@@ -7,37 +7,10 @@
     android:viewportHeight="200">
     <group android:translateX="0" android:translateY="0">
         <path
-            android:pathData="M78 34 a22 22 0 1 0 44 0 a22 22 0 1 0 -44 0 Z"
-            android:fillColor="#3AA6E0" />
-        <path
-            android:pathData="M124.7 53.3 a22 22 0 1 0 44 0 a22 22 0 1 0 -44 0 Z"
-            android:fillColor="#3AA6E0" />
-        <path
-            android:pathData="M144 100 a22 22 0 1 0 44 0 a22 22 0 1 0 -44 0 Z"
-            android:fillColor="#3AA6E0" />
-        <path
-            android:pathData="M124.7 146.7 a22 22 0 1 0 44 0 a22 22 0 1 0 -44 0 Z"
-            android:fillColor="#3AA6E0" />
-        <path
-            android:pathData="M78 166 a22 22 0 1 0 44 0 a22 22 0 1 0 -44 0 Z"
-            android:fillColor="#3AA6E0" />
-        <path
-            android:pathData="M31.3 146.7 a22 22 0 1 0 44 0 a22 22 0 1 0 -44 0 Z"
-            android:fillColor="#3AA6E0" />
-        <path
-            android:pathData="M12 100 a22 22 0 1 0 44 0 a22 22 0 1 0 -44 0 Z"
-            android:fillColor="#3AA6E0" />
-        <path
-            android:pathData="M31.3 53.3 a22 22 0 1 0 44 0 a22 22 0 1 0 -44 0 Z"
-            android:fillColor="#3AA6E0" />
-        <path
-            android:pathData="M40 100 a60 60 0 1 0 120 0 a60 60 0 1 0 -120 0 Z"
-            android:fillColor="#3AA6E0" />
-        <path
-            android:pathData="M82 132 a6 6 0 1 0 12 0 a6 6 0 1 0 -12 0 Z"
-            android:fillColor="#141A26" />
-        <path
-            android:pathData="M106 132 a6 6 0 1 0 12 0 a6 6 0 1 0 -12 0 Z"
-            android:fillColor="#141A26" />
+            android:pathData="M123.0 44.6A27 27 0 0 1 155.4 77.0A9 9 0 0 1 137.1 76.4M155.4 77.0A27 27 0 0 1 155.4 123.0A9 9 0 0 1 143.0 109.5M155.4 123.0A27 27 0 0 1 123.0 155.4A9 9 0 0 1 123.6 137.1M123.0 155.4A27 27 0 0 1 77.0 155.4A9 9 0 0 1 90.5 143.0M77.0 155.4A27 27 0 0 1 44.6 123.0A9 9 0 0 1 62.9 123.6M44.6 123.0A27 27 0 0 1 44.6 77.0A9 9 0 0 1 57.0 90.5M44.6 77.0A27 27 0 0 1 77.0 44.6A9 9 0 0 1 76.4 62.9M77.0 44.6A27 27 0 0 1 123.0 44.6A9 9 0 0 1 109.5 57.0"
+            android:strokeColor="#3AA6E0"
+            android:strokeWidth="9"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round" />
     </group>
 </vector>
