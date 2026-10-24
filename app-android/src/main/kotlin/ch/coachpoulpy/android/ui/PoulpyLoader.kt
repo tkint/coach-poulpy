@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import ch.coachpoulpy.android.R
 
 /**
- * The loading indicator: Poulpy seen from above as a blue outline, turning clockwise once every
+ * The loading indicator: Poulpy seen from above as a blue outline, turning clockwise (the top moves left to right) once every
  * 2.4 s, or every 10 s when the phone's animations are turned off. Below 32 dp the line is thicker.
  */
 @Composable

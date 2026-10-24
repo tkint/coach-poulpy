@@ -46,6 +46,6 @@ node design/build-poulpy.mjs
 | `app-android/src/main/res/drawable/poulpy_*.xml` | Android vector drawables (`R.drawable.poulpy_pose_champion`) |
 | `app-ios/CoachPoulpy/Assets.xcassets/Poulpy/*.imageset` | iOS vector assets (`Image("PoulpyPoseChampion")`) |
 
-Portraits and poses share one 248 × 226 frame, so they can replace each other without moving. The loader (`loader`, and `loader_small` with a thicker line for sizes under 32) is Poulpy seen from above as a blue outline; `PoulpyLoader` on Android and iOS turns it clockwise once every 2.4 s (10 s when animations are reduced) and replaces the old Spinning pose. CI runs it with `--check` too. The shared `PoulpyDrawing` enum names each drawing, and `PoulpyCoach` picks which one Today shows.
+Portraits and poses share one 248 × 226 frame, so they can replace each other without moving. The loader (`loader`, and `loader_small` with a thicker line for sizes under 32) is Poulpy seen from above as a blue outline of eight round lobes with short tails; `PoulpyLoader` on Android and iOS turns it clockwise once every 2.4 s (10 s when animations are reduced) and replaces the old Spinning pose. CI runs it with `--check` too. The shared `PoulpyDrawing` enum names each drawing, and `PoulpyCoach` picks which one Today shows.
 
 The full brand book, with the logo, mood rules and poses, is the "Poulpy Brand Book" page in the project.

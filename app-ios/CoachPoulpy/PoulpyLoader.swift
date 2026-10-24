@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// The loading indicator: Poulpy seen from above as a blue outline, turning clockwise once every
+/// The loading indicator: Poulpy seen from above as a blue outline, turning clockwise (the top moves left to right) once every
 /// 2.4 s, or every 10 s with Reduce Motion. Below 32 points the line is thicker.
 struct PoulpyLoader: View {
     var size: CGFloat = 48

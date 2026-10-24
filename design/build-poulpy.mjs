@@ -140,12 +140,13 @@ const POSES = {
   },
 }
 
-// The loading animation: Poulpy seen from above as a blue outline, eight round lobes each
-// curling inward with a small hook. The apps turn it clockwise. Small loaders get a thicker line.
-const LOADER_PATH = 'M123.0 44.6A27 27 0 0 1 155.4 77.0A9 9 0 0 1 137.1 76.4M155.4 77.0A27 27 0 0 1 155.4 123.0A9 9 0 0 1 143.0 109.5' +
-  'M155.4 123.0A27 27 0 0 1 123.0 155.4A9 9 0 0 1 123.6 137.1M123.0 155.4A27 27 0 0 1 77.0 155.4A9 9 0 0 1 90.5 143.0' +
-  'M77.0 155.4A27 27 0 0 1 44.6 123.0A9 9 0 0 1 62.9 123.6M44.6 123.0A27 27 0 0 1 44.6 77.0A9 9 0 0 1 57.0 90.5' +
-  'M44.6 77.0A27 27 0 0 1 77.0 44.6A9 9 0 0 1 76.4 62.9M77.0 44.6A27 27 0 0 1 123.0 44.6A9 9 0 0 1 109.5 57.0'
+// The loading animation: Poulpy seen from above as a blue outline, eight big round lobes each
+// ending in a short tail that dips inward. The apps turn it clockwise, so the top moves left to
+// right. Small loaders get a thicker line.
+const LOADER_PATH = 'M73.7 36.4A26.4 26.4 0 1 1 126.3 36.4A26.4 26.4 0 0 1 122.4 52.3M126.3 36.4A26.4 26.4 0 1 1 163.6 73.7A26.4 26.4 0 0 1 149.6 82.1' +
+  'M163.6 73.7A26.4 26.4 0 1 1 163.6 126.3A26.4 26.4 0 0 1 147.7 122.4M163.6 126.3A26.4 26.4 0 1 1 126.3 163.6A26.4 26.4 0 0 1 117.9 149.6' +
+  'M126.3 163.6A26.4 26.4 0 1 1 73.7 163.6A26.4 26.4 0 0 1 77.6 147.7M73.7 163.6A26.4 26.4 0 1 1 36.4 126.3A26.4 26.4 0 0 1 50.4 117.9' +
+  'M36.4 126.3A26.4 26.4 0 1 1 36.4 73.7A26.4 26.4 0 0 1 52.3 77.6M36.4 73.7A26.4 26.4 0 1 1 73.7 36.4A26.4 26.4 0 0 1 82.1 50.4'
 const loader = (width) => s(LOADER_PATH, width, BLUE)
 
 // Portraits and poses share one frame, so they line up when swapped. The loader is square.
@@ -154,8 +155,8 @@ const LOADER_VIEW = { x: 0, y: 0, width: 200, height: 200 }
 const DRAWINGS = [
   ...Object.keys(MOODS).map((mood) => ({ name: `mood_${snake(mood)}`, svg: portrait(mood), view: POSE_VIEW })),
   ...Object.entries(POSES).map(([pose, draw]) => ({ name: `pose_${snake(pose)}`, svg: draw(), view: POSE_VIEW })),
-  { name: 'loader', svg: loader(9), view: LOADER_VIEW },
-  { name: 'loader_small', svg: loader(12), view: LOADER_VIEW },
+  { name: 'loader', svg: loader(7), view: LOADER_VIEW },
+  { name: 'loader_small', svg: loader(10), view: LOADER_VIEW },
 ]
 
 function snake(name) { return name.replace(/[A-Z]/g, (c) => '_' + c.toLowerCase()) }
