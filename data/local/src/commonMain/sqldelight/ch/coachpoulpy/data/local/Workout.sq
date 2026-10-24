@@ -1,0 +1,23 @@
+-- Workout versions are immutable documents: structure as columns, content as JSON,
+-- the same split the server will use with Postgres JSONB.
+CREATE TABLE workout_version (
+    id TEXT NOT NULL,
+    version INTEGER NOT NULL,
+    type TEXT NOT NULL,
+    name TEXT NOT NULL,
+    content TEXT NOT NULL,
+    created_at INTEGER NOT NULL,
+    PRIMARY KEY (id, version)
+);
+
+insert:
+INSERT INTO workout_version(id, version, type, name, content, created_at)
+VALUES (?, ?, ?, ?, ?, ?);
+
+latestVersions:
+SELECT w.* FROM workout_version w
+WHERE w.version = (SELECT MAX(version) FROM workout_version WHERE id = w.id)
+ORDER BY w.name;
+
+byIdAndVersion:
+SELECT * FROM workout_version WHERE id = ? AND version = ?;

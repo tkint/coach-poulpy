@@ -1,0 +1,34 @@
+-- A session is an append-only event log; the execution row is its header.
+CREATE TABLE execution (
+    id TEXT NOT NULL PRIMARY KEY,
+    source TEXT NOT NULL,
+    workout_id TEXT,
+    workout_version INTEGER,
+    started_at INTEGER NOT NULL,
+    ended_at INTEGER
+);
+
+CREATE TABLE execution_event (
+    execution_id TEXT NOT NULL REFERENCES execution(id) ON DELETE CASCADE,
+    seq INTEGER NOT NULL,
+    at INTEGER NOT NULL,
+    payload TEXT NOT NULL,
+    PRIMARY KEY (execution_id, seq)
+);
+
+insertExecution:
+INSERT INTO execution(id, source, workout_id, workout_version, started_at, ended_at)
+VALUES (?, ?, ?, ?, ?, ?);
+
+finishExecution:
+UPDATE execution SET ended_at = ? WHERE id = ?;
+
+unfinished:
+SELECT * FROM execution WHERE ended_at IS NULL ORDER BY started_at DESC LIMIT 1;
+
+appendEvent:
+INSERT INTO execution_event(execution_id, seq, at, payload)
+VALUES (:executionId, (SELECT COALESCE(MAX(seq), -1) + 1 FROM execution_event WHERE execution_id = :executionId), :at, :payload);
+
+events:
+SELECT payload FROM execution_event WHERE execution_id = ? ORDER BY seq;

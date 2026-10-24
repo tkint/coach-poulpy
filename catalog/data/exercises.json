@@ -1,0 +1,84 @@
+{
+  "version": 1,
+  "exercises": [
+    {
+      "slug": "goblet-squat",
+      "name": { "en": "Goblet squat", "fr": "Squat gobelet" },
+      "movementPattern": "SQUAT",
+      "muscleGroups": ["QUADRICEPS", "GLUTES", "CORE"],
+      "equipment": ["DUMBBELL", "KETTLEBELL"],
+      "measurement": "REPS",
+      "instructions": [
+        { "en": "Hold the weight against your chest, elbows down.", "fr": "Tenez la charge contre la poitrine, coudes vers le bas." },
+        { "en": "Sit down between your heels, chest up, then stand.", "fr": "Descendez entre vos talons, buste droit, puis remontez." }
+      ]
+    },
+    {
+      "slug": "push-up",
+      "name": { "en": "Push-up", "fr": "Pompe" },
+      "movementPattern": "PUSH",
+      "muscleGroups": ["CHEST", "TRICEPS", "SHOULDERS"],
+      "equipment": ["BODYWEIGHT"],
+      "measurement": "REPS"
+    },
+    {
+      "slug": "romanian-deadlift",
+      "name": { "en": "Romanian deadlift", "fr": "Soulevé de terre roumain" },
+      "movementPattern": "HINGE",
+      "muscleGroups": ["HAMSTRINGS", "GLUTES", "BACK"],
+      "equipment": ["DUMBBELL", "BARBELL"],
+      "measurement": "REPS"
+    },
+    {
+      "slug": "dumbbell-row",
+      "name": { "en": "One-arm dumbbell row", "fr": "Rowing haltère à un bras" },
+      "movementPattern": "PULL",
+      "muscleGroups": ["BACK", "BICEPS"],
+      "equipment": ["DUMBBELL", "BENCH"],
+      "measurement": "REPS",
+      "perSide": true
+    },
+    {
+      "slug": "plank",
+      "name": { "en": "Plank", "fr": "Gainage" },
+      "movementPattern": "CORE",
+      "muscleGroups": ["CORE"],
+      "equipment": ["MAT"],
+      "measurement": "HOLD"
+    },
+    {
+      "slug": "jumping-jack",
+      "name": { "en": "Jumping jacks", "fr": "Jumping jacks" },
+      "movementPattern": "LOCOMOTION",
+      "muscleGroups": ["FULL_BODY"],
+      "equipment": ["BODYWEIGHT"],
+      "measurement": "TIME"
+    },
+    {
+      "slug": "hip-flexor-stretch",
+      "name": { "en": "Kneeling hip flexor stretch", "fr": "Étirement des fléchisseurs de hanche à genou" },
+      "movementPattern": "STRETCH",
+      "muscleGroups": ["HIPS", "QUADRICEPS"],
+      "equipment": ["MAT"],
+      "measurement": "HOLD",
+      "perSide": true
+    },
+    {
+      "slug": "cat-cow",
+      "name": { "en": "Cat-cow", "fr": "Chat-vache" },
+      "movementPattern": "MOBILITY",
+      "muscleGroups": ["BACK", "CORE"],
+      "equipment": ["MAT"],
+      "measurement": "REPS"
+    },
+    {
+      "slug": "clamshell",
+      "name": { "en": "Clamshell", "fr": "Clamshell (ouverture de hanche)" },
+      "movementPattern": "MOBILITY",
+      "muscleGroups": ["GLUTES", "HIPS"],
+      "equipment": ["MAT", "BAND"],
+      "measurement": "REPS",
+      "perSide": true
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+# Optional: a local Postgres for when the server gets a database.
+# Nothing depends on it yet. Start with: docker compose -f tools/compose.yaml up -d
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: coachpoulpy
+      POSTGRES_USER: coachpoulpy
+      POSTGRES_PASSWORD: coachpoulpy
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+volumes:
+  postgres-data:

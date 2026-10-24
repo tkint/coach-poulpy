@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Coach Poulpy</string>
+    <string name="tab_today">Today</string>
+    <string name="tab_exercises">Exercises</string>
+    <string name="today_empty_title">Nothing planned yet</string>
+    <string name="today_empty_body">Workouts and plans you create will show up here.</string>
+</resources>
