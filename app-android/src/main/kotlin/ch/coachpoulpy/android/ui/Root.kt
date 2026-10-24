@@ -4,9 +4,10 @@ import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.DirectionsRun
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Speed
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Today
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -29,13 +30,15 @@ import ch.coachpoulpy.shared.AppGraph
 private enum class Tab(@StringRes val label: Int, val icon: ImageVector) {
     TODAY(R.string.tab_today, Icons.Filled.Today),
     EXERCISES(R.string.tab_exercises, Icons.AutoMirrored.Filled.List),
-    TREADMILL(R.string.tab_treadmill, Icons.AutoMirrored.Filled.DirectionsRun),
+    LIVE(R.string.tab_live, Icons.Filled.Speed),
     HISTORY(R.string.tab_history, Icons.Filled.History),
+    SETTINGS(R.string.tab_settings, Icons.Filled.Settings),
 }
 
 /**
  * The screen shown over the tabs, as a string so it survives rotation:
- * "builder:" (new), "builder:<id>", "player:<id>", "resume", "exercise:<slug>" or "session:<id>".
+ * "builder:" (new), "builder:<id>", "player:<id>", "resume", "exercise:<slug>", "session:<id>",
+ * "device-add", "device-sources" or "device:<key>".
  */
 private typealias Route = String
 
@@ -43,6 +46,7 @@ private typealias Route = String
 fun CoachPoulpyRoot(graph: AppGraph) {
     var tab by rememberSaveable { mutableStateOf(Tab.TODAY) }
     var route by rememberSaveable { mutableStateOf<Route?>(null) }
+    var settingsSection by rememberSaveable { mutableStateOf(SettingsSection.GENERAL) }
     val language = LocalConfiguration.current.locales[0].language
     val close = { route = null }
 
@@ -75,11 +79,33 @@ fun CoachPoulpyRoot(graph: AppGraph) {
                     modifier = modifier,
                 )
                 Tab.EXERCISES -> ExercisesScreen(graph, language, onOpen = { route = "exercise:$it" }, modifier = modifier)
-                Tab.TREADMILL -> TreadmillScreen(graph, modifier)
+                Tab.LIVE -> LiveScreen(
+                    graph,
+                    onManageDevices = {
+                        settingsSection = SettingsSection.DEVICES
+                        tab = Tab.SETTINGS
+                    },
+                    modifier = modifier,
+                )
                 Tab.HISTORY -> HistoryScreen(graph, language, onOpen = { route = "session:$it" }, modifier = modifier)
+                Tab.SETTINGS -> SettingsScreen(
+                    graph,
+                    section = settingsSection,
+                    onSection = { settingsSection = it },
+                    onOpen = { device ->
+                        route = when (device) {
+                            DeviceRoute.Add -> "device-add"
+                            DeviceRoute.Sources -> "device-sources"
+                            is DeviceRoute.Device -> "device:${device.key}"
+                        }
+                    },
+                    modifier = modifier,
+                )
             }
         }
         "resume" -> PlayerScreen(graph, language, workoutId = null, onClose = close)
+        "device-add" -> DeviceAddScreen(graph, onBack = close)
+        "device-sources" -> DataSourcesScreen(graph, onBack = close)
         else -> {
             val (kind, arg) = current.split(':', limit = 2)
             when (kind) {
@@ -87,6 +113,7 @@ fun CoachPoulpyRoot(graph: AppGraph) {
                 "player" -> PlayerScreen(graph, language, workoutId = arg, onClose = close)
                 "exercise" -> ExerciseDetailScreen(graph, language, slug = arg, onBack = close)
                 "session" -> SessionDetailScreen(graph, language, sessionId = arg, onBack = close)
+                "device" -> DeviceScreen(graph, key = arg, onBack = close, onSources = { route = "device-sources" })
                 else -> LaunchedEffect(current) { close() }
             }
         }

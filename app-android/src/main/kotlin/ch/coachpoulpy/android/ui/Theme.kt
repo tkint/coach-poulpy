@@ -12,8 +12,7 @@ private val LocalPoulpyExtraColors = staticCompositionLocalOf { PoulpyLightExtra
 // Brand colours always win over the wallpaper-based dynamic colours, so Poulpy looks the same on every phone.
 // The palette, type scale and spacing come from PoulpyTokens.kt, generated from design/tokens.json.
 @Composable
-fun CoachPoulpyTheme(content: @Composable () -> Unit) {
-    val dark = isSystemInDarkTheme()
+fun CoachPoulpyTheme(dark: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
     CompositionLocalProvider(LocalPoulpyExtraColors provides if (dark) PoulpyDarkExtras else PoulpyLightExtras) {
         MaterialTheme(
             colorScheme = if (dark) PoulpyDarkColors else PoulpyLightColors,

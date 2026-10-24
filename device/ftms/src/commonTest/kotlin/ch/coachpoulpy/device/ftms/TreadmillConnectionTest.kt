@@ -37,13 +37,13 @@ private class FakeLink(var failConnects: Int = 0) : BleLink {
 
     override suspend fun awaitDisconnected() = dropped.await()
     override suspend fun disconnect() = drop()
-    override suspend fun read(characteristic: Uuid) = reads[characteristic] ?: error("Not readable")
-    override fun observe(characteristic: Uuid): Flow<ByteArray> = when (characteristic) {
+    override suspend fun read(characteristic: Uuid, service: Uuid) = reads[characteristic] ?: error("Not readable")
+    override fun observe(characteristic: Uuid, service: Uuid): Flow<ByteArray> = when (characteristic) {
         FtmsUuids.treadmillData -> notifications.receiveAsFlow()
         FtmsUuids.machineStatus -> statuses.receiveAsFlow()
         else -> error("Cannot observe $characteristic")
     }
-    override suspend fun write(characteristic: Uuid, value: ByteArray) = Unit
+    override suspend fun write(characteristic: Uuid, value: ByteArray, service: Uuid) = Unit
     override fun close() { closed = true }
 
     fun notify(bytes: ByteArray) = notifications.trySend(bytes)

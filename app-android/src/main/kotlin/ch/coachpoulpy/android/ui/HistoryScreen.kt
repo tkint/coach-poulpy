@@ -91,6 +91,7 @@ import ch.coachpoulpy.shared.HistoryState
 import ch.coachpoulpy.shared.PeriodUi
 import ch.coachpoulpy.shared.SessionKind
 import ch.coachpoulpy.shared.SessionRow
+import ch.coachpoulpy.shared.Units
 import ch.coachpoulpy.shared.WeekBar
 import java.time.DayOfWeek
 import java.time.Instant
@@ -408,7 +409,7 @@ private fun StatsView(state: HistoryState) {
             )
             StatTile(
                 stringResource(R.string.history_longest_run),
-                state.longestRunMeters?.let { "${decimal(it / 1000, 1)} km" } ?: "–",
+                state.longestRunMeters?.let { distance(it, 1) } ?: "–",
                 state.longestRunMillis?.let { shortDayMonth(it) } ?: "",
                 Modifier.weight(1f),
             )
@@ -444,7 +445,7 @@ private fun PeriodCard(@StringRes title: Int, period: PeriodUi, highlighted: Boo
             )
             val parts = listOfNotNull(
                 stringResource(R.string.history_minutes, period.activeMinutes),
-                period.distanceMeters.takeIf { it > 0 }?.let { "${decimal(it / 1000, 1)} km" },
+                period.distanceMeters.takeIf { it > 0 }?.let { distance(it, 1) },
             )
             Text(parts.joinToString(" · "), style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, color = content)
         }
@@ -615,8 +616,8 @@ fun SessionDetailScreen(graph: AppGraph, language: String, sessionId: String, on
                         }
                         session.setsSkipped?.takeIf { it > 0 }?.let { Line(R.string.history_sets_skipped, "$it") }
                     }
-                    session.distanceMeters?.let { Line(R.string.metric_distance, "${decimal(it / 1000, 2)} km") }
-                    session.averageSpeedKmh?.let { Line(R.string.treadmill_summary_average_speed, "${decimal(it, 1)} km/h") }
+                    session.distanceMeters?.let { Line(R.string.metric_distance, distance(it, 2)) }
+                    session.averageSpeedKmh?.let { kmh -> Line(R.string.treadmill_summary_average_speed, Units.speed(kmh, LocalUnitSystem.current).let { "${decimal(it.value, it.decimals)} ${it.unit}" }) }
                     session.averageHeartRateBpm?.let { Line(R.string.treadmill_summary_average_hr, "$it bpm") }
                     session.maxHeartRateBpm?.let { Line(R.string.treadmill_summary_max_hr, "$it bpm") }
                     session.energyKcal?.let { Line(R.string.metric_energy, "$it kcal") }
@@ -658,7 +659,7 @@ private val SessionRow.icon
 @Composable
 private fun SessionRow.headline(): String {
     val parts = mutableListOf(clock(activeSeconds))
-    distanceMeters?.let { parts += "${decimal(it / 1000, 2)} km" }
+    distanceMeters?.let { parts += distance(it, 2) }
     val done = setsDone
     val planned = setsPlanned
     if (kind == SessionKind.WORKOUT && done != null && planned != null) parts += stringResource(R.string.history_sets, done, planned)
@@ -692,6 +693,13 @@ private fun shortDayMonth(millis: Long): String = pattern("dMMM").format(zoned(m
 
 /** Day and month in the user's order, such as "21/10" or "10/21". */
 private fun shortDate(millis: Long): String = pattern("dM").format(zoned(millis))
+
+/** A distance in the units picked in Settings. */
+@Composable
+private fun distance(meters: Double, decimals: Int): String {
+    val m = Units.distance(meters, LocalUnitSystem.current, decimals)
+    return "${decimal(m.value, m.decimals)} ${m.unit}"
+}
 
 private fun decimal(value: Double, decimals: Int) = String.format(Locale.getDefault(), "%.${decimals}f", value)
 

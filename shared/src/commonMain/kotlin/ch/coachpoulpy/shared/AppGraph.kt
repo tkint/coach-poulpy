@@ -30,14 +30,23 @@ class AppGraph(driverFactory: DriverFactory) {
     fun today(languageCode: String) = TodayModel(store, compiler, languageCode)
     fun history(languageCode: String) = HistoryModel(store, compiler, languageCode)
 
-    private var treadmillModel: TreadmillModel? = null
+    private var settingsModel: SettingsModel? = null
+    private var devicesModel: DevicesModel? = null
+    private var liveModel: LiveModel? = null
+
+    /** The app's settings, created on first use. The apps pass the same [memory] every time. */
+    fun settings(memory: KeyValueStore): SettingsModel =
+        settingsModel ?: SettingsModel(memory).also { settingsModel = it }
 
     /**
-     * The one treadmill model of the app, created on first use. It outlives the screen
-     * so that leaving the tab mid-walk keeps the connection and the recording going.
+     * The one devices model of the app. Like [live], it outlives the screens so that
+     * leaving a tab mid-walk keeps the devices connected and the recording going.
      */
-    fun treadmill(memory: KeyValueStore): TreadmillModel =
-        treadmillModel ?: TreadmillModel(KableCentral(), store, compiler, memory).also { treadmillModel = it }
+    fun devices(memory: KeyValueStore): DevicesModel =
+        devicesModel ?: DevicesModel(KableCentral(), memory).also { devicesModel = it }
+
+    fun live(memory: KeyValueStore): LiveModel =
+        liveModel ?: LiveModel(devices(memory), settings(memory).state, store, compiler, memory).also { liveModel = it }
 
     // Not "newWorkout": Swift reserves the "new" prefix, and Kotlin would rename it.
     fun createWorkout(languageCode: String) =
