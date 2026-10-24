@@ -81,5 +81,7 @@ jobs:
           cache-dependency-path: web/package-lock.json
       - name: Check the generated theme files match design/tokens.json
         run: node ../design/build-tokens.mjs --check
+      - name: Check the generated Poulpy drawings match design/build-poulpy.mjs
+        run: node ../design/build-poulpy.mjs --check
       - run: npm ci
       - run: npm run build

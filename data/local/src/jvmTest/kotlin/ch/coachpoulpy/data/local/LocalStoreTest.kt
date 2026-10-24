@@ -16,6 +16,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.time.Instant
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.test.runTest
 
 class LocalStoreTest {
     private val t0 = Instant.fromEpochSeconds(1_700_000_000)
@@ -39,6 +41,23 @@ class LocalStoreTest {
 
         store.finishExecution("e1", t0)
         assertNull(store.unfinishedExecution())
+    }
+
+    @Test
+    fun onlySessionsPlayedToTheEndCountAsFinished() = runTest {
+        val store = LocalStore(DriverFactory())
+        val t1 = Instant.fromEpochSeconds(t0.epochSeconds + 600)
+        store.startExecution(Execution(ExecutionId("done"), ExecutionSource.GUIDED, startedAt = t0))
+        store.appendEvent("done", SessionEvent.Started(t0))
+        store.appendEvent("done", SessionEvent.Finished(t1))
+        store.finishExecution("done", t1)
+        // Left behind, then closed when another session started.
+        store.startExecution(Execution(ExecutionId("left"), ExecutionSource.GUIDED, startedAt = t0))
+        store.appendEvent("left", SessionEvent.Started(t0))
+        store.finishExecution("left", t0)
+        store.startExecution(Execution(ExecutionId("open"), ExecutionSource.GUIDED, startedAt = t1))
+
+        assertEquals(listOf(t1), store.finishedSessionEnds().first())
     }
 
     @Test
