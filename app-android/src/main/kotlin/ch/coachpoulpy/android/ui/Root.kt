@@ -19,6 +19,7 @@ import ch.coachpoulpy.shared.AppGraph
 private enum class Tab(@StringRes val label: Int, val symbol: String) {
     TODAY(R.string.tab_today, "●"),
     EXERCISES(R.string.tab_exercises, "≡"),
+    TREADMILL(R.string.tab_treadmill, "⏵"),
 }
 
 @Composable
@@ -42,6 +43,7 @@ fun CoachPoulpyRoot(graph: AppGraph) {
         when (tab) {
             Tab.TODAY -> TodayScreen(graph, modifier)
             Tab.EXERCISES -> ExercisesScreen(graph, modifier)
+            Tab.TREADMILL -> TreadmillScreen(graph, modifier)
         }
     }
 }

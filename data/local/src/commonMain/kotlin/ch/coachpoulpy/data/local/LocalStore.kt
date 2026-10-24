@@ -7,6 +7,7 @@ import ch.coachpoulpy.core.model.Execution
 import ch.coachpoulpy.core.model.Workout
 import ch.coachpoulpy.data.local.db.CoachPoulpyDatabase
 import kotlin.time.Clock
+import kotlin.time.Instant
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
@@ -42,6 +43,10 @@ class LocalStore(driverFactory: DriverFactory, private val clock: Clock = Clock.
             started_at = execution.startedAt.toEpochMilliseconds(),
             ended_at = execution.endedAt?.toEpochMilliseconds(),
         )
+    }
+
+    fun finishExecution(executionId: String, endedAt: Instant) {
+        db.executionQueries.finishExecution(ended_at = endedAt.toEpochMilliseconds(), id = executionId)
     }
 
     /** Written at once for every session action, so a killed app can replay it. */

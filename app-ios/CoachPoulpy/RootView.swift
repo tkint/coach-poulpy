@@ -10,6 +10,8 @@ struct RootView: View {
                 .tabItem { Label("tab.today", systemImage: "sun.max") }
             ExercisesView(graph: graph)
                 .tabItem { Label("tab.exercises", systemImage: "list.bullet") }
+            TreadmillView(graph: graph)
+                .tabItem { Label("tab.treadmill", systemImage: "figure.run") }
         }
     }
 }

@@ -1,5 +1,6 @@
 package ch.coachpoulpy.core.engine
 
+import ch.coachpoulpy.core.model.DeviceMetrics
 import kotlin.time.Duration
 import kotlin.time.Instant
 import kotlinx.serialization.SerialName
@@ -20,6 +21,9 @@ sealed interface SessionEvent {
     @Serializable @SerialName("paused") data class Paused(override val at: Instant) : SessionEvent
     @Serializable @SerialName("resumed") data class Resumed(override val at: Instant) : SessionEvent
     @Serializable @SerialName("finished") data class Finished(override val at: Instant) : SessionEvent
+
+    /** A reading from a connected machine, stamped by the phone's clock. It never moves the session on by itself. */
+    @Serializable @SerialName("sample") data class Sample(override val at: Instant, val metrics: DeviceMetrics) : SessionEvent
 }
 
 /** What the UI renders. It only observes this; all decisions are made here. */
@@ -49,6 +53,10 @@ class Session(val timeline: Timeline, events: List<SessionEvent> = emptyList()) 
     fun resume(now: Instant): List<SessionEvent> = record(SessionEvent.Resumed(now))
     fun completeCurrent(now: Instant): List<SessionEvent> = record(SessionEvent.PhaseCompleted(now, state(now).phaseIndex))
     fun skipCurrent(now: Instant): List<SessionEvent> = record(SessionEvent.PhaseSkipped(now, state(now).phaseIndex))
+
+    /** Appends a machine reading. Unlike the other actions it skips the fold, as it arrives every second. */
+    fun recordSample(now: Instant, metrics: DeviceMetrics): SessionEvent.Sample =
+        SessionEvent.Sample(now, metrics).also { log += it }
 
     /** Completes timed phases whose time is up. Call it from the UI clock, for example every 200 ms. */
     fun tick(now: Instant): List<SessionEvent> {
@@ -94,6 +102,7 @@ class Session(val timeline: Timeline, events: List<SessionEvent> = emptyList()) 
                 pausedTotal = Duration.ZERO
             }
             is SessionEvent.Finished -> status = SessionState.Status.FINISHED
+            is SessionEvent.Sample -> Unit
         }
 
         val phase = timeline.phases.getOrNull(index)
