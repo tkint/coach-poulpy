@@ -1,0 +1,23 @@
+-- A saved workout put on a day. The day is a local date (2026-10-27), so a plan
+-- stays on its day when the phone changes time zone.
+CREATE TABLE planned_workout (
+    id TEXT NOT NULL PRIMARY KEY,
+    workout_id TEXT NOT NULL,
+    day TEXT NOT NULL,
+    created_at INTEGER NOT NULL
+);
+
+insertPlan:
+INSERT INTO planned_workout(id, workout_id, day, created_at) VALUES (?, ?, ?, ?);
+
+plans:
+SELECT * FROM planned_workout ORDER BY day, created_at;
+
+movePlan:
+UPDATE planned_workout SET day = ? WHERE id = ?;
+
+deletePlan:
+DELETE FROM planned_workout WHERE id = ?;
+
+deletePlansOfWorkout:
+DELETE FROM planned_workout WHERE workout_id = ?;

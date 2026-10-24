@@ -99,4 +99,10 @@ internal class Labels(private val languageCode: String) {
     /** For a session whose workout was deleted before the history kept names. */
     val session get() = t("Workout", "Séance")
     val perSide get() = t("each side", "par côté")
+
+    fun exercises(count: Int) = if (count == 1) t("1 exercise", "1 exercice") else t("$count exercises", "$count exercices")
+
+    fun aboutMinutes(minutes: Int) = t("about $minutes min", "environ $minutes min")
+
+    fun restAfter(seconds: Int) = t("rest ${duration(seconds)}", "repos ${duration(seconds)}")
 }

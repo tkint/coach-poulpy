@@ -31,7 +31,7 @@ enum class PoulpyDrawing(val assetName: String) {
     FUMING("pose_fuming"),
 }
 
-/** What the Today header shows: Poulpy, what he says, and his eight tentacles. */
+/** What the Home header shows: Poulpy, what he says, and his eight tentacles. */
 data class PoulpyStatus(
     val mood: Mood,
     val drawing: PoulpyDrawing,

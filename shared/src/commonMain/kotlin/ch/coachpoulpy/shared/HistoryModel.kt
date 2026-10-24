@@ -76,7 +76,7 @@ data class HistoryState(
     /** The longest treadmill distance in one session, and when it started; null without any. */
     val longestRunMeters: Double? = null,
     val longestRunMillis: Long? = null,
-    /** Poulpy's tentacles, as on the Today screen. */
+    /** Poulpy's tentacles, as on Home. */
     val fullOctopuses: Int = 0,
     val tentaclesLit: Int = 0,
     /** How far back the calendar goes: 0 for this month, -3 when the oldest session is three months ago. */
@@ -188,7 +188,7 @@ class HistoryModel internal constructor(
         val today = now.toLocalDateTime(zone).date
         return HistoryState(
             loaded = true,
-            sessions = done.map { (s, t) -> row(s, t) },
+            sessions = done.map { (s, t) -> sessionRow(s, t, labels) },
             thisWeek = stats.thisWeek.toUi(),
             thisMonth = stats.thisMonth.toUi(),
             weeks = stats.weeks.mapIndexed { index, week ->
@@ -229,33 +229,6 @@ class HistoryModel internal constructor(
     private fun isTreadmill(session: StoredSession, events: List<SessionEvent>) =
         session.execution.workout == null || events.any { it is SessionEvent.Sample }
 
-    private fun row(session: StoredSession, totals: SessionTotals): SessionRow {
-        val execution = session.execution
-        val freeRun = execution.source == ExecutionSource.DEVICE_ONLY
-        val treadmill = freeRun || execution.workout == null || session.type == WorkoutType.TREADMILL || totals.distanceMeters != null
-        return SessionRow(
-            id = execution.id.value,
-            title = session.title ?: when {
-                freeRun -> labels.freeRun
-                treadmill && execution.workout == null -> labels.demoIntervals
-                else -> labels.session
-            },
-            kind = if (treadmill) SessionKind.TREADMILL else SessionKind.WORKOUT,
-            typeLabel = if (freeRun) null else (session.type ?: if (treadmill) WorkoutType.TREADMILL else null)?.let(labels::workoutType),
-            startedAtMillis = execution.startedAt.toEpochMilliseconds(),
-            activeSeconds = totals.active.inWholeSeconds,
-            setsDone = totals.setsDone,
-            setsSkipped = totals.setsSkipped,
-            setsPlanned = totals.setsPlanned,
-            distanceMeters = totals.distanceMeters,
-            averageSpeedKmh = totals.averageSpeedKmh,
-            averageHeartRateBpm = totals.averageHeartRateBpm,
-            maxHeartRateBpm = totals.maxHeartRateBpm,
-            energyKcal = totals.energyKcal,
-            estimatedSteps = totals.estimatedSteps,
-        )
-    }
-
     private fun PeriodTotals.toUi() = PeriodUi(sessions, active.inWholeMinutes.toInt(), distanceMeters)
 }
 
@@ -275,5 +248,33 @@ internal fun sessionTotals(events: List<SessionEvent>, timeline: Timeline?): Ses
         maxHeartRateBpm = machine.maxHeartRateBpm,
         energyKcal = machine.energyKcal,
         estimatedSteps = machine.estimatedSteps,
+    )
+}
+
+/** A finished session as the history and Home show it. */
+internal fun sessionRow(session: StoredSession, totals: SessionTotals, labels: Labels): SessionRow {
+    val execution = session.execution
+    val freeRun = execution.source == ExecutionSource.DEVICE_ONLY
+    val treadmill = freeRun || execution.workout == null || session.type == WorkoutType.TREADMILL || totals.distanceMeters != null
+    return SessionRow(
+        id = execution.id.value,
+        title = session.title ?: when {
+            freeRun -> labels.freeRun
+            treadmill && execution.workout == null -> labels.demoIntervals
+            else -> labels.session
+        },
+        kind = if (treadmill) SessionKind.TREADMILL else SessionKind.WORKOUT,
+        typeLabel = if (freeRun) null else (session.type ?: if (treadmill) WorkoutType.TREADMILL else null)?.let(labels::workoutType),
+        startedAtMillis = execution.startedAt.toEpochMilliseconds(),
+        activeSeconds = totals.active.inWholeSeconds,
+        setsDone = totals.setsDone,
+        setsSkipped = totals.setsSkipped,
+        setsPlanned = totals.setsPlanned,
+        distanceMeters = totals.distanceMeters,
+        averageSpeedKmh = totals.averageSpeedKmh,
+        averageHeartRateBpm = totals.averageHeartRateBpm,
+        maxHeartRateBpm = totals.maxHeartRateBpm,
+        energyKcal = totals.energyKcal,
+        estimatedSteps = totals.estimatedSteps,
     )
 }

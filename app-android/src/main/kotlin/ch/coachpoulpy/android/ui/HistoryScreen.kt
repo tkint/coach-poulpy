@@ -674,7 +674,7 @@ private fun pattern(skeleton: String) =
 private fun dateTime(millis: Long): String =
     DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT).withLocale(Locale.getDefault()).format(zoned(millis))
 
-private fun time(millis: Long): String =
+internal fun time(millis: Long): String =
     DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(Locale.getDefault()).format(zoned(millis))
 
 /** "October 2026", in the standalone form some languages need for a title. */
@@ -682,7 +682,7 @@ private fun monthTitle(millis: Long): String =
     pattern("LLLLyyyy").format(zoned(millis)).replaceFirstChar { it.titlecase(Locale.getDefault()) }
 
 /** "Sat 24 Oct", in the user's order. */
-private fun dayLabel(millis: Long): String = pattern("EEEdMMM").format(zoned(millis))
+internal fun dayLabel(millis: Long): String = pattern("EEEdMMM").format(zoned(millis))
 
 /** The whole date of [day] in the month starting at [monthStartMillis], for screen readers. */
 private fun fullDate(monthStartMillis: Long, day: Int): String =

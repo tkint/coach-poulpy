@@ -1,24 +1,7 @@
 import SwiftUI
 import Shared
 
-struct ExercisesView: View {
-    let graph: AppGraph
-
-    var body: some View {
-        NavigationStack {
-            ExerciseList(graph: graph, type: nil) { row in
-                NavigationLink {
-                    ExerciseDetailView(graph: graph, slug: row.slug)
-                } label: {
-                    ExerciseRowView(row: row)
-                }
-            }
-            .navigationTitle("tab.exercises")
-        }
-    }
-}
-
-/// The searchable catalog, used by the Exercises tab and by the builder's picker.
+/// The searchable catalog, used by the library and by the builder's picker.
 struct ExerciseList<Row: View>: View {
     let graph: AppGraph
     let type: WorkoutType?

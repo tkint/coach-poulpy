@@ -66,5 +66,53 @@
             <string>%lld connected</string>
         </dict>
     </dict>
+    <key>home.in.days %lld %@</key>
+    <dict>
+        <key>NSStringLocalizedFormatKey</key>
+        <string>%#@days@ · %2$@</string>
+        <key>days</key>
+        <dict>
+            <key>NSStringFormatSpecTypeKey</key>
+            <string>NSStringPluralRuleType</string>
+            <key>NSStringFormatValueTypeKey</key>
+            <string>lld</string>
+            <key>one</key>
+            <string>In %lld day</string>
+            <key>other</key>
+            <string>In %lld days</string>
+        </dict>
+    </dict>
+    <key>library.count %lld</key>
+    <dict>
+        <key>NSStringLocalizedFormatKey</key>
+        <string>%#@count@</string>
+        <key>count</key>
+        <dict>
+            <key>NSStringFormatSpecTypeKey</key>
+            <string>NSStringPluralRuleType</string>
+            <key>NSStringFormatValueTypeKey</key>
+            <string>lld</string>
+            <key>one</key>
+            <string>%lld workout</string>
+            <key>other</key>
+            <string>%lld workouts</string>
+        </dict>
+    </dict>
+    <key>workout.times %lld</key>
+    <dict>
+        <key>NSStringLocalizedFormatKey</key>
+        <string>%#@times@</string>
+        <key>times</key>
+        <dict>
+            <key>NSStringFormatSpecTypeKey</key>
+            <string>NSStringPluralRuleType</string>
+            <key>NSStringFormatValueTypeKey</key>
+            <string>lld</string>
+            <key>one</key>
+            <string>%lld time</string>
+            <key>other</key>
+            <string>%lld times</string>
+        </dict>
+    </dict>
 </dict>
 </plist>

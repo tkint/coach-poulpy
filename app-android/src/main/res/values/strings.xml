@@ -1,13 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Coach Poulpy</string>
-    <string name="tab_today">Today</string>
-    <string name="tab_exercises">Exercises</string>
-    <string name="today_empty_title">Nothing planned yet</string>
-    <string name="today_empty_body">Workouts and plans you create will show up here.</string>
-    <string name="today_new_workout">New workout</string>
-    <string name="today_resume">Resume %1$s</string>
-    <string name="today_resume_body">Your session is waiting where you left it.</string>
+    <string name="tab_home">Home</string>
+    <string name="tab_library">Library</string>
+    <string name="home_today">Today</string>
+    <string name="home_next">Next session</string>
+    <string name="home_see_workout">See workout</string>
+    <string name="home_in_progress">Your session is waiting where you left it.</string>
+    <string name="home_rest_title">Nothing planned today</string>
+    <string name="home_rest_body">Enjoy the rest, or pick a workout from your library if you feel like moving.</string>
+    <string name="home_first_title">Nothing planned yet</string>
+    <string name="home_first_body">Make your first workout in the library, then plan it for a day.</string>
+    <string name="home_open_library">Open the library</string>
+    <string name="home_something_else">Something else? Pick from your library</string>
+    <string name="home_tomorrow">Tomorrow · %1$s</string>
+    <plurals name="home_in_days">
+        <item quantity="one">In %1$d day · %2$s</item>
+        <item quantity="other">In %1$d days · %2$s</item>
+    </plurals>
+    <string name="library_workouts">Workouts</string>
+    <string name="library_exercises">Exercises</string>
+    <string name="library_search">Search your workouts</string>
+    <string name="library_all">All</string>
+    <string name="library_new_workout">New workout</string>
+    <plurals name="library_count">
+        <item quantity="one">%1$d workout</item>
+        <item quantity="other">%1$d workouts</item>
+    </plurals>
+    <string name="library_sort_recent">Recently done</string>
+    <string name="library_sort_name">By name</string>
+    <string name="library_planned">Planned · %1$s</string>
+    <string name="library_done_today">Done today</string>
+    <string name="library_last_done">Last done %1$s</string>
+    <string name="library_not_done">Not done yet</string>
+    <string name="library_empty_title">No workouts yet</string>
+    <string name="library_empty_body">Make one with New workout. It stays here, ready to start or to plan for a day.</string>
+    <string name="library_none">No workout matches.</string>
+    <string name="workout_planned">Planned for %1$s</string>
+    <string name="workout_planned_today">Planned for today</string>
+    <string name="workout_change">Change</string>
+    <string name="workout_unplan">Take it off the plan</string>
+    <string name="workout_plan">Plan it for a day</string>
+    <string name="workout_done">Done</string>
+    <string name="workout_last">Last time</string>
+    <string name="workout_usually">Usually</string>
+    <plurals name="workout_times">
+        <item quantity="one">%1$d time</item>
+        <item quantity="other">%1$d times</item>
+    </plurals>
+    <string name="workout_minutes">%1$d min</string>
+    <string name="workout_exercises">Exercises</string>
+    <string name="workout_start">Start now</string>
+    <string name="workout_gone">This workout was deleted.</string>
     <string name="action_start">Start</string>
     <string name="action_edit">Edit</string>
     <string name="action_delete">Delete</string>
