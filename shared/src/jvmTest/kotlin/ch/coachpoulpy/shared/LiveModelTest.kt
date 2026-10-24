@@ -196,31 +196,35 @@ class LiveModelTest {
         listOf("AA:BB", "POD", "BAND").forEach { m.devices.add(it) }
         m.devices.stopScan()
         runCurrent()
-        assertEquals(3, m.devices.state.value.connectedCount)
+        assertEquals(3, m.devices.state.value.connectedCount, "connected: ${m.devices.state.value.known}")
 
         central.treadmill.send(speedCentiKmh = 800, meters = 100, bpm = 110)
         central.band.beat(150)
         central.pod.pod(metersPerSecond256 = 640, cadence = 170) // 9 km/h
         runCurrent()
         var tiles = m.live.state.value.tiles.associateBy { it.metric }
-        assertEquals(9.0, tiles.getValue(LiveMetric.SPEED).value!!, 0.01)
-        assertEquals("Test pod", tiles.getValue(LiveMetric.SPEED).source)
-        assertEquals(150.0, tiles.getValue(LiveMetric.HEART_RATE).value)
-        assertEquals("Test band", tiles.getValue(LiveMetric.HEART_RATE).source)
-        assertEquals(170.0, tiles.getValue(LiveMetric.CADENCE).value)
+        val seen = "tiles: ${m.live.state.value.tiles}, devices: ${m.devices.state.value.known}"
+        assertEquals(9.0, tiles.getValue(LiveMetric.SPEED).value!!, 0.01, seen)
+        assertEquals("Test pod", tiles.getValue(LiveMetric.SPEED).source, seen)
+        assertEquals(150.0, tiles.getValue(LiveMetric.HEART_RATE).value, seen)
+        assertEquals("Test band", tiles.getValue(LiveMetric.HEART_RATE).source, seen)
+        assertEquals(170.0, tiles.getValue(LiveMetric.CADENCE).value, seen)
         assertNull(tiles[LiveMetric.STEPS_ESTIMATED]) // the pod counts real steps
         val treadmill = m.devices.state.value.known.first { it.key == "AA:BB" }
-        assertEquals(listOf(Quantity.SPEED, Quantity.HEART_RATE), treadmill.provides)
-        assertEquals(emptyList(), treadmill.usedFor)
-        assertEquals(setOf(Quantity.SPEED, Quantity.HEART_RATE), m.devices.state.value.sources.map { it.quantity }.toSet())
+        assertEquals(listOf(Quantity.SPEED, Quantity.HEART_RATE), treadmill.provides, seen)
+        assertEquals(emptyList(), treadmill.usedFor, seen)
+        // A pod or a band only claims what its profile measures, not every treadmill metric.
+        assertEquals(listOf(Quantity.SPEED, Quantity.CADENCE), m.devices.state.value.known.first { it.key == "POD" }.provides, seen)
+        assertEquals(listOf(Quantity.HEART_RATE), m.devices.state.value.known.first { it.key == "BAND" }.provides, seen)
+        assertEquals(setOf(Quantity.SPEED, Quantity.HEART_RATE), m.devices.state.value.sources.map { it.quantity }.toSet(), seen)
 
         m.devices.setSource(Quantity.SPEED, "AA:BB")
         central.treadmill.send(speedCentiKmh = 800, meters = 110, bpm = 110)
         runCurrent()
         tiles = m.live.state.value.tiles.associateBy { it.metric }
-        assertEquals(8.0, tiles.getValue(LiveMetric.SPEED).value)
-        assertEquals("Test treadmill", tiles.getValue(LiveMetric.SPEED).source)
-        assertEquals(0.11, tiles.getValue(LiveMetric.DISTANCE).value)
+        assertEquals(8.0, tiles.getValue(LiveMetric.SPEED).value, "tiles: ${m.live.state.value.tiles}")
+        assertEquals("Test treadmill", tiles.getValue(LiveMetric.SPEED).source, "tiles: ${m.live.state.value.tiles}")
+        assertEquals(0.11, tiles.getValue(LiveMetric.DISTANCE).value, "tiles: ${m.live.state.value.tiles}")
     }
 
     @Test
