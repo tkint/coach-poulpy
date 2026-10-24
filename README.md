@@ -20,6 +20,7 @@ A personal training platform: build workouts, follow plans, run guided sessions 
 | `server` | http4k API (placeholder with `/health`) |
 | `web` | Vue 3 + TypeScript website (placeholder) |
 | `build-logic` | Gradle convention plugins: `coachpoulpy.kmp-library` (Android, iOS, JVM) and `coachpoulpy.kmp-web-library` (the same plus JavaScript, for the modules the website runs) |
+| `design` | Brand tokens (`tokens.json`) and the script that generates the Android, iOS and web theme files from them |
 | `tools/compose.yaml` | Optional local Postgres, not needed yet |
 
 Library versions live in `gradle/libs.versions.toml`. Package and app id: `ch.coachpoulpy`.
