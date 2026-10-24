@@ -54,6 +54,9 @@ class Session(val timeline: Timeline, events: List<SessionEvent> = emptyList()) 
     fun completeCurrent(now: Instant): List<SessionEvent> = record(SessionEvent.PhaseCompleted(now, state(now).phaseIndex))
     fun skipCurrent(now: Instant): List<SessionEvent> = record(SessionEvent.PhaseSkipped(now, state(now).phaseIndex))
 
+    /** Ends the session early; the phases not reached simply stay undone. */
+    fun finish(now: Instant): List<SessionEvent> = record(SessionEvent.Finished(now))
+
     /** Appends a machine reading. Unlike the other actions it skips the fold, as it arrives every second. */
     fun recordSample(now: Instant, metrics: DeviceMetrics): SessionEvent.Sample =
         SessionEvent.Sample(now, metrics).also { log += it }

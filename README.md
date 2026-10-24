@@ -53,6 +53,14 @@ cd web && npm install && npm run dev
 
 The iOS build runs `./gradlew :shared:embedAndSignAppleFrameworkForXcode` itself, so the Kotlin code is rebuilt whenever you build in Xcode.
 
+## The exercise catalog
+
+`catalog/data/exercises.json` is the copy of the catalog shipped in the app. On start, the app copies it into its database when its `version` is higher than the one the phone already has, and every screen reads the catalog from the database.
+
+To change it today, edit the JSON, raise `version` by one and ship a new build. Keep every `slug`: workouts point at exercises by slug. To stop offering an exercise, set `"retired": true` rather than deleting it, so workouts that use it still open.
+
+Later, an admin menu on the server will publish new versions in the same format, and the app will download them on launch with no account needed (`CatalogRepository.apply`). That is separate from syncing a user's own data, so guests get catalog updates too.
+
 ## Installing on family phones
 
 - **Android:** every CI run on a pull request uploads a debug APK as the `coach-poulpy-debug-apk` artifact. Download it on the phone and allow installing from that source. `./gradlew :app-android:assembleRelease` gives a smaller build, signed with the debug key until a release key exists.
