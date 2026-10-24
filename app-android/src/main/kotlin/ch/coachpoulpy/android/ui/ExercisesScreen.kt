@@ -32,12 +32,7 @@ import ch.coachpoulpy.core.model.MuscleGroup
 import ch.coachpoulpy.core.model.WorkoutType
 import ch.coachpoulpy.shared.AppGraph
 
-@Composable
-fun ExercisesScreen(graph: AppGraph, language: String, onOpen: (String) -> Unit, modifier: Modifier = Modifier) {
-    ExerciseList(graph, language, type = null, onPick = onOpen, modifier = modifier)
-}
-
-/** The searchable catalog, used by the Exercises tab and by the builder's picker. */
+/** The searchable catalog, used by the library and by the builder's picker. */
 @Composable
 fun ExerciseList(
     graph: AppGraph,

@@ -4,11 +4,11 @@ import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.automirrored.filled.LibraryBooks
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Today
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -28,8 +28,8 @@ import ch.coachpoulpy.android.R
 import ch.coachpoulpy.shared.AppGraph
 
 private enum class Tab(@StringRes val label: Int, val icon: ImageVector) {
-    TODAY(R.string.tab_today, Icons.Filled.Today),
-    EXERCISES(R.string.tab_exercises, Icons.AutoMirrored.Filled.List),
+    HOME(R.string.tab_home, Icons.Filled.Home),
+    LIBRARY(R.string.tab_library, Icons.AutoMirrored.Filled.LibraryBooks),
     LIVE(R.string.tab_live, Icons.Filled.Speed),
     HISTORY(R.string.tab_history, Icons.Filled.History),
     SETTINGS(R.string.tab_settings, Icons.Filled.Settings),
@@ -37,18 +37,24 @@ private enum class Tab(@StringRes val label: Int, val icon: ImageVector) {
 
 /**
  * The screen shown over the tabs, as a string so it survives rotation:
- * "builder:" (new), "builder:<id>", "player:<id>", "resume", "exercise:<slug>", "session:<id>",
+ * "builder:" (new), "builder:<id>", "player:<id>", "resume", "workout:<id>", "exercise:<slug>", "session:<id>",
  * "device-add", "device-sources" or "device:<key>".
  */
 private typealias Route = String
 
 @Composable
 fun CoachPoulpyRoot(graph: AppGraph) {
-    var tab by rememberSaveable { mutableStateOf(Tab.TODAY) }
+    var tab by rememberSaveable { mutableStateOf(Tab.HOME) }
+    var libraryView by rememberSaveable { mutableStateOf(LibraryView.WORKOUTS) }
     var route by rememberSaveable { mutableStateOf<Route?>(null) }
     var settingsSection by rememberSaveable { mutableStateOf(SettingsSection.GENERAL) }
     val language = LocalConfiguration.current.locales[0].language
-    val close = { route = null }
+    // Where closing goes back to: the workout page for its editor and exercises, else the tabs.
+    var back by rememberSaveable { mutableStateOf<Route?>(null) }
+    val close = {
+        route = back
+        back = null
+    }
 
     BackHandler(enabled = route != null) { close() }
 
@@ -69,16 +75,30 @@ fun CoachPoulpyRoot(graph: AppGraph) {
         ) { padding ->
             val modifier = Modifier.padding(padding)
             when (tab) {
-                Tab.TODAY -> TodayScreen(
+                Tab.HOME -> HomeScreen(
                     graph = graph,
                     language = language,
-                    onNew = { route = "builder:" },
-                    onEdit = { route = "builder:$it" },
+                    onOpenWorkout = { route = "workout:$it" },
                     onStart = { route = "player:$it" },
                     onResume = { route = "resume" },
+                    onOpenSession = { route = "session:$it" },
+                    onOpenLibrary = {
+                        libraryView = LibraryView.WORKOUTS
+                        tab = Tab.LIBRARY
+                    },
                     modifier = modifier,
                 )
-                Tab.EXERCISES -> ExercisesScreen(graph, language, onOpen = { route = "exercise:$it" }, modifier = modifier)
+                Tab.LIBRARY -> LibraryScreen(
+                    graph = graph,
+                    language = language,
+                    view = libraryView,
+                    onView = { libraryView = it },
+                    onOpenWorkout = { route = "workout:$it" },
+                    onStart = { route = "player:$it" },
+                    onNew = { route = "builder:" },
+                    onOpenExercise = { route = "exercise:$it" },
+                    modifier = modifier,
+                )
                 Tab.LIVE -> LiveScreen(
                     graph,
                     onManageDevices = {
@@ -111,6 +131,19 @@ fun CoachPoulpyRoot(graph: AppGraph) {
             when (kind) {
                 "builder" -> BuilderScreen(graph, language, workoutId = arg.ifEmpty { null }, onClose = close)
                 "player" -> PlayerScreen(graph, language, workoutId = arg, onClose = close)
+                "workout" -> WorkoutPageScreen(
+                    graph, language, workoutId = arg,
+                    onBack = close,
+                    onStart = { route = "player:$arg" },
+                    onEdit = {
+                        back = current
+                        route = "builder:$arg"
+                    },
+                    onOpenExercise = {
+                        back = current
+                        route = "exercise:$it"
+                    },
+                )
                 "exercise" -> ExerciseDetailScreen(graph, language, slug = arg, onBack = close)
                 "session" -> SessionDetailScreen(graph, language, sessionId = arg, onBack = close)
                 "device" -> DeviceScreen(graph, key = arg, onBack = close, onSources = { route = "device-sources" })

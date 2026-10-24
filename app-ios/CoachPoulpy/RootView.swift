@@ -2,12 +2,13 @@ import SwiftUI
 import Shared
 
 /// The tabs, in order. Each label lives in Localizable.strings under its tab.* key.
-private enum AppTab: Hashable { case today, exercises, live, history, settings }
+private enum AppTab: Hashable { case home, library, live, history, settings }
 
 struct RootView: View {
     let graph: AppGraph
     @StateObject private var settings: Observed<SettingsModel, SettingsUiState>
-    @State private var tab = AppTab.today
+    @State private var tab = AppTab.home
+    @State private var librarySection = LibrarySection.workouts
     @State private var settingsSection = SettingsSection.general
 
     init(graph: AppGraph) {
@@ -17,12 +18,15 @@ struct RootView: View {
 
     var body: some View {
         TabView(selection: $tab) {
-            TodayView(graph: graph)
-                .tabItem { Label("tab.today", systemImage: "sun.max") }
-                .tag(AppTab.today)
-            ExercisesView(graph: graph)
-                .tabItem { Label("tab.exercises", systemImage: "list.bullet") }
-                .tag(AppTab.exercises)
+            HomeView(graph: graph, onOpenLibrary: {
+                librarySection = .workouts
+                tab = .library
+            })
+                .tabItem { Label("tab.home", systemImage: "house") }
+                .tag(AppTab.home)
+            LibraryView(graph: graph, section: $librarySection)
+                .tabItem { Label("tab.library", systemImage: "books.vertical") }
+                .tag(AppTab.library)
             LiveView(graph: graph, onManageDevices: {
                 settingsSection = .devices
                 tab = .settings

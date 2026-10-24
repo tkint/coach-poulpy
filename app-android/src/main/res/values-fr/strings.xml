@@ -1,12 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="tab_today">Aujourd’hui</string>
-    <string name="tab_exercises">Exercices</string>
-    <string name="today_empty_title">Rien de prévu pour l’instant</string>
-    <string name="today_empty_body">Les séances et programmes que vous créez apparaîtront ici.</string>
-    <string name="today_new_workout">Nouvelle séance</string>
-    <string name="today_resume">Reprendre %1$s</string>
-    <string name="today_resume_body">Votre séance vous attend là où vous l’avez laissée.</string>
+    <string name="tab_home">Accueil</string>
+    <string name="tab_library">Bibliothèque</string>
+    <string name="home_today">Aujourd’hui</string>
+    <string name="home_next">Prochaine séance</string>
+    <string name="home_see_workout">Voir la séance</string>
+    <string name="home_in_progress">Votre séance vous attend là où vous l’avez laissée.</string>
+    <string name="home_rest_title">Rien de prévu aujourd’hui</string>
+    <string name="home_rest_body">Profitez du repos, ou choisissez une séance dans votre bibliothèque si vous avez envie de bouger.</string>
+    <string name="home_first_title">Rien de prévu pour l’instant</string>
+    <string name="home_first_body">Créez votre première séance dans la bibliothèque, puis prévoyez-la pour un jour.</string>
+    <string name="home_open_library">Ouvrir la bibliothèque</string>
+    <string name="home_something_else">Autre chose ? Choisissez dans votre bibliothèque</string>
+    <string name="home_tomorrow">Demain · %1$s</string>
+    <plurals name="home_in_days">
+        <item quantity="one">Dans %1$d jour · %2$s</item>
+        <item quantity="other">Dans %1$d jours · %2$s</item>
+    </plurals>
+    <string name="library_workouts">Séances</string>
+    <string name="library_exercises">Exercices</string>
+    <string name="library_search">Rechercher dans vos séances</string>
+    <string name="library_all">Toutes</string>
+    <string name="library_new_workout">Nouvelle séance</string>
+    <plurals name="library_count">
+        <item quantity="one">%1$d séance</item>
+        <item quantity="other">%1$d séances</item>
+    </plurals>
+    <string name="library_sort_recent">Faites récemment</string>
+    <string name="library_sort_name">Par nom</string>
+    <string name="library_planned">Prévue · %1$s</string>
+    <string name="library_done_today">Faite aujourd’hui</string>
+    <string name="library_last_done">Dernière fois %1$s</string>
+    <string name="library_not_done">Pas encore faite</string>
+    <string name="library_empty_title">Aucune séance pour l’instant</string>
+    <string name="library_empty_body">Créez-en une avec Nouvelle séance. Elle reste ici, prête à commencer ou à prévoir pour un jour.</string>
+    <string name="library_none">Aucune séance ne correspond.</string>
+    <string name="workout_planned">Prévue le %1$s</string>
+    <string name="workout_planned_today">Prévue aujourd’hui</string>
+    <string name="workout_change">Changer</string>
+    <string name="workout_unplan">La retirer du planning</string>
+    <string name="workout_plan">La prévoir pour un jour</string>
+    <string name="workout_done">Faite</string>
+    <string name="workout_last">Dernière fois</string>
+    <string name="workout_usually">D’habitude</string>
+    <plurals name="workout_times">
+        <item quantity="one">%1$d fois</item>
+        <item quantity="other">%1$d fois</item>
+    </plurals>
+    <string name="workout_minutes">%1$d min</string>
+    <string name="workout_exercises">Exercices</string>
+    <string name="workout_start">Commencer</string>
+    <string name="workout_gone">Cette séance a été supprimée.</string>
     <string name="action_start">Commencer</string>
     <string name="action_edit">Modifier</string>
     <string name="action_delete">Supprimer</string>

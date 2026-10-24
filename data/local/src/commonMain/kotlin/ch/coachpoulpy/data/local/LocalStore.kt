@@ -7,6 +7,7 @@ import ch.coachpoulpy.core.model.Exercise
 import ch.coachpoulpy.core.model.Execution
 import ch.coachpoulpy.core.model.ExecutionId
 import ch.coachpoulpy.core.model.ExecutionSource
+import ch.coachpoulpy.core.model.Ids
 import ch.coachpoulpy.core.model.Workout
 import ch.coachpoulpy.core.model.WorkoutId
 import ch.coachpoulpy.core.model.WorkoutRef
@@ -19,6 +20,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.datetime.LocalDate
 import kotlinx.serialization.json.Json
 
 /** The phone's database: the source of truth for a guest. */
@@ -50,7 +52,28 @@ class LocalStore(driverFactory: DriverFactory, private val clock: Clock = Clock.
         db.workoutQueries.byIdAndVersion(id.value, version.toLong()).executeAsOneOrNull()
             ?.let { json.decodeFromString(Workout.serializer(), it.content) }
 
-    fun deleteWorkout(id: WorkoutId) = db.workoutQueries.deleteWorkout(id.value)
+    /** Its plans go with it: a day never points at a workout that is gone. */
+    fun deleteWorkout(id: WorkoutId) = db.transaction {
+        db.plannedWorkoutQueries.deletePlansOfWorkout(id.value)
+        db.workoutQueries.deleteWorkout(id.value)
+    }
+
+    /** Every planned workout, by day then in the order they were planned. */
+    fun plannedWorkouts(): Flow<List<PlannedWorkout>> =
+        db.plannedWorkoutQueries.plans { id, workoutId, day, _ -> PlannedWorkout(id, WorkoutId(workoutId), LocalDate.parse(day)) }
+            .asFlow()
+            .mapToList(Dispatchers.IO)
+
+    /** Puts a workout on [day] and returns the plan's id. */
+    fun planWorkout(workoutId: WorkoutId, day: LocalDate): String {
+        val id = Ids.newUuidV7()
+        db.plannedWorkoutQueries.insertPlan(id, workoutId.value, day.toString(), clock.now().toEpochMilliseconds())
+        return id
+    }
+
+    fun movePlan(planId: String, day: LocalDate) = db.plannedWorkoutQueries.movePlan(day.toString(), planId)
+
+    fun removePlan(planId: String) = db.plannedWorkoutQueries.deletePlan(planId)
 
     /** The catalog version stored on the phone, or null before the first seed. */
     fun catalogVersion(): Int? = db.catalogEntryQueries.version().executeAsOneOrNull()?.toInt()
@@ -152,3 +175,6 @@ class LocalStore(driverFactory: DriverFactory, private val clock: Clock = Clock.
 
 /** A finished session as stored: [totals] is null until it has been summed up once. */
 data class StoredSession(val execution: Execution, val title: String?, val type: WorkoutType?, val totals: SessionTotals?)
+
+/** A workout put on a [day]. */
+data class PlannedWorkout(val id: String, val workoutId: WorkoutId, val day: LocalDate)

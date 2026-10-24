@@ -11,6 +11,8 @@ import ch.coachpoulpy.core.model.LocalizedText
 import ch.coachpoulpy.core.model.MeasurementMode
 import ch.coachpoulpy.core.model.MovementPattern
 import ch.coachpoulpy.core.model.MuscleGroup
+import ch.coachpoulpy.core.model.Workout
+import ch.coachpoulpy.core.model.WorkoutId
 import ch.coachpoulpy.core.model.WorkoutType
 import ch.coachpoulpy.core.stats.SessionTotals
 import ch.coachpoulpy.data.local.db.CoachPoulpyDatabase
@@ -22,6 +24,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.time.Instant
+import kotlinx.datetime.LocalDate
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 
@@ -93,6 +96,26 @@ class LocalStoreTest {
         val old = db.executionQueries.finished().executeAsOne()
         assertEquals("old", old.id)
         assertNull(old.summary)
+        // The migrations reach the planning table too.
+        assertEquals(0, db.plannedWorkoutQueries.plans().executeAsList().size)
+    }
+
+    @Test
+    fun plansKeepTheirDayAndGoWithTheirWorkout() = runTest {
+        val store = LocalStore(DriverFactory())
+        val workout = Workout(WorkoutId("w1"), 1, "Legs", WorkoutType.STRENGTH, emptyList())
+        store.saveWorkout(workout)
+        val later = store.planWorkout(workout.id, LocalDate(2026, 10, 29))
+        val sooner = store.planWorkout(workout.id, LocalDate(2026, 10, 27))
+
+        assertEquals(listOf(sooner, later), store.plannedWorkouts().first().map { it.id })
+
+        store.movePlan(later, LocalDate(2026, 10, 26))
+        assertEquals(LocalDate(2026, 10, 26), store.plannedWorkouts().first().first().day)
+
+        store.removePlan(sooner)
+        store.deleteWorkout(workout.id)
+        assertEquals(emptyList(), store.plannedWorkouts().first())
     }
 
     @Test

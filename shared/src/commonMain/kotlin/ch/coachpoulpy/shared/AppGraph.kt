@@ -27,7 +27,9 @@ class AppGraph(driverFactory: DriverFactory) {
     val catalog: Catalog get() = catalogRepository.current
 
     fun exerciseList(languageCode: String) = ExerciseListModel(catalog, registry, languageCode)
-    fun today(languageCode: String) = TodayModel(store, compiler, languageCode)
+    fun home(languageCode: String) = HomeModel(store, compiler, catalog, languageCode)
+    fun library(languageCode: String) = LibraryModel(store, compiler, catalog, languageCode)
+    fun workoutPage(workoutId: String, languageCode: String) = WorkoutPageModel(WorkoutId(workoutId), store, compiler, catalog, languageCode)
     fun history(languageCode: String) = HistoryModel(store, compiler, languageCode)
 
     private var settingsModel: SettingsModel? = null
@@ -82,12 +84,6 @@ class AppGraph(driverFactory: DriverFactory) {
             return null
         }
         return player(workout, execution.id.value, languageCode)
-    }
-
-    /** The name of the workout of the session left open, for the "resume" banner. */
-    fun unfinishedSessionName(): String? {
-        val ref = store.unfinishedExecution()?.workout ?: return null
-        return store.workout(ref.workoutId, ref.version)?.name
     }
 
     private fun player(workout: Workout, executionId: String, languageCode: String) = PlayerModel(

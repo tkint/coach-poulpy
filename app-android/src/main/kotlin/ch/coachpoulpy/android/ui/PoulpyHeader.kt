@@ -9,6 +9,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -29,51 +30,74 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import ch.coachpoulpy.android.R
 import ch.coachpoulpy.shared.PoulpyDrawing
 import ch.coachpoulpy.shared.PoulpyStatus
 
-/** Poulpy in the middle of his eight tentacles, with what he has to say. */
+/**
+ * Poulpy in the middle of his eight tentacles, with what he has to say. [compact] puts
+ * the ring beside the text, as on Home, where the day's workouts need the room.
+ */
 @Composable
-fun PoulpyHeader(status: PoulpyStatus, modifier: Modifier = Modifier) {
+fun PoulpyHeader(status: PoulpyStatus, modifier: Modifier = Modifier, compact: Boolean = false) {
     val ember = !status.blueSide
     val container by animateColorAsState(
         if (ember) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.primaryContainer,
         tween(PoulpyMotion.moodMillis),
         label = "header",
     )
+    val ring: @Composable (Dp, Dp) -> Unit = { side, artSize ->
+        Box(Modifier.size(side), contentAlignment = Alignment.Center) {
+            TentacleRing(
+                lit = status.tentaclesLit,
+                on = if (ember) PoulpyTheme.extraColors.grumpy else MaterialTheme.colorScheme.primary,
+                off = MaterialTheme.colorScheme.outline,
+                modifier = Modifier.fillMaxSize().semantics { contentDescription = status.tentaclesCaption },
+            )
+            Crossfade(status.drawing, animationSpec = tween(PoulpyMotion.moodMillis), label = "poulpy") { drawing ->
+                Image(painterResource(drawing.drawable), contentDescription = status.title, modifier = Modifier.size(artSize))
+            }
+        }
+    }
     Card(modifier, colors = CardDefaults.cardColors(containerColor = container)) {
-        Column(
-            Modifier.fillMaxWidth().padding(PoulpySpace.lg),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(PoulpySpace.sm),
-        ) {
-            Box(Modifier.size(208.dp), contentAlignment = Alignment.Center) {
-                TentacleRing(
-                    lit = status.tentaclesLit,
-                    on = if (ember) PoulpyTheme.extraColors.grumpy else MaterialTheme.colorScheme.primary,
-                    off = MaterialTheme.colorScheme.outline,
-                    modifier = Modifier.fillMaxSize().semantics { contentDescription = status.tentaclesCaption },
-                )
-                Crossfade(status.drawing, animationSpec = tween(PoulpyMotion.moodMillis), label = "poulpy") { drawing ->
-                    Image(painterResource(drawing.drawable), contentDescription = status.title, modifier = Modifier.size(150.dp))
+        if (compact) {
+            Row(
+                Modifier.fillMaxWidth().padding(start = PoulpySpace.md, end = PoulpySpace.lg, top = PoulpySpace.md, bottom = PoulpySpace.md),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(14.dp),
+            ) {
+                ring(104.dp, 72.dp)
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text(status.title, style = MaterialTheme.typography.titleLarge)
+                    Text(status.line, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
+                    Text(status.tentaclesCaption, style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(top = 2.dp))
                 }
             }
-            Text(status.title, style = MaterialTheme.typography.titleLarge, textAlign = TextAlign.Center)
-            Text(status.line, style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center)
-            Text(
-                status.tentaclesCaption,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-            )
+        } else {
+            Column(
+                Modifier.fillMaxWidth().padding(PoulpySpace.lg),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(PoulpySpace.sm),
+            ) {
+                ring(208.dp, 150.dp)
+                Text(status.title, style = MaterialTheme.typography.titleLarge, textAlign = TextAlign.Center)
+                Text(status.line, style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center)
+                Text(
+                    status.tentaclesCaption,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                )
+            }
         }
     }
 }
 
-/** Eight rounded segments clockwise from the top, as in the brand book's week ring. */
+/** Eight rounded segments clockwise from the top, with clear gaps so each tentacle reads on its own. */
 @Composable
 private fun TentacleRing(lit: Int, on: Color, off: Color, modifier: Modifier = Modifier) {
     val litColor by animateColorAsState(on, tween(PoulpyMotion.moodMillis), label = "ring")
@@ -84,8 +108,8 @@ private fun TentacleRing(lit: Int, on: Color, off: Color, modifier: Modifier = M
             drawArc(
                 color = if (i < lit) litColor else off,
                 // Compose measures from 3 o'clock; the ring starts at 12.
-                startAngle = i * 45f + 5f - 90f,
-                sweepAngle = 35f,
+                startAngle = i * 45f + 11f - 90f,
+                sweepAngle = 23f,
                 useCenter = false,
                 topLeft = Offset(inset, inset),
                 size = Size(size.width - width, size.height - width),
