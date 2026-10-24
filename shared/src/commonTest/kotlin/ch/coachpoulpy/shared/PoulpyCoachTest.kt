@@ -12,7 +12,8 @@ class PoulpyCoachTest {
     private val coach = PoulpyCoach("en", TimeZone.UTC)
     private val now = Instant.parse("2026-10-24T18:00:00Z")
 
-    private fun ago(vararg durations: Duration) = durations.map { now - it }
+    // Duration is a value class, so it cannot be a vararg.
+    private fun ago(durations: List<Duration>) = durations.map { now - it }
 
     @Test
     fun noSessionYetIsAHappyHello() {
@@ -24,14 +25,14 @@ class PoulpyCoachTest {
 
     @Test
     fun eachFinishedSessionLightsOneTentacle() {
-        val status = coach.status(ago(3.hours, 2.days, 4.days), now)
+        val status = coach.status(ago(listOf(3.hours, 2.days, 4.days)), now)
         assertEquals(3, status.tentaclesLit)
         assertEquals(PoulpyDrawing.MOOD_HAPPY, status.drawing)
     }
 
     @Test
     fun tentaclesNeverGoDarkOverALongBreak() {
-        val status = coach.status(ago(60.days, 61.days, 90.days), now)
+        val status = coach.status(ago(listOf(60.days, 61.days, 90.days)), now)
         assertEquals(3, status.tentaclesLit)
         assertEquals(PoulpyDrawing.SLEEPING, status.drawing)
         assertEquals(true, status.blueSide)
@@ -39,7 +40,7 @@ class PoulpyCoachTest {
 
     @Test
     fun theEighthSessionMakesAChampionAndTheRingStaysFull() {
-        val eight = ago(1.hours, *(1..7).map { (it * 3).days }.toTypedArray())
+        val eight = ago(listOf(1.hours) + (1..7).map { (it * 3).days })
         val today = coach.status(eight, now)
         assertEquals(PoulpyDrawing.CHAMPION, today.drawing)
         assertEquals(PoulpyStatus.Mood.PROUD, today.mood)
@@ -53,7 +54,7 @@ class PoulpyCoachTest {
 
     @Test
     fun theNinthSessionStartsANewOctopus() {
-        val nine = ago(1.hours, *(1..8).map { (it * 3).days }.toTypedArray())
+        val nine = ago(listOf(1.hours) + (1..8).map { (it * 3).days })
         val status = coach.status(nine, now)
         assertEquals(1, status.tentaclesLit)
         assertEquals(1, status.fullOctopuses)
@@ -61,11 +62,11 @@ class PoulpyCoachTest {
 
     @Test
     fun theDayAfterASessionPoulpyRecovers() {
-        assertEquals(PoulpyDrawing.MOOD_RECOVERING, coach.status(ago(1.days), now).drawing)
+        assertEquals(PoulpyDrawing.MOOD_RECOVERING, coach.status(ago(listOf(1.days)), now).drawing)
     }
 
     @Test
     fun comingBackAfterABreakGetsAShyWelcome() {
-        assertEquals(PoulpyDrawing.SHY, coach.status(ago(2.hours, 10.days), now).drawing)
+        assertEquals(PoulpyDrawing.SHY, coach.status(ago(listOf(2.hours, 10.days)), now).drawing)
     }
 }
