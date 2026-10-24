@@ -68,7 +68,7 @@ struct ExerciseRowView: View {
             PatternBadge(pattern: row.pattern)
             VStack(alignment: .leading, spacing: 2) {
                 Text(row.name)
-                Text(row.details).font(.footnote).foregroundStyle(.secondary)
+                Text(row.details).font(.poulpy(.footnote)).foregroundStyle(.secondary)
             }
         }
     }
@@ -82,7 +82,7 @@ private struct Chip: View {
     var body: some View {
         Button(action: action) {
             title
-                .font(.subheadline)
+                .font(.poulpy(.subheadline))
                 .padding(.horizontal, 12)
                 .padding(.vertical, 6)
                 .background(selected ? Color.accentColor : Color.secondary.opacity(0.15), in: Capsule())
@@ -102,14 +102,14 @@ struct ExerciseDetailView: View {
                 VStack(alignment: .leading, spacing: 16) {
                     HStack(spacing: 16) {
                         PatternBadge(pattern: detail.pattern, size: 72)
-                        Text(detail.patternLabel).font(.headline)
+                        Text(detail.patternLabel).font(.poulpy(.headline))
                     }
                     section("exercise.muscles", detail.muscles)
                     section("exercise.equipment", detail.equipment)
                     if detail.perSide {
                         Text("exercise.per.side")
                     }
-                    Text("exercise.how").font(.headline)
+                    Text("exercise.how").font(.poulpy(.headline))
                     ForEach(Array(detail.instructions.enumerated()), id: \.offset) { index, step in
                         HStack(alignment: .top, spacing: 12) {
                             Text("\(index + 1).").foregroundStyle(Color.accentColor)
@@ -126,7 +126,7 @@ struct ExerciseDetailView: View {
 
     private func section(_ title: LocalizedStringKey, _ body: String) -> some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text(title).font(.caption).foregroundStyle(Color.accentColor)
+            Text(title).font(.poulpy(.caption)).foregroundStyle(Color.accentColor)
             Text(body)
         }
     }

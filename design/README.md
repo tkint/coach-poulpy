@@ -22,6 +22,14 @@ Colour rules:
 - The plush blue and ember are too light for white text: buttons use `primary` (lagoon 600) and `grumpy` (ember 600).
 - `error` is a crimson, always shown with an icon and text, so it is never confused with a grumpy Poulpy.
 
-The brand fonts are Baloo 2 (headings) and Nunito (body). The website loads them from Google Fonts. The apps use the system font (rounded on iOS) until the font files are added to the apps.
+The brand fonts are Baloo 2 (headings) and Nunito (body). The website loads them from Google Fonts. The apps bundle one static file per weight listed under `font` in `tokens.json`, in `app-android/src/main/res/font` and `app-ios/CoachPoulpy/Fonts`. After changing those weights, rebuild the files and the theme:
+
+```sh
+pip install fonttools
+python3 design/fonts/build-fonts.py
+node design/build-tokens.mjs
+```
+
+On iOS, also list any new file under `UIAppFonts` in `Info.plist`. Views use `.font(.poulpy(.headline))` instead of `.font(.headline)` to get the system text styles in the brand fonts. Both fonts are under the SIL Open Font License (`design/fonts/OFL-*.txt`).
 
 The full brand book, with the logo, mood rules and poses, is the "Poulpy Brand Book" page in the project.

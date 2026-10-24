@@ -64,8 +64,21 @@ Later, an admin menu on the server will publish new versions in the same format,
 
 ## Installing on family phones
 
-- **Android:** every CI run on a pull request uploads a debug APK as the `coach-poulpy-debug-apk` artifact. Download it on the phone and allow installing from that source. `./gradlew :app-android:assembleRelease` gives a smaller build, signed with the debug key until a release key exists.
+- **Android:** every CI run uploads a debug APK as the `coach-poulpy-debug-apk` artifact. Download it on the phone and allow installing from that source. Each build has a higher version number and is signed with the same key, so a new APK installs over the old one and keeps the phone's data. `./gradlew :app-android:assembleRelease` gives a smaller build, signed with the same key.
 - **iPhone:** set your Apple team in Xcode (Signing & Capabilities) and run on a connected iPhone. With a free Apple account the app expires after 7 days; TestFlight needs the paid Apple Developer Program.
+
+### The signing key
+
+Android only installs an update when it is signed with the same key as the app already on the phone. CI signs every APK with one fixed key, kept in two repository secrets:
+
+| Secret | What it holds |
+| --- | --- |
+| `ANDROID_KEYSTORE_BASE64` | The keystore file (`.jks`), base64 encoded on one line |
+| `ANDROID_KEYSTORE_PASSWORD` | Its password (the key inside, `poulpy`, uses the same one) |
+
+To make them, run `tools/make-signing-key.sh` once on your own computer (it needs a JDK) and follow what it prints. Keep the `.jks` file and its password in a password manager: losing them means every phone has to uninstall the app once more. Without the secrets, for example on a pull request from a fork, CI still builds but signs with a throwaway key and says so in a warning.
+
+To sign local builds with the same key, put `storeFile` and `storePassword` in `app-android/keystore.properties`, which is not committed. The build also reads `POULPY_KEYSTORE_FILE`, `POULPY_KEYSTORE_PASSWORD`, and optionally `POULPY_KEY_ALIAS` and `POULPY_KEY_PASSWORD`, from the environment.
 
 ## Treadmill (Bluetooth FTMS)
 

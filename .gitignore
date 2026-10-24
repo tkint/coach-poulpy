@@ -24,3 +24,4 @@ web/dist/
 *.jks
 *.keystore
 keystore.properties
+*.jks.base64.txt
