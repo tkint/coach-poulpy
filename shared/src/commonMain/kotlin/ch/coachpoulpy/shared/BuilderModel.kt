@@ -62,6 +62,9 @@ class BuilderModel internal constructor(
 
     val state: StateFlow<BuilderState> = mutableState.asStateFlow()
 
+    /** The latest state, for Swift, which cannot read a StateFlow's typed value. */
+    val current: BuilderState get() = state.value
+
     fun watch(onChange: (BuilderState) -> Unit): Cancellable = state.watchIn(scope, onChange)
 
     fun rename(name: String) = edit { copy(name = name) }

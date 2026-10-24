@@ -31,6 +31,9 @@ class TodayModel internal constructor(
         .map { workouts -> TodayState(workouts.map(::row)) }
         .stateIn(scope, SharingStarted.Eagerly, TodayState())
 
+    /** The latest state, for Swift, which cannot read a StateFlow's typed value. */
+    val current: TodayState get() = state.value
+
     fun watch(onChange: (TodayState) -> Unit): Cancellable = state.watchIn(scope, onChange)
 
     fun close() = scope.cancel()

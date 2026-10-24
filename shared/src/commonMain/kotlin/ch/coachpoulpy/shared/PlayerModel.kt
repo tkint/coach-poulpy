@@ -90,6 +90,9 @@ class PlayerModel internal constructor(
         if (session.state(clock.now()).status == SessionState.Status.RUNNING) startTicker()
     }
 
+    /** The latest state, for Swift, which cannot read a StateFlow's typed value. */
+    val current: PlayerState get() = state.value
+
     fun watch(onChange: (PlayerState) -> Unit): Cancellable = state.watchIn(scope, onChange)
 
     fun start() {
