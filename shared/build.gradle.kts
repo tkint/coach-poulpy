@@ -9,6 +9,8 @@ kotlin {
             baseName = "Shared"
             isStatic = true
             export(projects.core.model)
+            // Device kinds show in Settings › Devices, so Swift sees them by their own name.
+            export(projects.device.ftms)
         }
     }
 

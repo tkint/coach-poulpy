@@ -26,6 +26,7 @@ class KableCentral : BleCentral {
             rssi = ad.rssi,
             advertisesFtms = FtmsUuids.service in ad.uuids,
             handle = ad,
+            services = ad.uuids.toSet(),
         )
     }
 
@@ -47,14 +48,14 @@ private class KableLink(private val peripheral: Peripheral) : BleLink {
 
     override suspend fun disconnect() = peripheral.disconnect()
 
-    override suspend fun read(characteristic: Uuid): ByteArray = peripheral.read(ftms(characteristic))
+    override suspend fun read(characteristic: Uuid, service: Uuid): ByteArray =
+        peripheral.read(characteristicOf(service, characteristic))
 
-    override fun observe(characteristic: Uuid): Flow<ByteArray> = peripheral.observe(ftms(characteristic))
+    override fun observe(characteristic: Uuid, service: Uuid): Flow<ByteArray> =
+        peripheral.observe(characteristicOf(service, characteristic))
 
-    override suspend fun write(characteristic: Uuid, value: ByteArray) =
-        peripheral.write(ftms(characteristic), value, WriteType.WithResponse)
+    override suspend fun write(characteristic: Uuid, value: ByteArray, service: Uuid) =
+        peripheral.write(characteristicOf(service, characteristic), value, WriteType.WithResponse)
 
     override fun close() = peripheral.close()
-
-    private fun ftms(characteristic: Uuid) = characteristicOf(FtmsUuids.service, characteristic)
 }

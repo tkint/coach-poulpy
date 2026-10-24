@@ -217,7 +217,7 @@ class HistoryModel internal constructor(
         val timeline = when {
             workout != null -> runCatching { compiler.compile(workout) }.getOrNull()
             session.execution.source == ExecutionSource.DEVICE_ONLY -> TreadmillModule.freeRun
-            type == WorkoutType.TREADMILL -> compiler.compile(TreadmillModel.demoIntervals)
+            type == WorkoutType.TREADMILL -> compiler.compile(LiveModel.demoIntervals)
             else -> null
         }
         val totals = sessionTotals(events, timeline)

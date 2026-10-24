@@ -22,17 +22,10 @@ import ch.coachpoulpy.core.model.WorkoutId
 import ch.coachpoulpy.core.model.WorkoutRef
 import ch.coachpoulpy.core.model.WorkoutType
 import ch.coachpoulpy.data.local.LocalStore
-import ch.coachpoulpy.device.ftms.BleCentral
-import ch.coachpoulpy.device.ftms.FoundDevice
-import ch.coachpoulpy.device.ftms.TreadmillCapabilities
-import ch.coachpoulpy.device.ftms.TreadmillConnection
-import ch.coachpoulpy.device.ftms.TreadmillData
-import ch.coachpoulpy.device.ftms.TreadmillState
 import ch.coachpoulpy.types.treadmill.StepCounter
 import ch.coachpoulpy.types.treadmill.TreadmillModule
 import ch.coachpoulpy.types.treadmill.TreadmillRecorder
 import ch.coachpoulpy.types.treadmill.TreadmillSummary
-import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
@@ -50,35 +43,24 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
-enum class ConnectionStatus { IDLE, CONNECTING, CONNECTED, RECONNECTING, FAILED }
-
-/** Metrics the live screen can show; each platform names them in its own language. */
+/** Numbers the Live tab can show; each platform names them in its own language. */
 enum class LiveMetric {
-    SPEED, PACE, AVERAGE_SPEED, INCLINE, DISTANCE_KM, ELEVATION_GAIN, HEART_RATE, ENERGY, MET, MACHINE_TIME, REMAINING_TIME, POWER,
+    SPEED, PACE, DISTANCE, HEART_RATE, CADENCE, INCLINE, ENERGY, POWER,
 
-    /** Estimated from the speed, since treadmills do not count steps: shown with "≈". */
+    /** Estimated from the speed when no pod counts steps: shown with "≈". */
     STEPS_ESTIMATED;
 
-    /** Shown as minutes and seconds; the tile's value is then a number of seconds (per km for PACE). */
-    val isTime: Boolean get() = this == PACE || this == MACHINE_TIME || this == REMAINING_TIME
+    /** Shown as minutes and seconds; the tile's value is then a number of seconds. */
+    val isTime: Boolean get() = this == PACE
 }
 
-/** Whether the belt moves. PAUSED needs a treadmill that reports pauses; others show STOPPED. */
-enum class BeltStatus { UNKNOWN, MOVING, PAUSED, STOPPED }
+/**
+ * One number of the Live tab, already in the user's units. [value] null keeps the tile
+ * in place with a dash, for example the pace while the belt is paused, so tiles never jump.
+ * [source] is the name of the device it comes from.
+ */
+data class LiveTile(val metric: LiveMetric, val value: Double?, val decimals: Int, val unit: String, val source: String?)
 
-/** Small values kept between launches: SharedPreferences on Android, UserDefaults on iOS. */
-interface KeyValueStore {
-    fun getString(key: String): String?
-    fun putString(key: String, value: String?)
-}
-
-/** A value for one metric. The platform formats it with [decimals] in the user's locale, or as a time when [LiveMetric.isTime]. */
-data class LiveTile(val metric: LiveMetric, val value: Double, val decimals: Int)
-
-/** [key] identifies the device for [TreadmillModel.connect]: a MAC address on Android, a UUID on iOS. */
-data class DeviceRow(val key: String, val name: String, val rssi: Int, val advertisesFtms: Boolean)
-
-/** Something to record against: a free run, the demo intervals or a saved treadmill workout. */
 data class PlanOption(val key: String, val name: String)
 
 data class RecordingUi(
@@ -117,34 +99,30 @@ data class SummaryUi(
     val phases: List<PhaseResultUi>,
 )
 
-data class TreadmillUiState(
-    val scanning: Boolean = false,
-    val devices: List<DeviceRow> = emptyList(),
-    val connection: ConnectionStatus = ConnectionStatus.IDLE,
-    val deviceName: String? = null,
-    /** The treadmill the app reconnects to on its own, until the user forgets it. */
-    val rememberedName: String? = null,
+data class LiveUiState(
+    val connectedCount: Int = 0,
+    /** SPEED and PACE first when a device measures speed: the apps show those two large. */
+    val tiles: List<LiveTile> = emptyList(),
     val belt: BeltStatus = BeltStatus.UNKNOWN,
+    /** Whether a treadmill is connected, for the belt switch. */
+    val hasTreadmill: Boolean = false,
     /** When on, pausing or stopping the belt pauses the recording, and restarting it resumes. */
     val syncPause: Boolean = true,
-    /** Why scanning or connecting failed, in English: shown as a detail under a localized title. */
-    val error: String? = null,
-    val tiles: List<LiveTile> = emptyList(),
-    /** What the machine says it supports, for testing a new treadmill. */
-    val supportedMetrics: List<String> = emptyList(),
-    val malformedPackets: Int = 0,
+    /** For the summary, which the apps format with [Units]. */
+    val units: UnitSystem = UnitSystem.METRIC,
     val plans: List<PlanOption> = emptyList(),
     val recording: RecordingUi? = null,
     val summary: SummaryUi? = null,
 )
 
 /**
- * The treadmill screen: find the treadmill, connect, watch live metrics, and record
- * a session, free or following a treadmill workout. Each recorded event is written
- * to the phone's database as it happens, like any guided session.
+ * The Live tab: the merged numbers of every connected device, and the recorder, free
+ * or following a treadmill workout. Each recorded event is written to the phone's
+ * database as it happens, like any guided session.
  */
-class TreadmillModel(
-    private val central: BleCentral,
+class LiveModel(
+    private val devices: DevicesModel,
+    private val settings: StateFlow<SettingsUiState>,
     private val store: LocalStore,
     private val compiler: TimelineCompiler,
     private val memory: KeyValueStore,
@@ -152,30 +130,22 @@ class TreadmillModel(
     private val clock: Clock = Clock.System,
 ) {
     private val _state = MutableStateFlow(
-        TreadmillUiState(
+        LiveUiState(
             plans = builtInPlans.map { PlanOption(it.id.value, it.name) },
-            rememberedName = memory.getString(REMEMBERED_NAME),
             syncPause = memory.getString(SYNC_PAUSE) != "false",
+            units = settings.value.units,
         ),
     )
-    val state: StateFlow<TreadmillUiState> = _state.asStateFlow()
+    val state: StateFlow<LiveUiState> = _state.asStateFlow()
 
-    private val found = mutableMapOf<String, FoundDevice>()
     private var savedWorkouts = emptyList<Workout>()
-    private var scanJob: Job? = null
-    private var connection: TreadmillConnection? = null
-    private var connectedDevice: FoundDevice? = null
+    private var latest: MergedReading? = null
 
     /** Steps since the recording started, or since connecting when not recording. */
     private val steps = StepCounter()
 
     /** True while the recording is paused because the belt stopped, so restarting the belt resumes it. */
     private var pausedByBelt = false
-
-    /** Set by [connectRemembered]: connect as soon as the scan finds this device. */
-    private var pendingKey: String? = null
-    private var connectionJobs = emptyList<Job>()
-    private var capabilities = TreadmillCapabilities.Unknown
     private var recording: Recording? = null
 
     private class Recording(val executionId: String, val timeline: Timeline, val session: Session, val freeRun: Boolean) {
@@ -190,164 +160,72 @@ class TreadmillModel(
                 _state.update { it.copy(plans = (builtInPlans + savedWorkouts).map { w -> PlanOption(w.id.value, w.name) }) }
             }
         }
-    }
-
-    fun startScan() {
-        if (scanJob != null) return
-        _state.update { it.copy(scanning = true, error = null) }
-        scanJob = scope.launch {
-            try {
-                central.scan().collect { device ->
-                    // Unnamed devices that do not advertise FTMS are phones, earbuds and the like.
-                    if (device.name == null && !device.advertisesFtms) return@collect
-                    found[device.id] = device
-                    _state.update { it.copy(devices = deviceRows()) }
-                    if (device.id == pendingKey) connect(device.id)
-                }
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                _state.update { it.copy(error = e.message ?: e.toString()) }
-            } finally {
-                _state.update { it.copy(scanning = false) }
+        scope.launch { devices.merged.collect(::onReading) }
+        scope.launch {
+            devices.belt.collect { belt ->
+                _state.update { it.copy(belt = belt) }
+                followBelt(belt)
             }
         }
-    }
-
-    fun stopScan() {
-        pendingKey = null
-        scanJob?.cancel()
-        scanJob = null
-    }
-
-    /**
-     * Reconnects to the remembered treadmill: scans and connects once it shows up.
-     * Phones cannot connect to a Bluetooth address directly without having seen it
-     * in a scan since launch, so this goes through the scan on both platforms.
-     */
-    fun connectRemembered() {
-        val key = memory.getString(REMEMBERED_KEY) ?: return
-        if (connection != null) return
-        found[key]?.let { connect(key); return }
-        startScan()
-        pendingKey = key
-    }
-
-    /** Disconnects and stops reconnecting to this treadmill on its own. */
-    fun forget() {
-        disconnect()
-        memory.putString(REMEMBERED_KEY, null)
-        memory.putString(REMEMBERED_NAME, null)
-        _state.update { it.copy(rememberedName = null) }
-    }
-
-    private fun deviceRows() = found.values
-        .sortedWith(compareByDescending<FoundDevice> { it.advertisesFtms }.thenByDescending { it.rssi })
-        .map { DeviceRow(it.id, it.name ?: it.id, it.rssi, it.advertisesFtms) }
-
-    fun connect(deviceId: String) {
-        val device = found[deviceId] ?: return
-        stopScan()
-        disconnect()
-        val link = try {
-            central.open(device)
-        } catch (e: Exception) {
-            _state.update { it.copy(connection = ConnectionStatus.FAILED, error = e.message) }
-            return
-        }
-        val newConnection = TreadmillConnection(link, scope)
-        connection = newConnection
-        connectedDevice = device
-        _state.update { it.copy(deviceName = device.name ?: device.id, connection = ConnectionStatus.CONNECTING, error = null) }
-        connectionJobs = listOf(
-            scope.launch { newConnection.state.collect(::onConnectionState) },
-            scope.launch {
-                newConnection.beltState.collect { belt ->
-                    val status = BeltStatus.valueOf(belt.name)
-                    _state.update { it.copy(belt = status) }
-                    followBelt(status)
-                }
-            },
-            scope.launch {
-                newConnection.readings.collect { data ->
-                    onReading(data)
-                    _state.update { it.copy(malformedPackets = newConnection.malformedPackets) }
-                }
-            },
-        )
-        newConnection.start()
-    }
-
-    private fun onConnectionState(state: TreadmillState) {
-        val status = when (state) {
-            TreadmillState.Connecting -> ConnectionStatus.CONNECTING
-            is TreadmillState.Connected -> ConnectionStatus.CONNECTED.also {
-                capabilities = state.capabilities
-                remember()
+        scope.launch {
+            devices.state.collect { d ->
+                if (d.connectedCount == 0) latest = null
+                _state.update { it.copy(connectedCount = d.connectedCount, hasTreadmill = devices.hasTreadmill, tiles = tiles()) }
             }
-            is TreadmillState.Reconnecting -> ConnectionStatus.RECONNECTING
-            is TreadmillState.Failed -> ConnectionStatus.FAILED
-            TreadmillState.Closed -> ConnectionStatus.IDLE
         }
-        _state.update {
-            it.copy(
-                connection = status,
-                error = (state as? TreadmillState.Failed)?.reason,
-                supportedMetrics = capabilities.metrics.map { m -> m.name.lowercase().replace('_', ' ') } +
-                    listOfNotNull(
-                        capabilities.speedRange?.let { r -> "speed ${r.min}–${r.max} km/h" },
-                        capabilities.inclineRange?.let { r -> "incline ${r.min}–${r.max} %" },
-                    ),
-            )
-        }
+        scope.launch { devices.available.collect { _state.update { it.copy(tiles = tiles()) } } }
+        scope.launch { settings.collect { s -> _state.update { it.copy(units = s.units, tiles = tiles()) } } }
     }
 
-    private fun remember() {
-        val device = connectedDevice ?: return
-        val name = device.name ?: device.id
-        memory.putString(REMEMBERED_KEY, device.id)
-        memory.putString(REMEMBERED_NAME, name)
-        _state.update { it.copy(rememberedName = name) }
-    }
-
-    fun disconnect() {
-        val current = connection ?: return
-        connection = null
-        connectedDevice = null
-        connectionJobs.forEach { it.cancel() }
-        scope.launch { current.close() }
-        _state.update { it.copy(connection = ConnectionStatus.IDLE, deviceName = null, tiles = emptyList(), belt = BeltStatus.UNKNOWN) }
-    }
-
-    private fun onReading(data: TreadmillData) {
-        data.speedKmh?.let { steps.add(clock.now(), it) }
-        _state.update { it.copy(tiles = tiles(data)) }
+    private fun onReading(reading: MergedReading) {
+        latest = reading
+        reading.metrics.speedKmh?.let { steps.add(clock.now(), it) }
+        _state.update { it.copy(tiles = tiles()) }
         val current = recording ?: return
-        persist(current, current.recorder.onReading(clock.now(), data.toMetrics()))
+        persist(current, current.recorder.onReading(clock.now(), reading.metrics))
         refreshRecording(current)
     }
 
-    /** Every field the machine sends, whatever its feature bits claim: some machines under-report them. */
-    private fun tiles(data: TreadmillData): List<LiveTile> {
-        val m = data.toMetrics()
-        return listOfNotNull(
-            m.speedKmh?.let { LiveTile(LiveMetric.SPEED, it, 1) },
-            m.speedKmh?.takeIf { it >= 1.0 }?.let { LiveTile(LiveMetric.PACE, 3600 / it, 0) },
-            data.averageSpeedKmh?.let { LiveTile(LiveMetric.AVERAGE_SPEED, it, 1) },
-            m.inclinePercent?.let { LiveTile(LiveMetric.INCLINE, it, 1) },
-            m.distanceMeters?.let { LiveTile(LiveMetric.DISTANCE_KM, it / 1000, 2) },
-            m.elevationGainMeters?.let { LiveTile(LiveMetric.ELEVATION_GAIN, it, 0) },
-            m.heartRateBpm?.let { LiveTile(LiveMetric.HEART_RATE, it.toDouble(), 0) },
-            m.energyKcal?.let { LiveTile(LiveMetric.ENERGY, it.toDouble(), 0) },
-            data.metabolicEquivalent?.takeIf { it > 0 }?.let { LiveTile(LiveMetric.MET, it, 1) },
-            m.machineElapsed?.let { LiveTile(LiveMetric.MACHINE_TIME, it.inWholeSeconds.toDouble(), 0) },
-            data.remaining?.takeIf { it.isPositive() }?.let { LiveTile(LiveMetric.REMAINING_TIME, it.inWholeSeconds.toDouble(), 0) },
-            m.powerWatts?.let { LiveTile(LiveMetric.POWER, it.toDouble(), 0) },
-            m.speedKmh?.let { LiveTile(LiveMetric.STEPS_ESTIMATED, steps.steps.toDouble(), 0) },
-        )
+    /**
+     * The tiles follow what the connected devices measure, not what the last reading
+     * held: a number that goes missing for a moment keeps its tile, with a dash.
+     */
+    private fun tiles(): List<LiveTile> {
+        val available = devices.available.value
+        val units = settings.value.units
+        val m = latest?.metrics
+        val from = latest?.sources.orEmpty()
+        val speedFrom = from[Quantity.SPEED]
+        val tiles = mutableListOf<LiveTile>()
+        if (Quantity.SPEED in available) {
+            val speed = m?.speedKmh?.let { Units.speed(it, units) }
+            tiles += LiveTile(LiveMetric.SPEED, speed?.value, 1, Units.speed(0.0, units).unit, speedFrom)
+            tiles += LiveTile(LiveMetric.PACE, m?.speedKmh?.let { Units.paceSeconds(it, units) }, 0, Units.paceUnit(units), speedFrom)
+            val distance = m?.distanceMeters?.let { Units.distance(it, units) }
+            tiles += LiveTile(LiveMetric.DISTANCE, distance?.value, 2, Units.distance(0.0, units).unit, speedFrom)
+        }
+        if (Quantity.HEART_RATE in available) {
+            tiles += LiveTile(LiveMetric.HEART_RATE, m?.heartRateBpm?.toDouble(), 0, "bpm", from[Quantity.HEART_RATE])
+        }
+        if (Quantity.CADENCE in available) {
+            tiles += LiveTile(LiveMetric.CADENCE, m?.cadenceSpm?.toDouble(), 0, "spm", from[Quantity.CADENCE])
+        }
+        if (Quantity.INCLINE in available) {
+            tiles += LiveTile(LiveMetric.INCLINE, m?.inclinePercent, 1, "%", from[Quantity.INCLINE])
+        }
+        if (Quantity.ENERGY in available) {
+            tiles += LiveTile(LiveMetric.ENERGY, m?.energyKcal?.toDouble(), 0, "kcal", from[Quantity.ENERGY])
+        }
+        if (Quantity.POWER in available) {
+            tiles += LiveTile(LiveMetric.POWER, m?.powerWatts?.toDouble(), 0, "W", from[Quantity.POWER])
+        }
+        if (Quantity.SPEED in available && Quantity.CADENCE !in available) {
+            tiles += LiveTile(LiveMetric.STEPS_ESTIMATED, steps.steps.toDouble().takeIf { m?.speedKmh != null }, 0, "", speedFrom)
+        }
+        return tiles
     }
 
-    /** Starts recording against the plan with this [PlanOption.key]. Works without a treadmill too, as a timer. */
+    /** Starts recording against the plan with this [PlanOption.key]. Works without a device too, as a timer. */
     fun startRecording(planKey: String) {
         if (recording != null) return
         val workout = (builtInPlans + savedWorkouts).firstOrNull { it.id.value == planKey } ?: return
@@ -398,10 +276,10 @@ class TreadmillModel(
         if (on) followBelt(_state.value.belt)
     }
 
-    /** With [TreadmillUiState.syncPause] on, the recording follows the belt. A pause the user made stays theirs. */
+    /** With [LiveUiState.syncPause] on, the recording follows the belt. A pause the user made stays theirs. */
     private fun followBelt(belt: BeltStatus) {
         val current = recording ?: return
-        if (!_state.value.syncPause || connection == null) return
+        if (!_state.value.syncPause || !devices.hasTreadmill) return
         val status = current.session.state(clock.now()).status
         when {
             (belt == BeltStatus.PAUSED || belt == BeltStatus.STOPPED) && status == SessionState.Status.RUNNING -> {
@@ -413,6 +291,9 @@ class TreadmillModel(
     }
 
     fun skipPhase() = act { it.skipCurrent(clock.now()) }
+
+    /** Closes the summary of the last recording. */
+    fun clearSummary() = _state.update { it.copy(summary = null) }
 
     private fun act(action: (Session) -> List<SessionEvent>) {
         val current = recording ?: return
@@ -491,20 +372,14 @@ class TreadmillModel(
     )
 
     /** Callback form of [state] for Swift. Returns a handle to stop watching. */
-    fun watch(onChange: (TreadmillUiState) -> Unit): Cancellable {
-        val job = scope.launch { state.collect { onChange(it) } }
-        return Cancellable { job.cancel() }
-    }
+    fun watch(onChange: (LiveUiState) -> Unit): Cancellable = state.watchIn(scope, onChange)
 
     fun close() {
         recording?.let { stopRecording() }
-        disconnect()
         scope.cancel()
     }
 
     companion object {
-        private const val REMEMBERED_KEY = "treadmill.key"
-        private const val REMEMBERED_NAME = "treadmill.name"
         private const val SYNC_PAUSE = "treadmill.syncPause"
 
         private val freeRunPlan = Workout(WorkoutId("free-run"), 1, "Free run", WorkoutType.TREADMILL, emptyList())

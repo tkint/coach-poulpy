@@ -4,7 +4,7 @@ import kotlin.time.Duration
 import kotlinx.serialization.Serializable
 
 /**
- * One reading from a connected machine, in the units the app shows. Every field is
+ * One reading from a connected machine or sensor, in the units the app shows. Every field is
  * optional because machines send different subsets; a missing value means "not sent",
  * never zero. Counters (distance, energy, elevation) are totals since the machine's
  * own start, so a recording keeps the first reading to compute what was done in it.
@@ -19,4 +19,6 @@ data class DeviceMetrics(
     val powerWatts: Int? = null,
     val elevationGainMeters: Double? = null,
     val machineElapsed: Duration? = null,
+    /** Steps per minute, from a foot pod. */
+    val cadenceSpm: Int? = null,
 )

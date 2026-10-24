@@ -3,8 +3,11 @@ import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.VersionCatalogsExtension
+import org.gradle.api.tasks.testing.AbstractTestTask
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.getByType
+import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
@@ -39,6 +42,11 @@ class KmpLibraryConventionPlugin : Plugin<Project> {
             sourceSets.getByName("commonTest").dependencies {
                 implementation(kotlin("test"))
             }
+        }
+
+        // CI logs say why a test failed, with its message and the line, not only which test.
+        tasks.withType<AbstractTestTask>().configureEach {
+            testLogging.exceptionFormat = TestExceptionFormat.FULL
         }
 
         extensions.configure<LibraryExtension> {
