@@ -14,6 +14,7 @@ import ch.coachpoulpy.data.local.StoredSession
 import ch.coachpoulpy.types.treadmill.TreadmillModule
 import ch.coachpoulpy.types.treadmill.TreadmillSummary
 import kotlin.time.Clock
+import kotlin.time.Instant
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -21,11 +22,18 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.datetime.DatePeriod
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
+import kotlinx.datetime.isoDayNumber
+import kotlinx.datetime.minus
+import kotlinx.datetime.number
+import kotlinx.datetime.plus
+import kotlinx.datetime.toLocalDateTime
 
 /** A guided workout, or a treadmill session (free run or treadmill workout), which shows distance rather than sets. */
 enum class SessionKind { WORKOUT, TREADMILL }
@@ -64,14 +72,48 @@ data class HistoryState(
     val thisMonth: PeriodUi = PeriodUi(0, 0, 0.0),
     /** The last eight weeks, oldest first, the current one last. */
     val weeks: List<WeekBar> = emptyList(),
+    val totalSessions: Int = 0,
+    /** The longest treadmill distance in one session, and when it started; null without any. */
+    val longestRunMeters: Double? = null,
+    val longestRunMillis: Long? = null,
+    /** Poulpy's tentacles, as on the Today screen. */
+    val fullOctopuses: Int = 0,
+    val tentaclesLit: Int = 0,
+    /** How far back the calendar goes: 0 for this month, -3 when the oldest session is three months ago. */
+    val firstMonthOffset: Int = 0,
 ) {
     /** Whether the distance chart has anything to show. */
     val hasDistance: Boolean get() = weeks.any { it.distanceKm > 0 }
 }
 
+/** One day of the month grid. */
+data class CalendarDay(val day: Int, val sessionCount: Int, val isToday: Boolean, val isFuture: Boolean) {
+    val active: Boolean get() = sessionCount > 0
+}
+
+/** The sessions of one day, for the list under the calendar. No sessions: the selected day was a rest day. */
+data class DaySection(val day: Int, val dateMillis: Long, val isToday: Boolean, val sessions: List<SessionRow>)
+
+/** One month of the calendar, Monday first. [monthStartMillis] is the 1st at midnight, for the platform to name the month. */
+data class CalendarMonth(
+    val year: Int,
+    /** 1 to 12. */
+    val month: Int,
+    val monthStartMillis: Long,
+    /** Empty cells before the 1st, so it falls under its weekday. */
+    val leadingBlanks: Int,
+    val days: List<CalendarDay>,
+    val activeDays: Int,
+    val canGoBack: Boolean,
+    /** False for the current month: the calendar never shows the future. */
+    val canGoForward: Boolean,
+    /** Days with sessions, newest first, plus the selected day when it had none. */
+    val sections: List<DaySection>,
+)
+
 /**
- * The history screen: every finished session on this phone, newest first, with this
- * week's and this month's totals and the last weeks as charts. Sessions done before
+ * The history screen: a month calendar over the sessions of that month, and the stats
+ * (this week's and this month's totals, the last weeks as charts, records and Poulpy). Sessions done before
  * the history existed are summed up once, the first time it opens.
  */
 class HistoryModel internal constructor(
@@ -84,8 +126,9 @@ class HistoryModel internal constructor(
 ) {
     private val labels = Labels(languageCode)
 
-    val state: StateFlow<HistoryState> = store.finishedSessions()
-        .map(::build)
+    private val coach = PoulpyCoach(languageCode, zone)
+
+    val state: StateFlow<HistoryState> = combine(store.finishedSessions(), store.finishedSessionEnds(), ::build)
         .flowOn(Dispatchers.IO)
         .stateIn(scope, SharingStarted.Eagerly, HistoryState())
 
@@ -99,12 +142,50 @@ class HistoryModel internal constructor(
 
     fun close() = scope.cancel()
 
-    private fun build(stored: List<StoredSession>): HistoryState {
+    /**
+     * The month [offset] months from this one (0 now, -1 last month) out of [state], with
+     * [selectedDay] (1 to 31, or 0 for none) kept in the list even if nothing was done that day.
+     */
+    fun month(state: HistoryState, offset: Int, selectedDay: Int): CalendarMonth {
+        val today = clock.now().toLocalDateTime(zone).date
+        val first = LocalDate(today.year, today.month, 1).plus(DatePeriod(months = offset.coerceAtMost(0)))
+        val length = first.plus(DatePeriod(months = 1)).minus(DatePeriod(days = 1)).day
+        val byDay = state.sessions
+            .groupBy { Instant.fromEpochMilliseconds(it.startedAtMillis).toLocalDateTime(zone).date }
+            .filterKeys { it.year == first.year && it.month == first.month }
+            .mapKeys { it.key.day }
+        val days = (1..length).map { day ->
+            val date = LocalDate(first.year, first.month, day)
+            CalendarDay(day, byDay[day]?.size ?: 0, isToday = date == today, isFuture = date > today)
+        }
+        val shown = byDay.keys + listOfNotNull(selectedDay.takeIf { it in 1..length && !days[it - 1].isFuture })
+        return CalendarMonth(
+            year = first.year,
+            month = first.month.number,
+            monthStartMillis = first.atStartOfDayIn(zone).toEpochMilliseconds(),
+            leadingBlanks = first.dayOfWeek.isoDayNumber - 1,
+            days = days,
+            activeDays = byDay.size,
+            canGoBack = offset > state.firstMonthOffset,
+            canGoForward = offset < 0,
+            sections = shown.sortedDescending().map { day ->
+                val date = LocalDate(first.year, first.month, day)
+                DaySection(day, date.atStartOfDayIn(zone).toEpochMilliseconds(), date == today, byDay[day].orEmpty())
+            },
+        )
+    }
+
+    private fun build(stored: List<StoredSession>, finishedEnds: List<Instant>): HistoryState {
         val done = stored.mapNotNull { session ->
             val totals = session.totals ?: backfill(session)
             if (totals.isEmpty) null else session to totals
         }
-        val stats = HistoryStats.of(done.map { (s, t) -> DoneSession(s.execution.startedAt, t) }, clock.now(), zone)
+        val now = clock.now()
+        val stats = HistoryStats.of(done.map { (s, t) -> DoneSession(s.execution.startedAt, t) }, now, zone)
+        val longest = done.filter { (_, t) -> (t.distanceMeters ?: 0.0) > 0 }.maxByOrNull { (_, t) -> t.distanceMeters!! }
+        val poulpy = coach.status(finishedEnds, now)
+        val oldest = done.minOfOrNull { (s, _) -> s.execution.startedAt }?.toLocalDateTime(zone)?.date
+        val today = now.toLocalDateTime(zone).date
         return HistoryState(
             loaded = true,
             sessions = done.map { (s, t) -> row(s, t) },
@@ -118,6 +199,12 @@ class HistoryModel internal constructor(
                     isCurrent = index == stats.weeks.lastIndex,
                 )
             },
+            totalSessions = done.size,
+            longestRunMeters = longest?.second?.distanceMeters,
+            longestRunMillis = longest?.first?.execution?.startedAt?.toEpochMilliseconds(),
+            fullOctopuses = poulpy.fullOctopuses,
+            tentaclesLit = poulpy.tentaclesLit,
+            firstMonthOffset = oldest?.let { -((today.year - it.year) * 12 + (today.month.number - it.month.number)) }?.coerceAtMost(0) ?: 0,
         )
     }
 

@@ -137,4 +137,24 @@
     <string name="history_sets_skipped">Séries passées</string>
     <string name="history_delete_title">Retirer cette séance de l’historique ?</string>
     <string name="history_delete_body">Elle disparaît de votre historique et de vos statistiques. C’est définitif.</string>
+    <string name="history_view_calendar">Calendrier</string>
+    <string name="history_view_stats">Stats</string>
+    <plurals name="history_active_days">
+        <item quantity="one">%1$d jour actif · balayez pour changer de mois</item>
+        <item quantity="many">%1$d jours actifs · balayez pour changer de mois</item>
+        <item quantity="other">%1$d jours actifs · balayez pour changer de mois</item>
+    </plurals>
+    <string name="history_previous_month">Mois précédent</string>
+    <string name="history_next_month">Mois suivant</string>
+    <string name="history_today_day">Aujourd’hui · %1$s</string>
+    <string name="history_resting">Aucune séance ce jour-là. Poulpy se reposait aussi.</string>
+    <string name="history_total">Total</string>
+    <plurals name="history_sessions_unit">
+        <item quantity="one">séance</item>
+        <item quantity="many">séances</item>
+        <item quantity="other">séances</item>
+    </plurals>
+    <string name="history_longest_run">Plus longue course</string>
+    <string name="history_full_octopus">Poulpe complet</string>
+    <string name="history_tentacles_lit">%1$d sur 8 allumés</string>
 </resources>

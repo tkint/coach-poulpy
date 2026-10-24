@@ -137,4 +137,22 @@
     <string name="history_sets_skipped">Sets skipped</string>
     <string name="history_delete_title">Delete this session?</string>
     <string name="history_delete_body">It leaves your history and stats. This can’t be undone.</string>
+    <string name="history_view_calendar">Calendar</string>
+    <string name="history_view_stats">Stats</string>
+    <plurals name="history_active_days">
+        <item quantity="one">%1$d active day · swipe for other months</item>
+        <item quantity="other">%1$d active days · swipe for other months</item>
+    </plurals>
+    <string name="history_previous_month">Previous month</string>
+    <string name="history_next_month">Next month</string>
+    <string name="history_today_day">Today · %1$s</string>
+    <string name="history_resting">No session that day. Poulpy was resting too.</string>
+    <string name="history_total">Total</string>
+    <plurals name="history_sessions_unit">
+        <item quantity="one">session</item>
+        <item quantity="other">sessions</item>
+    </plurals>
+    <string name="history_longest_run">Longest run</string>
+    <string name="history_full_octopus">Full octopus</string>
+    <string name="history_tentacles_lit">%1$d of 8 lit</string>
 </resources>

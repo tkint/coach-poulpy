@@ -140,4 +140,60 @@ class HistoryModelTest {
         model.delete("walk")
         assertEquals(0, model.awaitSessions(0).thisWeek.sessions)
     }
+
+    private fun walk(id: String, start: Instant, minutes: Int = 20, meters: Double? = null) {
+        graph.store.startExecution(Execution(ExecutionId(id), ExecutionSource.DEVICE_ONLY, startedAt = start))
+        graph.store.appendEvent(id, SessionEvent.Started(start))
+        if (meters != null) {
+            graph.store.appendEvent(id, SessionEvent.Sample(start + 1.seconds, DeviceMetrics(speedKmh = 5.0, distanceMeters = 0.0)))
+            graph.store.appendEvent(id, SessionEvent.Sample(start + minutes.minutes, DeviceMetrics(speedKmh = 5.0, distanceMeters = meters)))
+        }
+        graph.store.appendEvent(id, SessionEvent.Finished(start + minutes.minutes))
+        graph.store.finishExecution(id, start + minutes.minutes)
+    }
+
+    @Test
+    fun calendarShowsTheMonthMondayFirstWithActiveDaysAndTheSelectedRestDay() {
+        // November 2023 starts on a Wednesday; "now" is Wednesday the 15th.
+        walk("a", Instant.parse("2023-11-13T08:00:00Z"))
+        walk("b", Instant.parse("2023-11-13T18:00:00Z"))
+        walk("c", Instant.parse("2023-11-02T08:00:00Z"))
+        walk("old", Instant.parse("2023-09-20T08:00:00Z"))
+        val model = history()
+        val state = model.awaitSessions(4)
+        assertEquals(-2, state.firstMonthOffset)
+
+        val month = model.month(state, offset = 0, selectedDay = 15)
+        assertEquals(2023 to 11, month.year to month.month)
+        assertEquals(2, month.leadingBlanks)
+        assertEquals(30, month.days.size)
+        assertEquals(2, month.activeDays)
+        assertEquals(2, month.days[12].sessionCount)
+        assertEquals(true, month.days[14].isToday)
+        assertEquals(true, month.days[15].isFuture)
+        assertEquals(false, month.canGoForward)
+        assertEquals(true, month.canGoBack)
+        // Newest first, with today kept as a rest day.
+        assertEquals(listOf(15, 13, 2), month.sections.map { it.day })
+        assertEquals(0, month.sections[0].sessions.size)
+        assertEquals(listOf("b", "a"), month.sections[1].sessions.map { it.id })
+
+        val september = model.month(state, offset = -2, selectedDay = 0)
+        assertEquals(listOf(20), september.sections.map { it.day })
+        assertEquals(false, september.canGoBack)
+        assertEquals(true, september.canGoForward)
+        // A future day cannot be selected.
+        assertEquals(listOf(13, 2), model.month(state, offset = 0, selectedDay = 20).sections.map { it.day })
+    }
+
+    @Test
+    fun statsKeepTheLongestRunAndCountPoulpysTentacles() {
+        (1..9).forEach { walk("w$it", now - it.days, meters = if (it == 4) 5200.0 else 1000.0 * it / 2) }
+        val state = history().awaitSessions(9)
+        assertEquals(9, state.totalSessions)
+        assertEquals(5200.0, state.longestRunMeters)
+        assertEquals((now - 4.days).toEpochMilliseconds(), state.longestRunMillis)
+        assertEquals(1, state.fullOctopuses)
+        assertEquals(1, state.tentaclesLit)
+    }
 }
