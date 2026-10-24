@@ -1,3 +1,4 @@
+import java.util.Properties
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -73,9 +74,9 @@ dependencies {
 class SigningKey(val storeFile: File, val storePassword: String, val keyAlias: String, val keyPassword: String)
 
 fun signingKey(): SigningKey? {
-    val properties = java.util.Properties()
+    val properties = Properties()
     val local = file("keystore.properties")
-    if (local.exists()) local.inputStream().use(properties::load)
+    if (local.exists()) local.inputStream().use { properties.load(it) }
     fun value(property: String, env: String) = properties.getProperty(property) ?: providers.environmentVariable(env).orNull
     val store = value("storeFile", "POULPY_KEYSTORE_FILE")?.takeIf { it.isNotBlank() } ?: return null
     val storePassword = value("storePassword", "POULPY_KEYSTORE_PASSWORD") ?: error("The signing key has no store password")
