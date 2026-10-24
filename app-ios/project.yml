@@ -32,7 +32,8 @@ targets:
         EXCLUDED_ARCHS[sdk=iphonesimulator*]: x86_64
         # The Kotlin framework is built by Gradle into this folder by the pre-build script.
         FRAMEWORK_SEARCH_PATHS: $(SRCROOT)/../shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)
-        OTHER_LDFLAGS: [$(inherited), -framework, Shared]
+        # Shared is a static framework, so the system SQLite it uses (SQLDelight) is linked here.
+        OTHER_LDFLAGS: [$(inherited), -framework, Shared, -lsqlite3]
     preBuildScripts:
       - name: Build Kotlin shared framework
         basedOnDependencyAnalysis: false
