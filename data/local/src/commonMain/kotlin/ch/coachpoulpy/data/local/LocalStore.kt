@@ -16,6 +16,7 @@ import kotlin.time.Instant
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
 
 /** The phone's database: the source of truth for a guest. */
@@ -103,9 +104,10 @@ class LocalStore(driverFactory: DriverFactory, private val clock: Clock = Clock.
 
     /** When each finished session ended, oldest first, updated as sessions finish. */
     fun finishedSessionEnds(): Flow<List<Instant>> =
-        db.executionQueries.finishedSessionEnds { endedAt -> Instant.fromEpochMilliseconds(endedAt!!) }
+        db.executionQueries.finishedSessionEnds()
             .asFlow()
             .mapToList(Dispatchers.IO)
+            .map { ends -> ends.map(Instant::fromEpochMilliseconds) }
 
     fun events(executionId: String): List<SessionEvent> =
         db.executionQueries.events(executionId).executeAsList()
