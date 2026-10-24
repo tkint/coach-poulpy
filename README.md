@@ -9,9 +9,10 @@ A personal training platform: build workouts, follow plans, run guided sessions 
 | `core/model` | Domain types: exercises, workouts, steps, prescriptions, plans, executions |
 | `core/engine` | Timeline compiler, session state machine, event log, `WorkoutTypeModule` |
 | `core/stats` | Derived metrics (placeholder) |
-| `types/*` | One module per workout type: strength, conditioning, rehab, mobility |
+| `types/*` | One module per workout type: strength, conditioning, rehab, mobility, treadmill |
 | `catalog` | Bundled exercise catalog, edited as JSON in `catalog/data/` |
 | `data/local` | SQLDelight database on the phone |
+| `device/ftms` | Bluetooth treadmills (FTMS): decoding, connection with reconnect, Bluetooth through Kable |
 | `export/fit` | .FIT export for Garmin Connect and Strava (placeholder) |
 | `shared` | Umbrella module the apps use; exported to iOS as the `Shared` framework |
 | `app-android` | Jetpack Compose app |
@@ -65,6 +66,12 @@ Later, an admin menu on the server will publish new versions in the same format,
 
 - **Android:** every CI run on a pull request uploads a debug APK as the `coach-poulpy-debug-apk` artifact. Download it on the phone and allow installing from that source. `./gradlew :app-android:assembleRelease` gives a smaller build, signed with the debug key until a release key exists.
 - **iPhone:** set your Apple team in Xcode (Signing & Capabilities) and run on a connected iPhone. With a free Apple account the app expires after 7 days; TestFlight needs the paid Apple Developer Program.
+
+## Treadmill (Bluetooth FTMS)
+
+The **Treadmill** tab finds a treadmill that speaks the Bluetooth Fitness Machine Service, shows its live readings and records a session, either free or following a treadmill workout (a built-in demo workout is there until the workout builder exists). Recording is read-only: the app never changes the treadmill's speed or incline yet, though `device/ftms` already encodes those commands.
+
+Testing on a new machine: the bottom of the tab lists what the treadmill says it can report and counts any packets the decoder could not read. Treadmills differ in which fields they send, so a metric that never shows up is usually one the machine does not send.
 
 ## Continuous integration
 

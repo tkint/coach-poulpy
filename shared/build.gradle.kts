@@ -18,6 +18,8 @@ kotlin {
             api(projects.core.engine)
             api(projects.catalog)
             api(projects.data.local)
+            api(projects.device.ftms)
+            api(projects.types.treadmill)
             implementation(projects.types.strength)
             implementation(projects.types.conditioning)
             implementation(projects.types.rehab)

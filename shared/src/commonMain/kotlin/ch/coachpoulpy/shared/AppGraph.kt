@@ -8,17 +8,19 @@ import ch.coachpoulpy.core.model.Workout
 import ch.coachpoulpy.core.model.WorkoutId
 import ch.coachpoulpy.data.local.DriverFactory
 import ch.coachpoulpy.data.local.LocalStore
+import ch.coachpoulpy.device.ftms.KableCentral
 import ch.coachpoulpy.types.conditioning.ConditioningModule
 import ch.coachpoulpy.types.mobility.MobilityModule
 import ch.coachpoulpy.types.rehab.RehabModule
 import ch.coachpoulpy.types.strength.StrengthModule
+import ch.coachpoulpy.types.treadmill.TreadmillModule
 
 /**
  * Wires the app together once at start-up. Android builds it in its Application,
  * iOS in the App struct. Guest mode: nothing here talks to the network.
  */
 class AppGraph(driverFactory: DriverFactory) {
-    val registry = WorkoutTypeRegistry(listOf(StrengthModule, ConditioningModule, RehabModule, MobilityModule))
+    val registry = WorkoutTypeRegistry(listOf(StrengthModule, ConditioningModule, RehabModule, MobilityModule, TreadmillModule))
     val compiler = TimelineCompiler(registry)
     val store = LocalStore(driverFactory)
     val catalogRepository = CatalogRepository(store, Catalog.bundled)
@@ -26,6 +28,15 @@ class AppGraph(driverFactory: DriverFactory) {
 
     fun exerciseList(languageCode: String) = ExerciseListModel(catalog, registry, languageCode)
     fun today(languageCode: String) = TodayModel(store, compiler, languageCode)
+
+    private var treadmillModel: TreadmillModel? = null
+
+    /**
+     * The one treadmill model of the app, created on first use. It outlives the screen
+     * so that leaving the tab mid-walk keeps the connection and the recording going.
+     */
+    fun treadmill(memory: KeyValueStore): TreadmillModel =
+        treadmillModel ?: TreadmillModel(KableCentral(), store, compiler, memory).also { treadmillModel = it }
 
     // Not "newWorkout": Swift reserves the "new" prefix, and Kotlin would rename it.
     fun createWorkout(languageCode: String) =

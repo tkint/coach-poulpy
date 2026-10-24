@@ -4,6 +4,7 @@ import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.DirectionsRun
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Today
 import androidx.compose.material3.Icon
@@ -27,6 +28,7 @@ import ch.coachpoulpy.shared.AppGraph
 private enum class Tab(@StringRes val label: Int, val icon: ImageVector) {
     TODAY(R.string.tab_today, Icons.Filled.Today),
     EXERCISES(R.string.tab_exercises, Icons.AutoMirrored.Filled.List),
+    TREADMILL(R.string.tab_treadmill, Icons.AutoMirrored.Filled.DirectionsRun),
 }
 
 /**
@@ -71,6 +73,7 @@ fun CoachPoulpyRoot(graph: AppGraph) {
                     modifier = modifier,
                 )
                 Tab.EXERCISES -> ExercisesScreen(graph, language, onOpen = { route = "exercise:$it" }, modifier = modifier)
+                Tab.TREADMILL -> TreadmillScreen(graph, modifier)
             }
         }
         "resume" -> PlayerScreen(graph, language, workoutId = null, onClose = close)

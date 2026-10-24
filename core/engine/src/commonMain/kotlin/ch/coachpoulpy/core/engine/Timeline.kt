@@ -1,6 +1,7 @@
 package ch.coachpoulpy.core.engine
 
 import ch.coachpoulpy.core.model.ExerciseSlug
+import ch.coachpoulpy.core.model.Intensity
 import ch.coachpoulpy.core.model.Side
 import ch.coachpoulpy.core.model.Step
 import ch.coachpoulpy.core.model.StepId
@@ -24,6 +25,8 @@ sealed interface Phase {
         val side: Side,
         val completion: CompletionRule,
         override val duration: Duration?,
+        /** The prescribed effort, such as a treadmill speed, checked against what a connected machine reports. */
+        val intensity: Intensity? = null,
     ) : Phase
 
     data class Rest(override val duration: Duration) : Phase
@@ -54,6 +57,7 @@ class TimelineCompiler(private val registry: WorkoutTypeRegistry) {
                         side = set.side,
                         completion = completion,
                         duration = if (completion == CompletionRule.Timer) set.target.duration() else null,
+                        intensity = set.intensity,
                     ),
                 )
                 addRest(set.restAfter)
