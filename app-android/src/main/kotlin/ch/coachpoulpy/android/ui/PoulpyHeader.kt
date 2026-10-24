@@ -113,7 +113,6 @@ private val PoulpyDrawing.drawable: Int
         PoulpyDrawing.PATCHED_UP -> R.drawable.poulpy_pose_patched_up
         PoulpyDrawing.SHY -> R.drawable.poulpy_pose_shy
         PoulpyDrawing.THINKING -> R.drawable.poulpy_pose_thinking
-        PoulpyDrawing.SPINNING -> R.drawable.poulpy_pose_spinning
         PoulpyDrawing.POUTING -> R.drawable.poulpy_pose_pouting
         PoulpyDrawing.FUMING -> R.drawable.poulpy_pose_fuming
     }

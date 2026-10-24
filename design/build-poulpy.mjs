@@ -138,22 +138,25 @@ const POSES = {
       FACES.fuming +
       s('M140 50 q6 6 0 12 M152 50 q-6 6 0 12 M140 50 q6 -6 12 0 M140 62 q6 6 12 0', 3.5, '#FFDCC7')
   },
-  spinning: () => {
-    const t = MOODS.happy.tone
-    const back = s('M186 132 Q100 100 14 132', 4, '#7FCBF0')
-    const front = '<path d="M8 140 Q100 192 194 140" fill="none" stroke="#1574B0" stroke-width="5" stroke-linecap="round"/>' + f('M202 132 L188 130 L194 146 Z', '#1574B0')
-    const face = eye(88, 96, 9, 10.5, 2) + eye(128, 96, 9, 10.5, 2) + s('M98 112 Q108 122 118 112') + blushB()
-    return back + body(t) + face + front +
-      s('M-14 70 l18 0 M-18 84 l14 0', 3, '#7FCBF0') + s('M196 64 l18 0 M200 78 l14 0', 3, '#7FCBF0') +
-      '<path d="M150 40 q8 -10 18 -4" fill="none" stroke="#7FCBF0" stroke-width="3" stroke-linecap="round"/>'
-  },
 }
 
-// Every drawing shares the poses' frame, so portraits and poses line up when swapped.
-const VIEW = { x: -24, y: -36, width: 248, height: 226 }
+// The loading animation: Poulpy seen from above as a blue outline, eight big round lobes each
+// ending in a short tail that dips inward. The apps turn it clockwise, so the top moves left to
+// right. Small loaders get a thicker line.
+const LOADER_PATH = 'M73.7 36.4A26.4 26.4 0 1 1 126.3 36.4A26.4 26.4 0 0 1 122.4 52.3M126.3 36.4A26.4 26.4 0 1 1 163.6 73.7A26.4 26.4 0 0 1 149.6 82.1' +
+  'M163.6 73.7A26.4 26.4 0 1 1 163.6 126.3A26.4 26.4 0 0 1 147.7 122.4M163.6 126.3A26.4 26.4 0 1 1 126.3 163.6A26.4 26.4 0 0 1 117.9 149.6' +
+  'M126.3 163.6A26.4 26.4 0 1 1 73.7 163.6A26.4 26.4 0 0 1 77.6 147.7M73.7 163.6A26.4 26.4 0 1 1 36.4 126.3A26.4 26.4 0 0 1 50.4 117.9' +
+  'M36.4 126.3A26.4 26.4 0 1 1 36.4 73.7A26.4 26.4 0 0 1 52.3 77.6M36.4 73.7A26.4 26.4 0 1 1 73.7 36.4A26.4 26.4 0 0 1 82.1 50.4'
+const loader = (width) => s(LOADER_PATH, width, BLUE)
+
+// Portraits and poses share one frame, so they line up when swapped. The loader is square.
+const POSE_VIEW = { x: -24, y: -36, width: 248, height: 226 }
+const LOADER_VIEW = { x: 0, y: 0, width: 200, height: 200 }
 const DRAWINGS = [
-  ...Object.keys(MOODS).map((mood) => ({ name: `mood_${snake(mood)}`, svg: portrait(mood) })),
-  ...Object.entries(POSES).map(([pose, draw]) => ({ name: `pose_${snake(pose)}`, svg: draw() })),
+  ...Object.keys(MOODS).map((mood) => ({ name: `mood_${snake(mood)}`, svg: portrait(mood), view: POSE_VIEW })),
+  ...Object.entries(POSES).map(([pose, draw]) => ({ name: `pose_${snake(pose)}`, svg: draw(), view: POSE_VIEW })),
+  { name: 'loader', svg: loader(7), view: LOADER_VIEW },
+  { name: 'loader_small', svg: loader(10), view: LOADER_VIEW },
 ]
 
 function snake(name) { return name.replace(/[A-Z]/g, (c) => '_' + c.toLowerCase()) }
@@ -266,7 +269,7 @@ function normalise(node) {
 // ---------------------------------------------------------------------------
 // Writers
 
-function svgOut(tree) {
+function svgOut(tree, VIEW) {
   const walk = (n, pad) => {
     if (n.group) {
       const t = (n.transforms || []).map((x) => `${x.op}(${x.args.join(' ')})`).join(' ')
@@ -292,7 +295,7 @@ function svgOut(tree) {
   ].join('\n')
 }
 
-function vectorOut(tree) {
+function vectorOut(tree, VIEW) {
   const walk = (n, pad) => {
     if (n.group) {
       let open = '', close = '', inner = pad
@@ -348,10 +351,10 @@ const files = {
 }
 for (const drawing of DRAWINGS) {
   const tree = normalise(parse(drawing.svg))
-  const svg = svgOut(tree)
+  const svg = svgOut(tree, drawing.view)
   const asset = `Poulpy${pascalOf(drawing.name)}`
   files[`design/poulpy/${drawing.name}.svg`] = svg
-  files[`app-android/src/main/res/drawable/poulpy_${drawing.name}.xml`] = vectorOut(tree)
+  files[`app-android/src/main/res/drawable/poulpy_${drawing.name}.xml`] = vectorOut(tree, drawing.view)
   files[`app-ios/CoachPoulpy/Assets.xcassets/Poulpy/${asset}.imageset/${asset}.svg`] = svg
   files[`app-ios/CoachPoulpy/Assets.xcassets/Poulpy/${asset}.imageset/Contents.json`] = imagesetContents(`${asset}.svg`)
 }

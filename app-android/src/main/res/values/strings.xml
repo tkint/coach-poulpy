@@ -66,6 +66,7 @@
     <string name="treadmill_scan">Find my treadmill</string>
     <string name="treadmill_stop_scan">Stop searching</string>
     <string name="treadmill_scanning">Searching nearby devices…</string>
+    <string name="loading">Loading</string>
     <string name="treadmill_disconnect">Disconnect</string>
     <string name="treadmill_status_idle">Not connected</string>
     <string name="treadmill_status_connecting">Connecting to %1$s…</string>

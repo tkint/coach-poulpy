@@ -181,7 +181,17 @@ struct TreadmillView: View {
     private var devicesSection: some View {
         Section {
             if state.scanning && state.devices.isEmpty {
-                Text("treadmill.scanning")
+                VStack(spacing: PoulpySpace.md) {
+                    PoulpyLoader(size: 96)
+                    Text("treadmill.scanning")
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, PoulpySpace.xl)
+            } else if state.scanning {
+                HStack(spacing: PoulpySpace.sm) {
+                    PoulpyLoader(size: 24)
+                    Text("treadmill.scanning")
+                }
             }
             ForEach(state.devices, id: \.key) { device in
                 Button {

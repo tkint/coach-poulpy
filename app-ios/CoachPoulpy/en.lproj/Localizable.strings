@@ -59,6 +59,7 @@
 "treadmill.scan" = "Find my treadmill";
 "treadmill.stop.scan" = "Stop searching";
 "treadmill.scanning" = "Searching nearby devices…";
+"loading" = "Loading";
 "treadmill.disconnect" = "Disconnect";
 "treadmill.status.idle" = "Not connected";
 "treadmill.status.connecting" = "Connecting to %@…";

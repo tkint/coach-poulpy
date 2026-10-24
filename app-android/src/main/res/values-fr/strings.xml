@@ -65,6 +65,7 @@
     <string name="treadmill_scan">Chercher mon tapis</string>
     <string name="treadmill_stop_scan">Arrêter la recherche</string>
     <string name="treadmill_scanning">Recherche des appareils à proximité…</string>
+    <string name="loading">Chargement</string>
     <string name="treadmill_disconnect">Déconnecter</string>
     <string name="treadmill_status_idle">Non connecté</string>
     <string name="treadmill_status_connecting">Connexion à %1$s…</string>

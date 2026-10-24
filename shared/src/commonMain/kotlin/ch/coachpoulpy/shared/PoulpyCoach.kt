@@ -27,7 +27,6 @@ enum class PoulpyDrawing(val assetName: String) {
     PATCHED_UP("pose_patched_up"),
     SHY("pose_shy"),
     THINKING("pose_thinking"),
-    SPINNING("pose_spinning"),
     POUTING("pose_pouting"),
     FUMING("pose_fuming"),
 }
