@@ -48,6 +48,16 @@ class TreadmillConnection(
     /** Complete readings, about one a second. Not replayed: a late subscriber starts with the next one. */
     val readings: SharedFlow<TreadmillData> = _readings.asSharedFlow()
 
+    private val belt = BeltMonitor()
+    private val _beltState = MutableStateFlow(BeltState.UNKNOWN)
+
+    /** Moving, paused or stopped, from the machine's status events and its speed. */
+    val beltState: StateFlow<BeltState> = _beltState.asStateFlow()
+
+    /** Whether the machine has sent any status event, so the UI can tell a pause from a stop. */
+    var sendsStatus = false
+        private set
+
     /** Notifications that did not match their flags; worth showing when testing a new machine. */
     var malformedPackets = 0
         private set
@@ -112,11 +122,36 @@ class TreadmillConnection(
                     malformedPackets++
                     return@collect
                 }
-                assembler.add(packet)?.let { _readings.emit(it) }
+                assembler.add(packet)?.let { reading ->
+                    belt.onReading(reading.speedKmh)
+                    _beltState.value = belt.state
+                    _readings.emit(reading)
+                }
+            }
+        }
+        val status = launch {
+            // Optional characteristic: a machine without it still streams data, so a failure here is not a disconnect.
+            try {
+                link.observe(FtmsUuids.machineStatus).collect { bytes ->
+                    val event = try {
+                        MachineStatusDecoder.decode(bytes)
+                    } catch (e: FtmsFormatException) {
+                        malformedPackets++
+                        return@collect
+                    }
+                    sendsStatus = true
+                    belt.onStatus(event)
+                    _beltState.value = belt.state
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                // Not supported by this machine.
             }
         }
         link.awaitDisconnected()
         stream.cancel()
+        status.cancel()
     }
 
     /** Stops reconnecting and drops the link. */

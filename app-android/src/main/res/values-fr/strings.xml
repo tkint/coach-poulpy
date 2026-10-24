@@ -47,4 +47,15 @@
     <string name="treadmill_summary_on_target">%1$d %% dans la cible</string>
     <string name="treadmill_machine_reports">Le tapis envoie : %1$s</string>
     <string name="treadmill_malformed">%1$d paquets illisibles</string>
+    <string name="treadmill_bluetooth_off">Le Bluetooth est désactivé. Activez-le pour vous connecter au tapis.</string>
+    <string name="treadmill_connect_to">Se connecter à %1$s</string>
+    <string name="treadmill_forget">Oublier ce tapis</string>
+    <string name="treadmill_scan_other">Chercher un autre tapis</string>
+    <string name="treadmill_belt_paused">En pause sur le tapis</string>
+    <string name="treadmill_belt_stopped">Tapis arrêté</string>
+    <string name="metric_pace">Allure</string>
+    <string name="metric_average_speed">Vitesse moyenne</string>
+    <string name="metric_elevation_gain">Dénivelé positif</string>
+    <string name="metric_met">Effort</string>
+    <string name="metric_remaining_time">Temps restant (tapis)</string>
 </resources>

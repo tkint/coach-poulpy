@@ -48,4 +48,15 @@
     <string name="treadmill_summary_on_target">%1$d%% on target</string>
     <string name="treadmill_machine_reports">Treadmill reports: %1$s</string>
     <string name="treadmill_malformed">%1$d unreadable packets</string>
+    <string name="treadmill_bluetooth_off">Bluetooth is off. Turn it on to connect to your treadmill.</string>
+    <string name="treadmill_connect_to">Connect to %1$s</string>
+    <string name="treadmill_forget">Forget this treadmill</string>
+    <string name="treadmill_scan_other">Find another treadmill</string>
+    <string name="treadmill_belt_paused">Paused on the treadmill</string>
+    <string name="treadmill_belt_stopped">Belt stopped</string>
+    <string name="metric_pace">Pace</string>
+    <string name="metric_average_speed">Average speed</string>
+    <string name="metric_elevation_gain">Elevation gain</string>
+    <string name="metric_met">Effort</string>
+    <string name="metric_remaining_time">Time left (treadmill)</string>
 </resources>

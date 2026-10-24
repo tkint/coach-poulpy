@@ -45,3 +45,14 @@
 "treadmill.summary.on.target" = "%lld %% dans la cible";
 "treadmill.machine.reports" = "Le tapis envoie : %@";
 "treadmill.malformed" = "%lld paquets illisibles";
+"treadmill.bluetooth.off" = "Le Bluetooth est désactivé. Activez-le pour vous connecter au tapis.";
+"treadmill.connect.to" = "Se connecter à %@";
+"treadmill.forget" = "Oublier ce tapis";
+"treadmill.scan.other" = "Chercher un autre tapis";
+"treadmill.belt.paused" = "En pause sur le tapis";
+"treadmill.belt.stopped" = "Tapis arrêté";
+"metric.pace" = "Allure";
+"metric.average.speed" = "Vitesse moyenne";
+"metric.elevation.gain" = "Dénivelé positif";
+"metric.met" = "Effort";
+"metric.remaining.time" = "Temps restant (tapis)";

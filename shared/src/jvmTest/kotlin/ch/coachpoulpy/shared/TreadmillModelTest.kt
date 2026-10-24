@@ -20,6 +20,7 @@ import kotlin.uuid.Uuid
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.test.TestScope
@@ -42,7 +43,8 @@ private class FakeTreadmill : BleCentral, BleLink {
         FtmsUuids.feature -> bytes(0x04, 0x04, 0, 0, 0, 0, 0, 0) // total distance (bit 2) and heart rate (bit 10)
         else -> error("Not readable")
     }
-    override fun observe(characteristic: Uuid): Flow<ByteArray> = notifications.receiveAsFlow()
+    override fun observe(characteristic: Uuid): Flow<ByteArray> =
+        if (characteristic == FtmsUuids.treadmillData) notifications.receiveAsFlow() else flow { error("No machine status") }
     override suspend fun write(characteristic: Uuid, value: ByteArray) = Unit
     override fun close() = Unit
 
@@ -56,13 +58,21 @@ private class FakeTreadmill : BleCentral, BleLink {
     private fun bytes(vararg values: Int) = ByteArray(values.size) { values[it].toByte() }
 }
 
+private class MemoryStore : KeyValueStore {
+    val values = mutableMapOf<String, String>()
+    override fun getString(key: String) = values[key]
+    override fun putString(key: String, value: String?) {
+        if (value == null) values.remove(key) else values[key] = value
+    }
+}
+
 class TreadmillModelTest {
-    private fun TestScope.model(treadmill: FakeTreadmill, store: LocalStore): TreadmillModel {
+    private fun TestScope.model(treadmill: FakeTreadmill, store: LocalStore, memory: KeyValueStore = MemoryStore()): TreadmillModel {
         val clock = object : Clock {
             override fun now() = Instant.fromEpochMilliseconds(1_700_000_000_000 + testScheduler.currentTime)
         }
         val compiler = TimelineCompiler(WorkoutTypeRegistry(listOf(TreadmillModule)))
-        return TreadmillModel(treadmill, store, compiler, backgroundScope, clock)
+        return TreadmillModel(treadmill, store, compiler, memory, backgroundScope, clock)
     }
 
     @Test
@@ -81,7 +91,12 @@ class TreadmillModelTest {
 
         treadmill.send(speedCentiKmh = 800, meters = 1_000, bpm = 120)
         runCurrent()
-        assertEquals(listOf(LiveMetric.SPEED, LiveMetric.DISTANCE_KM, LiveMetric.HEART_RATE), model.state.value.tiles.map { it.metric })
+        assertEquals(
+            listOf(LiveMetric.SPEED, LiveMetric.PACE, LiveMetric.DISTANCE_KM, LiveMetric.HEART_RATE),
+            model.state.value.tiles.map { it.metric },
+        )
+        assertEquals(450.0, model.state.value.tiles[1].value) // 8 km/h is 7:30 per km
+        assertEquals(BeltStatus.MOVING, model.state.value.belt)
 
         model.startRecording("free-run")
         for (i in 1..10) {
@@ -98,5 +113,30 @@ class TreadmillModelTest {
         assertEquals(10, summary.durationSeconds)
         assertEquals(27.0, summary.distanceMeters) // from the first reading in the recording to the last
         assertEquals(130, summary.maxHeartRateBpm)
+    }
+
+    @Test
+    fun remembersTheTreadmillUntilForgotten() = runTest {
+        val memory = MemoryStore()
+        val store = LocalStore(DriverFactory())
+        val first = model(FakeTreadmill(), store, memory)
+        first.startScan()
+        runCurrent()
+        first.connect("AA:BB")
+        runCurrent()
+        assertEquals("Test treadmill", first.state.value.rememberedName)
+
+        // Next launch: the remembered treadmill connects as soon as the scan sees it.
+        val second = model(FakeTreadmill(), store, memory)
+        assertEquals("Test treadmill", second.state.value.rememberedName)
+        second.connectRemembered()
+        runCurrent()
+        assertEquals(ConnectionStatus.CONNECTED, second.state.value.connection)
+
+        second.forget()
+        runCurrent()
+        assertEquals(ConnectionStatus.IDLE, second.state.value.connection)
+        assertNull(second.state.value.rememberedName)
+        assertEquals(emptyMap(), memory.values)
     }
 }

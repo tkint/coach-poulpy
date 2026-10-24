@@ -45,3 +45,14 @@
 "treadmill.summary.on.target" = "%lld%% on target";
 "treadmill.machine.reports" = "Treadmill reports: %@";
 "treadmill.malformed" = "%lld unreadable packets";
+"treadmill.bluetooth.off" = "Bluetooth is off. Turn it on to connect to your treadmill.";
+"treadmill.connect.to" = "Connect to %@";
+"treadmill.forget" = "Forget this treadmill";
+"treadmill.scan.other" = "Find another treadmill";
+"treadmill.belt.paused" = "Paused on the treadmill";
+"treadmill.belt.stopped" = "Belt stopped";
+"metric.pace" = "Pace";
+"metric.average.speed" = "Average speed";
+"metric.elevation.gain" = "Elevation gain";
+"metric.met" = "Effort";
+"metric.remaining.time" = "Time left (treadmill)";

@@ -1,6 +1,10 @@
 package ch.coachpoulpy.android.ui
 
 import android.Manifest
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothManager
+import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -25,8 +29,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,6 +47,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ch.coachpoulpy.android.R
 import ch.coachpoulpy.shared.AppGraph
+import ch.coachpoulpy.shared.BeltStatus
+import ch.coachpoulpy.shared.KeyValueStore
 import ch.coachpoulpy.shared.ConnectionStatus
 import ch.coachpoulpy.shared.LiveMetric
 import ch.coachpoulpy.shared.LiveTile
@@ -61,7 +69,8 @@ private val bluetoothPermissions =
 
 @Composable
 fun TreadmillScreen(graph: AppGraph, modifier: Modifier = Modifier) {
-    val model = remember(graph) { graph.treadmill() }
+    val context = LocalContext.current
+    val model = remember(graph) { graph.treadmill(PreferencesStore(context)) }
     DisposableEffect(model) { onDispose { model.close() } }
     val state by model.state.collectAsStateWithLifecycle()
 
@@ -72,22 +81,50 @@ fun TreadmillScreen(graph: AppGraph, modifier: Modifier = Modifier) {
         onDispose { view.keepScreenOn = false }
     }
 
-    val context = LocalContext.current
+    // Scanning needs the permissions, then Bluetooth on: each step asks the user if needed, then runs the next.
+    var pending by remember { mutableStateOf<(() -> Unit)?>(null) }
     var permissionDenied by remember { mutableStateOf(false) }
+    var bluetoothOff by remember { mutableStateOf(false) }
+    val enableLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        bluetoothOff = !isBluetoothOn(context)
+        if (!bluetoothOff) pending?.invoke()
+    }
+    val turnOnThen = { action: () -> Unit ->
+        if (isBluetoothOn(context)) {
+            bluetoothOff = false
+            action()
+        } else {
+            pending = action
+            enableLauncher.launch(Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE))
+        }
+    }
     val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { results ->
         permissionDenied = results.values.any { !it }
-        if (!permissionDenied) model.startScan()
+        if (!permissionDenied) pending?.let { turnOnThen(it) }
     }
-    val scan = {
+    val prepareThen = { action: () -> Unit ->
         val missing = bluetoothPermissions.filter { context.checkSelfPermission(it) != PackageManager.PERMISSION_GRANTED }
-        if (missing.isEmpty()) model.startScan() else permissionLauncher.launch(missing.toTypedArray())
+        if (missing.isEmpty()) {
+            turnOnThen(action)
+        } else {
+            pending = action
+            permissionLauncher.launch(missing.toTypedArray())
+        }
+    }
+    val scan = { prepareThen(model::startScan) }
+    val reconnect = { prepareThen(model::connectRemembered) }
+
+    // Opening the tab reconnects to the remembered treadmill, without asking for anything.
+    LaunchedEffect(model) {
+        val granted = bluetoothPermissions.all { context.checkSelfPermission(it) == PackageManager.PERMISSION_GRANTED }
+        if (granted && isBluetoothOn(context)) model.connectRemembered()
     }
 
     Column(
         modifier = modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        ConnectionCard(state, model, scan, permissionDenied)
+        ConnectionCard(state, model, scan, reconnect, permissionDenied, bluetoothOff)
         if (state.connection == ConnectionStatus.IDLE || state.connection == ConnectionStatus.FAILED) {
             DeviceList(state, model)
         }
@@ -95,7 +132,7 @@ fun TreadmillScreen(graph: AppGraph, modifier: Modifier = Modifier) {
             LiveTiles(state.tiles)
         }
         val recording = state.recording
-        if (recording != null) RecordingCard(recording, model) else RecordCard(state.plans, model)
+        if (recording != null) RecordingCard(recording, state.belt, model) else RecordCard(state.plans, model)
         state.summary?.let { SummaryCard(it) }
         if (state.supportedMetrics.isNotEmpty() || state.malformedPackets > 0) {
             Text(
@@ -109,7 +146,14 @@ fun TreadmillScreen(graph: AppGraph, modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun ConnectionCard(state: TreadmillUiState, model: TreadmillModel, scan: () -> Unit, permissionDenied: Boolean) {
+private fun ConnectionCard(
+    state: TreadmillUiState,
+    model: TreadmillModel,
+    scan: () -> Unit,
+    reconnect: () -> Unit,
+    permissionDenied: Boolean,
+    bluetoothOff: Boolean,
+) {
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             val name = state.deviceName.orEmpty()
@@ -123,15 +167,28 @@ private fun ConnectionCard(state: TreadmillUiState, model: TreadmillModel, scan:
                 },
                 style = MaterialTheme.typography.titleMedium,
             )
+            if (state.connection == ConnectionStatus.CONNECTED) BeltIndicator(state.belt)
             if (permissionDenied) Text(stringResource(R.string.treadmill_permission_needed), color = MaterialTheme.colorScheme.error)
+            if (bluetoothOff) Text(stringResource(R.string.treadmill_bluetooth_off), color = MaterialTheme.colorScheme.error)
             state.error?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error) }
-            when {
-                state.connection == ConnectionStatus.CONNECTING ||
-                    state.connection == ConnectionStatus.CONNECTED ||
-                    state.connection == ConnectionStatus.RECONNECTING ->
-                    OutlinedButton(onClick = model::disconnect) { Text(stringResource(R.string.treadmill_disconnect)) }
-                state.scanning -> OutlinedButton(onClick = model::stopScan) { Text(stringResource(R.string.treadmill_stop_scan)) }
-                else -> Button(onClick = scan) { Text(stringResource(R.string.treadmill_scan)) }
+            val linked = state.connection == ConnectionStatus.CONNECTING ||
+                state.connection == ConnectionStatus.CONNECTED ||
+                state.connection == ConnectionStatus.RECONNECTING
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                val remembered = state.rememberedName
+                when {
+                    linked -> OutlinedButton(onClick = model::disconnect) { Text(stringResource(R.string.treadmill_disconnect)) }
+                    state.scanning -> OutlinedButton(onClick = model::stopScan) { Text(stringResource(R.string.treadmill_stop_scan)) }
+                    remembered != null -> Button(onClick = reconnect) { Text(stringResource(R.string.treadmill_connect_to, remembered)) }
+                    else -> Button(onClick = scan) { Text(stringResource(R.string.treadmill_scan)) }
+                }
+                if (remembered != null && !state.scanning) {
+                    OutlinedButton(onClick = model::forget) { Text(stringResource(R.string.treadmill_forget)) }
+                }
+            }
+            // With a remembered treadmill, another one can still be picked.
+            if (!linked && !state.scanning && state.rememberedName != null) {
+                TextButton(onClick = scan) { Text(stringResource(R.string.treadmill_scan_other)) }
             }
         }
     }
@@ -209,11 +266,12 @@ private fun planName(plan: PlanOption) = when (plan.key) {
 }
 
 @Composable
-private fun RecordingCard(recording: RecordingUi, model: TreadmillModel) {
+private fun RecordingCard(recording: RecordingUi, belt: BeltStatus, model: TreadmillModel) {
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(stringResource(R.string.treadmill_elapsed, clock(recording.elapsedSeconds)), style = MaterialTheme.typography.headlineSmall)
             if (recording.paused) Text(stringResource(R.string.treadmill_paused), color = MaterialTheme.colorScheme.error)
+            BeltIndicator(belt)
             if (!recording.freeRun) {
                 Text(stringResource(R.string.treadmill_phase, recording.phaseNumber, recording.phaseCount), style = MaterialTheme.typography.titleMedium)
                 if (recording.isRest) Text(stringResource(R.string.treadmill_rest))
@@ -263,6 +321,21 @@ private fun SummaryCard(summary: SummaryUi) {
     }
 }
 
+/** Shown when the belt is not moving: paused if the treadmill says so, otherwise stopped. */
+@Composable
+private fun BeltIndicator(belt: BeltStatus) {
+    val text = when (belt) {
+        BeltStatus.PAUSED -> R.string.treadmill_belt_paused
+        BeltStatus.STOPPED -> R.string.treadmill_belt_stopped
+        else -> return
+    }
+    Text(
+        "⏸ " + stringResource(text),
+        style = MaterialTheme.typography.titleMedium,
+        color = MaterialTheme.colorScheme.tertiary,
+    )
+}
+
 @Composable
 private fun SummaryLine(@StringRes label: Int, value: String) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -274,6 +347,11 @@ private fun SummaryLine(@StringRes label: Int, value: String) {
 private val LiveMetric.label: Int
     get() = when (this) {
         LiveMetric.SPEED -> R.string.metric_speed
+        LiveMetric.PACE -> R.string.metric_pace
+        LiveMetric.AVERAGE_SPEED -> R.string.metric_average_speed
+        LiveMetric.ELEVATION_GAIN -> R.string.metric_elevation_gain
+        LiveMetric.MET -> R.string.metric_met
+        LiveMetric.REMAINING_TIME -> R.string.metric_remaining_time
         LiveMetric.INCLINE -> R.string.metric_incline
         LiveMetric.DISTANCE_KM -> R.string.metric_distance
         LiveMetric.HEART_RATE -> R.string.metric_heart_rate
@@ -284,7 +362,11 @@ private val LiveMetric.label: Int
 
 private val LiveMetric.unit: String
     get() = when (this) {
-        LiveMetric.SPEED -> "km/h"
+        LiveMetric.SPEED, LiveMetric.AVERAGE_SPEED -> "km/h"
+        LiveMetric.PACE -> "/km"
+        LiveMetric.ELEVATION_GAIN -> "m"
+        LiveMetric.MET -> "MET"
+        LiveMetric.REMAINING_TIME -> ""
         LiveMetric.INCLINE -> "%"
         LiveMetric.DISTANCE_KM -> "km"
         LiveMetric.HEART_RATE -> "bpm"
@@ -293,7 +375,17 @@ private val LiveMetric.unit: String
         LiveMetric.POWER -> "W"
     }
 
-private fun LiveTile.formatted() = if (metric == LiveMetric.MACHINE_TIME) clock(value.toLong()) else decimal(value, decimals)
+private fun LiveTile.formatted() = if (metric.isTime) clock(value.toLong()) else decimal(value, decimals)
+
+private fun isBluetoothOn(context: Context): Boolean =
+    context.getSystemService(BluetoothManager::class.java)?.adapter?.isEnabled == true
+
+/** Remembers the treadmill between launches. */
+private class PreferencesStore(context: Context) : KeyValueStore {
+    private val prefs = context.getSharedPreferences("treadmill", Context.MODE_PRIVATE)
+    override fun getString(key: String): String? = prefs.getString(key, null)
+    override fun putString(key: String, value: String?) = prefs.edit().putString(key, value).apply()
+}
 
 private fun decimal(value: Double, decimals: Int) = String.format(Locale.getDefault(), "%.${decimals}f", value)
 

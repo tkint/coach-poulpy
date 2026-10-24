@@ -24,5 +24,5 @@ class AppGraph(driverFactory: DriverFactory) {
 
     fun exerciseList(languageCode: String) = ExerciseListModel(catalog, languageCode)
     fun today() = TodayModel(store)
-    fun treadmill() = TreadmillModel(KableCentral(), store, compiler)
+    fun treadmill(memory: KeyValueStore) = TreadmillModel(KableCentral(), store, compiler, memory)
 }

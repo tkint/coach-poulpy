@@ -20,6 +20,7 @@ private class FakeLink(var failConnects: Int = 0) : BleLink {
     var closed = false
     private var dropped = CompletableDeferred<Unit>()
     private var notifications = Channel<ByteArray>(Channel.UNLIMITED)
+    private var statuses = Channel<ByteArray>(Channel.UNLIMITED)
 
     val reads = mapOf(
         FtmsUuids.feature to packet(((1 shl 2) or (1 shl 10)) to 4, 0 to 4),
@@ -31,16 +32,22 @@ private class FakeLink(var failConnects: Int = 0) : BleLink {
         if (failConnects-- > 0) error("Out of range")
         dropped = CompletableDeferred()
         notifications = Channel(Channel.UNLIMITED)
+        statuses = Channel(Channel.UNLIMITED)
     }
 
     override suspend fun awaitDisconnected() = dropped.await()
     override suspend fun disconnect() = drop()
     override suspend fun read(characteristic: Uuid) = reads[characteristic] ?: error("Not readable")
-    override fun observe(characteristic: Uuid): Flow<ByteArray> = notifications.receiveAsFlow()
+    override fun observe(characteristic: Uuid): Flow<ByteArray> = when (characteristic) {
+        FtmsUuids.treadmillData -> notifications.receiveAsFlow()
+        FtmsUuids.machineStatus -> statuses.receiveAsFlow()
+        else -> error("Cannot observe $characteristic")
+    }
     override suspend fun write(characteristic: Uuid, value: ByteArray) = Unit
     override fun close() { closed = true }
 
     fun notify(bytes: ByteArray) = notifications.trySend(bytes)
+    fun status(bytes: ByteArray) = statuses.trySend(bytes)
     fun drop() { dropped.complete(Unit) }
 }
 
@@ -107,5 +114,42 @@ class TreadmillConnectionTest {
         assertEquals(TreadmillState.Closed, connection.state.value)
         assertEquals(1, link.connects)
         assertEquals(true, link.closed)
+    }
+
+    @Test
+    fun pauseAndResumeFromTheConsole() = runTest {
+        val link = FakeLink()
+        val connection = TreadmillConnection(link, backgroundScope)
+        connection.start()
+        runCurrent()
+
+        link.notify(packet(0 to 2, 1000 to 2))
+        runCurrent()
+        assertEquals(BeltState.MOVING, connection.beltState.value)
+
+        link.status(packet(0x02 to 1, 0x02 to 1)) // paused by the user
+        link.notify(packet(0 to 2, 600 to 2)) // the belt slowing down is still a pause
+        link.notify(packet(0 to 2, 0 to 2))
+        runCurrent()
+        assertEquals(BeltState.PAUSED, connection.beltState.value)
+        assertEquals(true, connection.sendsStatus)
+
+        link.status(packet(0x04 to 1))
+        runCurrent()
+        assertEquals(BeltState.MOVING, connection.beltState.value)
+    }
+
+    @Test
+    fun withoutStatusEventsAStoppedBeltReadsAsStopped() = runTest {
+        val link = FakeLink()
+        val connection = TreadmillConnection(link, backgroundScope)
+        connection.start()
+        runCurrent()
+        link.notify(packet(0 to 2, 0 to 2))
+        runCurrent()
+        assertEquals(BeltState.STOPPED, connection.beltState.value)
+        link.notify(packet(0 to 2, 300 to 2))
+        runCurrent()
+        assertEquals(BeltState.MOVING, connection.beltState.value)
     }
 }

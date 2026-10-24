@@ -1,6 +1,45 @@
 import SwiftUI
 import UIKit
+import CoreBluetooth
 import Shared
+
+/// Remembers the treadmill between launches.
+final class UserDefaultsStore: NSObject, KeyValueStore {
+    func getString(key: String) -> String? { UserDefaults.standard.string(forKey: key) }
+
+    func putString(key: String, value: String?) {
+        if let value { UserDefaults.standard.set(value, forKey: key) } else { UserDefaults.standard.removeObject(forKey: key) }
+    }
+}
+
+/// Runs an action once Bluetooth is allowed and on. Kable turns off iOS's own "Turn on Bluetooth"
+/// alert, so this manager keeps it: the system asks for access first, then to switch Bluetooth on.
+final class BluetoothGate: NSObject, ObservableObject, CBCentralManagerDelegate {
+    @Published private(set) var isOff = false
+    @Published private(set) var isDenied = false
+    private var manager: CBCentralManager?
+    private var pending: (() -> Void)?
+
+    func whenReady(_ action: @escaping () -> Void) {
+        if let manager, manager.state == .poweredOn {
+            action()
+            return
+        }
+        pending = action
+        if manager == nil {
+            manager = CBCentralManager(delegate: self, queue: nil, options: [CBCentralManagerOptionShowPowerAlertKey: true])
+        }
+    }
+
+    func centralManagerDidUpdateState(_ central: CBCentralManager) {
+        isOff = central.state == .poweredOff
+        isDenied = central.state == .unauthorized
+        if central.state == .poweredOn, let action = pending {
+            pending = nil
+            action()
+        }
+    }
+}
 
 /// Bridges the Kotlin TreadmillModel to SwiftUI.
 final class TreadmillViewModel: ObservableObject {
@@ -9,7 +48,7 @@ final class TreadmillViewModel: ObservableObject {
     private var watch: Cancellable?
 
     init(graph: AppGraph) {
-        model = graph.treadmill()
+        model = graph.treadmill(memory: UserDefaultsStore())
         state = model.state.value as! TreadmillUiState
         watch = model.watch { [weak self] state in
             DispatchQueue.main.async {
@@ -28,6 +67,7 @@ final class TreadmillViewModel: ObservableObject {
 
 struct TreadmillView: View {
     @StateObject private var viewModel: TreadmillViewModel
+    @StateObject private var bluetooth = BluetoothGate()
     @State private var selectedPlan = "free-run"
 
     init(graph: AppGraph) {
@@ -67,23 +107,56 @@ struct TreadmillView: View {
                 }
             }
             .navigationTitle("tab.treadmill")
+            .onAppear {
+                // Opening the tab reconnects to the remembered treadmill, once Bluetooth was allowed before.
+                if state.rememberedName != nil && CBCentralManager.authorization == .allowedAlways {
+                    bluetooth.whenReady { model.connectRemembered() }
+                }
+            }
         }
     }
 
     private var connectionSection: some View {
         Section {
             Text(statusText).font(.headline)
+            if state.connection == .connected {
+                beltIndicator
+            }
+            if bluetooth.isDenied {
+                Text("treadmill.permission.needed").foregroundStyle(.red)
+            } else if bluetooth.isOff {
+                Text("treadmill.bluetooth.off").foregroundStyle(.red)
+            }
             if let error = state.error {
                 Text(error).font(.footnote).foregroundStyle(.red)
             }
-            if state.connection == .connecting || state.connection == .connected || state.connection == .reconnecting {
+            if isLinked {
                 Button(LocalizedStringKey("treadmill.disconnect")) { model.disconnect() }
             } else if state.scanning {
                 Button(LocalizedStringKey("treadmill.stop.scan")) { model.stopScan() }
+            } else if let remembered = state.rememberedName {
+                Button(L("treadmill.connect.to", remembered)) { bluetooth.whenReady { model.connectRemembered() } }
+                Button(LocalizedStringKey("treadmill.scan.other")) { bluetooth.whenReady { model.startScan() } }
             } else {
-                // iOS asks for Bluetooth access itself the first time the app scans.
-                Button(LocalizedStringKey("treadmill.scan")) { model.startScan() }
+                Button(LocalizedStringKey("treadmill.scan")) { bluetooth.whenReady { model.startScan() } }
             }
+            if state.rememberedName != nil && !state.scanning {
+                Button(LocalizedStringKey("treadmill.forget"), role: .destructive) { model.forget() }
+            }
+        }
+    }
+
+    private var isLinked: Bool {
+        state.connection == .connecting || state.connection == .connected || state.connection == .reconnecting
+    }
+
+    /// Shown when the belt is not moving: paused if the treadmill says so, otherwise stopped.
+    @ViewBuilder
+    private var beltIndicator: some View {
+        if state.belt == .paused {
+            Label("treadmill.belt.paused", systemImage: "pause.circle.fill").font(.headline).foregroundStyle(.orange)
+        } else if state.belt == .stopped {
+            Label("treadmill.belt.stopped", systemImage: "stop.circle.fill").font(.headline).foregroundStyle(.orange)
         }
     }
 
@@ -161,6 +234,7 @@ struct TreadmillView: View {
             if recording.paused {
                 Text("treadmill.paused").foregroundStyle(.red)
             }
+            beltIndicator
             if !recording.freeRun {
                 Text(L("treadmill.phase", Int(recording.phaseNumber), Int(recording.phaseCount))).font(.headline)
                 if recording.isRest {
@@ -241,6 +315,11 @@ struct TreadmillView: View {
     private func label(_ metric: LiveMetric) -> String {
         switch metric {
         case .speed: return L("metric.speed")
+        case .pace: return L("metric.pace")
+        case .averageSpeed: return L("metric.average.speed")
+        case .elevationGain: return L("metric.elevation.gain")
+        case .met: return L("metric.met")
+        case .remainingTime: return L("metric.remaining.time")
         case .incline: return L("metric.incline")
         case .distanceKm: return L("metric.distance")
         case .heartRate: return L("metric.heart.rate")
@@ -252,7 +331,11 @@ struct TreadmillView: View {
 
     private func unit(_ metric: LiveMetric) -> String {
         switch metric {
-        case .speed: return "km/h"
+        case .speed, .averageSpeed: return "km/h"
+        case .pace: return "/km"
+        case .elevationGain: return "m"
+        case .met: return "MET"
+        case .remainingTime: return ""
         case .incline: return "%"
         case .distanceKm: return "km"
         case .heartRate: return "bpm"
@@ -263,7 +346,7 @@ struct TreadmillView: View {
     }
 
     private func formatted(_ tile: LiveTile) -> String {
-        tile.metric == .machineTime ? clock(Int64(tile.value)) : decimal(tile.value, Int(tile.decimals))
+        tile.metric.isTime ? clock(Int64(tile.value)) : decimal(tile.value, Int(tile.decimals))
     }
 }
 
