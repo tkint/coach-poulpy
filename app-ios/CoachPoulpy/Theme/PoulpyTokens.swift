@@ -69,14 +69,24 @@ enum PoulpyMood: String, CaseIterable {
     }
 }
 
-/// Type scale, scaled with Dynamic Type. Uses the rounded system font until Baloo 2 and Nunito are bundled.
+/// PostScript names of the bundled Baloo 2 and Nunito files (CoachPoulpy/Fonts, listed in Info.plist).
+enum PoulpyFontFace {
+    static let baloo2Bold = "Baloo2-Bold"
+    static let baloo2ExtraBold = "Baloo2-ExtraBold"
+    static let nunitoRegular = "Nunito-Regular"
+    static let nunitoMedium = "Nunito-Medium"
+    static let nunitoBold = "Nunito-Bold"
+    static let nunitoExtraBold = "Nunito-ExtraBold"
+}
+
+/// Type scale, scaled with Dynamic Type.
 enum PoulpyFont {
-    static var display: Font { Font.system(size: UIFontMetrics(forTextStyle: .largeTitle).scaledValue(for: 40), weight: .heavy, design: .rounded) }
-    static var title: Font { Font.system(size: UIFontMetrics(forTextStyle: .title1).scaledValue(for: 28), weight: .bold, design: .rounded) }
-    static var headline: Font { Font.system(size: UIFontMetrics(forTextStyle: .title3).scaledValue(for: 21), weight: .bold, design: .rounded) }
-    static var body: Font { Font.system(size: UIFontMetrics(forTextStyle: .body).scaledValue(for: 16), weight: .medium, design: .rounded) }
-    static var label: Font { Font.system(size: UIFontMetrics(forTextStyle: .caption1).scaledValue(for: 12.5), weight: .heavy, design: .rounded) }
-    static var timer: Font { Font.system(size: UIFontMetrics(forTextStyle: .largeTitle).scaledValue(for: 64), weight: .heavy, design: .rounded).monospacedDigit() }
+    static var display: Font { Font.custom(PoulpyFontFace.baloo2ExtraBold, size: 40, relativeTo: .largeTitle) }
+    static var title: Font { Font.custom(PoulpyFontFace.baloo2Bold, size: 28, relativeTo: .title) }
+    static var headline: Font { Font.custom(PoulpyFontFace.baloo2Bold, size: 21, relativeTo: .title3) }
+    static var body: Font { Font.custom(PoulpyFontFace.nunitoMedium, size: 16, relativeTo: .body) }
+    static var label: Font { Font.custom(PoulpyFontFace.nunitoExtraBold, size: 12.5, relativeTo: .caption) }
+    static var timer: Font { Font.custom(PoulpyFontFace.nunitoExtraBold, size: 64, relativeTo: .largeTitle).monospacedDigit() }
 }
 
 enum PoulpySpace {

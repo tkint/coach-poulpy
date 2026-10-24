@@ -27,6 +27,15 @@
     <string>$(CURRENT_PROJECT_VERSION)</string>
     <key>NSBluetoothAlwaysUsageDescription</key>
     <string>Coach Poulpy connects to your treadmill to show and record your speed, distance and heart rate.</string>
+    <key>UIAppFonts</key>
+    <array>
+        <string>baloo2_bold.ttf</string>
+        <string>baloo2_extrabold.ttf</string>
+        <string>nunito_regular.ttf</string>
+        <string>nunito_medium.ttf</string>
+        <string>nunito_bold.ttf</string>
+        <string>nunito_extrabold.ttf</string>
+    </array>
     <key>UIBackgroundModes</key>
     <array>
         <string>bluetooth-central</string>

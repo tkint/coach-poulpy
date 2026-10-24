@@ -15,6 +15,10 @@ const kotlinColor = (value) => `Color(0xFF${hex(value)})`
 const swiftHex = (value) => `0x${hex(value)}`
 const kebab = (name) => name.replace(/[A-Z]/g, (c) => '-' + c.toLowerCase())
 const num = (n) => (Number.isInteger(n) ? String(n) : String(n))
+// Bundled font files, built by design/fonts/build-fonts.py: res/font/nunito_extrabold.ttf, PostScript name Nunito-ExtraBold.
+const weightStyle = { 400: 'Regular', 500: 'Medium', 600: 'SemiBold', 700: 'Bold', 800: 'ExtraBold' }
+const fontFile = (family, weight) => `${family.replace(/ /g, '').toLowerCase()}_${weightStyle[weight].toLowerCase()}`
+const postScriptName = (family, weight) => `${family.replace(/ /g, '')}-${weightStyle[weight]}`
 
 const { light, dark } = tokens.theme
 
@@ -30,10 +34,13 @@ function kotlin() {
     'import androidx.compose.material3.lightColorScheme',
     'import androidx.compose.ui.graphics.Color',
     'import androidx.compose.ui.text.TextStyle',
+    'import androidx.compose.ui.text.font.Font',
+    'import androidx.compose.ui.text.font.FontFamily',
     'import androidx.compose.ui.text.font.FontWeight',
     'import androidx.compose.ui.unit.dp',
     'import androidx.compose.ui.unit.em',
     'import androidx.compose.ui.unit.sp',
+    'import ch.coachpoulpy.android.R',
     '',
   )
   out.push('/** Fixed palette. The poulpy colours are the mascot itself and never change with the theme. */')
@@ -69,18 +76,34 @@ function kotlin() {
   out.push(`internal val PoulpyLightExtras = ${extras(light)}`)
   out.push(`internal val PoulpyDarkExtras = ${extras(dark)}`, '')
   const style = (t) => {
-    const parts = [`fontWeight = FontWeight.W${t.weight}`, `fontSize = ${num(t.size)}.sp`, `lineHeight = ${num(t.lineHeight)}.sp`]
+    const parts = [`fontFamily = PoulpyFonts.${pascal(t.font)}`, `fontWeight = FontWeight.W${t.weight}`, `fontSize = ${num(t.size)}.sp`, `lineHeight = ${num(t.lineHeight)}.sp`]
     if (t.tracking) parts.push(`letterSpacing = ${t.tracking}.em`)
     if (t.tabular) parts.push('fontFeatureSettings = "tnum"')
     return `TextStyle(${parts.join(', ')})`
   }
-  out.push('/** Type scale. Baloo 2 and Nunito are not bundled yet, so the system font is used meanwhile. */')
+  out.push('/** Baloo 2 (display) and Nunito (body), bundled in res/font. */')
+  out.push('object PoulpyFonts {')
+  for (const [name, f] of Object.entries(tokens.font)) {
+    const faces = f.weights.map((w) => `Font(R.font.${fontFile(f.family, w)}, FontWeight.W${w})`)
+    out.push(`    val ${pascal(name)} = FontFamily(${faces.join(', ')})`)
+  }
+  out.push('}', '')
+  out.push('/** Type scale. */')
   out.push('object PoulpyTextStyles {')
   for (const [name, t] of Object.entries(tokens.type)) out.push(`    val ${pascal(name)} = ${style(t)}`)
   out.push('}', '')
+  // Slots without a brand style keep Material's sizes but use the brand fonts: Baloo 2 for headings, Nunito for the rest.
+  const brandSlots = { headlineLarge: 'Display', headlineMedium: 'Title', titleLarge: 'Headline', bodyLarge: 'Body', labelMedium: 'Label' }
+  out.push('private val MaterialDefaults = Typography()', '')
   out.push('internal val PoulpyTypography = Typography(')
-  out.push('    headlineLarge = PoulpyTextStyles.Display,', '    headlineMedium = PoulpyTextStyles.Title,', '    titleLarge = PoulpyTextStyles.Headline,')
-  out.push('    bodyLarge = PoulpyTextStyles.Body,', '    labelMedium = PoulpyTextStyles.Label,', ')', '')
+  for (const size of ['display', 'headline', 'title', 'body', 'label']) {
+    for (const step of ['Large', 'Medium', 'Small']) {
+      const slot = size + step
+      const family = size === 'display' || size === 'headline' || slot === 'titleLarge' ? 'Display' : 'Body'
+      out.push(`    ${slot} = ${brandSlots[slot] ? `PoulpyTextStyles.${brandSlots[slot]}` : `MaterialDefaults.${slot}.copy(fontFamily = PoulpyFonts.${family})`},`)
+    }
+  }
+  out.push(')', '')
   out.push('object PoulpySpace {')
   for (const [name, v] of Object.entries(tokens.space)) out.push(`    val ${name} = ${v}.dp`)
   out.push('}', '')
@@ -116,11 +139,19 @@ function swift() {
   out.push(`    case ${Object.keys(tokens.mood).join(', ')}`, '', '    var tone: Color {', '        switch self {')
   for (const [mood, value] of Object.entries(tokens.mood)) out.push(`        case .${mood}: return Color(hex: ${swiftHex(value)})`)
   out.push('        }', '    }', '}', '')
-  const weight = { 400: 'regular', 500: 'medium', 600: 'semibold', 700: 'bold', 800: 'heavy', 900: 'black' }
-  out.push('/// Type scale, scaled with Dynamic Type. Uses the rounded system font until Baloo 2 and Nunito are bundled.')
+  const face = (family, weight) => `${family.replace(/ /g, '').toLowerCase()}${weightStyle[weight]}`
+  out.push('/// PostScript names of the bundled Baloo 2 and Nunito files (CoachPoulpy/Fonts, listed in Info.plist).')
+  out.push('enum PoulpyFontFace {')
+  for (const f of Object.values(tokens.font)) {
+    for (const w of f.weights) out.push(`    static let ${face(f.family, w)} = "${postScriptName(f.family, w)}"`)
+  }
+  out.push('}', '')
+  out.push('/// Type scale, scaled with Dynamic Type.')
   out.push('enum PoulpyFont {')
   for (const [name, t] of Object.entries(tokens.type)) {
-    const base = `.system(size: UIFontMetrics(forTextStyle: .${t.iosStyle}).scaledValue(for: ${num(t.size)}), weight: .${weight[t.weight]}, design: .rounded)`
+    // iosStyle uses UIKit's text style names; SwiftUI calls title1 and caption1 title and caption.
+    const relativeTo = { title1: 'title', caption1: 'caption' }[t.iosStyle] ?? t.iosStyle
+    const base = `.custom(PoulpyFontFace.${face(tokens.font[t.font].family, t.weight)}, size: ${num(t.size)}, relativeTo: .${relativeTo})`
     out.push(`    static var ${name}: Font { Font${base}${t.tabular ? '.monospacedDigit()' : ''} }`)
   }
   out.push('}', '')
