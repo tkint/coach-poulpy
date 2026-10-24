@@ -203,7 +203,17 @@ private fun ConnectionCard(
 
 @Composable
 private fun DeviceList(state: TreadmillUiState, model: TreadmillModel) {
-    if (state.scanning && state.devices.isEmpty()) Text(stringResource(R.string.treadmill_scanning))
+    if (state.scanning && state.devices.isEmpty()) {
+        Column(Modifier.fillMaxWidth().padding(vertical = 24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            PoulpyLoader(size = 96.dp)
+            Text(stringResource(R.string.treadmill_scanning), modifier = Modifier.padding(top = 12.dp))
+        }
+    } else if (state.scanning) {
+        Row(Modifier.padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+            PoulpyLoader(size = 24.dp)
+            Text(stringResource(R.string.treadmill_scanning), modifier = Modifier.padding(start = 8.dp))
+        }
+    }
     Column {
         state.devices.forEach { device ->
             ListItem(

@@ -59,6 +59,7 @@
 "treadmill.scan" = "Chercher mon tapis";
 "treadmill.stop.scan" = "Arrêter la recherche";
 "treadmill.scanning" = "Recherche des appareils à proximité…";
+"loading" = "Chargement";
 "treadmill.disconnect" = "Déconnecter";
 "treadmill.status.idle" = "Non connecté";
 "treadmill.status.connecting" = "Connexion à %@…";
