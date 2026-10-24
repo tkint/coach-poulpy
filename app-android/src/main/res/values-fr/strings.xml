@@ -117,4 +117,24 @@
     <string name="metric_remaining_time">Temps restant (tapis)</string>
     <string name="treadmill_sync_pause">Mettre l’enregistrement en pause quand le tapis s’arrête, reprendre quand il redémarre</string>
     <string name="metric_steps">Pas (estimation)</string>
+
+    <string name="tab_history">Historique</string>
+    <string name="history_empty_title">Aucune séance pour l’instant</string>
+    <string name="history_empty_body">Terminez une séance ou une course sur le tapis et elle apparaîtra ici.</string>
+    <string name="history_this_week">Cette semaine</string>
+    <string name="history_this_month">Ce mois-ci</string>
+    <plurals name="history_sessions">
+        <item quantity="one">%1$d séance</item>
+        <item quantity="many">%1$d séances</item>
+        <item quantity="other">%1$d séances</item>
+    </plurals>
+    <string name="history_minutes">%1$d min</string>
+    <string name="history_chart_minutes">Minutes actives par semaine</string>
+    <string name="history_chart_distance">Km sur le tapis par semaine</string>
+    <string name="history_sessions_title">Séances</string>
+    <string name="history_sets">%1$d séries sur %2$d</string>
+    <string name="history_sets_done">Séries faites</string>
+    <string name="history_sets_skipped">Séries passées</string>
+    <string name="history_delete_title">Retirer cette séance de l’historique ?</string>
+    <string name="history_delete_body">Elle disparaît de votre historique et de vos statistiques. C’est définitif.</string>
 </resources>

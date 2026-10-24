@@ -105,6 +105,8 @@ class PlayerModel internal constructor(
                 startedAt = now,
                 workout = WorkoutRef(workout.id, workout.version),
             ),
+            title = workout.name,
+            type = workout.type,
         )
         act { session.start(now) }
         startTicker()
@@ -145,6 +147,7 @@ class PlayerModel internal constructor(
             store.appendEvent(executionId, event)
             if (event is SessionEvent.Finished) {
                 store.finishExecution(executionId, event.at)
+                store.saveTotals(executionId, sessionTotals(session.events, session.timeline))
                 ticker?.cancel()
             }
         }

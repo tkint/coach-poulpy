@@ -73,6 +73,10 @@ The **Treadmill** tab finds a treadmill that speaks the Bluetooth Fitness Machin
 
 Testing on a new machine: the bottom of the tab lists what the treadmill says it can report and counts any packets the decoder could not read. Treadmills differ in which fields they send, so a metric that never shows up is usually one the machine does not send.
 
+## History
+
+The **History** tab lists every finished session on the phone, guided workouts and treadmill recordings alike, with this week's and this month's totals and two charts of the last eight weeks (active minutes, treadmill kilometres). Each session's totals (`core/stats`) are saved next to it when it ends, so the list opens without replaying the event log; sessions recorded before the history existed are summed up once, the first time the tab opens. Sessions can be deleted from their detail screen.
+
 ## Continuous integration
 
 `.github/workflows/ci.yml` runs the shared tests on the JVM and in JavaScript, the server tests, builds the Android APK, builds the iOS app for the simulator on macOS, and builds the website.

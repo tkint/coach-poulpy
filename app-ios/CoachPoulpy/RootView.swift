@@ -12,6 +12,8 @@ struct RootView: View {
                 .tabItem { Label("tab.exercises", systemImage: "list.bullet") }
             TreadmillView(graph: graph)
                 .tabItem { Label("tab.treadmill", systemImage: "figure.run") }
+            HistoryView(graph: graph)
+                .tabItem { Label("tab.history", systemImage: "clock.arrow.circlepath") }
         }
     }
 }

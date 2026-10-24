@@ -28,6 +28,7 @@ class AppGraph(driverFactory: DriverFactory) {
 
     fun exerciseList(languageCode: String) = ExerciseListModel(catalog, registry, languageCode)
     fun today(languageCode: String) = TodayModel(store, compiler, languageCode)
+    fun history(languageCode: String) = HistoryModel(store, compiler, languageCode)
 
     private var treadmillModel: TreadmillModel? = null
 

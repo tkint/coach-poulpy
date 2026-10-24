@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.DirectionsRun
 import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Today
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -29,11 +30,12 @@ private enum class Tab(@StringRes val label: Int, val icon: ImageVector) {
     TODAY(R.string.tab_today, Icons.Filled.Today),
     EXERCISES(R.string.tab_exercises, Icons.AutoMirrored.Filled.List),
     TREADMILL(R.string.tab_treadmill, Icons.AutoMirrored.Filled.DirectionsRun),
+    HISTORY(R.string.tab_history, Icons.Filled.History),
 }
 
 /**
  * The screen shown over the tabs, as a string so it survives rotation:
- * "builder:" (new), "builder:<id>", "player:<id>", "resume" or "exercise:<slug>".
+ * "builder:" (new), "builder:<id>", "player:<id>", "resume", "exercise:<slug>" or "session:<id>".
  */
 private typealias Route = String
 
@@ -74,6 +76,7 @@ fun CoachPoulpyRoot(graph: AppGraph) {
                 )
                 Tab.EXERCISES -> ExercisesScreen(graph, language, onOpen = { route = "exercise:$it" }, modifier = modifier)
                 Tab.TREADMILL -> TreadmillScreen(graph, modifier)
+                Tab.HISTORY -> HistoryScreen(graph, language, onOpen = { route = "session:$it" }, modifier = modifier)
             }
         }
         "resume" -> PlayerScreen(graph, language, workoutId = null, onClose = close)
@@ -83,6 +86,7 @@ fun CoachPoulpyRoot(graph: AppGraph) {
                 "builder" -> BuilderScreen(graph, language, workoutId = arg.ifEmpty { null }, onClose = close)
                 "player" -> PlayerScreen(graph, language, workoutId = arg, onClose = close)
                 "exercise" -> ExerciseDetailScreen(graph, language, slug = arg, onBack = close)
+                "session" -> SessionDetailScreen(graph, language, sessionId = arg, onBack = close)
                 else -> LaunchedEffect(current) { close() }
             }
         }

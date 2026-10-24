@@ -93,5 +93,10 @@ internal class Labels(private val languageCode: String) {
     }
 
     val rest get() = t("Rest", "Repos")
+    val freeRun get() = t("Free run", "Course libre")
+    val demoIntervals get() = t("Demo intervals", "Fractionné de démo")
+
+    /** For a session whose workout was deleted before the history kept names. */
+    val session get() = t("Workout", "Séance")
     val perSide get() = t("each side", "par côté")
 }
