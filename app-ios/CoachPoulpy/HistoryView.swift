@@ -19,7 +19,7 @@ struct HistoryView: View {
             List {
                 if state.loaded && state.sessions.isEmpty {
                     VStack(spacing: 8) {
-                        Text("history.empty.title").font(.title2)
+                        Text("history.empty.title").font(.poulpy(.title2))
                         Text("history.empty.body")
                             .foregroundStyle(.secondary)
                             .multilineTextAlignment(.center)
@@ -70,11 +70,11 @@ struct HistoryView: View {
 
     private func period(_ title: LocalizedStringKey, _ period: PeriodUi) -> some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text(title).font(.footnote.weight(.semibold)).foregroundStyle(Color.accentColor)
-            Text(L("history.sessions %lld", Int64(period.sessions))).font(.title3.weight(.semibold))
-            Text(L("history.minutes %lld", Int64(period.activeMinutes))).font(.subheadline)
+            Text(title).font(.poulpy(.footnote).weight(.semibold)).foregroundStyle(Color.accentColor)
+            Text(L("history.sessions %lld", Int64(period.sessions))).font(.poulpy(.title3).weight(.semibold))
+            Text(L("history.minutes %lld", Int64(period.activeMinutes))).font(.poulpy(.subheadline))
             if period.distanceMeters > 0 {
-                Text("\(decimal(period.distanceMeters / 1000, 1)) km").font(.subheadline)
+                Text("\(decimal(period.distanceMeters / 1000, 1)) km").font(.poulpy(.subheadline))
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -89,13 +89,13 @@ struct HistoryView: View {
         color: Color
     ) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(title).font(.subheadline.weight(.semibold))
+            Text(title).font(.poulpy(.subheadline).weight(.semibold))
             Chart(weeks, id: \.startMillis) { week in
                 BarMark(x: .value("week", shortDate(week.startMillis)), y: .value("value", value(week)))
                     .foregroundStyle(week.isCurrent ? color : color.opacity(0.45))
                     .annotation(position: .top) {
                         if value(week) > 0 {
-                            Text(label(value(week))).font(.caption2).foregroundStyle(.secondary)
+                            Text(label(value(week))).font(.poulpy(.caption2)).foregroundStyle(.secondary)
                         }
                     }
             }
@@ -111,9 +111,9 @@ struct HistoryView: View {
                 .foregroundStyle(Color.accentColor)
                 .frame(width: 28)
             VStack(alignment: .leading, spacing: 2) {
-                Text(session.title).font(.headline)
+                Text(session.title).font(.poulpy(.headline))
                 Text("\(dateTime(session.startedAtMillis)) · \(headline(session))")
-                    .font(.footnote)
+                    .font(.poulpy(.footnote))
                     .foregroundStyle(.secondary)
             }
         }
@@ -139,7 +139,7 @@ struct SessionDetailView: View {
     var body: some View {
         List {
             Section {
-                Text(dateTime(session.startedAtMillis)).font(.headline)
+                Text(dateTime(session.startedAtMillis)).font(.poulpy(.headline))
                 if let type = session.typeLabel {
                     Text(type).foregroundStyle(.secondary)
                 }
