@@ -88,7 +88,7 @@ Testing on a new machine: the bottom of the tab lists what the treadmill says it
 
 ## History
 
-The **History** tab lists every finished session on the phone, guided workouts and treadmill recordings alike, with this week's and this month's totals and two charts of the last eight weeks (active minutes, treadmill kilometres). Each session's totals (`core/stats`) are saved next to it when it ends, so the list opens without replaying the event log; sessions recorded before the history existed are summed up once, the first time the tab opens. Sessions can be deleted from their detail screen.
+The **History** tab has two views. **Calendar** shows a month, Monday first, with the days you trained filled in; swipe or use the arrows to go back through earlier months. Under it, that month's sessions are grouped by day, newest first, and tapping a day scrolls the list to it (a day without sessions shows as a rest day). **Stats** shows this week's and this month's totals, charts of the last eight weeks (active minutes, treadmill kilometres), the total number of sessions, the longest run and Poulpy's full octopuses. Each session's totals (`core/stats`) are saved next to it when it ends, so the history opens without replaying the event log; sessions recorded before the history existed are summed up once, the first time the tab opens. Sessions can be deleted from their detail screen.
 
 ## Continuous integration
 

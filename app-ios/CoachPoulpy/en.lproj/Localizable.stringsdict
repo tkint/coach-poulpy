@@ -18,5 +18,37 @@
             <string>%lld sessions</string>
         </dict>
     </dict>
+    <key>history.active.days %lld</key>
+    <dict>
+        <key>NSStringLocalizedFormatKey</key>
+        <string>%#@days@</string>
+        <key>days</key>
+        <dict>
+            <key>NSStringFormatSpecTypeKey</key>
+            <string>NSStringPluralRuleType</string>
+            <key>NSStringFormatValueTypeKey</key>
+            <string>lld</string>
+            <key>one</key>
+            <string>%lld active day · swipe for other months</string>
+            <key>other</key>
+            <string>%lld active days · swipe for other months</string>
+        </dict>
+    </dict>
+    <key>history.sessions.unit %lld</key>
+    <dict>
+        <key>NSStringLocalizedFormatKey</key>
+        <string>%#@unit@</string>
+        <key>unit</key>
+        <dict>
+            <key>NSStringFormatSpecTypeKey</key>
+            <string>NSStringPluralRuleType</string>
+            <key>NSStringFormatValueTypeKey</key>
+            <string>lld</string>
+            <key>one</key>
+            <string>session</string>
+            <key>other</key>
+            <string>sessions</string>
+        </dict>
+    </dict>
 </dict>
 </plist>

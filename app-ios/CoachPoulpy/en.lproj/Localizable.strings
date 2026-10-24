@@ -127,3 +127,13 @@
 "history.sets.skipped" = "Sets skipped";
 "history.delete.title" = "Delete this session?";
 "history.delete.body" = "It leaves your history and stats. This can’t be undone.";
+"history.view.calendar" = "Calendar";
+"history.view.stats" = "Stats";
+"history.previous.month" = "Previous month";
+"history.next.month" = "Next month";
+"history.today.day %@" = "Today · %@";
+"history.resting" = "No session that day. Poulpy was resting too.";
+"history.total" = "Total";
+"history.longest.run" = "Longest run";
+"history.full.octopus" = "Full octopus";
+"history.tentacles.lit %lld" = "%lld of 8 lit";

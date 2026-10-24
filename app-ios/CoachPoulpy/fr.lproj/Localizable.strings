@@ -127,3 +127,13 @@
 "history.sets.skipped" = "Séries passées";
 "history.delete.title" = "Retirer cette séance de l’historique ?";
 "history.delete.body" = "Elle disparaît de votre historique et de vos statistiques. C’est définitif.";
+"history.view.calendar" = "Calendrier";
+"history.view.stats" = "Stats";
+"history.previous.month" = "Mois précédent";
+"history.next.month" = "Mois suivant";
+"history.today.day %@" = "Aujourd’hui · %@";
+"history.resting" = "Aucune séance ce jour-là. Poulpy se reposait aussi.";
+"history.total" = "Total";
+"history.longest.run" = "Plus longue course";
+"history.full.octopus" = "Poulpe complet";
+"history.tentacles.lit %lld" = "%lld sur 8 allumés";
