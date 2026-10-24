@@ -109,3 +109,5 @@
 "metric.elevation.gain" = "Dénivelé positif";
 "metric.met" = "Effort";
 "metric.remaining.time" = "Temps restant (tapis)";
+"treadmill.sync.pause" = "Mettre l’enregistrement en pause quand le tapis s’arrête, reprendre quand il redémarre";
+"metric.steps" = "Pas (estimation)";

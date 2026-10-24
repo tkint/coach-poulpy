@@ -28,6 +28,7 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -133,6 +134,12 @@ fun TreadmillScreen(graph: AppGraph, modifier: Modifier = Modifier) {
         }
         val recording = state.recording
         if (recording != null) RecordingCard(recording, state.belt, model) else RecordCard(state.plans, model)
+        if (state.connection == ConnectionStatus.CONNECTED || state.connection == ConnectionStatus.RECONNECTING) {
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Text(stringResource(R.string.treadmill_sync_pause), Modifier.weight(1f))
+                Switch(checked = state.syncPause, onCheckedChange = model::setSyncPause)
+            }
+        }
         state.summary?.let { SummaryCard(it) }
         if (state.supportedMetrics.isNotEmpty() || state.malformedPackets > 0) {
             Text(
@@ -224,7 +231,7 @@ private fun LiveTiles(tiles: List<LiveTile>) {
                         Column(Modifier.padding(12.dp)) {
                             Text(stringResource(tile.metric.label), style = MaterialTheme.typography.labelMedium)
                             Text(
-                                "${tile.formatted()} ${tile.metric.unit}".trim(),
+                                "${if (tile.metric == LiveMetric.STEPS_ESTIMATED) "≈ " else ""}${tile.formatted()} ${tile.metric.unit}".trim(),
                                 style = MaterialTheme.typography.headlineMedium,
                             )
                         }
@@ -303,6 +310,7 @@ private fun SummaryCard(summary: SummaryUi) {
             summary.averageHeartRateBpm?.let { SummaryLine(R.string.treadmill_summary_average_hr, "$it bpm") }
             summary.maxHeartRateBpm?.let { SummaryLine(R.string.treadmill_summary_max_hr, "$it bpm") }
             summary.energyKcal?.let { SummaryLine(R.string.metric_energy, "$it kcal") }
+            summary.estimatedSteps?.let { SummaryLine(R.string.metric_steps, "≈ $it") }
             if (summary.phases.size > 1) {
                 HorizontalDivider(Modifier.padding(vertical = 4.dp))
                 summary.phases.forEach { phase ->
@@ -358,6 +366,7 @@ private val LiveMetric.label: Int
         LiveMetric.ENERGY -> R.string.metric_energy
         LiveMetric.MACHINE_TIME -> R.string.metric_machine_time
         LiveMetric.POWER -> R.string.metric_power
+        LiveMetric.STEPS_ESTIMATED -> R.string.metric_steps
     }
 
 private val LiveMetric.unit: String
@@ -373,6 +382,7 @@ private val LiveMetric.unit: String
         LiveMetric.ENERGY -> "kcal"
         LiveMetric.MACHINE_TIME -> ""
         LiveMetric.POWER -> "W"
+        LiveMetric.STEPS_ESTIMATED -> ""
     }
 
 private fun LiveTile.formatted() = if (metric.isTime) clock(value.toLong()) else decimal(value, decimals)

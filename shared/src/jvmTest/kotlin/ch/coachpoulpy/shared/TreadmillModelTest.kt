@@ -92,7 +92,7 @@ class TreadmillModelTest {
         treadmill.send(speedCentiKmh = 800, meters = 1_000, bpm = 120)
         runCurrent()
         assertEquals(
-            listOf(LiveMetric.SPEED, LiveMetric.PACE, LiveMetric.DISTANCE_KM, LiveMetric.HEART_RATE),
+            listOf(LiveMetric.SPEED, LiveMetric.PACE, LiveMetric.DISTANCE_KM, LiveMetric.HEART_RATE, LiveMetric.STEPS_ESTIMATED),
             model.state.value.tiles.map { it.metric },
         )
         assertEquals(450.0, model.state.value.tiles[1].value) // 8 km/h is 7:30 per km
@@ -138,5 +138,57 @@ class TreadmillModelTest {
         assertEquals(ConnectionStatus.IDLE, second.state.value.connection)
         assertNull(second.state.value.rememberedName)
         assertEquals(emptyMap(), memory.values)
+    }
+
+    @Test
+    fun recordingFollowsTheBeltWhenSyncIsOn() = runTest {
+        val treadmill = FakeTreadmill()
+        val model = model(treadmill, LocalStore(DriverFactory()))
+        model.startScan()
+        runCurrent()
+        model.connect("AA:BB")
+        runCurrent()
+        treadmill.send(speedCentiKmh = 800, meters = 0, bpm = 120)
+        runCurrent()
+        model.startRecording("free-run")
+        runCurrent()
+
+        treadmill.send(speedCentiKmh = 0, meters = 10, bpm = 120)
+        runCurrent()
+        assertEquals(true, model.state.value.recording?.paused)
+
+        treadmill.send(speedCentiKmh = 500, meters = 10, bpm = 120)
+        runCurrent()
+        assertEquals(false, model.state.value.recording?.paused)
+
+        // Switched off: the belt stopping no longer pauses the recording.
+        model.setSyncPause(false)
+        treadmill.send(speedCentiKmh = 0, meters = 12, bpm = 120)
+        runCurrent()
+        assertEquals(false, model.state.value.recording?.paused)
+    }
+
+    @Test
+    fun aPauseTheUserMadeIsNotUndoneByTheBelt() = runTest {
+        val treadmill = FakeTreadmill()
+        val model = model(treadmill, LocalStore(DriverFactory()))
+        model.startScan()
+        runCurrent()
+        model.connect("AA:BB")
+        runCurrent()
+        treadmill.send(speedCentiKmh = 0, meters = 0, bpm = 120)
+        runCurrent()
+        model.startRecording("free-run") // the belt is still: the timer waits
+        runCurrent()
+        assertEquals(true, model.state.value.recording?.paused)
+
+        treadmill.send(speedCentiKmh = 600, meters = 0, bpm = 120)
+        runCurrent()
+        assertEquals(false, model.state.value.recording?.paused)
+
+        model.pauseRecording()
+        treadmill.send(speedCentiKmh = 700, meters = 2, bpm = 120)
+        runCurrent()
+        assertEquals(true, model.state.value.recording?.paused)
     }
 }

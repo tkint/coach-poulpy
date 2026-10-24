@@ -92,6 +92,13 @@ struct TreadmillView: View {
                 } else {
                     recordSection
                 }
+                if state.connection == .connected || state.connection == .reconnecting {
+                    Section {
+                        Toggle(isOn: Binding(get: { state.syncPause }, set: { model.setSyncPause(on: $0) })) {
+                            Text("treadmill.sync.pause")
+                        }
+                    }
+                }
                 if let summary = state.summary {
                     summarySection(summary)
                 }
@@ -286,6 +293,9 @@ struct TreadmillView: View {
             if let kcal = summary.energyKcal {
                 LabeledContent(LocalizedStringKey("metric.energy"), value: "\(kcal.intValue) kcal")
             }
+            if let steps = summary.estimatedSteps {
+                LabeledContent(LocalizedStringKey("metric.steps"), value: "≈ \(steps.intValue)")
+            }
             if summary.phases.count > 1 {
                 ForEach(summary.phases, id: \.phaseNumber) { phase in
                     Text(phaseLine(phase)).font(.footnote)
@@ -325,6 +335,7 @@ struct TreadmillView: View {
         case .heartRate: return L("metric.heart.rate")
         case .energy: return L("metric.energy")
         case .machineTime: return L("metric.machine.time")
+        case .stepsEstimated: return L("metric.steps")
         default: return L("metric.power")
         }
     }
@@ -340,13 +351,15 @@ struct TreadmillView: View {
         case .distanceKm: return "km"
         case .heartRate: return "bpm"
         case .energy: return "kcal"
-        case .machineTime: return ""
+        case .machineTime, .stepsEstimated: return ""
         default: return "W"
         }
     }
 
     private func formatted(_ tile: LiveTile) -> String {
-        tile.metric.isTime ? clock(Int64(tile.value)) : decimal(tile.value, Int(tile.decimals))
+        if tile.metric.isTime { return clock(Int64(tile.value)) }
+        let value = decimal(tile.value, Int(tile.decimals))
+        return tile.metric == .stepsEstimated ? "≈ \(value)" : value
     }
 }
 

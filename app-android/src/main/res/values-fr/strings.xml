@@ -115,4 +115,6 @@
     <string name="metric_elevation_gain">Dénivelé positif</string>
     <string name="metric_met">Effort</string>
     <string name="metric_remaining_time">Temps restant (tapis)</string>
+    <string name="treadmill_sync_pause">Mettre l’enregistrement en pause quand le tapis s’arrête, reprendre quand il redémarre</string>
+    <string name="metric_steps">Pas (estimation)</string>
 </resources>

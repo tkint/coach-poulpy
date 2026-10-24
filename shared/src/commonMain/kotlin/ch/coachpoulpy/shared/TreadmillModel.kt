@@ -28,6 +28,7 @@ import ch.coachpoulpy.device.ftms.TreadmillCapabilities
 import ch.coachpoulpy.device.ftms.TreadmillConnection
 import ch.coachpoulpy.device.ftms.TreadmillData
 import ch.coachpoulpy.device.ftms.TreadmillState
+import ch.coachpoulpy.types.treadmill.StepCounter
 import ch.coachpoulpy.types.treadmill.TreadmillModule
 import ch.coachpoulpy.types.treadmill.TreadmillRecorder
 import ch.coachpoulpy.types.treadmill.TreadmillSummary
@@ -53,7 +54,10 @@ enum class ConnectionStatus { IDLE, CONNECTING, CONNECTED, RECONNECTING, FAILED 
 
 /** Metrics the live screen can show; each platform names them in its own language. */
 enum class LiveMetric {
-    SPEED, PACE, AVERAGE_SPEED, INCLINE, DISTANCE_KM, ELEVATION_GAIN, HEART_RATE, ENERGY, MET, MACHINE_TIME, REMAINING_TIME, POWER;
+    SPEED, PACE, AVERAGE_SPEED, INCLINE, DISTANCE_KM, ELEVATION_GAIN, HEART_RATE, ENERGY, MET, MACHINE_TIME, REMAINING_TIME, POWER,
+
+    /** Estimated from the speed, since treadmills do not count steps: shown with "≈". */
+    STEPS_ESTIMATED;
 
     /** Shown as minutes and seconds; the tile's value is then a number of seconds (per km for PACE). */
     val isTime: Boolean get() = this == PACE || this == MACHINE_TIME || this == REMAINING_TIME
@@ -108,6 +112,8 @@ data class SummaryUi(
     val averageHeartRateBpm: Int?,
     val maxHeartRateBpm: Int?,
     val energyKcal: Int?,
+    /** Estimated from the speed, shown with "≈". */
+    val estimatedSteps: Int?,
     val phases: List<PhaseResultUi>,
 )
 
@@ -119,6 +125,8 @@ data class TreadmillUiState(
     /** The treadmill the app reconnects to on its own, until the user forgets it. */
     val rememberedName: String? = null,
     val belt: BeltStatus = BeltStatus.UNKNOWN,
+    /** When on, pausing or stopping the belt pauses the recording, and restarting it resumes. */
+    val syncPause: Boolean = true,
     /** Why scanning or connecting failed, in English: shown as a detail under a localized title. */
     val error: String? = null,
     val tiles: List<LiveTile> = emptyList(),
@@ -147,6 +155,7 @@ class TreadmillModel(
         TreadmillUiState(
             plans = builtInPlans.map { PlanOption(it.id.value, it.name) },
             rememberedName = memory.getString(REMEMBERED_NAME),
+            syncPause = memory.getString(SYNC_PAUSE) != "false",
         ),
     )
     val state: StateFlow<TreadmillUiState> = _state.asStateFlow()
@@ -156,6 +165,12 @@ class TreadmillModel(
     private var scanJob: Job? = null
     private var connection: TreadmillConnection? = null
     private var connectedDevice: FoundDevice? = null
+
+    /** Steps since the recording started, or since connecting when not recording. */
+    private val steps = StepCounter()
+
+    /** True while the recording is paused because the belt stopped, so restarting the belt resumes it. */
+    private var pausedByBelt = false
 
     /** Set by [connectRemembered]: connect as soon as the scan finds this device. */
     private var pendingKey: String? = null
@@ -247,7 +262,11 @@ class TreadmillModel(
         connectionJobs = listOf(
             scope.launch { newConnection.state.collect(::onConnectionState) },
             scope.launch {
-                newConnection.beltState.collect { belt -> _state.update { it.copy(belt = BeltStatus.valueOf(belt.name)) } }
+                newConnection.beltState.collect { belt ->
+                    val status = BeltStatus.valueOf(belt.name)
+                    _state.update { it.copy(belt = status) }
+                    followBelt(status)
+                }
             },
             scope.launch {
                 newConnection.readings.collect { data ->
@@ -301,6 +320,7 @@ class TreadmillModel(
     }
 
     private fun onReading(data: TreadmillData) {
+        data.speedKmh?.let { steps.add(clock.now(), it) }
         _state.update { it.copy(tiles = tiles(data)) }
         val current = recording ?: return
         persist(current, current.recorder.onReading(clock.now(), data.toMetrics()))
@@ -323,6 +343,7 @@ class TreadmillModel(
             m.machineElapsed?.let { LiveTile(LiveMetric.MACHINE_TIME, it.inWholeSeconds.toDouble(), 0) },
             data.remaining?.takeIf { it.isPositive() }?.let { LiveTile(LiveMetric.REMAINING_TIME, it.inWholeSeconds.toDouble(), 0) },
             m.powerWatts?.let { LiveTile(LiveMetric.POWER, it.toDouble(), 0) },
+            m.speedKmh?.let { LiveTile(LiveMetric.STEPS_ESTIMATED, steps.steps.toDouble(), 0) },
         )
     }
 
@@ -354,13 +375,39 @@ class TreadmillModel(
                 refreshRecording(started)
             }
         }
+        steps.reset()
         _state.update { it.copy(summary = null) }
         refreshRecording(started)
+        // Started with the belt still: the timer waits for it to move.
+        followBelt(_state.value.belt)
     }
 
     fun pauseRecording() = act { it.pause(clock.now()) }
 
-    fun resumeRecording() = act { it.resume(clock.now()) }
+    fun resumeRecording() {
+        pausedByBelt = false
+        act { it.resume(clock.now()) }
+    }
+
+    fun setSyncPause(on: Boolean) {
+        memory.putString(SYNC_PAUSE, on.toString())
+        _state.update { it.copy(syncPause = on) }
+        if (on) followBelt(_state.value.belt)
+    }
+
+    /** With [TreadmillUiState.syncPause] on, the recording follows the belt. A pause the user made stays theirs. */
+    private fun followBelt(belt: BeltStatus) {
+        val current = recording ?: return
+        if (!_state.value.syncPause || connection == null) return
+        val status = current.session.state(clock.now()).status
+        when {
+            (belt == BeltStatus.PAUSED || belt == BeltStatus.STOPPED) && status == SessionState.Status.RUNNING -> {
+                pausedByBelt = true
+                act { it.pause(clock.now()) }
+            }
+            belt == BeltStatus.MOVING && status == SessionState.Status.PAUSED && pausedByBelt -> resumeRecording()
+        }
+    }
 
     fun skipPhase() = act { it.skipCurrent(clock.now()) }
 
@@ -425,6 +472,7 @@ class TreadmillModel(
         averageHeartRateBpm = averageHeartRateBpm,
         maxHeartRateBpm = maxHeartRateBpm,
         energyKcal = energyKcal,
+        estimatedSteps = estimatedSteps,
         phases = phases.map { p ->
             PhaseResultUi(
                 phaseNumber = p.phaseIndex + 1,
@@ -453,6 +501,7 @@ class TreadmillModel(
     companion object {
         private const val REMEMBERED_KEY = "treadmill.key"
         private const val REMEMBERED_NAME = "treadmill.name"
+        private const val SYNC_PAUSE = "treadmill.syncPause"
 
         private val freeRunPlan = Workout(WorkoutId("free-run"), 1, "Free run", WorkoutType.TREADMILL, emptyList())
 

@@ -116,4 +116,6 @@
     <string name="metric_elevation_gain">Elevation gain</string>
     <string name="metric_met">Effort</string>
     <string name="metric_remaining_time">Time left (treadmill)</string>
+    <string name="treadmill_sync_pause">Pause the recording when the treadmill pauses, resume when it restarts</string>
+    <string name="metric_steps">Steps (estimated)</string>
 </resources>

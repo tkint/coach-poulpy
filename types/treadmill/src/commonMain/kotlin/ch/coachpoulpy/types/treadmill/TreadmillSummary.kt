@@ -30,6 +30,8 @@ data class TreadmillSummary(
     val maxHeartRateBpm: Int?,
     val energyKcal: Int?,
     val elevationGainMeters: Double?,
+    /** Estimated from the speed: see [StepEstimate]. */
+    val estimatedSteps: Int?,
     val phases: List<PhaseResult>,
 ) {
     companion object {
@@ -79,6 +81,7 @@ data class TreadmillSummary(
                 maxHeartRateBpm = heartRates.maxOrNull(),
                 energyKcal = metrics.counterDelta { it.energyKcal?.toDouble() }?.toInt(),
                 elevationGainMeters = metrics.counterDelta { it.elevationGainMeters },
+                estimatedSteps = StepEstimate.steps(events),
                 phases = phases,
             )
         }

@@ -109,3 +109,5 @@
 "metric.elevation.gain" = "Elevation gain";
 "metric.met" = "Effort";
 "metric.remaining.time" = "Time left (treadmill)";
+"treadmill.sync.pause" = "Pause the recording when the treadmill pauses, resume when it restarts";
+"metric.steps" = "Steps (estimated)";
