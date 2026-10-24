@@ -1,0 +1,24 @@
+-- The newest catalog version the phone has: seeded from the copy bundled in the app,
+-- replaced when a newer version arrives. Entries are never deleted, only retired
+-- inside their content, because workouts point at them by slug.
+CREATE TABLE catalog_exercise (
+    slug TEXT NOT NULL PRIMARY KEY,
+    content TEXT NOT NULL
+);
+
+CREATE TABLE catalog_meta (
+    id INTEGER NOT NULL PRIMARY KEY CHECK (id = 0),
+    version INTEGER NOT NULL
+);
+
+version:
+SELECT version FROM catalog_meta WHERE id = 0;
+
+setVersion:
+INSERT OR REPLACE INTO catalog_meta(id, version) VALUES (0, ?);
+
+upsert:
+INSERT OR REPLACE INTO catalog_exercise(slug, content) VALUES (?, ?);
+
+all:
+SELECT content FROM catalog_exercise;

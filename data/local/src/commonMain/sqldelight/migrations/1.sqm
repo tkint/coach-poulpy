@@ -1,0 +1,10 @@
+-- Version 1 shipped without the catalog tables; the app seeds them on its next start.
+CREATE TABLE catalog_exercise (
+    slug TEXT NOT NULL PRIMARY KEY,
+    content TEXT NOT NULL
+);
+
+CREATE TABLE catalog_meta (
+    id INTEGER NOT NULL PRIMARY KEY CHECK (id = 0),
+    version INTEGER NOT NULL
+);

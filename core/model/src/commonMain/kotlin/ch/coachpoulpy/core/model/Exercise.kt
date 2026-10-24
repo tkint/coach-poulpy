@@ -2,7 +2,11 @@ package ch.coachpoulpy.core.model
 
 import kotlinx.serialization.Serializable
 
-/** A catalog entry. Read-only and bundled with the app in v1; the slug is the stable key. */
+/**
+ * A catalog entry. The slug is the stable key: workouts point at it, so an entry is
+ * never deleted. One that is no longer offered is [retired], which hides it from the
+ * catalog while workouts that already use it keep working.
+ */
 @Serializable
 data class Exercise(
     val slug: ExerciseSlug,
@@ -14,6 +18,7 @@ data class Exercise(
     val perSide: Boolean = false,
     val images: List<String> = emptyList(),
     val instructions: List<LocalizedText> = emptyList(),
+    val retired: Boolean = false,
 )
 
 @Serializable

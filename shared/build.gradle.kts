@@ -24,5 +24,8 @@ kotlin {
             implementation(projects.types.mobility)
             implementation(libs.kotlinx.coroutines.core)
         }
+        jvmTest.dependencies {
+            implementation(libs.kotlinx.coroutines.test)
+        }
     }
 }
