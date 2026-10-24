@@ -101,6 +101,12 @@ class LocalStore(driverFactory: DriverFactory, private val clock: Clock = Clock.
         )
     }
 
+    /** When each finished session ended, oldest first, updated as sessions finish. */
+    fun finishedSessionEnds(): Flow<List<Instant>> =
+        db.executionQueries.finishedSessionEnds { endedAt -> Instant.fromEpochMilliseconds(endedAt!!) }
+            .asFlow()
+            .mapToList(Dispatchers.IO)
+
     fun events(executionId: String): List<SessionEvent> =
         db.executionQueries.events(executionId).executeAsList()
             .map { json.decodeFromString(SessionEvent.serializer(), it) }

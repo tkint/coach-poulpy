@@ -66,6 +66,9 @@ fun TodayScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp),
             modifier = Modifier.fillMaxSize(),
         ) {
+            state.poulpy?.let { poulpy ->
+                item(key = "poulpy") { PoulpyHeader(poulpy, Modifier.fillMaxWidth()) }
+            }
             if (unfinished != null) {
                 item {
                     Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)) {
@@ -80,7 +83,7 @@ fun TodayScreen(
             if (state.workouts.isEmpty()) {
                 item {
                     Column(
-                        modifier = Modifier.fillMaxWidth().padding(top = 96.dp, start = 16.dp, end = 16.dp),
+                        modifier = Modifier.fillMaxWidth().padding(top = 24.dp, start = 16.dp, end = 16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         Text(stringResource(R.string.today_empty_title), style = MaterialTheme.typography.titleLarge)

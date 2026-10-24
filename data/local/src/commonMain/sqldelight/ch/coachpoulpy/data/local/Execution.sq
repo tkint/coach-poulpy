@@ -32,3 +32,10 @@ VALUES (:executionId, (SELECT COALESCE(MAX(seq), -1) + 1 FROM execution_event WH
 
 events:
 SELECT payload FROM execution_event WHERE execution_id = ? ORDER BY seq;
+
+-- Sessions played to the end (their log ends with "finished"), not ones closed when left behind.
+finishedSessionEnds:
+SELECT e.ended_at FROM execution e
+WHERE e.ended_at IS NOT NULL
+  AND (SELECT payload FROM execution_event WHERE execution_id = e.id ORDER BY seq DESC LIMIT 1) LIKE '{"type":"finished"%'
+ORDER BY e.ended_at;

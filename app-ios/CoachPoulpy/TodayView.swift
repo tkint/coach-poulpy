@@ -33,6 +33,11 @@ struct TodayView: View {
     var body: some View {
         NavigationStack {
             List {
+                if let poulpy = today.value.poulpy {
+                    PoulpyHeaderView(status: poulpy)
+                        .listRowInsets(EdgeInsets())
+                        .listRowBackground(Color.clear)
+                }
                 if let name = unfinished {
                     Section {
                         VStack(alignment: .leading, spacing: 8) {
