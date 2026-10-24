@@ -104,9 +104,9 @@ private struct EntryRow: View {
             HStack(spacing: 12) {
                 PatternBadge(pattern: row.pattern)
                 VStack(alignment: .leading) {
-                    Text(row.name).font(.headline)
+                    Text(row.name).font(.poulpy(.headline))
                     if let perSide = row.perSideLabel {
-                        Text(perSide).font(.caption).foregroundStyle(.secondary)
+                        Text(perSide).font(.poulpy(.caption)).foregroundStyle(.secondary)
                     }
                 }
                 Spacer()
@@ -119,7 +119,7 @@ private struct EntryRow: View {
                 }
             }
             if !row.fitsType {
-                Text("builder.does.not.fit").font(.caption).foregroundStyle(.red)
+                Text("builder.does.not.fit").font(.poulpy(.caption)).foregroundStyle(.red)
             }
             stepper("builder.sets", "\(row.sets)", less: { model.setSets(key: row.key, sets: row.sets - 1) }, more: { model.setSets(key: row.key, sets: row.sets + 1) })
             stepper("builder.target", row.amountLabel, less: { model.changeAmount(key: row.key, steps: -1) }, more: { model.changeAmount(key: row.key, steps: 1) })

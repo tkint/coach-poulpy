@@ -19,8 +19,22 @@ android {
         applicationId = "ch.coachpoulpy"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 1
+        // CI numbers each build, so a newer APK always installs over the one on the phone.
+        versionCode = providers.environmentVariable("GITHUB_RUN_NUMBER").orNull?.toInt() ?: 1
         versionName = "0.1.0"
+    }
+
+    // One fixed key for every build, so updates install over each other instead of asking to uninstall.
+    // CI passes it through environment variables (see the README); on a dev computer, keystore.properties
+    // next to this file does the same. Without either, Android's usual per-computer debug key is used.
+    val signing = signingKey()
+    if (signing != null) {
+        signingConfigs.getByName("debug") {
+            storeFile = signing.storeFile
+            storePassword = signing.storePassword
+            keyAlias = signing.keyAlias
+            keyPassword = signing.keyPassword
+        }
     }
 
     buildTypes {
@@ -28,8 +42,7 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            // Until a release key exists, release builds are signed with the debug key
-            // so they can be sideloaded on family phones.
+            // Sideloaded on family phones, so release builds share the same key as debug builds.
             signingConfig = signingConfigs.getByName("debug")
         }
     }
@@ -55,4 +68,21 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
     debugImplementation(libs.androidx.compose.ui.tooling)
+}
+
+class SigningKey(val storeFile: File, val storePassword: String, val keyAlias: String, val keyPassword: String)
+
+fun signingKey(): SigningKey? {
+    val properties = java.util.Properties()
+    val local = file("keystore.properties")
+    if (local.exists()) local.inputStream().use(properties::load)
+    fun value(property: String, env: String) = properties.getProperty(property) ?: providers.environmentVariable(env).orNull
+    val store = value("storeFile", "POULPY_KEYSTORE_FILE")?.takeIf { it.isNotBlank() } ?: return null
+    val storePassword = value("storePassword", "POULPY_KEYSTORE_PASSWORD") ?: error("The signing key has no store password")
+    return SigningKey(
+        storeFile = file(store),
+        storePassword = storePassword,
+        keyAlias = value("keyAlias", "POULPY_KEY_ALIAS") ?: "poulpy",
+        keyPassword = value("keyPassword", "POULPY_KEY_PASSWORD") ?: storePassword,
+    )
 }

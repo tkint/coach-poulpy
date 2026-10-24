@@ -13,5 +13,7 @@ struct RootView: View {
             TreadmillView(graph: graph)
                 .tabItem { Label("tab.treadmill", systemImage: "figure.run") }
         }
+        // Text without its own font (list rows, buttons, forms) is set in Nunito.
+        .font(.poulpy(.body))
     }
 }

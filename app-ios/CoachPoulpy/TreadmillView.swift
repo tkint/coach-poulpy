@@ -109,7 +109,7 @@ struct TreadmillView: View {
                             Text(L("treadmill.malformed", Int(state.malformedPackets)))
                         }
                     }
-                    .font(.footnote)
+                    .font(.poulpy(.footnote))
                     .foregroundStyle(.secondary)
                 }
             }
@@ -125,7 +125,7 @@ struct TreadmillView: View {
 
     private var connectionSection: some View {
         Section {
-            Text(statusText).font(.headline)
+            Text(statusText).font(.poulpy(.headline))
             if state.connection == .connected {
                 beltIndicator
             }
@@ -135,7 +135,7 @@ struct TreadmillView: View {
                 Text("treadmill.bluetooth.off").foregroundStyle(.red)
             }
             if let error = state.error {
-                Text(error).font(.footnote).foregroundStyle(.red)
+                Text(error).font(.poulpy(.footnote)).foregroundStyle(.red)
             }
             if isLinked {
                 Button(LocalizedStringKey("treadmill.disconnect")) { model.disconnect() }
@@ -161,9 +161,9 @@ struct TreadmillView: View {
     @ViewBuilder
     private var beltIndicator: some View {
         if state.belt == .paused {
-            Label("treadmill.belt.paused", systemImage: "pause.circle.fill").font(.headline).foregroundStyle(.orange)
+            Label("treadmill.belt.paused", systemImage: "pause.circle.fill").font(.poulpy(.headline)).foregroundStyle(.orange)
         } else if state.belt == .stopped {
-            Label("treadmill.belt.stopped", systemImage: "stop.circle.fill").font(.headline).foregroundStyle(.orange)
+            Label("treadmill.belt.stopped", systemImage: "stop.circle.fill").font(.poulpy(.headline)).foregroundStyle(.orange)
         }
     }
 
@@ -191,11 +191,11 @@ struct TreadmillView: View {
                         VStack(alignment: .leading) {
                             Text(device.name)
                             if device.advertisesFtms {
-                                Text("treadmill.ftms.badge").font(.footnote).foregroundStyle(.secondary)
+                                Text("treadmill.ftms.badge").font(.poulpy(.footnote)).foregroundStyle(.secondary)
                             }
                         }
                         Spacer()
-                        Text("\(device.rssi) dBm").font(.footnote).foregroundStyle(.secondary)
+                        Text("\(device.rssi) dBm").font(.poulpy(.footnote)).foregroundStyle(.secondary)
                     }
                 }
             }
@@ -210,9 +210,9 @@ struct TreadmillView: View {
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], alignment: .leading, spacing: 12) {
                     ForEach(state.tiles, id: \.metric) { tile in
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(label(tile.metric)).font(.caption).foregroundStyle(.secondary)
+                            Text(label(tile.metric)).font(.poulpy(.caption)).foregroundStyle(.secondary)
                             Text("\(formatted(tile)) \(unit(tile.metric))".trimmingCharacters(in: .whitespaces))
-                                .font(.title2.monospacedDigit())
+                                .font(.poulpy(.title2).monospacedDigit())
                         }
                     }
                 }
@@ -237,13 +237,13 @@ struct TreadmillView: View {
 
     private func recordingSection(_ recording: RecordingUi) -> some View {
         Section {
-            Text(L("treadmill.elapsed", clock(recording.elapsedSeconds))).font(.title2.monospacedDigit())
+            Text(L("treadmill.elapsed", clock(recording.elapsedSeconds))).font(.poulpy(.title2).monospacedDigit())
             if recording.paused {
                 Text("treadmill.paused").foregroundStyle(.red)
             }
             beltIndicator
             if !recording.freeRun {
-                Text(L("treadmill.phase", Int(recording.phaseNumber), Int(recording.phaseCount))).font(.headline)
+                Text(L("treadmill.phase", Int(recording.phaseNumber), Int(recording.phaseCount))).font(.poulpy(.headline))
                 if recording.isRest {
                     Text("treadmill.rest")
                 }
@@ -298,7 +298,7 @@ struct TreadmillView: View {
             }
             if summary.phases.count > 1 {
                 ForEach(summary.phases, id: \.phaseNumber) { phase in
-                    Text(phaseLine(phase)).font(.footnote)
+                    Text(phaseLine(phase)).font(.poulpy(.footnote))
                 }
             }
         }

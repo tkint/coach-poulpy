@@ -6,6 +6,10 @@ struct CoachPoulpyApp: App {
     // Built once at launch. Guest mode: everything stays on the phone.
     private let graph = IosAppGraphFactory().create()
 
+    init() {
+        PoulpyAppearance.apply()
+    }
+
     var body: some Scene {
         WindowGroup {
             RootView(graph: graph)

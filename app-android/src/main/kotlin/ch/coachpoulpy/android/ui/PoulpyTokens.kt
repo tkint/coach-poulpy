@@ -9,10 +9,13 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
+import ch.coachpoulpy.android.R
 
 /** Fixed palette. The poulpy colours are the mascot itself and never change with the theme. */
 object PoulpyPalette {
@@ -90,22 +93,40 @@ data class PoulpyExtraColors(
 internal val PoulpyLightExtras = PoulpyExtraColors(Color(0xFFB4471C), Color(0xFFFFFFFF), Color(0xFFFFE6D6), Color(0xFF4A1A0B), Color(0xFF2E9E6A))
 internal val PoulpyDarkExtras = PoulpyExtraColors(Color(0xFFFF9A66), Color(0xFF2A1006), Color(0xFF3A1E12), Color(0xFFFFDCC7), Color(0xFF4CC38A))
 
-/** Type scale. Baloo 2 and Nunito are not bundled yet, so the system font is used meanwhile. */
-object PoulpyTextStyles {
-    val Display = TextStyle(fontWeight = FontWeight.W800, fontSize = 40.sp, lineHeight = 44.sp)
-    val Title = TextStyle(fontWeight = FontWeight.W700, fontSize = 28.sp, lineHeight = 32.sp)
-    val Headline = TextStyle(fontWeight = FontWeight.W700, fontSize = 21.sp, lineHeight = 25.sp)
-    val Body = TextStyle(fontWeight = FontWeight.W500, fontSize = 16.sp, lineHeight = 24.sp)
-    val Label = TextStyle(fontWeight = FontWeight.W800, fontSize = 12.5.sp, lineHeight = 16.sp, letterSpacing = 0.08.em)
-    val Timer = TextStyle(fontWeight = FontWeight.W800, fontSize = 64.sp, lineHeight = 64.sp, fontFeatureSettings = "tnum")
+/** Baloo 2 (display) and Nunito (body), bundled in res/font. */
+object PoulpyFonts {
+    val Display = FontFamily(Font(R.font.baloo2_bold, FontWeight.W700), Font(R.font.baloo2_extrabold, FontWeight.W800))
+    val Body = FontFamily(Font(R.font.nunito_regular, FontWeight.W400), Font(R.font.nunito_medium, FontWeight.W500), Font(R.font.nunito_bold, FontWeight.W700), Font(R.font.nunito_extrabold, FontWeight.W800))
 }
 
+/** Type scale. */
+object PoulpyTextStyles {
+    val Display = TextStyle(fontFamily = PoulpyFonts.Display, fontWeight = FontWeight.W800, fontSize = 40.sp, lineHeight = 44.sp)
+    val Title = TextStyle(fontFamily = PoulpyFonts.Display, fontWeight = FontWeight.W700, fontSize = 28.sp, lineHeight = 32.sp)
+    val Headline = TextStyle(fontFamily = PoulpyFonts.Display, fontWeight = FontWeight.W700, fontSize = 21.sp, lineHeight = 25.sp)
+    val Body = TextStyle(fontFamily = PoulpyFonts.Body, fontWeight = FontWeight.W500, fontSize = 16.sp, lineHeight = 24.sp)
+    val Label = TextStyle(fontFamily = PoulpyFonts.Body, fontWeight = FontWeight.W800, fontSize = 12.5.sp, lineHeight = 16.sp, letterSpacing = 0.08.em)
+    val Timer = TextStyle(fontFamily = PoulpyFonts.Body, fontWeight = FontWeight.W800, fontSize = 64.sp, lineHeight = 64.sp, fontFeatureSettings = "tnum")
+}
+
+private val MaterialDefaults = Typography()
+
 internal val PoulpyTypography = Typography(
+    displayLarge = MaterialDefaults.displayLarge.copy(fontFamily = PoulpyFonts.Display),
+    displayMedium = MaterialDefaults.displayMedium.copy(fontFamily = PoulpyFonts.Display),
+    displaySmall = MaterialDefaults.displaySmall.copy(fontFamily = PoulpyFonts.Display),
     headlineLarge = PoulpyTextStyles.Display,
     headlineMedium = PoulpyTextStyles.Title,
+    headlineSmall = MaterialDefaults.headlineSmall.copy(fontFamily = PoulpyFonts.Display),
     titleLarge = PoulpyTextStyles.Headline,
+    titleMedium = MaterialDefaults.titleMedium.copy(fontFamily = PoulpyFonts.Body),
+    titleSmall = MaterialDefaults.titleSmall.copy(fontFamily = PoulpyFonts.Body),
     bodyLarge = PoulpyTextStyles.Body,
+    bodyMedium = MaterialDefaults.bodyMedium.copy(fontFamily = PoulpyFonts.Body),
+    bodySmall = MaterialDefaults.bodySmall.copy(fontFamily = PoulpyFonts.Body),
+    labelLarge = MaterialDefaults.labelLarge.copy(fontFamily = PoulpyFonts.Body),
     labelMedium = PoulpyTextStyles.Label,
+    labelSmall = MaterialDefaults.labelSmall.copy(fontFamily = PoulpyFonts.Body),
 )
 
 object PoulpySpace {
