@@ -16,16 +16,32 @@ onMounted(async () => {
 
 <template>
   <main>
-    <h1>Coach Poulpy</h1>
+    <h1>Coach <span>poulpy</span></h1>
     <p>The website arrives with accounts. Local server: {{ server }}</p>
   </main>
 </template>
 
+<style>
+body {
+  margin: 0;
+  background: var(--cp-background);
+  color: var(--cp-on-background);
+  font: var(--cp-type-body);
+}
+</style>
+
 <style scoped>
 main {
-  font-family: system-ui, sans-serif;
   max-width: 40rem;
   margin: 4rem auto;
-  padding: 0 1rem;
+  padding: 0 var(--cp-space-lg);
+}
+
+h1 {
+  font: var(--cp-type-display);
+}
+
+h1 span {
+  color: var(--cp-poulpy-blue);
 }
 </style>
