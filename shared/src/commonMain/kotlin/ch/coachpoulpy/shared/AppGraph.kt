@@ -27,7 +27,8 @@ class AppGraph(driverFactory: DriverFactory) {
     fun exerciseList(languageCode: String) = ExerciseListModel(catalog, registry, languageCode)
     fun today(languageCode: String) = TodayModel(store, compiler, languageCode)
 
-    fun newWorkout(languageCode: String) =
+    // Not "newWorkout": Swift reserves the "new" prefix, and Kotlin would rename it.
+    fun createWorkout(languageCode: String) =
         BuilderModel(WorkoutDraft.empty(), catalog, registry, store, languageCode)
 
     /** Null when the workout is gone or was not made with the builder. */

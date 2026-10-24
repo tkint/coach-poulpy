@@ -55,7 +55,7 @@ import ch.coachpoulpy.shared.BuilderRow
 @Composable
 fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose: () -> Unit) {
     val model = remember(graph, language, workoutId) {
-        workoutId?.let { graph.editWorkout(it, language) } ?: graph.newWorkout(language)
+        workoutId?.let { graph.editWorkout(it, language) } ?: graph.createWorkout(language)
     }
     DisposableEffect(model) { onDispose { model.close() } }
     val state by model.state.collectAsStateWithLifecycle()

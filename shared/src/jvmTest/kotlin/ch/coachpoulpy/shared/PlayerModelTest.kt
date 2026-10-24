@@ -24,7 +24,7 @@ class PlayerModelTest {
 
     /** Push-ups 2 x 10 with 45 s rest, then a 30 s plank. */
     private fun workout(): WorkoutId {
-        val builder = graph.newWorkout("en")
+        val builder = graph.createWorkout("en")
         builder.rename("Quick")
         builder.setType(WorkoutType.STRENGTH)
         builder.add("push-up")

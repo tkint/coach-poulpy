@@ -19,7 +19,7 @@ class BuilderModelTest {
 
     @Test
     fun savedWorkoutCompilesToTheSetsAndRestsChosen() {
-        val builder = graph.newWorkout("en")
+        val builder = graph.createWorkout("en")
         assertNull(builder.save(), "nothing to save yet")
 
         builder.rename("Monday")
@@ -42,7 +42,7 @@ class BuilderModelTest {
 
     @Test
     fun perSideTimedExerciseGetsLeftAndRightWithTimeToSwitch() {
-        val builder = graph.newWorkout("en")
+        val builder = graph.createWorkout("en")
         builder.rename("Stretch")
         builder.setType(WorkoutType.MOBILITY)
         builder.add("hamstring-stretch")
@@ -57,7 +57,7 @@ class BuilderModelTest {
 
     @Test
     fun exerciseTheTypeCannotRunBlocksSaving() {
-        val builder = graph.newWorkout("en")
+        val builder = graph.createWorkout("en")
         builder.rename("Mixed")
         builder.add("jumping-jack")
         builder.setType(WorkoutType.REHAB)
@@ -67,7 +67,7 @@ class BuilderModelTest {
 
     @Test
     fun editingSavesANewVersionWithTheSameExercises() {
-        val builder = graph.newWorkout("en")
+        val builder = graph.createWorkout("en")
         builder.rename("Legs")
         builder.add("bodyweight-squat")
         builder.add("reverse-lunge")

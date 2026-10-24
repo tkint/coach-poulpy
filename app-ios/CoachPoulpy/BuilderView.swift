@@ -12,7 +12,7 @@ struct BuilderView: View {
         _builder = StateObject(wrappedValue: {
             let language = Language.code
             let model = workoutId.flatMap { graph.editWorkout(workoutId: $0, languageCode: language) }
-                ?? graph.newWorkout(languageCode: language)
+                ?? graph.createWorkout(languageCode: language)
             return Observed(model, current: model.current, watch: model.watch, close: { $0.close() })
         }())
     }
