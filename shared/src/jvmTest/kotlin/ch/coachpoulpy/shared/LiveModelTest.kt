@@ -213,6 +213,9 @@ class LiveModelTest {
         val treadmill = m.devices.state.value.known.first { it.key == "AA:BB" }
         assertEquals(listOf(Quantity.SPEED, Quantity.HEART_RATE), treadmill.provides, seen)
         assertEquals(emptyList(), treadmill.usedFor, seen)
+        // A pod or a band only claims what its profile measures, not every treadmill metric.
+        assertEquals(listOf(Quantity.SPEED, Quantity.CADENCE), m.devices.state.value.known.first { it.key == "POD" }.provides, seen)
+        assertEquals(listOf(Quantity.HEART_RATE), m.devices.state.value.known.first { it.key == "BAND" }.provides, seen)
         assertEquals(setOf(Quantity.SPEED, Quantity.HEART_RATE), m.devices.state.value.sources.map { it.quantity }.toSet(), seen)
 
         m.devices.setSource(Quantity.SPEED, "AA:BB")

@@ -118,7 +118,8 @@ class SensorConnection(
                 failures = 0
                 _battery.value = runCatching { link.read(SensorUuids.batteryLevel, SensorUuids.battery)[0].toInt() and 0xFF }
                     .getOrNull()?.takeIf { it in 0..100 }
-                _state.value = TreadmillState.Connected(TreadmillCapabilities.Unknown)
+                // No machine features: what a pod or a band measures comes from its profile and its readings.
+                _state.value = TreadmillState.Connected(TreadmillCapabilities(emptySet(), emptySet()))
                 streamUntilDisconnected()
                 null
             } catch (e: CancellationException) {
