@@ -50,6 +50,9 @@ class Session(val timeline: Timeline, events: List<SessionEvent> = emptyList()) 
     fun completeCurrent(now: Instant): List<SessionEvent> = record(SessionEvent.PhaseCompleted(now, state(now).phaseIndex))
     fun skipCurrent(now: Instant): List<SessionEvent> = record(SessionEvent.PhaseSkipped(now, state(now).phaseIndex))
 
+    /** Ends the session early; the phases not reached simply stay undone. */
+    fun finish(now: Instant): List<SessionEvent> = record(SessionEvent.Finished(now))
+
     /** Completes timed phases whose time is up. Call it from the UI clock, for example every 200 ms. */
     fun tick(now: Instant): List<SessionEvent> {
         val added = mutableListOf<SessionEvent>()

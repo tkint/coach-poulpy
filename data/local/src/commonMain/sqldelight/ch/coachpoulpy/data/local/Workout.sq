@@ -21,3 +21,10 @@ ORDER BY w.name;
 
 byIdAndVersion:
 SELECT * FROM workout_version WHERE id = ? AND version = ?;
+
+latestById:
+SELECT * FROM workout_version WHERE id = ? ORDER BY version DESC LIMIT 1;
+
+-- Sessions already done keep their execution rows; only the plan is removed.
+deleteWorkout:
+DELETE FROM workout_version WHERE id = ?;
