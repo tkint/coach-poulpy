@@ -72,14 +72,14 @@ struct PlayerView: View {
     @ViewBuilder
     private func ready(_ model: PlayerModel, _ state: PlayerState) -> some View {
         HStack {
-            Button { dismiss() } label: { Image(systemName: "xmark").font(.title2) }
+            Button { dismiss() } label: { Image(systemName: "xmark").font(.poulpy(.title2)) }
             Spacer()
         }
         Spacer()
-        Text(state.workoutName).font(.largeTitle.bold()).multilineTextAlignment(.center)
-        Text("player.ready").font(.title3).foregroundStyle(.secondary)
+        Text(state.workoutName).font(.poulpy(.largeTitle)).multilineTextAlignment(.center)
+        Text("player.ready").font(.poulpy(.title3)).foregroundStyle(.secondary)
         PatternBadge(pattern: state.pattern, size: 120).padding(32)
-        Text(state.title).font(.title2)
+        Text(state.title).font(.poulpy(.title2))
         if let target = state.targetLabel { Text(target) }
         Spacer()
         Button {
@@ -97,32 +97,32 @@ struct PlayerView: View {
         let remaining = state.remainingSeconds?.intValue
 
         HStack {
-            Button { confirmStop = true } label: { Image(systemName: "xmark").font(.title2) }
+            Button { confirmStop = true } label: { Image(systemName: "xmark").font(.poulpy(.title2)) }
             Spacer()
-            Text("player.step \(Int(state.phaseNumber)) \(Int(state.phaseCount))").font(.subheadline)
+            Text("player.step \(Int(state.phaseNumber)) \(Int(state.phaseCount))").font(.poulpy(.subheadline))
         }
         ProgressView(value: Double(state.phaseNumber - 1), total: Double(max(state.phaseCount, 1)))
 
         Spacer()
         if !state.isRest { PatternBadge(pattern: state.pattern, size: 96) }
         Text(state.title)
-            .font(.largeTitle.bold())
+            .font(.poulpy(.largeTitle))
             .multilineTextAlignment(.center)
             .foregroundStyle(state.isRest ? Color.accentColor : Color.primary)
         if !state.isRest {
-            if state.setCount > 1 { Text("player.set \(Int(state.setNumber)) \(Int(state.setCount))").font(.title3) }
-            if let side = state.sideLabel { Text(side).font(.title3).foregroundStyle(Color.accentColor) }
+            if state.setCount > 1 { Text("player.set \(Int(state.setNumber)) \(Int(state.setCount))").font(.poulpy(.title3)) }
+            if let side = state.sideLabel { Text(side).font(.poulpy(.title3)).foregroundStyle(Color.accentColor) }
         }
         if let remaining {
-            Text(clock(remaining)).font(.system(size: 88, weight: .bold).monospacedDigit())
+            Text(clock(remaining)).font(.custom(PoulpyFontFace.nunitoExtraBold, fixedSize: 88).monospacedDigit())
             if let total = state.totalSeconds?.intValue, total > 0 {
                 ProgressView(value: Double(total - remaining), total: Double(total)).frame(maxWidth: 220)
             }
         } else if let target = state.targetLabel {
-            Text(target).font(.system(size: 48, weight: .bold))
+            Text(target).font(.custom(PoulpyFontFace.nunitoExtraBold, fixedSize: 48))
         }
-        if !state.isRest, let load = state.loadLabel { Text(load).font(.title2) }
-        if paused { Text("player.paused").font(.headline).foregroundStyle(.red) }
+        if !state.isRest, let load = state.loadLabel { Text(load).font(.poulpy(.title2)) }
+        if paused { Text("player.paused").font(.poulpy(.headline)).foregroundStyle(.red) }
 
         Spacer()
         if state.isRest || remaining != nil, let next = state.nextTitle {
@@ -149,7 +149,7 @@ struct PlayerView: View {
             Button {
                 model.done()
             } label: {
-                Label("player.done", systemImage: "checkmark").font(.title3).frame(maxWidth: .infinity, minHeight: 52)
+                Label("player.done", systemImage: "checkmark").font(.poulpy(.title3)).frame(maxWidth: .infinity, minHeight: 52)
             }
             .buttonStyle(.borderedProminent)
             .disabled(paused)
@@ -165,8 +165,8 @@ struct PlayerView: View {
     @ViewBuilder
     private func finished(_ state: PlayerState) -> some View {
         Spacer()
-        Text("player.finished").font(.largeTitle.bold())
-        Text(state.workoutName).font(.title2)
+        Text("player.finished").font(.poulpy(.largeTitle))
+        Text(state.workoutName).font(.poulpy(.title2))
         if let summary = state.summary {
             Text("player.summary \(Int(summary.setsDone)) \(Int(summary.setsPlanned)) \(summary.durationLabel)")
                 .multilineTextAlignment(.center)

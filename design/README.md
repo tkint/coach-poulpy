@@ -22,6 +22,30 @@ Colour rules:
 - The plush blue and ember are too light for white text: buttons use `primary` (lagoon 600) and `grumpy` (ember 600).
 - `error` is a crimson, always shown with an icon and text, so it is never confused with a grumpy Poulpy.
 
-The brand fonts are Baloo 2 (headings) and Nunito (body). The website loads them from Google Fonts. The apps use the system font (rounded on iOS) until the font files are added to the apps.
+The brand fonts are Baloo 2 (headings) and Nunito (body). The website loads them from Google Fonts. The apps bundle one static file per weight listed under `font` in `tokens.json`, in `app-android/src/main/res/font` and `app-ios/CoachPoulpy/Fonts`. After changing those weights, rebuild the files and the theme:
+
+```sh
+pip install fonttools
+python3 design/fonts/build-fonts.py
+node design/build-tokens.mjs
+```
+
+On iOS, also list any new file under `UIAppFonts` in `Info.plist`. Views use `.font(.poulpy(.headline))` instead of `.font(.headline)` to get the system text styles in the brand fonts. Both fonts are under the SIL Open Font License (`design/fonts/OFL-*.txt`).
+
+## Poulpy's drawings
+
+`build-poulpy.mjs` draws Poulpy's six mood portraits and thirteen poses with the brand book's own drawing code, and writes them for each platform:
+
+```sh
+node design/build-poulpy.mjs
+```
+
+| Generated file | Used by |
+| --- | --- |
+| `design/poulpy/*.svg` | Reference copies, to look at or reuse on the web |
+| `app-android/src/main/res/drawable/poulpy_*.xml` | Android vector drawables (`R.drawable.poulpy_pose_champion`) |
+| `app-ios/CoachPoulpy/Assets.xcassets/Poulpy/*.imageset` | iOS vector assets (`Image("PoulpyPoseChampion")`) |
+
+All drawings share one 248 × 226 frame, so a mood portrait and a pose can replace each other without moving. CI runs it with `--check` too. The shared `PoulpyDrawing` enum names each drawing, and `PoulpyCoach` picks which one Today shows.
 
 The full brand book, with the logo, mood rules and poses, is the "Poulpy Brand Book" page in the project.

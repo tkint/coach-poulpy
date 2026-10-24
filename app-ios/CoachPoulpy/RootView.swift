@@ -15,5 +15,7 @@ struct RootView: View {
             HistoryView(graph: graph)
                 .tabItem { Label("tab.history", systemImage: "clock.arrow.circlepath") }
         }
+        // Text without its own font (list rows, buttons, forms) is set in Nunito.
+        .font(.poulpy(.body))
     }
 }

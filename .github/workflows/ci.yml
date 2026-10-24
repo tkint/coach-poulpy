@@ -22,7 +22,21 @@ jobs:
       - uses: gradle/actions/setup-gradle@v5
       - name: Test shared modules and server
         run: ./gradlew jvmTest jsTest :server:test
+      - name: Unpack the signing key
+        # Every build is signed with the same key, so a new APK installs over the old one.
+        # Pull requests from forks get no secrets and fall back to a throwaway debug key.
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "::warning::ANDROID_KEYSTORE_BASE64 is not set, so this APK is signed with a throwaway key and will not install over earlier builds."
+            exit 0
+          fi
+          echo "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/poulpy.jks"
+          echo "POULPY_KEYSTORE_FILE=$RUNNER_TEMP/poulpy.jks" >> "$GITHUB_ENV"
       - name: Build Android APK
+        env:
+          POULPY_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
         run: ./gradlew :app-android:assembleDebug
       - uses: actions/upload-artifact@v5
         with:
@@ -67,5 +81,7 @@ jobs:
           cache-dependency-path: web/package-lock.json
       - name: Check the generated theme files match design/tokens.json
         run: node ../design/build-tokens.mjs --check
+      - name: Check the generated Poulpy drawings match design/build-poulpy.mjs
+        run: node ../design/build-poulpy.mjs --check
       - run: npm ci
       - run: npm run build

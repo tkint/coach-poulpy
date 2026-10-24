@@ -33,11 +33,16 @@ struct TodayView: View {
     var body: some View {
         NavigationStack {
             List {
+                if let poulpy = today.value.poulpy {
+                    PoulpyHeaderView(status: poulpy)
+                        .listRowInsets(EdgeInsets())
+                        .listRowBackground(Color.clear)
+                }
                 if let name = unfinished {
                     Section {
                         VStack(alignment: .leading, spacing: 8) {
-                            Text("today.resume \(name)").font(.headline)
-                            Text("today.resume.body").font(.subheadline).foregroundStyle(.secondary)
+                            Text("today.resume \(name)").font(.poulpy(.headline))
+                            Text("today.resume.body").font(.poulpy(.subheadline)).foregroundStyle(.secondary)
                             Button("player.resume") { cover = .player(workoutId: nil) }
                                 .buttonStyle(.borderedProminent)
                         }
@@ -46,7 +51,7 @@ struct TodayView: View {
                 }
                 if today.value.workouts.isEmpty {
                     VStack(spacing: 8) {
-                        Text("today.empty.title").font(.title2)
+                        Text("today.empty.title").font(.poulpy(.title2))
                         Text("today.empty.body")
                             .foregroundStyle(.secondary)
                             .multilineTextAlignment(.center)
@@ -58,8 +63,8 @@ struct TodayView: View {
                 ForEach(today.value.workouts, id: \.id) { workout in
                     HStack {
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(workout.name).font(.headline)
-                            Text(workout.details).font(.footnote).foregroundStyle(.secondary)
+                            Text(workout.name).font(.poulpy(.headline))
+                            Text(workout.details).font(.poulpy(.footnote)).foregroundStyle(.secondary)
                         }
                         Spacer()
                         Button {

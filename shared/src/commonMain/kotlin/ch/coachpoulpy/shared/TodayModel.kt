@@ -3,6 +3,7 @@ package ch.coachpoulpy.shared
 import ch.coachpoulpy.core.engine.TimelineCompiler
 import ch.coachpoulpy.core.model.Workout
 import ch.coachpoulpy.data.local.LocalStore
+import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
@@ -11,25 +12,27 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 
 data class WorkoutRow(val id: String, val name: String, val details: String)
 
-data class TodayState(val workouts: List<WorkoutRow> = emptyList())
+data class TodayState(val workouts: List<WorkoutRow> = emptyList(), val poulpy: PoulpyStatus? = null)
 
-/** The home screen: the workouts saved on this phone. */
+/** The home screen: Poulpy with his tentacles, and the workouts saved on this phone. */
 class TodayModel internal constructor(
     store: LocalStore,
     private val compiler: TimelineCompiler,
     languageCode: String,
+    private val clock: Clock = Clock.System,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private val labels = Labels(languageCode)
+    private val coach = PoulpyCoach(languageCode)
 
-    val state: StateFlow<TodayState> = store.workouts()
-        .map { workouts -> TodayState(workouts.map(::row)) }
-        .stateIn(scope, SharingStarted.Eagerly, TodayState())
+    val state: StateFlow<TodayState> = combine(store.workouts(), store.finishedSessionEnds()) { workouts, finished ->
+        TodayState(workouts.map(::row), coach.status(finished, clock.now()))
+    }.stateIn(scope, SharingStarted.Eagerly, TodayState())
 
     /** The latest state, for Swift, which cannot read a StateFlow's typed value. */
     val current: TodayState get() = state.value
