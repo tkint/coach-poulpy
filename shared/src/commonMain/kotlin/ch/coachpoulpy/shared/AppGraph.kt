@@ -28,7 +28,15 @@ class AppGraph(driverFactory: DriverFactory) {
 
     fun exerciseList(languageCode: String) = ExerciseListModel(catalog, registry, languageCode)
     fun today(languageCode: String) = TodayModel(store, compiler, languageCode)
-    fun treadmill(memory: KeyValueStore) = TreadmillModel(KableCentral(), store, compiler, memory)
+
+    private var treadmillModel: TreadmillModel? = null
+
+    /**
+     * The one treadmill model of the app, created on first use. It outlives the screen
+     * so that leaving the tab mid-walk keeps the connection and the recording going.
+     */
+    fun treadmill(memory: KeyValueStore): TreadmillModel =
+        treadmillModel ?: TreadmillModel(KableCentral(), store, compiler, memory).also { treadmillModel = it }
 
     // Not "newWorkout": Swift reserves the "new" prefix, and Kotlin would rename it.
     fun createWorkout(languageCode: String) =

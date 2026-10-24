@@ -71,8 +71,8 @@ private val bluetoothPermissions =
 @Composable
 fun TreadmillScreen(graph: AppGraph, modifier: Modifier = Modifier) {
     val context = LocalContext.current
-    val model = remember(graph) { graph.treadmill(PreferencesStore(context)) }
-    DisposableEffect(model) { onDispose { model.close() } }
+    // Shared by the whole app: leaving the tab keeps the treadmill connected and the recording going.
+    val model = remember(graph) { graph.treadmill(PreferencesStore(context.applicationContext)) }
     val state by model.state.collectAsStateWithLifecycle()
 
     // The phone stays awake while recording, as it sits on the treadmill's console.

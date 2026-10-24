@@ -6,15 +6,17 @@ import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
 
 /**
- * Steps estimated from the belt speed, since treadmills do not report them. Uses
- * typical cadences: walking rises from about 100 steps a minute at 3 km/h to 125 at
- * 7 km/h, running from 170 at 8 km/h to 190 at 16 km/h. Leg length and stride vary
- * from person to person, so the app always shows the result as an estimate.
+ * Steps estimated from the belt speed, since treadmills do not report them. Walking
+ * divides the distance by a step length that grows with speed, from about 35 cm at
+ * 1 km/h to 63 cm at 4 km/h and 90 cm at 7 km/h: about 48 steps a minute at 1 km/h,
+ * 106 at 4 km/h and 127 at 7 km/h. Running uses typical cadences, from 170 at 8 km/h
+ * to 190 at 16 km/h. Leg length and stride vary from person to person, so the app
+ * always shows the result as an estimate.
  */
 object StepEstimate {
     /** Steps per minute at this speed. */
     fun cadence(kmh: Double): Double {
-        val walking = 80 + 6.5 * kmh
+        val walking = kmh * 1000 / 60 / stepLength(kmh)
         val running = (150 + 2.5 * kmh).coerceAtMost(200.0)
         return when {
             kmh < 0.5 -> 0.0
@@ -24,6 +26,9 @@ object StepEstimate {
             else -> walking + (running - walking) * (kmh - 7.0)
         }
     }
+
+    /** Walking step length in metres: short shuffling steps when slow, longer strides when brisk. */
+    private fun stepLength(kmh: Double) = 0.25 + 0.095 * kmh
 
     /** Steps over a recorded session, from its speed samples. */
     fun steps(events: List<SessionEvent>): Int? {

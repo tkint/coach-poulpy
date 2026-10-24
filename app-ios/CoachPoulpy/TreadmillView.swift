@@ -48,6 +48,7 @@ final class TreadmillViewModel: ObservableObject {
     private var watch: Cancellable?
 
     init(graph: AppGraph) {
+        // Shared by the whole app: leaving the tab keeps the treadmill connected and the recording going.
         model = graph.treadmill(memory: UserDefaultsStore())
         state = model.state.value as! TreadmillUiState
         watch = model.watch { [weak self] state in
@@ -61,7 +62,6 @@ final class TreadmillViewModel: ObservableObject {
 
     deinit {
         watch?.cancel()
-        model.close()
     }
 }
 

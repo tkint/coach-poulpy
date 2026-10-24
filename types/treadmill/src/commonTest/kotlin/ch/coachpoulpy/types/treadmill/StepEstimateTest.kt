@@ -11,11 +11,14 @@ class StepEstimateTest {
     @Test
     fun cadenceFollowsWalkingThenRunning() {
         assertEquals(0.0, StepEstimate.cadence(0.0))
-        assertEquals(112.5, StepEstimate.cadence(5.0))
+        // Slow walking takes short steps, so far fewer of them than a brisk walk.
+        assertEquals(48.3, StepEstimate.cadence(1.0), 0.1)
+        assertEquals(105.8, StepEstimate.cadence(4.0), 0.1)
+        assertEquals(127.5, StepEstimate.cadence(7.0), 0.1)
         assertEquals(170.0, StepEstimate.cadence(8.0))
         assertEquals(180.0, StepEstimate.cadence(12.0))
-        // Halfway between walking (128.75) and running (168.75) at 7.5 km/h.
-        assertEquals(148.75, StepEstimate.cadence(7.5))
+        // Halfway between walking (129.9) and running (168.75) at 7.5 km/h.
+        assertEquals(149.3, StepEstimate.cadence(7.5), 0.1)
     }
 
     @Test
