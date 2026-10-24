@@ -1,5 +1,5 @@
 plugins {
-    id("coachpoulpy.kmp-library")
+    id("coachpoulpy.kmp-web-library")
     alias(libs.plugins.kotlin.serialization)
 }
 

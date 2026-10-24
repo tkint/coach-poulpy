@@ -18,7 +18,7 @@ A personal training platform: build workouts, follow plans, run guided sessions 
 | `app-ios` | SwiftUI app, project generated with XcodeGen |
 | `server` | http4k API (placeholder with `/health`) |
 | `web` | Vue 3 + TypeScript website (placeholder) |
-| `build-logic` | Gradle convention plugin shared by the Kotlin Multiplatform modules |
+| `build-logic` | Gradle convention plugins: `coachpoulpy.kmp-library` (Android, iOS, JVM) and `coachpoulpy.kmp-web-library` (the same plus JavaScript, for the modules the website runs) |
 | `tools/compose.yaml` | Optional local Postgres, not needed yet |
 
 Library versions live in `gradle/libs.versions.toml`. Package and app id: `ch.coachpoulpy`.
@@ -33,8 +33,8 @@ Library versions live in `gradle/libs.versions.toml`. Package and app id: `ch.co
 ## Run it on the dev computer
 
 ```sh
-# Shared logic and server tests (no Android SDK or Mac needed)
-./gradlew jvmTest :server:test
+# Shared logic (JVM and JavaScript) and server tests, no Android SDK or Mac needed
+./gradlew jvmTest jsTest :server:test
 
 # Android: build, or install on a phone connected over USB
 ./gradlew :app-android:assembleDebug
@@ -59,4 +59,4 @@ The iOS build runs `./gradlew :shared:embedAndSignAppleFrameworkForXcode` itself
 
 ## Continuous integration
 
-`.github/workflows/ci.yml` runs the shared and server tests, builds the Android APK, builds the iOS app for the simulator on macOS, and builds the website.
+`.github/workflows/ci.yml` runs the shared tests on the JVM and in JavaScript, the server tests, builds the Android APK, builds the iOS app for the simulator on macOS, and builds the website.

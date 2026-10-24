@@ -21,7 +21,7 @@ jobs:
           java-version: 21
       - uses: gradle/actions/setup-gradle@v5
       - name: Test shared modules and server
-        run: ./gradlew jvmTest :server:test
+        run: ./gradlew jvmTest jsTest :server:test
       - name: Build Android APK
         run: ./gradlew :app-android:assembleDebug
       - uses: actions/upload-artifact@v5
