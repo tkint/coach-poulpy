@@ -111,3 +111,18 @@
 "metric.remaining.time" = "Temps restant (tapis)";
 "treadmill.sync.pause" = "Mettre l’enregistrement en pause quand le tapis s’arrête, reprendre quand il redémarre";
 "metric.steps" = "Pas (estimation)";
+
+"tab.history" = "Historique";
+"history.empty.title" = "Aucune séance pour l’instant";
+"history.empty.body" = "Terminez une séance ou une course sur le tapis et elle apparaîtra ici.";
+"history.this.week" = "Cette semaine";
+"history.this.month" = "Ce mois-ci";
+"history.minutes %lld" = "%lld min";
+"history.chart.minutes" = "Minutes actives par semaine";
+"history.chart.distance" = "Km sur le tapis par semaine";
+"history.sessions.title" = "Séances";
+"history.sets %lld %lld" = "%lld séries sur %lld";
+"history.sets.done" = "Séries faites";
+"history.sets.skipped" = "Séries passées";
+"history.delete.title" = "Retirer cette séance de l’historique ?";
+"history.delete.body" = "Elle disparaît de votre historique et de vos statistiques. C’est définitif.";

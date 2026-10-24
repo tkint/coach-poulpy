@@ -10,6 +10,8 @@ import ch.coachpoulpy.core.model.ExecutionSource
 import ch.coachpoulpy.core.model.Workout
 import ch.coachpoulpy.core.model.WorkoutId
 import ch.coachpoulpy.core.model.WorkoutRef
+import ch.coachpoulpy.core.model.WorkoutType
+import ch.coachpoulpy.core.stats.SessionTotals
 import ch.coachpoulpy.data.local.db.CoachPoulpyDatabase
 import kotlin.time.Clock
 import kotlin.time.Instant
@@ -69,7 +71,8 @@ class LocalStore(driverFactory: DriverFactory, private val clock: Clock = Clock.
         db.catalogEntryQueries.setVersion(version.toLong())
     }
 
-    fun startExecution(execution: Execution) {
+    /** [title] and [type] are kept as they were at the start, for the history. */
+    fun startExecution(execution: Execution, title: String? = null, type: WorkoutType? = null) {
         db.executionQueries.insertExecution(
             id = execution.id.value,
             source = execution.source.name,
@@ -77,6 +80,8 @@ class LocalStore(driverFactory: DriverFactory, private val clock: Clock = Clock.
             workout_version = execution.workout?.version?.toLong(),
             started_at = execution.startedAt.toEpochMilliseconds(),
             ended_at = execution.endedAt?.toEpochMilliseconds(),
+            title = title,
+            workout_type = type?.name,
         )
     }
 
@@ -91,6 +96,37 @@ class LocalStore(driverFactory: DriverFactory, private val clock: Clock = Clock.
 
     fun finishExecution(executionId: String, endedAt: Instant) =
         db.executionQueries.finishExecution(endedAt.toEpochMilliseconds(), executionId)
+
+    /** Sessions that ended, newest first. Emits again when one is added, summed up or deleted. */
+    fun finishedSessions(): Flow<List<StoredSession>> =
+        db.executionQueries.finished().asFlow().mapToList(Dispatchers.IO).map { rows ->
+            rows.map { row ->
+                StoredSession(
+                    execution = Execution(
+                        id = ExecutionId(row.id),
+                        source = ExecutionSource.valueOf(row.source),
+                        startedAt = Instant.fromEpochMilliseconds(row.started_at),
+                        endedAt = row.ended_at?.let(Instant::fromEpochMilliseconds),
+                        workout = row.workout_id?.let { WorkoutRef(WorkoutId(it), row.workout_version?.toInt() ?: 1) },
+                    ),
+                    title = row.title,
+                    type = row.workout_type?.let { name -> WorkoutType.entries.firstOrNull { it.name == name } },
+                    totals = row.summary?.let { runCatching { json.decodeFromString(SessionTotals.serializer(), it) }.getOrNull() },
+                )
+            }
+        }
+
+    fun saveTotals(executionId: String, totals: SessionTotals) =
+        db.executionQueries.setSummary(json.encodeToString(SessionTotals.serializer(), totals), executionId)
+
+    /** Fills in what sessions from before the history did not keep. */
+    fun saveDetails(executionId: String, title: String?, type: WorkoutType?, totals: SessionTotals) =
+        db.executionQueries.setDetails(title, type?.name, json.encodeToString(SessionTotals.serializer(), totals), executionId)
+
+    fun deleteSession(executionId: String) = db.transaction {
+        db.executionQueries.deleteEvents(executionId)
+        db.executionQueries.deleteExecution(executionId)
+    }
 
     /** The session left open when the app was closed or killed, if any. */
     fun unfinishedExecution(): Execution? = db.executionQueries.unfinished().executeAsOneOrNull()?.let { row ->
@@ -113,3 +149,6 @@ class LocalStore(driverFactory: DriverFactory, private val clock: Clock = Clock.
         db.executionQueries.events(executionId).executeAsList()
             .map { json.decodeFromString(SessionEvent.serializer(), it) }
 }
+
+/** A finished session as stored: [totals] is null until it has been summed up once. */
+data class StoredSession(val execution: Execution, val title: String?, val type: WorkoutType?, val totals: SessionTotals?)

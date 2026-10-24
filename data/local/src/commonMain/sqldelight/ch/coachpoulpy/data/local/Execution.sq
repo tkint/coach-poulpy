@@ -5,7 +5,12 @@ CREATE TABLE execution (
     workout_id TEXT,
     workout_version INTEGER,
     started_at INTEGER NOT NULL,
-    ended_at INTEGER
+    ended_at INTEGER,
+    -- The workout's name and type when the session started: the workout may be renamed or deleted later.
+    title TEXT,
+    workout_type TEXT,
+    -- SessionTotals as JSON, written when the session ends, or later for sessions from before history.
+    summary TEXT
 );
 
 CREATE TABLE execution_event (
@@ -17,11 +22,27 @@ CREATE TABLE execution_event (
 );
 
 insertExecution:
-INSERT INTO execution(id, source, workout_id, workout_version, started_at, ended_at)
-VALUES (?, ?, ?, ?, ?, ?);
+INSERT INTO execution(id, source, workout_id, workout_version, started_at, ended_at, title, workout_type)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?);
 
 finishExecution:
 UPDATE execution SET ended_at = ? WHERE id = ?;
+
+finished:
+SELECT * FROM execution WHERE ended_at IS NOT NULL ORDER BY started_at DESC;
+
+setDetails:
+UPDATE execution SET title = ?, workout_type = ?, summary = ? WHERE id = ?;
+
+setSummary:
+UPDATE execution SET summary = ? WHERE id = ?;
+
+-- Events are deleted explicitly: SQLite leaves foreign keys off unless asked.
+deleteEvents:
+DELETE FROM execution_event WHERE execution_id = ?;
+
+deleteExecution:
+DELETE FROM execution WHERE id = ?;
 
 unfinished:
 SELECT * FROM execution WHERE ended_at IS NULL ORDER BY started_at DESC LIMIT 1;

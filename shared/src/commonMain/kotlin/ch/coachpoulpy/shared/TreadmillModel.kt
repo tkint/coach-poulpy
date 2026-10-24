@@ -363,6 +363,9 @@ class TreadmillModel(
                 workout = if (workout in savedWorkouts) WorkoutRef(workout.id, workout.version) else null,
                 notes = if (workout === demoIntervals) "Demo intervals" else null,
             ),
+            // Built-in plans get their name in the user's language when the history shows them.
+            title = if (workout in savedWorkouts) workout.name else null,
+            type = WorkoutType.TREADMILL,
         )
         val started = Recording(executionId, timeline, Session(timeline), freeRun)
         recording = started
@@ -438,6 +441,7 @@ class TreadmillModel(
         recording = null
         finished.ticker?.cancel()
         store.finishExecution(finished.executionId, at)
+        store.saveTotals(finished.executionId, sessionTotals(finished.session.events, finished.timeline))
         val summary = TreadmillSummary.of(finished.timeline, finished.session.events)
         _state.update { it.copy(recording = null, summary = summary.toUi()) }
     }

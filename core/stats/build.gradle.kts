@@ -1,5 +1,6 @@
 plugins {
     id("coachpoulpy.kmp-library")
+    alias(libs.plugins.kotlin.serialization)
 }
 
 kotlin {

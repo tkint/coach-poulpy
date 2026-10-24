@@ -111,3 +111,18 @@
 "metric.remaining.time" = "Time left (treadmill)";
 "treadmill.sync.pause" = "Pause the recording when the treadmill pauses, resume when it restarts";
 "metric.steps" = "Steps (estimated)";
+
+"tab.history" = "History";
+"history.empty.title" = "No sessions yet";
+"history.empty.body" = "Finish a workout or a treadmill session and it will show up here.";
+"history.this.week" = "This week";
+"history.this.month" = "This month";
+"history.minutes %lld" = "%lld min";
+"history.chart.minutes" = "Active minutes per week";
+"history.chart.distance" = "Treadmill km per week";
+"history.sessions.title" = "Sessions";
+"history.sets %lld %lld" = "%lld of %lld sets";
+"history.sets.done" = "Sets done";
+"history.sets.skipped" = "Sets skipped";
+"history.delete.title" = "Delete this session?";
+"history.delete.body" = "It leaves your history and stats. This can’t be undone.";

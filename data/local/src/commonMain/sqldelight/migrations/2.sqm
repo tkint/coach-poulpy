@@ -1,0 +1,4 @@
+-- History: keep each session's name and type, and its totals so the list opens without replaying events.
+ALTER TABLE execution ADD COLUMN title TEXT;
+ALTER TABLE execution ADD COLUMN workout_type TEXT;
+ALTER TABLE execution ADD COLUMN summary TEXT;
