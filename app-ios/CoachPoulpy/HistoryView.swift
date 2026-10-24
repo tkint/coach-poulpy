@@ -14,6 +14,7 @@ private enum ChartColor {
 struct HistoryView: View {
     @StateObject private var history: Observed<HistoryModel, HistoryState>
     @State private var tab = HistoryTab.calendar
+    @Environment(\.unitSystem) private var units
     /// 0 for this month, -1 for last month.
     @State private var offset: Int32 = 0
     /// This month opens on today; an earlier one opens with no day picked (0).
@@ -266,7 +267,7 @@ struct HistoryView: View {
     /// The numbers that matter most for the row: duration, then distance for the treadmill or sets for a workout.
     private func headline(_ session: SessionRow) -> String {
         var parts = [clock(session.activeSeconds)]
-        if let distance = session.distanceMeters { parts.append("\(decimal(distance.doubleValue / 1000, 2)) km") }
+        if let distance = session.distanceMeters { parts.append(Units.shared.distance(meters: distance.doubleValue, system: units, decimals: 2).text) }
         if session.kind == .workout, let done = session.setsDone, let planned = session.setsPlanned {
             parts.append(L("history.sets %lld %lld", Int64(done.intValue), Int64(planned.intValue)))
         }
@@ -312,7 +313,7 @@ struct HistoryView: View {
                 tile("history.total", value: "\(state.totalSessions)", caption: L("history.sessions.unit %lld", Int64(state.totalSessions)))
                 tile(
                     "history.longest.run",
-                    value: state.longestRunMeters.map { "\(decimal($0.doubleValue / 1000, 1)) km" } ?? "–",
+                    value: state.longestRunMeters.map { Units.shared.distance(meters: $0.doubleValue, system: units, decimals: 1).text } ?? "–",
                     caption: state.longestRunMillis.map { shortDayMonth($0.int64Value) } ?? ""
                 )
                 tile("history.full.octopus", value: "×\(state.fullOctopuses)", caption: L("history.tentacles.lit %lld", Int64(state.tentaclesLit)))
@@ -325,7 +326,7 @@ struct HistoryView: View {
     private func period(_ title: LocalizedStringKey, _ period: PeriodUi, highlighted: Bool) -> some View {
         let content = highlighted ? PoulpyColor.onPrimaryContainer : PoulpyColor.onSurface
         var parts = [L("history.minutes %lld", Int64(period.activeMinutes))]
-        if period.distanceMeters > 0 { parts.append("\(decimal(period.distanceMeters / 1000, 1)) km") }
+        if period.distanceMeters > 0 { parts.append(Units.shared.distance(meters: period.distanceMeters, system: units, decimals: 1).text) }
         return VStack(alignment: .leading, spacing: 2) {
             Text(title)
                 .textCase(.uppercase)
@@ -394,6 +395,7 @@ struct SessionDetailView: View {
     let onDelete: () -> Void
     @Environment(\.dismiss) private var dismiss
     @State private var deleting = false
+    @Environment(\.unitSystem) private var units
 
     var body: some View {
         ScrollView {
@@ -425,10 +427,10 @@ struct SessionDetailView: View {
                         line("history.sets.skipped", "\(skipped.intValue)")
                     }
                     if let distance = session.distanceMeters {
-                        line("metric.distance", "\(decimal(distance.doubleValue / 1000, 2)) km")
+                        line("metric.distance", Units.shared.distance(meters: distance.doubleValue, system: units, decimals: 2).text)
                     }
                     if let speed = session.averageSpeedKmh {
-                        line("treadmill.summary.average.speed", "\(decimal(speed.doubleValue, 1)) km/h")
+                        line("treadmill.summary.average.speed", Units.shared.speed(kmh: speed.doubleValue, system: units).text)
                     }
                     if let hr = session.averageHeartRateBpm {
                         line("treadmill.summary.average.hr", "\(hr.intValue) bpm")
