@@ -34,7 +34,7 @@ On iOS, also list any new file under `UIAppFonts` in `Info.plist`. Views use `.f
 
 ## Poulpy's drawings
 
-`build-poulpy.mjs` draws Poulpy's six mood portraits and twelve poses with the brand book's own drawing code, plus the loading animation's top view, and writes them for each platform:
+`build-poulpy.mjs` draws Poulpy's six mood portraits and twelve poses with the brand book's own drawing code, plus the loading animation's top view and the app icon, and writes them for each platform:
 
 ```sh
 node design/build-poulpy.mjs
@@ -45,7 +45,11 @@ node design/build-poulpy.mjs
 | `design/poulpy/*.svg` | Reference copies, to look at or reuse on the web |
 | `app-android/src/main/res/drawable/poulpy_*.xml` | Android vector drawables (`R.drawable.poulpy_pose_champion`) |
 | `app-ios/CoachPoulpy/Assets.xcassets/Poulpy/*.imageset` | iOS vector assets (`Image("PoulpyPoseChampion")`) |
+| `app-android/src/main/res/drawable/ic_launcher_*.xml`, `mipmap-anydpi-v26/ic_launcher.xml` | The Android launcher icon: an adaptive icon with a themed (monochrome) layer |
+| `app-ios/CoachPoulpy/Assets.xcassets/AppIcon.appiconset` | The iOS app icon: 1024 px PNGs for light, dark and tinted |
 
 Portraits and poses share one 248 × 226 frame, so they can replace each other without moving. The loader (`loader`, and `loader_small` with a thicker line for sizes under 32) is Poulpy seen from above as a blue outline of eight round lobes with short tails; `PoulpyLoader` on Android and iOS turns it clockwise once every 2.4 s (10 s when animations are reduced) and replaces the old Spinning pose. CI runs it with `--check` too. The shared `PoulpyDrawing` enum names each drawing, and `PoulpyCoach` picks which one Today shows.
+
+The app icon is the brand book's: the happy blue Poulpy on Foam (`neutral.50`), and on Deep sea (`theme.dark.background`) for the iOS dark icon. On Android, Poulpy is scaled so his farthest arm sits on the 66 dp circle every launcher mask keeps; the themed icon is his silhouette at half strength with the eyes and smile at full. iOS only takes PNGs, so the script rasterises the icon itself, in plain JavaScript so every machine gets the same pixels; `--check` compares those pixels, not the compressed bytes.
 
 The rules for using Poulpy are in [`docs/brand.md`](../docs/brand.md); the full brand book is in `site/public/brand/book.html` and on the docs site, and the decisions behind it are in [`docs/brand-decisions.md`](../docs/brand-decisions.md).
