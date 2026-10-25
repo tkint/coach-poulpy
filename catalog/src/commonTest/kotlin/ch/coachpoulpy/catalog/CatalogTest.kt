@@ -58,6 +58,19 @@ class CatalogTest {
     }
 
     @Test
+    fun gentleWalksAreTimedBodyweightVariationsOfTheBriskWalk() {
+        assertEquals(
+            listOf("walk-with-support", "gentle-walk", "brisk-walk"),
+            names(Catalog.bundled.variationsOf(ExerciseSlug("gentle-walk"))),
+        )
+        listOf("walk-with-support", "gentle-walk").forEach { slug ->
+            val walk = Catalog.bundled[ExerciseSlug(slug)]!!
+            assertEquals(MeasurementMode.TIME, walk.measurement)
+            assertTrue(walk.allEquipment.isEmpty(), "$slug needs nothing, not even a treadmill")
+        }
+    }
+
+    @Test
     fun aVariationGroupNamingAnUnknownSlugIsRejected() {
         val exercises = Catalog.bundled.exercises
         assertFailsWith<IllegalArgumentException> {
