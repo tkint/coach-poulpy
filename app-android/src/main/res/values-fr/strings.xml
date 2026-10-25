@@ -38,9 +38,21 @@
     <string name="library_empty_body">Créez une séance une fois, puis prévoyez-la pour n’importe quel jour ou gardez-la ici pour plus tard.</string>
     <string name="workout_planned">Prévue le %1$s</string>
     <string name="workout_planned_today">Prévue aujourd’hui</string>
-    <string name="workout_change">Changer</string>
-    <string name="workout_unplan">La retirer du planning</string>
     <string name="workout_plan">La prévoir pour un jour</string>
+    <string name="workout_change_days">Changer les jours</string>
+    <string name="plan_title">Prévoir %1$s</string>
+    <string name="plan_hint">Touchez les jours où la faire. Touchez à nouveau pour en retirer un.</string>
+    <string name="plan_previous_month">Mois précédent</string>
+    <string name="plan_next_month">Mois suivant</string>
+    <string name="plan_keep_unplanned">La garder sans date</string>
+    <plurals name="workout_planned_days">
+        <item quantity="one">Prévue sur %1$d jour</item>
+        <item quantity="other">Prévue sur %1$d jours</item>
+    </plurals>
+    <plurals name="plan_save">
+        <item quantity="one">Enregistrer %1$d jour</item>
+        <item quantity="other">Enregistrer %1$d jours</item>
+    </plurals>
     <string name="workout_done">Faite</string>
     <string name="workout_last">Dernière fois</string>
     <string name="workout_usually">D’habitude</string>

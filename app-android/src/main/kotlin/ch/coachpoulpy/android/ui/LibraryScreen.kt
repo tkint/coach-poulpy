@@ -244,7 +244,7 @@ private fun Note(row: LibraryRow) {
     val millis = row.noteMillis
     when (row.note) {
         LibraryNote.PLANNED -> Text(
-            stringResource(R.string.library_planned, millis?.let(::dayLabel) ?: ""),
+            stringResource(R.string.library_planned, millis?.let(::dayLabel) ?: "") + if (row.morePlanned > 0) " · +${row.morePlanned}" else "",
             style = MaterialTheme.typography.labelMedium,
             color = colors.onPrimaryContainer,
             modifier = Modifier.padding(top = 3.dp).clip(RoundedCornerShape(PoulpyRadius.pill)).background(colors.primaryContainer).padding(horizontal = 8.dp, vertical = 2.dp),

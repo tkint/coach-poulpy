@@ -33,10 +33,13 @@
 "library.empty.body" = "Build one once, then plan it for any day or keep it here for later.";
 "workout.planned %@" = "Planned for %@";
 "workout.planned.today" = "Planned for today";
-"workout.change" = "Change";
-"workout.unplan" = "Take it off the plan";
 "workout.plan" = "Plan it for a day";
-"workout.pick.day" = "Pick a day";
+"workout.change.days" = "Change days";
+"plan.title %@" = "Plan %@";
+"plan.hint" = "Tap the days to train it. Tap again to take one off.";
+"plan.previous.month" = "Previous month";
+"plan.next.month" = "Next month";
+"plan.keep.unplanned" = "Keep it unplanned";
 "workout.done" = "Done";
 "workout.last" = "Last time";
 "workout.usually" = "Usually";

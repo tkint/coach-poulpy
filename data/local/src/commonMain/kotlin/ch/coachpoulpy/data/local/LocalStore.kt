@@ -84,6 +84,12 @@ class LocalStore(driverFactory: DriverFactory, private val clock: Clock = Clock.
 
     fun removePlan(planId: String) = db.plannedWorkoutQueries.deletePlan(planId)
 
+    /** Removes the plans [remove] and puts the workout on each of [add], all at once. */
+    fun replacePlans(workoutId: WorkoutId, add: List<LocalDate>, remove: List<String>) = db.transaction {
+        remove.forEach { db.plannedWorkoutQueries.deletePlan(it) }
+        add.forEach { planWorkout(workoutId, it) }
+    }
+
     /** The catalog version stored on the phone, or null before the first seed. */
     fun catalogVersion(): Int? = db.catalogEntryQueries.version().executeAsOneOrNull()?.toInt()
 
