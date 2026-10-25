@@ -7,12 +7,14 @@ struct BuilderView: View {
     @State private var picking = false
     @Environment(\.dismiss) private var dismiss
 
-    /// [firstExercise] starts a new workout that already holds it, from an exercise page.
-    init(graph: AppGraph, workoutId: String?, firstExercise: String? = nil) {
+    /// [firstExercise] starts a new workout that already holds it, from an exercise page;
+    /// [copyOf] starts an unsaved copy of that workout.
+    init(graph: AppGraph, workoutId: String?, firstExercise: String? = nil, copyOf: String? = nil) {
         self.graph = graph
         _builder = StateObject(wrappedValue: {
             let language = Language.code
-            let model = workoutId.flatMap { graph.editWorkout(workoutId: $0, languageCode: language) }
+            let model = copyOf.flatMap { graph.copyWorkout(workoutId: $0, languageCode: language) }
+                ?? workoutId.flatMap { graph.editWorkout(workoutId: $0, languageCode: language) }
                 ?? firstExercise.map { graph.createWorkoutWith(exerciseSlug: $0, languageCode: language) }
                 ?? graph.createWorkout(languageCode: language)
             return Observed(model, current: model.current, watch: model.watch, close: { $0.close() })

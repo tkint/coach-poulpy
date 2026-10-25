@@ -66,12 +66,16 @@ Baloo 2 for display and titles, Nunito for everything else. Platforms map each r
 | Search field | 48 high, pill, 1.5 px `outline`, `primary` while it holds text, a round clear button | `PillSearchField` on both platforms |
 | Stepper | Inset `surfaceVariant` box, label, minus and plus round buttons of 44 | Sets, reps, load, rest |
 | Pattern badge | 44 round, `primaryContainer`, one icon per movement pattern in `onPrimaryContainer` | Stands in for exercise pictures until real images exist |
+| Filter row | Search field, a row of chips, then the count line with one action at its right | `ListFilters` on both platforms, shared by the exercise and workout lists |
+| Poulpy card | 24 radius, `primaryContainer`, Poulpy happy on the blue side, a title, a line and one primary button | `PoulpyCard`: no results, an empty list |
+| Item menu | A long press (iOS context menu) or ⋮; actions with icons, a divider, then the destructive one | Destructive items and their confirmation are `error` with an icon, never ember; the confirmation says what goes and what stays |
+| Plan sheet | 24 radius sheet, a month from Monday; past days dimmed, today outlined, planned days `primary` | `PlanSheet` on both platforms; tick several days, save once |
 | Error banner | `error` tint, icon plus text | Never ember |
 | Loader | Poulpy from above, a blue outline of eight lobes, one turn every 2.4 s | `PoulpyLoader` on both platforms; replaces spinners |
 
 ## Screens
 
-The mockups canvas in the Claude project holds every screen: Home (planned, done, nothing planned), Library (workouts, exercises), workout page, exercise detail, builder, the guided player (ready, set, rest, finished), Live and its summary, History (calendar, stats), session detail, and Settings (general, devices, data sources). Match a new screen to its mockup, and add one to the canvas before building a screen that has none.
+The mockups canvas in the Claude project holds every screen: Home (planned, done, nothing planned), Library (workouts, exercises, search, long-press actions, empty), workout page (menu, plan days, delete), exercise detail, builder, the guided player (ready, set, rest, finished), Live and its summary, History (calendar, stats), session detail, and Settings (general, devices, data sources). Match a new screen to its mockup, and add one to the canvas before building a screen that has none.
 
 ## Accessibility
 

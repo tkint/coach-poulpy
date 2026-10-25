@@ -1,7 +1,9 @@
 package ch.coachpoulpy.android.ui
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,17 +24,19 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.DirectionsRun
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.EditCalendar
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.SelfImprovement
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -47,9 +51,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ch.coachpoulpy.android.R
@@ -71,6 +78,7 @@ fun LibraryScreen(
     onOpenWorkout: (String) -> Unit,
     onStart: (String) -> Unit,
     onNew: () -> Unit,
+    onCopy: (String) -> Unit,
     onOpenExercise: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -83,7 +91,7 @@ fun LibraryScreen(
             ViewSwitch(view, onView)
         }
         when (view) {
-            LibraryView.WORKOUTS -> Workouts(graph, language, onOpenWorkout, onStart, onNew)
+            LibraryView.WORKOUTS -> Workouts(graph, language, onOpenWorkout, onStart, onNew, onCopy)
             LibraryView.EXERCISES -> ExerciseList(graph, language, type = null, onPick = onOpenExercise, modifier = Modifier.padding(top = 4.dp))
         }
     }
@@ -121,7 +129,14 @@ private fun ViewSwitch(selected: LibraryView, onSelect: (LibraryView) -> Unit) {
  * right of the count line; Poulpy's card when nothing matches or nothing is saved yet.
  */
 @Composable
-private fun Workouts(graph: AppGraph, language: String, onOpen: (String) -> Unit, onStart: (String) -> Unit, onNew: () -> Unit) {
+private fun Workouts(
+    graph: AppGraph,
+    language: String,
+    onOpen: (String) -> Unit,
+    onStart: (String) -> Unit,
+    onNew: () -> Unit,
+    onCopy: (String) -> Unit,
+) {
     val model = remember(graph, language) { graph.library(language) }
     DisposableEffect(model) { onDispose { model.close() } }
     val state by model.state.collectAsStateWithLifecycle()
@@ -134,6 +149,9 @@ private fun Workouts(graph: AppGraph, language: String, onOpen: (String) -> Unit
         query = ""
         kind = null
     }
+    // The workout whose plan sheet or delete dialog is open, by id so a fresh row is used.
+    var planning by rememberSaveable { mutableStateOf<String?>(null) }
+    var deleting by rememberSaveable { mutableStateOf<String?>(null) }
 
     if (!state.loaded) return
     if (state.rows.isEmpty()) {
@@ -187,7 +205,16 @@ private fun Workouts(graph: AppGraph, language: String, onOpen: (String) -> Unit
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.fillMaxSize(),
             ) {
-                items(listing.rows, key = { it.id }) { row -> WorkoutCard(row, onOpen = { onOpen(row.id) }, onStart = { onStart(row.id) }) }
+                items(listing.rows, key = { it.id }) { row ->
+                    WorkoutCard(
+                        row,
+                        onOpen = { onOpen(row.id) },
+                        onStart = { onStart(row.id) },
+                        onPlan = { planning = row.id },
+                        onCopy = { onCopy(row.id) },
+                        onDelete = { deleting = row.id },
+                    )
+                }
                 if (listing.rows.isEmpty()) {
                     item(key = "none") {
                         PoulpyCard(
@@ -208,34 +235,84 @@ private fun Workouts(graph: AppGraph, language: String, onOpen: (String) -> Unit
             modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
         )
     }
+    state.rows.firstOrNull { it.id == planning }?.let { row ->
+        PlanSheet(
+            name = row.name,
+            planned = row.plans,
+            onSave = {
+                model.setDays(row, it)
+                planning = null
+            },
+            onDismiss = { planning = null },
+        )
+    }
+    state.rows.firstOrNull { it.id == deleting }?.let { row ->
+        DeleteWorkoutDialog(row.deletePrompt, onDelete = { deleting = null; model.delete(row) }, onDismiss = { deleting = null })
+    }
 }
 
+/**
+ * A tap opens the workout and Play starts it; a long press raises the card and opens
+ * its menu: Plan for a day, Copy (builder-made workouts only), then a crimson Delete.
+ */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun WorkoutCard(row: LibraryRow, onOpen: () -> Unit, onStart: () -> Unit) {
+private fun WorkoutCard(row: LibraryRow, onOpen: () -> Unit, onStart: () -> Unit, onPlan: () -> Unit, onCopy: () -> Unit, onDelete: () -> Unit) {
     val colors = MaterialTheme.colorScheme
-    OutlinedCard(
-        onClick = onOpen,
-        colors = CardDefaults.outlinedCardColors(containerColor = colors.surface),
-        border = BorderStroke(1.dp, colors.outline),
-        shape = RoundedCornerShape(PoulpyRadius.md),
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        Row(
-            Modifier.padding(start = 12.dp, end = 8.dp, top = 10.dp, bottom = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+    val haptics = LocalHapticFeedback.current
+    var menu by remember { mutableStateOf(false) }
+    val shape = RoundedCornerShape(PoulpyRadius.md)
+    Box {
+        Surface(
+            color = colors.surface,
+            border = BorderStroke(1.dp, colors.outline),
+            shape = shape,
+            shadowElevation = if (menu) 8.dp else 0.dp,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(shape)
+                .combinedClickable(
+                    onClick = onOpen,
+                    onLongClick = {
+                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                        menu = true
+                    },
+                    onLongClickLabel = stringResource(R.string.action_more),
+                ),
         ) {
-            Box(Modifier.size(44.dp).clip(CircleShape).background(colors.primaryContainer), contentAlignment = Alignment.Center) {
-                Icon(row.type.icon, contentDescription = null, tint = colors.onPrimaryContainer)
+            Row(
+                Modifier.padding(start = 12.dp, end = 8.dp, top = 10.dp, bottom = 10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Box(Modifier.size(44.dp).clip(CircleShape).background(colors.primaryContainer), contentAlignment = Alignment.Center) {
+                    Icon(row.type.icon, contentDescription = null, tint = colors.onPrimaryContainer)
+                }
+                Column(Modifier.weight(1f)) {
+                    Text(row.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold)
+                    Text(row.details, style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
+                    Note(row)
+                }
+                FilledTonalIconButton(onClick = onStart, modifier = Modifier.size(44.dp)) {
+                    Icon(Icons.Filled.PlayArrow, contentDescription = stringResource(R.string.action_start) + " " + row.name)
+                }
             }
-            Column(Modifier.weight(1f)) {
-                Text(row.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold)
-                Text(row.details, style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
-                Note(row)
+        }
+        DropdownMenu(expanded = menu, onDismissRequest = { menu = false }, offset = DpOffset(12.dp, 4.dp)) {
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.library_plan_day)) },
+                leadingIcon = { Icon(Icons.Filled.EditCalendar, contentDescription = null) },
+                onClick = { menu = false; onPlan() },
+            )
+            if (row.editable) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.action_copy)) },
+                    leadingIcon = { Icon(Icons.Filled.ContentCopy, contentDescription = null) },
+                    onClick = { menu = false; onCopy() },
+                )
             }
-            FilledTonalIconButton(onClick = onStart, modifier = Modifier.size(44.dp)) {
-                Icon(Icons.Filled.PlayArrow, contentDescription = stringResource(R.string.action_start) + " " + row.name)
-            }
+            HorizontalDivider()
+            DeleteMenuItem(onClick = { menu = false; onDelete() })
         }
     }
 }

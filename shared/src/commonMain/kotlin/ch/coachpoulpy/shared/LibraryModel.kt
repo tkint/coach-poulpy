@@ -3,6 +3,7 @@ package ch.coachpoulpy.shared
 import ch.coachpoulpy.catalog.Catalog
 import ch.coachpoulpy.core.engine.TimelineCompiler
 import ch.coachpoulpy.core.model.Workout
+import ch.coachpoulpy.core.model.WorkoutId
 import ch.coachpoulpy.core.model.WorkoutType
 import ch.coachpoulpy.data.local.LocalStore
 import ch.coachpoulpy.data.local.PlannedWorkout
@@ -37,6 +38,11 @@ data class LibraryRow(
     val nextPlannedMillis: Long? = null,
     /** How many more planned days follow the next one: the "+2" after it. */
     val morePlanned: Int = 0,
+    /** Every upcoming planned day, soonest first, for the plan sheet. */
+    val plans: List<PlannedDay> = emptyList(),
+    /** Only workouts made with the builder can be copied. */
+    val editable: Boolean = false,
+    val deletePrompt: DeletePrompt = DeletePrompt("", ""),
 )
 
 /** A kind of workout the list can be narrowed to, only offered when a saved workout has it. */
@@ -58,7 +64,7 @@ data class WorkoutListing(val rows: List<LibraryRow>, val countLabel: String, va
 
 /** The workouts saved on this phone, with or without a day. */
 class LibraryModel internal constructor(
-    store: LocalStore,
+    private val store: LocalStore,
     compiler: TimelineCompiler,
     private val catalog: Catalog,
     languageCode: String,
@@ -79,6 +85,12 @@ class LibraryModel internal constructor(
     fun watch(onChange: (LibraryState) -> Unit): Cancellable = state.watchIn(scope, onChange)
 
     fun close() = scope.cancel()
+
+    /** Plans [row]'s workout on exactly [days] from today on, as ticked on the plan sheet. */
+    fun setDays(row: LibraryRow, days: List<PlanDate>) =
+        store.setDays(WorkoutId(row.id), row.plans, days, clock.now().toLocalDateTime(zone).date)
+
+    fun delete(row: LibraryRow) = store.deleteWorkout(WorkoutId(row.id))
 
     /**
      * Rows of [type] matching [query] ([WorkoutSearch]: the name, the type, or an exercise
@@ -103,6 +115,7 @@ class LibraryModel internal constructor(
 
     private fun build(workouts: List<Workout>, plans: List<PlannedWorkout>, sessions: List<StoredSession>): LibraryState {
         val today = clock.now().toLocalDateTime(zone).date
+        val timesDone = sessions.filter { it.counts }.mapNotNull { it.execution.workout?.workoutId }.groupingBy { it }.eachCount()
         val lastDone = sessions.filter { it.counts }
             .mapNotNull { session -> session.execution.workout?.workoutId?.let { it to session.execution.startedAt } }
             .groupBy({ it.first }, { it.second })
@@ -110,19 +123,21 @@ class LibraryModel internal constructor(
         val rows = workouts.map { workout ->
             val last = lastDone[workout.id]
             val doneToday = last?.toLocalDateTime(zone)?.date == today
-            // A plan for today that was already done is not shown again.
-            val upcoming = plans.filter { it.workoutId == workout.id && (it.day > today || (it.day == today && !doneToday)) }.sortedBy { it.day }
+            val upcoming = upcomingDays(plans, workout.id, today, doneToday, zone)
             val plan = upcoming.firstOrNull()
             val (note, noteMillis) = when {
-                plan != null -> LibraryNote.PLANNED to plan.day.startMillis(zone)
+                plan != null -> LibraryNote.PLANNED to plan.dayMillis
                 doneToday -> LibraryNote.DONE_TODAY to last?.toEpochMilliseconds()
                 last != null -> LibraryNote.LAST_DONE to last.toEpochMilliseconds()
                 else -> LibraryNote.NOT_DONE_YET to null
             }
             LibraryRow(
                 workout.id.value, workout.name, workout.type, facts.details(workout), note, noteMillis, last?.toEpochMilliseconds(),
-                nextPlannedMillis = plan?.day?.startMillis(zone),
+                nextPlannedMillis = plan?.dayMillis,
                 morePlanned = (upcoming.size - 1).coerceAtLeast(0),
+                plans = upcoming,
+                editable = WorkoutDraft.from(workout, catalog) != null,
+                deletePrompt = labels.deletePrompt(workout.name, upcoming.size, timesDone[workout.id] ?: 0),
             )
         }
         val kinds = workouts.map { it.type }.distinct().sortedBy { it.ordinal }.map { KindFilter(it, labels.workoutType(it)) }

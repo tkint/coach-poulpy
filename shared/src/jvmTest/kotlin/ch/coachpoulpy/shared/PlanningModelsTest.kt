@@ -228,4 +228,47 @@ class PlanningModelsTest {
         val ago = now.toEpochMilliseconds() - state.lastDoneMillis!!
         assertTrue(ago in 0..30.minutes.inWholeMilliseconds, "started $ago ms ago")
     }
+
+    @Test
+    fun aCopyIsAnUnsavedDraftWithNoDaysOrHistory() {
+        val legs = workout("Legs", "goblet-squat", "push-up")
+        graph.store.planWorkout(legs, LocalDate(2023, 11, 17))
+        play(legs)
+        val saved = runBlocking { graph.store.workouts().first() }.size
+
+        val copy = graph.copyWorkout(legs.value, "en")!!
+        assertEquals("Legs (copy)", copy.state.value.name)
+        assertEquals(2, copy.state.value.rows.size)
+        assertEquals(saved, runBlocking { graph.store.workouts().first() }.size)
+
+        val id = copy.save()!!
+        assertTrue(id != legs.value)
+        val page = page(WorkoutId(id)).state.await { it.loaded && it.found }
+        assertTrue(page.plans.isEmpty())
+        assertEquals(0, page.timesDone)
+        assertEquals("Haut du corps (copie)", Labels("fr").copyName("Haut du corps"))
+    }
+
+    @Test
+    fun deletingSaysWhatGoesAndWhatStays() {
+        val legs = workout("Legs", "goblet-squat")
+        graph.store.planWorkout(legs, LocalDate(2023, 11, 17))
+        graph.store.planWorkout(legs, LocalDate(2023, 11, 20))
+        play(legs)
+
+        val prompt = page(legs).state.await { it.found && it.timesDone == 1 && it.plans.size == 2 }.deletePrompt
+        assertEquals("Delete Legs?", prompt.title)
+        assertEquals("It comes off its 2 planned days. The time you did it stays in History.", prompt.message)
+
+        val library = library()
+        val row = library.state.await { it.loaded && it.rows.singleOrNull()?.deletePrompt?.title == "Delete Legs?" }.rows.single()
+        assertEquals(prompt, row.deletePrompt)
+        assertEquals("This can’t be undone.", Labels("en").deletePrompt("Arms", 0, 0).message)
+        assertEquals("Les 3 fois où vous l’avez faite restent dans l’historique.", Labels("fr").deletePrompt("Bras", 0, 3).message)
+
+        library.delete(row)
+        library.state.await { it.loaded && it.rows.isEmpty() }
+        assertTrue(runBlocking { graph.store.plannedWorkouts().first() }.isEmpty())
+    }
+
 }

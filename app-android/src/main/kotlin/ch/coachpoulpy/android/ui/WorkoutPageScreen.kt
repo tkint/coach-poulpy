@@ -4,10 +4,10 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,6 +21,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.EditCalendar
 import androidx.compose.material.icons.filled.MoreVert
@@ -30,6 +32,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -56,6 +59,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ch.coachpoulpy.android.R
 import ch.coachpoulpy.shared.AppGraph
+import ch.coachpoulpy.shared.DeletePrompt
 import ch.coachpoulpy.shared.WorkoutPageState
 import java.time.Instant
 import java.time.ZoneId
@@ -71,6 +75,7 @@ fun WorkoutPageScreen(
     onBack: () -> Unit,
     onStart: () -> Unit,
     onEdit: () -> Unit,
+    onCopy: () -> Unit,
     onOpenExercise: (String) -> Unit,
 ) {
     val model = remember(graph, language, workoutId) { graph.workoutPage(workoutId, language) }
@@ -95,7 +100,15 @@ fun WorkoutPageScreen(
                                 Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.action_more))
                             }
                             DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-                                DropdownMenuItem(text = { Text(stringResource(R.string.action_delete)) }, onClick = { menu = false; deleting = true })
+                                if (state.editable) {
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(R.string.action_copy)) },
+                                        leadingIcon = { Icon(Icons.Filled.ContentCopy, contentDescription = null) },
+                                        onClick = { menu = false; onCopy() },
+                                    )
+                                    HorizontalDivider()
+                                }
+                                DeleteMenuItem(onClick = { menu = false; deleting = true })
                             }
                         }
                     }
@@ -175,17 +188,32 @@ fun WorkoutPageScreen(
         )
     }
 
-    if (deleting) {
-        AlertDialog(
-            onDismissRequest = { deleting = false },
-            title = { Text(stringResource(R.string.delete_title)) },
-            text = { Text(stringResource(R.string.delete_body)) },
-            confirmButton = {
-                TextButton(onClick = { deleting = false; model.delete() }) { Text(stringResource(R.string.action_delete)) }
-            },
-            dismissButton = { TextButton(onClick = { deleting = false }) { Text(stringResource(R.string.action_cancel)) } },
-        )
-    }
+    if (deleting) DeleteWorkoutDialog(state.deletePrompt, onDelete = { deleting = false; model.delete() }, onDismiss = { deleting = false })
+}
+
+/** The crimson Delete of a workout's menus, with its icon: destructive, never ember. */
+@Composable
+internal fun DeleteMenuItem(onClick: () -> Unit) {
+    val error = MaterialTheme.colorScheme.error
+    DropdownMenuItem(
+        text = { Text(stringResource(R.string.action_delete), color = error) },
+        leadingIcon = { Icon(Icons.Filled.Delete, contentDescription = null, tint = error) },
+        onClick = onClick,
+    )
+}
+
+/** "Delete Upper body?", what goes and what stays, then Cancel and a crimson Delete. */
+@Composable
+internal fun DeleteWorkoutDialog(prompt: DeletePrompt, onDelete: () -> Unit, onDismiss: () -> Unit) {
+    val error = MaterialTheme.colorScheme.error
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = { Icon(Icons.Filled.Delete, contentDescription = null, tint = error) },
+        title = { Text(prompt.title) },
+        text = { Text(prompt.message) },
+        confirmButton = { TextButton(onClick = onDelete) { Text(stringResource(R.string.action_delete), color = error, fontWeight = FontWeight.ExtraBold) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel), fontWeight = FontWeight.ExtraBold) } },
+    )
 }
 
 /**

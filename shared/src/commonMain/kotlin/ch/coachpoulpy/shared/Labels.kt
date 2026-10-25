@@ -128,6 +128,25 @@ internal class Labels(private val languageCode: String) {
 
     fun exercises(count: Int) = if (count == 1) t("1 exercise", "1 exercice") else t("$count exercises", "$count exercices")
 
+    /** The name a copy starts with: "Upper body (copy)". */
+    fun copyName(name: String) = t("$name (copy)", "$name (copie)")
+
+    /** Only says what applies: the planned days it comes off, the sessions that stay in History. */
+    fun deletePrompt(name: String, planned: Int, done: Int): DeletePrompt {
+        val goes = when (planned) {
+            0 -> null
+            1 -> t("It comes off its planned day.", "Elle est retirée de son jour prévu.")
+            else -> t("It comes off its $planned planned days.", "Elle est retirée de ses $planned jours prévus.")
+        }
+        val stays = when (done) {
+            0 -> null
+            1 -> t("The time you did it stays in History.", "La fois où vous l’avez faite reste dans l’historique.")
+            else -> t("The $done times you did it stay in History.", "Les $done fois où vous l’avez faite restent dans l’historique.")
+        }
+        val message = listOfNotNull(goes, stays).joinToString(" ").ifEmpty { t("This can’t be undone.", "C’est définitif.") }
+        return DeletePrompt(t("Delete $name?", "Supprimer « $name » ?"), message)
+    }
+
     fun workouts(count: Int) = if (count == 1) t("1 workout", "1 séance") else t("$count workouts", "$count séances")
 
     fun matches(count: Int) = if (count == 1) t("1 match", "1 résultat") else t("$count matches", "$count résultats")
