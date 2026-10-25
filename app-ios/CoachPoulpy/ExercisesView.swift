@@ -450,7 +450,7 @@ struct ExerciseDetailView: View {
                 choosing = false
                 slug = picked
             }
-            .presentationDetents([.medium, .large])
+            .presentationDetents([.large])
         }
         .fullScreenCover(isPresented: $adding) {
             BuilderView(graph: graph, workoutId: nil, firstExercise: detail.slug)

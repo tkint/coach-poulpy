@@ -34,6 +34,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -75,37 +76,40 @@ fun ExerciseDetailScreen(
     var choosing by rememberSaveable { mutableStateOf(false) }
     val colors = MaterialTheme.colorScheme
 
-    Column(Modifier.fillMaxSize().background(colors.background)) {
-        PictureArea(detail, onBack, onVariations = { choosing = true })
-        Column(
-            Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 20.dp, top = 20.dp, bottom = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(18.dp),
-        ) {
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text(detail.eyebrow.uppercase(), style = MaterialTheme.typography.labelMedium, color = colors.primary)
-                Text(detail.name, style = MaterialTheme.typography.headlineMedium, modifier = Modifier.semantics { heading() })
-            }
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                FactCard(stringResource(R.string.exercise_muscles), detail.muscles, Modifier.weight(1f))
-                FactCard(stringResource(R.string.exercise_equipment), detail.equipment, Modifier.weight(1f))
-            }
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Text(stringResource(R.string.exercise_how), style = MaterialTheme.typography.titleLarge, modifier = Modifier.semantics { heading() })
-                detail.instructions.forEachIndexed { index, step ->
-                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Box(Modifier.size(28.dp).background(colors.primary, CircleShape), contentAlignment = Alignment.Center) {
-                            Text("${index + 1}", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.ExtraBold, color = colors.onPrimary)
+    // A Surface, not a background, so text takes onBackground in the dark theme too.
+    Surface(Modifier.fillMaxSize(), color = colors.background) {
+        Column(Modifier.fillMaxSize()) {
+            PictureArea(detail, onBack, onVariations = { choosing = true })
+            Column(
+                Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 20.dp, top = 20.dp, bottom = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(18.dp),
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text(detail.eyebrow.uppercase(), style = MaterialTheme.typography.labelMedium, color = colors.primary)
+                    Text(detail.name, style = MaterialTheme.typography.headlineMedium, modifier = Modifier.semantics { heading() })
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    FactCard(stringResource(R.string.exercise_muscles), detail.muscles, Modifier.weight(1f))
+                    FactCard(stringResource(R.string.exercise_equipment), detail.equipment, Modifier.weight(1f))
+                }
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text(stringResource(R.string.exercise_how), style = MaterialTheme.typography.titleLarge, modifier = Modifier.semantics { heading() })
+                    detail.instructions.forEachIndexed { index, step ->
+                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            Box(Modifier.size(28.dp).background(colors.primary, CircleShape), contentAlignment = Alignment.Center) {
+                                Text("${index + 1}", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.ExtraBold, color = colors.onPrimary)
+                            }
+                            Text(step, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
                         }
-                        Text(step, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
                     }
                 }
             }
-        }
-        HorizontalDivider(color = colors.surfaceVariant)
-        Box(Modifier.navigationBarsPadding().padding(start = 20.dp, end = 20.dp, top = 12.dp, bottom = 16.dp)) {
-            Button(onClick = { onAddToWorkout(detail.slug) }, modifier = Modifier.fillMaxWidth().height(56.dp)) {
-                Icon(Icons.Filled.Add, contentDescription = null)
-                Text(stringResource(R.string.exercise_add), fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 8.dp))
+            HorizontalDivider(color = colors.surfaceVariant)
+            Box(Modifier.navigationBarsPadding().padding(start = 20.dp, end = 20.dp, top = 12.dp, bottom = 16.dp)) {
+                Button(onClick = { onAddToWorkout(detail.slug) }, modifier = Modifier.fillMaxWidth().height(56.dp)) {
+                    Icon(Icons.Filled.Add, contentDescription = null)
+                    Text(stringResource(R.string.exercise_add), fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 8.dp))
+                }
             }
         }
     }
@@ -196,8 +200,16 @@ private fun FactCard(title: String, body: String, modifier: Modifier = Modifier)
 @Composable
 private fun VariationsSheet(variations: List<VariationRow>, onPick: (String) -> Unit, onDismiss: () -> Unit) {
     val colors = MaterialTheme.colorScheme
-    ModalBottomSheet(onDismissRequest = onDismiss, containerColor = colors.surface) {
-        Column(Modifier.padding(start = 20.dp, end = 20.dp, bottom = 28.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    // Opened in full, so the whole group is in view without scrolling.
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        containerColor = colors.surface,
+    ) {
+        Column(
+            Modifier.verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 20.dp, bottom = 28.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(stringResource(R.string.exercise_variations), style = MaterialTheme.typography.titleLarge, modifier = Modifier.semantics { heading() })
                 Text(stringResource(R.string.exercise_variations_hint), style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
