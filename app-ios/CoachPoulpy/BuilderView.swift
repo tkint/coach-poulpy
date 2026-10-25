@@ -14,7 +14,7 @@ struct BuilderView: View {
         _builder = StateObject(wrappedValue: {
             let language = Language.code
             let model: BuilderModel
-            if let copyOf, let copy = graph.copyWorkout(workoutId: copyOf, languageCode: language) {
+            if let copyOf, let copy = graph.duplicateWorkout(workoutId: copyOf, languageCode: language) {
                 model = copy
             } else if let workoutId, let edit = graph.editWorkout(workoutId: workoutId, languageCode: language) {
                 model = edit

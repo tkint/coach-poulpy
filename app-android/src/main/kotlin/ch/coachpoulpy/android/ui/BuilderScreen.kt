@@ -55,7 +55,7 @@ import ch.coachpoulpy.shared.BuilderRow
 @Composable
 fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose: () -> Unit, firstExercise: String? = null, copyOf: String? = null) {
     val model = remember(graph, language, workoutId, copyOf) {
-        copyOf?.let { graph.copyWorkout(it, language) }
+        copyOf?.let { graph.duplicateWorkout(it, language) }
             ?: workoutId?.let { graph.editWorkout(it, language) }
             ?: firstExercise?.let { graph.createWorkoutWith(it, language) }
             ?: graph.createWorkout(language)

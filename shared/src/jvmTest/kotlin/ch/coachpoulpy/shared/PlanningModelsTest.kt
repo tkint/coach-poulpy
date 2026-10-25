@@ -236,7 +236,7 @@ class PlanningModelsTest {
         play(legs)
         val saved = runBlocking { graph.store.workouts().first() }.size
 
-        val copy = graph.copyWorkout(legs.value, "en")!!
+        val copy = graph.duplicateWorkout(legs.value, "en")!!
         assertEquals("Legs (copy)", copy.state.value.name)
         assertEquals(2, copy.state.value.rows.size)
         assertEquals(saved, runBlocking { graph.store.workouts().first() }.size)
