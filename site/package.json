@@ -1,0 +1,17 @@
+{
+  "name": "coach-poulpy-site",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "predev": "node copy-docs.mjs",
+    "dev": "vitepress dev",
+    "prebuild": "node copy-docs.mjs",
+    "build": "vitepress build",
+    "preview": "vitepress preview"
+  },
+  "devDependencies": {
+    "mermaid": "11.17.2",
+    "vitepress": "1.6.4",
+    "vitepress-plugin-mermaid": "2.0.17"
+  }
+}

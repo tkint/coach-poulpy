@@ -1,0 +1,57 @@
+name: Labels
+
+# Applies .github/labels.yml to the repo's labels and milestones.
+on:
+  push:
+    branches: [main]
+    paths: [.github/labels.yml]
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  sync:
+    name: Sync labels and milestones
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - run: npm install --no-save js-yaml@4.1.0
+      - uses: actions/github-script@v8
+        with:
+          script: |
+            const fs = require('fs')
+            const yaml = require('js-yaml')
+            const config = yaml.load(fs.readFileSync('.github/labels.yml', 'utf8'))
+            const repo = context.repo
+
+            const existing = await github.paginate(github.rest.issues.listLabelsForRepo, repo)
+            const byName = new Map(existing.map((label) => [label.name.toLowerCase(), label]))
+            for (const { name, color, description } of config.labels) {
+              const found = byName.get(name.toLowerCase())
+              if (!found) {
+                await github.rest.issues.createLabel({ ...repo, name, color, description })
+                core.info(`created label ${name}`)
+              } else if (found.name !== name || found.color !== color || (found.description ?? '') !== description) {
+                await github.rest.issues.updateLabel({ ...repo, name: found.name, new_name: name, color, description })
+                core.info(`updated label ${name}`)
+              }
+            }
+            for (const name of config.remove ?? []) {
+              if (byName.has(name.toLowerCase())) {
+                await github.rest.issues.deleteLabel({ ...repo, name: byName.get(name.toLowerCase()).name })
+                core.info(`deleted label ${name}`)
+              }
+            }
+
+            const milestones = await github.paginate(github.rest.issues.listMilestones, { ...repo, state: 'all' })
+            for (const { title, description } of config.milestones ?? []) {
+              const found = milestones.find((m) => m.title === title)
+              if (!found) {
+                await github.rest.issues.createMilestone({ ...repo, title, description })
+                core.info(`created milestone ${title}`)
+              } else if ((found.description ?? '') !== description) {
+                await github.rest.issues.updateMilestone({ ...repo, milestone_number: found.number, description })
+                core.info(`updated milestone ${title}`)
+              }
+            }
