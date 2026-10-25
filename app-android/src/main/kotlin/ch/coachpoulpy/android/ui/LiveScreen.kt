@@ -59,6 +59,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ch.coachpoulpy.android.R
 import ch.coachpoulpy.shared.AppGraph
 import ch.coachpoulpy.shared.BeltStatus
+import ch.coachpoulpy.shared.LiveConnection
 import ch.coachpoulpy.shared.LiveMetric
 import ch.coachpoulpy.shared.LiveModel
 import ch.coachpoulpy.shared.LiveTile
@@ -99,16 +100,18 @@ fun LiveScreen(graph: AppGraph, onManageDevices: () -> Unit, modifier: Modifier 
             Text(stringResource(R.string.tab_live), style = MaterialTheme.typography.headlineMedium, modifier = Modifier.weight(1f))
             ConnectedChip(state.connectedCount, onManageDevices)
         }
-        if (state.connectedCount == 0 && state.recording == null) {
+        if (state.connection == LiveConnection.EMPTY && state.recording == null) {
             NothingConnected(onManageDevices, Modifier.weight(1f))
             return@Column
         }
+        // Added devices still connecting: the view shows read-only, with Poulpy where the controls go.
+        val connecting = state.connection == LiveConnection.CONNECTING && state.recording == null
         if (state.belt == BeltStatus.PAUSED || state.belt == BeltStatus.STOPPED) BeltBanner(state.belt)
         if (state.tiles.isNotEmpty()) LivePanel(state.tiles) else if (state.connectedCount > 0) {
             Text(stringResource(R.string.live_waiting), color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
-        Recorder(state, model)
-        if (state.hasTreadmill) SyncRow(state.syncPause, model::setSyncPause)
+        if (connecting) Connecting(state.connecting) else Recorder(state, model)
+        if (state.hasTreadmill && !connecting) SyncRow(state.syncPause, model::setSyncPause)
     }
     state.summary?.let { SummaryDialog(it, state.units, onDismiss = model::clearSummary) }
 }
@@ -148,6 +151,28 @@ private fun NothingConnected(onManageDevices: () -> Unit, modifier: Modifier) {
             Button(onClick = onManageDevices, modifier = Modifier.padding(top = 8.dp).height(52.dp)) {
                 Text(stringResource(R.string.live_manage_devices))
             }
+        }
+    }
+}
+
+@Composable
+private fun Connecting(names: List<String>) {
+    Surface(
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+    ) {
+        Column(
+            Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            PoulpyLoader(size = 48.dp)
+            Text(
+                if (names.size == 1) stringResource(R.string.live_connecting_one, names.single()) else stringResource(R.string.live_connecting_many),
+                fontWeight = FontWeight.ExtraBold,
+                textAlign = TextAlign.Center,
+            )
         }
     }
 }

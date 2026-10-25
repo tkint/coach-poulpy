@@ -220,6 +220,54 @@ class LiveModelTest {
     }
 
     @Test
+    fun liveIsReadOnlyWhileAnAddedDeviceConnects() = runTest {
+        val memory = MemoryStore()
+        val store = LocalStore(DriverFactory())
+        val nothingAdded = models(FakeCentral(), store, MemoryStore())
+        assertEquals(LiveConnection.EMPTY, nothingAdded.live.state.value.connection)
+
+        addTreadmill(models(FakeCentral(), store, memory))
+        // Next launch, the treadmill is still off: the scan has not seen it yet.
+        val treadmillOff = object : BleCentral by FakeCentral() {
+            override fun scan(): Flow<FoundDevice> = flow { CompletableDeferred<Unit>().await() }
+        }
+        val compiler = TimelineCompiler(WorkoutTypeRegistry(listOf(TreadmillModule)))
+        val settings = SettingsModel(memory, backgroundScope)
+        val devices = DevicesModel(treadmillOff, memory, backgroundScope)
+        val live = LiveModel(devices, settings.state, store, compiler, memory, backgroundScope)
+        devices.connectAutomatically()
+        runCurrent()
+        val connecting = live.state.value
+        assertEquals(LiveConnection.CONNECTING, connecting.connection)
+        assertEquals(listOf("Test treadmill"), connecting.connecting)
+        // The tiles a treadmill usually fills, waiting with a dash.
+        assertEquals(
+            listOf(LiveMetric.SPEED, LiveMetric.PACE, LiveMetric.DISTANCE, LiveMetric.STEPS_ESTIMATED),
+            connecting.tiles.map { it.metric },
+        )
+        assertEquals(listOf(null, null, null, null), connecting.tiles.map { it.value })
+        live.startRecording("free-run")
+        assertNull(live.state.value.recording)
+
+        // It never showed up: back to the empty state.
+        advanceTimeBy(31.seconds)
+        assertEquals(LiveConnection.EMPTY, live.state.value.connection)
+        assertEquals(emptyList(), live.state.value.connecting)
+        assertEquals(emptyList(), live.state.value.tiles)
+    }
+
+    @Test
+    fun liveTurnsLiveAsSoonAsADeviceConnects() = runTest {
+        val central = FakeCentral()
+        val m = models(central, LocalStore(DriverFactory()))
+        addTreadmill(m)
+        assertEquals(LiveConnection.CONNECTED, m.live.state.value.connection)
+        assertEquals(emptyList(), m.live.state.value.connecting)
+        m.live.startRecording("free-run")
+        assertNotNull(m.live.state.value.recording)
+    }
+
+    @Test
     fun recordingFollowsTheBeltWhenSyncIsOn() = runTest {
         val central = FakeCentral()
         val m = models(central, LocalStore(DriverFactory()))
