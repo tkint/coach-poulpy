@@ -2,6 +2,8 @@
 
 A personal training platform: build workouts, follow plans, run guided sessions and track progress. The first release is a guest-only mobile app for Android and iPhone that keeps everything on the phone. The backend and website join later as a sync and sharing layer over the same Kotlin domain.
 
+The brand, design system and architecture are published at [tkint.github.io/coach-poulpy](https://tkint.github.io/coach-poulpy/), built from `docs/`, `CONTEXT.md` and `CONTRIBUTING.md` by the VitePress project in `site/`. How work moves from an idea to a merged PR is in [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## Layout
 
 | Path | What it is |
@@ -21,6 +23,8 @@ A personal training platform: build workouts, follow plans, run guided sessions 
 | `web` | Vue 3 + TypeScript website (placeholder) |
 | `build-logic` | Gradle convention plugins: `coachpoulpy.kmp-library` (Android, iOS, JVM) and `coachpoulpy.kmp-web-library` (the same plus JavaScript, for the modules the website runs) |
 | `design` | Brand tokens (`tokens.json`) and the script that generates the Android, iOS and web theme files from them |
+| `docs` | Architecture, ADRs, design system and brand, read by agents and published on the docs site |
+| `site` | The docs site (VitePress), deployed to GitHub Pages by `.github/workflows/pages.yml` |
 | `tools/compose.yaml` | Optional local Postgres, not needed yet |
 
 Library versions live in `gradle/libs.versions.toml`. Package and app id: `ch.coachpoulpy`.

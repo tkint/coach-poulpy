@@ -1,0 +1,8 @@
+node_modules/
+.vitepress/cache/
+.vitepress/dist/
+# Copied from the repo by copy-docs.mjs before each build.
+/CONTEXT.md
+/CONTRIBUTING.md
+/docs/
+public/poulpy.svg
