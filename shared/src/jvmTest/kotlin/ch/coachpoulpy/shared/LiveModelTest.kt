@@ -567,6 +567,8 @@ class LiveModelTest {
         val store = LocalStore(DriverFactory())
         val m = models(central, store, memory)
         addTreadmill(m)
+        // Not following the belt, so Start records at once.
+        m.live.setFollowTreadmill(false)
         m.live.select("exercise:run")
         assertEquals(listOf("Walk", "Brisk walk", "Run"), m.live.state.value.quickPicks.map { it.name })
 
