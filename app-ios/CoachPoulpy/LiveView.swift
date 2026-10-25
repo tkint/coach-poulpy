@@ -345,12 +345,18 @@ struct LiveView: View {
     /// A square button next to Start: on, the recording follows the treadmill.
     private var followToggle: some View {
         let on = state.followTreadmill
+        // Filled when on, outlined and crossed out when off, so the state reads at a glance.
         return Button { model.setFollowTreadmill(on: !on) } label: {
             Image(systemName: "arrow.triangle.2.circlepath")
                 .font(.system(size: 20, weight: .bold))
-                .foregroundStyle(on ? PoulpyColor.onPrimaryContainer : PoulpyColor.onSurfaceVariant)
+                .foregroundStyle(on ? PoulpyColor.onPrimary : PoulpyColor.onSurfaceVariant)
+                .overlay {
+                    if !on {
+                        Capsule().fill(PoulpyColor.onSurfaceVariant).frame(width: 2.5, height: 30).rotationEffect(.degrees(-45))
+                    }
+                }
                 .frame(width: 52, height: 52)
-                .background(on ? PoulpyColor.primaryContainer : PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.md))
+                .background(on ? PoulpyColor.primary : PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.md))
                 .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.md).stroke(on ? Color.clear : PoulpyColor.outline, lineWidth: 1.5))
         }
         .buttonStyle(.plain)

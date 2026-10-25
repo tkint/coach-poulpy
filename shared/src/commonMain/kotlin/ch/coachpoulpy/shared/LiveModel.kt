@@ -404,7 +404,7 @@ class LiveModel(
      */
     fun startRecording(key: String) {
         if (recording != null || waiting != null || _state.value.connection == LiveConnection.CONNECTING) return
-        val choice = (_state.value.walking + _state.value.running + _state.value.workouts).firstOrNull { it.key == key } ?: return
+        val choice = with(_state.value) { recent + walking + running + workouts }.firstOrNull { it.key == key } ?: return
         if (_state.value.followTreadmill && devices.hasTreadmill && _state.value.belt != BeltStatus.MOVING) {
             waiting = key
             _state.update { it.copy(waitingFor = choice, summary = null) }

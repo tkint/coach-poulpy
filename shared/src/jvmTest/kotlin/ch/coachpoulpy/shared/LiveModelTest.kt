@@ -590,4 +590,18 @@ class LiveModelTest {
         assertEquals(listOf("Easy run"), m.live.state.value.running.map { it.name })
         assertEquals("exercise:run,gone,exercise:walk", memory.getString("live.recent"))
     }
+
+    @Test
+    fun aRecentChoiceWaitsForTheTreadmillToo() = runTest {
+        val central = FakeCentral()
+        val memory = MemoryStore()
+        memory.putString("live.recent", "exercise:walk")
+        val m = models(central, LocalStore(DriverFactory()), memory)
+        addTreadmill(m)
+        runCurrent()
+        // Walk shows only under Recent, and Start still finds it.
+        assertEquals(listOf("exercise:walk"), m.live.state.value.recent.map { it.key })
+        m.live.startRecording("exercise:walk")
+        assertEquals("exercise:walk", m.live.state.value.waitingFor?.key)
+    }
 }

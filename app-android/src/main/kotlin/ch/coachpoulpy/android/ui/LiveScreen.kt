@@ -31,6 +31,7 @@ import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Sync
+import androidx.compose.material.icons.filled.SyncDisabled
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -455,8 +456,9 @@ private fun FollowToggle(on: Boolean, onChange: (Boolean) -> Unit) {
     val colors = MaterialTheme.colorScheme
     Surface(
         shape = RoundedCornerShape(PoulpyRadius.md),
-        color = if (on) colors.primaryContainer else colors.surface,
-        contentColor = if (on) colors.onPrimaryContainer else colors.onSurfaceVariant,
+        // Filled when on, outlined with a crossed-out icon when off, so the state reads at a glance.
+        color = if (on) colors.primary else colors.surface,
+        contentColor = if (on) colors.onPrimary else colors.onSurfaceVariant,
         border = if (on) null else BorderStroke(1.5.dp, colors.outline),
         modifier = Modifier
             .size(52.dp)
@@ -464,7 +466,7 @@ private fun FollowToggle(on: Boolean, onChange: (Boolean) -> Unit) {
             .toggleable(value = on, role = Role.Switch, onValueChange = onChange),
     ) {
         Box(contentAlignment = Alignment.Center) {
-            Icon(Icons.Filled.Sync, contentDescription = stringResource(R.string.live_follow_treadmill))
+            Icon(if (on) Icons.Filled.Sync else Icons.Filled.SyncDisabled, contentDescription = stringResource(R.string.live_follow_treadmill))
         }
     }
 }
