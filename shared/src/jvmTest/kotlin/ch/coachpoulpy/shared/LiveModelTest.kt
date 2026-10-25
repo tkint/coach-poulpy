@@ -16,6 +16,7 @@ import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
@@ -67,7 +68,7 @@ class LiveModelTest {
         assertEquals("Test treadmill", m.live.state.value.tiles[0].source)
         assertEquals(BeltStatus.MOVING, m.live.state.value.belt)
 
-        m.live.startRecording("free-run")
+        m.live.startRecording("exercise:walk")
         for (i in 1..10) {
             advanceTimeBy(1.seconds)
             central.treadmill.send(speedCentiKmh = 1000, meters = 1_000 + 3 * i, bpm = 130)
@@ -246,7 +247,7 @@ class LiveModelTest {
             connecting.tiles.map { it.metric },
         )
         assertEquals(listOf(null, null, null, null), connecting.tiles.map { it.value })
-        live.startRecording("free-run")
+        live.startRecording("exercise:walk")
         assertNull(live.state.value.recording)
 
         // It never showed up: back to the empty state.
@@ -285,7 +286,7 @@ class LiveModelTest {
         addTreadmill(m)
         assertEquals(LiveConnection.CONNECTED, m.live.state.value.connection)
         assertEquals(emptyList(), m.live.state.value.connecting)
-        m.live.startRecording("free-run")
+        m.live.startRecording("exercise:walk")
         assertNotNull(m.live.state.value.recording)
     }
 
@@ -296,7 +297,7 @@ class LiveModelTest {
         addTreadmill(m)
         central.treadmill.send(speedCentiKmh = 800, meters = 0, bpm = 120)
         runCurrent()
-        m.live.startRecording("free-run")
+        m.live.startRecording("exercise:walk")
         runCurrent()
 
         central.treadmill.send(speedCentiKmh = 0, meters = 10, bpm = 120)
@@ -321,7 +322,7 @@ class LiveModelTest {
         addTreadmill(m)
         central.treadmill.send(speedCentiKmh = 0, meters = 0, bpm = 120)
         runCurrent()
-        m.live.startRecording("free-run") // the belt is still: the timer waits
+        m.live.startRecording("exercise:walk") // the belt is still: the timer waits
         runCurrent()
         assertEquals(true, m.live.state.value.recording?.paused)
 
@@ -333,5 +334,68 @@ class LiveModelTest {
         central.treadmill.send(speedCentiKmh = 700, meters = 2, bpm = 120)
         runCurrent()
         assertEquals(true, m.live.state.value.recording?.paused)
+    }
+
+    @Test
+    fun offersEveryTreadmillWalkAndRunThenTheWorkouts() = runTest {
+        val m = models(FakeCentral(), LocalStore(DriverFactory()))
+        runCurrent()
+        val state = m.live.state.value
+        assertEquals(
+            listOf("exercise:walk-with-support", "exercise:gentle-walk", "exercise:walk", "exercise:brisk-walk"),
+            state.walking.map { it.key },
+        )
+        assertEquals(listOf("exercise:easy-run", "exercise:run"), state.running.map { it.key })
+        assertEquals("demo-intervals", state.workouts.first().key)
+        assertEquals(listOf("Walk", "Brisk walk", "Easy run"), state.quickPicks.map { it.name })
+        assertEquals("exercise:walk", state.selected)
+        assertEquals("Your everyday pace", state.walking[2].note)
+    }
+
+    @Test
+    fun theChoicesAreInTheUsersLanguage() = runTest {
+        val central = FakeCentral()
+        val memory = MemoryStore()
+        val clock = object : Clock {
+            override fun now() = Instant.fromEpochMilliseconds(1_700_000_000_000 + testScheduler.currentTime)
+        }
+        val settings = SettingsModel(memory, backgroundScope)
+        val devices = DevicesModel(central, memory, backgroundScope, clock)
+        val compiler = TimelineCompiler(WorkoutTypeRegistry(listOf(TreadmillModule)))
+        val live = LiveModel(devices, settings.state, LocalStore(DriverFactory()), compiler, memory, backgroundScope, clock, languageCode = "fr")
+        runCurrent()
+        assertEquals(listOf("Marche", "Marche rapide", "Course facile"), live.state.value.quickPicks.map { it.name })
+        assertEquals("Fractionné de démo", live.state.value.workouts.first().name)
+    }
+
+    @Test
+    fun aPickFromMoreTakesTheLastChip() {
+        val available = listOf("exercise:walk", "exercise:brisk-walk", "exercise:easy-run", "exercise:run", "demo-intervals")
+        val recents = listOf("exercise:walk", "exercise:brisk-walk", "exercise:easy-run")
+        assertEquals(recents, LiveModel.quickPicks(recents, "exercise:brisk-walk", available))
+        assertEquals(listOf("exercise:walk", "exercise:brisk-walk", "exercise:run"), LiveModel.quickPicks(recents, "exercise:run", available))
+        // A recent that is gone, such as a deleted workout, gives its place to a default.
+        assertEquals(recents, LiveModel.quickPicks(listOf("gone", "exercise:walk"), "exercise:walk", available))
+    }
+
+    @Test
+    fun aFreeRecordingKeepsTheExerciseAndBecomesARecentPick() = runTest {
+        val central = FakeCentral()
+        val memory = MemoryStore()
+        val store = LocalStore(DriverFactory())
+        val m = models(central, store, memory)
+        addTreadmill(m)
+        m.live.select("exercise:run")
+        assertEquals(listOf("Walk", "Brisk walk", "Run"), m.live.state.value.quickPicks.map { it.name })
+
+        m.live.startRecording("exercise:run")
+        advanceTimeBy(5.seconds)
+        m.live.stopRecording()
+        runCurrent()
+
+        val saved = store.finishedSessions().first().single()
+        assertEquals("Run", saved.title)
+        assertEquals(listOf("Run", "Walk", "Brisk walk"), m.live.state.value.quickPicks.map { it.name })
+        assertEquals("exercise:run,exercise:walk,exercise:brisk-walk", memory.getString("live.recent"))
     }
 }

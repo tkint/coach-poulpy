@@ -128,8 +128,6 @@
 "metric.heart.rate" = "Fréquence cardiaque";
 "metric.energy" = "Énergie";
 "metric.power" = "Puissance";
-"treadmill.plan.free.run" = "Course libre";
-"treadmill.plan.demo" = "Fractionné de démo (3 min d’échauffement, 3 × 1 min rapide / 1 min facile, 200 m pour finir)";
 "treadmill.start" = "Démarrer l’enregistrement";
 "treadmill.pause" = "Pause";
 "treadmill.resume" = "Reprendre";
@@ -186,6 +184,11 @@
 "live.empty.body" = "Allumez votre tapis, votre pod ou votre ceinture. Poulpy se connecte à ceux que vous avez ajoutés dès qu’ils sont à proximité.";
 "live.manage.devices" = "Gérer les appareils";
 "live.sync.belt" = "Pause et reprise avec le tapis";
+"live.what.doing" = "Que faites-vous ?";
+"live.more" = "Plus";
+"live.group.walking" = "Marche";
+"live.group.running" = "Course";
+"live.group.workouts" = "Suivre une séance";
 "live.recording" = "Enregistrement";
 "live.waiting" = "En attente des premières mesures…";
 "live.connecting.one %@" = "Connexion à %@…";

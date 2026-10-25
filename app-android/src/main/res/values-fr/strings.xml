@@ -157,8 +157,6 @@
     <string name="metric_heart_rate">Fréquence cardiaque</string>
     <string name="metric_energy">Énergie</string>
     <string name="metric_power">Puissance</string>
-    <string name="treadmill_plan_free_run">Course libre</string>
-    <string name="treadmill_plan_demo">Fractionné de démo (3 min d’échauffement, 3 × 1 min rapide / 1 min facile, 200 m pour finir)</string>
     <string name="treadmill_start">Démarrer l’enregistrement</string>
     <string name="treadmill_pause">Pause</string>
     <string name="treadmill_resume">Reprendre</string>
@@ -233,6 +231,11 @@
     <string name="live_waiting">En attente des premières mesures…</string>
     <string name="live_connecting_one">Connexion à %1$s…</string>
     <string name="live_connecting_many">Connexion à vos appareils…</string>
+    <string name="live_what_doing">Que faites-vous ?</string>
+    <string name="live_more">Plus</string>
+    <string name="live_group_walking">Marche</string>
+    <string name="live_group_running">Course</string>
+    <string name="live_group_workouts">Suivre une séance</string>
     <string name="metric_cadence">Cadence</string>
     <string name="settings_general">Général</string>
     <string name="settings_devices">Appareils</string>

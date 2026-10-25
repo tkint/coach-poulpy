@@ -56,7 +56,7 @@ extension AppGraph {
     }
 
     func observedLive() -> Observed<LiveModel, LiveUiState> {
-        let model = live(memory: UserDefaultsStore())
+        let model = live(memory: UserDefaultsStore(), languageCode: Language.code)
         return Observed(model, current: model.state.value as! LiveUiState, watch: model.watch, close: { _ in })
     }
 }

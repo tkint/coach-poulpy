@@ -128,8 +128,6 @@
 "metric.heart.rate" = "Heart rate";
 "metric.energy" = "Energy";
 "metric.power" = "Power";
-"treadmill.plan.free.run" = "Free run";
-"treadmill.plan.demo" = "Demo intervals (3 min warm-up, 3 × 1 min fast / 1 min easy, 200 m finish)";
 "treadmill.start" = "Start recording";
 "treadmill.pause" = "Pause";
 "treadmill.resume" = "Resume";
@@ -186,6 +184,11 @@
 "live.empty.body" = "Switch on your treadmill, pod or band. Poulpy connects to the ones you added as soon as they are nearby.";
 "live.manage.devices" = "Manage devices";
 "live.sync.belt" = "Pause and resume with the belt";
+"live.what.doing" = "What are you doing?";
+"live.more" = "More";
+"live.group.walking" = "Walking";
+"live.group.running" = "Running";
+"live.group.workouts" = "Follow a workout";
 "live.recording" = "Recording";
 "live.waiting" = "Waiting for the first numbers…";
 "live.connecting.one %@" = "Connecting to %@…";

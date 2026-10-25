@@ -7,7 +7,7 @@ struct LiveView: View {
     @StateObject private var live: Observed<LiveModel, LiveUiState>
     @StateObject private var devices: Observed<DevicesModel, DevicesUiState>
     @StateObject private var bluetooth = BluetoothGate()
-    @State private var selectedPlan = "free-run"
+    @State private var choosing = false
     let onManageDevices: () -> Void
 
     init(graph: AppGraph, onManageDevices: @escaping () -> Void) {
@@ -197,7 +197,7 @@ struct LiveView: View {
             if let recording = state.recording {
                 recordingControls(recording)
             } else {
-                planPicker
+                choicePicker
             }
         }
         .padding(.horizontal, 14)
@@ -207,34 +207,60 @@ struct LiveView: View {
         .overlay(RoundedRectangle(cornerRadius: 20).stroke(PoulpyColor.outline))
     }
 
-    private var planPicker: some View {
+    private var choicePicker: some View {
         VStack(alignment: .leading, spacing: 10) {
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
-                    ForEach(state.plans, id: \.key) { plan in
-                        let on = plan.key == selectedPlan
-                        Button { selectedPlan = plan.key } label: {
-                            Text(planName(plan))
-                                .font(.custom(PoulpyFontFace.nunitoBold, size: 15, relativeTo: .subheadline))
-                                .foregroundStyle(on ? PoulpyColor.onPrimaryContainer : PoulpyColor.onSurfaceVariant)
-                                .padding(.horizontal, 14)
-                                .frame(height: 36)
-                                .background(on ? PoulpyColor.primaryContainer : Color.clear, in: Capsule())
-                                .overlay(Capsule().stroke(on ? Color.clear : PoulpyColor.outline))
-                        }
-                        .accessibilityAddTraits(on ? .isSelected : [])
+            Text(L("live.what.doing").uppercased())
+                .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 13, relativeTo: .caption))
+                .tracking(1)
+                .foregroundStyle(PoulpyColor.onSurfaceVariant)
+                .accessibilityAddTraits(.isHeader)
+            FlowLayout(spacing: 8) {
+                ForEach(state.quickPicks, id: \.key) { choice in
+                    let on = choice.key == state.selected
+                    Button { model.select(key: choice.key) } label: {
+                        Text(choice.name)
+                            .font(.custom(PoulpyFontFace.nunitoBold, size: 15, relativeTo: .subheadline))
+                            .foregroundStyle(on ? PoulpyColor.onPrimaryContainer : PoulpyColor.onSurfaceVariant)
+                            .padding(.horizontal, 14)
+                            .frame(height: 36)
+                            .background(on ? PoulpyColor.primaryContainer : Color.clear, in: Capsule())
+                            .overlay(Capsule().stroke(on ? Color.clear : PoulpyColor.outline))
                     }
+                    .accessibilityAddTraits(on ? .isSelected : [])
+                }
+                Button { choosing = true } label: {
+                    HStack(spacing: 4) {
+                        Text("live.more")
+                        Image(systemName: "chevron.down").font(.system(size: 12, weight: .bold))
+                    }
+                    .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 15, relativeTo: .subheadline))
+                    .foregroundStyle(PoulpyColor.onPrimaryContainer)
+                    .padding(.horizontal, 14)
+                    .frame(height: 36)
+                    .overlay(Capsule().stroke(PoulpyColor.outline))
                 }
             }
-            if selectedPlan == "demo-intervals" {
-                Text("treadmill.plan.demo").font(.poulpy(.footnote)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+            .buttonStyle(.plain)
+            if let note = selectedChoice?.note, !note.isEmpty {
+                Text(note).font(.poulpy(.footnote)).foregroundStyle(PoulpyColor.onSurfaceVariant)
             }
-            Button { model.startRecording(planKey: selectedPlan) } label: {
+            Button { model.startRecording(key: state.selected) } label: {
                 Text("treadmill.start").font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: 52)
             }
             .buttonStyle(.borderedProminent)
             .buttonBorderShape(.capsule)
         }
+        .sheet(isPresented: $choosing) {
+            ChoiceSheet(state: state) { key in
+                model.select(key: key)
+                choosing = false
+            }
+            .presentationDetents([.large])
+        }
+    }
+
+    private var selectedChoice: LiveChoice? {
+        (state.quickPicks + state.walking + state.running + state.workouts).first { $0.key == state.selected }
     }
 
     private func recordingControls(_ recording: RecordingUi) -> some View {
@@ -308,13 +334,6 @@ struct LiveView: View {
         .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.md))
         .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.md).stroke(PoulpyColor.outline))
     }
-
-    private func planName(_ plan: PlanOption) -> String {
-        switch plan.key {
-        case "free-run": return L("treadmill.plan.free.run")
-        case "demo-intervals": return L("treadmill.plan.demo").components(separatedBy: " (").first ?? plan.name
-        default: return plan.name
-        }
     }
 }
 
@@ -409,4 +428,62 @@ private func decimal(_ value: Double, _ decimals: Int) -> String {
 private func clock(_ seconds: Int64) -> String {
     let h = seconds / 3600, m = (seconds % 3600) / 60, s = seconds % 60
     return h > 0 ? String(format: "%lld:%02lld:%02lld", h, m, s) : String(format: "%lld:%02lld", m, s)
+}
+
+/// "More": every treadmill walk and run, then the workouts, one tap to pick.
+private struct ChoiceSheet: View {
+    let state: LiveUiState
+    let pick: (String) -> Void
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("live.what.doing").font(PoulpyFont.headline).accessibilityAddTraits(.isHeader)
+                group("live.group.walking", state.walking)
+                group("live.group.running", state.running)
+                group("live.group.workouts", state.workouts)
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 24)
+            .padding(.bottom, 28)
+        }
+        .background(PoulpyColor.surface)
+    }
+
+    @ViewBuilder
+    private func group(_ title: String, _ choices: [LiveChoice]) -> some View {
+        if !choices.isEmpty {
+            Text(L(title).uppercased())
+                .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 13, relativeTo: .caption))
+                .tracking(1)
+                .foregroundStyle(PoulpyColor.onSurfaceVariant)
+                .padding(.top, 16)
+                .padding(.bottom, 4)
+                .accessibilityAddTraits(.isHeader)
+            ForEach(choices, id: \.key) { choice in
+                let on = choice.key == state.selected
+                Button { pick(choice.key) } label: {
+                    HStack(spacing: 12) {
+                        VStack(alignment: .leading, spacing: 0) {
+                            Text(choice.name).font(.poulpy(.callout).weight(.heavy)).foregroundStyle(PoulpyColor.onSurface)
+                            if !choice.note.isEmpty {
+                                Text(choice.note).font(.poulpy(.footnote)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+                            }
+                        }
+                        Spacer()
+                        Image(systemName: on ? "largecircle.fill.circle" : "circle")
+                            .font(.system(size: 22))
+                            .foregroundStyle(on ? PoulpyColor.primary : PoulpyColor.outline)
+                            .accessibilityHidden(true)
+                    }
+                    .padding(.horizontal, 10)
+                    .frame(minHeight: 52)
+                    .background(on ? PoulpyColor.primaryContainer : Color.clear, in: RoundedRectangle(cornerRadius: PoulpyRadius.md))
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityAddTraits(on ? .isSelected : [])
+            }
+        }
+    }
 }

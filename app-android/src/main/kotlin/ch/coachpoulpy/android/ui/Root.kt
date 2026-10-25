@@ -103,6 +103,7 @@ fun CoachPoulpyRoot(graph: AppGraph) {
                 )
                 Tab.LIVE -> LiveScreen(
                     graph,
+                    language,
                     onManageDevices = {
                         settingsSection = SettingsSection.DEVICES
                         tab = Tab.SETTINGS

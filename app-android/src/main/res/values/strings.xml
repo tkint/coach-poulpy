@@ -158,8 +158,6 @@
     <string name="metric_heart_rate">Heart rate</string>
     <string name="metric_energy">Energy</string>
     <string name="metric_power">Power</string>
-    <string name="treadmill_plan_free_run">Free run</string>
-    <string name="treadmill_plan_demo">Demo intervals (3 min warm-up, 3 × 1 min fast / 1 min easy, 200 m finish)</string>
     <string name="treadmill_start">Start recording</string>
     <string name="treadmill_pause">Pause</string>
     <string name="treadmill_resume">Resume</string>
@@ -231,6 +229,11 @@
     <string name="live_waiting">Waiting for the first numbers…</string>
     <string name="live_connecting_one">Connecting to %1$s…</string>
     <string name="live_connecting_many">Connecting to your devices…</string>
+    <string name="live_what_doing">What are you doing?</string>
+    <string name="live_more">More</string>
+    <string name="live_group_walking">Walking</string>
+    <string name="live_group_running">Running</string>
+    <string name="live_group_workouts">Follow a workout</string>
     <string name="metric_cadence">Cadence</string>
     <string name="settings_general">General</string>
     <string name="settings_devices">Devices</string>
