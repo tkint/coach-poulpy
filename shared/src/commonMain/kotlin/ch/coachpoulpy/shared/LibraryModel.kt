@@ -33,24 +33,32 @@ data class LibraryRow(
     val noteMillis: Long?,
     /** When it was last done, for sorting; null if never. */
     val lastDoneMillis: Long?,
+    /** The next planned day at midnight, for sorting; null if none is coming. */
+    val nextPlannedMillis: Long? = null,
 )
 
 /** A kind of workout the list can be narrowed to, only offered when a saved workout has it. */
 data class KindFilter(val type: WorkoutType, val label: String)
 
-enum class LibrarySort { RECENT, ALPHABETICAL }
+/** Recently done first, the soonest planned day first (unplanned after), or by name. */
+enum class LibrarySort { RECENT, NEXT_PLANNED, ALPHABETICAL }
 
 data class LibraryState(
     val loaded: Boolean = false,
     val rows: List<LibraryRow> = emptyList(),
     val kinds: List<KindFilter> = emptyList(),
+    /** What [LibraryModel.filter] searches; a new one each time, so an edited workout always reaches the state. */
+    val search: WorkoutSearch = WorkoutSearch.EMPTY,
 )
+
+/** The workouts as shown, with the count line over them: "7 workouts", or "2 matches" while searching. */
+data class WorkoutListing(val rows: List<LibraryRow>, val countLabel: String, val searching: Boolean)
 
 /** The workouts saved on this phone, with or without a day. */
 class LibraryModel internal constructor(
     store: LocalStore,
     compiler: TimelineCompiler,
-    catalog: Catalog,
+    private val catalog: Catalog,
     languageCode: String,
     private val clock: Clock = Clock.System,
     private val zone: TimeZone = TimeZone.currentSystemDefault(),
@@ -70,16 +78,25 @@ class LibraryModel internal constructor(
 
     fun close() = scope.cancel()
 
-    /** Rows matching [query] (in the name) and [type], most recently done first or by name. */
-    fun filter(state: LibraryState, query: String = "", type: WorkoutType? = null, sort: LibrarySort = LibrarySort.RECENT): List<LibraryRow> {
-        val needle = query.trim().lowercase()
-        val rows = state.rows
-            .filter { needle.isEmpty() || needle in it.name.lowercase() }
-            .filter { type == null || it.type == type }
-        return when (sort) {
-            LibrarySort.ALPHABETICAL -> rows.sortedBy { it.name.lowercase() }
-            LibrarySort.RECENT -> rows.sortedWith(compareByDescending<LibraryRow> { it.lastDoneMillis ?: Long.MIN_VALUE }.thenBy { it.name.lowercase() })
+    /**
+     * Rows of [type] matching [query] ([WorkoutSearch]: the name, the type, or an exercise
+     * inside). While searching, the best matches come first and [sort] orders the ties.
+     */
+    fun filter(state: LibraryState, query: String = "", type: WorkoutType? = null, sort: LibrarySort = LibrarySort.RECENT): WorkoutListing {
+        val ranks = state.search.rank(query)
+        val order = when (sort) {
+            LibrarySort.ALPHABETICAL -> compareBy<LibraryRow> { SearchText.fold(it.name) }
+            LibrarySort.RECENT -> compareByDescending<LibraryRow> { it.lastDoneMillis ?: Long.MIN_VALUE }.thenBy { SearchText.fold(it.name) }
+            LibrarySort.NEXT_PLANNED -> compareBy<LibraryRow> { it.nextPlannedMillis ?: Long.MAX_VALUE }
+                .thenByDescending { it.lastDoneMillis ?: Long.MIN_VALUE }
+                .thenBy { SearchText.fold(it.name) }
         }
+        val rows = state.rows
+            .filter { type == null || it.type == type }
+            .filter { ranks == null || it.id in ranks }
+            .sortedWith(if (ranks == null) order else compareBy<LibraryRow> { ranks.getValue(it.id) }.then(order))
+        val countLabel = if (ranks == null) labels.workouts(rows.size) else labels.matches(rows.size)
+        return WorkoutListing(rows, countLabel, searching = ranks != null)
     }
 
     private fun build(workouts: List<Workout>, plans: List<PlannedWorkout>, sessions: List<StoredSession>): LibraryState {
@@ -99,9 +116,12 @@ class LibraryModel internal constructor(
                 last != null -> LibraryNote.LAST_DONE to last.toEpochMilliseconds()
                 else -> LibraryNote.NOT_DONE_YET to null
             }
-            LibraryRow(workout.id.value, workout.name, workout.type, facts.details(workout), note, noteMillis, last?.toEpochMilliseconds())
+            LibraryRow(
+                workout.id.value, workout.name, workout.type, facts.details(workout), note, noteMillis, last?.toEpochMilliseconds(),
+                nextPlannedMillis = plan?.day?.startMillis(zone),
+            )
         }
         val kinds = workouts.map { it.type }.distinct().sortedBy { it.ordinal }.map { KindFilter(it, labels.workoutType(it)) }
-        return LibraryState(loaded = true, rows = rows, kinds = kinds)
+        return LibraryState(loaded = true, rows = rows, kinds = kinds, search = WorkoutSearch.of(workouts, catalog))
     }
 }

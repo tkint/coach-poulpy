@@ -128,6 +128,8 @@ internal class Labels(private val languageCode: String) {
 
     fun exercises(count: Int) = if (count == 1) t("1 exercise", "1 exercice") else t("$count exercises", "$count exercices")
 
+    fun workouts(count: Int) = if (count == 1) t("1 workout", "1 séance") else t("$count workouts", "$count séances")
+
     fun matches(count: Int) = if (count == 1) t("1 match", "1 résultat") else t("$count matches", "$count résultats")
 
     fun exercisesYouCanDo(count: Int) =
