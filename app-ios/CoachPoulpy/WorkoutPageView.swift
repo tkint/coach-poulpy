@@ -57,6 +57,7 @@ struct WorkoutPageView: View {
                     }
                 }
                 .padding(.horizontal, 20)
+                .padding(.top, 12)
                 .padding(.bottom, PoulpySpace.lg)
             }
         }

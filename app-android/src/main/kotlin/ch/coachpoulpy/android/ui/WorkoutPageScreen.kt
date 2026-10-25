@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -30,6 +31,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -39,6 +41,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -87,6 +90,10 @@ fun WorkoutPageScreen(
         topBar = {
             TopAppBar(
                 title = { },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    scrolledContainerColor = MaterialTheme.colorScheme.background,
+                ),
                 navigationIcon = { BackButton(onBack) },
                 actions = {
                     if (state.found) {
@@ -104,17 +111,20 @@ fun WorkoutPageScreen(
         },
         bottomBar = {
             if (state.found) {
-                Surface(color = MaterialTheme.colorScheme.surface, tonalElevation = 2.dp) {
-                    Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        if (state.editable) {
-                            OutlinedButton(onClick = onEdit, modifier = Modifier.weight(1f).height(52.dp)) {
-                                Icon(Icons.Filled.Edit, contentDescription = null)
-                                Text(stringResource(R.string.action_edit), fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 6.dp))
+                Surface(color = MaterialTheme.colorScheme.surface) {
+                    Column {
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                        Row(Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = 20.dp, vertical = 12.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            if (state.editable) {
+                                OutlinedButton(onClick = onEdit, modifier = Modifier.weight(1f).height(52.dp)) {
+                                    Icon(Icons.Filled.Edit, contentDescription = null)
+                                    Text(stringResource(R.string.action_edit), fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 6.dp))
+                                }
                             }
-                        }
-                        Button(onClick = onStart, modifier = Modifier.weight(1.6f).height(52.dp)) {
-                            Icon(Icons.Filled.PlayArrow, contentDescription = null)
-                            Text(stringResource(R.string.workout_start), fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 6.dp))
+                            Button(onClick = onStart, modifier = Modifier.weight(1.6f).height(52.dp)) {
+                                Icon(Icons.Filled.PlayArrow, contentDescription = null)
+                                Text(stringResource(R.string.workout_start), fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 6.dp))
+                            }
                         }
                     }
                 }
@@ -123,7 +133,7 @@ fun WorkoutPageScreen(
     ) { padding ->
         if (!state.found) return@Scaffold
         Column(
-            Modifier.padding(padding).fillMaxSize().verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 20.dp, bottom = 16.dp),
+            Modifier.padding(padding).fillMaxSize().verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 20.dp, top = 12.dp, bottom = 16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
