@@ -82,6 +82,17 @@ class LocalStoreTest {
     }
 
     @Test
+    fun variationGroupsAreReplacedWithEachCatalogVersion() {
+        val store = LocalStore(DriverFactory())
+        val squat = listOf(ExerciseSlug("chair-squat"), ExerciseSlug("squat"))
+        store.replaceCatalog(1, listOf(exercise("chair-squat"), exercise("squat")), listOf(squat))
+        assertEquals(listOf(squat), store.catalogVariationGroups())
+
+        store.replaceCatalog(2, listOf(exercise("chair-squat"), exercise("squat")))
+        assertEquals(0, store.catalogVariationGroups().size)
+    }
+
+    @Test
     fun databaseFromTheFirstBuildGainsTheCatalogTables() {
         val driver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
         driver.execute(null, "CREATE TABLE workout_version (id TEXT NOT NULL, version INTEGER NOT NULL, type TEXT NOT NULL, name TEXT NOT NULL, content TEXT NOT NULL, created_at INTEGER NOT NULL, PRIMARY KEY (id, version))", 0)
@@ -96,8 +107,9 @@ class LocalStoreTest {
         val old = db.executionQueries.finished().executeAsOne()
         assertEquals("old", old.id)
         assertNull(old.summary)
-        // The migrations reach the planning table too.
+        // The migrations reach the planning and variation tables too.
         assertEquals(0, db.plannedWorkoutQueries.plans().executeAsList().size)
+        assertEquals(0, db.catalogEntryQueries.variationGroups().executeAsList().size)
     }
 
     @Test

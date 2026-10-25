@@ -17,6 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -144,7 +145,10 @@ fun CoachPoulpyRoot(graph: AppGraph) {
                         route = "exercise:$it"
                     },
                 )
-                "exercise" -> ExerciseDetailScreen(graph, language, slug = arg, onBack = close)
+                // A variation replaces the page in place, so back still leads where this page came from.
+                "exercise" -> key(arg) {
+                    ExerciseDetailScreen(graph, language, slug = arg, onBack = close, onOpenExercise = { route = "exercise:$it" })
+                }
                 "session" -> SessionDetailScreen(graph, language, sessionId = arg, onBack = close)
                 "device" -> DeviceScreen(graph, key = arg, onBack = close, onSources = { route = "device-sources" })
                 else -> LaunchedEffect(current) { close() }

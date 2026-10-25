@@ -53,6 +53,9 @@
 "exercise.equipment" = "Matériel";
 "exercise.how" = "Comment faire";
 "exercise.per.side" = "Se fait un côté après l’autre.";
+"exercise.variations" = "Variantes";
+"exercise.variations.hint" = "De la plus facile à la plus difficile.";
+"exercise.variation.current" = "Celle-ci";
 
 "builder.new.title" = "Nouvelle séance";
 "builder.edit.title" = "Modifier la séance";

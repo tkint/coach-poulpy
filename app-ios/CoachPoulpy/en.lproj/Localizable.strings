@@ -53,6 +53,9 @@
 "exercise.equipment" = "Equipment";
 "exercise.how" = "How to do it";
 "exercise.per.side" = "Done one side at a time.";
+"exercise.variations" = "Variations";
+"exercise.variations.hint" = "Easiest first, hardest last.";
+"exercise.variation.current" = "This one";
 
 "builder.new.title" = "New workout";
 "builder.edit.title" = "Edit workout";

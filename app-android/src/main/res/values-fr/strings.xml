@@ -69,6 +69,9 @@
     <string name="exercise_equipment">Matériel</string>
     <string name="exercise_how">Comment faire</string>
     <string name="exercise_per_side">Se fait un côté après l’autre.</string>
+    <string name="exercise_variations">Variantes</string>
+    <string name="exercise_variations_hint">De la plus facile à la plus difficile.</string>
+    <string name="exercise_variation_current">Celle-ci</string>
 
     <string name="builder_new_title">Nouvelle séance</string>
     <string name="builder_edit_title">Modifier la séance</string>

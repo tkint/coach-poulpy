@@ -99,11 +99,49 @@ struct ExerciseDetailView: View {
                             Text(step)
                         }
                     }
+                    if !detail.variations.isEmpty {
+                        variations(detail.variations)
+                    }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding()
             }
             .navigationTitle(detail.name)
+        }
+    }
+
+    /// The exercise's group, easiest first; this exercise is marked in place and the others open.
+    private func variations(_ variations: [VariationRow]) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("exercise.variations").font(.poulpy(.headline))
+            Text("exercise.variations.hint").font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+            ForEach(variations, id: \.slug) { variation in
+                if variation.current {
+                    HStack(spacing: 12) {
+                        Text(variation.name).frame(maxWidth: .infinity, alignment: .leading)
+                        Text("exercise.variation.current").font(.poulpy(.subheadline).weight(.heavy))
+                    }
+                    .foregroundStyle(PoulpyColor.onPrimaryContainer)
+                    .padding(EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16))
+                    .frame(minHeight: 48)
+                    .background(PoulpyColor.primaryContainer, in: RoundedRectangle(cornerRadius: 16))
+                    .accessibilityElement(children: .combine)
+                } else {
+                    NavigationLink {
+                        ExerciseDetailView(graph: graph, slug: variation.slug)
+                    } label: {
+                        HStack(spacing: 12) {
+                            Text(variation.name).foregroundStyle(PoulpyColor.onSurface).frame(maxWidth: .infinity, alignment: .leading)
+                            Image(systemName: "chevron.right").foregroundStyle(PoulpyColor.onSurfaceVariant)
+                        }
+                        .padding(EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16))
+                        .frame(minHeight: 48)
+                        .overlay(RoundedRectangle(cornerRadius: 16).stroke(PoulpyColor.outline, lineWidth: 1.5))
+                        .contentShape(RoundedRectangle(cornerRadius: 16))
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
         }
     }
 

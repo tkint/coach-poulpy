@@ -4,6 +4,7 @@ import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
 import ch.coachpoulpy.core.engine.SessionEvent
 import ch.coachpoulpy.core.model.Exercise
+import ch.coachpoulpy.core.model.ExerciseSlug
 import ch.coachpoulpy.core.model.Execution
 import ch.coachpoulpy.core.model.ExecutionId
 import ch.coachpoulpy.core.model.ExecutionSource
@@ -21,12 +22,14 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.datetime.LocalDate
+import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 
 /** The phone's database: the source of truth for a guest. */
 class LocalStore(driverFactory: DriverFactory, private val clock: Clock = Clock.System) {
     private val db = CoachPoulpyDatabase(driverFactory.create())
     private val json = Json { ignoreUnknownKeys = true }
+    private val slugList = ListSerializer(ExerciseSlug.serializer())
 
     fun saveWorkout(workout: Workout) {
         db.workoutQueries.insert(
@@ -81,15 +84,28 @@ class LocalStore(driverFactory: DriverFactory, private val clock: Clock = Clock.
     fun catalogExercises(): List<Exercise> =
         db.catalogEntryQueries.all().executeAsList().map { json.decodeFromString(Exercise.serializer(), it) }
 
+    /** The catalog's variation groups, each easiest to hardest, in catalog order. */
+    fun catalogVariationGroups(): List<List<ExerciseSlug>> =
+        db.catalogEntryQueries.variationGroups().executeAsList().map { json.decodeFromString(slugList, it) }
+
     /**
      * Stores a whole catalog version. An entry the new version leaves out is kept as
-     * retired rather than deleted, so workouts that use it still open.
+     * retired rather than deleted, so workouts that use it still open. Variation groups
+     * are replaced by the new version's.
      */
-    fun replaceCatalog(version: Int, exercises: List<Exercise>) = db.transaction {
+    fun replaceCatalog(
+        version: Int,
+        exercises: List<Exercise>,
+        variationGroups: List<List<ExerciseSlug>> = emptyList(),
+    ) = db.transaction {
         val incoming = exercises.map { it.slug }.toSet()
         val dropped = catalogExercises().filter { it.slug !in incoming }.map { it.copy(retired = true) }
         (exercises + dropped).forEach {
             db.catalogEntryQueries.upsert(it.slug.value, json.encodeToString(Exercise.serializer(), it))
+        }
+        db.catalogEntryQueries.clearVariationGroups()
+        variationGroups.forEachIndexed { position, group ->
+            db.catalogEntryQueries.insertVariationGroup(position.toLong(), json.encodeToString(slugList, group))
         }
         db.catalogEntryQueries.setVersion(version.toLong())
     }

@@ -64,6 +64,8 @@ The iOS build runs `./gradlew :shared:embedAndSignAppleFrameworkForXcode` itself
 
 To change it today, edit the JSON, raise `version` by one and ship a new build. Keep every `slug`: workouts point at exercises by slug. To stop offering an exercise, set `"retired": true` rather than deleting it, so workouts that use it still open.
 
+`variations` lists the catalog's variation groups: each is the slugs of one movement made easier or harder, ordered from easiest to hardest. An exercise is in at most one group, and a retired one stays in its group but isn't shown.
+
 Later, an admin menu on the server will publish new versions in the same format, and the app will download them on launch with no account needed (`CatalogRepository.apply`). That is separate from syncing a user's own data, so guests get catalog updates too.
 
 ## Installing on family phones

@@ -41,4 +41,20 @@ class ExerciseListModelTest {
         assertEquals("Gainage", detail.name)
         assertTrue(detail.instructions.first().startsWith("En appui"))
     }
+
+    @Test
+    fun detailListsVariationsEasiestToHardestWithTheCurrentOneMarked() {
+        val variations = model("fr").detail("diamond-push-up")!!.variations
+        assertEquals(
+            listOf("knee-push-up", "incline-push-up", "push-up", "diamond-push-up", "one-arm-push-up"),
+            variations.map { it.slug },
+        )
+        assertEquals(listOf("diamond-push-up"), variations.filter { it.current }.map { it.slug })
+        assertEquals("Pompe diamant", variations.single { it.current }.name)
+    }
+
+    @Test
+    fun detailHasNoVariationsOutsideAGroup() {
+        assertTrue(model("en").detail("plank")!!.variations.isEmpty())
+    }
 }

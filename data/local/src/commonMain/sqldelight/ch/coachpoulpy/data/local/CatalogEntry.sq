@@ -11,6 +11,12 @@ CREATE TABLE catalog_meta (
     version INTEGER NOT NULL
 );
 
+-- Each variation group as a JSON list of slugs, easiest to hardest, replaced with every catalog version.
+CREATE TABLE catalog_variation_group (
+    position INTEGER NOT NULL PRIMARY KEY,
+    slugs TEXT NOT NULL
+);
+
 version:
 SELECT version FROM catalog_meta WHERE id = 0;
 
@@ -22,3 +28,12 @@ INSERT OR REPLACE INTO catalog_exercise(slug, content) VALUES (?, ?);
 
 all:
 SELECT content FROM catalog_exercise;
+
+variationGroups:
+SELECT slugs FROM catalog_variation_group ORDER BY position;
+
+clearVariationGroups:
+DELETE FROM catalog_variation_group;
+
+insertVariationGroup:
+INSERT INTO catalog_variation_group(position, slugs) VALUES (?, ?);
