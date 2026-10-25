@@ -71,7 +71,18 @@
     <string name="exercises_nothing_for">Nothing for “%1$s”</string>
     <string name="exercises_nothing_hint">Try one word, a muscle like “glutes”, or something you own like “dumbbell”.</string>
     <string name="exercises_no_fit">No exercise fits these filters</string>
-    <string name="exercises_no_fit_hint">Try another muscle.</string>
+    <string name="exercises_no_fit_hint">Try another muscle, or tick more of what you have.</string>
+    <string name="exercises_equipment">Equipment</string>
+    <string name="exercises_equipment_hint">Tick what you have to list the exercises that use it.</string>
+    <string name="exercises_equipment_clear">Clear</string>
+    <plurals name="exercises_equipment_ticked">
+        <item quantity="one">Equipment, %1$d ticked</item>
+        <item quantity="other">Equipment, %1$d ticked</item>
+    </plurals>
+    <plurals name="exercises_equipment_show">
+        <item quantity="one">Show %1$d exercise</item>
+        <item quantity="other">Show %1$d exercises</item>
+    </plurals>
     <string name="exercises_clear_all">Clear search and filters</string>
     <string name="exercise_muscles">Muscles</string>
     <string name="exercise_equipment">Equipment</string>

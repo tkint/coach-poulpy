@@ -86,7 +86,7 @@ class ExerciseListModelTest {
 
     @Test
     fun equipmentFindsEveryExerciseUsingItWithNamesFirst() {
-        val dumbbell = Catalog.bundled.offered.filter { Equipment.DUMBBELL in it.equipment }.map { it.slug.value }
+        val dumbbell = Catalog.bundled.offered.filter { Equipment.DUMBBELL in it.allEquipment }.map { it.slug.value }
         assertEquals(11, dumbbell.size)
         val found = search("dumbbell")
         assertEquals(dumbbell.toSet(), found.toSet())
@@ -175,13 +175,83 @@ class ExerciseListModelTest {
     fun theDetailsLineGivesTwoMusclesThenOneFact() {
         val rows = model("en").filter().rows.associate { it.slug to it.details }
         assertEquals("Chest, triceps · No equipment", rows["push-up"])
-        assertEquals("Quadriceps, glutes · Dumbbells, kettlebell", rows["goblet-squat"])
+        assertEquals("Quadriceps, glutes · Dumbbells or kettlebell", rows["goblet-squat"])
+        assertEquals("Chest, triceps · Dumbbells and bench or step", rows["dumbbell-bench-press"])
         assertEquals("Quadriceps, glutes · Each side", rows["reverse-lunge"])
         assertEquals("Core · Hold", rows["plank"])
         assertEquals("Core, hips · Hold · each side", rows["side-plank"])
         assertEquals("Full body · Timed", rows["jumping-jack"])
         assertEquals("Glutes, hamstrings · Mat", rows["glute-bridge"])
-        assertEquals("Back, biceps · Dumbbells, bench or step · each side", rows["dumbbell-row"])
+        assertEquals("Back, biceps · Dumbbells · each side", rows["dumbbell-row"])
         assertEquals("Pectoraux, triceps · Sans matériel", model("fr").filter().rows.single { it.slug == "push-up" }.details)
+    }
+
+    private fun fitting(vararg ticked: Equipment) = model("en").filter(ticked = ticked.toSet()).rows.map { it.slug }
+
+    @Test
+    fun withDumbbellsTickedAGobletSquatShowsButNotAKettlebellSwing() {
+        val shown = fitting(Equipment.DUMBBELL)
+        assertTrue("goblet-squat" in shown)
+        assertTrue("kettlebell-swing" !in shown)
+    }
+
+    @Test
+    fun everyNeedMustHaveOneAlternativeTicked() {
+        assertTrue("dumbbell-bench-press" !in fitting(Equipment.DUMBBELL))
+        assertTrue("dumbbell-bench-press" in fitting(Equipment.DUMBBELL, Equipment.BENCH))
+    }
+
+    @Test
+    fun aTreadmillListsOnlyTheExercisesThatUseIt() {
+        assertEquals(setOf("brisk-walk", "easy-run"), fitting(Equipment.TREADMILL).toSet())
+    }
+
+    @Test
+    fun optionalEquipmentCountsAndBodyweightOnlyHides() {
+        val shown = fitting(Equipment.DUMBBELL)
+        assertTrue("reverse-lunge" in shown && "calf-raise" in shown)
+        assertTrue("push-up" !in shown && "plank" !in shown)
+    }
+
+    @Test
+    fun noEquipmentListsTheExercisesNeedingNothing() {
+        val free = Catalog.bundled.offered.filter { it.equipment.isEmpty() }.map { it.slug.value }
+        assertEquals(free.toSet(), fitting(Equipment.BODYWEIGHT).toSet())
+        assertTrue("push-up" in free && "plank" in free && "reverse-lunge" in free)
+        val withKettlebell = fitting(Equipment.BODYWEIGHT, Equipment.KETTLEBELL)
+        assertTrue("push-up" in withKettlebell && "kettlebell-swing" in withKettlebell)
+        assertTrue("dumbbell-row" !in withKettlebell)
+    }
+
+    @Test
+    fun tickingNothingIsNoFilter() {
+        val all = model("en").filter(ticked = emptySet())
+        assertEquals(Catalog.bundled.offered.size, all.count)
+        assertFalse(all.restricted)
+        assertEquals(Catalog.bundled.offered.size, model("en").filter(ticked = null).count)
+    }
+
+    @Test
+    fun theCountSaysWhatYouCanDoWhileEquipmentIsOn() {
+        val listing = model("en").filter(ticked = setOf(Equipment.DUMBBELL))
+        assertTrue(listing.restricted)
+        assertEquals("${listing.count} exercises you can do", listing.countLabel)
+        assertEquals("1 match you can do", model("en").filter("rdl", ticked = setOf(Equipment.DUMBBELL)).countLabel)
+        assertFalse(model("en").filter().restricted)
+    }
+
+    @Test
+    fun theSheetListsNoEquipmentThenEquipmentButNotTheMat() {
+        val options = model("en").equipmentOptions
+        assertEquals(
+            listOf(Equipment.BODYWEIGHT, Equipment.DUMBBELL, Equipment.KETTLEBELL, Equipment.BARBELL, Equipment.BAND, Equipment.BENCH, Equipment.PULL_UP_BAR, Equipment.TREADMILL),
+            options.map { it.equipment },
+        )
+        val kettlebell = options.single { it.equipment == Equipment.KETTLEBELL }
+        assertEquals(Catalog.bundled.offered.count { Equipment.KETTLEBELL in it.allEquipment }, kettlebell.count)
+        assertEquals("${kettlebell.count} exercises", kettlebell.countLabel)
+        val none = options.first()
+        assertEquals("No equipment", none.label)
+        assertEquals(Catalog.bundled.offered.count { it.equipment.isEmpty() }, none.count)
     }
 }

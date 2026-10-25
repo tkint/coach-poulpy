@@ -54,7 +54,10 @@
 "exercises.nothing.for %@" = "Nothing for “%@”";
 "exercises.nothing.hint" = "Try one word, a muscle like “glutes”, or something you own like “dumbbell”.";
 "exercises.no.fit" = "No exercise fits these filters";
-"exercises.no.fit.hint" = "Try another muscle.";
+"exercises.no.fit.hint" = "Try another muscle, or tick more of what you have.";
+"exercises.equipment" = "Equipment";
+"exercises.equipment.hint" = "Tick what you have to list the exercises that use it.";
+"exercises.equipment.clear" = "Clear";
 "exercises.clear.all" = "Clear search and filters";
 "exercise.muscles" = "Muscles";
 "exercise.equipment" = "Equipment";

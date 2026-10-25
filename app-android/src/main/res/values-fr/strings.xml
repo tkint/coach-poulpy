@@ -70,7 +70,18 @@
     <string name="exercises_nothing_for">Rien pour « %1$s »</string>
     <string name="exercises_nothing_hint">Essayez un seul mot, un muscle comme « fessiers » ou un matériel comme « haltères ».</string>
     <string name="exercises_no_fit">Aucun exercice ne correspond à ces filtres</string>
-    <string name="exercises_no_fit_hint">Essayez un autre muscle.</string>
+    <string name="exercises_no_fit_hint">Essayez un autre muscle, ou cochez plus de matériel.</string>
+    <string name="exercises_equipment">Matériel</string>
+    <string name="exercises_equipment_hint">Cochez ce que vous avez pour voir les exercices qui s’en servent.</string>
+    <string name="exercises_equipment_clear">Effacer</string>
+    <plurals name="exercises_equipment_ticked">
+        <item quantity="one">Matériel, %1$d coché</item>
+        <item quantity="other">Matériel, %1$d cochés</item>
+    </plurals>
+    <plurals name="exercises_equipment_show">
+        <item quantity="one">Voir %1$d exercice</item>
+        <item quantity="other">Voir %1$d exercices</item>
+    </plurals>
     <string name="exercises_clear_all">Effacer la recherche et les filtres</string>
     <string name="exercise_muscles">Muscles</string>
     <string name="exercise_equipment">Matériel</string>

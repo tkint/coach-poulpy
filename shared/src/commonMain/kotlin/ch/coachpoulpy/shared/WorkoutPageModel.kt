@@ -2,7 +2,6 @@ package ch.coachpoulpy.shared
 
 import ch.coachpoulpy.catalog.Catalog
 import ch.coachpoulpy.core.engine.TimelineCompiler
-import ch.coachpoulpy.core.model.Equipment
 import ch.coachpoulpy.core.model.MeasurementMode
 import ch.coachpoulpy.core.model.MovementPattern
 import ch.coachpoulpy.core.model.Step
@@ -105,8 +104,7 @@ class WorkoutPageModel internal constructor(
         val plan = plans.firstOrNull { it.workoutId == workoutId && (it.day > today || (it.day == today && !doneToday)) }
         val minutes = done.mapNotNull { it.realTotals?.active?.inWholeMinutes?.toInt() }.sorted()
         val equipment = exerciseSteps(workout).mapNotNull { catalog[it.exercise] }
-            .flatMap { it.equipment }
-            .filter { it != Equipment.BODYWEIGHT }
+            .flatMap { it.equipment.flatten() }
             .distinct()
             .map { labels.equipment(it).lowercase() }
         return WorkoutPageState(

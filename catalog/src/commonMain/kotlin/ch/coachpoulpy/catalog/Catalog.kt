@@ -1,5 +1,6 @@
 package ch.coachpoulpy.catalog
 
+import ch.coachpoulpy.core.model.Equipment
 import ch.coachpoulpy.core.model.Exercise
 import ch.coachpoulpy.core.model.ExerciseSlug
 import kotlinx.serialization.Serializable
@@ -24,6 +25,12 @@ class Catalog(
     init {
         exercises.forEach { exercise ->
             require(exercise.aliases.all.none { it.isBlank() }) { "Exercise ${exercise.slug.value} has an empty alias" }
+            exercise.equipment.forEach { need ->
+                require(need.isNotEmpty()) { "Exercise ${exercise.slug.value} has an empty equipment need" }
+                require(Equipment.BODYWEIGHT !in need && Equipment.MAT !in need) {
+                    "Exercise ${exercise.slug.value} needs bodyweight or a mat, which are never needs"
+                }
+            }
         }
         val seen = mutableMapOf<ExerciseSlug, List<ExerciseSlug>>()
         variationGroups.forEach { group ->

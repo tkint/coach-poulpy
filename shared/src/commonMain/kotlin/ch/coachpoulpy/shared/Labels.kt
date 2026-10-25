@@ -111,11 +111,19 @@ internal class Labels(private val languageCode: String) {
     val session get() = t("Workout", "Séance")
     val perSide get() = t("each side", "par côté")
     val hold get() = t("Hold", "Maintien")
+    val orWord get() = t("or", "ou")
+    val andWord get() = t("and", "et")
     val timed get() = t("Timed", "Chronométré")
 
     fun exercises(count: Int) = if (count == 1) t("1 exercise", "1 exercice") else t("$count exercises", "$count exercices")
 
     fun matches(count: Int) = if (count == 1) t("1 match", "1 résultat") else t("$count matches", "$count résultats")
+
+    fun exercisesYouCanDo(count: Int) =
+        if (count == 1) t("1 exercise you can do", "1 exercice à votre portée") else t("$count exercises you can do", "$count exercices à votre portée")
+
+    fun matchesYouCanDo(count: Int) =
+        if (count == 1) t("1 match you can do", "1 résultat à votre portée") else t("$count matches you can do", "$count résultats à votre portée")
 
     fun aboutMinutes(minutes: Int) = t("about $minutes min", "environ $minutes min")
 
