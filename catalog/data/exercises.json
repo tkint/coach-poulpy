@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "exercises": [
     {
       "slug": "goblet-squat",
@@ -16,6 +16,7 @@
     {
       "slug": "bodyweight-squat",
       "name": { "en": "Bodyweight squat", "fr": "Squat au poids du corps" },
+      "aliases": { "en": ["air squat"] },
       "movementPattern": "SQUAT",
       "muscleGroups": ["QUADRICEPS", "GLUTES"],
       "equipment": ["BODYWEIGHT"],
@@ -29,6 +30,7 @@
     {
       "slug": "chair-squat",
       "name": { "en": "Sit to stand", "fr": "Assis-debout sur chaise" },
+      "aliases": { "en": ["chair squat"], "fr": ["squat sur chaise"] },
       "movementPattern": "SQUAT",
       "muscleGroups": ["QUADRICEPS", "GLUTES"],
       "equipment": ["BODYWEIGHT"],
@@ -54,6 +56,7 @@
     {
       "slug": "glute-bridge",
       "name": { "en": "Glute bridge", "fr": "Pont fessier" },
+      "aliases": { "en": ["hip bridge"] },
       "movementPattern": "HINGE",
       "muscleGroups": ["GLUTES", "HAMSTRINGS"],
       "equipment": ["MAT"],
@@ -67,6 +70,7 @@
     {
       "slug": "romanian-deadlift",
       "name": { "en": "Romanian deadlift", "fr": "Soulevé de terre roumain" },
+      "aliases": { "en": ["RDL"], "fr": ["RDL"] },
       "movementPattern": "HINGE",
       "muscleGroups": ["HAMSTRINGS", "GLUTES", "BACK"],
       "equipment": ["DUMBBELL", "BARBELL"],
@@ -144,6 +148,7 @@
     {
       "slug": "push-up",
       "name": { "en": "Push-up", "fr": "Pompe" },
+      "aliases": { "en": ["press-up"] },
       "movementPattern": "PUSH",
       "muscleGroups": ["CHEST", "TRICEPS", "SHOULDERS"],
       "equipment": ["BODYWEIGHT"],
@@ -157,6 +162,7 @@
     {
       "slug": "knee-push-up",
       "name": { "en": "Knee push-up", "fr": "Pompe sur les genoux" },
+      "aliases": { "en": ["press-up"] },
       "movementPattern": "PUSH",
       "muscleGroups": ["CHEST", "TRICEPS", "SHOULDERS"],
       "equipment": ["MAT"],
@@ -169,6 +175,7 @@
     {
       "slug": "incline-push-up",
       "name": { "en": "Incline push-up", "fr": "Pompe inclinée" },
+      "aliases": { "en": ["press-up"] },
       "movementPattern": "PUSH",
       "muscleGroups": ["CHEST", "TRICEPS"],
       "equipment": ["BENCH"],
@@ -181,6 +188,7 @@
     {
       "slug": "diamond-push-up",
       "name": { "en": "Diamond push-up", "fr": "Pompe diamant" },
+      "aliases": { "en": ["press-up"] },
       "movementPattern": "PUSH",
       "muscleGroups": ["TRICEPS", "CHEST", "SHOULDERS"],
       "equipment": ["BODYWEIGHT"],
@@ -194,6 +202,7 @@
     {
       "slug": "one-arm-push-up",
       "name": { "en": "One-arm push-up", "fr": "Pompe sur un bras" },
+      "aliases": { "en": ["press-up"] },
       "movementPattern": "PUSH",
       "muscleGroups": ["CHEST", "TRICEPS", "SHOULDERS", "CORE"],
       "equipment": ["BODYWEIGHT"],
@@ -220,6 +229,7 @@
     {
       "slug": "overhead-press",
       "name": { "en": "Dumbbell overhead press", "fr": "Développé militaire haltères" },
+      "aliases": { "en": ["shoulder press"] },
       "movementPattern": "PUSH",
       "muscleGroups": ["SHOULDERS", "TRICEPS"],
       "equipment": ["DUMBBELL"],
@@ -281,6 +291,7 @@
     {
       "slug": "pull-up",
       "name": { "en": "Pull-up", "fr": "Traction" },
+      "aliases": { "en": ["chin-up"] },
       "movementPattern": "PULL",
       "muscleGroups": ["BACK", "BICEPS"],
       "equipment": ["PULL_UP_BAR"],
@@ -305,6 +316,7 @@
     {
       "slug": "farmer-carry",
       "name": { "en": "Farmer's carry", "fr": "Marche du fermier" },
+      "aliases": { "en": ["farmer walk"] },
       "movementPattern": "CARRY",
       "muscleGroups": ["FOREARMS", "CORE", "SHOULDERS"],
       "equipment": ["DUMBBELL", "KETTLEBELL"],
@@ -317,6 +329,7 @@
     {
       "slug": "plank",
       "name": { "en": "Plank", "fr": "Gainage" },
+      "aliases": { "en": ["abs"], "fr": ["abdos"] },
       "movementPattern": "CORE",
       "muscleGroups": ["CORE"],
       "equipment": ["MAT"],
@@ -329,6 +342,7 @@
     {
       "slug": "side-plank",
       "name": { "en": "Side plank", "fr": "Gainage latéral" },
+      "aliases": { "en": ["abs"], "fr": ["abdos"] },
       "movementPattern": "CORE",
       "muscleGroups": ["CORE", "HIPS"],
       "equipment": ["MAT"],
@@ -342,6 +356,7 @@
     {
       "slug": "dead-bug",
       "name": { "en": "Dead bug", "fr": "Dead bug" },
+      "aliases": { "en": ["abs"], "fr": ["abdos"] },
       "movementPattern": "CORE",
       "muscleGroups": ["CORE"],
       "equipment": ["MAT"],
@@ -355,6 +370,7 @@
     {
       "slug": "bird-dog",
       "name": { "en": "Bird dog", "fr": "Bird dog" },
+      "aliases": { "en": ["abs"], "fr": ["abdos"] },
       "movementPattern": "CORE",
       "muscleGroups": ["CORE", "BACK", "GLUTES"],
       "equipment": ["MAT"],
@@ -368,6 +384,7 @@
     {
       "slug": "crunch",
       "name": { "en": "Crunch", "fr": "Crunch" },
+      "aliases": { "en": ["abs", "sit-up"], "fr": ["abdos"] },
       "movementPattern": "CORE",
       "muscleGroups": ["CORE"],
       "equipment": ["MAT"],
@@ -380,6 +397,7 @@
     {
       "slug": "hollow-hold",
       "name": { "en": "Hollow hold", "fr": "Hollow body" },
+      "aliases": { "en": ["abs"], "fr": ["abdos"] },
       "movementPattern": "CORE",
       "muscleGroups": ["CORE"],
       "equipment": ["MAT"],
@@ -392,6 +410,7 @@
     {
       "slug": "russian-twist",
       "name": { "en": "Russian twist", "fr": "Rotation russe" },
+      "aliases": { "en": ["abs"], "fr": ["abdos"] },
       "movementPattern": "ROTATION",
       "muscleGroups": ["CORE"],
       "equipment": ["MAT", "DUMBBELL"],
@@ -488,6 +507,7 @@
     {
       "slug": "easy-run",
       "name": { "en": "Easy run", "fr": "Course facile" },
+      "aliases": { "en": ["jog", "jogging"], "fr": ["footing", "jogging"] },
       "movementPattern": "LOCOMOTION",
       "muscleGroups": ["FULL_BODY", "CALVES"],
       "equipment": ["BODYWEIGHT", "TREADMILL"],

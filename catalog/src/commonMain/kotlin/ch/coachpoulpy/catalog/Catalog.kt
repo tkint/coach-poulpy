@@ -22,6 +22,9 @@ class Catalog(
     private val groupOf: Map<ExerciseSlug, List<ExerciseSlug>>
 
     init {
+        exercises.forEach { exercise ->
+            require(exercise.aliases.all.none { it.isBlank() }) { "Exercise ${exercise.slug.value} has an empty alias" }
+        }
         val seen = mutableMapOf<ExerciseSlug, List<ExerciseSlug>>()
         variationGroups.forEach { group ->
             group.forEach { slug ->

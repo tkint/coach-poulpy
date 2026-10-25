@@ -46,7 +46,7 @@
 "delete.title" = "Supprimer cette séance ?";
 "delete.body" = "Les séances déjà faites sont conservées.";
 
-"exercises.search" = "Rechercher un exercice";
+"exercises.search" = "Nom, muscle ou matériel";
 "exercises.all" = "Tous";
 "exercises.none" = "Aucun exercice ne correspond.";
 "exercise.muscles" = "Muscles";
