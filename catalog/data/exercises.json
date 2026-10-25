@@ -1,5 +1,5 @@
 {
-  "version": 4,
+  "version": 5,
   "exercises": [
     {
       "slug": "goblet-squat",
@@ -494,6 +494,34 @@
       ]
     },
     {
+      "slug": "walk-with-support",
+      "name": { "en": "Walk with support", "fr": "Marche avec appui" },
+      "aliases": { "en": ["assisted walk", "walker", "cane", "crutches"], "fr": ["marche assistée", "déambulateur", "canne", "béquilles"] },
+      "movementPattern": "LOCOMOTION",
+      "muscleGroups": ["FULL_BODY"],
+      "equipment": ["BODYWEIGHT"],
+      "measurement": "TIME",
+      "instructions": [
+        { "en": "Use the walking aid your care team gave you, or walk along a wall, a rail or a counter.", "fr": "Utilisez l'aide à la marche conseillée par vos soignants, ou marchez le long d'un mur, d'une rampe ou d'un plan de travail." },
+        { "en": "Take small steps at your own pace. A few steps already count.", "fr": "Faites de petits pas, à votre rythme. Quelques pas comptent déjà." },
+        { "en": "Keep a chair close by, and sit down whenever you need to.", "fr": "Gardez une chaise à portée et asseyez-vous dès que vous en avez besoin." }
+      ]
+    },
+    {
+      "slug": "gentle-walk",
+      "name": { "en": "Gentle walk", "fr": "Marche douce" },
+      "aliases": { "en": ["slow walk", "easy walk", "stroll"], "fr": ["marche lente", "promenade"] },
+      "movementPattern": "LOCOMOTION",
+      "muscleGroups": ["FULL_BODY"],
+      "equipment": ["BODYWEIGHT"],
+      "measurement": "TIME",
+      "instructions": [
+        { "en": "Walk slowly on flat ground, indoors or outside, standing tall.", "fr": "Marchez lentement sur un sol plat, à l'intérieur ou dehors, en vous tenant droit." },
+        { "en": "Keep a pace where you breathe easily. A minute or two is a good start.", "fr": "Gardez une allure où vous respirez facilement. Une minute ou deux, c'est un bon début." },
+        { "en": "Stop and rest if anything hurts, and follow your care team's advice.", "fr": "Arrêtez-vous et reposez-vous si quelque chose fait mal, et suivez les conseils de vos soignants." }
+      ]
+    },
+    {
       "slug": "brisk-walk",
       "name": { "en": "Brisk walk", "fr": "Marche rapide" },
       "movementPattern": "LOCOMOTION",
@@ -672,6 +700,7 @@
   ],
   "variations": [
     ["knee-push-up", "incline-push-up", "push-up", "diamond-push-up", "one-arm-push-up"],
-    ["chair-squat", "bodyweight-squat", "goblet-squat"]
+    ["chair-squat", "bodyweight-squat", "goblet-squat"],
+    ["walk-with-support", "gentle-walk", "brisk-walk"]
   ]
 }

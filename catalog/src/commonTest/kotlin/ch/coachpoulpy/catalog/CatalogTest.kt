@@ -1,6 +1,7 @@
 package ch.coachpoulpy.catalog
 
 import ch.coachpoulpy.core.model.Aliases
+import ch.coachpoulpy.core.model.Equipment
 import ch.coachpoulpy.core.model.Exercise
 import ch.coachpoulpy.core.model.ExerciseSlug
 import ch.coachpoulpy.core.model.MeasurementMode
@@ -54,6 +55,19 @@ class CatalogTest {
             names(Catalog.bundled.variationsOf(ExerciseSlug("goblet-squat"))),
         )
         assertTrue(Catalog.bundled.variationsOf(ExerciseSlug("plank")).isEmpty())
+    }
+
+    @Test
+    fun gentleWalksAreTimedBodyweightVariationsOfTheBriskWalk() {
+        assertEquals(
+            listOf("walk-with-support", "gentle-walk", "brisk-walk"),
+            names(Catalog.bundled.variationsOf(ExerciseSlug("gentle-walk"))),
+        )
+        listOf("walk-with-support", "gentle-walk").forEach { slug ->
+            val walk = Catalog.bundled[ExerciseSlug(slug)]!!
+            assertEquals(MeasurementMode.TIME, walk.measurement)
+            assertEquals(listOf(Equipment.BODYWEIGHT), walk.equipment)
+        }
     }
 
     @Test
