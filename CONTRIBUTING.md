@@ -53,6 +53,7 @@ Rounded boxes are where work starts; each step leaves something behind, listed i
 - **Words come from `CONTEXT.md`.** If an issue or a test needs a word the glossary lacks, add it there first.
 - **A decision that would surprise the next reader gets an ADR** in `docs/adr/`, in the same PR that makes it.
 - **Every PR says `Closes #n`**, so merging closes the issue.
+- **Branch names say what the work is**: `<type>/<issue-number>-<short-description>`, in English, like `feat/21-training-plans` or `fix/34-rest-timer-sound`. Leave out the number when there is no issue (`docs/brand-decisions`). Types are `feat`, `fix`, `docs`, `chore` and `design`. No random suffixes, session ids or tool prefixes such as `claude/`.
 - **CI is not a phone.** Anything about Bluetooth, sound, haptics, background running or installs carries the `device-test` label and is checked on a real phone before merge.
 
 ## Labels

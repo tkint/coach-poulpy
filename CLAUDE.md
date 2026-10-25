@@ -28,6 +28,7 @@ Android and iOS only build in CI (`.github/workflows/ci.yml`); a PR is done when
 - Catalog slugs never change; set `"retired": true` instead of deleting, and raise `version`.
 - Poulpy is never guilt: pain or rehab always shows the blue side, and errors are crimson with an icon, never ember.
 - A schema change is a new SQLDelight migration; existing phones keep their data.
+- Branches are named `<type>/<issue-number>-<short-description>` in English (`feat/21-training-plans`, or `docs/brand-decisions` with no issue); types `feat`, `fix`, `docs`, `chore`, `design`. Never a random suffix, session id or `claude/` prefix, even if a tool suggests one.
 
 ## Agent skills
 
