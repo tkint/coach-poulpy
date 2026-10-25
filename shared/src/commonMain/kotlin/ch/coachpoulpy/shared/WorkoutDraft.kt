@@ -2,9 +2,11 @@ package ch.coachpoulpy.shared
 
 import ch.coachpoulpy.catalog.Catalog
 import ch.coachpoulpy.core.engine.WorkoutTypeRegistry
+import ch.coachpoulpy.core.model.Equipment
 import ch.coachpoulpy.core.model.Exercise
 import ch.coachpoulpy.core.model.ExerciseSlug
 import ch.coachpoulpy.core.model.Ids
+import ch.coachpoulpy.core.model.Intensity
 import ch.coachpoulpy.core.model.Load
 import ch.coachpoulpy.core.model.MeasurementMode
 import ch.coachpoulpy.core.model.Prescription
@@ -23,6 +25,10 @@ import kotlin.time.Duration.Companion.seconds
  * One exercise in the builder: the same number of sets, each with the same target,
  * load and rest. [amount] is reps, seconds or meters depending on [measurement].
  * Exercises done one side at a time get a left and a right set for each set.
+ *
+ * A walk or a run ([walkOrRun]) is one block instead: a duration or a distance, with an
+ * optional pace kept as [speedKmh]. [distanceUnit] and [paceUnit] are how the builder shows
+ * them, and are not saved with the workout.
  */
 data class DraftEntry(
     val key: String,
@@ -33,7 +39,21 @@ data class DraftEntry(
     val amount: Int,
     val loadKg: Double?,
     val restSeconds: Int,
+    val walkOrRun: Boolean = false,
+    val speedKmh: Double? = null,
+    val distanceUnit: DistanceUnit = DistanceUnit.KM,
+    val paceUnit: PaceUnit = PaceUnit.PER_KM,
 ) {
+    /** Which of the four targets a walk or a run has; null for any other exercise. */
+    val targetKind: TargetKind?
+        get() = if (!walkOrRun) {
+            null
+        } else if (measurement == MeasurementMode.DISTANCE) {
+            if (speedKmh != null) TargetKind.DISTANCE_PACE else TargetKind.DISTANCE
+        } else {
+            if (speedKmh != null) TargetKind.DURATION_PACE else TargetKind.DURATION
+        }
+
     internal fun toStep(): Step.ExerciseStep {
         val target = when (measurement) {
             MeasurementMode.REPS -> Target.Reps(amount)
@@ -43,6 +63,10 @@ data class DraftEntry(
         }
         val load = loadKg?.let { Load.Kilograms(it) }
         val rest = restSeconds.seconds
+        if (walkOrRun) {
+            val set = SetPrescription(target, intensity = speedKmh?.let { Intensity.Speed(it) }, restAfter = rest)
+            return Step.ExerciseStep(StepId(key), exercise, Prescription(listOf(set)))
+        }
         val prescriptions = (1..sets).flatMap {
             if (perSide) {
                 listOf(
@@ -60,20 +84,52 @@ data class DraftEntry(
         /** Time to change sides between the left and right halves of a timed set. */
         internal val SWITCH_SIDES = 5.seconds
 
-        internal fun new(exercise: Exercise, type: WorkoutType): DraftEntry = DraftEntry(
-            key = Ids.newUuidV7(),
-            exercise = exercise.slug,
-            measurement = exercise.measurement,
-            perSide = exercise.perSide,
-            sets = if (type == WorkoutType.MOBILITY) 1 else 3,
-            amount = defaultAmount(exercise.measurement),
-            loadKg = null,
-            restSeconds = if (type == WorkoutType.STRENGTH) 60 else 20,
-        )
+        internal fun new(exercise: Exercise, type: WorkoutType, units: UnitSystem = UnitSystem.METRIC): DraftEntry {
+            if (exercise.isWalkOrRun) {
+                return DraftEntry(
+                    key = Ids.newUuidV7(),
+                    exercise = exercise.slug,
+                    measurement = MeasurementMode.TIME,
+                    perSide = false,
+                    sets = 1,
+                    amount = WALK_OR_RUN_MINUTES * 60,
+                    loadKg = null,
+                    restSeconds = 0,
+                    walkOrRun = true,
+                ).inUnits(units)
+            }
+            return DraftEntry(
+                key = Ids.newUuidV7(),
+                exercise = exercise.slug,
+                measurement = exercise.measurement,
+                perSide = exercise.perSide,
+                sets = if (type == WorkoutType.MOBILITY) 1 else 3,
+                amount = defaultAmount(exercise.measurement),
+                loadKg = null,
+                restSeconds = if (type == WorkoutType.STRENGTH) 60 else 20,
+            )
+        }
+
+        /** Twenty minutes, the duration a new walk or run starts with. */
+        internal const val WALK_OR_RUN_MINUTES = 20
 
         internal fun from(step: Step.ExerciseStep, exercise: Exercise?): DraftEntry? {
             val sets = step.prescription.sets
             val first = sets.firstOrNull() ?: return null
+            if (exercise?.isWalkOrRun == true && sets.size == 1 && (first.target is Target.Time || first.target is Target.Distance)) {
+                return DraftEntry(
+                    key = step.id.value,
+                    exercise = step.exercise,
+                    measurement = first.target.measurement,
+                    perSide = false,
+                    sets = 1,
+                    amount = first.target.amount,
+                    loadKg = null,
+                    restSeconds = first.restAfter.inWholeSeconds.toInt(),
+                    walkOrRun = true,
+                    speedKmh = (first.intensity as? Intensity.Speed)?.kmh,
+                )
+            }
             val measurement = exercise?.measurement ?: first.target.measurement
             return DraftEntry(
                 key = step.id.value,
@@ -132,6 +188,21 @@ data class WorkoutDraft(
     }
 }
 
+/** The four targets of a walk or a run. */
+enum class TargetKind { DURATION, DISTANCE, DURATION_PACE, DISTANCE_PACE }
+
+/** Walks and runs, from rehab to marathon training: the exercises a treadmill can do. */
+internal val Exercise.isWalkOrRun: Boolean get() = Equipment.TREADMILL in optionalEquipment
+
+/** Shows distance and pace the way [units] does. */
+internal fun DraftEntry.inUnits(units: UnitSystem) = if (!walkOrRun) {
+    this
+} else if (units == UnitSystem.IMPERIAL) {
+    copy(distanceUnit = DistanceUnit.MI, paceUnit = PaceUnit.PER_MI)
+} else {
+    copy(distanceUnit = DistanceUnit.KM, paceUnit = PaceUnit.PER_KM)
+}
+
 internal val Target.isTimed: Boolean get() = this is Target.Time || this is Target.Hold
 
 internal val Target.measurement: MeasurementMode get() = when (this) {
@@ -147,6 +218,25 @@ internal val Target.amount: Int get() = when (this) {
     is Target.Hold -> duration.inWholeSeconds.toInt()
     is Target.Distance -> meters.toInt()
 }
+
+/** The types a walk or a run fits whatever its target: a treadmill workout, a cardio circuit, rehab. */
+private val WALK_OR_RUN_TYPES = setOf(WorkoutType.TREADMILL, WorkoutType.CONDITIONING, WorkoutType.REHAB)
+
+/** Whether the builder can add [exercise] to a workout of [type]; a treadmill workout only takes walks and runs. */
+internal fun WorkoutTypeRegistry.fits(type: WorkoutType, exercise: Exercise): Boolean =
+    if (type == WorkoutType.TREADMILL) {
+        exercise.isWalkOrRun
+    } else {
+        accepts(type, exercise.measurement) || (exercise.isWalkOrRun && type in WALK_OR_RUN_TYPES)
+    }
+
+/** Whether a workout of [type] can run [entry] as it is set. */
+internal fun WorkoutTypeRegistry.fits(type: WorkoutType, entry: DraftEntry): Boolean =
+    if (type == WorkoutType.TREADMILL) {
+        entry.walkOrRun
+    } else {
+        accepts(type, entry.measurement) || (entry.walkOrRun && type in WALK_OR_RUN_TYPES)
+    }
 
 /** Whether a workout of [type] can run an exercise measured this way. */
 internal fun WorkoutTypeRegistry.accepts(type: WorkoutType, measurement: MeasurementMode): Boolean {

@@ -92,4 +92,95 @@ class BuilderModelTest {
         assertFalse(builder.isEditing)
         assertEquals(listOf("Diamond push-up"), builder.state.value.rows.map { it.name })
     }
+
+    @Test
+    fun aWalkIsOneTwentyMinuteBlockNotSetsOfShortReps() {
+        val builder = graph.createWorkout("en")
+        builder.rename("Walk")
+        builder.setType(WorkoutType.TREADMILL)
+        builder.add("walk")
+        val row = builder.state.value.rows.single()
+        assertEquals(TargetKind.DURATION, row.target?.kind)
+        assertEquals("20 min", row.summary)
+        assertTrue(row.fitsType)
+
+        val workout = graph.store.latestWorkout(WorkoutId(builder.save()!!))!!
+        val phases = graph.compiler.compile(workout).phases
+        assertEquals(1, phases.size)
+        assertEquals(Target.Time(1200.seconds), (phases.single() as Phase.Work).target)
+    }
+
+    @Test
+    fun distanceAndPaceTargetsSaveAndComeBack() {
+        val builder = graph.createWorkout("en")
+        builder.rename("Long run")
+        builder.setType(WorkoutType.TREADMILL)
+        builder.add("run")
+        val key = builder.state.value.rows.single().key
+
+        builder.setTarget(key, TargetKind.DISTANCE_PACE)
+        var target = builder.state.value.rows.single().target!!
+        assertEquals("5.0 km", target.distanceLabel)
+        assertEquals("6:00 /km", target.paceLabel)
+        assertEquals("10.0 km/h · about 30 min", target.hint)
+
+        assertTrue(builder.setDistance(key, "10", DistanceUnit.KM))
+        assertTrue(builder.setPace(key, "5:30", PaceUnit.PER_KM))
+        assertFalse(builder.setPace(key, "fast", PaceUnit.PER_KM))
+        builder.changeDistance(key, 2)
+        builder.changePace(key, -6)
+        assertEquals("10.2 km · 5:00 /km", builder.state.value.rows.single().summary)
+
+        val id = builder.save()!!
+        val step = graph.store.latestWorkout(WorkoutId(id))!!.steps.single() as ch.coachpoulpy.core.model.Step.ExerciseStep
+        val set = step.prescription.sets.single()
+        assertEquals(Target.Distance(10_200.0), set.target)
+        assertEquals(12.0, (set.intensity as ch.coachpoulpy.core.model.Intensity.Speed).kmh, 0.001)
+
+        target = graph.editWorkout(id, "en")!!.state.value.rows.single().target!!
+        assertEquals(TargetKind.DISTANCE_PACE, target.kind)
+        assertEquals("10.2", target.distanceText)
+        assertEquals("5:00", target.paceText)
+    }
+
+    @Test
+    fun switchingUnitsRewritesTheValue() {
+        val builder = graph.createWorkout("en")
+        builder.add("brisk-walk")
+        val key = builder.state.value.rows.single().key
+        builder.setTarget(key, TargetKind.DURATION_PACE)
+        assertEquals("10:00", builder.state.value.rows.single().target!!.paceText)
+        assertEquals("6.0", builder.setPaceUnit(key, PaceUnit.KMH, "10:00"))
+        assertEquals("6.0 km/h", builder.state.value.rows.single().target!!.paceLabel)
+
+        builder.setTarget(key, TargetKind.DISTANCE)
+        assertNull(builder.state.value.rows.single().target!!.speedKmh)
+        assertEquals("2000", builder.setDistanceUnit(key, DistanceUnit.M, "2"))
+        assertEquals("1.0", builder.setDistanceUnit(key, DistanceUnit.MI, "1609"))
+    }
+
+    @Test
+    fun walksFitRehabAndCardioButNotAtADistanceInStrength() {
+        val builder = graph.createWorkout("en")
+        builder.rename("Back on my feet")
+        builder.setType(WorkoutType.REHAB)
+        builder.add("walk-with-support")
+        builder.add("calf-raise")
+        assertTrue(builder.state.value.canSave)
+
+        val key = builder.state.value.rows.first().key
+        builder.setTarget(key, TargetKind.DISTANCE)
+        builder.setType(WorkoutType.STRENGTH)
+        assertFalse(builder.state.value.rows.first().fitsType)
+        builder.setType(WorkoutType.CONDITIONING)
+        assertTrue(builder.state.value.rows.first().fitsType)
+    }
+
+    @Test
+    fun valuePicksGoUpToTheMarathon() {
+        val builder = graph.createWorkout("fr")
+        assertEquals(listOf("10 min", "20 min", "30 min", "45 min", "1 h"), builder.durationPicks().map { it.label })
+        assertEquals("Semi-marathon", builder.distancePicks(DistanceUnit.KM)[3].label)
+        assertEquals(42_195.0, TargetInput.parseDistance(builder.distancePicks(DistanceUnit.MI).last().text, DistanceUnit.MI)!!, 1.0)
+    }
 }

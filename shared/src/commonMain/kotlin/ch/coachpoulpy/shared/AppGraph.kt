@@ -55,7 +55,7 @@ class AppGraph(driverFactory: DriverFactory) {
 
     // Not "newWorkout": Swift reserves the "new" prefix, and Kotlin would rename it.
     fun createWorkout(languageCode: String) =
-        BuilderModel(WorkoutDraft.empty(), catalog, registry, store, languageCode)
+        BuilderModel(WorkoutDraft.empty(), catalog, registry, store, languageCode, ::units)
 
     /** A new workout that already holds [exerciseSlug], for an exercise page's "Add to a workout". */
     fun createWorkoutWith(exerciseSlug: String, languageCode: String) =
@@ -65,7 +65,7 @@ class AppGraph(driverFactory: DriverFactory) {
     fun editWorkout(workoutId: String, languageCode: String): BuilderModel? {
         val workout = store.latestWorkout(WorkoutId(workoutId)) ?: return null
         val draft = WorkoutDraft.from(workout, catalog) ?: return null
-        return BuilderModel(draft, catalog, registry, store, languageCode)
+        return BuilderModel(draft, catalog, registry, store, languageCode, ::units)
     }
 
     /**
@@ -77,8 +77,11 @@ class AppGraph(driverFactory: DriverFactory) {
         val workout = store.latestWorkout(WorkoutId(workoutId)) ?: return null
         val draft = WorkoutDraft.from(workout, catalog) ?: return null
         val copy = draft.copy(id = null, version = 1, name = Labels(languageCode).copyName(workout.name))
-        return BuilderModel(copy, catalog, registry, store, languageCode)
+        return BuilderModel(copy, catalog, registry, store, languageCode, ::units)
     }
+
+    /** The units chosen in Settings, once the app has opened them; metric until then. */
+    private fun units() = settingsModel?.state?.value?.units ?: UnitSystem.METRIC
 
     fun deleteWorkout(workoutId: String) = store.deleteWorkout(WorkoutId(workoutId))
 

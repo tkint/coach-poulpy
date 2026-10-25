@@ -134,7 +134,7 @@ class ExerciseListModel internal constructor(
         val owned = ticked?.takeIf { it.isNotEmpty() }
         val candidates = catalog.offered
             .filter { area == null || it.muscleGroups.any { group -> group in area.groups } }
-            .filter { type == null || registry.accepts(type, it.measurement) }
+            .filter { type == null || registry.fits(type, it) }
             .filter { owned == null || it.uses(owned) }
         val ranks = search.rank(query)
         val sections = if (ranks == null) {
@@ -203,7 +203,7 @@ class ExerciseListModel internal constructor(
 
     private fun recentlyUsedRows(type: WorkoutType?): List<ExerciseRow> = recent.asSequence()
         .mapNotNull { catalog[it] }
-        .filter { !it.retired && (type == null || registry.accepts(type, it.measurement)) }
+        .filter { !it.retired && (type == null || registry.fits(type, it)) }
         .take(RECENT_COUNT)
         .map(::row)
         .toList()

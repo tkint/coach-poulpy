@@ -42,6 +42,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -76,6 +77,10 @@ import ch.coachpoulpy.android.R
 import ch.coachpoulpy.shared.AppGraph
 import ch.coachpoulpy.shared.BuilderModel
 import ch.coachpoulpy.shared.BuilderRow
+import ch.coachpoulpy.shared.DistanceUnit
+import ch.coachpoulpy.shared.PaceUnit
+import ch.coachpoulpy.shared.TargetKind
+import ch.coachpoulpy.shared.WalkRunTarget
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -254,7 +259,10 @@ private fun EntryCard(model: BuilderModel, row: BuilderRow, open: Boolean, onOpe
                     Text(stringResource(R.string.builder_does_not_fit), color = colors.error, style = MaterialTheme.typography.bodySmall)
                 }
             }
-            if (open) {
+            val target = row.target
+            if (open && target != null) {
+                TargetEditor(model, row, target)
+            } else if (open) {
                 Column(Modifier.padding(end = 4.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         StepperCell(stringResource(R.string.builder_sets), row.sets.toString(), { model.setSets(row.key, row.sets - 1) }, { model.setSets(row.key, row.sets + 1) }, Modifier.weight(1f))
@@ -302,18 +310,28 @@ private fun SettingCell(label: String, modifier: Modifier, content: @Composable 
     }
 }
 
+/** A value between − and +; with [onValue], tapping the value opens a sheet to type it. */
 @Composable
-private fun StepperCell(label: String, value: String, onLess: () -> Unit, onMore: () -> Unit, modifier: Modifier) {
+private fun StepperCell(label: String, value: String, onLess: () -> Unit, onMore: () -> Unit, modifier: Modifier, onValue: (() -> Unit)? = null) {
     val colors = MaterialTheme.colorScheme
+    val editLabel = stringResource(R.string.builder_edit_value, label)
     SettingCell(label, modifier) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             RoundStep("−", stringResource(R.string.builder_less_named, label), onLess)
             BasicText(
                 value,
-                style = MaterialTheme.typography.bodyLarge.copy(color = colors.onSurface, fontWeight = FontWeight.ExtraBold, textAlign = TextAlign.Center, fontFeatureSettings = "tnum"),
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    color = if (onValue != null) colors.primary else colors.onSurface,
+                    fontWeight = FontWeight.ExtraBold,
+                    textAlign = TextAlign.Center,
+                    fontFeatureSettings = "tnum",
+                ),
                 maxLines = 1,
                 autoSize = TextAutoSize.StepBased(minFontSize = 13.sp, maxFontSize = 22.sp),
-                modifier = Modifier.weight(1f).padding(horizontal = 2.dp),
+                modifier = Modifier
+                    .weight(1f)
+                    .then(if (onValue != null) Modifier.clip(RoundedCornerShape(8.dp)).clickable(onClickLabel = editLabel, onClick = onValue) else Modifier)
+                    .padding(horizontal = 2.dp, vertical = 10.dp),
             )
             RoundStep("+", stringResource(R.string.builder_more_named, label), onMore)
         }
@@ -348,6 +366,147 @@ private fun WeightCell(model: BuilderModel, row: BuilderRow, modifier: Modifier)
                 center = true,
             )
             Text("kg", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
+}
+
+private enum class TargetField { DURATION, DISTANCE, PACE }
+
+/** A walk or a run: one block with a duration or a distance, and an optional pace, instead of sets. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun TargetEditor(model: BuilderModel, row: BuilderRow, target: WalkRunTarget) {
+    var editing by rememberSaveable(row.key) { mutableStateOf<TargetField?>(null) }
+    Column(Modifier.padding(end = 4.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        FieldLabel(stringResource(R.string.builder_goal))
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            TargetKind.entries.forEach { kind ->
+                PoulpyChip(selected = target.kind == kind, onClick = { model.setTarget(row.key, kind) }, label = stringResource(kind.label()))
+            }
+        }
+        if (target.durationSeconds != null) {
+            StepperCell(
+                stringResource(R.string.builder_duration), target.durationLabel,
+                { model.changeDuration(row.key, -1) }, { model.changeDuration(row.key, 1) },
+                Modifier.fillMaxWidth(), onValue = { editing = TargetField.DURATION },
+            )
+        }
+        if (target.distanceMeters != null) {
+            StepperCell(
+                stringResource(R.string.builder_distance), target.distanceLabel,
+                { model.changeDistance(row.key, -1) }, { model.changeDistance(row.key, 1) },
+                Modifier.fillMaxWidth(), onValue = { editing = TargetField.DISTANCE },
+            )
+        }
+        if (target.speedKmh != null) {
+            StepperCell(
+                stringResource(R.string.builder_pace), target.paceLabel,
+                { model.changePace(row.key, -1) }, { model.changePace(row.key, 1) },
+                Modifier.fillMaxWidth(), onValue = { editing = TargetField.PACE },
+            )
+        }
+        StepperCell(stringResource(R.string.builder_rest), row.restLabel, { model.changeRest(row.key, -1) }, { model.changeRest(row.key, 1) }, Modifier.fillMaxWidth())
+        Text(
+            listOfNotNull(target.hint?.let { "≈ $it" }, stringResource(R.string.builder_tap_to_type)).joinToString(" · "),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+    editing?.let { field -> ValueSheet(model, row.key, target, field, onDone = { editing = null }) }
+}
+
+private fun TargetKind.label() = when (this) {
+    TargetKind.DURATION -> R.string.builder_duration
+    TargetKind.DISTANCE -> R.string.builder_distance
+    TargetKind.DURATION_PACE -> R.string.builder_duration_pace
+    TargetKind.DISTANCE_PACE -> R.string.builder_distance_pace
+}
+
+/** Types a duration, distance or pace, with its unit and quick picks such as 10 km, 1 h or 5:00 /km. */
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@Composable
+private fun ValueSheet(model: BuilderModel, key: String, target: WalkRunTarget, field: TargetField, onDone: () -> Unit) {
+    var text by remember(field) {
+        mutableStateOf(
+            when (field) {
+                TargetField.DURATION -> target.durationText
+                TargetField.DISTANCE -> target.distanceText
+                TargetField.PACE -> target.paceText
+            },
+        )
+    }
+    var invalid by remember(field) { mutableStateOf(false) }
+    val title = stringResource(
+        when (field) {
+            TargetField.DURATION -> R.string.builder_duration
+            TargetField.DISTANCE -> R.string.builder_distance
+            TargetField.PACE -> R.string.builder_pace
+        },
+    )
+    fun apply(value: String) = when (field) {
+        TargetField.DURATION -> model.setDuration(key, value)
+        TargetField.DISTANCE -> model.setDistance(key, value, target.distanceUnit)
+        TargetField.PACE -> model.setPace(key, value, target.paceUnit)
+    }
+    val picks = when (field) {
+        TargetField.DURATION -> model.durationPicks()
+        TargetField.DISTANCE -> model.distancePicks(target.distanceUnit)
+        TargetField.PACE -> model.pacePicks(key, target.paceUnit)
+    }
+    val decimal = field == TargetField.DISTANCE || (field == TargetField.PACE && target.paceUnit.isSpeed)
+    val colors = MaterialTheme.colorScheme
+    ModalBottomSheet(onDismissRequest = onDone, containerColor = colors.surface) {
+        Column(
+            Modifier.padding(horizontal = 20.dp).padding(bottom = 24.dp).navigationBarsPadding(),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
+        ) {
+            Text(title, style = MaterialTheme.typography.titleLarge)
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                BoxField(
+                    text,
+                    { text = it; invalid = false },
+                    label = title,
+                    modifier = Modifier.weight(1f).height(56.dp),
+                    keyboard = KeyboardOptions(keyboardType = if (decimal) KeyboardType.Decimal else KeyboardType.Text),
+                    center = true,
+                )
+                if (field != TargetField.DURATION) {
+                    Text(
+                        if (field == TargetField.DISTANCE) target.distanceUnit.symbol else target.paceUnit.symbol,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = colors.onSurfaceVariant,
+                    )
+                }
+            }
+            if (invalid) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Icon(Icons.Filled.ErrorOutline, contentDescription = null, tint = colors.error, modifier = Modifier.size(18.dp))
+                    Text(stringResource(R.string.builder_value_invalid), color = colors.error, style = MaterialTheme.typography.bodySmall)
+                }
+            }
+            if (field != TargetField.DURATION) {
+                FieldLabel(stringResource(R.string.builder_unit))
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    if (field == TargetField.DISTANCE) {
+                        DistanceUnit.entries.forEach { unit ->
+                            PoulpyChip(selected = target.distanceUnit == unit, onClick = { text = model.setDistanceUnit(key, unit, text); invalid = false }, label = unit.symbol)
+                        }
+                    } else {
+                        PaceUnit.entries.forEach { unit ->
+                            PoulpyChip(selected = target.paceUnit == unit, onClick = { text = model.setPaceUnit(key, unit, text); invalid = false }, label = unit.symbol)
+                        }
+                    }
+                }
+            }
+            FieldLabel(stringResource(R.string.builder_quick_picks))
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                picks.forEach { pick ->
+                    PoulpyChip(selected = text == pick.text, onClick = { if (apply(pick.text)) onDone() }, label = pick.label)
+                }
+            }
+            Button(onClick = { if (apply(text)) onDone() else invalid = true }, modifier = Modifier.fillMaxWidth().height(52.dp)) {
+                Text(stringResource(R.string.action_done), fontWeight = FontWeight.ExtraBold)
+            }
         }
     }
 }
