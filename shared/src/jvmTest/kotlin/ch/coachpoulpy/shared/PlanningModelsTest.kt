@@ -149,7 +149,7 @@ class PlanningModelsTest {
         assertEquals(listOf("Zebra"), model.filter(state, query = "zeb").rows.map { it.name })
         assertEquals(listOf("Arms", "Legs", "Zebra"), model.filter(state, sort = LibrarySort.ALPHABETICAL).rows.map { it.name })
         assertEquals(listOf("Arms", "Legs", "Zebra"), model.filter(state, sort = LibrarySort.NEXT_PLANNED).rows.map { it.name })
-        assertEquals(listOf(WorkoutType.STRENGTH), state.kinds.map { it.type })
+        assertEquals(WorkoutType.entries, state.kinds.map { it.type })
     }
 
     @Test

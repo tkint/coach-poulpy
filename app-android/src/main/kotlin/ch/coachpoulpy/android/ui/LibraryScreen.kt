@@ -91,7 +91,7 @@ fun LibraryScreen(
             ViewSwitch(view, onView)
         }
         when (view) {
-            LibraryView.WORKOUTS -> Workouts(graph, language, onOpenWorkout, onStart, onNew, onCopy)
+            LibraryView.WORKOUTS -> Box(Modifier.padding(top = 4.dp)) { Workouts(graph, language, onOpenWorkout, onStart, onNew, onCopy) }
             LibraryView.EXERCISES -> ExerciseList(graph, language, type = null, onPick = onOpenExercise, modifier = Modifier.padding(top = 4.dp))
         }
     }
@@ -175,15 +175,13 @@ private fun Workouts(
                 label = stringResource(R.string.library_search_label),
                 countLabel = listing.countLabel,
                 chips = {
-                    if (state.kinds.size > 1) {
-                        item { PoulpyChip(selected = kind == null, onClick = { kind = null }, label = stringResource(R.string.library_all)) }
-                        items(state.kinds, key = { it.type.name }) { filter ->
-                            PoulpyChip(
-                                selected = kind == filter.type,
-                                onClick = { kind = if (kind == filter.type) null else filter.type },
-                                label = filter.label,
-                            )
-                        }
+                    item { PoulpyChip(selected = kind == null, onClick = { kind = null }, label = stringResource(R.string.library_all)) }
+                    items(state.kinds, key = { it.type.name }) { filter ->
+                        PoulpyChip(
+                            selected = kind == filter.type,
+                            onClick = { kind = if (kind == filter.type) null else filter.type },
+                            label = filter.label,
+                        )
                     }
                 },
                 action = {
