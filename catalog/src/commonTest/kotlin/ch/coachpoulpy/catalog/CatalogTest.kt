@@ -58,16 +58,23 @@ class CatalogTest {
     }
 
     @Test
-    fun gentleWalksAreTimedBodyweightVariationsOfTheBriskWalk() {
+    fun walksAndRunsAreOrderedEasiestToHardest() {
         assertEquals(
-            listOf("walk-with-support", "gentle-walk", "brisk-walk"),
+            listOf("walk-with-support", "gentle-walk", "walk", "brisk-walk"),
             names(Catalog.bundled.variationsOf(ExerciseSlug("gentle-walk"))),
         )
+        assertEquals(listOf("easy-run", "run"), names(Catalog.bundled.variationsOf(ExerciseSlug("run"))))
         listOf("walk-with-support", "gentle-walk").forEach { slug ->
             val walk = Catalog.bundled[ExerciseSlug(slug)]!!
             assertEquals(MeasurementMode.TIME, walk.measurement)
-            assertTrue(walk.allEquipment.isEmpty(), "$slug needs nothing, not even a treadmill")
+            assertTrue(walk.equipment.isEmpty(), "$slug needs nothing; a treadmill is only optional")
         }
+    }
+
+    @Test
+    fun everyWalkAndRunCanBeDoneOnATreadmillButNotTheJumps() {
+        val treadmill = Catalog.bundled.offered.filter { Equipment.TREADMILL in it.optionalEquipment }.map { it.slug.value }.toSet()
+        assertEquals(setOf("walk-with-support", "gentle-walk", "walk", "brisk-walk", "easy-run", "run"), treadmill)
     }
 
     @Test

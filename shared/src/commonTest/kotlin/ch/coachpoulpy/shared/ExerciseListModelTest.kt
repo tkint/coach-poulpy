@@ -225,7 +225,7 @@ class ExerciseListModelTest {
 
     @Test
     fun aTreadmillListsOnlyTheExercisesThatUseIt() {
-        assertEquals(setOf("brisk-walk", "easy-run"), fitting(Equipment.TREADMILL).toSet())
+        assertEquals(setOf("walk-with-support", "gentle-walk", "walk", "brisk-walk", "easy-run", "run"), fitting(Equipment.TREADMILL).toSet())
     }
 
     @Test

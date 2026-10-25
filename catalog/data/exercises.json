@@ -1,5 +1,5 @@
 {
-  "version": 7,
+  "version": 8,
   "exercises": [
     {
       "slug": "goblet-squat",
@@ -496,6 +496,7 @@
       "aliases": { "en": ["assisted walk", "walker", "cane", "crutches"], "fr": ["marche assistée", "déambulateur", "canne", "béquilles"] },
       "movementPattern": "LOCOMOTION",
       "muscleGroups": ["FULL_BODY"],
+      "optionalEquipment": ["TREADMILL"],
       "measurement": "TIME",
       "variationNote": { "en": "With a walking aid or something to hold", "fr": "Avec une aide à la marche ou un appui" },
       "instructions": [
@@ -510,12 +511,28 @@
       "aliases": { "en": ["slow walk", "easy walk", "stroll"], "fr": ["marche lente", "promenade"] },
       "movementPattern": "LOCOMOTION",
       "muscleGroups": ["FULL_BODY"],
+      "optionalEquipment": ["TREADMILL"],
       "measurement": "TIME",
       "variationNote": { "en": "Slow and short, at your own pace", "fr": "Lente et courte, à votre rythme" },
       "instructions": [
         { "en": "Walk slowly on flat ground, indoors or outside, standing tall.", "fr": "Marchez lentement sur un sol plat, à l'intérieur ou dehors, en vous tenant droit." },
         { "en": "Keep a pace where you breathe easily. A minute or two is a good start.", "fr": "Gardez une allure où vous respirez facilement. Une minute ou deux, c'est un bon début." },
         { "en": "Stop and rest if anything hurts, and follow your care team's advice.", "fr": "Arrêtez-vous et reposez-vous si quelque chose fait mal, et suivez les conseils de vos soignants." }
+      ]
+    },
+    {
+      "slug": "walk",
+      "name": { "en": "Walk", "fr": "Marche" },
+      "aliases": { "en": ["walking"], "fr": ["promenade active"] },
+      "movementPattern": "LOCOMOTION",
+      "muscleGroups": ["FULL_BODY"],
+      "optionalEquipment": ["TREADMILL"],
+      "measurement": "TIME",
+      "variationNote": { "en": "Your everyday pace", "fr": "Votre allure de tous les jours" },
+      "instructions": [
+        { "en": "Walk at your everyday pace, standing tall, arms swinging freely.", "fr": "Marchez à votre allure de tous les jours, en vous tenant droit, les bras libres." },
+        { "en": "Land on your heel and roll through to your toes.", "fr": "Posez le talon puis déroulez le pied jusqu'aux orteils." },
+        { "en": "On a treadmill, look ahead rather than at your feet.", "fr": "Sur un tapis, regardez devant vous plutôt que vos pieds." }
       ]
     },
     {
@@ -538,8 +555,23 @@
       "muscleGroups": ["FULL_BODY", "CALVES"],
       "optionalEquipment": ["TREADMILL"],
       "measurement": "TIME",
+      "variationNote": { "en": "Relaxed, you could chat", "fr": "Détendue, on peut discuter" },
       "instructions": [
         { "en": "Run at a relaxed pace where you could hold a conversation.", "fr": "Courez à une allure détendue qui permet de discuter." }
+      ]
+    },
+    {
+      "slug": "run",
+      "name": { "en": "Run", "fr": "Course" },
+      "aliases": { "en": ["running", "steady run"], "fr": ["course à pied", "running"] },
+      "movementPattern": "LOCOMOTION",
+      "muscleGroups": ["FULL_BODY", "CALVES"],
+      "optionalEquipment": ["TREADMILL"],
+      "measurement": "TIME",
+      "variationNote": { "en": "Steady and comfortable", "fr": "Régulière et confortable" },
+      "instructions": [
+        { "en": "Run at a steady pace you could hold for a while, breathing deeply.", "fr": "Courez à une allure régulière que vous pourriez tenir longtemps, en respirant profondément." },
+        { "en": "Take short, light steps under your hips, shoulders relaxed.", "fr": "Faites des foulées courtes et légères sous les hanches, épaules relâchées." }
       ]
     },
     {
@@ -693,6 +725,7 @@
   "variations": [
     ["knee-push-up", "incline-push-up", "push-up", "diamond-push-up", "one-arm-push-up"],
     ["chair-squat", "bodyweight-squat", "goblet-squat"],
-    ["walk-with-support", "gentle-walk", "brisk-walk"]
+    ["walk-with-support", "gentle-walk", "walk", "brisk-walk"],
+    ["easy-run", "run"]
   ]
 }
