@@ -1,6 +1,6 @@
 # Brand
 
-Poulpy is a reversible plush octopus: blue and smiling on one side, grumpy on the other. In the app the grumpy side is ember, from burnt orange to red. **The side is the status** (are you keeping your plan?) **and the shade is the feeling** (what just happened). The full brand book v6, with the logo, colour choices and every drawing, is on the site's Brand book page.
+Poulpy is a reversible plush octopus: blue and smiling on one side, grumpy on the other. In the app the grumpy side is ember, from burnt orange to red. **The side is the status** (are you keeping your plan?) **and the shade is the feeling** (what just happened). The full brand book, with the logo, colours and every drawing, is on the site's Brand book page, and [Brand decisions](./brand-decisions.md) traces what was decided and why.
 
 ## Character rules
 
@@ -47,7 +47,7 @@ Poses marked Current keep whatever mood Poulpy is in. The shared `PoulpyCoach` d
 
 ## Tentacles
 
-Poulpy's ring has eight tentacles. Each finished session lights one, and **a lit tentacle never goes dark**: there is no weekly reset, so a quiet month takes nothing away. The eighth makes a **full octopus** (Champion), and the next session starts a new ring. This replaces the brand book's "eight tentacles a week".
+Poulpy's ring has eight tentacles. Each finished session lights one, and **a lit tentacle never goes dark**: there is no weekly reset, so a quiet month takes nothing away. The eighth makes a **full octopus** (Champion), and the next session starts a new ring. This replaced "eight tentacles a week"; see [Brand decisions](./brand-decisions.md), decision 11.
 
 ## Voice
 

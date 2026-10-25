@@ -2,7 +2,7 @@
 //   node design/build-poulpy.mjs          write the generated files
 //   node design/build-poulpy.mjs --check  fail if a generated file is out of date (used by CI)
 //
-// The drawing code is ported from the Poulpy Brand Book (v6) so the apps draw exactly the
+// The drawing code is ported from the Poulpy brand book (site/public/brand/book.html) so the apps draw exactly the
 // validated sketches. Each drawing is built as SVG, normalised (shapes become paths, text
 // becomes stroked lettering), then written as:
 //   design/poulpy/<name>.svg                                    reference copy

@@ -4,7 +4,7 @@ import { data as adrs } from './adrs.data.ts'
 
 # Decisions
 
-Architecture decision records: each one says what was decided and why, in a paragraph or two. They live in [`docs/adr/`](../docs/adr/), and a new one is added in the same PR as the change it explains. Agents read the ones touching their area before working there.
+Architecture decision records: each one says what was decided and why, in a paragraph or two. They live in [`docs/adr/`](../docs/adr/), and a new one is added in the same PR as the change it explains. Agents read the ones touching their area before working there. Brand decisions (logo, colours, moods, poses) are traced on their own page, [Brand decisions](../docs/brand-decisions.md).
 
 <table>
   <thead><tr><th>#</th><th>Decision</th><th>Status</th><th>Date</th></tr></thead>

@@ -81,7 +81,8 @@ export default withMermaid(
           items: [
             { text: 'Poulpy and his moods', link: '/docs/brand' },
             { text: 'Drawings', link: '/drawings' },
-            { text: 'Brand book v6', link: '/brand-book' },
+            { text: 'Brand book', link: '/brand-book' },
+            { text: 'Brand decisions', link: '/docs/brand-decisions' },
           ],
         },
         {
