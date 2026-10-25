@@ -68,6 +68,18 @@ class AppGraph(driverFactory: DriverFactory) {
         return BuilderModel(draft, catalog, registry, store, languageCode)
     }
 
+    /**
+     * An unsaved copy of a workout made with the builder: a new id, version 1, "(copy)"
+     * after the name, the same type and steps, and no days or history. Null otherwise.
+     * Not "copyWorkout": Objective-C reserves the "copy" prefix, and Kotlin would rename it.
+     */
+    fun duplicateWorkout(workoutId: String, languageCode: String): BuilderModel? {
+        val workout = store.latestWorkout(WorkoutId(workoutId)) ?: return null
+        val draft = WorkoutDraft.from(workout, catalog) ?: return null
+        val copy = draft.copy(id = null, version = 1, name = Labels(languageCode).copyName(workout.name))
+        return BuilderModel(copy, catalog, registry, store, languageCode)
+    }
+
     fun deleteWorkout(workoutId: String) = store.deleteWorkout(WorkoutId(workoutId))
 
     /** A new guided session of the latest version of a workout, ready to start. */

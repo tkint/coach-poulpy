@@ -3,7 +3,7 @@ import Shared
 
 /// What to open over the workout page.
 private enum Cover: Identifiable {
-    case builder, player
+    case builder, player, copy
 
     var id: Self { self }
 }
@@ -66,7 +66,11 @@ struct WorkoutPageView: View {
         .toolbar {
             if state.found {
                 Menu {
-                    Button("action.delete", role: .destructive) { deleting = true }
+                    if state.editable {
+                        Button { cover = .copy } label: { Label("action.copy", systemImage: "doc.on.doc") }
+                        Divider()
+                    }
+                    Button(role: .destructive) { deleting = true } label: { Label("action.delete", systemImage: "trash") }
                 } label: {
                     Label("action.more", systemImage: "ellipsis.circle")
                 }
@@ -82,15 +86,17 @@ struct WorkoutPageView: View {
         .sheet(isPresented: $picking) {
             PlanSheet(name: state.name, planned: state.plans) { days in page.model.setDays(days: days) }
         }
-        .confirmationDialog("delete.title", isPresented: $deleting, titleVisibility: .visible) {
+        .alert(state.deletePrompt.title, isPresented: $deleting) {
+            Button("action.cancel", role: .cancel) {}
             Button("action.delete", role: .destructive) { page.model.delete() }
         } message: {
-            Text("delete.body")
+            Text(state.deletePrompt.message)
         }
         .fullScreenCover(item: $cover) { cover in
             switch cover {
             case .builder: BuilderView(graph: graph, workoutId: workoutId)
             case .player: PlayerView(graph: graph, workoutId: workoutId)
+            case .copy: BuilderView(graph: graph, workoutId: nil, copyOf: workoutId)
             }
         }
     }

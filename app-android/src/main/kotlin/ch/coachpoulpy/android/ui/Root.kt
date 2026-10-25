@@ -38,7 +38,7 @@ private enum class Tab(@StringRes val label: Int, val icon: ImageVector) {
 
 /**
  * The screen shown over the tabs, as a string so it survives rotation:
- * "builder:" (new), "builder:<id>", "builder-add:<slug>" (new, holding that exercise), "player:<id>", "resume", "workout:<id>", "exercise:<slug>", "session:<id>",
+ * "builder:" (new), "builder:<id>", "builder-add:<slug>" (new, holding that exercise), "builder-copy:<id>" (an unsaved copy), "player:<id>", "resume", "workout:<id>", "exercise:<slug>", "session:<id>",
  * "device-add", "device-sources" or "device:<key>".
  */
 private typealias Route = String
@@ -97,6 +97,7 @@ fun CoachPoulpyRoot(graph: AppGraph) {
                     onOpenWorkout = { route = "workout:$it" },
                     onStart = { route = "player:$it" },
                     onNew = { route = "builder:" },
+                    onCopy = { route = "builder-copy:$it" },
                     onOpenExercise = { route = "exercise:$it" },
                     modifier = modifier,
                 )
@@ -132,6 +133,7 @@ fun CoachPoulpyRoot(graph: AppGraph) {
             when (kind) {
                 "builder" -> BuilderScreen(graph, language, workoutId = arg.ifEmpty { null }, onClose = close)
                 "builder-add" -> BuilderScreen(graph, language, workoutId = null, firstExercise = arg, onClose = close)
+                "builder-copy" -> BuilderScreen(graph, language, workoutId = null, copyOf = arg, onClose = close)
                 "player" -> PlayerScreen(graph, language, workoutId = arg, onClose = close)
                 "workout" -> WorkoutPageScreen(
                     graph, language, workoutId = arg,
@@ -140,6 +142,10 @@ fun CoachPoulpyRoot(graph: AppGraph) {
                     onEdit = {
                         back = current
                         route = "builder:$arg"
+                    },
+                    onCopy = {
+                        back = current
+                        route = "builder-copy:$arg"
                     },
                     onOpenExercise = {
                         back = current

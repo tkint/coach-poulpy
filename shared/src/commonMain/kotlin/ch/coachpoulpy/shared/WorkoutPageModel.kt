@@ -64,9 +64,33 @@ data class WorkoutPageState(
     val usualMinutes: Int? = null,
     /** Every upcoming planned day, soonest first; empty when the workout waits in the library. */
     val plans: List<PlannedDay> = emptyList(),
-    /** Only workouts made with the builder can be edited. */
+    /** Only workouts made with the builder can be edited or copied. */
     val editable: Boolean = false,
+    val deletePrompt: DeletePrompt = DeletePrompt("", ""),
 )
+
+/** What deleting a workout asks: "Delete Upper body?", then what goes and what stays. */
+data class DeletePrompt(val title: String, val message: String)
+
+/** The upcoming days [workoutId] is planned for, soonest first; a plan for today already done is not shown again. */
+internal fun upcomingDays(plans: List<PlannedWorkout>, workoutId: WorkoutId, today: LocalDate, doneToday: Boolean, zone: TimeZone) =
+    plans.filter { it.workoutId == workoutId && (it.day > today || (it.day == today && !doneToday)) }
+        .sortedBy { it.day }
+        .map { PlannedDay(it.id, it.day.startMillis(zone), today.daysUntil(it.day), PlanDate.of(it.day)) }
+
+/**
+ * Plans [workoutId] on exactly [days] from [today] on, as ticked on the plan sheet:
+ * [upcoming] plans not in [days] are removed, new days are added, and past days are
+ * left as they are. An empty list keeps the workout unplanned.
+ */
+internal fun LocalStore.setDays(workoutId: WorkoutId, upcoming: List<PlannedDay>, days: List<PlanDate>, today: LocalDate) {
+    val wanted = days.map { it.date }.filter { it >= today }.toSet()
+    replacePlans(
+        workoutId,
+        add = (wanted - upcoming.map { it.date.date }.toSet()).sorted(),
+        remove = upcoming.filter { it.date.date !in wanted }.map { it.planId },
+    )
+}
 
 /** One saved workout: what is in it, how it went before, and the days it is planned for. */
 class WorkoutPageModel internal constructor(
@@ -91,21 +115,8 @@ class WorkoutPageModel internal constructor(
 
     fun watch(onChange: (WorkoutPageState) -> Unit): Cancellable = state.watchIn(scope, onChange)
 
-    /**
-     * Plans the workout on exactly [days] from today on, as ticked on the plan sheet:
-     * upcoming plans not in [days] are removed, new days are added, and past days are
-     * left as they are. An empty list keeps the workout unplanned.
-     */
-    fun setDays(days: List<PlanDate>) {
-        val today = clock.now().toLocalDateTime(zone).date
-        val wanted = days.map { it.date }.filter { it >= today }.toSet()
-        val upcoming = state.value.plans
-        store.replacePlans(
-            workoutId,
-            add = (wanted - upcoming.map { it.date.date }.toSet()).sorted(),
-            remove = upcoming.filter { it.date.date !in wanted }.map { it.planId },
-        )
-    }
+    /** Plans the workout on exactly [days] from today on, as ticked on the plan sheet ([LocalStore.setDays]). */
+    fun setDays(days: List<PlanDate>) = store.setDays(workoutId, state.value.plans, days, clock.now().toLocalDateTime(zone).date)
 
     fun delete() = store.deleteWorkout(workoutId)
 
@@ -116,8 +127,7 @@ class WorkoutPageModel internal constructor(
         val today = clock.now().toLocalDateTime(zone).date
         val done = sessions.filter { it.counts && it.execution.workout?.workoutId == workoutId }
         val doneToday = done.any { it.execution.startedAt.toLocalDateTime(zone).date == today }
-        // A plan for today that was already done is not shown again.
-        val upcoming = plans.filter { it.workoutId == workoutId && (it.day > today || (it.day == today && !doneToday)) }.sortedBy { it.day }
+        val upcoming = upcomingDays(plans, workoutId, today, doneToday, zone)
         val minutes = done.mapNotNull { it.realTotals?.active?.inWholeMinutes?.toInt() }.sorted()
         val equipment = exerciseSteps(workout).mapNotNull { catalog[it.exercise] }
             .flatMap { it.equipment.flatten() }
@@ -136,7 +146,8 @@ class WorkoutPageModel internal constructor(
             timesDone = done.size,
             lastDoneMillis = done.maxOfOrNull { it.execution.startedAt }?.toEpochMilliseconds(),
             usualMinutes = minutes.getOrNull(minutes.size / 2)?.coerceAtLeast(1),
-            plans = upcoming.map { PlannedDay(it.id, it.day.startMillis(zone), today.daysUntil(it.day), PlanDate.of(it.day)) },
+            plans = upcoming,
+            deletePrompt = labels.deletePrompt(workout.name, upcoming.size, done.size),
             editable = WorkoutDraft.from(workout, catalog) != null,
         )
     }

@@ -7,11 +7,13 @@ enum LibrarySection: Hashable { case workouts, exercises }
 private enum Cover: Identifiable {
     case builder
     case player(workoutId: String)
+    case copy(workoutId: String)
 
     var id: String {
         switch self {
         case .builder: return "builder"
         case .player(let id): return "player:\(id)"
+        case .copy(let id): return "copy:\(id)"
         }
     }
 }
@@ -25,6 +27,9 @@ struct LibraryView: View {
     @State private var kind: WorkoutType?
     @State private var sort = LibrarySort.recent
     @State private var cover: Cover?
+    /// The workout whose plan sheet or delete alert is open, by id so a fresh row is used.
+    @State private var planning: String?
+    @State private var deleting: String?
 
     init(graph: AppGraph, section: Binding<LibrarySection>) {
         self.graph = graph
@@ -70,6 +75,7 @@ struct LibraryView: View {
                 switch cover {
                 case .builder: BuilderView(graph: graph, workoutId: nil)
                 case .player(let id): PlayerView(graph: graph, workoutId: id)
+                case .copy(let id): BuilderView(graph: graph, workoutId: nil, copyOf: id)
                 }
             }
         }
@@ -168,6 +174,22 @@ struct LibraryView: View {
                 .padding(.horizontal, 20)
                 .padding(.bottom, 20)
             }
+            .sheet(isPresented: Binding(get: { planning != nil }, set: { if !$0 { planning = nil } })) {
+                if let row = state.rows.first(where: { $0.id == planning }) {
+                    PlanSheet(name: row.name, planned: row.plans) { days in library.model.setDays(row: row, days: days) }
+                }
+            }
+            .alert(
+                state.rows.first(where: { $0.id == deleting })?.deletePrompt.title ?? "",
+                isPresented: Binding(get: { deleting != nil }, set: { if !$0 { deleting = nil } })
+            ) {
+                Button("action.cancel", role: .cancel) {}
+                Button("action.delete", role: .destructive) {
+                    if let row = state.rows.first(where: { $0.id == deleting }) { library.model.delete(row: row) }
+                }
+            } message: {
+                Text(state.rows.first(where: { $0.id == deleting })?.deletePrompt.message ?? "")
+            }
         }
     }
 
@@ -217,6 +239,15 @@ struct LibraryView: View {
         .padding(EdgeInsets(top: 10, leading: 12, bottom: 10, trailing: 8))
         .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 16))
         .overlay(RoundedRectangle(cornerRadius: 16).stroke(PoulpyColor.outline))
+        .contentShape(.contextMenuPreview, RoundedRectangle(cornerRadius: 16))
+        .contextMenu {
+            Button { planning = row.id } label: { Label("library.plan.day", systemImage: "calendar.badge.plus") }
+            if row.editable {
+                Button { cover = .copy(workoutId: row.id) } label: { Label("action.copy", systemImage: "doc.on.doc") }
+            }
+            Divider()
+            Button(role: .destructive) { deleting = row.id } label: { Label("action.delete", systemImage: "trash") }
+        }
     }
 
     @ViewBuilder

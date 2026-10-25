@@ -68,11 +68,11 @@
     <string name="action_start">Start</string>
     <string name="action_edit">Edit</string>
     <string name="action_delete">Delete</string>
+    <string name="action_copy">Copy</string>
+    <string name="library_plan_day">Plan for a day</string>
     <string name="action_back">Back</string>
     <string name="action_save">Save</string>
     <string name="action_more">More</string>
-    <string name="delete_title">Delete this workout?</string>
-    <string name="delete_body">Sessions you already did are kept.</string>
     <string name="action_done">Done</string>
     <string name="action_cancel">Cancel</string>
 

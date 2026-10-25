@@ -49,11 +49,11 @@
 "action.start" = "Commencer";
 "action.edit" = "Modifier";
 "action.delete" = "Supprimer";
+"action.copy" = "Copier";
+"library.plan.day" = "Prévoir pour un jour";
 "action.save" = "Enregistrer";
 "action.cancel" = "Annuler";
 "action.more" = "Plus";
-"delete.title" = "Supprimer cette séance ?";
-"delete.body" = "Les séances déjà faites sont conservées.";
 
 "exercises.search" = "Nom, muscle ou matériel";
 "exercises.all" = "Tous";
