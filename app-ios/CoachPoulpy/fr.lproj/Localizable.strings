@@ -98,7 +98,6 @@
 "builder.more" = "Plus";
 "builder.remove.named %@" = "Retirer %@";
 "builder.open %@" = "Modifier %@";
-"builder.reorder %@" = "Déplacer %@";
 "builder.does.not.fit" = "Ce type de séance ne peut pas inclure cet exercice. Retirez-le ou choisissez un autre type.";
 "builder.empty" = "Ajoutez des exercices pour composer votre séance.";
 
