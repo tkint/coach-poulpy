@@ -159,5 +159,18 @@ internal class Labels(private val languageCode: String) {
 
     fun aboutMinutes(minutes: Int) = t("about $minutes min", "environ $minutes min")
 
+    /** One exercise's plan in a line: "3 × 10 each side · 14 kg · rest 60 s". */
+    fun prescription(entry: DraftEntry): String {
+        val amount = when (entry.measurement) {
+            MeasurementMode.REPS -> entry.amount.toString()
+            else -> amount(entry.measurement, entry.amount)
+        }
+        return listOfNotNull(
+            "${entry.sets} × $amount" + if (entry.perSide) " $perSide" else "",
+            entry.loadKg?.let(::kilograms),
+            entry.restSeconds.takeIf { it > 0 }?.let(::restAfter),
+        ).joinToString(" · ")
+    }
+
     fun restAfter(seconds: Int) = t("rest ${duration(seconds)}", "repos ${duration(seconds)}")
 }

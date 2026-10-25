@@ -74,6 +74,7 @@
     <string name="action_more">Plus</string>
     <string name="action_done">OK</string>
     <string name="action_cancel">Annuler</string>
+    <string name="action_close">Fermer</string>
 
     <string name="exercises_search">Nom, muscle ou matériel</string>
     <string name="exercises_all">Tous</string>
@@ -116,12 +117,16 @@
     <string name="builder_sets">Séries</string>
     <string name="builder_target">Par série</string>
     <string name="builder_rest">Repos après</string>
-    <string name="builder_weight">Charge (kg)</string>
+    <string name="builder_weight">Charge</string>
     <string name="builder_move_up">Monter</string>
     <string name="builder_move_down">Descendre</string>
     <string name="builder_remove">Retirer</string>
-    <string name="builder_less">Moins</string>
-    <string name="builder_more">Plus</string>
+    <string name="builder_weight_kg">Charge en kilogrammes</string>
+    <string name="builder_less_named">Moins : %1$s</string>
+    <string name="builder_more_named">Plus : %1$s</string>
+    <string name="builder_remove_named">Retirer %1$s</string>
+    <string name="builder_open">Modifier %1$s</string>
+    <string name="builder_reorder">Déplacer %1$s</string>
     <string name="builder_does_not_fit">Ce type de séance ne peut pas inclure cet exercice. Retirez-le ou choisissez un autre type.</string>
     <string name="builder_empty">Ajoutez des exercices pour composer votre séance.</string>
 

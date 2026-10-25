@@ -31,6 +31,8 @@ data class BuilderRow(
     val restLabel: String,
     /** False when the chosen workout type cannot run this exercise. */
     val fitsType: Boolean,
+    /** The folded card's line, as on the workout page: "3 × 10 · 20 kg · rest 90 s". */
+    val summary: String,
 )
 
 data class BuilderState(
@@ -138,6 +140,7 @@ class BuilderModel internal constructor(
                 restSeconds = entry.restSeconds,
                 restLabel = labels.duration(entry.restSeconds),
                 fitsType = registry.accepts(draft.type, entry.measurement),
+                summary = labels.prescription(entry),
             )
         }
         return BuilderState(
