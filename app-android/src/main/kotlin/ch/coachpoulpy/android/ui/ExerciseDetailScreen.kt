@@ -1,22 +1,19 @@
 package ch.coachpoulpy.android.ui
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -27,7 +24,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import ch.coachpoulpy.android.R
@@ -77,7 +73,7 @@ fun ExerciseDetailScreen(
     }
 }
 
-/** The exercise's group, easiest first; this exercise is marked in place and the others open. */
+/** The exercise's group as one line of pills, easiest first; this exercise is checked in place and the others open. */
 @Composable
 private fun Variations(variations: List<VariationRow>, onOpen: (String) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -87,37 +83,18 @@ private fun Variations(variations: List<VariationRow>, onOpen: (String) -> Unit)
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        variations.forEach { variation ->
-            val shape = RoundedCornerShape(16.dp)
-            val row = Modifier.fillMaxWidth().heightIn(min = 48.dp).clip(shape)
-            Row(
-                modifier = if (variation.current) {
-                    row.background(MaterialTheme.colorScheme.primaryContainer)
-                } else {
-                    row.border(1.5.dp, MaterialTheme.colorScheme.outline, shape).clickable { onOpen(variation.slug) }
-                }.padding(horizontal = 16.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                Text(
-                    variation.name,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = if (variation.current) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.weight(1f),
+        Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            variations.forEach { variation ->
+                FilterChip(
+                    selected = variation.current,
+                    onClick = { if (!variation.current) onOpen(variation.slug) },
+                    label = { Text(variation.name) },
+                    leadingIcon = if (variation.current) {
+                        { Icon(Icons.Filled.Check, contentDescription = stringResource(R.string.exercise_variation_current)) }
+                    } else {
+                        null
+                    },
                 )
-                if (variation.current) {
-                    Text(
-                        stringResource(R.string.exercise_variation_current),
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    )
-                } else {
-                    Icon(
-                        Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
             }
         }
     }
