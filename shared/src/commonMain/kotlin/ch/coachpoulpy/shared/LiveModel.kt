@@ -104,7 +104,10 @@ enum class LiveConnection {
     /** No device added, or none of the added ones is connecting: the empty state shows. */
     EMPTY,
 
-    /** At least one added device is connecting or reconnecting and none is connected yet: Live shows read-only. */
+    /**
+     * At least one added device is connecting or reconnecting, or about to just after launch, and none is
+     * connected yet: Live shows read-only.
+     */
     CONNECTING,
 
     /** At least one device is connected. */
@@ -191,7 +194,10 @@ class LiveModel(
         scope.launch {
             devices.state.collect { d ->
                 if (d.connectedCount == 0) latest = null
-                val connecting = d.known.filter { it.status == ConnectionStatus.CONNECTING || it.status == ConnectionStatus.RECONNECTING }
+                val connecting = d.known.filter {
+                    it.status == ConnectionStatus.CONNECTING || it.status == ConnectionStatus.RECONNECTING ||
+                        (d.startingUp && it.autoConnect && it.status == ConnectionStatus.IDLE)
+                }
                 val connection = when {
                     d.connectedCount > 0 -> LiveConnection.CONNECTED
                     connecting.isNotEmpty() -> LiveConnection.CONNECTING

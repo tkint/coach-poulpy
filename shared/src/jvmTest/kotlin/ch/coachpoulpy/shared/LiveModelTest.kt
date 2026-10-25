@@ -257,6 +257,29 @@ class LiveModelTest {
     }
 
     @Test
+    fun justLaunchedLiveWaitsForTheDevicesThatConnectOnTheirOwn() = runTest {
+        val memory = MemoryStore()
+        val store = LocalStore(DriverFactory())
+        addTreadmill(models(FakeCentral(), store, memory))
+
+        // Next launch: before the app gets to connect, Live already waits instead of flashing its empty state.
+        val launched = models(FakeCentral(), store, memory)
+        runCurrent()
+        assertEquals(LiveConnection.CONNECTING, launched.live.state.value.connection)
+        assertEquals(listOf("Test treadmill"), launched.live.state.value.connecting)
+        launched.devices.connectAutomatically()
+        runCurrent()
+        assertEquals(LiveConnection.CONNECTED, launched.live.state.value.connection)
+
+        // Bluetooth off: the app never connects, and Live gives up waiting after a moment.
+        val bluetoothOff = models(FakeCentral(), store, memory)
+        runCurrent()
+        assertEquals(LiveConnection.CONNECTING, bluetoothOff.live.state.value.connection)
+        advanceTimeBy(4.seconds)
+        assertEquals(LiveConnection.EMPTY, bluetoothOff.live.state.value.connection)
+    }
+
+    @Test
     fun liveTurnsLiveAsSoonAsADeviceConnects() = runTest {
         val central = FakeCentral()
         val m = models(central, LocalStore(DriverFactory()))
