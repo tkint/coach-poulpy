@@ -127,12 +127,10 @@ struct LibraryView: View {
             }
         } else {
             ListFilters(query: $query, placeholder: "library.search", label: "library.search.label", countLabel: listing.countLabel) {
-                if state.kinds.count > 1 {
-                    PoulpyChip(title: Text("library.all"), selected: kind == nil) { kind = nil }
-                    ForEach(state.kinds, id: \.label) { filter in
-                        PoulpyChip(title: Text(filter.label), selected: kind == filter.type) {
-                            kind = kind == filter.type ? nil : filter.type
-                        }
+                PoulpyChip(title: Text("library.all"), selected: kind == nil) { kind = nil }
+                ForEach(state.kinds, id: \.label) { filter in
+                    PoulpyChip(title: Text(filter.label), selected: kind == filter.type) {
+                        kind = kind == filter.type ? nil : filter.type
                     }
                 }
             } action: {

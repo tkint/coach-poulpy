@@ -37,7 +37,7 @@ data class LibraryRow(
     val nextPlannedMillis: Long? = null,
 )
 
-/** A kind of workout the list can be narrowed to, only offered when a saved workout has it. */
+/** A kind of workout the list can be narrowed to; every workout type is offered, like the exercise list's muscles. */
 data class KindFilter(val type: WorkoutType, val label: String)
 
 /** Recently done first, the soonest planned day first (unplanned after), or by name. */
@@ -121,7 +121,7 @@ class LibraryModel internal constructor(
                 nextPlannedMillis = plan?.day?.startMillis(zone),
             )
         }
-        val kinds = workouts.map { it.type }.distinct().sortedBy { it.ordinal }.map { KindFilter(it, labels.workoutType(it)) }
+        val kinds = WorkoutType.entries.map { KindFilter(it, labels.workoutType(it)) }
         return LibraryState(loaded = true, rows = rows, kinds = kinds, search = WorkoutSearch.of(workouts, catalog))
     }
 }
