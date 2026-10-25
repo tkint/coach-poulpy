@@ -441,7 +441,7 @@ class LiveModel(
             },
             type = WorkoutType.TREADMILL,
         )
-        recents = (listOf(key) + recents - key).take(QUICK_PICKS)
+        recents = (listOf(key) + (recents - key)).take(QUICK_PICKS)
         memory.putString(RECENT, recents.joinToString(","))
         publishChoices()
         val started = Recording(executionId, timeline, Session(timeline), freeRun)
