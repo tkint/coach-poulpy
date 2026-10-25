@@ -111,7 +111,7 @@ struct ExerciseList<Row: View>: View {
                 tick(value)
                 choosing = false
             }
-            .presentationDetents([.medium, .large])
+            .presentationDetents([.large])
         }
     }
 }
