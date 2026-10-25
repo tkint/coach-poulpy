@@ -110,6 +110,7 @@ internal class Labels(private val languageCode: String) {
     /** For a session whose workout was deleted before the history kept names. */
     val session get() = t("Workout", "Séance")
     val perSide get() = t("each side", "par côté")
+    val recentlyUsed get() = t("Recently used", "Utilisés récemment")
     val hold get() = t("Hold", "Maintien")
     val orWord get() = t("or", "ou")
     val andWord get() = t("and", "et")

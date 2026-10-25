@@ -47,6 +47,12 @@ class LocalStore(driverFactory: DriverFactory, private val clock: Clock = Clock.
             .asFlow()
             .mapToList(Dispatchers.IO)
 
+    /** Every saved workout's latest version with when it was saved, read once. */
+    fun savedWorkouts(): List<SavedWorkout> =
+        db.workoutQueries.latestVersions().executeAsList().map {
+            SavedWorkout(json.decodeFromString(Workout.serializer(), it.content), Instant.fromEpochMilliseconds(it.created_at))
+        }
+
     fun latestWorkout(id: WorkoutId): Workout? =
         db.workoutQueries.latestById(id.value).executeAsOneOrNull()
             ?.let { json.decodeFromString(Workout.serializer(), it.content) }
@@ -155,6 +161,13 @@ class LocalStore(driverFactory: DriverFactory, private val clock: Clock = Clock.
             }
         }
 
+    /** The workout version each finished session followed, with when it started, newest first, read once. */
+    fun finishedWorkoutRefs(): List<Pair<WorkoutRef, Instant>> =
+        db.executionQueries.finished().executeAsList().mapNotNull { row ->
+            val id = row.workout_id ?: return@mapNotNull null
+            WorkoutRef(WorkoutId(id), row.workout_version?.toInt() ?: 1) to Instant.fromEpochMilliseconds(row.started_at)
+        }
+
     fun saveTotals(executionId: String, totals: SessionTotals) =
         db.executionQueries.setSummary(json.encodeToString(SessionTotals.serializer(), totals), executionId)
 
@@ -191,6 +204,9 @@ class LocalStore(driverFactory: DriverFactory, private val clock: Clock = Clock.
 
 /** A finished session as stored: [totals] is null until it has been summed up once. */
 data class StoredSession(val execution: Execution, val title: String?, val type: WorkoutType?, val totals: SessionTotals?)
+
+/** A workout's latest version and when it was saved. */
+data class SavedWorkout(val workout: Workout, val savedAt: Instant)
 
 /** A workout put on a [day]. */
 data class PlannedWorkout(val id: String, val workoutId: WorkoutId, val day: LocalDate)
