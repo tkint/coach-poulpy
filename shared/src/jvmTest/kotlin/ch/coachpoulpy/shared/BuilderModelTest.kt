@@ -92,4 +92,24 @@ class BuilderModelTest {
         assertFalse(builder.isEditing)
         assertEquals(listOf("Diamond push-up"), builder.state.value.rows.map { it.name })
     }
+
+    @Test
+    fun aDraggedExerciseLandsWhereItIsDropped() {
+        val builder = graph.createWorkout("en")
+        listOf("goblet-squat", "push-up", "plank").forEach(builder::add)
+        fun order() = builder.state.value.rows.map { it.key }
+        val (squat, pushUp, plank) = builder.state.value.rows.map { it.key }
+
+        builder.move(squat, 2)
+        assertEquals(listOf(pushUp, plank, squat), order())
+        builder.move(squat, -5)
+        assertEquals(listOf(squat, pushUp, plank), order())
+        builder.move(plank, 99)
+        assertEquals(listOf(squat, pushUp, plank), order())
+        builder.moveUp(squat)
+        builder.moveDown(plank)
+        assertEquals(listOf(squat, pushUp, plank), order())
+        builder.moveDown(squat)
+        assertEquals(listOf(pushUp, squat, plank), order())
+    }
 }
