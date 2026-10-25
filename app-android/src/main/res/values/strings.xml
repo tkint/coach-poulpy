@@ -229,7 +229,10 @@
     <string name="live_connecting_one">Connecting to %1$s…</string>
     <string name="live_connecting_many">Connecting to your devices…</string>
     <string name="live_follow_treadmill">Follow the treadmill</string>
-    <string name="live_follow_treadmill_hint">Starts, pauses and finishes with the belt</string>
+    <string name="live_mode_auto">Auto: starts, pauses and stops with the treadmill</string>
+    <string name="live_mode_manual">Manual: you start and stop the recording</string>
+    <string name="live_mode_info_label">About auto and manual</string>
+    <string name="live_mode_info">With the sync button on, Start waits for the belt to move. Pausing the treadmill pauses the recording, and Stop on the console finishes it. If the belt stays still or the treadmill disconnects for a while, you’re asked whether to finish. With it off, you start, pause and stop here.</string>
     <string name="live_wait_treadmill">Wait for the treadmill</string>
     <string name="live_waiting_title">Press start on your treadmill</string>
     <string name="live_waiting_body">%1$s · recording starts with the belt</string>

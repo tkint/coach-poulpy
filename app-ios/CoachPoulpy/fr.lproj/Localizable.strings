@@ -194,7 +194,10 @@
 "live.connecting.one %@" = "Connexion à %@…";
 "live.connecting.many" = "Connexion à vos appareils…";
 "live.follow.treadmill" = "Suivre le tapis";
-"live.follow.treadmill.hint" = "Démarre, se met en pause et s’arrête avec le tapis";
+"live.mode.auto" = "Auto : démarre, se met en pause et s’arrête avec le tapis";
+"live.mode.manual" = "Manuel : vous lancez et arrêtez l’enregistrement";
+"live.mode.info.label" = "À propos des modes auto et manuel";
+"live.mode.info" = "Avec le bouton de synchro activé, Démarrer attend que la bande avance. Mettre le tapis en pause met l’enregistrement en pause, et Stop sur la console le termine. Si la bande reste immobile ou si le tapis se déconnecte un moment, on vous demande s’il faut terminer. Désactivé, vous démarrez, mettez en pause et arrêtez ici.";
 "live.wait.treadmill" = "Attendre le tapis";
 "live.waiting.title" = "Appuyez sur Start sur votre tapis";
 "live.waiting.body" = "%@ · l’enregistrement démarre avec le tapis";

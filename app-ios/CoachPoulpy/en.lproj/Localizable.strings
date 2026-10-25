@@ -194,7 +194,10 @@
 "live.connecting.one %@" = "Connecting to %@…";
 "live.connecting.many" = "Connecting to your devices…";
 "live.follow.treadmill" = "Follow the treadmill";
-"live.follow.treadmill.hint" = "Starts, pauses and finishes with the belt";
+"live.mode.auto" = "Auto: starts, pauses and stops with the treadmill";
+"live.mode.manual" = "Manual: you start and stop the recording";
+"live.mode.info.label" = "About auto and manual";
+"live.mode.info" = "With the sync button on, Start waits for the belt to move. Pausing the treadmill pauses the recording, and Stop on the console finishes it. If the belt stays still or the treadmill disconnects for a while, you’re asked whether to finish. With it off, you start, pause and stop here.";
 "live.wait.treadmill" = "Wait for the treadmill";
 "live.waiting.title" = "Press start on your treadmill";
 "live.waiting.body" = "%@ · recording starts with the belt";

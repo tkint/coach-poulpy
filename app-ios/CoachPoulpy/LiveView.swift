@@ -8,6 +8,7 @@ struct LiveView: View {
     @StateObject private var devices: Observed<DevicesModel, DevicesUiState>
     @StateObject private var bluetooth = BluetoothGate()
     @State private var choosing = false
+    @State private var modeInfo = false
     let onManageDevices: () -> Void
 
     init(graph: AppGraph, onManageDevices: @escaping () -> Void) {
@@ -239,14 +240,19 @@ struct LiveView: View {
             .buttonStyle(.plain)
             .accessibilityHint(Text("live.change"))
             if state.hasTreadmill {
-                followRow
+                followMode
             }
-            Button { model.startRecording(key: state.selected) } label: {
-                Text(LocalizedStringKey(state.hasTreadmill && state.followTreadmill ? "live.wait.treadmill" : "treadmill.start"))
-                    .font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: 52)
+            HStack(spacing: 8) {
+                if state.hasTreadmill {
+                    followToggle
+                }
+                Button { model.startRecording(key: state.selected) } label: {
+                    Text(LocalizedStringKey(state.hasTreadmill && state.followTreadmill ? "live.wait.treadmill" : "treadmill.start"))
+                        .font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: 52)
+                }
+                .buttonStyle(.borderedProminent)
+                .buttonBorderShape(.capsule)
             }
-            .buttonStyle(.borderedProminent)
-            .buttonBorderShape(.capsule)
         }
         .sheet(isPresented: $choosing) {
             ChoiceSheet(state: state) { key in
@@ -315,20 +321,41 @@ struct LiveView: View {
         return parts.joined(separator: " · ")
     }
 
-    private var followRow: some View {
-        Toggle(isOn: Binding(get: { state.followTreadmill }, set: { model.setFollowTreadmill(on: $0) })) {
-            Label {
-                VStack(alignment: .leading, spacing: 0) {
-                    Text("live.follow.treadmill").font(.custom(PoulpyFontFace.nunitoExtraBold, size: 16, relativeTo: .body))
-                    Text("live.follow.treadmill.hint").font(.poulpy(.footnote)).foregroundStyle(PoulpyColor.onSurfaceVariant)
-                }
-            } icon: {
-                Image(systemName: "arrow.triangle.2.circlepath").foregroundStyle(PoulpyColor.primary)
+    /// Which mode Start is in, auto or manual, with what each does behind the info button.
+    private var followMode: some View {
+        HStack(spacing: 4) {
+            Text(LocalizedStringKey(state.followTreadmill ? "live.mode.auto" : "live.mode.manual"))
+                .font(.poulpy(.footnote))
+                .foregroundStyle(PoulpyColor.onSurfaceVariant)
+            Spacer(minLength: 0)
+            Button { modeInfo = true } label: {
+                Image(systemName: "info.circle").font(.system(size: 17)).frame(width: 40, height: 40)
             }
+            .buttonStyle(.plain)
+            .foregroundStyle(PoulpyColor.onSurfaceVariant)
+            .accessibilityLabel(Text("live.mode.info.label"))
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
-        .background(PoulpyColor.background, in: RoundedRectangle(cornerRadius: PoulpyRadius.md))
+        .alert(Text("live.follow.treadmill"), isPresented: $modeInfo) {
+            Button("action.done", role: .cancel) {}
+        } message: {
+            Text("live.mode.info")
+        }
+    }
+
+    /// A square button next to Start: on, the recording follows the treadmill.
+    private var followToggle: some View {
+        let on = state.followTreadmill
+        return Button { model.setFollowTreadmill(on: !on) } label: {
+            Image(systemName: "arrow.triangle.2.circlepath")
+                .font(.system(size: 20, weight: .bold))
+                .foregroundStyle(on ? PoulpyColor.onPrimaryContainer : PoulpyColor.onSurfaceVariant)
+                .frame(width: 52, height: 52)
+                .background(on ? PoulpyColor.primaryContainer : PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.md))
+                .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.md).stroke(on ? Color.clear : PoulpyColor.outline, lineWidth: 1.5))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(Text("live.follow.treadmill"))
+        .accessibilityAddTraits(on ? .isSelected : [])
     }
 
     /// Start was tapped with the belt still: the recording begins when the belt moves.

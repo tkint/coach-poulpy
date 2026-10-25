@@ -26,6 +26,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Schedule
@@ -42,7 +43,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -319,9 +320,12 @@ private fun ChoicePicker(state: LiveUiState, model: LiveModel) {
         }
         Icon(Icons.Filled.ExpandMore, contentDescription = null, tint = colors.onSurfaceVariant)
     }
-    if (state.hasTreadmill) FollowRow(state.followTreadmill, model::setFollowTreadmill)
-    Button(onClick = { model.startRecording(state.selected) }, modifier = Modifier.fillMaxWidth().height(52.dp)) {
-        Text(stringResource(if (state.hasTreadmill && state.followTreadmill) R.string.live_wait_treadmill else R.string.treadmill_start))
+    if (state.hasTreadmill) FollowMode(state.followTreadmill)
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+        if (state.hasTreadmill) FollowToggle(state.followTreadmill, model::setFollowTreadmill)
+        Button(onClick = { model.startRecording(state.selected) }, modifier = Modifier.weight(1f).height(52.dp)) {
+            Text(stringResource(if (state.hasTreadmill && state.followTreadmill) R.string.live_wait_treadmill else R.string.treadmill_start))
+        }
     }
     if (picking) {
         ChoiceSheet(state, onPick = { model.select(it); picking = false }, onDismiss = { picking = false })
@@ -420,24 +424,48 @@ private fun Recording(recording: RecordingUi, units: UnitSystem, model: LiveMode
     }
 }
 
+/** Which mode Start is in, auto or manual, with what each does behind the info button. */
 @Composable
-private fun FollowRow(on: Boolean, onChange: (Boolean) -> Unit) {
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(PoulpyRadius.md))
-            .background(MaterialTheme.colorScheme.background)
-            .toggleable(value = on, role = Role.Switch, onValueChange = onChange)
-            .padding(horizontal = 12.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(Icons.Filled.Sync, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-        Spacer(Modifier.size(12.dp))
-        Column(Modifier.weight(1f)) {
-            Text(stringResource(R.string.live_follow_treadmill), fontWeight = FontWeight.ExtraBold)
-            Text(stringResource(R.string.live_follow_treadmill_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+private fun FollowMode(on: Boolean) {
+    var info by rememberSaveable { mutableStateOf(false) }
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            stringResource(if (on) R.string.live_mode_auto else R.string.live_mode_manual),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.weight(1f),
+        )
+        IconButton(onClick = { info = true }, modifier = Modifier.size(40.dp)) {
+            Icon(Icons.Filled.Info, contentDescription = stringResource(R.string.live_mode_info_label), tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp))
         }
-        Switch(checked = on, onCheckedChange = null)
+    }
+    if (info) {
+        AlertDialog(
+            onDismissRequest = { info = false },
+            confirmButton = { TextButton(onClick = { info = false }) { Text(stringResource(R.string.action_done)) } },
+            title = { Text(stringResource(R.string.live_follow_treadmill)) },
+            text = { Text(stringResource(R.string.live_mode_info)) },
+        )
+    }
+}
+
+/** A square button next to Start: on, the recording follows the treadmill. */
+@Composable
+private fun FollowToggle(on: Boolean, onChange: (Boolean) -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    Surface(
+        shape = RoundedCornerShape(PoulpyRadius.md),
+        color = if (on) colors.primaryContainer else colors.surface,
+        contentColor = if (on) colors.onPrimaryContainer else colors.onSurfaceVariant,
+        border = if (on) null else BorderStroke(1.5.dp, colors.outline),
+        modifier = Modifier
+            .size(52.dp)
+            .clip(RoundedCornerShape(PoulpyRadius.md))
+            .toggleable(value = on, role = Role.Switch, onValueChange = onChange),
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Icon(Icons.Filled.Sync, contentDescription = stringResource(R.string.live_follow_treadmill))
+        }
     }
 }
 

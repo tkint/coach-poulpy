@@ -231,7 +231,10 @@
     <string name="live_connecting_one">Connexion à %1$s…</string>
     <string name="live_connecting_many">Connexion à vos appareils…</string>
     <string name="live_follow_treadmill">Suivre le tapis</string>
-    <string name="live_follow_treadmill_hint">Démarre, se met en pause et s’arrête avec le tapis</string>
+    <string name="live_mode_auto">Auto : démarre, se met en pause et s’arrête avec le tapis</string>
+    <string name="live_mode_manual">Manuel : vous lancez et arrêtez l’enregistrement</string>
+    <string name="live_mode_info_label">À propos des modes auto et manuel</string>
+    <string name="live_mode_info">Avec le bouton de synchro activé, Démarrer attend que la bande avance. Mettre le tapis en pause met l’enregistrement en pause, et Stop sur la console le termine. Si la bande reste immobile ou si le tapis se déconnecte un moment, on vous demande s’il faut terminer. Désactivé, vous démarrez, mettez en pause et arrêtez ici.</string>
     <string name="live_wait_treadmill">Attendre le tapis</string>
     <string name="live_waiting_title">Appuyez sur Start sur votre tapis</string>
     <string name="live_waiting_body">%1$s · l’enregistrement démarre avec le tapis</string>
