@@ -65,9 +65,6 @@ struct WorkoutPageView: View {
         .toolbar {
             if state.found {
                 Menu {
-                    if state.plan != nil {
-                        Button("workout.unplan") { page.model.unplan() }
-                    }
                     Button("action.delete", role: .destructive) { deleting = true }
                 } label: {
                     Label("action.more", systemImage: "ellipsis.circle")
@@ -82,10 +79,7 @@ struct WorkoutPageView: View {
             if gone { dismiss() }
         }
         .sheet(isPresented: $picking) {
-            PlanSheet(initial: state.plan.map { Date(timeIntervalSince1970: Double($0.dayMillis) / 1000) } ?? Date()) { day in
-                let parts = Calendar.current.dateComponents([.year, .month, .day], from: day)
-                page.model.plan(year: Int32(parts.year ?? 0), month: Int32(parts.month ?? 1), day: Int32(parts.day ?? 1))
-            }
+            PlanSheet(name: state.name, planned: state.plans) { days in page.model.setDays(days: days) }
         }
         .confirmationDialog("delete.title", isPresented: $deleting, titleVisibility: .visible) {
             Button("action.delete", role: .destructive) { page.model.delete() }
@@ -100,24 +94,49 @@ struct WorkoutPageView: View {
         }
     }
 
-    /// "Planned for Tue 27 Oct · Change", or a dashed button to plan it.
+    private func plannedTitle(_ plans: [PlannedDay]) -> String {
+        if plans.count > 1 {
+            return String.localizedStringWithFormat(NSLocalizedString("workout.planned.days %lld", comment: ""), Int64(plans.count))
+        }
+        let plan = plans[0]
+        return plan.daysAway == 0 ? NSLocalizedString("workout.planned.today", comment: "") : L("workout.planned %@", dayLabel(plan.dayMillis))
+    }
+
+    /// "Planned for Tue 27 Oct", or "Planned on 3 days" with each upcoming day as a pill, and
+    /// "Change days"; a dashed button to plan it while it waits in the library.
     @ViewBuilder
     private func planRow(_ state: WorkoutPageState) -> some View {
-        if let plan = state.plan {
-            HStack(spacing: 10) {
-                Image(systemName: "calendar").accessibilityHidden(true)
-                Text(plan.daysAway == 0 ? NSLocalizedString("workout.planned.today", comment: "") : L("workout.planned %@", dayLabel(plan.dayMillis)))
-                    .font(.poulpy(.subheadline).weight(.heavy))
-                Spacer(minLength: 0)
-                Button("workout.change") { picking = true }
-                    .font(.poulpy(.subheadline).weight(.heavy))
-                    .padding(.horizontal, 14)
-                    .frame(minHeight: 40)
-                    .background(PoulpyColor.surface, in: Capsule())
-                    .buttonStyle(.plain)
+        let plans = state.plans
+        if !plans.isEmpty {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(spacing: 10) {
+                    Image(systemName: "calendar").accessibilityHidden(true)
+                    Text(plannedTitle(plans))
+                        .font(.poulpy(.subheadline).weight(.heavy))
+                    Spacer(minLength: 0)
+                    Button("workout.change.days") { picking = true }
+                        .font(.poulpy(.subheadline).weight(.heavy))
+                        .padding(.horizontal, 14)
+                        .frame(minHeight: 40)
+                        .background(PoulpyColor.surface, in: Capsule())
+                        .buttonStyle(.plain)
+                }
+                if plans.count > 1 {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 6) {
+                            ForEach(plans, id: \.planId) { plan in
+                                Text(plan.daysAway == 0 ? NSLocalizedString("home.today", comment: "") : dayLabel(plan.dayMillis))
+                                    .font(.poulpy(.subheadline).weight(.heavy))
+                                    .padding(.horizontal, 12)
+                                    .frame(height: 32)
+                                    .background(PoulpyColor.surface, in: Capsule())
+                            }
+                        }
+                    }
+                }
             }
             .foregroundStyle(PoulpyColor.onPrimaryContainer)
-            .padding(EdgeInsets(top: 6, leading: 14, bottom: 6, trailing: 6))
+            .padding(EdgeInsets(top: 6, leading: 14, bottom: 10, trailing: 6))
             .background(PoulpyColor.primaryContainer, in: RoundedRectangle(cornerRadius: 16))
         } else {
             Button {
@@ -204,41 +223,6 @@ struct WorkoutPageView: View {
         .padding(.vertical, 12)
         .background(PoulpyColor.surface.ignoresSafeArea())
         .overlay(alignment: .top) { Divider() }
-    }
-}
-
-/// A calendar from today on, to plan the workout or move it to another day.
-private struct PlanSheet: View {
-    let onPick: (Date) -> Void
-    @State private var day: Date
-    @Environment(\.dismiss) private var dismiss
-
-    init(initial: Date, onPick: @escaping (Date) -> Void) {
-        self.onPick = onPick
-        _day = State(initialValue: max(initial, Calendar.current.startOfDay(for: Date())))
-    }
-
-    var body: some View {
-        NavigationStack {
-            DatePicker("workout.pick.day", selection: $day, in: Calendar.current.startOfDay(for: Date())..., displayedComponents: .date)
-                .datePickerStyle(.graphical)
-                .padding()
-                .navigationTitle("workout.pick.day")
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button("action.cancel") { dismiss() }
-                    }
-                    ToolbarItem(placement: .confirmationAction) {
-                        Button("action.save") {
-                            onPick(day)
-                            dismiss()
-                        }
-                    }
-                }
-            Spacer(minLength: 0)
-        }
-        .presentationDetents([.medium, .large])
     }
 }
 

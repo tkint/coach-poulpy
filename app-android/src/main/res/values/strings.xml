@@ -39,9 +39,21 @@
     <string name="library_empty_body">Build one once, then plan it for any day or keep it here for later.</string>
     <string name="workout_planned">Planned for %1$s</string>
     <string name="workout_planned_today">Planned for today</string>
-    <string name="workout_change">Change</string>
-    <string name="workout_unplan">Take it off the plan</string>
     <string name="workout_plan">Plan it for a day</string>
+    <string name="workout_change_days">Change days</string>
+    <string name="plan_title">Plan %1$s</string>
+    <string name="plan_hint">Tap the days to train it. Tap again to take one off.</string>
+    <string name="plan_previous_month">Previous month</string>
+    <string name="plan_next_month">Next month</string>
+    <string name="plan_keep_unplanned">Keep it unplanned</string>
+    <plurals name="workout_planned_days">
+        <item quantity="one">Planned on %1$d day</item>
+        <item quantity="other">Planned on %1$d days</item>
+    </plurals>
+    <plurals name="plan_save">
+        <item quantity="one">Save %1$d day</item>
+        <item quantity="other">Save %1$d days</item>
+    </plurals>
     <string name="workout_done">Done</string>
     <string name="workout_last">Last time</string>
     <string name="workout_usually">Usually</string>

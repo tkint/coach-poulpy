@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.daysUntil
+import kotlinx.datetime.number
 import kotlinx.datetime.toLocalDateTime
 
 /** One exercise of the workout page: "3 × 10 each side · 14 kg · rest 60 s". */
@@ -34,8 +35,17 @@ data class WorkoutStepRow(
     val prescription: String,
 )
 
-/** The next day a workout is planned for. [dayMillis] is that day at midnight, local time; [daysAway] 0 for today. */
-data class PlannedDay(val planId: String, val dayMillis: Long, val daysAway: Int)
+/** A calendar day, [month] 1 to 12, as the plan sheet picks it. */
+data class PlanDate(val year: Int, val month: Int, val day: Int) {
+    internal val date: LocalDate get() = LocalDate(year, month, day)
+
+    internal companion object {
+        fun of(date: LocalDate) = PlanDate(date.year, date.month.number, date.day)
+    }
+}
+
+/** An upcoming day a workout is planned for. [dayMillis] is that day at midnight, local time; [daysAway] 0 for today. */
+data class PlannedDay(val planId: String, val dayMillis: Long, val daysAway: Int, val date: PlanDate)
 
 data class WorkoutPageState(
     val loaded: Boolean = false,
@@ -52,12 +62,13 @@ data class WorkoutPageState(
     val lastDoneMillis: Long? = null,
     /** The middle length of the sessions done, in minutes; null before the first. */
     val usualMinutes: Int? = null,
-    val plan: PlannedDay? = null,
+    /** Every upcoming planned day, soonest first; empty when the workout waits in the library. */
+    val plans: List<PlannedDay> = emptyList(),
     /** Only workouts made with the builder can be edited. */
     val editable: Boolean = false,
 )
 
-/** One saved workout: what is in it, how it went before, and the day it is planned for. */
+/** One saved workout: what is in it, how it went before, and the days it is planned for. */
 class WorkoutPageModel internal constructor(
     private val workoutId: WorkoutId,
     private val store: LocalStore,
@@ -80,16 +91,20 @@ class WorkoutPageModel internal constructor(
 
     fun watch(onChange: (WorkoutPageState) -> Unit): Cancellable = state.watchIn(scope, onChange)
 
-    /** Plans the workout on a day picked on a calendar ([month] 1 to 12), or moves its next plan there. */
-    fun plan(year: Int, month: Int, day: Int) {
-        val date = LocalDate(year, month, day)
-        val current = state.value.plan
-        if (current != null) store.movePlan(current.planId, date) else store.planWorkout(workoutId, date)
-    }
-
-    /** Takes the workout off the day it is planned for. */
-    fun unplan() {
-        state.value.plan?.let { store.removePlan(it.planId) }
+    /**
+     * Plans the workout on exactly [days] from today on, as ticked on the plan sheet:
+     * upcoming plans not in [days] are removed, new days are added, and past days are
+     * left as they are. An empty list keeps the workout unplanned.
+     */
+    fun setDays(days: List<PlanDate>) {
+        val today = clock.now().toLocalDateTime(zone).date
+        val wanted = days.map { it.date }.filter { it >= today }.toSet()
+        val upcoming = state.value.plans
+        store.replacePlans(
+            workoutId,
+            add = (wanted - upcoming.map { it.date.date }.toSet()).sorted(),
+            remove = upcoming.filter { it.date.date !in wanted }.map { it.planId },
+        )
     }
 
     fun delete() = store.deleteWorkout(workoutId)
@@ -101,7 +116,8 @@ class WorkoutPageModel internal constructor(
         val today = clock.now().toLocalDateTime(zone).date
         val done = sessions.filter { it.counts && it.execution.workout?.workoutId == workoutId }
         val doneToday = done.any { it.execution.startedAt.toLocalDateTime(zone).date == today }
-        val plan = plans.firstOrNull { it.workoutId == workoutId && (it.day > today || (it.day == today && !doneToday)) }
+        // A plan for today that was already done is not shown again.
+        val upcoming = plans.filter { it.workoutId == workoutId && (it.day > today || (it.day == today && !doneToday)) }.sortedBy { it.day }
         val minutes = done.mapNotNull { it.realTotals?.active?.inWholeMinutes?.toInt() }.sorted()
         val equipment = exerciseSteps(workout).mapNotNull { catalog[it.exercise] }
             .flatMap { it.equipment.flatten() }
@@ -120,7 +136,7 @@ class WorkoutPageModel internal constructor(
             timesDone = done.size,
             lastDoneMillis = done.maxOfOrNull { it.execution.startedAt }?.toEpochMilliseconds(),
             usualMinutes = minutes.getOrNull(minutes.size / 2)?.coerceAtLeast(1),
-            plan = plan?.let { PlannedDay(it.id, it.day.startMillis(zone), today.daysUntil(it.day)) },
+            plans = upcoming.map { PlannedDay(it.id, it.day.startMillis(zone), today.daysUntil(it.day), PlanDate.of(it.day)) },
             editable = WorkoutDraft.from(workout, catalog) != null,
         )
     }

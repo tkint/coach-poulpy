@@ -226,7 +226,7 @@ struct LibraryView: View {
         let day = row.noteMillis.map { dayLabel($0.int64Value) } ?? ""
         switch row.note {
         case .planned:
-            Text(L("library.planned %@", day))
+            Text(L("library.planned %@", day) + (row.morePlanned > 0 ? " · +\(row.morePlanned)" : ""))
                 .font(PoulpyFont.label)
                 .foregroundStyle(PoulpyColor.onPrimaryContainer)
                 .padding(.horizontal, 8)

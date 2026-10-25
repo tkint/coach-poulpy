@@ -35,6 +35,8 @@ data class LibraryRow(
     val lastDoneMillis: Long?,
     /** The next planned day at midnight, for sorting; null if none is coming. */
     val nextPlannedMillis: Long? = null,
+    /** How many more planned days follow the next one: the "+2" after it. */
+    val morePlanned: Int = 0,
 )
 
 /** A kind of workout the list can be narrowed to, only offered when a saved workout has it. */
@@ -109,7 +111,8 @@ class LibraryModel internal constructor(
             val last = lastDone[workout.id]
             val doneToday = last?.toLocalDateTime(zone)?.date == today
             // A plan for today that was already done is not shown again.
-            val plan = plans.firstOrNull { it.workoutId == workout.id && (it.day > today || (it.day == today && !doneToday)) }
+            val upcoming = plans.filter { it.workoutId == workout.id && (it.day > today || (it.day == today && !doneToday)) }.sortedBy { it.day }
+            val plan = upcoming.firstOrNull()
             val (note, noteMillis) = when {
                 plan != null -> LibraryNote.PLANNED to plan.day.startMillis(zone)
                 doneToday -> LibraryNote.DONE_TODAY to last?.toEpochMilliseconds()
@@ -119,6 +122,7 @@ class LibraryModel internal constructor(
             LibraryRow(
                 workout.id.value, workout.name, workout.type, facts.details(workout), note, noteMillis, last?.toEpochMilliseconds(),
                 nextPlannedMillis = plan?.day?.startMillis(zone),
+                morePlanned = (upcoming.size - 1).coerceAtLeast(0),
             )
         }
         val kinds = workouts.map { it.type }.distinct().sortedBy { it.ordinal }.map { KindFilter(it, labels.workoutType(it)) }

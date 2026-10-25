@@ -21,6 +21,7 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.withTimeout
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.atStartOfDayIn
 
 class PlanningModelsTest {
     private val graph = AppGraph(DriverFactory())
@@ -180,24 +181,39 @@ class PlanningModelsTest {
     }
 
     @Test
-    fun workoutPagePlansMovesAndUnplans() {
+    fun workoutPagePlansSeveralDaysAndKeepsThePast() {
         val legs = workout("Legs", "goblet-squat")
+        val past = LocalDate(2023, 11, 10)
+        graph.store.planWorkout(legs, past)
         val model = page(legs)
         val empty = model.state.await { it.loaded && it.found }
-        assertNull(empty.plan)
+        assertTrue(empty.plans.isEmpty())
         assertEquals("Goblet squat", empty.steps.single().name)
         assertTrue(empty.steps.single().prescription.startsWith("3 × 10"))
         assertTrue(empty.editable)
 
-        model.plan(2023, 11, 17)
-        assertEquals(2, model.state.await { it.plan != null }.plan!!.daysAway)
+        // A past day is ignored: only today on can be planned.
+        model.setDays(listOf(PlanDate(2023, 11, 20), PlanDate(2023, 11, 17), PlanDate(2023, 11, 1)))
+        val two = model.state.await { it.plans.size == 2 }
+        assertEquals(listOf(PlanDate(2023, 11, 17), PlanDate(2023, 11, 20)), two.plans.map { it.date })
+        assertEquals(listOf(2, 5), two.plans.map { it.daysAway })
 
-        model.plan(2023, 11, 16)
-        assertEquals(1, model.state.await { it.plan?.daysAway == 1 }.plan!!.daysAway)
-        assertEquals(1, runBlocking { graph.store.plannedWorkouts().first() }.size)
+        // Ticking 16, unticking 20: 17 keeps its plan, the past one stays untouched.
+        val kept = two.plans.first().planId
+        model.setDays(listOf(PlanDate(2023, 11, 16), PlanDate(2023, 11, 17)))
+        val moved = model.state.await { it.plans.map { p -> p.date.day } == listOf(16, 17) }
+        assertEquals(kept, moved.plans[1].planId)
+        val stored = runBlocking { graph.store.plannedWorkouts().first() }
+        assertEquals(listOf(past, LocalDate(2023, 11, 16), LocalDate(2023, 11, 17)), stored.map { it.day })
 
-        model.unplan()
-        model.state.await { it.plan == null }
+        val library = library()
+        val row = library.state.await { it.loaded && it.rows.isNotEmpty() && it.rows.single().morePlanned == 1 }.rows.single()
+        assertEquals(LibraryNote.PLANNED, row.note)
+        assertEquals(LocalDate(2023, 11, 16).atStartOfDayIn(TimeZone.UTC).toEpochMilliseconds(), row.noteMillis)
+
+        model.setDays(emptyList())
+        model.state.await { it.plans.isEmpty() }
+        assertEquals(listOf(past), runBlocking { graph.store.plannedWorkouts().first() }.map { it.day })
 
         model.delete()
         assertFalse(model.state.await { !it.found }.found)

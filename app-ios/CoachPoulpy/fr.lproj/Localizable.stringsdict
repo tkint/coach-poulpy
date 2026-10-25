@@ -130,5 +130,37 @@
             <string>Voir %lld exercices</string>
         </dict>
     </dict>
+    <key>workout.planned.days %lld</key>
+    <dict>
+        <key>NSStringLocalizedFormatKey</key>
+        <string>%#@days@</string>
+        <key>days</key>
+        <dict>
+            <key>NSStringFormatSpecTypeKey</key>
+            <string>NSStringPluralRuleType</string>
+            <key>NSStringFormatValueTypeKey</key>
+            <string>lld</string>
+            <key>one</key>
+            <string>Prévue sur %lld jour</string>
+            <key>other</key>
+            <string>Prévue sur %lld jours</string>
+        </dict>
+    </dict>
+    <key>plan.save %lld</key>
+    <dict>
+        <key>NSStringLocalizedFormatKey</key>
+        <string>%#@days@</string>
+        <key>days</key>
+        <dict>
+            <key>NSStringFormatSpecTypeKey</key>
+            <string>NSStringPluralRuleType</string>
+            <key>NSStringFormatValueTypeKey</key>
+            <string>lld</string>
+            <key>one</key>
+            <string>Enregistrer %lld jour</string>
+            <key>other</key>
+            <string>Enregistrer %lld jours</string>
+        </dict>
+    </dict>
 </dict>
 </plist>

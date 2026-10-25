@@ -4,6 +4,8 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -25,8 +27,6 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -35,12 +35,10 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -58,12 +56,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ch.coachpoulpy.android.R
 import ch.coachpoulpy.shared.AppGraph
-import ch.coachpoulpy.shared.WorkoutPageModel
 import ch.coachpoulpy.shared.WorkoutPageState
 import java.time.Instant
-import java.time.LocalDate
 import java.time.ZoneId
-import java.time.ZoneOffset
 import java.util.Locale
 
 /** One saved workout: its exercises, how it went before, the day it is planned for, and Start. */
@@ -100,9 +95,6 @@ fun WorkoutPageScreen(
                                 Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.action_more))
                             }
                             DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-                                if (state.plan != null) {
-                                    DropdownMenuItem(text = { Text(stringResource(R.string.workout_unplan)) }, onClick = { menu = false; model.unplan() })
-                                }
                                 DropdownMenuItem(text = { Text(stringResource(R.string.action_delete)) }, onClick = { menu = false; deleting = true })
                             }
                         }
@@ -171,7 +163,17 @@ fun WorkoutPageScreen(
         }
     }
 
-    if (picking) PlanDialog(model, state, onDismiss = { picking = false })
+    if (picking) {
+        PlanSheet(
+            name = state.name,
+            planned = state.plans,
+            onSave = {
+                model.setDays(it)
+                picking = false
+            },
+            onDismiss = { picking = false },
+        )
+    }
 
     if (deleting) {
         AlertDialog(
@@ -186,26 +188,49 @@ fun WorkoutPageScreen(
     }
 }
 
-/** "Planned for Tue 27 Oct · Change", or a dashed button to plan it. */
+/**
+ * "Planned for Tue 27 Oct", or "Planned on 3 days" with each upcoming day as a pill, and
+ * "Change days"; a dashed button to plan it while it waits in the library.
+ */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun PlanRow(state: WorkoutPageState, onPick: () -> Unit) {
     val colors = MaterialTheme.colorScheme
-    val plan = state.plan
-    if (plan != null) {
-        Row(
-            Modifier.fillMaxWidth().clip(RoundedCornerShape(PoulpyRadius.md)).background(colors.primaryContainer).padding(start = 14.dp, end = 8.dp, top = 6.dp, bottom = 6.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
+    val plans = state.plans
+    if (plans.isNotEmpty()) {
+        Column(
+            Modifier.fillMaxWidth().clip(RoundedCornerShape(PoulpyRadius.md)).background(colors.primaryContainer).padding(start = 14.dp, end = 8.dp, top = 6.dp, bottom = 10.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-            Icon(Icons.Filled.CalendarMonth, contentDescription = null, tint = colors.onPrimaryContainer)
-            Text(
-                if (plan.daysAway == 0) stringResource(R.string.workout_planned_today) else stringResource(R.string.workout_planned, dayLabel(plan.dayMillis)),
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.ExtraBold,
-                color = colors.onPrimaryContainer,
-                modifier = Modifier.weight(1f),
-            )
-            TextButton(onClick = onPick) { Text(stringResource(R.string.workout_change), fontWeight = FontWeight.ExtraBold) }
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                Icon(Icons.Filled.CalendarMonth, contentDescription = null, tint = colors.onPrimaryContainer)
+                val single = plans.singleOrNull()
+                Text(
+                    when {
+                        single == null -> pluralStringResource(R.plurals.workout_planned_days, plans.size, plans.size)
+                        single.daysAway == 0 -> stringResource(R.string.workout_planned_today)
+                        else -> stringResource(R.string.workout_planned, dayLabel(single.dayMillis))
+                    },
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = colors.onPrimaryContainer,
+                    modifier = Modifier.weight(1f),
+                )
+                TextButton(onClick = onPick) { Text(stringResource(R.string.workout_change_days), fontWeight = FontWeight.ExtraBold) }
+            }
+            if (plans.size > 1) {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    plans.forEach { plan ->
+                        Text(
+                            if (plan.daysAway == 0) stringResource(R.string.home_today) else dayLabel(plan.dayMillis),
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = colors.onPrimaryContainer,
+                            modifier = Modifier.clip(RoundedCornerShape(PoulpyRadius.pill)).background(colors.surface).padding(horizontal = 12.dp, vertical = 6.dp),
+                        )
+                    }
+                }
+            }
         }
     } else {
         OutlinedButton(
@@ -239,40 +264,6 @@ private fun StatBox(label: String, value: String, modifier: Modifier) {
     ) {
         Text(label.uppercase(Locale.getDefault()), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
         Text(value, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold, maxLines = 1)
-    }
-}
-
-/** A calendar from today on. The picker works in UTC days; the model gets the plain date. */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun PlanDialog(model: WorkoutPageModel, state: WorkoutPageState, onDismiss: () -> Unit) {
-    val today = LocalDate.now()
-    val initial = (state.plan?.let { Instant.ofEpochMilli(it.dayMillis).atZone(ZoneId.systemDefault()).toLocalDate() } ?: today)
-    val picker = rememberDatePickerState(
-        initialSelectedDateMillis = initial.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli(),
-        selectableDates = object : SelectableDates {
-            override fun isSelectableDate(utcTimeMillis: Long) =
-                !Instant.ofEpochMilli(utcTimeMillis).atZone(ZoneOffset.UTC).toLocalDate().isBefore(today)
-            override fun isSelectableYear(year: Int) = year >= today.year
-        },
-    )
-    DatePickerDialog(
-        onDismissRequest = onDismiss,
-        confirmButton = {
-            TextButton(
-                enabled = picker.selectedDateMillis != null,
-                onClick = {
-                    picker.selectedDateMillis?.let { millis ->
-                        val day = Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDate()
-                        model.plan(day.year, day.monthValue, day.dayOfMonth)
-                    }
-                    onDismiss()
-                },
-            ) { Text(stringResource(R.string.action_save)) }
-        },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
-    ) {
-        DatePicker(picker)
     }
 }
 

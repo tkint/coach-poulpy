@@ -33,10 +33,13 @@
 "library.empty.body" = "Créez une séance une fois, puis prévoyez-la pour n’importe quel jour ou gardez-la ici pour plus tard.";
 "workout.planned %@" = "Prévue le %@";
 "workout.planned.today" = "Prévue aujourd’hui";
-"workout.change" = "Changer";
-"workout.unplan" = "La retirer du planning";
 "workout.plan" = "La prévoir pour un jour";
-"workout.pick.day" = "Choisissez un jour";
+"workout.change.days" = "Changer les jours";
+"plan.title %@" = "Prévoir %@";
+"plan.hint" = "Touchez les jours où la faire. Touchez à nouveau pour en retirer un.";
+"plan.previous.month" = "Mois précédent";
+"plan.next.month" = "Mois suivant";
+"plan.keep.unplanned" = "La garder sans date";
 "workout.done" = "Faite";
 "workout.last" = "Dernière fois";
 "workout.usually" = "D’habitude";
