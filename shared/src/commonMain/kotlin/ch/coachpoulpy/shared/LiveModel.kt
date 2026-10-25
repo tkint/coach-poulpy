@@ -166,13 +166,15 @@ data class LiveUiState(
     val finishPrompt: FinishPromptUi? = null,
     /** For the summary, which the apps format with [Units]. */
     val units: UnitSystem = UnitSystem.METRIC,
-    /** The last three picks, with [selected] among them, then a "More" chip opens the groups below. */
-    val quickPicks: List<LiveChoice> = emptyList(),
+    /** What Start records, shown in the "What are you doing?" field; null until the choices load. */
+    val choice: LiveChoice? = null,
+    /** Up to three choices last started, most recent first, at the top of the sheet. */
+    val recent: List<LiveChoice> = emptyList(),
     /** Every treadmill-ready walk, easiest first. */
     val walking: List<LiveChoice> = emptyList(),
     /** Every treadmill-ready run, easiest first. */
     val running: List<LiveChoice> = emptyList(),
-    /** The demo intervals, then the saved treadmill workouts. */
+    /** The saved treadmill workouts. */
     val workouts: List<LiveChoice> = emptyList(),
     /** The [LiveChoice.key] that Start records. */
     val selected: String = "",
@@ -199,7 +201,7 @@ class LiveModel(
     private val labels = Labels(languageCode)
 
     /** The keys last started, most recent first. */
-    private var recents = memory.getString(RECENT)?.split(',')?.filter { it.isNotBlank() } ?: DEFAULT_RECENTS
+    private var recents = memory.getString(RECENT)?.split(',')?.filter { it.isNotBlank() }.orEmpty()
 
     private val _state = MutableStateFlow(
         LiveUiState(
@@ -369,13 +371,16 @@ class LiveModel(
             LiveChoice(EXERCISE + e.slug.value, labels.text(e.name), e.variationNote?.let(labels::text).orEmpty())
         val walks = walking.map(::exercise)
         val runs = running.map(::exercise)
-        val workouts = listOf(LiveChoice(demoIntervals.id.value, labels.demoIntervals, labels.demoIntervalsNote)) +
-            savedWorkouts.map { LiveChoice(it.id.value, it.name, "") }
+        val workouts = savedWorkouts.map { LiveChoice(it.id.value, it.name, "") }
         val all = (walks + runs + workouts).associateBy { it.key }
-        val selected = _state.value.selected.takeIf { it in all } ?: recents.firstOrNull { it in all } ?: all.keys.first()
+        val selected = _state.value.selected.takeIf { it in all }
+            ?: recents.firstOrNull { it in all }
+            ?: DEFAULT_CHOICE.takeIf { it in all }
+            ?: all.keys.first()
         _state.update {
             it.copy(
-                quickPicks = quickPicks(recents, selected, all.keys).mapNotNull(all::get),
+                choice = all[selected],
+                recent = recents.mapNotNull(all::get).take(RECENT_COUNT),
                 walking = walks,
                 running = runs,
                 workouts = workouts,
@@ -420,7 +425,7 @@ class LiveModel(
 
     private fun begin(key: String) {
         val exercise = key.takeIf { it.startsWith(EXERCISE) }?.let { catalog()[ExerciseSlug(it.removePrefix(EXERCISE))] }
-        val workout = if (exercise != null) null else (builtInPlans + savedWorkouts).firstOrNull { it.id.value == key } ?: return
+        val workout = if (exercise != null) null else savedWorkouts.firstOrNull { it.id.value == key } ?: return
         val freeRun = exercise != null
         val timeline = if (exercise != null) TreadmillModule.freeRecording(exercise.slug) else compiler.compile(workout!!)
         val now = clock.now()
@@ -431,17 +436,11 @@ class LiveModel(
                 source = if (freeRun) ExecutionSource.DEVICE_ONLY else ExecutionSource.GUIDED,
                 startedAt = now,
                 workout = if (workout != null && workout in savedWorkouts) WorkoutRef(workout.id, workout.version) else null,
-                notes = if (workout === demoIntervals) "Demo intervals" else null,
             ),
-            // The demo gets its name in the user's language when the history shows it.
-            title = when {
-                exercise != null -> labels.text(exercise.name)
-                workout in savedWorkouts -> workout!!.name
-                else -> null
-            },
+            title = exercise?.let { labels.text(it.name) } ?: workout!!.name,
             type = WorkoutType.TREADMILL,
         )
-        recents = (listOf(key) + (recents - key)).take(QUICK_PICKS)
+        recents = (listOf(key) + (recents - key)).take(RECENT_KEPT)
         memory.putString(RECENT, recents.joinToString(","))
         publishChoices()
         val started = Recording(executionId, timeline, Session(timeline), freeRun)
@@ -657,25 +656,20 @@ class LiveModel(
         internal val LOST_AFTER = 2.minutes
         internal val AUTO_FINISH_AFTER = 10.minutes
         private const val RECENT = "live.recent"
-        private const val QUICK_PICKS = 3
+        private const val RECENT_COUNT = 3
+
+        /** More than [RECENT_COUNT], so a deleted workout leaves room for the next one. */
+        private const val RECENT_KEPT = 6
 
         /** The key prefix of a walk or a run from the catalog. */
         const val EXERCISE = "exercise:"
 
         private val WALK = ExerciseSlug("walk")
         private val RUN = ExerciseSlug("run")
-        private val DEFAULT_RECENTS = listOf("${EXERCISE}walk", "${EXERCISE}brisk-walk", "${EXERCISE}easy-run")
+        /** What Start records before anything was ever started. */
+        private const val DEFAULT_CHOICE = "${EXERCISE}walk"
 
-        /**
-         * The chips under "What are you doing?": the [recents] that still exist, topped up from
-         * [available] to three, and [selected] in place of the last one when it is not there yet.
-         */
-        internal fun quickPicks(recents: List<String>, selected: String, available: Collection<String>): List<String> {
-            val picks = (recents + DEFAULT_RECENTS + available).distinct().filter { it in available }.take(QUICK_PICKS)
-            return if (selected in picks || selected !in available) picks else picks.dropLast(1) + selected
-        }
-
-        /** A short workout to try plan checking on a real treadmill before the workout builder exists. */
+        /** A short workout to try plan checking on a real treadmill before the workout builder existed; History still reads it. */
         val demoIntervals = Workout(
             id = WorkoutId("demo-intervals"),
             version = 1,
@@ -692,8 +686,6 @@ class LiveModel(
                 run("finish", Target.Distance(200.0), 7.0),
             ),
         )
-
-        private val builtInPlans = listOf(demoIntervals)
 
         private fun run(id: String, target: Target, kmh: Double) = Step.ExerciseStep(
             id = StepId(id),

@@ -184,7 +184,8 @@
 "live.empty.body" = "Switch on your treadmill, pod or band. Poulpy connects to the ones you added as soon as they are nearby.";
 "live.manage.devices" = "Manage devices";
 "live.what.doing" = "What are you doing?";
-"live.more" = "More";
+"live.change" = "Change";
+"live.group.recent" = "Recent";
 "live.group.walking" = "Walking";
 "live.group.running" = "Running";
 "live.group.workouts" = "Follow a workout";

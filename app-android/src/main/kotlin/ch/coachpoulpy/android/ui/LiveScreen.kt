@@ -4,11 +4,11 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -31,11 +31,9 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -291,40 +289,46 @@ private fun Recorder(state: LiveUiState, model: LiveModel) {
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ChoicePicker(state: LiveUiState, model: LiveModel) {
-    var more by rememberSaveable { mutableStateOf(false) }
+    var picking by rememberSaveable { mutableStateOf(false) }
+    val colors = MaterialTheme.colorScheme
     Text(
         stringResource(R.string.live_what_doing).uppercase(Locale.getDefault()),
         style = MaterialTheme.typography.labelMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        color = colors.onSurfaceVariant,
         modifier = Modifier.semantics { heading() },
     )
-    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        state.quickPicks.forEach { choice ->
-            FilterChip(selected = state.selected == choice.key, onClick = { model.select(choice.key) }, label = { Text(choice.name) })
+    // One field showing the choice; the sheet holds the recent ones and every other.
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .heightIn(min = 56.dp)
+            .clip(RoundedCornerShape(PoulpyRadius.md))
+            .border(1.5.dp, colors.outline, RoundedCornerShape(PoulpyRadius.md))
+            .clickable(onClickLabel = stringResource(R.string.live_change)) { picking = true }
+            .padding(horizontal = 14.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(Modifier.weight(1f)) {
+            Text(state.choice?.name.orEmpty(), style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.ExtraBold)
+            val note = state.choice?.note
+            if (!note.isNullOrEmpty()) {
+                Text(note, style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
+            }
         }
-        AssistChip(
-            onClick = { more = true },
-            label = { Text(stringResource(R.string.live_more)) },
-            trailingIcon = { Icon(Icons.Filled.ExpandMore, contentDescription = null) },
-        )
-    }
-    val note = (state.quickPicks + state.walking + state.running + state.workouts).firstOrNull { it.key == state.selected }?.note
-    if (!note.isNullOrEmpty()) {
-        Text(note, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Icon(Icons.Filled.ExpandMore, contentDescription = null, tint = colors.onSurfaceVariant)
     }
     if (state.hasTreadmill) FollowRow(state.followTreadmill, model::setFollowTreadmill)
     Button(onClick = { model.startRecording(state.selected) }, modifier = Modifier.fillMaxWidth().height(52.dp)) {
         Text(stringResource(if (state.hasTreadmill && state.followTreadmill) R.string.live_wait_treadmill else R.string.treadmill_start))
     }
-    if (more) {
-        ChoiceSheet(state, onPick = { model.select(it); more = false }, onDismiss = { more = false })
+    if (picking) {
+        ChoiceSheet(state, onPick = { model.select(it); picking = false }, onDismiss = { picking = false })
     }
 }
 
-/** "More": every treadmill walk and run, then the workouts, one tap to pick. */
+/** The recent choices, every treadmill walk and run, then the workouts, one tap to pick. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ChoiceSheet(state: LiveUiState, onPick: (String) -> Unit, onDismiss: () -> Unit) {
@@ -336,6 +340,7 @@ private fun ChoiceSheet(state: LiveUiState, onPick: (String) -> Unit, onDismiss:
         Column(Modifier.verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 20.dp, bottom = 28.dp).selectableGroup()) {
             Text(stringResource(R.string.live_what_doing), style = MaterialTheme.typography.titleLarge, modifier = Modifier.semantics { heading() })
             listOf(
+                R.string.live_group_recent to state.recent,
                 R.string.live_group_walking to state.walking,
                 R.string.live_group_running to state.running,
                 R.string.live_group_workouts to state.workouts,

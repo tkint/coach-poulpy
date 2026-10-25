@@ -242,7 +242,8 @@
     <string name="live_finish_lost_body">Il s’est déconnecté il y a %1$d min et Poulpy essaie de le retrouver. Sans réponse, la séance se termine dans %2$d min, arrêtée à %3$s, quand il a été vu pour la dernière fois.</string>
     <string name="live_keep_going">Continuer</string>
     <string name="live_what_doing">Que faites-vous ?</string>
-    <string name="live_more">Plus</string>
+    <string name="live_change">Changer</string>
+    <string name="live_group_recent">Récents</string>
     <string name="live_group_walking">Marche</string>
     <string name="live_group_running">Course</string>
     <string name="live_group_workouts">Suivre une séance</string>

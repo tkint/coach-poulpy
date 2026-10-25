@@ -240,7 +240,8 @@
     <string name="live_finish_lost_body">It disconnected %1$d min ago and Poulpy keeps trying. With no answer, the session finishes in %2$d min, ending at %3$s, when it was last seen.</string>
     <string name="live_keep_going">Keep going</string>
     <string name="live_what_doing">What are you doing?</string>
-    <string name="live_more">More</string>
+    <string name="live_change">Change</string>
+    <string name="live_group_recent">Recent</string>
     <string name="live_group_walking">Walking</string>
     <string name="live_group_running">Running</string>
     <string name="live_group_workouts">Follow a workout</string>

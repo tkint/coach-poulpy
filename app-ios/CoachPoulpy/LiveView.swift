@@ -216,36 +216,28 @@ struct LiveView: View {
                 .tracking(1)
                 .foregroundStyle(PoulpyColor.onSurfaceVariant)
                 .accessibilityAddTraits(.isHeader)
-            FlowLayout(spacing: 8) {
-                ForEach(state.quickPicks, id: \.key) { choice in
-                    let on = choice.key == state.selected
-                    Button { model.select(key: choice.key) } label: {
-                        Text(choice.name)
-                            .font(.custom(PoulpyFontFace.nunitoBold, size: 15, relativeTo: .subheadline))
-                            .foregroundStyle(on ? PoulpyColor.onPrimaryContainer : PoulpyColor.onSurfaceVariant)
-                            .padding(.horizontal, 14)
-                            .frame(height: 36)
-                            .background(on ? PoulpyColor.primaryContainer : Color.clear, in: Capsule())
-                            .overlay(Capsule().stroke(on ? Color.clear : PoulpyColor.outline))
+            // One field showing the choice; the sheet holds the recent ones and every other.
+            Button { choosing = true } label: {
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(state.choice?.name ?? "")
+                            .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 17, relativeTo: .body))
+                            .foregroundStyle(PoulpyColor.onSurface)
+                        if let note = state.choice?.note, !note.isEmpty {
+                            Text(note).font(.poulpy(.footnote)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+                        }
                     }
-                    .accessibilityAddTraits(on ? .isSelected : [])
+                    Spacer()
+                    Image(systemName: "chevron.down").font(.system(size: 14, weight: .bold)).foregroundStyle(PoulpyColor.onSurfaceVariant)
                 }
-                Button { choosing = true } label: {
-                    HStack(spacing: 4) {
-                        Text("live.more")
-                        Image(systemName: "chevron.down").font(.system(size: 12, weight: .bold))
-                    }
-                    .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 15, relativeTo: .subheadline))
-                    .foregroundStyle(PoulpyColor.onPrimaryContainer)
-                    .padding(.horizontal, 14)
-                    .frame(height: 36)
-                    .overlay(Capsule().stroke(PoulpyColor.outline))
-                }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 8)
+                .frame(minHeight: 56)
+                .overlay(RoundedRectangle(cornerRadius: 16).stroke(PoulpyColor.outline, lineWidth: 1.5))
+                .contentShape(RoundedRectangle(cornerRadius: 16))
             }
             .buttonStyle(.plain)
-            if let note = selectedChoice?.note, !note.isEmpty {
-                Text(note).font(.poulpy(.footnote)).foregroundStyle(PoulpyColor.onSurfaceVariant)
-            }
+            .accessibilityHint(Text("live.change"))
             if state.hasTreadmill {
                 followRow
             }
@@ -263,10 +255,6 @@ struct LiveView: View {
             }
             .presentationDetents([.large])
         }
-    }
-
-    private var selectedChoice: LiveChoice? {
-        (state.quickPicks + state.walking + state.running + state.workouts).first { $0.key == state.selected }
     }
 
     private func recordingControls(_ recording: RecordingUi) -> some View {
@@ -497,7 +485,7 @@ private func clock(_ seconds: Int64) -> String {
     return h > 0 ? String(format: "%lld:%02lld:%02lld", h, m, s) : String(format: "%lld:%02lld", m, s)
 }
 
-/// "More": every treadmill walk and run, then the workouts, one tap to pick.
+/// The recent choices, every treadmill walk and run, then the workouts, one tap to pick.
 private struct ChoiceSheet: View {
     let state: LiveUiState
     let pick: (String) -> Void
@@ -506,6 +494,7 @@ private struct ChoiceSheet: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 4) {
                 Text("live.what.doing").font(PoulpyFont.headline).accessibilityAddTraits(.isHeader)
+                group("live.group.recent", state.recent)
                 group("live.group.walking", state.walking)
                 group("live.group.running", state.running)
                 group("live.group.workouts", state.workouts)
