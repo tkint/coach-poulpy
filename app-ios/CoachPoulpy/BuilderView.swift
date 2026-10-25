@@ -13,10 +13,16 @@ struct BuilderView: View {
         self.graph = graph
         _builder = StateObject(wrappedValue: {
             let language = Language.code
-            let model = copyOf.flatMap { graph.copyWorkout(workoutId: $0, languageCode: language) }
-                ?? workoutId.flatMap { graph.editWorkout(workoutId: $0, languageCode: language) }
-                ?? firstExercise.map { graph.createWorkoutWith(exerciseSlug: $0, languageCode: language) }
-                ?? graph.createWorkout(languageCode: language)
+            let model: BuilderModel
+            if let copyOf, let copy = graph.copyWorkout(workoutId: copyOf, languageCode: language) {
+                model = copy
+            } else if let workoutId, let edit = graph.editWorkout(workoutId: workoutId, languageCode: language) {
+                model = edit
+            } else if let firstExercise {
+                model = graph.createWorkoutWith(exerciseSlug: firstExercise, languageCode: language)
+            } else {
+                model = graph.createWorkout(languageCode: language)
+            }
             return Observed(model, current: model.current, watch: model.watch, close: { $0.close() })
         }())
     }
