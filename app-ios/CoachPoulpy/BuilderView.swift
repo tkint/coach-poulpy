@@ -71,9 +71,9 @@ struct BuilderView: View {
                             model.add(slug: row.slug)
                             picking = false
                         } label: {
-                            ExerciseRowView(row: row)
+                            ExerciseRowView(row: row, adding: true)
                         }
-                        .foregroundStyle(.primary)
+                        .buttonStyle(.plain)
                     }
                     .navigationTitle("builder.pick.title")
                     .navigationBarTitleDisplayMode(.inline)

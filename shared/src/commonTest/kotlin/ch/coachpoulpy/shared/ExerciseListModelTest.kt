@@ -10,6 +10,7 @@ import ch.coachpoulpy.types.mobility.MobilityModule
 import ch.coachpoulpy.types.rehab.RehabModule
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class ExerciseListModelTest {
@@ -18,20 +19,20 @@ class ExerciseListModelTest {
 
     @Test
     fun rowsAreLocalized() {
-        assertEquals("Pompe", model("fr").rows.single { it.slug == "push-up" }.name)
-        assertEquals("Push-up", model("en").rows.single { it.slug == "push-up" }.name)
+        assertEquals("Pompe", model("fr").filter().rows.single { it.slug == "push-up" }.name)
+        assertEquals("Push-up", model("en").filter().rows.single { it.slug == "push-up" }.name)
     }
 
     @Test
     fun searchMatchesEitherLanguageAndFiltersByMuscle() {
         val list = model("en")
-        assertEquals(listOf("push-up"), list.filter("pompe").map { it.slug }.filter { it == "push-up" })
-        assertTrue(list.filter(muscle = MuscleGroup.NECK).all { it.slug == "neck-stretch" })
+        assertEquals(listOf("push-up"), list.filter("pompe").rows.map { it.slug }.filter { it == "push-up" })
+        assertTrue(list.filter(area = MuscleArea.SHOULDERS).rows.any { it.slug == "neck-stretch" })
     }
 
     @Test
     fun pickerOnlyOffersExercisesTheWorkoutTypeCanRun() {
-        val rehab = model("en").filter(type = WorkoutType.REHAB).map { Catalog.bundled[ch.coachpoulpy.core.model.ExerciseSlug(it.slug)]!!.measurement }
+        val rehab = model("en").filter(type = WorkoutType.REHAB).rows.map { Catalog.bundled[ch.coachpoulpy.core.model.ExerciseSlug(it.slug)]!!.measurement }
         assertTrue(rehab.isNotEmpty())
         assertTrue(MeasurementMode.TIME !in rehab)
     }
@@ -59,7 +60,7 @@ class ExerciseListModelTest {
         assertTrue(model("en").detail("plank")!!.variations.isEmpty())
     }
 
-    private fun search(query: String, language: String = "en") = model(language).filter(query).map { it.slug }
+    private fun search(query: String, language: String = "en") = model(language).filter(query).rows.map { it.slug }
 
     private val pushUps = listOf("knee-push-up", "incline-push-up", "push-up", "diamond-push-up", "one-arm-push-up")
 
@@ -97,7 +98,7 @@ class ExerciseListModelTest {
     @Test
     fun aliasesAreSearchedButNeverShown() {
         assertEquals(listOf("romanian-deadlift"), search("rdl"))
-        assertEquals("Romanian deadlift", model("en").filter("rdl").single().name)
+        assertEquals("Romanian deadlift", model("en").filter("rdl").rows.single().name)
         val core = listOf("plank", "side-plank", "dead-bug", "bird-dog", "crunch", "hollow-hold", "russian-twist")
         assertEquals(core.toSet(), search("abdos").take(core.size).toSet())
     }
@@ -112,13 +113,75 @@ class ExerciseListModelTest {
     @Test
     fun aVariationGroupStaysTogetherEasiestToHardest() {
         assertEquals(pushUps, search("pompes"))
-        val all = model("en").rows.map { it.slug }
+        val all = model("en").filter().rows.map { it.slug }
         val start = all.indexOf("knee-push-up")
         assertEquals(pushUps, all.subList(start, start + pushUps.size))
     }
 
     @Test
     fun filtersStillApplyOnTopOfTheQuery() {
-        assertEquals(listOf("biceps-curl", "dumbbell-row"), model("en").filter("dumbbell", MuscleGroup.BICEPS).map { it.slug }.sorted())
+        assertEquals(listOf("dumbbell-row", "romanian-deadlift"), model("en").filter("dumbbell", MuscleArea.BACK).rows.map { it.slug }.sorted())
+    }
+
+    @Test
+    fun anEmptySearchIsGroupedByMovementPatternInOrder() {
+        val listing = model("en").filter()
+        assertEquals(listOf("Squat", "Hinge", "Lunge", "Push", "Pull", "Carry", "Core", "Rotation", "Cardio", "Mobility", "Stretch"), listing.sections.map { it.title })
+        assertEquals(Catalog.bundled.offered.size, listing.count)
+        assertEquals("${listing.count} exercises", listing.countLabel)
+        assertFalse(listing.searching)
+        val squat = listing.sections.first().rows.map { it.slug }
+        assertEquals(listOf("chair-squat", "bodyweight-squat", "goblet-squat"), squat.filter { it in listOf("chair-squat", "bodyweight-squat", "goblet-squat") })
+    }
+
+    @Test
+    fun aVariationGroupIsPlacedByItsEasiestMembersName() {
+        // Sit to stand (S) opens the squat group, so Bodyweight squat and Goblet squat follow it, after Calf raise and before Wall sit.
+        assertEquals(
+            listOf("calf-raise", "chair-squat", "bodyweight-squat", "goblet-squat", "wall-sit"),
+            model("en").filter().sections.first().rows.map { it.slug },
+        )
+        val push = model("en").filter().sections.single { it.title == "Push" }.rows.map { it.slug }
+        assertEquals(listOf("bench-dip", "dumbbell-bench-press", "overhead-press", "knee-push-up", "incline-push-up", "push-up", "diamond-push-up", "one-arm-push-up"), push)
+    }
+
+    @Test
+    fun searchingGivesOneUntitledSectionCountedAsMatches() {
+        val listing = model("en").filter("rdl")
+        assertEquals(listOf<String?>(null), listing.sections.map { it.title })
+        assertEquals("1 match", listing.countLabel)
+        assertTrue(listing.searching)
+        assertEquals("5 résultats", model("fr").filter("pompes").countLabel)
+        assertTrue(model("en").filter("zumba").sections.isEmpty())
+        assertEquals("0 matches", model("en").filter("zumba").countLabel)
+    }
+
+    @Test
+    fun everyMuscleGroupMapsToExactlyOneChip() {
+        MuscleGroup.entries.forEach { group ->
+            assertEquals(1, MuscleArea.entries.count { group in it.groups }, "${group.name} is not on exactly one chip")
+        }
+        assertEquals(listOf("Legs", "Glutes", "Core", "Back", "Chest", "Shoulders", "Arms", "Full body"), model("en").muscleFilters.map { it.label })
+    }
+
+    @Test
+    fun aChipListsEveryExerciseWithOneOfItsMuscles() {
+        val legs = model("en").filter(area = MuscleArea.LEGS).rows.map { it.slug }
+        assertTrue("calf-raise" in legs && "hip-circles" in legs && "goblet-squat" in legs)
+        assertTrue("push-up" !in legs)
+    }
+
+    @Test
+    fun theDetailsLineGivesTwoMusclesThenOneFact() {
+        val rows = model("en").filter().rows.associate { it.slug to it.details }
+        assertEquals("Chest, triceps · No equipment", rows["push-up"])
+        assertEquals("Quadriceps, glutes · Dumbbells, kettlebell", rows["goblet-squat"])
+        assertEquals("Quadriceps, glutes · Each side", rows["reverse-lunge"])
+        assertEquals("Core · Hold", rows["plank"])
+        assertEquals("Core, hips · Hold · each side", rows["side-plank"])
+        assertEquals("Full body · Timed", rows["jumping-jack"])
+        assertEquals("Glutes, hamstrings · Mat", rows["glute-bridge"])
+        assertEquals("Back, biceps · Dumbbells, bench or step · each side", rows["dumbbell-row"])
+        assertEquals("Pectoraux, triceps · Sans matériel", model("fr").filter().rows.single { it.slug == "push-up" }.details)
     }
 }

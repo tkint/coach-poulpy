@@ -34,6 +34,17 @@ internal class Labels(private val languageCode: String) {
         MuscleGroup.FULL_BODY -> t("Full body", "Corps entier")
     }
 
+    fun muscleArea(area: MuscleArea) = when (area) {
+        MuscleArea.LEGS -> t("Legs", "Jambes")
+        MuscleArea.GLUTES -> t("Glutes", "Fessiers")
+        MuscleArea.CORE -> t("Core", "Abdos")
+        MuscleArea.BACK -> t("Back", "Dos")
+        MuscleArea.CHEST -> t("Chest", "Pectoraux")
+        MuscleArea.SHOULDERS -> t("Shoulders", "Épaules")
+        MuscleArea.ARMS -> t("Arms", "Bras")
+        MuscleArea.FULL_BODY -> t("Full body", "Corps entier")
+    }
+
     fun equipment(item: Equipment) = when (item) {
         Equipment.BODYWEIGHT -> t("No equipment", "Sans matériel")
         Equipment.DUMBBELL -> t("Dumbbells", "Haltères")
@@ -99,8 +110,12 @@ internal class Labels(private val languageCode: String) {
     /** For a session whose workout was deleted before the history kept names. */
     val session get() = t("Workout", "Séance")
     val perSide get() = t("each side", "par côté")
+    val hold get() = t("Hold", "Maintien")
+    val timed get() = t("Timed", "Chronométré")
 
     fun exercises(count: Int) = if (count == 1) t("1 exercise", "1 exercice") else t("$count exercises", "$count exercices")
+
+    fun matches(count: Int) = if (count == 1) t("1 match", "1 résultat") else t("$count matches", "$count résultats")
 
     fun aboutMinutes(minutes: Int) = t("about $minutes min", "environ $minutes min")
 

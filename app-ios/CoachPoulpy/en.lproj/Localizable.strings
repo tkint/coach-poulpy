@@ -48,7 +48,14 @@
 
 "exercises.search" = "Name, muscle or equipment";
 "exercises.all" = "All";
-"exercises.none" = "No exercise matches.";
+"exercises.search.label" = "Search exercises";
+"exercises.clear.search" = "Clear search";
+"exercises.clear.filters" = "Clear filters";
+"exercises.nothing.for %@" = "Nothing for “%@”";
+"exercises.nothing.hint" = "Try one word, a muscle like “glutes”, or something you own like “dumbbell”.";
+"exercises.no.fit" = "No exercise fits these filters";
+"exercises.no.fit.hint" = "Try another muscle.";
+"exercises.clear.all" = "Clear search and filters";
 "exercise.muscles" = "Muscles";
 "exercise.equipment" = "Equipment";
 "exercise.how" = "How to do it";
