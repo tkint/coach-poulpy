@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
@@ -36,8 +37,6 @@ import androidx.compose.material.icons.filled.DragIndicator
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Button
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -65,7 +64,9 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -102,6 +103,17 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
         count = state.rows.size
     }
     val colors = MaterialTheme.colorScheme
+    val list = rememberLazyListState()
+    val drag = rememberDragReorder(
+        list,
+        canDropOn = { key -> state.rows.any { it.key == key } },
+        onMove = { key, toKey ->
+            val to = state.rows.indexOfFirst { it.key == toKey }
+            val moved = to >= 0 && state.rows.indexOfFirst { it.key == key } != to
+            if (moved) model.move(key as String, to)
+            moved
+        },
+    )
 
     if (picking) {
         BackHandler { picking = false }
@@ -148,6 +160,7 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
         },
     ) { padding ->
         LazyColumn(
+            state = list,
             modifier = Modifier.padding(padding).fillMaxSize().navigationBarsPadding(),
             contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
@@ -172,7 +185,13 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
                 item { Text(stringResource(R.string.builder_empty), style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant) }
             }
             items(state.rows, key = { it.key }) { row ->
-                EntryCard(model, row, open = row.key == open, onOpen = { open = row.key })
+                EntryCard(
+                    model, row,
+                    open = row.key == open,
+                    onOpen = { open = row.key },
+                    handle = Modifier.dragHandle(drag, row.key),
+                    modifier = Modifier.draggedItem(this, drag, row.key),
+                )
             }
             item { AddButton(onClick = { picking = true }) }
         }
@@ -221,20 +240,33 @@ private fun BoxField(
 
 /** An exercise of the workout: open, its four settings in a 2×2 grid; folded, its name and summary. */
 @Composable
-private fun EntryCard(model: BuilderModel, row: BuilderRow, open: Boolean, onOpen: () -> Unit) {
+private fun EntryCard(model: BuilderModel, row: BuilderRow, open: Boolean, onOpen: () -> Unit, handle: Modifier, modifier: Modifier) {
     val colors = MaterialTheme.colorScheme
+    val moveUp = stringResource(R.string.builder_move_up)
+    val moveDown = stringResource(R.string.builder_move_down)
     Surface(
         shape = RoundedCornerShape(PoulpyRadius.md),
         color = colors.surface,
         border = if (open) BorderStroke(1.5.dp, PoulpyPalette.Lagoon300) else BorderStroke(1.dp, colors.outline),
-        modifier = Modifier.fillMaxWidth(),
+        // Screen readers can't drag: they get Move up and Move down as actions on the card.
+        modifier = modifier.fillMaxWidth().semantics {
+            customActions = listOf(
+                CustomAccessibilityAction(moveUp) { model.moveUp(row.key); true },
+                CustomAccessibilityAction(moveDown) { model.moveDown(row.key); true },
+            )
+        },
     ) {
         Column(
             Modifier.padding(start = 12.dp, end = 8.dp, top = 12.dp, bottom = if (open) 14.dp else 12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                ReorderHandle(model, row)
+                Icon(
+                    Icons.Filled.DragIndicator,
+                    contentDescription = null,
+                    tint = PoulpyPalette.Neutral500,
+                    modifier = handle.size(28.dp, 44.dp).padding(horizontal = 4.dp, vertical = 12.dp),
+                )
                 Column(
                     Modifier.weight(1f).then(if (open) Modifier else Modifier.clickable(onClick = onOpen)),
                 ) {
@@ -274,26 +306,6 @@ private fun EntryCard(model: BuilderModel, row: BuilderRow, open: Boolean, onOpe
                     }
                 }
             }
-        }
-    }
-}
-
-/** The handle: until cards can be dragged, it opens Move up and Move down. */
-@Composable
-private fun ReorderHandle(model: BuilderModel, row: BuilderRow) {
-    var menu by remember { mutableStateOf(false) }
-    Box {
-        IconButton(onClick = { menu = true }, modifier = Modifier.size(32.dp, 44.dp)) {
-            Icon(
-                Icons.Filled.DragIndicator,
-                contentDescription = stringResource(R.string.builder_reorder, row.name),
-                tint = PoulpyPalette.Neutral500,
-                modifier = Modifier.size(20.dp),
-            )
-        }
-        DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-            DropdownMenuItem(text = { Text(stringResource(R.string.builder_move_up)) }, onClick = { menu = false; model.moveUp(row.key) })
-            DropdownMenuItem(text = { Text(stringResource(R.string.builder_move_down)) }, onClick = { menu = false; model.moveDown(row.key) })
         }
     }
 }

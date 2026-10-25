@@ -127,7 +127,6 @@
     <string name="builder_more_named">More: %1$s</string>
     <string name="builder_remove_named">Remove %1$s</string>
     <string name="builder_open">Edit %1$s</string>
-    <string name="builder_reorder">Move %1$s</string>
     <string name="builder_does_not_fit">This kind of workout can’t run this exercise. Remove it or pick another kind.</string>
     <string name="builder_empty">Add exercises to build your workout.</string>
     <string name="builder_goal">Target</string>

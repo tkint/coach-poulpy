@@ -98,7 +98,6 @@
 "builder.more" = "More";
 "builder.remove.named %@" = "Remove %@";
 "builder.open %@" = "Edit %@";
-"builder.reorder %@" = "Move %@";
 "builder.does.not.fit" = "This kind of workout can’t run this exercise. Remove it or pick another kind.";
 "builder.empty" = "Add exercises to build your workout.";
 "builder.goal" = "Target";

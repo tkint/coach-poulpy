@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 import Shared
 
 struct BuilderView: View {
@@ -32,6 +33,11 @@ struct BuilderView: View {
 
     @State private var open: String?
     @State private var count = 0
+    // The card being dragged, where its middle started and how far the finger went.
+    @State private var dragging: String?
+    @State private var dragStart: CGFloat = 0
+    @State private var dragY: CGFloat = 0
+    @State private var frames: [String: CGRect] = [:]
 
     var body: some View {
         NavigationStack {
@@ -61,7 +67,20 @@ struct BuilderView: View {
                         Text("builder.empty").font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
                     }
                     ForEach(state.rows, id: \.key) { row in
-                        EntryCard(model: model, row: row, open: open == row.key) { open = row.key }
+                        let lifted = dragging == row.key
+                        EntryCard(
+                            model: model, row: row, open: open == row.key,
+                            onOpen: { open = row.key },
+                            onDrag: { drag(row.key, by: $0) },
+                            onDrop: drop
+                        )
+                        .background(GeometryReader { geometry in
+                            Color.clear.preference(key: CardFrames.self, value: [row.key: geometry.frame(in: .named("builder"))])
+                        })
+                        .offset(y: lifted ? dragStart + dragY - (frames[row.key]?.midY ?? dragStart) : 0)
+                        .shadow(color: .black.opacity(lifted ? 0.18 : 0), radius: 12, y: 6)
+                        .zIndex(lifted ? 1 : 0)
+                        .transaction { if lifted { $0.animation = nil } }
                     }
                     Button {
                         picking = true
@@ -78,6 +97,8 @@ struct BuilderView: View {
                 .padding(.horizontal, 20)
                 .padding(.top, 8)
                 .padding(.bottom, PoulpySpace.xl)
+                .coordinateSpace(name: "builder")
+                .onPreferenceChange(CardFrames.self) { frames = $0 }
             }
             .background(PoulpyColor.background)
             .navigationTitle(LocalizedStringKey(model.isEditing ? "builder.edit.title" : "builder.new.title"))
@@ -140,6 +161,36 @@ struct BuilderView: View {
         }
     }
 
+    /// Follows the finger; once the card's middle passes over another card, it takes that card's place.
+    private func drag(_ key: String, by y: CGFloat) {
+        if dragging == nil {
+            dragging = key
+            dragStart = frames[key]?.midY ?? 0
+        }
+        dragY = y
+        let middle = dragStart + y
+        let rows = state.rows
+        guard
+            let from = rows.firstIndex(where: { $0.key == key }),
+            let to = rows.firstIndex(where: { row in
+                guard row.key != key, let frame = frames[row.key] else { return false }
+                return frame.minY <= middle && middle < frame.maxY
+            }),
+            to != from
+        else { return }
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
+            model.move(key: key, toIndex: Int32(to))
+        }
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+    }
+
+    private func drop() {
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
+            dragging = nil
+            dragY = 0
+        }
+    }
+
     private func fieldLabel(_ key: LocalizedStringKey) -> some View {
         Text(key).textCase(.uppercase).font(PoulpyFont.label).kerning(1).foregroundStyle(PoulpyColor.onSurfaceVariant)
     }
@@ -151,31 +202,36 @@ private struct EntryCard: View {
     let row: BuilderRow
     let open: Bool
     let onOpen: () -> Void
+    let onDrag: (CGFloat) -> Void
+    let onDrop: () -> Void
     @State private var weight: String
     @State private var editing: TargetField?
 
-    init(model: BuilderModel, row: BuilderRow, open: Bool, onOpen: @escaping () -> Void) {
+    init(model: BuilderModel, row: BuilderRow, open: Bool, onOpen: @escaping () -> Void, onDrag: @escaping (CGFloat) -> Void, onDrop: @escaping () -> Void) {
         self.model = model
         self.row = row
         self.open = open
         self.onOpen = onOpen
+        self.onDrag = onDrag
+        self.onDrop = onDrop
         _weight = State(initialValue: row.loadKg.map { EntryCard.format($0.doubleValue) } ?? "")
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 10) {
-                // Until cards can be dragged, the handle opens Move up and Move down.
-                Menu {
-                    Button("builder.move.up") { model.moveUp(key: row.key) }
-                    Button("builder.move.down") { model.moveDown(key: row.key) }
-                } label: {
-                    Image(systemName: "line.3.horizontal")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundStyle(PoulpyPalette.neutral500)
-                        .frame(width: 28, height: 44)
-                }
-                .accessibilityLabel(Text(L("builder.reorder %@", row.name)))
+                // Only the handle drags, so the rest of the card still scrolls the list.
+                Image(systemName: "line.3.horizontal")
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundStyle(PoulpyPalette.neutral500)
+                    .frame(width: 28, height: 44)
+                    .contentShape(Rectangle())
+                    .highPriorityGesture(
+                        DragGesture(minimumDistance: 1, coordinateSpace: .named("builder"))
+                            .onChanged { onDrag($0.translation.height) }
+                            .onEnded { _ in onDrop() }
+                    )
+                    .accessibilityHidden(true)
                 Button(action: onOpen) {
                     VStack(alignment: .leading, spacing: 0) {
                         Text(row.name).font(.custom(PoulpyFontFace.baloo2Bold, size: 19, relativeTo: .headline))
@@ -187,7 +243,9 @@ private struct EntryCard: View {
                     .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
-                .disabled(open)
+                // Screen readers can't drag: they get Move up and Move down as actions.
+                .accessibilityAction(named: Text("builder.move.up")) { model.moveUp(key: row.key) }
+                .accessibilityAction(named: Text("builder.move.down")) { model.moveDown(key: row.key) }
                 if open {
                     Button { model.remove(key: row.key) } label: {
                         Image(systemName: "trash").frame(width: 44, height: 44)
@@ -483,6 +541,14 @@ private struct ValueSheet: View {
 
     private func sectionLabel(_ key: LocalizedStringKey) -> some View {
         Text(key).textCase(.uppercase).font(PoulpyFont.label).kerning(1).foregroundStyle(PoulpyColor.onSurfaceVariant)
+    }
+}
+
+/// Where each exercise card sits in the builder, so a drag knows which card it is over.
+private struct CardFrames: PreferenceKey {
+    static var defaultValue: [String: CGRect] = [:]
+    static func reduce(value: inout [String: CGRect], nextValue: () -> [String: CGRect]) {
+        value.merge(nextValue()) { $1 }
     }
 }
 

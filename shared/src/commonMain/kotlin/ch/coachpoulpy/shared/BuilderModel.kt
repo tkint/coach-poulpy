@@ -105,8 +105,17 @@ class BuilderModel internal constructor(
 
     fun remove(key: String) = edit { copy(entries = entries.filterNot { it.key == key }) }
 
-    fun moveUp(key: String) = move(key, -1)
-    fun moveDown(key: String) = move(key, +1)
+    fun moveUp(key: String) = moveBy(key, -1)
+    fun moveDown(key: String) = moveBy(key, +1)
+
+    /** Moves the exercise to [toIndex] in the list, as a drag drops it; out-of-range indexes clamp to the ends. */
+    fun move(key: String, toIndex: Int) = edit {
+        val from = entries.indexOfFirst { it.key == key }
+        if (from < 0) return@edit this
+        val to = toIndex.coerceIn(0, entries.lastIndex)
+        if (to == from) return@edit this
+        copy(entries = entries.toMutableList().apply { add(to, removeAt(from)) })
+    }
 
     fun setSets(key: String, sets: Int) = editEntry(key) { copy(sets = sets.coerceIn(1, 20)) }
 
@@ -271,11 +280,11 @@ class BuilderModel internal constructor(
         copy(entries = entries.map { if (it.key == key) it.change() else it })
     }
 
-    private fun move(key: String, by: Int) = edit {
-        val from = entries.indexOfFirst { it.key == key }
+    private fun moveBy(key: String, by: Int) {
+        val from = draft.entries.indexOfFirst { it.key == key }
         val to = from + by
-        if (from < 0 || to !in entries.indices) return@edit this
-        copy(entries = entries.toMutableList().apply { add(to, removeAt(from)) })
+        if (from < 0 || to !in draft.entries.indices) return
+        move(key, to)
     }
 
     private fun render(draft: WorkoutDraft): BuilderState {

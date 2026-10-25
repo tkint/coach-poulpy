@@ -126,7 +126,6 @@
     <string name="builder_more_named">Plus : %1$s</string>
     <string name="builder_remove_named">Retirer %1$s</string>
     <string name="builder_open">Modifier %1$s</string>
-    <string name="builder_reorder">Déplacer %1$s</string>
     <string name="builder_does_not_fit">Ce type de séance ne peut pas inclure cet exercice. Retirez-le ou choisissez un autre type.</string>
     <string name="builder_empty">Ajoutez des exercices pour composer votre séance.</string>
     <string name="builder_goal">Objectif</string>

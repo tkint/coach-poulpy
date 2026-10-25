@@ -183,4 +183,24 @@ class BuilderModelTest {
         assertEquals("Semi-marathon", builder.distancePicks(DistanceUnit.KM)[3].label)
         assertEquals(42_195.0, TargetInput.parseDistance(builder.distancePicks(DistanceUnit.MI).last().text, DistanceUnit.MI)!!, 1.0)
     }
+
+    @Test
+    fun aDraggedExerciseLandsWhereItIsDropped() {
+        val builder = graph.createWorkout("en")
+        listOf("goblet-squat", "push-up", "plank").forEach(builder::add)
+        fun order() = builder.state.value.rows.map { it.key }
+        val (squat, pushUp, plank) = builder.state.value.rows.map { it.key }
+
+        builder.move(squat, 2)
+        assertEquals(listOf(pushUp, plank, squat), order())
+        builder.move(squat, -5)
+        assertEquals(listOf(squat, pushUp, plank), order())
+        builder.move(plank, 99)
+        assertEquals(listOf(squat, pushUp, plank), order())
+        builder.moveUp(squat)
+        builder.moveDown(plank)
+        assertEquals(listOf(squat, pushUp, plank), order())
+        builder.moveDown(squat)
+        assertEquals(listOf(pushUp, squat, plank), order())
+    }
 }
