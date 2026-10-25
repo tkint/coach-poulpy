@@ -111,7 +111,9 @@ class DevicesModel(
     private var known: List<Known> = loadKnown()
     private val links = mutableMapOf<String, Link>()
     private val failures = mutableMapOf<String, String>()
-    private val found = mutableMapOf<String, FoundDevice>()
+
+    /** In the order first seen, so a row never moves under the user's finger while the scan runs. */
+    private val found = linkedMapOf<String, FoundDevice>()
 
     /** Added devices to connect as soon as the scan sees them. */
     private val pending = mutableSetOf<String>()
@@ -156,6 +158,11 @@ class DevicesModel(
     /** Scans for devices to add, until [stopScan]. Added devices are left out of [DevicesUiState.found]. */
     fun startScan() {
         userScan = true
+        // A new scan may order the list afresh: known kinds first, then the strongest signal.
+        val sorted = found.values.sortedWith(compareByDescending<FoundDevice> { it.kind != null }.thenByDescending { it.rssi })
+        found.clear()
+        sorted.forEach { found[it.id] = it }
+        publish()
         scan()
     }
 
@@ -433,7 +440,6 @@ class DevicesModel(
                 known = rows,
                 found = found.values
                     .filter { device -> device.id !in knownKeys }
-                    .sortedWith(compareByDescending<FoundDevice> { d -> d.kind != null }.thenByDescending { d -> d.rssi })
                     .map { d -> FoundDeviceUi(d.id, d.name ?: d.id, d.kind, d.rssi) },
                 sources = sources,
                 connectedCount = links.values.count { link -> link.status == ConnectionStatus.CONNECTED },
