@@ -56,7 +56,7 @@
 "exercises.no.fit" = "Aucun exercice ne correspond à ces filtres";
 "exercises.no.fit.hint" = "Essayez un autre muscle, ou cochez plus de matériel.";
 "exercises.equipment" = "Matériel";
-"exercises.equipment.hint" = "Cochez ce que vous avez pour ne voir que les exercices faisables. Ceux au poids du corps ou sur tapis restent toujours là.";
+"exercises.equipment.hint" = "Cochez ce que vous avez pour voir les exercices qui s’en servent.";
 "exercises.equipment.clear" = "Effacer";
 "exercises.clear.all" = "Effacer la recherche et les filtres";
 "exercise.muscles" = "Muscles";

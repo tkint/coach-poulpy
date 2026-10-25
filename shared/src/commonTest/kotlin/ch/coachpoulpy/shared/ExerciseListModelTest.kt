@@ -202,10 +202,22 @@ class ExerciseListModelTest {
     }
 
     @Test
-    fun withNothingTickedEveryBodyweightAndMatExerciseShows() {
-        val free = Catalog.bundled.offered.filter { it.equipment.isEmpty() }.map { it.slug.value }
-        assertEquals(free.toSet(), fitting().toSet())
-        assertTrue("plank" in free && "push-up" in free && "glute-bridge" in free)
+    fun aTreadmillListsOnlyTheExercisesThatUseIt() {
+        assertEquals(setOf("brisk-walk", "easy-run"), fitting(Equipment.TREADMILL).toSet())
+    }
+
+    @Test
+    fun optionalEquipmentCountsAndBodyweightOnlyHides() {
+        val shown = fitting(Equipment.DUMBBELL)
+        assertTrue("reverse-lunge" in shown && "calf-raise" in shown)
+        assertTrue("push-up" !in shown && "plank" !in shown)
+    }
+
+    @Test
+    fun tickingNothingIsNoFilter() {
+        val all = model("en").filter(ticked = emptySet())
+        assertEquals(Catalog.bundled.offered.size, all.count)
+        assertFalse(all.restricted)
         assertEquals(Catalog.bundled.offered.size, model("en").filter(ticked = null).count)
     }
 

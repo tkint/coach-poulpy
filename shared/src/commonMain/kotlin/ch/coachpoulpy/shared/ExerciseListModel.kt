@@ -107,9 +107,10 @@ class ExerciseListModel internal constructor(
 
     /**
      * Offered exercises matching [query] and [area]. With [type], only exercises that
-     * workout type can run are listed; with [ticked], only those that equipment fits
-     * (null is no equipment filter). With a query, one section of the best matches
-     * first ([ExerciseSearch]); without, a section per movement pattern, by name.
+     * workout type can run are listed; with [ticked], only those that use a ticked item
+     * and that it fits ([uses]; null or empty is no equipment filter). With a query, one
+     * section of the best matches first ([ExerciseSearch]); without, a section per
+     * movement pattern, by name.
      * [withRecent], for the builder's picker, puts up to 5 recently used exercises
      * first while nothing is typed or filtered; they also stay in their pattern.
      */
@@ -120,10 +121,11 @@ class ExerciseListModel internal constructor(
         ticked: Set<Equipment>? = null,
         withRecent: Boolean = false,
     ): ExerciseListing {
+        val owned = ticked?.takeIf { it.isNotEmpty() }
         val candidates = catalog.offered
             .filter { area == null || it.muscleGroups.any { group -> group in area.groups } }
             .filter { type == null || registry.accepts(type, it.measurement) }
-            .filter { ticked == null || it.fits(ticked) }
+            .filter { owned == null || it.uses(owned) }
         val ranks = search.rank(query)
         val sections = if (ranks == null) {
             MovementPattern.entries.mapNotNull { pattern ->
@@ -139,7 +141,7 @@ class ExerciseListModel internal constructor(
         }
         val count = sections.sumOf { it.rows.size }
         val searching = ranks != null
-        val restricted = ticked != null
+        val restricted = owned != null
         val recentRows = if (withRecent && !searching && area == null && !restricted) recentlyUsedRows(type) else emptyList()
         val shown = if (recentRows.isEmpty()) sections else listOf(ExerciseSection(labels.recentlyUsed, recentRows)) + sections
         val countLabel = when {
@@ -170,6 +172,13 @@ class ExerciseListModel internal constructor(
             },
         )
     }
+
+    /**
+     * What the Equipment filter lists: exercises using something ticked, needed or
+     * optional, whose every need is ticked. Dumbbells alone list the goblet squat and
+     * lunges but not the dumbbell bench press; a treadmill lists the walk and the run.
+     */
+    private fun Exercise.uses(ticked: Set<Equipment>) = fits(ticked) && allEquipment.any { it in ticked }
 
     private fun recentlyUsedRows(type: WorkoutType?): List<ExerciseRow> = recent.asSequence()
         .mapNotNull { catalog[it] }
