@@ -340,14 +340,8 @@ private struct DeviceView: View {
                     .listRowBackground(PoulpyColor.primaryContainer)
                 }
                 Section("devices.measures") {
-                    ForEach(device.provides, id: \.self) { quantity in
-                        HStack {
-                            Text(quantityLabel(quantity)).font(.poulpy(.headline))
-                            Spacer()
-                            if device.status == .connected {
-                                usedPill(device, quantity, known: state.known)
-                            }
-                        }
+                    ForEach(device.measures, id: \.quantity) { measure in
+                        measureRow(device, measure, known: state.known)
                     }
                     if !state.sources.isEmpty {
                         NavigationLink(value: DeviceRoute.sources) {
@@ -391,17 +385,30 @@ private struct DeviceView: View {
         }
     }
 
+    /// Another added device measures it too: the switch picks this one, as Data sources does.
     @ViewBuilder
-    private func usedPill(_ device: KnownDeviceUi, _ quantity: Quantity, known: [KnownDeviceUi]) -> some View {
-        let used = device.usedFor.contains(quantity)
-        let instead = known.first { $0.key != device.key && $0.usedFor.contains(quantity) }
-        if used || instead != nil {
-            Text(used ? L("devices.used") : L("devices.used.instead", instead?.name ?? ""))
-                .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 13, relativeTo: .footnote))
-                .foregroundStyle(used ? PoulpyColor.onPrimaryContainer : PoulpyColor.onSurfaceVariant)
-                .padding(.horizontal, 10)
-                .padding(.vertical, 4)
-                .background(used ? PoulpyColor.primaryContainer : PoulpyColor.surfaceVariant, in: Capsule())
+    private func measureRow(_ device: KnownDeviceUi, _ measure: MeasureUi, known: [KnownDeviceUi]) -> some View {
+        if measure.choosable {
+            let instead = known.first { other in other.key != device.key && other.measures.contains { $0.quantity == measure.quantity && $0.used } }
+            Toggle(isOn: Binding(get: { measure.used }, set: { devices.model.useForMeasure(key: device.key, quantity: measure.quantity, on: $0) })) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(quantityLabel(measure.quantity)).font(.poulpy(.headline))
+                    Text(measure.used || instead == nil ? L("devices.use.this") : L("devices.used.instead", instead?.name ?? ""))
+                        .font(.poulpy(.footnote))
+                        .foregroundStyle(PoulpyColor.onSurfaceVariant)
+                }
+            }
+        } else {
+            HStack {
+                Text(quantityLabel(measure.quantity)).font(.poulpy(.headline))
+                Spacer()
+                Text(L("devices.used"))
+                    .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 13, relativeTo: .footnote))
+                    .foregroundStyle(PoulpyColor.onPrimaryContainer)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 4)
+                    .background(PoulpyColor.primaryContainer, in: Capsule())
+            }
         }
     }
 }

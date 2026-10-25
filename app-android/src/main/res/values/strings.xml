@@ -225,6 +225,7 @@
     <string name="devices_measures">What it measures</string>
     <string name="devices_used">Used</string>
     <string name="devices_used_instead">%1$s used instead</string>
+    <string name="devices_use_this">Use this device</string>
     <string name="devices_change_sources">Change which device is used</string>
     <string name="devices_sources">Data sources</string>
     <string name="devices_sources_hint">When two devices measure the same thing, pick the one to trust. Automatic prefers what is on your body: the pod over the treadmill, the band over the treadmill’s grips.</string>

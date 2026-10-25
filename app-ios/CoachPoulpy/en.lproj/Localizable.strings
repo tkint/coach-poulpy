@@ -194,6 +194,7 @@
 "devices.measures" = "What it measures";
 "devices.used" = "Used";
 "devices.used.instead" = "%@ used instead";
+"devices.use.this" = "Use this device";
 "devices.change.sources" = "Change which device is used";
 "devices.sources" = "Data sources";
 "devices.sources.hint" = "When two devices measure the same thing, pick the one to trust. Automatic prefers what is on your body: the pod over the treadmill, the band over the treadmill’s grips.";

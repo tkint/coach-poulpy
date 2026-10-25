@@ -381,20 +381,24 @@ fun DeviceScreen(graph: AppGraph, key: String, onBack: () -> Unit, onSources: ()
         SectionLabel(R.string.devices_measures)
         OutlinedSurface {
             Column(Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) {
-                device.provides.forEach { quantity ->
+                device.measures.forEach { measure ->
                     Row(Modifier.fillMaxWidth().padding(vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Text(stringResource(quantity.label), fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-                        if (device.status == ConnectionStatus.CONNECTED) {
-                            val used = quantity in device.usedFor
-                            val instead = state.known.firstOrNull { it.key != device.key && quantity in it.usedFor }
-                            Pill(
-                                when {
-                                    used -> stringResource(R.string.devices_used)
-                                    instead != null -> stringResource(R.string.devices_used_instead, instead.name)
-                                    else -> null
-                                },
-                                highlighted = used,
-                            )
+                        Column(Modifier.weight(1f)) {
+                            Text(stringResource(measure.quantity.label), fontWeight = FontWeight.Bold)
+                            // Another added device measures it too: the switch picks this one, as Data sources does.
+                            if (measure.choosable) {
+                                val instead = state.known.firstOrNull { other -> other.key != device.key && other.measures.any { it.quantity == measure.quantity && it.used } }
+                                Text(
+                                    if (measure.used || instead == null) stringResource(R.string.devices_use_this) else stringResource(R.string.devices_used_instead, instead.name),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        }
+                        if (measure.choosable) {
+                            Switch(checked = measure.used, onCheckedChange = { model.useForMeasure(device.key, measure.quantity, it) })
+                        } else {
+                            Pill(stringResource(R.string.devices_used), highlighted = true)
                         }
                     }
                 }

@@ -54,12 +54,21 @@ data class KnownDeviceUi(
     val provides: List<Quantity>,
     /** Of [provides], what the live screen takes from this device right now. */
     val usedFor: List<Quantity>,
+    /** One per quantity in [provides], for the device page. */
+    val measures: List<MeasureUi>,
     /** Why connecting failed, in English: shown as a detail under a localized title. */
     val error: String?,
 )
 
 /** A device the scan found that is not added yet. [kind] null: it lists no known service, so it is tried as a treadmill. */
 data class FoundDeviceUi(val key: String, val name: String, val kind: DeviceKind?, val rssi: Int)
+
+/**
+ * One quantity a device provides, on its page. [used]: this device is the metric source for it among the
+ * added devices, by the user's choice or else automatically. [choosable]: another added device provides it
+ * too, so the page offers a "Use this device" switch.
+ */
+data class MeasureUi(val quantity: Quantity, val used: Boolean, val choosable: Boolean)
 
 data class SourceOption(val key: String, val name: String)
 
@@ -239,6 +248,18 @@ class DevicesModel(
         publish()
     }
 
+    /**
+     * The device page's "Use this device" switch: the same setting as [setSource]. Off hands [quantity] back to
+     * automatic; when automatic would pick this device anyway, the next added device that provides it is picked,
+     * so the switch never stays on after being turned off.
+     */
+    fun useForMeasure(key: String, quantity: Quantity, on: Boolean) {
+        if (on) return setSource(quantity, key)
+        if (chosen(quantity) != key) return
+        val automatic = automatic(quantity, known)
+        setSource(quantity, if (automatic?.key == key) automatic(quantity, known.filter { it.key != key })?.key else null)
+    }
+
     private fun scan() {
         if (scanJob != null) return
         _state.update { it.copy(scanning = true, error = null) }
@@ -406,6 +427,17 @@ class DevicesModel(
 
     private fun provides(device: Known): Set<Quantity> = links[device.key]?.seen ?: defaults(device.kind)
 
+    /** The added device that is the metric source for [quantity], connected or not: the user's choice, else automatic. */
+    private fun chosen(quantity: Quantity): String? {
+        val options = known.filter { quantity in provides(it) }
+        val choice = memory.getString(sourceKey(quantity))
+        return options.firstOrNull { it.key == choice }?.key ?: automatic(quantity, options)?.key
+    }
+
+    /** Automatic among [devices]: the one on the body wins, like [source] does for connected ones. */
+    private fun automatic(quantity: Quantity, devices: List<Known>): Known? =
+        devices.filter { quantity in provides(it) }.minByOrNull { priority(quantity, it.kind) }
+
     private fun publish() {
         val used = Quantity.entries.associateWith { source(it)?.known?.key }
         val rows = known.map { device ->
@@ -425,6 +457,13 @@ class DevicesModel(
                 autoConnect = device.autoConnect,
                 provides = provides,
                 usedFor = provides.filter { used[it] == device.key },
+                measures = provides.map { quantity ->
+                    MeasureUi(
+                        quantity = quantity,
+                        used = chosen(quantity) == device.key,
+                        choosable = known.any { it.key != device.key && quantity in provides(it) },
+                    )
+                },
                 error = failures[device.key],
             )
         }

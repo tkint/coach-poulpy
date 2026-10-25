@@ -227,6 +227,7 @@
     <string name="devices_measures">Ce qu’il mesure</string>
     <string name="devices_used">Utilisé</string>
     <string name="devices_used_instead">%1$s utilisé à la place</string>
+    <string name="devices_use_this">Utiliser cet appareil</string>
     <string name="devices_change_sources">Choisir quel appareil est utilisé</string>
     <string name="devices_sources">Sources des données</string>
     <string name="devices_sources_hint">Quand deux appareils mesurent la même chose, choisissez celui auquel vous fiez. Automatique préfère ce que vous portez : le pod plutôt que le tapis, la ceinture plutôt que les poignées du tapis.</string>

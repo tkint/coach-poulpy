@@ -194,6 +194,7 @@
 "devices.measures" = "Ce qu’il mesure";
 "devices.used" = "Utilisé";
 "devices.used.instead" = "%@ utilisé à la place";
+"devices.use.this" = "Utiliser cet appareil";
 "devices.change.sources" = "Choisir quel appareil est utilisé";
 "devices.sources" = "Sources des données";
 "devices.sources.hint" = "Quand deux appareils mesurent la même chose, choisissez celui auquel vous vous fiez. Automatique préfère ce que vous portez : le pod plutôt que le tapis, la ceinture plutôt que les poignées du tapis.";
