@@ -390,6 +390,9 @@ class LiveModelTest {
         assertEquals("Run", saved.title)
         // A recent that is gone, such as a deleted workout, is skipped.
         assertEquals(listOf("Run", "Walk"), m.live.state.value.recent.map { it.name })
+        // Each shows once, in Recent only.
+        assertEquals(listOf("Walk with support", "Gentle walk", "Brisk walk"), m.live.state.value.walking.map { it.name })
+        assertEquals(listOf("Easy run"), m.live.state.value.running.map { it.name })
         assertEquals("exercise:run,gone,exercise:walk", memory.getString("live.recent"))
     }
 }

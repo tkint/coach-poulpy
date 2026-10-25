@@ -143,11 +143,11 @@ data class LiveUiState(
     val choice: LiveChoice? = null,
     /** Up to three choices last started, most recent first, at the top of the sheet. */
     val recent: List<LiveChoice> = emptyList(),
-    /** Every treadmill-ready walk, easiest first. */
+    /** Every treadmill-ready walk not in [recent], easiest first. */
     val walking: List<LiveChoice> = emptyList(),
-    /** Every treadmill-ready run, easiest first. */
+    /** Every treadmill-ready run not in [recent], easiest first. */
     val running: List<LiveChoice> = emptyList(),
-    /** The saved treadmill workouts. */
+    /** The saved treadmill workouts not in [recent]. */
     val workouts: List<LiveChoice> = emptyList(),
     /** The [LiveChoice.key] that Start records. */
     val selected: String = "",
@@ -318,13 +318,16 @@ class LiveModel(
             ?: recents.firstOrNull { it in all }
             ?: DEFAULT_CHOICE.takeIf { it in all }
             ?: all.keys.first()
+        val recent = recents.mapNotNull(all::get).take(RECENT_COUNT)
+        // A recent choice shows once, in Recent, not again in its group.
+        fun others(choices: List<LiveChoice>) = choices.filterNot { it in recent }
         _state.update {
             it.copy(
                 choice = all[selected],
-                recent = recents.mapNotNull(all::get).take(RECENT_COUNT),
-                walking = walks,
-                running = runs,
-                workouts = workouts,
+                recent = recent,
+                walking = others(walks),
+                running = others(runs),
+                workouts = others(workouts),
                 selected = selected,
             )
         }
