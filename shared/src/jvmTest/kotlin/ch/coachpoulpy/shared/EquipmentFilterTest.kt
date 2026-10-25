@@ -15,10 +15,12 @@ class EquipmentFilterTest {
     }
 
     @Test
-    fun nothingTickedIsAFilterAndClearingRemovesIt() {
+    fun tickingNothingOrClearingRemovesIt() {
         val memory = MemoryStore()
+        EquipmentFilter(memory).ticked = setOf(Equipment.BAND)
         EquipmentFilter(memory).ticked = emptySet()
-        assertEquals(emptySet(), EquipmentFilter(memory).ticked)
+        assertNull(EquipmentFilter(memory).ticked)
+        EquipmentFilter(memory).ticked = setOf(Equipment.BAND)
         EquipmentFilter(memory).ticked = null
         assertNull(EquipmentFilter(memory).ticked)
     }

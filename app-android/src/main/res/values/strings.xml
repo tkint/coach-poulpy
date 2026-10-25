@@ -73,7 +73,7 @@
     <string name="exercises_no_fit">No exercise fits these filters</string>
     <string name="exercises_no_fit_hint">Try another muscle, or tick more of what you have.</string>
     <string name="exercises_equipment">Equipment</string>
-    <string name="exercises_equipment_hint">Tick what you have to only list exercises you can do. Bodyweight and mat exercises always show.</string>
+    <string name="exercises_equipment_hint">Tick what you have to list the exercises that use it.</string>
     <string name="exercises_equipment_clear">Clear</string>
     <plurals name="exercises_equipment_ticked">
         <item quantity="one">Equipment, %1$d ticked</item>

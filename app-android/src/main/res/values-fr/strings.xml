@@ -72,7 +72,7 @@
     <string name="exercises_no_fit">Aucun exercice ne correspond à ces filtres</string>
     <string name="exercises_no_fit_hint">Essayez un autre muscle, ou cochez plus de matériel.</string>
     <string name="exercises_equipment">Matériel</string>
-    <string name="exercises_equipment_hint">Cochez ce que vous avez pour ne voir que les exercices faisables. Ceux au poids du corps ou sur tapis restent toujours là.</string>
+    <string name="exercises_equipment_hint">Cochez ce que vous avez pour voir les exercices qui s’en servent.</string>
     <string name="exercises_equipment_clear">Effacer</string>
     <plurals name="exercises_equipment_ticked">
         <item quantity="one">Matériel, %1$d coché</item>

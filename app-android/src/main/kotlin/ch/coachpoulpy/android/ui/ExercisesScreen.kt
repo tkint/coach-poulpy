@@ -96,7 +96,7 @@ fun ExerciseList(
     val listing = remember(model, query, area, type, ticked) { model.filter(query, area, type, ticked) }
     val tick = { value: Set<Equipment>? ->
         equipment.ticked = value
-        ticked = value
+        ticked = equipment.ticked
     }
     val clearFilters = {
         area = null

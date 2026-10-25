@@ -25,8 +25,9 @@ struct ExerciseList<Row: View>: View {
 
     /// Keeps the choice on the phone, for the library and the builder's picker alike.
     private func tick(_ value: Set<Equipment>?) {
-        graph.equipmentFilter(memory: UserDefaultsStore()).ticked = value
-        ticked = value
+        let filter = graph.equipmentFilter(memory: UserDefaultsStore())
+        filter.ticked = value
+        ticked = filter.ticked
     }
 
     var body: some View {
