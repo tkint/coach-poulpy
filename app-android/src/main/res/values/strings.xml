@@ -20,22 +20,23 @@
     </plurals>
     <string name="library_workouts">Workouts</string>
     <string name="library_exercises">Exercises</string>
-    <string name="library_search">Search your workouts</string>
+    <string name="library_search">Name, type or exercise</string>
+    <string name="library_search_label">Search your workouts</string>
+    <string name="library_sort_planned">Next planned</string>
+    <string name="library_build_first">Build your first workout</string>
+    <string name="library_nothing_for">Nothing for “%1$s”</string>
+    <string name="library_no_kind">No workout of this kind</string>
+    <string name="library_nothing_hint">Try another word, or look in the exercises to build one.</string>
     <string name="library_all">All</string>
     <string name="library_new_workout">New workout</string>
-    <plurals name="library_count">
-        <item quantity="one">%1$d workout</item>
-        <item quantity="other">%1$d workouts</item>
-    </plurals>
     <string name="library_sort_recent">Recently done</string>
-    <string name="library_sort_name">By name</string>
+    <string name="library_sort_name">Name</string>
     <string name="library_planned">Planned · %1$s</string>
     <string name="library_done_today">Done today</string>
     <string name="library_last_done">Last done %1$s</string>
     <string name="library_not_done">Not done yet</string>
     <string name="library_empty_title">No workouts yet</string>
-    <string name="library_empty_body">Make one with New workout. It stays here, ready to start or to plan for a day.</string>
-    <string name="library_none">No workout matches.</string>
+    <string name="library_empty_body">Build one once, then plan it for any day or keep it here for later.</string>
     <string name="workout_planned">Planned for %1$s</string>
     <string name="workout_planned_today">Planned for today</string>
     <string name="workout_change">Change</string>

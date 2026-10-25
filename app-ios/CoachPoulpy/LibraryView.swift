@@ -58,7 +58,7 @@ struct LibraryView: View {
             .background(PoulpyColor.background)
             .navigationTitle("tab.library")
             .toolbar {
-                if section == .workouts {
+                if section == .workouts && !library.value.rows.isEmpty {
                     Button {
                         cover = .builder
                     } label: {
@@ -105,68 +105,80 @@ struct LibraryView: View {
 
     // MARK: Workouts
 
+    /// The saved workouts under the filter row the exercise list uses, with the sort at the
+    /// right of the count line; Poulpy's card when nothing matches or nothing is saved yet.
+    @ViewBuilder
     private var workouts: some View {
         let state = library.value
-        let rows = library.model.filter(state: state, query: query, type: kind, sort: sort)
-        return List {
-            if state.kinds.count > 1 {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 8) {
-                        chip(Text("library.all"), selected: kind == nil) { kind = nil }
-                        ForEach(state.kinds, id: \.label) { filter in
-                            chip(Text(filter.label), selected: kind == filter.type) {
-                                kind = kind == filter.type ? nil : filter.type
-                            }
-                        }
-                    }
-                }
-                .listRowInsets(EdgeInsets(top: 8, leading: 20, bottom: 4, trailing: 20))
-                .listRowBackground(Color.clear)
-                .listRowSeparator(.hidden)
+        let listing = library.model.filter(state: state, query: query, type: kind, sort: sort)
+        if !state.loaded {
+            Spacer()
+        } else if state.rows.isEmpty {
+            ScrollView {
+                PoulpyCard(
+                    title: Text("library.empty.title"),
+                    message: Text("library.empty.body"),
+                    button: Text("library.build.first"),
+                    systemImage: "plus",
+                    poulpySize: 120
+                ) { cover = .builder }
+                .padding(.horizontal, 20)
+                .padding(.top, 16)
             }
-            if state.loaded && state.rows.isEmpty {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("library.empty.title").font(PoulpyFont.headline)
-                    Text("library.empty.body").font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
-                }
-                .padding(.vertical, 16)
-                .listRowBackground(Color.clear)
-                .listRowSeparator(.hidden)
-            } else if state.loaded {
-                HStack {
-                    Text(L("library.count %lld", Int64(rows.count)))
-                        .font(.poulpy(.subheadline).weight(.bold))
-                        .foregroundStyle(PoulpyColor.onSurfaceVariant)
-                    Spacer()
-                    Menu {
-                        Picker("library.sort.recent", selection: $sort) {
-                            Text("library.sort.recent").tag(LibrarySort.recent)
-                            Text("library.sort.name").tag(LibrarySort.alphabetical)
-                        }
-                    } label: {
-                        HStack(spacing: 4) {
-                            Text(LocalizedStringKey(sort == .recent ? "library.sort.recent" : "library.sort.name"))
-                            Image(systemName: "chevron.down").font(.system(size: 12, weight: .bold))
-                        }
-                        .font(.poulpy(.subheadline).weight(.heavy))
+        } else {
+            ListFilters(query: $query, placeholder: "library.search", label: "library.search.label", countLabel: listing.countLabel) {
+                PoulpyChip(title: Text("library.all"), selected: kind == nil) { kind = nil }
+                ForEach(state.kinds, id: \.label) { filter in
+                    PoulpyChip(title: Text(filter.label), selected: kind == filter.type) {
+                        kind = kind == filter.type ? nil : filter.type
                     }
                 }
-                .listRowBackground(Color.clear)
-                .listRowSeparator(.hidden)
-                if rows.isEmpty {
-                    Text("library.none").foregroundStyle(.secondary).listRowBackground(Color.clear)
+            } action: {
+                Menu {
+                    Picker("library.sort", selection: $sort) {
+                        ForEach(sorts, id: \.self) { option in
+                            Text(sortTitle(option)).tag(option)
+                        }
+                    }
+                } label: {
+                    HStack(spacing: 4) {
+                        Text(sortTitle(sort))
+                        Image(systemName: "chevron.down").font(.system(size: 12, weight: .bold))
+                    }
+                    .font(.poulpy(.subheadline).weight(.heavy))
                 }
-                ForEach(rows, id: \.id) { row in
-                    workoutRow(row)
-                        .listRowInsets(EdgeInsets(top: 4, leading: 20, bottom: 4, trailing: 20))
-                        .listRowBackground(Color.clear)
-                        .listRowSeparator(.hidden)
+            }
+            ScrollView {
+                LazyVStack(spacing: 8) {
+                    ForEach(listing.rows, id: \.id) { row in workoutRow(row) }
+                    if listing.rows.isEmpty {
+                        PoulpyCard(
+                            title: listing.searching
+                                ? Text("library.nothing.for \(query.trimmingCharacters(in: .whitespaces))")
+                                : Text("library.no.kind"),
+                            message: Text("library.nothing.hint"),
+                            button: Text("exercises.clear.all")
+                        ) {
+                            query = ""
+                            kind = nil
+                        }
+                        .padding(.top, 8)
+                    }
                 }
+                .padding(.horizontal, 20)
+                .padding(.bottom, 20)
             }
         }
-        .listStyle(.plain)
-        .scrollContentBackground(.hidden)
-        .searchable(text: $query, prompt: Text("library.search"))
+    }
+
+    private let sorts: [LibrarySort] = [.recent, .nextPlanned, .alphabetical]
+
+    private func sortTitle(_ sort: LibrarySort) -> LocalizedStringKey {
+        switch sort {
+        case .nextPlanned: return "library.sort.planned"
+        case .alphabetical: return "library.sort.name"
+        default: return "library.sort.recent"
+        }
     }
 
     private func workoutRow(_ row: LibraryRow) -> some View {
@@ -225,18 +237,6 @@ struct LibraryView: View {
         default:
             Text("library.not.done").font(.poulpy(.footnote).weight(.bold)).foregroundStyle(PoulpyColor.onSurfaceVariant)
         }
-    }
-
-    private func chip(_ title: Text, selected: Bool, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            title
-                .font(.poulpy(.subheadline))
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .background(selected ? Color.accentColor : Color.secondary.opacity(0.15), in: Capsule())
-                .foregroundStyle(selected ? Color.white : Color.primary)
-        }
-        .buttonStyle(.plain)
     }
 
     private func icon(_ type: WorkoutType) -> String {

@@ -141,13 +141,42 @@ class PlanningModelsTest {
 
         val model = library()
         val state = model.state.await { it.loaded && it.rows.size == 3 && it.rows.any { r -> r.note == LibraryNote.DONE_TODAY } }
-        val rows = model.filter(state)
+        val rows = model.filter(state).rows
 
         assertEquals(listOf("Legs", "Arms", "Zebra"), rows.map { it.name })
         assertEquals(listOf(LibraryNote.DONE_TODAY, LibraryNote.PLANNED, LibraryNote.NOT_DONE_YET), rows.map { it.note })
-        assertEquals(listOf("Zebra"), model.filter(state, query = "zeb").map { it.name })
-        assertEquals(listOf("Arms", "Legs", "Zebra"), model.filter(state, sort = LibrarySort.ALPHABETICAL).map { it.name })
-        assertEquals(listOf(WorkoutType.STRENGTH), state.kinds.map { it.type })
+        assertEquals(listOf("Zebra"), model.filter(state, query = "zeb").rows.map { it.name })
+        assertEquals(listOf("Arms", "Legs", "Zebra"), model.filter(state, sort = LibrarySort.ALPHABETICAL).rows.map { it.name })
+        assertEquals(listOf("Arms", "Legs", "Zebra"), model.filter(state, sort = LibrarySort.NEXT_PLANNED).rows.map { it.name })
+        assertEquals(WorkoutType.entries, state.kinds.map { it.type })
+    }
+
+    @Test
+    fun librarySearchForgivesAndLooksInsideWorkouts() {
+        workout("Lower body strength", "goblet-squat")
+        workout("Upper body", "push-up")
+        workout("Équilibre et gainage", "push-up")
+
+        val model = library()
+        val state = model.state.await { it.loaded && it.rows.size == 3 }
+        fun names(query: String) = model.filter(state, query = query).rows.map { it.name }
+
+        // An exercise inside, in either language and through an alias.
+        assertEquals(listOf("Lower body strength"), names("squats"))
+        assertEquals(listOf("Équilibre et gainage", "Upper body"), names("pompe"))
+        // "up" starts Upper body's name, so it comes before a workout matching only by its exercise.
+        assertEquals(listOf("Upper body", "Équilibre et gainage"), names("press-up"))
+        // Accents and case ignored, words in any order.
+        assertEquals(listOf("Équilibre et gainage"), names("GAINAGE equilibre"))
+        // A word of the name before the type ("Strength", "Renforcement"), ties by name.
+        assertEquals(listOf("Lower body strength", "Équilibre et gainage", "Upper body"), names("str"))
+        assertEquals(3, names("renfo").size)
+        assertEquals(emptyList(), names("zumba"))
+
+        val listing = model.filter(state, query = "pompe")
+        assertTrue(listing.searching)
+        assertEquals("2 matches", listing.countLabel)
+        assertEquals("3 workouts", model.filter(state).countLabel)
     }
 
     @Test

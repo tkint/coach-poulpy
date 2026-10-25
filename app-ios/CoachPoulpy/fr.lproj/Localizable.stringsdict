@@ -82,22 +82,6 @@
             <string>Dans %lld jours</string>
         </dict>
     </dict>
-    <key>library.count %lld</key>
-    <dict>
-        <key>NSStringLocalizedFormatKey</key>
-        <string>%#@count@</string>
-        <key>count</key>
-        <dict>
-            <key>NSStringFormatSpecTypeKey</key>
-            <string>NSStringPluralRuleType</string>
-            <key>NSStringFormatValueTypeKey</key>
-            <string>lld</string>
-            <key>one</key>
-            <string>%lld séance</string>
-            <key>other</key>
-            <string>%lld séances</string>
-        </dict>
-    </dict>
     <key>workout.times %lld</key>
     <dict>
         <key>NSStringLocalizedFormatKey</key>

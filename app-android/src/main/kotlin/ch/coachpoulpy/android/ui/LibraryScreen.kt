@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
@@ -25,18 +24,15 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SelfImprovement
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilledTonalIconButton
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -51,7 +47,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
@@ -88,7 +83,7 @@ fun LibraryScreen(
             ViewSwitch(view, onView)
         }
         when (view) {
-            LibraryView.WORKOUTS -> Workouts(graph, language, onOpenWorkout, onStart, onNew)
+            LibraryView.WORKOUTS -> Box(Modifier.padding(top = 4.dp)) { Workouts(graph, language, onOpenWorkout, onStart, onNew) }
             LibraryView.EXERCISES -> ExerciseList(graph, language, type = null, onPick = onOpenExercise, modifier = Modifier.padding(top = 4.dp))
         }
     }
@@ -121,6 +116,10 @@ private fun ViewSwitch(selected: LibraryView, onSelect: (LibraryView) -> Unit) {
     }
 }
 
+/**
+ * The saved workouts under the filter row the exercise list uses, with the sort at the
+ * right of the count line; Poulpy's card when nothing matches or nothing is saved yet.
+ */
 @Composable
 private fun Workouts(graph: AppGraph, language: String, onOpen: (String) -> Unit, onStart: (String) -> Unit, onNew: () -> Unit) {
     val model = remember(graph, language) { graph.library(language) }
@@ -130,73 +129,74 @@ private fun Workouts(graph: AppGraph, language: String, onOpen: (String) -> Unit
     var kind by rememberSaveable { mutableStateOf<WorkoutType?>(null) }
     var sort by rememberSaveable { mutableStateOf(LibrarySort.RECENT) }
     var sorting by remember { mutableStateOf(false) }
-    val rows = remember(state, query, kind, sort) { model.filter(state, query, kind, sort) }
+    val listing = remember(state, query, kind, sort) { model.filter(state, query, kind, sort) }
+    val clearAll = {
+        query = ""
+        kind = null
+    }
 
+    if (!state.loaded) return
+    if (state.rows.isEmpty()) {
+        PoulpyCard(
+            title = stringResource(R.string.library_empty_title),
+            body = stringResource(R.string.library_empty_body),
+            button = stringResource(R.string.library_build_first),
+            onClick = onNew,
+            buttonIcon = Icons.Filled.Add,
+            poulpySize = 120.dp,
+            modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 16.dp),
+        )
+        return
+    }
     Box(Modifier.fillMaxSize()) {
-        LazyColumn(
-            contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 96.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.fillMaxSize(),
-        ) {
-            item(key = "search") {
-                OutlinedTextField(
-                    value = query,
-                    onValueChange = { query = it },
-                    placeholder = { Text(stringResource(R.string.library_search)) },
-                    leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
-                    singleLine = true,
-                    shape = RoundedCornerShape(PoulpyRadius.pill),
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            }
-            if (state.kinds.size > 1) {
-                item(key = "kinds") {
-                    LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        item { FilterChip(selected = kind == null, onClick = { kind = null }, label = { Text(stringResource(R.string.library_all)) }) }
-                        items(state.kinds, key = { it.type.name }) { filter ->
-                            FilterChip(
-                                selected = kind == filter.type,
-                                onClick = { kind = if (kind == filter.type) null else filter.type },
-                                label = { Text(filter.label) },
-                            )
-                        }
-                    }
-                }
-            }
-            if (state.loaded && state.rows.isEmpty()) {
-                item(key = "empty") {
-                    Column(Modifier.padding(top = 24.dp, start = 4.dp, end = 4.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Text(stringResource(R.string.library_empty_title), style = MaterialTheme.typography.titleLarge)
-                        Text(stringResource(R.string.library_empty_body), style = MaterialTheme.typography.bodyMedium)
-                    }
-                }
-            } else if (state.loaded) {
-                item(key = "count") {
-                    Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            pluralStringResource(R.plurals.library_count, rows.size, rows.size),
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.weight(1f),
+        Column(Modifier.fillMaxSize()) {
+            ListFilters(
+                query = query,
+                onQuery = { query = it },
+                placeholder = stringResource(R.string.library_search),
+                label = stringResource(R.string.library_search_label),
+                countLabel = listing.countLabel,
+                chips = {
+                    item { PoulpyChip(selected = kind == null, onClick = { kind = null }, label = stringResource(R.string.library_all)) }
+                    items(state.kinds, key = { it.type.name }) { filter ->
+                        PoulpyChip(
+                            selected = kind == filter.type,
+                            onClick = { kind = if (kind == filter.type) null else filter.type },
+                            label = filter.label,
                         )
-                        Box {
-                            TextButton(onClick = { sorting = true }) {
-                                Text(stringResource(sort.label), fontWeight = FontWeight.ExtraBold)
-                                Icon(Icons.Filled.ArrowDropDown, contentDescription = null)
-                            }
-                            DropdownMenu(expanded = sorting, onDismissRequest = { sorting = false }) {
-                                LibrarySort.entries.forEach { option ->
-                                    DropdownMenuItem(text = { Text(stringResource(option.label)) }, onClick = { sort = option; sorting = false })
-                                }
+                    }
+                },
+                action = {
+                    Box {
+                        TextButton(onClick = { sorting = true }) {
+                            Text(stringResource(sort.label), fontWeight = FontWeight.ExtraBold)
+                            Icon(Icons.Filled.ArrowDropDown, contentDescription = null)
+                        }
+                        DropdownMenu(expanded = sorting, onDismissRequest = { sorting = false }) {
+                            LibrarySort.entries.forEach { option ->
+                                DropdownMenuItem(text = { Text(stringResource(option.label)) }, onClick = { sort = option; sorting = false })
                             }
                         }
                     }
+                },
+            )
+            LazyColumn(
+                contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 96.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxSize(),
+            ) {
+                items(listing.rows, key = { it.id }) { row -> WorkoutCard(row, onOpen = { onOpen(row.id) }, onStart = { onStart(row.id) }) }
+                if (listing.rows.isEmpty()) {
+                    item(key = "none") {
+                        PoulpyCard(
+                            title = if (listing.searching) stringResource(R.string.library_nothing_for, query.trim()) else stringResource(R.string.library_no_kind),
+                            body = stringResource(R.string.library_nothing_hint),
+                            button = stringResource(R.string.exercises_clear_all),
+                            onClick = clearAll,
+                            modifier = Modifier.padding(top = 8.dp),
+                        )
+                    }
                 }
-                if (rows.isEmpty()) {
-                    item(key = "none") { Text(stringResource(R.string.library_none), modifier = Modifier.padding(4.dp)) }
-                }
-                items(rows, key = { it.id }) { row -> WorkoutCard(row, onOpen = { onOpen(row.id) }, onStart = { onStart(row.id) }) }
             }
         }
         ExtendedFloatingActionButton(
@@ -275,6 +275,7 @@ private fun Note(row: LibraryRow) {
 private val LibrarySort.label: Int
     get() = when (this) {
         LibrarySort.RECENT -> R.string.library_sort_recent
+        LibrarySort.NEXT_PLANNED -> R.string.library_sort_planned
         LibrarySort.ALPHABETICAL -> R.string.library_sort_name
     }
 

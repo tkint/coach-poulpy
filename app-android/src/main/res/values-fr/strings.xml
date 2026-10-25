@@ -19,22 +19,23 @@
     </plurals>
     <string name="library_workouts">Séances</string>
     <string name="library_exercises">Exercices</string>
-    <string name="library_search">Rechercher dans vos séances</string>
+    <string name="library_search">Nom, type ou exercice</string>
+    <string name="library_search_label">Rechercher dans vos séances</string>
+    <string name="library_sort_planned">Prochaine prévue</string>
+    <string name="library_build_first">Créer votre première séance</string>
+    <string name="library_nothing_for">Rien pour « %1$s »</string>
+    <string name="library_no_kind">Aucune séance de ce type</string>
+    <string name="library_nothing_hint">Essayez un autre mot, ou partez des exercices pour en créer une.</string>
     <string name="library_all">Toutes</string>
     <string name="library_new_workout">Nouvelle séance</string>
-    <plurals name="library_count">
-        <item quantity="one">%1$d séance</item>
-        <item quantity="other">%1$d séances</item>
-    </plurals>
     <string name="library_sort_recent">Faites récemment</string>
-    <string name="library_sort_name">Par nom</string>
+    <string name="library_sort_name">Nom</string>
     <string name="library_planned">Prévue · %1$s</string>
     <string name="library_done_today">Faite aujourd’hui</string>
     <string name="library_last_done">Dernière fois %1$s</string>
     <string name="library_not_done">Pas encore faite</string>
     <string name="library_empty_title">Aucune séance pour l’instant</string>
-    <string name="library_empty_body">Créez-en une avec Nouvelle séance. Elle reste ici, prête à commencer ou à prévoir pour un jour.</string>
-    <string name="library_none">Aucune séance ne correspond.</string>
+    <string name="library_empty_body">Créez une séance une fois, puis prévoyez-la pour n’importe quel jour ou gardez-la ici pour plus tard.</string>
     <string name="workout_planned">Prévue le %1$s</string>
     <string name="workout_planned_today">Prévue aujourd’hui</string>
     <string name="workout_change">Changer</string>
