@@ -3,8 +3,8 @@ layout: page
 ---
 
 <div class="brand-book">
-  <p>The Poulpy brand book v6, as approved on 24 October 2026. Where it differs from the <a href="/coach-poulpy/docs/brand">brand page</a>, the brand page wins: tentacles no longer reset each week. <a href="/coach-poulpy/brand/book.html" target="_blank" rel="noopener">Open it on its own page</a>.</p>
-  <iframe src="/coach-poulpy/brand/book.html" title="Poulpy brand book v6" loading="lazy"></iframe>
+  <p>The Poulpy brand book: logo, colours, poses, type, tokens and behaviour, with every drawing live. The rules are summed up on the <a href="/coach-poulpy/docs/brand">brand page</a>, and what was decided and why is on <a href="/coach-poulpy/docs/brand-decisions">Brand decisions</a>. <a href="/coach-poulpy/brand/book.html" target="_blank" rel="noopener">Open it on its own page</a>.</p>
+  <iframe src="/coach-poulpy/brand/book.html" title="Poulpy brand book" loading="lazy"></iframe>
 </div>
 
 <style>
