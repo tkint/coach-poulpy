@@ -90,13 +90,14 @@ class ExerciseListModel internal constructor(
     val muscleFilters: List<MuscleFilter> = MuscleArea.entries.map { MuscleFilter(it, labels.muscleArea(it)) }
 
     /**
-     * What the Equipment sheet lists: the catalog's equipment, bodyweight and mat left
-     * out since those exercises always show, each with how many exercises use it.
+     * What the Equipment sheet lists, each with how many exercises use it: "No equipment"
+     * ([Equipment.BODYWEIGHT], the exercises needing nothing) first, then the catalog's
+     * equipment. The mat is left out, as it is never needed.
      */
     val equipmentOptions: List<EquipmentOption> = Equipment.entries
-        .filter { it != Equipment.BODYWEIGHT && it != Equipment.MAT }
+        .filter { it != Equipment.MAT }
         .mapNotNull { item ->
-            val count = catalog.offered.count { item in it.allEquipment }
+            val count = catalog.offered.count { if (item == Equipment.BODYWEIGHT) it.equipment.isEmpty() else item in it.allEquipment }
             if (count == 0) null else EquipmentOption(item, labels.equipment(item), count, labels.exercises(count))
         }
 
@@ -165,10 +166,12 @@ class ExerciseListModel internal constructor(
 
     /**
      * What the Equipment filter lists: exercises using something ticked, needed or
-     * optional, whose every need is ticked. Dumbbells alone list the goblet squat and
-     * lunges but not the dumbbell bench press; a treadmill lists the walk and the run.
+     * optional, whose every need is ticked, and with "No equipment" ticked the exercises
+     * needing nothing. Dumbbells alone list the goblet squat and lunges but not the
+     * dumbbell bench press; a treadmill lists the walk and the run.
      */
-    private fun Exercise.uses(ticked: Set<Equipment>) = fits(ticked) && allEquipment.any { it in ticked }
+    private fun Exercise.uses(ticked: Set<Equipment>) =
+        (Equipment.BODYWEIGHT in ticked && equipment.isEmpty()) || (fits(ticked) && allEquipment.any { it in ticked })
 
     private fun row(exercise: Exercise) =
         ExerciseRow(exercise.slug.value, labels.text(exercise.name), details(exercise), exercise.movementPattern)
