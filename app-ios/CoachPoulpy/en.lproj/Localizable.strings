@@ -185,7 +185,8 @@
 "live.manage.devices" = "Manage devices";
 "live.sync.belt" = "Pause and resume with the belt";
 "live.what.doing" = "What are you doing?";
-"live.more" = "More";
+"live.change" = "Change";
+"live.group.recent" = "Recent";
 "live.group.walking" = "Walking";
 "live.group.running" = "Running";
 "live.group.workouts" = "Follow a workout";

@@ -185,7 +185,8 @@
 "live.manage.devices" = "Gérer les appareils";
 "live.sync.belt" = "Pause et reprise avec le tapis";
 "live.what.doing" = "Que faites-vous ?";
-"live.more" = "Plus";
+"live.change" = "Changer";
+"live.group.recent" = "Récents";
 "live.group.walking" = "Marche";
 "live.group.running" = "Course";
 "live.group.workouts" = "Suivre une séance";

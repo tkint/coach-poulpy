@@ -232,7 +232,8 @@
     <string name="live_connecting_one">Connexion à %1$s…</string>
     <string name="live_connecting_many">Connexion à vos appareils…</string>
     <string name="live_what_doing">Que faites-vous ?</string>
-    <string name="live_more">Plus</string>
+    <string name="live_change">Changer</string>
+    <string name="live_group_recent">Récents</string>
     <string name="live_group_walking">Marche</string>
     <string name="live_group_running">Course</string>
     <string name="live_group_workouts">Suivre une séance</string>

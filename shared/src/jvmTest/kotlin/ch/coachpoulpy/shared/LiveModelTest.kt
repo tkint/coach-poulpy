@@ -346,9 +346,11 @@ class LiveModelTest {
             state.walking.map { it.key },
         )
         assertEquals(listOf("exercise:easy-run", "exercise:run"), state.running.map { it.key })
-        assertEquals("demo-intervals", state.workouts.first().key)
-        assertEquals(listOf("Walk", "Brisk walk", "Easy run"), state.quickPicks.map { it.name })
+        // The demo intervals are gone; only saved treadmill workouts are offered.
+        assertEquals(emptyList(), state.workouts)
+        assertEquals(emptyList(), state.recent, "nothing started yet")
         assertEquals("exercise:walk", state.selected)
+        assertEquals("Walk", state.choice?.name)
         assertEquals("Your everyday pace", state.walking[2].note)
     }
 
@@ -364,29 +366,20 @@ class LiveModelTest {
         val compiler = TimelineCompiler(WorkoutTypeRegistry(listOf(TreadmillModule)))
         val live = LiveModel(devices, settings.state, LocalStore(DriverFactory()), compiler, memory, backgroundScope, clock, languageCode = "fr")
         runCurrent()
-        assertEquals(listOf("Marche", "Marche rapide", "Course facile"), live.state.value.quickPicks.map { it.name })
-        assertEquals("Fractionné de démo", live.state.value.workouts.first().name)
-    }
-
-    @Test
-    fun aPickFromMoreTakesTheLastChip() {
-        val available = listOf("exercise:walk", "exercise:brisk-walk", "exercise:easy-run", "exercise:run", "demo-intervals")
-        val recents = listOf("exercise:walk", "exercise:brisk-walk", "exercise:easy-run")
-        assertEquals(recents, LiveModel.quickPicks(recents, "exercise:brisk-walk", available))
-        assertEquals(listOf("exercise:walk", "exercise:brisk-walk", "exercise:run"), LiveModel.quickPicks(recents, "exercise:run", available))
-        // A recent that is gone, such as a deleted workout, gives its place to a default.
-        assertEquals(recents, LiveModel.quickPicks(listOf("gone", "exercise:walk"), "exercise:walk", available))
+        assertEquals("Marche", live.state.value.choice?.name)
+        assertEquals(listOf("Marche avec appui", "Marche douce", "Marche", "Marche rapide"), live.state.value.walking.map { it.name })
     }
 
     @Test
     fun aFreeRecordingKeepsTheExerciseAndBecomesARecentPick() = runTest {
         val central = FakeCentral()
         val memory = MemoryStore()
+        memory.putString("live.recent", "gone,exercise:walk")
         val store = LocalStore(DriverFactory())
         val m = models(central, store, memory)
         addTreadmill(m)
         m.live.select("exercise:run")
-        assertEquals(listOf("Walk", "Brisk walk", "Run"), m.live.state.value.quickPicks.map { it.name })
+        assertEquals("Run", m.live.state.value.choice?.name)
 
         m.live.startRecording("exercise:run")
         advanceTimeBy(5.seconds)
@@ -395,7 +388,8 @@ class LiveModelTest {
 
         val saved = store.finishedSessions().first().single()
         assertEquals("Run", saved.title)
-        assertEquals(listOf("Run", "Walk", "Brisk walk"), m.live.state.value.quickPicks.map { it.name })
-        assertEquals("exercise:run,exercise:walk,exercise:brisk-walk", memory.getString("live.recent"))
+        // A recent that is gone, such as a deleted workout, is skipped.
+        assertEquals(listOf("Run", "Walk"), m.live.state.value.recent.map { it.name })
+        assertEquals("exercise:run,gone,exercise:walk", memory.getString("live.recent"))
     }
 }
