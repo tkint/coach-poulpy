@@ -2,7 +2,6 @@ package ch.coachpoulpy.shared
 
 import ch.coachpoulpy.catalog.Catalog
 import ch.coachpoulpy.core.engine.TimelineCompiler
-import ch.coachpoulpy.core.model.MeasurementMode
 import ch.coachpoulpy.core.model.MovementPattern
 import ch.coachpoulpy.core.model.Step
 import ch.coachpoulpy.core.model.Workout
@@ -155,19 +154,7 @@ class WorkoutPageModel internal constructor(
     private fun stepRow(step: Step.ExerciseStep): WorkoutStepRow {
         val exercise = catalog[step.exercise]
         val entry = DraftEntry.from(step, exercise)
-        val prescription = if (entry == null) {
-            "${step.prescription.sets.size} ×"
-        } else {
-            val amount = when (entry.measurement) {
-                MeasurementMode.REPS -> entry.amount.toString()
-                else -> labels.amount(entry.measurement, entry.amount)
-            }
-            listOfNotNull(
-                "${entry.sets} × $amount" + if (entry.perSide) " ${labels.perSide}" else "",
-                entry.loadKg?.let(labels::kilograms),
-                entry.restSeconds.takeIf { it > 0 }?.let(labels::restAfter),
-            ).joinToString(" · ")
-        }
+        val prescription = entry?.let(labels::prescription) ?: "${step.prescription.sets.size} ×"
         return WorkoutStepRow(
             key = step.id.value,
             slug = step.exercise.value,

@@ -75,6 +75,7 @@
     <string name="action_more">More</string>
     <string name="action_done">Done</string>
     <string name="action_cancel">Cancel</string>
+    <string name="action_close">Close</string>
 
     <string name="exercises_search">Name, muscle or equipment</string>
     <string name="exercises_all">All</string>
@@ -117,12 +118,16 @@
     <string name="builder_sets">Sets</string>
     <string name="builder_target">Each set</string>
     <string name="builder_rest">Rest after</string>
-    <string name="builder_weight">Weight (kg)</string>
+    <string name="builder_weight">Weight</string>
     <string name="builder_move_up">Move up</string>
     <string name="builder_move_down">Move down</string>
     <string name="builder_remove">Remove</string>
-    <string name="builder_less">Less</string>
-    <string name="builder_more">More</string>
+    <string name="builder_weight_kg">Weight in kilograms</string>
+    <string name="builder_less_named">Less: %1$s</string>
+    <string name="builder_more_named">More: %1$s</string>
+    <string name="builder_remove_named">Remove %1$s</string>
+    <string name="builder_open">Edit %1$s</string>
+    <string name="builder_reorder">Move %1$s</string>
     <string name="builder_does_not_fit">This kind of workout can’t run this exercise. Remove it or pick another kind.</string>
     <string name="builder_empty">Add exercises to build your workout.</string>
 

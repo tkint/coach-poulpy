@@ -53,6 +53,7 @@
 "library.plan.day" = "Prévoir pour un jour";
 "action.save" = "Enregistrer";
 "action.cancel" = "Annuler";
+"action.close" = "Fermer";
 "action.more" = "Plus";
 
 "exercises.search" = "Nom, muscle ou matériel";
@@ -88,10 +89,16 @@
 "builder.sets" = "Séries";
 "builder.target" = "Par série";
 "builder.rest" = "Repos après";
-"builder.weight" = "Charge (kg)";
+"builder.weight" = "Charge";
 "builder.move.up" = "Monter";
 "builder.move.down" = "Descendre";
 "builder.remove" = "Retirer";
+"builder.weight.kg" = "Charge en kilogrammes";
+"builder.less" = "Moins";
+"builder.more" = "Plus";
+"builder.remove.named %@" = "Retirer %@";
+"builder.open %@" = "Modifier %@";
+"builder.reorder %@" = "Déplacer %@";
 "builder.does.not.fit" = "Ce type de séance ne peut pas inclure cet exercice. Retirez-le ou choisissez un autre type.";
 "builder.empty" = "Ajoutez des exercices pour composer votre séance.";
 

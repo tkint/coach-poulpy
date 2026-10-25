@@ -53,6 +53,7 @@
 "library.plan.day" = "Plan for a day";
 "action.save" = "Save";
 "action.cancel" = "Cancel";
+"action.close" = "Close";
 "action.more" = "More";
 
 "exercises.search" = "Name, muscle or equipment";
@@ -88,10 +89,16 @@
 "builder.sets" = "Sets";
 "builder.target" = "Each set";
 "builder.rest" = "Rest after";
-"builder.weight" = "Weight (kg)";
+"builder.weight" = "Weight";
 "builder.move.up" = "Move up";
 "builder.move.down" = "Move down";
 "builder.remove" = "Remove";
+"builder.weight.kg" = "Weight in kilograms";
+"builder.less" = "Less";
+"builder.more" = "More";
+"builder.remove.named %@" = "Remove %@";
+"builder.open %@" = "Edit %@";
+"builder.reorder %@" = "Move %@";
 "builder.does.not.fit" = "This kind of workout can’t run this exercise. Remove it or pick another kind.";
 "builder.empty" = "Add exercises to build your workout.";
 

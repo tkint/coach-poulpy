@@ -29,6 +29,7 @@ class BuilderModelTest {
         builder.changeAmount(key, 2)
         builder.setLoadKg(key, 12.0)
         builder.changeRest(key, -2)
+        assertEquals("2 × 12 · 12 kg · rest 30 s", builder.state.value.rows.single().summary)
 
         val id = assertNotNull(builder.save())
         val workout = assertNotNull(graph.store.latestWorkout(WorkoutId(id)))

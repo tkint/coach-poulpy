@@ -30,49 +30,92 @@ struct BuilderView: View {
     private var model: BuilderModel { builder.model }
     private var state: BuilderState { builder.value }
 
+    @State private var open: String?
+    @State private var count = 0
+
     var body: some View {
         NavigationStack {
-            Form {
-                Section {
-                    TextField("builder.name", text: Binding(get: { state.name }, set: { model.rename(name: $0) }))
-                }
-                Section("builder.type") {
-                    Picker("builder.type", selection: Binding(get: { state.type }, set: { model.setType(type: $0) })) {
-                        ForEach(model.typeOptions, id: \.label) { option in
-                            Text(option.label).tag(option.type)
+            ScrollView {
+                VStack(alignment: .leading, spacing: 14) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        fieldLabel("builder.name")
+                        TextField("", text: Binding(get: { state.name }, set: { model.rename(name: $0) }))
+                            .font(.poulpy(.body).weight(.bold))
+                            .padding(.horizontal, 16)
+                            .frame(height: 52)
+                            .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 16))
+                            .overlay(RoundedRectangle(cornerRadius: 16).stroke(state.name.isEmpty ? PoulpyColor.outline : PoulpyColor.primary, lineWidth: 1.5))
+                            .accessibilityLabel(Text("builder.name"))
+                    }
+                    VStack(alignment: .leading, spacing: 8) {
+                        fieldLabel("builder.type")
+                        FlowLayout(spacing: 8) {
+                            ForEach(model.typeOptions, id: \.label) { option in
+                                PoulpyChip(title: Text(option.label), selected: state.type == option.type) {
+                                    model.setType(type: option.type)
+                                }
+                            }
                         }
                     }
-                    .pickerStyle(.inline)
-                    .labelsHidden()
-                }
-                if state.rows.isEmpty {
-                    Text("builder.empty").foregroundStyle(.secondary)
-                }
-                ForEach(state.rows, id: \.key) { row in
-                    Section {
-                        EntryRow(model: model, row: row)
+                    if state.rows.isEmpty {
+                        Text("builder.empty").font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
                     }
-                }
-                Section {
+                    ForEach(state.rows, id: \.key) { row in
+                        EntryCard(model: model, row: row, open: open == row.key) { open = row.key }
+                    }
                     Button {
                         picking = true
                     } label: {
                         Label("builder.add", systemImage: "plus")
+                            .font(.poulpy(.body).weight(.heavy))
+                            .foregroundStyle(PoulpyColor.primary)
+                            .frame(maxWidth: .infinity, minHeight: 56)
+                            .overlay(RoundedRectangle(cornerRadius: 16).stroke(PoulpyPalette.lagoon300, style: StrokeStyle(lineWidth: 2, dash: [8, 6])))
+                            .contentShape(RoundedRectangle(cornerRadius: 16))
                     }
+                    .buttonStyle(.plain)
                 }
+                .padding(.horizontal, 20)
+                .padding(.top, 8)
+                .padding(.bottom, PoulpySpace.xl)
             }
+            .background(PoulpyColor.background)
             .navigationTitle(LocalizedStringKey(model.isEditing ? "builder.edit.title" : "builder.new.title"))
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(PoulpyColor.background, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("action.cancel") { dismiss() }
+                    Button { dismiss() } label: {
+                        Image(systemName: "xmark").font(.system(size: 17, weight: .bold))
+                    }
+                    .foregroundStyle(PoulpyColor.onSurface)
+                    .accessibilityLabel(Text("action.close"))
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("action.save") {
+                    Button {
                         if model.save() != nil { dismiss() }
+                    } label: {
+                        Text("action.save")
+                            .font(.poulpy(.subheadline).weight(.heavy))
+                            .padding(.horizontal, 18)
+                            .frame(height: 36)
+                            .foregroundStyle(PoulpyColor.onPrimary)
+                            .background(PoulpyColor.primary.opacity(state.canSave ? 1 : 0.4), in: Capsule())
                     }
+                    .buttonStyle(.plain)
                     .disabled(!state.canSave)
                 }
+            }
+            .onAppear {
+                if count == 0 {
+                    count = state.rows.count
+                    open = state.rows.first?.key
+                }
+            }
+            .onChange(of: state.rows.count) { rows in
+                // A newly added exercise opens; one card is open at a time.
+                if rows > count { open = state.rows.last?.key }
+                count = rows
             }
             .sheet(isPresented: $picking) {
                 NavigationStack {
@@ -96,72 +139,154 @@ struct BuilderView: View {
             }
         }
     }
+
+    private func fieldLabel(_ key: LocalizedStringKey) -> some View {
+        Text(key).textCase(.uppercase).font(PoulpyFont.label).kerning(1).foregroundStyle(PoulpyColor.onSurfaceVariant)
+    }
 }
 
-private struct EntryRow: View {
+/// An exercise of the workout: open, its four settings in a 2×2 grid; folded, its name and summary.
+private struct EntryCard: View {
     let model: BuilderModel
     let row: BuilderRow
+    let open: Bool
+    let onOpen: () -> Void
     @State private var weight: String
 
-    init(model: BuilderModel, row: BuilderRow) {
+    init(model: BuilderModel, row: BuilderRow, open: Bool, onOpen: @escaping () -> Void) {
         self.model = model
         self.row = row
-        _weight = State(initialValue: row.loadKg.map { EntryRow.format($0.doubleValue) } ?? "")
+        self.open = open
+        self.onOpen = onOpen
+        _weight = State(initialValue: row.loadKg.map { EntryCard.format($0.doubleValue) } ?? "")
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 12) {
-                PatternBadge(pattern: row.pattern)
-                VStack(alignment: .leading) {
-                    Text(row.name).font(.poulpy(.headline))
-                    if let perSide = row.perSideLabel {
-                        Text(perSide).font(.poulpy(.caption)).foregroundStyle(.secondary)
-                    }
-                }
-                Spacer()
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 10) {
+                // Until cards can be dragged, the handle opens Move up and Move down.
                 Menu {
                     Button("builder.move.up") { model.moveUp(key: row.key) }
                     Button("builder.move.down") { model.moveDown(key: row.key) }
-                    Button("builder.remove", role: .destructive) { model.remove(key: row.key) }
                 } label: {
-                    Image(systemName: "ellipsis.circle")
+                    Image(systemName: "line.3.horizontal")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundStyle(PoulpyPalette.neutral500)
+                        .frame(width: 28, height: 44)
+                }
+                .accessibilityLabel(Text(L("builder.reorder %@", row.name)))
+                Button(action: onOpen) {
+                    VStack(alignment: .leading, spacing: 0) {
+                        Text(row.name).font(.custom(PoulpyFontFace.baloo2Bold, size: 19, relativeTo: .headline))
+                        if !open {
+                            Text(row.summary).font(.poulpy(.subheadline)).monospacedDigit().foregroundStyle(PoulpyColor.onSurfaceVariant)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .disabled(open)
+                if open {
+                    Button { model.remove(key: row.key) } label: {
+                        Image(systemName: "trash").frame(width: 44, height: 44)
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(PoulpyColor.onSurfaceVariant)
+                    .accessibilityLabel(Text(L("builder.remove.named %@", row.name)))
+                } else {
+                    Button(action: onOpen) {
+                        Image(systemName: "chevron.down").font(.system(size: 15, weight: .bold)).frame(width: 44, height: 44)
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(PoulpyColor.onSurfaceVariant)
+                    .accessibilityLabel(Text(L("builder.open %@", row.name)))
                 }
             }
             if !row.fitsType {
-                Text("builder.does.not.fit").font(.poulpy(.caption)).foregroundStyle(.red)
+                Label("builder.does.not.fit", systemImage: "exclamationmark.circle")
+                    .font(.poulpy(.caption))
+                    .foregroundStyle(PoulpyColor.error)
             }
-            stepper("builder.sets", "\(row.sets)", less: { model.setSets(key: row.key, sets: row.sets - 1) }, more: { model.setSets(key: row.key, sets: row.sets + 1) })
-            stepper("builder.target", row.amountLabel, less: { model.changeAmount(key: row.key, steps: -1) }, more: { model.changeAmount(key: row.key, steps: 1) })
-            stepper("builder.rest", row.restLabel, less: { model.changeRest(key: row.key, steps: -1) }, more: { model.changeRest(key: row.key, steps: 1) })
-            if !row.isTimed {
-                HStack {
-                    Text("builder.weight")
-                    Spacer()
-                    TextField("0", text: $weight)
-                        .keyboardType(.decimalPad)
-                        .multilineTextAlignment(.trailing)
-                        .frame(width: 80)
-                        .onChange(of: weight) { text in
-                            model.setLoadKg(key: row.key, kg: Double(text.replacingOccurrences(of: ",", with: ".")) ?? 0)
-                        }
+            if open {
+                let columns = [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)]
+                LazyVGrid(columns: columns, spacing: 8) {
+                    stepper("builder.sets", "\(row.sets)", less: { model.setSets(key: row.key, sets: row.sets - 1) }, more: { model.setSets(key: row.key, sets: row.sets + 1) })
+                    stepper("builder.target", row.amountLabel, less: { model.changeAmount(key: row.key, steps: -1) }, more: { model.changeAmount(key: row.key, steps: 1) })
+                    stepper("builder.rest", row.restLabel, less: { model.changeRest(key: row.key, steps: -1) }, more: { model.changeRest(key: row.key, steps: 1) })
+                    if !row.isTimed { weightCell }
                 }
+                .padding(.trailing, 4)
             }
         }
-        .buttonStyle(.borderless)
+        .padding(EdgeInsets(top: 12, leading: 12, bottom: open ? 14 : 12, trailing: 8))
+        .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 16))
+        .overlay(RoundedRectangle(cornerRadius: 16).stroke(open ? PoulpyPalette.lagoon300 : PoulpyColor.outline, lineWidth: open ? 1.5 : 1))
+    }
+
+    private func cell<Content: View>(_ label: LocalizedStringKey, @ViewBuilder content: () -> Content) -> some View {
+        VStack(spacing: 2) {
+            Text(label).textCase(.uppercase).font(PoulpyFont.label).kerning(1).lineLimit(1).foregroundStyle(PoulpyColor.onSurfaceVariant)
+            content()
+        }
+        .padding(6)
+        .frame(maxWidth: .infinity)
+        .background(PoulpyColor.background, in: RoundedRectangle(cornerRadius: 12))
     }
 
     private func stepper(_ label: LocalizedStringKey, _ value: String, less: @escaping () -> Void, more: @escaping () -> Void) -> some View {
-        HStack {
-            Text(label)
-            Spacer()
-            Button(action: less) { Image(systemName: "minus.circle") }
-            Text(value).monospacedDigit().frame(minWidth: 80)
-            Button(action: more) { Image(systemName: "plus.circle") }
+        cell(label) {
+            HStack(spacing: 2) {
+                roundStep("minus", "builder.less", less)
+                Text(value)
+                    .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 22, relativeTo: .title3))
+                    .monospacedDigit()
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
+                    .frame(maxWidth: .infinity)
+                roundStep("plus", "builder.more", more)
+            }
+        }
+    }
+
+    private func roundStep(_ symbol: String, _ description: LocalizedStringKey, _ action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: symbol)
+                .font(.system(size: 18, weight: .heavy))
+                .foregroundStyle(PoulpyColor.primary)
+                .frame(width: 44, height: 44)
+                .background(PoulpyColor.surface, in: Circle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(Text(description))
+    }
+
+    private var weightCell: some View {
+        cell("builder.weight") {
+            HStack(spacing: 4) {
+                TextField("0", text: $weight)
+                    .keyboardType(.decimalPad)
+                    .multilineTextAlignment(.center)
+                    .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 22, relativeTo: .title3))
+                    .frame(width: 60, height: 40)
+                    .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 10))
+                    .overlay(RoundedRectangle(cornerRadius: 10).stroke(PoulpyColor.outline, lineWidth: 1.5))
+                    .accessibilityLabel(Text("builder.weight.kg"))
+                    .onChange(of: weight) { text in
+                        model.setLoadKg(key: row.key, kg: Double(text.replacingOccurrences(of: ",", with: ".")) ?? 0)
+                    }
+                Text("kg").font(.poulpy(.body).weight(.bold)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+            }
+            .frame(height: 44)
         }
     }
 
     private static func format(_ kg: Double) -> String {
         kg.truncatingRemainder(dividingBy: 1) == 0 ? String(Int(kg)) : String(kg)
     }
+}
+
+/// A localized string with printf-style arguments, as in Localizable.strings.
+private func L(_ key: String, _ args: CVarArg...) -> String {
+    String(format: NSLocalizedString(key, comment: ""), locale: Locale.current, arguments: args)
 }
