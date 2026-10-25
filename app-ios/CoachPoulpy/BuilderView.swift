@@ -66,7 +66,7 @@ struct BuilderView: View {
             }
             .sheet(isPresented: $picking) {
                 NavigationStack {
-                    ExerciseList(graph: graph, type: state.type) { row in
+                    ExerciseList(graph: graph, type: state.type, withRecent: true) { row in
                         Button {
                             model.add(slug: row.slug)
                             picking = false

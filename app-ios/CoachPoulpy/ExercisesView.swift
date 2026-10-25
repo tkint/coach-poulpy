@@ -7,21 +7,25 @@ import Shared
 struct ExerciseList<Row: View>: View {
     let graph: AppGraph
     let type: WorkoutType?
+    /// The builder's picker: recently used exercises come first.
+    let withRecent: Bool
     let row: (ExerciseRow) -> Row
 
+    @State private var model: ExerciseListModel
     @State private var query = ""
     @State private var area: MuscleArea?
     @State private var ticked: Set<Equipment>?
     @State private var choosing = false
 
-    init(graph: AppGraph, type: WorkoutType?, @ViewBuilder row: @escaping (ExerciseRow) -> Row) {
+    init(graph: AppGraph, type: WorkoutType?, withRecent: Bool = false, @ViewBuilder row: @escaping (ExerciseRow) -> Row) {
         self.graph = graph
         self.type = type
+        self.withRecent = withRecent
         self.row = row
+        // Built once per list, so the search index and the history are read once.
+        _model = State(initialValue: graph.exerciseList(languageCode: Language.code))
         _ticked = State(initialValue: graph.equipmentFilter(memory: UserDefaultsStore()).ticked)
     }
-
-    private var model: ExerciseListModel { graph.exerciseList(languageCode: Language.code) }
 
     /// Keeps the choice on the phone, for the library and the builder's picker alike.
     private func tick(_ value: Set<Equipment>?) {
@@ -31,7 +35,7 @@ struct ExerciseList<Row: View>: View {
 
     var body: some View {
         let model = self.model
-        let listing = model.filter(query: query, area: area, type: type, ticked: ticked)
+        let listing = model.filter(query: query, area: area, type: type, ticked: ticked, withRecent: withRecent)
         VStack(spacing: 0) {
             PillSearchField(query: $query, placeholder: "exercises.search", label: "exercises.search.label")
                 .padding(.horizontal, 20)
@@ -101,7 +105,7 @@ struct ExerciseList<Row: View>: View {
             EquipmentSheet(
                 options: model.equipmentOptions,
                 ticked: ticked,
-                fitting: { Int(model.filter(query: query, area: area, type: type, ticked: $0).count) }
+                fitting: { Int(model.filter(query: query, area: area, type: type, ticked: $0, withRecent: false).count) }
             ) { value in
                 tick(value)
                 choosing = false

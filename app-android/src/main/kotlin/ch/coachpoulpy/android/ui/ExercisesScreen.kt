@@ -75,7 +75,7 @@ import ch.coachpoulpy.shared.MuscleArea
  * The searchable catalog, used by the library and by the builder's picker: a pill
  * search, muscle chips, the count line, then card rows grouped by movement pattern,
  * or ranked results while searching. In the picker ([adding]) each row ends with a
- * round plus instead of a chevron.
+ * round plus instead of a chevron, and recently used exercises come first.
  */
 @Composable
 fun ExerciseList(
@@ -93,7 +93,7 @@ fun ExerciseList(
     var area by rememberSaveable { mutableStateOf<MuscleArea?>(null) }
     var ticked by remember(equipment) { mutableStateOf(equipment.ticked) }
     var choosing by rememberSaveable { mutableStateOf(false) }
-    val listing = remember(model, query, area, type, ticked) { model.filter(query, area, type, ticked) }
+    val listing = remember(model, query, area, type, ticked) { model.filter(query, area, type, ticked, withRecent = adding) }
     val tick = { value: Set<Equipment>? ->
         equipment.ticked = value
         ticked = value

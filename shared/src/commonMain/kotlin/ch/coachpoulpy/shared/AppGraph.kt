@@ -26,7 +26,7 @@ class AppGraph(driverFactory: DriverFactory) {
     val catalogRepository = CatalogRepository(store, Catalog.bundled)
     val catalog: Catalog get() = catalogRepository.current
 
-    fun exerciseList(languageCode: String) = ExerciseListModel(catalog, registry, languageCode)
+    fun exerciseList(languageCode: String) = ExerciseListModel(catalog, registry, languageCode) { recentlyUsedExercises(store) }
 
     /** What the user ticked in the exercise list's Equipment sheet. The apps pass the same [memory] every time. */
     fun equipmentFilter(memory: KeyValueStore) = EquipmentFilter(memory)

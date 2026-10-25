@@ -25,6 +25,7 @@ data class ExerciseSection(val title: String?, val rows: List<ExerciseRow>)
  */
 data class ExerciseListing(
     val sections: List<ExerciseSection>,
+    /** Exercises listed, each once: the "Recently used" section repeats some and isn't counted. */
     val count: Int,
     /** "34 exercises", or "3 matches" while searching; "… you can do" while [restricted]. */
     val countLabel: String,
@@ -32,7 +33,8 @@ data class ExerciseListing(
     /** True while the equipment filter is on. */
     val restricted: Boolean,
 ) {
-    val rows: List<ExerciseRow> get() = sections.flatMap { it.rows }
+    /** Every row once, in list order. */
+    val rows: List<ExerciseRow> get() = sections.flatMap { it.rows }.distinctBy { it.slug }
 }
 
 /** A broad muscle chip of the exercise list; every [MuscleGroup] belongs to exactly one. */
@@ -74,8 +76,11 @@ class ExerciseListModel internal constructor(
     private val catalog: Catalog,
     private val registry: WorkoutTypeRegistry,
     languageCode: String,
+    /** Exercises used last, most recent first, read once when the picker first needs them. */
+    recentlyUsed: () -> List<ExerciseSlug> = { emptyList() },
 ) {
     private val labels = Labels(languageCode)
+    private val recent by lazy(recentlyUsed)
     private val search = ExerciseSearch(catalog.offered)
 
     /**
@@ -105,12 +110,15 @@ class ExerciseListModel internal constructor(
      * workout type can run are listed; with [ticked], only those that equipment fits
      * (null is no equipment filter). With a query, one section of the best matches
      * first ([ExerciseSearch]); without, a section per movement pattern, by name.
+     * [withRecent], for the builder's picker, puts up to 5 recently used exercises
+     * first while nothing is typed or filtered; they also stay in their pattern.
      */
     fun filter(
         query: String = "",
         area: MuscleArea? = null,
         type: WorkoutType? = null,
         ticked: Set<Equipment>? = null,
+        withRecent: Boolean = false,
     ): ExerciseListing {
         val candidates = catalog.offered
             .filter { area == null || it.muscleGroups.any { group -> group in area.groups } }
@@ -132,13 +140,15 @@ class ExerciseListModel internal constructor(
         val count = sections.sumOf { it.rows.size }
         val searching = ranks != null
         val restricted = ticked != null
+        val recentRows = if (withRecent && !searching && area == null && !restricted) recentlyUsedRows(type) else emptyList()
+        val shown = if (recentRows.isEmpty()) sections else listOf(ExerciseSection(labels.recentlyUsed, recentRows)) + sections
         val countLabel = when {
             searching && restricted -> labels.matchesYouCanDo(count)
             searching -> labels.matches(count)
             restricted -> labels.exercisesYouCanDo(count)
             else -> labels.exercises(count)
         }
-        return ExerciseListing(sections, count, countLabel, searching, restricted)
+        return ExerciseListing(shown, count, countLabel, searching, restricted)
     }
 
     fun detail(slug: String): ExerciseDetail? = catalog[ExerciseSlug(slug)]?.let { exercise ->
@@ -160,6 +170,13 @@ class ExerciseListModel internal constructor(
             },
         )
     }
+
+    private fun recentlyUsedRows(type: WorkoutType?): List<ExerciseRow> = recent.asSequence()
+        .mapNotNull { catalog[it] }
+        .filter { !it.retired && (type == null || registry.accepts(type, it.measurement)) }
+        .take(RECENT_COUNT)
+        .map(::row)
+        .toList()
 
     private fun row(exercise: Exercise) =
         ExerciseRow(exercise.slug.value, labels.text(exercise.name), details(exercise), exercise.movementPattern)
@@ -194,4 +211,8 @@ class ExerciseListModel internal constructor(
     private fun List<String>.sentence() = mapIndexed { index, word -> if (index == 0) word else word.lowercase() }.joinToString(", ")
 
     private fun String.capitalized() = replaceFirstChar { it.uppercaseChar() }
+
+    private companion object {
+        const val RECENT_COUNT = 5
+    }
 }
