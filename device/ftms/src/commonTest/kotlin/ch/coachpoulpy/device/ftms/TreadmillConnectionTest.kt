@@ -140,14 +140,37 @@ class TreadmillConnectionTest {
     }
 
     @Test
-    fun withoutStatusEventsAStoppedBeltReadsAsStopped() = runTest {
+    fun stopAndTheSafetyKeyFromTheConsole() = runTest {
+        val link = FakeLink()
+        val connection = TreadmillConnection(link, backgroundScope)
+        connection.start()
+        runCurrent()
+        link.notify(packet(0 to 2, 1000 to 2))
+        link.status(packet(0x02 to 1, 0x01 to 1)) // stopped by the user
+        link.notify(packet(0 to 2, 400 to 2))
+        runCurrent()
+        assertEquals(BeltState.STOPPED, connection.beltState.value)
+
+        link.status(packet(0x04 to 1))
+        link.status(packet(0x03 to 1))
+        runCurrent()
+        assertEquals(BeltState.SAFETY_KEY, connection.beltState.value)
+
+        link.status(packet(0x04 to 1))
+        link.status(packet(0x02 to 1)) // no parameter: a pause or a stop, so a pause
+        runCurrent()
+        assertEquals(BeltState.PAUSED, connection.beltState.value)
+    }
+
+    @Test
+    fun withoutStatusEventsAStoppedBeltReadsAsStill() = runTest {
         val link = FakeLink()
         val connection = TreadmillConnection(link, backgroundScope)
         connection.start()
         runCurrent()
         link.notify(packet(0 to 2, 0 to 2))
         runCurrent()
-        assertEquals(BeltState.STOPPED, connection.beltState.value)
+        assertEquals(BeltState.STILL, connection.beltState.value)
         link.notify(packet(0 to 2, 300 to 2))
         runCurrent()
         assertEquals(BeltState.MOVING, connection.beltState.value)

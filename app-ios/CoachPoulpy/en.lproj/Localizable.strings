@@ -183,7 +183,6 @@
 "live.empty.title" = "No device connected";
 "live.empty.body" = "Switch on your treadmill, pod or band. Poulpy connects to the ones you added as soon as they are nearby.";
 "live.manage.devices" = "Manage devices";
-"live.sync.belt" = "Pause and resume with the belt";
 "live.what.doing" = "What are you doing?";
 "live.more" = "More";
 "live.group.walking" = "Walking";
@@ -193,6 +192,17 @@
 "live.waiting" = "Waiting for the first numbers…";
 "live.connecting.one %@" = "Connecting to %@…";
 "live.connecting.many" = "Connecting to your devices…";
+"live.follow.treadmill" = "Follow the treadmill";
+"live.follow.treadmill.hint" = "Starts, pauses and finishes with the belt";
+"live.wait.treadmill" = "Wait for the treadmill";
+"live.waiting.title" = "Press start on your treadmill";
+"live.waiting.body" = "%@ · recording starts with the belt";
+"live.start.now" = "Start now";
+"live.finish.still.title" = "Finished?";
+"live.finish.still.body" = "The belt stopped %1$lld min ago. With no answer, Poulpy finishes the session in %2$lld min, ending it at %3$@.";
+"live.finish.lost.title" = "Lost the treadmill";
+"live.finish.lost.body" = "It disconnected %1$lld min ago and Poulpy keeps trying. With no answer, the session finishes in %2$lld min, ending at %3$@, when it was last seen.";
+"live.keep.going" = "Keep going";
 "settings.general" = "General";
 "settings.devices" = "Devices";
 "settings.appearance" = "Appearance";

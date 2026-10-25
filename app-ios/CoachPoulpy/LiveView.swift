@@ -27,7 +27,7 @@ struct LiveView: View {
                     if state.connection == .empty && state.recording == nil {
                         nothingConnected
                     } else {
-                        if state.belt == .paused || state.belt == .stopped {
+                        if [.paused, .stopped, .safetyKey, .still].contains(state.belt) && state.waitingFor == nil {
                             beltBanner
                         }
                         if !state.tiles.isEmpty {
@@ -36,13 +36,13 @@ struct LiveView: View {
                             Text("live.waiting").foregroundStyle(PoulpyColor.onSurfaceVariant)
                         }
                         // Added devices still connecting: the view shows read-only, with Poulpy where the controls go.
+                        if let prompt = state.finishPrompt {
+                            finishCard(prompt)
+                        }
                         if isConnecting {
                             connecting
                         } else {
                             recorder
-                            if state.hasTreadmill {
-                                syncRow
-                            }
                         }
                     }
                 }
@@ -196,6 +196,8 @@ struct LiveView: View {
         VStack(alignment: .leading, spacing: 10) {
             if let recording = state.recording {
                 recordingControls(recording)
+            } else if let waiting = state.waitingFor {
+                waitingControls(waiting)
             } else {
                 choicePicker
             }
@@ -244,8 +246,12 @@ struct LiveView: View {
             if let note = selectedChoice?.note, !note.isEmpty {
                 Text(note).font(.poulpy(.footnote)).foregroundStyle(PoulpyColor.onSurfaceVariant)
             }
+            if state.hasTreadmill {
+                followRow
+            }
             Button { model.startRecording(key: state.selected) } label: {
-                Text("treadmill.start").font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: 52)
+                Text(LocalizedStringKey(state.hasTreadmill && state.followTreadmill ? "live.wait.treadmill" : "treadmill.start"))
+                    .font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: 52)
             }
             .buttonStyle(.borderedProminent)
             .buttonBorderShape(.capsule)
@@ -321,19 +327,80 @@ struct LiveView: View {
         return parts.joined(separator: " · ")
     }
 
-    private var syncRow: some View {
-        Toggle(isOn: Binding(get: { state.syncPause }, set: { model.setSyncPause(on: $0) })) {
+    private var followRow: some View {
+        Toggle(isOn: Binding(get: { state.followTreadmill }, set: { model.setFollowTreadmill(on: $0) })) {
             Label {
-                Text("live.sync.belt").font(.custom(PoulpyFontFace.nunitoExtraBold, size: 16, relativeTo: .body))
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("live.follow.treadmill").font(.custom(PoulpyFontFace.nunitoExtraBold, size: 16, relativeTo: .body))
+                    Text("live.follow.treadmill.hint").font(.poulpy(.footnote)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+                }
             } icon: {
                 Image(systemName: "arrow.triangle.2.circlepath").foregroundStyle(PoulpyColor.primary)
             }
         }
-        .padding(.horizontal, 14)
+        .padding(.horizontal, 12)
         .padding(.vertical, 8)
-        .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.md))
-        .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.md).stroke(PoulpyColor.outline))
+        .background(PoulpyColor.background, in: RoundedRectangle(cornerRadius: PoulpyRadius.md))
     }
+
+    /// Start was tapped with the belt still: the recording begins when the belt moves.
+    private func waitingControls(_ choice: LiveChoice) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 14) {
+                ProgressView().controlSize(.large).tint(PoulpyColor.primary)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("live.waiting.title").font(.custom(PoulpyFontFace.nunitoExtraBold, size: 19, relativeTo: .title3))
+                    Text(L("live.waiting.body", choice.name)).font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+                }
+            }
+            .accessibilityElement(children: .combine)
+            HStack(spacing: 8) {
+                Button { model.cancelWaiting() } label: {
+                    Text("action.cancel").font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: 40)
+                }
+                .buttonStyle(.bordered)
+                .buttonBorderShape(.capsule)
+                Button { model.startNow() } label: {
+                    Text("live.start.now").font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: 40)
+                }
+                .buttonStyle(.bordered)
+                .buttonBorderShape(.capsule)
+            }
+        }
+    }
+
+    /// The treadmill went quiet or away for long: blue, never a reproach.
+    private func finishCard(_ prompt: FinishPromptUi) -> some View {
+        let lost = prompt.reason == .treadmillLost
+        return VStack(alignment: .leading, spacing: 10) {
+            HStack(alignment: .top, spacing: 12) {
+                Image(systemName: "clock").font(.system(size: 22, weight: .semibold)).foregroundStyle(PoulpyColor.primary)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(LocalizedStringKey(lost ? "live.finish.lost.title" : "live.finish.still.title"))
+                        .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 19, relativeTo: .title3))
+                        .accessibilityAddTraits(.isHeader)
+                    Text(L(lost ? "live.finish.lost.body" : "live.finish.still.body",
+                           Int64(prompt.sinceMinutes), Int64(prompt.autoFinishMinutes), clock(prompt.endsAtSeconds)))
+                        .font(.poulpy(.subheadline))
+                }
+            }
+            HStack(spacing: 8) {
+                Button { model.keepGoing() } label: {
+                    Text("live.keep.going").font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: 40)
+                }
+                .buttonStyle(.bordered)
+                .buttonBorderShape(.capsule)
+                Button { model.stopRecording() } label: {
+                    Text("treadmill.stop").font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: 40)
+                }
+                .buttonStyle(.borderedProminent)
+                .buttonBorderShape(.capsule)
+            }
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .foregroundStyle(PoulpyColor.onPrimaryContainer)
+        .background(PoulpyColor.primaryContainer, in: RoundedRectangle(cornerRadius: 20))
     }
 }
 

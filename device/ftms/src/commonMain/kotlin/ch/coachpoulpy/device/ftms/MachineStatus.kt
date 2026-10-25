@@ -8,6 +8,9 @@ sealed interface MachineStatus {
     data object Reset : MachineStatus
     data object StoppedByUser : MachineStatus
     data object PausedByUser : MachineStatus
+
+    /** "Stopped or paused" without the parameter that says which: some machines leave it out. */
+    data object StoppedOrPausedByUser : MachineStatus
     data object StoppedBySafetyKey : MachineStatus
     data object StartedOrResumedByUser : MachineStatus
     data class TargetSpeedChanged(val kmh: Double) : MachineStatus
@@ -23,8 +26,12 @@ object MachineStatusDecoder {
         val reader = ByteReader(bytes)
         return when (val opCode = reader.uint8()) {
             0x01 -> MachineStatus.Reset
-            // The parameter says which: 0x01 stop, 0x02 pause. Some machines leave it out; treat that as a stop.
-            0x02 -> if (bytes.size > 1 && reader.uint8() == 0x02) MachineStatus.PausedByUser else MachineStatus.StoppedByUser
+            // The parameter says which: 0x01 stop, 0x02 pause. Some machines leave it out.
+            0x02 -> when (if (bytes.size > 1) reader.uint8() else null) {
+                0x01 -> MachineStatus.StoppedByUser
+                0x02 -> MachineStatus.PausedByUser
+                else -> MachineStatus.StoppedOrPausedByUser
+            }
             0x03 -> MachineStatus.StoppedBySafetyKey
             0x04 -> MachineStatus.StartedOrResumedByUser
             0x05 -> MachineStatus.TargetSpeedChanged(reader.uint16() / 100.0)
@@ -40,17 +47,23 @@ enum class BeltState {
     UNKNOWN,
     MOVING,
 
-    /** The user paused on the treadmill's console. */
+    /** The user paused on the treadmill's console, or pressed a button that may be pause or stop. */
     PAUSED,
 
-    /** Stopped by the user or the safety key, or not started yet. */
+    /** The user pressed Stop on the console. */
     STOPPED,
+
+    /** The safety key was pulled. */
+    SAFETY_KEY,
+
+    /** At 0 km/h with nothing saying why: not started yet, or a machine without status events paused or stopped. */
+    STILL,
 }
 
 /**
  * Whether the belt is moving, from the machine's status events when it sends them and
  * from the speed otherwise. A machine without status events cannot tell a pause from a
- * stop, so a belt at 0 km/h reads as stopped.
+ * stop, so a belt at 0 km/h reads as [BeltState.STILL], never as a stop.
  */
 class BeltMonitor {
     var state = BeltState.UNKNOWN
@@ -58,8 +71,10 @@ class BeltMonitor {
 
     fun onStatus(status: MachineStatus) {
         state = when (status) {
-            MachineStatus.PausedByUser -> BeltState.PAUSED
-            MachineStatus.StoppedByUser, MachineStatus.StoppedBySafetyKey, MachineStatus.Reset -> BeltState.STOPPED
+            MachineStatus.PausedByUser, MachineStatus.StoppedOrPausedByUser -> BeltState.PAUSED
+            MachineStatus.StoppedByUser -> BeltState.STOPPED
+            MachineStatus.StoppedBySafetyKey -> BeltState.SAFETY_KEY
+            MachineStatus.Reset -> BeltState.STILL
             MachineStatus.StartedOrResumedByUser -> BeltState.MOVING
             else -> state
         }
@@ -69,12 +84,12 @@ class BeltMonitor {
 
     fun onReading(speedKmh: Double?) {
         speedKmh ?: return
-        val halted = state == BeltState.PAUSED || state == BeltState.STOPPED
+        val halted = state == BeltState.PAUSED || state == BeltState.STOPPED || state == BeltState.SAFETY_KEY
         state = when {
             // After a pause or stop the belt slows down for a few seconds: only speeding up means it moves again.
             halted -> if (speedKmh > lastSpeed) BeltState.MOVING else state
             speedKmh > 0 -> BeltState.MOVING
-            else -> BeltState.STOPPED
+            else -> BeltState.STILL
         }
         lastSpeed = speedKmh
     }

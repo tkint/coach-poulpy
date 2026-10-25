@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -27,10 +28,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
@@ -62,8 +65,10 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -74,6 +79,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ch.coachpoulpy.android.R
 import ch.coachpoulpy.shared.AppGraph
 import ch.coachpoulpy.shared.BeltStatus
+import ch.coachpoulpy.shared.FinishPromptUi
+import ch.coachpoulpy.shared.FinishReason
+import ch.coachpoulpy.shared.LiveChoice
 import ch.coachpoulpy.shared.LiveConnection
 import ch.coachpoulpy.shared.LiveMetric
 import ch.coachpoulpy.shared.LiveModel
@@ -120,12 +128,12 @@ fun LiveScreen(graph: AppGraph, language: String, onManageDevices: () -> Unit, m
         }
         // Added devices still connecting: the view shows read-only, with Poulpy where the controls go.
         val connecting = state.connection == LiveConnection.CONNECTING && state.recording == null
-        if (state.belt == BeltStatus.PAUSED || state.belt == BeltStatus.STOPPED) BeltBanner(state.belt)
+        if (state.belt in HALTED && state.waitingFor == null) BeltBanner(state.belt)
         if (state.tiles.isNotEmpty()) LivePanel(state.tiles) else if (state.connectedCount > 0) {
             Text(stringResource(R.string.live_waiting), color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
+        state.finishPrompt?.let { FinishCard(it, model) }
         if (connecting) Connecting(state.connecting) else Recorder(state, model)
-        if (state.hasTreadmill && !connecting) SyncRow(state.syncPause, model::setSyncPause)
     }
     state.summary?.let { SummaryDialog(it, state.units, onDismiss = model::clearSummary) }
 }
@@ -273,7 +281,12 @@ private fun Recorder(state: LiveUiState, model: LiveModel) {
     ) {
         Column(Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             val recording = state.recording
-            if (recording == null) ChoicePicker(state, model) else Recording(recording, state.units, model)
+            val waiting = state.waitingFor
+            when {
+                recording != null -> Recording(recording, state.units, model)
+                waiting != null -> Waiting(waiting, model)
+                else -> ChoicePicker(state, model)
+            }
         }
     }
 }
@@ -302,8 +315,9 @@ private fun ChoicePicker(state: LiveUiState, model: LiveModel) {
     if (!note.isNullOrEmpty()) {
         Text(note, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
+    if (state.hasTreadmill) FollowRow(state.followTreadmill, model::setFollowTreadmill)
     Button(onClick = { model.startRecording(state.selected) }, modifier = Modifier.fillMaxWidth().height(52.dp)) {
-        Text(stringResource(R.string.treadmill_start))
+        Text(stringResource(if (state.hasTreadmill && state.followTreadmill) R.string.live_wait_treadmill else R.string.treadmill_start))
     }
     if (more) {
         ChoiceSheet(state, onPick = { model.select(it); more = false }, onDismiss = { more = false })
@@ -402,17 +416,79 @@ private fun Recording(recording: RecordingUi, units: UnitSystem, model: LiveMode
 }
 
 @Composable
-private fun SyncRow(on: Boolean, onChange: (Boolean) -> Unit) {
-    Surface(
-        shape = RoundedCornerShape(PoulpyRadius.md),
-        color = MaterialTheme.colorScheme.surface,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+private fun FollowRow(on: Boolean, onChange: (Boolean) -> Unit) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(PoulpyRadius.md))
+            .background(MaterialTheme.colorScheme.background)
+            .toggleable(value = on, role = Role.Switch, onValueChange = onChange)
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Row(Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Filled.Sync, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-            Spacer(Modifier.size(12.dp))
-            Text(stringResource(R.string.live_sync_belt), fontWeight = FontWeight.ExtraBold, modifier = Modifier.weight(1f))
-            Switch(checked = on, onCheckedChange = onChange)
+        Icon(Icons.Filled.Sync, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+        Spacer(Modifier.size(12.dp))
+        Column(Modifier.weight(1f)) {
+            Text(stringResource(R.string.live_follow_treadmill), fontWeight = FontWeight.ExtraBold)
+            Text(stringResource(R.string.live_follow_treadmill_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        Switch(checked = on, onCheckedChange = null)
+    }
+}
+
+/** Start was tapped with the belt still: the recording begins when the belt moves. */
+@Composable
+private fun Waiting(choice: LiveChoice, model: LiveModel) {
+    Row(Modifier.semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite }, verticalAlignment = Alignment.CenterVertically) {
+        CircularProgressIndicator(Modifier.size(40.dp), strokeWidth = 4.dp)
+        Spacer(Modifier.size(14.dp))
+        Column {
+            Text(stringResource(R.string.live_waiting_title), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold)
+            Text(
+                stringResource(R.string.live_waiting_body, choice.name),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        OutlinedButton(onClick = model::cancelWaiting, modifier = Modifier.weight(1f).height(52.dp)) { Text(stringResource(R.string.action_cancel)) }
+        OutlinedButton(onClick = model::startNow, modifier = Modifier.weight(1f).height(52.dp)) { Text(stringResource(R.string.live_start_now)) }
+    }
+}
+
+/** The treadmill went quiet or away for long: blue, never a reproach. */
+@Composable
+private fun FinishCard(prompt: FinishPromptUi, model: LiveModel) {
+    val colors = MaterialTheme.colorScheme
+    Surface(shape = RoundedCornerShape(20.dp), color = colors.primaryContainer, contentColor = colors.onPrimaryContainer) {
+        Column(Modifier.fillMaxWidth().padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(verticalAlignment = Alignment.Top) {
+                Icon(Icons.Filled.Schedule, contentDescription = null, tint = colors.primary, modifier = Modifier.size(26.dp))
+                Spacer(Modifier.size(12.dp))
+                Column(Modifier.semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite }) {
+                    val lost = prompt.reason == FinishReason.TREADMILL_LOST
+                    Text(
+                        stringResource(if (lost) R.string.live_finish_lost_title else R.string.live_finish_still_title),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.ExtraBold,
+                        modifier = Modifier.semantics { heading() },
+                    )
+                    Text(
+                        stringResource(
+                            if (lost) R.string.live_finish_lost_body else R.string.live_finish_still_body,
+                            prompt.sinceMinutes,
+                            prompt.autoFinishMinutes,
+                            clock(prompt.endsAtSeconds),
+                        ),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(onClick = model::keepGoing, modifier = Modifier.weight(1f).height(48.dp)) { Text(stringResource(R.string.live_keep_going)) }
+                Button(onClick = model::stopRecording, modifier = Modifier.weight(1f).height(48.dp)) { Text(stringResource(R.string.treadmill_stop)) }
+            }
         }
     }
 }
@@ -487,3 +563,5 @@ private fun clock(seconds: Long): String {
     val s = seconds % 60
     return if (h > 0) "%d:%02d:%02d".format(h, m, s) else "%d:%02d".format(m, s)
 }
+
+private val HALTED = setOf(BeltStatus.PAUSED, BeltStatus.STOPPED, BeltStatus.SAFETY_KEY, BeltStatus.STILL)
