@@ -156,6 +156,8 @@
 "live.sync.belt" = "Pause et reprise avec le tapis";
 "live.recording" = "Enregistrement";
 "live.waiting" = "En attente des premières mesures…";
+"live.connecting.one %@" = "Connexion à %@…";
+"live.connecting.many" = "Connexion à vos appareils…";
 "settings.general" = "Général";
 "settings.devices" = "Appareils";
 "settings.appearance" = "Apparence";

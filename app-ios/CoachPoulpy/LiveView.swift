@@ -24,7 +24,7 @@ struct LiveView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 10) {
-                    if state.connectedCount == 0 && state.recording == nil {
+                    if state.connection == .empty && state.recording == nil {
                         nothingConnected
                     } else {
                         if state.belt == .paused || state.belt == .stopped {
@@ -35,9 +35,14 @@ struct LiveView: View {
                         } else {
                             Text("live.waiting").foregroundStyle(PoulpyColor.onSurfaceVariant)
                         }
-                        recorder
-                        if state.hasTreadmill {
-                            syncRow
+                        // Added devices still connecting: the view shows read-only, with Poulpy where the controls go.
+                        if isConnecting {
+                            connecting
+                        } else {
+                            recorder
+                            if state.hasTreadmill {
+                                syncRow
+                            }
                         }
                     }
                 }
@@ -169,6 +174,22 @@ struct LiveView: View {
         .padding(.vertical, 8)
         .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 14))
         .accessibilityElement(children: .combine)
+    }
+
+    private var isConnecting: Bool { state.connection == .connecting && state.recording == nil }
+
+    private var connecting: some View {
+        VStack(spacing: 10) {
+            PoulpyLoader(size: 48)
+            Text(state.connecting.count == 1 ? L("live.connecting.one %@", state.connecting[0]) : L("live.connecting.many"))
+                .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 16, relativeTo: .body))
+                .multilineTextAlignment(.center)
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 16)
+        .frame(maxWidth: .infinity)
+        .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 20))
+        .overlay(RoundedRectangle(cornerRadius: 20).stroke(PoulpyColor.outline))
     }
 
     private var recorder: some View {

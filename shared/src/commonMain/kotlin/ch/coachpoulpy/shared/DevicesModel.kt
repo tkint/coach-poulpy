@@ -74,6 +74,11 @@ data class DevicesUiState(
     /** Only quantities that more than one added device measures: the others have nothing to choose. */
     val sources: List<SourceUi> = emptyList(),
     val connectedCount: Int = 0,
+    /**
+     * Just launched, with added devices that connect on their own, before [DevicesModel.connectAutomatically]
+     * ran: they are about to connect, so Live waits for them rather than flashing its empty state.
+     */
+    val startingUp: Boolean = false,
 )
 
 /** The merged reading of every connected device, with the name of the device each number came from. */
@@ -124,6 +129,9 @@ class DevicesModel(
     private var userScan = false
     private var autoConnectedOnce = false
 
+    /** See [DevicesUiState.startingUp]. Ends after [STARTUP_GRACE] too, for a phone whose Bluetooth is off. */
+    private var startingUp = known.any { it.autoConnect }
+
     private val _state = MutableStateFlow(DevicesUiState())
     val state: StateFlow<DevicesUiState> = _state.asStateFlow()
 
@@ -143,6 +151,13 @@ class DevicesModel(
 
     init {
         publish()
+        if (startingUp) {
+            scope.launch {
+                delay(STARTUP_GRACE)
+                startingUp = false
+                publish()
+            }
+        }
     }
 
     /**
@@ -153,6 +168,8 @@ class DevicesModel(
         if (autoConnectedOnce) return
         autoConnectedOnce = true
         known.filter { it.autoConnect }.forEach { connect(it.key) }
+        startingUp = false
+        publish()
     }
 
     /** Scans for devices to add, until [stopScan]. Added devices are left out of [DevicesUiState.found]. */
@@ -443,6 +460,7 @@ class DevicesModel(
                     .map { d -> FoundDeviceUi(d.id, d.name ?: d.id, d.kind, d.rssi) },
                 sources = sources,
                 connectedCount = links.values.count { link -> link.status == ConnectionStatus.CONNECTED },
+                startingUp = startingUp,
             )
         }
     }
@@ -482,6 +500,7 @@ class DevicesModel(
         const val OLD_KEY = "treadmill.key"
         const val OLD_NAME = "treadmill.name"
         val PENDING_TIMEOUT = 30.seconds
+        val STARTUP_GRACE = 3.seconds
         val MAX_GAP = 5.seconds
 
         fun sourceKey(quantity: Quantity) = "devices.source.${quantity.name}"

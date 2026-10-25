@@ -156,6 +156,8 @@
 "live.sync.belt" = "Pause and resume with the belt";
 "live.recording" = "Recording";
 "live.waiting" = "Waiting for the first numbers…";
+"live.connecting.one %@" = "Connecting to %@…";
+"live.connecting.many" = "Connecting to your devices…";
 "settings.general" = "General";
 "settings.devices" = "Devices";
 "settings.appearance" = "Appearance";

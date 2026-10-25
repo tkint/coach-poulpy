@@ -187,6 +187,8 @@
     <string name="live_sync_belt">Pause and resume with the belt</string>
     <string name="live_recording">Recording</string>
     <string name="live_waiting">Waiting for the first numbers…</string>
+    <string name="live_connecting_one">Connecting to %1$s…</string>
+    <string name="live_connecting_many">Connecting to your devices…</string>
     <string name="metric_cadence">Cadence</string>
     <string name="settings_general">General</string>
     <string name="settings_devices">Devices</string>

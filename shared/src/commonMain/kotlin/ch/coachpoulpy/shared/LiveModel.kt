@@ -99,9 +99,30 @@ data class SummaryUi(
     val phases: List<PhaseResultUi>,
 )
 
+/** Where the Live tab stands with the added devices. */
+enum class LiveConnection {
+    /** No device added, or none of the added ones is connecting: the empty state shows. */
+    EMPTY,
+
+    /**
+     * At least one added device is connecting or reconnecting, or about to just after launch, and none is
+     * connected yet: Live shows read-only.
+     */
+    CONNECTING,
+
+    /** At least one device is connected. */
+    CONNECTED,
+}
+
 data class LiveUiState(
     val connectedCount: Int = 0,
-    /** SPEED and PACE first when a device measures speed: the apps show those two large. */
+    val connection: LiveConnection = LiveConnection.EMPTY,
+    /** The devices being connected while [connection] is CONNECTING, for "Connecting to …". */
+    val connecting: List<String> = emptyList(),
+    /**
+     * SPEED and PACE first when a device measures speed: the apps show those two large.
+     * While connecting, the tiles of what the connecting devices usually measure, all without a value.
+     */
     val tiles: List<LiveTile> = emptyList(),
     val belt: BeltStatus = BeltStatus.UNKNOWN,
     /** Whether a treadmill is connected, for the belt switch. */
@@ -141,6 +162,9 @@ class LiveModel(
     private var savedWorkouts = emptyList<Workout>()
     private var latest: MergedReading? = null
 
+    /** What the devices being connected usually measure, for placeholder tiles before any is connected. */
+    private var expected = emptySet<Quantity>()
+
     /** Steps since the recording started, or since connecting when not recording. */
     private val steps = StepCounter()
 
@@ -167,14 +191,35 @@ class LiveModel(
                 followBelt(belt)
             }
         }
-        scope.launch {
-            devices.state.collect { d ->
-                if (d.connectedCount == 0) latest = null
-                _state.update { it.copy(connectedCount = d.connectedCount, hasTreadmill = devices.hasTreadmill, tiles = tiles()) }
-            }
-        }
+        // Read once now, not only when the collector first runs: the first frame would show the empty state.
+        onDevices(devices.state.value)
+        scope.launch { devices.state.collect(::onDevices) }
         scope.launch { devices.available.collect { _state.update { it.copy(tiles = tiles()) } } }
         scope.launch { settings.collect { s -> _state.update { it.copy(units = s.units, tiles = tiles()) } } }
+    }
+
+    /** Follows the added devices: how many are connected, and whether Live waits for some. */
+    private fun onDevices(d: DevicesUiState) {
+        if (d.connectedCount == 0) latest = null
+        val connecting = d.known.filter {
+            it.status == ConnectionStatus.CONNECTING || it.status == ConnectionStatus.RECONNECTING ||
+                (d.startingUp && it.autoConnect && it.status == ConnectionStatus.IDLE)
+        }
+        val connection = when {
+            d.connectedCount > 0 -> LiveConnection.CONNECTED
+            connecting.isNotEmpty() -> LiveConnection.CONNECTING
+            else -> LiveConnection.EMPTY
+        }
+        expected = if (connection == LiveConnection.CONNECTING) connecting.flatMap { it.provides }.toSet() else emptySet()
+        _state.update {
+            it.copy(
+                connectedCount = d.connectedCount,
+                connection = connection,
+                connecting = if (connection == LiveConnection.CONNECTING) connecting.map { device -> device.name } else emptyList(),
+                hasTreadmill = devices.hasTreadmill,
+                tiles = tiles(),
+            )
+        }
     }
 
     private fun onReading(reading: MergedReading) {
@@ -191,7 +236,7 @@ class LiveModel(
      * held: a number that goes missing for a moment keeps its tile, with a dash.
      */
     private fun tiles(): List<LiveTile> {
-        val available = devices.available.value
+        val available = devices.available.value.ifEmpty { expected }
         val units = settings.value.units
         val m = latest?.metrics
         val from = latest?.sources.orEmpty()
@@ -225,9 +270,12 @@ class LiveModel(
         return tiles
     }
 
-    /** Starts recording against the plan with this [PlanOption.key]. Works without a device too, as a timer. */
+    /**
+     * Starts recording against the plan with this [PlanOption.key]. Works without a device too, as a timer,
+     * but not while the added devices are still connecting: Live is read-only until one is there.
+     */
     fun startRecording(planKey: String) {
-        if (recording != null) return
+        if (recording != null || _state.value.connection == LiveConnection.CONNECTING) return
         val workout = (builtInPlans + savedWorkouts).firstOrNull { it.id.value == planKey } ?: return
         val freeRun = workout === freeRunPlan
         val timeline = if (freeRun) TreadmillModule.freeRun else compiler.compile(workout)
