@@ -55,20 +55,29 @@ data class MuscleFilter(val area: MuscleArea, val label: String)
 /** One row of the Equipment sheet, with how many offered exercises use it ("12 exercises"). */
 data class EquipmentOption(val equipment: Equipment, val label: String, val count: Int, val countLabel: String)
 
-/** One variation on an exercise's page; [current] marks the exercise the page is about. */
-data class VariationRow(val slug: String, val name: String, val current: Boolean)
+/**
+ * One variation in the exercise page's variations sheet; [current] marks the exercise
+ * the page is about. [note] is a line on how it differs ("Knees down, a shorter lever").
+ */
+data class VariationRow(val slug: String, val name: String, val note: String, val current: Boolean)
 
 data class ExerciseDetail(
     val slug: String,
     val name: String,
     val pattern: MovementPattern,
     val patternLabel: String,
+    /** Pattern · measurement, and "Each side" when it applies: "Lunge · Reps · Each side". */
+    val eyebrow: String,
     val muscles: String,
     val equipment: String,
     val perSide: Boolean,
     val instructions: List<String>,
     /** Easiest to hardest, this exercise included; empty when it has no variations. */
     val variations: List<VariationRow>,
+    /** This exercise's place in [variations], from 1; 0 without variations. */
+    val variationIndex: Int,
+    /** "3 of 5", or empty without variations. */
+    val variationPosition: String,
 )
 
 /** The catalog as the exercise screens and the workout builder's picker show it. */
@@ -155,12 +164,19 @@ class ExerciseListModel internal constructor(
     }
 
     fun detail(slug: String): ExerciseDetail? = catalog[ExerciseSlug(slug)]?.let { exercise ->
+        val variations = catalog.variationsOf(exercise.slug)
+        val index = variations.indexOfFirst { it.slug == exercise.slug }
         ExerciseDetail(
             slug = exercise.slug.value,
             name = labels.text(exercise.name),
             pattern = exercise.movementPattern,
             patternLabel = labels.pattern(exercise.movementPattern),
-            muscles = exercise.muscleGroups.joinToString(", ") { labels.muscle(it) },
+            eyebrow = listOfNotNull(
+                labels.pattern(exercise.movementPattern),
+                labels.measurement(exercise.measurement),
+                labels.perSide.capitalized().takeIf { exercise.perSide },
+            ).joinToString(" · "),
+            muscles = exercise.muscleGroups.map(labels::muscle).sentence(),
             equipment = when {
                 exercise.equipment.isNotEmpty() -> needs(exercise)
                 exercise.optionalEquipment.isNotEmpty() -> exercise.optionalEquipment.map(labels::equipment).sentence()
@@ -168,9 +184,11 @@ class ExerciseListModel internal constructor(
             },
             perSide = exercise.perSide,
             instructions = exercise.instructions.map { labels.text(it) },
-            variations = catalog.variationsOf(exercise.slug).map {
-                VariationRow(it.slug.value, labels.text(it.name), current = it.slug == exercise.slug)
+            variations = variations.map {
+                VariationRow(it.slug.value, labels.text(it.name), it.variationNote?.let(labels::text).orEmpty(), current = it.slug == exercise.slug)
             },
+            variationIndex = index + 1,
+            variationPosition = if (variations.isEmpty()) "" else labels.position(index + 1, variations.size),
         )
     }
 

@@ -1,5 +1,5 @@
 {
-  "version": 5,
+  "version": 6,
   "exercises": [
     {
       "slug": "goblet-squat",
@@ -8,6 +8,7 @@
       "muscleGroups": ["QUADRICEPS", "GLUTES", "CORE"],
       "equipment": [["DUMBBELL", "KETTLEBELL"]],
       "measurement": "REPS",
+      "variationNote": { "en": "A weight held against your chest", "fr": "Une charge tenue contre la poitrine" },
       "instructions": [
         { "en": "Hold the weight against your chest, elbows down.", "fr": "Tenez la charge contre la poitrine, coudes vers le bas." },
         { "en": "Sit down between your heels, chest up, then stand.", "fr": "Descendez entre vos talons, buste droit, puis remontez." }
@@ -20,6 +21,7 @@
       "movementPattern": "SQUAT",
       "muscleGroups": ["QUADRICEPS", "GLUTES"],
       "measurement": "REPS",
+      "variationNote": { "en": "No support, thighs down to level", "fr": "Sans appui, cuisses jusqu’à l’horizontale" },
       "instructions": [
         { "en": "Stand with feet shoulder-width apart, toes slightly out.", "fr": "Pieds écartés à la largeur des épaules, pointes légèrement ouvertes." },
         { "en": "Push your hips back and bend your knees until your thighs are level with the floor.", "fr": "Poussez les hanches en arrière et pliez les genoux jusqu'à ce que les cuisses soient parallèles au sol." },
@@ -33,6 +35,7 @@
       "movementPattern": "SQUAT",
       "muscleGroups": ["QUADRICEPS", "GLUTES"],
       "measurement": "REPS",
+      "variationNote": { "en": "Sit down on a chair and stand back up", "fr": "On s’assoit sur une chaise et on se relève" },
       "instructions": [
         { "en": "Sit on the front half of a sturdy chair, feet flat.", "fr": "Asseyez-vous sur l'avant d'une chaise stable, pieds à plat." },
         { "en": "Lean forward slightly and stand up without using your hands.", "fr": "Penchez-vous légèrement en avant et levez-vous sans les mains." },
@@ -149,6 +152,7 @@
       "movementPattern": "PUSH",
       "muscleGroups": ["CHEST", "TRICEPS", "SHOULDERS"],
       "measurement": "REPS",
+      "variationNote": { "en": "The classic, on hands and toes", "fr": "La classique, sur les mains et les pointes" },
       "instructions": [
         { "en": "Hands under your shoulders, body straight from head to heels.", "fr": "Mains sous les épaules, corps aligné de la tête aux talons." },
         { "en": "Lower your chest to just above the floor, elbows at about 45 degrees.", "fr": "Descendez la poitrine près du sol, coudes à environ 45 degrés." },
@@ -163,6 +167,7 @@
       "muscleGroups": ["CHEST", "TRICEPS", "SHOULDERS"],
       "optionalEquipment": ["MAT"],
       "measurement": "REPS",
+      "variationNote": { "en": "Knees down, a shorter lever", "fr": "Genoux au sol, un levier plus court" },
       "instructions": [
         { "en": "Start on your hands and knees, body straight from head to knees.", "fr": "En appui sur les mains et les genoux, corps aligné de la tête aux genoux." },
         { "en": "Lower your chest towards the floor and push back up.", "fr": "Descendez la poitrine vers le sol puis remontez." }
@@ -176,6 +181,7 @@
       "muscleGroups": ["CHEST", "TRICEPS"],
       "equipment": [["BENCH"]],
       "measurement": "REPS",
+      "variationNote": { "en": "Hands raised on a bench or wall", "fr": "Mains surélevées sur un banc ou un mur" },
       "instructions": [
         { "en": "Place your hands on a bench, table or wall, body straight.", "fr": "Mains sur un banc, une table ou un mur, corps gainé." },
         { "en": "Lower your chest to the edge and push away.", "fr": "Amenez la poitrine vers le bord puis repoussez." }
@@ -188,6 +194,7 @@
       "movementPattern": "PUSH",
       "muscleGroups": ["TRICEPS", "CHEST", "SHOULDERS"],
       "measurement": "REPS",
+      "variationNote": { "en": "Hands together, more triceps", "fr": "Mains jointes, plus de triceps" },
       "instructions": [
         { "en": "Place your hands under your chest, thumbs and index fingers touching in a diamond.", "fr": "Mains sous la poitrine, pouces et index qui se touchent en forme de diamant." },
         { "en": "Body straight from head to heels, lower your chest to your hands, elbows close to your sides.", "fr": "Corps aligné de la tête aux talons, descendez la poitrine vers les mains, coudes près du corps." },
@@ -202,6 +209,7 @@
       "muscleGroups": ["CHEST", "TRICEPS", "SHOULDERS", "CORE"],
       "measurement": "REPS",
       "perSide": true,
+      "variationNote": { "en": "One hand behind your back", "fr": "Une main dans le dos" },
       "instructions": [
         { "en": "Feet wider than your hips, one hand under your shoulder and the other behind your back.", "fr": "Pieds plus écartés que les hanches, une main sous l'épaule et l'autre dans le dos." },
         { "en": "Keep your hips square to the floor and lower your chest towards your hand.", "fr": "Gardez les hanches face au sol et descendez la poitrine vers la main." },

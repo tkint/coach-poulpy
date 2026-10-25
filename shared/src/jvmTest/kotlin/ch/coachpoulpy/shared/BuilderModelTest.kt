@@ -84,4 +84,11 @@ class BuilderModelTest {
         assertEquals(listOf("Reverse lunge", "Bodyweight squat"), graph.editWorkout(id, "en")!!.state.value.rows.map { it.name })
         assertEquals(3, edit.state.value.rows.single { it.name == "Reverse lunge" }.sets)
     }
+
+    @Test
+    fun addToAWorkoutStartsANewOneHoldingTheExercise() {
+        val builder = graph.createWorkoutWith("diamond-push-up", "en")
+        assertFalse(builder.isEditing)
+        assertEquals(listOf("Diamond push-up"), builder.state.value.rows.map { it.name })
+    }
 }

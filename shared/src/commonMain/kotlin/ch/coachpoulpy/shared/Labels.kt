@@ -72,6 +72,16 @@ internal class Labels(private val languageCode: String) {
         MovementPattern.STRETCH -> t("Stretch", "Étirement")
     }
 
+    fun measurement(mode: MeasurementMode) = when (mode) {
+        MeasurementMode.REPS -> t("Reps", "Répétitions")
+        MeasurementMode.TIME -> t("Timed", "Chronométré")
+        MeasurementMode.HOLD -> t("Hold", "Maintien")
+        MeasurementMode.DISTANCE -> t("Distance", "Distance")
+    }
+
+    /** "3 of 5". */
+    fun position(index: Int, count: Int) = t("$index of $count", "$index sur $count")
+
     fun workoutType(type: WorkoutType) = when (type) {
         WorkoutType.STRENGTH -> t("Strength", "Renforcement")
         WorkoutType.CONDITIONING -> t("Cardio circuit", "Circuit cardio")

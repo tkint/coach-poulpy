@@ -64,7 +64,7 @@ The iOS build runs `./gradlew :shared:embedAndSignAppleFrameworkForXcode` itself
 
 To change it today, edit the JSON, raise `version` by one and ship a new build. Keep every `slug`: workouts point at exercises by slug. To stop offering an exercise, set `"retired": true` rather than deleting it, so workouts that use it still open.
 
-`variations` lists the catalog's variation groups: each is the slugs of one movement made easier or harder, ordered from easiest to hardest. An exercise is in at most one group, and a retired one stays in its group but isn't shown.
+`variations` lists the catalog's variation groups: each is the slugs of one movement made easier or harder, ordered from easiest to hardest. An exercise is in at most one group, and a retired one stays in its group but isn't shown. Every exercise in a group carries a `variationNote` in both languages, the one line the variations sheet shows under its name ("Knees down, a shorter lever").
 
 An exercise's `equipment` lists what it needs, each need a list of alternatives: `[["DUMBBELL", "KETTLEBELL"]]` is a dumbbell or a kettlebell, `[["DUMBBELL"], ["BENCH"]]` is dumbbells and a bench. No need means bodyweight; `BODYWEIGHT` and `MAT` are never needs. Equipment that helps but isn't needed (a mat, a treadmill for a walk) goes in `optionalEquipment`. The Equipment filter shows an exercise when it uses something ticked, needed or optional, and every need has one alternative ticked; bodyweight-only exercises hide while anything is ticked, unless "No equipment" is.
 

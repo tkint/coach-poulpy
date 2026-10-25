@@ -141,4 +141,12 @@ class CatalogTest {
         val exercise = Catalog.fromJson(old).exercises.single()
         assertEquals(listOf(listOf(Equipment.DUMBBELL), listOf(Equipment.BENCH)), exercise.equipment)
     }
+
+    @Test
+    fun everyExerciseInAVariationGroupHasANoteInBothLanguages() {
+        Catalog.bundled.variationGroups.flatten().forEach { slug ->
+            val note = Catalog.bundled[slug]?.variationNote
+            assertTrue(note != null && note.en.isNotBlank() && note.fr.isNotBlank(), "${slug.value} has no variation note")
+        }
+    }
 }

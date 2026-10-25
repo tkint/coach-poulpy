@@ -53,9 +53,11 @@ import ch.coachpoulpy.shared.BuilderRow
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose: () -> Unit) {
+fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose: () -> Unit, firstExercise: String? = null) {
     val model = remember(graph, language, workoutId) {
-        workoutId?.let { graph.editWorkout(it, language) } ?: graph.createWorkout(language)
+        workoutId?.let { graph.editWorkout(it, language) }
+            ?: firstExercise?.let { graph.createWorkoutWith(it, language) }
+            ?: graph.createWorkout(language)
     }
     DisposableEffect(model) { onDispose { model.close() } }
     val state by model.state.collectAsStateWithLifecycle()

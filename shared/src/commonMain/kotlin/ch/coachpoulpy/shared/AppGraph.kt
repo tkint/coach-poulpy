@@ -57,6 +57,10 @@ class AppGraph(driverFactory: DriverFactory) {
     fun createWorkout(languageCode: String) =
         BuilderModel(WorkoutDraft.empty(), catalog, registry, store, languageCode)
 
+    /** A new workout that already holds [exerciseSlug], for an exercise page's "Add to a workout". */
+    fun createWorkoutWith(exerciseSlug: String, languageCode: String) =
+        createWorkout(languageCode).also { it.add(exerciseSlug) }
+
     /** Null when the workout is gone or was not made with the builder. */
     fun editWorkout(workoutId: String, languageCode: String): BuilderModel? {
         val workout = store.latestWorkout(WorkoutId(workoutId)) ?: return null

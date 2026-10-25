@@ -57,7 +57,29 @@ class ExerciseListModelTest {
 
     @Test
     fun detailHasNoVariationsOutsideAGroup() {
-        assertTrue(model("en").detail("plank")!!.variations.isEmpty())
+        val plank = model("en").detail("plank")!!
+        assertTrue(plank.variations.isEmpty())
+        assertEquals(0, plank.variationIndex)
+        assertEquals("", plank.variationPosition)
+        assertEquals("Core · Hold", plank.eyebrow)
+    }
+
+    @Test
+    fun detailGivesTheEyebrowThePositionAndEachVariationsNote() {
+        val detail = model("en").detail("diamond-push-up")!!
+        assertEquals("Push · Reps", detail.eyebrow)
+        assertEquals(4, detail.variationIndex)
+        assertEquals("4 of 5", detail.variationPosition)
+        assertEquals("Hands together, more triceps", detail.variations.single { it.current }.note)
+        assertEquals("Knees down, a shorter lever", detail.variations.first().note)
+        assertEquals("Triceps, chest, shoulders", detail.muscles)
+        assertEquals("1 sur 3", model("fr").detail("chair-squat")!!.variationPosition)
+    }
+
+    @Test
+    fun eachSideMovesIntoTheEyebrow() {
+        assertEquals("Lunge · Reps · Each side", model("en").detail("reverse-lunge")!!.eyebrow)
+        assertEquals("Fente · Répétitions · Par côté", model("fr").detail("reverse-lunge")!!.eyebrow)
     }
 
     private fun search(query: String, language: String = "en") = model(language).filter(query).rows.map { it.slug }
