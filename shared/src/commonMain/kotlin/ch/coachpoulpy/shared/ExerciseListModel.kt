@@ -26,9 +26,11 @@ data class ExerciseSection(val title: String?, val rows: List<ExerciseRow>)
 data class ExerciseListing(
     val sections: List<ExerciseSection>,
     val count: Int,
-    /** "34 exercises", or "3 matches" while searching. */
+    /** "34 exercises", or "3 matches" while searching; "… you can do" while [restricted]. */
     val countLabel: String,
     val searching: Boolean,
+    /** True while the equipment filter is on. */
+    val restricted: Boolean,
 ) {
     val rows: List<ExerciseRow> get() = sections.flatMap { it.rows }
 }
@@ -47,6 +49,9 @@ enum class MuscleArea(val groups: Set<MuscleGroup>) {
 
 /** A chip the list can be narrowed to; "All" is no filter. */
 data class MuscleFilter(val area: MuscleArea, val label: String)
+
+/** One row of the Equipment sheet, with how many offered exercises use it ("12 exercises"). */
+data class EquipmentOption(val equipment: Equipment, val label: String, val count: Int, val countLabel: String)
 
 /** One variation on an exercise's page; [current] marks the exercise the page is about. */
 data class VariationRow(val slug: String, val name: String, val current: Boolean)
@@ -85,14 +90,32 @@ class ExerciseListModel internal constructor(
     val muscleFilters: List<MuscleFilter> = MuscleArea.entries.map { MuscleFilter(it, labels.muscleArea(it)) }
 
     /**
+     * What the Equipment sheet lists: the catalog's equipment, bodyweight and mat left
+     * out since those exercises always show, each with how many exercises use it.
+     */
+    val equipmentOptions: List<EquipmentOption> = Equipment.entries
+        .filter { it != Equipment.BODYWEIGHT && it != Equipment.MAT }
+        .mapNotNull { item ->
+            val count = catalog.offered.count { item in it.allEquipment }
+            if (count == 0) null else EquipmentOption(item, labels.equipment(item), count, labels.exercises(count))
+        }
+
+    /**
      * Offered exercises matching [query] and [area]. With [type], only exercises that
-     * workout type can run are listed. With a query, one section of the best matches
+     * workout type can run are listed; with [ticked], only those that equipment fits
+     * (null is no equipment filter). With a query, one section of the best matches
      * first ([ExerciseSearch]); without, a section per movement pattern, by name.
      */
-    fun filter(query: String = "", area: MuscleArea? = null, type: WorkoutType? = null): ExerciseListing {
+    fun filter(
+        query: String = "",
+        area: MuscleArea? = null,
+        type: WorkoutType? = null,
+        ticked: Set<Equipment>? = null,
+    ): ExerciseListing {
         val candidates = catalog.offered
             .filter { area == null || it.muscleGroups.any { group -> group in area.groups } }
             .filter { type == null || registry.accepts(type, it.measurement) }
+            .filter { ticked == null || it.fits(ticked) }
         val ranks = search.rank(query)
         val sections = if (ranks == null) {
             MovementPattern.entries.mapNotNull { pattern ->
@@ -108,7 +131,14 @@ class ExerciseListModel internal constructor(
         }
         val count = sections.sumOf { it.rows.size }
         val searching = ranks != null
-        return ExerciseListing(sections, count, if (searching) labels.matches(count) else labels.exercises(count), searching)
+        val restricted = ticked != null
+        val countLabel = when {
+            searching && restricted -> labels.matchesYouCanDo(count)
+            searching -> labels.matches(count)
+            restricted -> labels.exercisesYouCanDo(count)
+            else -> labels.exercises(count)
+        }
+        return ExerciseListing(sections, count, countLabel, searching, restricted)
     }
 
     fun detail(slug: String): ExerciseDetail? = catalog[ExerciseSlug(slug)]?.let { exercise ->
@@ -118,7 +148,11 @@ class ExerciseListModel internal constructor(
             pattern = exercise.movementPattern,
             patternLabel = labels.pattern(exercise.movementPattern),
             muscles = exercise.muscleGroups.joinToString(", ") { labels.muscle(it) },
-            equipment = exercise.equipment.joinToString(", ") { labels.equipment(it) },
+            equipment = when {
+                exercise.equipment.isNotEmpty() -> needs(exercise)
+                exercise.optionalEquipment.isNotEmpty() -> exercise.optionalEquipment.map(labels::equipment).sentence()
+                else -> labels.equipment(Equipment.BODYWEIGHT)
+            },
             perSide = exercise.perSide,
             instructions = exercise.instructions.map { labels.text(it) },
             variations = catalog.variationsOf(exercise.slug).map {
@@ -135,18 +169,25 @@ class ExerciseListModel internal constructor(
         return listOf(muscles, fact(exercise)).filter { it.isNotEmpty() }.joinToString(" · ")
     }
 
-    /** What the exercise needs, else how it is done: "Dumbbells, bench", "Hold", "Each side", "Timed". */
+    /** What the exercise needs, else how it is done: "Dumbbells or kettlebell", "Hold", "Each side", "Timed". */
     private fun fact(exercise: Exercise): String {
-        val gear = if (Equipment.BODYWEIGHT in exercise.equipment) emptyList() else exercise.equipment - Equipment.MAT
         val main = when {
-            gear.isNotEmpty() -> gear.map(labels::equipment).sentence()
+            exercise.equipment.isNotEmpty() -> needs(exercise)
             exercise.measurement == MeasurementMode.HOLD -> labels.hold
             exercise.perSide -> return labels.perSide.capitalized()
             exercise.measurement == MeasurementMode.TIME -> labels.timed
-            Equipment.MAT in exercise.equipment -> labels.equipment(Equipment.MAT)
+            Equipment.MAT in exercise.optionalEquipment -> labels.equipment(Equipment.MAT)
             else -> labels.equipment(Equipment.BODYWEIGHT)
         }
         return if (exercise.perSide) "$main · ${labels.perSide}" else main
+    }
+
+    /** "Dumbbells or kettlebell", "Dumbbells and bench or step": alternatives with "or", needs with "and". */
+    private fun needs(exercise: Exercise): String {
+        val words = exercise.equipment.joinToString(" ${labels.andWord} ") { need ->
+            need.joinToString(" ${labels.orWord} ") { labels.equipment(it).lowercase() }
+        }
+        return words.capitalized()
     }
 
     /** "Chest, triceps": the first word as it is, the others in lower case. */

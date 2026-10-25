@@ -40,7 +40,7 @@ Every workout type shares the same concepts; a type only adds its own step kinds
 
 | Concept | What it holds |
 | --- | --- |
-| Exercise | Stable slug, names in French and English, movement pattern, muscle groups, equipment, measurement (reps, time, distance, hold), per-side flag, images, instruction steps |
+| Exercise | Stable slug, names in French and English, movement pattern, muscle groups, equipment needs (each a list of alternatives) and optional equipment, measurement (reps, time, distance, hold), per-side flag, images, instruction steps |
 | Workout | Name, workout type, a tree of steps, estimated duration, tags |
 | Step | An exercise step (exercise and prescription), a group (sequence, superset, circuit, interval set with rounds), or a rest |
 | Prescription | Sets, and per set a target (reps, duration, distance, hold), an optional load, intensity (RPE, speed, incline, heart rate zone), tempo, and rest after the set |

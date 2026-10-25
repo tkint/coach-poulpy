@@ -11,18 +11,27 @@ struct ExerciseList<Row: View>: View {
 
     @State private var query = ""
     @State private var area: MuscleArea?
+    @State private var ticked: Set<Equipment>?
+    @State private var choosing = false
 
     init(graph: AppGraph, type: WorkoutType?, @ViewBuilder row: @escaping (ExerciseRow) -> Row) {
         self.graph = graph
         self.type = type
         self.row = row
+        _ticked = State(initialValue: graph.equipmentFilter(memory: UserDefaultsStore()).ticked)
     }
 
     private var model: ExerciseListModel { graph.exerciseList(languageCode: Language.code) }
 
+    /// Keeps the choice on the phone, for the library and the builder's picker alike.
+    private func tick(_ value: Set<Equipment>?) {
+        graph.equipmentFilter(memory: UserDefaultsStore()).ticked = value
+        ticked = value
+    }
+
     var body: some View {
         let model = self.model
-        let listing = model.filter(query: query, area: area, type: type)
+        let listing = model.filter(query: query, area: area, type: type, ticked: ticked)
         VStack(spacing: 0) {
             PillSearchField(query: $query, placeholder: "exercises.search", label: "exercises.search.label")
                 .padding(.horizontal, 20)
@@ -30,6 +39,11 @@ struct ExerciseList<Row: View>: View {
                 .padding(.bottom, 12)
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
+                    EquipmentChip(ticked: ticked) { choosing = true }
+                    Rectangle()
+                        .fill(PoulpyColor.outline)
+                        .frame(width: 1, height: 24)
+                        .accessibilityHidden(true)
                     PoulpyChip(title: Text("exercises.all"), selected: area == nil) { area = nil }
                     ForEach(model.muscleFilters, id: \.label) { filter in
                         PoulpyChip(title: Text(filter.label), selected: area == filter.area) {
@@ -44,8 +58,11 @@ struct ExerciseList<Row: View>: View {
                     .font(.poulpy(.subheadline).weight(.bold))
                     .foregroundStyle(PoulpyColor.onSurfaceVariant)
                 Spacer()
-                if area != nil {
-                    Button("exercises.clear.filters") { area = nil }
+                if area != nil || ticked != nil {
+                    Button("exercises.clear.filters") {
+                        area = nil
+                        tick(nil)
+                    }
                         .font(.poulpy(.subheadline).weight(.heavy))
                         .foregroundStyle(PoulpyColor.primary)
                 }
@@ -71,6 +88,7 @@ struct ExerciseList<Row: View>: View {
                         NoExercises(query: query.trimmingCharacters(in: .whitespaces)) {
                             query = ""
                             area = nil
+                            tick(nil)
                         }
                     }
                 }
@@ -79,6 +97,126 @@ struct ExerciseList<Row: View>: View {
             }
         }
         .background(PoulpyColor.background)
+        .sheet(isPresented: $choosing) {
+            EquipmentSheet(
+                options: model.equipmentOptions,
+                ticked: ticked,
+                fitting: { Int(model.filter(query: query, area: area, type: type, ticked: $0).count) }
+            ) { value in
+                tick(value)
+                choosing = false
+            }
+            .presentationDetents([.medium, .large])
+        }
+    }
+}
+
+/// The icon-only Equipment chip; filled, with how many items are ticked, while the filter is on.
+private struct EquipmentChip: View {
+    let ticked: Set<Equipment>?
+    let action: () -> Void
+
+    var body: some View {
+        let on = ticked != nil
+        Button(action: action) {
+            HStack(spacing: 4) {
+                Image(systemName: "dumbbell")
+                    .font(.system(size: 15, weight: .semibold))
+                if let ticked {
+                    Text(verbatim: "\(ticked.count)")
+                        .font(PoulpyFont.label)
+                        .monospacedDigit()
+                        .foregroundStyle(PoulpyColor.onPrimaryContainer)
+                        .frame(minWidth: 18, minHeight: 18)
+                        .padding(.horizontal, 2)
+                        .background(PoulpyColor.surface, in: Capsule())
+                }
+            }
+            .padding(.horizontal, 12)
+            .frame(minWidth: 48)
+            .frame(height: 36)
+            .foregroundStyle(on ? PoulpyColor.primaryContainer : PoulpyColor.onSurface)
+            .background(on ? PoulpyColor.onPrimaryContainer : PoulpyColor.surface, in: Capsule())
+            .overlay(Capsule().stroke(on ? Color.clear : PoulpyColor.outline, lineWidth: 1.5))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(ticked.map { Text("exercises.equipment.ticked \($0.count)") } ?? Text("exercises.equipment"))
+        .accessibilityAddTraits(on ? [.isSelected] : [])
+    }
+}
+
+/// Tick what you own: the list then only offers exercises it fits. "Show N exercises"
+/// counts live and applies; "Clear" removes the filter.
+private struct EquipmentSheet: View {
+    let options: [EquipmentOption]
+    let fitting: (Set<Equipment>) -> Int
+    let apply: (Set<Equipment>?) -> Void
+    @State private var pending: Set<Equipment>
+
+    init(options: [EquipmentOption], ticked: Set<Equipment>?, fitting: @escaping (Set<Equipment>) -> Int, apply: @escaping (Set<Equipment>?) -> Void) {
+        self.options = options
+        self.fitting = fitting
+        self.apply = apply
+        _pending = State(initialValue: ticked ?? [])
+    }
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("exercises.equipment").font(PoulpyFont.headline).accessibilityAddTraits(.isHeader)
+                    Text("exercises.equipment.hint").font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+                }
+                VStack(spacing: 0) {
+                    ForEach(options, id: \.label) { option in
+                        let on = pending.contains(option.equipment)
+                        Button {
+                            if on { pending.remove(option.equipment) } else { pending.insert(option.equipment) }
+                        } label: {
+                            HStack(spacing: 14) {
+                                Image(systemName: on ? "checkmark.square.fill" : "square")
+                                    .font(.system(size: 22))
+                                    .foregroundStyle(on ? PoulpyColor.primary : PoulpyColor.onSurfaceVariant)
+                                Text(option.label).font(.poulpy(.callout).weight(.bold))
+                                Spacer()
+                                Text(option.countLabel)
+                                    .font(.poulpy(.subheadline).weight(.bold))
+                                    .monospacedDigit()
+                                    .foregroundStyle(PoulpyColor.onSurfaceVariant)
+                            }
+                            .frame(minHeight: 48)
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityAddTraits(on ? [.isSelected] : [])
+                        Divider()
+                    }
+                }
+                HStack(spacing: 8) {
+                    Button { apply(nil) } label: {
+                        Text("exercises.equipment.clear")
+                            .font(.poulpy(.callout).weight(.heavy))
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 56)
+                            .overlay(Capsule().stroke(PoulpyColor.outline, lineWidth: 2))
+                    }
+                    Button { apply(pending) } label: {
+                        Text("exercises.equipment.show \(fitting(pending))")
+                            .font(.poulpy(.callout).weight(.heavy))
+                            .foregroundStyle(PoulpyColor.onPrimary)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 56)
+                            .background(PoulpyColor.primary, in: Capsule())
+                    }
+                }
+                .buttonStyle(.plain)
+                .padding(.top, 4)
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 24)
+            .padding(.bottom, 28)
+        }
+        .background(PoulpyColor.surface)
     }
 }
 

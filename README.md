@@ -66,6 +66,8 @@ To change it today, edit the JSON, raise `version` by one and ship a new build. 
 
 `variations` lists the catalog's variation groups: each is the slugs of one movement made easier or harder, ordered from easiest to hardest. An exercise is in at most one group, and a retired one stays in its group but isn't shown.
 
+An exercise's `equipment` lists what it needs, each need a list of alternatives: `[["DUMBBELL", "KETTLEBELL"]]` is a dumbbell or a kettlebell, `[["DUMBBELL"], ["BENCH"]]` is dumbbells and a bench. No need means bodyweight; `BODYWEIGHT` and `MAT` are never needs. Equipment that helps but isn't needed (a mat, a treadmill for a walk) goes in `optionalEquipment`. The Equipment filter shows an exercise when every need has one alternative ticked.
+
 An exercise's optional `aliases` are other names people search with, per language (`{ "en": ["RDL"], "fr": ["abdos"] }`). The search reads them like names but never shows them, and an alias can't be empty.
 
 Later, an admin menu on the server will publish new versions in the same format, and the app will download them on launch with no account needed (`CatalogRepository.apply`). That is separate from syncing a user's own data, so guests get catalog updates too.
