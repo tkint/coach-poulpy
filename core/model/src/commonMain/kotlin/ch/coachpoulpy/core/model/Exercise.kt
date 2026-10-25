@@ -34,6 +34,8 @@ data class Exercise(
     val perSide: Boolean = false,
     val images: List<String> = emptyList(),
     val instructions: List<LocalizedText> = emptyList(),
+    /** How this variation differs from the others in its group, shown only in the variations sheet. */
+    val variationNote: LocalizedText? = null,
     val retired: Boolean = false,
 ) {
     /** Every piece of equipment named, needed or optional, once each. */

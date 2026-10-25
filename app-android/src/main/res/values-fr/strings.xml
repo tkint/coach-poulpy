@@ -86,10 +86,13 @@
     <string name="exercise_muscles">Muscles</string>
     <string name="exercise_equipment">Matériel</string>
     <string name="exercise_how">Comment faire</string>
-    <string name="exercise_per_side">Se fait un côté après l’autre.</string>
     <string name="exercise_variations">Variantes</string>
-    <string name="exercise_variations_hint">De la plus facile à la plus difficile.</string>
-    <string name="exercise_variation_current">Celle-ci</string>
+    <string name="exercise_variations_hint">La plus facile en haut, la plus difficile en bas.</string>
+    <string name="exercise_variation_current">Vous êtes ici</string>
+    <string name="exercise_variation_position">Variante %1$s</string>
+    <string name="exercise_variations_a11y">Variantes, %1$s, de la plus facile à la plus difficile</string>
+    <string name="exercise_add">Ajouter à une séance</string>
+    <string name="exercise_picture">Illustration de l’exercice</string>
 
     <string name="builder_new_title">Nouvelle séance</string>
     <string name="builder_edit_title">Modifier la séance</string>
