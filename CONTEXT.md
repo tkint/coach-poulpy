@@ -18,6 +18,10 @@ _Avoid_: Exercise database, library (the library is the user's)
 A catalog exercise no longer offered, kept so the workouts that use it still open.
 _Avoid_: Deleted exercise
 
+**Variation**:
+A catalog exercise that does the same movement made easier or harder, like the knee push-up and the diamond push-up for the push-up. Variations are equals in one group, ordered from easiest to hardest, and each keeps its own slug, records and history.
+_Avoid_: Progression, regression, alternative
+
 **Workout type**:
 The family a workout belongs to (strength, conditioning, rehab, mobility, treadmill), which decides the targets it accepts, how its steps finish and what it records.
 _Avoid_: Sport, category
