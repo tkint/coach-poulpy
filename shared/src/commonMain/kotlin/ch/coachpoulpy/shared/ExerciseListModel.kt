@@ -14,6 +14,9 @@ data class ExerciseRow(val slug: String, val name: String, val details: String, 
 /** A muscle group the list can be narrowed to. */
 data class MuscleFilter(val group: MuscleGroup, val label: String)
 
+/** One variation on an exercise's page; [current] marks the exercise the page is about. */
+data class VariationRow(val slug: String, val name: String, val current: Boolean)
+
 data class ExerciseDetail(
     val slug: String,
     val name: String,
@@ -23,6 +26,8 @@ data class ExerciseDetail(
     val equipment: String,
     val perSide: Boolean,
     val instructions: List<String>,
+    /** Easiest to hardest, this exercise included; empty when it has no variations. */
+    val variations: List<VariationRow>,
 )
 
 /** The catalog as the exercise screens and the workout builder's picker show it. */
@@ -63,6 +68,9 @@ class ExerciseListModel internal constructor(
             equipment = exercise.equipment.joinToString(", ") { labels.equipment(it) },
             perSide = exercise.perSide,
             instructions = exercise.instructions.map { labels.text(it) },
+            variations = catalog.variationsOf(exercise.slug).map {
+                VariationRow(it.slug.value, labels.text(it.name), current = it.slug == exercise.slug)
+            },
         )
     }
 

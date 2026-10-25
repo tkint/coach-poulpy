@@ -64,14 +64,24 @@ private struct Chip: View {
 
     var body: some View {
         Button(action: action) {
-            title
-                .font(.poulpy(.subheadline))
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .background(selected ? Color.accentColor : Color.secondary.opacity(0.15), in: Capsule())
-                .foregroundStyle(selected ? Color.white : Color.primary)
+            ChipLabel(title: title, selected: selected)
         }
         .buttonStyle(.plain)
+    }
+}
+
+/// A chip's pill, for when the tap belongs to something else, like a navigation link.
+private struct ChipLabel: View {
+    let title: Text
+    let selected: Bool
+
+    var body: some View {
+        title
+            .font(.poulpy(.subheadline))
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+            .background(selected ? Color.accentColor : Color.secondary.opacity(0.15), in: Capsule())
+            .foregroundStyle(selected ? Color.white : Color.primary)
     }
 }
 
@@ -99,11 +109,41 @@ struct ExerciseDetailView: View {
                             Text(step)
                         }
                     }
+                    if !detail.variations.isEmpty {
+                        variations(detail.variations)
+                    }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding()
             }
             .navigationTitle(detail.name)
+        }
+    }
+
+    /// The exercise's group as one line of pills, easiest first; this exercise is checked in place and the others open.
+    private func variations(_ variations: [VariationRow]) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("exercise.variations").font(.poulpy(.headline))
+            Text("exercise.variations.hint").font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    ForEach(variations, id: \.slug) { variation in
+                        if variation.current {
+                            ChipLabel(title: Text("\(Image(systemName: "checkmark")) \(variation.name)"), selected: true)
+                                .accessibilityElement(children: .ignore)
+                                .accessibilityLabel(Text(variation.name))
+                                .accessibilityValue(Text("exercise.variation.current"))
+                        } else {
+                            NavigationLink {
+                                ExerciseDetailView(graph: graph, slug: variation.slug)
+                            } label: {
+                                ChipLabel(title: Text(variation.name), selected: false)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                }
+            }
         }
     }
 

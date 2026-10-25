@@ -1,5 +1,6 @@
 package ch.coachpoulpy.android.ui
 
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,7 +11,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -25,10 +28,17 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import ch.coachpoulpy.android.R
 import ch.coachpoulpy.shared.AppGraph
+import ch.coachpoulpy.shared.VariationRow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ExerciseDetailScreen(graph: AppGraph, language: String, slug: String, onBack: () -> Unit) {
+fun ExerciseDetailScreen(
+    graph: AppGraph,
+    language: String,
+    slug: String,
+    onBack: () -> Unit,
+    onOpenExercise: (String) -> Unit,
+) {
     val detail = remember(graph, language, slug) { graph.exerciseList(language).detail(slug) }
 
     Scaffold(
@@ -57,6 +67,34 @@ fun ExerciseDetailScreen(graph: AppGraph, language: String, slug: String, onBack
                     Text("${index + 1}.", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.primary)
                     Text(step, style = MaterialTheme.typography.bodyLarge)
                 }
+            }
+            if (detail.variations.isNotEmpty()) Variations(detail.variations, onOpenExercise)
+        }
+    }
+}
+
+/** The exercise's group as one line of pills, easiest first; this exercise is checked in place and the others open. */
+@Composable
+private fun Variations(variations: List<VariationRow>, onOpen: (String) -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(stringResource(R.string.exercise_variations), style = MaterialTheme.typography.titleMedium)
+        Text(
+            stringResource(R.string.exercise_variations_hint),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            variations.forEach { variation ->
+                FilterChip(
+                    selected = variation.current,
+                    onClick = { if (!variation.current) onOpen(variation.slug) },
+                    label = { Text(variation.name) },
+                    leadingIcon = if (variation.current) {
+                        { Icon(Icons.Filled.Check, contentDescription = stringResource(R.string.exercise_variation_current)) }
+                    } else {
+                        null
+                    },
+                )
             }
         }
     }

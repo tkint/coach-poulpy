@@ -1,0 +1,6 @@
+-- Variations: the catalog's groups of one movement, easiest to hardest. Phones on an older
+-- catalog get them with the next catalog version the app seeds.
+CREATE TABLE catalog_variation_group (
+    position INTEGER NOT NULL PRIMARY KEY,
+    slugs TEXT NOT NULL
+);

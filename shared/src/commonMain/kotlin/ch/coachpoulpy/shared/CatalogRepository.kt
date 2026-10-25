@@ -14,7 +14,7 @@ class CatalogRepository(private val store: LocalStore, bundled: Catalog) {
 
     init {
         if ((store.catalogVersion() ?: 0) < bundled.version) {
-            store.replaceCatalog(bundled.version, bundled.exercises)
+            store.replaceCatalog(bundled.version, bundled.exercises, bundled.variationGroups)
         }
         current = load()
     }
@@ -22,10 +22,10 @@ class CatalogRepository(private val store: LocalStore, bundled: Catalog) {
     /** Stores [update] if it is newer than what the phone has. Returns whether it was applied. */
     fun apply(update: Catalog): Boolean {
         if (update.version <= current.version) return false
-        store.replaceCatalog(update.version, update.exercises)
+        store.replaceCatalog(update.version, update.exercises, update.variationGroups)
         current = load()
         return true
     }
 
-    private fun load() = Catalog(store.catalogVersion() ?: 0, store.catalogExercises())
+    private fun load() = Catalog(store.catalogVersion() ?: 0, store.catalogExercises(), store.catalogVariationGroups())
 }

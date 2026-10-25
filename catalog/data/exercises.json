@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "exercises": [
     {
       "slug": "goblet-squat",
@@ -176,6 +176,33 @@
       "instructions": [
         { "en": "Place your hands on a bench, table or wall, body straight.", "fr": "Mains sur un banc, une table ou un mur, corps gainé." },
         { "en": "Lower your chest to the edge and push away.", "fr": "Amenez la poitrine vers le bord puis repoussez." }
+      ]
+    },
+    {
+      "slug": "diamond-push-up",
+      "name": { "en": "Diamond push-up", "fr": "Pompe diamant" },
+      "movementPattern": "PUSH",
+      "muscleGroups": ["TRICEPS", "CHEST", "SHOULDERS"],
+      "equipment": ["BODYWEIGHT"],
+      "measurement": "REPS",
+      "instructions": [
+        { "en": "Place your hands under your chest, thumbs and index fingers touching in a diamond.", "fr": "Mains sous la poitrine, pouces et index qui se touchent en forme de diamant." },
+        { "en": "Body straight from head to heels, lower your chest to your hands, elbows close to your sides.", "fr": "Corps aligné de la tête aux talons, descendez la poitrine vers les mains, coudes près du corps." },
+        { "en": "Push back up.", "fr": "Remontez en poussant." }
+      ]
+    },
+    {
+      "slug": "one-arm-push-up",
+      "name": { "en": "One-arm push-up", "fr": "Pompe sur un bras" },
+      "movementPattern": "PUSH",
+      "muscleGroups": ["CHEST", "TRICEPS", "SHOULDERS", "CORE"],
+      "equipment": ["BODYWEIGHT"],
+      "measurement": "REPS",
+      "perSide": true,
+      "instructions": [
+        { "en": "Feet wider than your hips, one hand under your shoulder and the other behind your back.", "fr": "Pieds plus écartés que les hanches, une main sous l'épaule et l'autre dans le dos." },
+        { "en": "Keep your hips square to the floor and lower your chest towards your hand.", "fr": "Gardez les hanches face au sol et descendez la poitrine vers la main." },
+        { "en": "Push back up, then switch arms.", "fr": "Remontez en poussant, puis changez de bras." }
       ]
     },
     {
@@ -622,5 +649,9 @@
         { "en": "Tilt your ear towards your shoulder and hold gently.", "fr": "Inclinez l'oreille vers l'épaule et tenez en douceur." }
       ]
     }
+  ],
+  "variations": [
+    ["knee-push-up", "incline-push-up", "push-up", "diamond-push-up", "one-arm-push-up"],
+    ["chair-squat", "bodyweight-squat", "goblet-squat"]
   ]
 }

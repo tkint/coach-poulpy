@@ -70,6 +70,9 @@
     <string name="exercise_equipment">Equipment</string>
     <string name="exercise_how">How to do it</string>
     <string name="exercise_per_side">Done one side at a time.</string>
+    <string name="exercise_variations">Variations</string>
+    <string name="exercise_variations_hint">Easiest first, hardest last.</string>
+    <string name="exercise_variation_current">This one</string>
 
     <string name="builder_new_title">New workout</string>
     <string name="builder_edit_title">Edit workout</string>
