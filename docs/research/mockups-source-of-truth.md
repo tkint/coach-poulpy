@@ -29,11 +29,11 @@ Write the Docs describes docs as code as "writing documentation with the same to
 | Docs site | Link only | Does not render without the runtime | Iframe, like the brand book | Live embed (Figma) | Show the reference PNGs | `<img>` |
 | Drift with real screens | Not detected | Not detected | Token check only | Code Connect links components, not screens | Caught in CI | Not detected |
 | Cost and lock-in | Free, tied to claude.ai | Tied to claude.ai runtime | None | Figma plans; Penpot free, self-hostable | None | LFS quota if used |
-| Setup effort | None | Medium, ongoing sync | One-time conversion of 43 artboards | High, redraw everything | Medium per platform, per screen | Low |
+| Setup effort | None | Medium, ongoing sync | One-time conversion of 42 artboards | High, redraw everything | Medium per platform, per screen | Low |
 
 ## Option 1: keep the claude.ai canvas as the source
 
-This is today. It is the cheapest and keeps comments and claude.ai version history. Its weaknesses are the ones the coordinator named: no PR review, a change can land without anyone seeing it next to the code it affects, the history lives outside the repo, and the canvas is private, so the docs site can only link to it. Committing exported PNG snapshots next to it (option 6) adds a visible history in Git but creates a second copy that drifts the day someone forgets to export (inference). Keep this as the place for quick exploration, not as the record.
+This is today. It is the cheapest and keeps comments and claude.ai version history. Its weaknesses are the ones raised in the project chat: no PR review, a change can land without anyone seeing it next to the code it affects, the history lives outside the repo, and the canvas is private, so the docs site can only link to it. Committing exported PNG snapshots next to it (option 6) adds a visible history in Git but creates a second copy that drifts the day someone forgets to export (inference). Keep this as the place for quick exploration, not as the record.
 
 ## Option 2: commit the canvas files (`canvas.json` and `.dc.html`)
 
