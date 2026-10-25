@@ -51,6 +51,7 @@ struct LibraryView: View {
                         } label: {
                             ExerciseRowView(row: row)
                         }
+                        .buttonStyle(.plain)
                     }
                 }
             }

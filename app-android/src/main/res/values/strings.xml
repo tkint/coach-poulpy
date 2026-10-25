@@ -65,7 +65,14 @@
 
     <string name="exercises_search">Name, muscle or equipment</string>
     <string name="exercises_all">All</string>
-    <string name="exercises_none">No exercise matches.</string>
+    <string name="exercises_search_label">Search exercises</string>
+    <string name="exercises_clear_search">Clear search</string>
+    <string name="exercises_clear_filters">Clear filters</string>
+    <string name="exercises_nothing_for">Nothing for “%1$s”</string>
+    <string name="exercises_nothing_hint">Try one word, a muscle like “glutes”, or something you own like “dumbbell”.</string>
+    <string name="exercises_no_fit">No exercise fits these filters</string>
+    <string name="exercises_no_fit_hint">Try another muscle.</string>
+    <string name="exercises_clear_all">Clear search and filters</string>
     <string name="exercise_muscles">Muscles</string>
     <string name="exercise_equipment">Equipment</string>
     <string name="exercise_how">How to do it</string>

@@ -62,9 +62,10 @@ Baloo 2 for display and titles, Nunito for everything else. Platforms map each r
 | Tonal button | 56 high, pill, `primaryContainer` | Secondary actions |
 | Outline button | 56 high, pill, 2 px `outline` | Cancel, less important choices |
 | Grumpy button | 56 high, pill, `grumpy` | Only the catch-up action while Poulpy is ember |
-| Chip | 36 high, pill; on = `primary`, off = 1.5 px `outline` | Filters (muscle, equipment, workout type), with `aria-pressed` or selected state |
+| Chip | 36 high, pill; on = `primary`, off = 1.5 px `outline` | Filters (muscle, equipment, workout type), with `aria-pressed` or selected state; `PoulpyChip` on both platforms |
+| Search field | 48 high, pill, 1.5 px `outline`, `primary` while it holds text, a round clear button | `PillSearchField` on both platforms |
 | Stepper | Inset `surfaceVariant` box, label, minus and plus round buttons of 44 | Sets, reps, load, rest |
-| Pattern badge | 44 round, `primaryContainer`, two letters of the movement pattern | Stands in for exercise pictures until real images exist |
+| Pattern badge | 44 round, `primaryContainer`, one icon per movement pattern in `onPrimaryContainer` | Stands in for exercise pictures until real images exist |
 | Error banner | `error` tint, icon plus text | Never ember |
 | Loader | Poulpy from above, a blue outline of eight lobes, one turn every 2.4 s | `PoulpyLoader` on both platforms; replaces spinners |
 

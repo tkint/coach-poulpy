@@ -9,9 +9,9 @@ struct PatternBadge: View {
     var body: some View {
         Image(systemName: symbol)
             .font(.system(size: size * 0.5))
-            .foregroundStyle(Color.accentColor)
+            .foregroundStyle(PoulpyColor.onPrimaryContainer)
             .frame(width: size, height: size)
-            .background(Color.accentColor.opacity(0.15), in: Circle())
+            .background(PoulpyColor.primaryContainer, in: Circle())
     }
 
     private var symbol: String {

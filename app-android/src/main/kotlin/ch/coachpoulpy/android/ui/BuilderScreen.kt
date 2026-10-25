@@ -75,6 +75,7 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
                 graph, language, type = state.type,
                 onPick = { model.add(it); picking = false },
                 modifier = Modifier.padding(padding),
+                adding = true,
             )
         }
         return
