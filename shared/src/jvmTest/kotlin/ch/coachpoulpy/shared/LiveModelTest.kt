@@ -264,7 +264,6 @@ class LiveModelTest {
 
         // Next launch: before the app gets to connect, Live already waits instead of flashing its empty state.
         val launched = models(FakeCentral(), store, memory)
-        runCurrent()
         assertEquals(LiveConnection.CONNECTING, launched.live.state.value.connection)
         assertEquals(listOf("Test treadmill"), launched.live.state.value.connecting)
         launched.devices.connectAutomatically()

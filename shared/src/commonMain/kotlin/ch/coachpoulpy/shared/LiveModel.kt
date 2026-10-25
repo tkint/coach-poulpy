@@ -191,32 +191,35 @@ class LiveModel(
                 followBelt(belt)
             }
         }
-        scope.launch {
-            devices.state.collect { d ->
-                if (d.connectedCount == 0) latest = null
-                val connecting = d.known.filter {
-                    it.status == ConnectionStatus.CONNECTING || it.status == ConnectionStatus.RECONNECTING ||
-                        (d.startingUp && it.autoConnect && it.status == ConnectionStatus.IDLE)
-                }
-                val connection = when {
-                    d.connectedCount > 0 -> LiveConnection.CONNECTED
-                    connecting.isNotEmpty() -> LiveConnection.CONNECTING
-                    else -> LiveConnection.EMPTY
-                }
-                expected = if (connection == LiveConnection.CONNECTING) connecting.flatMap { it.provides }.toSet() else emptySet()
-                _state.update {
-                    it.copy(
-                        connectedCount = d.connectedCount,
-                        connection = connection,
-                        connecting = if (connection == LiveConnection.CONNECTING) connecting.map { device -> device.name } else emptyList(),
-                        hasTreadmill = devices.hasTreadmill,
-                        tiles = tiles(),
-                    )
-                }
-            }
-        }
+        // Read once now, not only when the collector first runs: the first frame would show the empty state.
+        onDevices(devices.state.value)
+        scope.launch { devices.state.collect(::onDevices) }
         scope.launch { devices.available.collect { _state.update { it.copy(tiles = tiles()) } } }
         scope.launch { settings.collect { s -> _state.update { it.copy(units = s.units, tiles = tiles()) } } }
+    }
+
+    /** Follows the added devices: how many are connected, and whether Live waits for some. */
+    private fun onDevices(d: DevicesUiState) {
+        if (d.connectedCount == 0) latest = null
+        val connecting = d.known.filter {
+            it.status == ConnectionStatus.CONNECTING || it.status == ConnectionStatus.RECONNECTING ||
+                (d.startingUp && it.autoConnect && it.status == ConnectionStatus.IDLE)
+        }
+        val connection = when {
+            d.connectedCount > 0 -> LiveConnection.CONNECTED
+            connecting.isNotEmpty() -> LiveConnection.CONNECTING
+            else -> LiveConnection.EMPTY
+        }
+        expected = if (connection == LiveConnection.CONNECTING) connecting.flatMap { it.provides }.toSet() else emptySet()
+        _state.update {
+            it.copy(
+                connectedCount = d.connectedCount,
+                connection = connection,
+                connecting = if (connection == LiveConnection.CONNECTING) connecting.map { device -> device.name } else emptyList(),
+                hasTreadmill = devices.hasTreadmill,
+                tiles = tiles(),
+            )
+        }
     }
 
     private fun onReading(reading: MergedReading) {
