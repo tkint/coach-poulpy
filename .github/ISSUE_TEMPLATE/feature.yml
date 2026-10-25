@@ -1,0 +1,34 @@
+name: Feature
+description: Something new the app, site or server should do
+labels: [enhancement, needs-triage]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What and why
+      description: What should be possible, from the person's point of view, and why it matters. Use the words from CONTEXT.md.
+    validations:
+      required: true
+  - type: input
+    id: who
+    attributes:
+      label: Who it is for
+      placeholder: A guest training alone, a coach, the family on their phones...
+  - type: textarea
+    id: done
+    attributes:
+      label: Acceptance criteria
+      description: How we will know it works. One checkable line each.
+      value: |
+        - [ ]
+  - type: textarea
+    id: out
+    attributes:
+      label: Out of scope
+      description: What this issue deliberately does not cover.
+  - type: dropdown
+    id: areas
+    attributes:
+      label: Areas
+      multiple: true
+      options: [Shared logic, Android, iOS, Devices, Catalog, Server, Website, Design and brand]

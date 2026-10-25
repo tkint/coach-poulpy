@@ -1,0 +1,101 @@
+# Labels and milestones for this repo. The "Labels" workflow applies this file to GitHub when it
+# changes on main: it creates and updates what is listed here and deletes the labels under
+# `remove`. Labels not listed are left alone.
+
+labels:
+  # Type
+  - name: bug
+    color: "d73a4a"
+    description: Something is broken
+  - name: enhancement
+    color: "a2eeef"
+    description: New feature or improvement
+  - name: documentation
+    color: "0075ca"
+    description: Docs, ADRs or the glossary
+
+  # State (the triage skill's five roles)
+  - name: needs-triage
+    color: "fbca04"
+    description: Waiting for a first look
+  - name: needs-info
+    color: "f9d0c4"
+    description: Waiting on more detail from whoever opened it
+  - name: ready-for-agent
+    color: "0e8a16"
+    description: Fully specified; a Claude thread can take it
+  - name: ready-for-human
+    color: "5319e7"
+    description: "Needs a person: a decision, a purchase or a test by hand"
+  - name: wontfix
+    color: "ffffff"
+    description: Will not be done
+
+  # Area
+  - name: area:shared
+    color: "c5def5"
+    description: Shared Kotlin (model, engine, types, stats, shared view models)
+  - name: area:android
+    color: "c5def5"
+    description: The Android app
+  - name: area:ios
+    color: "c5def5"
+    description: The iOS app
+  - name: area:devices
+    color: "c5def5"
+    description: Bluetooth devices and metric sources
+  - name: area:catalog
+    color: "c5def5"
+    description: The exercise catalog
+  - name: area:server
+    color: "c5def5"
+    description: The http4k server and Postgres
+  - name: area:web
+    color: "c5def5"
+    description: The Vue website
+  - name: area:design
+    color: "c5def5"
+    description: Tokens, Poulpy drawings, brand and the docs site
+
+  # Check
+  - name: device-test
+    color: "d93f0b"
+    description: Has to be checked on a real phone or treadmill, not only in CI
+
+  # Wayfinder maps and tickets
+  - name: wayfinder:map
+    color: "1d76db"
+    description: A wayfinder map of decision tickets
+  - name: wayfinder:research
+    color: "bfdadc"
+    description: Wayfinder ticket answered by research
+  - name: wayfinder:prototype
+    color: "bfdadc"
+    description: Wayfinder ticket answered by a prototype
+  - name: wayfinder:grilling
+    color: "bfdadc"
+    description: Wayfinder ticket answered by grilling
+  - name: wayfinder:task
+    color: "bfdadc"
+    description: Wayfinder ticket answered by doing a small task
+
+remove:
+  - duplicate
+  - good first issue
+  - help wanted
+  - invalid
+  - question
+
+milestones:
+  - title: Phase 1 · Guest app
+    description: Catalog, builder, player, plans, history and FIT export, all on the phone
+  - title: Phase 2 · Treadmill
+    description: FTMS recording, free or matched to a planned workout
+  - title: Phase 3 · Accounts and sync
+    description: Server, Postgres, sign-in, guest upload, sync between phones, catalog updates
+  - title: Phase 4 · Website
+    description: Plan, review and run guided sessions in the browser
+  - title: Phase 5 · Sharing and coaching
+    description: Library sync or copy, coach links, comments
+  - title: Later
+    description: Wanted, not planned yet

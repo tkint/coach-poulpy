@@ -1,0 +1,25 @@
+name: Device test
+description: Something to check by hand on a real phone or treadmill
+labels: [device-test, ready-for-human]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What to check
+      description: Why this needs a real device, and which PR or build it covers.
+    validations:
+      required: true
+  - type: textarea
+    id: checklist
+    attributes:
+      label: Checklist
+      description: One line per thing to try. Tick them as you go and note anything odd below each line.
+      value: |
+        - [ ]
+    validations:
+      required: true
+  - type: input
+    id: devices
+    attributes:
+      label: Phones and devices used
+      placeholder: Pixel 8 (Android 16), iPhone 15 (iOS 26), treadmill brand and model

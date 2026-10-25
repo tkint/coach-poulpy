@@ -1,0 +1,35 @@
+name: Bug
+description: Something in the app, site or server is broken
+labels: [bug, needs-triage]
+body:
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps
+      description: What you did, one step per line.
+      value: |
+        1.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected and actual
+      description: What you expected, and what happened instead. Screenshots welcome.
+    validations:
+      required: true
+  - type: input
+    id: phone
+    attributes:
+      label: Phone and system
+      placeholder: Pixel 8, Android 16 / iPhone 15, iOS 26
+  - type: input
+    id: build
+    attributes:
+      label: App build
+      description: The build number from Settings, or the CI run the APK came from.
+  - type: input
+    id: device
+    attributes:
+      label: Treadmill or other device
+      description: Brand and model, if a device was connected.
