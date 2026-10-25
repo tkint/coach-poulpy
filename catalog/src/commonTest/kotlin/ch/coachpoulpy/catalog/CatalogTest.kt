@@ -1,5 +1,6 @@
 package ch.coachpoulpy.catalog
 
+import ch.coachpoulpy.core.model.Aliases
 import ch.coachpoulpy.core.model.Exercise
 import ch.coachpoulpy.core.model.ExerciseSlug
 import ch.coachpoulpy.core.model.MeasurementMode
@@ -86,5 +87,21 @@ class CatalogTest {
         val exercises = Catalog.bundled.exercises.map { if (it.slug.value == "knee-push-up") it.copy(retired = true) else it }
         val catalog = Catalog(3, exercises, listOf(slugs("knee-push-up", "push-up")))
         assertTrue(catalog.variationsOf(ExerciseSlug("push-up")).isEmpty())
+    }
+
+    @Test
+    fun bundledAliasesLoadPerLanguage() {
+        val rdl = Catalog.bundled[ExerciseSlug("romanian-deadlift")]!!
+        assertEquals(listOf("RDL"), rdl.aliases.en)
+        assertEquals(listOf("abdos"), Catalog.bundled[ExerciseSlug("plank")]!!.aliases.fr)
+        assertTrue(Catalog.bundled[ExerciseSlug("wall-sit")]!!.aliases.all.isEmpty())
+    }
+
+    @Test
+    fun anEmptyAliasIsRejected() {
+        val exercises = Catalog.bundled.exercises.map {
+            if (it.slug.value == "plank") it.copy(aliases = Aliases(fr = listOf("abdos", " "))) else it
+        }
+        assertFailsWith<IllegalArgumentException> { Catalog(4, exercises) }
     }
 }

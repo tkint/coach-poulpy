@@ -37,6 +37,16 @@ class ExerciseListModel internal constructor(
     languageCode: String,
 ) {
     private val labels = Labels(languageCode)
+    private val search = ExerciseSearch(catalog.offered)
+
+    /**
+     * By name, with a variation group kept together easiest to hardest and placed by
+     * its easiest member's name.
+     */
+    private val byName: Comparator<Exercise> = compareBy<Exercise>(
+        { SearchText.fold(labels.text((catalog.variationsOf(it.slug).firstOrNull() ?: it).name)) },
+        { catalog.variationsOf(it.slug).indexOf(it) },
+    )
 
     val rows: List<ExerciseRow> get() = filter()
 
@@ -45,17 +55,21 @@ class ExerciseListModel internal constructor(
         .map { MuscleFilter(it, labels.muscle(it)) }
 
     /**
-     * Offered exercises matching [query] (name in either language) and [muscle], sorted
-     * by name. With [type], only exercises that workout type can run are listed.
+     * Offered exercises matching [query] and [muscle]. With [type], only exercises that
+     * workout type can run are listed. With a query, the best matches come first
+     * ([ExerciseSearch]); otherwise, and inside a rank, they go by name.
      */
     fun filter(query: String = "", muscle: MuscleGroup? = null, type: WorkoutType? = null): List<ExerciseRow> {
-        val needle = query.trim().lowercase()
-        return catalog.offered
-            .filter { needle.isEmpty() || needle in it.name.en.lowercase() || needle in it.name.fr.lowercase() }
+        val candidates = catalog.offered
             .filter { muscle == null || muscle in it.muscleGroups }
             .filter { type == null || registry.accepts(type, it.measurement) }
-            .map { ExerciseRow(it.slug.value, labels.text(it.name), details(it), it.movementPattern) }
-            .sortedBy { it.name.lowercase() }
+        val ranks = search.rank(query)
+        val listed = if (ranks == null) {
+            candidates.sortedWith(byName)
+        } else {
+            candidates.filter { it.slug in ranks }.sortedWith(compareBy<Exercise> { ranks.getValue(it.slug) }.then(byName))
+        }
+        return listed.map { ExerciseRow(it.slug.value, labels.text(it.name), details(it), it.movementPattern) }
     }
 
     fun detail(slug: String): ExerciseDetail? = catalog[ExerciseSlug(slug)]?.let { exercise ->

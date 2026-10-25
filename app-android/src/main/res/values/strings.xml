@@ -63,7 +63,7 @@
     <string name="action_done">Done</string>
     <string name="action_cancel">Cancel</string>
 
-    <string name="exercises_search">Search exercises</string>
+    <string name="exercises_search">Name, muscle or equipment</string>
     <string name="exercises_all">All</string>
     <string name="exercises_none">No exercise matches.</string>
     <string name="exercise_muscles">Muscles</string>

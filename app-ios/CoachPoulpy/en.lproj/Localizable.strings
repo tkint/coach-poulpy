@@ -46,7 +46,7 @@
 "delete.title" = "Delete this workout?";
 "delete.body" = "Sessions you already did are kept.";
 
-"exercises.search" = "Search exercises";
+"exercises.search" = "Name, muscle or equipment";
 "exercises.all" = "All";
 "exercises.none" = "No exercise matches.";
 "exercise.muscles" = "Muscles";
