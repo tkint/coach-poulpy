@@ -1,14 +1,18 @@
 package ch.coachpoulpy.shared
 
+import ch.coachpoulpy.catalog.Catalog
 import ch.coachpoulpy.core.engine.Phase
 import ch.coachpoulpy.core.engine.Session
 import ch.coachpoulpy.core.engine.SessionEvent
 import ch.coachpoulpy.core.engine.SessionState
 import ch.coachpoulpy.core.engine.Timeline
 import ch.coachpoulpy.core.engine.TimelineCompiler
+import ch.coachpoulpy.core.model.Equipment
 import ch.coachpoulpy.core.model.Execution
 import ch.coachpoulpy.core.model.ExecutionId
 import ch.coachpoulpy.core.model.ExecutionSource
+import ch.coachpoulpy.core.model.Exercise
+import ch.coachpoulpy.core.model.ExerciseSlug
 import ch.coachpoulpy.core.model.GroupKind
 import ch.coachpoulpy.core.model.Ids
 import ch.coachpoulpy.core.model.Intensity
@@ -61,7 +65,11 @@ enum class LiveMetric {
  */
 data class LiveTile(val metric: LiveMetric, val value: Double?, val decimals: Int, val unit: String, val source: String?)
 
-data class PlanOption(val key: String, val name: String)
+/**
+ * Something the recorder can follow: a walk or a run from the catalog, recorded as one open
+ * phase, or a treadmill workout. [note] says what it is in a few words, and may be empty.
+ */
+data class LiveChoice(val key: String, val name: String, val note: String)
 
 data class RecordingUi(
     val paused: Boolean,
@@ -131,7 +139,18 @@ data class LiveUiState(
     val syncPause: Boolean = true,
     /** For the summary, which the apps format with [Units]. */
     val units: UnitSystem = UnitSystem.METRIC,
-    val plans: List<PlanOption> = emptyList(),
+    /** What Start records, shown in the "What are you doing?" field; null until the choices load. */
+    val choice: LiveChoice? = null,
+    /** Up to three choices last started, most recent first, at the top of the sheet. */
+    val recent: List<LiveChoice> = emptyList(),
+    /** Every treadmill-ready walk not in [recent], easiest first. */
+    val walking: List<LiveChoice> = emptyList(),
+    /** Every treadmill-ready run not in [recent], easiest first. */
+    val running: List<LiveChoice> = emptyList(),
+    /** The saved treadmill workouts not in [recent]. */
+    val workouts: List<LiveChoice> = emptyList(),
+    /** The [LiveChoice.key] that Start records. */
+    val selected: String = "",
     val recording: RecordingUi? = null,
     val summary: SummaryUi? = null,
 )
@@ -149,10 +168,16 @@ class LiveModel(
     private val memory: KeyValueStore,
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main),
     private val clock: Clock = Clock.System,
+    private val catalog: () -> Catalog = { Catalog.bundled },
+    languageCode: String = "en",
 ) {
+    private val labels = Labels(languageCode)
+
+    /** The keys last started, most recent first. */
+    private var recents = memory.getString(RECENT)?.split(',')?.filter { it.isNotBlank() }.orEmpty()
+
     private val _state = MutableStateFlow(
         LiveUiState(
-            plans = builtInPlans.map { PlanOption(it.id.value, it.name) },
             syncPause = memory.getString(SYNC_PAUSE) != "false",
             units = settings.value.units,
         ),
@@ -181,9 +206,10 @@ class LiveModel(
         scope.launch {
             store.workouts().collect { workouts ->
                 savedWorkouts = workouts.filter { it.type == WorkoutType.TREADMILL }
-                _state.update { it.copy(plans = (builtInPlans + savedWorkouts).map { w -> PlanOption(w.id.value, w.name) }) }
+                publishChoices()
             }
         }
+        publishChoices()
         scope.launch { devices.merged.collect(::onReading) }
         scope.launch {
             devices.belt.collect { belt ->
@@ -270,15 +296,59 @@ class LiveModel(
         return tiles
     }
 
+    /** Every walk and run that can be done on a treadmill, as Walking then Running. */
+    private fun exerciseGroups(): Pair<List<Exercise>, List<Exercise>> {
+        val catalog = catalog()
+        val ready = catalog.offered.filter { Equipment.TREADMILL in it.optionalEquipment }
+        val walking = catalog.variationsOf(WALK).filter { it in ready }
+        val running = catalog.variationsOf(RUN).filter { it in ready }
+        // A treadmill exercise outside both chains still shows, after the runs.
+        return walking to running + (ready - walking.toSet() - running.toSet())
+    }
+
+    private fun publishChoices() {
+        val (walking, running) = exerciseGroups()
+        fun exercise(e: Exercise) =
+            LiveChoice(EXERCISE + e.slug.value, labels.text(e.name), e.variationNote?.let(labels::text).orEmpty())
+        val walks = walking.map(::exercise)
+        val runs = running.map(::exercise)
+        val workouts = savedWorkouts.map { LiveChoice(it.id.value, it.name, "") }
+        val all = (walks + runs + workouts).associateBy { it.key }
+        val selected = _state.value.selected.takeIf { it in all }
+            ?: recents.firstOrNull { it in all }
+            ?: DEFAULT_CHOICE.takeIf { it in all }
+            ?: all.keys.first()
+        val recent = recents.mapNotNull(all::get).take(RECENT_COUNT)
+        // A recent choice shows once, in Recent, not again in its group.
+        fun others(choices: List<LiveChoice>) = choices.filterNot { it in recent }
+        _state.update {
+            it.copy(
+                choice = all[selected],
+                recent = recent,
+                walking = others(walks),
+                running = others(runs),
+                workouts = others(workouts),
+                selected = selected,
+            )
+        }
+    }
+
+    /** Picks what Start records, from the chips or the "More" sheet. */
+    fun select(key: String) {
+        _state.update { it.copy(selected = key) }
+        publishChoices()
+    }
+
     /**
-     * Starts recording against the plan with this [PlanOption.key]. Works without a device too, as a timer,
+     * Starts recording [key], an exercise or a workout from [LiveUiState]. Works without a device too, as a timer,
      * but not while the added devices are still connecting: Live is read-only until one is there.
      */
-    fun startRecording(planKey: String) {
+    fun startRecording(key: String) {
         if (recording != null || _state.value.connection == LiveConnection.CONNECTING) return
-        val workout = (builtInPlans + savedWorkouts).firstOrNull { it.id.value == planKey } ?: return
-        val freeRun = workout === freeRunPlan
-        val timeline = if (freeRun) TreadmillModule.freeRun else compiler.compile(workout)
+        val exercise = key.takeIf { it.startsWith(EXERCISE) }?.let { catalog()[ExerciseSlug(it.removePrefix(EXERCISE))] }
+        val workout = if (exercise != null) null else savedWorkouts.firstOrNull { it.id.value == key } ?: return
+        val freeRun = exercise != null
+        val timeline = if (exercise != null) TreadmillModule.freeRecording(exercise.slug) else compiler.compile(workout!!)
         val now = clock.now()
         val executionId = Ids.newUuidV7(now.toEpochMilliseconds())
         store.startExecution(
@@ -286,13 +356,14 @@ class LiveModel(
                 id = ExecutionId(executionId),
                 source = if (freeRun) ExecutionSource.DEVICE_ONLY else ExecutionSource.GUIDED,
                 startedAt = now,
-                workout = if (workout in savedWorkouts) WorkoutRef(workout.id, workout.version) else null,
-                notes = if (workout === demoIntervals) "Demo intervals" else null,
+                workout = if (workout != null && workout in savedWorkouts) WorkoutRef(workout.id, workout.version) else null,
             ),
-            // Built-in plans get their name in the user's language when the history shows them.
-            title = if (workout in savedWorkouts) workout.name else null,
+            title = exercise?.let { labels.text(it.name) } ?: workout!!.name,
             type = WorkoutType.TREADMILL,
         )
+        recents = (listOf(key) + (recents - key)).take(RECENT_KEPT)
+        memory.putString(RECENT, recents.joinToString(","))
+        publishChoices()
         val started = Recording(executionId, timeline, Session(timeline), freeRun)
         recording = started
         persist(started, started.session.start(now))
@@ -429,10 +500,21 @@ class LiveModel(
 
     companion object {
         private const val SYNC_PAUSE = "treadmill.syncPause"
+        private const val RECENT = "live.recent"
+        private const val RECENT_COUNT = 3
 
-        private val freeRunPlan = Workout(WorkoutId("free-run"), 1, "Free run", WorkoutType.TREADMILL, emptyList())
+        /** More than [RECENT_COUNT], so a deleted workout leaves room for the next one. */
+        private const val RECENT_KEPT = 6
 
-        /** A short workout to try plan checking on a real treadmill before the workout builder exists. */
+        /** The key prefix of a walk or a run from the catalog. */
+        const val EXERCISE = "exercise:"
+
+        private val WALK = ExerciseSlug("walk")
+        private val RUN = ExerciseSlug("run")
+        /** What Start records before anything was ever started. */
+        private const val DEFAULT_CHOICE = "${EXERCISE}walk"
+
+        /** A short workout to try plan checking on a real treadmill before the workout builder existed; History still reads it. */
         val demoIntervals = Workout(
             id = WorkoutId("demo-intervals"),
             version = 1,
@@ -449,8 +531,6 @@ class LiveModel(
                 run("finish", Target.Distance(200.0), 7.0),
             ),
         )
-
-        private val builtInPlans = listOf(freeRunPlan, demoIntervals)
 
         private fun run(id: String, target: Target, kmh: Double) = Step.ExerciseStep(
             id = StepId(id),

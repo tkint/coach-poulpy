@@ -50,8 +50,9 @@ class AppGraph(driverFactory: DriverFactory) {
     fun devices(memory: KeyValueStore): DevicesModel =
         devicesModel ?: DevicesModel(KableCentral(), memory).also { devicesModel = it }
 
-    fun live(memory: KeyValueStore): LiveModel =
-        liveModel ?: LiveModel(devices(memory), settings(memory).state, store, compiler, memory).also { liveModel = it }
+    fun live(memory: KeyValueStore, languageCode: String): LiveModel =
+        liveModel ?: LiveModel(devices(memory), settings(memory).state, store, compiler, memory, catalog = { catalog }, languageCode = languageCode)
+            .also { liveModel = it }
 
     // Not "newWorkout": Swift reserves the "new" prefix, and Kotlin would rename it.
     fun createWorkout(languageCode: String) =

@@ -4,7 +4,8 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,27 +14,35 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.FilterChip
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedIconButton
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -45,11 +54,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -65,7 +78,6 @@ import ch.coachpoulpy.shared.LiveModel
 import ch.coachpoulpy.shared.LiveTile
 import ch.coachpoulpy.shared.LiveUiState
 import ch.coachpoulpy.shared.Measure
-import ch.coachpoulpy.shared.PlanOption
 import ch.coachpoulpy.shared.RecordingUi
 import ch.coachpoulpy.shared.SummaryUi
 import ch.coachpoulpy.shared.UnitSystem
@@ -74,11 +86,11 @@ import java.util.Locale
 
 /** The Live tab: every connected device's numbers together, the recorder under them, all on one screen. */
 @Composable
-fun LiveScreen(graph: AppGraph, onManageDevices: () -> Unit, modifier: Modifier = Modifier) {
+fun LiveScreen(graph: AppGraph, language: String, onManageDevices: () -> Unit, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val memory = remember(context) { AppPreferences(context) }
     // Shared by the whole app: leaving the tab keeps the devices connected and the recording going.
-    val model = remember(graph) { graph.live(memory) }
+    val model = remember(graph) { graph.live(memory, language) }
     val devices = remember(graph) { graph.devices(memory) }
     val state by model.state.collectAsStateWithLifecycle()
     val bluetooth = rememberBluetoothGate()
@@ -259,32 +271,97 @@ private fun Recorder(state: LiveUiState, model: LiveModel) {
     ) {
         Column(Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             val recording = state.recording
-            if (recording == null) PlanPicker(state.plans, model) else Recording(recording, state.units, model)
+            if (recording == null) ChoicePicker(state, model) else Recording(recording, state.units, model)
         }
     }
 }
 
 @Composable
-private fun PlanPicker(plans: List<PlanOption>, model: LiveModel) {
-    var selected by rememberSaveable { mutableStateOf("free-run") }
-    Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        plans.forEach { plan ->
-            FilterChip(selected = selected == plan.key, onClick = { selected = plan.key }, label = { Text(planName(plan)) })
+private fun ChoicePicker(state: LiveUiState, model: LiveModel) {
+    var picking by rememberSaveable { mutableStateOf(false) }
+    val colors = MaterialTheme.colorScheme
+    Text(
+        stringResource(R.string.live_what_doing).uppercase(Locale.getDefault()),
+        style = MaterialTheme.typography.labelMedium,
+        color = colors.onSurfaceVariant,
+        modifier = Modifier.semantics { heading() },
+    )
+    // One field showing the choice; the sheet holds the recent ones and every other.
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .heightIn(min = 56.dp)
+            .clip(RoundedCornerShape(PoulpyRadius.md))
+            .border(1.5.dp, colors.outline, RoundedCornerShape(PoulpyRadius.md))
+            .clickable(onClickLabel = stringResource(R.string.live_change)) { picking = true }
+            .padding(horizontal = 14.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(Modifier.weight(1f)) {
+            Text(state.choice?.name.orEmpty(), style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.ExtraBold)
+            val note = state.choice?.note
+            if (!note.isNullOrEmpty()) {
+                Text(note, style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
+            }
         }
+        Icon(Icons.Filled.ExpandMore, contentDescription = null, tint = colors.onSurfaceVariant)
     }
-    if (selected == "demo-intervals") {
-        Text(stringResource(R.string.treadmill_plan_demo), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-    }
-    Button(onClick = { model.startRecording(selected) }, modifier = Modifier.fillMaxWidth().height(52.dp)) {
+    Button(onClick = { model.startRecording(state.selected) }, modifier = Modifier.fillMaxWidth().height(52.dp)) {
         Text(stringResource(R.string.treadmill_start))
     }
+    if (picking) {
+        ChoiceSheet(state, onPick = { model.select(it); picking = false }, onDismiss = { picking = false })
+    }
 }
 
+/** The recent choices, every treadmill walk and run, then the workouts, one tap to pick. */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun planName(plan: PlanOption) = when (plan.key) {
-    "free-run" -> stringResource(R.string.treadmill_plan_free_run)
-    "demo-intervals" -> stringResource(R.string.treadmill_plan_demo).substringBefore(" (")
-    else -> plan.name
+private fun ChoiceSheet(state: LiveUiState, onPick: (String) -> Unit, onDismiss: () -> Unit) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        containerColor = MaterialTheme.colorScheme.surface,
+    ) {
+        Column(Modifier.verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 20.dp, bottom = 28.dp).selectableGroup()) {
+            Text(stringResource(R.string.live_what_doing), style = MaterialTheme.typography.titleLarge, modifier = Modifier.semantics { heading() })
+            listOf(
+                R.string.live_group_recent to state.recent,
+                R.string.live_group_walking to state.walking,
+                R.string.live_group_running to state.running,
+                R.string.live_group_workouts to state.workouts,
+            ).forEach { (title, choices) ->
+                if (choices.isEmpty()) return@forEach
+                Text(
+                    stringResource(title).uppercase(Locale.getDefault()),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 16.dp, bottom = 4.dp).semantics { heading() },
+                )
+                choices.forEach { choice ->
+                    val on = choice.key == state.selected
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = 52.dp)
+                            .clip(RoundedCornerShape(PoulpyRadius.md))
+                            .background(if (on) MaterialTheme.colorScheme.primaryContainer else Color.Transparent)
+                            .selectable(selected = on, role = Role.RadioButton) { onPick(choice.key) }
+                            .padding(horizontal = 10.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Column(Modifier.weight(1f)) {
+                            Text(choice.name, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.ExtraBold)
+                            if (choice.note.isNotEmpty()) {
+                                Text(choice.note, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                        }
+                        RadioButton(selected = on, onClick = null)
+                    }
+                }
+            }
+        }
+    }
 }
 
 @Composable
