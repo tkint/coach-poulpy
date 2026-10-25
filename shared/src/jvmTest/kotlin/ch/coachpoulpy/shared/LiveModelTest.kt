@@ -11,6 +11,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
@@ -407,7 +408,14 @@ class LiveModelTest {
         val m = models(central, store)
         addTreadmill(m)
         central.treadmill.send(speedCentiKmh = 600, meters = 0, bpm = 120)
-        runCurrent()
+        // Saved workouts are read on the IO dispatcher, outside the test clock: wait for them.
+        fun saved() = m.live.state.value.workouts.any { it.key == "demo-intervals" }
+        var tries = 0
+        while (!saved() && tries++ < 500) {
+            Thread.sleep(10)
+            runCurrent()
+        }
+        assertTrue(saved())
         m.live.startRecording("demo-intervals")
         advanceTimeBy(60.seconds)
         central.treadmill.status(0x02, 0x01)
