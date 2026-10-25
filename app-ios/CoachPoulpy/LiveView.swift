@@ -334,7 +334,6 @@ struct LiveView: View {
         .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.md))
         .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.md).stroke(PoulpyColor.outline))
     }
-    }
 }
 
 /// The numbers of the session just finished, shown once.
