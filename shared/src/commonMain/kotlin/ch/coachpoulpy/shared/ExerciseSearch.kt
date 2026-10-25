@@ -34,7 +34,7 @@ internal class ExerciseSearch(exercises: List<Exercise>) {
         private val compactNames = names.map { it.replace(" ", "") }
         private val nameWords = (listOf(exercise.name.en, exercise.name.fr) + exercise.aliases.all).flatMap(SearchText::words)
         private val labelWords = labels.flatMap { language ->
-            exercise.muscleGroups.map(language::muscle) + exercise.equipment.map(language::equipment) +
+            exercise.muscleGroups.map(language::muscle) + exercise.allEquipment.map(language::equipment) +
                 language.pattern(exercise.movementPattern)
         }.flatMap(SearchText::words)
 

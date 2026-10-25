@@ -66,7 +66,7 @@ class CatalogTest {
         listOf("walk-with-support", "gentle-walk").forEach { slug ->
             val walk = Catalog.bundled[ExerciseSlug(slug)]!!
             assertEquals(MeasurementMode.TIME, walk.measurement)
-            assertEquals(listOf(Equipment.BODYWEIGHT), walk.equipment)
+            assertTrue(walk.allEquipment.isEmpty(), "$slug needs nothing, not even a treadmill")
         }
     }
 
@@ -117,5 +117,49 @@ class CatalogTest {
             if (it.slug.value == "plank") it.copy(aliases = Aliases(fr = listOf("abdos", " "))) else it
         }
         assertFailsWith<IllegalArgumentException> { Catalog(4, exercises) }
+    }
+
+    @Test
+    fun equipmentLoadsAsNeedsOfAlternatives() {
+        assertEquals(listOf(listOf(Equipment.DUMBBELL, Equipment.KETTLEBELL)), Catalog.bundled[ExerciseSlug("goblet-squat")]!!.equipment)
+        assertEquals(
+            listOf(listOf(Equipment.DUMBBELL), listOf(Equipment.BENCH)),
+            Catalog.bundled[ExerciseSlug("dumbbell-bench-press")]!!.equipment,
+        )
+        val plank = Catalog.bundled[ExerciseSlug("plank")]!!
+        assertTrue(plank.equipment.isEmpty())
+        assertEquals(listOf(Equipment.MAT), plank.optionalEquipment)
+    }
+
+    @Test
+    fun anEmptyNeedIsRejected() {
+        val exercises = Catalog.bundled.exercises.map { if (it.slug.value == "plank") it.copy(equipment = listOf(emptyList())) else it }
+        assertFailsWith<IllegalArgumentException> { Catalog(5, exercises) }
+    }
+
+    @Test
+    fun aNeedHoldingBodyweightOrAMatIsRejected() {
+        listOf(Equipment.BODYWEIGHT, Equipment.MAT).forEach { never ->
+            val exercises = Catalog.bundled.exercises.map {
+                if (it.slug.value == "plank") it.copy(equipment = listOf(listOf(Equipment.DUMBBELL, never))) else it
+            }
+            assertFailsWith<IllegalArgumentException> { Catalog(5, exercises) }
+        }
+    }
+
+    @Test
+    fun aFlatEquipmentListFromAnOlderCatalogReadsAsOneNeedPerItem() {
+        val old = """{"version": 4, "exercises": [{"slug": "dumbbell-bench-press", "name": {"en": "Dumbbell bench press", "fr": "Développé couché haltères"},
+            "movementPattern": "PUSH", "muscleGroups": ["CHEST"], "equipment": ["DUMBBELL", "BENCH", "BODYWEIGHT", "MAT"], "measurement": "REPS"}]}"""
+        val exercise = Catalog.fromJson(old).exercises.single()
+        assertEquals(listOf(listOf(Equipment.DUMBBELL), listOf(Equipment.BENCH)), exercise.equipment)
+    }
+
+    @Test
+    fun everyExerciseInAVariationGroupHasANoteInBothLanguages() {
+        Catalog.bundled.variationGroups.flatten().forEach { slug ->
+            val note = Catalog.bundled[slug]?.variationNote
+            assertTrue(note != null && note.en.isNotBlank() && note.fr.isNotBlank(), "${slug.value} has no variation note")
+        }
     }
 }

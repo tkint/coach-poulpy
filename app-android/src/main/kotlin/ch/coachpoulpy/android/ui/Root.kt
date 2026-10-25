@@ -38,7 +38,7 @@ private enum class Tab(@StringRes val label: Int, val icon: ImageVector) {
 
 /**
  * The screen shown over the tabs, as a string so it survives rotation:
- * "builder:" (new), "builder:<id>", "player:<id>", "resume", "workout:<id>", "exercise:<slug>", "session:<id>",
+ * "builder:" (new), "builder:<id>", "builder-add:<slug>" (new, holding that exercise), "player:<id>", "resume", "workout:<id>", "exercise:<slug>", "session:<id>",
  * "device-add", "device-sources" or "device:<key>".
  */
 private typealias Route = String
@@ -131,6 +131,7 @@ fun CoachPoulpyRoot(graph: AppGraph) {
             val (kind, arg) = current.split(':', limit = 2)
             when (kind) {
                 "builder" -> BuilderScreen(graph, language, workoutId = arg.ifEmpty { null }, onClose = close)
+                "builder-add" -> BuilderScreen(graph, language, workoutId = null, firstExercise = arg, onClose = close)
                 "player" -> PlayerScreen(graph, language, workoutId = arg, onClose = close)
                 "workout" -> WorkoutPageScreen(
                     graph, language, workoutId = arg,
@@ -147,7 +148,15 @@ fun CoachPoulpyRoot(graph: AppGraph) {
                 )
                 // A variation replaces the page in place, so back still leads where this page came from.
                 "exercise" -> key(arg) {
-                    ExerciseDetailScreen(graph, language, slug = arg, onBack = close, onOpenExercise = { route = "exercise:$it" })
+                    ExerciseDetailScreen(
+                        graph, language, slug = arg,
+                        onBack = close,
+                        onOpenExercise = { route = "exercise:$it" },
+                        onAddToWorkout = {
+                            back = current
+                            route = "builder-add:$it"
+                        },
+                    )
                 }
                 "session" -> SessionDetailScreen(graph, language, sessionId = arg, onBack = close)
                 "device" -> DeviceScreen(graph, key = arg, onBack = close, onSources = { route = "device-sources" })

@@ -26,7 +26,10 @@ class AppGraph(driverFactory: DriverFactory) {
     val catalogRepository = CatalogRepository(store, Catalog.bundled)
     val catalog: Catalog get() = catalogRepository.current
 
-    fun exerciseList(languageCode: String) = ExerciseListModel(catalog, registry, languageCode)
+    fun exerciseList(languageCode: String) = ExerciseListModel(catalog, registry, languageCode) { recentlyUsedExercises(store) }
+
+    /** What the user ticked in the exercise list's Equipment sheet. The apps pass the same [memory] every time. */
+    fun equipmentFilter(memory: KeyValueStore) = EquipmentFilter(memory)
     fun home(languageCode: String) = HomeModel(store, compiler, catalog, languageCode)
     fun library(languageCode: String) = LibraryModel(store, compiler, catalog, languageCode)
     fun workoutPage(workoutId: String, languageCode: String) = WorkoutPageModel(WorkoutId(workoutId), store, compiler, catalog, languageCode)
@@ -53,6 +56,10 @@ class AppGraph(driverFactory: DriverFactory) {
     // Not "newWorkout": Swift reserves the "new" prefix, and Kotlin would rename it.
     fun createWorkout(languageCode: String) =
         BuilderModel(WorkoutDraft.empty(), catalog, registry, store, languageCode)
+
+    /** A new workout that already holds [exerciseSlug], for an exercise page's "Add to a workout". */
+    fun createWorkoutWith(exerciseSlug: String, languageCode: String) =
+        createWorkout(languageCode).also { it.add(exerciseSlug) }
 
     /** Null when the workout is gone or was not made with the builder. */
     fun editWorkout(workoutId: String, languageCode: String): BuilderModel? {

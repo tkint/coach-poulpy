@@ -1,12 +1,24 @@
 package ch.coachpoulpy.core.model
 
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonDecoder
+import kotlinx.serialization.json.jsonArray
 
 /**
  * A catalog entry. The slug is the stable key: workouts point at it, so an entry is
  * never deleted. One that is no longer offered is [retired], which hides it from the
  * catalog while workouts that already use it keep working. [aliases] are other names
  * people search with; they are never shown.
+ *
+ * [equipment] lists what the exercise needs: each need is a list of alternatives, and
+ * one of them must be at hand (goblet squat: dumbbell or kettlebell; dumbbell bench
+ * press: dumbbells, and a bench). No need means bodyweight. [optionalEquipment] helps
+ * but isn't needed, like a mat or a treadmill for a walk.
  */
 @Serializable
 data class Exercise(
@@ -15,13 +27,48 @@ data class Exercise(
     val aliases: Aliases = Aliases(),
     val movementPattern: MovementPattern,
     val muscleGroups: List<MuscleGroup>,
-    val equipment: List<Equipment> = emptyList(),
+    @Serializable(with = EquipmentNeedsSerializer::class)
+    val equipment: List<List<Equipment>> = emptyList(),
+    val optionalEquipment: List<Equipment> = emptyList(),
     val measurement: MeasurementMode,
     val perSide: Boolean = false,
     val images: List<String> = emptyList(),
     val instructions: List<LocalizedText> = emptyList(),
+    /** How this variation differs from the others in its group, shown only in the variations sheet. */
+    val variationNote: LocalizedText? = null,
     val retired: Boolean = false,
-)
+) {
+    /** Every piece of equipment named, needed or optional, once each. */
+    val allEquipment: List<Equipment> get() = (equipment.flatten() + optionalEquipment).distinct()
+
+    /** True when every need has one alternative in [owned]. */
+    fun fits(owned: Set<Equipment>): Boolean = equipment.all { need -> need.any { it in owned } }
+}
+
+/**
+ * Reads [Exercise.equipment] as needs. Catalogs before version 5 stored one flat list;
+ * the phone still decodes those entries once before replacing them, so each item is
+ * read as its own need, and bodyweight and mat, never needs, are dropped.
+ */
+internal object EquipmentNeedsSerializer : KSerializer<List<List<Equipment>>> {
+    private val needs = ListSerializer(ListSerializer(Equipment.serializer()))
+    override val descriptor = needs.descriptor
+
+    override fun serialize(encoder: Encoder, value: List<List<Equipment>>) = needs.serialize(encoder, value)
+
+    override fun deserialize(decoder: Decoder): List<List<Equipment>> {
+        val json = decoder as? JsonDecoder ?: return needs.deserialize(decoder)
+        return json.decodeJsonElement().jsonArray.mapNotNull { need ->
+            if (need is JsonArray) {
+                need.map { json.json.decodeFromJsonElement(Equipment.serializer(), it) }
+            } else {
+                json.json.decodeFromJsonElement(Equipment.serializer(), need)
+                    .takeIf { it != Equipment.BODYWEIGHT && it != Equipment.MAT }
+                    ?.let(::listOf)
+            }
+        }
+    }
+}
 
 /** Search-only names for an exercise, per language, like "RDL" or "abdos". */
 @Serializable

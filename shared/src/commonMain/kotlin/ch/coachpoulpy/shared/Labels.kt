@@ -72,6 +72,16 @@ internal class Labels(private val languageCode: String) {
         MovementPattern.STRETCH -> t("Stretch", "Étirement")
     }
 
+    fun measurement(mode: MeasurementMode) = when (mode) {
+        MeasurementMode.REPS -> t("Reps", "Répétitions")
+        MeasurementMode.TIME -> t("Timed", "Chronométré")
+        MeasurementMode.HOLD -> t("Hold", "Maintien")
+        MeasurementMode.DISTANCE -> t("Distance", "Distance")
+    }
+
+    /** "3 of 5". */
+    fun position(index: Int, count: Int) = t("$index of $count", "$index sur $count")
+
     fun workoutType(type: WorkoutType) = when (type) {
         WorkoutType.STRENGTH -> t("Strength", "Renforcement")
         WorkoutType.CONDITIONING -> t("Cardio circuit", "Circuit cardio")
@@ -110,12 +120,21 @@ internal class Labels(private val languageCode: String) {
     /** For a session whose workout was deleted before the history kept names. */
     val session get() = t("Workout", "Séance")
     val perSide get() = t("each side", "par côté")
+    val recentlyUsed get() = t("Recently used", "Utilisés récemment")
     val hold get() = t("Hold", "Maintien")
+    val orWord get() = t("or", "ou")
+    val andWord get() = t("and", "et")
     val timed get() = t("Timed", "Chronométré")
 
     fun exercises(count: Int) = if (count == 1) t("1 exercise", "1 exercice") else t("$count exercises", "$count exercices")
 
     fun matches(count: Int) = if (count == 1) t("1 match", "1 résultat") else t("$count matches", "$count résultats")
+
+    fun exercisesYouCanDo(count: Int) =
+        if (count == 1) t("1 exercise you can do", "1 exercice à votre portée") else t("$count exercises you can do", "$count exercices à votre portée")
+
+    fun matchesYouCanDo(count: Int) =
+        if (count == 1) t("1 match you can do", "1 résultat à votre portée") else t("$count matches you can do", "$count résultats à votre portée")
 
     fun aboutMinutes(minutes: Int) = t("about $minutes min", "environ $minutes min")
 

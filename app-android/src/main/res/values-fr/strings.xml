@@ -70,15 +70,29 @@
     <string name="exercises_nothing_for">Rien pour « %1$s »</string>
     <string name="exercises_nothing_hint">Essayez un seul mot, un muscle comme « fessiers » ou un matériel comme « haltères ».</string>
     <string name="exercises_no_fit">Aucun exercice ne correspond à ces filtres</string>
-    <string name="exercises_no_fit_hint">Essayez un autre muscle.</string>
+    <string name="exercises_no_fit_hint">Essayez un autre muscle, ou cochez plus de matériel.</string>
+    <string name="exercises_equipment">Matériel</string>
+    <string name="exercises_equipment_hint">Cochez ce que vous avez pour voir les exercices qui s’en servent.</string>
+    <string name="exercises_equipment_clear">Effacer</string>
+    <plurals name="exercises_equipment_ticked">
+        <item quantity="one">Matériel, %1$d coché</item>
+        <item quantity="other">Matériel, %1$d cochés</item>
+    </plurals>
+    <plurals name="exercises_equipment_show">
+        <item quantity="one">Voir %1$d exercice</item>
+        <item quantity="other">Voir %1$d exercices</item>
+    </plurals>
     <string name="exercises_clear_all">Effacer la recherche et les filtres</string>
     <string name="exercise_muscles">Muscles</string>
     <string name="exercise_equipment">Matériel</string>
     <string name="exercise_how">Comment faire</string>
-    <string name="exercise_per_side">Se fait un côté après l’autre.</string>
     <string name="exercise_variations">Variantes</string>
-    <string name="exercise_variations_hint">De la plus facile à la plus difficile.</string>
-    <string name="exercise_variation_current">Celle-ci</string>
+    <string name="exercise_variations_hint">La plus facile en haut, la plus difficile en bas.</string>
+    <string name="exercise_variation_current">Vous êtes ici</string>
+    <string name="exercise_variation_position">Variante %1$s</string>
+    <string name="exercise_variations_a11y">Variantes, %1$s, de la plus facile à la plus difficile</string>
+    <string name="exercise_add">Ajouter à une séance</string>
+    <string name="exercise_picture">Illustration de l’exercice</string>
 
     <string name="builder_new_title">Nouvelle séance</string>
     <string name="builder_edit_title">Modifier la séance</string>

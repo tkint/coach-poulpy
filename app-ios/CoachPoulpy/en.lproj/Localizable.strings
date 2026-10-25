@@ -54,15 +54,21 @@
 "exercises.nothing.for %@" = "Nothing for “%@”";
 "exercises.nothing.hint" = "Try one word, a muscle like “glutes”, or something you own like “dumbbell”.";
 "exercises.no.fit" = "No exercise fits these filters";
-"exercises.no.fit.hint" = "Try another muscle.";
+"exercises.no.fit.hint" = "Try another muscle, or tick more of what you have.";
+"exercises.equipment" = "Equipment";
+"exercises.equipment.hint" = "Tick what you have to list the exercises that use it.";
+"exercises.equipment.clear" = "Clear";
 "exercises.clear.all" = "Clear search and filters";
 "exercise.muscles" = "Muscles";
 "exercise.equipment" = "Equipment";
 "exercise.how" = "How to do it";
-"exercise.per.side" = "Done one side at a time.";
 "exercise.variations" = "Variations";
-"exercise.variations.hint" = "Easiest first, hardest last.";
-"exercise.variation.current" = "This one";
+"exercise.variations.hint" = "Easiest at the top, hardest at the bottom.";
+"exercise.variation.current" = "You’re here";
+"exercise.variation.position %@" = "Variation %@";
+"exercise.variations.a11y %@" = "Variations, %@, easiest first";
+"exercise.add" = "Add to a workout";
+"exercise.picture" = "Exercise picture";
 
 "builder.new.title" = "New workout";
 "builder.edit.title" = "Edit workout";

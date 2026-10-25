@@ -71,15 +71,29 @@
     <string name="exercises_nothing_for">Nothing for “%1$s”</string>
     <string name="exercises_nothing_hint">Try one word, a muscle like “glutes”, or something you own like “dumbbell”.</string>
     <string name="exercises_no_fit">No exercise fits these filters</string>
-    <string name="exercises_no_fit_hint">Try another muscle.</string>
+    <string name="exercises_no_fit_hint">Try another muscle, or tick more of what you have.</string>
+    <string name="exercises_equipment">Equipment</string>
+    <string name="exercises_equipment_hint">Tick what you have to list the exercises that use it.</string>
+    <string name="exercises_equipment_clear">Clear</string>
+    <plurals name="exercises_equipment_ticked">
+        <item quantity="one">Equipment, %1$d ticked</item>
+        <item quantity="other">Equipment, %1$d ticked</item>
+    </plurals>
+    <plurals name="exercises_equipment_show">
+        <item quantity="one">Show %1$d exercise</item>
+        <item quantity="other">Show %1$d exercises</item>
+    </plurals>
     <string name="exercises_clear_all">Clear search and filters</string>
     <string name="exercise_muscles">Muscles</string>
     <string name="exercise_equipment">Equipment</string>
     <string name="exercise_how">How to do it</string>
-    <string name="exercise_per_side">Done one side at a time.</string>
     <string name="exercise_variations">Variations</string>
-    <string name="exercise_variations_hint">Easiest first, hardest last.</string>
-    <string name="exercise_variation_current">This one</string>
+    <string name="exercise_variations_hint">Easiest at the top, hardest at the bottom.</string>
+    <string name="exercise_variation_current">You’re here</string>
+    <string name="exercise_variation_position">Variation %1$s</string>
+    <string name="exercise_variations_a11y">Variations, %1$s, easiest first</string>
+    <string name="exercise_add">Add to a workout</string>
+    <string name="exercise_picture">Exercise picture</string>
 
     <string name="builder_new_title">New workout</string>
     <string name="builder_edit_title">Edit workout</string>

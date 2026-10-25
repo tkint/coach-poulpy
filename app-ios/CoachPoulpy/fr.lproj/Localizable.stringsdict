@@ -114,5 +114,37 @@
             <string>%lld fois</string>
         </dict>
     </dict>
+    <key>exercises.equipment.ticked %lld</key>
+    <dict>
+        <key>NSStringLocalizedFormatKey</key>
+        <string>%#@count@</string>
+        <key>count</key>
+        <dict>
+            <key>NSStringFormatSpecTypeKey</key>
+            <string>NSStringPluralRuleType</string>
+            <key>NSStringFormatValueTypeKey</key>
+            <string>lld</string>
+            <key>one</key>
+            <string>Matériel, %lld coché</string>
+            <key>other</key>
+            <string>Matériel, %lld cochés</string>
+        </dict>
+    </dict>
+    <key>exercises.equipment.show %lld</key>
+    <dict>
+        <key>NSStringLocalizedFormatKey</key>
+        <string>%#@count@</string>
+        <key>count</key>
+        <dict>
+            <key>NSStringFormatSpecTypeKey</key>
+            <string>NSStringPluralRuleType</string>
+            <key>NSStringFormatValueTypeKey</key>
+            <string>lld</string>
+            <key>one</key>
+            <string>Voir %lld exercice</string>
+            <key>other</key>
+            <string>Voir %lld exercices</string>
+        </dict>
+    </dict>
 </dict>
 </plist>

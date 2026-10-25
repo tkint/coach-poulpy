@@ -54,15 +54,21 @@
 "exercises.nothing.for %@" = "Rien pour « %@ »";
 "exercises.nothing.hint" = "Essayez un seul mot, un muscle comme « fessiers » ou un matériel comme « haltères ».";
 "exercises.no.fit" = "Aucun exercice ne correspond à ces filtres";
-"exercises.no.fit.hint" = "Essayez un autre muscle.";
+"exercises.no.fit.hint" = "Essayez un autre muscle, ou cochez plus de matériel.";
+"exercises.equipment" = "Matériel";
+"exercises.equipment.hint" = "Cochez ce que vous avez pour voir les exercices qui s’en servent.";
+"exercises.equipment.clear" = "Effacer";
 "exercises.clear.all" = "Effacer la recherche et les filtres";
 "exercise.muscles" = "Muscles";
 "exercise.equipment" = "Matériel";
 "exercise.how" = "Comment faire";
-"exercise.per.side" = "Se fait un côté après l’autre.";
 "exercise.variations" = "Variantes";
-"exercise.variations.hint" = "De la plus facile à la plus difficile.";
-"exercise.variation.current" = "Celle-ci";
+"exercise.variations.hint" = "La plus facile en haut, la plus difficile en bas.";
+"exercise.variation.current" = "Vous êtes ici";
+"exercise.variation.position %@" = "Variante %@";
+"exercise.variations.a11y %@" = "Variantes, %@, de la plus facile à la plus difficile";
+"exercise.add" = "Ajouter à une séance";
+"exercise.picture" = "Illustration de l’exercice";
 
 "builder.new.title" = "Nouvelle séance";
 "builder.edit.title" = "Modifier la séance";

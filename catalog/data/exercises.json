@@ -1,13 +1,14 @@
 {
-  "version": 5,
+  "version": 7,
   "exercises": [
     {
       "slug": "goblet-squat",
       "name": { "en": "Goblet squat", "fr": "Squat gobelet" },
       "movementPattern": "SQUAT",
       "muscleGroups": ["QUADRICEPS", "GLUTES", "CORE"],
-      "equipment": ["DUMBBELL", "KETTLEBELL"],
+      "equipment": [["DUMBBELL", "KETTLEBELL"]],
       "measurement": "REPS",
+      "variationNote": { "en": "A weight held against your chest", "fr": "Une charge tenue contre la poitrine" },
       "instructions": [
         { "en": "Hold the weight against your chest, elbows down.", "fr": "Tenez la charge contre la poitrine, coudes vers le bas." },
         { "en": "Sit down between your heels, chest up, then stand.", "fr": "Descendez entre vos talons, buste droit, puis remontez." }
@@ -19,8 +20,8 @@
       "aliases": { "en": ["air squat"] },
       "movementPattern": "SQUAT",
       "muscleGroups": ["QUADRICEPS", "GLUTES"],
-      "equipment": ["BODYWEIGHT"],
       "measurement": "REPS",
+      "variationNote": { "en": "No support, thighs down to level", "fr": "Sans appui, cuisses jusqu’à l’horizontale" },
       "instructions": [
         { "en": "Stand with feet shoulder-width apart, toes slightly out.", "fr": "Pieds écartés à la largeur des épaules, pointes légèrement ouvertes." },
         { "en": "Push your hips back and bend your knees until your thighs are level with the floor.", "fr": "Poussez les hanches en arrière et pliez les genoux jusqu'à ce que les cuisses soient parallèles au sol." },
@@ -33,8 +34,8 @@
       "aliases": { "en": ["chair squat"], "fr": ["squat sur chaise"] },
       "movementPattern": "SQUAT",
       "muscleGroups": ["QUADRICEPS", "GLUTES"],
-      "equipment": ["BODYWEIGHT"],
       "measurement": "REPS",
+      "variationNote": { "en": "Sit down on a chair and stand back up", "fr": "On s’assoit sur une chaise et on se relève" },
       "instructions": [
         { "en": "Sit on the front half of a sturdy chair, feet flat.", "fr": "Asseyez-vous sur l'avant d'une chaise stable, pieds à plat." },
         { "en": "Lean forward slightly and stand up without using your hands.", "fr": "Penchez-vous légèrement en avant et levez-vous sans les mains." },
@@ -46,7 +47,6 @@
       "name": { "en": "Wall sit", "fr": "Chaise contre le mur" },
       "movementPattern": "SQUAT",
       "muscleGroups": ["QUADRICEPS", "GLUTES"],
-      "equipment": ["BODYWEIGHT"],
       "measurement": "HOLD",
       "instructions": [
         { "en": "Lean your back against a wall and slide down until your knees are bent at a right angle.", "fr": "Dos contre un mur, descendez jusqu'à ce que les genoux forment un angle droit." },
@@ -59,7 +59,7 @@
       "aliases": { "en": ["hip bridge"] },
       "movementPattern": "HINGE",
       "muscleGroups": ["GLUTES", "HAMSTRINGS"],
-      "equipment": ["MAT"],
+      "optionalEquipment": ["MAT"],
       "measurement": "REPS",
       "instructions": [
         { "en": "Lie on your back, knees bent, feet flat on the floor.", "fr": "Allongé sur le dos, genoux pliés, pieds à plat au sol." },
@@ -73,7 +73,7 @@
       "aliases": { "en": ["RDL"], "fr": ["RDL"] },
       "movementPattern": "HINGE",
       "muscleGroups": ["HAMSTRINGS", "GLUTES", "BACK"],
-      "equipment": ["DUMBBELL", "BARBELL"],
+      "equipment": [["DUMBBELL", "BARBELL"]],
       "measurement": "REPS",
       "instructions": [
         { "en": "Hold the weights in front of your thighs, knees soft.", "fr": "Tenez les charges devant les cuisses, genoux légèrement fléchis." },
@@ -86,7 +86,7 @@
       "name": { "en": "Kettlebell swing", "fr": "Swing kettlebell" },
       "movementPattern": "HINGE",
       "muscleGroups": ["GLUTES", "HAMSTRINGS", "CORE"],
-      "equipment": ["KETTLEBELL"],
+      "equipment": [["KETTLEBELL"]],
       "measurement": "REPS",
       "instructions": [
         { "en": "Hinge at the hips and hike the kettlebell back between your legs.", "fr": "Basculez le buste et lancez la kettlebell entre vos jambes." },
@@ -99,7 +99,7 @@
       "name": { "en": "Good morning", "fr": "Good morning" },
       "movementPattern": "HINGE",
       "muscleGroups": ["HAMSTRINGS", "BACK"],
-      "equipment": ["BODYWEIGHT", "BAND"],
+      "optionalEquipment": ["BAND"],
       "measurement": "REPS",
       "instructions": [
         { "en": "Stand with hands behind your head, knees soft.", "fr": "Debout, mains derrière la tête, genoux légèrement fléchis." },
@@ -112,7 +112,7 @@
       "name": { "en": "Reverse lunge", "fr": "Fente arrière" },
       "movementPattern": "LUNGE",
       "muscleGroups": ["QUADRICEPS", "GLUTES"],
-      "equipment": ["BODYWEIGHT", "DUMBBELL"],
+      "optionalEquipment": ["DUMBBELL"],
       "measurement": "REPS",
       "perSide": true,
       "instructions": [
@@ -125,7 +125,7 @@
       "name": { "en": "Walking lunge", "fr": "Fentes marchées" },
       "movementPattern": "LUNGE",
       "muscleGroups": ["QUADRICEPS", "GLUTES", "HAMSTRINGS"],
-      "equipment": ["BODYWEIGHT", "DUMBBELL"],
+      "optionalEquipment": ["DUMBBELL"],
       "measurement": "REPS",
       "instructions": [
         { "en": "Step forward into a lunge, back knee close to the floor.", "fr": "Faites un pas en avant en fente, genou arrière près du sol." },
@@ -137,7 +137,7 @@
       "name": { "en": "Step-up", "fr": "Montée sur banc" },
       "movementPattern": "LUNGE",
       "muscleGroups": ["QUADRICEPS", "GLUTES"],
-      "equipment": ["BENCH", "BODYWEIGHT"],
+      "equipment": [["BENCH"]],
       "measurement": "REPS",
       "perSide": true,
       "instructions": [
@@ -151,8 +151,8 @@
       "aliases": { "en": ["press-up"] },
       "movementPattern": "PUSH",
       "muscleGroups": ["CHEST", "TRICEPS", "SHOULDERS"],
-      "equipment": ["BODYWEIGHT"],
       "measurement": "REPS",
+      "variationNote": { "en": "The classic, on hands and toes", "fr": "La classique, sur les mains et les pointes" },
       "instructions": [
         { "en": "Hands under your shoulders, body straight from head to heels.", "fr": "Mains sous les épaules, corps aligné de la tête aux talons." },
         { "en": "Lower your chest to just above the floor, elbows at about 45 degrees.", "fr": "Descendez la poitrine près du sol, coudes à environ 45 degrés." },
@@ -165,8 +165,9 @@
       "aliases": { "en": ["press-up"] },
       "movementPattern": "PUSH",
       "muscleGroups": ["CHEST", "TRICEPS", "SHOULDERS"],
-      "equipment": ["MAT"],
+      "optionalEquipment": ["MAT"],
       "measurement": "REPS",
+      "variationNote": { "en": "Knees down, a shorter lever", "fr": "Genoux au sol, un levier plus court" },
       "instructions": [
         { "en": "Start on your hands and knees, body straight from head to knees.", "fr": "En appui sur les mains et les genoux, corps aligné de la tête aux genoux." },
         { "en": "Lower your chest towards the floor and push back up.", "fr": "Descendez la poitrine vers le sol puis remontez." }
@@ -178,8 +179,9 @@
       "aliases": { "en": ["press-up"] },
       "movementPattern": "PUSH",
       "muscleGroups": ["CHEST", "TRICEPS"],
-      "equipment": ["BENCH"],
+      "equipment": [["BENCH"]],
       "measurement": "REPS",
+      "variationNote": { "en": "Hands raised on a bench or wall", "fr": "Mains surélevées sur un banc ou un mur" },
       "instructions": [
         { "en": "Place your hands on a bench, table or wall, body straight.", "fr": "Mains sur un banc, une table ou un mur, corps gainé." },
         { "en": "Lower your chest to the edge and push away.", "fr": "Amenez la poitrine vers le bord puis repoussez." }
@@ -191,8 +193,8 @@
       "aliases": { "en": ["press-up"] },
       "movementPattern": "PUSH",
       "muscleGroups": ["TRICEPS", "CHEST", "SHOULDERS"],
-      "equipment": ["BODYWEIGHT"],
       "measurement": "REPS",
+      "variationNote": { "en": "Hands together, more triceps", "fr": "Mains jointes, plus de triceps" },
       "instructions": [
         { "en": "Place your hands under your chest, thumbs and index fingers touching in a diamond.", "fr": "Mains sous la poitrine, pouces et index qui se touchent en forme de diamant." },
         { "en": "Body straight from head to heels, lower your chest to your hands, elbows close to your sides.", "fr": "Corps aligné de la tête aux talons, descendez la poitrine vers les mains, coudes près du corps." },
@@ -205,9 +207,9 @@
       "aliases": { "en": ["press-up"] },
       "movementPattern": "PUSH",
       "muscleGroups": ["CHEST", "TRICEPS", "SHOULDERS", "CORE"],
-      "equipment": ["BODYWEIGHT"],
       "measurement": "REPS",
       "perSide": true,
+      "variationNote": { "en": "One hand behind your back", "fr": "Une main dans le dos" },
       "instructions": [
         { "en": "Feet wider than your hips, one hand under your shoulder and the other behind your back.", "fr": "Pieds plus écartés que les hanches, une main sous l'épaule et l'autre dans le dos." },
         { "en": "Keep your hips square to the floor and lower your chest towards your hand.", "fr": "Gardez les hanches face au sol et descendez la poitrine vers la main." },
@@ -219,7 +221,7 @@
       "name": { "en": "Dumbbell bench press", "fr": "Développé couché haltères" },
       "movementPattern": "PUSH",
       "muscleGroups": ["CHEST", "TRICEPS", "SHOULDERS"],
-      "equipment": ["DUMBBELL", "BENCH"],
+      "equipment": [["DUMBBELL"], ["BENCH"]],
       "measurement": "REPS",
       "instructions": [
         { "en": "Lie on a bench with a dumbbell in each hand above your chest.", "fr": "Allongé sur un banc, un haltère dans chaque main au-dessus de la poitrine." },
@@ -232,7 +234,7 @@
       "aliases": { "en": ["shoulder press"] },
       "movementPattern": "PUSH",
       "muscleGroups": ["SHOULDERS", "TRICEPS"],
-      "equipment": ["DUMBBELL"],
+      "equipment": [["DUMBBELL"]],
       "measurement": "REPS",
       "instructions": [
         { "en": "Hold the dumbbells at shoulder height, core tight.", "fr": "Haltères à hauteur d'épaules, abdominaux serrés." },
@@ -244,7 +246,7 @@
       "name": { "en": "Bench dip", "fr": "Dips sur banc" },
       "movementPattern": "PUSH",
       "muscleGroups": ["TRICEPS", "CHEST"],
-      "equipment": ["BENCH"],
+      "equipment": [["BENCH"]],
       "measurement": "REPS",
       "instructions": [
         { "en": "Sit on the edge of a bench, hands beside your hips, then slide off.", "fr": "Assis au bord d'un banc, mains à côté des hanches, avancez le bassin dans le vide." },
@@ -256,7 +258,8 @@
       "name": { "en": "One-arm dumbbell row", "fr": "Rowing haltère à un bras" },
       "movementPattern": "PULL",
       "muscleGroups": ["BACK", "BICEPS"],
-      "equipment": ["DUMBBELL", "BENCH"],
+      "equipment": [["DUMBBELL"]],
+      "optionalEquipment": ["BENCH"],
       "measurement": "REPS",
       "perSide": true,
       "instructions": [
@@ -269,7 +272,7 @@
       "name": { "en": "Band row", "fr": "Tirage élastique" },
       "movementPattern": "PULL",
       "muscleGroups": ["BACK", "BICEPS"],
-      "equipment": ["BAND"],
+      "equipment": [["BAND"]],
       "measurement": "REPS",
       "instructions": [
         { "en": "Anchor the band at chest height and hold one end in each hand.", "fr": "Fixez l'élastique à hauteur de poitrine, une extrémité dans chaque main." },
@@ -281,7 +284,7 @@
       "name": { "en": "Band pull-apart", "fr": "Écartés élastique" },
       "movementPattern": "PULL",
       "muscleGroups": ["SHOULDERS", "BACK"],
-      "equipment": ["BAND"],
+      "equipment": [["BAND"]],
       "measurement": "REPS",
       "instructions": [
         { "en": "Hold a band in front of you at shoulder height, arms straight.", "fr": "Tenez l'élastique devant vous à hauteur d'épaules, bras tendus." },
@@ -294,7 +297,7 @@
       "aliases": { "en": ["chin-up"] },
       "movementPattern": "PULL",
       "muscleGroups": ["BACK", "BICEPS"],
-      "equipment": ["PULL_UP_BAR"],
+      "equipment": [["PULL_UP_BAR"]],
       "measurement": "REPS",
       "instructions": [
         { "en": "Hang from the bar, hands a bit wider than your shoulders.", "fr": "Suspendu à la barre, mains un peu plus larges que les épaules." },
@@ -306,7 +309,7 @@
       "name": { "en": "Dumbbell biceps curl", "fr": "Curl biceps haltères" },
       "movementPattern": "PULL",
       "muscleGroups": ["BICEPS", "FOREARMS"],
-      "equipment": ["DUMBBELL", "BAND"],
+      "equipment": [["DUMBBELL", "BAND"]],
       "measurement": "REPS",
       "instructions": [
         { "en": "Stand with the weights at your sides, palms forward.", "fr": "Debout, charges le long du corps, paumes vers l'avant." },
@@ -319,7 +322,7 @@
       "aliases": { "en": ["farmer walk"] },
       "movementPattern": "CARRY",
       "muscleGroups": ["FOREARMS", "CORE", "SHOULDERS"],
-      "equipment": ["DUMBBELL", "KETTLEBELL"],
+      "equipment": [["DUMBBELL", "KETTLEBELL"]],
       "measurement": "TIME",
       "instructions": [
         { "en": "Pick up a heavy weight in each hand.", "fr": "Prenez une charge lourde dans chaque main." },
@@ -332,7 +335,7 @@
       "aliases": { "en": ["abs"], "fr": ["abdos"] },
       "movementPattern": "CORE",
       "muscleGroups": ["CORE"],
-      "equipment": ["MAT"],
+      "optionalEquipment": ["MAT"],
       "measurement": "HOLD",
       "instructions": [
         { "en": "Rest on your forearms and toes, elbows under your shoulders.", "fr": "En appui sur les avant-bras et les orteils, coudes sous les épaules." },
@@ -345,7 +348,7 @@
       "aliases": { "en": ["abs"], "fr": ["abdos"] },
       "movementPattern": "CORE",
       "muscleGroups": ["CORE", "HIPS"],
-      "equipment": ["MAT"],
+      "optionalEquipment": ["MAT"],
       "measurement": "HOLD",
       "perSide": true,
       "instructions": [
@@ -359,7 +362,7 @@
       "aliases": { "en": ["abs"], "fr": ["abdos"] },
       "movementPattern": "CORE",
       "muscleGroups": ["CORE"],
-      "equipment": ["MAT"],
+      "optionalEquipment": ["MAT"],
       "measurement": "REPS",
       "instructions": [
         { "en": "Lie on your back, arms up, knees bent above your hips.", "fr": "Sur le dos, bras tendus vers le plafond, genoux pliés au-dessus des hanches." },
@@ -373,7 +376,7 @@
       "aliases": { "en": ["abs"], "fr": ["abdos"] },
       "movementPattern": "CORE",
       "muscleGroups": ["CORE", "BACK", "GLUTES"],
-      "equipment": ["MAT"],
+      "optionalEquipment": ["MAT"],
       "measurement": "REPS",
       "perSide": true,
       "instructions": [
@@ -387,7 +390,7 @@
       "aliases": { "en": ["abs", "sit-up"], "fr": ["abdos"] },
       "movementPattern": "CORE",
       "muscleGroups": ["CORE"],
-      "equipment": ["MAT"],
+      "optionalEquipment": ["MAT"],
       "measurement": "REPS",
       "instructions": [
         { "en": "Lie on your back, knees bent, hands across your chest.", "fr": "Sur le dos, genoux pliés, mains croisées sur la poitrine." },
@@ -400,7 +403,7 @@
       "aliases": { "en": ["abs"], "fr": ["abdos"] },
       "movementPattern": "CORE",
       "muscleGroups": ["CORE"],
-      "equipment": ["MAT"],
+      "optionalEquipment": ["MAT"],
       "measurement": "HOLD",
       "instructions": [
         { "en": "Lie on your back and press your lower back into the floor.", "fr": "Sur le dos, plaquez le bas du dos au sol." },
@@ -413,7 +416,7 @@
       "aliases": { "en": ["abs"], "fr": ["abdos"] },
       "movementPattern": "ROTATION",
       "muscleGroups": ["CORE"],
-      "equipment": ["MAT", "DUMBBELL"],
+      "optionalEquipment": ["MAT", "DUMBBELL"],
       "measurement": "REPS",
       "instructions": [
         { "en": "Sit with knees bent and lean back slightly, chest up.", "fr": "Assis, genoux pliés, penchez-vous légèrement en arrière, buste droit." },
@@ -425,7 +428,6 @@
       "name": { "en": "Jumping jacks", "fr": "Jumping jacks" },
       "movementPattern": "LOCOMOTION",
       "muscleGroups": ["FULL_BODY"],
-      "equipment": ["BODYWEIGHT"],
       "measurement": "TIME",
       "instructions": [
         { "en": "Jump your feet apart while raising your arms overhead.", "fr": "Sautez en écartant les pieds et levez les bras au-dessus de la tête." },
@@ -437,7 +439,6 @@
       "name": { "en": "High knees", "fr": "Montées de genoux" },
       "movementPattern": "LOCOMOTION",
       "muscleGroups": ["FULL_BODY", "HIPS"],
-      "equipment": ["BODYWEIGHT"],
       "measurement": "TIME",
       "instructions": [
         { "en": "Run on the spot, bringing your knees up to hip height.", "fr": "Courez sur place en montant les genoux à hauteur de hanches." },
@@ -449,7 +450,6 @@
       "name": { "en": "Mountain climbers", "fr": "Mountain climbers" },
       "movementPattern": "LOCOMOTION",
       "muscleGroups": ["CORE", "SHOULDERS", "FULL_BODY"],
-      "equipment": ["BODYWEIGHT"],
       "measurement": "TIME",
       "instructions": [
         { "en": "Start in a high plank.", "fr": "Partez en planche bras tendus." },
@@ -461,7 +461,6 @@
       "name": { "en": "Burpee", "fr": "Burpee" },
       "movementPattern": "LOCOMOTION",
       "muscleGroups": ["FULL_BODY"],
-      "equipment": ["BODYWEIGHT"],
       "measurement": "REPS",
       "instructions": [
         { "en": "Squat down and place your hands on the floor.", "fr": "Accroupissez-vous et posez les mains au sol." },
@@ -474,7 +473,6 @@
       "name": { "en": "Skater jumps", "fr": "Sauts du patineur" },
       "movementPattern": "LOCOMOTION",
       "muscleGroups": ["GLUTES", "QUADRICEPS", "FULL_BODY"],
-      "equipment": ["BODYWEIGHT"],
       "measurement": "TIME",
       "instructions": [
         { "en": "Leap sideways onto one foot, bringing the other behind you.", "fr": "Sautez latéralement sur un pied, l'autre jambe passe derrière." },
@@ -486,7 +484,6 @@
       "name": { "en": "Jump rope", "fr": "Corde à sauter" },
       "movementPattern": "LOCOMOTION",
       "muscleGroups": ["CALVES", "FULL_BODY"],
-      "equipment": ["BODYWEIGHT"],
       "measurement": "TIME",
       "instructions": [
         { "en": "Turn the rope with your wrists and make small jumps.", "fr": "Faites tourner la corde avec les poignets et faites de petits sauts." },
@@ -499,8 +496,8 @@
       "aliases": { "en": ["assisted walk", "walker", "cane", "crutches"], "fr": ["marche assistée", "déambulateur", "canne", "béquilles"] },
       "movementPattern": "LOCOMOTION",
       "muscleGroups": ["FULL_BODY"],
-      "equipment": ["BODYWEIGHT"],
       "measurement": "TIME",
+      "variationNote": { "en": "With a walking aid or something to hold", "fr": "Avec une aide à la marche ou un appui" },
       "instructions": [
         { "en": "Use the walking aid your care team gave you, or walk along a wall, a rail or a counter.", "fr": "Utilisez l'aide à la marche conseillée par vos soignants, ou marchez le long d'un mur, d'une rampe ou d'un plan de travail." },
         { "en": "Take small steps at your own pace. A few steps already count.", "fr": "Faites de petits pas, à votre rythme. Quelques pas comptent déjà." },
@@ -513,8 +510,8 @@
       "aliases": { "en": ["slow walk", "easy walk", "stroll"], "fr": ["marche lente", "promenade"] },
       "movementPattern": "LOCOMOTION",
       "muscleGroups": ["FULL_BODY"],
-      "equipment": ["BODYWEIGHT"],
       "measurement": "TIME",
+      "variationNote": { "en": "Slow and short, at your own pace", "fr": "Lente et courte, à votre rythme" },
       "instructions": [
         { "en": "Walk slowly on flat ground, indoors or outside, standing tall.", "fr": "Marchez lentement sur un sol plat, à l'intérieur ou dehors, en vous tenant droit." },
         { "en": "Keep a pace where you breathe easily. A minute or two is a good start.", "fr": "Gardez une allure où vous respirez facilement. Une minute ou deux, c'est un bon début." },
@@ -526,8 +523,9 @@
       "name": { "en": "Brisk walk", "fr": "Marche rapide" },
       "movementPattern": "LOCOMOTION",
       "muscleGroups": ["FULL_BODY"],
-      "equipment": ["BODYWEIGHT", "TREADMILL"],
+      "optionalEquipment": ["TREADMILL"],
       "measurement": "TIME",
+      "variationNote": { "en": "Faster, you can talk but not sing", "fr": "Plus rapide, on peut parler mais pas chanter" },
       "instructions": [
         { "en": "Walk at a pace where you can talk but not sing.", "fr": "Marchez à une allure où vous pouvez parler mais pas chanter." }
       ]
@@ -538,7 +536,7 @@
       "aliases": { "en": ["jog", "jogging"], "fr": ["footing", "jogging"] },
       "movementPattern": "LOCOMOTION",
       "muscleGroups": ["FULL_BODY", "CALVES"],
-      "equipment": ["BODYWEIGHT", "TREADMILL"],
+      "optionalEquipment": ["TREADMILL"],
       "measurement": "TIME",
       "instructions": [
         { "en": "Run at a relaxed pace where you could hold a conversation.", "fr": "Courez à une allure détendue qui permet de discuter." }
@@ -549,7 +547,7 @@
       "name": { "en": "Calf raise", "fr": "Montée sur pointes" },
       "movementPattern": "SQUAT",
       "muscleGroups": ["CALVES"],
-      "equipment": ["BODYWEIGHT", "DUMBBELL"],
+      "optionalEquipment": ["DUMBBELL"],
       "measurement": "REPS",
       "instructions": [
         { "en": "Stand tall, holding a wall for balance if needed.", "fr": "Debout, tenez un mur pour l'équilibre si besoin." },
@@ -561,7 +559,7 @@
       "name": { "en": "Cat-cow", "fr": "Chat-vache" },
       "movementPattern": "MOBILITY",
       "muscleGroups": ["BACK", "CORE"],
-      "equipment": ["MAT"],
+      "optionalEquipment": ["MAT"],
       "measurement": "REPS",
       "instructions": [
         { "en": "Start on hands and knees.", "fr": "À quatre pattes." },
@@ -574,7 +572,7 @@
       "name": { "en": "Clamshell", "fr": "Clamshell (ouverture de hanche)" },
       "movementPattern": "MOBILITY",
       "muscleGroups": ["GLUTES", "HIPS"],
-      "equipment": ["MAT", "BAND"],
+      "optionalEquipment": ["MAT", "BAND"],
       "measurement": "REPS",
       "perSide": true,
       "instructions": [
@@ -587,7 +585,6 @@
       "name": { "en": "Arm circles", "fr": "Cercles de bras" },
       "movementPattern": "MOBILITY",
       "muscleGroups": ["SHOULDERS"],
-      "equipment": ["BODYWEIGHT"],
       "measurement": "TIME",
       "instructions": [
         { "en": "Hold your arms out to the sides.", "fr": "Bras tendus sur les côtés." },
@@ -599,7 +596,6 @@
       "name": { "en": "Hip circles", "fr": "Cercles de hanches" },
       "movementPattern": "MOBILITY",
       "muscleGroups": ["HIPS"],
-      "equipment": ["BODYWEIGHT"],
       "measurement": "TIME",
       "instructions": [
         { "en": "Stand with hands on your hips.", "fr": "Debout, mains sur les hanches." },
@@ -611,7 +607,7 @@
       "name": { "en": "World's greatest stretch", "fr": "Étirement complet en fente" },
       "movementPattern": "MOBILITY",
       "muscleGroups": ["HIPS", "BACK", "HAMSTRINGS"],
-      "equipment": ["MAT"],
+      "optionalEquipment": ["MAT"],
       "measurement": "REPS",
       "perSide": true,
       "instructions": [
@@ -625,7 +621,7 @@
       "name": { "en": "Kneeling hip flexor stretch", "fr": "Étirement des fléchisseurs de hanche à genou" },
       "movementPattern": "STRETCH",
       "muscleGroups": ["HIPS", "QUADRICEPS"],
-      "equipment": ["MAT"],
+      "optionalEquipment": ["MAT"],
       "measurement": "HOLD",
       "perSide": true,
       "instructions": [
@@ -638,7 +634,6 @@
       "name": { "en": "Standing hamstring stretch", "fr": "Étirement des ischio-jambiers debout" },
       "movementPattern": "STRETCH",
       "muscleGroups": ["HAMSTRINGS"],
-      "equipment": ["BODYWEIGHT"],
       "measurement": "HOLD",
       "perSide": true,
       "instructions": [
@@ -651,7 +646,6 @@
       "name": { "en": "Standing quad stretch", "fr": "Étirement des quadriceps debout" },
       "movementPattern": "STRETCH",
       "muscleGroups": ["QUADRICEPS"],
-      "equipment": ["BODYWEIGHT"],
       "measurement": "HOLD",
       "perSide": true,
       "instructions": [
@@ -664,7 +658,7 @@
       "name": { "en": "Child's pose", "fr": "Posture de l'enfant" },
       "movementPattern": "STRETCH",
       "muscleGroups": ["BACK", "HIPS"],
-      "equipment": ["MAT"],
+      "optionalEquipment": ["MAT"],
       "measurement": "HOLD",
       "instructions": [
         { "en": "Kneel, sit back on your heels and fold forward.", "fr": "À genoux, asseyez-vous sur les talons et penchez-vous en avant." },
@@ -676,7 +670,6 @@
       "name": { "en": "Doorway chest stretch", "fr": "Étirement des pectoraux contre un cadre de porte" },
       "movementPattern": "STRETCH",
       "muscleGroups": ["CHEST", "SHOULDERS"],
-      "equipment": ["BODYWEIGHT"],
       "measurement": "HOLD",
       "perSide": true,
       "instructions": [
@@ -689,7 +682,6 @@
       "name": { "en": "Neck side stretch", "fr": "Étirement latéral du cou" },
       "movementPattern": "STRETCH",
       "muscleGroups": ["NECK"],
-      "equipment": ["BODYWEIGHT"],
       "measurement": "HOLD",
       "perSide": true,
       "instructions": [
