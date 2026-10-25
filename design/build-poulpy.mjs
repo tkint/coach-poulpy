@@ -8,7 +8,12 @@
 //   design/poulpy/<name>.svg                                    reference copy
 //   app-android/src/main/res/drawable/poulpy_<name>.xml         Android vector drawable
 //   app-ios/CoachPoulpy/Assets.xcassets/Poulpy/<Name>.imageset  iOS vector asset
+// and the app icon, from the brand book's icon (happy blue Poulpy on Foam), as:
+//   design/poulpy/app_icon*.svg                                 reference copies
+//   app-android/src/main/res/drawable/ic_launcher_*.xml         adaptive icon layers, with a themed (monochrome) layer
+//   app-ios/CoachPoulpy/Assets.xcassets/AppIcon.appiconset      1024 px PNGs: light, dark and tinted
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs'
+import { deflateSync, inflateSync } from 'node:zlib'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -159,6 +164,32 @@ const DRAWINGS = [
   { name: 'loader_small', svg: loader(10), view: LOADER_VIEW },
 ]
 
+// The app icon, as the brand book draws it: Poulpy scaled into a 200 square on Foam, or Deep sea in the dark.
+const ICON_VIEW = { x: 0, y: 0, width: 200, height: 200 }
+const FOAM = tokens.color.neutral['50'], DEEP_SEA = tokens.theme.dark.background
+const ICON_POULPY = body(BLUE) + FACES.happy
+const icon = (bg) => `<rect x="0" y="0" width="200" height="200" fill="${bg}"/><g transform="translate(14 24) scale(.86)">${ICON_POULPY}</g>`
+
+// Android draws the adaptive icon on a 108 dp layer and only promises the 66 dp circle in the middle, so
+// Poulpy is centred and scaled until his farthest arm sits on that circle. The themed icon is one colour
+// whose alpha is the drawing: the body as one lighter silhouette, the eyes and smile at full strength.
+const LAUNCHER_VIEW = { x: 0, y: 0, width: 108, height: 108 }
+const POULPY_BOX = { x0: 1, y0: 30, x1: 199, y1: 167 }
+function launcherFrame() {
+  const cx = (POULPY_BOX.x0 + POULPY_BOX.x1) / 2, cy = (POULPY_BOX.y0 + POULPY_BOX.y1) / 2
+  let reach = 0
+  for (const poly of flatten(normalise(parse(ICON_POULPY)), [1, 0, 0, 1, 0, 0]).flatMap((shape) => shape.polys)) {
+    for (const [x, y] of poly) reach = Math.max(reach, Math.hypot(x - cx, y - cy))
+  }
+  const k = Math.floor((33 / reach) * 1000) / 1000
+  return `translate(${fmt(54 - cx * k)} ${fmt(54 - cy * k)}) scale(${k})`
+}
+const HEAD_CCW = 'M163 130 C167 68 136 30 100 30 C64 30 33 68 37 130 Z'
+const ARM_XS = [[26, 126, 25, 17], [62, 139, 24, 18], [100, 143, 24, 18], [138, 139, 24, 18], [174, 126, 25, 17]]
+const silhouette = () => [6, 0].flatMap((dy) => ARM_XS.map((a) => ellipsePath(a[0], a[1] + dy, a[2], a[3]))).concat(HEAD_CCW).join(' ')
+const monochrome = () => `<path d="${silhouette()}" fill="#000" opacity=".5"/>` +
+  `<ellipse cx="80" cy="96" rx="9" ry="10.5" fill="#000"/><ellipse cx="120" cy="96" rx="9" ry="10.5" fill="#000"/>` + s('M90 112 Q100 123 110 112', 4.5, '#000')
+
 function snake(name) { return name.replace(/[A-Z]/g, (c) => '_' + c.toLowerCase()) }
 function pascalOf(name) { return name.split('_').map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join('') }
 
@@ -267,6 +298,175 @@ function normalise(node) {
 }
 
 // ---------------------------------------------------------------------------
+// Rasterising, for the iOS app icon, which has to be a PNG. Plain JavaScript, so the pixels are the same
+// on every machine: paths are flattened into polygons, then 4 x 4 samples per pixel are filled (non-zero
+// rule) or stroked (round caps and joins) and blended in order.
+
+const mul = (m, n) => [m[0] * n[0] + m[2] * n[1], m[1] * n[0] + m[3] * n[1], m[0] * n[2] + m[2] * n[3], m[1] * n[2] + m[3] * n[3], m[0] * n[4] + m[2] * n[5] + m[4], m[1] * n[4] + m[3] * n[5] + m[5]]
+function matrixOf(t) {
+  const [a, b = 0, c = 0] = t.args
+  if (t.op === 'translate') return [1, 0, 0, 1, a, b]
+  if (t.op === 'scale') return [a, 0, 0, t.args[1] ?? a, 0, 0]
+  const r = (a * Math.PI) / 180, cos = Math.cos(r), sin = Math.sin(r)
+  return mul(mul([1, 0, 0, 1, b, c], [cos, sin, -sin, cos, 0, 0]), [1, 0, 0, 1, -b, -c])
+}
+
+// Turns path data into polygons (one per subpath), in the path's own units.
+function polygons(d) {
+  const tokens = d.match(/[a-zA-Z]|-?(?:\d+\.?\d*|\.\d+)(?:e-?\d+)?/g)
+  const polys = []
+  let i = 0, cmd = '', x = 0, y = 0, sx = 0, sy = 0, poly = null
+  const num = () => +tokens[i++]
+  const to = (px, py) => { poly.push([px, py]); x = px; y = py }
+  while (i < tokens.length) {
+    if (/[a-zA-Z]/.test(tokens[i])) cmd = tokens[i++]
+    const rel = cmd === cmd.toLowerCase(), ox = rel ? x : 0, oy = rel ? y : 0
+    switch (cmd.toUpperCase()) {
+      case 'M': poly = []; polys.push(poly); to(ox + num(), oy + num()); sx = x; sy = y; cmd = rel ? 'l' : 'L'; break
+      case 'L': to(ox + num(), oy + num()); break
+      case 'H': to(ox + num(), y); break
+      case 'V': to(x, oy + num()); break
+      case 'Q': case 'C': {
+        const pts = [[x, y]]
+        for (let n = cmd.toUpperCase() === 'Q' ? 2 : 3; n > 0; n--) pts.push([ox + num(), oy + num()])
+        for (let k = 1; k <= 24; k++) {
+          const t = k / 24, u = 1 - t
+          const w = pts.length === 3 ? [u * u, 2 * u * t, t * t] : [u * u * u, 3 * u * u * t, 3 * u * t * t, t * t * t]
+          poly.push([w.reduce((a, wi, j) => a + wi * pts[j][0], 0), w.reduce((a, wi, j) => a + wi * pts[j][1], 0)])
+        }
+        ;[x, y] = pts[pts.length - 1]
+        break
+      }
+      case 'A': {
+        const rx = num(), ry = num(); num(); const large = num(), sweep = num(), ex = ox + num(), ey = oy + num()
+        // Endpoint to centre form (no rotation is used in the drawings).
+        const hx = (x - ex) / 2, hy = (y - ey) / 2
+        const f = Math.sqrt(Math.max(0, (rx * rx * ry * ry - rx * rx * hy * hy - ry * ry * hx * hx) / (rx * rx * hy * hy + ry * ry * hx * hx))) * (large === sweep ? -1 : 1)
+        const cx = f * ((rx * hy) / ry) + (x + ex) / 2, cy = f * (-(ry * hx) / rx) + (y + ey) / 2
+        const a0 = Math.atan2((y - cy) / ry, (x - cx) / rx)
+        let da = Math.atan2((ey - cy) / ry, (ex - cx) / rx) - a0
+        if (sweep && da < 0) da += 2 * Math.PI
+        if (!sweep && da > 0) da -= 2 * Math.PI
+        for (let k = 1; k <= 48; k++) poly.push([cx + rx * Math.cos(a0 + (da * k) / 48), cy + ry * Math.sin(a0 + (da * k) / 48)])
+        x = ex; y = ey
+        break
+      }
+      case 'Z': poly.closed = true; x = sx; y = sy; break
+      default: throw new Error(`Unsupported path command ${cmd}`)
+    }
+  }
+  return polys
+}
+
+// The tree as a list of shapes in drawing order, each with its polygons placed by the matrix m.
+function flatten(n, m) {
+  if (n.group) {
+    const inner = (n.transforms || []).reduce((acc, t) => mul(acc, matrixOf(t)), m)
+    return n.children.flatMap((c) => flatten(c, inner))
+  }
+  const place = ([px, py]) => [m[0] * px + m[2] * py + m[4], m[1] * px + m[3] * py + m[5]]
+  const polys = polygons(n.d).map((p) => Object.assign(p.map(place), { closed: p.closed }))
+  return [{ ...n, polys, scale: Math.sqrt(Math.abs(m[0] * m[3] - m[1] * m[2])) }]
+}
+
+const SS = 4
+const rgb = (c) => [1, 3, 5].map((i) => parseInt(c.slice(i, i + 2), 16))
+
+function rasterise(tree, VIEW, size) {
+  const k = size / VIEW.width, N = size * SS
+  const canvas = new Float64Array(size * size * 3)
+  const paint = (mask, x0, y0, w, h, colour, alpha) => {
+    const cov = new Float64Array(size * size)
+    for (let sy = 0; sy < h; sy++) for (let sx = 0; sx < w; sx++) if (mask[sy * w + sx]) cov[((y0 + sy) >> 2) * size + ((x0 + sx) >> 2)] += 1 / (SS * SS)
+    const c = rgb(colour)
+    for (let p = 0; p < cov.length; p++) {
+      if (!cov[p]) continue
+      const a = cov[p] * alpha
+      for (let j = 0; j < 3; j++) canvas[p * 3 + j] = canvas[p * 3 + j] * (1 - a) + c[j] * a
+    }
+  }
+  for (const shape of flatten(tree, [k * SS, 0, 0, k * SS, -VIEW.x * k * SS, -VIEW.y * k * SS])) {
+    const pts = shape.polys.flat(), hw = shape.stroke ? (+shape.strokeWidth * shape.scale) / 2 : 0
+    const x0 = Math.max(0, Math.floor(Math.min(...pts.map((p) => p[0])) - hw)), x1 = Math.min(N, Math.ceil(Math.max(...pts.map((p) => p[0])) + hw) + 1)
+    const y0 = Math.max(0, Math.floor(Math.min(...pts.map((p) => p[1])) - hw)), y1 = Math.min(N, Math.ceil(Math.max(...pts.map((p) => p[1])) + hw) + 1)
+    const w = x1 - x0, h = y1 - y0
+    if (shape.fill) {
+      const mask = new Uint8Array(w * h), edges = []
+      for (const poly of shape.polys) for (let e = 0; e < poly.length; e++) edges.push([poly[e], poly[(e + 1) % poly.length]])
+      for (let sy = 0; sy < h; sy++) {
+        const yc = y0 + sy + 0.5, xs = []
+        for (const [p, q] of edges) {
+          if (p[1] === q[1] || yc < Math.min(p[1], q[1]) || yc >= Math.max(p[1], q[1])) continue
+          xs.push([p[0] + ((yc - p[1]) / (q[1] - p[1])) * (q[0] - p[0]), q[1] > p[1] ? 1 : -1])
+        }
+        xs.sort((a, b) => a[0] - b[0])
+        let wind = 0
+        for (let j = 0; j < xs.length - 1; j++) {
+          wind += xs[j][1]
+          if (!wind) continue
+          for (let sx = Math.max(0, Math.ceil(xs[j][0] - 0.5) - x0); sx < Math.min(w, Math.ceil(xs[j + 1][0] - 0.5) - x0); sx++) mask[sy * w + sx] = 1
+        }
+      }
+      paint(mask, x0, y0, w, h, shape.fill, shape.fillAlpha ?? 1)
+    }
+    if (shape.stroke) {
+      const mask = new Uint8Array(w * h)
+      for (const poly of shape.polys) {
+        const segs = poly.closed ? poly.concat([poly[0]]) : poly
+        for (let e = 0; e < segs.length - 1; e++) {
+          const [ax, ay] = segs[e], [bx, by] = segs[e + 1], dx = bx - ax, dy = by - ay, len = dx * dx + dy * dy
+          for (let py = Math.max(y0, Math.floor(Math.min(ay, by) - hw)); py < Math.min(y1, Math.ceil(Math.max(ay, by) + hw)); py++) {
+            for (let px = Math.max(x0, Math.floor(Math.min(ax, bx) - hw)); px < Math.min(x1, Math.ceil(Math.max(ax, bx) + hw)); px++) {
+              const cx = px + 0.5, cy = py + 0.5, t = len ? Math.max(0, Math.min(1, ((cx - ax) * dx + (cy - ay) * dy) / len)) : 0
+              const ex = cx - ax - t * dx, ey = cy - ay - t * dy
+              if (ex * ex + ey * ey <= hw * hw) mask[(py - y0) * w + (px - x0)] = 1
+            }
+          }
+        }
+      }
+      paint(mask, x0, y0, w, h, shape.stroke, shape.strokeAlpha ?? 1)
+    }
+  }
+  return Uint8Array.from(canvas, (v) => Math.round(v))
+}
+
+const grey = (pixels) => {
+  const out = new Uint8Array(pixels.length)
+  for (let p = 0; p < pixels.length; p += 3) out[p] = out[p + 1] = out[p + 2] = Math.round(0.2126 * pixels[p] + 0.7152 * pixels[p + 1] + 0.0722 * pixels[p + 2])
+  return out
+}
+
+// An opaque RGB PNG, every row unfiltered, so a check can read the pixels back without a decoder.
+const CRC = Array.from({ length: 256 }, (_, n) => { for (let j = 0; j < 8; j++) n = n & 1 ? 0xedb88320 ^ (n >>> 1) : n >>> 1; return n >>> 0 })
+const crc32 = (buf) => { let c = 0xffffffff; for (const b of buf) c = CRC[(c ^ b) & 0xff] ^ (c >>> 8); return (c ^ 0xffffffff) >>> 0 }
+function chunk(type, data) {
+  const out = Buffer.alloc(12 + data.length)
+  out.writeUInt32BE(data.length, 0); out.write(type, 4, 'latin1'); data.copy(out, 8)
+  out.writeUInt32BE(crc32(out.subarray(4, 8 + data.length)), 8 + data.length)
+  return out
+}
+function pngOut(pixels, size) {
+  const rows = Buffer.alloc(size * (size * 3 + 1))
+  for (let y = 0; y < size; y++) Buffer.from(pixels.buffer, y * size * 3, size * 3).copy(rows, y * (size * 3 + 1) + 1)
+  const head = Buffer.alloc(13)
+  head.writeUInt32BE(size, 0); head.writeUInt32BE(size, 4); head[8] = 8; head[9] = 2
+  return Buffer.concat([Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), chunk('IHDR', head), chunk('IDAT', deflateSync(rows, { level: 9 })), chunk('IEND', Buffer.alloc(0))])
+}
+// The unfiltered rows of a PNG written by pngOut, or null for any other PNG.
+function pngRows(buf) {
+  const data = []
+  let head = null
+  for (let at = 8; at + 8 <= buf.length;) {
+    const len = buf.readUInt32BE(at), type = buf.toString('latin1', at + 4, at + 8)
+    if (type === 'IHDR') head = buf.subarray(at + 8, at + 8 + len)
+    if (type === 'IDAT') data.push(buf.subarray(at + 8, at + 8 + len))
+    at += 12 + len
+  }
+  if (!head || head[8] !== 8 || head[9] !== 2 || head[12] !== 0) return null
+  try { return inflateSync(Buffer.concat(data)) } catch { return null }
+}
+
+// ---------------------------------------------------------------------------
 // Writers
 
 function svgOut(tree, VIEW) {
@@ -359,12 +559,53 @@ for (const drawing of DRAWINGS) {
   files[`app-ios/CoachPoulpy/Assets.xcassets/Poulpy/${asset}.imageset/Contents.json`] = imagesetContents(`${asset}.svg`)
 }
 
+const ICON_SIZE = 1024
+const lightIcon = normalise(parse(icon(FOAM))), darkIcon = normalise(parse(icon(DEEP_SEA)))
+files['design/poulpy/app_icon.svg'] = svgOut(lightIcon, ICON_VIEW)
+files['design/poulpy/app_icon_dark.svg'] = svgOut(darkIcon, ICON_VIEW)
+const frame = launcherFrame()
+files['app-android/src/main/res/drawable/ic_launcher_background.xml'] = vectorOut(normalise(parse(`<rect x="0" y="0" width="108" height="108" fill="${FOAM}"/>`)), LAUNCHER_VIEW)
+files['app-android/src/main/res/drawable/ic_launcher_foreground.xml'] = vectorOut(normalise(parse(`<g transform="${frame}">${ICON_POULPY}</g>`)), LAUNCHER_VIEW)
+files['app-android/src/main/res/drawable/ic_launcher_monochrome.xml'] = vectorOut(normalise(parse(`<g transform="${frame}">${monochrome()}</g>`)), LAUNCHER_VIEW)
+files['app-android/src/main/res/mipmap-anydpi-v26/ic_launcher.xml'] = [
+  '<?xml version="1.0" encoding="utf-8"?>',
+  `<!-- ${banner} -->`,
+  '<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">',
+  '    <background android:drawable="@drawable/ic_launcher_background" />',
+  '    <foreground android:drawable="@drawable/ic_launcher_foreground" />',
+  '    <monochrome android:drawable="@drawable/ic_launcher_monochrome" />',
+  '</adaptive-icon>',
+  '',
+].join('\n')
+const darkPixels = rasterise(darkIcon, ICON_VIEW, ICON_SIZE)
+const ICONSET = 'app-ios/CoachPoulpy/Assets.xcassets/AppIcon.appiconset'
+files[`${ICONSET}/AppIcon.png`] = pngOut(rasterise(lightIcon, ICON_VIEW, ICON_SIZE), ICON_SIZE)
+files[`${ICONSET}/AppIconDark.png`] = pngOut(darkPixels, ICON_SIZE)
+files[`${ICONSET}/AppIconTinted.png`] = pngOut(grey(darkPixels), ICON_SIZE)
+const appearance = (value) => ({ appearances: [{ appearance: 'luminosity', value }] })
+files[`${ICONSET}/Contents.json`] = JSON.stringify({
+  images: [
+    { filename: 'AppIcon.png', idiom: 'universal', platform: 'ios', size: '1024x1024' },
+    { ...appearance('dark'), filename: 'AppIconDark.png', idiom: 'universal', platform: 'ios', size: '1024x1024' },
+    { ...appearance('tinted'), filename: 'AppIconTinted.png', idiom: 'universal', platform: 'ios', size: '1024x1024' },
+  ],
+  info: { author: 'xcode', version: 1 },
+}, null, 2) + '\n'
+
+// A PNG is up to date when its pixels match, give or take rounding, whatever compressed them.
+function upToDate(full, content) {
+  if (!existsSync(full)) return false
+  if (typeof content === 'string') return readFileSync(full, 'utf8') === content
+  const want = pngRows(content), have = pngRows(readFileSync(full))
+  return !!have && have.length === want.length && have.every((b, i) => Math.abs(b - want[i]) <= 2)
+}
+
 const check = process.argv.includes('--check')
 let stale = 0
 for (const [path, content] of Object.entries(files)) {
   const full = join(root, path)
   if (check) {
-    if (!existsSync(full) || readFileSync(full, 'utf8') !== content) { console.error(`Out of date: ${path}`); stale++ }
+    if (!upToDate(full, content)) { console.error(`Out of date: ${path}`); stale++ }
   } else {
     mkdirSync(dirname(full), { recursive: true })
     writeFileSync(full, content)
