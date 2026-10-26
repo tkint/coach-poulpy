@@ -7,8 +7,7 @@ English is the source language (ADR 0014). Every other language translates from 
 - **Ids** are `<group>.<camelCaseName>`: the group is the screen or area (`library.sortPlanned`, `muscle.chest`). Catalog ids are `<slug>.<field>`, with `<slug>.instructions.<n>` for each instruction in order. No id is the prefix of another.
 - **Placeholders** are named ICU arguments. `{name}` is text, `{count, number}` is a whole number. Keep every placeholder of the English, with the same name; move it wherever the sentence needs it.
 - **Plurals** are ICU `plural`: `{count, plural, one {# session} other {# sessions}}`. `#` is the number. Give every form your language needs (French: `one`, `many`, `other`); Fink lists them.
-- **Apostrophes** are typographic (’), never the straight ' . A straight apostrophe can turn into an ICU escape next to a brace.
-- **Ellipsis** is one character (…), never three dots.
+- **Apostrophes, ellipses and spaces** need no care: type ' and ... as usual. `i18n/typography.mjs` turns them into ’ and …, and adds the non-breaking spaces a language needs (French: before `: ; ! ? %` and inside « »). It runs on `main` after every merge (`.github/workflows/i18n-typography.yml`), so a Fink pull request needs nothing more.
 - **Product names** stay as they are: Coach Poulpy, Poulpy.
 
 ## Namespaces
