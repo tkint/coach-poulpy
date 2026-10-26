@@ -258,7 +258,7 @@ class LiveModel(
         /** "Keep going" was answered to Stop on the console; asked again only once the belt has moved. */
         var stopAnswered = false
 
-        /** Stop was pressed on the console since the last resume: restarting the belt starts a new step. */
+        /** Stop was pressed on the console, or the treadmill switched off, since the last resume: restarting the belt starts a new step. */
         var stoppedOnConsole = false
         var prompt: Prompt? = null
 
@@ -334,6 +334,8 @@ class LiveModel(
             }
         } else if (current.hadTreadmill && current.lostSince == null) {
             current.lostSince = clock.now()
+            // Switched off, then on again: another run, like after a Stop.
+            current.stoppedOnConsole = true
             val running = current.session.state(clock.now()).status == SessionState.Status.RUNNING
             if (_state.value.followTreadmill && running) {
                 pausedByBelt = true
