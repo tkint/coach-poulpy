@@ -34,6 +34,13 @@ jobs:
           fi
           echo "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/poulpy.jks"
           echo "POULPY_KEYSTORE_FILE=$RUNNER_TEMP/poulpy.jks" >> "$GITHUB_ENV"
+      - name: Number the build
+        # Minutes since 2026-01-01, so a build made later always has a higher version than one made
+        # earlier, even across branches; Android refuses to install a lower version over a higher one.
+        run: |
+          code=$(( ($(date +%s) - 1767225600) / 60 ))
+          echo "POULPY_VERSION_CODE=$code" >> "$GITHUB_ENV"
+          echo "Android version code: **$code**" >> "$GITHUB_STEP_SUMMARY"
       - name: Build Android APK
         env:
           POULPY_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
