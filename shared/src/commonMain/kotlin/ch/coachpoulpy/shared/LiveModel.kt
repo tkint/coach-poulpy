@@ -302,7 +302,10 @@ class LiveModel(
         recording?.let(::followConnection)
     }
 
-    /** Notes when the treadmill of the recording goes away and comes back. */
+    /**
+     * Notes when the treadmill of the recording goes away and comes back. Following the treadmill, a treadmill
+     * switched off pauses the recording like a halted belt, and it resumes once the belt moves again.
+     */
     private fun followConnection(current: Recording) {
         if (devices.hasTreadmill) {
             current.hadTreadmill = true
@@ -312,6 +315,11 @@ class LiveModel(
             }
         } else if (current.hadTreadmill && current.lostSince == null) {
             current.lostSince = clock.now()
+            val running = current.session.state(clock.now()).status == SessionState.Status.RUNNING
+            if (_state.value.followTreadmill && running) {
+                pausedByBelt = true
+                persist(current, current.session.pause(clock.now()))
+            }
         }
         refreshRecording(current)
     }

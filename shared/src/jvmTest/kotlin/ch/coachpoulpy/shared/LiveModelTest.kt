@@ -540,6 +540,24 @@ class LiveModelTest {
     }
 
     @Test
+    fun aTreadmillSwitchedOffPausesTheRecordingWhenFollowing() = runTest {
+        val central = FakeCentral()
+        val m = models(central, LocalStore(DriverFactory()))
+        addTreadmill(m)
+        central.treadmill.send(speedCentiKmh = 800, meters = 0, bpm = 120)
+        runCurrent()
+        m.live.startRecording("exercise:run")
+        advanceTimeBy(60.seconds)
+        m.devices.disconnect("AA:BB")
+        runCurrent()
+        assertEquals(true, m.live.state.value.recording?.paused)
+        advanceTimeBy(30.seconds)
+        runCurrent()
+        // The timer stopped with the treadmill.
+        assertEquals(60L, m.live.state.value.recording?.elapsedSeconds)
+    }
+
+    @Test
     fun aTreadmillGoneForTwoMinutesAsksEvenWithFollowOff() = runTest {
         val central = FakeCentral()
         val m = models(central, LocalStore(DriverFactory()))
