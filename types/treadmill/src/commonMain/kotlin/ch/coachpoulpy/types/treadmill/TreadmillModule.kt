@@ -19,7 +19,7 @@ import kotlin.time.Duration
  */
 object TreadmillModule : WorkoutTypeModule {
     override val type = WorkoutType.TREADMILL
-    override val acceptedTargets = setOf(Target.Time::class, Target.Distance::class)
+    override val acceptedTargets = setOf(Target.Time::class, Target.Distance::class, Target.Open::class)
 
     override fun completionRule(set: SetPrescription): CompletionRule =
         if (set.target is Target.Time) CompletionRule.Timer else CompletionRule.Manual

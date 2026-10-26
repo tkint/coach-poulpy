@@ -6,6 +6,8 @@ import ch.coachpoulpy.core.model.MeasurementMode
 import ch.coachpoulpy.core.model.MovementPattern
 import ch.coachpoulpy.core.model.MuscleGroup
 import ch.coachpoulpy.core.model.Side
+import ch.coachpoulpy.core.model.StepRole
+import ch.coachpoulpy.core.model.Target
 import ch.coachpoulpy.core.model.WorkoutType
 
 /**
@@ -166,19 +168,21 @@ internal class Labels(private val languageCode: String) {
         return "${seconds / 3600} h" + if (minutes > 0) " ${minutes.toString().padStart(2, '0')}" else ""
     }
 
-    /** One exercise's plan in a line: "3 × 10 each side · 14 kg · rest 60 s", or "5.0 km · 6:00 /km" for a walk or a run. */
-    fun prescription(entry: DraftEntry): String {
+    /**
+     * One exercise's plan in a line: "3 × 10 each side · 14 kg · rest 60 s", or "5.0 km · 6:00 /km"
+     * and "5:30 /km · until button press" for a walk or a run; [last] says "until the end" instead.
+     */
+    fun prescription(entry: DraftEntry, last: Boolean = false): String {
         if (entry.walkOrRun) {
+            val pace = entry.speedKmh?.let { TargetInput.paceLabel(it, entry.paceUnit) }
+            val rest = entry.restSeconds.takeIf { it > 0 }?.let(::restAfter)
+            if (entry.open) return listOfNotNull(pace, until(last).lowercase(), rest).joinToString(" · ")
             val main = if (entry.measurement == MeasurementMode.DISTANCE) {
                 TargetInput.distanceLabel(entry.amount.toDouble(), entry.distanceUnit)
             } else {
                 longDuration(entry.amount)
             }
-            return listOfNotNull(
-                main,
-                entry.speedKmh?.let { TargetInput.paceLabel(it, entry.paceUnit) },
-                entry.restSeconds.takeIf { it > 0 }?.let(::restAfter),
-            ).joinToString(" · ")
+            return listOfNotNull(main, pace, rest).joinToString(" · ")
         }
         val amount = when (entry.measurement) {
             MeasurementMode.REPS -> entry.amount.toString()
@@ -195,6 +199,28 @@ internal class Labels(private val languageCode: String) {
 
     val halfMarathon get() = t("Half marathon", "Semi-marathon")
     val marathon get() = t("Marathon", "Marathon")
+
+    /** "Until button press", or "Until the end" on the last step, where the press finishes the session. */
+    fun until(last: Boolean) = if (last) t("Until the end", "Jusqu’à la fin") else t("Until button press", "Jusqu’à l’appui")
+
+    /** What a phase asks for in the player: "10 reps", "30 s", "400 m", or "Until you tap Next". */
+    fun target(target: Target) = if (target is Target.Open) t("Until you tap Next", "Jusqu’à « Suivant »") else amount(target.measurement, target.amount)
+
+    /** The tag on a step; null for plain exercise steps, which have none. */
+    fun role(role: StepRole) = when (role) {
+        StepRole.WARM_UP -> t("Warm-up", "Échauffement")
+        StepRole.WORK -> null
+        StepRole.RECOVER -> t("Recover", "Récupération")
+        StepRole.COOL_DOWN -> t("Cool down", "Retour au calme")
+    }
+
+    /** The name of a role in the step select, Exercise included. */
+    fun roleName(role: StepRole) = role(role) ?: t("Exercise", "Exercice")
+
+    fun times(count: Int) = t("$count times", "$count fois")
+
+    /** "Round 2 of 4", inside a repeat. */
+    fun round(round: Int, rounds: Int) = t("Round $round of $rounds", "Tour $round sur $rounds")
 
     fun restAfter(seconds: Int) = t("rest ${duration(seconds)}", "repos ${duration(seconds)}")
 }

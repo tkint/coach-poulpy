@@ -100,7 +100,8 @@ class BuilderModelTest {
         builder.setType(WorkoutType.TREADMILL)
         builder.add("walk")
         val row = builder.state.value.rows.single()
-        assertEquals(TargetKind.DURATION, row.target?.kind)
+        assertEquals(DurationKind.TIME, row.target?.duration)
+        assertEquals(IntensityKind.FREE, row.target?.intensity)
         assertEquals("20 min", row.summary)
         assertTrue(row.fitsType)
 
@@ -118,7 +119,8 @@ class BuilderModelTest {
         builder.add("run")
         val key = builder.state.value.rows.single().key
 
-        builder.setTarget(key, TargetKind.DISTANCE_PACE)
+        builder.setDurationKind(key, DurationKind.DISTANCE)
+        builder.setIntensityKind(key, IntensityKind.PACE)
         var target = builder.state.value.rows.single().target!!
         assertEquals("5.0 km", target.distanceLabel)
         assertEquals("6:00 /km", target.paceLabel)
@@ -138,7 +140,8 @@ class BuilderModelTest {
         assertEquals(12.0, (set.intensity as ch.coachpoulpy.core.model.Intensity.Speed).kmh, 0.001)
 
         target = graph.editWorkout(id, "en")!!.state.value.rows.single().target!!
-        assertEquals(TargetKind.DISTANCE_PACE, target.kind)
+        assertEquals(DurationKind.DISTANCE, target.duration)
+        assertEquals(IntensityKind.PACE, target.intensity)
         assertEquals("10.2", target.distanceText)
         assertEquals("5:00", target.paceText)
     }
@@ -148,12 +151,13 @@ class BuilderModelTest {
         val builder = graph.createWorkout("en")
         builder.add("brisk-walk")
         val key = builder.state.value.rows.single().key
-        builder.setTarget(key, TargetKind.DURATION_PACE)
+        builder.setIntensityKind(key, IntensityKind.PACE)
         assertEquals("10:00", builder.state.value.rows.single().target!!.paceText)
         assertEquals("6.0", builder.setPaceUnit(key, PaceUnit.KMH, "10:00"))
         assertEquals("6.0 km/h", builder.state.value.rows.single().target!!.paceLabel)
 
-        builder.setTarget(key, TargetKind.DISTANCE)
+        builder.setDurationKind(key, DurationKind.DISTANCE)
+        builder.setIntensityKind(key, IntensityKind.FREE)
         assertNull(builder.state.value.rows.single().target!!.speedKmh)
         assertEquals("2000", builder.setDistanceUnit(key, DistanceUnit.M, "2"))
         assertEquals("1.0", builder.setDistanceUnit(key, DistanceUnit.MI, "1609"))
@@ -169,7 +173,7 @@ class BuilderModelTest {
         assertTrue(builder.state.value.canSave)
 
         val key = builder.state.value.rows.first().key
-        builder.setTarget(key, TargetKind.DISTANCE)
+        builder.setDurationKind(key, DurationKind.DISTANCE)
         builder.setType(WorkoutType.STRENGTH)
         assertFalse(builder.state.value.rows.first().fitsType)
         builder.setType(WorkoutType.CONDITIONING)

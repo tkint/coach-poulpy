@@ -35,12 +35,20 @@ A versioned tree of steps of one workout type, ready to be done.
 _Avoid_: Routine, program, training
 
 **Step**:
-One node of a workout's tree: an exercise with its prescription, a group, or a rest.
+One node of a workout's tree: an exercise with its prescription, a group, or a rest. An exercise step has a role: warm-up, exercise, recover or cool down; a rest is a recover step with no exercise.
 _Avoid_: Item, block
 
 **Group**:
-A step holding other steps: a sequence, superset, circuit or interval set with rounds.
+A step holding other steps: a sequence, superset, circuit or interval set with rounds. The builder calls the group it makes a **Repeat**: steps done a number of times, one level deep.
 _Avoid_: Block, round (a round is one pass through a group)
+
+**Repeat**:
+The builder's name for a group: "Repeat 4 times" around a run and a walk. It holds exercises and rests, never another repeat.
+_Avoid_: Loop, set (a set belongs to one exercise's prescription)
+
+**Until button press**:
+A walk or run's duration with no set amount: the step ends when the person taps Next. On the last step it reads **until the end**, and the tap finishes the session.
+_Avoid_: Lap, open-ended
 
 **Prescription**:
 What an exercise step asks for: its sets, and per set a target, load, intensity, tempo and the rest after it.

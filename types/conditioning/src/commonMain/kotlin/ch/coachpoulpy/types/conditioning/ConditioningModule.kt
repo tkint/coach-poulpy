@@ -12,8 +12,8 @@ import ch.coachpoulpy.core.model.WorkoutType
  */
 object ConditioningModule : WorkoutTypeModule {
     override val type = WorkoutType.CONDITIONING
-    override val acceptedTargets = setOf(Target.Time::class, Target.Hold::class, Target.Reps::class)
+    override val acceptedTargets = setOf(Target.Time::class, Target.Hold::class, Target.Reps::class, Target.Open::class)
 
     override fun completionRule(set: SetPrescription): CompletionRule =
-        if (set.target is Target.Reps || set.target is Target.Distance) CompletionRule.Manual else CompletionRule.Timer
+        if (set.target is Target.Reps || set.target is Target.Distance || set.target is Target.Open) CompletionRule.Manual else CompletionRule.Timer
 }

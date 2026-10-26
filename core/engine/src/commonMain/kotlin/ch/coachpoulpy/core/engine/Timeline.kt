@@ -5,6 +5,7 @@ import ch.coachpoulpy.core.model.Intensity
 import ch.coachpoulpy.core.model.Side
 import ch.coachpoulpy.core.model.Step
 import ch.coachpoulpy.core.model.StepId
+import ch.coachpoulpy.core.model.StepRole
 import ch.coachpoulpy.core.model.Target
 import ch.coachpoulpy.core.model.Workout
 import kotlin.time.Duration
@@ -27,6 +28,9 @@ sealed interface Phase {
         override val duration: Duration?,
         /** The prescribed effort, such as a treadmill speed, checked against what a connected machine reports. */
         val intensity: Intensity? = null,
+        val role: StepRole = StepRole.WORK,
+        /** How many rounds the repeat holding this step runs; 1 outside a repeat. */
+        val rounds: Int = 1,
     ) : Phase
 
     data class Rest(override val duration: Duration) : Phase
@@ -38,11 +42,11 @@ class TimelineCompiler(private val registry: WorkoutTypeRegistry) {
     fun compile(workout: Workout): Timeline {
         val module = registry[workout.type]
         val phases = mutableListOf<Phase>()
-        workout.steps.forEach { phases.addStep(it, module, round = 1) }
+        workout.steps.forEach { phases.addStep(it, module, round = 1, rounds = 1) }
         return Timeline(phases.dropLastWhile { it is Phase.Rest })
     }
 
-    private fun MutableList<Phase>.addStep(step: Step, module: WorkoutTypeModule, round: Int) {
+    private fun MutableList<Phase>.addStep(step: Step, module: WorkoutTypeModule, round: Int, rounds: Int) {
         when (step) {
             is Step.Rest -> addRest(step.duration)
             is Step.ExerciseStep -> step.prescription.sets.forEachIndexed { index, set ->
@@ -58,12 +62,14 @@ class TimelineCompiler(private val registry: WorkoutTypeRegistry) {
                         completion = completion,
                         duration = if (completion == CompletionRule.Timer) set.target.duration() else null,
                         intensity = set.intensity,
+                        role = step.role,
+                        rounds = rounds,
                     ),
                 )
                 addRest(set.restAfter)
             }
             is Step.Group -> for (r in 1..step.rounds) {
-                step.children.forEach { addStep(it, module, round = r) }
+                step.children.forEach { addStep(it, module, round = r, rounds = step.rounds) }
                 if (r < step.rounds) addRest(step.restBetweenRounds)
             }
         }
@@ -76,6 +82,6 @@ class TimelineCompiler(private val registry: WorkoutTypeRegistry) {
     private fun Target.duration(): Duration? = when (this) {
         is Target.Time -> duration
         is Target.Hold -> duration
-        is Target.Reps, is Target.Distance -> null
+        is Target.Reps, is Target.Distance, Target.Open -> null
     }
 }
