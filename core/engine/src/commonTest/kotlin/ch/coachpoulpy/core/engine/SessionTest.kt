@@ -6,6 +6,7 @@ import ch.coachpoulpy.core.model.StepId
 import ch.coachpoulpy.core.model.Target
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
 
@@ -60,5 +61,27 @@ class SessionTest {
 
         val replayed = Session(timeline, session.events)
         assertEquals(session.state(t0 + 100.seconds), replayed.state(t0 + 100.seconds))
+    }
+
+    @Test
+    fun anOpenEndedTimelineGrowsAStepAtATimeUntilFinished() {
+        val free = Timeline(listOf(work(Target.Time(Duration.INFINITE), CompletionRule.Manual)), openEnded = true)
+        val session = Session(free)
+        session.start(t0)
+        session.pause(t0 + 60.seconds)
+        session.completeCurrent(t0 + 70.seconds)
+        session.resume(t0 + 90.seconds)
+
+        // The step ended during the pause: the new one counts from the resume, without the rest.
+        val state = session.state(t0 + 120.seconds)
+        assertEquals(SessionState.Status.RUNNING, state.status)
+        assertEquals(1, state.phaseIndex)
+        assertEquals(30.seconds, state.phaseElapsed)
+        assertEquals(2, free.covering(session.events).phases.size)
+
+        session.completeCurrent(t0 + 150.seconds)
+        session.finish(t0 + 150.seconds)
+        assertEquals(SessionState.Status.FINISHED, session.state(t0 + 150.seconds).status)
+        assertEquals(2, free.covering(session.events).phases.size)
     }
 }

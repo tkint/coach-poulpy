@@ -77,7 +77,7 @@ class Session(val timeline: Timeline, events: List<SessionEvent> = emptyList()) 
 
     private fun record(event: SessionEvent): List<SessionEvent> {
         log += event
-        if (event !is SessionEvent.Finished && state(event.at).phaseIndex >= timeline.phases.size) {
+        if (event !is SessionEvent.Finished && timeline.phaseAt(state(event.at).phaseIndex) == null) {
             log += SessionEvent.Finished(event.at)
             return listOf(event, log.last())
         }
@@ -103,12 +103,14 @@ class Session(val timeline: Timeline, events: List<SessionEvent> = emptyList()) 
                 index++
                 phaseStart = event.at
                 pausedTotal = Duration.ZERO
+                // Ended during a pause: the new phase's share of the pause starts here.
+                if (pausedAt != null) pausedAt = event.at
             }
             is SessionEvent.Finished -> status = SessionState.Status.FINISHED
             is SessionEvent.Sample -> Unit
         }
 
-        val phase = timeline.phases.getOrNull(index)
+        val phase = timeline.phaseAt(index)
         val elapsed = when (val start = phaseStart) {
             null -> Duration.ZERO
             else -> ((pausedAt ?: now) - start - pausedTotal).coerceAtLeast(Duration.ZERO)
@@ -116,4 +118,14 @@ class Session(val timeline: Timeline, events: List<SessionEvent> = emptyList()) 
         val remaining = phase?.duration?.let { (it - elapsed).coerceAtLeast(Duration.ZERO) }
         return SessionState(status, index, phase.takeIf { status != SessionState.Status.FINISHED }, elapsed, remaining)
     }
+}
+
+/**
+ * The phases [events] went through: an open-ended timeline grows by one phase per step ended,
+ * plus the one still running.
+ */
+fun Timeline.covering(events: List<SessionEvent>): Timeline {
+    val ended = events.count { it is SessionEvent.PhaseCompleted || it is SessionEvent.PhaseSkipped }
+    val running = if (events.any { it is SessionEvent.Finished }) 0 else 1
+    return grownTo(ended + running)
 }

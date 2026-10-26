@@ -405,6 +405,9 @@ class LiveModelTest {
         runCurrent()
         assertEquals(false, m.live.state.value.recording?.paused)
         assertNull(m.live.state.value.finishPrompt)
+        // Restarting after a Stop is another run: a new step. The console pause stayed in the first.
+        assertEquals(listOf(60L), m.live.state.value.recording?.steps?.map { it.durationSeconds })
+        assertEquals(0L, m.live.state.value.recording?.stepElapsedSeconds)
 
         // With no answer, it finishes on its own, ending when Stop was pressed.
         advanceTimeBy(60.seconds)
@@ -414,6 +417,43 @@ class LiveModelTest {
         advanceTimeBy(10.minutes + 1.seconds)
         assertNull(m.live.state.value.recording)
         assertEquals(120L, m.live.state.value.summary?.durationSeconds)
+        assertEquals(listOf(60L, 60L), m.live.state.value.summary?.phases?.map { it.durationSeconds })
+    }
+
+    @Test
+    fun endingAStepWhilePausedStartsTheNextOneAfterARest() = runTest {
+        val central = FakeCentral()
+        val m = models(central, LocalStore(DriverFactory()))
+        addTreadmill(m)
+        central.treadmill.send(speedCentiKmh = 800, meters = 0, bpm = 120)
+        runCurrent()
+        m.live.startRecording("exercise:run")
+        advanceTimeBy(60.seconds)
+        m.live.pauseRecording()
+        advanceTimeBy(30.seconds)
+        m.live.endStep()
+        advanceTimeBy(15.seconds)
+
+        val resting = assertNotNull(m.live.state.value.recording)
+        assertEquals(listOf(60L), resting.steps.map { it.durationSeconds })
+        assertEquals(45L, resting.restSeconds)
+        assertEquals(0L, resting.stepElapsedSeconds)
+        m.live.endStep() // twice does not add an empty step
+        assertEquals(1, m.live.state.value.recording?.steps?.size)
+
+        m.live.resumeRecording()
+        advanceTimeBy(40.seconds)
+        val running = assertNotNull(m.live.state.value.recording)
+        assertNull(running.restSeconds)
+        assertEquals(40L, running.stepElapsedSeconds)
+        assertEquals(100L, running.elapsedSeconds)
+        assertEquals(45L, running.steps.single().restAfterSeconds)
+
+        m.live.stopRecording()
+        val summary = assertNotNull(m.live.state.value.summary)
+        assertEquals(100L, summary.durationSeconds)
+        assertEquals(listOf(60L, 40L), summary.phases.map { it.durationSeconds })
+        assertEquals(listOf(45L, null), summary.phases.map { it.restAfterSeconds })
     }
 
     @Test

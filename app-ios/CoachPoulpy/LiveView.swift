@@ -36,19 +36,32 @@ struct LiveView: View {
                         } else {
                             Text("live.waiting").foregroundStyle(PoulpyColor.onSurfaceVariant)
                         }
-                        // Added devices still connecting: the view shows read-only, with Poulpy where the controls go.
+                        if let recording = state.recording, !recording.steps.isEmpty || recording.restSeconds != nil {
+                            sessionSteps(recording)
+                        }
+                    }
+                }
+                .padding(.horizontal, 20)
+                .padding(.vertical, PoulpySpace.md)
+            }
+            // The numbers and the steps scroll; the finish question and the recorder stay whole at the bottom.
+            .safeAreaInset(edge: .bottom) {
+                if !(state.connection == .empty && state.recording == nil) {
+                    VStack(spacing: 10) {
                         if let prompt = state.finishPrompt {
                             finishCard(prompt)
                         }
+                        // Added devices still connecting: the view shows read-only, with Poulpy where the controls go.
                         if isConnecting {
                             connecting
                         } else {
                             recorder
                         }
                     }
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 8)
+                    .background(PoulpyColor.background)
                 }
-                .padding(.horizontal, 20)
-                .padding(.vertical, PoulpySpace.md)
             }
             .background(PoulpyColor.background)
             .navigationTitle("tab.live")
@@ -267,15 +280,30 @@ struct LiveView: View {
         let statusColor = recording.paused ? PoulpyColor.grumpy : PoulpyColor.error
         return VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 6) {
-                Text(clock(recording.elapsedSeconds))
-                    .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 32, relativeTo: .title).monospacedDigit())
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("live.session.time")
+                        .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 13, relativeTo: .caption))
+                        .foregroundStyle(PoulpyColor.onSurfaceVariant)
+                    Text(clock(recording.elapsedSeconds))
+                        .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 32, relativeTo: .title).monospacedDigit())
+                }
                 Spacer()
                 Circle().fill(statusColor).frame(width: 8, height: 8)
                 Text(LocalizedStringKey(recording.paused ? "treadmill.paused" : "live.recording"))
                     .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 15, relativeTo: .subheadline))
                     .foregroundStyle(statusColor)
             }
-            if !recording.freeRun {
+            if recording.freeRun {
+                // The step under way, or the rest after ending one.
+                Group {
+                    if let rest = recording.restSeconds {
+                        Text("\(L("treadmill.rest")) · \(clock(rest.int64Value))")
+                    } else {
+                        Text("\(L("live.step", Int64(recording.phaseNumber))) · \(clock(recording.stepElapsedSeconds))")
+                    }
+                }
+                .font(.poulpy(.subheadline).weight(.bold).monospacedDigit())
+            } else {
                 HStack(alignment: .firstTextBaseline) {
                     Text(phaseLine(recording)).font(.poulpy(.subheadline))
                     Spacer()
@@ -284,21 +312,29 @@ struct LiveView: View {
                     }
                 }
             }
-            // Recording: only Pause (and Skip in a workout). Paused: Resume or Finish.
-            HStack(spacing: 8) {
-                if recording.paused {
+            // Recording: only Pause (and Skip in a workout). Paused: Resume, End step or Finish.
+            if recording.paused {
+                HStack(spacing: 8) {
                     Button { model.resumeRecording() } label: {
                         Label("treadmill.resume", systemImage: "play.fill")
                             .font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: 40)
                     }
                     .buttonStyle(.bordered)
                     .buttonBorderShape(.capsule)
-                    Button { model.stopRecording() } label: {
-                        Text("treadmill.stop").font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: 40)
+                    Button { model.endStep() } label: {
+                        Text("live.end.step").font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: 40)
                     }
-                    .buttonStyle(.borderedProminent)
+                    .buttonStyle(.bordered)
                     .buttonBorderShape(.capsule)
-                } else {
+                    .disabled(recording.restSeconds != nil)
+                }
+                Button { model.stopRecording() } label: {
+                    Text("treadmill.stop").font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: 40)
+                }
+                .buttonStyle(.borderedProminent)
+                .buttonBorderShape(.capsule)
+            } else {
+                HStack(spacing: 8) {
                     Button { model.pauseRecording() } label: {
                         Label("treadmill.pause", systemImage: "pause.fill")
                             .font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: 40)
@@ -315,6 +351,44 @@ struct LiveView: View {
                 }
             }
         }
+    }
+
+    /// The steps done so far in this session, each with its own time, and the rest between them.
+    private func sessionSteps(_ recording: RecordingUi) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(L("live.steps.title").uppercased())
+                .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 13, relativeTo: .caption))
+                .tracking(1)
+                .foregroundStyle(PoulpyColor.onSurfaceVariant)
+                .accessibilityAddTraits(.isHeader)
+            ForEach(recording.steps, id: \.phaseNumber) { step in
+                stepLine(stepTitle(step), stepParts(step, units: state.units))
+                if let rest = step.restAfterSeconds?.int64Value, rest > 0 {
+                    stepLine(L("treadmill.rest"), clock(rest), muted: true)
+                }
+            }
+            if let rest = recording.restSeconds {
+                stepLine(L("treadmill.rest"), clock(rest.int64Value), muted: true, current: true)
+            } else {
+                stepLine(L("live.step", Int64(recording.phaseNumber)), clock(recording.stepElapsedSeconds), current: true)
+            }
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 20))
+        .overlay(RoundedRectangle(cornerRadius: 20).stroke(PoulpyColor.outline))
+    }
+
+    private func stepLine(_ title: String, _ detail: String, muted: Bool = false, current: Bool = false) -> some View {
+        HStack(spacing: 8) {
+            Circle().fill(current ? PoulpyColor.primary : Color.clear).frame(width: 8, height: 8)
+            Text(title).font(.poulpy(.subheadline).weight(current ? .heavy : .bold))
+            Spacer()
+            Text(detail).font(.poulpy(.subheadline).monospacedDigit())
+        }
+        .foregroundStyle(muted ? PoulpyColor.onSurfaceVariant : PoulpyColor.onSurface)
+        .accessibilityElement(children: .combine)
     }
 
     private func phaseLine(_ recording: RecordingUi) -> String {
@@ -485,12 +559,24 @@ private struct SummarySheet: View {
     }
 
     private func phaseLine(_ phase: PhaseResultUi) -> String {
-        var parts = [clock(phase.durationSeconds)]
-        if let s = phase.averageSpeedKmh { parts.append(Units.shared.speed(kmh: s.doubleValue, system: units).text) }
-        if let p = phase.onTargetPercent { parts.append(L("treadmill.summary.on.target", Int64(p.intValue))) }
-        let title = phase.isRest ? L("treadmill.rest") : "#\(phase.phaseNumber)"
-        return "\(title)  \(parts.joined(separator: " · "))"
+        var line = "\(stepTitle(phase))  \(stepParts(phase, units: units))"
+        if let rest = phase.restAfterSeconds?.int64Value, rest > 0 {
+            line += "\n\(L("treadmill.rest"))  \(clock(rest))"
+        }
+        return line
     }
+}
+
+private func stepTitle(_ step: PhaseResultUi) -> String {
+    step.isRest ? L("treadmill.rest") : L("live.step", Int64(step.phaseNumber))
+}
+
+private func stepParts(_ step: PhaseResultUi, units: UnitSystem) -> String {
+    var parts = [clock(step.durationSeconds)]
+    if let d = step.distanceMeters { parts.append(Units.shared.distance(meters: d.doubleValue, system: units, decimals: 2).text) }
+    if let s = step.averageSpeedKmh { parts.append(Units.shared.speed(kmh: s.doubleValue, system: units).text) }
+    if let p = step.onTargetPercent { parts.append(L("treadmill.summary.on.target", Int64(p.intValue))) }
+    return parts.joined(separator: " · ")
 }
 
 private func label(_ metric: LiveMetric) -> String {

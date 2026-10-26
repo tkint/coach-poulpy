@@ -200,6 +200,10 @@
 "live.group.running" = "Running";
 "live.group.workouts" = "Follow a workout";
 "live.recording" = "Recording";
+"live.session.time" = "Session";
+"live.step" = "Step %lld";
+"live.end.step" = "End step";
+"live.steps.title" = "This session";
 "live.waiting" = "Waiting for the first numbers…";
 "live.connecting.one %@" = "Connecting to %@…";
 "live.connecting.many" = "Connecting to your devices…";

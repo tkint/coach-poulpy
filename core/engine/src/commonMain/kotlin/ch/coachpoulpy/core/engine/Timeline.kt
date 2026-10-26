@@ -9,8 +9,17 @@ import ch.coachpoulpy.core.model.Target
 import ch.coachpoulpy.core.model.Workout
 import kotlin.time.Duration
 
-/** A workout compiled into the flat list of phases the player runs one after another. */
-data class Timeline(val phases: List<Phase>)
+/**
+ * A workout compiled into the flat list of phases the player runs one after another. An [openEnded]
+ * timeline, a free recording, repeats its last phase for as many steps as the user ends.
+ */
+data class Timeline(val phases: List<Phase>, val openEnded: Boolean = false) {
+    fun phaseAt(index: Int): Phase? = phases.getOrNull(index) ?: phases.lastOrNull()?.takeIf { openEnded && index >= 0 }
+
+    /** The first [count] phases, an open-ended timeline grown to reach them. */
+    fun grownTo(count: Int): Timeline =
+        if (!openEnded || count <= phases.size) this else Timeline(List(count) { phaseAt(it)!! }, openEnded = true)
+}
 
 sealed interface Phase {
     /** Planned length, or null when the phase ends manually. */

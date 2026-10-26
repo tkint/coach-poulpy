@@ -200,6 +200,10 @@
 "live.group.running" = "Course";
 "live.group.workouts" = "Suivre une séance";
 "live.recording" = "Enregistrement";
+"live.session.time" = "Séance";
+"live.step" = "Étape %lld";
+"live.end.step" = "Finir l’étape";
+"live.steps.title" = "Cette séance";
 "live.waiting" = "En attente des premières mesures…";
 "live.connecting.one %@" = "Connexion à %@…";
 "live.connecting.many" = "Connexion à vos appareils…";
