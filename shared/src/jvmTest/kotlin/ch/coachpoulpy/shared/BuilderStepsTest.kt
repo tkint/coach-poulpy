@@ -2,14 +2,9 @@ package ch.coachpoulpy.shared
 
 import ch.coachpoulpy.core.engine.CompletionRule
 import ch.coachpoulpy.core.engine.Phase
-import ch.coachpoulpy.core.model.ExerciseSlug
-import ch.coachpoulpy.core.model.Prescription
-import ch.coachpoulpy.core.model.SetPrescription
 import ch.coachpoulpy.core.model.Step
-import ch.coachpoulpy.core.model.StepId
 import ch.coachpoulpy.core.model.StepRole
 import ch.coachpoulpy.core.model.Target
-import ch.coachpoulpy.core.model.Workout
 import ch.coachpoulpy.core.model.WorkoutId
 import ch.coachpoulpy.core.model.WorkoutType
 import ch.coachpoulpy.data.local.DriverFactory
@@ -310,30 +305,4 @@ class BuilderStepsTest {
         assertEquals("5.0 km", builder.state.value.rows.single().summary)
     }
 
-    @Test
-    fun restsSavedInsideAStepComeBackAsRestSteps() {
-        // Before rests were steps: 3 squats with 90 s after each, a run with 2 min after it.
-        val squat = Step.ExerciseStep(
-            StepId("squat"), ExerciseSlug("goblet-squat"),
-            Prescription(List(3) { SetPrescription(Target.Reps(8), restAfter = 90.seconds) }),
-        )
-        val run = Step.ExerciseStep(
-            StepId("run"), ExerciseSlug("run"),
-            Prescription(listOf(SetPrescription(Target.Time(600.seconds), restAfter = 120.seconds))),
-        )
-        val old = Workout(WorkoutId("old"), 1, "Old", WorkoutType.STRENGTH, listOf(squat, run))
-        val before = graph.compiler.compile(old).phases
-        graph.store.saveWorkout(old)
-
-        val edit = assertNotNull(graph.editWorkout("old", "en"))
-        val steps = edit.state.value.steps
-        val repeat = assertNotNull(steps[0].repeatGroup)
-        assertEquals(3, repeat.times)
-        assertEquals(listOf("1 × 8", "1 min 30"), repeat.rows.map { it.summary })
-        assertEquals("Run", steps[1].row?.name)
-        assertTrue(steps[2].row!!.isRest)
-
-        val again = graph.store.latestWorkout(WorkoutId(edit.save()!!))!!
-        assertEquals(before.map { it::class to it.duration }, graph.compiler.compile(again).phases.map { it::class to it.duration })
-    }
 }

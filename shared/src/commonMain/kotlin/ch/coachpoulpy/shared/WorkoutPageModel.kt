@@ -67,7 +67,6 @@ data class WorkoutPageState(
     val typeLabel: String = "",
     /** "5 exercises · about 40 min · dumbbells, mat". */
     val details: String = "",
-    val steps: List<WorkoutStepRow> = emptyList(),
     /** The workout's structure, as in the builder: steps and repeats. */
     val structure: List<WorkoutPageStep> = emptyList(),
     val timesDone: Int = 0,
@@ -154,7 +153,6 @@ class WorkoutPageModel internal constructor(
             typeLabel = labels.workoutType(workout.type),
             details = (listOf(labels.exercises(exerciseSteps(workout).size), labels.aboutMinutes(facts.minutes(workout))) +
                 listOfNotNull(equipment.takeIf { it.isNotEmpty() }?.joinToString(", "))).joinToString(" · "),
-            steps = exerciseSteps(workout).map { stepRow(it) },
             structure = structure(workout),
             timesDone = done.size,
             lastDoneMillis = done.maxOfOrNull { it.execution.startedAt }?.toEpochMilliseconds(),

@@ -215,37 +215,22 @@ data class WorkoutDraft(
          * repeats one level deep with no rest of their own between rounds.
          */
         internal fun from(workout: Workout, catalog: Catalog): WorkoutDraft? {
-            fun leaves(step: Step, inRepeat: Boolean): List<DraftStep>? = when (step) {
-                is Step.ExerciseStep -> DraftEntry.from(step, catalog[step.exercise])?.let { withoutSetRests(it, step, inRepeat) }
-                is Step.Rest -> listOf(DraftRest(step.id.value, step.duration.inWholeSeconds.toInt()))
+            fun leaf(step: Step): DraftStep? = when (step) {
+                is Step.ExerciseStep -> DraftEntry.from(step, catalog[step.exercise])
+                is Step.Rest -> DraftRest(step.id.value, step.duration.inWholeSeconds.toInt())
                 is Step.Group -> null
             }
-            val steps = workout.steps.flatMap { step ->
+            val steps = workout.steps.map { step ->
                 if (step is Step.Group) {
                     if (step.restBetweenRounds > Duration.ZERO) return null
-                    listOf(DraftRepeat(step.id.value, step.rounds, step.children.flatMap { leaves(it, inRepeat = true) ?: return null }))
+                    DraftRepeat(step.id.value, step.rounds, step.children.map { leaf(it) ?: return null })
                 } else {
-                    leaves(step, inRepeat = false) ?: return null
+                    leaf(step) ?: return null
                 }
             }
             return WorkoutDraft(workout.id, workout.version + 1, workout.name, workout.type, steps)
         }
     }
-}
-
-/**
- * Steps saved before rests were steps of their own rested after each set. They come back
- * as rest steps, so the workout plays the same: sets with a rest after each become a repeat
- * of one set and that rest; in a repeat, which can't hold another, only the rest after the
- * last set stays.
- */
-private fun withoutSetRests(entry: DraftEntry, step: Step.ExerciseStep, inRepeat: Boolean): List<DraftStep> {
-    val rest = step.prescription.sets.last().restAfter.inWholeSeconds.toInt()
-    if (rest <= 0) return listOf(entry)
-    if (entry.sets > 1 && !inRepeat) {
-        return listOf(DraftRepeat(Ids.newUuidV7(), entry.sets, listOf(entry.copy(sets = 1), DraftRest(Ids.newUuidV7(), rest))))
-    }
-    return listOf(entry, DraftRest(Ids.newUuidV7(), rest))
 }
 
 /** How a walk or a run ends: after a time, a distance, or when the button is pressed ("until the end" on the last step). */

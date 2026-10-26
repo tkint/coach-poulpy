@@ -219,6 +219,8 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
                         )
                     }
                 } else if (repeat != null) {
+                    // CLEANUP: a repeat is a header item plus one item per step, so dragging it lifts only the
+                    // header and the steps follow on drop. Draw the repeat as one item to drag it whole (#73).
                     item(key = repeat.key) {
                         RepeatHeader(model, repeat, handle = Modifier.dragHandle(drag, repeat.key), modifier = Modifier.draggedItem(this, drag, repeat.key))
                     }
