@@ -13,7 +13,7 @@ The text moves so translators can edit it in Fink alongside the rest of the app.
 
 ## Consequences
 
-- Changing an exercise's text raises the catalog `version`, as any catalog change does.
+- Changing an exercise's text raises the catalog `version`, as any catalog change does. Fink's pull requests don't, so CI fails when catalog text changes and `version` doesn't, and the version is raised before merging.
 - A slug is also a message id prefix, one more reason it never changes.
 - Reordering an exercise's instructions renumbers their ids, and translators see the change as new messages.
 - The build fails when an exercise has no name in a shipped language, or a message names a slug the catalog lacks.
