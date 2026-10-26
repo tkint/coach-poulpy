@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Player · repeat in a sets workout</title>
+<meta name="mockup:screen" content="player-repeat-in-sets">
+<meta name="mockup:section" content="Guided player">
+<meta name="mockup:issue" content="92">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../../../web/src/styles/tokens.css">
+<link rel="stylesheet" href="../../shared/mockup.css">
+</head>
+<body>
+<main class="phone player">
+  <div class="session-progress" id="session-progress">
+    <button class="icon-button icon-button--filled" type="button" aria-label="Pause"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1.5"/><rect x="14" y="5" width="4" height="14" rx="1.5"/></svg></button>
+    <div>
+      <span class="label numbers">Step 12 of 18 · 22:30</span>
+      <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="18" aria-valuenow="12" aria-label="Session progress"><div style="width: 67%;"></div></div>
+    </div>
+    <a class="icon-button icon-button--filled" href="#" aria-label="End session"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></a>
+  </div>
+
+  <div class="player-step" id="current-step">
+    <img src="../../../poulpy/pose_straining.svg" alt="Poulpy straining">
+    <span class="part-line" id="part-line" data-component="part-line"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg>Work · round 2 of 3</span>
+    <h1 class="title">Biceps curl</h1>
+    <span class="no-dots" aria-hidden="true"></span>
+    <span class="target-value">12</span>
+    <span class="target-unit">reps at 10 kg</span>
+  </div>
+
+  <div class="next-card" id="next-step" data-component="next-card"><span class="label">Next</span><span>Triceps dip · 12 reps</span></div>
+
+  <div class="player-actions">
+    <button class="secondary-button secondary-button--large" data-component="secondary-button" type="button">Skip</button>
+    <a class="primary-button primary-button--large" data-component="primary-button" href="#"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>Done</a>
+  </div>
+</main>
+</body>
+</html>

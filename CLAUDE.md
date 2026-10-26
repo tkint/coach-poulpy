@@ -25,6 +25,7 @@ Android and iOS only build in CI (`.github/workflows/ci.yml`); a PR is done when
 
 - Logic goes in shared Kotlin with a test; Compose and SwiftUI code stays thin and mirrors the other platform.
 - Theme files and Poulpy drawings are generated: edit `design/tokens.json` or `design/build-poulpy.mjs` and regenerate.
+- Mockups are plain HTML in `design/mockups/` (ADR 0016), styled only with `var(--cp-*)` from the token CSS, `shared/mockup.css` and `design/poulpy/*.svg`. A new screen or redesign starts in `drafts/`; nothing is built until a PR moves it to `agreed/`. The claude.ai canvas is scratch only.
 - Every user-facing string exists in English and French (Android `values` and `values-fr`, iOS `en.lproj` and `fr.lproj`, shared `Labels`).
 - Catalog slugs never change; set `"retired": true` instead of deleting, and raise `version`.
 - Poulpy is never guilt: pain or rehab always shows the blue side, and errors are crimson with an icon, never ember.

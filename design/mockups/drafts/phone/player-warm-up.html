@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Player · in the warm-up</title>
+<meta name="mockup:screen" content="player-warm-up">
+<meta name="mockup:section" content="Guided player">
+<meta name="mockup:issue" content="92">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../../../web/src/styles/tokens.css">
+<link rel="stylesheet" href="../../shared/mockup.css">
+</head>
+<body>
+<main class="phone player">
+  <div class="session-progress" id="session-progress">
+    <button class="icon-button icon-button--filled" type="button" aria-label="Pause"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1.5"/><rect x="14" y="5" width="4" height="14" rx="1.5"/></svg></button>
+    <div>
+      <span class="label numbers">Step 2 of 25 · 00:41</span>
+      <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="25" aria-valuenow="2" aria-label="Session progress"><div style="width: 8%;"></div></div>
+    </div>
+    <a class="icon-button icon-button--filled" href="#" aria-label="End session"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></a>
+  </div>
+
+  <div class="player-step" id="current-step">
+    <img src="../../../poulpy/pose_straining.svg" alt="Poulpy straining">
+    <span class="part-line" id="part-line" data-component="part-line"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18h18"/><path d="M7 18a5 5 0 0 1 10 0"/><path d="M12 4v4M4.9 8.9l2.1 2.1M19.1 8.9L17 11"/></svg>Warm-up</span>
+    <h1 class="title">Air squat</h1>
+    <span class="no-dots" aria-hidden="true"></span>
+    <span class="target-value">10</span>
+    <span class="target-unit">reps</span>
+  </div>
+
+  <div class="next-card" id="next-step" data-component="next-card"><span class="label">Next</span><span>Work 1 · Goblet squat</span></div>
+
+  <div class="player-actions">
+    <button class="secondary-button secondary-button--large" data-component="secondary-button" type="button">Skip</button>
+    <a class="primary-button primary-button--large" data-component="primary-button" href="player-circuit-round.html"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>Done</a>
+  </div>
+</main>
+</body>
+</html>
