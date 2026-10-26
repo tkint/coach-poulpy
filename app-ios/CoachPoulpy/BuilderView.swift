@@ -205,6 +205,7 @@ private struct EntryCard: View {
     let onDrag: (CGFloat) -> Void
     let onDrop: () -> Void
     @State private var weight: String
+    @State private var editing: TargetField?
 
     init(model: BuilderModel, row: BuilderRow, open: Bool, onOpen: @escaping () -> Void, onDrag: @escaping (CGFloat) -> Void, onDrop: @escaping () -> Void) {
         self.model = model
@@ -266,7 +267,9 @@ private struct EntryCard: View {
                     .font(.poulpy(.caption))
                     .foregroundStyle(PoulpyColor.error)
             }
-            if open {
+            if open, let target = row.target {
+                targetEditor(target)
+            } else if open {
                 let columns = [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)]
                 LazyVGrid(columns: columns, spacing: 8) {
                     stepper("builder.sets", "\(row.sets)", less: { model.setSets(key: row.key, sets: row.sets - 1) }, more: { model.setSets(key: row.key, sets: row.sets + 1) })
@@ -292,17 +295,78 @@ private struct EntryCard: View {
         .background(PoulpyColor.background, in: RoundedRectangle(cornerRadius: 12))
     }
 
-    private func stepper(_ label: LocalizedStringKey, _ value: String, less: @escaping () -> Void, more: @escaping () -> Void) -> some View {
+    /// A value between − and +; with [onValue], tapping the value opens a sheet to type it.
+    private func stepper(
+        _ label: LocalizedStringKey,
+        _ value: String,
+        less: @escaping () -> Void,
+        more: @escaping () -> Void,
+        onValue: (() -> Void)? = nil
+    ) -> some View {
         cell(label) {
             HStack(spacing: 2) {
                 roundStep("minus", "builder.less", less)
-                Text(value)
-                    .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 22, relativeTo: .title3))
-                    .monospacedDigit()
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.6)
-                    .frame(maxWidth: .infinity)
+                if let onValue {
+                    Button(action: onValue) { stepperValue(value, tappable: true) }
+                        .buttonStyle(.plain)
+                        .accessibilityHint(Text("builder.tap.to.type"))
+                } else {
+                    stepperValue(value, tappable: false)
+                }
                 roundStep("plus", "builder.more", more)
+            }
+        }
+    }
+
+    private func stepperValue(_ value: String, tappable: Bool) -> some View {
+        Text(value)
+            .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 22, relativeTo: .title3))
+            .monospacedDigit()
+            .lineLimit(1)
+            .minimumScaleFactor(0.6)
+            .foregroundStyle(tappable ? PoulpyColor.primary : PoulpyColor.onSurface)
+            .frame(maxWidth: .infinity, minHeight: 44)
+            .contentShape(Rectangle())
+    }
+
+    /// A walk or a run: one block with a duration or a distance, and an optional pace, instead of sets.
+    private func targetEditor(_ target: WalkRunTarget) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("builder.goal").textCase(.uppercase).font(PoulpyFont.label).kerning(1).foregroundStyle(PoulpyColor.onSurfaceVariant)
+            FlowLayout(spacing: 8) {
+                ForEach([TargetKind.duration, .distance, .durationPace, .distancePace], id: \.self) { kind in
+                    PoulpyChip(title: Text(TargetField.label(of: kind)), selected: target.kind == kind) {
+                        model.setTarget(key: row.key, kind: kind)
+                    }
+                }
+            }
+            if target.durationSeconds != nil {
+                stepper("builder.duration", target.durationLabel,
+                        less: { model.changeDuration(key: row.key, steps: -1) },
+                        more: { model.changeDuration(key: row.key, steps: 1) },
+                        onValue: { editing = .duration })
+            }
+            if target.distanceMeters != nil {
+                stepper("builder.distance", target.distanceLabel,
+                        less: { model.changeDistance(key: row.key, steps: -1) },
+                        more: { model.changeDistance(key: row.key, steps: 1) },
+                        onValue: { editing = .distance })
+            }
+            if target.speedKmh != nil {
+                stepper("builder.pace", target.paceLabel,
+                        less: { model.changePace(key: row.key, steps: -1) },
+                        more: { model.changePace(key: row.key, steps: 1) },
+                        onValue: { editing = .pace })
+            }
+            stepper("builder.rest", row.restLabel, less: { model.changeRest(key: row.key, steps: -1) }, more: { model.changeRest(key: row.key, steps: 1) })
+            Text([target.hint.map { "≈ \($0)" }, NSLocalizedString("builder.tap.to.type", comment: "")].compactMap { $0 }.joined(separator: " · "))
+                .font(.poulpy(.caption))
+                .foregroundStyle(PoulpyColor.onSurfaceVariant)
+        }
+        .padding(.trailing, 4)
+        .sheet(item: $editing) { field in
+            if let target = row.target {
+                ValueSheet(model: model, key: row.key, target: target, field: field) { editing = nil }
             }
         }
     }
@@ -341,6 +405,142 @@ private struct EntryCard: View {
 
     private static func format(_ kg: Double) -> String {
         kg.truncatingRemainder(dividingBy: 1) == 0 ? String(Int(kg)) : String(kg)
+    }
+}
+
+private enum TargetField: Identifiable {
+    case duration, distance, pace
+
+    var id: Self { self }
+
+    var title: LocalizedStringKey {
+        switch self {
+        case .duration: return "builder.duration"
+        case .distance: return "builder.distance"
+        case .pace: return "builder.pace"
+        }
+    }
+
+    static func label(of kind: TargetKind) -> LocalizedStringKey {
+        switch kind {
+        case .distance: return "builder.distance"
+        case .durationPace: return "builder.duration.pace"
+        case .distancePace: return "builder.distance.pace"
+        default: return "builder.duration"
+        }
+    }
+}
+
+/// Types a duration, distance or pace, with its unit and quick picks such as 10 km, 1 h or 5:00 /km.
+private struct ValueSheet: View {
+    let model: BuilderModel
+    let key: String
+    let target: WalkRunTarget
+    let field: TargetField
+    let onDone: () -> Void
+    @State private var text: String
+    @State private var invalid = false
+
+    init(model: BuilderModel, key: String, target: WalkRunTarget, field: TargetField, onDone: @escaping () -> Void) {
+        self.model = model
+        self.key = key
+        self.target = target
+        self.field = field
+        self.onDone = onDone
+        switch field {
+        case .duration: _text = State(initialValue: target.durationText)
+        case .distance: _text = State(initialValue: target.distanceText)
+        case .pace: _text = State(initialValue: target.paceText)
+        }
+    }
+
+    private var picks: [ValuePick] {
+        switch field {
+        case .duration: return model.durationPicks()
+        case .distance: return model.distancePicks(unit: target.distanceUnit)
+        case .pace: return model.pacePicks(key: key, unit: target.paceUnit)
+        }
+    }
+
+    private var decimal: Bool { field == .distance || (field == .pace && target.paceUnit.isSpeed) }
+
+    private func apply(_ value: String) -> Bool {
+        switch field {
+        case .duration: return model.setDuration(key: key, text: value)
+        case .distance: return model.setDistance(key: key, text: value, unit: target.distanceUnit)
+        case .pace: return model.setPace(key: key, text: value, unit: target.paceUnit)
+        }
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text(field.title).font(.poulpy(.title2).weight(.heavy))
+            HStack(spacing: 10) {
+                TextField("", text: $text)
+                    .keyboardType(decimal ? .decimalPad : .numbersAndPunctuation)
+                    .multilineTextAlignment(.center)
+                    .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 22, relativeTo: .title3))
+                    .frame(height: 56)
+                    .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 16))
+                    .overlay(RoundedRectangle(cornerRadius: 16).stroke(PoulpyColor.primary, lineWidth: 1.5))
+                    .accessibilityLabel(Text(field.title))
+                    .onChange(of: text) { _ in invalid = false }
+                if field != .duration {
+                    Text(field == .distance ? target.distanceUnit.symbol : target.paceUnit.symbol)
+                        .font(.poulpy(.headline))
+                        .foregroundStyle(PoulpyColor.onSurfaceVariant)
+                }
+            }
+            if invalid {
+                Label("builder.value.invalid", systemImage: "exclamationmark.circle")
+                    .font(.poulpy(.caption))
+                    .foregroundStyle(PoulpyColor.error)
+            }
+            if field != .duration {
+                sectionLabel("builder.unit")
+                FlowLayout(spacing: 8) {
+                    if field == .distance {
+                        ForEach([DistanceUnit.m, .km, .mi], id: \.self) { unit in
+                            PoulpyChip(title: Text(unit.symbol), selected: target.distanceUnit == unit) {
+                                text = model.setDistanceUnit(key: key, unit: unit, typed: text)
+                            }
+                        }
+                    } else {
+                        ForEach([PaceUnit.perKm, .perMi, .kmh, .mph], id: \.self) { unit in
+                            PoulpyChip(title: Text(unit.symbol), selected: target.paceUnit == unit) {
+                                text = model.setPaceUnit(key: key, unit: unit, typed: text)
+                            }
+                        }
+                    }
+                }
+            }
+            sectionLabel("builder.quick.picks")
+            FlowLayout(spacing: 8) {
+                ForEach(picks, id: \.text) { pick in
+                    PoulpyChip(title: Text(pick.label), selected: text == pick.text) {
+                        if apply(pick.text) { onDone() }
+                    }
+                }
+            }
+            Button {
+                if apply(text) { onDone() } else { invalid = true }
+            } label: {
+                Text("action.done")
+                    .font(.poulpy(.body).weight(.heavy))
+                    .foregroundStyle(PoulpyColor.onPrimary)
+                    .frame(maxWidth: .infinity, minHeight: 52)
+                    .background(PoulpyColor.primary, in: Capsule())
+            }
+            .buttonStyle(.plain)
+            Spacer(minLength: 0)
+        }
+        .padding(20)
+        .background(PoulpyColor.surface)
+        .presentationDetents([.medium, .large])
+    }
+
+    private func sectionLabel(_ key: LocalizedStringKey) -> some View {
+        Text(key).textCase(.uppercase).font(PoulpyFont.label).kerning(1).foregroundStyle(PoulpyColor.onSurfaceVariant)
     }
 }
 

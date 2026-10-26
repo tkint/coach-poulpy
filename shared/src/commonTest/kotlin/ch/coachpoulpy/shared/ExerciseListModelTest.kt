@@ -32,9 +32,19 @@ class ExerciseListModelTest {
 
     @Test
     fun pickerOnlyOffersExercisesTheWorkoutTypeCanRun() {
-        val rehab = model("en").filter(type = WorkoutType.REHAB).rows.map { Catalog.bundled[ch.coachpoulpy.core.model.ExerciseSlug(it.slug)]!!.measurement }
+        val rehab = model("en").filter(type = WorkoutType.REHAB).rows.map { Catalog.bundled[ch.coachpoulpy.core.model.ExerciseSlug(it.slug)]!! }
         assertTrue(rehab.isNotEmpty())
-        assertTrue(MeasurementMode.TIME !in rehab)
+        // Rehab has no timed work, except walks, which the builder sets as one block.
+        assertEquals(
+            listOf("walk-with-support", "gentle-walk", "walk", "brisk-walk", "easy-run", "run").sorted(),
+            rehab.filter { it.measurement == MeasurementMode.TIME }.map { it.slug.value }.sorted(),
+        )
+    }
+
+    @Test
+    fun treadmillWorkoutsOnlyOfferWalksAndRuns() {
+        val treadmill = model("en").filter(type = WorkoutType.TREADMILL).rows.map { it.slug }
+        assertEquals(listOf("brisk-walk", "easy-run", "gentle-walk", "run", "walk", "walk-with-support"), treadmill.sorted())
     }
 
     @Test
