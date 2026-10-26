@@ -7,15 +7,12 @@ Les règles de `en.md` s’appliquent aussi (identifiants, placeholders, pluriel
 - **L’application vouvoie** : « Vos séances », « Allumez d’abord l’appareil ».
 - **Poulpy tutoie** (`domain` → `poulpy.*`) : « Termine une séance et j’allume mon premier tentacule ». C’est un personnage qui parle, pas l’interface.
 - Les consignes d’exercice (`catalog` → `instructions`) vouvoient à l’impératif : « Tenez la charge contre la poitrine ».
-- **Pas de genre pour la personne** : préférez l’impératif à un participe accordé (« Allongez-vous sur le dos » plutôt que « Allongé sur le dos », « On y va ? » plutôt que « Prêt ? »). Poulpy, lui, est masculin : « Je suis prêt quand tu l’es ».
+- **Pas de genre pour la personne** : d’abord une tournure neutre, souvent l’impératif (« Allongez-vous sur le dos » plutôt que « Allongé sur le dos », « On y va ? » plutôt que « Prêt ? »). Quand aucune ne sonne naturel, l’écriture inclusive au point médian est permise sur un mot court (« Prêt·e ? », « Bienvenue, sportif·ve »), jamais de parenthèses ni de barre oblique. Évitez-la dans les phrases longues : les lecteurs d’écran la lisent mal. Poulpy, lui, est masculin : « Je suis prêt quand tu l’es ».
 - Les notes de variante (`variationNote`) décrivent, sans « on » : « S’asseoir sur une chaise et se relever ».
 
 ## Typographie
 
-- Apostrophe typographique ’, jamais '.
-- Guillemets français « … » avec une espace insécable (U+00A0) à l’intérieur.
-- Espace insécable (U+00A0) avant `:` `;` `!` `?` et `%` (« On y va ? », « 80 % dans la cible »), pour qu’un retour à la ligne ne les isole pas. Dans Fink, elle ressemble à une espace normale : copiez-la depuis un message existant.
-- Points de suspension en un seul caractère (…).
+- Tapez normalement : l’apostrophe ' , les trois points ... et une espace ordinaire avant `:` `;` `!` `?` `%` et autour de « ». Le dépôt les corrige tout seul (apostrophe ’, points de suspension …, espaces insécables pour qu’un retour à la ligne n’isole jamais un « ? »).
 - Pluriels : donnez les trois formes `one`, `many`, `other`. En français `one` couvre 0 et 1 ; `many` sert aux grands nombres ronds (1 000 000) et prend le texte de `other`.
 
 ## Vocabulaire

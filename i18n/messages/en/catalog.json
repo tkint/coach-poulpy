@@ -196,7 +196,7 @@
     }
   },
   "farmer-carry": {
-    "name": "Farmer's carry",
+    "name": "Farmer’s carry",
     "instructions": {
       "0": "Pick up a heavy weight in each hand.",
       "1": "Walk tall with your shoulders down until the time is up."
@@ -319,7 +319,7 @@
     "instructions": {
       "0": "Walk slowly on flat ground, indoors or outside, standing tall.",
       "1": "Keep a pace where you breathe easily. A minute or two is a good start.",
-      "2": "Stop and rest if anything hurts, and follow your care team's advice."
+      "2": "Stop and rest if anything hurts, and follow your care team’s advice."
     },
     "aliases": "slow walk, easy walk, stroll"
   },
@@ -394,7 +394,7 @@
     }
   },
   "worlds-greatest-stretch": {
-    "name": "World's greatest stretch",
+    "name": "World’s greatest stretch",
     "instructions": {
       "0": "Step into a deep lunge and place both hands inside the front foot.",
       "1": "Rotate your chest and reach the inside arm to the ceiling.",
@@ -423,7 +423,7 @@
     }
   },
   "childs-pose": {
-    "name": "Child's pose",
+    "name": "Child’s pose",
     "instructions": {
       "0": "Kneel, sit back on your heels and fold forward.",
       "1": "Reach your arms forward and breathe slowly."

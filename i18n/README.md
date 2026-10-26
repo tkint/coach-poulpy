@@ -5,6 +5,7 @@ Every word a person reads lives here, one JSON file per language and namespace (
 - `messages/<locale>/<namespace>.json`: the messages, nested JSON whose path is the message id, in ICU MessageFormat.
 - `project.inlang/settings.json`: the inlang project that [Fink](https://fink.inlang.com/) reads, through the next-intl plugin.
 - `glossary/<locale>.md`: rules and vocabulary per language; `glossary/en.md` also holds the translator notes.
+- `typography.mjs`: fixes apostrophes, ellipses and each language’s non-breaking spaces; it runs on `main` after every merge.
 - `key-map.json`: each Android and iOS string key from before the move, mapped to its message id, for switching the apps over (#99).
 
 ## Proofread or translate in Fink
