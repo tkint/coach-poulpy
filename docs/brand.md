@@ -64,12 +64,12 @@ When several apply, the first wins: pain or rehab, then Fuming, Grumpy, Annoyed,
 
 | Mood | Title | Line |
 | --- | --- | --- |
-| Annoyed | Tick tock / Tic tac | "Today's {workout} is still waiting. I'm turning a little orange." / « {workout} t’attend encore aujourd’hui. Je commence à virer orange. » |
-| Grumpy | Hmph / Pff | "{day}'s {workout} is still waiting. {minutes} minutes and I flip back, promise." / « {workout} de {day} attend toujours. {minutes} minutes et je me retourne, promis. » |
-| Fuming | Full lava / Mode lave | "Two sessions slipped and I'm boiling like a kettle. {minutes} minutes and I'm blue again." / « Deux séances ont filé et je bous comme une bouilloire. {minutes} minutes et je redeviens bleu. » |
+| Annoyed | Tick tock / Tic tac | "Today's {workout} is still waiting. I'm turning a little orange." / « {workout} t’attend encore aujourd’hui. Je commence à virer à l’orange. » |
+| Grumpy | Hmph / Pff | "{workout} has been waiting since {day}. {minutes} minutes and I flip back, promise." / « {workout} t’attend depuis {day}. {minutes} minutes et je me retourne, promis. » |
+| Fuming | Full lava / Mode lave | "Sessions slipped by and I'm boiling like a kettle. {minutes} minutes and I'm blue again." / « Des séances ont filé et je bous comme une bouilloire. {minutes} minutes et je redeviens bleu. » |
 | Recovering, rest day | Rest day / Jour de repos | "No training today. I'm napping too." / « Pas d’entraînement aujourd’hui. Moi aussi, je fais la sieste. » |
 
-The catch-up button reads "Catch up: {workout}, {minutes} min" / « Rattrapage : {workout}, {minutes} min ». In the Grumpy and Fuming lines, `{minutes}` is the catch-up's duration; in the Grumpy line, `{day}` and `{workout}` are the oldest missed entry's.
+The catch-up button reads "Catch up: {workout}, {minutes} min" / « Rattrapage : {workout}, {minutes} min », with a non-breaking space before the colon. In the Grumpy and Fuming lines, `{minutes}` is the catch-up's duration, an ICU plural in the translation files so one minute reads "1 minute". In the Grumpy line, `{workout}` and `{day}` are the oldest missed entry's: `{day}` is its weekday while it is less than a week old ("Thursday" / « jeudi »), its date after that ("12 October" / « le 12 octobre »).
 
 ## Tentacles
 
