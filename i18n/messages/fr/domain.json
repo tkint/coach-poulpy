@@ -43,7 +43,7 @@
     "lunge": "Fente",
     "push": "Poussée",
     "pull": "Tirage",
-    "carry": "Porté",
+    "carry": "Portage",
     "core": "Gainage",
     "rotation": "Rotation",
     "locomotion": "Cardio",
@@ -88,7 +88,7 @@
     "marathon": "Marathon",
     "untilPress": "Jusqu’à l’appui",
     "untilEnd": "Jusqu’à la fin",
-    "untilNext": "Jusqu’à « Suivant »"
+    "untilNext": "Jusqu’à « Suivant »"
   },
   "count": {
     "position": "{index, number} sur {count, number}",
@@ -114,7 +114,7 @@
   },
   "workout": {
     "copyName": "{name} (copie)",
-    "deleteTitle": "Supprimer « {name} » ?",
+    "deleteTitle": "Supprimer « {name} » ?",
     "deletePlanned": "{planned, plural, one {Elle est retirée de son jour prévu.} many {Elle est retirée de ses # jours prévus.} other {Elle est retirée de ses # jours prévus.}}",
     "deleteDone": "{done, plural, one {La fois où vous l’avez faite reste dans l’historique.} many {Les # fois où vous l’avez faite restent dans l’historique.} other {Les # fois où vous l’avez faite restent dans l’historique.}}",
     "deleteFinal": "C’est définitif."
@@ -124,17 +124,17 @@
     "captionFull": "{full, plural, one {{lit, number} tentacules sur 8 allumés · # poulpe complet} many {{lit, number} tentacules sur 8 allumés · # poulpes complets} other {{lit, number} tentacules sur 8 allumés · # poulpes complets}}",
     "firstTitle": "Salut, moi c’est Poulpy",
     "firstLine": "Termine une séance et j’allume mon premier tentacule.",
-    "championTitle": "Poulpe complet !",
-    "championLine": "Les huit tentacules sont allumés. L’or pour le poulpe !",
-    "backTitle": "Oh… te revoilà !",
+    "championTitle": "Poulpe complet !",
+    "championLine": "Les huit tentacules sont allumés. L’or pour le poulpe !",
+    "backTitle": "Oh… te revoilà !",
     "backLine": "J’ai gardé tes tentacules allumés. Un de plus brille maintenant.",
     "litTitle": "Bien joué",
     "litLine": "{left, plural, one {Encore une séance et je suis un poulpe complet.} many {Un tentacule de plus. Encore # pour un poulpe complet.} other {Un tentacule de plus. Encore # pour un poulpe complet.}}",
     "restTitle": "Repos",
-    "restLine": "Le repos, c’est aussi de l’entraînement. Prêt quand tu l’es.",
+    "restLine": "Le repos, c’est aussi de l’entraînement. Je suis prêt quand tu l’es.",
     "happyTitle": "Poulpy est content",
-    "happyLine": "On allume un autre tentacule ?",
-    "happyFullLine": "Un poulpe complet ! La prochaine séance en commence un nouveau.",
+    "happyLine": "On allume un autre tentacule ?",
+    "happyFullLine": "Un poulpe complet ! La prochaine séance en commence un nouveau.",
     "nappingTitle": "Poulpy fait la sieste",
     "nappingLine": "Tes tentacules sont toujours allumés. Réveille-moi avec une séance."
   }

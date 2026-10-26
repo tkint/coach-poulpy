@@ -7,12 +7,14 @@ Les règles de `en.md` s’appliquent aussi (identifiants, placeholders, pluriel
 - **L’application vouvoie** : « Vos séances », « Allumez d’abord l’appareil ».
 - **Poulpy tutoie** (`domain` → `poulpy.*`) : « Termine une séance et j’allume mon premier tentacule ». C’est un personnage qui parle, pas l’interface.
 - Les consignes d’exercice (`catalog` → `instructions`) vouvoient à l’impératif : « Tenez la charge contre la poitrine ».
+- **Pas de genre pour la personne** : préférez l’impératif à un participe accordé (« Allongez-vous sur le dos » plutôt que « Allongé sur le dos », « On y va ? » plutôt que « Prêt ? »). Poulpy, lui, est masculin : « Je suis prêt quand tu l’es ».
+- Les notes de variante (`variationNote`) décrivent, sans « on » : « S’asseoir sur une chaise et se relever ».
 
 ## Typographie
 
 - Apostrophe typographique ’, jamais '.
-- Guillemets français « … » avec une espace insécable à l’intérieur.
-- Espace insécable avant `:` `;` `!` `?` et `%` (« Prêt ? », « 80 % dans la cible »), pour qu’un retour à la ligne ne les isole pas.
+- Guillemets français « … » avec une espace insécable (U+00A0) à l’intérieur.
+- Espace insécable (U+00A0) avant `:` `;` `!` `?` et `%` (« On y va ? », « 80 % dans la cible »), pour qu’un retour à la ligne ne les isole pas. Dans Fink, elle ressemble à une espace normale : copiez-la depuis un message existant.
 - Points de suspension en un seul caractère (…).
 - Pluriels : donnez les trois formes `one`, `many`, `other`. En français `one` couvre 0 et 1 ; `many` sert aux grands nombres ronds (1 000 000) et prend le texte de `other`.
 
@@ -25,8 +27,8 @@ Les règles de `en.md` s’appliquent aussi (identifiants, placeholders, pluriel
 | exercise | exercice | |
 | set | série | |
 | rep, reps | répétition, répétitions | |
-| repeat (builder) | répétition | Un groupe d’étapes refait plusieurs fois. |
-| round | tour | « Tour 2 sur 4 », dans une répétition. |
+| repeat (builder) | boucle | Un groupe d’étapes refait plusieurs fois. Jamais « répétition », réservé aux reps. |
+| round | tour | « Tour 2 sur 4 », dans une boucle. |
 | step | étape | |
 | block (treadmill) | bloc | |
 | rest | repos | |
@@ -37,7 +39,7 @@ Les règles de `en.md` s’appliquent aussi (identifiants, placeholders, pluriel
 | library | bibliothèque | |
 | plan (a workout for a day) | prévoir | « Prévoir pour un jour ». |
 | treadmill | tapis de course, tapis | « tapis » seul une fois le contexte posé. |
-| belt (treadmill) | tapis | « Le tapis s’est arrêté ». |
+| belt (treadmill) | tapis, bande | « Le tapis s’est arrêté » ; « bande » quand il faut la distinguer de la machine. |
 | heart rate band | ceinture cardio | |
 | foot pod | pod de foulée | |
 | heart rate | fréquence cardiaque | |
@@ -49,6 +51,7 @@ Les règles de `en.md` s’appliquent aussi (identifiants, placeholders, pluriel
 | no equipment | sans matériel | |
 | core (muscle) | abdominaux, abdos | « Abdos » sur les filtres courts. |
 | core (pattern) | gainage | |
+| carry (pattern) | portage | |
 | hinge | charnière de hanche | |
 | rehab | rééducation | |
 | strength | renforcement | |
