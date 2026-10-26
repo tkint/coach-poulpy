@@ -188,8 +188,8 @@ class PlanningModelsTest {
         val model = page(legs)
         val empty = model.state.await { it.loaded && it.found }
         assertTrue(empty.plans.isEmpty())
-        assertEquals("Goblet squat", empty.steps.single().name)
-        assertTrue(empty.steps.single().prescription.startsWith("3 × 10"))
+        assertEquals("Goblet squat", empty.structure.single().row!!.name)
+        assertTrue(empty.structure.single().row!!.prescription.startsWith("3 × 10"))
         assertTrue(empty.editable)
 
         // A past day is ignored: only today on can be planned.

@@ -32,6 +32,7 @@ sealed interface Step {
         override val id: StepId,
         val exercise: ExerciseSlug,
         val prescription: Prescription,
+        val role: StepRole = StepRole.WORK,
     ) : Step
 
     @Serializable @SerialName("group")
@@ -49,6 +50,10 @@ sealed interface Step {
         val duration: Duration,
     ) : Step
 }
+
+/** What a step is for in the workout; saved workouts without one are work. */
+@Serializable
+enum class StepRole { WARM_UP, WORK, RECOVER, COOL_DOWN }
 
 @Serializable
 enum class GroupKind { SEQUENCE, SUPERSET, CIRCUIT, INTERVALS }
@@ -75,6 +80,9 @@ sealed interface Target {
     @Serializable @SerialName("duration") data class Time(val duration: Duration) : Target
     @Serializable @SerialName("distance") data class Distance(val meters: Double) : Target
     @Serializable @SerialName("hold") data class Hold(val duration: Duration) : Target
+
+    /** No set amount: the step ends when the person taps Next, or Finish on the last step. */
+    @Serializable @SerialName("open") data object Open : Target
 }
 
 @Serializable

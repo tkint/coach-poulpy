@@ -9,8 +9,8 @@ import ch.coachpoulpy.core.model.WorkoutType
 /** Stretching and mobility: holds and timed drills run on a timer, slow reps (cat-cow) wait for a tap. */
 object MobilityModule : WorkoutTypeModule {
     override val type = WorkoutType.MOBILITY
-    override val acceptedTargets = setOf(Target.Hold::class, Target.Time::class, Target.Reps::class)
+    override val acceptedTargets = setOf(Target.Hold::class, Target.Time::class, Target.Reps::class, Target.Open::class)
 
     override fun completionRule(set: SetPrescription): CompletionRule =
-        if (set.target is Target.Reps) CompletionRule.Manual else CompletionRule.Timer
+        if (set.target is Target.Reps || set.target is Target.Open) CompletionRule.Manual else CompletionRule.Timer
 }

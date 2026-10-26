@@ -22,17 +22,18 @@ class PlayerModelTest {
         fun advance(by: Duration) { now += by }
     }
 
-    /** Push-ups 2 x 10 with 45 s rest, then a 30 s plank. */
+    /** Twice 10 push-ups and a 45 s rest, then a 30 s plank. */
     private fun workout(): WorkoutId {
         val builder = graph.createWorkout("en")
         builder.rename("Quick")
         builder.setType(WorkoutType.STRENGTH)
-        builder.add("push-up")
+        builder.addRepeat()
+        val repeat = builder.state.value.steps.single().key
+        builder.add("push-up", repeat)
+        builder.addRest(repeat)
+        builder.changeRest(builder.state.value.addedKey!!, -1)
         builder.add("plank")
-        val (push, plank) = builder.state.value.rows.map { it.key }
-        builder.setSets(push, 2)
-        builder.changeRest(push, -1)
-        builder.setSets(plank, 1)
+        builder.setSets(builder.state.value.addedKey!!, 1)
         return WorkoutId(builder.save()!!)
     }
 
@@ -53,8 +54,7 @@ class PlayerModelTest {
         player.start()
         with(player.state.value) {
             assertEquals("Push-up", title)
-            assertEquals(1, setNumber)
-            assertEquals(2, setCount)
+            assertEquals("Round 1 of 2", roundLabel)
             assertEquals("10 reps", targetLabel)
             assertEquals(false, isTimed)
         }
@@ -68,7 +68,7 @@ class PlayerModelTest {
 
         clock.advance(45.seconds)
         player.tick()
-        assertEquals(2, player.state.value.setNumber)
+        assertEquals("Round 2 of 2", player.state.value.roundLabel)
 
         player.done()
         clock.advance(45.seconds)

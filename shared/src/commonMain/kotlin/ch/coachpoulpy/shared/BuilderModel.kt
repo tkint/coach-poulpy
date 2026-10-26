@@ -3,8 +3,10 @@ package ch.coachpoulpy.shared
 import ch.coachpoulpy.catalog.Catalog
 import ch.coachpoulpy.core.engine.WorkoutTypeRegistry
 import ch.coachpoulpy.core.model.ExerciseSlug
+import ch.coachpoulpy.core.model.Ids
 import ch.coachpoulpy.core.model.MeasurementMode
 import ch.coachpoulpy.core.model.MovementPattern
+import ch.coachpoulpy.core.model.StepRole
 import ch.coachpoulpy.core.model.WorkoutType
 import ch.coachpoulpy.data.local.LocalStore
 import kotlinx.coroutines.CoroutineScope
@@ -16,9 +18,20 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlin.math.roundToInt
 
-/** One exercise as the builder screen shows it. */
+/** One exercise or rest as the builder screen shows it. */
 data class BuilderRow(
     val key: String,
+    /** The tag above the name ("Warm-up", "Recover"); null for plain exercise steps. */
+    val roleLabel: String?,
+    val role: StepRole,
+    /** A rest: only its length, kept in [restSeconds], can change. */
+    val isRest: Boolean,
+    /** The repeat holding this step, or null at the top of the workout. */
+    val repeatKey: String?,
+    /** Whether the step right above is a repeat this step can move into. */
+    val canMoveIntoRepeat: Boolean,
+    /** The workout's last step, where "until button press" reads "until the end". */
+    val isLast: Boolean,
     val name: String,
     val pattern: MovementPattern,
     val sets: Int,
@@ -28,11 +41,12 @@ data class BuilderRow(
     val isTimed: Boolean,
     val perSideLabel: String?,
     val loadKg: Double?,
+    /** A rest's length; zero for exercises, whose rests are steps of their own. */
     val restSeconds: Int,
     val restLabel: String,
     /** False when the chosen workout type cannot run this exercise. */
     val fitsType: Boolean,
-    /** The folded card's line, as on the workout page: "3 × 10 · 20 kg · rest 90 s". */
+    /** The folded card's line, as on the workout page: "3 × 10 · 20 kg". */
     val summary: String,
     /** A walk or a run's target, edited instead of sets, reps and weight; null for any other exercise. */
     val target: WalkRunTarget? = null,
@@ -43,7 +57,8 @@ data class BuilderRow(
  * starts with, in [distanceUnit] and [paceUnit]; the labels add the unit.
  */
 data class WalkRunTarget(
-    val kind: TargetKind,
+    val duration: DurationKind,
+    val intensity: IntensityKind,
     val durationSeconds: Int?,
     val durationText: String,
     val durationLabel: String,
@@ -59,17 +74,33 @@ data class WalkRunTarget(
     val hint: String?,
 )
 
+/** Steps done [times] times in a row, as the builder shows them. */
+data class BuilderRepeat(val key: String, val times: Int, val timesLabel: String, val rows: List<BuilderRow>)
+
+/** One step at the top of the workout: either an exercise or rest ([row]), or a repeat ([repeatGroup]; "repeat" is a Swift keyword). */
+data class BuilderStep(val key: String, val row: BuilderRow?, val repeatGroup: BuilderRepeat?)
+
 data class BuilderState(
     val name: String,
     val type: WorkoutType,
     val typeLabel: String,
+    val steps: List<BuilderStep>,
+    /** Every exercise and rest, repeats opened up, in order. */
     val rows: List<BuilderRow>,
+    /** The exercise or rest added last, so the screen can open it. */
+    val addedKey: String?,
     val canSave: Boolean,
 )
 
 data class WorkoutTypeOption(val type: WorkoutType, val label: String)
 
-/** The workout builder: pick exercises, then set sets, reps or time, weight and rest for each. */
+data class StepRoleOption(val role: StepRole, val label: String)
+
+/**
+ * The workout builder: a list of steps (exercises and rests, each with a role) and repeats
+ * that run the steps inside them several times. Each exercise has its sets, reps or time,
+ * weight and rest; a walk or a run has a duration and an intensity instead.
+ */
 class BuilderModel internal constructor(
     initial: WorkoutDraft,
     private val catalog: Catalog,
@@ -80,12 +111,15 @@ class BuilderModel internal constructor(
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private val labels = Labels(languageCode)
-    private var draft = initial.copy(entries = initial.entries.map { it.inUnits(units()) })
+    private var draft = initial.copy(steps = initial.steps.mapLeaves { (it as? DraftEntry)?.inUnits(units()) ?: it })
+    private var addedKey: String? = null
     private val mutableState = MutableStateFlow(render(draft))
 
     val isEditing: Boolean = initial.id != null
 
     val typeOptions: List<WorkoutTypeOption> = BUILDER_TYPES.map { WorkoutTypeOption(it, labels.workoutType(it)) }
+
+    val roleOptions: List<StepRoleOption> = StepRole.entries.map { StepRoleOption(it, labels.roleName(it)) }
 
     val state: StateFlow<BuilderState> = mutableState.asStateFlow()
 
@@ -98,24 +132,80 @@ class BuilderModel internal constructor(
 
     fun setType(type: WorkoutType) = edit { copy(type = type) }
 
-    fun add(slug: String) {
+    /**
+     * Adds an exercise with its [role] at the end of the workout, or at the end of the repeat
+     * [repeatKey]. A warm-up goes before every other step, after the warm-ups already there.
+     * A walk or a run starts with a distance.
+     */
+    fun add(slug: String, repeatKey: String? = null, role: StepRole = StepRole.WORK) {
         val exercise = catalog[ExerciseSlug(slug)] ?: return
-        edit { copy(entries = entries + DraftEntry.new(exercise, type, units())) }
+        val warmUp = role == StepRole.WARM_UP
+        val entry = DraftEntry.new(exercise, draft.type, units(), inRepeat = repeatKey != null && !warmUp)
+            .copy(role = role)
+            .let { if (it.walkOrRun) it.withDuration(DurationKind.DISTANCE) else it }
+        if (warmUp) {
+            val at = draft.steps.takeWhile { it is DraftEntry && it.role == StepRole.WARM_UP }.size
+            edit { copy(steps = steps.toMutableList().apply { add(at, entry) }) }
+            addedKey = entry.key
+            mutableState.value = render(draft)
+        } else {
+            addStep(entry, repeatKey)
+        }
     }
 
-    fun remove(key: String) = edit { copy(entries = entries.filterNot { it.key == key }) }
+    /** Puts a copy of a step, or of a repeat and its steps, right after it. */
+    fun duplicate(key: String) = editList(key) { list ->
+        val index = list.indexOfFirst { it.key == key }
+        list.toMutableList().apply { add(index + 1, list[index].copied()) }
+    }
+
+    /** Adds a one-minute rest at the end of the workout, or at the end of the repeat [repeatKey]. */
+    fun addRest(repeatKey: String? = null) = addStep(DraftRest(Ids.newUuidV7(), DEFAULT_REST), repeatKey)
+
+    /** Adds an empty repeat, done twice, at the end of the workout. */
+    fun addRepeat() = edit { copy(steps = steps + DraftRepeat(Ids.newUuidV7(), 2, emptyList())) }
+
+    fun setRepeatTimes(key: String, times: Int) = edit {
+        copy(steps = steps.map { if (it is DraftRepeat && it.key == key) it.copy(times = times.coerceIn(1, MAX_TIMES)) else it })
+    }
+
+    /** Removes a step, or a repeat with everything in it. */
+    fun remove(key: String) = edit {
+        copy(steps = steps.filterNot { it.key == key }.map { if (it is DraftRepeat) it.copy(steps = it.steps.filterNot { s -> s.key == key }) else it })
+    }
 
     fun moveUp(key: String) = moveBy(key, -1)
     fun moveDown(key: String) = moveBy(key, +1)
 
-    /** Moves the exercise to [toIndex] in the list, as a drag drops it; out-of-range indexes clamp to the ends. */
-    fun move(key: String, toIndex: Int) = edit {
-        val from = entries.indexOfFirst { it.key == key }
-        if (from < 0) return@edit this
-        val to = toIndex.coerceIn(0, entries.lastIndex)
-        if (to == from) return@edit this
-        copy(entries = entries.toMutableList().apply { add(to, removeAt(from)) })
+    /**
+     * Moves a step to [toIndex] in the list that holds it (the workout, or its repeat), as a
+     * drag drops it; out-of-range indexes clamp to the ends.
+     */
+    fun move(key: String, toIndex: Int) = editList(key) { list ->
+        val from = list.indexOfFirst { it.key == key }
+        val to = toIndex.coerceIn(0, list.lastIndex)
+        if (to == from) list else list.toMutableList().apply { add(to, removeAt(from)) }
     }
+
+    /** Puts a step at the end of the repeat right above it. */
+    fun moveIntoRepeatAbove(key: String) = edit {
+        val index = steps.indexOfFirst { it.key == key }
+        val above = steps.getOrNull(index - 1) as? DraftRepeat
+        val step = steps.getOrNull(index)
+        if (above == null || step == null || step is DraftRepeat) return@edit this
+        copy(steps = steps.toMutableList().apply { removeAt(index); set(index - 1, above.copy(steps = above.steps + step)) })
+    }
+
+    /** Takes a step out of its repeat and puts it right after the repeat. */
+    fun moveOutOfRepeat(key: String) = edit {
+        val index = steps.indexOfFirst { it is DraftRepeat && it.steps.any { s -> s.key == key } }
+        val repeat = steps.getOrNull(index) as? DraftRepeat ?: return@edit this
+        val step = repeat.steps.first { it.key == key }
+        copy(steps = steps.toMutableList().apply { set(index, repeat.copy(steps = repeat.steps - step)); add(index + 1, step) })
+    }
+
+    /** What the step is for: warm-up, exercise, recover or cool down. A rest is always a Recover step. */
+    fun setRole(key: String, role: StepRole) = editEntry(key) { copy(role = role) }
 
     fun setSets(key: String, sets: Int) = editEntry(key) { copy(sets = sets.coerceIn(1, 20)) }
 
@@ -127,31 +217,45 @@ class BuilderModel internal constructor(
     /** Sets the weight; zero or less means no weight. */
     fun setLoadKg(key: String, kg: Double) = editEntry(key) { copy(loadKg = kg.takeIf { it > 0.0 }) }
 
-    fun changeRest(key: String, steps: Int) = editEntry(key) {
-        copy(restSeconds = (restSeconds + steps * REST_STEP).coerceIn(0, 600))
+    /** Changes the length of a rest step. */
+    fun changeRest(key: String, steps: Int) {
+        edit {
+            copy(
+                steps = this.steps.mapLeaves {
+                    if (it is DraftRest && it.key == key) it.copy(seconds = (it.seconds + steps * REST_STEP).coerceIn(REST_STEP, 600)) else it
+                },
+            )
+        }
     }
 
     /**
-     * Gives a walk or a run another target. A distance starts at 5 km (3 mi) for a run and
-     * 2 km (1 mi) for a walk, a pace at 10 km/h for a run and 6 km/h for a walk.
+     * Says how a walk or a run ends. A distance starts at 5 km (3 mi) for a run and 2 km (1 mi)
+     * for a walk; until button press keeps the duration and distance for when it comes back.
      */
-    fun setTarget(key: String, kind: TargetKind) = editEntry(key) {
-        if (!walkOrRun) return@editEntry this
-        val byDistance = kind == TargetKind.DISTANCE || kind == TargetKind.DISTANCE_PACE
-        val withPace = kind == TargetKind.DURATION_PACE || kind == TargetKind.DISTANCE_PACE
+    fun setDurationKind(key: String, kind: DurationKind) = editEntry(key) { withDuration(kind) }
+
+    private fun DraftEntry.withDuration(kind: DurationKind): DraftEntry {
+        if (!walkOrRun) return this
         val run = isRun(exercise)
-        val measured = when {
-            byDistance && measurement != MeasurementMode.DISTANCE -> {
+        return when {
+            kind == DurationKind.UNTIL_PRESSED -> copy(open = true)
+            kind == DurationKind.DISTANCE && measurement != MeasurementMode.DISTANCE -> {
                 val meters = if (distanceUnit == DistanceUnit.MI) (if (run) 3 else 1) * DistanceUnit.MI.meters else (if (run) 5000.0 else 2000.0)
-                copy(measurement = MeasurementMode.DISTANCE, amount = meters.roundToInt())
+                copy(measurement = MeasurementMode.DISTANCE, amount = meters.roundToInt(), open = false)
             }
-            !byDistance && measurement != MeasurementMode.TIME -> copy(measurement = MeasurementMode.TIME, amount = DraftEntry.WALK_OR_RUN_MINUTES * 60)
-            else -> this
+            kind == DurationKind.TIME && measurement != MeasurementMode.TIME ->
+                copy(measurement = MeasurementMode.TIME, amount = DraftEntry.WALK_OR_RUN_MINUTES * 60, open = false)
+            else -> copy(open = false)
         }
+    }
+
+    /** Free, or at a pace that starts at 10 km/h for a run and 6 km/h for a walk. */
+    fun setIntensityKind(key: String, kind: IntensityKind) = editEntry(key) {
         when {
-            !withPace -> measured.copy(speedKmh = null)
-            measured.speedKmh != null -> measured
-            else -> measured.copy(speedKmh = defaultSpeed(run, paceUnit))
+            !walkOrRun -> this
+            kind == IntensityKind.FREE -> copy(speedKmh = null)
+            speedKmh != null -> this
+            else -> copy(speedKmh = defaultSpeed(isRun(exercise), paceUnit))
         }
     }
 
@@ -186,14 +290,14 @@ class BuilderModel internal constructor(
     /** Applies a typed duration ("45", "1:05:00"); false when it cannot be read. */
     fun setDuration(key: String, text: String): Boolean {
         val seconds = TargetInput.parseDuration(text)?.takeIf { it <= MAX_SECONDS } ?: return false
-        editEntry(key) { if (walkOrRun) copy(measurement = MeasurementMode.TIME, amount = seconds) else this }
+        editEntry(key) { if (walkOrRun) copy(measurement = MeasurementMode.TIME, amount = seconds, open = false) else this }
         return true
     }
 
     /** Applies a typed distance in [unit], which the block keeps; false when it cannot be read. */
     fun setDistance(key: String, text: String, unit: DistanceUnit): Boolean {
         val meters = TargetInput.parseDistance(text, unit)?.takeIf { it in 1.0..MAX_METERS } ?: return false
-        editEntry(key) { if (walkOrRun) copy(measurement = MeasurementMode.DISTANCE, amount = meters.roundToInt(), distanceUnit = unit) else this }
+        editEntry(key) { if (walkOrRun) copy(measurement = MeasurementMode.DISTANCE, amount = meters.roundToInt(), distanceUnit = unit, open = false) else this }
         return true
     }
 
@@ -209,19 +313,19 @@ class BuilderModel internal constructor(
      * keeps [unit] for the block, and returns the distance written in it.
      */
     fun setDistanceUnit(key: String, unit: DistanceUnit, typed: String): String {
-        val entry = draft.entries.firstOrNull { it.key == key } ?: return typed
+        val entry = entry(key) ?: return typed
         setDistance(key, typed, entry.distanceUnit)
         editEntry(key) { copy(distanceUnit = unit) }
-        val meters = draft.entries.first { it.key == key }.let { if (it.measurement == MeasurementMode.DISTANCE) it.amount.toDouble() else null }
+        val meters = entry(key)!!.let { if (it.measurement == MeasurementMode.DISTANCE) it.amount.toDouble() else null }
         return meters?.let { TargetInput.formatDistance(it, unit) } ?: typed
     }
 
     /** Like [setDistanceUnit], for the pace: "6:00" /km becomes "10.0" km/h. */
     fun setPaceUnit(key: String, unit: PaceUnit, typed: String): String {
-        val entry = draft.entries.firstOrNull { it.key == key } ?: return typed
+        val entry = entry(key) ?: return typed
         setPace(key, typed, entry.paceUnit)
         editEntry(key) { copy(paceUnit = unit) }
-        val kmh = draft.entries.first { it.key == key }.speedKmh
+        val kmh = entry(key)!!.speedKmh
         return kmh?.let { TargetInput.formatPace(it, unit) } ?: typed
     }
 
@@ -250,7 +354,7 @@ class BuilderModel internal constructor(
 
     /** The value sheet's quick picks for a pace in [unit], slower ones for a walk and faster ones for a run. */
     fun pacePicks(key: String, unit: PaceUnit): List<ValuePick> {
-        val run = draft.entries.firstOrNull { it.key == key }?.let { isRun(it.exercise) } ?: false
+        val run = entry(key)?.let { isRun(it.exercise) } ?: false
         val texts = when (unit) {
             PaceUnit.PER_KM -> if (run) listOf("7:00", "6:00", "5:30", "5:00", "4:30") else listOf("12:00", "10:00", "9:00", "8:00")
             PaceUnit.PER_MI -> if (run) listOf("11:00", "10:00", "9:00", "8:00", "7:00") else listOf("20:00", "18:00", "16:00", "14:00")
@@ -277,51 +381,124 @@ class BuilderModel internal constructor(
     }
 
     private fun editEntry(key: String, change: DraftEntry.() -> DraftEntry) = edit {
-        copy(entries = entries.map { if (it.key == key) it.change() else it })
+        copy(steps = steps.mapLeaves { if (it is DraftEntry && it.key == key) it.change() else it })
     }
 
+    /** Changes the list holding [key]: the workout's steps, or its repeat's. */
+    private fun editList(key: String, change: (List<DraftStep>) -> List<DraftStep>) = edit {
+        if (steps.any { it.key == key }) {
+            copy(steps = change(steps))
+        } else {
+            copy(steps = steps.map { if (it is DraftRepeat && it.steps.any { s -> s.key == key }) it.copy(steps = change(it.steps)) else it })
+        }
+    }
+
+    private fun addStep(step: DraftStep, repeatKey: String?) {
+        edit {
+            if (repeatKey == null) {
+                copy(steps = steps + step)
+            } else {
+                copy(steps = steps.map { if (it is DraftRepeat && it.key == repeatKey) it.copy(steps = it.steps + step) else it })
+            }
+        }
+        addedKey = step.key
+        mutableState.value = render(draft)
+    }
+
+    private fun entry(key: String) = draft.leaves.firstOrNull { it.key == key } as? DraftEntry
+
     private fun moveBy(key: String, by: Int) {
-        val from = draft.entries.indexOfFirst { it.key == key }
-        val to = from + by
-        if (from < 0 || to !in draft.entries.indices) return
+        val list = draft.steps.takeIf { s -> s.any { it.key == key } }
+            ?: draft.steps.filterIsInstance<DraftRepeat>().firstOrNull { r -> r.steps.any { it.key == key } }?.steps
+            ?: return
+        val to = list.indexOfFirst { it.key == key } + by
+        if (to !in list.indices) return
         move(key, to)
     }
 
     private fun render(draft: WorkoutDraft): BuilderState {
-        val rows = draft.entries.map { entry ->
-            val exercise = catalog[entry.exercise]
-            BuilderRow(
-                key = entry.key,
-                name = exercise?.let { labels.text(it.name) } ?: entry.exercise.value,
-                pattern = exercise?.movementPattern ?: MovementPattern.CORE,
-                sets = entry.sets,
-                amount = entry.amount,
-                amountLabel = labels.amount(entry.measurement, entry.amount),
-                isTimed = entry.measurement == MeasurementMode.TIME || entry.measurement == MeasurementMode.HOLD,
-                perSideLabel = if (entry.perSide) labels.perSide else null,
-                loadKg = entry.loadKg,
-                restSeconds = entry.restSeconds,
-                restLabel = labels.duration(entry.restSeconds),
-                fitsType = registry.fits(draft.type, entry),
-                summary = labels.prescription(entry),
-                target = entry.targetKind?.let { target(entry, it) },
-            )
+        // "Until the end" only makes sense at the very end, not on every round of a repeat.
+        val lastKey = draft.steps.lastOrNull()?.takeIf { it !is DraftRepeat }?.key
+        fun row(step: DraftStep, repeatKey: String?, above: DraftStep?): BuilderRow = when (step) {
+            is DraftEntry -> entryRow(step, repeatKey, above is DraftRepeat && repeatKey == null, step.key == lastKey)
+            is DraftRest -> restRow(step, repeatKey, above is DraftRepeat && repeatKey == null, step.key == lastKey)
+            is DraftRepeat -> error("A repeat holds no repeat")
         }
+        val steps = draft.steps.mapIndexed { index, step ->
+            if (step is DraftRepeat) {
+                val rows = step.steps.mapIndexed { i, child -> row(child, step.key, step.steps.getOrNull(i - 1)) }
+                BuilderStep(step.key, null, BuilderRepeat(step.key, step.times, labels.times(step.times), rows))
+            } else {
+                BuilderStep(step.key, row(step, null, draft.steps.getOrNull(index - 1)), null)
+            }
+        }
+        val rows = steps.flatMap { it.row?.let(::listOf) ?: it.repeatGroup!!.rows }
         return BuilderState(
             name = draft.name,
             type = draft.type,
             typeLabel = labels.workoutType(draft.type),
+            steps = steps,
             rows = rows,
-            canSave = draft.name.isNotBlank() && rows.isNotEmpty() && rows.all { it.fitsType },
+            addedKey = addedKey,
+            canSave = draft.name.isNotBlank() && rows.any { !it.isRest } && rows.all { it.fitsType } &&
+                steps.all { it.repeatGroup?.rows?.isNotEmpty() ?: true },
         )
     }
 
-    private fun target(entry: DraftEntry, kind: TargetKind): WalkRunTarget {
-        val seconds = entry.amount.takeIf { entry.measurement == MeasurementMode.TIME }
-        val meters = entry.amount.toDouble().takeIf { entry.measurement == MeasurementMode.DISTANCE }
+    private fun restRow(rest: DraftRest, repeatKey: String?, canMoveIntoRepeat: Boolean, last: Boolean) = BuilderRow(
+        key = rest.key,
+        roleLabel = labels.role(StepRole.RECOVER),
+        role = StepRole.RECOVER,
+        isRest = true,
+        repeatKey = repeatKey,
+        canMoveIntoRepeat = canMoveIntoRepeat,
+        isLast = last,
+        name = labels.rest,
+        pattern = MovementPattern.MOBILITY,
+        sets = 1,
+        amount = rest.seconds,
+        amountLabel = labels.duration(rest.seconds),
+        isTimed = true,
+        perSideLabel = null,
+        loadKg = null,
+        restSeconds = rest.seconds,
+        restLabel = labels.duration(rest.seconds),
+        fitsType = true,
+        summary = labels.longDuration(rest.seconds),
+    )
+
+    private fun entryRow(entry: DraftEntry, repeatKey: String?, canMoveIntoRepeat: Boolean, last: Boolean): BuilderRow {
+        val exercise = catalog[entry.exercise]
+        return BuilderRow(
+            key = entry.key,
+            roleLabel = labels.role(entry.role),
+            role = entry.role,
+            isRest = false,
+            repeatKey = repeatKey,
+            canMoveIntoRepeat = canMoveIntoRepeat,
+            isLast = last,
+            name = exercise?.let { labels.text(it.name) } ?: entry.exercise.value,
+            pattern = exercise?.movementPattern ?: MovementPattern.CORE,
+            sets = entry.sets,
+            amount = entry.amount,
+            amountLabel = labels.amount(entry.measurement, entry.amount),
+            isTimed = entry.measurement == MeasurementMode.TIME || entry.measurement == MeasurementMode.HOLD,
+            perSideLabel = if (entry.perSide) labels.perSide else null,
+            loadKg = entry.loadKg,
+            restSeconds = 0,
+            restLabel = "",
+            fitsType = registry.fits(draft.type, entry),
+            summary = labels.prescription(entry, last),
+            target = entry.durationKind?.let { target(entry, it, entry.intensityKind!!) },
+        )
+    }
+
+    private fun target(entry: DraftEntry, duration: DurationKind, intensity: IntensityKind): WalkRunTarget {
+        val seconds = entry.amount.takeIf { !entry.open && entry.measurement == MeasurementMode.TIME }
+        val meters = entry.amount.toDouble().takeIf { !entry.open && entry.measurement == MeasurementMode.DISTANCE }
         val kmh = entry.speedKmh
         val shownDistance = meters ?: 0.0
-        val hint = kmh?.let {
+        val hint = kmh?.takeIf { !entry.open }?.let {
             val other = TargetInput.paceLabel(it, TargetInput.other(entry.paceUnit))
             val outcome = if (seconds != null) {
                 TargetInput.distanceLabel(it * seconds / 3.6, entry.distanceUnit.takeIf { unit -> unit != DistanceUnit.M } ?: DistanceUnit.KM)
@@ -331,7 +508,8 @@ class BuilderModel internal constructor(
             "$other · ${labels.about(outcome)}"
         }
         return WalkRunTarget(
-            kind = kind,
+            duration = duration,
+            intensity = intensity,
             durationSeconds = seconds,
             durationText = TargetInput.formatDuration(seconds ?: DraftEntry.WALK_OR_RUN_MINUTES * 60),
             durationLabel = labels.longDuration(seconds ?: DraftEntry.WALK_OR_RUN_MINUTES * 60),
@@ -356,9 +534,23 @@ class BuilderModel internal constructor(
 
     private companion object {
         const val REST_STEP = 15
+        const val DEFAULT_REST = 60
+        const val MAX_TIMES = 50
         const val MAX_SECONDS = 12 * 3600
         const val MAX_METERS = 200_000.0
         val RUN = ExerciseSlug("run")
         val BUILDER_TYPES = listOf(WorkoutType.STRENGTH, WorkoutType.CONDITIONING, WorkoutType.MOBILITY, WorkoutType.REHAB, WorkoutType.TREADMILL)
     }
+}
+
+/** Changes every exercise and rest, inside repeats too. */
+internal fun List<DraftStep>.mapLeaves(change: (DraftStep) -> DraftStep): List<DraftStep> = map { step ->
+    if (step is DraftRepeat) step.copy(steps = step.steps.map(change)) else change(step)
+}
+
+/** The same step with new keys, so the copy is its own step. */
+internal fun DraftStep.copied(): DraftStep = when (this) {
+    is DraftEntry -> copy(key = Ids.newUuidV7())
+    is DraftRest -> copy(key = Ids.newUuidV7())
+    is DraftRepeat -> copy(key = Ids.newUuidV7(), steps = steps.map { it.copied() })
 }

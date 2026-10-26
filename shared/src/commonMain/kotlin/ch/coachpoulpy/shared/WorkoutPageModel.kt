@@ -4,6 +4,7 @@ import ch.coachpoulpy.catalog.Catalog
 import ch.coachpoulpy.core.engine.TimelineCompiler
 import ch.coachpoulpy.core.model.MovementPattern
 import ch.coachpoulpy.core.model.Step
+import ch.coachpoulpy.core.model.StepRole
 import ch.coachpoulpy.core.model.Workout
 import ch.coachpoulpy.core.model.WorkoutId
 import ch.coachpoulpy.core.model.WorkoutType
@@ -25,14 +26,24 @@ import kotlinx.datetime.daysUntil
 import kotlinx.datetime.number
 import kotlinx.datetime.toLocalDateTime
 
-/** One exercise of the workout page: "3 × 10 each side · 14 kg · rest 60 s". */
+/** One exercise of the workout page: "3 × 10 each side · 14 kg", or a rest. */
 data class WorkoutStepRow(
     val key: String,
     val slug: String,
     val name: String,
     val pattern: MovementPattern?,
     val prescription: String,
+    /** "Warm-up", "Recover", "Cool down"; null for plain exercise steps. */
+    val roleLabel: String? = null,
+    /** A rest, which has no exercise page to open. */
+    val isRest: Boolean = false,
 )
+
+/** Steps done several times, as the builder shows them: "Repeat · 4 times". */
+data class WorkoutRepeatBlock(val key: String, val timesLabel: String, val rows: List<WorkoutStepRow>)
+
+/** One step at the top of the workout page: an exercise or rest ([row]), or a repeat ([repeatGroup]). */
+data class WorkoutPageStep(val key: String, val row: WorkoutStepRow?, val repeatGroup: WorkoutRepeatBlock?)
 
 /** A calendar day, [month] 1 to 12, as the plan sheet picks it. */
 data class PlanDate(val year: Int, val month: Int, val day: Int) {
@@ -56,7 +67,8 @@ data class WorkoutPageState(
     val typeLabel: String = "",
     /** "5 exercises · about 40 min · dumbbells, mat". */
     val details: String = "",
-    val steps: List<WorkoutStepRow> = emptyList(),
+    /** The workout's structure, as in the builder: steps and repeats. */
+    val structure: List<WorkoutPageStep> = emptyList(),
     val timesDone: Int = 0,
     val lastDoneMillis: Long? = null,
     /** The middle length of the sessions done, in minutes; null before the first. */
@@ -141,7 +153,7 @@ class WorkoutPageModel internal constructor(
             typeLabel = labels.workoutType(workout.type),
             details = (listOf(labels.exercises(exerciseSteps(workout).size), labels.aboutMinutes(facts.minutes(workout))) +
                 listOfNotNull(equipment.takeIf { it.isNotEmpty() }?.joinToString(", "))).joinToString(" · "),
-            steps = exerciseSteps(workout).map(::stepRow),
+            structure = structure(workout),
             timesDone = done.size,
             lastDoneMillis = done.maxOfOrNull { it.execution.startedAt }?.toEpochMilliseconds(),
             usualMinutes = minutes.getOrNull(minutes.size / 2)?.coerceAtLeast(1),
@@ -151,16 +163,41 @@ class WorkoutPageModel internal constructor(
         )
     }
 
-    private fun stepRow(step: Step.ExerciseStep): WorkoutStepRow {
+    private fun structure(workout: Workout): List<WorkoutPageStep> {
+        val last = workout.steps.lastOrNull()?.id
+        fun leaf(step: Step): WorkoutStepRow? = when (step) {
+            is Step.ExerciseStep -> stepRow(step, last = step.id == last)
+            is Step.Rest -> WorkoutStepRow(
+                key = step.id.value,
+                slug = "",
+                name = labels.rest,
+                pattern = null,
+                prescription = labels.longDuration(step.duration.inWholeSeconds.toInt()),
+                roleLabel = labels.role(StepRole.RECOVER),
+                isRest = true,
+            )
+            is Step.Group -> null
+        }
+        return workout.steps.map { step ->
+            if (step is Step.Group) {
+                WorkoutPageStep(step.id.value, null, WorkoutRepeatBlock(step.id.value, labels.times(step.rounds), step.children.mapNotNull(::leaf)))
+            } else {
+                WorkoutPageStep(step.id.value, leaf(step), null)
+            }
+        }
+    }
+
+    private fun stepRow(step: Step.ExerciseStep, last: Boolean = false): WorkoutStepRow {
         val exercise = catalog[step.exercise]
         val entry = DraftEntry.from(step, exercise)
-        val prescription = entry?.let(labels::prescription) ?: "${step.prescription.sets.size} ×"
+        val prescription = entry?.let { labels.prescription(it, last) } ?: "${step.prescription.sets.size} ×"
         return WorkoutStepRow(
             key = step.id.value,
             slug = step.exercise.value,
             name = exercise?.let { labels.text(it.name) } ?: step.exercise.value,
             pattern = exercise?.movementPattern,
             prescription = prescription,
+            roleLabel = labels.role(step.role),
         )
     }
 }
