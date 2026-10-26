@@ -73,7 +73,7 @@ export default withMermaid(
         { text: 'Brand', link: '/docs/brand' },
         { text: 'Design system', link: '/docs/design-system' },
         { text: 'Architecture', link: '/docs/architecture' },
-        { text: 'Translations', link: '/i18n/' },
+        { text: 'Translations', link: '/translations' },
         { text: 'Contributing', link: '/CONTRIBUTING' },
       ],
       sidebar: [
@@ -105,7 +105,7 @@ export default withMermaid(
         {
           text: 'Translations',
           items: [
-            { text: 'Proofread and translate', link: '/i18n/' },
+            { text: 'Proofread and translate', link: '/translations' },
             { text: 'English rules and notes', link: '/i18n/glossary/en' },
             { text: 'Français : règles et vocabulaire', link: '/i18n/glossary/fr' },
           ],
@@ -117,9 +117,8 @@ export default withMermaid(
       editLink: {
         // Runs in the browser, so it can't use this file's constants.
         pattern: ({ filePath }) => {
-          const path = filePath === 'i18n/index.md' ? 'i18n/README.md' : filePath
-          const shared = ['CONTEXT.md', 'CONTRIBUTING.md'].includes(path) || /^(docs|i18n)\//.test(path)
-          return `https://github.com/tkint/coach-poulpy/edit/main/${shared ? '' : 'site/'}${path}`
+          const shared = ['CONTEXT.md', 'CONTRIBUTING.md'].includes(filePath) || /^(docs|i18n)\//.test(filePath)
+          return `https://github.com/tkint/coach-poulpy/edit/main/${shared ? '' : 'site/'}${filePath}`
         },
         text: 'Edit this page on GitHub',
       },

@@ -1,22 +1,24 @@
 # English source: conventions and translator notes
 
-English is the source language (ADR 0014). Every other language translates from `messages/en/`. This file holds the rules every translation follows and a note for each message whose meaning isn't obvious from the English alone. Fink shows only the id and the text, so look an id up here when in doubt.
+English is the source language: every other language translates from it. This page holds the rules every translation follows and a note for each message whose meaning isn't obvious from the English alone. Fink shows only the id and the text, so look an id up here when in doubt.
 
 ## How a message is written
 
 - **Ids** are `<group>.<camelCaseName>`: the group is the screen or area (`library.sortPlanned`, `muscle.chest`). Catalog ids are `<slug>.<field>`, with `<slug>.instructions.<n>` for each instruction in order. No id is the prefix of another.
 - **Placeholders** are named ICU arguments. `{name}` is text, `{count, number}` is a whole number. Keep every placeholder of the English, with the same name; move it wherever the sentence needs it.
 - **Plurals** are ICU `plural`: `{count, plural, one {# session} other {# sessions}}`. `#` is the number. Give every form your language needs (French: `one`, `many`, `other`); Fink lists them.
-- **Apostrophes, ellipses and spaces** need no care: type ' and ... as usual. `i18n/typography.mjs` turns them into ’ and …, and adds the non-breaking spaces a language needs (French: before `: ; ! ? %` and inside « »). It runs on `main` after every merge (`.github/workflows/i18n-typography.yml`), so a Fink pull request needs nothing more.
+- **Apostrophes, ellipses and spaces** need no care: type ' and ... as usual. After each merge they become ’ and …, and the non-breaking spaces a language needs are added (French: before `: ; ! ? %` and inside « »).
 - **Product names** stay as they are: Coach Poulpy, Poulpy.
 
 ## Namespaces
 
-| Namespace | What it holds | Read by |
-| --- | --- | --- |
-| `app` | Android and iOS screen text | the apps |
-| `domain` | Words the shared code shows: muscles, equipment, units, workout types, step roles, Poulpy’s lines | shared Kotlin, on every platform |
-| `catalog` | Exercise names, instructions, variation notes and search aliases | the catalog, built into each version |
+Fink groups messages in three namespaces:
+
+| Namespace | What it holds |
+| --- | --- |
+| `app` | The app’s screens |
+| `domain` | Words shown everywhere: muscles, equipment, units, workout types, step roles, Poulpy’s lines |
+| `catalog` | Exercise names, instructions, variation notes and search aliases |
 
 ## Translator notes
 
@@ -64,7 +66,7 @@ Messages not listed here mean what their English says.
 | `count.position` | “3 of 5”, used in many places. |
 | `unit.*` | Unit formats. `unit.minutesSeconds` and `unit.hoursMinutes`: the second argument is already two digits (“1 h 05”). |
 | `workout.deleteTitle` | `{name}` is the workout’s name, chosen by the person. |
-| `poulpy.*` | Poulpy, the octopus mascot, speaking in the first person. He lights one of his eight tentacles per finished session; eight make a full octopus. He is warm and never guilt-trips. Read `docs/brand.md` before changing his voice. |
+| `poulpy.*` | Poulpy, the octopus mascot, speaking in the first person. He lights one of his eight tentacles per finished session; eight make a full octopus. He is warm and never guilt-trips. His voice is described on the [brand](../../docs/brand.md) page. |
 
 ### catalog
 
