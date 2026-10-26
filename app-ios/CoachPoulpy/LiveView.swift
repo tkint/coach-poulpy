@@ -243,15 +243,15 @@ struct LiveView: View {
                 followMode
             }
             HStack(spacing: 8) {
-                if state.hasTreadmill {
-                    followToggle
-                }
                 Button { model.startRecording(key: state.selected) } label: {
                     Text(LocalizedStringKey(state.hasTreadmill && state.followTreadmill ? "live.wait.treadmill" : "treadmill.start"))
                         .font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: 52)
                 }
                 .buttonStyle(.borderedProminent)
                 .buttonBorderShape(.capsule)
+                if state.hasTreadmill {
+                    followToggle
+                }
             }
         }
         .sheet(isPresented: $choosing) {
@@ -284,27 +284,35 @@ struct LiveView: View {
                     }
                 }
             }
+            // Recording: only Pause (and Skip in a workout). Paused: Resume or Finish.
             HStack(spacing: 8) {
-                Button {
-                    if recording.paused { model.resumeRecording() } else { model.pauseRecording() }
-                } label: {
-                    Image(systemName: recording.paused ? "play.fill" : "pause.fill").frame(width: 28, height: 40)
-                }
-                .buttonStyle(.bordered)
-                .buttonBorderShape(.capsule)
-                .accessibilityLabel(Text(LocalizedStringKey(recording.paused ? "treadmill.resume" : "treadmill.pause")))
-                if !recording.freeRun {
-                    Button { model.skipPhase() } label: {
-                        Text("treadmill.skip").font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: 40)
+                if recording.paused {
+                    Button { model.resumeRecording() } label: {
+                        Label("treadmill.resume", systemImage: "play.fill")
+                            .font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: 40)
                     }
                     .buttonStyle(.bordered)
                     .buttonBorderShape(.capsule)
+                    Button { model.stopRecording() } label: {
+                        Text("treadmill.stop").font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: 40)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .buttonBorderShape(.capsule)
+                } else {
+                    Button { model.pauseRecording() } label: {
+                        Label("treadmill.pause", systemImage: "pause.fill")
+                            .font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: 40)
+                    }
+                    .buttonStyle(.bordered)
+                    .buttonBorderShape(.capsule)
+                    if !recording.freeRun {
+                        Button { model.skipPhase() } label: {
+                            Text("treadmill.skip").font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: 40)
+                        }
+                        .buttonStyle(.bordered)
+                        .buttonBorderShape(.capsule)
+                    }
                 }
-                Button { model.stopRecording() } label: {
-                    Text("treadmill.stop").font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: 40)
-                }
-                .buttonStyle(.borderedProminent)
-                .buttonBorderShape(.capsule)
             }
         }
     }
@@ -400,8 +408,10 @@ struct LiveView: View {
                     Text(LocalizedStringKey(lost ? "live.finish.lost.title" : "live.finish.still.title"))
                         .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 19, relativeTo: .title3))
                         .accessibilityAddTraits(.isHeader)
-                    Text(L(lost ? "live.finish.lost.body" : "live.finish.still.body",
-                           Int64(prompt.sinceMinutes), Int64(prompt.autoFinishMinutes), clock(prompt.endsAtSeconds)))
+                    Text(prompt.reason == .beltStopped
+                         ? L("live.finish.stopped.body", Int64(prompt.autoFinishMinutes), clock(prompt.endsAtSeconds))
+                         : L(lost ? "live.finish.lost.body" : "live.finish.still.body",
+                             Int64(prompt.sinceMinutes), Int64(prompt.autoFinishMinutes), clock(prompt.endsAtSeconds)))
                         .font(.poulpy(.subheadline))
                 }
             }

@@ -203,6 +203,7 @@
 "live.start.now" = "Démarrer maintenant";
 "live.finish.still.title" = "Terminé ?";
 "live.finish.still.body" = "Le tapis s’est arrêté il y a %1$lld min. Sans réponse, Poulpy termine la séance dans %2$lld min, en l’arrêtant à %3$@.";
+"live.finish.stopped.body" = "Vous avez arrêté le tapis. Relancez-le pour continuer, même avec un autre programme. Sans réponse, Poulpy termine la séance dans %1$lld min, en l’arrêtant à %2$@.";
 "live.finish.lost.title" = "Tapis déconnecté";
 "live.finish.lost.body" = "Il s’est déconnecté il y a %1$lld min et Poulpy essaie de le retrouver. Sans réponse, la séance se termine dans %2$lld min, arrêtée à %3$@, quand il a été vu pour la dernière fois.";
 "live.keep.going" = "Continuer";

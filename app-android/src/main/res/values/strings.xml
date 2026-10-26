@@ -238,6 +238,7 @@
     <string name="live_start_now">Start now</string>
     <string name="live_finish_still_title">Finished?</string>
     <string name="live_finish_still_body">The belt stopped %1$d min ago. With no answer, Poulpy finishes the session in %2$d min, ending it at %3$s.</string>
+    <string name="live_finish_stopped_body">You stopped the treadmill. Start it again to carry on, even with another program. With no answer, Poulpy finishes the session in %1$d min, ending it at %2$s.</string>
     <string name="live_finish_lost_title">Lost the treadmill</string>
     <string name="live_finish_lost_body">It disconnected %1$d min ago and Poulpy keeps trying. With no answer, the session finishes in %2$d min, ending at %3$s, when it was last seen.</string>
     <string name="live_keep_going">Keep going</string>

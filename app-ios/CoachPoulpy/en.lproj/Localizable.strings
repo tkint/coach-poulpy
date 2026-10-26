@@ -203,6 +203,7 @@
 "live.start.now" = "Start now";
 "live.finish.still.title" = "Finished?";
 "live.finish.still.body" = "The belt stopped %1$lld min ago. With no answer, Poulpy finishes the session in %2$lld min, ending it at %3$@.";
+"live.finish.stopped.body" = "You stopped the treadmill. Start it again to carry on, even with another program. With no answer, Poulpy finishes the session in %1$lld min, ending it at %2$@.";
 "live.finish.lost.title" = "Lost the treadmill";
 "live.finish.lost.body" = "It disconnected %1$lld min ago and Poulpy keeps trying. With no answer, the session finishes in %2$lld min, ending at %3$@, when it was last seen.";
 "live.keep.going" = "Keep going";

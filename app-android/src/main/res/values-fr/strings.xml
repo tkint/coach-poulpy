@@ -240,6 +240,7 @@
     <string name="live_start_now">Démarrer maintenant</string>
     <string name="live_finish_still_title">Terminé ?</string>
     <string name="live_finish_still_body">Le tapis s’est arrêté il y a %1$d min. Sans réponse, Poulpy termine la séance dans %2$d min, en l’arrêtant à %3$s.</string>
+    <string name="live_finish_stopped_body">Vous avez arrêté le tapis. Relancez-le pour continuer, même avec un autre programme. Sans réponse, Poulpy termine la séance dans %1$d min, en l’arrêtant à %2$s.</string>
     <string name="live_finish_lost_title">Tapis déconnecté</string>
     <string name="live_finish_lost_body">Il s’est déconnecté il y a %1$d min et Poulpy essaie de le retrouver. Sans réponse, la séance se termine dans %2$d min, arrêtée à %3$s, quand il a été vu pour la dernière fois.</string>
     <string name="live_keep_going">Continuer</string>

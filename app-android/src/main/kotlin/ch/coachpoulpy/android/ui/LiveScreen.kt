@@ -41,7 +41,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.IconButton
@@ -323,10 +322,10 @@ private fun ChoicePicker(state: LiveUiState, model: LiveModel) {
     }
     if (state.hasTreadmill) FollowMode(state.followTreadmill)
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-        if (state.hasTreadmill) FollowToggle(state.followTreadmill, model::setFollowTreadmill)
         Button(onClick = { model.startRecording(state.selected) }, modifier = Modifier.weight(1f).height(52.dp)) {
             Text(stringResource(if (state.hasTreadmill && state.followTreadmill) R.string.live_wait_treadmill else R.string.treadmill_start))
         }
+        if (state.hasTreadmill) FollowToggle(state.followTreadmill, model::setFollowTreadmill)
     }
     if (picking) {
         ChoiceSheet(state, onPick = { model.select(it); picking = false }, onDismiss = { picking = false })
@@ -409,19 +408,24 @@ private fun Recording(recording: RecordingUi, units: UnitSystem, model: LiveMode
         }
     }
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-        OutlinedIconButton(
-            onClick = if (recording.paused) model::resumeRecording else model::pauseRecording,
-            modifier = Modifier.size(52.dp),
-        ) {
-            Icon(
-                if (recording.paused) Icons.Filled.PlayArrow else Icons.Filled.Pause,
-                contentDescription = stringResource(if (recording.paused) R.string.treadmill_resume else R.string.treadmill_pause),
-            )
+        // Recording: only Pause (and Skip in a workout). Paused: Resume or Finish.
+        if (recording.paused) {
+            OutlinedButton(onClick = model::resumeRecording, modifier = Modifier.weight(1f).height(52.dp)) {
+                Icon(Icons.Filled.PlayArrow, contentDescription = null)
+                Spacer(Modifier.size(6.dp))
+                Text(stringResource(R.string.treadmill_resume))
+            }
+            Button(onClick = model::stopRecording, modifier = Modifier.weight(1f).height(52.dp)) { Text(stringResource(R.string.treadmill_stop)) }
+        } else {
+            OutlinedButton(onClick = model::pauseRecording, modifier = Modifier.weight(1f).height(52.dp)) {
+                Icon(Icons.Filled.Pause, contentDescription = null)
+                Spacer(Modifier.size(6.dp))
+                Text(stringResource(R.string.treadmill_pause))
+            }
+            if (!recording.freeRun) {
+                OutlinedButton(onClick = model::skipPhase, modifier = Modifier.weight(1f).height(52.dp)) { Text(stringResource(R.string.treadmill_skip)) }
+            }
         }
-        if (!recording.freeRun) {
-            OutlinedButton(onClick = model::skipPhase, modifier = Modifier.weight(1f).height(52.dp)) { Text(stringResource(R.string.treadmill_skip)) }
-        }
-        Button(onClick = model::stopRecording, modifier = Modifier.weight(1f).height(52.dp)) { Text(stringResource(R.string.treadmill_stop)) }
     }
 }
 
@@ -510,12 +514,16 @@ private fun FinishCard(prompt: FinishPromptUi, model: LiveModel) {
                         modifier = Modifier.semantics { heading() },
                     )
                     Text(
-                        stringResource(
-                            if (lost) R.string.live_finish_lost_body else R.string.live_finish_still_body,
-                            prompt.sinceMinutes,
-                            prompt.autoFinishMinutes,
-                            clock(prompt.endsAtSeconds),
-                        ),
+                        when (prompt.reason) {
+                            FinishReason.BELT_STOPPED ->
+                                stringResource(R.string.live_finish_stopped_body, prompt.autoFinishMinutes, clock(prompt.endsAtSeconds))
+                            else -> stringResource(
+                                if (lost) R.string.live_finish_lost_body else R.string.live_finish_still_body,
+                                prompt.sinceMinutes,
+                                prompt.autoFinishMinutes,
+                                clock(prompt.endsAtSeconds),
+                            )
+                        },
                         style = MaterialTheme.typography.bodyMedium,
                     )
                 }

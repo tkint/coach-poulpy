@@ -389,18 +389,57 @@ class LiveModelTest {
         central.treadmill.status(0x02, 0x02)
         runCurrent()
         assertEquals(true, m.live.state.value.recording?.paused)
+        advanceTimeBy(30.seconds)
         central.treadmill.status(0x04)
         runCurrent()
         assertEquals(false, m.live.state.value.recording?.paused)
+        // The timer counts only the time recorded, not the pause.
+        assertEquals(60L, m.live.state.value.recording?.elapsedSeconds)
 
+        // Stop pauses and asks: another program may follow on the treadmill.
         central.treadmill.status(0x02, 0x01)
         runCurrent()
+        assertEquals(true, m.live.state.value.recording?.paused)
+        assertEquals(FinishReason.BELT_STOPPED, m.live.state.value.finishPrompt?.reason)
+        central.treadmill.status(0x04)
+        runCurrent()
+        assertEquals(false, m.live.state.value.recording?.paused)
+        assertNull(m.live.state.value.finishPrompt)
+
+        // With no answer, it finishes on its own, ending when Stop was pressed.
+        advanceTimeBy(60.seconds)
+        central.treadmill.status(0x02, 0x01)
+        runCurrent()
+        assertEquals(120L, m.live.state.value.finishPrompt?.endsAtSeconds)
+        advanceTimeBy(10.minutes + 1.seconds)
         assertNull(m.live.state.value.recording)
-        assertNotNull(m.live.state.value.summary)
+        assertEquals(120L, m.live.state.value.summary?.durationSeconds)
     }
 
     @Test
-    fun aStopOnTheConsoleSkipsTheRestOfAWorkout() = runTest {
+    fun keepGoingAfterAStopOnTheConsoleStaysPaused() = runTest {
+        val central = FakeCentral()
+        val m = models(central, LocalStore(DriverFactory()))
+        addTreadmill(m)
+        central.treadmill.send(speedCentiKmh = 800, meters = 0, bpm = 120)
+        runCurrent()
+        m.live.startRecording("exercise:run")
+        advanceTimeBy(60.seconds)
+        central.treadmill.status(0x02, 0x01)
+        runCurrent()
+        assertEquals(FinishReason.BELT_STOPPED, m.live.state.value.finishPrompt?.reason)
+
+        m.live.keepGoing()
+        advanceTimeBy(1.minutes)
+        assertNull(m.live.state.value.finishPrompt)
+        assertEquals(true, m.live.state.value.recording?.paused)
+        // Still stopped a full wait later: the usual question comes back.
+        advanceTimeBy(10.minutes)
+        assertEquals(FinishReason.BELT_STILL, m.live.state.value.finishPrompt?.reason)
+    }
+
+    @Test
+    fun finishingAfterAStopOnTheConsoleSkipsTheRestOfAWorkout() = runTest {
         val central = FakeCentral()
         val store = LocalStore(DriverFactory())
         // A saved treadmill workout of a few steps; the demo is no longer offered.
@@ -420,6 +459,8 @@ class LiveModelTest {
         advanceTimeBy(60.seconds)
         central.treadmill.status(0x02, 0x01)
         runCurrent()
+        assertEquals(FinishReason.BELT_STOPPED, m.live.state.value.finishPrompt?.reason)
+        m.live.stopRecording()
         assertNull(m.live.state.value.recording)
         assertNotNull(m.live.state.value.summary)
     }

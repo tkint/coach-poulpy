@@ -31,6 +31,7 @@ import ch.coachpoulpy.types.treadmill.TreadmillModule
 import ch.coachpoulpy.types.treadmill.TreadmillRecorder
 import ch.coachpoulpy.types.treadmill.TreadmillSummary
 import kotlin.time.Clock
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Instant
@@ -73,6 +74,7 @@ data class LiveChoice(val key: String, val name: String, val note: String)
 
 data class RecordingUi(
     val paused: Boolean,
+    /** Time recorded, without the pauses. */
     val elapsedSeconds: Long,
     /** 1-based, out of [phaseCount]. */
     val phaseNumber: Int,
@@ -114,6 +116,9 @@ enum class FinishReason {
 
     /** The treadmill disconnected and has not come back. */
     TREADMILL_LOST,
+
+    /** Stop was pressed on the console: the user may start another program, or be done. */
+    BELT_STOPPED,
 }
 
 /** "Finish the session?", asked when the treadmill went quiet or away for a long time. */
@@ -240,6 +245,9 @@ class LiveModel(
 
         /** Since when the treadmill is disconnected. */
         var lostSince: Instant? = null
+
+        /** "Keep going" was answered to Stop on the console; asked again only once the belt has moved. */
+        var stopAnswered = false
         var prompt: Prompt? = null
     }
 
@@ -488,7 +496,8 @@ class LiveModel(
             BeltStatus.MOVING, BeltStatus.UNKNOWN -> null
             else -> current.stillSince ?: clock.now()
         }
-        if (belt == BeltStatus.MOVING && current.prompt?.reason == FinishReason.BELT_STILL) current.prompt = null
+        if (belt != BeltStatus.STOPPED) current.stopAnswered = false
+        if (belt == BeltStatus.MOVING && current.prompt?.reason in BELT_REASONS) current.prompt = null
         followBelt(belt)
         recording?.let {
             checkInactivity(it)
@@ -497,15 +506,14 @@ class LiveModel(
     }
 
     /**
-     * With [LiveUiState.followTreadmill] on, the recording follows the belt, and Stop on the console finishes it.
-     * A pause the user made on the phone stays theirs.
+     * With [LiveUiState.followTreadmill] on, the recording pauses and resumes with the belt. Stop on the console
+     * pauses too, and asks whether the session is over. A pause the user made on the phone stays theirs.
      */
     private fun followBelt(belt: BeltStatus) {
         val current = recording ?: return
         if (!_state.value.followTreadmill || !devices.hasTreadmill) return
         val status = current.session.state(clock.now()).status
         when {
-            belt == BeltStatus.STOPPED -> stopRecording()
             belt in HALTED && status == SessionState.Status.RUNNING -> {
                 pausedByBelt = true
                 act { it.pause(clock.now()) }
@@ -515,8 +523,9 @@ class LiveModel(
     }
 
     /**
-     * Asks whether the session is over once the belt has been still for [STILL_AFTER] (at once for the safety key)
-     * or the treadmill gone for [LOST_AFTER], and finishes it when nobody answers within [AUTO_FINISH_AFTER].
+     * Asks whether the session is over once the belt has been still for [STILL_AFTER] (at once for the safety key,
+     * and for Stop on the console while following the treadmill) or the treadmill gone for [LOST_AFTER], and
+     * finishes it when nobody answers within [AUTO_FINISH_AFTER].
      */
     private fun checkInactivity(current: Recording) {
         if (recording !== current || !current.hadTreadmill) return
@@ -530,6 +539,7 @@ class LiveModel(
         val still = current.stillSince
         current.prompt = when {
             lost != null && now - lost >= LOST_AFTER -> Prompt(FinishReason.TREADMILL_LOST, lost, now)
+            still != null && _state.value.belt == BeltStatus.STOPPED && _state.value.followTreadmill && !current.stopAnswered -> Prompt(FinishReason.BELT_STOPPED, still, now)
             still != null && (_state.value.belt == BeltStatus.SAFETY_KEY || now - still >= STILL_AFTER) -> Prompt(FinishReason.BELT_STILL, still, now)
             else -> null
         }
@@ -539,6 +549,7 @@ class LiveModel(
     fun keepGoing() {
         val current = recording ?: return
         val now = clock.now()
+        if (current.prompt?.reason == FinishReason.BELT_STOPPED) current.stopAnswered = true
         current.prompt = null
         if (current.stillSince != null) current.stillSince = now
         if (current.lostSince != null) current.lostSince = now
@@ -594,12 +605,11 @@ class LiveModel(
         val now = clock.now()
         val s = current.session.state(now)
         val work = s.phase as? Phase.Work
-        val started = current.session.events.firstOrNull()?.at ?: now
         _state.update {
             it.copy(
                 recording = RecordingUi(
                     paused = s.status == SessionState.Status.PAUSED,
-                    elapsedSeconds = (now - started).inWholeSeconds,
+                    elapsedSeconds = activeTime(current.session.events, now).inWholeSeconds,
                     phaseNumber = s.phaseIndex + 1,
                     phaseCount = current.timeline.phases.size,
                     isRest = s.phase is Phase.Rest,
@@ -614,11 +624,28 @@ class LiveModel(
                         reason = p.reason,
                         sinceMinutes = (now - p.since).inWholeMinutes.toInt(),
                         autoFinishMinutes = ((left.inWholeSeconds + 59) / 60).toInt().coerceAtLeast(0),
-                        endsAtSeconds = (p.since - started).inWholeSeconds.coerceAtLeast(0),
+                        endsAtSeconds = activeTime(current.session.events.filter { e -> e.at <= p.since }, p.since).inWholeSeconds,
                     )
                 },
             )
         }
+    }
+
+    /** The time between each start or resume and the next pause or finish. */
+    private fun activeTime(events: List<SessionEvent>, now: Instant): Duration {
+        var total = Duration.ZERO
+        var runningSince: Instant? = null
+        for (event in events) {
+            when (event) {
+                is SessionEvent.Started, is SessionEvent.Resumed -> if (runningSince == null) runningSince = event.at
+                is SessionEvent.Paused, is SessionEvent.Finished -> runningSince?.let {
+                    total += event.at - it
+                    runningSince = null
+                }
+                else -> Unit
+            }
+        }
+        return total + (runningSince?.let { now - it } ?: Duration.ZERO)
     }
 
     private fun TreadmillSummary.toUi() = SummaryUi(
@@ -654,7 +681,10 @@ class LiveModel(
         private const val SYNC_PAUSE = "treadmill.syncPause"
         private const val FOLLOW = "treadmill.follow"
 
-        private val HALTED = setOf(BeltStatus.PAUSED, BeltStatus.SAFETY_KEY, BeltStatus.STILL)
+        private val HALTED = setOf(BeltStatus.PAUSED, BeltStatus.STOPPED, BeltStatus.SAFETY_KEY, BeltStatus.STILL)
+
+        /** The questions that go away when the belt moves again. */
+        private val BELT_REASONS = setOf(FinishReason.BELT_STILL, FinishReason.BELT_STOPPED)
         internal val STILL_AFTER = 10.minutes
         internal val LOST_AFTER = 2.minutes
         internal val AUTO_FINISH_AFTER = 10.minutes
