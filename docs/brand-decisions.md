@@ -76,3 +76,11 @@ Add a decision here in the same PR as the brand change it explains, newest at th
 **Accepted, 24 October 2026.** Each finished session lights one of the eight tentacles, and a lit tentacle never goes dark. The eighth makes a full octopus and the next session starts a new ring. This replaces "eight tentacles a week", where the ring emptied every Monday.
 
 **Why:** eight sessions a week is a lot, and a weekly reset punishes the people who train least. A ring that only fills keeps Poulpy positive for them.
+
+## 12. The ember-side rules
+
+**Accepted, 26 October 2026**, for [#17](https://github.com/tkint/coach-poulpy/issues/17). The [brand page](./brand.md#the-ember-side) sets when Poulpy turns ember. Annoyed runs from 18:00 on an entry's day to the end of the next day; the entry is missed after that, which makes him Grumpy, and two missed entries make him Fuming. Only plan calendar entries count, never planned workouts placed by hand. Skipped entries never count. Any finished session forgives every entry dated on or before its day. Entries inside a 72 h pain or rehab window never count. The catch-up is the plan's shortest workout and leaves missed entries as they are.
+
+**Why:** decision 7 promised a grace period "until 24 hours after its day", and reading it as the whole next day gives a person who trains in the morning a real second chance. Counting only what is still planned keeps the ember side for sessions left hanging, not for honest choices: a skip, a move, a rest day or pain. Forgiving by date rather than by matching each entry keeps "any finished session flips him straight back" literally true.
+
+**Set aside:** a skip counting as missed, which makes skipping feel like a confession; the catch-up marking a missed entry done, which rewrites History.
