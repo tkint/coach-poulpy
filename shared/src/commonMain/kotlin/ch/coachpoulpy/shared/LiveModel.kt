@@ -25,6 +25,7 @@ import ch.coachpoulpy.core.model.Workout
 import ch.coachpoulpy.core.model.WorkoutId
 import ch.coachpoulpy.core.model.WorkoutRef
 import ch.coachpoulpy.core.model.WorkoutType
+import ch.coachpoulpy.core.stats.SessionTotals
 import ch.coachpoulpy.data.local.LocalStore
 import ch.coachpoulpy.types.treadmill.StepCounter
 import ch.coachpoulpy.types.treadmill.TreadmillModule
@@ -597,7 +598,9 @@ class LiveModel(
         store.finishExecution(finished.executionId, at)
         store.saveTotals(finished.executionId, sessionTotals(finished.session.events, finished.timeline))
         val summary = TreadmillSummary.of(finished.timeline, finished.session.events)
-        _state.update { it.copy(recording = null, finishPrompt = null, summary = summary.toUi()) }
+        // Without the pauses, like the timer and History.
+        val active = SessionTotals.activeTime(finished.session.events)
+        _state.update { it.copy(recording = null, finishPrompt = null, summary = summary.toUi().copy(durationSeconds = active.inWholeSeconds)) }
     }
 
     private fun refreshRecording(current: Recording) {
