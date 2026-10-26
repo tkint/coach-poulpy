@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -60,6 +59,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -244,6 +244,7 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
                                 onExercise = { role -> pickingRole = role; pickingFor = repeat.key },
                                 onRest = { model.addRest(repeat.key) },
                                 height = 44,
+                                inRepeat = true,
                             )
                         }
                     }
@@ -415,7 +416,8 @@ private fun StepCard(model: BuilderModel, row: BuilderRow, onEdit: () -> Unit, h
 @Composable
 private fun StepSheet(model: BuilderModel, row: BuilderRow, onDone: () -> Unit) {
     val colors = MaterialTheme.colorScheme
-    ModalBottomSheet(onDismissRequest = onDone, containerColor = colors.surface) {
+    // Opens fully, so every field shows without dragging the sheet up.
+    ModalBottomSheet(onDismissRequest = onDone, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), containerColor = colors.surface) {
         Column(
             Modifier.padding(horizontal = 20.dp).padding(bottom = 24.dp).navigationBarsPadding(),
             verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -448,10 +450,7 @@ private fun StepSheet(model: BuilderModel, row: BuilderRow, onDone: () -> Unit) 
                             StepperCell(stringResource(R.string.builder_sets), row.sets.toString(), { model.setSets(row.key, row.sets - 1) }, { model.setSets(row.key, row.sets + 1) }, Modifier.weight(1f))
                             StepperCell(stringResource(R.string.builder_target), row.amountLabel, { model.changeAmount(row.key, -1) }, { model.changeAmount(row.key, 1) }, Modifier.weight(1f))
                         }
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            StepperCell(stringResource(R.string.builder_rest), row.restLabel, { model.changeRest(row.key, -1) }, { model.changeRest(row.key, 1) }, Modifier.weight(1f))
-                            if (row.isTimed) Spacer(Modifier.weight(1f)) else WeightCell(model, row, Modifier.weight(1f))
-                        }
+                        if (!row.isTimed) WeightCell(model, row, Modifier.fillMaxWidth())
                     }
                 }
             }
@@ -638,8 +637,8 @@ private fun TargetEditor(model: BuilderModel, row: BuilderRow, target: WalkRunTa
     var editing by rememberSaveable(row.key) { mutableStateOf<TargetField?>(null) }
     val untilPressed = stringResource(if (row.isLast) R.string.builder_until_end else R.string.builder_until_pressed)
     val durations = listOf(
-        DurationKind.TIME to stringResource(R.string.builder_time),
         DurationKind.DISTANCE to stringResource(R.string.builder_distance),
+        DurationKind.TIME to stringResource(R.string.builder_time),
         DurationKind.UNTIL_PRESSED to untilPressed,
     )
     val intensities = listOf(
@@ -682,7 +681,6 @@ private fun TargetEditor(model: BuilderModel, row: BuilderRow, target: WalkRunTa
                 Modifier.fillMaxWidth(), onValue = { editing = TargetField.PACE },
             )
         }
-        StepperCell(stringResource(R.string.builder_rest), row.restLabel, { model.changeRest(row.key, -1) }, { model.changeRest(row.key, 1) }, Modifier.fillMaxWidth())
         Text(
             listOfNotNull(target.hint?.let { "≈ $it" }, stringResource(R.string.builder_tap_to_type)).joinToString(" · "),
             style = MaterialTheme.typography.bodySmall,
@@ -809,16 +807,17 @@ private fun DashedTile(label: String, icon: ImageVector, onClick: () -> Unit, mo
 
 /**
  * "Add a step": a tap asks what the step is for. A warm-up, an exercise, a recovery or a cool
- * down is picked from the exercise list; a rest is added right away.
+ * down is picked from the exercise list; a rest is added right away. In a repeat ([inRepeat])
+ * there is no warm-up or cool down, which belong at the ends of the workout.
  */
 @Composable
-private fun AddStepButton(label: String, onExercise: (StepRole) -> Unit, onRest: () -> Unit, modifier: Modifier = Modifier, height: Int = 56) {
+private fun AddStepButton(label: String, onExercise: (StepRole) -> Unit, onRest: () -> Unit, modifier: Modifier = Modifier, height: Int = 56, inRepeat: Boolean = false) {
     var expanded by remember { mutableStateOf(false) }
     Box(modifier) {
         DashedTile(label, Icons.Filled.Add, onClick = { expanded = true }, height = height)
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            listOf(
-                Triple(StepRole.WARM_UP, R.string.builder_add_warm_up, Icons.Filled.WbSunny),
+            listOfNotNull(
+                Triple(StepRole.WARM_UP, R.string.builder_add_warm_up, Icons.Filled.WbSunny).takeUnless { inRepeat },
                 Triple(StepRole.WORK, R.string.builder_add_exercise, Icons.Filled.FitnessCenter),
                 Triple(StepRole.RECOVER, R.string.builder_add_recover, Icons.AutoMirrored.Filled.DirectionsWalk),
             ).forEach { (role, text, icon) ->
@@ -833,11 +832,13 @@ private fun AddStepButton(label: String, onExercise: (StepRole) -> Unit, onRest:
                 leadingIcon = { Icon(Icons.Filled.Timer, contentDescription = null) },
                 onClick = { expanded = false; onRest() },
             )
-            DropdownMenuItem(
-                text = { Text(stringResource(R.string.builder_add_cool_down)) },
-                leadingIcon = { Icon(Icons.Filled.Bedtime, contentDescription = null) },
-                onClick = { expanded = false; onExercise(StepRole.COOL_DOWN) },
-            )
+            if (!inRepeat) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.builder_add_cool_down)) },
+                    leadingIcon = { Icon(Icons.Filled.Bedtime, contentDescription = null) },
+                    onClick = { expanded = false; onExercise(StepRole.COOL_DOWN) },
+                )
+            }
         }
     }
 }

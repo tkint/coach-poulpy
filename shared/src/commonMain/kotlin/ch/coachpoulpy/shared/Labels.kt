@@ -169,20 +169,19 @@ internal class Labels(private val languageCode: String) {
     }
 
     /**
-     * One exercise's plan in a line: "3 × 10 each side · 14 kg · rest 60 s", or "5.0 km · 6:00 /km"
+     * One exercise's plan in a line: "3 × 10 each side · 14 kg", or "5.0 km · 6:00 /km"
      * and "5:30 /km · until button press" for a walk or a run; [last] says "until the end" instead.
      */
     fun prescription(entry: DraftEntry, last: Boolean = false): String {
         if (entry.walkOrRun) {
             val pace = entry.speedKmh?.let { TargetInput.paceLabel(it, entry.paceUnit) }
-            val rest = entry.restSeconds.takeIf { it > 0 }?.let(::restAfter)
-            if (entry.open) return listOfNotNull(pace, until(last).lowercase(), rest).joinToString(" · ")
+            if (entry.open) return listOfNotNull(pace, until(last).lowercase()).joinToString(" · ")
             val main = if (entry.measurement == MeasurementMode.DISTANCE) {
                 TargetInput.distanceLabel(entry.amount.toDouble(), entry.distanceUnit)
             } else {
                 longDuration(entry.amount)
             }
-            return listOfNotNull(main, pace, rest).joinToString(" · ")
+            return listOfNotNull(main, pace).joinToString(" · ")
         }
         val amount = when (entry.measurement) {
             MeasurementMode.REPS -> entry.amount.toString()
@@ -191,7 +190,6 @@ internal class Labels(private val languageCode: String) {
         return listOfNotNull(
             "${entry.sets} × $amount" + if (entry.perSide) " $perSide" else "",
             entry.loadKg?.let(::kilograms),
-            entry.restSeconds.takeIf { it > 0 }?.let(::restAfter),
         ).joinToString(" · ")
     }
 
@@ -221,6 +219,4 @@ internal class Labels(private val languageCode: String) {
 
     /** "Round 2 of 4", inside a repeat. */
     fun round(round: Int, rounds: Int) = t("Round $round of $rounds", "Tour $round sur $rounds")
-
-    fun restAfter(seconds: Int) = t("rest ${duration(seconds)}", "repos ${duration(seconds)}")
 }

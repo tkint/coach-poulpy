@@ -41,11 +41,12 @@ data class BuilderRow(
     val isTimed: Boolean,
     val perSideLabel: String?,
     val loadKg: Double?,
+    /** A rest's length; zero for exercises, whose rests are steps of their own. */
     val restSeconds: Int,
     val restLabel: String,
     /** False when the chosen workout type cannot run this exercise. */
     val fitsType: Boolean,
-    /** The folded card's line, as on the workout page: "3 × 10 · 20 kg · rest 90 s". */
+    /** The folded card's line, as on the workout page: "3 × 10 · 20 kg". */
     val summary: String,
     /** A walk or a run's target, edited instead of sets, reps and weight; null for any other exercise. */
     val target: WalkRunTarget? = null,
@@ -131,10 +132,25 @@ class BuilderModel internal constructor(
 
     fun setType(type: WorkoutType) = edit { copy(type = type) }
 
-    /** Adds an exercise with its [role] at the end of the workout, or at the end of the repeat [repeatKey]. */
+    /**
+     * Adds an exercise with its [role] at the end of the workout, or at the end of the repeat
+     * [repeatKey]. A warm-up goes before every other step, after the warm-ups already there.
+     * A walk or a run starts with a distance.
+     */
     fun add(slug: String, repeatKey: String? = null, role: StepRole = StepRole.WORK) {
         val exercise = catalog[ExerciseSlug(slug)] ?: return
-        addStep(DraftEntry.new(exercise, draft.type, units(), inRepeat = repeatKey != null).copy(role = role), repeatKey)
+        val warmUp = role == StepRole.WARM_UP
+        val entry = DraftEntry.new(exercise, draft.type, units(), inRepeat = repeatKey != null && !warmUp)
+            .copy(role = role)
+            .let { if (it.walkOrRun) it.withDuration(DurationKind.DISTANCE) else it }
+        if (warmUp) {
+            val at = draft.steps.takeWhile { it is DraftEntry && it.role == StepRole.WARM_UP }.size
+            edit { copy(steps = steps.toMutableList().apply { add(at, entry) }) }
+            addedKey = entry.key
+            mutableState.value = render(draft)
+        } else {
+            addStep(entry, repeatKey)
+        }
     }
 
     /** Puts a copy of a step, or of a repeat and its steps, right after it. */
@@ -201,7 +217,7 @@ class BuilderModel internal constructor(
     /** Sets the weight; zero or less means no weight. */
     fun setLoadKg(key: String, kg: Double) = editEntry(key) { copy(loadKg = kg.takeIf { it > 0.0 }) }
 
-    /** The rest after each set, or the length of a rest step. */
+    /** Changes the length of a rest step. */
     fun changeRest(key: String, steps: Int) {
         edit {
             copy(
@@ -210,17 +226,18 @@ class BuilderModel internal constructor(
                 },
             )
         }
-        editEntry(key) { copy(restSeconds = (restSeconds + steps * REST_STEP).coerceIn(0, 600)) }
     }
 
     /**
      * Says how a walk or a run ends. A distance starts at 5 km (3 mi) for a run and 2 km (1 mi)
      * for a walk; until button press keeps the duration and distance for when it comes back.
      */
-    fun setDurationKind(key: String, kind: DurationKind) = editEntry(key) {
-        if (!walkOrRun) return@editEntry this
+    fun setDurationKind(key: String, kind: DurationKind) = editEntry(key) { withDuration(kind) }
+
+    private fun DraftEntry.withDuration(kind: DurationKind): DraftEntry {
+        if (!walkOrRun) return this
         val run = isRun(exercise)
-        when {
+        return when {
             kind == DurationKind.UNTIL_PRESSED -> copy(open = true)
             kind == DurationKind.DISTANCE && measurement != MeasurementMode.DISTANCE -> {
                 val meters = if (distanceUnit == DistanceUnit.MI) (if (run) 3 else 1) * DistanceUnit.MI.meters else (if (run) 5000.0 else 2000.0)
@@ -468,8 +485,8 @@ class BuilderModel internal constructor(
             isTimed = entry.measurement == MeasurementMode.TIME || entry.measurement == MeasurementMode.HOLD,
             perSideLabel = if (entry.perSide) labels.perSide else null,
             loadKg = entry.loadKg,
-            restSeconds = entry.restSeconds,
-            restLabel = labels.duration(entry.restSeconds),
+            restSeconds = 0,
+            restLabel = "",
             fitsType = registry.fits(draft.type, entry),
             summary = labels.prescription(entry, last),
             target = entry.durationKind?.let { target(entry, it, entry.intensityKind!!) },

@@ -51,7 +51,7 @@ A walk or run's duration with no set amount: the step ends when the person taps 
 _Avoid_: Lap, open-ended
 
 **Prescription**:
-What an exercise step asks for: its sets, and per set a target, load, intensity, tempo and the rest after it.
+What an exercise step asks for: its sets, and per set a target, load, intensity, tempo and the rest after it. The builder no longer sets that rest: its sets follow one another, and a rest is a step of its own (to rest between sets, repeat one set and a rest).
 _Avoid_: Target (a target is one part of a prescription), plan
 
 ### Plans and scheduling

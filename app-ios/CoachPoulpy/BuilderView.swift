@@ -232,14 +232,19 @@ struct BuilderView: View {
     }
 
     /// "Add a step": asks what the step is for. A warm-up, an exercise, a recovery or a cool down
-    /// is picked from the exercise list; a rest is added right away.
+    /// is picked from the exercise list; a rest is added right away. A repeat offers no warm-up
+    /// or cool down, which belong at the ends of the workout.
     private func addStepButton(_ label: LocalizedStringKey, height: CGFloat, to repeatKey: String?) -> some View {
         Menu {
-            Button { picking = PickTarget(repeatKey: repeatKey, role: .warmUp) } label: { Label("builder.add.warm.up", systemImage: "sun.max") }
+            if repeatKey == nil {
+                Button { picking = PickTarget(repeatKey: nil, role: .warmUp) } label: { Label("builder.add.warm.up", systemImage: "sun.max") }
+            }
             Button { picking = PickTarget(repeatKey: repeatKey, role: .work) } label: { Label("builder.add.exercise", systemImage: "dumbbell") }
             Button { picking = PickTarget(repeatKey: repeatKey, role: .recover) } label: { Label("builder.add.recover", systemImage: "figure.walk") }
             Button { model.addRest(repeatKey: repeatKey) } label: { Label("builder.add.rest", systemImage: "timer") }
-            Button { picking = PickTarget(repeatKey: repeatKey, role: .coolDown) } label: { Label("builder.add.cool.down", systemImage: "moon") }
+            if repeatKey == nil {
+                Button { picking = PickTarget(repeatKey: nil, role: .coolDown) } label: { Label("builder.add.cool.down", systemImage: "moon") }
+            }
         } label: {
             dashedTile(label, systemImage: "plus", height: height)
         }
@@ -332,7 +337,8 @@ private struct StepSheet: View {
             .padding(20)
         }
         .background(PoulpyColor.background)
-        .presentationDetents([.medium, .large])
+        // Opens fully, so every field shows without dragging the sheet up.
+        .presentationDetents([.large])
     }
 }
 
@@ -443,7 +449,6 @@ private struct EntryCard: View {
                 LazyVGrid(columns: columns, spacing: 8) {
                     stepper("builder.sets", "\(row.sets)", less: { model.setSets(key: row.key, sets: row.sets - 1) }, more: { model.setSets(key: row.key, sets: row.sets + 1) })
                     stepper("builder.target", row.amountLabel, less: { model.changeAmount(key: row.key, steps: -1) }, more: { model.changeAmount(key: row.key, steps: 1) })
-                    stepper("builder.rest", row.restLabel, less: { model.changeRest(key: row.key, steps: -1) }, more: { model.changeRest(key: row.key, steps: 1) })
                     if !row.isTimed { weightCell }
                 }
                 .padding(.trailing, 4)
@@ -557,7 +562,7 @@ private struct EntryCard: View {
     /// A walk or a run: one block with a duration (time, distance or until button press) and an intensity, instead of sets.
     private func targetEditor(_ target: WalkRunTarget) -> some View {
         let untilPressed = row.isLast ? "builder.until.end" : "builder.until.pressed"
-        let durations: [(kind: DurationKind, key: String)] = [(.time, "builder.time"), (.distance, "builder.distance"), (.untilPressed, untilPressed)]
+        let durations: [(kind: DurationKind, key: String)] = [(.distance, "builder.distance"), (.time, "builder.time"), (.untilPressed, untilPressed)]
         let intensities: [(kind: IntensityKind, key: String)] = [(.free, "builder.free"), (.pace, "builder.pace")]
         return VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 8) {
@@ -590,7 +595,6 @@ private struct EntryCard: View {
                         more: { model.changePace(key: row.key, steps: 1) },
                         onValue: { editing = .pace })
             }
-            stepper("builder.rest", row.restLabel, less: { model.changeRest(key: row.key, steps: -1) }, more: { model.changeRest(key: row.key, steps: 1) })
             Text([target.hint.map { "≈ \($0)" }, NSLocalizedString("builder.tap.to.type", comment: "")].compactMap { $0 }.joined(separator: " · "))
                 .font(.poulpy(.caption))
                 .foregroundStyle(PoulpyColor.onSurfaceVariant)

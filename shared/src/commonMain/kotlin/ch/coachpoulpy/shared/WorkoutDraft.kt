@@ -45,9 +45,10 @@ internal fun DraftStep.toModelStep(): Step = when (this) {
 }
 
 /**
- * One exercise in the builder: the same number of sets, each with the same target,
- * load and rest. [amount] is reps, seconds or meters depending on [measurement].
- * Exercises done one side at a time get a left and a right set for each set.
+ * One exercise in the builder: the same number of sets, each with the same target and
+ * load, one after the other. [amount] is reps, seconds or meters depending on [measurement].
+ * Exercises done one side at a time get a left and a right set for each set. Rests are
+ * steps of their own; to rest between sets, put one set and a rest in a repeat.
  *
  * A walk or a run ([walkOrRun]) is one block instead: a duration, a distance or until the
  * button is pressed ([open]), with an optional pace kept as [speedKmh]. [distanceUnit] and
@@ -61,7 +62,6 @@ data class DraftEntry(
     val sets: Int,
     val amount: Int,
     val loadKg: Double?,
-    val restSeconds: Int,
     val walkOrRun: Boolean = false,
     val speedKmh: Double? = null,
     val distanceUnit: DistanceUnit = DistanceUnit.KM,
@@ -90,19 +90,18 @@ data class DraftEntry(
             MeasurementMode.DISTANCE -> Target.Distance(amount.toDouble())
         }
         val load = loadKg?.let { Load.Kilograms(it) }
-        val rest = restSeconds.seconds
         if (walkOrRun) {
-            val set = SetPrescription(target, intensity = speedKmh?.let { Intensity.Speed(it) }, restAfter = rest)
+            val set = SetPrescription(target, intensity = speedKmh?.let { Intensity.Speed(it) })
             return Step.ExerciseStep(StepId(key), exercise, Prescription(listOf(set)), role)
         }
         val prescriptions = (1..sets).flatMap {
             if (perSide) {
                 listOf(
                     SetPrescription(target, load, side = Side.LEFT, restAfter = if (target.isTimed) SWITCH_SIDES else Duration.ZERO),
-                    SetPrescription(target, load, side = Side.RIGHT, restAfter = rest),
+                    SetPrescription(target, load, side = Side.RIGHT),
                 )
             } else {
-                listOf(SetPrescription(target, load, restAfter = rest))
+                listOf(SetPrescription(target, load))
             }
         }
         return Step.ExerciseStep(StepId(key), exercise, Prescription(prescriptions), role)
@@ -123,7 +122,6 @@ data class DraftEntry(
                     sets = 1,
                     amount = WALK_OR_RUN_MINUTES * 60,
                     loadKg = null,
-                    restSeconds = 0,
                     walkOrRun = true,
                 ).inUnits(units)
             }
@@ -135,7 +133,6 @@ data class DraftEntry(
                 sets = if (type == WorkoutType.MOBILITY || inRepeat) 1 else 3,
                 amount = defaultAmount(exercise.measurement),
                 loadKg = null,
-                restSeconds = if (type == WorkoutType.STRENGTH) 60 else 20,
             )
         }
 
@@ -156,7 +153,6 @@ data class DraftEntry(
                     sets = 1,
                     amount = if (open) WALK_OR_RUN_MINUTES * 60 else first.target.amount,
                     loadKg = null,
-                    restSeconds = first.restAfter.inWholeSeconds.toInt(),
                     walkOrRun = true,
                     speedKmh = (first.intensity as? Intensity.Speed)?.kmh,
                     role = step.role,
@@ -173,7 +169,6 @@ data class DraftEntry(
                 sets = sets.count { it.side != Side.RIGHT },
                 amount = first.target.amount,
                 loadKg = (first.load as? Load.Kilograms)?.kg,
-                restSeconds = sets.last().restAfter.inWholeSeconds.toInt(),
                 role = step.role,
             )
         }
@@ -220,17 +215,17 @@ data class WorkoutDraft(
          * repeats one level deep with no rest of their own between rounds.
          */
         internal fun from(workout: Workout, catalog: Catalog): WorkoutDraft? {
-            fun leaf(step: Step): DraftStep? = when (step) {
-                is Step.ExerciseStep -> DraftEntry.from(step, catalog[step.exercise])
-                is Step.Rest -> DraftRest(step.id.value, step.duration.inWholeSeconds.toInt())
+            fun leaves(step: Step, inRepeat: Boolean): List<DraftStep>? = when (step) {
+                is Step.ExerciseStep -> DraftEntry.from(step, catalog[step.exercise])?.let { withoutSetRests(it, step, inRepeat) }
+                is Step.Rest -> listOf(DraftRest(step.id.value, step.duration.inWholeSeconds.toInt()))
                 is Step.Group -> null
             }
-            val steps = workout.steps.map { step ->
+            val steps = workout.steps.flatMap { step ->
                 if (step is Step.Group) {
                     if (step.restBetweenRounds > Duration.ZERO) return null
-                    DraftRepeat(step.id.value, step.rounds, step.children.map { leaf(it) ?: return null })
+                    listOf(DraftRepeat(step.id.value, step.rounds, step.children.flatMap { leaves(it, inRepeat = true) ?: return null }))
                 } else {
-                    leaf(step) ?: return null
+                    leaves(step, inRepeat = false) ?: return null
                 }
             }
             return WorkoutDraft(workout.id, workout.version + 1, workout.name, workout.type, steps)
@@ -238,8 +233,23 @@ data class WorkoutDraft(
     }
 }
 
+/**
+ * Steps saved before rests were steps of their own rested after each set. They come back
+ * as rest steps, so the workout plays the same: sets with a rest after each become a repeat
+ * of one set and that rest; in a repeat, which can't hold another, only the rest after the
+ * last set stays.
+ */
+private fun withoutSetRests(entry: DraftEntry, step: Step.ExerciseStep, inRepeat: Boolean): List<DraftStep> {
+    val rest = step.prescription.sets.last().restAfter.inWholeSeconds.toInt()
+    if (rest <= 0) return listOf(entry)
+    if (entry.sets > 1 && !inRepeat) {
+        return listOf(DraftRepeat(Ids.newUuidV7(), entry.sets, listOf(entry.copy(sets = 1), DraftRest(Ids.newUuidV7(), rest))))
+    }
+    return listOf(entry, DraftRest(Ids.newUuidV7(), rest))
+}
+
 /** How a walk or a run ends: after a time, a distance, or when the button is pressed ("until the end" on the last step). */
-enum class DurationKind { TIME, DISTANCE, UNTIL_PRESSED }
+enum class DurationKind { DISTANCE, TIME, UNTIL_PRESSED }
 
 /** A walk or a run's effort: free, or at a pace. */
 enum class IntensityKind { FREE, PACE }

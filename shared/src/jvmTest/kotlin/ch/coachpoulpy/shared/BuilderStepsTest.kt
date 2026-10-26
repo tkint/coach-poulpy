@@ -2,9 +2,14 @@ package ch.coachpoulpy.shared
 
 import ch.coachpoulpy.core.engine.CompletionRule
 import ch.coachpoulpy.core.engine.Phase
+import ch.coachpoulpy.core.model.ExerciseSlug
+import ch.coachpoulpy.core.model.Prescription
+import ch.coachpoulpy.core.model.SetPrescription
 import ch.coachpoulpy.core.model.Step
+import ch.coachpoulpy.core.model.StepId
 import ch.coachpoulpy.core.model.StepRole
 import ch.coachpoulpy.core.model.Target
+import ch.coachpoulpy.core.model.Workout
 import ch.coachpoulpy.core.model.WorkoutId
 import ch.coachpoulpy.core.model.WorkoutType
 import ch.coachpoulpy.data.local.DriverFactory
@@ -147,8 +152,8 @@ class BuilderStepsTest {
         builder.changeRest(rest, 1)
 
         val rows = builder.state.value.rows
-        assertEquals("3 × 10 · rest 1 min", rows[0].summary)
-        assertEquals("1 × 10 · rest 1 min", rows[1].summary)
+        assertEquals("3 × 10", rows[0].summary)
+        assertEquals("1 × 10", rows[1].summary)
         assertTrue(rows[2].isRest)
         assertEquals("Recover", rows[2].roleLabel)
         assertEquals("1 min 15", rows[2].summary)
@@ -158,9 +163,9 @@ class BuilderStepsTest {
         assertEquals(3, group.rounds)
         assertEquals(75.seconds, (group.children[1] as Step.Rest).duration)
         val phases = graph.compiler.compile(workout).phases
-        // Squat: 3 sets with rests between them and after the last; then 3 rounds of push-up and rest, the very last rest dropped.
-        assertEquals(3, phases.take(6).count { it is Phase.Work })
-        assertEquals(3, phases.drop(6).count { it is Phase.Work })
+        // Squat: 3 sets back to back; then 3 rounds of push-up and rest, the very last rest dropped.
+        assertEquals(3, phases.take(3).count { it is Phase.Work })
+        assertEquals(3, phases.drop(3).count { it is Phase.Work })
         assertTrue(phases.last() is Phase.Work)
     }
 
@@ -281,5 +286,54 @@ class BuilderStepsTest {
         assertEquals(listOf("0.4 km · 5:00 /km", "1 min 30"), repeat.rows.map { it.prescription })
         assertEquals("5:45 /km · until the end", state.structure[2].row?.prescription)
         page.close()
+    }
+
+    @Test
+    fun aWarmUpGoesBeforeEveryOtherStep() {
+        val builder = intervalRun()
+        builder.add("walk", role = StepRole.WARM_UP)
+        val walk = builder.state.value.addedKey!!
+        assertEquals(listOf("Run", "Walk"), builder.state.value.steps.take(2).map { it.row?.name })
+        assertEquals(walk, builder.state.value.steps[1].key)
+
+        // Even from a repeat's menu, a warm-up goes to the top of the workout.
+        builder.add("walk", builder.state.value.steps[2].key, StepRole.WARM_UP)
+        assertEquals(3, builder.state.value.steps.takeWhile { it.row?.role == StepRole.WARM_UP }.size)
+    }
+
+    @Test
+    fun aWalkOrRunStartsWithADistance() {
+        val builder = graph.createWorkout("en")
+        builder.add("run")
+        val target = builder.state.value.rows.single().target!!
+        assertEquals(DurationKind.DISTANCE, target.duration)
+        assertEquals("5.0 km", builder.state.value.rows.single().summary)
+    }
+
+    @Test
+    fun restsSavedInsideAStepComeBackAsRestSteps() {
+        // Before rests were steps: 3 squats with 90 s after each, a run with 2 min after it.
+        val squat = Step.ExerciseStep(
+            StepId("squat"), ExerciseSlug("goblet-squat"),
+            Prescription(List(3) { SetPrescription(Target.Reps(8), restAfter = 90.seconds) }),
+        )
+        val run = Step.ExerciseStep(
+            StepId("run"), ExerciseSlug("run"),
+            Prescription(listOf(SetPrescription(Target.Time(600.seconds), restAfter = 120.seconds))),
+        )
+        val old = Workout(WorkoutId("old"), 1, "Old", WorkoutType.STRENGTH, listOf(squat, run))
+        val before = graph.compiler.compile(old).phases
+        graph.store.saveWorkout(old)
+
+        val edit = assertNotNull(graph.editWorkout("old", "en"))
+        val steps = edit.state.value.steps
+        val repeat = assertNotNull(steps[0].repeatGroup)
+        assertEquals(3, repeat.times)
+        assertEquals(listOf("1 × 8", "1 min 30"), repeat.rows.map { it.summary })
+        assertEquals("Run", steps[1].row?.name)
+        assertTrue(steps[2].row!!.isRest)
+
+        val again = graph.store.latestWorkout(WorkoutId(edit.save()!!))!!
+        assertEquals(before.map { it::class to it.duration }, graph.compiler.compile(again).phases.map { it::class to it.duration })
     }
 }

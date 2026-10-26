@@ -28,17 +28,19 @@ class BuilderModelTest {
         builder.setSets(key, 2)
         builder.changeAmount(key, 2)
         builder.setLoadKg(key, 12.0)
-        builder.changeRest(key, -2)
-        assertEquals("2 × 12 · 12 kg · rest 30 s", builder.state.value.rows.single().summary)
+        assertEquals("2 × 12 · 12 kg", builder.state.value.rows.single().summary)
+        builder.addRest()
+        builder.changeRest(builder.state.value.addedKey!!, -2)
+        builder.add("push-up")
 
         val id = assertNotNull(builder.save())
         val workout = assertNotNull(graph.store.latestWorkout(WorkoutId(id)))
         val phases = graph.compiler.compile(workout).phases
 
-        // 2 sets of 12 reps with 30 s rest between them; the trailing rest is dropped.
-        assertEquals(3, phases.size)
+        // 2 sets of 12 reps one after the other, the 30 s rest step, then the push-ups.
+        assertEquals(listOf(true, true, false), phases.take(3).map { it is Phase.Work })
         assertEquals(Target.Reps(12), (phases[0] as Phase.Work).target)
-        assertEquals(30.seconds, phases[1].duration)
+        assertEquals(30.seconds, phases[2].duration)
     }
 
     @Test
@@ -94,21 +96,21 @@ class BuilderModelTest {
     }
 
     @Test
-    fun aWalkIsOneTwentyMinuteBlockNotSetsOfShortReps() {
+    fun aWalkIsOneTwoKilometreBlockNotSetsOfShortReps() {
         val builder = graph.createWorkout("en")
         builder.rename("Walk")
         builder.setType(WorkoutType.TREADMILL)
         builder.add("walk")
         val row = builder.state.value.rows.single()
-        assertEquals(DurationKind.TIME, row.target?.duration)
+        assertEquals(DurationKind.DISTANCE, row.target?.duration)
         assertEquals(IntensityKind.FREE, row.target?.intensity)
-        assertEquals("20 min", row.summary)
+        assertEquals("2.0 km", row.summary)
         assertTrue(row.fitsType)
 
         val workout = graph.store.latestWorkout(WorkoutId(builder.save()!!))!!
         val phases = graph.compiler.compile(workout).phases
         assertEquals(1, phases.size)
-        assertEquals(Target.Time(1200.seconds), (phases.single() as Phase.Work).target)
+        assertEquals(Target.Distance(2000.0), (phases.single() as Phase.Work).target)
     }
 
     @Test

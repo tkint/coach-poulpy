@@ -26,7 +26,7 @@ import kotlinx.datetime.daysUntil
 import kotlinx.datetime.number
 import kotlinx.datetime.toLocalDateTime
 
-/** One exercise of the workout page: "3 × 10 each side · 14 kg · rest 60 s", or a rest. */
+/** One exercise of the workout page: "3 × 10 each side · 14 kg", or a rest. */
 data class WorkoutStepRow(
     val key: String,
     val slug: String,
