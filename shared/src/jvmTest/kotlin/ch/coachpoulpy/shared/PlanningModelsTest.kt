@@ -83,7 +83,7 @@ class PlanningModelsTest {
         with(state.today.single()) {
             assertEquals(TodayStatus.TO_DO, status)
             assertEquals("Legs", title)
-            assertEquals("Strength · 2 exercises · about 6 min", details.replace(Regex("about \\d+ min"), "about 6 min"))
+            assertEquals("Sets · 2 exercises · about 6 min", details.replace(Regex("about \\d+ min"), "about 6 min"))
             assertEquals("Goblet squat, Push-up", exercises)
         }
         with(state.next!!) {
