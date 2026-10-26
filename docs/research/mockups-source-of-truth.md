@@ -1,6 +1,6 @@
 # Keeping the screen mockups as a versioned source of truth
 
-Research notes, 25 October 2026. The owner chose the recommendation on 26 October 2026, with two changes (see "Owner's answers"); the decision is [ADR 0013](../adr/0013-mockups-are-plain-html-in-the-repo.md).
+Research notes, 25 October 2026. The owner chose the recommendation on 26 October 2026, with two changes (see "Owner's answers"); the decision is [ADR 0016](../adr/0016-mockups-are-plain-html-in-the-repo.md).
 
 ## Short answer
 
@@ -88,7 +88,7 @@ GitHub renders PNG, JPG, GIF and SVG and diffs images in three views ([GitHub Do
 
 Option 3 for intent, option 5 for shipped screens, the canvas as scratch.
 
-1. **Record the decision.** Add ADR 0013, "Mockups are plain HTML in the repo", and rewrite the "Screens" section of `docs/design-system.md`: mockups live in `design/mockups/`, a new screen gets a mockup in a PR before it is built, and the claude.ai canvas is only a scratch space. This changes the rule in `docs/design-system.md`; it does not contradict ADR 0012, it extends it.
+1. **Record the decision.** Add ADR 0016, "Mockups are plain HTML in the repo", and rewrite the "Screens" section of `docs/design-system.md`: mockups live in `design/mockups/`, a new screen gets a mockup in a PR before it is built, and the claude.ai canvas is only a scratch space. This changes the rule in `docs/design-system.md`; it does not contradict ADR 0012, it extends it.
 2. **Folder layout.** One file per artboard, such as `design/mockups/home-planned.html`, plus a shared `design/mockups/mockup.css` for the phone frame and common components (Primary button, Chip, Poulpy card, Plan sheet...). Each file says what it is in its own `<head>` (see "How a mockup file is written" below), and the site's gallery is built from those headers, so there is no separate index to keep in step. Mockups read `web/src/styles/tokens.css` and `design/poulpy/*.svg`; no copied hex values.
 3. **Convert once.** A Claude session reads the canvas artboards from the artifact, inlines each `<dc-import>`, fills each `{{hole}}` with sample content in glossary terms (a Workout, a Session, a Plan), replaces `/_blob/` images with generated Poulpy drawings or committed files, and opens one PR per section so each stays reviewable. Keep the canvas link in the ADR as the archive of the old version.
 4. **Show them on the site.** Extend `site/copy-docs.mjs` to copy `design/mockups/` and the token CSS and Poulpy SVGs they use into `site/public/mockups/`, and add `site/mockups.md`, a gallery of 390 by 844 iframes grouped by section with each status, linked from the Design system sidebar. The site then always shows `main`.
@@ -122,7 +122,7 @@ Two changes to the plan above:
 - **Drafts are isolated from validated mockups**: `drafts/` and `agreed/` folders instead of a status tag, and validating a draft is a PR that moves it to `agreed/`.
 - **Tablet and website screens are coming**, so each of those folders is split into `phone/`, `tablet/` and `web/`, each with its own device frame, and a screen keeps the same file name across them.
 
-ADR 0013 records the resulting layout and rules.
+ADR 0016 records the resulting layout and rules.
 
 ## Not verified
 

@@ -75,7 +75,7 @@ Baloo 2 for display and titles, Nunito for everything else. Platforms map each r
 
 ## Screens
 
-Mockups are plain HTML pages in `design/mockups/` ([ADR 0013](adr/0013-mockups-are-plain-html-in-the-repo.md)): drafts in `drafts/`, validated screens in `agreed/`, each split into `phone/`, `tablet/` and `web/`. Build a screen from its agreed mockup, and get a mockup agreed, through a PR that moves it out of `drafts/`, before building a screen that has none. Until the existing screens are converted, the mockups canvas in the Claude project still holds them: Home (planned, done, nothing planned), Library (workouts, exercises, search, long-press actions, empty), workout page (menu, plan days, delete), exercise detail, builder, the guided player (ready, set, rest, finished), Live and its summary, History (calendar, stats), session detail, and Settings (general, devices, data sources).
+Mockups are plain HTML pages in `design/mockups/` ([ADR 0016](adr/0016-mockups-are-plain-html-in-the-repo.md)): drafts in `drafts/`, validated screens in `agreed/`, each split into `phone/`, `tablet/` and `web/`. Build a screen from its agreed mockup, and get a mockup agreed, through a PR that moves it out of `drafts/`, before building a screen that has none. Until the existing screens are converted, the mockups canvas in the Claude project still holds them: Home (planned, done, nothing planned), Library (workouts, exercises, search, long-press actions, empty), workout page (menu, plan days, delete), exercise detail, builder, the guided player (ready, set, rest, finished), Live and its summary, History (calendar, stats), session detail, and Settings (general, devices, data sources).
 
 ## Accessibility
 
