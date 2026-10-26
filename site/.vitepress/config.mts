@@ -3,6 +3,7 @@ import { dirname, join, posix, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vitepress'
 import { withMermaid } from 'vitepress-plugin-mermaid'
+import { devices, listMockups, stages } from './mockups.mts'
 
 const here = dirname(fileURLToPath(import.meta.url))
 // copy-docs.mjs mirrors the repo's shared Markdown into site/ at the same paths, so a path from
@@ -21,6 +22,17 @@ const adrs = readdirSync(join(repoRoot, 'docs/adr'))
     const title = readFileSync(join(repoRoot, 'docs/adr', file), 'utf8').match(/^# (.+)$/m)?.[1] ?? file
     return { text: `${file.slice(0, 4)} · ${title}`, link: `/docs/adr/${file.replace(/\.md$/, '')}` }
   })
+
+// One sidebar entry per mockup, under its stage, so drafts and agreed screens never mix.
+const mockups = listMockups()
+const mockupSidebar = (Object.keys(stages) as (keyof typeof stages)[]).map((stage) => ({
+  text: stages[stage],
+  link: `/mockups/${stage}`,
+  collapsed: true,
+  items: mockups
+    .filter((m) => m.stage === stage)
+    .map((m) => ({ text: m.device === 'phone' ? m.title : `${devices[m.device]} · ${m.title}`, link: m.link })),
+}))
 
 /**
  * A relative link to a file the site doesn't publish (code, scripts, agent docs) becomes a link
@@ -90,7 +102,8 @@ export default withMermaid(
           items: [
             { text: 'How to use it', link: '/docs/design-system' },
             { text: 'Tokens', link: '/tokens' },
-            { text: 'Mockups', link: '/mockups' },
+            { text: 'Mockups', link: '/mockups/' },
+            ...mockupSidebar,
           ],
         },
         {
