@@ -433,6 +433,7 @@ class LiveModelTest {
         advanceTimeBy(30.seconds)
         m.live.endStep()
         advanceTimeBy(15.seconds)
+        runCurrent() // the ticker's refresh due right now
 
         val resting = assertNotNull(m.live.state.value.recording)
         assertEquals(listOf(60L), resting.steps.map { it.durationSeconds })
@@ -443,6 +444,7 @@ class LiveModelTest {
 
         m.live.resumeRecording()
         advanceTimeBy(40.seconds)
+        runCurrent()
         val running = assertNotNull(m.live.state.value.recording)
         assertNull(running.restSeconds)
         assertEquals(40L, running.stepElapsedSeconds)
