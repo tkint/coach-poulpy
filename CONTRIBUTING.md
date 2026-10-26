@@ -50,6 +50,7 @@ Rounded boxes are where work starts; each step leaves something behind, listed i
 
 - **One goal per thread or session.** Grill, spec and tickets in one unbroken conversation; then each ticket starts fresh, because the ticket carries everything it needs.
 - **Don't triage what `/to-tickets` made.** Those issues are born `ready-for-agent`.
+- **Ask the role that owns it.** The Architect, Designer, Poulpy keeper, Translator and Maintainer threads each own part of the repo; a spec asks them before its tickets exist, and a PR that touches their files sends them the link. See [`docs/agents/roles.md`](docs/agents/roles.md).
 - **Words come from `CONTEXT.md`.** If an issue or a test needs a word the glossary lacks, add it there first.
 - **A decision that would surprise the next reader gets an ADR** in `docs/adr/`, in the same PR that makes it.
 - **Every PR says `Closes #n`**, so merging closes the issue.

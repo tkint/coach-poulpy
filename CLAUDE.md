@@ -9,6 +9,7 @@ A training platform: Android and iOS apps first, guest-only and offline, with a 
 - `docs/architecture.md`: the overview, for anything spanning modules.
 - `docs/design-system.md` and `docs/brand.md`: before any screen, colour, copy or Poulpy change.
 - `CONTRIBUTING.md`: the issue-to-PR flow and labels.
+- `docs/agents/roles.md`: the long-running role threads (Architect, Designer, Poulpy keeper, Translator, Maintainer), what each owns, and when to consult them and hand back.
 
 ## Prove a change works
 
