@@ -1,6 +1,6 @@
 # Keeping the screen mockups as a versioned source of truth
 
-Research notes, 25 October 2026. Nothing here is decided yet; the owner chooses.
+Research notes, 25 October 2026. The owner chose the recommendation on 26 October 2026, with two changes (see "Owner's answers"); the decision is [ADR 0013](../adr/0013-mockups-are-plain-html-in-the-repo.md).
 
 ## Short answer
 
@@ -106,16 +106,23 @@ The owner's PR comment listed practices for static HTML mockups. Checked against
 - **No network.** Agreed, and enforced by the check (step 5). Sample content is literal text in the markup, in glossary terms. Interaction, such as opening a sheet or switching a tab, uses a few lines of inline script or a separate file per state (`library-actions.html`), as the canvas does today; no framework.
 - **Rules in `CLAUDE.md`.** Agreed: when the decision is made, `CLAUDE.md` gains one line under "House rules" pointing to `design/mockups/` and the check command, and `docs/design-system.md` holds the full rules, as it already does for tokens. The comment's claim that this saves tokens through caching is not something this note verified.
 
-## Open questions for the owner
+## Owner's answers
 
-- Is losing canvas comments and free placement acceptable, or should the canvas stay the editing tool for exploration with a manual "promote to repo" step?
-- `design/mockups/` (beside the other sources, copied into the site) or `site/public/mockups/` (beside the brand book)? This note assumes the first.
-- Should mockups exist in French too, or English only with the French strings checked in the apps?
-- Light only, or a dark variant of each screen? The token CSS already supports `prefers-color-scheme`.
-- Should rendered PNGs be committed (reviewable in GitHub's image diff, but rendering differs between machines) or only uploaded by CI?
-- Roborazzi or Google's alpha tool for Android, and is a pinned iOS simulator in CI acceptable for SwiftUI snapshots?
-- Should a shipped mockup be kept, frozen, or deleted once screenshot references exist?
+The owner took the suggested answer to each open question, on 26 October 2026:
 
+- Mockups become plain HTML in the repo; the canvas stays a scratch space, and losing its comments and free placement is acceptable.
+- They live in `design/mockups/`, not `site/public/mockups/`.
+- English only, light only.
+- Rendered PNGs are uploaded by CI, not committed.
+- Roborazzi on Android; a pinned iOS simulator in CI is acceptable for swift-snapshot-testing.
+- A shipped mockup is kept, frozen, and marked shipped.
+
+Two changes to the plan above:
+
+- **Drafts are isolated from validated mockups**: `drafts/` and `agreed/` folders instead of a status tag, and validating a draft is a PR that moves it to `agreed/`.
+- **Tablet and website screens are coming**, so each of those folders is split into `phone/`, `tablet/` and `web/`, each with its own device frame, and a screen keeps the same file name across them.
+
+ADR 0013 records the resulting layout and rules.
 
 ## Not verified
 
