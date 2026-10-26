@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { withBase } from 'vitepress'
 import type { Mockup } from '../mockups.mts'
 
@@ -7,6 +7,19 @@ const props = defineProps<{ mockup: Mockup }>()
 // Changing the key remounts the iframe: the mockup starts over without reloading the docs page.
 const run = ref(0)
 const src = () => withBase('/' + props.mockup.path)
+
+// The frame is drawn at its real size and scaled down to fit the column, so a phone screen never
+// scrolls inside its frame, even on a narrow screen.
+const width = 438
+const height = () => props.mockup.height + 48
+const box = ref<HTMLElement>()
+const scale = ref(1)
+let observer: ResizeObserver | undefined
+onMounted(() => {
+  observer = new ResizeObserver(([entry]) => (scale.value = Math.min(1, entry.contentRect.width / width)))
+  observer.observe(box.value!)
+})
+onBeforeUnmount(() => observer?.disconnect())
 </script>
 
 <template>
@@ -20,7 +33,15 @@ const src = () => withBase('/' + props.mockup.path)
       <a :href="`https://github.com/tkint/coach-poulpy/blob/main/${mockup.path}`">Source</a>
       <a v-if="mockup.issue" :href="`https://github.com/tkint/coach-poulpy/issues/${mockup.issue}`">#{{ mockup.issue }}</a>
     </div>
-    <iframe :key="run" :src="src()" :title="mockup.title" :style="{ height: mockup.height + 48 + 'px' }"></iframe>
+    <div ref="box" class="mockup-box" :style="{ height: height() * scale + 'px' }">
+      <iframe
+        :key="run"
+        :src="src()"
+        :title="mockup.title"
+        scrolling="no"
+        :style="{ width: width + 'px', height: height() + 'px', transform: `scale(${scale})` }"
+      ></iframe>
+    </div>
   </div>
 </template>
 
@@ -34,5 +55,6 @@ const src = () => withBase('/' + props.mockup.path)
 }
 .mockup-toolbar button:hover { border-color: var(--vp-c-brand-1); color: var(--vp-c-brand-1); }
 .mockup-toolbar a { color: var(--vp-c-brand-1); font-weight: 500; }
-iframe { width: 438px; max-width: 100%; border: 0; border-radius: 24px; display: block; }
+.mockup-box { width: 100%; overflow: hidden; }
+iframe { border: 0; display: block; transform-origin: top left; }
 </style>

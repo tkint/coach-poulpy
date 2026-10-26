@@ -23,7 +23,7 @@ const adrs = readdirSync(join(repoRoot, 'docs/adr'))
     return { text: `${file.slice(0, 4)} · ${title}`, link: `/docs/adr/${file.replace(/\.md$/, '')}` }
   })
 
-// One sidebar entry per mockup, under its stage, so drafts and agreed screens never mix.
+// Mockups › Agreed and Drafts, each listing its screens, so drafts and agreed screens never mix.
 const mockups = listMockups()
 const mockupSidebar = (Object.keys(stages) as (keyof typeof stages)[]).map((stage) => ({
   text: stages[stage],
@@ -103,8 +103,7 @@ export default withMermaid(
           items: [
             { text: 'How to use it', link: '/docs/design-system' },
             { text: 'Tokens', link: '/tokens' },
-            { text: 'Mockups', link: '/mockups/' },
-            ...mockupSidebar,
+            { text: 'Mockups', link: '/mockups/', collapsed: false, items: mockupSidebar },
           ],
         },
         {
