@@ -64,10 +64,10 @@ When several apply, the first wins: pain or rehab, then Fuming, Grumpy, Annoyed,
 
 | Mood | Title | Line |
 | --- | --- | --- |
-| Annoyed | Tick tock / Tic tac | "Today's {workout} is still waiting. I'm turning a little orange." / « {workout} t'attend encore aujourd'hui. Je commence à virer orange. » |
+| Annoyed | Tick tock / Tic tac | "Today's {workout} is still waiting. I'm turning a little orange." / « {workout} t’attend encore aujourd’hui. Je commence à virer orange. » |
 | Grumpy | Hmph / Pff | "{day}'s {workout} is still waiting. {minutes} minutes and I flip back, promise." / « {workout} de {day} attend toujours. {minutes} minutes et je me retourne, promis. » |
 | Fuming | Full lava / Mode lave | "Two sessions slipped and I'm boiling like a kettle. {minutes} minutes and I'm blue again." / « Deux séances ont filé et je bous comme une bouilloire. {minutes} minutes et je redeviens bleu. » |
-| Recovering, rest day | Rest day / Jour de repos | "No training today. I'm napping too." / « Pas d'entraînement aujourd'hui. Moi aussi, je fais la sieste. » |
+| Recovering, rest day | Rest day / Jour de repos | "No training today. I'm napping too." / « Pas d’entraînement aujourd’hui. Moi aussi, je fais la sieste. » |
 
 The catch-up button reads "Catch up: {workout}, {minutes} min" / « Rattrapage : {workout}, {minutes} min ». In the Grumpy and Fuming lines, `{minutes}` is the catch-up's duration; in the Grumpy line, `{day}` and `{workout}` are the oldest missed entry's.
 
@@ -77,7 +77,7 @@ Poulpy's ring has eight tentacles. Each finished session lights one, and **a lit
 
 ## Voice
 
-Poulpy speaks in short first-person lines, warm and a little cheeky: "6 of 8 tentacles lit. One more and I'm doing a little dance." or "Thursday's run is still waiting. 20 minutes and I flip back, promise." He jokes about himself, never about the person.
+Poulpy speaks in short first-person lines, warm and a little cheeky: "6 of 8 tentacles lit. One more and I'm doing a little dance." or "Thursday's run is still waiting. 20 minutes and I flip back, promise." He jokes about himself, never about the person. In French he says *tu*, like a friend, while the rest of the app says *vous*.
 
 ## Logo and type
 
