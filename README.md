@@ -74,7 +74,7 @@ Later, an admin menu on the server will publish new versions in the same format,
 
 ## Installing on family phones
 
-- **Android:** every CI run uploads a debug APK as the `coach-poulpy-debug-apk` artifact. Download it on the phone and allow installing from that source. Each build has a higher version number and is signed with the same key, so a new APK installs over the old one and keeps the phone's data. `./gradlew :app-android:assembleRelease` gives a smaller build, signed with the same key.
+- **Android:** every CI run uploads a debug APK as the `coach-poulpy-debug-apk` artifact. Download it on the phone and allow installing from that source. Each build is numbered by the time it ran and signed with the same key, so a newer APK installs over the old one and keeps the phone's data. Android refuses an APK built before the one on the phone ("you can't install the app on your device"); to install an older branch's build, re-run its CI job, which gives it a fresh number. `./gradlew :app-android:assembleRelease` gives a smaller build, signed with the same key.
 - **iPhone:** set your Apple team in Xcode (Signing & Capabilities) and run on a connected iPhone. With a free Apple account the app expires after 7 days; TestFlight needs the paid Apple Developer Program.
 
 ### The signing key
