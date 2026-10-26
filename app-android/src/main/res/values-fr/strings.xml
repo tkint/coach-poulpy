@@ -119,11 +119,9 @@
     <string name="builder_weight">Charge</string>
     <string name="builder_move_up">Monter</string>
     <string name="builder_move_down">Descendre</string>
-    <string name="builder_remove">Retirer</string>
     <string name="builder_weight_kg">Charge en kilogrammes</string>
     <string name="builder_less_named">Moins : %1$s</string>
     <string name="builder_more_named">Plus : %1$s</string>
-    <string name="builder_remove_named">Retirer %1$s</string>
     <string name="builder_open">Modifier %1$s</string>
     <string name="builder_does_not_fit">Ce type de séance ne peut pas inclure cet exercice. Retirez-le ou choisissez un autre type.</string>
     <string name="builder_empty">Ajoutez des étapes pour composer votre séance.</string>
@@ -143,7 +141,6 @@
     <string name="builder_repeat">Répétition</string>
     <string name="builder_repeat_fewer">Moins de fois</string>
     <string name="builder_repeat_more">Plus de fois</string>
-    <string name="builder_remove_repeat">Retirer cette répétition</string>
     <string name="builder_step">Étape</string>
     <string name="builder_intensity">Intensité</string>
     <string name="builder_time">Temps</string>
@@ -153,6 +150,13 @@
     <string name="builder_move_into_repeat">Mettre dans la répétition au-dessus</string>
     <string name="builder_move_out_of_repeat">Sortir de la répétition</string>
     <string name="builder_more_actions">Autres actions pour %1$s</string>
+    <string name="builder_edit">Modifier</string>
+    <string name="builder_duplicate">Dupliquer</string>
+    <string name="builder_delete">Supprimer</string>
+    <string name="builder_repeat_actions">Autres actions pour cette répétition</string>
+    <string name="builder_add_warm_up">Un échauffement</string>
+    <string name="builder_add_recover">Une récupération</string>
+    <string name="builder_add_cool_down">Un retour au calme</string>
 
     <string name="player_ready">Prêt ?</string>
     <string name="player_start">Lancer la séance</string>

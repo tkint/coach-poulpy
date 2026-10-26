@@ -47,13 +47,26 @@ struct WorkoutPageView: View {
                         .foregroundStyle(PoulpyColor.onSurfaceVariant)
                         .padding(.leading, 4)
                         .padding(.top, 4)
-                    ForEach(Array(state.steps.enumerated()), id: \.element.key) { index, step in
-                        NavigationLink {
-                            ExerciseDetailView(graph: graph, slug: step.slug)
-                        } label: {
-                            stepRow(index: index, step: step)
+                    let numbers = exerciseNumbers(state)
+                    ForEach(state.structure, id: \.key) { step in
+                        if let row = step.row {
+                            structureRow(row, number: numbers[row.key])
+                        } else if let group = step.repeatGroup {
+                            VStack(alignment: .leading, spacing: 6) {
+                                HStack(spacing: 8) {
+                                    Image(systemName: "repeat").font(.system(size: 16, weight: .bold)).foregroundStyle(PoulpyColor.primary)
+                                    Text("\(NSLocalizedString("builder.repeat", comment: "")) · \(group.timesLabel)")
+                                        .font(.poulpy(.headline))
+                                        .foregroundStyle(PoulpyColor.onPrimaryContainer)
+                                }
+                                .padding(EdgeInsets(top: 2, leading: 4, bottom: 2, trailing: 4))
+                                ForEach(group.rows, id: \.key) { row in
+                                    structureRow(row, number: numbers[row.key])
+                                }
+                            }
+                            .padding(10)
+                            .background(PoulpyColor.primaryContainer, in: RoundedRectangle(cornerRadius: 16))
                         }
-                        .buttonStyle(.plain)
                     }
                 }
                 .padding(.horizontal, 20)
@@ -181,20 +194,56 @@ struct WorkoutPageView: View {
         .overlay(RoundedRectangle(cornerRadius: 14).stroke(PoulpyColor.outline))
     }
 
-    private func stepRow(index: Int, step: WorkoutStepRow) -> some View {
+    /// Exercises are numbered in order, through repeats; rests aren't.
+    private func exerciseNumbers(_ state: WorkoutPageState) -> [String: Int] {
+        let rows = state.structure.flatMap { step in step.row.map { [$0] } ?? step.repeatGroup?.rows ?? [] }
+        var numbers: [String: Int] = [:]
+        for row in rows where !row.isRest { numbers[row.key] = numbers.count + 1 }
+        return numbers
+    }
+
+    /// An exercise opens its page; a rest shows a timer and opens nothing.
+    @ViewBuilder
+    private func structureRow(_ row: WorkoutStepRow, number: Int?) -> some View {
+        if row.isRest {
+            stepRow(row, number: nil)
+        } else {
+            NavigationLink {
+                ExerciseDetailView(graph: graph, slug: row.slug)
+            } label: {
+                stepRow(row, number: number)
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    private func stepRow(_ step: WorkoutStepRow, number: Int?) -> some View {
         HStack(spacing: 12) {
-            Text("\(index + 1)")
-                .font(.poulpy(.title3))
-                .foregroundStyle(PoulpyColor.onPrimaryContainer)
-                .frame(width: 32, height: 32)
-                .background(PoulpyColor.primaryContainer, in: Circle())
-                .accessibilityHidden(true)
+            Group {
+                if let number {
+                    Text("\(number)").font(.poulpy(.title3)).foregroundStyle(PoulpyColor.onPrimaryContainer)
+                } else {
+                    Image(systemName: "timer").font(.system(size: 15, weight: .bold)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+                }
+            }
+            .frame(width: 32, height: 32)
+            .background(step.isRest ? PoulpyColor.surfaceVariant : PoulpyColor.primaryContainer, in: Circle())
+            .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 1) {
+                if let role = step.roleLabel, !step.isRest {
+                    Text(role)
+                        .textCase(.uppercase)
+                        .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 11.5, relativeTo: .caption2))
+                        .kerning(0.9)
+                        .foregroundStyle(PoulpyColor.primary)
+                }
                 Text(step.name).font(.poulpy(.headline)).foregroundStyle(PoulpyColor.onSurface)
                 Text(step.prescription).font(.poulpy(.subheadline)).monospacedDigit().foregroundStyle(PoulpyColor.onSurfaceVariant)
             }
             Spacer(minLength: 0)
-            Image(systemName: "chevron.right").foregroundStyle(PoulpyColor.onSurfaceVariant)
+            if !step.isRest {
+                Image(systemName: "chevron.right").foregroundStyle(PoulpyColor.onSurfaceVariant)
+            }
         }
         .padding(EdgeInsets(top: 10, leading: 12, bottom: 10, trailing: 12))
         .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 16))

@@ -120,11 +120,9 @@
     <string name="builder_weight">Weight</string>
     <string name="builder_move_up">Move up</string>
     <string name="builder_move_down">Move down</string>
-    <string name="builder_remove">Remove</string>
     <string name="builder_weight_kg">Weight in kilograms</string>
     <string name="builder_less_named">Less: %1$s</string>
     <string name="builder_more_named">More: %1$s</string>
-    <string name="builder_remove_named">Remove %1$s</string>
     <string name="builder_open">Edit %1$s</string>
     <string name="builder_does_not_fit">This kind of workout can’t run this exercise. Remove it or pick another kind.</string>
     <string name="builder_empty">Add steps to build your workout.</string>
@@ -144,7 +142,6 @@
     <string name="builder_repeat">Repeat</string>
     <string name="builder_repeat_fewer">Fewer times</string>
     <string name="builder_repeat_more">More times</string>
-    <string name="builder_remove_repeat">Remove this repeat</string>
     <string name="builder_step">Step</string>
     <string name="builder_intensity">Intensity</string>
     <string name="builder_time">Time</string>
@@ -154,6 +151,13 @@
     <string name="builder_move_into_repeat">Move into the repeat above</string>
     <string name="builder_move_out_of_repeat">Move out of the repeat</string>
     <string name="builder_more_actions">More actions for %1$s</string>
+    <string name="builder_edit">Edit</string>
+    <string name="builder_duplicate">Duplicate</string>
+    <string name="builder_delete">Delete</string>
+    <string name="builder_repeat_actions">More actions for this repeat</string>
+    <string name="builder_add_warm_up">A warm-up</string>
+    <string name="builder_add_recover">A recovery</string>
+    <string name="builder_add_cool_down">A cool down</string>
 
     <string name="player_ready">Ready?</string>
     <string name="player_start">Start the session</string>

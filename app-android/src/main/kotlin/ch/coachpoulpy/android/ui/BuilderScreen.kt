@@ -32,6 +32,11 @@ import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.automirrored.filled.DirectionsWalk
+import androidx.compose.material.icons.filled.Bedtime
+import androidx.compose.material.icons.filled.WbSunny
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DragIndicator
@@ -107,11 +112,12 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
     }
     DisposableEffect(model) { onDispose { model.close() } }
     val state by model.state.collectAsStateWithLifecycle()
-    // Where the exercise being picked goes: TOP_LEVEL, a repeat's key, or null when not picking.
+    // Where the exercise being picked goes (TOP_LEVEL or a repeat's key) and as what; null when not picking.
     var pickingFor by rememberSaveable { mutableStateOf<String?>(null) }
-    // One card is open at a time: the first at start, then whichever was added or tapped last.
-    var open by rememberSaveable { mutableStateOf(state.rows.firstOrNull()?.key) }
-    LaunchedEffect(state.addedKey) { state.addedKey?.let { open = it } }
+    var pickingRole by rememberSaveable { mutableStateOf(StepRole.WORK) }
+    // The step being edited in the sheet: the one just added, or the one tapped.
+    var editing by rememberSaveable { mutableStateOf<String?>(null) }
+    LaunchedEffect(state.addedKey) { state.addedKey?.let { editing = it } }
     val colors = MaterialTheme.colorScheme
     val list = rememberLazyListState()
     // A step moves among the steps of the list that holds it: the workout's, or its repeat's.
@@ -120,10 +126,11 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
             ?: state.steps.firstNotNullOfOrNull { step -> step.repeatGroup?.rows?.map { it.key }?.takeIf { key in it } }
     val drag = rememberDragReorder(
         list,
-        canDropOn = { key, onto -> siblings(key as String)?.contains(onto as String) == true },
+        // The name field, the kinds and the add tiles have keys that are not step keys.
+        canDropOn = { key, onto -> onto is String && siblings(key as String)?.contains(onto) == true },
         onMove = { key, toKey ->
             val keys = siblings(key as String).orEmpty()
-            val to = keys.indexOf(toKey as String)
+            val to = if (toKey is String) keys.indexOf(toKey) else -1
             val moved = to >= 0 && keys.indexOf(key) != to
             if (moved) model.move(key, to)
             moved
@@ -142,7 +149,7 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
         ) { padding ->
             ExerciseList(
                 graph, language, type = state.type,
-                onPick = { model.add(it, target.takeUnless { key -> key == TOP_LEVEL }); pickingFor = null },
+                onPick = { model.add(it, target.takeUnless { key -> key == TOP_LEVEL }, pickingRole); pickingFor = null },
                 modifier = Modifier.padding(padding),
                 adding = true,
             )
@@ -204,10 +211,9 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
                 val repeat = step.repeatGroup
                 if (row != null) {
                     item(key = row.key) {
-                        EntryCard(
+                        StepCard(
                             model, row,
-                            open = row.key == open,
-                            onOpen = { open = row.key },
+                            onEdit = { editing = row.key },
                             handle = Modifier.dragHandle(drag, row.key),
                             modifier = Modifier.draggedItem(this, drag, row.key).padding(bottom = 12.dp),
                         )
@@ -218,10 +224,9 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
                     }
                     items(repeat.rows, key = { it.key }) { child ->
                         Box(Modifier.draggedItem(this, drag, child.key).background(colors.primaryContainer).padding(start = 22.dp, end = 8.dp, bottom = 6.dp)) {
-                            EntryCard(
+                            StepCard(
                                 model, child,
-                                open = child.key == open,
-                                onOpen = { open = child.key },
+                                onEdit = { editing = child.key },
                                 handle = Modifier.dragHandle(drag, child.key),
                                 modifier = Modifier,
                             )
@@ -236,7 +241,7 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
                         ) {
                             AddStepButton(
                                 label = stringResource(R.string.builder_add_to_repeat),
-                                onExercise = { pickingFor = repeat.key },
+                                onExercise = { role -> pickingRole = role; pickingFor = repeat.key },
                                 onRest = { model.addRest(repeat.key) },
                                 height = 44,
                             )
@@ -248,7 +253,7 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     AddStepButton(
                         label = stringResource(R.string.builder_add_step),
-                        onExercise = { pickingFor = TOP_LEVEL },
+                        onExercise = { role -> pickingRole = role; pickingFor = TOP_LEVEL },
                         onRest = { model.addRest() },
                         modifier = Modifier.weight(1f),
                     )
@@ -257,12 +262,16 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
             }
         }
     }
+
+    state.rows.firstOrNull { it.key == editing }?.let { row ->
+        StepSheet(model, row, onDone = { editing = null })
+    }
 }
 
 /** What the exercise picker adds to when it was opened from the end of the list. */
 private const val TOP_LEVEL = "top-level"
 
-/** A repeat's header: its handle, "Repeat", how many times as − N times +, and remove. */
+/** A repeat's header: its handle, "Repeat", how many times as − N times +, and a menu to duplicate or remove it. */
 @Composable
 private fun RepeatHeader(model: BuilderModel, repeat: BuilderRepeat, handle: Modifier, modifier: Modifier) {
     val colors = MaterialTheme.colorScheme
@@ -293,9 +302,11 @@ private fun RepeatHeader(model: BuilderModel, repeat: BuilderRepeat, handle: Mod
             Text(repeat.timesLabel, fontWeight = FontWeight.ExtraBold, color = colors.onPrimaryContainer, textAlign = TextAlign.Center, modifier = Modifier.width(64.dp))
             RoundStep("+", stringResource(R.string.builder_repeat_more), { model.setRepeatTimes(repeat.key, repeat.times + 1) })
         }
-        IconButton(onClick = { model.remove(repeat.key) }) {
-            Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.builder_remove_repeat), tint = colors.onSurfaceVariant)
-        }
+        ActionsMenu(
+            description = stringResource(R.string.builder_repeat_actions),
+            onDuplicate = { model.duplicate(repeat.key) },
+            onRemove = { model.remove(repeat.key) },
+        )
     }
 }
 
@@ -339,13 +350,9 @@ private fun BoxField(
     )
 }
 
-/**
- * A step of the workout. Folded: its role, name and summary. Open: what the step is for, then
- * sets, reps and weight for an exercise, a duration and intensity for a walk or a run, or the
- * length of a rest.
- */
+/** A step of the workout, read-only: its role, name and summary. A tap edits it in a sheet; the menu has the rest. */
 @Composable
-private fun EntryCard(model: BuilderModel, row: BuilderRow, open: Boolean, onOpen: () -> Unit, handle: Modifier, modifier: Modifier) {
+private fun StepCard(model: BuilderModel, row: BuilderRow, onEdit: () -> Unit, handle: Modifier, modifier: Modifier) {
     val colors = MaterialTheme.colorScheme
     val moveUp = stringResource(R.string.builder_move_up)
     val moveDown = stringResource(R.string.builder_move_down)
@@ -354,7 +361,7 @@ private fun EntryCard(model: BuilderModel, row: BuilderRow, open: Boolean, onOpe
     Surface(
         shape = RoundedCornerShape(PoulpyRadius.md),
         color = colors.surface,
-        border = if (open) BorderStroke(1.5.dp, PoulpyPalette.Lagoon300) else BorderStroke(1.dp, colors.outline),
+        border = BorderStroke(1.dp, if (row.fitsType) colors.outline else colors.error),
         // Screen readers can't drag: they get the moves as actions on the card.
         modifier = modifier.fillMaxWidth().semantics {
             customActions = listOfNotNull(
@@ -365,10 +372,7 @@ private fun EntryCard(model: BuilderModel, row: BuilderRow, open: Boolean, onOpe
             )
         },
     ) {
-        Column(
-            Modifier.padding(start = 12.dp, end = 8.dp, top = 10.dp, bottom = if (open) 14.dp else 10.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
+        Column(Modifier.padding(start = 12.dp, end = 4.dp, top = 10.dp, bottom = 10.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 Icon(
                     Icons.Filled.DragIndicator,
@@ -377,22 +381,48 @@ private fun EntryCard(model: BuilderModel, row: BuilderRow, open: Boolean, onOpe
                     modifier = handle.size(28.dp, 44.dp).padding(horizontal = 4.dp, vertical = 12.dp),
                 )
                 Column(
-                    Modifier.weight(1f).then(if (open) Modifier else Modifier.clickable(onClick = onOpen)),
+                    Modifier.weight(1f).clickable(onClickLabel = stringResource(R.string.builder_open, row.name), onClick = onEdit),
                     verticalArrangement = Arrangement.spacedBy(2.dp),
                 ) {
                     row.roleLabel?.let { RoleTag(it, row.role) }
                     Text(row.name, style = PoulpyTextStyles.Headline.copy(fontSize = 19.sp, lineHeight = 23.sp))
-                    if (!open) {
-                        Text(row.summary, style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
-                    }
+                    Text(row.summary, style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
                 }
-                if (open) {
-                    StepMenu(model, row)
-                } else {
-                    IconButton(onClick = onOpen) {
-                        Icon(Icons.Filled.KeyboardArrowDown, contentDescription = stringResource(R.string.builder_open, row.name), tint = colors.onSurfaceVariant)
-                    }
+                ActionsMenu(
+                    description = stringResource(R.string.builder_more_actions, row.name),
+                    onEdit = onEdit,
+                    onDuplicate = { model.duplicate(row.key) },
+                    onMoveIn = if (row.canMoveIntoRepeat) ({ model.moveIntoRepeatAbove(row.key) }) else null,
+                    onMoveOut = if (row.repeatKey != null) ({ model.moveOutOfRepeat(row.key) }) else null,
+                    onRemove = { model.remove(row.key) },
+                )
+            }
+            if (!row.fitsType) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Icon(Icons.Filled.ErrorOutline, contentDescription = null, tint = colors.error, modifier = Modifier.size(18.dp))
+                    Text(stringResource(R.string.builder_does_not_fit), color = colors.error, style = MaterialTheme.typography.bodySmall)
                 }
+            }
+        }
+    }
+}
+
+/**
+ * Edits one step: what it is for, then sets, reps and weight for an exercise, a duration and
+ * an intensity for a walk or a run, or the length of a rest.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun StepSheet(model: BuilderModel, row: BuilderRow, onDone: () -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    ModalBottomSheet(onDismissRequest = onDone, containerColor = colors.surface) {
+        Column(
+            Modifier.padding(horizontal = 20.dp).padding(bottom = 24.dp).navigationBarsPadding(),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                row.roleLabel?.let { RoleTag(it, row.role) }
+                Text(row.name, style = MaterialTheme.typography.titleLarge)
             }
             if (!row.fitsType) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -401,19 +431,19 @@ private fun EntryCard(model: BuilderModel, row: BuilderRow, open: Boolean, onOpe
                 }
             }
             val target = row.target
-            if (open && row.isRest) {
-                StepperCell(stringResource(R.string.builder_duration), row.restLabel, { model.changeRest(row.key, -1) }, { model.changeRest(row.key, 1) }, Modifier.fillMaxWidth().padding(end = 4.dp))
-            } else if (open) {
+            if (row.isRest) {
+                StepperCell(stringResource(R.string.builder_duration), row.restLabel, { model.changeRest(row.key, -1) }, { model.changeRest(row.key, 1) }, Modifier.fillMaxWidth())
+            } else {
                 PoulpySelect(
                     stringResource(R.string.builder_step),
                     model.roleOptions.first { it.role == row.role }.label,
                     model.roleOptions.map { option -> option.label to { model.setRole(row.key, option.role) } },
-                    Modifier.fillMaxWidth().padding(end = 4.dp),
+                    Modifier.fillMaxWidth(),
                 )
                 if (target != null) {
                     TargetEditor(model, row, target)
                 } else {
-                    Column(Modifier.padding(end = 4.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             StepperCell(stringResource(R.string.builder_sets), row.sets.toString(), { model.setSets(row.key, row.sets - 1) }, { model.setSets(row.key, row.sets + 1) }, Modifier.weight(1f))
                             StepperCell(stringResource(R.string.builder_target), row.amountLabel, { model.changeAmount(row.key, -1) }, { model.changeAmount(row.key, 1) }, Modifier.weight(1f))
@@ -424,6 +454,9 @@ private fun EntryCard(model: BuilderModel, row: BuilderRow, open: Boolean, onOpe
                         }
                     }
                 }
+            }
+            Button(onClick = onDone, modifier = Modifier.fillMaxWidth().height(52.dp)) {
+                Text(stringResource(R.string.action_done), fontWeight = FontWeight.ExtraBold)
             }
         }
     }
@@ -443,41 +476,54 @@ private fun RoleTag(label: String, role: StepRole) {
     )
 }
 
-/** Remove, and the moves into or out of a repeat when they apply. */
+/** The ⋮ menu of a step or a repeat: edit, duplicate, the moves into or out of a repeat when they apply, and delete. */
 @Composable
-private fun StepMenu(model: BuilderModel, row: BuilderRow) {
+private fun ActionsMenu(
+    description: String,
+    onDuplicate: () -> Unit,
+    onRemove: () -> Unit,
+    onEdit: (() -> Unit)? = null,
+    onMoveIn: (() -> Unit)? = null,
+    onMoveOut: (() -> Unit)? = null,
+) {
     val colors = MaterialTheme.colorScheme
-    if (!row.canMoveIntoRepeat && row.repeatKey == null) {
-        IconButton(onClick = { model.remove(row.key) }) {
-            Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.builder_remove_named, row.name), tint = colors.onSurfaceVariant)
-        }
-        return
-    }
     var expanded by remember { mutableStateOf(false) }
     Box {
         IconButton(onClick = { expanded = true }) {
-            Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.builder_more_actions, row.name), tint = colors.onSurfaceVariant)
+            Icon(Icons.Filled.MoreVert, contentDescription = description, tint = colors.onSurfaceVariant)
         }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            if (row.canMoveIntoRepeat) {
+            onEdit?.let { edit ->
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.builder_edit)) },
+                    leadingIcon = { Icon(Icons.Filled.Edit, contentDescription = null) },
+                    onClick = { expanded = false; edit() },
+                )
+            }
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.builder_duplicate)) },
+                leadingIcon = { Icon(Icons.Filled.ContentCopy, contentDescription = null) },
+                onClick = { expanded = false; onDuplicate() },
+            )
+            onMoveIn?.let { move ->
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.builder_move_into_repeat)) },
                     leadingIcon = { Icon(Icons.Filled.Repeat, contentDescription = null) },
-                    onClick = { expanded = false; model.moveIntoRepeatAbove(row.key) },
+                    onClick = { expanded = false; move() },
                 )
             }
-            if (row.repeatKey != null) {
+            onMoveOut?.let { move ->
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.builder_move_out_of_repeat)) },
                     leadingIcon = { Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null) },
-                    onClick = { expanded = false; model.moveOutOfRepeat(row.key) },
+                    onClick = { expanded = false; move() },
                 )
             }
             HorizontalDivider()
             DropdownMenuItem(
-                text = { Text(stringResource(R.string.builder_remove), color = colors.error) },
+                text = { Text(stringResource(R.string.builder_delete), color = colors.error) },
                 leadingIcon = { Icon(Icons.Filled.Delete, contentDescription = null, tint = colors.error) },
-                onClick = { expanded = false; model.remove(row.key) },
+                onClick = { expanded = false; onRemove() },
             )
         }
     }
@@ -600,7 +646,7 @@ private fun TargetEditor(model: BuilderModel, row: BuilderRow, target: WalkRunTa
         IntensityKind.FREE to stringResource(R.string.builder_free),
         IntensityKind.PACE to stringResource(R.string.builder_pace),
     )
-    Column(Modifier.padding(end = 4.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             PoulpySelect(
                 stringResource(R.string.builder_duration),
@@ -761,22 +807,36 @@ private fun DashedTile(label: String, icon: ImageVector, onClick: () -> Unit, mo
     }
 }
 
-/** "Add a step": a tap asks whether it is an exercise, picked from the list, or a rest. */
+/**
+ * "Add a step": a tap asks what the step is for. A warm-up, an exercise, a recovery or a cool
+ * down is picked from the exercise list; a rest is added right away.
+ */
 @Composable
-private fun AddStepButton(label: String, onExercise: () -> Unit, onRest: () -> Unit, modifier: Modifier = Modifier, height: Int = 56) {
+private fun AddStepButton(label: String, onExercise: (StepRole) -> Unit, onRest: () -> Unit, modifier: Modifier = Modifier, height: Int = 56) {
     var expanded by remember { mutableStateOf(false) }
     Box(modifier) {
         DashedTile(label, Icons.Filled.Add, onClick = { expanded = true }, height = height)
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            DropdownMenuItem(
-                text = { Text(stringResource(R.string.builder_add_exercise)) },
-                leadingIcon = { Icon(Icons.Filled.FitnessCenter, contentDescription = null) },
-                onClick = { expanded = false; onExercise() },
-            )
+            listOf(
+                Triple(StepRole.WARM_UP, R.string.builder_add_warm_up, Icons.Filled.WbSunny),
+                Triple(StepRole.WORK, R.string.builder_add_exercise, Icons.Filled.FitnessCenter),
+                Triple(StepRole.RECOVER, R.string.builder_add_recover, Icons.AutoMirrored.Filled.DirectionsWalk),
+            ).forEach { (role, text, icon) ->
+                DropdownMenuItem(
+                    text = { Text(stringResource(text)) },
+                    leadingIcon = { Icon(icon, contentDescription = null) },
+                    onClick = { expanded = false; onExercise(role) },
+                )
+            }
             DropdownMenuItem(
                 text = { Text(stringResource(R.string.builder_add_rest)) },
                 leadingIcon = { Icon(Icons.Filled.Timer, contentDescription = null) },
                 onClick = { expanded = false; onRest() },
+            )
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.builder_add_cool_down)) },
+                leadingIcon = { Icon(Icons.Filled.Bedtime, contentDescription = null) },
+                onClick = { expanded = false; onExercise(StepRole.COOL_DOWN) },
             )
         }
     }

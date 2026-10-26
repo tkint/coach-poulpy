@@ -91,12 +91,9 @@
 "builder.weight" = "Weight";
 "builder.move.up" = "Move up";
 "builder.move.down" = "Move down";
-"builder.remove" = "Remove";
 "builder.weight.kg" = "Weight in kilograms";
 "builder.less" = "Less";
 "builder.more" = "More";
-"builder.remove.named %@" = "Remove %@";
-"builder.open %@" = "Edit %@";
 "builder.does.not.fit" = "This kind of workout can’t run this exercise. Remove it or pick another kind.";
 "builder.empty" = "Add steps to build your workout.";
 "builder.duration" = "Duration";
@@ -115,7 +112,6 @@
 "builder.repeat" = "Repeat";
 "builder.repeat.fewer" = "Fewer times";
 "builder.repeat.more" = "More times";
-"builder.remove.repeat" = "Remove this repeat";
 "builder.step" = "Step";
 "builder.intensity" = "Intensity";
 "builder.time" = "Time";
@@ -125,6 +121,13 @@
 "builder.move.into.repeat" = "Move into the repeat above";
 "builder.move.out.of.repeat" = "Move out of the repeat";
 "builder.more.actions %@" = "More actions for %@";
+"builder.edit" = "Edit";
+"builder.duplicate" = "Duplicate";
+"builder.delete" = "Delete";
+"builder.repeat.actions" = "More actions for this repeat";
+"builder.add.warm.up" = "A warm-up";
+"builder.add.recover" = "A recovery";
+"builder.add.cool.down" = "A cool down";
 
 "player.ready" = "Ready?";
 "player.start" = "Start the session";

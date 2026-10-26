@@ -16,6 +16,10 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.serialization.json.Json
 
@@ -236,5 +240,46 @@ class BuilderStepsTest {
         val step = Json.decodeFromString<Step>(json) as Step.ExerciseStep
         assertEquals(StepRole.WORK, step.role)
         assertEquals(Target.Open, Json.decodeFromString<Target>("""{"type":"open"}"""))
+    }
+
+    @Test
+    fun aStepAddedAsAWarmUpOrCoolDownKeepsThatRole() {
+        val builder = graph.createWorkout("en")
+        builder.add("walk", role = StepRole.WARM_UP)
+        builder.add("walk", role = StepRole.COOL_DOWN)
+        assertEquals(listOf("Warm-up", "Cool down"), builder.state.value.rows.map { it.roleLabel })
+    }
+
+    @Test
+    fun duplicatingPutsACopyRightAfter() {
+        val builder = intervalRun()
+        val warmUp = builder.state.value.rows.first()
+        builder.duplicate(warmUp.key)
+        val rows = builder.state.value.rows
+        assertEquals(warmUp.summary, rows[1].summary)
+        assertEquals("Warm-up", rows[1].roleLabel)
+        assertTrue(rows[1].key != warmUp.key)
+
+        val repeat = builder.state.value.steps[2].repeatGroup!!
+        builder.duplicate(repeat.key)
+        val copy = builder.state.value.steps[3].repeatGroup!!
+        assertEquals(repeat.timesLabel, copy.timesLabel)
+        assertEquals(repeat.rows.map { it.summary }, copy.rows.map { it.summary })
+        assertTrue(copy.rows.none { row -> repeat.rows.any { it.key == row.key } })
+    }
+
+    @Test
+    fun theWorkoutPageShowsTheStructure() {
+        val id = intervalRun().save()!!
+        val page = WorkoutPageModel(WorkoutId(id), graph.store, graph.compiler, graph.catalog, "en", scope = CoroutineScope(Dispatchers.Default))
+        val state = runBlocking { withTimeout(5.seconds) { page.state.first { it.loaded } } }
+        assertEquals(3, state.structure.size)
+        assertEquals("Warm-up", state.structure[0].row?.roleLabel)
+        val repeat = assertNotNull(state.structure[1].repeatGroup)
+        assertEquals("4 times", repeat.timesLabel)
+        // Units are not saved with the workout (#72), so the page shows the distance in km.
+        assertEquals(listOf("0.4 km · 5:00 /km", "1 min 30"), repeat.rows.map { it.prescription })
+        assertEquals("5:45 /km · until the end", state.structure[2].row?.prescription)
+        page.close()
     }
 }

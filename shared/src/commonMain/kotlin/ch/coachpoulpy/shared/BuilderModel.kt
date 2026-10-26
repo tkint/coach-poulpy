@@ -131,10 +131,16 @@ class BuilderModel internal constructor(
 
     fun setType(type: WorkoutType) = edit { copy(type = type) }
 
-    /** Adds an exercise at the end of the workout, or at the end of the repeat [repeatKey]. */
-    fun add(slug: String, repeatKey: String? = null) {
+    /** Adds an exercise with its [role] at the end of the workout, or at the end of the repeat [repeatKey]. */
+    fun add(slug: String, repeatKey: String? = null, role: StepRole = StepRole.WORK) {
         val exercise = catalog[ExerciseSlug(slug)] ?: return
-        addStep(DraftEntry.new(exercise, draft.type, units(), inRepeat = repeatKey != null), repeatKey)
+        addStep(DraftEntry.new(exercise, draft.type, units(), inRepeat = repeatKey != null).copy(role = role), repeatKey)
+    }
+
+    /** Puts a copy of a step, or of a repeat and its steps, right after it. */
+    fun duplicate(key: String) = editList(key) { list ->
+        val index = list.indexOfFirst { it.key == key }
+        list.toMutableList().apply { add(index + 1, list[index].copied()) }
     }
 
     /** Adds a one-minute rest at the end of the workout, or at the end of the repeat [repeatKey]. */
@@ -523,4 +529,11 @@ class BuilderModel internal constructor(
 /** Changes every exercise and rest, inside repeats too. */
 internal fun List<DraftStep>.mapLeaves(change: (DraftStep) -> DraftStep): List<DraftStep> = map { step ->
     if (step is DraftRepeat) step.copy(steps = step.steps.map(change)) else change(step)
+}
+
+/** The same step with new keys, so the copy is its own step. */
+internal fun DraftStep.copied(): DraftStep = when (this) {
+    is DraftEntry -> copy(key = Ids.newUuidV7())
+    is DraftRest -> copy(key = Ids.newUuidV7())
+    is DraftRepeat -> copy(key = Ids.newUuidV7(), steps = steps.map { it.copied() })
 }

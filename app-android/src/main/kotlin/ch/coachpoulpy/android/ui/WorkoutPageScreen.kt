@@ -28,6 +28,8 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.EditCalendar
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Repeat
+import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
@@ -63,6 +65,7 @@ import ch.coachpoulpy.android.R
 import ch.coachpoulpy.shared.AppGraph
 import ch.coachpoulpy.shared.DeletePrompt
 import ch.coachpoulpy.shared.WorkoutPageState
+import ch.coachpoulpy.shared.WorkoutStepRow
 import java.time.Instant
 import java.time.ZoneId
 import java.util.Locale
@@ -161,25 +164,28 @@ fun WorkoutPageScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(start = 4.dp, top = 4.dp),
             )
-            state.steps.forEachIndexed { index, step ->
-                Row(
-                    Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(PoulpyRadius.md))
-                        .background(MaterialTheme.colorScheme.surface)
-                        .clickable { onOpenExercise(step.slug) }
-                        .padding(horizontal = 12.dp, vertical = 10.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    Box(Modifier.size(32.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primaryContainer), contentAlignment = Alignment.Center) {
-                        Text("${index + 1}", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onPrimaryContainer)
+            // Exercises are numbered in order, through repeats; rests show a timer instead.
+            var number = 0
+            state.structure.forEach { step ->
+                val row = step.row
+                val group = step.repeatGroup
+                if (row != null) {
+                    StructureRow(row, if (row.isRest) null else ++number, onOpenExercise)
+                } else if (group != null) {
+                    Column(
+                        Modifier.fillMaxWidth().clip(RoundedCornerShape(PoulpyRadius.md)).background(MaterialTheme.colorScheme.primaryContainer).padding(10.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                        Row(Modifier.padding(start = 4.dp, top = 2.dp, bottom = 2.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Icon(Icons.Filled.Repeat, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+                            Text(
+                                "${stringResource(R.string.builder_repeat)} · ${group.timesLabel}",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            )
+                        }
+                        group.rows.forEach { child -> StructureRow(child, if (child.isRest) null else ++number, onOpenExercise) }
                     }
-                    Column(Modifier.weight(1f)) {
-                        Text(step.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold)
-                        Text(step.prescription, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
-                    Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         }
@@ -198,6 +204,38 @@ fun WorkoutPageScreen(
     }
 
     if (deleting) DeleteWorkoutDialog(state.deletePrompt, onDelete = { deleting = false; model.delete() }, onDismiss = { deleting = false })
+}
+
+/** A step of the workout page: its number (a timer for a rest), role, name and prescription; an exercise opens its page. */
+@Composable
+private fun StructureRow(row: WorkoutStepRow, number: Int?, onOpenExercise: (String) -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(PoulpyRadius.md))
+            .background(colors.surface)
+            .then(if (row.isRest) Modifier else Modifier.clickable { onOpenExercise(row.slug) })
+            .padding(horizontal = 12.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Box(Modifier.size(32.dp).clip(CircleShape).background(if (row.isRest) colors.surfaceVariant else colors.primaryContainer), contentAlignment = Alignment.Center) {
+            if (number != null) {
+                Text("$number", style = MaterialTheme.typography.titleSmall, color = colors.onPrimaryContainer)
+            } else {
+                Icon(Icons.Filled.Timer, contentDescription = null, tint = colors.onSurfaceVariant, modifier = Modifier.size(18.dp))
+            }
+        }
+        Column(Modifier.weight(1f)) {
+            row.roleLabel?.takeIf { !row.isRest }?.let {
+                Text(it.uppercase(Locale.getDefault()), style = MaterialTheme.typography.labelSmall, color = colors.primary)
+            }
+            Text(row.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold)
+            Text(row.prescription, style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
+        }
+        if (!row.isRest) Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = colors.onSurfaceVariant)
+    }
 }
 
 /** The crimson Delete of a workout's menus, with its icon: destructive, never ember. */

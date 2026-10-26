@@ -91,12 +91,9 @@
 "builder.weight" = "Charge";
 "builder.move.up" = "Monter";
 "builder.move.down" = "Descendre";
-"builder.remove" = "Retirer";
 "builder.weight.kg" = "Charge en kilogrammes";
 "builder.less" = "Moins";
 "builder.more" = "Plus";
-"builder.remove.named %@" = "Retirer %@";
-"builder.open %@" = "Modifier %@";
 "builder.does.not.fit" = "Ce type de séance ne peut pas inclure cet exercice. Retirez-le ou choisissez un autre type.";
 "builder.empty" = "Ajoutez des étapes pour composer votre séance.";
 "builder.duration" = "Durée";
@@ -115,7 +112,6 @@
 "builder.repeat" = "Répétition";
 "builder.repeat.fewer" = "Moins de fois";
 "builder.repeat.more" = "Plus de fois";
-"builder.remove.repeat" = "Retirer cette répétition";
 "builder.step" = "Étape";
 "builder.intensity" = "Intensité";
 "builder.time" = "Temps";
@@ -125,6 +121,13 @@
 "builder.move.into.repeat" = "Mettre dans la répétition au-dessus";
 "builder.move.out.of.repeat" = "Sortir de la répétition";
 "builder.more.actions %@" = "Autres actions pour %@";
+"builder.edit" = "Modifier";
+"builder.duplicate" = "Dupliquer";
+"builder.delete" = "Supprimer";
+"builder.repeat.actions" = "Autres actions pour cette répétition";
+"builder.add.warm.up" = "Un échauffement";
+"builder.add.recover" = "Une récupération";
+"builder.add.cool.down" = "Un retour au calme";
 
 "player.ready" = "Prêt ?";
 "player.start" = "Lancer la séance";
