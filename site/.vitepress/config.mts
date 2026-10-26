@@ -90,6 +90,7 @@ export default withMermaid(
           items: [
             { text: 'How to use it', link: '/docs/design-system' },
             { text: 'Tokens', link: '/tokens' },
+            { text: 'Mockups', link: '/mockups' },
           ],
         },
         {
