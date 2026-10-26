@@ -20,26 +20,30 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Sync
+import androidx.compose.material.icons.filled.SyncDisabled
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -60,8 +64,10 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -72,6 +78,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ch.coachpoulpy.android.R
 import ch.coachpoulpy.shared.AppGraph
 import ch.coachpoulpy.shared.BeltStatus
+import ch.coachpoulpy.shared.FinishPromptUi
+import ch.coachpoulpy.shared.FinishReason
+import ch.coachpoulpy.shared.LiveChoice
 import ch.coachpoulpy.shared.LiveConnection
 import ch.coachpoulpy.shared.LiveMetric
 import ch.coachpoulpy.shared.LiveModel
@@ -118,12 +127,12 @@ fun LiveScreen(graph: AppGraph, language: String, onManageDevices: () -> Unit, m
         }
         // Added devices still connecting: the view shows read-only, with Poulpy where the controls go.
         val connecting = state.connection == LiveConnection.CONNECTING && state.recording == null
-        if (state.belt == BeltStatus.PAUSED || state.belt == BeltStatus.STOPPED) BeltBanner(state.belt)
+        if (state.belt in HALTED && state.waitingFor == null) BeltBanner(state.belt)
         if (state.tiles.isNotEmpty()) LivePanel(state.tiles) else if (state.connectedCount > 0) {
             Text(stringResource(R.string.live_waiting), color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
+        state.finishPrompt?.let { FinishCard(it, model) }
         if (connecting) Connecting(state.connecting) else Recorder(state, model)
-        if (state.hasTreadmill && !connecting) SyncRow(state.syncPause, model::setSyncPause)
     }
     state.summary?.let { SummaryDialog(it, state.units, onDismiss = model::clearSummary) }
 }
@@ -271,7 +280,12 @@ private fun Recorder(state: LiveUiState, model: LiveModel) {
     ) {
         Column(Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             val recording = state.recording
-            if (recording == null) ChoicePicker(state, model) else Recording(recording, state.units, model)
+            val waiting = state.waitingFor
+            when {
+                recording != null -> Recording(recording, state.units, model)
+                waiting != null -> Waiting(waiting, model)
+                else -> ChoicePicker(state, model)
+            }
         }
     }
 }
@@ -306,8 +320,12 @@ private fun ChoicePicker(state: LiveUiState, model: LiveModel) {
         }
         Icon(Icons.Filled.ExpandMore, contentDescription = null, tint = colors.onSurfaceVariant)
     }
-    Button(onClick = { model.startRecording(state.selected) }, modifier = Modifier.fillMaxWidth().height(52.dp)) {
-        Text(stringResource(R.string.treadmill_start))
+    if (state.hasTreadmill) FollowMode(state.followTreadmill)
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+        Button(onClick = { model.startRecording(state.selected) }, modifier = Modifier.weight(1f).height(52.dp)) {
+            Text(stringResource(if (state.hasTreadmill && state.followTreadmill) R.string.live_wait_treadmill else R.string.treadmill_start))
+        }
+        if (state.hasTreadmill) FollowToggle(state.followTreadmill, model::setFollowTreadmill)
     }
     if (picking) {
         ChoiceSheet(state, onPick = { model.select(it); picking = false }, onDismiss = { picking = false })
@@ -390,34 +408,130 @@ private fun Recording(recording: RecordingUi, units: UnitSystem, model: LiveMode
         }
     }
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-        OutlinedIconButton(
-            onClick = if (recording.paused) model::resumeRecording else model::pauseRecording,
-            modifier = Modifier.size(52.dp),
-        ) {
-            Icon(
-                if (recording.paused) Icons.Filled.PlayArrow else Icons.Filled.Pause,
-                contentDescription = stringResource(if (recording.paused) R.string.treadmill_resume else R.string.treadmill_pause),
-            )
+        // Recording: only Pause (and Skip in a workout). Paused: Resume or Finish.
+        if (recording.paused) {
+            OutlinedButton(onClick = model::resumeRecording, modifier = Modifier.weight(1f).height(52.dp)) {
+                Icon(Icons.Filled.PlayArrow, contentDescription = null)
+                Spacer(Modifier.size(6.dp))
+                Text(stringResource(R.string.treadmill_resume))
+            }
+            Button(onClick = model::stopRecording, modifier = Modifier.weight(1f).height(52.dp)) { Text(stringResource(R.string.treadmill_stop)) }
+        } else {
+            OutlinedButton(onClick = model::pauseRecording, modifier = Modifier.weight(1f).height(52.dp)) {
+                Icon(Icons.Filled.Pause, contentDescription = null)
+                Spacer(Modifier.size(6.dp))
+                Text(stringResource(R.string.treadmill_pause))
+            }
+            if (!recording.freeRun) {
+                OutlinedButton(onClick = model::skipPhase, modifier = Modifier.weight(1f).height(52.dp)) { Text(stringResource(R.string.treadmill_skip)) }
+            }
         }
-        if (!recording.freeRun) {
-            OutlinedButton(onClick = model::skipPhase, modifier = Modifier.weight(1f).height(52.dp)) { Text(stringResource(R.string.treadmill_skip)) }
-        }
-        Button(onClick = model::stopRecording, modifier = Modifier.weight(1f).height(52.dp)) { Text(stringResource(R.string.treadmill_stop)) }
     }
 }
 
+/** Which mode Start is in, auto or manual, with what each does behind the info button. */
 @Composable
-private fun SyncRow(on: Boolean, onChange: (Boolean) -> Unit) {
+private fun FollowMode(on: Boolean) {
+    var info by rememberSaveable { mutableStateOf(false) }
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            stringResource(if (on) R.string.live_mode_auto else R.string.live_mode_manual),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.weight(1f),
+        )
+        IconButton(onClick = { info = true }, modifier = Modifier.size(40.dp)) {
+            Icon(Icons.Filled.Info, contentDescription = stringResource(R.string.live_mode_info_label), tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp))
+        }
+    }
+    if (info) {
+        AlertDialog(
+            onDismissRequest = { info = false },
+            confirmButton = { TextButton(onClick = { info = false }) { Text(stringResource(R.string.action_done)) } },
+            title = { Text(stringResource(R.string.live_follow_treadmill)) },
+            text = { Text(stringResource(R.string.live_mode_info)) },
+        )
+    }
+}
+
+/** A square button next to Start: on, the recording follows the treadmill. */
+@Composable
+private fun FollowToggle(on: Boolean, onChange: (Boolean) -> Unit) {
+    val colors = MaterialTheme.colorScheme
     Surface(
         shape = RoundedCornerShape(PoulpyRadius.md),
-        color = MaterialTheme.colorScheme.surface,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        // Filled when on, outlined with a crossed-out icon when off, so the state reads at a glance.
+        color = if (on) colors.primary else colors.surface,
+        contentColor = if (on) colors.onPrimary else colors.onSurfaceVariant,
+        border = if (on) null else BorderStroke(1.5.dp, colors.outline),
+        modifier = Modifier
+            .size(52.dp)
+            .clip(RoundedCornerShape(PoulpyRadius.md))
+            .toggleable(value = on, role = Role.Switch, onValueChange = onChange),
     ) {
-        Row(Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Filled.Sync, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-            Spacer(Modifier.size(12.dp))
-            Text(stringResource(R.string.live_sync_belt), fontWeight = FontWeight.ExtraBold, modifier = Modifier.weight(1f))
-            Switch(checked = on, onCheckedChange = onChange)
+        Box(contentAlignment = Alignment.Center) {
+            Icon(if (on) Icons.Filled.Sync else Icons.Filled.SyncDisabled, contentDescription = stringResource(R.string.live_follow_treadmill))
+        }
+    }
+}
+
+/** Start was tapped with the belt still: the recording begins when the belt moves. */
+@Composable
+private fun Waiting(choice: LiveChoice, model: LiveModel) {
+    Row(Modifier.semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite }, verticalAlignment = Alignment.CenterVertically) {
+        CircularProgressIndicator(Modifier.size(40.dp), strokeWidth = 4.dp)
+        Spacer(Modifier.size(14.dp))
+        Column {
+            Text(stringResource(R.string.live_waiting_title), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold)
+            Text(
+                stringResource(R.string.live_waiting_body, choice.name),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        OutlinedButton(onClick = model::cancelWaiting, modifier = Modifier.weight(1f).height(52.dp)) { Text(stringResource(R.string.action_cancel)) }
+        OutlinedButton(onClick = model::startNow, modifier = Modifier.weight(1f).height(52.dp)) { Text(stringResource(R.string.live_start_now)) }
+    }
+}
+
+/** The treadmill went quiet or away for long: blue, never a reproach. */
+@Composable
+private fun FinishCard(prompt: FinishPromptUi, model: LiveModel) {
+    val colors = MaterialTheme.colorScheme
+    Surface(shape = RoundedCornerShape(20.dp), color = colors.primaryContainer, contentColor = colors.onPrimaryContainer) {
+        Column(Modifier.fillMaxWidth().padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(verticalAlignment = Alignment.Top) {
+                Icon(Icons.Filled.Schedule, contentDescription = null, tint = colors.primary, modifier = Modifier.size(26.dp))
+                Spacer(Modifier.size(12.dp))
+                Column(Modifier.semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite }) {
+                    val lost = prompt.reason == FinishReason.TREADMILL_LOST
+                    Text(
+                        stringResource(if (lost) R.string.live_finish_lost_title else R.string.live_finish_still_title),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.ExtraBold,
+                        modifier = Modifier.semantics { heading() },
+                    )
+                    Text(
+                        when (prompt.reason) {
+                            FinishReason.BELT_STOPPED ->
+                                stringResource(R.string.live_finish_stopped_body, prompt.autoFinishMinutes, clock(prompt.endsAtSeconds))
+                            else -> stringResource(
+                                if (lost) R.string.live_finish_lost_body else R.string.live_finish_still_body,
+                                prompt.sinceMinutes,
+                                prompt.autoFinishMinutes,
+                                clock(prompt.endsAtSeconds),
+                            )
+                        },
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(onClick = model::keepGoing, modifier = Modifier.weight(1f).height(48.dp)) { Text(stringResource(R.string.live_keep_going)) }
+                Button(onClick = model::stopRecording, modifier = Modifier.weight(1f).height(48.dp)) { Text(stringResource(R.string.treadmill_stop)) }
+            }
         }
     }
 }
@@ -492,3 +606,5 @@ private fun clock(seconds: Long): String {
     val s = seconds % 60
     return if (h > 0) "%d:%02d:%02d".format(h, m, s) else "%d:%02d".format(m, s)
 }
+
+private val HALTED = setOf(BeltStatus.PAUSED, BeltStatus.STOPPED, BeltStatus.SAFETY_KEY, BeltStatus.STILL)

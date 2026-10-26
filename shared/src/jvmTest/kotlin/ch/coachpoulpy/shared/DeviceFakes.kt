@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 internal class FakeTreadmill : BleLink {
     val device = FoundDevice(id = "AA:BB", name = "Test treadmill", rssi = -50, advertisesFtms = true)
     val notifications = Channel<ByteArray>(Channel.UNLIMITED)
+    val statuses = Channel<ByteArray>(Channel.UNLIMITED)
 
     override suspend fun connect() = Unit
     override suspend fun awaitDisconnected() = CompletableDeferred<Unit>().await()
@@ -26,7 +27,11 @@ internal class FakeTreadmill : BleLink {
         else -> error("Not readable")
     }
     override fun observe(characteristic: Uuid, service: Uuid): Flow<ByteArray> =
-        if (characteristic == FtmsUuids.treadmillData) notifications.receiveAsFlow() else flow { error("No machine status") }
+        when (characteristic) {
+            FtmsUuids.treadmillData -> notifications.receiveAsFlow()
+            FtmsUuids.machineStatus -> statuses.receiveAsFlow()
+            else -> flow { error("Not observed") }
+        }
     override suspend fun write(characteristic: Uuid, value: ByteArray, service: Uuid) = Unit
     override fun close() = Unit
 
@@ -35,6 +40,11 @@ internal class FakeTreadmill : BleLink {
         notifications.trySend(
             bytes(0x04, 0x01, speedCentiKmh and 0xFF, speedCentiKmh shr 8, meters and 0xFF, (meters shr 8) and 0xFF, meters shr 16, bpm),
         )
+    }
+
+    /** A Fitness Machine Status event, as pressed on the console: 0x02 0x01 stop, 0x02 0x02 pause, 0x03 safety key, 0x04 start. */
+    fun status(vararg values: Int) {
+        statuses.trySend(bytes(*values))
     }
 }
 

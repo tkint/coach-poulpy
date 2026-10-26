@@ -11,7 +11,9 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import kotlin.time.Clock
+import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
 import kotlinx.coroutines.CompletableDeferred
@@ -286,19 +288,20 @@ class LiveModelTest {
         addTreadmill(m)
         assertEquals(LiveConnection.CONNECTED, m.live.state.value.connection)
         assertEquals(emptyList(), m.live.state.value.connecting)
-        m.live.startRecording("exercise:walk")
-        assertNotNull(m.live.state.value.recording)
+        m.live.startRecording("exercise:walk") // no reading yet: the belt has not started
+        assertNotNull(m.live.state.value.waitingFor)
     }
 
     @Test
-    fun recordingFollowsTheBeltWhenSyncIsOn() = runTest {
+    fun recordingFollowsTheBeltWhenFollowIsOn() = runTest {
         val central = FakeCentral()
         val m = models(central, LocalStore(DriverFactory()))
         addTreadmill(m)
         central.treadmill.send(speedCentiKmh = 800, meters = 0, bpm = 120)
         runCurrent()
-        m.live.startRecording("exercise:walk")
+        m.live.startRecording("exercise:walk") // the belt already moves: no waiting
         runCurrent()
+        assertNull(m.live.state.value.waitingFor)
 
         central.treadmill.send(speedCentiKmh = 0, meters = 10, bpm = 120)
         runCurrent()
@@ -309,9 +312,49 @@ class LiveModelTest {
         assertEquals(false, m.live.state.value.recording?.paused)
 
         // Switched off: the belt stopping no longer pauses the recording.
-        m.live.setSyncPause(false)
+        m.live.setFollowTreadmill(false)
         central.treadmill.send(speedCentiKmh = 0, meters = 12, bpm = 120)
         runCurrent()
+        assertEquals(false, m.live.state.value.recording?.paused)
+    }
+
+    @Test
+    fun startWaitsForTheBeltToMove() = runTest {
+        val central = FakeCentral()
+        val store = LocalStore(DriverFactory())
+        val m = models(central, store)
+        addTreadmill(m)
+        central.treadmill.send(speedCentiKmh = 0, meters = 0, bpm = 120)
+        runCurrent()
+
+        m.live.startRecording("exercise:walk")
+        assertEquals("Walk", m.live.state.value.waitingFor?.name)
+        assertNull(m.live.state.value.recording)
+        m.live.cancelWaiting()
+        assertNull(m.live.state.value.waitingFor)
+
+        m.live.startRecording("exercise:walk")
+        advanceTimeBy(30.seconds)
+        central.treadmill.send(speedCentiKmh = 400, meters = 0, bpm = 120)
+        runCurrent()
+        assertNull(m.live.state.value.waitingFor)
+        assertEquals(false, m.live.state.value.recording?.paused)
+        m.live.stopRecording()
+        runCurrent()
+        // The session starts with the belt, not with the tap.
+        assertEquals(Instant.fromEpochMilliseconds(1_700_000_000_000 + 30_000), store.finishedSessions().first().single().execution.startedAt)
+    }
+
+    @Test
+    fun startNowRecordsWithoutTheBelt() = runTest {
+        val central = FakeCentral()
+        val m = models(central, LocalStore(DriverFactory()))
+        addTreadmill(m)
+        central.treadmill.send(speedCentiKmh = 0, meters = 0, bpm = 120)
+        runCurrent()
+        m.live.startRecording("exercise:walk")
+        m.live.startNow()
+        assertNull(m.live.state.value.waitingFor)
         assertEquals(false, m.live.state.value.recording?.paused)
     }
 
@@ -322,10 +365,7 @@ class LiveModelTest {
         addTreadmill(m)
         central.treadmill.send(speedCentiKmh = 0, meters = 0, bpm = 120)
         runCurrent()
-        m.live.startRecording("exercise:walk") // the belt is still: the timer waits
-        runCurrent()
-        assertEquals(true, m.live.state.value.recording?.paused)
-
+        m.live.startRecording("exercise:walk") // the belt is still: Start waits
         central.treadmill.send(speedCentiKmh = 600, meters = 0, bpm = 120)
         runCurrent()
         assertEquals(false, m.live.state.value.recording?.paused)
@@ -334,6 +374,218 @@ class LiveModelTest {
         central.treadmill.send(speedCentiKmh = 700, meters = 2, bpm = 120)
         runCurrent()
         assertEquals(true, m.live.state.value.recording?.paused)
+    }
+
+    @Test
+    fun pauseResumeAndStopOnTheConsole() = runTest {
+        val central = FakeCentral()
+        val m = models(central, LocalStore(DriverFactory()))
+        addTreadmill(m)
+        central.treadmill.send(speedCentiKmh = 800, meters = 0, bpm = 120)
+        runCurrent()
+        m.live.startRecording("exercise:run")
+        advanceTimeBy(60.seconds)
+
+        central.treadmill.status(0x02, 0x02)
+        runCurrent()
+        assertEquals(true, m.live.state.value.recording?.paused)
+        advanceTimeBy(30.seconds)
+        central.treadmill.status(0x04)
+        runCurrent()
+        assertEquals(false, m.live.state.value.recording?.paused)
+        // The timer counts only the time recorded, not the pause.
+        assertEquals(60L, m.live.state.value.recording?.elapsedSeconds)
+
+        // Stop pauses and asks: another program may follow on the treadmill.
+        central.treadmill.status(0x02, 0x01)
+        runCurrent()
+        assertEquals(true, m.live.state.value.recording?.paused)
+        assertEquals(FinishReason.BELT_STOPPED, m.live.state.value.finishPrompt?.reason)
+        central.treadmill.status(0x04)
+        runCurrent()
+        assertEquals(false, m.live.state.value.recording?.paused)
+        assertNull(m.live.state.value.finishPrompt)
+
+        // With no answer, it finishes on its own, ending when Stop was pressed.
+        advanceTimeBy(60.seconds)
+        central.treadmill.status(0x02, 0x01)
+        runCurrent()
+        assertEquals(120L, m.live.state.value.finishPrompt?.endsAtSeconds)
+        advanceTimeBy(10.minutes + 1.seconds)
+        assertNull(m.live.state.value.recording)
+        assertEquals(120L, m.live.state.value.summary?.durationSeconds)
+    }
+
+    @Test
+    fun keepGoingAfterAStopOnTheConsoleStaysPaused() = runTest {
+        val central = FakeCentral()
+        val m = models(central, LocalStore(DriverFactory()))
+        addTreadmill(m)
+        central.treadmill.send(speedCentiKmh = 800, meters = 0, bpm = 120)
+        runCurrent()
+        m.live.startRecording("exercise:run")
+        advanceTimeBy(60.seconds)
+        central.treadmill.status(0x02, 0x01)
+        runCurrent()
+        assertEquals(FinishReason.BELT_STOPPED, m.live.state.value.finishPrompt?.reason)
+
+        m.live.keepGoing()
+        advanceTimeBy(1.minutes)
+        assertNull(m.live.state.value.finishPrompt)
+        assertEquals(true, m.live.state.value.recording?.paused)
+        // Still stopped a full wait later: the usual question comes back.
+        advanceTimeBy(10.minutes)
+        assertEquals(FinishReason.BELT_STILL, m.live.state.value.finishPrompt?.reason)
+    }
+
+    @Test
+    fun finishingAfterAStopOnTheConsoleSkipsTheRestOfAWorkout() = runTest {
+        val central = FakeCentral()
+        val store = LocalStore(DriverFactory())
+        // A saved treadmill workout of a few steps; the demo is no longer offered.
+        store.saveWorkout(LiveModel.demoIntervals)
+        val m = models(central, store)
+        addTreadmill(m)
+        central.treadmill.send(speedCentiKmh = 600, meters = 0, bpm = 120)
+        // Saved workouts are read on the IO dispatcher, outside the test clock: wait for them.
+        fun saved() = m.live.state.value.workouts.any { it.key == "demo-intervals" }
+        var tries = 0
+        while (!saved() && tries++ < 500) {
+            Thread.sleep(10)
+            runCurrent()
+        }
+        assertTrue(saved())
+        m.live.startRecording("demo-intervals")
+        advanceTimeBy(60.seconds)
+        central.treadmill.status(0x02, 0x01)
+        runCurrent()
+        assertEquals(FinishReason.BELT_STOPPED, m.live.state.value.finishPrompt?.reason)
+        m.live.stopRecording()
+        assertNull(m.live.state.value.recording)
+        assertNotNull(m.live.state.value.summary)
+    }
+
+    @Test
+    fun aBeltStillForLongAsksThenFinishesWhenItLastMoved() = runTest {
+        val central = FakeCentral()
+        val store = LocalStore(DriverFactory())
+        val m = models(central, store)
+        addTreadmill(m)
+        central.treadmill.send(speedCentiKmh = 500, meters = 0, bpm = 120)
+        runCurrent()
+        m.live.startRecording("exercise:walk")
+        advanceTimeBy(5.minutes)
+        // A treadmill without status events: 0 km/h is a pause, never a finish.
+        central.treadmill.send(speedCentiKmh = 0, meters = 400, bpm = 100)
+        runCurrent()
+        val stoppedAt = Instant.fromEpochMilliseconds(1_700_000_000_000 + testScheduler.currentTime)
+        assertEquals(true, m.live.state.value.recording?.paused)
+
+        advanceTimeBy(9.minutes)
+        assertNull(m.live.state.value.finishPrompt)
+        advanceTimeBy(1.minutes + 1.seconds)
+        val prompt = assertNotNull(m.live.state.value.finishPrompt)
+        assertEquals(FinishReason.BELT_STILL, prompt.reason)
+        assertEquals(10, prompt.sinceMinutes)
+        assertEquals(10, prompt.autoFinishMinutes)
+        assertEquals(300, prompt.endsAtSeconds)
+
+        advanceTimeBy(10.minutes)
+        assertNull(m.live.state.value.recording)
+        runCurrent()
+        val saved = store.finishedSessions().first().single()
+        assertEquals(stoppedAt, saved.execution.endedAt)
+        assertEquals(5.minutes, saved.totals?.active)
+    }
+
+    @Test
+    fun keepGoingWaitsAnotherFullTenMinutes() = runTest {
+        val central = FakeCentral()
+        val m = models(central, LocalStore(DriverFactory()))
+        addTreadmill(m)
+        central.treadmill.send(speedCentiKmh = 500, meters = 0, bpm = 120)
+        runCurrent()
+        m.live.startRecording("exercise:walk")
+        central.treadmill.send(speedCentiKmh = 0, meters = 10, bpm = 100)
+        runCurrent()
+        advanceTimeBy(10.minutes + 1.seconds)
+        assertNotNull(m.live.state.value.finishPrompt)
+
+        m.live.keepGoing()
+        assertNull(m.live.state.value.finishPrompt)
+        advanceTimeBy(9.minutes)
+        assertNull(m.live.state.value.finishPrompt)
+        assertNotNull(m.live.state.value.recording)
+
+        // The belt moving again also puts the question away.
+        advanceTimeBy(1.minutes + 1.seconds)
+        assertNotNull(m.live.state.value.finishPrompt)
+        central.treadmill.send(speedCentiKmh = 400, meters = 10, bpm = 110)
+        runCurrent()
+        assertNull(m.live.state.value.finishPrompt)
+    }
+
+    @Test
+    fun theSafetyKeyAsksAtOnce() = runTest {
+        val central = FakeCentral()
+        val m = models(central, LocalStore(DriverFactory()))
+        addTreadmill(m)
+        central.treadmill.send(speedCentiKmh = 500, meters = 0, bpm = 120)
+        runCurrent()
+        m.live.startRecording("exercise:walk")
+        central.treadmill.status(0x03)
+        runCurrent()
+        assertEquals(true, m.live.state.value.recording?.paused)
+        assertEquals(FinishReason.BELT_STILL, m.live.state.value.finishPrompt?.reason)
+    }
+
+    @Test
+    fun aTreadmillSwitchedOffPausesTheRecordingWhenFollowing() = runTest {
+        val central = FakeCentral()
+        val m = models(central, LocalStore(DriverFactory()))
+        addTreadmill(m)
+        central.treadmill.send(speedCentiKmh = 800, meters = 0, bpm = 120)
+        runCurrent()
+        m.live.startRecording("exercise:run")
+        advanceTimeBy(60.seconds)
+        m.devices.disconnect("AA:BB")
+        runCurrent()
+        assertEquals(true, m.live.state.value.recording?.paused)
+        advanceTimeBy(30.seconds)
+        runCurrent()
+        // The timer stopped with the treadmill.
+        assertEquals(60L, m.live.state.value.recording?.elapsedSeconds)
+    }
+
+    @Test
+    fun aTreadmillGoneForTwoMinutesAsksEvenWithFollowOff() = runTest {
+        val central = FakeCentral()
+        val m = models(central, LocalStore(DriverFactory()))
+        addTreadmill(m)
+        m.live.setFollowTreadmill(false)
+        central.treadmill.send(speedCentiKmh = 500, meters = 0, bpm = 120)
+        runCurrent()
+        m.live.startRecording("exercise:walk")
+        advanceTimeBy(3.minutes)
+        m.devices.disconnect("AA:BB")
+        runCurrent()
+        advanceTimeBy(2.minutes + 1.seconds)
+        val prompt = assertNotNull(m.live.state.value.finishPrompt)
+        assertEquals(FinishReason.TREADMILL_LOST, prompt.reason)
+        assertEquals(180, prompt.endsAtSeconds)
+
+        m.live.stopRecording()
+        assertNull(m.live.state.value.finishPrompt)
+    }
+
+    @Test
+    fun theOldPauseSwitchSeedsFollowTheTreadmill() = runTest {
+        val memory = MemoryStore()
+        memory.putString("treadmill.syncPause", "false")
+        val m = models(FakeCentral(), LocalStore(DriverFactory()), memory)
+        assertEquals(false, m.live.state.value.followTreadmill)
+        m.live.setFollowTreadmill(true)
+        assertEquals("true", memory.getString("treadmill.follow"))
     }
 
     @Test
@@ -378,6 +630,8 @@ class LiveModelTest {
         val store = LocalStore(DriverFactory())
         val m = models(central, store, memory)
         addTreadmill(m)
+        // Not following the belt, so Start records at once.
+        m.live.setFollowTreadmill(false)
         m.live.select("exercise:run")
         assertEquals("Run", m.live.state.value.choice?.name)
 
@@ -394,5 +648,19 @@ class LiveModelTest {
         assertEquals(listOf("Walk with support", "Gentle walk", "Brisk walk"), m.live.state.value.walking.map { it.name })
         assertEquals(listOf("Easy run"), m.live.state.value.running.map { it.name })
         assertEquals("exercise:run,gone,exercise:walk", memory.getString("live.recent"))
+    }
+
+    @Test
+    fun aRecentChoiceWaitsForTheTreadmillToo() = runTest {
+        val central = FakeCentral()
+        val memory = MemoryStore()
+        memory.putString("live.recent", "exercise:walk")
+        val m = models(central, LocalStore(DriverFactory()), memory)
+        addTreadmill(m)
+        runCurrent()
+        // Walk shows only under Recent, and Start still finds it.
+        assertEquals(listOf("exercise:walk"), m.live.state.value.recent.map { it.key })
+        m.live.startRecording("exercise:walk")
+        assertEquals("exercise:walk", m.live.state.value.waitingFor?.key)
     }
 }

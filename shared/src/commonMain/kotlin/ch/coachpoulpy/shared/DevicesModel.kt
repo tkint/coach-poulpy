@@ -29,8 +29,8 @@ import kotlinx.coroutines.launch
 
 enum class ConnectionStatus { IDLE, CONNECTING, CONNECTED, RECONNECTING, FAILED }
 
-/** Whether the belt moves. PAUSED needs a treadmill that reports pauses; others show STOPPED. */
-enum class BeltStatus { UNKNOWN, MOVING, PAUSED, STOPPED }
+/** Whether the belt moves, as [ch.coachpoulpy.device.ftms.BeltState] tells: STOPPED only for a Stop pressed on the console. */
+enum class BeltStatus { UNKNOWN, MOVING, PAUSED, STOPPED, SAFETY_KEY, STILL }
 
 /** What a device can measure, and what a data source is picked for. SPEED also covers pace and distance. */
 enum class Quantity { SPEED, HEART_RATE, CADENCE, INCLINE, ENERGY, POWER }

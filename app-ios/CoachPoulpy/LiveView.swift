@@ -8,6 +8,7 @@ struct LiveView: View {
     @StateObject private var devices: Observed<DevicesModel, DevicesUiState>
     @StateObject private var bluetooth = BluetoothGate()
     @State private var choosing = false
+    @State private var modeInfo = false
     let onManageDevices: () -> Void
 
     init(graph: AppGraph, onManageDevices: @escaping () -> Void) {
@@ -27,7 +28,7 @@ struct LiveView: View {
                     if state.connection == .empty && state.recording == nil {
                         nothingConnected
                     } else {
-                        if state.belt == .paused || state.belt == .stopped {
+                        if [.paused, .stopped, .safetyKey, .still].contains(state.belt) && state.waitingFor == nil {
                             beltBanner
                         }
                         if !state.tiles.isEmpty {
@@ -36,13 +37,13 @@ struct LiveView: View {
                             Text("live.waiting").foregroundStyle(PoulpyColor.onSurfaceVariant)
                         }
                         // Added devices still connecting: the view shows read-only, with Poulpy where the controls go.
+                        if let prompt = state.finishPrompt {
+                            finishCard(prompt)
+                        }
                         if isConnecting {
                             connecting
                         } else {
                             recorder
-                            if state.hasTreadmill {
-                                syncRow
-                            }
                         }
                     }
                 }
@@ -196,6 +197,8 @@ struct LiveView: View {
         VStack(alignment: .leading, spacing: 10) {
             if let recording = state.recording {
                 recordingControls(recording)
+            } else if let waiting = state.waitingFor {
+                waitingControls(waiting)
             } else {
                 choicePicker
             }
@@ -236,11 +239,20 @@ struct LiveView: View {
             }
             .buttonStyle(.plain)
             .accessibilityHint(Text("live.change"))
-            Button { model.startRecording(key: state.selected) } label: {
-                Text("treadmill.start").font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: 52)
+            if state.hasTreadmill {
+                followMode
             }
-            .buttonStyle(.borderedProminent)
-            .buttonBorderShape(.capsule)
+            HStack(spacing: 8) {
+                Button { model.startRecording(key: state.selected) } label: {
+                    Text(LocalizedStringKey(state.hasTreadmill && state.followTreadmill ? "live.wait.treadmill" : "treadmill.start"))
+                        .font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: 52)
+                }
+                .buttonStyle(.borderedProminent)
+                .buttonBorderShape(.capsule)
+                if state.hasTreadmill {
+                    followToggle
+                }
+            }
         }
         .sheet(isPresented: $choosing) {
             ChoiceSheet(state: state) { key in
@@ -272,27 +284,35 @@ struct LiveView: View {
                     }
                 }
             }
+            // Recording: only Pause (and Skip in a workout). Paused: Resume or Finish.
             HStack(spacing: 8) {
-                Button {
-                    if recording.paused { model.resumeRecording() } else { model.pauseRecording() }
-                } label: {
-                    Image(systemName: recording.paused ? "play.fill" : "pause.fill").frame(width: 28, height: 40)
-                }
-                .buttonStyle(.bordered)
-                .buttonBorderShape(.capsule)
-                .accessibilityLabel(Text(LocalizedStringKey(recording.paused ? "treadmill.resume" : "treadmill.pause")))
-                if !recording.freeRun {
-                    Button { model.skipPhase() } label: {
-                        Text("treadmill.skip").font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: 40)
+                if recording.paused {
+                    Button { model.resumeRecording() } label: {
+                        Label("treadmill.resume", systemImage: "play.fill")
+                            .font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: 40)
                     }
                     .buttonStyle(.bordered)
                     .buttonBorderShape(.capsule)
+                    Button { model.stopRecording() } label: {
+                        Text("treadmill.stop").font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: 40)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .buttonBorderShape(.capsule)
+                } else {
+                    Button { model.pauseRecording() } label: {
+                        Label("treadmill.pause", systemImage: "pause.fill")
+                            .font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: 40)
+                    }
+                    .buttonStyle(.bordered)
+                    .buttonBorderShape(.capsule)
+                    if !recording.freeRun {
+                        Button { model.skipPhase() } label: {
+                            Text("treadmill.skip").font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: 40)
+                        }
+                        .buttonStyle(.bordered)
+                        .buttonBorderShape(.capsule)
+                    }
                 }
-                Button { model.stopRecording() } label: {
-                    Text("treadmill.stop").font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: 40)
-                }
-                .buttonStyle(.borderedProminent)
-                .buttonBorderShape(.capsule)
             }
         }
     }
@@ -309,18 +329,109 @@ struct LiveView: View {
         return parts.joined(separator: " · ")
     }
 
-    private var syncRow: some View {
-        Toggle(isOn: Binding(get: { state.syncPause }, set: { model.setSyncPause(on: $0) })) {
-            Label {
-                Text("live.sync.belt").font(.custom(PoulpyFontFace.nunitoExtraBold, size: 16, relativeTo: .body))
-            } icon: {
-                Image(systemName: "arrow.triangle.2.circlepath").foregroundStyle(PoulpyColor.primary)
+    /// Which mode Start is in, auto or manual, with what each does behind the info button.
+    private var followMode: some View {
+        HStack(spacing: 4) {
+            Text(LocalizedStringKey(state.followTreadmill ? "live.mode.auto" : "live.mode.manual"))
+                .font(.poulpy(.footnote))
+                .foregroundStyle(PoulpyColor.onSurfaceVariant)
+            Spacer(minLength: 0)
+            Button { modeInfo = true } label: {
+                Image(systemName: "info.circle").font(.system(size: 17)).frame(width: 40, height: 40)
+            }
+            .buttonStyle(.plain)
+            .foregroundStyle(PoulpyColor.onSurfaceVariant)
+            .accessibilityLabel(Text("live.mode.info.label"))
+        }
+        .alert(Text("live.follow.treadmill"), isPresented: $modeInfo) {
+            Button("action.done", role: .cancel) {}
+        } message: {
+            Text("live.mode.info")
+        }
+    }
+
+    /// A square button next to Start: on, the recording follows the treadmill.
+    private var followToggle: some View {
+        let on = state.followTreadmill
+        // Filled when on, outlined and crossed out when off, so the state reads at a glance.
+        return Button { model.setFollowTreadmill(on: !on) } label: {
+            Image(systemName: "arrow.triangle.2.circlepath")
+                .font(.system(size: 20, weight: .bold))
+                .foregroundStyle(on ? PoulpyColor.onPrimary : PoulpyColor.onSurfaceVariant)
+                .overlay {
+                    if !on {
+                        Capsule().fill(PoulpyColor.onSurfaceVariant).frame(width: 2.5, height: 30).rotationEffect(.degrees(-45))
+                    }
+                }
+                .frame(width: 52, height: 52)
+                .background(on ? PoulpyColor.primary : PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.md))
+                .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.md).stroke(on ? Color.clear : PoulpyColor.outline, lineWidth: 1.5))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(Text("live.follow.treadmill"))
+        .accessibilityAddTraits(on ? .isSelected : [])
+    }
+
+    /// Start was tapped with the belt still: the recording begins when the belt moves.
+    private func waitingControls(_ choice: LiveChoice) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 14) {
+                ProgressView().controlSize(.large).tint(PoulpyColor.primary)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("live.waiting.title").font(.custom(PoulpyFontFace.nunitoExtraBold, size: 19, relativeTo: .title3))
+                    Text(L("live.waiting.body", choice.name)).font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+                }
+            }
+            .accessibilityElement(children: .combine)
+            HStack(spacing: 8) {
+                Button { model.cancelWaiting() } label: {
+                    Text("action.cancel").font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: 40)
+                }
+                .buttonStyle(.bordered)
+                .buttonBorderShape(.capsule)
+                Button { model.startNow() } label: {
+                    Text("live.start.now").font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: 40)
+                }
+                .buttonStyle(.bordered)
+                .buttonBorderShape(.capsule)
             }
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 8)
-        .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.md))
-        .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.md).stroke(PoulpyColor.outline))
+    }
+
+    /// The treadmill went quiet or away for long: blue, never a reproach.
+    private func finishCard(_ prompt: FinishPromptUi) -> some View {
+        let lost = prompt.reason == .treadmillLost
+        return VStack(alignment: .leading, spacing: 10) {
+            HStack(alignment: .top, spacing: 12) {
+                Image(systemName: "clock").font(.system(size: 22, weight: .semibold)).foregroundStyle(PoulpyColor.primary)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(LocalizedStringKey(lost ? "live.finish.lost.title" : "live.finish.still.title"))
+                        .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 19, relativeTo: .title3))
+                        .accessibilityAddTraits(.isHeader)
+                    Text(prompt.reason == .beltStopped
+                         ? L("live.finish.stopped.body", Int64(prompt.autoFinishMinutes), clock(prompt.endsAtSeconds))
+                         : L(lost ? "live.finish.lost.body" : "live.finish.still.body",
+                             Int64(prompt.sinceMinutes), Int64(prompt.autoFinishMinutes), clock(prompt.endsAtSeconds)))
+                        .font(.poulpy(.subheadline))
+                }
+            }
+            HStack(spacing: 8) {
+                Button { model.keepGoing() } label: {
+                    Text("live.keep.going").font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: 40)
+                }
+                .buttonStyle(.bordered)
+                .buttonBorderShape(.capsule)
+                Button { model.stopRecording() } label: {
+                    Text("treadmill.stop").font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: 40)
+                }
+                .buttonStyle(.borderedProminent)
+                .buttonBorderShape(.capsule)
+            }
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .foregroundStyle(PoulpyColor.onPrimaryContainer)
+        .background(PoulpyColor.primaryContainer, in: RoundedRectangle(cornerRadius: 20))
     }
 }
 

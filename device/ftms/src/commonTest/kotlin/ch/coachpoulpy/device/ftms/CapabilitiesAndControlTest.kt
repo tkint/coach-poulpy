@@ -42,7 +42,7 @@ class CapabilitiesAndControlTest {
     fun machineStatusDecodes() {
         assertEquals(MachineStatus.PausedByUser, MachineStatusDecoder.decode(packet(0x02 to 1, 0x02 to 1)))
         assertEquals(MachineStatus.StoppedByUser, MachineStatusDecoder.decode(packet(0x02 to 1, 0x01 to 1)))
-        assertEquals(MachineStatus.StoppedByUser, MachineStatusDecoder.decode(packet(0x02 to 1)))
+        assertEquals(MachineStatus.StoppedOrPausedByUser, MachineStatusDecoder.decode(packet(0x02 to 1)))
         assertEquals(MachineStatus.StartedOrResumedByUser, MachineStatusDecoder.decode(packet(0x04 to 1)))
         assertEquals(MachineStatus.TargetSpeedChanged(8.5), MachineStatusDecoder.decode(packet(0x05 to 1, 850 to 2)))
         assertEquals(MachineStatus.Other(0x07), MachineStatusDecoder.decode(packet(0x07 to 1, 10 to 2)))
