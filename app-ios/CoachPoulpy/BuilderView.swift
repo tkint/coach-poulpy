@@ -5,7 +5,8 @@ import Shared
 struct BuilderView: View {
     let graph: AppGraph
     @StateObject private var builder: Observed<BuilderModel, BuilderState>
-    @State private var picking = false
+    /// Where the exercise being picked goes: the workout, or a repeat; nil when not picking.
+    @State private var picking: PickTarget?
     @Environment(\.dismiss) private var dismiss
 
     /// [firstExercise] starts a new workout that already holds it, from an exercise page;
@@ -32,7 +33,7 @@ struct BuilderView: View {
     private var state: BuilderState { builder.value }
 
     @State private var open: String?
-    @State private var count = 0
+    @State private var started = false
     // The card being dragged, where its middle started and how far the finger went.
     @State private var dragging: String?
     @State private var dragStart: CGFloat = 0
@@ -63,36 +64,23 @@ struct BuilderView: View {
                             }
                         }
                     }
-                    if state.rows.isEmpty {
+                    if state.steps.isEmpty {
                         Text("builder.empty").font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
                     }
-                    ForEach(state.rows, id: \.key) { row in
-                        let lifted = dragging == row.key
-                        EntryCard(
-                            model: model, row: row, open: open == row.key,
-                            onOpen: { open = row.key },
-                            onDrag: { drag(row.key, by: $0) },
-                            onDrop: drop
-                        )
-                        .background(GeometryReader { geometry in
-                            Color.clear.preference(key: CardFrames.self, value: [row.key: geometry.frame(in: .named("builder"))])
-                        })
-                        .offset(y: lifted ? dragStart + dragY - (frames[row.key]?.midY ?? dragStart) : 0)
-                        .shadow(color: .black.opacity(lifted ? 0.18 : 0), radius: 12, y: 6)
-                        .zIndex(lifted ? 1 : 0)
-                        .transaction { if lifted { $0.animation = nil } }
+                    ForEach(state.steps, id: \.key) { step in
+                        if let row = step.row {
+                            card(row).liftable(step.key, dragging: dragging, dragStart: dragStart, dragY: dragY, frames: frames)
+                        } else if let group = step.repeatGroup {
+                            repeatBlock(group).liftable(step.key, dragging: dragging, dragStart: dragStart, dragY: dragY, frames: frames)
+                        }
                     }
-                    Button {
-                        picking = true
-                    } label: {
-                        Label("builder.add", systemImage: "plus")
-                            .font(.poulpy(.body).weight(.heavy))
-                            .foregroundStyle(PoulpyColor.primary)
-                            .frame(maxWidth: .infinity, minHeight: 56)
-                            .overlay(RoundedRectangle(cornerRadius: 16).stroke(PoulpyPalette.lagoon300, style: StrokeStyle(lineWidth: 2, dash: [8, 6])))
-                            .contentShape(RoundedRectangle(cornerRadius: 16))
+                    HStack(spacing: 8) {
+                        addStepButton("builder.add.step", height: 56, to: .workout)
+                        Button { model.addRepeat() } label: {
+                            dashedTile("builder.add.repeat", systemImage: "repeat", height: 56)
+                        }
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 8)
@@ -128,22 +116,21 @@ struct BuilderView: View {
                 }
             }
             .onAppear {
-                if count == 0 {
-                    count = state.rows.count
-                    open = state.rows.first?.key
+                if !started {
+                    started = true
+                    open = state.addedKey ?? state.rows.first?.key
                 }
             }
-            .onChange(of: state.rows.count) { rows in
-                // A newly added exercise opens; one card is open at a time.
-                if rows > count { open = state.rows.last?.key }
-                count = rows
+            .onChange(of: state.addedKey) { key in
+                // A newly added step opens; one card is open at a time.
+                if let key { open = key }
             }
-            .sheet(isPresented: $picking) {
+            .sheet(item: $picking) { target in
                 NavigationStack {
                     ExerciseList(graph: graph, type: state.type, withRecent: true) { row in
                         Button {
-                            model.add(slug: row.slug)
-                            picking = false
+                            model.add(slug: row.slug, repeatKey: target.repeatKey)
+                            picking = nil
                         } label: {
                             ExerciseRowView(row: row, adding: true)
                         }
@@ -153,7 +140,7 @@ struct BuilderView: View {
                     .navigationBarTitleDisplayMode(.inline)
                     .toolbar {
                         ToolbarItem(placement: .cancellationAction) {
-                            Button("action.cancel") { picking = false }
+                            Button("action.cancel") { picking = nil }
                         }
                     }
                 }
@@ -161,7 +148,115 @@ struct BuilderView: View {
         }
     }
 
-    /// Follows the finger; once the card's middle passes over another card, it takes that card's place.
+    private func card(_ row: BuilderRow) -> some View {
+        EntryCard(
+            model: model, row: row, roleOptions: model.roleOptions, open: open == row.key,
+            onOpen: { open = row.key },
+            onDrag: { drag(row.key, by: $0) },
+            onDrop: drop
+        )
+    }
+
+    /// A repeat: its header with − N times +, its steps inside a tinted block, and a way to add one.
+    private func repeatBlock(_ group: BuilderRepeat) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 8) {
+                dragHandle(group.key)
+                Image(systemName: "repeat").font(.system(size: 17, weight: .bold)).foregroundStyle(PoulpyColor.primary)
+                Text("builder.repeat")
+                    .font(.custom(PoulpyFontFace.baloo2Bold, size: 19, relativeTo: .headline))
+                    .foregroundStyle(PoulpyColor.onPrimaryContainer)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                HStack(spacing: 4) {
+                    timesButton("minus", "builder.repeat.fewer") { model.setRepeatTimes(key: group.key, times: group.times - 1) }
+                    Text(group.timesLabel)
+                        .font(.poulpy(.subheadline).weight(.heavy))
+                        .monospacedDigit()
+                        .foregroundStyle(PoulpyColor.onPrimaryContainer)
+                        .frame(minWidth: 58)
+                    timesButton("plus", "builder.repeat.more") { model.setRepeatTimes(key: group.key, times: group.times + 1) }
+                }
+                .padding(4)
+                .background(PoulpyColor.surface.opacity(0.6), in: Capsule())
+                Button { model.remove(key: group.key) } label: {
+                    Image(systemName: "trash").frame(width: 44, height: 44)
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(PoulpyColor.onSurfaceVariant)
+                .accessibilityLabel(Text("builder.remove.repeat"))
+            }
+            .accessibilityElement(children: .contain)
+            .accessibilityAction(named: Text("builder.move.up")) { model.moveUp(key: group.key) }
+            .accessibilityAction(named: Text("builder.move.down")) { model.moveDown(key: group.key) }
+            VStack(spacing: 6) {
+                ForEach(group.rows, id: \.key) { row in
+                    card(row).liftable(row.key, dragging: dragging, dragStart: dragStart, dragY: dragY, frames: frames)
+                }
+                addStepButton("builder.add.to.repeat", height: 44, to: .group(group.key))
+            }
+            .padding(.leading, 10)
+        }
+        .padding(EdgeInsets(top: 8, leading: 12, bottom: 10, trailing: 8))
+        .background(PoulpyColor.primaryContainer, in: RoundedRectangle(cornerRadius: 16))
+    }
+
+    private func dragHandle(_ key: String) -> some View {
+        Image(systemName: "line.3.horizontal")
+            .font(.system(size: 16, weight: .bold))
+            .foregroundStyle(PoulpyPalette.neutral500)
+            .frame(width: 28, height: 44)
+            .contentShape(Rectangle())
+            .highPriorityGesture(
+                DragGesture(minimumDistance: 1, coordinateSpace: .named("builder"))
+                    .onChanged { drag(key, by: $0.translation.height) }
+                    .onEnded { _ in drop() }
+            )
+            .accessibilityHidden(true)
+    }
+
+    private func timesButton(_ symbol: String, _ description: LocalizedStringKey, _ action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: symbol)
+                .font(.system(size: 15, weight: .heavy))
+                .foregroundStyle(PoulpyColor.primary)
+                .frame(width: 36, height: 36)
+                .background(PoulpyColor.surface, in: Circle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(Text(description))
+    }
+
+    /// "Add a step": asks whether it is an exercise, picked from the list, or a rest.
+    private func addStepButton(_ label: LocalizedStringKey, height: CGFloat, to target: PickTarget) -> some View {
+        Menu {
+            Button { picking = target } label: { Label("builder.add.exercise", systemImage: "dumbbell") }
+            Button { model.addRest(repeatKey: target.repeatKey) } label: { Label("builder.add.rest", systemImage: "timer") }
+        } label: {
+            dashedTile(label, systemImage: "plus", height: height)
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func dashedTile(_ label: LocalizedStringKey, systemImage: String, height: CGFloat) -> some View {
+        Label(label, systemImage: systemImage)
+            .font(.poulpy(height < 56 ? .subheadline : .body).weight(.heavy))
+            .foregroundStyle(PoulpyColor.primary)
+            .frame(maxWidth: .infinity, minHeight: height)
+            .overlay(RoundedRectangle(cornerRadius: height < 56 ? 12 : 16).stroke(PoulpyPalette.lagoon300, style: StrokeStyle(lineWidth: 2, dash: [8, 6])))
+            .contentShape(RoundedRectangle(cornerRadius: 16))
+    }
+
+    /// The keys of the list holding [key]: the workout's steps, or its repeat's.
+    private func siblings(_ key: String) -> [String] {
+        let top = state.steps.map(\.key)
+        if top.contains(key) { return top }
+        for step in state.steps {
+            if let rows = step.repeatGroup?.rows.map(\.key), rows.contains(key) { return rows }
+        }
+        return []
+    }
+
+    /// Follows the finger; once the card's middle passes over another step of its list, it takes that step's place.
     private func drag(_ key: String, by y: CGFloat) {
         if dragging == nil {
             dragging = key
@@ -169,11 +264,11 @@ struct BuilderView: View {
         }
         dragY = y
         let middle = dragStart + y
-        let rows = state.rows
+        let keys = siblings(key)
         guard
-            let from = rows.firstIndex(where: { $0.key == key }),
-            let to = rows.firstIndex(where: { row in
-                guard row.key != key, let frame = frames[row.key] else { return false }
+            let from = keys.firstIndex(of: key),
+            let to = keys.firstIndex(where: { other in
+                guard other != key, let frame = frames[other] else { return false }
                 return frame.minY <= middle && middle < frame.maxY
             }),
             to != from
@@ -196,10 +291,41 @@ struct BuilderView: View {
     }
 }
 
-/// An exercise of the workout: open, its four settings in a 2×2 grid; folded, its name and summary.
+/// Where a picked exercise goes.
+private enum PickTarget: Identifiable, Hashable {
+    case workout
+    case group(String)
+
+    var id: String { repeatKey ?? "" }
+
+    var repeatKey: String? {
+        if case let .group(key) = self { return key }
+        return nil
+    }
+}
+
+extension View {
+    /// Lifts the step being dragged above the others with a shadow, and records where each step sits.
+    fileprivate func liftable(_ key: String, dragging: String?, dragStart: CGFloat, dragY: CGFloat, frames: [String: CGRect]) -> some View {
+        let lifted = dragging == key
+        return self
+            .background(GeometryReader { geometry in
+                Color.clear.preference(key: CardFrames.self, value: [key: geometry.frame(in: .named("builder"))])
+            })
+            .offset(y: lifted ? dragStart + dragY - (frames[key]?.midY ?? dragStart) : 0)
+            .shadow(color: .black.opacity(lifted ? 0.18 : 0), radius: 12, y: 6)
+            .zIndex(lifted ? 1 : 0)
+            .transaction { if lifted { $0.animation = nil } }
+    }
+}
+
+/// A step of the workout. Folded: its role, name and summary. Open: what the step is for, then
+/// sets, reps and weight for an exercise, a duration and intensity for a walk or a run, or the
+/// length of a rest.
 private struct EntryCard: View {
     let model: BuilderModel
     let row: BuilderRow
+    let roleOptions: [StepRoleOption]
     let open: Bool
     let onOpen: () -> Void
     let onDrag: (CGFloat) -> Void
@@ -207,9 +333,10 @@ private struct EntryCard: View {
     @State private var weight: String
     @State private var editing: TargetField?
 
-    init(model: BuilderModel, row: BuilderRow, open: Bool, onOpen: @escaping () -> Void, onDrag: @escaping (CGFloat) -> Void, onDrop: @escaping () -> Void) {
+    init(model: BuilderModel, row: BuilderRow, roleOptions: [StepRoleOption], open: Bool, onOpen: @escaping () -> Void, onDrag: @escaping (CGFloat) -> Void, onDrop: @escaping () -> Void) {
         self.model = model
         self.row = row
+        self.roleOptions = roleOptions
         self.open = open
         self.onOpen = onOpen
         self.onDrag = onDrag
@@ -233,7 +360,8 @@ private struct EntryCard: View {
                     )
                     .accessibilityHidden(true)
                 Button(action: onOpen) {
-                    VStack(alignment: .leading, spacing: 0) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        if let role = row.roleLabel { roleTag(role) }
                         Text(row.name).font(.custom(PoulpyFontFace.baloo2Bold, size: 19, relativeTo: .headline))
                         if !open {
                             Text(row.summary).font(.poulpy(.subheadline)).monospacedDigit().foregroundStyle(PoulpyColor.onSurfaceVariant)
@@ -243,16 +371,19 @@ private struct EntryCard: View {
                     .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
-                // Screen readers can't drag: they get Move up and Move down as actions.
+                // Screen readers can't drag: they get the moves as actions.
                 .accessibilityAction(named: Text("builder.move.up")) { model.moveUp(key: row.key) }
                 .accessibilityAction(named: Text("builder.move.down")) { model.moveDown(key: row.key) }
-                if open {
-                    Button { model.remove(key: row.key) } label: {
-                        Image(systemName: "trash").frame(width: 44, height: 44)
+                .accessibilityActions {
+                    if row.canMoveIntoRepeat {
+                        Button("builder.move.into.repeat") { model.moveIntoRepeatAbove(key: row.key) }
                     }
-                    .buttonStyle(.plain)
-                    .foregroundStyle(PoulpyColor.onSurfaceVariant)
-                    .accessibilityLabel(Text(L("builder.remove.named %@", row.name)))
+                    if row.repeatKey != nil {
+                        Button("builder.move.out.of.repeat") { model.moveOutOfRepeat(key: row.key) }
+                    }
+                }
+                if open {
+                    stepMenu
                 } else {
                     Button(action: onOpen) {
                         Image(systemName: "chevron.down").font(.system(size: 15, weight: .bold)).frame(width: 44, height: 44)
@@ -267,9 +398,20 @@ private struct EntryCard: View {
                     .font(.poulpy(.caption))
                     .foregroundStyle(PoulpyColor.error)
             }
-            if open, let target = row.target {
-                targetEditor(target)
+            if open && row.isRest {
+                stepper("builder.duration", row.restLabel, less: { model.changeRest(key: row.key, steps: -1) }, more: { model.changeRest(key: row.key, steps: 1) })
+                    .padding(.trailing, 4)
             } else if open {
+                select("builder.step", value: roleOptions.first(where: { $0.role == row.role })?.label ?? "") {
+                    ForEach(roleOptions, id: \.label) { option in
+                        Button(option.label) { model.setRole(key: row.key, role: option.role) }
+                    }
+                }
+                .padding(.trailing, 4)
+            }
+            if open, !row.isRest, let target = row.target {
+                targetEditor(target)
+            } else if open, !row.isRest {
                 let columns = [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)]
                 LazyVGrid(columns: columns, spacing: 8) {
                     stepper("builder.sets", "\(row.sets)", less: { model.setSets(key: row.key, sets: row.sets - 1) }, more: { model.setSets(key: row.key, sets: row.sets + 1) })
@@ -280,9 +422,72 @@ private struct EntryCard: View {
                 .padding(.trailing, 4)
             }
         }
-        .padding(EdgeInsets(top: 12, leading: 12, bottom: open ? 14 : 12, trailing: 8))
+        .padding(EdgeInsets(top: 10, leading: 12, bottom: open ? 14 : 10, trailing: 8))
         .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 16))
         .overlay(RoundedRectangle(cornerRadius: 16).stroke(open ? PoulpyPalette.lagoon300 : PoulpyColor.outline, lineWidth: open ? 1.5 : 1))
+    }
+
+    /// The small tag above a step's name: "WARM-UP", "RECOVER", "COOL DOWN".
+    private func roleTag(_ label: String) -> some View {
+        let recover = row.role == .recover
+        return Text(label)
+            .textCase(.uppercase)
+            .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 11.5, relativeTo: .caption2))
+            .kerning(0.9)
+            .foregroundStyle(recover ? PoulpyColor.onSurfaceVariant : PoulpyColor.onPrimaryContainer)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 3)
+            .background(recover ? PoulpyColor.surfaceVariant : PoulpyColor.primaryContainer, in: Capsule())
+    }
+
+    /// Remove, and the moves into or out of a repeat when they apply.
+    @ViewBuilder private var stepMenu: some View {
+        if !row.canMoveIntoRepeat && row.repeatKey == nil {
+            Button { model.remove(key: row.key) } label: {
+                Image(systemName: "trash").frame(width: 44, height: 44)
+            }
+            .buttonStyle(.plain)
+            .foregroundStyle(PoulpyColor.onSurfaceVariant)
+            .accessibilityLabel(Text(L("builder.remove.named %@", row.name)))
+        } else {
+            Menu {
+                if row.canMoveIntoRepeat {
+                    Button { model.moveIntoRepeatAbove(key: row.key) } label: { Label("builder.move.into.repeat", systemImage: "repeat") }
+                }
+                if row.repeatKey != nil {
+                    Button { model.moveOutOfRepeat(key: row.key) } label: { Label("builder.move.out.of.repeat", systemImage: "rectangle.portrait.and.arrow.right") }
+                }
+                Divider()
+                Button(role: .destructive) { model.remove(key: row.key) } label: { Label("builder.remove", systemImage: "trash") }
+            } label: {
+                Image(systemName: "ellipsis").font(.system(size: 17, weight: .bold)).frame(width: 44, height: 44)
+            }
+            .foregroundStyle(PoulpyColor.onSurfaceVariant)
+            .accessibilityLabel(Text(L("builder.more.actions %@", row.name)))
+        }
+    }
+
+    /// A compact select: its label just above the chosen value, and a chevron; a tap lists the options.
+    private func select<Options: View>(_ label: LocalizedStringKey, value: String, @ViewBuilder options: () -> Options) -> some View {
+        Menu {
+            options()
+        } label: {
+            HStack(spacing: 4) {
+                VStack(alignment: .leading, spacing: 0) {
+                    Text(label).textCase(.uppercase).font(.custom(PoulpyFontFace.nunitoExtraBold, size: 11.5, relativeTo: .caption2)).kerning(0.9).foregroundStyle(PoulpyColor.onSurfaceVariant)
+                    Text(value).font(.poulpy(.body).weight(.bold)).lineLimit(1).foregroundStyle(PoulpyColor.onSurface)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                Image(systemName: "chevron.down").font(.system(size: 14, weight: .bold)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+            }
+            .padding(.leading, 12)
+            .padding(.trailing, 10)
+            .frame(maxWidth: .infinity, minHeight: 52)
+            .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 12))
+            .overlay(RoundedRectangle(cornerRadius: 12).stroke(PoulpyColor.outline, lineWidth: 1.5))
+            .contentShape(RoundedRectangle(cornerRadius: 12))
+        }
+        .buttonStyle(.plain)
     }
 
     private func cell<Content: View>(_ label: LocalizedStringKey, @ViewBuilder content: () -> Content) -> some View {
@@ -329,19 +534,26 @@ private struct EntryCard: View {
             .contentShape(Rectangle())
     }
 
-    /// A walk or a run: one block with a duration or a distance, and an optional pace, instead of sets.
+    /// A walk or a run: one block with a duration (time, distance or until button press) and an intensity, instead of sets.
     private func targetEditor(_ target: WalkRunTarget) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("builder.goal").textCase(.uppercase).font(PoulpyFont.label).kerning(1).foregroundStyle(PoulpyColor.onSurfaceVariant)
-            FlowLayout(spacing: 8) {
-                ForEach([TargetKind.duration, .distance, .durationPace, .distancePace], id: \.self) { kind in
-                    PoulpyChip(title: Text(TargetField.label(of: kind)), selected: target.kind == kind) {
-                        model.setTarget(key: row.key, kind: kind)
+        let untilPressed = row.isLast ? "builder.until.end" : "builder.until.pressed"
+        let durations: [(kind: DurationKind, key: String)] = [(.time, "builder.time"), (.distance, "builder.distance"), (.untilPressed, untilPressed)]
+        let intensities: [(kind: IntensityKind, key: String)] = [(.free, "builder.free"), (.pace, "builder.pace")]
+        return VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 8) {
+                select("builder.duration", value: NSLocalizedString(durations.first(where: { $0.kind == target.duration })?.key ?? "", comment: "")) {
+                    ForEach(durations.indices, id: \.self) { index in
+                        Button { model.setDurationKind(key: row.key, kind: durations[index].kind) } label: { Text(LocalizedStringKey(durations[index].key)) }
+                    }
+                }
+                select("builder.intensity", value: NSLocalizedString(intensities.first(where: { $0.kind == target.intensity })?.key ?? "", comment: "")) {
+                    ForEach(intensities.indices, id: \.self) { index in
+                        Button { model.setIntensityKind(key: row.key, kind: intensities[index].kind) } label: { Text(LocalizedStringKey(intensities[index].key)) }
                     }
                 }
             }
             if target.durationSeconds != nil {
-                stepper("builder.duration", target.durationLabel,
+                stepper("builder.time", target.durationLabel,
                         less: { model.changeDuration(key: row.key, steps: -1) },
                         more: { model.changeDuration(key: row.key, steps: 1) },
                         onValue: { editing = .duration })
@@ -418,15 +630,6 @@ private enum TargetField: Identifiable {
         case .duration: return "builder.duration"
         case .distance: return "builder.distance"
         case .pace: return "builder.pace"
-        }
-    }
-
-    static func label(of kind: TargetKind) -> LocalizedStringKey {
-        switch kind {
-        case .distance: return "builder.distance"
-        case .durationPace: return "builder.duration.pace"
-        case .distancePace: return "builder.distance.pace"
-        default: return "builder.duration"
         }
     }
 }

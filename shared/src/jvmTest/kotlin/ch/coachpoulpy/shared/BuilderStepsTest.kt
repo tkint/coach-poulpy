@@ -68,7 +68,7 @@ class BuilderStepsTest {
         assertEquals("5:30 /km · until button press", state.rows[0].summary)
         assertEquals(DurationKind.UNTIL_PRESSED, state.rows[0].target?.duration)
 
-        val repeat = assertNotNull(state.steps[1].repeat)
+        val repeat = assertNotNull(state.steps[1].repeatGroup)
         assertEquals("4 times", repeat.timesLabel)
         assertEquals(listOf("400 m · 5:00 /km", "1 min 30"), repeat.rows.map { it.summary })
         assertEquals(listOf(null, "Recover"), repeat.rows.map { it.roleLabel })
@@ -106,7 +106,7 @@ class BuilderStepsTest {
         val edit = assertNotNull(graph.editWorkout(id, "en"))
         val state = edit.state.value
         assertEquals(listOf("Warm-up", null, "Recover", "Cool down"), state.rows.map { it.roleLabel })
-        assertEquals(4, state.steps[1].repeat?.times)
+        assertEquals(4, state.steps[1].repeatGroup?.times)
         assertEquals("5:45 /km · until the end", state.rows.last().summary)
 
         val again = graph.store.latestWorkout(WorkoutId(edit.save()!!))!!
@@ -172,12 +172,12 @@ class BuilderStepsTest {
 
         builder.moveIntoRepeatAbove(plank)
         assertEquals(1, builder.state.value.steps.size)
-        assertEquals(plank, builder.state.value.steps.single().repeat!!.rows.single().key)
+        assertEquals(plank, builder.state.value.steps.single().repeatGroup!!.rows.single().key)
         assertTrue(builder.state.value.canSave)
 
         builder.moveOutOfRepeat(plank)
         assertEquals(listOf(null, plank), builder.state.value.steps.map { it.row?.key })
-        assertTrue(builder.state.value.steps.first().repeat!!.rows.isEmpty())
+        assertTrue(builder.state.value.steps.first().repeatGroup!!.rows.isEmpty())
     }
 
     @Test
@@ -192,9 +192,9 @@ class BuilderStepsTest {
         val plank = builder.state.value.addedKey!!
 
         builder.move(plank, 0)
-        assertEquals(listOf(plank, push), builder.state.value.steps[1].repeat!!.rows.map { it.key })
+        assertEquals(listOf(plank, push), builder.state.value.steps[1].repeatGroup!!.rows.map { it.key })
         builder.moveUp(plank)
-        assertEquals(listOf(plank, push), builder.state.value.steps[1].repeat!!.rows.map { it.key })
+        assertEquals(listOf(plank, push), builder.state.value.steps[1].repeatGroup!!.rows.map { it.key })
         builder.move(repeat, 0)
         assertEquals(repeat, builder.state.value.steps.first().key)
 

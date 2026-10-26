@@ -76,8 +76,8 @@ data class WalkRunTarget(
 /** Steps done [times] times in a row, as the builder shows them. */
 data class BuilderRepeat(val key: String, val times: Int, val timesLabel: String, val rows: List<BuilderRow>)
 
-/** One step at the top of the workout: either an exercise or rest ([row]), or a [repeat]. */
-data class BuilderStep(val key: String, val row: BuilderRow?, val repeat: BuilderRepeat?)
+/** One step at the top of the workout: either an exercise or rest ([row]), or a repeat ([repeatGroup]; "repeat" is a Swift keyword). */
+data class BuilderStep(val key: String, val row: BuilderRow?, val repeatGroup: BuilderRepeat?)
 
 data class BuilderState(
     val name: String,
@@ -409,7 +409,7 @@ class BuilderModel internal constructor(
                 BuilderStep(step.key, row(step, null, draft.steps.getOrNull(index - 1)), null)
             }
         }
-        val rows = steps.flatMap { it.row?.let(::listOf) ?: it.repeat!!.rows }
+        val rows = steps.flatMap { it.row?.let(::listOf) ?: it.repeatGroup!!.rows }
         return BuilderState(
             name = draft.name,
             type = draft.type,
@@ -418,7 +418,7 @@ class BuilderModel internal constructor(
             rows = rows,
             addedKey = addedKey,
             canSave = draft.name.isNotBlank() && rows.any { !it.isRest } && rows.all { it.fitsType } &&
-                steps.all { it.repeat?.rows?.isNotEmpty() ?: true },
+                steps.all { it.repeatGroup?.rows?.isNotEmpty() ?: true },
         )
     }
 

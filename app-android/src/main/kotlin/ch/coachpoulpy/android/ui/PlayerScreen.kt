@@ -125,6 +125,15 @@ private fun ColumnScope.Running(state: PlayerState, model: PlayerModel) {
 
     Spacer(Modifier.weight(1f))
     if (!state.isRest) state.pattern?.let { PatternBadge(it, size = 96.dp, modifier = Modifier.padding(bottom = 16.dp)) }
+    // "WARM-UP", "ROUND 2 OF 4": where this step sits in the workout.
+    listOfNotNull(state.roleLabel, state.roundLabel).takeIf { it.isNotEmpty() }?.let { tags ->
+        Text(
+            tags.joinToString(" · ").uppercase(),
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.padding(bottom = 4.dp),
+        )
+    }
     Text(
         state.title,
         style = MaterialTheme.typography.headlineMedium,

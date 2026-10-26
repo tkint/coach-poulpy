@@ -23,13 +23,13 @@ import androidx.compose.ui.zIndex
 
 /**
  * Drags a [LazyListState] item by its key: the item follows the finger, and once its middle
- * passes over another item that [canDropOn] accepts, [onMove] moves it there. [onMove] answers
+ * passes over another item that [canDropOn] accepts for it, [onMove] moves it there. [onMove] answers
  * whether the order changed, which plays a light tick.
  */
 @Stable
 class DragReorder internal constructor(
     private val list: LazyListState,
-    private val canDropOn: (Any) -> Boolean,
+    private val canDropOn: (key: Any, onto: Any) -> Boolean,
     private val onMove: (key: Any, toKey: Any) -> Boolean,
 ) {
     var key by mutableStateOf<Any?>(null)
@@ -55,7 +55,7 @@ class DragReorder internal constructor(
         val dragged = info(key) ?: return false
         val middle = (start + delta + dragged.size / 2f).toInt()
         val target = list.layoutInfo.visibleItemsInfo.firstOrNull {
-            it.key != dragged.key && canDropOn(it.key) && middle in it.offset until it.offset + it.size
+            it.key != dragged.key && canDropOn(dragged.key, it.key) && middle in it.offset until it.offset + it.size
         } ?: return false
         return onMove(dragged.key, target.key)
     }
@@ -67,10 +67,10 @@ class DragReorder internal constructor(
 }
 
 @Composable
-fun rememberDragReorder(list: LazyListState, canDropOn: (Any) -> Boolean, onMove: (key: Any, toKey: Any) -> Boolean): DragReorder {
+fun rememberDragReorder(list: LazyListState, canDropOn: (key: Any, onto: Any) -> Boolean, onMove: (key: Any, toKey: Any) -> Boolean): DragReorder {
     val accepts by rememberUpdatedState(canDropOn)
     val move by rememberUpdatedState(onMove)
-    return remember(list) { DragReorder(list, { accepts(it) }, { key, toKey -> move(key, toKey) }) }
+    return remember(list) { DragReorder(list, { key, onto -> accepts(key, onto) }, { key, toKey -> move(key, toKey) }) }
 }
 
 /** The handle that drags the item [key]: only it starts a drag, so the list still scrolls. */

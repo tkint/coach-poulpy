@@ -105,6 +105,11 @@ struct PlayerView: View {
 
         Spacer()
         if !state.isRest { PatternBadge(pattern: state.pattern, size: 96) }
+        // "WARM-UP", "ROUND 2 OF 4": where this step sits in the workout.
+        let tags = [state.roleLabel, state.roundLabel].compactMap { $0 }
+        if !tags.isEmpty {
+            Text(tags.joined(separator: " · ")).textCase(.uppercase).font(PoulpyFont.label).kerning(1).foregroundStyle(Color.accentColor)
+        }
         Text(state.title)
             .font(.poulpy(.largeTitle))
             .multilineTextAlignment(.center)
