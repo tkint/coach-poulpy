@@ -1,21 +1,15 @@
 package ch.coachpoulpy.shared
 
 import ch.coachpoulpy.catalog.Catalog
-import ch.coachpoulpy.core.engine.WorkoutTypeRegistry
 import ch.coachpoulpy.core.model.Equipment
-import ch.coachpoulpy.core.model.MeasurementMode
 import ch.coachpoulpy.core.model.MuscleGroup
-import ch.coachpoulpy.core.model.WorkoutType
-import ch.coachpoulpy.types.mobility.MobilityModule
-import ch.coachpoulpy.types.rehab.RehabModule
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class ExerciseListModelTest {
-    private val registry = WorkoutTypeRegistry(listOf(MobilityModule, RehabModule))
-    private fun model(language: String) = ExerciseListModel(Catalog.bundled, registry, language)
+    private fun model(language: String) = ExerciseListModel(Catalog.bundled, language)
 
     @Test
     fun rowsAreLocalized() {
@@ -28,23 +22,6 @@ class ExerciseListModelTest {
         val list = model("en")
         assertEquals(listOf("push-up"), list.filter("pompe").rows.map { it.slug }.filter { it == "push-up" })
         assertTrue(list.filter(area = MuscleArea.SHOULDERS).rows.any { it.slug == "neck-stretch" })
-    }
-
-    @Test
-    fun pickerOnlyOffersExercisesTheWorkoutTypeCanRun() {
-        val rehab = model("en").filter(type = WorkoutType.REHAB).rows.map { Catalog.bundled[ch.coachpoulpy.core.model.ExerciseSlug(it.slug)]!! }
-        assertTrue(rehab.isNotEmpty())
-        // Rehab has no timed work, except walks, which the builder sets as one block.
-        assertEquals(
-            listOf("walk-with-support", "gentle-walk", "walk", "brisk-walk", "easy-run", "run").sorted(),
-            rehab.filter { it.measurement == MeasurementMode.TIME }.map { it.slug.value }.sorted(),
-        )
-    }
-
-    @Test
-    fun treadmillWorkoutsOnlyOfferWalksAndRuns() {
-        val treadmill = model("en").filter(type = WorkoutType.TREADMILL).rows.map { it.slug }
-        assertEquals(listOf("brisk-walk", "easy-run", "gentle-walk", "run", "walk", "walk-with-support"), treadmill.sorted())
     }
 
     @Test

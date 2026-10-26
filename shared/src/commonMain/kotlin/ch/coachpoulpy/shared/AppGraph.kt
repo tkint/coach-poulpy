@@ -2,31 +2,24 @@ package ch.coachpoulpy.shared
 
 import ch.coachpoulpy.catalog.Catalog
 import ch.coachpoulpy.core.engine.TimelineCompiler
-import ch.coachpoulpy.core.engine.WorkoutTypeRegistry
 import ch.coachpoulpy.core.model.Ids
 import ch.coachpoulpy.core.model.Workout
 import ch.coachpoulpy.core.model.WorkoutId
 import ch.coachpoulpy.data.local.DriverFactory
 import ch.coachpoulpy.data.local.LocalStore
 import ch.coachpoulpy.device.ftms.KableCentral
-import ch.coachpoulpy.types.conditioning.ConditioningModule
-import ch.coachpoulpy.types.mobility.MobilityModule
-import ch.coachpoulpy.types.rehab.RehabModule
-import ch.coachpoulpy.types.strength.StrengthModule
-import ch.coachpoulpy.types.treadmill.TreadmillModule
 
 /**
  * Wires the app together once at start-up. Android builds it in its Application,
  * iOS in the App struct. Guest mode: nothing here talks to the network.
  */
 class AppGraph(driverFactory: DriverFactory) {
-    val registry = WorkoutTypeRegistry(listOf(StrengthModule, ConditioningModule, RehabModule, MobilityModule, TreadmillModule))
-    val compiler = TimelineCompiler(registry)
+    val compiler = TimelineCompiler()
     val store = LocalStore(driverFactory)
     val catalogRepository = CatalogRepository(store, Catalog.bundled)
     val catalog: Catalog get() = catalogRepository.current
 
-    fun exerciseList(languageCode: String) = ExerciseListModel(catalog, registry, languageCode) { recentlyUsedExercises(store) }
+    fun exerciseList(languageCode: String) = ExerciseListModel(catalog, languageCode) { recentlyUsedExercises(store) }
 
     /** What the user ticked in the exercise list's Equipment sheet. The apps pass the same [memory] every time. */
     fun equipmentFilter(memory: KeyValueStore) = EquipmentFilter(memory)
@@ -56,7 +49,7 @@ class AppGraph(driverFactory: DriverFactory) {
 
     // Not "newWorkout": Swift reserves the "new" prefix, and Kotlin would rename it.
     fun createWorkout(languageCode: String) =
-        BuilderModel(WorkoutDraft.empty(), catalog, registry, store, languageCode, ::units)
+        BuilderModel(WorkoutDraft.empty(), catalog, store, languageCode, ::units)
 
     /** A new workout that already holds [exerciseSlug], for an exercise page's "Add to a workout". */
     fun createWorkoutWith(exerciseSlug: String, languageCode: String) =
@@ -66,19 +59,19 @@ class AppGraph(driverFactory: DriverFactory) {
     fun editWorkout(workoutId: String, languageCode: String): BuilderModel? {
         val workout = store.latestWorkout(WorkoutId(workoutId)) ?: return null
         val draft = WorkoutDraft.from(workout, catalog) ?: return null
-        return BuilderModel(draft, catalog, registry, store, languageCode, ::units)
+        return BuilderModel(draft, catalog, store, languageCode, ::units)
     }
 
     /**
      * An unsaved copy of a workout made with the builder: a new id, version 1, "(copy)"
-     * after the name, the same type and steps, and no days or history. Null otherwise.
+     * after the name, the same format and steps, and no days or history. Null otherwise.
      * Not "copyWorkout": Objective-C reserves the "copy" prefix, and Kotlin would rename it.
      */
     fun duplicateWorkout(workoutId: String, languageCode: String): BuilderModel? {
         val workout = store.latestWorkout(WorkoutId(workoutId)) ?: return null
         val draft = WorkoutDraft.from(workout, catalog) ?: return null
         val copy = draft.copy(id = null, version = 1, name = Labels(languageCode).copyName(workout.name))
-        return BuilderModel(copy, catalog, registry, store, languageCode, ::units)
+        return BuilderModel(copy, catalog, store, languageCode, ::units)
     }
 
     /** The units chosen in Settings, once the app has opened them; metric until then. */

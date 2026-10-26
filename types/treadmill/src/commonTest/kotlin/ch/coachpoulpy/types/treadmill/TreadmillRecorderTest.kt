@@ -4,17 +4,19 @@ import ch.coachpoulpy.core.engine.Session
 import ch.coachpoulpy.core.engine.SessionEvent
 import ch.coachpoulpy.core.engine.SessionState
 import ch.coachpoulpy.core.engine.TimelineCompiler
-import ch.coachpoulpy.core.engine.WorkoutTypeRegistry
 import ch.coachpoulpy.core.model.DeviceMetrics
 import ch.coachpoulpy.core.model.Intensity
+import ch.coachpoulpy.core.model.Part
+import ch.coachpoulpy.core.model.PartId
+import ch.coachpoulpy.core.model.PartKind
 import ch.coachpoulpy.core.model.Prescription
 import ch.coachpoulpy.core.model.SetPrescription
 import ch.coachpoulpy.core.model.Step
 import ch.coachpoulpy.core.model.StepId
 import ch.coachpoulpy.core.model.Target
 import ch.coachpoulpy.core.model.Workout
+import ch.coachpoulpy.core.model.WorkoutFormat
 import ch.coachpoulpy.core.model.WorkoutId
-import ch.coachpoulpy.core.model.WorkoutType
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.time.Duration.Companion.seconds
@@ -22,7 +24,7 @@ import kotlin.time.Instant
 
 class TreadmillRecorderTest {
     private val t0 = Instant.fromEpochSeconds(1_700_000_000)
-    private val compiler = TimelineCompiler(WorkoutTypeRegistry(listOf(TreadmillModule)))
+    private val compiler = TimelineCompiler()
 
     private fun block(id: String, target: Target, kmh: Double) = Step.ExerciseStep(
         id = StepId(id),
@@ -35,8 +37,11 @@ class TreadmillRecorderTest {
         id = WorkoutId("w"),
         version = 1,
         name = "Intervals",
-        type = WorkoutType.TREADMILL,
-        steps = listOf(block("warm-up", Target.Time(60.seconds), 6.0), block("fast", Target.Distance(100.0), 12.0)),
+        format = WorkoutFormat.CIRCUIT,
+        parts = listOf(
+            Part(PartId("warm-up"), PartKind.WARM_UP, listOf(block("warm-up", Target.Time(60.seconds), 6.0))),
+            Part(PartId("work"), PartKind.WORK, listOf(block("fast", Target.Distance(100.0), 12.0))),
+        ),
     )
 
     @Test

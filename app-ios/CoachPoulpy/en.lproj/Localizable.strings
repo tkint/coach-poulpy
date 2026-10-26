@@ -83,7 +83,7 @@
 "builder.new.title" = "New workout";
 "builder.edit.title" = "Edit workout";
 "builder.name" = "Name";
-"builder.type" = "Kind of workout";
+"builder.format" = "Format";
 "builder.pick.title" = "Pick an exercise";
 "builder.sets" = "Sets";
 "builder.target" = "Each set";

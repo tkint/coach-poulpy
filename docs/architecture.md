@@ -10,7 +10,7 @@ Coach Poulpy is **local-first**: the mobile app holds the whole domain model and
 | Accounts | Guest mode, all data on the phone; email and password, Sign in with Apple and Google when the server arrives | Guest data moves into a new account on sign-up |
 | Website | Needs an account; plans, manages, reviews and runs guided sessions without devices | |
 | Catalog | Built-in and curated, with simple images; no user-created exercises | User-created exercises with duplicate detection |
-| Workout types | Strength, conditioning, rehab, stretching and mobility, treadmill | Outdoor running, walking, swimming with GPS |
+| Workouts | Circuit or sets, in parts (warm-up, work, cool down); strength, cardio, rehab, stretching and treadmill walks and runs | Outdoor running, walking, swimming with GPS; workout tags |
 | Treadmill | FTMS read and record, alone or checked against a planned workout | Speed and incline control per phase |
 | Progression | Every week written out by hand | Rules from recognised protocols, driven by sessions and goals |
 | Sharing | Save to library synced with the author or as a copy | |
@@ -36,34 +36,33 @@ Each phase adds a layer without reworking the one below it, because the domain, 
 
 ## Domain model
 
-Every workout type shares the same concepts; a type only adds its own step kinds, targets and rules. Planned content is versioned and immutable per version, so a session always points at the exact version it followed, a synced library entry follows the latest version, and a copy forks from one.
+Every workout shares the same concepts, whatever its format. Planned content is versioned and immutable per version, so a session always points at the exact version it followed, a synced library entry follows the latest version, and a copy forks from one.
 
 | Concept | What it holds |
 | --- | --- |
 | Exercise | Stable slug, names in French and English, movement pattern, muscle groups, equipment needs (each a list of alternatives) and optional equipment, measurement (reps, time, distance, hold), per-side flag, images, instruction steps |
-| Workout | Name, workout type, a tree of steps, estimated duration, tags |
-| Step | An exercise step (exercise and prescription), a group (sequence, superset, circuit, interval set with rounds), or a rest |
-| Prescription | Sets, and per set a target (reps, duration, distance, hold), an optional load, intensity (RPE, speed, incline, heart rate zone), tempo, and rest after the set |
+| Workout | Name, format (circuit or sets), parts (an optional warm-up, one or more work parts, an optional cool down) each holding a tree of steps, estimated duration, tags |
+| Step | An exercise step (exercise, prescription, and a role: exercise or recover), a group (sequence, superset, circuit, interval set with rounds), or a rest |
+| Prescription | Sets, and per set a target (reps, duration, distance, hold), an optional load, intensity (RPE, speed, incline, heart rate zone), tempo, and rest before the next set |
 | Plan | Name, goal, weeks of days, each day holding zero or more workouts |
 | Enrollment | A person following a plan version from a start date, with one calendar entry per scheduled workout (planned, done, skipped, moved) |
 | Goal | A measurable target with an optional deadline, computed from sessions |
 | Session | One workout actually done: start and end, source (guided, free, device only), optional link to the planned workout version and calendar entry, set results, samples, notes, effort and pain |
 
-Statistics are derived, never typed in. Each workout type declares the metrics it produces, and `core/stats` computes them from sessions: personal records, weekly load per type and goal progress all come from the same computation, on the phone for guests and on the server for accounts.
+Statistics are derived, never typed in. `core/stats` computes metrics from sessions: personal records, weekly load and goal progress all come from the same computation, on the phone for guests and on the server for accounts.
 
 Sharing and coaching add three small concepts: a library entry (synced or copy), a coach link (status, revocation date) and a comment attached to a session, a set result or a calendar entry.
 
-## Workout types and the engine
+## Formats, parts and the engine
 
-Each workout type is a module behind `WorkoutTypeModule`: the targets it accepts, how its steps finish, what it records per set, and the metrics and FIT sport it maps to.
+A workout's format is chosen when it is created ([ADR 0013](./adr/0013-workouts-have-a-format-not-a-type.md)):
 
-| Type | Targets | A step finishes | Recorded per set | Metrics |
-| --- | --- | --- | --- | --- |
-| Strength | Reps, load (kg, % 1RM, bodyweight, band), RPE, tempo | When the person taps done; rest starts by itself | Reps, load, RPE, failed or partial | Volume, estimated 1RM, records |
-| Conditioning | Duration, reps, rounds; AMRAP, EMOM, Tabata, circuit | On a timer, with automatic transitions | Rounds and reps, time per round | Work time, density, rounds |
-| Rehab | Reps, hold, light load, side, tempo | Manually or on a hold timer, per side | Reps or hold, pain 0 to 10, side | Pain trend, adherence |
-| Mobility | Hold, breaths, side | Hold timer with automatic side switch | Hold done | Time in hold, sessions per region |
-| Treadmill | Duration, distance, speed, incline, pace | Timer or distance from the device | Samples | Distance, pace, elevation, plan compliance |
+| Format | Built as | An exercise holds |
+| --- | --- | --- |
+| Circuit | Rounds through several exercises: a repeat around them | One set: reps, time or hold and a load; a walk or run has a duration and an intensity |
+| Sets | One exercise at a time, all its sets, then the next; repeats for supersets | Its sets, each with a target and load, and the rest between sets |
+
+Its parts run in order: an optional warm-up, one or more work parts, an optional cool down. How a step finishes comes from its target alone: a time or a hold runs a timer; reps, a distance (unless a treadmill reports it) or "until button press" wait for a tap.
 
 The engine compiles a workout into a flat **timeline** of work, rest and transition phases, then runs it as a state machine that the UI only observes. The clock is injected, so the engine is testable without waiting. It emits **cues** (3-2-1, switch sides, next exercise) that each platform turns into sound, vibration and text. Every action is a **session event** written at once, so a killed app resumes at the same second.
 
@@ -72,8 +71,8 @@ The engine compiles a workout into a flat **timeline** of work, rest and transit
 | Module | Runs on | Responsibility |
 | --- | --- | --- |
 | `core/model` | Android, iOS, JVM, JS | Domain types, serializable, no dependencies |
-| `core/engine` | Android, iOS, JVM, JS | Timeline compiler, session state machine, event fold, `WorkoutTypeModule` |
-| `types/*` | Android, iOS, JVM, JS | One module per workout type |
+| `core/engine` | Android, iOS, JVM, JS | Timeline compiler, session state machine, event fold |
+| `types/treadmill` | Android, iOS, JVM, JS | Treadmill recording, summaries and step estimate |
 | `core/stats` | Android, iOS, JVM | Metrics, records, goal progress, weekly summaries |
 | `catalog` | Android, iOS, JVM | The bundled, versioned exercise catalog |
 | `data/local` | Android, iOS | SQLDelight schema, repositories, event storage, migrations |
@@ -84,7 +83,7 @@ The engine compiles a workout into a flat **timeline** of work, rest and transit
 | `app-android` | Android | Compose UI, a foreground service for sessions and Bluetooth, Health Connect |
 | `app-ios` | iOS | SwiftUI UI, Bluetooth and audio background modes, HealthKit |
 | `web` | Browser | Vue 3, TypeScript, Vite, Pinia; the engine through Kotlin/JS |
-| `server` | JVM | http4k routes, Flyway, jOOQ, reusing model, types and stats for validation |
+| `server` | JVM | http4k routes, Flyway, jOOQ, reusing model and stats for validation |
 
 ## Storage and sync
 

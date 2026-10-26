@@ -6,7 +6,8 @@ CREATE TABLE execution (
     workout_version INTEGER,
     started_at INTEGER NOT NULL,
     ended_at INTEGER,
-    -- The workout's name and type when the session started: the workout may be renamed or deleted later.
+    -- The workout's name and format when the session started: the workout may be renamed or deleted later.
+    -- The format column keeps its older name, from when it held the workout type.
     title TEXT,
     workout_type TEXT,
     -- SessionTotals as JSON, written when the session ends, or later for sessions from before history.

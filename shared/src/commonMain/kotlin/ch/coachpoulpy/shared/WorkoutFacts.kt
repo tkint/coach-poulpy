@@ -15,9 +15,9 @@ import kotlinx.datetime.atStartOfDayIn
 /** What Home, the library and the workout page say about a saved workout. */
 internal class WorkoutFacts(private val compiler: TimelineCompiler, private val catalog: Catalog, private val labels: Labels) {
 
-    /** "Strength · 5 exercises · about 40 min". */
+    /** "Circuit · 5 exercises · about 40 min". */
     fun details(workout: Workout): String =
-        listOf(labels.workoutType(workout.type), labels.exercises(exerciseSteps(workout).size), labels.aboutMinutes(minutes(workout)))
+        listOf(labels.format(workout.format), labels.exercises(exerciseSteps(workout).size), labels.aboutMinutes(minutes(workout)))
             .joinToString(" · ")
 
     /** The exercise names in order, for a workout still to do today. */

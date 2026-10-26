@@ -26,16 +26,20 @@ _Avoid_: Progression, regression, alternative
 Another name people search an exercise by, like "RDL" or "abdos", kept per language in the catalog and never shown.
 _Avoid_: Tag, keyword
 
-**Workout type**:
-The family a workout belongs to (strength, conditioning, rehab, mobility, treadmill), which decides the targets it accepts, how its steps finish and what it records.
-_Avoid_: Sport, category
+**Format**:
+How a workout is built, chosen when it is created and kept: a **circuit** goes round several exercises, each done once per round, so its exercises have no sets; **sets** does one exercise at a time, all its sets with a rest between them, then the next.
+_Avoid_: Workout type, kind, sport, category
 
 **Workout**:
-A versioned tree of steps of one workout type, ready to be done.
+A versioned list of parts in one format, ready to be done.
 _Avoid_: Routine, program, training
 
+**Part**:
+One section of a workout, holding its steps: the warm-up (at most one, first), a work part (one or more, "Work 1", "Work 2"), or the cool down (at most one, last).
+_Avoid_: Phase (a phase is one stretch of a timeline), block, section
+
 **Step**:
-One node of a workout's tree: an exercise with its prescription, a group, or a rest. An exercise step has a role: warm-up, exercise, recover or cool down; a rest is a recover step with no exercise.
+One node of a part's tree: an exercise with its prescription, a group, or a rest. An exercise step has a role: exercise or recover; a rest is a recover step with no exercise.
 _Avoid_: Item, block
 
 **Group**:
@@ -51,7 +55,7 @@ A walk or run's duration with no set amount: the step ends when the person taps 
 _Avoid_: Lap, open-ended
 
 **Prescription**:
-What an exercise step asks for: its sets, and per set a target, load, intensity, tempo and the rest after it. The builder no longer sets that rest: its sets follow one another, and a rest is a step of its own (to rest between sets, repeat one set and a rest).
+What an exercise step asks for: its sets, and per set a target, load, intensity, tempo and the rest before the next set, none after the last. In a circuit an exercise holds one set, and the repeat around it does the rounds.
 _Avoid_: Target (a target is one part of a prescription), plan
 
 ### Plans and scheduling
@@ -91,7 +95,7 @@ The flat run of work, rest and transition phases a workout compiles to before a 
 _Avoid_: Playlist, sequence
 
 **Phase**:
-One stretch of a timeline with its own completion rule: manual, timer, distance or round count.
+One stretch of a timeline with its own completion rule: manual, timer, distance or round count. Each phase knows the part it comes from; a part is not a phase.
 _Avoid_: Interval (an interval set is a group)
 
 **Cue**:

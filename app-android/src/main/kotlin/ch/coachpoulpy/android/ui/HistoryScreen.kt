@@ -593,7 +593,7 @@ fun SessionDetailScreen(graph: AppGraph, language: String, sessionId: String, on
                 ) {
                     Image(painterResource(R.drawable.poulpy_pose_exhausted), contentDescription = null, modifier = Modifier.width(96.dp).height(86.dp))
                     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                        session.typeLabel?.let {
+                        session.formatLabel?.let {
                             Text(
                                 it.uppercase(Locale.getDefault()),
                                 style = MaterialTheme.typography.labelMedium,

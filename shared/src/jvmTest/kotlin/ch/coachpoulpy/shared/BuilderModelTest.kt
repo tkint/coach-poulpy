@@ -3,8 +3,8 @@ package ch.coachpoulpy.shared
 import ch.coachpoulpy.core.engine.Phase
 import ch.coachpoulpy.core.model.Side
 import ch.coachpoulpy.core.model.Target
+import ch.coachpoulpy.core.model.WorkoutFormat
 import ch.coachpoulpy.core.model.WorkoutId
-import ch.coachpoulpy.core.model.WorkoutType
 import ch.coachpoulpy.data.local.DriverFactory
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -47,10 +47,8 @@ class BuilderModelTest {
     fun perSideTimedExerciseGetsLeftAndRightWithTimeToSwitch() {
         val builder = graph.createWorkout("en")
         builder.rename("Stretch")
-        builder.setType(WorkoutType.MOBILITY)
         builder.add("hamstring-stretch")
-        val key = builder.state.value.rows.single().key
-        builder.setSets(key, 1)
+        assertEquals(1, builder.state.value.rows.single().sets, "a stretch starts at one set")
         val workout = graph.store.latestWorkout(WorkoutId(builder.save()!!))!!
 
         val phases = graph.compiler.compile(workout).phases
@@ -59,13 +57,31 @@ class BuilderModelTest {
     }
 
     @Test
-    fun exerciseTheTypeCannotRunBlocksSaving() {
+    fun severalSetsInACircuitBlockSaving() {
         val builder = graph.createWorkout("en")
         builder.rename("Mixed")
         builder.add("jumping-jack")
-        builder.setType(WorkoutType.REHAB)
-        assertFalse(builder.state.value.rows.single().fitsType)
+        assertEquals(3, builder.state.value.rows.single().sets)
+        builder.setFormat(WorkoutFormat.CIRCUIT)
+        assertFalse(builder.state.value.rows.single().fitsFormat)
         assertFalse(builder.state.value.canSave)
+
+        builder.setSets(builder.state.value.rows.single().key, 1)
+        assertTrue(builder.state.value.canSave)
+        val workout = graph.store.latestWorkout(WorkoutId(builder.save()!!))!!
+        assertEquals(WorkoutFormat.CIRCUIT, workout.format)
+    }
+
+    @Test
+    fun aCircuitStartsExercisesAtOneSetAndSetsAtThree() {
+        val circuit = graph.createWorkout("en")
+        circuit.setFormat(WorkoutFormat.CIRCUIT)
+        circuit.add("push-up")
+        assertEquals(1, circuit.state.value.rows.single().sets)
+
+        val sets = graph.createWorkout("en")
+        sets.add("push-up")
+        assertEquals(3, sets.state.value.rows.single().sets)
     }
 
     @Test
@@ -99,13 +115,13 @@ class BuilderModelTest {
     fun aWalkIsOneTwoKilometreBlockNotSetsOfShortReps() {
         val builder = graph.createWorkout("en")
         builder.rename("Walk")
-        builder.setType(WorkoutType.TREADMILL)
+        builder.setFormat(WorkoutFormat.CIRCUIT)
         builder.add("walk")
         val row = builder.state.value.rows.single()
         assertEquals(DurationKind.DISTANCE, row.target?.duration)
         assertEquals(IntensityKind.FREE, row.target?.intensity)
         assertEquals("2.0 km", row.summary)
-        assertTrue(row.fitsType)
+        assertTrue(row.fitsFormat)
 
         val workout = graph.store.latestWorkout(WorkoutId(builder.save()!!))!!
         val phases = graph.compiler.compile(workout).phases
@@ -117,7 +133,7 @@ class BuilderModelTest {
     fun distanceAndPaceTargetsSaveAndComeBack() {
         val builder = graph.createWorkout("en")
         builder.rename("Long run")
-        builder.setType(WorkoutType.TREADMILL)
+        builder.setFormat(WorkoutFormat.CIRCUIT)
         builder.add("run")
         val key = builder.state.value.rows.single().key
 
@@ -163,23 +179,6 @@ class BuilderModelTest {
         assertNull(builder.state.value.rows.single().target!!.speedKmh)
         assertEquals("2000", builder.setDistanceUnit(key, DistanceUnit.M, "2"))
         assertEquals("1.0", builder.setDistanceUnit(key, DistanceUnit.MI, "1609"))
-    }
-
-    @Test
-    fun walksFitRehabAndCardioButNotAtADistanceInStrength() {
-        val builder = graph.createWorkout("en")
-        builder.rename("Back on my feet")
-        builder.setType(WorkoutType.REHAB)
-        builder.add("walk-with-support")
-        builder.add("calf-raise")
-        assertTrue(builder.state.value.canSave)
-
-        val key = builder.state.value.rows.first().key
-        builder.setDurationKind(key, DurationKind.DISTANCE)
-        builder.setType(WorkoutType.STRENGTH)
-        assertFalse(builder.state.value.rows.first().fitsType)
-        builder.setType(WorkoutType.CONDITIONING)
-        assertTrue(builder.state.value.rows.first().fitsType)
     }
 
     @Test

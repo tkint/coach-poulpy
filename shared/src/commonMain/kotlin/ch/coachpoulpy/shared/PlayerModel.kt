@@ -110,7 +110,7 @@ class PlayerModel internal constructor(
                 workout = WorkoutRef(workout.id, workout.version),
             ),
             title = workout.name,
-            type = workout.type,
+            format = workout.format,
         )
         act { session.start(now) }
         startTicker()
@@ -194,7 +194,7 @@ class PlayerModel internal constructor(
             },
             exerciseSlug = work?.exercise?.value,
             pattern = exercise?.movementPattern,
-            roleLabel = work?.let { labels.role(it.role) },
+            roleLabel = work?.let { labels.role(it.role, it.part) },
             roundLabel = work?.takeIf { it.rounds > 1 }?.let { labels.round(it.round, it.rounds) },
             setNumber = if (work != null && step != null) step.setNumber(work.setIndex) else 0,
             setCount = step?.setCount() ?: 0,

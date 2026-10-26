@@ -1,13 +1,11 @@
 package ch.coachpoulpy.shared
 
 import ch.coachpoulpy.catalog.Catalog
-import ch.coachpoulpy.core.engine.WorkoutTypeRegistry
 import ch.coachpoulpy.core.model.ExerciseSlug
 import ch.coachpoulpy.core.model.Ids
 import ch.coachpoulpy.core.model.MeasurementMode
 import ch.coachpoulpy.core.model.MovementPattern
-import ch.coachpoulpy.core.model.StepRole
-import ch.coachpoulpy.core.model.WorkoutType
+import ch.coachpoulpy.core.model.WorkoutFormat
 import ch.coachpoulpy.data.local.LocalStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -23,7 +21,7 @@ data class BuilderRow(
     val key: String,
     /** The tag above the name ("Warm-up", "Recover"); null for plain exercise steps. */
     val roleLabel: String?,
-    val role: StepRole,
+    val role: BuilderRole,
     /** A rest: only its length, kept in [restSeconds], can change. */
     val isRest: Boolean,
     /** The repeat holding this step, or null at the top of the workout. */
@@ -44,8 +42,8 @@ data class BuilderRow(
     /** A rest's length; zero for exercises, whose rests are steps of their own. */
     val restSeconds: Int,
     val restLabel: String,
-    /** False when the chosen workout type cannot run this exercise. */
-    val fitsType: Boolean,
+    /** False when the workout's format cannot run this exercise as it is set: several sets in a circuit. */
+    val fitsFormat: Boolean,
     /** The folded card's line, as on the workout page: "3 × 10 · 20 kg". */
     val summary: String,
     /** A walk or a run's target, edited instead of sets, reps and weight; null for any other exercise. */
@@ -82,8 +80,8 @@ data class BuilderStep(val key: String, val row: BuilderRow?, val repeatGroup: B
 
 data class BuilderState(
     val name: String,
-    val type: WorkoutType,
-    val typeLabel: String,
+    val format: WorkoutFormat,
+    val formatLabel: String,
     val steps: List<BuilderStep>,
     /** Every exercise and rest, repeats opened up, in order. */
     val rows: List<BuilderRow>,
@@ -92,9 +90,9 @@ data class BuilderState(
     val canSave: Boolean,
 )
 
-data class WorkoutTypeOption(val type: WorkoutType, val label: String)
+data class WorkoutFormatOption(val format: WorkoutFormat, val label: String)
 
-data class StepRoleOption(val role: StepRole, val label: String)
+data class StepRoleOption(val role: BuilderRole, val label: String)
 
 /**
  * The workout builder: a list of steps (exercises and rests, each with a role) and repeats
@@ -104,7 +102,6 @@ data class StepRoleOption(val role: StepRole, val label: String)
 class BuilderModel internal constructor(
     initial: WorkoutDraft,
     private val catalog: Catalog,
-    private val registry: WorkoutTypeRegistry,
     private val store: LocalStore,
     languageCode: String,
     private val units: () -> UnitSystem = { UnitSystem.METRIC },
@@ -117,9 +114,10 @@ class BuilderModel internal constructor(
 
     val isEditing: Boolean = initial.id != null
 
-    val typeOptions: List<WorkoutTypeOption> = BUILDER_TYPES.map { WorkoutTypeOption(it, labels.workoutType(it)) }
+    // CLEANUP: #90 chooses the format once, when the workout is created; then these options and setFormat go.
+    val formatOptions: List<WorkoutFormatOption> = WorkoutFormat.entries.map { WorkoutFormatOption(it, labels.format(it)) }
 
-    val roleOptions: List<StepRoleOption> = StepRole.entries.map { StepRoleOption(it, labels.roleName(it)) }
+    val roleOptions: List<StepRoleOption> = BuilderRole.entries.map { StepRoleOption(it, labels.roleName(it)) }
 
     val state: StateFlow<BuilderState> = mutableState.asStateFlow()
 
@@ -130,21 +128,21 @@ class BuilderModel internal constructor(
 
     fun rename(name: String) = edit { copy(name = name) }
 
-    fun setType(type: WorkoutType) = edit { copy(type = type) }
+    fun setFormat(format: WorkoutFormat) = edit { copy(format = format) }
 
     /**
      * Adds an exercise with its [role] at the end of the workout, or at the end of the repeat
      * [repeatKey]. A warm-up goes before every other step, after the warm-ups already there.
      * A walk or a run starts with a distance.
      */
-    fun add(slug: String, repeatKey: String? = null, role: StepRole = StepRole.WORK) {
+    fun add(slug: String, repeatKey: String? = null, role: BuilderRole = BuilderRole.WORK) {
         val exercise = catalog[ExerciseSlug(slug)] ?: return
-        val warmUp = role == StepRole.WARM_UP
-        val entry = DraftEntry.new(exercise, draft.type, units(), inRepeat = repeatKey != null && !warmUp)
+        val warmUp = role == BuilderRole.WARM_UP
+        val entry = DraftEntry.new(exercise, draft.format, units(), inRepeat = repeatKey != null && !warmUp)
             .copy(role = role)
             .let { if (it.walkOrRun) it.withDuration(DurationKind.DISTANCE) else it }
         if (warmUp) {
-            val at = draft.steps.takeWhile { it is DraftEntry && it.role == StepRole.WARM_UP }.size
+            val at = draft.steps.takeWhile { it is DraftEntry && it.role == BuilderRole.WARM_UP }.size
             edit { copy(steps = steps.toMutableList().apply { add(at, entry) }) }
             addedKey = entry.key
             mutableState.value = render(draft)
@@ -205,7 +203,7 @@ class BuilderModel internal constructor(
     }
 
     /** What the step is for: warm-up, exercise, recover or cool down. A rest is always a Recover step. */
-    fun setRole(key: String, role: StepRole) = editEntry(key) { copy(role = role) }
+    fun setRole(key: String, role: BuilderRole) = editEntry(key) { copy(role = role) }
 
     fun setSets(key: String, sets: Int) = editEntry(key) { copy(sets = sets.coerceIn(1, 20)) }
 
@@ -435,20 +433,20 @@ class BuilderModel internal constructor(
         val rows = steps.flatMap { it.row?.let(::listOf) ?: it.repeatGroup!!.rows }
         return BuilderState(
             name = draft.name,
-            type = draft.type,
-            typeLabel = labels.workoutType(draft.type),
+            format = draft.format,
+            formatLabel = labels.format(draft.format),
             steps = steps,
             rows = rows,
             addedKey = addedKey,
-            canSave = draft.name.isNotBlank() && rows.any { !it.isRest } && rows.all { it.fitsType } &&
+            canSave = draft.name.isNotBlank() && rows.any { !it.isRest } && rows.all { it.fitsFormat } &&
                 steps.all { it.repeatGroup?.rows?.isNotEmpty() ?: true },
         )
     }
 
     private fun restRow(rest: DraftRest, repeatKey: String?, canMoveIntoRepeat: Boolean, last: Boolean) = BuilderRow(
         key = rest.key,
-        roleLabel = labels.role(StepRole.RECOVER),
-        role = StepRole.RECOVER,
+        roleLabel = labels.role(BuilderRole.RECOVER),
+        role = BuilderRole.RECOVER,
         isRest = true,
         repeatKey = repeatKey,
         canMoveIntoRepeat = canMoveIntoRepeat,
@@ -463,7 +461,7 @@ class BuilderModel internal constructor(
         loadKg = null,
         restSeconds = rest.seconds,
         restLabel = labels.duration(rest.seconds),
-        fitsType = true,
+        fitsFormat = true,
         summary = labels.longDuration(rest.seconds),
     )
 
@@ -487,7 +485,7 @@ class BuilderModel internal constructor(
             loadKg = entry.loadKg,
             restSeconds = 0,
             restLabel = "",
-            fitsType = registry.fits(draft.type, entry),
+            fitsFormat = draft.format != WorkoutFormat.CIRCUIT || entry.walkOrRun || entry.sets == 1,
             summary = labels.prescription(entry, last),
             target = entry.durationKind?.let { target(entry, it, entry.intensityKind!!) },
         )
@@ -539,7 +537,6 @@ class BuilderModel internal constructor(
         const val MAX_SECONDS = 12 * 3600
         const val MAX_METERS = 200_000.0
         val RUN = ExerciseSlug("run")
-        val BUILDER_TYPES = listOf(WorkoutType.STRENGTH, WorkoutType.CONDITIONING, WorkoutType.MOBILITY, WorkoutType.REHAB, WorkoutType.TREADMILL)
     }
 }
 

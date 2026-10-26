@@ -1,7 +1,6 @@
 package ch.coachpoulpy.shared
 
 import ch.coachpoulpy.catalog.Catalog
-import ch.coachpoulpy.core.engine.WorkoutTypeRegistry
 import ch.coachpoulpy.core.model.Equipment
 import ch.coachpoulpy.core.model.Exercise
 import ch.coachpoulpy.core.model.ExerciseSlug
@@ -10,6 +9,10 @@ import ch.coachpoulpy.core.model.Ids
 import ch.coachpoulpy.core.model.Intensity
 import ch.coachpoulpy.core.model.Load
 import ch.coachpoulpy.core.model.MeasurementMode
+import ch.coachpoulpy.core.model.MovementPattern
+import ch.coachpoulpy.core.model.Part
+import ch.coachpoulpy.core.model.PartId
+import ch.coachpoulpy.core.model.PartKind
 import ch.coachpoulpy.core.model.Prescription
 import ch.coachpoulpy.core.model.SetPrescription
 import ch.coachpoulpy.core.model.Side
@@ -18,10 +21,17 @@ import ch.coachpoulpy.core.model.StepId
 import ch.coachpoulpy.core.model.StepRole
 import ch.coachpoulpy.core.model.Target
 import ch.coachpoulpy.core.model.Workout
+import ch.coachpoulpy.core.model.WorkoutFormat
 import ch.coachpoulpy.core.model.WorkoutId
-import ch.coachpoulpy.core.model.WorkoutType
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
+
+/**
+ * What an exercise step is for in the builder. The builder still shows one list of steps, so a
+ * warm-up or cool down is a role here and becomes the workout's warm-up or cool down part on save.
+ */
+// CLEANUP: #90 builds workouts in parts; then the builder keeps parts and uses StepRole, and this goes.
+enum class BuilderRole { WARM_UP, WORK, RECOVER, COOL_DOWN }
 
 /** One step of a workout in the builder: an exercise, a rest or a repeat. */
 sealed interface DraftStep {
@@ -66,7 +76,7 @@ data class DraftEntry(
     val speedKmh: Double? = null,
     val distanceUnit: DistanceUnit = DistanceUnit.KM,
     val paceUnit: PaceUnit = PaceUnit.PER_KM,
-    val role: StepRole = StepRole.WORK,
+    val role: BuilderRole = BuilderRole.WORK,
     val open: Boolean = false,
 ) : DraftStep {
     /** How a walk or a run ends; null for any other exercise. */
@@ -82,6 +92,8 @@ data class DraftEntry(
     val intensityKind: IntensityKind?
         get() = if (!walkOrRun) null else if (speedKmh != null) IntensityKind.PACE else IntensityKind.FREE
 
+    private val stepRole: StepRole get() = if (role == BuilderRole.RECOVER) StepRole.RECOVER else StepRole.WORK
+
     internal fun toStep(): Step.ExerciseStep {
         val target = if (walkOrRun && open) Target.Open else when (measurement) {
             MeasurementMode.REPS -> Target.Reps(amount)
@@ -92,7 +104,7 @@ data class DraftEntry(
         val load = loadKg?.let { Load.Kilograms(it) }
         if (walkOrRun) {
             val set = SetPrescription(target, intensity = speedKmh?.let { Intensity.Speed(it) })
-            return Step.ExerciseStep(StepId(key), exercise, Prescription(listOf(set)), role)
+            return Step.ExerciseStep(StepId(key), exercise, Prescription(listOf(set)), stepRole)
         }
         val prescriptions = (1..sets).flatMap {
             if (perSide) {
@@ -104,15 +116,18 @@ data class DraftEntry(
                 listOf(SetPrescription(target, load))
             }
         }
-        return Step.ExerciseStep(StepId(key), exercise, Prescription(prescriptions), role)
+        return Step.ExerciseStep(StepId(key), exercise, Prescription(prescriptions), stepRole)
     }
 
     companion object {
         /** Time to change sides between the left and right halves of a timed set. */
         internal val SWITCH_SIDES = 5.seconds
 
-        /** A new exercise step; one added inside a repeat starts at one set, since the repeat does the repeating. */
-        internal fun new(exercise: Exercise, type: WorkoutType, units: UnitSystem = UnitSystem.METRIC, inRepeat: Boolean = false): DraftEntry {
+        /**
+         * A new exercise step. It starts at one set in a circuit, inside a repeat, since the repeat
+         * does the repeating, and for stretches and mobility; otherwise at three.
+         */
+        internal fun new(exercise: Exercise, format: WorkoutFormat, units: UnitSystem = UnitSystem.METRIC, inRepeat: Boolean = false): DraftEntry {
             if (exercise.isWalkOrRun) {
                 return DraftEntry(
                     key = Ids.newUuidV7(),
@@ -130,16 +145,24 @@ data class DraftEntry(
                 exercise = exercise.slug,
                 measurement = exercise.measurement,
                 perSide = exercise.perSide,
-                sets = if (type == WorkoutType.MOBILITY || inRepeat) 1 else 3,
+                sets = if (format == WorkoutFormat.CIRCUIT || inRepeat || exercise.movementPattern in ONE_SET_PATTERNS) 1 else 3,
                 amount = defaultAmount(exercise.measurement),
                 loadKg = null,
             )
         }
 
+        private val ONE_SET_PATTERNS = setOf(MovementPattern.STRETCH, MovementPattern.MOBILITY)
+
         /** Twenty minutes, the duration a new walk or run starts with. */
         internal const val WALK_OR_RUN_MINUTES = 20
 
-        internal fun from(step: Step.ExerciseStep, exercise: Exercise?): DraftEntry? {
+        internal fun from(step: Step.ExerciseStep, exercise: Exercise?, part: PartKind = PartKind.WORK): DraftEntry? {
+            val role = when {
+                step.role == StepRole.RECOVER -> BuilderRole.RECOVER
+                part == PartKind.WARM_UP -> BuilderRole.WARM_UP
+                part == PartKind.COOL_DOWN -> BuilderRole.COOL_DOWN
+                else -> BuilderRole.WORK
+            }
             val sets = step.prescription.sets
             val first = sets.firstOrNull() ?: return null
             val walkTarget = first.target is Target.Time || first.target is Target.Distance || first.target is Target.Open
@@ -155,7 +178,7 @@ data class DraftEntry(
                     loadKg = null,
                     walkOrRun = true,
                     speedKmh = (first.intensity as? Intensity.Speed)?.kmh,
-                    role = step.role,
+                    role = role,
                     open = open,
                 )
             }
@@ -169,7 +192,7 @@ data class DraftEntry(
                 sets = sets.count { it.side != Side.RIGHT },
                 amount = first.target.amount,
                 loadKg = (first.load as? Load.Kilograms)?.kg,
-                role = step.role,
+                role = role,
             )
         }
 
@@ -193,42 +216,60 @@ data class WorkoutDraft(
     val id: WorkoutId?,
     val version: Int,
     val name: String,
-    val type: WorkoutType,
+    val format: WorkoutFormat,
     val steps: List<DraftStep>,
 ) {
-    internal fun toWorkout(): Workout = Workout(
-        id = id ?: WorkoutId(Ids.newUuidV7()),
-        version = version,
-        name = name.trim(),
-        type = type,
-        steps = steps.map { it.toModelStep() },
-    )
+    /**
+     * The warm-ups at the top make the warm-up part and the cool downs at the bottom the cool down
+     * part; every other step is the work part.
+     */
+    internal fun toWorkout(): Workout {
+        val warmUps = steps.takeWhile { it is DraftEntry && it.role == BuilderRole.WARM_UP }
+        val coolDowns = steps.drop(warmUps.size).takeLastWhile { it is DraftEntry && it.role == BuilderRole.COOL_DOWN }
+        val work = steps.subList(warmUps.size, steps.size - coolDowns.size)
+        fun part(kind: PartKind, steps: List<DraftStep>) = Part(PartId(Ids.newUuidV7()), kind, steps.map { it.toModelStep() })
+        return Workout(
+            id = id ?: WorkoutId(Ids.newUuidV7()),
+            version = version,
+            name = name.trim(),
+            format = format,
+            parts = listOfNotNull(
+                warmUps.takeIf { it.isNotEmpty() }?.let { part(PartKind.WARM_UP, it) },
+                part(PartKind.WORK, work),
+                coolDowns.takeIf { it.isNotEmpty() }?.let { part(PartKind.COOL_DOWN, it) },
+            ),
+        )
+    }
 
     /** Every exercise and rest, repeats opened up, in order. */
     internal val leaves: List<DraftStep> get() = steps.flatMap { if (it is DraftRepeat) it.steps else listOf(it) }
 
     companion object {
-        internal fun empty(type: WorkoutType = WorkoutType.STRENGTH) = WorkoutDraft(null, 1, "", type, emptyList())
+        internal fun empty(format: WorkoutFormat = WorkoutFormat.SETS) = WorkoutDraft(null, 1, "", format, emptyList())
 
         /**
-         * Only workouts the builder could have made can be edited: exercises, rests and
-         * repeats one level deep with no rest of their own between rounds.
+         * Only workouts the builder could have made can be edited: one work part, an optional
+         * warm-up and cool down of exercises only, and in them exercises, rests and repeats one
+         * level deep with no rest of their own between rounds.
          */
         internal fun from(workout: Workout, catalog: Catalog): WorkoutDraft? {
-            fun leaf(step: Step): DraftStep? = when (step) {
-                is Step.ExerciseStep -> DraftEntry.from(step, catalog[step.exercise])
-                is Step.Rest -> DraftRest(step.id.value, step.duration.inWholeSeconds.toInt())
+            if (workout.parts.count { it.kind == PartKind.WORK } != 1 || workout.problems().isNotEmpty()) return null
+            fun leaf(step: Step, part: PartKind): DraftStep? = when (step) {
+                is Step.ExerciseStep -> DraftEntry.from(step, catalog[step.exercise], part)
+                is Step.Rest -> DraftRest(step.id.value, step.duration.inWholeSeconds.toInt()).takeIf { part == PartKind.WORK }
                 is Step.Group -> null
             }
-            val steps = workout.steps.map { step ->
-                if (step is Step.Group) {
-                    if (step.restBetweenRounds > Duration.ZERO) return null
-                    DraftRepeat(step.id.value, step.rounds, step.children.map { leaf(it) ?: return null })
-                } else {
-                    leaf(step) ?: return null
+            val steps = workout.parts.flatMap { part ->
+                part.steps.map { step ->
+                    if (step is Step.Group) {
+                        if (step.restBetweenRounds > Duration.ZERO || part.kind != PartKind.WORK) return null
+                        DraftRepeat(step.id.value, step.rounds, step.children.map { leaf(it, part.kind) ?: return null })
+                    } else {
+                        leaf(step, part.kind) ?: return null
+                    }
                 }
             }
-            return WorkoutDraft(workout.id, workout.version + 1, workout.name, workout.type, steps)
+            return WorkoutDraft(workout.id, workout.version + 1, workout.name, workout.format, steps)
         }
     }
 }
@@ -267,36 +308,4 @@ internal val Target.amount: Int get() = when (this) {
     is Target.Hold -> duration.inWholeSeconds.toInt()
     is Target.Distance -> meters.toInt()
     Target.Open -> 0
-}
-
-/** The types a walk or a run fits whatever its target: a treadmill workout, a cardio circuit, rehab. */
-private val WALK_OR_RUN_TYPES = setOf(WorkoutType.TREADMILL, WorkoutType.CONDITIONING, WorkoutType.REHAB)
-
-/** Whether the builder can add [exercise] to a workout of [type]; a treadmill workout only takes walks and runs. */
-internal fun WorkoutTypeRegistry.fits(type: WorkoutType, exercise: Exercise): Boolean =
-    if (type == WorkoutType.TREADMILL) {
-        exercise.isWalkOrRun
-    } else {
-        accepts(type, exercise.measurement) || (exercise.isWalkOrRun && type in WALK_OR_RUN_TYPES)
-    }
-
-/** Whether a workout of [type] can run [entry] as it is set. */
-internal fun WorkoutTypeRegistry.fits(type: WorkoutType, entry: DraftEntry): Boolean =
-    if (type == WorkoutType.TREADMILL) {
-        entry.walkOrRun
-    } else if (entry.open) {
-        runCatching { this[type] }.getOrNull()?.acceptedTargets?.contains(Target.Open::class) == true
-    } else {
-        accepts(type, entry.measurement) || (entry.walkOrRun && type in WALK_OR_RUN_TYPES)
-    }
-
-/** Whether a workout of [type] can run an exercise measured this way. */
-internal fun WorkoutTypeRegistry.accepts(type: WorkoutType, measurement: MeasurementMode): Boolean {
-    val target = when (measurement) {
-        MeasurementMode.REPS -> Target.Reps::class
-        MeasurementMode.TIME -> Target.Time::class
-        MeasurementMode.HOLD -> Target.Hold::class
-        MeasurementMode.DISTANCE -> Target.Distance::class
-    }
-    return runCatching { this[type] }.getOrNull()?.acceptedTargets?.contains(target) == true
 }

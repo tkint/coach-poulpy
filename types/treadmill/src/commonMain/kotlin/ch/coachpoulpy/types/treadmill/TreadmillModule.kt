@@ -3,27 +3,18 @@ package ch.coachpoulpy.types.treadmill
 import ch.coachpoulpy.core.engine.CompletionRule
 import ch.coachpoulpy.core.engine.Phase
 import ch.coachpoulpy.core.engine.Timeline
-import ch.coachpoulpy.core.engine.WorkoutTypeModule
 import ch.coachpoulpy.core.model.ExerciseSlug
-import ch.coachpoulpy.core.model.SetPrescription
 import ch.coachpoulpy.core.model.Side
 import ch.coachpoulpy.core.model.StepId
 import ch.coachpoulpy.core.model.Target
-import ch.coachpoulpy.core.model.WorkoutType
 import kotlin.time.Duration
 
 /**
- * Treadmill runs and walks. Timed blocks end on the clock; distance blocks end when
+ * Treadmill runs and walks. Timed steps end on the clock; distance steps end when
  * the connected treadmill reports the distance done (see [TreadmillRecorder]), or
  * with a tap when no treadmill is connected.
  */
-object TreadmillModule : WorkoutTypeModule {
-    override val type = WorkoutType.TREADMILL
-    override val acceptedTargets = setOf(Target.Time::class, Target.Distance::class, Target.Open::class)
-
-    override fun completionRule(set: SetPrescription): CompletionRule =
-        if (set.target is Target.Time) CompletionRule.Timer else CompletionRule.Manual
-
+object TreadmillModule {
     /** The exercise a treadmill block refers to. */
     val treadmillRun = ExerciseSlug("treadmill-run")
 

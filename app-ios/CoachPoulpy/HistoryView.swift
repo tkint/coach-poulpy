@@ -407,7 +407,7 @@ struct SessionDetailView: View {
                         .frame(width: 96, height: 86)
                         .accessibilityHidden(true)
                     VStack(alignment: .leading, spacing: 2) {
-                        if let type = session.typeLabel {
+                        if let type = session.formatLabel {
                             Text(type.uppercased()).font(PoulpyFont.label).kerning(1)
                         }
                         Text(dateTime(session.startedAtMillis)).font(PoulpyFont.headline)

@@ -9,9 +9,9 @@ The brand, design system and architecture are published at [tkint.github.io/coac
 | Path | What it is |
 | --- | --- |
 | `core/model` | Domain types: exercises, workouts, steps, prescriptions, plans, executions |
-| `core/engine` | Timeline compiler, session state machine, event log, `WorkoutTypeModule` |
+| `core/engine` | Timeline compiler, session state machine, event log |
 | `core/stats` | Derived metrics (placeholder) |
-| `types/*` | One module per workout type: strength, conditioning, rehab, mobility, treadmill |
+| `types/treadmill` | Treadmill recording, summaries and step estimate |
 | `catalog` | Bundled exercise catalog, edited as JSON in `catalog/data/` |
 | `data/local` | SQLDelight database on the phone |
 | `device/ftms` | Bluetooth treadmills (FTMS): decoding, connection with reconnect, Bluetooth through Kable |

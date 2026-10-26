@@ -3,16 +3,16 @@ package ch.coachpoulpy.data.local
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
 import ch.coachpoulpy.core.engine.SessionEvent
-import ch.coachpoulpy.core.model.Exercise
-import ch.coachpoulpy.core.model.ExerciseSlug
 import ch.coachpoulpy.core.model.Execution
 import ch.coachpoulpy.core.model.ExecutionId
 import ch.coachpoulpy.core.model.ExecutionSource
+import ch.coachpoulpy.core.model.Exercise
+import ch.coachpoulpy.core.model.ExerciseSlug
 import ch.coachpoulpy.core.model.Ids
 import ch.coachpoulpy.core.model.Workout
+import ch.coachpoulpy.core.model.WorkoutFormat
 import ch.coachpoulpy.core.model.WorkoutId
 import ch.coachpoulpy.core.model.WorkoutRef
-import ch.coachpoulpy.core.model.WorkoutType
 import ch.coachpoulpy.core.stats.SessionTotals
 import ch.coachpoulpy.data.local.db.CoachPoulpyDatabase
 import kotlin.time.Clock
@@ -35,7 +35,7 @@ class LocalStore(driverFactory: DriverFactory, private val clock: Clock = Clock.
         db.workoutQueries.insert(
             id = workout.id.value,
             version = workout.version.toLong(),
-            type = workout.type.name,
+            format = workout.format.name,
             name = workout.name,
             content = json.encodeToString(Workout.serializer(), workout),
             created_at = clock.now().toEpochMilliseconds(),
@@ -122,8 +122,8 @@ class LocalStore(driverFactory: DriverFactory, private val clock: Clock = Clock.
         db.catalogEntryQueries.setVersion(version.toLong())
     }
 
-    /** [title] and [type] are kept as they were at the start, for the history. */
-    fun startExecution(execution: Execution, title: String? = null, type: WorkoutType? = null) {
+    /** [title] and [format] are kept as they were at the start, for the history. */
+    fun startExecution(execution: Execution, title: String? = null, format: WorkoutFormat? = null) {
         db.executionQueries.insertExecution(
             id = execution.id.value,
             source = execution.source.name,
@@ -132,7 +132,7 @@ class LocalStore(driverFactory: DriverFactory, private val clock: Clock = Clock.
             started_at = execution.startedAt.toEpochMilliseconds(),
             ended_at = execution.endedAt?.toEpochMilliseconds(),
             title = title,
-            workout_type = type?.name,
+            workout_type = format?.name,
         )
     }
 
@@ -161,7 +161,7 @@ class LocalStore(driverFactory: DriverFactory, private val clock: Clock = Clock.
                         workout = row.workout_id?.let { WorkoutRef(WorkoutId(it), row.workout_version?.toInt() ?: 1) },
                     ),
                     title = row.title,
-                    type = row.workout_type?.let { name -> WorkoutType.entries.firstOrNull { it.name == name } },
+                    format = row.workout_type?.let { name -> WorkoutFormat.entries.firstOrNull { it.name == name } },
                     totals = row.summary?.let { runCatching { json.decodeFromString(SessionTotals.serializer(), it) }.getOrNull() },
                 )
             }
@@ -178,8 +178,8 @@ class LocalStore(driverFactory: DriverFactory, private val clock: Clock = Clock.
         db.executionQueries.setSummary(json.encodeToString(SessionTotals.serializer(), totals), executionId)
 
     /** Fills in what sessions from before the history did not keep. */
-    fun saveDetails(executionId: String, title: String?, type: WorkoutType?, totals: SessionTotals) =
-        db.executionQueries.setDetails(title, type?.name, json.encodeToString(SessionTotals.serializer(), totals), executionId)
+    fun saveDetails(executionId: String, title: String?, format: WorkoutFormat?, totals: SessionTotals) =
+        db.executionQueries.setDetails(title, format?.name, json.encodeToString(SessionTotals.serializer(), totals), executionId)
 
     fun deleteSession(executionId: String) = db.transaction {
         db.executionQueries.deleteEvents(executionId)
@@ -209,7 +209,7 @@ class LocalStore(driverFactory: DriverFactory, private val clock: Clock = Clock.
 }
 
 /** A finished session as stored: [totals] is null until it has been summed up once. */
-data class StoredSession(val execution: Execution, val title: String?, val type: WorkoutType?, val totals: SessionTotals?)
+data class StoredSession(val execution: Execution, val title: String?, val format: WorkoutFormat?, val totals: SessionTotals?)
 
 /** A workout's latest version and when it was saved. */
 data class SavedWorkout(val workout: Workout, val savedAt: Instant)

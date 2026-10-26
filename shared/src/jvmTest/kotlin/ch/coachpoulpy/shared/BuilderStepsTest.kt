@@ -2,11 +2,13 @@ package ch.coachpoulpy.shared
 
 import ch.coachpoulpy.core.engine.CompletionRule
 import ch.coachpoulpy.core.engine.Phase
+import ch.coachpoulpy.core.model.PartId
+import ch.coachpoulpy.core.model.PartKind
 import ch.coachpoulpy.core.model.Step
 import ch.coachpoulpy.core.model.StepRole
 import ch.coachpoulpy.core.model.Target
+import ch.coachpoulpy.core.model.WorkoutFormat
 import ch.coachpoulpy.core.model.WorkoutId
-import ch.coachpoulpy.core.model.WorkoutType
 import ch.coachpoulpy.data.local.DriverFactory
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -33,11 +35,11 @@ class BuilderStepsTest {
      */
     private fun intervalRun(builder: BuilderModel = graph.createWorkout("en")): BuilderModel {
         builder.rename("4 × 400 m")
-        builder.setType(WorkoutType.TREADMILL)
+        builder.setFormat(WorkoutFormat.CIRCUIT)
 
         builder.add("run")
         val warmUp = builder.state.value.addedKey!!
-        builder.setRole(warmUp, StepRole.WARM_UP)
+        builder.setRole(warmUp, BuilderRole.WARM_UP)
         builder.setDurationKind(warmUp, DurationKind.UNTIL_PRESSED)
         builder.setIntensityKind(warmUp, IntensityKind.PACE)
         builder.setPace(warmUp, "5:30", PaceUnit.PER_KM)
@@ -52,12 +54,12 @@ class BuilderStepsTest {
         builder.setPace(fast, "5:00", PaceUnit.PER_KM)
         builder.add("walk", repeat)
         val easy = builder.state.value.addedKey!!
-        builder.setRole(easy, StepRole.RECOVER)
+        builder.setRole(easy, BuilderRole.RECOVER)
         builder.setDuration(easy, "1:30")
 
         builder.add("run")
         val coolDown = builder.state.value.addedKey!!
-        builder.setRole(coolDown, StepRole.COOL_DOWN)
+        builder.setRole(coolDown, BuilderRole.COOL_DOWN)
         builder.setDurationKind(coolDown, DurationKind.UNTIL_PRESSED)
         builder.setIntensityKind(coolDown, IntensityKind.PACE)
         builder.setPace(coolDown, "5:45", PaceUnit.PER_KM)
@@ -94,19 +96,22 @@ class BuilderStepsTest {
         assertEquals(Target.Open, work.first().target)
         assertEquals(CompletionRule.Manual, work.first().completion)
         assertNull(work.first().duration)
-        assertEquals(StepRole.WARM_UP, work.first().role)
+        assertEquals(PartKind.WARM_UP, work.first().part)
+        assertEquals(StepRole.WORK, work.first().role)
         assertEquals(listOf(1, 1, 2, 2, 3, 3, 4, 4), work.drop(1).dropLast(1).map { it.round })
         assertTrue(work.drop(1).dropLast(1).all { it.rounds == 4 })
         assertEquals(Target.Time(90.seconds), work[2].target)
         assertEquals(StepRole.RECOVER, work[2].role)
         assertEquals(Target.Open, work.last().target)
-        assertEquals(StepRole.COOL_DOWN, work.last().role)
+        assertEquals(PartKind.COOL_DOWN, work.last().part)
+        assertTrue(work.drop(1).dropLast(1).all { it.part == PartKind.WORK && it.workPart == null })
     }
 
     @Test
     fun anIntervalRunComesBackTheSameWhenEdited() {
         val id = intervalRun().save()!!
         val saved = graph.store.latestWorkout(WorkoutId(id))!!
+        assertEquals(listOf(PartKind.WARM_UP, PartKind.WORK, PartKind.COOL_DOWN), saved.parts.map { it.kind })
         val edit = assertNotNull(graph.editWorkout(id, "en"))
         val state = edit.state.value
         assertEquals(listOf("Warm-up", null, "Recover", "Cool down"), state.rows.map { it.roleLabel })
@@ -235,6 +240,16 @@ class BuilderStepsTest {
     }
 
     @Test
+    fun aWorkoutWithSeveralWorkPartsCannotBeEditedYet() {
+        val saved = graph.store.latestWorkout(WorkoutId(intervalRun().save()!!))!!
+        val split = saved.copy(parts = saved.parts.flatMap { part ->
+            if (part.kind == PartKind.WORK) listOf(part, part.copy(id = PartId("second"))) else listOf(part)
+        })
+
+        assertNull(WorkoutDraft.from(split, graph.catalog))
+    }
+
+    @Test
     fun aStepSavedBeforeRolesIsAnExerciseStep() {
         val json = """{"type":"exercise","id":"a","exercise":"squat","prescription":{"sets":[]}}"""
         val step = Json.decodeFromString<Step>(json) as Step.ExerciseStep
@@ -245,8 +260,8 @@ class BuilderStepsTest {
     @Test
     fun aStepAddedAsAWarmUpOrCoolDownKeepsThatRole() {
         val builder = graph.createWorkout("en")
-        builder.add("walk", role = StepRole.WARM_UP)
-        builder.add("walk", role = StepRole.COOL_DOWN)
+        builder.add("walk", role = BuilderRole.WARM_UP)
+        builder.add("walk", role = BuilderRole.COOL_DOWN)
         assertEquals(listOf("Warm-up", "Cool down"), builder.state.value.rows.map { it.roleLabel })
     }
 
@@ -286,14 +301,14 @@ class BuilderStepsTest {
     @Test
     fun aWarmUpGoesBeforeEveryOtherStep() {
         val builder = intervalRun()
-        builder.add("walk", role = StepRole.WARM_UP)
+        builder.add("walk", role = BuilderRole.WARM_UP)
         val walk = builder.state.value.addedKey!!
         assertEquals(listOf("Run", "Walk"), builder.state.value.steps.take(2).map { it.row?.name })
         assertEquals(walk, builder.state.value.steps[1].key)
 
         // Even from a repeat's menu, a warm-up goes to the top of the workout.
-        builder.add("walk", builder.state.value.steps[2].key, StepRole.WARM_UP)
-        assertEquals(3, builder.state.value.steps.takeWhile { it.row?.role == StepRole.WARM_UP }.size)
+        builder.add("walk", builder.state.value.steps[2].key, BuilderRole.WARM_UP)
+        assertEquals(3, builder.state.value.steps.takeWhile { it.row?.role == BuilderRole.WARM_UP }.size)
     }
 
     @Test

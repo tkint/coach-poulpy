@@ -5,10 +5,11 @@ import ch.coachpoulpy.core.model.LocalizedText
 import ch.coachpoulpy.core.model.MeasurementMode
 import ch.coachpoulpy.core.model.MovementPattern
 import ch.coachpoulpy.core.model.MuscleGroup
+import ch.coachpoulpy.core.model.PartKind
 import ch.coachpoulpy.core.model.Side
 import ch.coachpoulpy.core.model.StepRole
 import ch.coachpoulpy.core.model.Target
-import ch.coachpoulpy.core.model.WorkoutType
+import ch.coachpoulpy.core.model.WorkoutFormat
 
 /**
  * Words that come from the domain (muscles, equipment, units) in both languages, so
@@ -84,12 +85,15 @@ internal class Labels(private val languageCode: String) {
     /** "3 of 5". */
     fun position(index: Int, count: Int) = t("$index of $count", "$index sur $count")
 
-    fun workoutType(type: WorkoutType) = when (type) {
-        WorkoutType.STRENGTH -> t("Strength", "Renforcement")
-        WorkoutType.CONDITIONING -> t("Cardio circuit", "Circuit cardio")
-        WorkoutType.REHAB -> t("Rehab", "Rééducation")
-        WorkoutType.MOBILITY -> t("Mobility and stretching", "Mobilité et étirements")
-        WorkoutType.TREADMILL -> t("Treadmill", "Tapis de course")
+    fun format(format: WorkoutFormat) = when (format) {
+        WorkoutFormat.CIRCUIT -> t("Circuit", "Circuit")
+        WorkoutFormat.SETS -> t("Sets", "Séries")
+    }
+
+    fun part(kind: PartKind) = when (kind) {
+        PartKind.WARM_UP -> t("Warm-up", "Échauffement")
+        PartKind.WORK -> t("Work", "Travail")
+        PartKind.COOL_DOWN -> t("Cool down", "Retour au calme")
     }
 
     fun amount(measurement: MeasurementMode, amount: Int) = when (measurement) {
@@ -204,16 +208,23 @@ internal class Labels(private val languageCode: String) {
     /** What a phase asks for in the player: "10 reps", "30 s", "400 m", or "Until you tap Next". */
     fun target(target: Target) = if (target is Target.Open) t("Until you tap Next", "Jusqu’à « Suivant »") else amount(target.measurement, target.amount)
 
-    /** The tag on a step; null for plain exercise steps, which have none. */
-    fun role(role: StepRole) = when (role) {
-        StepRole.WARM_UP -> t("Warm-up", "Échauffement")
-        StepRole.WORK -> null
-        StepRole.RECOVER -> t("Recover", "Récupération")
-        StepRole.COOL_DOWN -> t("Cool down", "Retour au calme")
+    /** The tag on a step: Recover, or the warm-up or cool down holding it; null for exercise steps of a work part. */
+    fun role(role: StepRole, part: PartKind = PartKind.WORK) = when {
+        role == StepRole.RECOVER -> t("Recover", "Récupération")
+        part == PartKind.WORK -> null
+        else -> this.part(part)
+    }
+
+    /** The tag on a step in the builder; null for plain exercise steps, which have none. */
+    fun role(role: BuilderRole) = when (role) {
+        BuilderRole.WARM_UP -> part(PartKind.WARM_UP)
+        BuilderRole.WORK -> null
+        BuilderRole.RECOVER -> role(StepRole.RECOVER)
+        BuilderRole.COOL_DOWN -> part(PartKind.COOL_DOWN)
     }
 
     /** The name of a role in the step select, Exercise included. */
-    fun roleName(role: StepRole) = role(role) ?: t("Exercise", "Exercice")
+    fun roleName(role: BuilderRole) = role(role) ?: t("Exercise", "Exercice")
 
     fun times(count: Int) = t("$count times", "$count fois")
 

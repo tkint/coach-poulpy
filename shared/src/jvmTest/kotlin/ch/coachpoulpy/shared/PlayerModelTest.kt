@@ -1,7 +1,7 @@
 package ch.coachpoulpy.shared
 
+import ch.coachpoulpy.core.model.WorkoutFormat
 import ch.coachpoulpy.core.model.WorkoutId
-import ch.coachpoulpy.core.model.WorkoutType
 import ch.coachpoulpy.data.local.DriverFactory
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -26,7 +26,7 @@ class PlayerModelTest {
     private fun workout(): WorkoutId {
         val builder = graph.createWorkout("en")
         builder.rename("Quick")
-        builder.setType(WorkoutType.STRENGTH)
+        builder.setFormat(WorkoutFormat.SETS)
         builder.addRepeat()
         val repeat = builder.state.value.steps.single().key
         builder.add("push-up", repeat)

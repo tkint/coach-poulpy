@@ -5,9 +5,9 @@ import ch.coachpoulpy.core.model.DeviceMetrics
 import ch.coachpoulpy.core.model.Execution
 import ch.coachpoulpy.core.model.ExecutionId
 import ch.coachpoulpy.core.model.ExecutionSource
+import ch.coachpoulpy.core.model.WorkoutFormat
 import ch.coachpoulpy.core.model.WorkoutId
 import ch.coachpoulpy.core.model.WorkoutRef
-import ch.coachpoulpy.core.model.WorkoutType
 import ch.coachpoulpy.data.local.DriverFactory
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -47,7 +47,7 @@ class HistoryModelTest {
     private fun strengthWorkout(): WorkoutId {
         val builder = graph.createWorkout("en")
         builder.rename("Quick")
-        builder.setType(WorkoutType.STRENGTH)
+        builder.setFormat(WorkoutFormat.SETS)
         builder.add("push-up")
         return WorkoutId(builder.save()!!)
     }
@@ -74,7 +74,7 @@ class HistoryModelTest {
         with(state.sessions.single()) {
             assertEquals("Quick", title)
             assertEquals(SessionKind.WORKOUT, kind)
-            assertEquals("Strength", typeLabel)
+            assertEquals("Sets", formatLabel)
             assertEquals(1, setsDone)
             assertNull(distanceMeters)
         }
@@ -107,14 +107,14 @@ class HistoryModelTest {
         // Saved, so the next opening reads it without replaying the events.
         val saved = runBlocking { graph.store.finishedSessions().first() }.single()
         assertEquals(1000.0, saved.totals?.distanceMeters)
-        assertEquals(WorkoutType.TREADMILL, saved.type)
+        assertNull(saved.format)
     }
 
     @Test
     fun keepsTheNameOfAWorkoutDeletedAfterwards() {
         val id = strengthWorkout()
         val start = now - 1.days
-        graph.store.startExecution(Execution(ExecutionId("e1"), ExecutionSource.GUIDED, startedAt = start, workout = WorkoutRef(id, 1)), "Quick", WorkoutType.STRENGTH)
+        graph.store.startExecution(Execution(ExecutionId("e1"), ExecutionSource.GUIDED, startedAt = start, workout = WorkoutRef(id, 1)), "Quick", WorkoutFormat.SETS)
         graph.store.appendEvent("e1", SessionEvent.Started(start))
         graph.store.appendEvent("e1", SessionEvent.Finished(start + 5.minutes))
         graph.store.finishExecution("e1", start + 5.minutes)

@@ -1,0 +1,15 @@
+-- Workouts have a format (circuit or sets) and parts instead of a workout type (ADR 0013).
+-- Saved workouts are not converted: they and the days they were planned on are removed.
+-- Past sessions stay; their workout_type column holds the format from now on.
+DELETE FROM planned_workout;
+DROP TABLE workout_version;
+CREATE TABLE workout_version (
+    id TEXT NOT NULL,
+    version INTEGER NOT NULL,
+    format TEXT NOT NULL,
+    name TEXT NOT NULL,
+    content TEXT NOT NULL,
+    created_at INTEGER NOT NULL,
+    PRIMARY KEY (id, version)
+);
+UPDATE execution SET workout_type = NULL;

@@ -1,14 +1,12 @@
 package ch.coachpoulpy.shared
 
 import ch.coachpoulpy.catalog.Catalog
-import ch.coachpoulpy.core.engine.WorkoutTypeRegistry
 import ch.coachpoulpy.core.model.Equipment
 import ch.coachpoulpy.core.model.Exercise
 import ch.coachpoulpy.core.model.ExerciseSlug
 import ch.coachpoulpy.core.model.MeasurementMode
 import ch.coachpoulpy.core.model.MovementPattern
 import ch.coachpoulpy.core.model.MuscleGroup
-import ch.coachpoulpy.core.model.WorkoutType
 
 /**
  * One row of the exercise list, already localized so the UI only renders it.
@@ -83,7 +81,6 @@ data class ExerciseDetail(
 /** The catalog as the exercise screens and the workout builder's picker show it. */
 class ExerciseListModel internal constructor(
     private val catalog: Catalog,
-    private val registry: WorkoutTypeRegistry,
     languageCode: String,
     /** Exercises used last, most recent first, read once when the picker first needs them. */
     recentlyUsed: () -> List<ExerciseSlug> = { emptyList() },
@@ -116,8 +113,7 @@ class ExerciseListModel internal constructor(
         }
 
     /**
-     * Offered exercises matching [query] and [area]. With [type], only exercises that
-     * workout type can run are listed; with [ticked], only those that use a ticked item
+     * Offered exercises matching [query] and [area]. With [ticked], only those that use a ticked item
      * and that it fits ([uses]; null or empty is no equipment filter). With a query, one
      * section of the best matches first ([ExerciseSearch]); without, a section per
      * movement pattern, by name.
@@ -127,14 +123,12 @@ class ExerciseListModel internal constructor(
     fun filter(
         query: String = "",
         area: MuscleArea? = null,
-        type: WorkoutType? = null,
         ticked: Set<Equipment>? = null,
         withRecent: Boolean = false,
     ): ExerciseListing {
         val owned = ticked?.takeIf { it.isNotEmpty() }
         val candidates = catalog.offered
             .filter { area == null || it.muscleGroups.any { group -> group in area.groups } }
-            .filter { type == null || registry.fits(type, it) }
             .filter { owned == null || it.uses(owned) }
         val ranks = search.rank(query)
         val sections = if (ranks == null) {
@@ -152,7 +146,7 @@ class ExerciseListModel internal constructor(
         val count = sections.sumOf { it.rows.size }
         val searching = ranks != null
         val restricted = owned != null
-        val recentRows = if (withRecent && !searching && area == null && !restricted) recentlyUsedRows(type) else emptyList()
+        val recentRows = if (withRecent && !searching && area == null && !restricted) recentlyUsedRows() else emptyList()
         val shown = if (recentRows.isEmpty()) sections else listOf(ExerciseSection(labels.recentlyUsed, recentRows)) + sections
         val countLabel = when {
             searching && restricted -> labels.matchesYouCanDo(count)
@@ -201,9 +195,9 @@ class ExerciseListModel internal constructor(
     private fun Exercise.uses(ticked: Set<Equipment>) =
         (Equipment.BODYWEIGHT in ticked && equipment.isEmpty()) || (fits(ticked) && allEquipment.any { it in ticked })
 
-    private fun recentlyUsedRows(type: WorkoutType?): List<ExerciseRow> = recent.asSequence()
+    private fun recentlyUsedRows(): List<ExerciseRow> = recent.asSequence()
         .mapNotNull { catalog[it] }
-        .filter { !it.retired && (type == null || registry.fits(type, it)) }
+        .filter { !it.retired }
         .take(RECENT_COUNT)
         .map(::row)
         .toList()

@@ -2,18 +2,18 @@ package ch.coachpoulpy.data.local
 
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import ch.coachpoulpy.core.engine.SessionEvent
-import ch.coachpoulpy.core.model.Exercise
-import ch.coachpoulpy.core.model.ExerciseSlug
 import ch.coachpoulpy.core.model.Execution
 import ch.coachpoulpy.core.model.ExecutionId
 import ch.coachpoulpy.core.model.ExecutionSource
+import ch.coachpoulpy.core.model.Exercise
+import ch.coachpoulpy.core.model.ExerciseSlug
 import ch.coachpoulpy.core.model.LocalizedText
 import ch.coachpoulpy.core.model.MeasurementMode
 import ch.coachpoulpy.core.model.MovementPattern
 import ch.coachpoulpy.core.model.MuscleGroup
 import ch.coachpoulpy.core.model.Workout
+import ch.coachpoulpy.core.model.WorkoutFormat
 import ch.coachpoulpy.core.model.WorkoutId
-import ch.coachpoulpy.core.model.WorkoutType
 import ch.coachpoulpy.core.stats.SessionTotals
 import ch.coachpoulpy.data.local.db.CoachPoulpyDatabase
 import kotlin.time.Duration.Companion.days
@@ -113,9 +113,31 @@ class LocalStoreTest {
     }
 
     @Test
+    fun workoutsWithATypeAreRemovedAndSessionsKeptWithoutIt() {
+        val driver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
+        driver.execute(null, "CREATE TABLE workout_version (id TEXT NOT NULL, version INTEGER NOT NULL, type TEXT NOT NULL, name TEXT NOT NULL, content TEXT NOT NULL, created_at INTEGER NOT NULL, PRIMARY KEY (id, version))", 0)
+        driver.execute(null, "CREATE TABLE execution (id TEXT NOT NULL PRIMARY KEY, source TEXT NOT NULL, workout_id TEXT, workout_version INTEGER, started_at INTEGER NOT NULL, ended_at INTEGER)", 0)
+        CoachPoulpyDatabase.Schema.migrate(driver, oldVersion = 1, newVersion = 5)
+        driver.execute(null, "INSERT INTO workout_version VALUES ('w1', 1, 'STRENGTH', 'Legs', '{}', 1700000000000)", 0)
+        driver.execute(null, "INSERT INTO planned_workout VALUES ('p1', 'w1', '2026-10-27', 1700000000000)", 0)
+        driver.execute(null, "INSERT INTO execution(id, source, workout_id, workout_version, started_at, ended_at, title, workout_type) VALUES ('old', 'GUIDED', 'w1', 1, 1700000000000, 1700000600000, 'Legs', 'STRENGTH')", 0)
+
+        CoachPoulpyDatabase.Schema.migrate(driver, oldVersion = 5, newVersion = CoachPoulpyDatabase.Schema.version)
+
+        val db = CoachPoulpyDatabase(driver)
+        assertEquals(0, db.workoutQueries.latestVersions().executeAsList().size)
+        assertEquals(0, db.plannedWorkoutQueries.plans().executeAsList().size)
+        val old = db.executionQueries.finished().executeAsOne()
+        assertEquals("Legs", old.title)
+        assertNull(old.workout_type)
+        db.workoutQueries.insert("w2", 1, "CIRCUIT", "Burner", "{}", 1700000000000)
+        assertEquals("CIRCUIT", db.workoutQueries.latestById("w2").executeAsOne().format)
+    }
+
+    @Test
     fun plansKeepTheirDayAndGoWithTheirWorkout() = runTest {
         val store = LocalStore(DriverFactory())
-        val workout = Workout(WorkoutId("w1"), 1, "Legs", WorkoutType.STRENGTH, emptyList())
+        val workout = Workout(WorkoutId("w1"), 1, "Legs", WorkoutFormat.SETS, emptyList())
         store.saveWorkout(workout)
         val later = store.planWorkout(workout.id, LocalDate(2026, 10, 29))
         val sooner = store.planWorkout(workout.id, LocalDate(2026, 10, 27))
@@ -133,8 +155,8 @@ class LocalStoreTest {
     @Test
     fun finishedSessionsComeNewestFirstWithTheirTotals() = runTest {
         val store = LocalStore(DriverFactory())
-        store.startExecution(Execution(ExecutionId("a"), ExecutionSource.GUIDED, startedAt = t0), title = "Legs", type = WorkoutType.STRENGTH)
-        store.startExecution(Execution(ExecutionId("b"), ExecutionSource.DEVICE_ONLY, startedAt = t0 + 1.days), type = WorkoutType.TREADMILL)
+        store.startExecution(Execution(ExecutionId("a"), ExecutionSource.GUIDED, startedAt = t0), title = "Legs", format = WorkoutFormat.SETS)
+        store.startExecution(Execution(ExecutionId("b"), ExecutionSource.DEVICE_ONLY, startedAt = t0 + 1.days), format = WorkoutFormat.CIRCUIT)
         store.startExecution(Execution(ExecutionId("open"), ExecutionSource.GUIDED, startedAt = t0 + 2.days))
         store.finishExecution("a", t0 + 20.minutes)
         store.finishExecution("b", t0 + 1.days + 30.minutes)
@@ -143,7 +165,7 @@ class LocalStoreTest {
         val rows = store.finishedSessions().first()
         assertEquals(listOf("b", "a"), rows.map { it.execution.id.value })
         assertEquals(3000.0, rows[0].totals?.distanceMeters)
-        assertEquals(WorkoutType.TREADMILL, rows[0].type)
+        assertEquals(WorkoutFormat.CIRCUIT, rows[0].format)
         assertEquals("Legs", rows[1].title)
         assertNull(rows[1].totals)
     }

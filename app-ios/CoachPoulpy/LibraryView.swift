@@ -24,7 +24,7 @@ struct LibraryView: View {
     @Binding var section: LibrarySection
     @StateObject private var library: Observed<LibraryModel, LibraryState>
     @State private var query = ""
-    @State private var kind: WorkoutType?
+    @State private var kind: WorkoutFormat?
     @State private var sort = LibrarySort.recent
     @State private var cover: Cover?
     /// The workout whose plan sheet or delete alert is open, by id so a fresh row is used.
@@ -50,7 +50,7 @@ struct LibraryView: View {
                 switch section {
                 case .workouts: workouts
                 case .exercises:
-                    ExerciseList(graph: graph, type: nil) { row in
+                    ExerciseList(graph: graph) { row in
                         NavigationLink {
                             ExerciseDetailView(graph: graph, slug: row.slug)
                         } label: {
@@ -116,7 +116,7 @@ struct LibraryView: View {
     @ViewBuilder
     private var workouts: some View {
         let state = library.value
-        let listing = library.model.filter(state: state, query: query, type: kind, sort: sort)
+        let listing = library.model.filter(state: state, query: query, format: kind, sort: sort)
         if !state.loaded {
             Spacer()
         } else if state.rows.isEmpty {
@@ -135,8 +135,8 @@ struct LibraryView: View {
             ListFilters(query: $query, placeholder: "library.search", label: "library.search.label", countLabel: listing.countLabel) {
                 PoulpyChip(title: Text("library.all"), selected: kind == nil) { kind = nil }
                 ForEach(state.kinds, id: \.label) { filter in
-                    PoulpyChip(title: Text(filter.label), selected: kind == filter.type) {
-                        kind = kind == filter.type ? nil : filter.type
+                    PoulpyChip(title: Text(filter.label), selected: kind == filter.format) {
+                        kind = kind == filter.format ? nil : filter.format
                     }
                 }
             } action: {
@@ -209,7 +209,7 @@ struct LibraryView: View {
                 WorkoutPageView(graph: graph, workoutId: row.id)
             } label: {
                 HStack(spacing: 12) {
-                    Image(systemName: icon(row.type))
+                    Image(systemName: icon(row.format))
                         .font(.system(size: 18, weight: .semibold))
                         .foregroundStyle(PoulpyColor.onPrimaryContainer)
                         .frame(width: 44, height: 44)
@@ -270,12 +270,8 @@ struct LibraryView: View {
         }
     }
 
-    private func icon(_ type: WorkoutType) -> String {
-        switch type {
-        case .treadmill: return "figure.run"
-        case .mobility, .rehab: return "figure.mind.and.body"
-        default: return "dumbbell"
-        }
+    private func icon(_ format: WorkoutFormat) -> String {
+        format == .circuit ? "repeat" : "dumbbell"
     }
 }
 
