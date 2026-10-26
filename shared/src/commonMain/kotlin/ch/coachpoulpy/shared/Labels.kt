@@ -159,8 +159,27 @@ internal class Labels(private val languageCode: String) {
 
     fun aboutMinutes(minutes: Int) = t("about $minutes min", "environ $minutes min")
 
-    /** One exercise's plan in a line: "3 × 10 each side · 14 kg · rest 60 s". */
+    /** "45 min", or "1 h" and "1 h 05" from an hour on. */
+    fun longDuration(seconds: Int): String {
+        if (seconds < 3600) return duration(seconds)
+        val minutes = seconds % 3600 / 60
+        return "${seconds / 3600} h" + if (minutes > 0) " ${minutes.toString().padStart(2, '0')}" else ""
+    }
+
+    /** One exercise's plan in a line: "3 × 10 each side · 14 kg · rest 60 s", or "5.0 km · 6:00 /km" for a walk or a run. */
     fun prescription(entry: DraftEntry): String {
+        if (entry.walkOrRun) {
+            val main = if (entry.measurement == MeasurementMode.DISTANCE) {
+                TargetInput.distanceLabel(entry.amount.toDouble(), entry.distanceUnit)
+            } else {
+                longDuration(entry.amount)
+            }
+            return listOfNotNull(
+                main,
+                entry.speedKmh?.let { TargetInput.paceLabel(it, entry.paceUnit) },
+                entry.restSeconds.takeIf { it > 0 }?.let(::restAfter),
+            ).joinToString(" · ")
+        }
         val amount = when (entry.measurement) {
             MeasurementMode.REPS -> entry.amount.toString()
             else -> amount(entry.measurement, entry.amount)
@@ -171,6 +190,11 @@ internal class Labels(private val languageCode: String) {
             entry.restSeconds.takeIf { it > 0 }?.let(::restAfter),
         ).joinToString(" · ")
     }
+
+    fun about(text: String) = t("about $text", "environ $text")
+
+    val halfMarathon get() = t("Half marathon", "Semi-marathon")
+    val marathon get() = t("Marathon", "Marathon")
 
     fun restAfter(seconds: Int) = t("rest ${duration(seconds)}", "repos ${duration(seconds)}")
 }

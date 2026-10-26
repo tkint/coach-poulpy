@@ -100,6 +100,17 @@
 "builder.open %@" = "Modifier %@";
 "builder.does.not.fit" = "Ce type de séance ne peut pas inclure cet exercice. Retirez-le ou choisissez un autre type.";
 "builder.empty" = "Ajoutez des exercices pour composer votre séance.";
+"builder.goal" = "Objectif";
+"builder.duration" = "Durée";
+"builder.distance" = "Distance";
+"builder.pace" = "Allure";
+"builder.duration.pace" = "Durée + allure";
+"builder.distance.pace" = "Distance + allure";
+"builder.tap.to.type" = "touchez une valeur pour la saisir";
+"builder.unit" = "Unité";
+"builder.quick.picks" = "Raccourcis";
+"builder.value.invalid" = "Valeur illisible. Saisissez une valeur comme les raccourcis ci-dessous.";
+"builder.edit.value" = "Saisir : %@";
 
 "player.ready" = "Prêt ?";
 "player.start" = "Lancer la séance";

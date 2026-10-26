@@ -100,6 +100,17 @@
 "builder.open %@" = "Edit %@";
 "builder.does.not.fit" = "This kind of workout can’t run this exercise. Remove it or pick another kind.";
 "builder.empty" = "Add exercises to build your workout.";
+"builder.goal" = "Target";
+"builder.duration" = "Duration";
+"builder.distance" = "Distance";
+"builder.pace" = "Pace";
+"builder.duration.pace" = "Duration + pace";
+"builder.distance.pace" = "Distance + pace";
+"builder.tap.to.type" = "tap a value to type it";
+"builder.unit" = "Unit";
+"builder.quick.picks" = "Quick picks";
+"builder.value.invalid" = "This can’t be read. Type a value like the quick picks below.";
+"builder.edit.value" = "Type %@";
 
 "player.ready" = "Ready?";
 "player.start" = "Start the session";

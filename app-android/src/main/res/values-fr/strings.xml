@@ -128,6 +128,17 @@
     <string name="builder_open">Modifier %1$s</string>
     <string name="builder_does_not_fit">Ce type de séance ne peut pas inclure cet exercice. Retirez-le ou choisissez un autre type.</string>
     <string name="builder_empty">Ajoutez des exercices pour composer votre séance.</string>
+    <string name="builder_goal">Objectif</string>
+    <string name="builder_duration">Durée</string>
+    <string name="builder_distance">Distance</string>
+    <string name="builder_pace">Allure</string>
+    <string name="builder_duration_pace">Durée + allure</string>
+    <string name="builder_distance_pace">Distance + allure</string>
+    <string name="builder_tap_to_type">touchez une valeur pour la saisir</string>
+    <string name="builder_unit">Unité</string>
+    <string name="builder_quick_picks">Raccourcis</string>
+    <string name="builder_value_invalid">Valeur illisible. Saisissez une valeur comme les raccourcis ci-dessous.</string>
+    <string name="builder_edit_value">Saisir : %1$s</string>
 
     <string name="player_ready">Prêt ?</string>
     <string name="player_start">Lancer la séance</string>
