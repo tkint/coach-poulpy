@@ -79,7 +79,7 @@ One thing that happened during a session (a phase started, a set logged, a pause
 _Avoid_: Log entry
 
 **Timeline**:
-The flat run of work, rest and transition phases a workout compiles to before a session runs it.
+The flat run of work, rest and transition phases a workout compiles to before a session runs it. A free recording's timeline is open-ended: it grows one manual phase each time the user ends a step, and the pause between two steps is their rest.
 _Avoid_: Playlist, sequence
 
 **Phase**:

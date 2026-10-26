@@ -27,7 +27,7 @@ object TreadmillModule : WorkoutTypeModule {
     /** The exercise a treadmill block refers to. */
     val treadmillRun = ExerciseSlug("treadmill-run")
 
-    /** A recording without a planned workout: one open phase on [exercise] that ends when the user stops. */
+    /** A recording without a planned workout: open phases on [exercise], one per step, until the user finishes. */
     fun freeRecording(exercise: ExerciseSlug) = Timeline(
         listOf(
             Phase.Work(
@@ -41,6 +41,7 @@ object TreadmillModule : WorkoutTypeModule {
                 duration = null,
             ),
         ),
+        openEnded = true,
     )
 
     /** The free recording from before the exercise could be picked, for sessions recorded then. */

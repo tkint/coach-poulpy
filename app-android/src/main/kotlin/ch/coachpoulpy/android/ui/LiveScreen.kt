@@ -87,6 +87,7 @@ import ch.coachpoulpy.shared.LiveModel
 import ch.coachpoulpy.shared.LiveTile
 import ch.coachpoulpy.shared.LiveUiState
 import ch.coachpoulpy.shared.Measure
+import ch.coachpoulpy.shared.PhaseResultUi
 import ch.coachpoulpy.shared.RecordingUi
 import ch.coachpoulpy.shared.SummaryUi
 import ch.coachpoulpy.shared.UnitSystem
@@ -127,9 +128,16 @@ fun LiveScreen(graph: AppGraph, language: String, onManageDevices: () -> Unit, m
         }
         // Added devices still connecting: the view shows read-only, with Poulpy where the controls go.
         val connecting = state.connection == LiveConnection.CONNECTING && state.recording == null
-        if (state.belt in HALTED && state.waitingFor == null) BeltBanner(state.belt)
-        if (state.tiles.isNotEmpty()) LivePanel(state.tiles) else if (state.connectedCount > 0) {
-            Text(stringResource(R.string.live_waiting), color = MaterialTheme.colorScheme.onSurfaceVariant)
+        // The numbers and the steps scroll; the finish question and the recorder stay whole at the bottom.
+        Column(
+            Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            if (state.belt in HALTED && state.waitingFor == null) BeltBanner(state.belt)
+            if (state.tiles.isNotEmpty()) LivePanel(state.tiles) else if (state.connectedCount > 0) {
+                Text(stringResource(R.string.live_waiting), color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            state.recording?.let { if (it.steps.isNotEmpty() || it.restSeconds != null) SessionSteps(it, state.units) }
         }
         state.finishPrompt?.let { FinishCard(it, model) }
         if (connecting) Connecting(state.connecting) else Recorder(state, model)
@@ -386,7 +394,10 @@ private fun ChoiceSheet(state: LiveUiState, onPick: (String) -> Unit, onDismiss:
 private fun Recording(recording: RecordingUi, units: UnitSystem, model: LiveModel) {
     val statusColor = if (recording.paused) PoulpyTheme.extraColors.grumpy else MaterialTheme.colorScheme.error
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Text(clock(recording.elapsedSeconds), fontSize = 32.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.weight(1f))
+        Column(Modifier.weight(1f)) {
+            Text(stringResource(R.string.live_session_time), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(clock(recording.elapsedSeconds), fontSize = 32.sp, lineHeight = 36.sp, fontWeight = FontWeight.ExtraBold)
+        }
         Box(Modifier.size(8.dp).clip(CircleShape).background(statusColor))
         Spacer(Modifier.size(6.dp))
         Text(
@@ -395,7 +406,19 @@ private fun Recording(recording: RecordingUi, units: UnitSystem, model: LiveMode
             fontWeight = FontWeight.ExtraBold,
         )
     }
-    if (!recording.freeRun) {
+    if (recording.freeRun) {
+        // The step under way, or the rest after ending one.
+        val rest = recording.restSeconds
+        Text(
+            if (rest != null) {
+                "${stringResource(R.string.treadmill_rest)} · ${clock(rest)}"
+            } else {
+                "${stringResource(R.string.live_step, recording.phaseNumber)} · ${clock(recording.stepElapsedSeconds)}"
+            },
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Bold,
+        )
+    } else {
         val parts = listOfNotNull(
             stringResource(R.string.treadmill_phase, recording.phaseNumber, recording.phaseCount),
             if (recording.isRest) stringResource(R.string.treadmill_rest) else null,
@@ -407,16 +430,23 @@ private fun Recording(recording: RecordingUi, units: UnitSystem, model: LiveMode
             recording.phaseRemainingSeconds?.let { Text(stringResource(R.string.treadmill_remaining, clock(it)), style = MaterialTheme.typography.bodyMedium) }
         }
     }
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-        // Recording: only Pause (and Skip in a workout). Paused: Resume or Finish.
-        if (recording.paused) {
+    // Recording: only Pause (and Skip in a workout). Paused: Resume, End step or Finish.
+    if (recording.paused) {
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedButton(onClick = model::resumeRecording, modifier = Modifier.weight(1f).height(52.dp)) {
                 Icon(Icons.Filled.PlayArrow, contentDescription = null)
                 Spacer(Modifier.size(6.dp))
                 Text(stringResource(R.string.treadmill_resume))
             }
-            Button(onClick = model::stopRecording, modifier = Modifier.weight(1f).height(52.dp)) { Text(stringResource(R.string.treadmill_stop)) }
-        } else {
+            OutlinedButton(
+                onClick = model::endStep,
+                enabled = recording.restSeconds == null,
+                modifier = Modifier.weight(1f).height(52.dp),
+            ) { Text(stringResource(R.string.live_end_step)) }
+        }
+        Button(onClick = model::stopRecording, modifier = Modifier.fillMaxWidth().height(52.dp)) { Text(stringResource(R.string.treadmill_stop)) }
+    } else {
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedButton(onClick = model::pauseRecording, modifier = Modifier.weight(1f).height(52.dp)) {
                 Icon(Icons.Filled.Pause, contentDescription = null)
                 Spacer(Modifier.size(6.dp))
@@ -428,6 +458,56 @@ private fun Recording(recording: RecordingUi, units: UnitSystem, model: LiveMode
         }
     }
 }
+
+/** The steps done so far in this session, each with its own time, and the rest between them. */
+@Composable
+private fun SessionSteps(recording: RecordingUi, units: UnitSystem) {
+    val colors = MaterialTheme.colorScheme
+    Surface(shape = RoundedCornerShape(PoulpyRadius.lg), color = colors.surface, border = BorderStroke(1.dp, colors.outlineVariant)) {
+        Column(Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(
+                stringResource(R.string.live_steps_title).uppercase(),
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.ExtraBold,
+                modifier = Modifier.semantics { heading() },
+            )
+            recording.steps.forEach { step ->
+                StepLine(stepTitle(step), stepParts(step, units))
+                step.restAfterSeconds?.takeIf { it > 0 }?.let { StepLine(stringResource(R.string.treadmill_rest), clock(it), muted = true) }
+            }
+            val rest = recording.restSeconds
+            if (rest != null) {
+                StepLine(stringResource(R.string.treadmill_rest), clock(rest), muted = true, current = true)
+            } else {
+                StepLine(stringResource(R.string.live_step, recording.phaseNumber), clock(recording.stepElapsedSeconds), current = true)
+            }
+        }
+    }
+}
+
+@Composable
+private fun StepLine(title: String, detail: String, muted: Boolean = false, current: Boolean = false) {
+    val colors = MaterialTheme.colorScheme
+    val color = if (muted) colors.onSurfaceVariant else colors.onSurface
+    Row(Modifier.fillMaxWidth().semantics(mergeDescendants = true) {}, verticalAlignment = Alignment.CenterVertically) {
+        Box(Modifier.size(8.dp).clip(CircleShape).background(if (current) colors.primary else colors.surface))
+        Spacer(Modifier.size(8.dp))
+        Text(title, color = color, fontWeight = if (current) FontWeight.ExtraBold else FontWeight.Bold, modifier = Modifier.weight(1f))
+        Text(detail, color = color, style = MaterialTheme.typography.bodyMedium)
+    }
+}
+
+@Composable
+private fun stepTitle(step: PhaseResultUi): String =
+    if (step.isRest) stringResource(R.string.treadmill_rest) else stringResource(R.string.live_step, step.phaseNumber)
+
+@Composable
+private fun stepParts(step: PhaseResultUi, units: UnitSystem): String = listOfNotNull(
+    clock(step.durationSeconds),
+    step.distanceMeters?.let { measure(Units.distance(it, units)) },
+    step.averageSpeedKmh?.let { measure(Units.speed(it, units)) },
+    step.onTargetPercent?.let { stringResource(R.string.treadmill_summary_on_target, it) },
+).joinToString(" · ")
 
 /** Which mode Start is in, auto or manual, with what each does behind the info button. */
 @Composable
@@ -554,13 +634,10 @@ private fun SummaryDialog(summary: SummaryUi, units: UnitSystem, onDismiss: () -
                 if (summary.phases.size > 1) {
                     HorizontalDivider(Modifier.padding(vertical = 4.dp))
                     summary.phases.forEach { phase ->
-                        val parts = listOfNotNull(
-                            clock(phase.durationSeconds),
-                            phase.averageSpeedKmh?.let { measure(Units.speed(it, units)) },
-                            phase.onTargetPercent?.let { stringResource(R.string.treadmill_summary_on_target, it) },
-                        )
-                        val title = if (phase.isRest) stringResource(R.string.treadmill_rest) else "#${phase.phaseNumber}"
-                        Text("$title  ${parts.joinToString(" · ")}", style = MaterialTheme.typography.bodySmall)
+                        Text("${stepTitle(phase)}  ${stepParts(phase, units)}", style = MaterialTheme.typography.bodySmall)
+                        phase.restAfterSeconds?.takeIf { it > 0 }?.let {
+                            Text("${stringResource(R.string.treadmill_rest)}  ${clock(it)}", style = MaterialTheme.typography.bodySmall)
+                        }
                     }
                 }
             }

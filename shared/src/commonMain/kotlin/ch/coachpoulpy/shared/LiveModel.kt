@@ -7,6 +7,7 @@ import ch.coachpoulpy.core.engine.SessionEvent
 import ch.coachpoulpy.core.engine.SessionState
 import ch.coachpoulpy.core.engine.Timeline
 import ch.coachpoulpy.core.engine.TimelineCompiler
+import ch.coachpoulpy.core.engine.covering
 import ch.coachpoulpy.core.model.Equipment
 import ch.coachpoulpy.core.model.Execution
 import ch.coachpoulpy.core.model.ExecutionId
@@ -25,7 +26,6 @@ import ch.coachpoulpy.core.model.Workout
 import ch.coachpoulpy.core.model.WorkoutId
 import ch.coachpoulpy.core.model.WorkoutRef
 import ch.coachpoulpy.core.model.WorkoutType
-import ch.coachpoulpy.core.stats.SessionTotals
 import ch.coachpoulpy.data.local.LocalStore
 import ch.coachpoulpy.types.treadmill.StepCounter
 import ch.coachpoulpy.types.treadmill.TreadmillModule
@@ -77,6 +77,12 @@ data class RecordingUi(
     val paused: Boolean,
     /** Time recorded, without the pauses. */
     val elapsedSeconds: Long,
+    /** Time in the current step, without the pauses. */
+    val stepElapsedSeconds: Long,
+    /** The steps already done in this session, oldest first. */
+    val steps: List<PhaseResultUi>,
+    /** Paused after ending a step: how long the rest has lasted so far. */
+    val restSeconds: Long?,
     /** 1-based, out of [phaseCount]. */
     val phaseNumber: Int,
     val phaseCount: Int,
@@ -96,6 +102,8 @@ data class PhaseResultUi(
     val targetSpeedKmh: Double?,
     /** 0 to 100, or null without a target speed or readings. */
     val onTargetPercent: Int?,
+    /** The pause between this step and the next, when the step was ended while paused. */
+    val restAfterSeconds: Long? = null,
 )
 
 data class SummaryUi(
@@ -249,7 +257,18 @@ class LiveModel(
 
         /** "Keep going" was answered to Stop on the console; asked again only once the belt has moved. */
         var stopAnswered = false
+
+        /** Stop was pressed on the console, or the treadmill switched off, since the last resume: restarting the belt starts a new step. */
+        var stoppedOnConsole = false
         var prompt: Prompt? = null
+
+        /** The finished steps, kept until another one ends or a rest closes. */
+        var steps: List<PhaseResultUi> = emptyList()
+        var stepsKey: Pair<Int, Int>? = null
+
+        /** Paused right after ending a step, so the next one has not begun. */
+        fun stepJustEnded(): Boolean =
+            session.events.lastOrNull { it !is SessionEvent.Sample } is SessionEvent.PhaseCompleted
     }
 
     /** A finish question asked [at], which would end the session at [since]. */
@@ -315,6 +334,8 @@ class LiveModel(
             }
         } else if (current.hadTreadmill && current.lostSince == null) {
             current.lostSince = clock.now()
+            // Switched off, then on again: another run, like after a Stop.
+            current.stoppedOnConsole = true
             val running = current.session.state(clock.now()).status == SessionState.Status.RUNNING
             if (_state.value.followTreadmill && running) {
                 pausedByBelt = true
@@ -486,7 +507,19 @@ class LiveModel(
 
     fun resumeRecording() {
         pausedByBelt = false
+        recording?.stoppedOnConsole = false
         act { it.resume(clock.now()) }
+    }
+
+    /**
+     * While paused, in a free recording: closes the current step, and the next one starts on resume. The pause
+     * between them is the rest. In a workout, moves on to the next phase like [skipPhase].
+     */
+    fun endStep() {
+        val current = recording ?: return
+        if (!current.freeRun) return skipPhase()
+        if (current.stepJustEnded()) return
+        act { it.completeCurrent(clock.now()) }
     }
 
     fun setFollowTreadmill(on: Boolean) {
@@ -506,6 +539,7 @@ class LiveModel(
             else -> current.stillSince ?: clock.now()
         }
         if (belt != BeltStatus.STOPPED) current.stopAnswered = false
+        if (belt == BeltStatus.STOPPED) current.stoppedOnConsole = true
         if (belt == BeltStatus.MOVING && current.prompt?.reason in BELT_REASONS) current.prompt = null
         followBelt(belt)
         recording?.let {
@@ -527,7 +561,11 @@ class LiveModel(
                 pausedByBelt = true
                 act { it.pause(clock.now()) }
             }
-            belt == BeltStatus.MOVING && status == SessionState.Status.PAUSED && pausedByBelt -> resumeRecording()
+            belt == BeltStatus.MOVING && status == SessionState.Status.PAUSED && pausedByBelt -> {
+                // After a Stop, the belt restarting is another run: a new step, the stop its rest.
+                if (current.stoppedOnConsole && current.freeRun) endStep()
+                resumeRecording()
+            }
         }
     }
 
@@ -587,6 +625,13 @@ class LiveModel(
 
     private fun stopRecording(now: Instant) {
         val current = recording ?: return
+        if (current.freeRun) {
+            // A step ended during the pause has nothing after it: the session ends with it.
+            if (!current.stepJustEnded()) persist(current, current.session.completeCurrent(now))
+            persist(current, current.session.finish(now))
+            refreshRecording(current)
+            return
+        }
         if (current.session.state(now).status == SessionState.Status.PAUSED) persist(current, current.session.resume(now))
         while (current.session.state(now).status != SessionState.Status.FINISHED) {
             persist(current, if (current.freeRun) current.session.completeCurrent(now) else current.session.skipCurrent(now))
@@ -606,9 +651,7 @@ class LiveModel(
         store.finishExecution(finished.executionId, at)
         store.saveTotals(finished.executionId, sessionTotals(finished.session.events, finished.timeline))
         val summary = TreadmillSummary.of(finished.timeline, finished.session.events)
-        // Without the pauses, like the timer and History.
-        val active = SessionTotals.activeTime(finished.session.events)
-        _state.update { it.copy(recording = null, finishPrompt = null, summary = summary.toUi().copy(durationSeconds = active.inWholeSeconds)) }
+        _state.update { it.copy(recording = null, finishPrompt = null, summary = summary.toUi(finished.session.events)) }
     }
 
     private fun refreshRecording(current: Recording) {
@@ -616,13 +659,27 @@ class LiveModel(
         val now = clock.now()
         val s = current.session.state(now)
         val work = s.phase as? Phase.Work
+        val events = current.session.events
+        val paused = s.status == SessionState.Status.PAUSED
+        val key = s.phaseIndex to events.count { it is SessionEvent.Resumed }
+        if (current.stepsKey != key) {
+            current.steps = TreadmillSummary.of(current.timeline, events).toUi(events).phases.filter { it.phaseNumber <= s.phaseIndex }
+            current.stepsKey = key
+        }
         _state.update {
             it.copy(
                 recording = RecordingUi(
-                    paused = s.status == SessionState.Status.PAUSED,
-                    elapsedSeconds = activeTime(current.session.events, now).inWholeSeconds,
+                    paused = paused,
+                    elapsedSeconds = activeTime(events, now).inWholeSeconds,
+                    stepElapsedSeconds = s.phaseElapsed.inWholeSeconds,
+                    steps = current.steps,
+                    restSeconds = if (paused && current.stepJustEnded()) {
+                        events.lastOrNull { it is SessionEvent.Paused }?.let { (now - it.at).inWholeSeconds }
+                    } else {
+                        null
+                    },
                     phaseNumber = s.phaseIndex + 1,
-                    phaseCount = current.timeline.phases.size,
+                    phaseCount = current.timeline.covering(events).phases.size,
                     isRest = s.phase is Phase.Rest,
                     phaseRemainingSeconds = s.phaseRemaining?.inWholeSeconds,
                     targetSpeedKmh = (work?.intensity as? Intensity.Speed)?.kmh,
@@ -659,7 +716,17 @@ class LiveModel(
         return total + (runningSince?.let { now - it } ?: Duration.ZERO)
     }
 
-    private fun TreadmillSummary.toUi() = SummaryUi(
+    /** [events] give the rest after each step: a pause that a step ended in, once it is over. */
+    private fun TreadmillSummary.toUi(events: List<SessionEvent>): SummaryUi {
+        val rests = TreadmillSummary.pauses(events, end = null)
+        val ends = events.filter { it is SessionEvent.PhaseCompleted || it is SessionEvent.PhaseSkipped }.map { it.at }
+        return toUi { index ->
+            ends.getOrNull(index)?.let { end -> rests.firstOrNull { (from, to) -> end in from..to } }
+                ?.let { (from, to) -> (to - from).inWholeSeconds }
+        }
+    }
+
+    private fun TreadmillSummary.toUi(restAfter: (Int) -> Long?) = SummaryUi(
         durationSeconds = duration.inWholeSeconds,
         distanceMeters = distanceMeters,
         averageSpeedKmh = averageSpeedKmh,
@@ -676,6 +743,7 @@ class LiveModel(
                 averageSpeedKmh = p.averageSpeedKmh,
                 targetSpeedKmh = p.targetSpeedKmh,
                 onTargetPercent = p.timeOnTargetSpeed?.let { f -> (f * 100).toInt() },
+                restAfterSeconds = restAfter(p.phaseIndex),
             )
         },
     )

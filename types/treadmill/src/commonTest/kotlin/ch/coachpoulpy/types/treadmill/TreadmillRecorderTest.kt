@@ -89,16 +89,18 @@ class TreadmillRecorderTest {
         session.resume(t0 + 10.seconds)
         recorder.onReading(t0 + 20.seconds, DeviceMetrics(speedKmh = 10.0, distanceMeters = 1_050.0, heartRateBpm = 140, energyKcal = 54))
         session.completeCurrent(t0 + 30.seconds)
+        session.finish(t0 + 30.seconds)
 
         assertEquals(SessionState.Status.FINISHED, session.state(t0 + 30.seconds).status)
         val summary = TreadmillSummary.of(TreadmillModule.freeRun, session.events)
-        assertEquals(30.seconds, summary.duration)
+        // Without the 5 s pause.
+        assertEquals(25.seconds, summary.duration)
         assertEquals(50.0, summary.distanceMeters)
         assertEquals(9.0, summary.averageSpeedKmh)
         assertEquals(130, summary.averageHeartRateBpm)
         assertEquals(140, summary.maxHeartRateBpm)
         assertEquals(4, summary.energyKcal)
         assertEquals(2, session.events.count { it is SessionEvent.Sample })
-        assertEquals(30.seconds, summary.phases.single().duration)
+        assertEquals(25.seconds, summary.phases.single().duration)
     }
 }

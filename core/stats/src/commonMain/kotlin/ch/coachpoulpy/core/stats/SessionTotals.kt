@@ -3,6 +3,7 @@ package ch.coachpoulpy.core.stats
 import ch.coachpoulpy.core.engine.Phase
 import ch.coachpoulpy.core.engine.SessionEvent
 import ch.coachpoulpy.core.engine.Timeline
+import ch.coachpoulpy.core.engine.covering
 import kotlin.time.Duration
 import kotlin.time.Instant
 import kotlinx.serialization.Serializable
@@ -33,7 +34,7 @@ data class SessionTotals(
     companion object {
         /** Time and sets of a session; [timeline] is the plan it followed, when still known. */
         fun of(events: List<SessionEvent>, timeline: Timeline?): SessionTotals {
-            val phases = timeline?.phases
+            val phases = timeline?.covering(events)?.phases
             fun workCount(pick: (SessionEvent) -> Int?) =
                 phases?.let { p -> events.mapNotNull(pick).count { p.getOrNull(it) is Phase.Work } }
             return SessionTotals(

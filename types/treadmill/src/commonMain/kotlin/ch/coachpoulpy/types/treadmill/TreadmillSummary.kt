@@ -3,10 +3,13 @@ package ch.coachpoulpy.types.treadmill
 import ch.coachpoulpy.core.engine.Phase
 import ch.coachpoulpy.core.engine.SessionEvent
 import ch.coachpoulpy.core.engine.Timeline
+import ch.coachpoulpy.core.engine.covering
 import ch.coachpoulpy.core.model.DeviceMetrics
 import ch.coachpoulpy.core.model.Intensity
 import kotlin.math.abs
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Instant
 
 /** What one phase of a recorded session looked like, next to what was planned for it. */
 data class PhaseResult(
@@ -60,21 +63,29 @@ data class TreadmillSummary(
             }
             val samples = events.filterIsInstance<SessionEvent.Sample>()
 
+            val pauses = pauses(events, end)
             var lastBefore: SessionEvent.Sample? = null
-            val phases = timeline.phases.mapIndexedNotNull { index, phase ->
+            val phases = timeline.covering(events).phases.mapIndexedNotNull { index, phase ->
                 val from = if (index == 0) start else ends.getOrNull(index - 1)
                 val to = ends.getOrNull(index) ?: end
                 val inPhase = samplesByPhase[index].orEmpty()
                 val atStart = lastBefore
                 lastBefore = inPhase.lastOrNull() ?: lastBefore
                 if (from == null || to == null || from > to) return@mapIndexedNotNull null
-                phaseResult(index, phase, to - from, inPhase, atStart)
+                val paused = pauses.sumOf { (pausedAt, resumedAt) ->
+                    (minOf(to, resumedAt) - maxOf(from, pausedAt)).coerceAtLeast(Duration.ZERO).inWholeMilliseconds
+                }.milliseconds
+                phaseResult(index, phase, to - from - paused, inPhase, atStart)
             }
 
             val metrics = samples.map { it.metrics }
             val heartRates = metrics.mapNotNull { it.heartRateBpm }
             return TreadmillSummary(
-                duration = if (start != null && end != null) end - start else Duration.ZERO,
+                duration = if (start != null && end != null) {
+                    end - start - pauses.sumOf { (from, to) -> (to - from).inWholeMilliseconds }.milliseconds
+                } else {
+                    Duration.ZERO
+                },
                 distanceMeters = metrics.counterDelta { it.distanceMeters },
                 averageSpeedKmh = metrics.mapNotNull { it.speedKmh }.averageOrNull(),
                 averageHeartRateBpm = heartRates.map { it.toDouble() }.averageOrNull()?.toInt(),
@@ -84,6 +95,22 @@ data class TreadmillSummary(
                 estimatedSteps = StepEstimate.steps(events),
                 phases = phases,
             )
+        }
+
+        /** Each pause, from its start to the resume, or to [end] when never resumed. */
+        fun pauses(events: List<SessionEvent>, end: Instant?): List<Pair<Instant, Instant>> {
+            val spans = mutableListOf<Pair<Instant, Instant>>()
+            var pausedAt: Instant? = null
+            for (event in events) when (event) {
+                is SessionEvent.Paused -> if (pausedAt == null) pausedAt = event.at
+                is SessionEvent.Resumed -> {
+                    pausedAt?.let { spans += it to event.at }
+                    pausedAt = null
+                }
+                else -> Unit
+            }
+            pausedAt?.let { from -> end?.let { spans += from to maxOf(from, it) } }
+            return spans
         }
 
         /** [atStart] is the last reading before the phase began, the base for its distance. */
