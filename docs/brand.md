@@ -6,7 +6,7 @@ Poulpy is a reversible plush octopus: blue and smiling on one side, grumpy on th
 
 - **Grumpy is comic, never guilt.** No "you failed", no streak-loss alarms. Even Fuming is a cartoon tantrum.
 - **Pain and rehab always win.** Someone who logged pain gets the Patched up pose and the blue side for 72 h, never ember.
-- **One way back, always short.** While Poulpy is ember, the catch-up offered is the easiest session in the plan, and any finished session flips him straight back.
+- **One way back, always short.** While Poulpy is ember, the catch-up offered is the shortest workout in the plan, and any finished session flips him straight back.
 - **Nothing promised, nothing missed.** With no plan, Poulpy stays on the blue side and only reacts to when you last trained.
 - **Poulpy never lifts his tentacles.** Every pose keeps the plush's shape and shows the mood with his face, shade, props and small effects.
 - **At most one notification a day** in Poulpy's voice, and turning them off keeps the mascot.
@@ -43,7 +43,33 @@ Poulpy is a reversible plush octopus: blue and smiling on one side, grumpy on th
 | No plan, 7 days without training | Happy | Sleeping |
 | Loading | | The loader, Poulpy from above |
 
-Poses marked Current keep whatever mood Poulpy is in. The shared `PoulpyCoach` decides which drawing shows; `PoulpyDrawing` names every drawing. Rules that depend on plans (Annoyed, Grumpy, Fuming, rest days) wait for training plans.
+Poses marked Current keep whatever mood Poulpy is in. The shared `PoulpyCoach` decides which drawing shows; `PoulpyDrawing` names every drawing.
+
+## The ember side
+
+Only a plan can turn Poulpy ember, through its calendar entries. A planned workout placed by hand is a reminder, not a promise, and never counts. See [Brand decisions](./brand-decisions.md), decision 12.
+
+- **Annoyed (the grace period).** From 18:00 on an entry's day, while it is still planned, until the end of the next day. The entry can still be done the day after: finishing it then marks it done.
+- **Grumpy.** An entry still planned once the day after its day is over: it is missed.
+- **Fuming.** Two or more missed entries.
+- **Any finished session flips him back.** Entries dated on or before the day of the last finished session never count, whatever their status. Finishing the catch-up, a free session or another entry all work.
+- **Only planned entries count.** Done never counts; a moved entry counts on its new date only; a skipped entry never counts, because skipping is an honest choice and the ember side is for sessions left hanging.
+- **Rest days never count.** A plan day with no workout has no entry. On a rest day Poulpy sleeps if he is blue and stays ember if he is ember: a rest day doesn't erase a missed session.
+- **Pain and rehab win.** For 72 h after pain is logged or a rehab session is marked too hard, Poulpy is blue and Patched up, and entries dated inside those 72 h never count, even afterwards.
+- **No enrollment, no ember.** Without an active enrollment the blue-side rules apply.
+
+When several apply, the first wins: pain or rehab, then Fuming, Grumpy, Annoyed, then the blue-side rules.
+
+**The catch-up** is offered with Grumpy and Fuming, and nowhere on the blue side. It is the workout with the shortest estimated duration in the enrolled plan version, the earliest in the plan on a tie. Finishing it flips Poulpy back like any session; it leaves the missed entries as they are, for the person to skip or move. While Annoyed there is no catch-up: today's entry is the way back.
+
+| Mood | Title | Line |
+| --- | --- | --- |
+| Annoyed | Tick tock / Tic tac | "Today's {workout} is still waiting. I'm turning a little orange." / « {workout} t’attend encore aujourd’hui. Je commence à virer à l’orange. » |
+| Grumpy | Hmph / Pff | "{workout} has been waiting since {day}. {minutes} minutes and I flip back, promise." / « {workout} t’attend depuis {day}. {minutes} minutes et je me retourne, promis. » |
+| Fuming | Full lava / Mode lave | "Sessions slipped by and I'm boiling like a kettle. {minutes} minutes and I'm blue again." / « Des séances ont filé et je bous comme une bouilloire. {minutes} minutes et je redeviens bleu. » |
+| Recovering, rest day | Rest day / Jour de repos | "No training today. I'm napping too." / « Pas d’entraînement aujourd’hui. Moi aussi, je fais la sieste. » |
+
+The catch-up button reads "Catch up: {workout}, {minutes} min" / « Rattrapage : {workout}, {minutes} min », with a non-breaking space before the colon. In the Grumpy and Fuming lines, `{minutes}` is the catch-up's duration, an ICU plural in the translation files so one minute reads "1 minute". In the Grumpy line, `{workout}` and `{day}` are the oldest missed entry's: `{day}` is its weekday while it is less than a week old ("Thursday" / « jeudi »), its date after that ("12 October" / « le 12 octobre »).
 
 ## Tentacles
 
@@ -51,7 +77,7 @@ Poulpy's ring has eight tentacles. Each finished session lights one, and **a lit
 
 ## Voice
 
-Poulpy speaks in short first-person lines, warm and a little cheeky: "6 of 8 tentacles lit. One more and I'm doing a little dance." or "Thursday's run is still waiting. 20 minutes and I flip back, promise." He jokes about himself, never about the person.
+Poulpy speaks in short first-person lines, warm and a little cheeky: "6 of 8 tentacles lit. One more and I'm doing a little dance." or "Thursday's run is still waiting. 20 minutes and I flip back, promise." He jokes about himself, never about the person. In French he says *tu*, like a friend, while the rest of the app says *vous*.
 
 ## Logo and type
 
