@@ -1,12 +1,29 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from 'vue'
-import { useData, withBase } from 'vitepress'
+import { withBase } from 'vitepress'
 import type { Mockup } from '../mockups.mts'
 
 const props = defineProps<{ mockup: Mockup }>()
-// The docs site's own theme switch: the mockups follow it through shared/mockup-theme.js.
-const { isDark } = useData()
-const toggleTheme = () => (isDark.value = !isDark.value)
+// The mockups' own theme, apart from the docs site's: shared/mockup-theme.js in every mockup reads
+// the same key, so one switch changes them all. With no choice, they follow the system setting.
+const themeKey = 'coach-poulpy-mockup-theme'
+const isDark = ref(false)
+function readTheme() {
+  let choice: string | null = null
+  try {
+    choice = localStorage.getItem(themeKey)
+  } catch {}
+  isDark.value = choice ? choice === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches
+}
+function toggleTheme() {
+  isDark.value = !isDark.value
+  try {
+    localStorage.setItem(themeKey, isDark.value ? 'dark' : 'light')
+  } catch {}
+}
+const onStorage = (event: StorageEvent) => {
+  if (event.key === themeKey || event.key === null) readTheme()
+}
 // Changing the key remounts the iframe: the mockup starts over without reloading the docs page.
 const run = ref(0)
 const src = () => withBase('/' + props.mockup.path)
@@ -19,10 +36,15 @@ const box = ref<HTMLElement>()
 const scale = ref(1)
 let observer: ResizeObserver | undefined
 onMounted(() => {
+  readTheme()
+  addEventListener('storage', onStorage)
   observer = new ResizeObserver(([entry]) => (scale.value = Math.min(1, entry.contentRect.width / width)))
   observer.observe(box.value!)
 })
-onBeforeUnmount(() => observer?.disconnect())
+onBeforeUnmount(() => {
+  observer?.disconnect()
+  removeEventListener('storage', onStorage)
+})
 </script>
 
 <template>
@@ -47,7 +69,7 @@ onBeforeUnmount(() => observer?.disconnect())
         :src="src()"
         :title="mockup.title"
         scrolling="no"
-        :style="{ width: width + 'px', height: height() + 'px', transform: `scale(${scale})` }"
+        :style="{ width: width + 'px', height: height() + 'px', transform: `scale(${scale})`, colorScheme: isDark ? 'dark' : 'light' }"
       ></iframe>
     </div>
   </div>
