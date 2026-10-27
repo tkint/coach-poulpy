@@ -122,7 +122,7 @@
 "builder.repeat.actions" = "Autres actions pour cette répétition";
 "builder.add.recover" = "Une récupération";
 "builder.format.title" = "Comment cette séance est-elle construite ?";
-"builder.format.subtitle" = "Vous choisissez une fois : le format reste celui de cette séance.";
+"builder.format.subtitle" = "Ce choix est définitif pour cette séance.";
 "builder.circuit.description" = "Des tours de plusieurs exercices, chacun fait une fois par tour. Idéal pour le HIIT, les circuits au poids du corps et la course.";
 "builder.circuit.example" = "Squat 15 · Pompe 10 · Course 200 m, 4 tours";
 "builder.sets.description" = "Un exercice à la fois : toutes ses séries, puis le suivant. Idéal pour la salle et le renforcement musculaire.";

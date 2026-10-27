@@ -518,9 +518,10 @@ class BuilderModel internal constructor(
         var workNumber = 0
         val parts = draft.parts.mapIndexed { partIndex, part ->
             if (part.kind == PartKind.WORK) workNumber++
-            val name = labels.part(part.kind, workNumber.takeIf { workCount > 1 && part.kind == PartKind.WORK })
+            val number = workNumber.takeIf { workCount > 1 && part.kind == PartKind.WORK }
+            val name = labels.part(part.kind, number)
             fun row(step: DraftStep, repeat: DraftRepeat?, above: DraftStep?): BuilderRow {
-                val place = Place(part.key, labels.inPart(part.kind, name), repeat)
+                val place = Place(part.key, labels.inPart(part.kind, number), repeat)
                 val canMoveIn = above is DraftRepeat && repeat == null
                 return when (step) {
                     is DraftEntry -> entryRow(step, draft.format, place, canMoveIn, step.key == lastKey)
@@ -542,7 +543,7 @@ class BuilderModel internal constructor(
                 kind = part.kind,
                 name = name,
                 summary = facts.partSummary(part.toPart(), endsWorkout = part == lastPart),
-                addLabel = labels.addTo(part.kind, name),
+                addLabel = labels.addTo(part.kind, number),
                 steps = steps,
                 canMoveUp = work && draft.parts.getOrNull(partIndex - 1)?.kind == PartKind.WORK,
                 canMoveDown = work && draft.parts.getOrNull(partIndex + 1)?.kind == PartKind.WORK,

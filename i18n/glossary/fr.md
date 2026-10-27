@@ -25,7 +25,7 @@ Les règles de `en.md` s’appliquent aussi (identifiants, placeholders, pluriel
 | set | série | |
 | format | format | |
 | work (part) | corps de séance | Le cœur de la séance, entre échauffement et retour au calme. |
-| part | partie | Échauffement, corps de séance ou retour au calme. « Ajouter au corps de séance 2 » : le nom de la partie passe en minuscule après « au » ou « le ». |
+| part | partie | Échauffement, corps de séance ou retour au calme. |
 | rep, reps | répétition, répétitions | |
 | repeat (builder) | boucle | Un groupe d’étapes refait plusieurs fois. Jamais « répétition », réservé aux reps. |
 | round | tour | « Tour 2 sur 4 », dans une boucle. |

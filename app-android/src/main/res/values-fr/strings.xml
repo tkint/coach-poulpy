@@ -151,7 +151,7 @@
     <string name="builder_repeat_actions">Autres actions pour cette répétition</string>
     <string name="builder_add_recover">Une récupération</string>
     <string name="builder_format_title">Comment cette séance est-elle construite ?</string>
-    <string name="builder_format_subtitle">Vous choisissez une fois : le format reste celui de cette séance.</string>
+    <string name="builder_format_subtitle">Ce choix est définitif pour cette séance.</string>
     <string name="builder_circuit_description">Des tours de plusieurs exercices, chacun fait une fois par tour. Idéal pour le HIIT, les circuits au poids du corps et la course.</string>
     <string name="builder_circuit_example">Squat 15 · Pompe 10 · Course 200 m, 4 tours</string>
     <string name="builder_sets_description">Un exercice à la fois : toutes ses séries, puis le suivant. Idéal pour la salle et le renforcement musculaire.</string>

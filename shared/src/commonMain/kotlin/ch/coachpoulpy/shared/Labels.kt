@@ -97,17 +97,17 @@ internal class Labels(private val languageCode: String) {
         PartKind.COOL_DOWN -> t("Cool down", "Retour au calme")
     }
 
-    /** "Add to warm-up", "Add to Work 2": the link at the end of a part in the builder, [name] as [part] gives it. */
-    fun addTo(kind: PartKind, name: String) = when (kind) {
+    /** "Add to warm-up", "Add to Work 2": the link at the end of a part in the builder; [number] as in [part]. */
+    fun addTo(kind: PartKind, number: Int? = null) = when (kind) {
         PartKind.WARM_UP -> t("Add to warm-up", "Ajouter à l’échauffement")
-        PartKind.WORK -> t("Add to $name", "Ajouter au ${name.lowercase()}")
+        PartKind.WORK -> if (number == null) t("Add to Work", "Ajouter au corps de séance") else t("Add to Work $number", "Ajouter au corps de séance $number")
         PartKind.COOL_DOWN -> t("Add to cool down", "Ajouter au retour au calme")
     }
 
-    /** "In Work 2", where a step sits, [name] as [part] gives it. */
-    fun inPart(kind: PartKind, name: String) = when (kind) {
+    /** "In Work 2", where a step sits; [number] as in [part]. */
+    fun inPart(kind: PartKind, number: Int? = null) = when (kind) {
         PartKind.WARM_UP -> t("In the warm-up", "Dans l’échauffement")
-        PartKind.WORK -> t("In $name", "Dans le ${name.lowercase()}")
+        PartKind.WORK -> if (number == null) t("In Work", "Dans le corps de séance") else t("In Work $number", "Dans le corps de séance $number")
         PartKind.COOL_DOWN -> t("In the cool down", "Dans le retour au calme")
     }
 
