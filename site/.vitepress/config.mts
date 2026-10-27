@@ -23,6 +23,14 @@ const adrs = readdirSync(join(repoRoot, 'docs/adr'))
     return { text: `${file.slice(0, 4)} · ${title}`, link: `/docs/adr/${file.replace(/\.md$/, '')}` }
   })
 
+const research = readdirSync(join(repoRoot, 'docs/research'))
+  .filter((file) => file.endsWith('.md'))
+  .sort()
+  .map((file) => {
+    const title = readFileSync(join(repoRoot, 'docs/research', file), 'utf8').match(/^# (.+)$/m)?.[1] ?? file
+    return { text: title, link: `/docs/research/${file.replace(/\.md$/, '')}` }
+  })
+
 // Mockups › Agreed and Drafts, each listing its screens, so drafts and agreed screens never mix.
 const mockups = listMockups()
 const mockupSidebar = (Object.keys(stages) as (keyof typeof stages)[]).map((stage) => ({
@@ -103,6 +111,7 @@ export default withMermaid(
           items: [
             { text: 'How to use it', link: '/docs/design-system' },
             { text: 'Tokens', link: '/tokens' },
+            { text: 'Generating tokens and fonts', link: '/design/README' },
             { text: 'Mockups', link: '/mockups/', collapsed: false, items: mockupSidebar },
           ],
         },
@@ -112,6 +121,7 @@ export default withMermaid(
             { text: 'Overview', link: '/docs/architecture' },
             { text: 'Glossary', link: '/CONTEXT' },
             { text: 'Decisions', link: '/decisions/', collapsed: true, items: adrs },
+            { text: 'Research', collapsed: true, items: research },
           ],
         },
         {
@@ -120,16 +130,28 @@ export default withMermaid(
             { text: 'Proofread and translate', link: '/translations' },
             { text: 'English rules and notes', link: '/i18n/glossary/en' },
             { text: 'Français : règles et vocabulaire', link: '/i18n/glossary/fr' },
+            { text: 'Translation files', link: '/i18n/README' },
           ],
         },
-        { text: 'Contributing', items: [{ text: 'Issues, skills and PRs', link: '/CONTRIBUTING' }] },
+        {
+          text: 'Contributing',
+          items: [
+            { text: 'Issues, skills and PRs', link: '/CONTRIBUTING' },
+            { text: 'House rules', link: '/CLAUDE' },
+            { text: 'Role threads', link: '/docs/agents/roles' },
+            { text: 'Issue tracker', link: '/docs/agents/issue-tracker' },
+            { text: 'Triage labels', link: '/docs/agents/triage-labels' },
+            { text: 'Domain docs', link: '/docs/agents/domain' },
+          ],
+        },
       ],
       socialLinks: [{ icon: 'github', link: repoUrl }],
       search: { provider: 'local' },
       editLink: {
         // Runs in the browser, so it can't use this file's constants.
         pattern: ({ filePath }) => {
-          const shared = ['CONTEXT.md', 'CONTRIBUTING.md'].includes(filePath) || /^(docs|i18n)\//.test(filePath)
+          // Pages copied from the rest of the repo; keep in step with `shared` in published.mjs.
+          const shared = /^(CONTEXT\.md|CONTRIBUTING\.md|CLAUDE\.md|docs\/|design\/|i18n\/)/.test(filePath)
           return `https://github.com/tkint/coach-poulpy/edit/main/${shared ? '' : 'site/'}${filePath}`
         },
         text: 'Edit this page on GitHub',
