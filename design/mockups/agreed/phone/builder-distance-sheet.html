@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Builder · run in parts</title>
-<meta name="mockup:screen" content="builder-run-parts">
+<title>Builder · type a distance</title>
+<meta name="mockup:screen" content="builder-distance-sheet">
 <meta name="mockup:section" content="Builder">
 <meta name="mockup:issue" content="90">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,7 +16,7 @@
 <body>
 <main class="phone" style="--frame-height: 1040px">
 <header class="top-bar" style="padding: var(--cp-space-xxxl) var(--cp-space-md) var(--cp-space-sm); justify-content: flex-start; gap: var(--cp-space-xs);">
-    <a class="icon-button" href="home-planned.html" aria-label="Close"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4"><path d="M6 6l12 12M18 6L6 18"/></svg></a>
+    <a class="icon-button" href="../../drafts/phone/home-planned.html" aria-label="Close"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4"><path d="M6 6l12 12M18 6L6 18"/></svg></a>
     <h1 class="headline" style="flex: 1;">New workout</h1>
     <a class="small-button" data-component="primary-button" href="#">Save</a>
   </header>
@@ -93,6 +93,38 @@
     </section>
     <a class="add-button" data-component="add-part-button" href="builder-add-part.html"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>Add a part</a>
   </div>
+
+  <div class="scrim" aria-hidden="true"></div>
+  <section class="sheet" id="distance-sheet" data-component="sheet" role="dialog" aria-label="Distance" style="gap: var(--cp-space-md);">
+    <span class="sheet-handle" aria-hidden="true"></span>
+    <div style="display: flex; align-items: center;">
+      <h2 style="flex: 1;">Distance</h2>
+      <a class="icon-button" href="builder-run-parts.html" aria-label="Close"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4"><path d="M6 6l12 12M18 6L6 18"/></svg></a>
+    </div>
+    <label style="display: flex; align-items: baseline; justify-content: center; gap: var(--cp-space-sm); border-radius: 20px; background: var(--cp-background); border: 2px solid var(--cp-primary); padding: 14px;">
+      <input type="text" inputmode="decimal" value="2" aria-label="Distance value" style="width: 150px; border: 0; background: transparent; text-align: right; font: inherit; font-size: 56px; line-height: 64px; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--cp-on-primary-container); padding: 0;">
+      <span style="width: 150px; font-size: 24px; font-weight: 800; color: var(--cp-on-surface-variant);">km</span>
+    </label>
+    <div class="field" style="gap: var(--cp-space-sm);">
+      <span class="label">Unit</span>
+      <div class="segmented" role="radiogroup" aria-label="Unit" data-component="segmented">
+        <button type="button" role="radio" aria-checked="false">m</button>
+        <button type="button" role="radio" aria-checked="true">km</button>
+        <button type="button" role="radio" aria-checked="false">mi</button>
+      </div>
+    </div>
+    <div class="field" style="gap: var(--cp-space-sm);">
+      <span class="label">Quick picks</span>
+      <div class="chip-row chip-row--wrap">
+        <button class="filter-chip filter-chip--small" data-component="filter-chip" type="button" aria-pressed="false">1 km</button>
+        <button class="filter-chip filter-chip--small" data-component="filter-chip" type="button" aria-pressed="true">2 km</button>
+        <button class="filter-chip filter-chip--small" data-component="filter-chip" type="button" aria-pressed="false">5 km</button>
+        <button class="filter-chip filter-chip--small" data-component="filter-chip" type="button" aria-pressed="false">10 km</button>
+        <button class="filter-chip filter-chip--small" data-component="filter-chip" type="button" aria-pressed="false">Half marathon</button>
+      </div>
+    </div>
+    <a class="primary-button" data-component="primary-button" href="builder-run-parts.html" style="font-size: 17px;">Done</a>
+  </section>
 </main>
 </body>
 </html>
