@@ -11,8 +11,10 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# By PR number for a PR: once a PR is merged, its closing run's ref is main, and sharing main's
+# group would cancel the run that publishes the merge.
 concurrency:
-  group: pages-${{ github.ref }}
+  group: pages-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -70,7 +72,9 @@ jobs:
   deploy:
     name: Publish to GitHub Pages
     if: github.event_name != 'pull_request'
-    needs: [build, check]
+    # Not on the link check: a dead link elsewhere, or the site itself being down, mustn't stop
+    # main from publishing. The check still fails the run.
+    needs: build
     runs-on: ubuntu-latest
     # One job at a time writes to gh-pages, previews included.
     concurrency:
