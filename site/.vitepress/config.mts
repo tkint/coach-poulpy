@@ -22,6 +22,14 @@ const adrs = readdirSync(join(repoRoot, 'docs/adr'))
     return { text: `${file.slice(0, 4)} · ${title}`, link: `/docs/adr/${file.replace(/\.md$/, '')}` }
   })
 
+const research = readdirSync(join(repoRoot, 'docs/research'))
+  .filter((file) => file.endsWith('.md'))
+  .sort()
+  .map((file) => {
+    const title = readFileSync(join(repoRoot, 'docs/research', file), 'utf8').match(/^# (.+)$/m)?.[1] ?? file
+    return { text: title, link: `/docs/research/${file.replace(/\.md$/, '')}` }
+  })
+
 /**
  * A relative link to a file the site doesn't publish (code, scripts, agent docs) becomes a link
  * to that file on GitHub, so the same Markdown works in the repo and on the site.
@@ -90,6 +98,7 @@ export default withMermaid(
           items: [
             { text: 'How to use it', link: '/docs/design-system' },
             { text: 'Tokens', link: '/tokens' },
+            { text: 'Generating tokens and fonts', link: '/design/README' },
           ],
         },
         {
@@ -98,16 +107,36 @@ export default withMermaid(
             { text: 'Overview', link: '/docs/architecture' },
             { text: 'Glossary', link: '/CONTEXT' },
             { text: 'Decisions', link: '/decisions/', collapsed: true, items: adrs },
+            { text: 'Research', collapsed: true, items: research },
           ],
         },
-        { text: 'Contributing', items: [{ text: 'Issues, skills and PRs', link: '/CONTRIBUTING' }] },
+        {
+          text: 'Translations',
+          items: [
+            { text: 'How translation works', link: '/i18n/README' },
+            { text: 'English glossary', link: '/i18n/glossary/en' },
+            { text: 'French glossary', link: '/i18n/glossary/fr' },
+          ],
+        },
+        {
+          text: 'Contributing',
+          items: [
+            { text: 'Issues, skills and PRs', link: '/CONTRIBUTING' },
+            { text: 'House rules', link: '/CLAUDE' },
+            { text: 'Role threads', link: '/docs/agents/roles' },
+            { text: 'Issue tracker', link: '/docs/agents/issue-tracker' },
+            { text: 'Triage labels', link: '/docs/agents/triage-labels' },
+            { text: 'Domain docs', link: '/docs/agents/domain' },
+          ],
+        },
       ],
       socialLinks: [{ icon: 'github', link: repoUrl }],
       search: { provider: 'local' },
       editLink: {
         // Runs in the browser, so it can't use this file's constants.
         pattern: ({ filePath }) => {
-          const shared = filePath === 'CONTEXT.md' || filePath === 'CONTRIBUTING.md' || filePath.startsWith('docs/')
+          // Pages copied from the rest of the repo; keep in step with `shared` in published.mjs.
+          const shared = /^(CONTEXT\.md|CONTRIBUTING\.md|CLAUDE\.md|docs\/|design\/|i18n\/)/.test(filePath)
           return `https://github.com/tkint/coach-poulpy/edit/main/${shared ? '' : 'site/'}${filePath}`
         },
         text: 'Edit this page on GitHub',

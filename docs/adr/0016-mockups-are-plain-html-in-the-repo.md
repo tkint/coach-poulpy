@@ -9,7 +9,7 @@ Screen mockups live in `design/mockups/` as plain HTML pages, styled only with t
 
 ## How the folder is organised
 
-```
+```text
 design/mockups/
   shared/                  mockup.css (the device frames and common components), shared images
   drafts/phone/            screens being explored or redesigned

@@ -1,7 +1,7 @@
 name: Docs site
 
-# Builds the docs site on every pull request so a broken page fails CI,
-# and publishes it to GitHub Pages from main.
+# Builds and checks the docs site on every pull request so a broken page, a dead link or an
+# unpublished guideline fails CI, and publishes it to GitHub Pages from main.
 on:
   pull_request:
   push:
@@ -28,15 +28,39 @@ jobs:
           cache-dependency-path: site/package-lock.json
       - run: npm ci
       - run: npm run build
+      - name: Check every guideline is published and reachable
+        run: node check-published.mjs
       - uses: actions/upload-pages-artifact@v4
         if: github.event_name != 'pull_request'
         with:
           path: site/.vitepress/dist
 
+  check:
+    name: Lint the Markdown and check its links
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Lint the Markdown
+        run: npx --yes markdownlint-cli2@0.24.0
+      - name: Check the links
+        uses: lycheeverse/lychee-action@v2
+        with:
+          lycheeVersion: v0.24.2
+          # Links to this repo on GitHub are checked against the branch's own files, so a PR can
+          # link to a file it adds.
+          args: >-
+            --config lychee.toml
+            --remap 'https://github\.com/tkint/coach-poulpy/(?:blob|tree)/main/([^#]*) file://${{ github.workspace }}/$1'
+            './**/*.md'
+          token: ${{ github.token }}
+
   deploy:
     name: Publish to GitHub Pages
     if: github.event_name != 'pull_request'
-    needs: build
+    needs: [build, check]
     runs-on: ubuntu-latest
     permissions:
       pages: write
