@@ -64,7 +64,17 @@
     "warmUp": "Échauffement",
     "work": "Corps de séance",
     "coolDown": "Retour au calme",
-    "workNumbered": "Corps de séance {number, number}"
+    "workNumbered": "Corps de séance {number, number}",
+    "addToWarmUp": "Ajouter à l’échauffement",
+    "addToWork": "Ajouter au {part}",
+    "addToCoolDown": "Ajouter au retour au calme",
+    "inWarmUp": "Dans l’échauffement",
+    "inWork": "Dans le {part}",
+    "inCoolDown": "Dans le retour au calme",
+    "alreadyIn": "Déjà dans cette séance",
+    "goesFirst": "Se place en premier",
+    "goesLast": "Se place en dernier",
+    "addedAfter": "Ajouté après {after} : {part}"
   },
   "side": {
     "left": "Côté gauche",
@@ -103,7 +113,13 @@
     "exercisesYouCanDo": "{count, plural, one {# exercice à votre portée} many {# exercices à votre portée} other {# exercices à votre portée}}",
     "matchesYouCanDo": "{count, plural, one {# résultat à votre portée} many {# résultats à votre portée} other {# résultats à votre portée}}",
     "aboutMinutes": "environ {minutes, number} min",
-    "about": "environ {text}"
+    "about": "environ {text}",
+    "rounds": "{count, plural, one {# tour} other {# tours}}",
+    "sets": "{count, plural, one {# série} other {# séries}}",
+    "oncePerRound": "une fois par tour, {rounds}",
+    "perRound": "{sets} par tour, {rounds}",
+    "betweenSets": "{rest} entre les séries",
+    "hold": "{duration} de maintien"
   },
   "unit": {
     "seconds": "{seconds, number} s",

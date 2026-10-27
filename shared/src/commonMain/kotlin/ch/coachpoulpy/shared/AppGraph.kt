@@ -49,29 +49,29 @@ class AppGraph(driverFactory: DriverFactory) {
 
     // Not "newWorkout": Swift reserves the "new" prefix, and Kotlin would rename it.
     fun createWorkout(languageCode: String) =
-        BuilderModel(WorkoutDraft.empty(), catalog, store, languageCode, ::units)
+        BuilderModel(WorkoutDraft.empty(), catalog, store, compiler, languageCode, ::units)
 
-    /** A new workout that already holds [exerciseSlug], for an exercise page's "Add to a workout". */
+    /** A new workout that holds [exerciseSlug] once its format is chosen, for an exercise page's "Add to a workout". */
     fun createWorkoutWith(exerciseSlug: String, languageCode: String) =
-        createWorkout(languageCode).also { it.add(exerciseSlug) }
+        BuilderModel(WorkoutDraft.empty(), catalog, store, compiler, languageCode, ::units, pendingSlug = exerciseSlug)
 
     /** Null when the workout is gone or was not made with the builder. */
     fun editWorkout(workoutId: String, languageCode: String): BuilderModel? {
         val workout = store.latestWorkout(WorkoutId(workoutId)) ?: return null
         val draft = WorkoutDraft.from(workout, catalog) ?: return null
-        return BuilderModel(draft, catalog, store, languageCode, ::units)
+        return BuilderModel(draft, catalog, store, compiler, languageCode, ::units)
     }
 
     /**
      * An unsaved copy of a workout made with the builder: a new id, version 1, "(copy)"
-     * after the name, the same format and steps, and no days or history. Null otherwise.
+     * after the name, the same format and parts, and no days or history. Null otherwise.
      * Not "copyWorkout": Objective-C reserves the "copy" prefix, and Kotlin would rename it.
      */
     fun duplicateWorkout(workoutId: String, languageCode: String): BuilderModel? {
         val workout = store.latestWorkout(WorkoutId(workoutId)) ?: return null
         val draft = WorkoutDraft.from(workout, catalog) ?: return null
         val copy = draft.copy(id = null, version = 1, name = Labels(languageCode).copyName(workout.name))
-        return BuilderModel(copy, catalog, store, languageCode, ::units)
+        return BuilderModel(copy, catalog, store, compiler, languageCode, ::units)
     }
 
     /** The units chosen in Settings, once the app has opened them; metric until then. */

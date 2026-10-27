@@ -209,7 +209,7 @@ struct LibraryView: View {
                 WorkoutPageView(graph: graph, workoutId: row.id)
             } label: {
                 HStack(spacing: 12) {
-                    Image(systemName: icon(row.format))
+                    Image(systemName: formatIcon(row.format))
                         .font(.system(size: 18, weight: .semibold))
                         .foregroundStyle(PoulpyColor.onPrimaryContainer)
                         .frame(width: 44, height: 44)
@@ -268,10 +268,6 @@ struct LibraryView: View {
         default:
             Text("library.not.done").font(.poulpy(.footnote).weight(.bold)).foregroundStyle(PoulpyColor.onSurfaceVariant)
         }
-    }
-
-    private func icon(_ format: WorkoutFormat) -> String {
-        format == .circuit ? "repeat" : "list.bullet"
     }
 }
 

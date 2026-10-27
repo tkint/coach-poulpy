@@ -1,10 +1,13 @@
 package ch.coachpoulpy.shared
 
 import ch.coachpoulpy.catalog.Catalog
+import ch.coachpoulpy.core.engine.TimelineCompiler
 import ch.coachpoulpy.core.model.ExerciseSlug
 import ch.coachpoulpy.core.model.Ids
 import ch.coachpoulpy.core.model.MeasurementMode
 import ch.coachpoulpy.core.model.MovementPattern
+import ch.coachpoulpy.core.model.PartKind
+import ch.coachpoulpy.core.model.StepRole
 import ch.coachpoulpy.core.model.WorkoutFormat
 import ch.coachpoulpy.data.local.LocalStore
 import kotlinx.coroutines.CoroutineScope
@@ -19,12 +22,14 @@ import kotlin.math.roundToInt
 /** One exercise or rest as the builder screen shows it. */
 data class BuilderRow(
     val key: String,
-    /** The tag above the name ("Warm-up", "Recover"); null for plain exercise steps. */
+    /** The Recover tag above the name; null for exercise steps. */
     val roleLabel: String?,
-    val role: BuilderRole,
+    val role: StepRole,
     /** A rest: only its length, kept in [restSeconds], can change. */
     val isRest: Boolean,
-    /** The repeat holding this step, or null at the top of the workout. */
+    /** The part holding this step. */
+    val partKey: String,
+    /** The repeat holding this step, or null at the top of its part. */
     val repeatKey: String?,
     /** Whether the step right above is a repeat this step can move into. */
     val canMoveIntoRepeat: Boolean,
@@ -39,12 +44,17 @@ data class BuilderRow(
     val isTimed: Boolean,
     val perSideLabel: String?,
     val loadKg: Double?,
-    /** A rest's length; zero for exercises, whose rests are steps of their own. */
+    /** A rest's length; zero for exercises. */
     val restSeconds: Int,
     val restLabel: String,
-    /** False when the workout's format cannot run this exercise as it is set: several sets in a circuit. */
-    val fitsFormat: Boolean,
-    /** The folded card's line, as on the workout page: "3 × 10 · 20 kg". */
+    /** Whether the step sheet has a Sets stepper: exercises of a Sets workout, not walks or runs. */
+    val showsSets: Boolean,
+    /** The rest after each set but the last, shown from two sets on. */
+    val restBetweenSets: Int,
+    val restBetweenSetsLabel: String,
+    /** Where the step is, under its name in the step sheet: "In Work 1 · once per round, 4 rounds", "In Work · 3 sets". */
+    val place: String,
+    /** The folded card's line, as on the workout page: "3 × 10 · 20 kg · 1 min between sets". */
     val summary: String,
     /** A walk or a run's target, edited instead of sets, reps and weight; null for any other exercise. */
     val target: WalkRunTarget? = null,
@@ -75,49 +85,79 @@ data class WalkRunTarget(
 /** Steps done [times] times in a row, as the builder shows them. */
 data class BuilderRepeat(val key: String, val times: Int, val timesLabel: String, val rows: List<BuilderRow>)
 
-/** One step at the top of the workout: either an exercise or rest ([row]), or a repeat ([repeatGroup]; "repeat" is a Swift keyword). */
+/** One step at the top of a part: either an exercise or rest ([row]), or a repeat ([repeatGroup]; "repeat" is a Swift keyword). */
 data class BuilderStep(val key: String, val row: BuilderRow?, val repeatGroup: BuilderRepeat?)
+
+/** A part of the workout under its header: "Work 1", "4 rounds · about 14 min", its steps, then "Add to Work 1". */
+data class BuilderPart(
+    val key: String,
+    val kind: PartKind,
+    /** "Warm-up", "Work", or "Work 2" when there are several work parts. */
+    val name: String,
+    /** The same line as on the workout page ([WorkoutFacts.partSummary]). */
+    val summary: String,
+    /** "Add to warm-up", "Add to Work 1". */
+    val addLabel: String,
+    val steps: List<BuilderStep>,
+    /** Only work parts move, and only among themselves. */
+    val canMoveUp: Boolean,
+    val canMoveDown: Boolean,
+    /** False for the last work part: a workout always has one. */
+    val canDelete: Boolean,
+)
+
+/** A line of the "Add a part" sheet: "Work", "Added after Work 2 as Work 3", or "Already in this workout" when not [enabled]. */
+data class BuilderPartOption(val kind: PartKind, val name: String, val note: String, val enabled: Boolean)
 
 data class BuilderState(
     val name: String,
-    val format: WorkoutFormat,
+    /** Null until it is chosen, once, when the workout is created; the screen asks first. */
+    val format: WorkoutFormat?,
     val formatLabel: String,
-    val steps: List<BuilderStep>,
-    /** Every exercise and rest, repeats opened up, in order. */
+    val parts: List<BuilderPart>,
+    /** Every exercise and rest of every part, repeats opened up, in order. */
     val rows: List<BuilderRow>,
+    val partOptions: List<BuilderPartOption>,
     /** The exercise or rest added last, so the screen can open it. */
     val addedKey: String?,
     val canSave: Boolean,
 )
 
+/** A card of the format sheet: Circuit or Sets, with its name. */
 data class WorkoutFormatOption(val format: WorkoutFormat, val label: String)
 
-data class StepRoleOption(val role: BuilderRole, val label: String)
+data class StepRoleOption(val role: StepRole, val label: String)
 
 /**
- * The workout builder: a list of steps (exercises and rests, each with a role) and repeats
- * that run the steps inside them several times. Each exercise has its sets, reps or time,
- * weight and rest; a walk or a run has a duration and an intensity instead.
+ * The workout builder. The format, Circuit or Sets, is chosen once when the workout is
+ * created. The workout is parts in order (warm-up, work parts, cool down), each a list of
+ * steps (exercises and rests) and repeats that run the steps inside them several times.
+ * In a circuit an exercise is one set and the repeat sets the rounds; in Sets an exercise
+ * has its sets and the rest between them. A walk or a run has a duration and an intensity.
  */
 class BuilderModel internal constructor(
     initial: WorkoutDraft,
     private val catalog: Catalog,
     private val store: LocalStore,
+    compiler: TimelineCompiler,
     languageCode: String,
     private val units: () -> UnitSystem = { UnitSystem.METRIC },
+    /** An exercise to add once the format is chosen, for an exercise page's "Add to a workout". */
+    private var pendingSlug: String? = null,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private val labels = Labels(languageCode)
-    private var draft = initial.copy(steps = initial.steps.mapLeaves { (it as? DraftEntry)?.inUnits(units()) ?: it })
+    private val facts = WorkoutFacts(compiler, catalog, labels)
+    private var draft = initial.mapLeaves { (it as? DraftEntry)?.inUnits(units()) ?: it }
     private var addedKey: String? = null
     private val mutableState = MutableStateFlow(render(draft))
 
     val isEditing: Boolean = initial.id != null
 
-    // CLEANUP: #90 chooses the format once, when the workout is created; then these options and setFormat go.
+    /** What the format sheet offers, asked once for a new workout. */
     val formatOptions: List<WorkoutFormatOption> = WorkoutFormat.entries.map { WorkoutFormatOption(it, labels.format(it)) }
 
-    val roleOptions: List<StepRoleOption> = BuilderRole.entries.map { StepRoleOption(it, labels.roleName(it)) }
+    val roleOptions: List<StepRoleOption> = StepRole.entries.map { StepRoleOption(it, labels.roleName(it)) }
 
     val state: StateFlow<BuilderState> = mutableState.asStateFlow()
 
@@ -128,27 +168,54 @@ class BuilderModel internal constructor(
 
     fun rename(name: String) = edit { copy(name = name) }
 
-    fun setFormat(format: WorkoutFormat) = edit { copy(format = format) }
+    /**
+     * Sets the format of a new workout; it never changes after. In a circuit the work part
+     * starts as a repeat done three times, which holds the exercise waiting to be added.
+     */
+    fun chooseFormat(format: WorkoutFormat) {
+        if (draft.format != null) return
+        edit { copy(format = format, parts = parts.map { if (it.kind == PartKind.WORK && it.steps.isEmpty()) DraftPart.new(PartKind.WORK, format).copy(key = it.key) else it }) }
+        val slug = pendingSlug ?: return
+        pendingSlug = null
+        val work = draft.parts.first { it.kind == PartKind.WORK }
+        add(slug, work.key, (work.steps.singleOrNull() as? DraftRepeat)?.key)
+    }
+
+    /** Adds a part where it belongs: a warm-up first, a cool down last, a work part after the last one. */
+    fun addPart(kind: PartKind) {
+        if (state.value.partOptions.none { it.kind == kind && it.enabled }) return
+        val part = DraftPart.new(kind, draft.format)
+        edit {
+            copy(
+                parts = when (kind) {
+                    PartKind.WARM_UP -> listOf(part) + parts
+                    PartKind.COOL_DOWN -> parts + part
+                    PartKind.WORK -> parts.toMutableList().apply { add(parts.indexOfLast { it.kind == PartKind.WORK } + 1, part) }
+                },
+            )
+        }
+    }
+
+    fun movePartUp(key: String) = movePart(key, -1)
+    fun movePartDown(key: String) = movePart(key, +1)
+
+    /** Removes a part and its steps; the last work part stays. */
+    fun removePart(key: String) = edit {
+        val part = parts.firstOrNull { it.key == key } ?: return@edit this
+        if (part.kind == PartKind.WORK && parts.count { it.kind == PartKind.WORK } == 1) this else copy(parts = parts - part)
+    }
 
     /**
-     * Adds an exercise with its [role] at the end of the workout, or at the end of the repeat
-     * [repeatKey]. A warm-up goes before every other step, after the warm-ups already there.
-     * A walk or a run starts with a distance.
+     * Adds an exercise with its [role] at the end of the part [partKey], or at the end of its
+     * repeat [repeatKey]. A walk or a run starts with a distance.
      */
-    fun add(slug: String, repeatKey: String? = null, role: BuilderRole = BuilderRole.WORK) {
+    fun add(slug: String, partKey: String, repeatKey: String? = null, role: StepRole = StepRole.WORK) {
         val exercise = catalog[ExerciseSlug(slug)] ?: return
-        val warmUp = role == BuilderRole.WARM_UP
-        val entry = DraftEntry.new(exercise, draft.format, units(), inRepeat = repeatKey != null && !warmUp)
+        val format = draft.format ?: return
+        val entry = DraftEntry.new(exercise, format, units(), inRepeat = repeatKey != null)
             .copy(role = role)
             .let { if (it.walkOrRun) it.withDuration(DurationKind.DISTANCE) else it }
-        if (warmUp) {
-            val at = draft.steps.takeWhile { it is DraftEntry && it.role == BuilderRole.WARM_UP }.size
-            edit { copy(steps = steps.toMutableList().apply { add(at, entry) }) }
-            addedKey = entry.key
-            mutableState.value = render(draft)
-        } else {
-            addStep(entry, repeatKey)
-        }
+        addStep(entry, partKey, repeatKey)
     }
 
     /** Puts a copy of a step, or of a repeat and its steps, right after it. */
@@ -157,27 +224,27 @@ class BuilderModel internal constructor(
         list.toMutableList().apply { add(index + 1, list[index].copied()) }
     }
 
-    /** Adds a one-minute rest at the end of the workout, or at the end of the repeat [repeatKey]. */
-    fun addRest(repeatKey: String? = null) = addStep(DraftRest(Ids.newUuidV7(), DEFAULT_REST), repeatKey)
+    /** Adds a one-minute rest at the end of the part [partKey], or at the end of its repeat [repeatKey]. */
+    fun addRest(partKey: String, repeatKey: String? = null) = addStep(DraftRest(Ids.newUuidV7(), DEFAULT_REST), partKey, repeatKey)
 
-    /** Adds an empty repeat, done twice, at the end of the workout. */
-    fun addRepeat() = edit { copy(steps = steps + DraftRepeat(Ids.newUuidV7(), 2, emptyList())) }
+    /** Adds an empty repeat, done twice, at the end of the part [partKey]. */
+    fun addRepeat(partKey: String) = editPart(partKey) { it + DraftRepeat(Ids.newUuidV7(), 2, emptyList()) }
 
     fun setRepeatTimes(key: String, times: Int) = edit {
-        copy(steps = steps.map { if (it is DraftRepeat && it.key == key) it.copy(times = times.coerceIn(1, MAX_TIMES)) else it })
+        mapParts { steps -> steps.map { if (it is DraftRepeat && it.key == key) it.copy(times = times.coerceIn(1, MAX_TIMES)) else it } }
     }
 
     /** Removes a step, or a repeat with everything in it. */
     fun remove(key: String) = edit {
-        copy(steps = steps.filterNot { it.key == key }.map { if (it is DraftRepeat) it.copy(steps = it.steps.filterNot { s -> s.key == key }) else it })
+        mapParts { steps -> steps.filterNot { it.key == key }.map { if (it is DraftRepeat) it.copy(steps = it.steps.filterNot { s -> s.key == key }) else it } }
     }
 
     fun moveUp(key: String) = moveBy(key, -1)
     fun moveDown(key: String) = moveBy(key, +1)
 
     /**
-     * Moves a step to [toIndex] in the list that holds it (the workout, or its repeat), as a
-     * drag drops it; out-of-range indexes clamp to the ends.
+     * Moves a step to [toIndex] in the list that holds it (its part, or its repeat), as a
+     * drag drops it; out-of-range indexes clamp to the ends. A drag stays within its part.
      */
     fun move(key: String, toIndex: Int) = editList(key) { list ->
         val from = list.indexOfFirst { it.key == key }
@@ -187,25 +254,47 @@ class BuilderModel internal constructor(
 
     /** Puts a step at the end of the repeat right above it. */
     fun moveIntoRepeatAbove(key: String) = edit {
-        val index = steps.indexOfFirst { it.key == key }
-        val above = steps.getOrNull(index - 1) as? DraftRepeat
-        val step = steps.getOrNull(index)
-        if (above == null || step == null || step is DraftRepeat) return@edit this
-        copy(steps = steps.toMutableList().apply { removeAt(index); set(index - 1, above.copy(steps = above.steps + step)) })
+        mapParts { steps ->
+            val index = steps.indexOfFirst { it.key == key }
+            val above = steps.getOrNull(index - 1) as? DraftRepeat
+            val step = steps.getOrNull(index)
+            if (above == null || step == null || step is DraftRepeat) steps
+            else steps.toMutableList().apply { removeAt(index); set(index - 1, above.copy(steps = above.steps + step)) }
+        }
     }
 
     /** Takes a step out of its repeat and puts it right after the repeat. */
     fun moveOutOfRepeat(key: String) = edit {
-        val index = steps.indexOfFirst { it is DraftRepeat && it.steps.any { s -> s.key == key } }
-        val repeat = steps.getOrNull(index) as? DraftRepeat ?: return@edit this
-        val step = repeat.steps.first { it.key == key }
-        copy(steps = steps.toMutableList().apply { set(index, repeat.copy(steps = repeat.steps - step)); add(index + 1, step) })
+        mapParts { steps ->
+            val index = steps.indexOfFirst { it is DraftRepeat && it.steps.any { s -> s.key == key } }
+            val repeat = steps.getOrNull(index) as? DraftRepeat
+            if (repeat == null) {
+                steps
+            } else {
+                val step = repeat.steps.first { it.key == key }
+                steps.toMutableList().apply { set(index, repeat.copy(steps = repeat.steps - step)); add(index + 1, step) }
+            }
+        }
     }
 
-    /** What the step is for: warm-up, exercise, recover or cool down. A rest is always a Recover step. */
-    fun setRole(key: String, role: BuilderRole) = editEntry(key) { copy(role = role) }
+    /** Moves a step, or a repeat with its steps, to the end of the part [partKey]; a step leaves its repeat. */
+    fun moveToPart(key: String, partKey: String) {
+        val from = draft.parts.firstOrNull { part -> part.steps.any { it.key == key || (it is DraftRepeat && it.steps.any { s -> s.key == key }) } }
+        if (from == null || from.key == partKey || draft.parts.none { it.key == partKey }) return
+        val step = from.steps.firstOrNull { it.key == key }
+            ?: from.steps.filterIsInstance<DraftRepeat>().flatMap { it.steps }.first { it.key == key }
+        remove(key)
+        editPart(partKey) { it + step }
+    }
 
-    fun setSets(key: String, sets: Int) = editEntry(key) { copy(sets = sets.coerceIn(1, 20)) }
+    /** What the step is for: an exercise, or recovering. A rest is always a Recover step. */
+    fun setRole(key: String, role: StepRole) = editEntry(key) { copy(role = role) }
+
+    /** A circuit has no sets, nor a walk or a run: the repeat around them sets the rounds. */
+    fun setSets(key: String, sets: Int) {
+        if (draft.format != WorkoutFormat.SETS) return
+        editEntry(key) { if (walkOrRun) this else copy(sets = sets.coerceIn(1, 20)) }
+    }
 
     fun changeAmount(key: String, steps: Int) = editEntry(key) {
         val step = DraftEntry.amountStep(measurement)
@@ -216,14 +305,13 @@ class BuilderModel internal constructor(
     fun setLoadKg(key: String, kg: Double) = editEntry(key) { copy(loadKg = kg.takeIf { it > 0.0 }) }
 
     /** Changes the length of a rest step. */
-    fun changeRest(key: String, steps: Int) {
-        edit {
-            copy(
-                steps = this.steps.mapLeaves {
-                    if (it is DraftRest && it.key == key) it.copy(seconds = (it.seconds + steps * REST_STEP).coerceIn(REST_STEP, 600)) else it
-                },
-            )
-        }
+    fun changeRest(key: String, steps: Int) = edit {
+        mapLeaves { if (it is DraftRest && it.key == key) it.copy(seconds = (it.seconds + steps * REST_STEP).coerceIn(REST_STEP, MAX_REST)) else it }
+    }
+
+    /** Changes the rest between an exercise's sets, down to none. */
+    fun changeRestBetweenSets(key: String, steps: Int) = editEntry(key) {
+        copy(restBetweenSets = (restBetweenSets + steps * REST_STEP).coerceIn(0, MAX_REST))
     }
 
     /**
@@ -379,25 +467,27 @@ class BuilderModel internal constructor(
     }
 
     private fun editEntry(key: String, change: DraftEntry.() -> DraftEntry) = edit {
-        copy(steps = steps.mapLeaves { if (it is DraftEntry && it.key == key) it.change() else it })
+        mapLeaves { if (it is DraftEntry && it.key == key) it.change() else it }
     }
 
-    /** Changes the list holding [key]: the workout's steps, or its repeat's. */
+    private fun editPart(key: String, change: (List<DraftStep>) -> List<DraftStep>) = edit {
+        copy(parts = parts.map { if (it.key == key) it.copy(steps = change(it.steps)) else it })
+    }
+
+    /** Changes the list holding [key]: its part's steps, or its repeat's. */
     private fun editList(key: String, change: (List<DraftStep>) -> List<DraftStep>) = edit {
-        if (steps.any { it.key == key }) {
-            copy(steps = change(steps))
-        } else {
-            copy(steps = steps.map { if (it is DraftRepeat && it.steps.any { s -> s.key == key }) it.copy(steps = change(it.steps)) else it })
+        mapParts { steps ->
+            if (steps.any { it.key == key }) {
+                change(steps)
+            } else {
+                steps.map { if (it is DraftRepeat && it.steps.any { s -> s.key == key }) it.copy(steps = change(it.steps)) else it }
+            }
         }
     }
 
-    private fun addStep(step: DraftStep, repeatKey: String?) {
-        edit {
-            if (repeatKey == null) {
-                copy(steps = steps + step)
-            } else {
-                copy(steps = steps.map { if (it is DraftRepeat && it.key == repeatKey) it.copy(steps = it.steps + step) else it })
-            }
+    private fun addStep(step: DraftStep, partKey: String, repeatKey: String?) {
+        editPart(partKey) { steps ->
+            if (repeatKey == null) steps + step else steps.map { if (it is DraftRepeat && it.key == repeatKey) it.copy(steps = it.steps + step) else it }
         }
         addedKey = step.key
         mutableState.value = render(draft)
@@ -406,49 +496,93 @@ class BuilderModel internal constructor(
     private fun entry(key: String) = draft.leaves.firstOrNull { it.key == key } as? DraftEntry
 
     private fun moveBy(key: String, by: Int) {
-        val list = draft.steps.takeIf { s -> s.any { it.key == key } }
-            ?: draft.steps.filterIsInstance<DraftRepeat>().firstOrNull { r -> r.steps.any { it.key == key } }?.steps
-            ?: return
+        val lists = draft.parts.map { it.steps } + draft.parts.flatMap { part -> part.steps.filterIsInstance<DraftRepeat>().map { it.steps } }
+        val list = lists.firstOrNull { l -> l.any { it.key == key } } ?: return
         val to = list.indexOfFirst { it.key == key } + by
         if (to !in list.indices) return
         move(key, to)
     }
 
+    private fun movePart(key: String, by: Int) = edit {
+        val from = parts.indexOfFirst { it.key == key }
+        val to = from + by
+        if (parts.getOrNull(from)?.kind != PartKind.WORK || parts.getOrNull(to)?.kind != PartKind.WORK) return@edit this
+        copy(parts = parts.toMutableList().apply { add(to, removeAt(from)) })
+    }
+
     private fun render(draft: WorkoutDraft): BuilderState {
+        val lastPart = draft.parts.last()
         // "Until the end" only makes sense at the very end, not on every round of a repeat.
-        val lastKey = draft.steps.lastOrNull()?.takeIf { it !is DraftRepeat }?.key
-        fun row(step: DraftStep, repeatKey: String?, above: DraftStep?): BuilderRow = when (step) {
-            is DraftEntry -> entryRow(step, repeatKey, above is DraftRepeat && repeatKey == null, step.key == lastKey)
-            is DraftRest -> restRow(step, repeatKey, above is DraftRepeat && repeatKey == null, step.key == lastKey)
-            is DraftRepeat -> error("A repeat holds no repeat")
-        }
-        val steps = draft.steps.mapIndexed { index, step ->
-            if (step is DraftRepeat) {
-                val rows = step.steps.mapIndexed { i, child -> row(child, step.key, step.steps.getOrNull(i - 1)) }
-                BuilderStep(step.key, null, BuilderRepeat(step.key, step.times, labels.times(step.times), rows))
-            } else {
-                BuilderStep(step.key, row(step, null, draft.steps.getOrNull(index - 1)), null)
+        val lastKey = lastPart.steps.lastOrNull()?.takeIf { it !is DraftRepeat }?.key
+        val workCount = draft.parts.count { it.kind == PartKind.WORK }
+        var workNumber = 0
+        val parts = draft.parts.mapIndexed { partIndex, part ->
+            if (part.kind == PartKind.WORK) workNumber++
+            val name = labels.part(part.kind, workNumber.takeIf { workCount > 1 && part.kind == PartKind.WORK })
+            fun row(step: DraftStep, repeat: DraftRepeat?, above: DraftStep?): BuilderRow {
+                val place = Place(part.key, labels.inPart(part.kind, name), repeat)
+                val canMoveIn = above is DraftRepeat && repeat == null
+                return when (step) {
+                    is DraftEntry -> entryRow(step, draft.format, place, canMoveIn, step.key == lastKey)
+                    is DraftRest -> restRow(step, place, canMoveIn, step.key == lastKey)
+                    is DraftRepeat -> error("A repeat holds no repeat")
+                }
             }
+            val steps = part.steps.mapIndexed { index, step ->
+                if (step is DraftRepeat) {
+                    val rows = step.steps.mapIndexed { i, child -> row(child, step, step.steps.getOrNull(i - 1)) }
+                    BuilderStep(step.key, null, BuilderRepeat(step.key, step.times, labels.times(step.times), rows))
+                } else {
+                    BuilderStep(step.key, row(step, null, part.steps.getOrNull(index - 1)), null)
+                }
+            }
+            val work = part.kind == PartKind.WORK
+            BuilderPart(
+                key = part.key,
+                kind = part.kind,
+                name = name,
+                summary = facts.partSummary(part.toPart(), endsWorkout = part == lastPart),
+                addLabel = labels.addTo(part.kind, name),
+                steps = steps,
+                canMoveUp = work && draft.parts.getOrNull(partIndex - 1)?.kind == PartKind.WORK,
+                canMoveDown = work && draft.parts.getOrNull(partIndex + 1)?.kind == PartKind.WORK,
+                canDelete = !work || workCount > 1,
+            )
         }
-        val rows = steps.flatMap { it.row?.let(::listOf) ?: it.repeatGroup!!.rows }
+        val rows = parts.flatMap { part -> part.steps.flatMap { it.row?.let(::listOf) ?: it.repeatGroup!!.rows } }
+        val lastWork = parts.last { it.kind == PartKind.WORK }.name
+        val partOptions = PartKind.entries.map { kind ->
+            val present = kind != PartKind.WORK && draft.parts.any { it.kind == kind }
+            BuilderPartOption(
+                kind = kind,
+                name = labels.part(kind),
+                note = if (present) labels.alreadyInWorkout else labels.partGoes(kind, lastWork, labels.part(PartKind.WORK, workCount + 1)),
+                enabled = !present,
+            )
+        }
         return BuilderState(
             name = draft.name,
             format = draft.format,
-            formatLabel = labels.format(draft.format),
-            steps = steps,
+            formatLabel = draft.format?.let { labels.format(it) } ?: "",
+            parts = parts,
             rows = rows,
+            partOptions = partOptions,
             addedKey = addedKey,
-            canSave = draft.name.isNotBlank() && rows.any { !it.isRest } && rows.all { it.fitsFormat } &&
-                steps.all { it.repeatGroup?.rows?.isNotEmpty() ?: true },
+            canSave = draft.name.isNotBlank() && draft.format != null && rows.any { !it.isRest } &&
+                draft.parts.all { it.steps.isNotEmpty() } && parts.all { part -> part.steps.all { it.repeatGroup?.rows?.isNotEmpty() ?: true } },
         )
     }
 
-    private fun restRow(rest: DraftRest, repeatKey: String?, canMoveIntoRepeat: Boolean, last: Boolean) = BuilderRow(
+    /** Where a step sits: its part, "In Work 1", and the repeat around it. */
+    private class Place(val partKey: String, val inPart: String, val repeat: DraftRepeat?)
+
+    private fun restRow(rest: DraftRest, place: Place, canMoveIntoRepeat: Boolean, last: Boolean) = BuilderRow(
         key = rest.key,
-        roleLabel = labels.role(BuilderRole.RECOVER),
-        role = BuilderRole.RECOVER,
+        roleLabel = labels.role(StepRole.RECOVER),
+        role = StepRole.RECOVER,
         isRest = true,
-        repeatKey = repeatKey,
+        partKey = place.partKey,
+        repeatKey = place.repeat?.key,
         canMoveIntoRepeat = canMoveIntoRepeat,
         isLast = last,
         name = labels.rest,
@@ -461,18 +595,28 @@ class BuilderModel internal constructor(
         loadKg = null,
         restSeconds = rest.seconds,
         restLabel = labels.duration(rest.seconds),
-        fitsFormat = true,
+        showsSets = false,
+        restBetweenSets = 0,
+        restBetweenSetsLabel = "",
+        place = place.inPart,
         summary = labels.longDuration(rest.seconds),
     )
 
-    private fun entryRow(entry: DraftEntry, repeatKey: String?, canMoveIntoRepeat: Boolean, last: Boolean): BuilderRow {
+    private fun entryRow(entry: DraftEntry, format: WorkoutFormat?, place: Place, canMoveIntoRepeat: Boolean, last: Boolean): BuilderRow {
         val exercise = catalog[entry.exercise]
+        val showsSets = format == WorkoutFormat.SETS && !entry.walkOrRun
+        val detail = when {
+            showsSets -> labels.setsPerRound(entry.sets, place.repeat?.times)
+            place.repeat != null -> labels.oncePerRound(place.repeat.times)
+            else -> null
+        }
         return BuilderRow(
             key = entry.key,
             roleLabel = labels.role(entry.role),
             role = entry.role,
             isRest = false,
-            repeatKey = repeatKey,
+            partKey = place.partKey,
+            repeatKey = place.repeat?.key,
             canMoveIntoRepeat = canMoveIntoRepeat,
             isLast = last,
             name = exercise?.let { labels.text(it.name) } ?: entry.exercise.value,
@@ -485,7 +629,10 @@ class BuilderModel internal constructor(
             loadKg = entry.loadKg,
             restSeconds = 0,
             restLabel = "",
-            fitsFormat = draft.format != WorkoutFormat.CIRCUIT || entry.walkOrRun || entry.sets == 1,
+            showsSets = showsSets,
+            restBetweenSets = entry.restBetweenSets,
+            restBetweenSetsLabel = labels.duration(entry.restBetweenSets),
+            place = listOfNotNull(place.inPart, detail).joinToString(" · "),
             summary = labels.prescription(entry, last),
             target = entry.durationKind?.let { target(entry, it, entry.intensityKind!!) },
         )
@@ -532,6 +679,7 @@ class BuilderModel internal constructor(
 
     private companion object {
         const val REST_STEP = 15
+        const val MAX_REST = 600
         const val DEFAULT_REST = 60
         const val MAX_TIMES = 50
         const val MAX_SECONDS = 12 * 3600
@@ -539,6 +687,12 @@ class BuilderModel internal constructor(
         val RUN = ExerciseSlug("run")
     }
 }
+
+/** Changes the steps of every part. */
+internal fun WorkoutDraft.mapParts(change: (List<DraftStep>) -> List<DraftStep>) = copy(parts = parts.map { it.copy(steps = change(it.steps)) })
+
+/** Changes every exercise and rest of every part, inside repeats too. */
+internal fun WorkoutDraft.mapLeaves(change: (DraftStep) -> DraftStep) = mapParts { it.mapLeaves(change) }
 
 /** Changes every exercise and rest, inside repeats too. */
 internal fun List<DraftStep>.mapLeaves(change: (DraftStep) -> DraftStep): List<DraftStep> = map { step ->

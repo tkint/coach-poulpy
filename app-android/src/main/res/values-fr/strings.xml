@@ -121,8 +121,6 @@
     <string name="builder_less_named">Moins : %1$s</string>
     <string name="builder_more_named">Plus : %1$s</string>
     <string name="builder_open">Modifier %1$s</string>
-    <string name="builder_does_not_fit">Ce type de séance ne peut pas inclure cet exercice. Retirez-le ou choisissez un autre type.</string>
-    <string name="builder_empty">Ajoutez des étapes pour composer votre séance.</string>
     <string name="builder_duration">Durée</string>
     <string name="builder_distance">Distance</string>
     <string name="builder_pace">Allure</string>
@@ -131,7 +129,6 @@
     <string name="builder_quick_picks">Raccourcis</string>
     <string name="builder_value_invalid">Valeur illisible. Saisissez une valeur comme les raccourcis ci-dessous.</string>
     <string name="builder_edit_value">Saisir : %1$s</string>
-    <string name="builder_add_step">Ajouter une étape</string>
     <string name="builder_add_repeat">Ajouter une répétition</string>
     <string name="builder_add_to_repeat">Ajouter une étape à cette répétition</string>
     <string name="builder_add_exercise">Un exercice</string>
@@ -152,9 +149,21 @@
     <string name="builder_duplicate">Dupliquer</string>
     <string name="builder_delete">Supprimer</string>
     <string name="builder_repeat_actions">Autres actions pour cette répétition</string>
-    <string name="builder_add_warm_up">Un échauffement</string>
     <string name="builder_add_recover">Une récupération</string>
-    <string name="builder_add_cool_down">Un retour au calme</string>
+    <string name="builder_format_title">Comment cette séance est-elle construite ?</string>
+    <string name="builder_format_subtitle">Vous choisissez une fois : le format reste celui de cette séance.</string>
+    <string name="builder_circuit_description">Des tours de plusieurs exercices, chacun fait une fois par tour. Idéal pour le HIIT, les circuits au poids du corps et la course.</string>
+    <string name="builder_circuit_example">Squat 15 · Pompe 10 · Course 200 m, 4 tours</string>
+    <string name="builder_sets_description">Un exercice à la fois : toutes ses séries, puis le suivant. Idéal pour la salle et le renforcement musculaire.</string>
+    <string name="builder_sets_example">Développé couché 3 × 8, puis rowing 3 × 10</string>
+    <string name="builder_continue">Continuer</string>
+    <string name="builder_format_locked">choisi à la création</string>
+    <string name="builder_add_part">Ajouter une partie</string>
+    <string name="builder_add_part_subtitle">Les parties s’enchaînent dans l’ordre : échauffement, corps de séance, retour au calme.</string>
+    <string name="builder_move_to_part">Déplacer vers une autre partie</string>
+    <string name="builder_rest_between_sets">Repos entre les séries</string>
+    <string name="builder_circuit_hint">Un circuit n’a pas de séries : la boucle qui l’entoure fixe le nombre de tours.</string>
+    <string name="builder_sets_hint">Le repos entre les séries apparaît dès 2 séries. Une marche ou une course n’a pas de séries.</string>
 
     <string name="player_ready">Prêt ?</string>
     <string name="player_start">Lancer la séance</string>

@@ -64,7 +64,17 @@
     "warmUp": "Warm-up",
     "work": "Work",
     "coolDown": "Cool down",
-    "workNumbered": "Work {number, number}"
+    "workNumbered": "Work {number, number}",
+    "addToWarmUp": "Add to warm-up",
+    "addToWork": "Add to {part}",
+    "addToCoolDown": "Add to cool down",
+    "inWarmUp": "In the warm-up",
+    "inWork": "In {part}",
+    "inCoolDown": "In the cool down",
+    "alreadyIn": "Already in this workout",
+    "goesFirst": "Goes first",
+    "goesLast": "Goes last",
+    "addedAfter": "Added after {after} as {part}"
   },
   "side": {
     "left": "Left side",
@@ -103,7 +113,13 @@
     "exercisesYouCanDo": "{count, plural, one {# exercise you can do} other {# exercises you can do}}",
     "matchesYouCanDo": "{count, plural, one {# match you can do} other {# matches you can do}}",
     "aboutMinutes": "about {minutes, number} min",
-    "about": "about {text}"
+    "about": "about {text}",
+    "rounds": "{count, plural, one {# round} other {# rounds}}",
+    "sets": "{count, plural, one {# set} other {# sets}}",
+    "oncePerRound": "once per round, {rounds}",
+    "perRound": "{sets} per round, {rounds}",
+    "betweenSets": "{rest} between sets",
+    "hold": "{duration} hold"
   },
   "unit": {
     "seconds": "{seconds, number} s",

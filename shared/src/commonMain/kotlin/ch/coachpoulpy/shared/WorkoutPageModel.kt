@@ -52,7 +52,7 @@ data class WorkoutPagePart(
     val kind: PartKind,
     /** "Warm-up", "Work", or "Work 2" when there are several work parts. */
     val name: String,
-    /** "4 exercises · about 25 min" for work; steps are counted for a warm-up or cool down. */
+    /** "4 rounds · about 14 min" or "4 exercises · about 25 min" for work, "2 steps · about 6 min" otherwise ([WorkoutFacts.partSummary]). */
     val summary: String,
     val steps: List<WorkoutPageStep>,
 )
@@ -194,14 +194,11 @@ class WorkoutPageModel internal constructor(
         }
         return workout.parts.map { part ->
             if (part.kind == PartKind.WORK) workParts++
-            val alone = workout.copy(parts = listOf(part))
-            val exercises = exerciseSteps(alone).size
-            val count = if (part.kind == PartKind.WORK) labels.exercises(exercises) else labels.steps(exercises)
             WorkoutPagePart(
                 key = part.id.value,
                 kind = part.kind,
                 name = labels.part(part.kind, workParts.takeIf { severalWorkParts && part.kind == PartKind.WORK }),
-                summary = "$count · ${facts.length(alone)}",
+                summary = facts.partSummary(part, endsWorkout = part == workout.parts.last()),
                 steps = part.steps.map { step ->
                     if (step is Step.Group) {
                         WorkoutPageStep(step.id.value, null, WorkoutRepeatBlock(step.id.value, labels.times(step.rounds), step.children.mapNotNull(::leaf)))
