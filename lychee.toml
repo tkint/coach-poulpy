@@ -1,0 +1,13 @@
+# Link check for the repo's Markdown, run by the Docs site workflow. Pages under site/ link with
+# site paths, which `vitepress build` already checks, so they are left out here.
+include_fragments = "anchor-only"
+max_retries = 3
+accept = ["200..=299", "429"]
+exclude_loopback = true
+exclude = [
+  # The docs site itself: a link to a page the same PR adds would fail until it's published.
+  '^https://tkint\.github\.io/coach-poulpy/',
+  # The GitHub edit and "new issue" pages need a signed-in browser.
+  '^https://github\.com/.*/(edit|issues/new)',
+]
+exclude_path = ['(^|/)node_modules/', '^(\./)?site/']

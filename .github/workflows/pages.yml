@@ -1,21 +1,29 @@
 name: Docs site
 
-# Builds the docs site on every pull request so a broken page fails CI,
-# and publishes it to GitHub Pages from main.
+# Builds and checks the docs site on every pull request so a broken page, a dead link or an
+# unpublished guideline fails CI. Main is published at the root of the gh-pages branch, and each
+# PR as a preview under pr-preview/pr-<number>/, linked from a comment and removed on close.
+# GitHub Pages serves the gh-pages branch (Settings > Pages > Deploy from a branch).
 on:
   pull_request:
+    types: [opened, reopened, synchronize, closed]
   push:
     branches: [main]
   workflow_dispatch:
 
+# By PR number for a PR: once a PR is merged, its closing run's ref is main, and sharing main's
+# group would cancel the run that publishes the merge.
 concurrency:
-  group: pages-${{ github.ref }}
+  group: pages-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
   build:
     name: Build the docs site
+    if: github.event.action != 'closed'
     runs-on: ubuntu-latest
+    env:
+      SITE_BASE: ${{ github.event_name == 'pull_request' && format('/coach-poulpy/pr-preview/pr-{0}/', github.event.number) || '/coach-poulpy/' }}
     defaults:
       run:
         working-directory: site
@@ -28,22 +36,90 @@ jobs:
           cache-dependency-path: site/package-lock.json
       - run: npm ci
       - run: npm run build
-      - uses: actions/upload-pages-artifact@v4
-        if: github.event_name != 'pull_request'
+      - name: Check every guideline is published and reachable
+        run: node check-published.mjs
+      # Pages would otherwise run the files through Jekyll, which drops some of them.
+      - run: touch .vitepress/dist/.nojekyll
+      - uses: actions/upload-artifact@v5
         with:
+          name: site
           path: site/.vitepress/dist
+          include-hidden-files: true
+
+  check:
+    name: Lint the Markdown and check its links
+    if: github.event.action != 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Lint the Markdown
+        run: npx --yes markdownlint-cli2@0.24.0
+      - name: Check the links
+        uses: lycheeverse/lychee-action@v2
+        with:
+          lycheeVersion: v0.24.2
+          # Links to this repo on GitHub are checked against the branch's own files, so a PR can
+          # link to a file it adds.
+          args: >-
+            --config lychee.toml
+            --remap 'https://github\.com/tkint/coach-poulpy/(?:blob|tree)/main/([^#]*) file://${{ github.workspace }}/$1'
+            './**/*.md'
+          token: ${{ github.token }}
 
   deploy:
     name: Publish to GitHub Pages
     if: github.event_name != 'pull_request'
+    # Not on the link check: a dead link elsewhere, or the site itself being down, mustn't stop
+    # main from publishing. The check still fails the run.
     needs: build
     runs-on: ubuntu-latest
+    # One job at a time writes to gh-pages, previews included.
+    concurrency:
+      group: gh-pages
+      cancel-in-progress: false
     permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      contents: write
     steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v5
+        with:
+          name: site
+          path: dist
+      - uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: dist
+          branch: gh-pages
+          # Keep the open PRs' previews when main is published.
+          clean-exclude: pr-preview/
+
+  preview:
+    name: Preview this PR on GitHub Pages
+    # A fork's PR gets a read-only token, so it can't publish a preview.
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      !failure() && !cancelled()
+    needs: [build, check]
+    runs-on: ubuntu-latest
+    concurrency:
+      group: gh-pages
+      cancel-in-progress: false
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v5
+        if: github.event.action != 'closed'
+        with:
+          name: site
+          path: dist
+      # Publishes dist under pr-preview/pr-<number>/ and comments the link; removes it on close.
+      - uses: rossjrw/pr-preview-action@v1
+        with:
+          source-dir: dist
+          preview-branch: gh-pages
+          umbrella-dir: pr-preview

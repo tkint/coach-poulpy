@@ -4,5 +4,10 @@ node_modules/
 # Copied from the repo by copy-docs.mjs before each build.
 /CONTEXT.md
 /CONTRIBUTING.md
+/CLAUDE.md
 /docs/
+/design/
+/i18n/
 public/poulpy.svg
+/public/design/
+/public/web/

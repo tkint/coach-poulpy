@@ -1,0 +1,436 @@
+{
+  "goblet-squat": {
+    "name": "Squat gobelet",
+    "variationNote": "Une charge tenue contre la poitrine",
+    "instructions": {
+      "0": "Tenez la charge contre la poitrine, coudes vers le bas.",
+      "1": "Descendez entre vos talons, buste droit, puis remontez."
+    }
+  },
+  "bodyweight-squat": {
+    "name": "Squat au poids du corps",
+    "variationNote": "Sans appui, cuisses jusqu’à l’horizontale",
+    "instructions": {
+      "0": "Debout, pieds écartés à la largeur des épaules, pointes légèrement ouvertes.",
+      "1": "Poussez les hanches en arrière et pliez les genoux jusqu’à ce que les cuisses soient parallèles au sol.",
+      "2": "Poussez sur les talons pour remonter."
+    }
+  },
+  "chair-squat": {
+    "name": "Assis-debout sur chaise",
+    "variationNote": "S’asseoir sur une chaise et se relever",
+    "instructions": {
+      "0": "Asseyez-vous sur l’avant d’une chaise stable, pieds à plat.",
+      "1": "Penchez-vous légèrement en avant et levez-vous sans les mains.",
+      "2": "Rasseyez-vous lentement en contrôlant la descente."
+    },
+    "aliases": "squat sur chaise"
+  },
+  "wall-sit": {
+    "name": "Chaise contre le mur",
+    "instructions": {
+      "0": "Dos contre un mur, descendez jusqu’à ce que les genoux forment un angle droit.",
+      "1": "Gardez les genoux au-dessus des chevilles et tenez la position."
+    }
+  },
+  "glute-bridge": {
+    "name": "Pont fessier",
+    "instructions": {
+      "0": "Allongez-vous sur le dos, genoux pliés, pieds à plat au sol.",
+      "1": "Serrez les fessiers et montez les hanches jusqu’à aligner genoux, hanches et épaules.",
+      "2": "Redescendez lentement."
+    }
+  },
+  "romanian-deadlift": {
+    "name": "Soulevé de terre roumain",
+    "instructions": {
+      "0": "Tenez les charges devant les cuisses, genoux légèrement fléchis.",
+      "1": "Poussez les hanches en arrière et descendez les charges le long des jambes, dos plat.",
+      "2": "Arrêtez quand l’arrière des cuisses s’étire, puis redressez-vous."
+    },
+    "aliases": "RDL"
+  },
+  "kettlebell-swing": {
+    "name": "Swing kettlebell",
+    "instructions": {
+      "0": "Basculez le buste depuis les hanches et envoyez la kettlebell en arrière entre vos jambes.",
+      "1": "Projetez les hanches vers l’avant pour l’amener à hauteur de poitrine, bras relâchés.",
+      "2": "Laissez-la redescendre et enchaînez."
+    }
+  },
+  "good-morning": {
+    "name": "Good morning",
+    "instructions": {
+      "0": "Debout, mains derrière la tête, genoux légèrement fléchis.",
+      "1": "Penchez-vous depuis les hanches, dos plat, jusqu’à ce que le buste soit presque horizontal.",
+      "2": "Revenez debout."
+    }
+  },
+  "reverse-lunge": {
+    "name": "Fente arrière",
+    "instructions": {
+      "0": "Reculez un pied et descendez jusqu’à ce que les deux genoux soient pliés à angle droit.",
+      "1": "Poussez sur le talon avant pour revenir."
+    }
+  },
+  "walking-lunge": {
+    "name": "Fentes marchées",
+    "instructions": {
+      "0": "Faites un pas en avant en fente, genou arrière près du sol.",
+      "1": "Ramenez le pied arrière vers l’avant pour la fente suivante."
+    }
+  },
+  "step-up": {
+    "name": "Montée sur banc",
+    "instructions": {
+      "0": "Posez un pied sur une marche ou un banc stable.",
+      "1": "Poussez sur ce pied pour monter, puis redescendez en contrôlant."
+    }
+  },
+  "push-up": {
+    "name": "Pompe",
+    "variationNote": "La classique, sur les mains et les pointes",
+    "instructions": {
+      "0": "Mains sous les épaules, corps aligné de la tête aux talons.",
+      "1": "Descendez la poitrine près du sol, coudes à environ 45 degrés.",
+      "2": "Remontez en poussant."
+    }
+  },
+  "knee-push-up": {
+    "name": "Pompe sur les genoux",
+    "variationNote": "Genoux au sol, un levier plus court",
+    "instructions": {
+      "0": "En appui sur les mains et les genoux, corps aligné de la tête aux genoux.",
+      "1": "Descendez la poitrine vers le sol puis remontez."
+    }
+  },
+  "incline-push-up": {
+    "name": "Pompe inclinée",
+    "variationNote": "Mains surélevées sur un banc ou un mur",
+    "instructions": {
+      "0": "Mains sur un banc, une table ou un mur, corps gainé.",
+      "1": "Amenez la poitrine vers le bord puis repoussez."
+    }
+  },
+  "diamond-push-up": {
+    "name": "Pompe diamant",
+    "variationNote": "Mains jointes, plus de triceps",
+    "instructions": {
+      "0": "Mains sous la poitrine, pouces et index qui se touchent en forme de diamant.",
+      "1": "Corps aligné de la tête aux talons, descendez la poitrine vers les mains, coudes près du corps.",
+      "2": "Remontez en poussant."
+    }
+  },
+  "one-arm-push-up": {
+    "name": "Pompe sur un bras",
+    "variationNote": "Une main dans le dos",
+    "instructions": {
+      "0": "Pieds plus écartés que les hanches, une main sous l’épaule et l’autre dans le dos.",
+      "1": "Gardez les hanches face au sol et descendez la poitrine vers la main.",
+      "2": "Remontez en poussant, puis changez de bras."
+    }
+  },
+  "dumbbell-bench-press": {
+    "name": "Développé couché haltères",
+    "instructions": {
+      "0": "Allongez-vous sur un banc, un haltère dans chaque main au-dessus de la poitrine.",
+      "1": "Descendez-les sur les côtés de la poitrine, puis poussez vers le haut."
+    }
+  },
+  "overhead-press": {
+    "name": "Développé militaire haltères",
+    "instructions": {
+      "0": "Haltères à hauteur d’épaules, abdominaux serrés.",
+      "1": "Poussez-les au-dessus de la tête jusqu’à tendre les bras, puis redescendez."
+    }
+  },
+  "bench-dip": {
+    "name": "Dips sur banc",
+    "instructions": {
+      "0": "Asseyez-vous au bord d’un banc, mains à côté des hanches, puis avancez le bassin dans le vide.",
+      "1": "Pliez les coudes pour descendre, puis remontez."
+    }
+  },
+  "dumbbell-row": {
+    "name": "Rowing haltère à un bras",
+    "instructions": {
+      "0": "Une main et un genou sur un banc, dos plat.",
+      "1": "Tirez l’haltère vers la hanche, puis redescendez lentement."
+    }
+  },
+  "band-row": {
+    "name": "Tirage élastique",
+    "instructions": {
+      "0": "Fixez l’élastique à hauteur de poitrine, une extrémité dans chaque main.",
+      "1": "Tirez les coudes en arrière en serrant les omoplates, puis revenez."
+    }
+  },
+  "band-pull-apart": {
+    "name": "Écartés élastique",
+    "instructions": {
+      "0": "Tenez l’élastique devant vous à hauteur d’épaules, bras tendus.",
+      "1": "Écartez-le jusqu’à la poitrine, puis revenez lentement."
+    }
+  },
+  "pull-up": {
+    "name": "Traction",
+    "instructions": {
+      "0": "Suspendez-vous à la barre, mains un peu plus écartées que les épaules.",
+      "1": "Tirez la poitrine vers la barre, puis redescendez complètement."
+    }
+  },
+  "biceps-curl": {
+    "name": "Curl biceps haltères",
+    "instructions": {
+      "0": "Debout, charges le long du corps, paumes vers l’avant.",
+      "1": "Pliez les coudes pour monter les charges sans bouger les coudes, puis redescendez."
+    }
+  },
+  "farmer-carry": {
+    "name": "Marche du fermier",
+    "instructions": {
+      "0": "Prenez une charge lourde dans chaque main.",
+      "1": "Marchez droit, épaules basses, jusqu’à la fin du chrono."
+    }
+  },
+  "plank": {
+    "name": "Gainage",
+    "instructions": {
+      "0": "En appui sur les avant-bras et les orteils, coudes sous les épaules.",
+      "1": "Gardez le corps aligné et serrez les fessiers. Respirez."
+    },
+    "aliases": "abdos"
+  },
+  "side-plank": {
+    "name": "Gainage latéral",
+    "instructions": {
+      "0": "Allongez-vous sur le côté, avant-bras sous l’épaule.",
+      "1": "Montez les hanches pour aligner le corps et tenez."
+    },
+    "aliases": "abdos"
+  },
+  "dead-bug": {
+    "name": "Dead bug",
+    "instructions": {
+      "0": "Sur le dos, bras tendus vers le plafond, genoux pliés au-dessus des hanches.",
+      "1": "Descendez un bras et la jambe opposée vers le sol, bas du dos plaqué.",
+      "2": "Revenez et changez de côté."
+    },
+    "aliases": "abdos"
+  },
+  "bird-dog": {
+    "name": "Bird dog",
+    "instructions": {
+      "0": "À quatre pattes.",
+      "1": "Tendez un bras devant et la jambe opposée derrière, tenez une respiration, puis revenez."
+    },
+    "aliases": "abdos"
+  },
+  "crunch": {
+    "name": "Crunch",
+    "instructions": {
+      "0": "Sur le dos, genoux pliés, mains croisées sur la poitrine.",
+      "1": "Enroulez les épaules pour les décoller du sol, puis redescendez lentement."
+    },
+    "aliases": "abdos"
+  },
+  "hollow-hold": {
+    "name": "Hollow body",
+    "instructions": {
+      "0": "Sur le dos, plaquez le bas du dos au sol.",
+      "1": "Décollez les épaules et les jambes de quelques centimètres et tenez."
+    },
+    "aliases": "abdos"
+  },
+  "russian-twist": {
+    "name": "Rotation russe",
+    "instructions": {
+      "0": "Asseyez-vous genoux pliés et penchez-vous légèrement en arrière, buste droit.",
+      "1": "Tournez les épaules d’un côté puis de l’autre."
+    },
+    "aliases": "abdos"
+  },
+  "jumping-jack": {
+    "name": "Jumping jacks",
+    "instructions": {
+      "0": "Sautez en écartant les pieds et levez les bras au-dessus de la tête.",
+      "1": "Revenez pieds joints et enchaînez à un rythme régulier."
+    }
+  },
+  "high-knees": {
+    "name": "Montées de genoux",
+    "instructions": {
+      "0": "Courez sur place en montant les genoux à hauteur de hanches.",
+      "1": "Accompagnez avec les bras et gardez des appuis légers."
+    }
+  },
+  "mountain-climber": {
+    "name": "Mountain climbers",
+    "instructions": {
+      "0": "Partez en planche bras tendus.",
+      "1": "Ramenez rapidement les genoux vers la poitrine en alternance."
+    }
+  },
+  "burpee": {
+    "name": "Burpee",
+    "instructions": {
+      "0": "Accroupissez-vous et posez les mains au sol.",
+      "1": "Lancez les pieds en arrière en planche, puis ramenez-les.",
+      "2": "Relevez-vous et sautez bras en l’air."
+    }
+  },
+  "skater-jump": {
+    "name": "Sauts du patineur",
+    "instructions": {
+      "0": "Sautez latéralement sur un pied, l’autre jambe passe derrière.",
+      "1": "Sautez de l’autre côté et continuez."
+    }
+  },
+  "jump-rope": {
+    "name": "Corde à sauter",
+    "instructions": {
+      "0": "Faites tourner la corde avec les poignets et faites de petits sauts.",
+      "1": "Atterrissez en douceur sur l’avant des pieds."
+    }
+  },
+  "walk-with-support": {
+    "name": "Marche avec appui",
+    "variationNote": "Avec une aide à la marche ou un appui",
+    "instructions": {
+      "0": "Utilisez l’aide à la marche conseillée par vos soignants, ou marchez le long d’un mur, d’une rampe ou d’un plan de travail.",
+      "1": "Faites de petits pas, à votre rythme. Quelques pas comptent déjà.",
+      "2": "Gardez une chaise à portée et asseyez-vous dès que vous en avez besoin."
+    },
+    "aliases": "marche assistée, déambulateur, canne, béquilles"
+  },
+  "gentle-walk": {
+    "name": "Marche douce",
+    "variationNote": "Lente et courte, à votre rythme",
+    "instructions": {
+      "0": "Marchez lentement sur un sol plat, à l’intérieur ou dehors, en vous tenant droit.",
+      "1": "Gardez une allure où vous respirez facilement. Une minute ou deux, c’est un bon début.",
+      "2": "Arrêtez-vous et reposez-vous si quelque chose fait mal, et suivez les conseils de vos soignants."
+    },
+    "aliases": "marche lente, promenade"
+  },
+  "walk": {
+    "name": "Marche",
+    "variationNote": "Votre allure de tous les jours",
+    "instructions": {
+      "0": "Marchez à votre allure de tous les jours, en vous tenant droit, les bras libres.",
+      "1": "Posez le talon puis déroulez le pied jusqu’aux orteils.",
+      "2": "Sur un tapis, regardez devant vous plutôt que vos pieds."
+    },
+    "aliases": "promenade active"
+  },
+  "brisk-walk": {
+    "name": "Marche rapide",
+    "variationNote": "Plus rapide, assez pour parler mais pas pour chanter",
+    "instructions": {
+      "0": "Marchez à une allure où vous pouvez parler mais pas chanter."
+    }
+  },
+  "easy-run": {
+    "name": "Course facile",
+    "variationNote": "Détendue, assez pour discuter",
+    "instructions": {
+      "0": "Courez à une allure détendue qui permet de discuter."
+    },
+    "aliases": "footing, jogging"
+  },
+  "run": {
+    "name": "Course",
+    "variationNote": "Régulière et confortable",
+    "instructions": {
+      "0": "Courez à une allure régulière que vous pourriez tenir longtemps, en respirant profondément.",
+      "1": "Faites des foulées courtes et légères sous les hanches, épaules relâchées."
+    },
+    "aliases": "course à pied, running"
+  },
+  "calf-raise": {
+    "name": "Montée sur pointes",
+    "instructions": {
+      "0": "Debout, tenez un mur pour l’équilibre si besoin.",
+      "1": "Montez sur la pointe des pieds, marquez une pause, puis redescendez lentement."
+    }
+  },
+  "cat-cow": {
+    "name": "Chat-vache",
+    "instructions": {
+      "0": "À quatre pattes.",
+      "1": "Inspirez en creusant le dos et en regardant vers le haut.",
+      "2": "Expirez en arrondissant le dos vers le plafond."
+    }
+  },
+  "clamshell": {
+    "name": "Clamshell (ouverture de hanche)",
+    "instructions": {
+      "0": "Allongez-vous sur le côté, genoux pliés, pieds joints.",
+      "1": "Ouvrez le genou du dessus sans basculer le bassin, puis refermez."
+    }
+  },
+  "arm-circles": {
+    "name": "Cercles de bras",
+    "instructions": {
+      "0": "Bras tendus sur les côtés.",
+      "1": "Faites de petits cercles qui s’agrandissent, et changez de sens à la moitié du temps."
+    }
+  },
+  "hip-circles": {
+    "name": "Cercles de hanches",
+    "instructions": {
+      "0": "Debout, mains sur les hanches.",
+      "1": "Dessinez de grands cercles lents avec le bassin, et changez de sens à la moitié du temps."
+    }
+  },
+  "worlds-greatest-stretch": {
+    "name": "Étirement complet en fente",
+    "instructions": {
+      "0": "Faites une grande fente et posez les deux mains à l’intérieur du pied avant.",
+      "1": "Tournez le buste et levez le bras intérieur vers le plafond.",
+      "2": "Reposez la main au sol et revenez."
+    }
+  },
+  "hip-flexor-stretch": {
+    "name": "Étirement des fléchisseurs de hanche à genou",
+    "instructions": {
+      "0": "Un genou au sol, l’autre pied à plat devant.",
+      "1": "Rentrez le bassin et avancez jusqu’à sentir l’étirement à l’avant de la hanche."
+    }
+  },
+  "hamstring-stretch": {
+    "name": "Étirement des ischio-jambiers debout",
+    "instructions": {
+      "0": "Posez un talon sur une marche basse, jambe tendue.",
+      "1": "Penchez-vous en avant dos plat jusqu’à sentir l’étirement derrière la cuisse."
+    }
+  },
+  "quad-stretch": {
+    "name": "Étirement des quadriceps debout",
+    "instructions": {
+      "0": "Debout, tenez un mur pour l’équilibre.",
+      "1": "Ramenez un talon vers les fessiers et tenez la cheville, genoux serrés."
+    }
+  },
+  "childs-pose": {
+    "name": "Posture de l’enfant",
+    "instructions": {
+      "0": "À genoux, asseyez-vous sur les talons et penchez-vous en avant.",
+      "1": "Allongez les bras devant vous et respirez lentement."
+    }
+  },
+  "chest-stretch": {
+    "name": "Étirement des pectoraux contre un cadre de porte",
+    "instructions": {
+      "0": "Posez l’avant-bras sur un cadre de porte, coude à hauteur d’épaule.",
+      "1": "Avancez doucement jusqu’à sentir l’étirement de la poitrine."
+    }
+  },
+  "neck-stretch": {
+    "name": "Étirement latéral du cou",
+    "instructions": {
+      "0": "Tenez-vous droit, assis ou debout, épaules relâchées.",
+      "1": "Inclinez l’oreille vers l’épaule et tenez en douceur."
+    }
+  }
+}

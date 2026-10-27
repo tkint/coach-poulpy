@@ -1,0 +1,13 @@
+// Markdown lint for every guideline in the repo, run by the Docs site workflow.
+{
+  "config": {
+    "default": true,
+    // One paragraph is one line, so lines run long on purpose.
+    "MD013": false,
+    // The site's pages use Vue and HTML blocks, and the PR template starts with a form line.
+    "MD033": false,
+    "MD041": false
+  },
+  "globs": ["**/*.md"],
+  "ignores": ["**/node_modules/**", "site/CONTEXT.md", "site/CONTRIBUTING.md", "site/CLAUDE.md", "site/docs/**", "site/design/**", "site/i18n/**"]
+}

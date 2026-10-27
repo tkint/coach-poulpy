@@ -1,0 +1,38 @@
+name: Translation typography
+
+# Translators type plain apostrophes and spaces, in Fink or by hand; this fixes them on main
+# after each merge, so nobody has to learn which space is non-breaking.
+on:
+  push:
+    branches: [main]
+    paths: ['i18n/messages/**']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# Two merges close together run one after the other, so the second push isn't rejected.
+concurrency:
+  group: i18n-typography
+  cancel-in-progress: false
+
+jobs:
+  fix:
+    name: Fix apostrophes and non-breaking spaces
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - run: node i18n/typography.mjs
+      # If main gets branch protection, this push needs a bypass for github-actions,
+      # or the job has to open a pull request instead.
+      - name: Commit the fixes, if any
+        run: |
+          git diff --quiet && exit 0
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -am 'Fix the typography of the translations'
+          git pull --rebase
+          git push

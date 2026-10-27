@@ -1,0 +1,141 @@
+{
+  "muscle": {
+    "chest": "Chest",
+    "back": "Back",
+    "shoulders": "Shoulders",
+    "biceps": "Biceps",
+    "triceps": "Triceps",
+    "forearms": "Forearms",
+    "core": "Core",
+    "glutes": "Glutes",
+    "quadriceps": "Quadriceps",
+    "hamstrings": "Hamstrings",
+    "calves": "Calves",
+    "hips": "Hips",
+    "neck": "Neck",
+    "fullBody": "Full body"
+  },
+  "muscleArea": {
+    "legs": "Legs",
+    "glutes": "Glutes",
+    "core": "Core",
+    "back": "Back",
+    "chest": "Chest",
+    "shoulders": "Shoulders",
+    "arms": "Arms",
+    "fullBody": "Full body"
+  },
+  "equipment": {
+    "bodyweight": "No equipment",
+    "dumbbell": "Dumbbells",
+    "kettlebell": "Kettlebell",
+    "barbell": "Barbell",
+    "band": "Resistance band",
+    "mat": "Mat",
+    "bench": "Bench or step",
+    "pullUpBar": "Pull-up bar",
+    "treadmill": "Treadmill",
+    "machine": "Machine"
+  },
+  "pattern": {
+    "squat": "Squat",
+    "hinge": "Hinge",
+    "lunge": "Lunge",
+    "push": "Push",
+    "pull": "Pull",
+    "carry": "Carry",
+    "core": "Core",
+    "rotation": "Rotation",
+    "locomotion": "Cardio",
+    "mobility": "Mobility",
+    "stretch": "Stretch"
+  },
+  "measurement": {
+    "reps": "Reps",
+    "time": "Timed",
+    "hold": "Hold",
+    "distance": "Distance"
+  },
+  "workoutType": {
+    "strength": "Strength",
+    "conditioning": "Cardio circuit",
+    "rehab": "Rehab",
+    "mobility": "Mobility and stretching",
+    "treadmill": "Treadmill"
+  },
+  "side": {
+    "left": "Left side",
+    "right": "Right side"
+  },
+  "role": {
+    "warmUp": "Warm-up",
+    "recover": "Recover",
+    "coolDown": "Cool down",
+    "exercise": "Exercise"
+  },
+  "label": {
+    "rest": "Rest",
+    "freeRun": "Free run",
+    "demoIntervals": "Demo intervals",
+    "session": "Workout",
+    "perSide": "each side",
+    "recentlyUsed": "Recently used",
+    "hold": "Hold",
+    "timed": "Timed",
+    "or": "or",
+    "and": "and",
+    "halfMarathon": "Half marathon",
+    "marathon": "Marathon",
+    "untilPress": "Until button press",
+    "untilEnd": "Until the end",
+    "untilNext": "Until you tap Next"
+  },
+  "count": {
+    "position": "{index, number} of {count, number}",
+    "round": "Round {round, number} of {rounds, number}",
+    "times": "{count, number} times",
+    "reps": "{count, number} reps",
+    "exercises": "{count, plural, one {# exercise} other {# exercises}}",
+    "workouts": "{count, plural, one {# workout} other {# workouts}}",
+    "matches": "{count, plural, one {# match} other {# matches}}",
+    "exercisesYouCanDo": "{count, plural, one {# exercise you can do} other {# exercises you can do}}",
+    "matchesYouCanDo": "{count, plural, one {# match you can do} other {# matches you can do}}",
+    "aboutMinutes": "about {minutes, number} min",
+    "about": "about {text}"
+  },
+  "unit": {
+    "seconds": "{seconds, number} s",
+    "minutes": "{minutes, number} min",
+    "minutesSeconds": "{minutes, number} min {seconds}",
+    "hours": "{hours, number} h",
+    "hoursMinutes": "{hours, number} h {minutes}",
+    "meters": "{meters, number} m",
+    "kilograms": "{kilograms} kg"
+  },
+  "workout": {
+    "copyName": "{name} (copy)",
+    "deleteTitle": "Delete {name}?",
+    "deletePlanned": "{planned, plural, one {It comes off its planned day.} other {It comes off its # planned days.}}",
+    "deleteDone": "{done, plural, one {The time you did it stays in History.} other {The # times you did it stay in History.}}",
+    "deleteFinal": "This can’t be undone."
+  },
+  "poulpy": {
+    "caption": "{lit, number} of 8 tentacles lit",
+    "captionFull": "{full, plural, one {{lit, number} of 8 tentacles lit · # full octopus} other {{lit, number} of 8 tentacles lit · # full octopuses}}",
+    "firstTitle": "Hi, I’m Poulpy",
+    "firstLine": "Finish a session and I light my first tentacle.",
+    "championTitle": "Full octopus!",
+    "championLine": "All eight tentacles lit. Gold for the octopus!",
+    "backTitle": "Oh… you’re back!",
+    "backLine": "I kept your tentacles lit. One more glows now.",
+    "litTitle": "Nice one",
+    "litLine": "{left, plural, one {One more session and I’m a full octopus.} other {Another tentacle lit. # to go for a full octopus.}}",
+    "restTitle": "Resting",
+    "restLine": "Rest is training too. Ready when you are.",
+    "happyTitle": "Poulpy is happy",
+    "happyLine": "Shall we light another tentacle?",
+    "happyFullLine": "A full octopus! The next session starts a new one.",
+    "nappingTitle": "Poulpy is napping",
+    "nappingLine": "Your tentacles are still lit. Wake me up with a session."
+  }
+}

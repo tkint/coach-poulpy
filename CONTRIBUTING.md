@@ -50,10 +50,12 @@ Rounded boxes are where work starts; each step leaves something behind, listed i
 
 - **One goal per thread or session.** Grill, spec and tickets in one unbroken conversation; then each ticket starts fresh, because the ticket carries everything it needs.
 - **Don't triage what `/to-tickets` made.** Those issues are born `ready-for-agent`.
+- **Ask the role that owns it.** The Architect, Designer, Poulpy keeper, Translator and Maintainer threads each own part of the repo; a spec asks them before its tickets exist, and a PR that touches their files sends them the link. See [`docs/agents/roles.md`](docs/agents/roles.md).
 - **Words come from `CONTEXT.md`.** If an issue or a test needs a word the glossary lacks, add it there first.
 - **A decision that would surprise the next reader gets an ADR** in `docs/adr/`, in the same PR that makes it.
 - **Every PR says `Closes #n`**, so merging closes the issue.
 - **Branch names say what the work is**: `<type>/<issue-number>-<short-description>`, in English, like `feat/21-training-plans` or `fix/34-rest-timer-sound`. Leave out the number when there is no issue (`docs/brand-decisions`). Types are `feat`, `fix`, `docs`, `chore` and `design`. No random suffixes, session ids or tool prefixes such as `claude/`.
+- **Every guideline is on the docs site.** A new rule, glossary or ADR is published in the same PR that adds it: add its file to `site/published.mjs` and a sidebar entry in `site/.vitepress/config.mts`. CI fails on a Markdown file the site doesn't publish or a page no link reaches.
 - **CI is not a phone.** Anything about Bluetooth, sound, haptics, background running or installs carries the `device-test` label and is checked on a real phone before merge.
 
 ## Labels
@@ -78,4 +80,12 @@ See the [README](README.md) for building each app. Before opening a PR, at least
 ./gradlew jvmTest jsTest :server:test
 node design/build-tokens.mjs --check
 node design/build-poulpy.mjs --check
+```
+
+When a change touches Markdown, CI also lints it, checks its links and checks the site publishes it. To run the same checks first (lychee is a separate install, see [its README](https://github.com/lycheeverse/lychee#installation)):
+
+```sh
+npx markdownlint-cli2
+lychee --config lychee.toml './**/*.md'
+(cd site && npm ci && npm run build && node check-published.mjs)
 ```

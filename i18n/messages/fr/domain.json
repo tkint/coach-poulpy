@@ -1,0 +1,141 @@
+{
+  "muscle": {
+    "chest": "Pectoraux",
+    "back": "Dos",
+    "shoulders": "Épaules",
+    "biceps": "Biceps",
+    "triceps": "Triceps",
+    "forearms": "Avant-bras",
+    "core": "Abdominaux",
+    "glutes": "Fessiers",
+    "quadriceps": "Quadriceps",
+    "hamstrings": "Ischio-jambiers",
+    "calves": "Mollets",
+    "hips": "Hanches",
+    "neck": "Cou",
+    "fullBody": "Corps entier"
+  },
+  "muscleArea": {
+    "legs": "Jambes",
+    "glutes": "Fessiers",
+    "core": "Abdos",
+    "back": "Dos",
+    "chest": "Pectoraux",
+    "shoulders": "Épaules",
+    "arms": "Bras",
+    "fullBody": "Corps entier"
+  },
+  "equipment": {
+    "bodyweight": "Sans matériel",
+    "dumbbell": "Haltères",
+    "kettlebell": "Kettlebell",
+    "barbell": "Barre",
+    "band": "Élastique",
+    "mat": "Tapis",
+    "bench": "Banc ou marche",
+    "pullUpBar": "Barre de traction",
+    "treadmill": "Tapis de course",
+    "machine": "Machine"
+  },
+  "pattern": {
+    "squat": "Squat",
+    "hinge": "Charnière de hanche",
+    "lunge": "Fente",
+    "push": "Poussée",
+    "pull": "Tirage",
+    "carry": "Portage",
+    "core": "Gainage",
+    "rotation": "Rotation",
+    "locomotion": "Cardio",
+    "mobility": "Mobilité",
+    "stretch": "Étirement"
+  },
+  "measurement": {
+    "reps": "Répétitions",
+    "time": "Chronométré",
+    "hold": "Maintien",
+    "distance": "Distance"
+  },
+  "workoutType": {
+    "strength": "Renforcement",
+    "conditioning": "Circuit cardio",
+    "rehab": "Rééducation",
+    "mobility": "Mobilité et étirements",
+    "treadmill": "Tapis de course"
+  },
+  "side": {
+    "left": "Côté gauche",
+    "right": "Côté droit"
+  },
+  "role": {
+    "warmUp": "Échauffement",
+    "recover": "Récupération",
+    "coolDown": "Retour au calme",
+    "exercise": "Exercice"
+  },
+  "label": {
+    "rest": "Repos",
+    "freeRun": "Course libre",
+    "demoIntervals": "Fractionné de démo",
+    "session": "Séance",
+    "perSide": "par côté",
+    "recentlyUsed": "Utilisés récemment",
+    "hold": "Maintien",
+    "timed": "Chronométré",
+    "or": "ou",
+    "and": "et",
+    "halfMarathon": "Semi-marathon",
+    "marathon": "Marathon",
+    "untilPress": "Jusqu’à l’appui",
+    "untilEnd": "Jusqu’à la fin",
+    "untilNext": "Jusqu’à « Suivant »"
+  },
+  "count": {
+    "position": "{index, number} sur {count, number}",
+    "round": "Tour {round, number} sur {rounds, number}",
+    "times": "{count, number} fois",
+    "reps": "{count, number} répétitions",
+    "exercises": "{count, plural, one {# exercice} many {# exercices} other {# exercices}}",
+    "workouts": "{count, plural, one {# séance} many {# séances} other {# séances}}",
+    "matches": "{count, plural, one {# résultat} many {# résultats} other {# résultats}}",
+    "exercisesYouCanDo": "{count, plural, one {# exercice à votre portée} many {# exercices à votre portée} other {# exercices à votre portée}}",
+    "matchesYouCanDo": "{count, plural, one {# résultat à votre portée} many {# résultats à votre portée} other {# résultats à votre portée}}",
+    "aboutMinutes": "environ {minutes, number} min",
+    "about": "environ {text}"
+  },
+  "unit": {
+    "seconds": "{seconds, number} s",
+    "minutes": "{minutes, number} min",
+    "minutesSeconds": "{minutes, number} min {seconds}",
+    "hours": "{hours, number} h",
+    "hoursMinutes": "{hours, number} h {minutes}",
+    "meters": "{meters, number} m",
+    "kilograms": "{kilograms} kg"
+  },
+  "workout": {
+    "copyName": "{name} (copie)",
+    "deleteTitle": "Supprimer « {name} » ?",
+    "deletePlanned": "{planned, plural, one {Elle est retirée de son jour prévu.} many {Elle est retirée de ses # jours prévus.} other {Elle est retirée de ses # jours prévus.}}",
+    "deleteDone": "{done, plural, one {La fois où vous l’avez faite reste dans l’historique.} many {Les # fois où vous l’avez faite restent dans l’historique.} other {Les # fois où vous l’avez faite restent dans l’historique.}}",
+    "deleteFinal": "C’est définitif."
+  },
+  "poulpy": {
+    "caption": "{lit, number} tentacules sur 8 allumés",
+    "captionFull": "{full, plural, one {{lit, number} tentacules sur 8 allumés · # poulpe complet} many {{lit, number} tentacules sur 8 allumés · # poulpes complets} other {{lit, number} tentacules sur 8 allumés · # poulpes complets}}",
+    "firstTitle": "Salut, moi c’est Poulpy",
+    "firstLine": "Termine une séance et j’allume mon premier tentacule.",
+    "championTitle": "Poulpe complet !",
+    "championLine": "Les huit tentacules sont allumés. L’or pour le poulpe !",
+    "backTitle": "Oh… te revoilà !",
+    "backLine": "J’ai gardé tes tentacules allumés. Un de plus brille maintenant.",
+    "litTitle": "Bien joué",
+    "litLine": "{left, plural, one {Encore une séance et je suis un poulpe complet.} many {Un tentacule de plus. Encore # pour un poulpe complet.} other {Un tentacule de plus. Encore # pour un poulpe complet.}}",
+    "restTitle": "Repos",
+    "restLine": "Le repos, c’est aussi de l’entraînement. Je suis prêt quand tu l’es.",
+    "happyTitle": "Poulpy est content",
+    "happyLine": "On allume un autre tentacule ?",
+    "happyFullLine": "Un poulpe complet ! La prochaine séance en commence un nouveau.",
+    "nappingTitle": "Poulpy fait la sieste",
+    "nappingLine": "Tes tentacules sont toujours allumés. Réveille-moi avec une séance."
+  }
+}
