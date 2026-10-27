@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Home · planned</title>
+<meta name="mockup:screen" content="home-planned">
+<meta name="mockup:section" content="Home">
+<meta name="mockup:issue" content="104">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../../../web/src/styles/tokens.css">
+<link rel="stylesheet" href="../../shared/mockup.css">
+<script src="../../shared/mockup-theme.js"></script>
+</head>
+<body>
+<main class="phone">
+<div class="screen-header">
+    <span class="label">Saturday 24 October</span>
+    <h1>Home</h1>
+  </div>
+
+  <div class="page-body" style="padding-top: 14px; gap: 10px;">
+    <section class="poulpy-card" id="poulpy" data-component="poulpy-card" aria-label="Poulpy">
+      <div class="tentacle-ring">
+        <svg viewBox="0 0 200 200" width="104" height="104" role="img" aria-label="6 of 8 lit · 1 full octopus"><path class="lit" d="M117.65 9.20 A92.5 92.5 0 0 1 151.73 23.31"/><path class="lit" d="M176.69 48.27 A92.5 92.5 0 0 1 190.80 82.35"/><path class="lit" d="M190.80 117.65 A92.5 92.5 0 0 1 176.69 151.73"/><path class="lit" d="M151.73 176.69 A92.5 92.5 0 0 1 117.65 190.80"/><path class="lit" d="M82.35 190.80 A92.5 92.5 0 0 1 48.27 176.69"/><path class="lit" d="M23.31 151.73 A92.5 92.5 0 0 1 9.20 117.65"/><path d="M9.20 82.35 A92.5 92.5 0 0 1 23.31 48.27"/><path d="M48.27 23.31 A92.5 92.5 0 0 1 82.35 9.20"/></svg>
+        <img src="../../../poulpy/mood_happy.svg" alt="Poulpy, happy">
+      </div>
+      <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px;">
+        <h2>Ready when you are</h2>
+        <p>Today’s session lights tentacle 7.</p>
+        <span class="label" style="margin-top: 2px; font-size: 12px; letter-spacing: 0.06em; color: inherit;">6 of 8 lit · 1 full octopus</span>
+      </div>
+    </section>
+    <span class="label label-row">Today</span>
+    <article class="card card--highlight" id="planned-workout" data-component="planned-workout-card" style="display: flex; flex-direction: column; gap: var(--cp-space-md);">
+      <div style="display: flex; align-items: center; gap: var(--cp-space-md);">
+        <span class="row-icon" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7v10M18 7v10M3 10v4M21 10v4M6 12h12"/></svg></span>
+        <a href="workout-page-planned.html" class="row-text"><strong style="font-family: var(--cp-font-display); font-size: 20px; line-height: 24px; font-weight: 700;">Lower body strength</strong><span>Sets · 5 exercises · about 40 min</span></a>
+      </div>
+      <p style="font-size: 14px; line-height: 20px; color: var(--cp-on-surface-variant);">Goblet squat, Romanian deadlift, Reverse lunge, Glute bridge, Calf raise</p>
+      <div style="display: flex; gap: var(--cp-space-sm);">
+        <a class="secondary-button" data-component="secondary-button" href="workout-page-planned.html" style="flex: 1; height: 48px; font-size: 15px;">See workout</a>
+        <a class="primary-button" data-component="primary-button" href="#" style="flex: 1.4; height: 48px; font-size: 16px;"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M8 5l11 7-11 7z"/></svg>Start</a>
+      </div>
+    </article>
+    <a class="text-link" href="library-workouts.html" style="align-self: flex-start; margin: -4px var(--cp-space-xs) 0;">Something else? Pick from your library<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4"><path d="M9 5l7 7-7 7"/></svg></a>
+    <span class="label label-row" style="margin-top: var(--cp-space-sm);">Next session</span>
+    <a class="list-row" id="next-session" data-component="list-row" href="workout-page-planned.html" style="border-radius: 20px; padding: var(--cp-space-md) 14px var(--cp-space-md) var(--cp-space-md);">
+      <span aria-hidden="true" style="width: 52px; height: 56px; border-radius: 14px; background: var(--cp-background); border: 1px solid var(--cp-outline); display: flex; flex-direction: column; align-items: center; justify-content: center; flex: none;">
+        <span class="label label--primary" style="font-size: 11.5px; line-height: 14px;">Tue</span>
+        <span style="font-family: var(--cp-font-display); font-size: 22px; line-height: 24px; font-weight: 700; color: var(--cp-on-primary-container);">27</span>
+      </span>
+      <span class="row-text"><strong>Upper body</strong><span>In 3 days · Sets · about 32 min</span></span>
+      <span class="chevron"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"><path d="M9 5l7 7-7 7"/></svg></span>
+    </a>
+  </div>
+
+  <nav class="nav-bar" aria-label="Main" data-component="nav-bar">
+    <a class="nav-item" href="home-planned.html" aria-current="page"><span><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7M5 9.5V20h5v-6h4v6h5V9.5"/></svg></span>Home</a>
+    <a class="nav-item" href="library-workouts.html"><span><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4v16H5zM10 4h4v16h-4zM15.2 5.3l3.9-1 3.4 14.8-3.9 1z"/></svg></span>Library</a>
+    <a class="nav-item" href="#"><span><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3-7 4 14 3-7h4"/></svg></span>Live</a>
+    <a class="nav-item" href="#"><span><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.4-5.7L4 8.5M4 4v4.5h4.5M12 8v4l3 2"/></svg></span>History</a>
+    <a class="nav-item" href="#"><span><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg></span>Settings</a>
+  </nav>
+</main>
+</body>
+</html>
