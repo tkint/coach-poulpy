@@ -222,15 +222,22 @@ fun WorkoutPageScreen(
 @Composable
 private fun PartHeader(part: WorkoutPagePart) {
     val colors = MaterialTheme.colorScheme
-    val work = part.kind == PartKind.WORK
     Row(Modifier.padding(start = 2.dp, top = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        Box(Modifier.size(36.dp).clip(CircleShape).background(if (work) colors.primary else colors.primaryContainer), contentAlignment = Alignment.Center) {
-            Icon(part.kind.icon, contentDescription = null, tint = if (work) colors.onPrimary else colors.onPrimaryContainer, modifier = Modifier.size(20.dp))
-        }
+        PartBadge(part.kind)
         Column {
             Text(part.name, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.ExtraBold)
             Text(part.summary, style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
         }
+    }
+}
+
+/** A part's icon in its round badge, filled for work, as on the workout page and in the builder. */
+@Composable
+internal fun PartBadge(kind: PartKind) {
+    val colors = MaterialTheme.colorScheme
+    val work = kind == PartKind.WORK
+    Box(Modifier.size(36.dp).clip(CircleShape).background(if (work) colors.primary else colors.primaryContainer), contentAlignment = Alignment.Center) {
+        Icon(kind.icon, contentDescription = null, tint = if (work) colors.onPrimary else colors.onPrimaryContainer, modifier = Modifier.size(20.dp))
     }
 }
 

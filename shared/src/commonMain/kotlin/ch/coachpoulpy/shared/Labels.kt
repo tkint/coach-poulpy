@@ -97,6 +97,43 @@ internal class Labels(private val languageCode: String) {
         PartKind.COOL_DOWN -> t("Cool down", "Retour au calme")
     }
 
+    /** "Add to warm-up", "Add to Work 2": the link at the end of a part in the builder; [number] as in [part]. */
+    fun addTo(kind: PartKind, number: Int? = null) = when (kind) {
+        PartKind.WARM_UP -> t("Add to warm-up", "Ajouter à l’échauffement")
+        PartKind.WORK -> if (number == null) t("Add to Work", "Ajouter au corps de séance") else t("Add to Work $number", "Ajouter au corps de séance $number")
+        PartKind.COOL_DOWN -> t("Add to cool down", "Ajouter au retour au calme")
+    }
+
+    /** "In Work 2", where a step sits; [number] as in [part]. */
+    fun inPart(kind: PartKind, number: Int? = null) = when (kind) {
+        PartKind.WARM_UP -> t("In the warm-up", "Dans l’échauffement")
+        PartKind.WORK -> if (number == null) t("In Work", "Dans le corps de séance") else t("In Work $number", "Dans le corps de séance $number")
+        PartKind.COOL_DOWN -> t("In the cool down", "Dans le retour au calme")
+    }
+
+    /** "once per round, 4 rounds", for a step of a circuit's repeat. */
+    fun oncePerRound(roundCount: Int) = rounds(roundCount).let { t("once per round, $it", "une fois par tour, $it") }
+
+    /** "3 sets", or "3 sets per round, 4 rounds" inside a repeat of [roundCount] rounds. */
+    fun setsPerRound(sets: Int, roundCount: Int?): String {
+        val count = if (sets == 1) t("1 set", "1 série") else t("$sets sets", "$sets séries")
+        if (roundCount == null) return count
+        val total = rounds(roundCount)
+        return t("$count per round, $total", "$count par tour, $total")
+    }
+
+    fun rounds(count: Int) = if (count == 1) t("1 round", "1 tour") else t("$count rounds", "$count tours")
+
+    /** Why a part cannot be added again. */
+    val alreadyInWorkout get() = t("Already in this workout", "Déjà dans cette séance")
+
+    /** Where a new part goes: "Goes first", "Goes last", or "Added after Work 2 as Work 3". */
+    fun partGoes(kind: PartKind, after: String, name: String) = when (kind) {
+        PartKind.WARM_UP -> t("Goes first", "Se place en premier")
+        PartKind.WORK -> t("Added after $after as $name", "Ajouté après $after : $name")
+        PartKind.COOL_DOWN -> t("Goes last", "Se place en dernier")
+    }
+
     /** The player's part line: "Work 1 · round 2 of 4", or the [part] alone outside a repeat. */
     fun partLine(part: String, round: Int, rounds: Int) =
         if (rounds > 1) "$part · ${roundOf(round, rounds)}" else part
@@ -183,7 +220,8 @@ internal class Labels(private val languageCode: String) {
     }
 
     /**
-     * One exercise's plan in a line: "3 × 10 each side · 14 kg", or "5.0 km · 6:00 /km"
+     * One exercise's plan in a line: "3 × 10 · each side · 14 kg · 1 min between sets", "15 reps",
+     * "40 s hold" for one set, or "5.0 km · 6:00 /km"
      * and "5:30 /km · until button press" for a walk or a run; [last] says "until the end" instead.
      */
     fun prescription(entry: DraftEntry, last: Boolean = false): String {
@@ -197,15 +235,22 @@ internal class Labels(private val languageCode: String) {
             }
             return listOfNotNull(main, pace).joinToString(" · ")
         }
+        val several = entry.sets > 1
         val amount = when (entry.measurement) {
-            MeasurementMode.REPS -> entry.amount.toString()
+            MeasurementMode.REPS -> if (several) entry.amount.toString() else amount(MeasurementMode.REPS, entry.amount)
+            MeasurementMode.HOLD -> t("${duration(entry.amount)} hold", "${duration(entry.amount)} de maintien")
             else -> amount(entry.measurement, entry.amount)
         }
         return listOfNotNull(
-            "${entry.sets} × $amount" + if (entry.perSide) " $perSide" else "",
+            if (several) "${entry.sets} × $amount" else amount,
+            perSide.takeIf { entry.perSide },
             entry.loadKg?.let(::kilograms),
+            entry.restBetweenSets.takeIf { several && it > 0 }?.let { betweenSets(longDuration(it)) },
         ).joinToString(" · ")
     }
+
+    /** "2 min between sets". */
+    fun betweenSets(rest: String) = t("$rest between sets", "$rest entre les séries")
 
     fun about(text: String) = t("about $text", "environ $text")
 
@@ -224,16 +269,8 @@ internal class Labels(private val languageCode: String) {
         StepRole.WORK -> null
     }
 
-    /** The tag on a step in the builder; null for plain exercise steps, which have none. */
-    fun role(role: BuilderRole) = when (role) {
-        BuilderRole.WARM_UP -> part(PartKind.WARM_UP)
-        BuilderRole.WORK -> null
-        BuilderRole.RECOVER -> role(StepRole.RECOVER)
-        BuilderRole.COOL_DOWN -> part(PartKind.COOL_DOWN)
-    }
-
-    /** The name of a role in the step select, Exercise included. */
-    fun roleName(role: BuilderRole) = role(role) ?: t("Exercise", "Exercice")
+    /** The name of a role in the step select: Exercise or Recover. */
+    fun roleName(role: StepRole) = role(role) ?: t("Exercise", "Exercice")
 
     fun times(count: Int) = t("$count times", "$count fois")
 }

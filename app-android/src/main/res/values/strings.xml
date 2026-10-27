@@ -122,8 +122,6 @@
     <string name="builder_less_named">Less: %1$s</string>
     <string name="builder_more_named">More: %1$s</string>
     <string name="builder_open">Edit %1$s</string>
-    <string name="builder_does_not_fit">This kind of workout can’t run this exercise. Remove it or pick another kind.</string>
-    <string name="builder_empty">Add steps to build your workout.</string>
     <string name="builder_duration">Duration</string>
     <string name="builder_distance">Distance</string>
     <string name="builder_pace">Pace</string>
@@ -132,7 +130,6 @@
     <string name="builder_quick_picks">Quick picks</string>
     <string name="builder_value_invalid">This can’t be read. Type a value like the quick picks below.</string>
     <string name="builder_edit_value">Type %1$s</string>
-    <string name="builder_add_step">Add a step</string>
     <string name="builder_add_repeat">Add a repeat</string>
     <string name="builder_add_to_repeat">Add a step to this repeat</string>
     <string name="builder_add_exercise">An exercise</string>
@@ -153,9 +150,21 @@
     <string name="builder_duplicate">Duplicate</string>
     <string name="builder_delete">Delete</string>
     <string name="builder_repeat_actions">More actions for this repeat</string>
-    <string name="builder_add_warm_up">A warm-up</string>
     <string name="builder_add_recover">A recovery</string>
-    <string name="builder_add_cool_down">A cool down</string>
+    <string name="builder_format_title">How is this workout built?</string>
+    <string name="builder_format_subtitle">You choose once: the format stays for this workout.</string>
+    <string name="builder_circuit_description">Rounds through several exercises, each done once per round. Fits HIIT, bodyweight circuits and runs.</string>
+    <string name="builder_circuit_example">Squat 15 · Push-up 10 · Run 200 m, 4 rounds</string>
+    <string name="builder_sets_description">One exercise at a time: all its sets, then the next. Fits gym and strength training.</string>
+    <string name="builder_sets_example">Bench press 3 × 8, then Row 3 × 10</string>
+    <string name="builder_continue">Continue</string>
+    <string name="builder_format_locked">chosen at creation</string>
+    <string name="builder_add_part">Add a part</string>
+    <string name="builder_add_part_subtitle">Parts run in order: warm-up, work, cool down.</string>
+    <string name="builder_move_to_part">Move to another part</string>
+    <string name="builder_rest_between_sets">Rest between sets</string>
+    <string name="builder_circuit_hint">A circuit has no sets: the repeat around it sets the rounds.</string>
+    <string name="builder_sets_hint">Rest between sets shows from 2 sets. A walk or a run has no sets.</string>
 
     <string name="player_ready">Ready?</string>
     <string name="player_start">Start the session</string>

@@ -92,8 +92,6 @@
 "builder.weight.kg" = "Weight in kilograms";
 "builder.less" = "Less";
 "builder.more" = "More";
-"builder.does.not.fit" = "This kind of workout can’t run this exercise. Remove it or pick another kind.";
-"builder.empty" = "Add steps to build your workout.";
 "builder.duration" = "Duration";
 "builder.distance" = "Distance";
 "builder.pace" = "Pace";
@@ -102,7 +100,6 @@
 "builder.quick.picks" = "Quick picks";
 "builder.value.invalid" = "This can’t be read. Type a value like the quick picks below.";
 "builder.edit.value" = "Type %@";
-"builder.add.step" = "Add a step";
 "builder.add.repeat" = "Add a repeat";
 "builder.add.to.repeat" = "Add a step to this repeat";
 "builder.add.exercise" = "An exercise";
@@ -123,9 +120,21 @@
 "builder.duplicate" = "Duplicate";
 "builder.delete" = "Delete";
 "builder.repeat.actions" = "More actions for this repeat";
-"builder.add.warm.up" = "A warm-up";
 "builder.add.recover" = "A recovery";
-"builder.add.cool.down" = "A cool down";
+"builder.format.title" = "How is this workout built?";
+"builder.format.subtitle" = "You choose once: the format stays for this workout.";
+"builder.circuit.description" = "Rounds through several exercises, each done once per round. Fits HIIT, bodyweight circuits and runs.";
+"builder.circuit.example" = "Squat 15 · Push-up 10 · Run 200 m, 4 rounds";
+"builder.sets.description" = "One exercise at a time: all its sets, then the next. Fits gym and strength training.";
+"builder.sets.example" = "Bench press 3 × 8, then Row 3 × 10";
+"builder.continue" = "Continue";
+"builder.format.locked" = "chosen at creation";
+"builder.add.part" = "Add a part";
+"builder.add.part.subtitle" = "Parts run in order: warm-up, work, cool down.";
+"builder.move.to.part" = "Move to another part";
+"builder.rest.between.sets" = "Rest between sets";
+"builder.circuit.hint" = "A circuit has no sets: the repeat around it sets the rounds.";
+"builder.sets.hint" = "Rest between sets shows from 2 sets. A walk or a run has no sets.";
 
 "player.ready" = "Ready?";
 "player.start" = "Start the session";

@@ -92,8 +92,6 @@
 "builder.weight.kg" = "Charge en kilogrammes";
 "builder.less" = "Moins";
 "builder.more" = "Plus";
-"builder.does.not.fit" = "Ce type de séance ne peut pas inclure cet exercice. Retirez-le ou choisissez un autre type.";
-"builder.empty" = "Ajoutez des étapes pour composer votre séance.";
 "builder.duration" = "Durée";
 "builder.distance" = "Distance";
 "builder.pace" = "Allure";
@@ -102,7 +100,6 @@
 "builder.quick.picks" = "Raccourcis";
 "builder.value.invalid" = "Valeur illisible. Saisissez une valeur comme les raccourcis ci-dessous.";
 "builder.edit.value" = "Saisir : %@";
-"builder.add.step" = "Ajouter une étape";
 "builder.add.repeat" = "Ajouter une répétition";
 "builder.add.to.repeat" = "Ajouter une étape à cette répétition";
 "builder.add.exercise" = "Un exercice";
@@ -123,9 +120,21 @@
 "builder.duplicate" = "Dupliquer";
 "builder.delete" = "Supprimer";
 "builder.repeat.actions" = "Autres actions pour cette répétition";
-"builder.add.warm.up" = "Un échauffement";
 "builder.add.recover" = "Une récupération";
-"builder.add.cool.down" = "Un retour au calme";
+"builder.format.title" = "Comment cette séance est-elle construite ?";
+"builder.format.subtitle" = "Ce choix est définitif pour cette séance.";
+"builder.circuit.description" = "Des tours de plusieurs exercices, chacun fait une fois par tour. Idéal pour le HIIT, les circuits au poids du corps et la course.";
+"builder.circuit.example" = "Squat 15 · Pompe 10 · Course 200 m, 4 tours";
+"builder.sets.description" = "Un exercice à la fois : toutes ses séries, puis le suivant. Idéal pour la salle et le renforcement musculaire.";
+"builder.sets.example" = "Développé couché 3 × 8, puis rowing 3 × 10";
+"builder.continue" = "Continuer";
+"builder.format.locked" = "choisi à la création";
+"builder.add.part" = "Ajouter une partie";
+"builder.add.part.subtitle" = "Les parties s’enchaînent dans l’ordre : échauffement, corps de séance, retour au calme.";
+"builder.move.to.part" = "Déplacer vers une autre partie";
+"builder.rest.between.sets" = "Repos entre les séries";
+"builder.circuit.hint" = "Un circuit n’a pas de séries : la boucle qui l’entoure fixe le nombre de tours.";
+"builder.sets.hint" = "Le repos entre les séries apparaît dès 2 séries. Une marche ou une course n’a pas de séries.";
 
 "player.ready" = "Prêt ?";
 "player.start" = "Lancer la séance";

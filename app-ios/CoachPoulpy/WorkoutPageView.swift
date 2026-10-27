@@ -199,14 +199,8 @@ struct WorkoutPageView: View {
 
     /// "Warm-up", "2 steps · about 6 min" beside the part's icon, as the builder heads a part.
     private func partHeader(_ part: WorkoutPagePart) -> some View {
-        let work = part.kind == .work
-        return HStack(spacing: 10) {
-            Image(systemName: partIcon(part.kind))
-                .font(.system(size: 16, weight: .bold))
-                .foregroundStyle(work ? PoulpyColor.onPrimary : PoulpyColor.onPrimaryContainer)
-                .frame(width: 36, height: 36)
-                .background(work ? PoulpyColor.primary : PoulpyColor.primaryContainer, in: Circle())
-                .accessibilityHidden(true)
+        HStack(spacing: 10) {
+            PartBadge(kind: part.kind)
             VStack(alignment: .leading, spacing: 0) {
                 Text(part.name).font(.poulpy(.title3).weight(.heavy)).foregroundStyle(PoulpyColor.onSurface)
                 Text(part.summary).font(.poulpy(.footnote)).monospacedDigit().foregroundStyle(PoulpyColor.onSurfaceVariant)
@@ -321,6 +315,26 @@ private func shortDay(_ millis: Int64) -> String {
 }
 
 /// The icon of a part, as the builder adds it: the sun for a warm-up, a bolt for work, the moon for a cool down.
+/// A part's icon in its round badge, filled for work, as on the workout page and in the builder.
+struct PartBadge: View {
+    let kind: PartKind
+
+    var body: some View {
+        let work = kind == .work
+        Image(systemName: partIcon(kind))
+            .font(.system(size: 16, weight: .bold))
+            .foregroundStyle(work ? PoulpyColor.onPrimary : PoulpyColor.onPrimaryContainer)
+            .frame(width: 36, height: 36)
+            .background(work ? PoulpyColor.primary : PoulpyColor.primaryContainer, in: Circle())
+            .accessibilityHidden(true)
+    }
+}
+
+/// The icon of a format: a loop for a circuit, a list for sets.
+func formatIcon(_ format: WorkoutFormat) -> String {
+    format == .circuit ? "repeat" : "list.bullet"
+}
+
 func partIcon(_ kind: PartKind) -> String {
     switch kind {
     case .warmUp: return "sun.max"

@@ -26,13 +26,13 @@ class PlayerModelTest {
     private fun workout(): WorkoutId {
         val builder = graph.createWorkout("en")
         builder.rename("Quick")
-        builder.setFormat(WorkoutFormat.SETS)
-        builder.addRepeat()
-        val repeat = builder.state.value.steps.single().key
-        builder.add("push-up", repeat)
-        builder.addRest(repeat)
+        builder.chooseFormat(WorkoutFormat.SETS)
+        builder.addRepeat(builder.work)
+        val repeat = builder.state.value.parts.single().steps.single().key
+        builder.add("push-up", builder.work, repeat)
+        builder.addRest(builder.work, repeat)
         builder.changeRest(builder.state.value.addedKey!!, -1)
-        builder.add("plank")
+        builder.add("plank", builder.work)
         builder.setSets(builder.state.value.addedKey!!, 1)
         return WorkoutId(builder.save()!!)
     }

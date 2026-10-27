@@ -5,8 +5,9 @@ import Shared
 struct BuilderView: View {
     let graph: AppGraph
     @StateObject private var builder: Observed<BuilderModel, BuilderState>
-    /// Where the exercise being picked goes (the workout, or a repeat) and as what; nil when not picking.
+    /// Where the exercise being picked goes (a part, or one of its repeats) and as what; nil when not picking.
     @State private var picking: PickTarget?
+    @State private var addingPart = false
     @Environment(\.dismiss) private var dismiss
 
     /// [firstExercise] starts a new workout that already holds it, from an exercise page;
@@ -54,30 +55,13 @@ struct BuilderView: View {
                             .overlay(RoundedRectangle(cornerRadius: 16).stroke(state.name.isEmpty ? PoulpyColor.outline : PoulpyColor.primary, lineWidth: 1.5))
                             .accessibilityLabel(Text("builder.name"))
                     }
-                    VStack(alignment: .leading, spacing: 8) {
-                        fieldLabel("builder.format")
-                        FlowLayout(spacing: 8) {
-                            ForEach(model.formatOptions, id: \.label) { option in
-                                PoulpyChip(title: Text(option.label), selected: state.format == option.format) {
-                                    model.setFormat(format: option.format)
-                                }
-                            }
+                    if let format = state.format {
+                        formatLine(format)
+                        ForEach(state.parts, id: \.key) { part in
+                            partBlock(part)
                         }
-                    }
-                    if state.steps.isEmpty {
-                        Text("builder.empty").font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
-                    }
-                    ForEach(state.steps, id: \.key) { step in
-                        if let row = step.row {
-                            card(row).liftable(step.key, dragging: dragging, dragStart: dragStart, dragY: dragY, frames: frames)
-                        } else if let group = step.repeatGroup {
-                            repeatBlock(group).liftable(step.key, dragging: dragging, dragStart: dragStart, dragY: dragY, frames: frames)
-                        }
-                    }
-                    HStack(spacing: 8) {
-                        addStepButton("builder.add.step", height: 56, to: nil)
-                        Button { model.addRepeat() } label: {
-                            dashedTile("builder.add.repeat", systemImage: "repeat", height: 56)
+                        Button { addingPart = true } label: {
+                            dashedTile(Text("builder.add.part"), systemImage: "plus", height: 56)
                         }
                         .buttonStyle(.plain)
                     }
@@ -122,14 +106,24 @@ struct BuilderView: View {
             }
             .sheet(isPresented: Binding(get: { editingRow != nil }, set: { if !$0 { editing = nil } })) {
                 if let row = editingRow {
-                    StepSheet(model: model, row: row, roleOptions: model.roleOptions) { editing = nil }
+                    StepSheet(model: model, row: row, parts: state.parts, format: state.format) { editing = nil }
+                }
+            }
+            // A new workout asks for its format first; closing the sheet without one leaves the builder.
+            .sheet(isPresented: Binding(get: { state.format == nil }, set: { if !$0 && state.format == nil { dismiss() } })) {
+                FormatSheet(options: model.formatOptions) { model.chooseFormat(format: $0) }
+            }
+            .sheet(isPresented: $addingPart) {
+                PartSheet(options: state.partOptions) { kind in
+                    model.addPart(kind: kind)
+                    addingPart = false
                 }
             }
             .sheet(item: $picking) { target in
                 NavigationStack {
                     ExerciseList(graph: graph, withRecent: true) { row in
                         Button {
-                            model.add(slug: row.slug, repeatKey: target.repeatKey, role: target.role)
+                            model.add(slug: row.slug, partKey: target.partKey, repeatKey: target.repeatKey, role: target.role)
                             picking = nil
                         } label: {
                             ExerciseRowView(row: row, adding: true)
@@ -150,9 +144,70 @@ struct BuilderView: View {
 
     private var editingRow: BuilderRow? { state.rows.first { $0.key == editing } }
 
+    /// Under the name: the format as a chip, with a lock, since it was chosen at creation and stays.
+    private func formatLine(_ format: WorkoutFormat) -> some View {
+        HStack(spacing: 10) {
+            fieldLabel("builder.format")
+            Label(state.formatLabel, systemImage: formatIcon(format))
+                .font(.poulpy(.subheadline).weight(.heavy))
+                .foregroundStyle(PoulpyColor.onPrimaryContainer)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(PoulpyColor.primaryContainer, in: Capsule())
+            Image(systemName: "lock.fill").font(.system(size: 13, weight: .bold)).foregroundStyle(PoulpyColor.onSurfaceVariant).accessibilityHidden(true)
+            Text("builder.format.locked").font(.poulpy(.caption)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+        }
+    }
+
+    /// A part: its header, its steps and repeats, and "Add to Work 1".
+    private func partBlock(_ part: BuilderPart) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            partHeader(part)
+            ForEach(part.steps, id: \.key) { step in
+                if let row = step.row {
+                    card(row).liftable(step.key, dragging: dragging, dragStart: dragStart, dragY: dragY, frames: frames)
+                } else if let group = step.repeatGroup {
+                    repeatBlock(group, in: part.key).liftable(step.key, dragging: dragging, dragStart: dragStart, dragY: dragY, frames: frames)
+                }
+            }
+            addStepButton(Text(part.addLabel), height: 56, part: part.key, repeatKey: nil)
+        }
+        .padding(.bottom, 8)
+    }
+
+    /// A part's header: its icon, name and summary, and a menu to move a work part or delete the part.
+    private func partHeader(_ part: BuilderPart) -> some View {
+        HStack(spacing: 10) {
+            PartBadge(kind: part.kind)
+            VStack(alignment: .leading, spacing: 0) {
+                Text(part.name).font(.poulpy(.title3).weight(.heavy)).foregroundStyle(PoulpyColor.onSurface)
+                Text(part.summary).font(.poulpy(.footnote)).monospacedDigit().foregroundStyle(PoulpyColor.onSurfaceVariant)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            if part.canMoveUp || part.canMoveDown || part.canDelete {
+                Menu {
+                    if part.canMoveUp {
+                        Button { model.movePartUp(key: part.key) } label: { Label("builder.move.up", systemImage: "arrow.up") }
+                    }
+                    if part.canMoveDown {
+                        Button { model.movePartDown(key: part.key) } label: { Label("builder.move.down", systemImage: "arrow.down") }
+                    }
+                    if part.canDelete {
+                        Divider()
+                        Button(role: .destructive) { model.removePart(key: part.key) } label: { Label("builder.delete", systemImage: "trash") }
+                    }
+                } label: {
+                    Image(systemName: "ellipsis").font(.system(size: 17, weight: .bold)).frame(width: 44, height: 44)
+                }
+                .foregroundStyle(PoulpyColor.onSurfaceVariant)
+                .accessibilityLabel(Text(L("builder.more.actions %@", part.name)))
+            }
+        }
+    }
+
     private func card(_ row: BuilderRow) -> some View {
         EntryCard(
-            model: model, row: row, roleOptions: model.roleOptions, open: false,
+            model: model, row: row, roleOptions: model.roleOptions, parts: state.parts, open: false,
             onOpen: { editing = row.key },
             onDrag: { drag(row.key, by: $0) },
             onDrop: drop
@@ -160,7 +215,7 @@ struct BuilderView: View {
     }
 
     /// A repeat: its header with − N times +, its steps inside a tinted block, and a way to add one.
-    private func repeatBlock(_ group: BuilderRepeat) -> some View {
+    private func repeatBlock(_ group: BuilderRepeat, in partKey: String) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 8) {
                 dragHandle(group.key)
@@ -182,6 +237,7 @@ struct BuilderView: View {
                 .background(PoulpyColor.surface.opacity(0.6), in: Capsule())
                 Menu {
                     Button { model.duplicate(key: group.key) } label: { Label("builder.duplicate", systemImage: "plus.square.on.square") }
+                    moveToPartMenu(group.key, from: partKey, parts: state.parts, model: model)
                     Divider()
                     Button(role: .destructive) { model.remove(key: group.key) } label: { Label("builder.delete", systemImage: "trash") }
                 } label: {
@@ -197,7 +253,7 @@ struct BuilderView: View {
                 ForEach(group.rows, id: \.key) { row in
                     card(row).liftable(row.key, dragging: dragging, dragStart: dragStart, dragY: dragY, frames: frames)
                 }
-                addStepButton("builder.add.to.repeat", height: 44, to: group.key)
+                addStepButton(Text("builder.add.to.repeat"), height: 44, part: partKey, repeatKey: group.key)
             }
             .padding(.leading, 10)
         }
@@ -231,19 +287,15 @@ struct BuilderView: View {
         .accessibilityLabel(Text(description))
     }
 
-    /// "Add a step": asks what the step is for. A warm-up, an exercise, a recovery or a cool down
-    /// is picked from the exercise list; a rest is added right away. A repeat offers no warm-up
-    /// or cool down, which belong at the ends of the workout.
-    private func addStepButton(_ label: LocalizedStringKey, height: CGFloat, to repeatKey: String?) -> some View {
+    /// "Add to Work 1": asks what to add. An exercise or a recovery is picked from the exercise
+    /// list; a rest, or a repeat at the end of a part (none inside a repeat), is added right away.
+    private func addStepButton(_ label: Text, height: CGFloat, part: String, repeatKey: String?) -> some View {
         Menu {
+            Button { picking = PickTarget(partKey: part, repeatKey: repeatKey, role: .work) } label: { Label("builder.add.exercise", systemImage: "dumbbell") }
+            Button { picking = PickTarget(partKey: part, repeatKey: repeatKey, role: .recover) } label: { Label("builder.add.recover", systemImage: "figure.walk") }
+            Button { model.addRest(partKey: part, repeatKey: repeatKey) } label: { Label("builder.add.rest", systemImage: "timer") }
             if repeatKey == nil {
-                Button { picking = PickTarget(repeatKey: nil, role: .warmUp) } label: { Label("builder.add.warm.up", systemImage: "sun.max") }
-            }
-            Button { picking = PickTarget(repeatKey: repeatKey, role: .work) } label: { Label("builder.add.exercise", systemImage: "dumbbell") }
-            Button { picking = PickTarget(repeatKey: repeatKey, role: .recover) } label: { Label("builder.add.recover", systemImage: "figure.walk") }
-            Button { model.addRest(repeatKey: repeatKey) } label: { Label("builder.add.rest", systemImage: "timer") }
-            if repeatKey == nil {
-                Button { picking = PickTarget(repeatKey: nil, role: .coolDown) } label: { Label("builder.add.cool.down", systemImage: "moon") }
+                Button { model.addRepeat(partKey: part) } label: { Label("builder.add.repeat", systemImage: "repeat") }
             }
         } label: {
             dashedTile(label, systemImage: "plus", height: height)
@@ -251,8 +303,8 @@ struct BuilderView: View {
         .buttonStyle(.plain)
     }
 
-    private func dashedTile(_ label: LocalizedStringKey, systemImage: String, height: CGFloat) -> some View {
-        Label(label, systemImage: systemImage)
+    private func dashedTile(_ label: Text, systemImage: String, height: CGFloat) -> some View {
+        Label { label } icon: { Image(systemName: systemImage) }
             .font(.poulpy(height < 56 ? .subheadline : .body).weight(.heavy))
             .foregroundStyle(PoulpyColor.primary)
             .frame(maxWidth: .infinity, minHeight: height)
@@ -260,12 +312,14 @@ struct BuilderView: View {
             .contentShape(RoundedRectangle(cornerRadius: 16))
     }
 
-    /// The keys of the list holding [key]: the workout's steps, or its repeat's.
+    /// The keys of the list holding [key]: its part's steps, or its repeat's. A drag stays in its part.
     private func siblings(_ key: String) -> [String] {
-        let top = state.steps.map(\.key)
-        if top.contains(key) { return top }
-        for step in state.steps {
-            if let rows = step.repeatGroup?.rows.map(\.key), rows.contains(key) { return rows }
+        for part in state.parts {
+            let top = part.steps.map(\.key)
+            if top.contains(key) { return top }
+            for step in part.steps {
+                if let rows = step.repeatGroup?.rows.map(\.key), rows.contains(key) { return rows }
+            }
         }
         return []
     }
@@ -305,25 +359,148 @@ struct BuilderView: View {
     }
 }
 
-/// Where a picked exercise goes: the workout, or the repeat [repeatKey]; and what it is for.
+/// Where a picked exercise goes: the part [partKey], or its repeat [repeatKey]; and what it is for.
 private struct PickTarget: Identifiable {
+    let partKey: String
     let repeatKey: String?
-    let role: BuilderRole
+    let role: StepRole
 
-    var id: String { "\(repeatKey ?? "")-\(role.name)" }
+    var id: String { "\(partKey)-\(repeatKey ?? "")-\(role.name)" }
+}
+
+/// "Move to another part" in a step's or a repeat's menu: the other parts by name.
+@ViewBuilder
+private func moveToPartMenu(_ key: String, from partKey: String, parts: [BuilderPart], model: BuilderModel) -> some View {
+    let others = parts.filter { $0.key != partKey }
+    if !others.isEmpty {
+        Menu {
+            ForEach(others, id: \.key) { part in
+                Button(part.name) { model.moveToPart(key: key, partKey: part.key) }
+            }
+        } label: {
+            Label("builder.move.to.part", systemImage: "arrow.right.doc.on.clipboard")
+        }
+    }
+}
+
+/// The format, asked once when a workout is created: Circuit or Sets, each with what it fits and an example.
+private struct FormatSheet: View {
+    let options: [WorkoutFormatOption]
+    let onChoose: (WorkoutFormat) -> Void
+    @State private var chosen: WorkoutFormat = .circuit
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                SheetTitle(title: Text("builder.format.title"), subtitle: Text("builder.format.subtitle"))
+                ForEach(options, id: \.label) { option in
+                    card(option)
+                }
+                Button { onChoose(chosen) } label: {
+                    Text("builder.continue")
+                        .font(.poulpy(.body).weight(.heavy))
+                        .foregroundStyle(PoulpyColor.onPrimary)
+                        .frame(maxWidth: .infinity, minHeight: 52)
+                        .background(PoulpyColor.primary, in: Capsule())
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(20)
+        }
+        .background(PoulpyColor.surface)
+        .presentationDetents([.large])
+    }
+
+    private func card(_ option: WorkoutFormatOption) -> some View {
+        let selected = chosen == option.format
+        let circuit = option.format == .circuit
+        return Button { chosen = option.format } label: {
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(spacing: 10) {
+                    Image(systemName: formatIcon(option.format))
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundStyle(selected ? PoulpyColor.onPrimary : PoulpyColor.onPrimaryContainer)
+                        .frame(width: 36, height: 36)
+                        .background(selected ? PoulpyColor.primary : PoulpyColor.primaryContainer, in: Circle())
+                    Text(option.label).font(.custom(PoulpyFontFace.baloo2Bold, size: 19, relativeTo: .headline))
+                }
+                Text(LocalizedStringKey(circuit ? "builder.circuit.description" : "builder.sets.description"))
+                    .font(.poulpy(.subheadline))
+                    .fixedSize(horizontal: false, vertical: true)
+                Text(LocalizedStringKey(circuit ? "builder.circuit.example" : "builder.sets.example"))
+                    .font(.poulpy(.caption))
+                    .foregroundStyle(PoulpyColor.onSurfaceVariant)
+            }
+            .foregroundStyle(PoulpyColor.onSurface)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(14)
+            .background(selected ? PoulpyColor.primaryContainer : PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 16))
+            .overlay(RoundedRectangle(cornerRadius: 16).stroke(selected ? PoulpyColor.primary : PoulpyColor.outline, lineWidth: selected ? 2 : 1))
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(selected ? .isSelected : [])
+    }
+}
+
+/// "Add a part": warm-up, work and cool down, each saying where it goes or that it is already there.
+private struct PartSheet: View {
+    let options: [BuilderPartOption]
+    let onPick: (PartKind) -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            SheetTitle(title: Text("builder.add.part"), subtitle: Text("builder.add.part.subtitle"))
+            ForEach(options, id: \.name) { option in
+                Button { onPick(option.kind) } label: {
+                    HStack(spacing: 12) {
+                        PartBadge(kind: option.kind)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(option.name).font(.poulpy(.body).weight(.heavy)).foregroundStyle(PoulpyColor.onSurface)
+                            Text(option.note).font(.poulpy(.caption)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .padding(12)
+                    .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 16))
+                    .overlay(RoundedRectangle(cornerRadius: 16).stroke(PoulpyColor.outline, lineWidth: 1))
+                    .opacity(option.enabled ? 1 : 0.5)
+                }
+                .buttonStyle(.plain)
+                .disabled(!option.enabled)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(20)
+        .background(PoulpyColor.surface)
+        .presentationDetents([.medium])
+    }
+}
+
+/// A sheet's title and the line under it.
+private struct SheetTitle: View {
+    let title: Text
+    let subtitle: Text
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            title.font(.poulpy(.title2).weight(.heavy))
+            subtitle.font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+        }
+    }
 }
 
 /// Edits one step in a sheet: the open card, and Done.
 private struct StepSheet: View {
     let model: BuilderModel
     let row: BuilderRow
-    let roleOptions: [StepRoleOption]
+    let parts: [BuilderPart]
+    let format: WorkoutFormat?
     let onDone: () -> Void
 
     var body: some View {
         ScrollView {
             VStack(spacing: 14) {
-                EntryCard(model: model, row: row, roleOptions: roleOptions, open: true, onOpen: {}, onDrag: { _ in }, onDrop: {})
+                EntryCard(model: model, row: row, roleOptions: model.roleOptions, parts: parts, format: format, open: true, onOpen: {}, onDrag: { _ in }, onDrop: {})
                     .id(row.key)
                 Button(action: onDone) {
                     Text("action.done")
@@ -357,13 +534,15 @@ extension View {
     }
 }
 
-/// A step of the workout. Folded: its role, name and summary. Open: what the step is for, then
-/// sets, reps and weight for an exercise, a duration and intensity for a walk or a run, or the
-/// length of a rest.
+/// A step of the workout. Folded: its role, name and summary. Open: where it is, what the step
+/// is for, then reps and weight for an exercise, with its sets and the rest between them in a
+/// Sets workout; a duration and intensity for a walk or a run; or the length of a rest.
 private struct EntryCard: View {
     let model: BuilderModel
     let row: BuilderRow
     let roleOptions: [StepRoleOption]
+    let parts: [BuilderPart]
+    let format: WorkoutFormat?
     let open: Bool
     let onOpen: () -> Void
     let onDrag: (CGFloat) -> Void
@@ -371,10 +550,12 @@ private struct EntryCard: View {
     @State private var weight: String
     @State private var editing: TargetField?
 
-    init(model: BuilderModel, row: BuilderRow, roleOptions: [StepRoleOption], open: Bool, onOpen: @escaping () -> Void, onDrag: @escaping (CGFloat) -> Void, onDrop: @escaping () -> Void) {
+    init(model: BuilderModel, row: BuilderRow, roleOptions: [StepRoleOption], parts: [BuilderPart], format: WorkoutFormat? = nil, open: Bool, onOpen: @escaping () -> Void, onDrag: @escaping (CGFloat) -> Void, onDrop: @escaping () -> Void) {
         self.model = model
         self.row = row
         self.roleOptions = roleOptions
+        self.parts = parts
+        self.format = format
         self.open = open
         self.onOpen = onOpen
         self.onDrag = onDrag
@@ -403,6 +584,9 @@ private struct EntryCard: View {
                     VStack(alignment: .leading, spacing: 2) {
                         if let role = row.roleLabel { roleTag(role) }
                         Text(row.name).font(.custom(PoulpyFontFace.baloo2Bold, size: 19, relativeTo: .headline))
+                        if open {
+                            Text(row.place).font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+                        }
                         if !open || row.isRest {
                             Text(row.summary).font(.poulpy(.subheadline)).monospacedDigit().foregroundStyle(PoulpyColor.onSurfaceVariant)
                         }
@@ -426,11 +610,6 @@ private struct EntryCard: View {
                     stepMenu
                 }
             }
-            if !row.fitsFormat {
-                Label("builder.does.not.fit", systemImage: "exclamationmark.circle")
-                    .font(.poulpy(.caption))
-                    .foregroundStyle(PoulpyColor.error)
-            }
             if open && row.isRest {
                 stepper("builder.duration", row.restLabel, less: { model.changeRest(key: row.key, steps: -1) }, more: { model.changeRest(key: row.key, steps: 1) })
                     .padding(.trailing, 4)
@@ -446,20 +625,33 @@ private struct EntryCard: View {
                 targetEditor(target)
             } else if open, !row.isRest {
                 let columns = [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)]
-                LazyVGrid(columns: columns, spacing: 8) {
-                    stepper("builder.sets", "\(row.sets)", less: { model.setSets(key: row.key, sets: row.sets - 1) }, more: { model.setSets(key: row.key, sets: row.sets + 1) })
+                LazyVGrid(columns: row.showsSets ? columns : [GridItem(.flexible())], spacing: 8) {
+                    if row.showsSets {
+                        stepper("builder.sets", "\(row.sets)", less: { model.setSets(key: row.key, sets: row.sets - 1) }, more: { model.setSets(key: row.key, sets: row.sets + 1) })
+                    }
                     stepper("builder.target", row.amountLabel, less: { model.changeAmount(key: row.key, steps: -1) }, more: { model.changeAmount(key: row.key, steps: 1) })
-                    if !row.isTimed { weightCell }
                 }
                 .padding(.trailing, 4)
+                if row.showsSets && row.sets >= 2 {
+                    stepper("builder.rest.between.sets", row.restBetweenSetsLabel,
+                            less: { model.changeRestBetweenSets(key: row.key, steps: -1) },
+                            more: { model.changeRestBetweenSets(key: row.key, steps: 1) })
+                        .padding(.trailing, 4)
+                }
+                if !row.isTimed {
+                    weightCell.padding(.trailing, 4)
+                }
+                Text(LocalizedStringKey(format == .circuit ? "builder.circuit.hint" : "builder.sets.hint"))
+                    .font(.poulpy(.caption))
+                    .foregroundStyle(PoulpyColor.onSurfaceVariant)
             }
         }
         .padding(EdgeInsets(top: 10, leading: 12, bottom: open ? 14 : 10, trailing: 8))
         .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 16))
-        .overlay(RoundedRectangle(cornerRadius: 16).stroke(row.fitsFormat ? PoulpyColor.outline : PoulpyColor.error, lineWidth: 1))
+        .overlay(RoundedRectangle(cornerRadius: 16).stroke(PoulpyColor.outline, lineWidth: 1))
     }
 
-    /// The small tag above a step's name: "WARM-UP", "RECOVER", "COOL DOWN".
+    /// The small tag above a step's name: "RECOVER".
     private func roleTag(_ label: String) -> some View {
         let recover = row.role == .recover
         return Text(label)
@@ -472,7 +664,7 @@ private struct EntryCard: View {
             .background(recover ? PoulpyColor.surfaceVariant : PoulpyColor.primaryContainer, in: Capsule())
     }
 
-    /// Edit, duplicate, the moves into or out of a repeat when they apply, and delete.
+    /// Edit, duplicate, the moves into or out of a repeat when they apply, the move to another part, and delete.
     private var stepMenu: some View {
         Menu {
             Button(action: onOpen) { Label("builder.edit", systemImage: "pencil") }
@@ -483,6 +675,7 @@ private struct EntryCard: View {
             if row.repeatKey != nil {
                 Button { model.moveOutOfRepeat(key: row.key) } label: { Label("builder.move.out.of.repeat", systemImage: "rectangle.portrait.and.arrow.right") }
             }
+            moveToPartMenu(row.key, from: row.partKey, parts: parts, model: model)
             Divider()
             Button(role: .destructive) { model.remove(key: row.key) } label: { Label("builder.delete", systemImage: "trash") }
         } label: {

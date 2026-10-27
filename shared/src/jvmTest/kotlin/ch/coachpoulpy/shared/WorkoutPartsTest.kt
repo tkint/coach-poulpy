@@ -78,7 +78,8 @@ class WorkoutPartsTest {
         assertEquals(listOf("Warm-up", "Work 1", "Work 2", "Cool down"), state.parts.map { it.name })
         assertEquals(listOf(PartKind.WARM_UP, PartKind.WORK, PartKind.WORK, PartKind.COOL_DOWN), state.parts.map { it.kind })
         assertEquals("1 step · 5 min", state.parts[0].summary)
-        assertEquals("1 exercise · about 2 min", state.parts[1].summary)
+        assertEquals("2 rounds · about 2 min", state.parts[1].summary)
+        assertEquals("1 exercise · 1 min", state.parts[2].summary)
         assertEquals("1 step · 1 min", state.parts[3].summary)
         assertEquals("Circuit", state.formatLabel)
 
@@ -138,7 +139,8 @@ class WorkoutPartsTest {
     fun aSetsWorkoutCountsSetsOutsideARepeat() {
         val builder = graph.createWorkout("fr")
         builder.rename("Jambes")
-        builder.add("goblet-squat")
+        builder.chooseFormat(WorkoutFormat.SETS)
+        builder.add("goblet-squat", builder.work)
         val workout = graph.store.latestWorkout(WorkoutId(builder.save()!!))!!
         val player = PlayerModel(
             workout, graph.compiler.compile(workout), graph.catalog, graph.store, "fr",
@@ -153,6 +155,8 @@ class WorkoutPartsTest {
             assertEquals(3, setCount)
         }
         player.done()
+        clock.advance(1.minutes)
+        player.tick()
         assertEquals(2, player.state.value.setNumber)
     }
 }

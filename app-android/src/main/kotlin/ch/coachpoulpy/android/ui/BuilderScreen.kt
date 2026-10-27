@@ -29,11 +29,10 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.DriveFileMove
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.automirrored.filled.DirectionsWalk
-import androidx.compose.material.icons.filled.Bedtime
-import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Close
@@ -42,6 +41,8 @@ import androidx.compose.material.icons.filled.DragIndicator
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Timer
@@ -70,6 +71,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
@@ -81,6 +83,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -90,18 +93,23 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ch.coachpoulpy.android.R
+import ch.coachpoulpy.core.model.PartKind
+import ch.coachpoulpy.core.model.StepRole
+import ch.coachpoulpy.core.model.WorkoutFormat
 import ch.coachpoulpy.shared.AppGraph
 import ch.coachpoulpy.shared.BuilderModel
+import ch.coachpoulpy.shared.BuilderPart
+import ch.coachpoulpy.shared.BuilderPartOption
 import ch.coachpoulpy.shared.BuilderRepeat
-import ch.coachpoulpy.shared.BuilderRole
 import ch.coachpoulpy.shared.BuilderRow
 import ch.coachpoulpy.shared.DistanceUnit
 import ch.coachpoulpy.shared.DurationKind
 import ch.coachpoulpy.shared.IntensityKind
 import ch.coachpoulpy.shared.PaceUnit
 import ch.coachpoulpy.shared.WalkRunTarget
+import ch.coachpoulpy.shared.WorkoutFormatOption
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose: () -> Unit, firstExercise: String? = null, copyOf: String? = null) {
     val model = remember(graph, language, workoutId, copyOf) {
@@ -112,21 +120,24 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
     }
     DisposableEffect(model) { onDispose { model.close() } }
     val state by model.state.collectAsStateWithLifecycle()
-    // Where the exercise being picked goes (TOP_LEVEL or a repeat's key) and as what; null when not picking.
-    var pickingFor by rememberSaveable { mutableStateOf<String?>(null) }
-    var pickingRole by rememberSaveable { mutableStateOf(BuilderRole.WORK) }
+    // Where the exercise being picked goes (a part, and maybe one of its repeats) and as what; null when not picking.
+    var pickingPart by rememberSaveable { mutableStateOf<String?>(null) }
+    var pickingRepeat by rememberSaveable { mutableStateOf<String?>(null) }
+    var pickingRole by rememberSaveable { mutableStateOf(StepRole.WORK) }
     // The step being edited in the sheet: the one just added, or the one tapped.
     var editing by rememberSaveable { mutableStateOf<String?>(null) }
+    var addingPart by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(state.addedKey) { state.addedKey?.let { editing = it } }
     val colors = MaterialTheme.colorScheme
     val list = rememberLazyListState()
-    // A step moves among the steps of the list that holds it: the workout's, or its repeat's.
-    fun siblings(key: String): List<String>? =
-        state.steps.map { it.key }.takeIf { key in it }
-            ?: state.steps.firstNotNullOfOrNull { step -> step.repeatGroup?.rows?.map { it.key }?.takeIf { key in it } }
+    // A step moves among the steps of the list that holds it: its part's, or its repeat's. A drag stays in its part.
+    fun siblings(key: String): List<String>? = state.parts.firstNotNullOfOrNull { part ->
+        part.steps.map { it.key }.takeIf { key in it }
+            ?: part.steps.firstNotNullOfOrNull { step -> step.repeatGroup?.rows?.map { it.key }?.takeIf { key in it } }
+    }
     val drag = rememberDragReorder(
         list,
-        // The name field, the kinds and the add tiles have keys that are not step keys.
+        // The name field, the part headers and the add tiles have keys that are not step keys.
         canDropOn = { key, onto -> onto is String && siblings(key as String)?.contains(onto) == true },
         onMove = { key, toKey ->
             val keys = siblings(key as String).orEmpty()
@@ -136,20 +147,25 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
             moved
         },
     )
+    fun pick(part: String, repeat: String?, role: StepRole) {
+        pickingRole = role
+        pickingRepeat = repeat
+        pickingPart = part
+    }
 
-    pickingFor?.let { target ->
-        BackHandler { pickingFor = null }
+    pickingPart?.let { part ->
+        BackHandler { pickingPart = null }
         Scaffold(
             topBar = {
                 TopAppBar(
                     title = { Text(stringResource(R.string.builder_pick_title)) },
-                    navigationIcon = { BackButton { pickingFor = null } },
+                    navigationIcon = { BackButton { pickingPart = null } },
                 )
             },
         ) { padding ->
             ExerciseList(
                 graph, language,
-                onPick = { model.add(it, target.takeUnless { key -> key == TOP_LEVEL }, pickingRole); pickingFor = null },
+                onPick = { model.add(it, part, pickingRepeat, pickingRole); pickingPart = null },
                 modifier = Modifier.padding(padding),
                 adding = true,
             )
@@ -193,90 +209,239 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
                     BoxField(state.name, model::rename, label = stringResource(R.string.builder_name), modifier = Modifier.fillMaxWidth().height(52.dp))
                 }
             }
-            item {
-                Column(Modifier.padding(bottom = 14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    FieldLabel(stringResource(R.string.builder_format))
-                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        model.formatOptions.forEach { option ->
-                            PoulpyChip(selected = state.format == option.format, onClick = { model.setFormat(option.format) }, label = option.label)
-                        }
-                    }
-                }
-            }
-            if (state.steps.isEmpty()) {
-                item { Text(stringResource(R.string.builder_empty), style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant, modifier = Modifier.padding(bottom = 14.dp)) }
-            }
-            state.steps.forEach { step ->
-                val row = step.row
-                val repeat = step.repeatGroup
-                if (row != null) {
-                    item(key = row.key) {
-                        StepCard(
-                            model, row,
-                            onEdit = { editing = row.key },
-                            handle = Modifier.dragHandle(drag, row.key),
-                            modifier = Modifier.draggedItem(this, drag, row.key).padding(bottom = 12.dp),
-                        )
-                    }
-                } else if (repeat != null) {
-                    // CLEANUP: a repeat is a header item plus one item per step, so dragging it lifts only the
-                    // header and the steps follow on drop. Draw the repeat as one item to drag it whole (#73).
-                    item(key = repeat.key) {
-                        RepeatHeader(model, repeat, handle = Modifier.dragHandle(drag, repeat.key), modifier = Modifier.draggedItem(this, drag, repeat.key))
-                    }
-                    items(repeat.rows, key = { it.key }) { child ->
-                        Box(Modifier.draggedItem(this, drag, child.key).background(colors.primaryContainer).padding(start = 22.dp, end = 8.dp, bottom = 6.dp)) {
+            val format = state.format ?: return@LazyColumn
+            item { FormatLine(format, state.formatLabel) }
+            state.parts.forEach { part ->
+                item(key = "part-${part.key}") { BuilderPartHeader(model, part) }
+                part.steps.forEach { step ->
+                    val row = step.row
+                    val repeat = step.repeatGroup
+                    if (row != null) {
+                        item(key = row.key) {
                             StepCard(
-                                model, child,
-                                onEdit = { editing = child.key },
-                                handle = Modifier.dragHandle(drag, child.key),
-                                modifier = Modifier,
+                                model, row, state.parts,
+                                onEdit = { editing = row.key },
+                                handle = Modifier.dragHandle(drag, row.key),
+                                modifier = Modifier.draggedItem(this, drag, row.key).padding(bottom = 12.dp),
                             )
                         }
-                    }
-                    item(key = "add-${repeat.key}") {
-                        Box(
-                            Modifier
-                                .padding(bottom = 12.dp)
-                                .background(colors.primaryContainer, RoundedCornerShape(bottomStart = PoulpyRadius.md, bottomEnd = PoulpyRadius.md))
-                                .padding(start = 22.dp, end = 8.dp, bottom = 10.dp, top = 2.dp),
-                        ) {
-                            AddStepButton(
-                                label = stringResource(R.string.builder_add_to_repeat),
-                                onExercise = { role -> pickingRole = role; pickingFor = repeat.key },
-                                onRest = { model.addRest(repeat.key) },
-                                height = 44,
-                                inRepeat = true,
-                            )
+                    } else if (repeat != null) {
+                        // CLEANUP: a repeat is a header item plus one item per step, so dragging it lifts only the
+                        // header and the steps follow on drop. Draw the repeat as one item to drag it whole (#73).
+                        item(key = repeat.key) {
+                            RepeatHeader(model, repeat, part.key, state.parts, handle = Modifier.dragHandle(drag, repeat.key), modifier = Modifier.draggedItem(this, drag, repeat.key))
+                        }
+                        items(repeat.rows, key = { it.key }) { child ->
+                            Box(Modifier.draggedItem(this, drag, child.key).background(colors.primaryContainer).padding(start = 22.dp, end = 8.dp, bottom = 6.dp)) {
+                                StepCard(
+                                    model, child, state.parts,
+                                    onEdit = { editing = child.key },
+                                    handle = Modifier.dragHandle(drag, child.key),
+                                    modifier = Modifier,
+                                )
+                            }
+                        }
+                        item(key = "add-${repeat.key}") {
+                            Box(
+                                Modifier
+                                    .padding(bottom = 12.dp)
+                                    .background(colors.primaryContainer, RoundedCornerShape(bottomStart = PoulpyRadius.md, bottomEnd = PoulpyRadius.md))
+                                    .padding(start = 22.dp, end = 8.dp, bottom = 10.dp, top = 2.dp),
+                            ) {
+                                AddStepButton(
+                                    label = stringResource(R.string.builder_add_to_repeat),
+                                    onExercise = { role -> pick(part.key, repeat.key, role) },
+                                    onRest = { model.addRest(part.key, repeat.key) },
+                                    height = 44,
+                                )
+                            }
                         }
                     }
+                }
+                item(key = "add-${part.key}") {
+                    AddStepButton(
+                        label = part.addLabel,
+                        onExercise = { role -> pick(part.key, null, role) },
+                        onRest = { model.addRest(part.key) },
+                        onRepeat = { model.addRepeat(part.key) },
+                        modifier = Modifier.padding(bottom = 20.dp),
+                    )
                 }
             }
             item {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    AddStepButton(
-                        label = stringResource(R.string.builder_add_step),
-                        onExercise = { role -> pickingRole = role; pickingFor = TOP_LEVEL },
-                        onRest = { model.addRest() },
-                        modifier = Modifier.weight(1f),
-                    )
-                    DashedTile(stringResource(R.string.builder_add_repeat), Icons.Filled.Repeat, onClick = model::addRepeat, modifier = Modifier.weight(1f))
-                }
+                DashedTile(stringResource(R.string.builder_add_part), Icons.Filled.Add, onClick = { addingPart = true })
             }
         }
     }
 
+    if (state.format == null) {
+        FormatSheet(model.formatOptions, onChoose = model::chooseFormat, onClose = onClose)
+    }
+    if (addingPart) {
+        PartSheet(state.partOptions, onPick = { model.addPart(it); addingPart = false }, onDone = { addingPart = false })
+    }
     state.rows.firstOrNull { it.key == editing }?.let { row ->
-        StepSheet(model, row, onDone = { editing = null })
+        StepSheet(model, row, state.format, onDone = { editing = null })
     }
 }
 
-/** What the exercise picker adds to when it was opened from the end of the list. */
-private const val TOP_LEVEL = "top-level"
-
-/** A repeat's header: its handle, "Repeat", how many times as − N times +, and a menu to duplicate or remove it. */
+/**
+ * The format, asked once when a workout is created: Circuit or Sets, each with what it fits
+ * and an example. Closing the sheet without choosing leaves the builder.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun RepeatHeader(model: BuilderModel, repeat: BuilderRepeat, handle: Modifier, modifier: Modifier) {
+private fun FormatSheet(options: List<WorkoutFormatOption>, onChoose: (WorkoutFormat) -> Unit, onClose: () -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    var chosen by rememberSaveable { mutableStateOf(WorkoutFormat.CIRCUIT) }
+    ModalBottomSheet(onDismissRequest = onClose, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), containerColor = colors.surface) {
+        Column(
+            Modifier.padding(horizontal = 20.dp).padding(bottom = 24.dp).navigationBarsPadding(),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            SheetTitle(stringResource(R.string.builder_format_title), stringResource(R.string.builder_format_subtitle))
+            options.forEach { option ->
+                val format = option.format
+                val (description, example) = when (format) {
+                    WorkoutFormat.CIRCUIT -> R.string.builder_circuit_description to R.string.builder_circuit_example
+                    WorkoutFormat.SETS -> R.string.builder_sets_description to R.string.builder_sets_example
+                }
+                val selected = chosen == format
+                Surface(
+                    onClick = { chosen = format },
+                    shape = RoundedCornerShape(PoulpyRadius.md),
+                    color = if (selected) colors.primaryContainer else colors.surface,
+                    border = BorderStroke(if (selected) 2.dp else 1.dp, if (selected) colors.primary else colors.outline),
+                    modifier = Modifier.fillMaxWidth().semantics { this.selected = selected },
+                ) {
+                    Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            Box(Modifier.size(36.dp).clip(CircleShape).background(if (selected) colors.primary else colors.primaryContainer), contentAlignment = Alignment.Center) {
+                                Icon(format.icon, contentDescription = null, tint = if (selected) colors.onPrimary else colors.onPrimaryContainer, modifier = Modifier.size(20.dp))
+                            }
+                            Text(option.label, style = PoulpyTextStyles.Headline.copy(fontSize = 19.sp, lineHeight = 23.sp))
+                        }
+                        Text(stringResource(description), style = MaterialTheme.typography.bodyMedium)
+                        Text(stringResource(example), style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
+                    }
+                }
+            }
+            Button(onClick = { onChoose(chosen) }, modifier = Modifier.fillMaxWidth().height(52.dp)) {
+                Text(stringResource(R.string.builder_continue), fontWeight = FontWeight.ExtraBold)
+            }
+        }
+    }
+}
+
+/** A sheet's title and the line under it. */
+@Composable
+private fun SheetTitle(title: String, subtitle: String) {
+    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Text(title, style = MaterialTheme.typography.titleLarge)
+        Text(subtitle, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+}
+
+/** Under the name: the format as a chip, with a lock, since it was chosen at creation and stays. */
+@Composable
+private fun FormatLine(format: WorkoutFormat, label: String) {
+    val colors = MaterialTheme.colorScheme
+    Row(Modifier.padding(bottom = 18.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        FieldLabel(stringResource(R.string.builder_format))
+        Row(
+            Modifier.background(colors.primaryContainer, CircleShape).padding(horizontal = 12.dp, vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            Icon(format.icon, contentDescription = null, tint = colors.onPrimaryContainer, modifier = Modifier.size(18.dp))
+            Text(label, fontWeight = FontWeight.ExtraBold, color = colors.onPrimaryContainer)
+        }
+        Icon(Icons.Filled.Lock, contentDescription = null, tint = colors.onSurfaceVariant, modifier = Modifier.size(16.dp))
+        Text(stringResource(R.string.builder_format_locked), style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
+    }
+}
+
+/** A part's header: its icon, name and summary, and a menu to move a work part or delete the part. */
+@Composable
+private fun BuilderPartHeader(model: BuilderModel, part: BuilderPart) {
+    val colors = MaterialTheme.colorScheme
+    var expanded by remember { mutableStateOf(false) }
+    Row(Modifier.padding(bottom = 10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        PartBadge(part.kind)
+        Column(Modifier.weight(1f)) {
+            Text(part.name, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.ExtraBold)
+            Text(part.summary, style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
+        }
+        if (part.canMoveUp || part.canMoveDown || part.canDelete) {
+            Box {
+                IconButton(onClick = { expanded = true }) {
+                    Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.builder_more_actions, part.name), tint = colors.onSurfaceVariant)
+                }
+                DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                    if (part.canMoveUp) {
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.builder_move_up)) },
+                            leadingIcon = { Icon(Icons.Filled.KeyboardArrowUp, contentDescription = null) },
+                            onClick = { expanded = false; model.movePartUp(part.key) },
+                        )
+                    }
+                    if (part.canMoveDown) {
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.builder_move_down)) },
+                            leadingIcon = { Icon(Icons.Filled.KeyboardArrowDown, contentDescription = null) },
+                            onClick = { expanded = false; model.movePartDown(part.key) },
+                        )
+                    }
+                    if (part.canDelete) {
+                        if (part.canMoveUp || part.canMoveDown) HorizontalDivider()
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.builder_delete), color = colors.error) },
+                            leadingIcon = { Icon(Icons.Filled.Delete, contentDescription = null, tint = colors.error) },
+                            onClick = { expanded = false; model.removePart(part.key) },
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** "Add a part": warm-up, work and cool down, each saying where it goes or that it is already there. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun PartSheet(options: List<BuilderPartOption>, onPick: (PartKind) -> Unit, onDone: () -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    ModalBottomSheet(onDismissRequest = onDone, containerColor = colors.surface) {
+        Column(
+            Modifier.padding(horizontal = 20.dp).padding(bottom = 24.dp).navigationBarsPadding(),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            SheetTitle(stringResource(R.string.builder_add_part), stringResource(R.string.builder_add_part_subtitle))
+            options.forEach { option ->
+                Surface(
+                    onClick = { onPick(option.kind) },
+                    enabled = option.enabled,
+                    shape = RoundedCornerShape(PoulpyRadius.md),
+                    color = colors.surface,
+                    border = BorderStroke(1.dp, colors.outline),
+                    modifier = Modifier.fillMaxWidth().alpha(if (option.enabled) 1f else 0.5f),
+                ) {
+                    Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        PartBadge(option.kind)
+                        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                            Text(option.name, fontWeight = FontWeight.ExtraBold)
+                            Text(option.note, style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** A repeat's header: its handle, "Repeat", how many times as − N times +, and a menu to duplicate, move or remove it. */
+@Composable
+private fun RepeatHeader(model: BuilderModel, repeat: BuilderRepeat, partKey: String, parts: List<BuilderPart>, handle: Modifier, modifier: Modifier) {
     val colors = MaterialTheme.colorScheme
     val moveUp = stringResource(R.string.builder_move_up)
     val moveDown = stringResource(R.string.builder_move_down)
@@ -308,6 +473,7 @@ private fun RepeatHeader(model: BuilderModel, repeat: BuilderRepeat, handle: Mod
         ActionsMenu(
             description = stringResource(R.string.builder_repeat_actions),
             onDuplicate = { model.duplicate(repeat.key) },
+            otherParts = parts.filter { it.key != partKey }.map { it.name to { model.moveToPart(repeat.key, it.key) } },
             onRemove = { model.remove(repeat.key) },
         )
     }
@@ -355,7 +521,7 @@ private fun BoxField(
 
 /** A step of the workout, read-only: its role, name and summary. A tap edits it in a sheet; the menu has the rest. */
 @Composable
-private fun StepCard(model: BuilderModel, row: BuilderRow, onEdit: () -> Unit, handle: Modifier, modifier: Modifier) {
+private fun StepCard(model: BuilderModel, row: BuilderRow, parts: List<BuilderPart>, onEdit: () -> Unit, handle: Modifier, modifier: Modifier) {
     val colors = MaterialTheme.colorScheme
     val moveUp = stringResource(R.string.builder_move_up)
     val moveDown = stringResource(R.string.builder_move_down)
@@ -364,7 +530,7 @@ private fun StepCard(model: BuilderModel, row: BuilderRow, onEdit: () -> Unit, h
     Surface(
         shape = RoundedCornerShape(PoulpyRadius.md),
         color = colors.surface,
-        border = BorderStroke(1.dp, if (row.fitsFormat) colors.outline else colors.error),
+        border = BorderStroke(1.dp, colors.outline),
         // Screen readers can't drag: they get the moves as actions on the card.
         modifier = modifier.fillMaxWidth().semantics {
             customActions = listOfNotNull(
@@ -375,48 +541,42 @@ private fun StepCard(model: BuilderModel, row: BuilderRow, onEdit: () -> Unit, h
             )
         },
     ) {
-        Column(Modifier.padding(start = 12.dp, end = 4.dp, top = 10.dp, bottom = 10.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Icon(
-                    Icons.Filled.DragIndicator,
-                    contentDescription = null,
-                    tint = PoulpyPalette.Neutral500,
-                    modifier = handle.size(28.dp, 44.dp).padding(horizontal = 4.dp, vertical = 12.dp),
-                )
-                Column(
-                    Modifier.weight(1f).clickable(onClickLabel = stringResource(R.string.builder_open, row.name), onClick = onEdit),
-                    verticalArrangement = Arrangement.spacedBy(2.dp),
-                ) {
-                    row.roleLabel?.let { RoleTag(it, row.role) }
-                    Text(row.name, style = PoulpyTextStyles.Headline.copy(fontSize = 19.sp, lineHeight = 23.sp))
-                    Text(row.summary, style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
-                }
-                ActionsMenu(
-                    description = stringResource(R.string.builder_more_actions, row.name),
-                    onEdit = onEdit,
-                    onDuplicate = { model.duplicate(row.key) },
-                    onMoveIn = if (row.canMoveIntoRepeat) ({ model.moveIntoRepeatAbove(row.key) }) else null,
-                    onMoveOut = if (row.repeatKey != null) ({ model.moveOutOfRepeat(row.key) }) else null,
-                    onRemove = { model.remove(row.key) },
-                )
+        Row(Modifier.padding(start = 12.dp, end = 4.dp, top = 10.dp, bottom = 10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            Icon(
+                Icons.Filled.DragIndicator,
+                contentDescription = null,
+                tint = PoulpyPalette.Neutral500,
+                modifier = handle.size(28.dp, 44.dp).padding(horizontal = 4.dp, vertical = 12.dp),
+            )
+            Column(
+                Modifier.weight(1f).clickable(onClickLabel = stringResource(R.string.builder_open, row.name), onClick = onEdit),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+            ) {
+                row.roleLabel?.let { RoleTag(it, row.role) }
+                Text(row.name, style = PoulpyTextStyles.Headline.copy(fontSize = 19.sp, lineHeight = 23.sp))
+                Text(row.summary, style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
             }
-            if (!row.fitsFormat) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Icon(Icons.Filled.ErrorOutline, contentDescription = null, tint = colors.error, modifier = Modifier.size(18.dp))
-                    Text(stringResource(R.string.builder_does_not_fit), color = colors.error, style = MaterialTheme.typography.bodySmall)
-                }
-            }
+            ActionsMenu(
+                description = stringResource(R.string.builder_more_actions, row.name),
+                onEdit = onEdit,
+                onDuplicate = { model.duplicate(row.key) },
+                onMoveIn = if (row.canMoveIntoRepeat) ({ model.moveIntoRepeatAbove(row.key) }) else null,
+                onMoveOut = if (row.repeatKey != null) ({ model.moveOutOfRepeat(row.key) }) else null,
+                otherParts = parts.filter { it.key != row.partKey }.map { it.name to { model.moveToPart(row.key, it.key) } },
+                onRemove = { model.remove(row.key) },
+            )
         }
     }
 }
 
 /**
- * Edits one step: what it is for, then sets, reps and weight for an exercise, a duration and
- * an intensity for a walk or a run, or the length of a rest.
+ * Edits one step: what it is for, then reps and weight for an exercise, with its sets and the
+ * rest between them in a Sets workout; a duration and an intensity for a walk or a run; or the
+ * length of a rest.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun StepSheet(model: BuilderModel, row: BuilderRow, onDone: () -> Unit) {
+private fun StepSheet(model: BuilderModel, row: BuilderRow, format: WorkoutFormat?, onDone: () -> Unit) {
     val colors = MaterialTheme.colorScheme
     // Opens fully, so every field shows without dragging the sheet up.
     ModalBottomSheet(onDismissRequest = onDone, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), containerColor = colors.surface) {
@@ -426,13 +586,7 @@ private fun StepSheet(model: BuilderModel, row: BuilderRow, onDone: () -> Unit) 
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 row.roleLabel?.let { RoleTag(it, row.role) }
-                Text(row.name, style = MaterialTheme.typography.titleLarge)
-            }
-            if (!row.fitsFormat) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Icon(Icons.Filled.ErrorOutline, contentDescription = null, tint = colors.error, modifier = Modifier.size(18.dp))
-                    Text(stringResource(R.string.builder_does_not_fit), color = colors.error, style = MaterialTheme.typography.bodySmall)
-                }
+                SheetTitle(row.name, row.place)
             }
             val target = row.target
             if (row.isRest) {
@@ -449,10 +603,24 @@ private fun StepSheet(model: BuilderModel, row: BuilderRow, onDone: () -> Unit) 
                 } else {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            StepperCell(stringResource(R.string.builder_sets), row.sets.toString(), { model.setSets(row.key, row.sets - 1) }, { model.setSets(row.key, row.sets + 1) }, Modifier.weight(1f))
+                            if (row.showsSets) {
+                                StepperCell(stringResource(R.string.builder_sets), row.sets.toString(), { model.setSets(row.key, row.sets - 1) }, { model.setSets(row.key, row.sets + 1) }, Modifier.weight(1f))
+                            }
                             StepperCell(stringResource(R.string.builder_target), row.amountLabel, { model.changeAmount(row.key, -1) }, { model.changeAmount(row.key, 1) }, Modifier.weight(1f))
                         }
+                        if (row.showsSets && row.sets >= 2) {
+                            StepperCell(
+                                stringResource(R.string.builder_rest_between_sets), row.restBetweenSetsLabel,
+                                { model.changeRestBetweenSets(row.key, -1) }, { model.changeRestBetweenSets(row.key, 1) },
+                                Modifier.fillMaxWidth(),
+                            )
+                        }
                         if (!row.isTimed) WeightCell(model, row, Modifier.fillMaxWidth())
+                        Text(
+                            stringResource(if (format == WorkoutFormat.CIRCUIT) R.string.builder_circuit_hint else R.string.builder_sets_hint),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = colors.onSurfaceVariant,
+                        )
                     }
                 }
             }
@@ -463,10 +631,10 @@ private fun StepSheet(model: BuilderModel, row: BuilderRow, onDone: () -> Unit) 
     }
 }
 
-/** The small tag above a step's name: "WARM-UP", "RECOVER", "COOL DOWN". */
+/** The small tag above a step's name: "RECOVER". */
 @Composable
-private fun RoleTag(label: String, role: BuilderRole) {
-    val recover = role == BuilderRole.RECOVER
+private fun RoleTag(label: String, role: StepRole) {
+    val recover = role == StepRole.RECOVER
     Text(
         label.uppercase(),
         style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
@@ -477,19 +645,29 @@ private fun RoleTag(label: String, role: BuilderRole) {
     )
 }
 
-/** The ⋮ menu of a step or a repeat: edit, duplicate, the moves into or out of a repeat when they apply, and delete. */
+/**
+ * The ⋮ menu of a step or a repeat: edit, duplicate, the moves into or out of a repeat when they
+ * apply, the move to another part (the names in [otherParts] with what moving there does), and delete.
+ */
 @Composable
 private fun ActionsMenu(
     description: String,
     onDuplicate: () -> Unit,
     onRemove: () -> Unit,
+    otherParts: List<Pair<String, () -> Unit>>,
     onEdit: (() -> Unit)? = null,
     onMoveIn: (() -> Unit)? = null,
     onMoveOut: (() -> Unit)? = null,
 ) {
     val colors = MaterialTheme.colorScheme
     var expanded by remember { mutableStateOf(false) }
+    var choosingPart by remember { mutableStateOf(false) }
     Box {
+        DropdownMenu(expanded = choosingPart, onDismissRequest = { choosingPart = false }) {
+            otherParts.forEach { (name, move) ->
+                DropdownMenuItem(text = { Text(name) }, onClick = { choosingPart = false; move() })
+            }
+        }
         IconButton(onClick = { expanded = true }) {
             Icon(Icons.Filled.MoreVert, contentDescription = description, tint = colors.onSurfaceVariant)
         }
@@ -518,6 +696,13 @@ private fun ActionsMenu(
                     text = { Text(stringResource(R.string.builder_move_out_of_repeat)) },
                     leadingIcon = { Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null) },
                     onClick = { expanded = false; move() },
+                )
+            }
+            if (otherParts.isNotEmpty()) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.builder_move_to_part)) },
+                    leadingIcon = { Icon(Icons.AutoMirrored.Filled.DriveFileMove, contentDescription = null) },
+                    onClick = { expanded = false; choosingPart = true },
                 )
             }
             HorizontalDivider()
@@ -808,20 +993,18 @@ private fun DashedTile(label: String, icon: ImageVector, onClick: () -> Unit, mo
 }
 
 /**
- * "Add a step": a tap asks what the step is for. A warm-up, an exercise, a recovery or a cool
- * down is picked from the exercise list; a rest is added right away. In a repeat ([inRepeat])
- * there is no warm-up or cool down, which belong at the ends of the workout.
+ * "Add to Work 1": a tap asks what to add. An exercise or a recovery is picked from the exercise
+ * list; a rest, or a repeat at the end of a part ([onRepeat]; none inside a repeat), is added right away.
  */
 @Composable
-private fun AddStepButton(label: String, onExercise: (BuilderRole) -> Unit, onRest: () -> Unit, modifier: Modifier = Modifier, height: Int = 56, inRepeat: Boolean = false) {
+private fun AddStepButton(label: String, onExercise: (StepRole) -> Unit, onRest: () -> Unit, modifier: Modifier = Modifier, height: Int = 56, onRepeat: (() -> Unit)? = null) {
     var expanded by remember { mutableStateOf(false) }
     Box(modifier) {
         DashedTile(label, Icons.Filled.Add, onClick = { expanded = true }, height = height)
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            listOfNotNull(
-                Triple(BuilderRole.WARM_UP, R.string.builder_add_warm_up, Icons.Filled.WbSunny).takeUnless { inRepeat },
-                Triple(BuilderRole.WORK, R.string.builder_add_exercise, Icons.Filled.FitnessCenter),
-                Triple(BuilderRole.RECOVER, R.string.builder_add_recover, Icons.AutoMirrored.Filled.DirectionsWalk),
+            listOf(
+                Triple(StepRole.WORK, R.string.builder_add_exercise, Icons.Filled.FitnessCenter),
+                Triple(StepRole.RECOVER, R.string.builder_add_recover, Icons.AutoMirrored.Filled.DirectionsWalk),
             ).forEach { (role, text, icon) ->
                 DropdownMenuItem(
                     text = { Text(stringResource(text)) },
@@ -834,11 +1017,11 @@ private fun AddStepButton(label: String, onExercise: (BuilderRole) -> Unit, onRe
                 leadingIcon = { Icon(Icons.Filled.Timer, contentDescription = null) },
                 onClick = { expanded = false; onRest() },
             )
-            if (!inRepeat) {
+            onRepeat?.let { repeat ->
                 DropdownMenuItem(
-                    text = { Text(stringResource(R.string.builder_add_cool_down)) },
-                    leadingIcon = { Icon(Icons.Filled.Bedtime, contentDescription = null) },
-                    onClick = { expanded = false; onExercise(BuilderRole.COOL_DOWN) },
+                    text = { Text(stringResource(R.string.builder_add_repeat)) },
+                    leadingIcon = { Icon(Icons.Filled.Repeat, contentDescription = null) },
+                    onClick = { expanded = false; repeat() },
                 )
             }
         }

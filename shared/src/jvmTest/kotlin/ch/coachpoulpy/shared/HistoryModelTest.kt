@@ -47,8 +47,8 @@ class HistoryModelTest {
     private fun strengthWorkout(): WorkoutId {
         val builder = graph.createWorkout("en")
         builder.rename("Quick")
-        builder.setFormat(WorkoutFormat.SETS)
-        builder.add("push-up")
+        builder.chooseFormat(WorkoutFormat.SETS)
+        builder.add("push-up", builder.work)
         return WorkoutId(builder.save()!!)
     }
 

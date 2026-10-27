@@ -26,13 +26,6 @@ import ch.coachpoulpy.core.model.WorkoutId
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
-/**
- * What an exercise step is for in the builder. The builder still shows one list of steps, so a
- * warm-up or cool down is a role here and becomes the workout's warm-up or cool down part on save.
- */
-// CLEANUP: #90 builds workouts in parts; then the builder keeps parts and uses StepRole, and this goes.
-enum class BuilderRole { WARM_UP, WORK, RECOVER, COOL_DOWN }
-
 /** One step of a workout in the builder: an exercise, a rest or a repeat. */
 sealed interface DraftStep {
     val key: String
@@ -57,8 +50,9 @@ internal fun DraftStep.toModelStep(): Step = when (this) {
 /**
  * One exercise in the builder: the same number of sets, each with the same target and
  * load, one after the other. [amount] is reps, seconds or meters depending on [measurement].
- * Exercises done one side at a time get a left and a right set for each set. Rests are
- * steps of their own; to rest between sets, put one set and a rest in a repeat.
+ * Exercises done one side at a time get a left and a right set for each set. Between two
+ * sets comes [restBetweenSets]; in a circuit there is one set, and the repeat around it
+ * does the repeating.
  *
  * A walk or a run ([walkOrRun]) is one block instead: a duration, a distance or until the
  * button is pressed ([open]), with an optional pace kept as [speedKmh]. [distanceUnit] and
@@ -76,8 +70,10 @@ data class DraftEntry(
     val speedKmh: Double? = null,
     val distanceUnit: DistanceUnit = DistanceUnit.KM,
     val paceUnit: PaceUnit = PaceUnit.PER_KM,
-    val role: BuilderRole = BuilderRole.WORK,
+    val role: StepRole = StepRole.WORK,
     val open: Boolean = false,
+    /** Seconds of rest after each set but the last. */
+    val restBetweenSets: Int = DEFAULT_REST_BETWEEN_SETS,
 ) : DraftStep {
     /** How a walk or a run ends; null for any other exercise. */
     val durationKind: DurationKind?
@@ -92,8 +88,6 @@ data class DraftEntry(
     val intensityKind: IntensityKind?
         get() = if (!walkOrRun) null else if (speedKmh != null) IntensityKind.PACE else IntensityKind.FREE
 
-    private val stepRole: StepRole get() = if (role == BuilderRole.RECOVER) StepRole.RECOVER else StepRole.WORK
-
     internal fun toStep(): Step.ExerciseStep {
         val target = if (walkOrRun && open) Target.Open else when (measurement) {
             MeasurementMode.REPS -> Target.Reps(amount)
@@ -104,24 +98,28 @@ data class DraftEntry(
         val load = loadKg?.let { Load.Kilograms(it) }
         if (walkOrRun) {
             val set = SetPrescription(target, intensity = speedKmh?.let { Intensity.Speed(it) })
-            return Step.ExerciseStep(StepId(key), exercise, Prescription(listOf(set)), stepRole)
+            return Step.ExerciseStep(StepId(key), exercise, Prescription(listOf(set)), role)
         }
-        val prescriptions = (1..sets).flatMap {
+        val prescriptions = (1..sets).flatMap { set ->
+            val rest = if (set < sets) restBetweenSets.seconds else Duration.ZERO
             if (perSide) {
                 listOf(
                     SetPrescription(target, load, side = Side.LEFT, restAfter = if (target.isTimed) SWITCH_SIDES else Duration.ZERO),
-                    SetPrescription(target, load, side = Side.RIGHT),
+                    SetPrescription(target, load, side = Side.RIGHT, restAfter = rest),
                 )
             } else {
-                listOf(SetPrescription(target, load))
+                listOf(SetPrescription(target, load, restAfter = rest))
             }
         }
-        return Step.ExerciseStep(StepId(key), exercise, Prescription(prescriptions), stepRole)
+        return Step.ExerciseStep(StepId(key), exercise, Prescription(prescriptions), role)
     }
 
     companion object {
         /** Time to change sides between the left and right halves of a timed set. */
         internal val SWITCH_SIDES = 5.seconds
+
+        /** The rest between sets a new exercise starts with, in seconds. */
+        internal const val DEFAULT_REST_BETWEEN_SETS = 60
 
         /**
          * A new exercise step. It starts at one set in a circuit, inside a repeat, since the repeat
@@ -156,13 +154,8 @@ data class DraftEntry(
         /** Twenty minutes, the duration a new walk or run starts with. */
         internal const val WALK_OR_RUN_MINUTES = 20
 
-        internal fun from(step: Step.ExerciseStep, exercise: Exercise?, part: PartKind = PartKind.WORK): DraftEntry? {
-            val role = when {
-                step.role == StepRole.RECOVER -> BuilderRole.RECOVER
-                part == PartKind.WARM_UP -> BuilderRole.WARM_UP
-                part == PartKind.COOL_DOWN -> BuilderRole.COOL_DOWN
-                else -> BuilderRole.WORK
-            }
+        internal fun from(step: Step.ExerciseStep, exercise: Exercise?): DraftEntry? {
+            val role = step.role
             val sets = step.prescription.sets
             val first = sets.firstOrNull() ?: return null
             val walkTarget = first.target is Target.Time || first.target is Target.Distance || first.target is Target.Open
@@ -184,6 +177,8 @@ data class DraftEntry(
             }
             if (sets.any { it.target is Target.Open }) return null
             val measurement = exercise?.measurement ?: first.target.measurement
+            // Every set but the last ends with the same rest; a left half ends with the switch.
+            val between = sets.dropLast(1).firstOrNull { it.side != Side.LEFT }?.restAfter
             return DraftEntry(
                 key = step.id.value,
                 exercise = step.exercise,
@@ -193,6 +188,7 @@ data class DraftEntry(
                 amount = first.target.amount,
                 loadKg = (first.load as? Load.Kilograms)?.kg,
                 role = role,
+                restBetweenSets = between?.inWholeSeconds?.toInt() ?: DEFAULT_REST_BETWEEN_SETS,
             )
         }
 
@@ -211,65 +207,70 @@ data class DraftEntry(
     }
 }
 
-/** A workout being created or edited. Saving it stores a new version; old versions stay for past sessions. */
+/** A part of the workout in the builder: the warm-up, a work part or the cool down, with its steps. */
+data class DraftPart(val key: String, val kind: PartKind, val steps: List<DraftStep>) {
+    internal fun toPart() = Part(PartId(key), kind, steps.map { it.toModelStep() })
+
+    internal companion object {
+        /** A new part; in a circuit, a work part starts as a repeat done three times. */
+        fun new(kind: PartKind, format: WorkoutFormat?) = DraftPart(
+            Ids.newUuidV7(),
+            kind,
+            if (kind == PartKind.WORK && format == WorkoutFormat.CIRCUIT) listOf(DraftRepeat(Ids.newUuidV7(), 3, emptyList())) else emptyList(),
+        )
+    }
+}
+
+/**
+ * A workout being created or edited. Saving it stores a new version; old versions stay for past
+ * sessions. [format] is null until it is chosen, once, when the workout is created.
+ */
 data class WorkoutDraft(
     val id: WorkoutId?,
     val version: Int,
     val name: String,
-    val format: WorkoutFormat,
-    val steps: List<DraftStep>,
+    val format: WorkoutFormat?,
+    val parts: List<DraftPart>,
 ) {
-    /**
-     * The warm-ups at the top make the warm-up part and the cool downs at the bottom the cool down
-     * part; every other step is the work part.
-     */
-    internal fun toWorkout(): Workout {
-        val warmUps = steps.takeWhile { it is DraftEntry && it.role == BuilderRole.WARM_UP }
-        val coolDowns = steps.drop(warmUps.size).takeLastWhile { it is DraftEntry && it.role == BuilderRole.COOL_DOWN }
-        val work = steps.subList(warmUps.size, steps.size - coolDowns.size)
-        fun part(kind: PartKind, steps: List<DraftStep>) = Part(PartId(Ids.newUuidV7()), kind, steps.map { it.toModelStep() })
-        return Workout(
-            id = id ?: WorkoutId(Ids.newUuidV7()),
-            version = version,
-            name = name.trim(),
-            format = format,
-            parts = listOfNotNull(
-                warmUps.takeIf { it.isNotEmpty() }?.let { part(PartKind.WARM_UP, it) },
-                part(PartKind.WORK, work),
-                coolDowns.takeIf { it.isNotEmpty() }?.let { part(PartKind.COOL_DOWN, it) },
-            ),
-        )
-    }
+    /** Only call once [format] is chosen. */
+    internal fun toWorkout() = Workout(
+        id = id ?: WorkoutId(Ids.newUuidV7()),
+        version = version,
+        name = name.trim(),
+        format = format!!,
+        parts = parts.map { it.toPart() },
+    )
 
-    /** Every exercise and rest, repeats opened up, in order. */
-    internal val leaves: List<DraftStep> get() = steps.flatMap { if (it is DraftRepeat) it.steps else listOf(it) }
+    /** Every exercise and rest of every part, repeats opened up, in order. */
+    internal val leaves: List<DraftStep> get() = parts.flatMap { part -> part.steps.flatMap { if (it is DraftRepeat) it.steps else listOf(it) } }
 
     companion object {
-        internal fun empty(format: WorkoutFormat = WorkoutFormat.SETS) = WorkoutDraft(null, 1, "", format, emptyList())
+        /** A new workout: no format yet, and one empty work part. */
+        internal fun empty() = WorkoutDraft(null, 1, "", null, listOf(DraftPart.new(PartKind.WORK, null)))
 
         /**
-         * Only workouts the builder could have made can be edited: one work part, an optional
-         * warm-up and cool down of exercises only, and in them exercises, rests and repeats one
-         * level deep with no rest of their own between rounds.
+         * Only workouts the builder could have made can be edited: parts of exercises, rests and
+         * repeats one level deep with no rest of their own between rounds.
          */
         internal fun from(workout: Workout, catalog: Catalog): WorkoutDraft? {
-            if (workout.parts.count { it.kind == PartKind.WORK } != 1 || workout.problems().isNotEmpty()) return null
-            fun leaf(step: Step, part: PartKind): DraftStep? = when (step) {
-                is Step.ExerciseStep -> DraftEntry.from(step, catalog[step.exercise], part)
-                is Step.Rest -> DraftRest(step.id.value, step.duration.inWholeSeconds.toInt()).takeIf { part == PartKind.WORK }
+            if (workout.problems().isNotEmpty()) return null
+            fun leaf(step: Step): DraftStep? = when (step) {
+                is Step.ExerciseStep -> DraftEntry.from(step, catalog[step.exercise])
+                is Step.Rest -> DraftRest(step.id.value, step.duration.inWholeSeconds.toInt())
                 is Step.Group -> null
             }
-            val steps = workout.parts.flatMap { part ->
-                part.steps.map { step ->
+            val parts = workout.parts.map { part ->
+                val steps = part.steps.map { step ->
                     if (step is Step.Group) {
-                        if (step.restBetweenRounds > Duration.ZERO || part.kind != PartKind.WORK) return null
-                        DraftRepeat(step.id.value, step.rounds, step.children.map { leaf(it, part.kind) ?: return null })
+                        if (step.restBetweenRounds > Duration.ZERO) return null
+                        DraftRepeat(step.id.value, step.rounds, step.children.map { leaf(it) ?: return null })
                     } else {
-                        leaf(step, part.kind) ?: return null
+                        leaf(step) ?: return null
                     }
                 }
+                DraftPart(part.id.value, part.kind, steps)
             }
-            return WorkoutDraft(workout.id, workout.version + 1, workout.name, workout.format, steps)
+            return WorkoutDraft(workout.id, workout.version + 1, workout.name, workout.format, parts)
         }
     }
 }

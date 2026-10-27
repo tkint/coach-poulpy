@@ -45,8 +45,8 @@ class PlanningModelsTest {
     private fun workout(name: String, vararg exercises: String): WorkoutId {
         val builder = graph.createWorkout("en")
         builder.rename(name)
-        builder.setFormat(WorkoutFormat.SETS)
-        exercises.forEach { builder.add(it) }
+        builder.chooseFormat(WorkoutFormat.SETS)
+        exercises.forEach { builder.add(it, builder.work) }
         return WorkoutId(builder.save()!!)
     }
 
