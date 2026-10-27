@@ -72,7 +72,9 @@ jobs:
   deploy:
     name: Publish to GitHub Pages
     if: github.event_name != 'pull_request'
-    needs: [build, check]
+    # Not on the link check: a dead link elsewhere, or the site itself being down, mustn't stop
+    # main from publishing. The check still fails the run.
+    needs: build
     runs-on: ubuntu-latest
     # One job at a time writes to gh-pages, previews included.
     concurrency:
