@@ -114,7 +114,7 @@
     "newTitle": "New workout",
     "editTitle": "Edit workout",
     "name": "Name",
-    "type": "Kind of workout",
+    "format": "Format",
     "pickTitle": "Pick an exercise",
     "sets": "Sets",
     "target": "Each set",

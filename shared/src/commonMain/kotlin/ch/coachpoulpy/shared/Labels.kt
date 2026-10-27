@@ -92,7 +92,7 @@ internal class Labels(private val languageCode: String) {
 
     fun part(kind: PartKind) = when (kind) {
         PartKind.WARM_UP -> t("Warm-up", "Échauffement")
-        PartKind.WORK -> t("Work", "Travail")
+        PartKind.WORK -> t("Work", "Corps de séance")
         PartKind.COOL_DOWN -> t("Cool down", "Retour au calme")
     }
 
