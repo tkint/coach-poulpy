@@ -1,7 +1,8 @@
-// Light or dark for every mockup at once. The docs site's theme switch stores its choice under
-// this key; with no choice ("auto" or nothing), the mockup follows the system setting through
-// prefers-color-scheme in the token CSS. Open mockups follow a change made in another frame or tab.
-const key = 'vitepress-theme-appearance'
+// Light or dark for every mockup at once, apart from the page around them. The mockup pages on
+// the docs site store the choice under this key; with no choice, the mockup follows the system
+// setting through prefers-color-scheme in the token CSS. Open mockups follow a change made in
+// another frame or tab.
+const key = 'coach-poulpy-mockup-theme'
 
 function apply() {
   let choice = null
