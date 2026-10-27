@@ -90,11 +90,19 @@ internal class Labels(private val languageCode: String) {
         WorkoutFormat.SETS -> t("Sets", "Séries")
     }
 
-    fun part(kind: PartKind) = when (kind) {
+    /** "Warm-up", "Work", or "Work 2" when the workout has several work parts ([number]). */
+    fun part(kind: PartKind, number: Int? = null) = when (kind) {
         PartKind.WARM_UP -> t("Warm-up", "Échauffement")
-        PartKind.WORK -> t("Work", "Corps de séance")
+        PartKind.WORK -> if (number == null) t("Work", "Corps de séance") else t("Work $number", "Corps de séance $number")
         PartKind.COOL_DOWN -> t("Cool down", "Retour au calme")
     }
+
+    /** The player's part line: "Work 1 · round 2 of 4", or the [part] alone outside a repeat. */
+    fun partLine(part: String, round: Int, rounds: Int) =
+        if (rounds > 1) "$part · ${roundOf(round, rounds)}" else part
+
+    /** "round 3 of 4", after a part or "Next up". */
+    fun roundOf(round: Int, rounds: Int) = t("round $round of $rounds", "tour $round sur $rounds")
 
     fun amount(measurement: MeasurementMode, amount: Int) = when (measurement) {
         MeasurementMode.REPS -> t("$amount reps", "$amount répétitions")
@@ -131,6 +139,8 @@ internal class Labels(private val languageCode: String) {
     val orWord get() = t("or", "ou")
     val andWord get() = t("and", "et")
     val timed get() = t("Timed", "Chronométré")
+
+    fun steps(count: Int) = if (count == 1) t("1 step", "1 étape") else t("$count steps", "$count étapes")
 
     fun exercises(count: Int) = if (count == 1) t("1 exercise", "1 exercice") else t("$count exercises", "$count exercices")
 
@@ -208,11 +218,10 @@ internal class Labels(private val languageCode: String) {
     /** What a phase asks for in the player: "10 reps", "30 s", "400 m", or "Until you tap Next". */
     fun target(target: Target) = if (target is Target.Open) t("Until you tap Next", "Jusqu’à « Suivant »") else amount(target.measurement, target.amount)
 
-    /** The tag on a step: Recover, or the warm-up or cool down holding it; null for exercise steps of a work part. */
-    fun role(role: StepRole, part: PartKind = PartKind.WORK) = when {
-        role == StepRole.RECOVER -> t("Recover", "Récupération")
-        part == PartKind.WORK -> null
-        else -> this.part(part)
+    /** The Recover tag on rests and recover steps; null for work steps, whose part says where they are. */
+    fun role(role: StepRole) = when (role) {
+        StepRole.RECOVER -> t("Recover", "Récupération")
+        StepRole.WORK -> null
     }
 
     /** The tag on a step in the builder; null for plain exercise steps, which have none. */
@@ -227,7 +236,4 @@ internal class Labels(private val languageCode: String) {
     fun roleName(role: BuilderRole) = role(role) ?: t("Exercise", "Exercice")
 
     fun times(count: Int) = t("$count times", "$count fois")
-
-    /** "Round 2 of 4", inside a repeat. */
-    fun round(round: Int, rounds: Int) = t("Round $round of $rounds", "Tour $round sur $rounds")
 }

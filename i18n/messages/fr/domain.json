@@ -63,7 +63,8 @@
   "part": {
     "warmUp": "Échauffement",
     "work": "Corps de séance",
-    "coolDown": "Retour au calme"
+    "coolDown": "Retour au calme",
+    "workNumbered": "Corps de séance {number, number}"
   },
   "side": {
     "left": "Côté gauche",
@@ -92,9 +93,10 @@
   },
   "count": {
     "position": "{index, number} sur {count, number}",
-    "round": "Tour {round, number} sur {rounds, number}",
+    "roundOf": "tour {round, number} sur {rounds, number}",
     "times": "{count, number} fois",
     "reps": "{count, number} répétitions",
+    "steps": "{count, plural, one {# étape} many {# étapes} other {# étapes}}",
     "exercises": "{count, plural, one {# exercice} many {# exercices} other {# exercices}}",
     "workouts": "{count, plural, one {# séance} many {# séances} other {# séances}}",
     "matches": "{count, plural, one {# résultat} many {# résultats} other {# résultats}}",

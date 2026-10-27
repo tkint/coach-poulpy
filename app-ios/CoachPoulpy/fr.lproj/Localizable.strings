@@ -44,7 +44,6 @@
 "workout.last" = "Dernière fois";
 "workout.usually" = "D’habitude";
 "workout.minutes %lld" = "%lld min";
-"workout.exercises" = "Exercices";
 "workout.start" = "Commencer";
 "action.start" = "Commencer";
 "action.edit" = "Modifier";
@@ -132,6 +131,7 @@
 "player.start" = "Lancer la séance";
 "player.set %lld %lld" = "Série %lld sur %lld";
 "player.next %@ %@" = "Ensuite : %@ · %@";
+"player.next.round %@" = "Ensuite · %@";
 "player.done" = "Terminé";
 "player.skip" = "Passer";
 "player.skip.rest" = "Passer le repos";

@@ -33,39 +33,42 @@ struct WorkoutPageView: View {
         ScrollView {
             if state.found {
                 VStack(alignment: .leading, spacing: 12) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(state.formatLabel.uppercased()).font(PoulpyFont.label).kerning(1).foregroundStyle(PoulpyColor.primary)
+                    VStack(alignment: .leading, spacing: 6) {
                         Text(state.name).font(PoulpyFont.title)
-                        Text(state.details).font(.poulpy(.callout)).foregroundStyle(PoulpyColor.onSurface)
+                        // The format chip leads the details line.
+                        HStack(spacing: 8) {
+                            Text(state.formatLabel)
+                                .font(.poulpy(.subheadline).weight(.heavy))
+                                .foregroundStyle(PoulpyColor.onPrimaryContainer)
+                                .padding(EdgeInsets(top: 4, leading: 10, bottom: 4, trailing: 10))
+                                .background(PoulpyColor.primaryContainer, in: Capsule())
+                            Text(state.details).font(.poulpy(.callout)).foregroundStyle(PoulpyColor.onSurface)
+                        }
                     }
                     planRow(state)
                     stats(state)
-                    Text("workout.exercises")
-                        .textCase(.uppercase)
-                        .font(PoulpyFont.label)
-                        .kerning(1)
-                        .foregroundStyle(PoulpyColor.onSurfaceVariant)
-                        .padding(.leading, 4)
-                        .padding(.top, 4)
                     let numbers = exerciseNumbers(state)
-                    ForEach(state.structure, id: \.key) { step in
-                        if let row = step.row {
-                            structureRow(row, number: numbers[row.key])
-                        } else if let group = step.repeatGroup {
-                            VStack(alignment: .leading, spacing: 6) {
-                                HStack(spacing: 8) {
-                                    Image(systemName: "repeat").font(.system(size: 16, weight: .bold)).foregroundStyle(PoulpyColor.primary)
-                                    Text("\(NSLocalizedString("builder.repeat", comment: "")) · \(group.timesLabel)")
-                                        .font(.poulpy(.headline))
-                                        .foregroundStyle(PoulpyColor.onPrimaryContainer)
+                    ForEach(state.parts, id: \.key) { part in
+                        partHeader(part)
+                        ForEach(part.steps, id: \.key) { step in
+                            if let row = step.row {
+                                structureRow(row, number: numbers[row.key])
+                            } else if let group = step.repeatGroup {
+                                VStack(alignment: .leading, spacing: 6) {
+                                    HStack(spacing: 8) {
+                                        Image(systemName: "repeat").font(.system(size: 16, weight: .bold)).foregroundStyle(PoulpyColor.primary)
+                                        Text("\(NSLocalizedString("builder.repeat", comment: "")) · \(group.timesLabel)")
+                                            .font(.poulpy(.headline))
+                                            .foregroundStyle(PoulpyColor.onPrimaryContainer)
+                                    }
+                                    .padding(EdgeInsets(top: 2, leading: 4, bottom: 2, trailing: 4))
+                                    ForEach(group.rows, id: \.key) { row in
+                                        structureRow(row, number: numbers[row.key])
+                                    }
                                 }
-                                .padding(EdgeInsets(top: 2, leading: 4, bottom: 2, trailing: 4))
-                                ForEach(group.rows, id: \.key) { row in
-                                    structureRow(row, number: numbers[row.key])
-                                }
+                                .padding(10)
+                                .background(PoulpyColor.primaryContainer, in: RoundedRectangle(cornerRadius: 16))
                             }
-                            .padding(10)
-                            .background(PoulpyColor.primaryContainer, in: RoundedRectangle(cornerRadius: 16))
                         }
                     }
                 }
@@ -194,9 +197,29 @@ struct WorkoutPageView: View {
         .overlay(RoundedRectangle(cornerRadius: 14).stroke(PoulpyColor.outline))
     }
 
-    /// Exercises are numbered in order, through repeats; rests aren't.
+    /// "Warm-up", "2 steps · about 6 min" beside the part's icon, as the builder heads a part.
+    private func partHeader(_ part: WorkoutPagePart) -> some View {
+        let work = part.kind == .work
+        return HStack(spacing: 10) {
+            Image(systemName: partIcon(part.kind))
+                .font(.system(size: 16, weight: .bold))
+                .foregroundStyle(work ? PoulpyColor.onPrimary : PoulpyColor.onPrimaryContainer)
+                .frame(width: 36, height: 36)
+                .background(work ? PoulpyColor.primary : PoulpyColor.primaryContainer, in: Circle())
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 0) {
+                Text(part.name).font(.poulpy(.title3).weight(.heavy)).foregroundStyle(PoulpyColor.onSurface)
+                Text(part.summary).font(.poulpy(.footnote)).monospacedDigit().foregroundStyle(PoulpyColor.onSurfaceVariant)
+            }
+        }
+        .padding(.leading, 2)
+        .padding(.top, 8)
+    }
+
+    /// Exercises are numbered in order, through parts and repeats; rests aren't.
     private func exerciseNumbers(_ state: WorkoutPageState) -> [String: Int] {
-        let rows = state.structure.flatMap { step in step.row.map { [$0] } ?? step.repeatGroup?.rows ?? [] }
+        let steps = state.parts.flatMap { $0.steps }
+        let rows = steps.flatMap { step in step.row.map { [$0] } ?? step.repeatGroup?.rows ?? [] }
         var numbers: [String: Int] = [:]
         for row in rows where !row.isRest { numbers[row.key] = numbers.count + 1 }
         return numbers
@@ -230,7 +253,7 @@ struct WorkoutPageView: View {
             .background(step.isRest ? PoulpyColor.surfaceVariant : PoulpyColor.primaryContainer, in: Circle())
             .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 1) {
-                if let role = step.roleLabel, !step.isRest {
+                if let role = step.roleLabel {
                     Text(role)
                         .textCase(.uppercase)
                         .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 11.5, relativeTo: .caption2))
@@ -295,4 +318,13 @@ private func dayLabel(_ millis: Int64) -> String {
 /// "21 Oct", in the user's order.
 private func shortDay(_ millis: Int64) -> String {
     Date(timeIntervalSince1970: Double(millis) / 1000).formatted(.dateTime.day().month(.abbreviated))
+}
+
+/// The icon of a part, as the builder adds it: the sun for a warm-up, a bolt for work, the moon for a cool down.
+func partIcon(_ kind: PartKind) -> String {
+    switch kind {
+    case .warmUp: return "sun.max"
+    case .coolDown: return "moon"
+    default: return "bolt.fill"
+    }
 }

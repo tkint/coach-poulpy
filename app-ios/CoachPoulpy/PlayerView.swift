@@ -105,17 +105,26 @@ struct PlayerView: View {
 
         Spacer()
         if !state.isRest { PatternBadge(pattern: state.pattern, size: 96) }
-        // "WARM-UP", "ROUND 2 OF 4": where this step sits in the workout.
-        let tags = [state.roleLabel, state.roundLabel].compactMap { $0 }
-        if !tags.isEmpty {
-            Text(tags.joined(separator: " · ")).textCase(.uppercase).font(PoulpyFont.label).kerning(1).foregroundStyle(Color.accentColor)
+        // "WORK 1 · ROUND 2 OF 4": the part this step is in, with its icon.
+        if let part = state.partLabel {
+            HStack(spacing: 6) {
+                if let kind = state.partKind { Image(systemName: partIcon(kind)).font(.system(size: 13, weight: .bold)) }
+                Text(part).textCase(.uppercase).font(PoulpyFont.label).kerning(1)
+            }
+            .foregroundStyle(Color.accentColor)
         }
-        Text(state.title)
-            .font(.poulpy(.largeTitle))
-            .multilineTextAlignment(.center)
-            .foregroundStyle(state.isRest ? Color.accentColor : Color.primary)
+        HStack(spacing: 8) {
+            if let role = state.roleLabel { recoverTag(role) }
+            Text(state.title)
+                .font(.poulpy(.largeTitle))
+                .multilineTextAlignment(.center)
+                .foregroundStyle(state.isRest ? Color.accentColor : Color.primary)
+        }
         if !state.isRest {
-            if state.setCount > 1 { Text("player.set \(Int(state.setNumber)) \(Int(state.setCount))").font(.poulpy(.title3)) }
+            if state.setCount > 1 {
+                Text("player.set \(Int(state.setNumber)) \(Int(state.setCount))").font(.poulpy(.title3))
+                setDots(number: Int(state.setNumber), count: Int(state.setCount))
+            }
             if let side = state.sideLabel { Text(side).font(.poulpy(.title3)).foregroundStyle(Color.accentColor) }
         }
         if let remaining {
@@ -131,6 +140,9 @@ struct PlayerView: View {
 
         Spacer()
         if state.isRest || remaining != nil, let next = state.nextTitle {
+            if let round = state.nextRound {
+                Text("player.next.round \(round)").textCase(.uppercase).font(PoulpyFont.label).foregroundStyle(.secondary)
+            }
             Text("player.next \(next) \(state.nextDetail ?? "")").multilineTextAlignment(.center)
         }
         HStack(spacing: 12) {
@@ -192,6 +204,30 @@ struct PlayerView: View {
     /// A short tick for the last seconds of a timer and a longer sound when a phase starts.
     private func cue(long: Bool) {
         AudioServicesPlaySystemSound(long ? 1005 : 1057)
+    }
+
+    /// The grey Recover tag beside "Rest" or a recover step.
+    private func recoverTag(_ label: String) -> some View {
+        Text(label)
+            .textCase(.uppercase)
+            .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 11.5, relativeTo: .caption2))
+            .foregroundStyle(PoulpyColor.onSurfaceVariant)
+            .padding(EdgeInsets(top: 3, leading: 8, bottom: 3, trailing: 8))
+            .background(PoulpyColor.surfaceVariant, in: Capsule())
+    }
+
+    /// One dot per set: done ones green, the current one in the primary colour.
+    private func setDots(number: Int, count: Int) -> some View {
+        HStack(spacing: 8) {
+            ForEach(0..<count, id: \.self) { index in
+                Capsule()
+                    .fill(index < number - 1 ? PoulpyColor.success : index == number - 1 ? PoulpyColor.primary : PoulpyColor.outline)
+                    .frame(width: 28, height: 8)
+            }
+        }
+        .padding(.top, 10)
+        .padding(.bottom, 6)
+        .accessibilityHidden(true)
     }
 
     private func clock(_ seconds: Int) -> String {
