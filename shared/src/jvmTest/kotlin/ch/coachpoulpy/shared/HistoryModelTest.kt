@@ -123,6 +123,33 @@ class HistoryModelTest {
         assertEquals("Quick", history().awaitSessions(1).sessions.single().title)
     }
 
+    /** A session of five minutes started [daysAgo] days ago, without events in between. */
+    private fun session(id: String, daysAgo: Int, source: ExecutionSource, workout: WorkoutRef?, title: String?, format: WorkoutFormat?) {
+        val start = now - daysAgo.days
+        graph.store.startExecution(Execution(ExecutionId(id), source, startedAt = start, workout = workout), title, format)
+        graph.store.appendEvent(id, SessionEvent.Started(start))
+        graph.store.appendEvent(id, SessionEvent.Finished(start + 5.minutes))
+        graph.store.finishExecution(id, start + 5.minutes)
+    }
+
+    @Test
+    fun aSessionIsLabelledByItsWorkoutsFormat() {
+        session("circuit", 1, ExecutionSource.GUIDED, WorkoutRef(WorkoutId("w-circuit"), 1), "Legs circuit", WorkoutFormat.CIRCUIT)
+        // Recorded before formats: its workout is gone and it never had one.
+        session("before", 2, ExecutionSource.GUIDED, WorkoutRef(WorkoutId("w-gone"), 1), "Old legs", null)
+        // The demo intervals followed in Live, with no saved workout.
+        session("demo", 3, ExecutionSource.FREE, null, null, null)
+
+        val rows = history().awaitSessions(3).sessions.associateBy { it.id }
+        assertEquals("Circuit", rows.getValue("circuit").formatLabel)
+        assertNull(rows.getValue("before").formatLabel)
+        assertEquals("Old legs", rows.getValue("before").title)
+        with(rows.getValue("demo")) {
+            assertNull(formatLabel)
+            assertEquals("Demo intervals", title)
+        }
+    }
+
     @Test
     fun hidesSessionsWhereNothingWasDoneAndDeletesOthers() {
         graph.store.startExecution(Execution(ExecutionId("nothing"), ExecutionSource.DEVICE_ONLY, startedAt = now))

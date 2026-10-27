@@ -280,11 +280,7 @@ class LiveModel(
     init {
         scope.launch {
             store.workouts().collect { workouts ->
-                // Only workouts made of walks and runs, which the treadmill can follow from start to end.
-                savedWorkouts = workouts.filter { workout ->
-                    val steps = exerciseSteps(workout)
-                    steps.isNotEmpty() && steps.all { it.exercise == TreadmillModule.treadmillRun || catalog()[it.exercise]?.isWalkOrRun == true }
-                }
+                savedWorkouts = workouts.filter { it.isWalksAndRuns(catalog()) }
                 publishChoices()
             }
         }

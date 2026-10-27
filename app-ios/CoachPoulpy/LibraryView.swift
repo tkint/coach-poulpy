@@ -271,7 +271,7 @@ struct LibraryView: View {
     }
 
     private func icon(_ format: WorkoutFormat) -> String {
-        format == .circuit ? "repeat" : "dumbbell"
+        format == .circuit ? "repeat" : "list.bullet"
     }
 }
 
