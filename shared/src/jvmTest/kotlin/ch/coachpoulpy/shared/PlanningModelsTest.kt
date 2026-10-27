@@ -1,7 +1,7 @@
 package ch.coachpoulpy.shared
 
+import ch.coachpoulpy.core.model.WorkoutFormat
 import ch.coachpoulpy.core.model.WorkoutId
-import ch.coachpoulpy.core.model.WorkoutType
 import ch.coachpoulpy.data.local.DriverFactory
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -45,7 +45,7 @@ class PlanningModelsTest {
     private fun workout(name: String, vararg exercises: String): WorkoutId {
         val builder = graph.createWorkout("en")
         builder.rename(name)
-        builder.setType(WorkoutType.STRENGTH)
+        builder.setFormat(WorkoutFormat.SETS)
         exercises.forEach { builder.add(it) }
         return WorkoutId(builder.save()!!)
     }
@@ -83,7 +83,7 @@ class PlanningModelsTest {
         with(state.today.single()) {
             assertEquals(TodayStatus.TO_DO, status)
             assertEquals("Legs", title)
-            assertEquals("Strength · 2 exercises · about 6 min", details.replace(Regex("about \\d+ min"), "about 6 min"))
+            assertEquals("Sets · 2 exercises · about 6 min", details.replace(Regex("about \\d+ min"), "about 6 min"))
             assertEquals("Goblet squat, Push-up", exercises)
         }
         with(state.next!!) {
@@ -149,7 +149,9 @@ class PlanningModelsTest {
         assertEquals(listOf("Zebra"), model.filter(state, query = "zeb").rows.map { it.name })
         assertEquals(listOf("Arms", "Legs", "Zebra"), model.filter(state, sort = LibrarySort.ALPHABETICAL).rows.map { it.name })
         assertEquals(listOf("Arms", "Legs", "Zebra"), model.filter(state, sort = LibrarySort.NEXT_PLANNED).rows.map { it.name })
-        assertEquals(WorkoutType.entries, state.kinds.map { it.type })
+        assertEquals(WorkoutFormat.entries, state.kinds.map { it.format })
+        assertEquals(listOf("Arms", "Legs", "Zebra"), model.filter(state, format = WorkoutFormat.SETS, sort = LibrarySort.ALPHABETICAL).rows.map { it.name })
+        assertEquals(emptyList(), model.filter(state, format = WorkoutFormat.CIRCUIT).rows)
     }
 
     @Test
@@ -169,9 +171,10 @@ class PlanningModelsTest {
         assertEquals(listOf("Upper body", "Équilibre et gainage"), names("press-up"))
         // Accents and case ignored, words in any order.
         assertEquals(listOf("Équilibre et gainage"), names("GAINAGE equilibre"))
-        // A word of the name before the type ("Strength", "Renforcement"), ties by name.
-        assertEquals(listOf("Lower body strength", "Équilibre et gainage", "Upper body"), names("str"))
-        assertEquals(3, names("renfo").size)
+        // The format ("Sets", "Séries") matches every workout in that format.
+        assertEquals(listOf("Lower body strength"), names("str"))
+        assertEquals(3, names("series").size)
+        assertEquals(3, names("sets").size)
         assertEquals(emptyList(), names("zumba"))
 
         val listing = model.filter(state, query = "pompe")

@@ -111,7 +111,7 @@
     <string name="builder_new_title">Nouvelle séance</string>
     <string name="builder_edit_title">Modifier la séance</string>
     <string name="builder_name">Nom</string>
-    <string name="builder_type">Type de séance</string>
+    <string name="builder_format">Format</string>
     <string name="builder_pick_title">Choisir un exercice</string>
     <string name="builder_sets">Séries</string>
     <string name="builder_target">Par série</string>

@@ -17,15 +17,18 @@ import ch.coachpoulpy.core.model.ExerciseSlug
 import ch.coachpoulpy.core.model.GroupKind
 import ch.coachpoulpy.core.model.Ids
 import ch.coachpoulpy.core.model.Intensity
+import ch.coachpoulpy.core.model.Part
+import ch.coachpoulpy.core.model.PartId
+import ch.coachpoulpy.core.model.PartKind
 import ch.coachpoulpy.core.model.Prescription
 import ch.coachpoulpy.core.model.SetPrescription
 import ch.coachpoulpy.core.model.Step
 import ch.coachpoulpy.core.model.StepId
 import ch.coachpoulpy.core.model.Target
 import ch.coachpoulpy.core.model.Workout
+import ch.coachpoulpy.core.model.WorkoutFormat
 import ch.coachpoulpy.core.model.WorkoutId
 import ch.coachpoulpy.core.model.WorkoutRef
-import ch.coachpoulpy.core.model.WorkoutType
 import ch.coachpoulpy.data.local.LocalStore
 import ch.coachpoulpy.types.treadmill.StepCounter
 import ch.coachpoulpy.types.treadmill.TreadmillModule
@@ -277,7 +280,11 @@ class LiveModel(
     init {
         scope.launch {
             store.workouts().collect { workouts ->
-                savedWorkouts = workouts.filter { it.type == WorkoutType.TREADMILL }
+                // Only workouts made of walks and runs, which the treadmill can follow from start to end.
+                savedWorkouts = workouts.filter { workout ->
+                    val steps = exerciseSteps(workout)
+                    steps.isNotEmpty() && steps.all { it.exercise == TreadmillModule.treadmillRun || catalog()[it.exercise]?.isWalkOrRun == true }
+                }
                 publishChoices()
             }
         }
@@ -479,7 +486,7 @@ class LiveModel(
                 workout = if (workout != null && workout in savedWorkouts) WorkoutRef(workout.id, workout.version) else null,
             ),
             title = exercise?.let { labels.text(it.name) } ?: workout!!.name,
-            type = WorkoutType.TREADMILL,
+            format = workout?.format,
         )
         recents = (listOf(key) + (recents - key)).take(RECENT_KEPT)
         memory.putString(RECENT, recents.joinToString(","))
@@ -786,16 +793,22 @@ class LiveModel(
             id = WorkoutId("demo-intervals"),
             version = 1,
             name = "Demo intervals",
-            type = WorkoutType.TREADMILL,
-            steps = listOf(
-                run("warm-up", Target.Time(3.minutes), 6.0),
-                Step.Group(
-                    id = StepId("intervals"),
-                    kind = GroupKind.INTERVALS,
-                    rounds = 3,
-                    children = listOf(run("fast", Target.Time(1.minutes), 9.0), run("easy", Target.Time(1.minutes), 6.0)),
+            format = WorkoutFormat.CIRCUIT,
+            parts = listOf(
+                Part(
+                    PartId("work"),
+                    PartKind.WORK,
+                    listOf(
+                        run("warm-up", Target.Time(3.minutes), 6.0),
+                        Step.Group(
+                            id = StepId("intervals"),
+                            kind = GroupKind.INTERVALS,
+                            rounds = 3,
+                            children = listOf(run("fast", Target.Time(1.minutes), 9.0), run("easy", Target.Time(1.minutes), 6.0)),
+                        ),
+                        run("finish", Target.Distance(200.0), 7.0),
+                    ),
                 ),
-                run("finish", Target.Distance(200.0), 7.0),
             ),
         )
 

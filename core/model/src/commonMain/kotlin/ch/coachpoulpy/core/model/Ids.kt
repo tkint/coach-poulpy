@@ -26,6 +26,7 @@ object Ids {
 @Serializable @JvmInline value class ExerciseSlug(val value: String)
 @Serializable @JvmInline value class WorkoutId(val value: String)
 @Serializable @JvmInline value class StepId(val value: String)
+@Serializable @JvmInline value class PartId(val value: String)
 @Serializable @JvmInline value class PlanId(val value: String)
 @Serializable @JvmInline value class EnrollmentId(val value: String)
 @Serializable @JvmInline value class GoalId(val value: String)

@@ -6,7 +6,6 @@ import Shared
 /// or ranked results while searching.
 struct ExerciseList<Row: View>: View {
     let graph: AppGraph
-    let type: WorkoutType?
     /// The builder's picker: recently used exercises come first.
     let withRecent: Bool
     let row: (ExerciseRow) -> Row
@@ -17,9 +16,8 @@ struct ExerciseList<Row: View>: View {
     @State private var ticked: Set<Equipment>?
     @State private var choosing = false
 
-    init(graph: AppGraph, type: WorkoutType?, withRecent: Bool = false, @ViewBuilder row: @escaping (ExerciseRow) -> Row) {
+    init(graph: AppGraph, withRecent: Bool = false, @ViewBuilder row: @escaping (ExerciseRow) -> Row) {
         self.graph = graph
-        self.type = type
         self.withRecent = withRecent
         self.row = row
         // Built once per list, so the search index and the history are read once.
@@ -36,7 +34,7 @@ struct ExerciseList<Row: View>: View {
 
     var body: some View {
         let model = self.model
-        let listing = model.filter(query: query, area: area, type: type, ticked: ticked, withRecent: withRecent)
+        let listing = model.filter(query: query, area: area, ticked: ticked, withRecent: withRecent)
         VStack(spacing: 0) {
             ListFilters(query: $query, placeholder: "exercises.search", label: "exercises.search.label", countLabel: listing.countLabel) {
                 EquipmentChip(ticked: ticked) { choosing = true }
@@ -91,7 +89,7 @@ struct ExerciseList<Row: View>: View {
             EquipmentSheet(
                 options: model.equipmentOptions,
                 ticked: ticked,
-                fitting: { Int(model.filter(query: query, area: area, type: type, ticked: $0, withRecent: false).count) }
+                fitting: { Int(model.filter(query: query, area: area, ticked: $0, withRecent: false).count) }
             ) { value in
                 tick(value)
                 choosing = false

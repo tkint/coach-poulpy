@@ -112,7 +112,7 @@
     <string name="builder_new_title">New workout</string>
     <string name="builder_edit_title">Edit workout</string>
     <string name="builder_name">Name</string>
-    <string name="builder_type">Kind of workout</string>
+    <string name="builder_format">Format</string>
     <string name="builder_pick_title">Pick an exercise</string>
     <string name="builder_sets">Sets</string>
     <string name="builder_target">Each set</string>

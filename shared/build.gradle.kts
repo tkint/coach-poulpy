@@ -22,10 +22,6 @@ kotlin {
             api(projects.data.local)
             api(projects.device.ftms)
             api(projects.types.treadmill)
-            implementation(projects.types.strength)
-            implementation(projects.types.conditioning)
-            implementation(projects.types.rehab)
-            implementation(projects.types.mobility)
             implementation(libs.kotlinx.coroutines.core)
         }
         jvmTest.dependencies {

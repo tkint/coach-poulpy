@@ -56,21 +56,21 @@
     "hold": "Maintien",
     "distance": "Distance"
   },
-  "workoutType": {
-    "strength": "Renforcement",
-    "conditioning": "Circuit cardio",
-    "rehab": "Rééducation",
-    "mobility": "Mobilité et étirements",
-    "treadmill": "Tapis de course"
+  "format": {
+    "circuit": "Circuit",
+    "sets": "Séries"
+  },
+  "part": {
+    "warmUp": "Échauffement",
+    "work": "Corps de séance",
+    "coolDown": "Retour au calme"
   },
   "side": {
     "left": "Côté gauche",
     "right": "Côté droit"
   },
   "role": {
-    "warmUp": "Échauffement",
     "recover": "Récupération",
-    "coolDown": "Retour au calme",
     "exercise": "Exercice"
   },
   "label": {

@@ -152,7 +152,7 @@ fun WorkoutPageScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(state.typeLabel.uppercase(Locale.getDefault()), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+                Text(state.formatLabel.uppercase(Locale.getDefault()), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
                 Text(state.name, style = MaterialTheme.typography.headlineMedium)
                 Text(state.details, style = MaterialTheme.typography.bodyLarge)
             }

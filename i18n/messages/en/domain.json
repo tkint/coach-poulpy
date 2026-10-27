@@ -56,21 +56,21 @@
     "hold": "Hold",
     "distance": "Distance"
   },
-  "workoutType": {
-    "strength": "Strength",
-    "conditioning": "Cardio circuit",
-    "rehab": "Rehab",
-    "mobility": "Mobility and stretching",
-    "treadmill": "Treadmill"
+  "format": {
+    "circuit": "Circuit",
+    "sets": "Sets"
+  },
+  "part": {
+    "warmUp": "Warm-up",
+    "work": "Work",
+    "coolDown": "Cool down"
   },
   "side": {
     "left": "Left side",
     "right": "Right side"
   },
   "role": {
-    "warmUp": "Warm-up",
     "recover": "Recover",
-    "coolDown": "Cool down",
     "exercise": "Exercise"
   },
   "label": {

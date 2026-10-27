@@ -34,7 +34,7 @@ struct WorkoutPageView: View {
             if state.found {
                 VStack(alignment: .leading, spacing: 12) {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(state.typeLabel.uppercased()).font(PoulpyFont.label).kerning(1).foregroundStyle(PoulpyColor.primary)
+                        Text(state.formatLabel.uppercased()).font(PoulpyFont.label).kerning(1).foregroundStyle(PoulpyColor.primary)
                         Text(state.name).font(PoulpyFont.title)
                         Text(state.details).font(.poulpy(.callout)).foregroundStyle(PoulpyColor.onSurface)
                     }

@@ -21,14 +21,13 @@ import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.DirectionsRun
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.EditCalendar
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.SelfImprovement
+import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -60,7 +59,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ch.coachpoulpy.android.R
-import ch.coachpoulpy.core.model.WorkoutType
+import ch.coachpoulpy.core.model.WorkoutFormat
 import ch.coachpoulpy.shared.AppGraph
 import ch.coachpoulpy.shared.LibraryNote
 import ch.coachpoulpy.shared.LibraryRow
@@ -92,7 +91,7 @@ fun LibraryScreen(
         }
         when (view) {
             LibraryView.WORKOUTS -> Box(Modifier.padding(top = 4.dp)) { Workouts(graph, language, onOpenWorkout, onStart, onNew, onCopy) }
-            LibraryView.EXERCISES -> ExerciseList(graph, language, type = null, onPick = onOpenExercise, modifier = Modifier.padding(top = 4.dp))
+            LibraryView.EXERCISES -> ExerciseList(graph, language, onPick = onOpenExercise, modifier = Modifier.padding(top = 4.dp))
         }
     }
 }
@@ -141,7 +140,7 @@ private fun Workouts(
     DisposableEffect(model) { onDispose { model.close() } }
     val state by model.state.collectAsStateWithLifecycle()
     var query by rememberSaveable { mutableStateOf("") }
-    var kind by rememberSaveable { mutableStateOf<WorkoutType?>(null) }
+    var kind by rememberSaveable { mutableStateOf<WorkoutFormat?>(null) }
     var sort by rememberSaveable { mutableStateOf(LibrarySort.RECENT) }
     var sorting by remember { mutableStateOf(false) }
     val listing = remember(state, query, kind, sort) { model.filter(state, query, kind, sort) }
@@ -176,10 +175,10 @@ private fun Workouts(
                 countLabel = listing.countLabel,
                 chips = {
                     item { PoulpyChip(selected = kind == null, onClick = { kind = null }, label = stringResource(R.string.library_all)) }
-                    items(state.kinds, key = { it.type.name }) { filter ->
+                    items(state.kinds, key = { it.format.name }) { filter ->
                         PoulpyChip(
-                            selected = kind == filter.type,
-                            onClick = { kind = if (kind == filter.type) null else filter.type },
+                            selected = kind == filter.format,
+                            onClick = { kind = if (kind == filter.format) null else filter.format },
                             label = filter.label,
                         )
                     }
@@ -284,7 +283,7 @@ private fun WorkoutCard(row: LibraryRow, onOpen: () -> Unit, onStart: () -> Unit
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 Box(Modifier.size(44.dp).clip(CircleShape).background(colors.primaryContainer), contentAlignment = Alignment.Center) {
-                    Icon(row.type.icon, contentDescription = null, tint = colors.onPrimaryContainer)
+                    Icon(row.format.icon, contentDescription = null, tint = colors.onPrimaryContainer)
                 }
                 Column(Modifier.weight(1f)) {
                     Text(row.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold)
@@ -356,9 +355,8 @@ private val LibrarySort.label: Int
         LibrarySort.ALPHABETICAL -> R.string.library_sort_name
     }
 
-internal val WorkoutType.icon: ImageVector
+internal val WorkoutFormat.icon: ImageVector
     get() = when (this) {
-        WorkoutType.TREADMILL -> Icons.AutoMirrored.Filled.DirectionsRun
-        WorkoutType.MOBILITY, WorkoutType.REHAB -> Icons.Filled.SelfImprovement
-        else -> Icons.Filled.FitnessCenter
+        WorkoutFormat.CIRCUIT -> Icons.Filled.Repeat
+        WorkoutFormat.SETS -> Icons.Filled.FitnessCenter
     }

@@ -90,15 +90,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ch.coachpoulpy.android.R
-import ch.coachpoulpy.core.model.StepRole
 import ch.coachpoulpy.shared.AppGraph
 import ch.coachpoulpy.shared.BuilderModel
+import ch.coachpoulpy.shared.BuilderRepeat
+import ch.coachpoulpy.shared.BuilderRole
 import ch.coachpoulpy.shared.BuilderRow
 import ch.coachpoulpy.shared.DistanceUnit
-import ch.coachpoulpy.shared.PaceUnit
-import ch.coachpoulpy.shared.BuilderRepeat
 import ch.coachpoulpy.shared.DurationKind
 import ch.coachpoulpy.shared.IntensityKind
+import ch.coachpoulpy.shared.PaceUnit
 import ch.coachpoulpy.shared.WalkRunTarget
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -114,7 +114,7 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
     val state by model.state.collectAsStateWithLifecycle()
     // Where the exercise being picked goes (TOP_LEVEL or a repeat's key) and as what; null when not picking.
     var pickingFor by rememberSaveable { mutableStateOf<String?>(null) }
-    var pickingRole by rememberSaveable { mutableStateOf(StepRole.WORK) }
+    var pickingRole by rememberSaveable { mutableStateOf(BuilderRole.WORK) }
     // The step being edited in the sheet: the one just added, or the one tapped.
     var editing by rememberSaveable { mutableStateOf<String?>(null) }
     LaunchedEffect(state.addedKey) { state.addedKey?.let { editing = it } }
@@ -148,7 +148,7 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
             },
         ) { padding ->
             ExerciseList(
-                graph, language, type = state.type,
+                graph, language,
                 onPick = { model.add(it, target.takeUnless { key -> key == TOP_LEVEL }, pickingRole); pickingFor = null },
                 modifier = Modifier.padding(padding),
                 adding = true,
@@ -195,10 +195,10 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
             }
             item {
                 Column(Modifier.padding(bottom = 14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    FieldLabel(stringResource(R.string.builder_type))
+                    FieldLabel(stringResource(R.string.builder_format))
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        model.typeOptions.forEach { option ->
-                            PoulpyChip(selected = state.type == option.type, onClick = { model.setType(option.type) }, label = option.label)
+                        model.formatOptions.forEach { option ->
+                            PoulpyChip(selected = state.format == option.format, onClick = { model.setFormat(option.format) }, label = option.label)
                         }
                     }
                 }
@@ -364,7 +364,7 @@ private fun StepCard(model: BuilderModel, row: BuilderRow, onEdit: () -> Unit, h
     Surface(
         shape = RoundedCornerShape(PoulpyRadius.md),
         color = colors.surface,
-        border = BorderStroke(1.dp, if (row.fitsType) colors.outline else colors.error),
+        border = BorderStroke(1.dp, if (row.fitsFormat) colors.outline else colors.error),
         // Screen readers can't drag: they get the moves as actions on the card.
         modifier = modifier.fillMaxWidth().semantics {
             customActions = listOfNotNull(
@@ -400,7 +400,7 @@ private fun StepCard(model: BuilderModel, row: BuilderRow, onEdit: () -> Unit, h
                     onRemove = { model.remove(row.key) },
                 )
             }
-            if (!row.fitsType) {
+            if (!row.fitsFormat) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     Icon(Icons.Filled.ErrorOutline, contentDescription = null, tint = colors.error, modifier = Modifier.size(18.dp))
                     Text(stringResource(R.string.builder_does_not_fit), color = colors.error, style = MaterialTheme.typography.bodySmall)
@@ -428,7 +428,7 @@ private fun StepSheet(model: BuilderModel, row: BuilderRow, onDone: () -> Unit) 
                 row.roleLabel?.let { RoleTag(it, row.role) }
                 Text(row.name, style = MaterialTheme.typography.titleLarge)
             }
-            if (!row.fitsType) {
+            if (!row.fitsFormat) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     Icon(Icons.Filled.ErrorOutline, contentDescription = null, tint = colors.error, modifier = Modifier.size(18.dp))
                     Text(stringResource(R.string.builder_does_not_fit), color = colors.error, style = MaterialTheme.typography.bodySmall)
@@ -465,8 +465,8 @@ private fun StepSheet(model: BuilderModel, row: BuilderRow, onDone: () -> Unit) 
 
 /** The small tag above a step's name: "WARM-UP", "RECOVER", "COOL DOWN". */
 @Composable
-private fun RoleTag(label: String, role: StepRole) {
-    val recover = role == StepRole.RECOVER
+private fun RoleTag(label: String, role: BuilderRole) {
+    val recover = role == BuilderRole.RECOVER
     Text(
         label.uppercase(),
         style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
@@ -813,15 +813,15 @@ private fun DashedTile(label: String, icon: ImageVector, onClick: () -> Unit, mo
  * there is no warm-up or cool down, which belong at the ends of the workout.
  */
 @Composable
-private fun AddStepButton(label: String, onExercise: (StepRole) -> Unit, onRest: () -> Unit, modifier: Modifier = Modifier, height: Int = 56, inRepeat: Boolean = false) {
+private fun AddStepButton(label: String, onExercise: (BuilderRole) -> Unit, onRest: () -> Unit, modifier: Modifier = Modifier, height: Int = 56, inRepeat: Boolean = false) {
     var expanded by remember { mutableStateOf(false) }
     Box(modifier) {
         DashedTile(label, Icons.Filled.Add, onClick = { expanded = true }, height = height)
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             listOfNotNull(
-                Triple(StepRole.WARM_UP, R.string.builder_add_warm_up, Icons.Filled.WbSunny).takeUnless { inRepeat },
-                Triple(StepRole.WORK, R.string.builder_add_exercise, Icons.Filled.FitnessCenter),
-                Triple(StepRole.RECOVER, R.string.builder_add_recover, Icons.AutoMirrored.Filled.DirectionsWalk),
+                Triple(BuilderRole.WARM_UP, R.string.builder_add_warm_up, Icons.Filled.WbSunny).takeUnless { inRepeat },
+                Triple(BuilderRole.WORK, R.string.builder_add_exercise, Icons.Filled.FitnessCenter),
+                Triple(BuilderRole.RECOVER, R.string.builder_add_recover, Icons.AutoMirrored.Filled.DirectionsWalk),
             ).forEach { (role, text, icon) ->
                 DropdownMenuItem(
                     text = { Text(stringResource(text)) },
@@ -838,7 +838,7 @@ private fun AddStepButton(label: String, onExercise: (StepRole) -> Unit, onRest:
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.builder_add_cool_down)) },
                     leadingIcon = { Icon(Icons.Filled.Bedtime, contentDescription = null) },
-                    onClick = { expanded = false; onExercise(StepRole.COOL_DOWN) },
+                    onClick = { expanded = false; onExercise(BuilderRole.COOL_DOWN) },
                 )
             }
         }

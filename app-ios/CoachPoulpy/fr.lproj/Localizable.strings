@@ -83,7 +83,7 @@
 "builder.new.title" = "Nouvelle séance";
 "builder.edit.title" = "Modifier la séance";
 "builder.name" = "Nom";
-"builder.type" = "Type de séance";
+"builder.format" = "Format";
 "builder.pick.title" = "Choisir un exercice";
 "builder.sets" = "Séries";
 "builder.target" = "Par série";

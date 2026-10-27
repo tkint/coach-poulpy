@@ -3,7 +3,7 @@
 CREATE TABLE workout_version (
     id TEXT NOT NULL,
     version INTEGER NOT NULL,
-    type TEXT NOT NULL,
+    format TEXT NOT NULL,
     name TEXT NOT NULL,
     content TEXT NOT NULL,
     created_at INTEGER NOT NULL,
@@ -11,7 +11,7 @@ CREATE TABLE workout_version (
 );
 
 insert:
-INSERT INTO workout_version(id, version, type, name, content, created_at)
+INSERT INTO workout_version(id, version, format, name, content, created_at)
 VALUES (?, ?, ?, ?, ?, ?);
 
 latestVersions:

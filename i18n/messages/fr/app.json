@@ -114,7 +114,7 @@
     "newTitle": "Nouvelle séance",
     "editTitle": "Modifier la séance",
     "name": "Nom",
-    "type": "Type de séance",
+    "format": "Format",
     "pickTitle": "Choisir un exercice",
     "sets": "Séries",
     "target": "Par série",

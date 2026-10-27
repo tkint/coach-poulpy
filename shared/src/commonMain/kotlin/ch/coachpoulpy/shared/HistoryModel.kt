@@ -4,7 +4,6 @@ import ch.coachpoulpy.core.engine.SessionEvent
 import ch.coachpoulpy.core.engine.Timeline
 import ch.coachpoulpy.core.engine.TimelineCompiler
 import ch.coachpoulpy.core.model.ExecutionSource
-import ch.coachpoulpy.core.model.WorkoutType
 import ch.coachpoulpy.core.stats.DoneSession
 import ch.coachpoulpy.core.stats.HistoryStats
 import ch.coachpoulpy.core.stats.PeriodTotals
@@ -43,8 +42,8 @@ data class SessionRow(
     val id: String,
     val title: String,
     val kind: SessionKind,
-    /** The kind of workout, in the user's language, or null for a free run. */
-    val typeLabel: String?,
+    /** The workout's format, in the user's language, or null for a free run and sessions from before formats. */
+    val formatLabel: String?,
     val startedAtMillis: Long,
     val activeSeconds: Long,
     val setsDone: Int?,
@@ -208,26 +207,22 @@ class HistoryModel internal constructor(
         )
     }
 
-    /** Sums up a session from before the history, and keeps its name and type while its workout is still here. */
+    /** Sums up a session from before the history, and keeps its name and format while its workout is still here. */
     private fun backfill(session: StoredSession): SessionTotals {
         val id = session.execution.id.value
         val events = store.events(id)
         val workout = session.execution.workout?.let { store.workout(it.workoutId, it.version) }
-        val type = session.type ?: workout?.type ?: if (isTreadmill(session, events)) WorkoutType.TREADMILL else null
+        val format = session.format ?: workout?.format
         val timeline = when {
             workout != null -> runCatching { compiler.compile(workout) }.getOrNull()
             session.execution.source == ExecutionSource.DEVICE_ONLY -> TreadmillModule.freeRun
-            type == WorkoutType.TREADMILL -> compiler.compile(LiveModel.demoIntervals)
+            session.execution.workout == null -> compiler.compile(LiveModel.demoIntervals)
             else -> null
         }
         val totals = sessionTotals(events, timeline)
-        store.saveDetails(id, session.title ?: workout?.name, type, totals)
+        store.saveDetails(id, session.title ?: workout?.name, format, totals)
         return totals
     }
-
-    /** Free runs and the demo intervals are the only sessions that follow no saved workout. */
-    private fun isTreadmill(session: StoredSession, events: List<SessionEvent>) =
-        session.execution.workout == null || events.any { it is SessionEvent.Sample }
 
     private fun PeriodTotals.toUi() = PeriodUi(sessions, active.inWholeMinutes.toInt(), distanceMeters)
 }
@@ -255,7 +250,7 @@ internal fun sessionTotals(events: List<SessionEvent>, timeline: Timeline?): Ses
 internal fun sessionRow(session: StoredSession, totals: SessionTotals, labels: Labels): SessionRow {
     val execution = session.execution
     val freeRun = execution.source == ExecutionSource.DEVICE_ONLY
-    val treadmill = freeRun || execution.workout == null || session.type == WorkoutType.TREADMILL || totals.distanceMeters != null
+    val treadmill = freeRun || execution.workout == null || totals.distanceMeters != null
     return SessionRow(
         id = execution.id.value,
         title = session.title ?: when {
@@ -264,7 +259,7 @@ internal fun sessionRow(session: StoredSession, totals: SessionTotals, labels: L
             else -> labels.session
         },
         kind = if (treadmill) SessionKind.TREADMILL else SessionKind.WORKOUT,
-        typeLabel = if (freeRun) null else (session.type ?: if (treadmill) WorkoutType.TREADMILL else null)?.let(labels::workoutType),
+        formatLabel = if (freeRun) null else session.format?.let(labels::format),
         startedAtMillis = execution.startedAt.toEpochMilliseconds(),
         activeSeconds = totals.active.inWholeSeconds,
         setsDone = totals.setsDone,

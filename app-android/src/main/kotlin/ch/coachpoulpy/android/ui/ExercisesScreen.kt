@@ -59,7 +59,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ch.coachpoulpy.android.R
 import ch.coachpoulpy.core.model.Equipment
-import ch.coachpoulpy.core.model.WorkoutType
 import ch.coachpoulpy.shared.AppGraph
 import ch.coachpoulpy.shared.EquipmentOption
 import ch.coachpoulpy.shared.ExerciseRow
@@ -75,7 +74,6 @@ import ch.coachpoulpy.shared.MuscleArea
 fun ExerciseList(
     graph: AppGraph,
     language: String,
-    type: WorkoutType?,
     onPick: (String) -> Unit,
     modifier: Modifier = Modifier,
     adding: Boolean = false,
@@ -87,7 +85,7 @@ fun ExerciseList(
     var area by rememberSaveable { mutableStateOf<MuscleArea?>(null) }
     var ticked by remember(equipment) { mutableStateOf(equipment.ticked) }
     var choosing by rememberSaveable { mutableStateOf(false) }
-    val listing = remember(model, query, area, type, ticked) { model.filter(query, area, type, ticked, withRecent = adding) }
+    val listing = remember(model, query, area, ticked) { model.filter(query, area, ticked, withRecent = adding) }
     val tick = { value: Set<Equipment>? ->
         equipment.ticked = value
         ticked = equipment.ticked
@@ -157,7 +155,7 @@ fun ExerciseList(
         EquipmentSheet(
             options = model.equipmentOptions,
             ticked = ticked,
-            fitting = { model.filter(query, area, type, it).count },
+            fitting = { model.filter(query, area, it).count },
             onApply = {
                 tick(it)
                 choosing = false

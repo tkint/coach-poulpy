@@ -55,11 +55,11 @@ struct BuilderView: View {
                             .accessibilityLabel(Text("builder.name"))
                     }
                     VStack(alignment: .leading, spacing: 8) {
-                        fieldLabel("builder.type")
+                        fieldLabel("builder.format")
                         FlowLayout(spacing: 8) {
-                            ForEach(model.typeOptions, id: \.label) { option in
-                                PoulpyChip(title: Text(option.label), selected: state.type == option.type) {
-                                    model.setType(type: option.type)
+                            ForEach(model.formatOptions, id: \.label) { option in
+                                PoulpyChip(title: Text(option.label), selected: state.format == option.format) {
+                                    model.setFormat(format: option.format)
                                 }
                             }
                         }
@@ -127,7 +127,7 @@ struct BuilderView: View {
             }
             .sheet(item: $picking) { target in
                 NavigationStack {
-                    ExerciseList(graph: graph, type: state.type, withRecent: true) { row in
+                    ExerciseList(graph: graph, withRecent: true) { row in
                         Button {
                             model.add(slug: row.slug, repeatKey: target.repeatKey, role: target.role)
                             picking = nil
@@ -308,7 +308,7 @@ struct BuilderView: View {
 /// Where a picked exercise goes: the workout, or the repeat [repeatKey]; and what it is for.
 private struct PickTarget: Identifiable {
     let repeatKey: String?
-    let role: StepRole
+    let role: BuilderRole
 
     var id: String { "\(repeatKey ?? "")-\(role.name)" }
 }
@@ -426,7 +426,7 @@ private struct EntryCard: View {
                     stepMenu
                 }
             }
-            if !row.fitsType {
+            if !row.fitsFormat {
                 Label("builder.does.not.fit", systemImage: "exclamationmark.circle")
                     .font(.poulpy(.caption))
                     .foregroundStyle(PoulpyColor.error)
@@ -456,7 +456,7 @@ private struct EntryCard: View {
         }
         .padding(EdgeInsets(top: 10, leading: 12, bottom: open ? 14 : 10, trailing: 8))
         .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 16))
-        .overlay(RoundedRectangle(cornerRadius: 16).stroke(row.fitsType ? PoulpyColor.outline : PoulpyColor.error, lineWidth: 1))
+        .overlay(RoundedRectangle(cornerRadius: 16).stroke(row.fitsFormat ? PoulpyColor.outline : PoulpyColor.error, lineWidth: 1))
     }
 
     /// The small tag above a step's name: "WARM-UP", "RECOVER", "COOL DOWN".

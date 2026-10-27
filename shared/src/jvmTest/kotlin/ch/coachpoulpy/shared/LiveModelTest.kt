@@ -1,7 +1,6 @@
 package ch.coachpoulpy.shared
 
 import ch.coachpoulpy.core.engine.TimelineCompiler
-import ch.coachpoulpy.core.engine.WorkoutTypeRegistry
 import ch.coachpoulpy.data.local.DriverFactory
 import ch.coachpoulpy.data.local.LocalStore
 import ch.coachpoulpy.device.ftms.BleCentral
@@ -32,7 +31,7 @@ class LiveModelTest {
         val clock = object : Clock {
             override fun now() = Instant.fromEpochMilliseconds(1_700_000_000_000 + testScheduler.currentTime)
         }
-        val compiler = TimelineCompiler(WorkoutTypeRegistry(listOf(TreadmillModule)))
+        val compiler = TimelineCompiler()
         val settings = SettingsModel(memory, backgroundScope)
         val devices = DevicesModel(central, memory, backgroundScope, clock)
         return Models(devices, LiveModel(devices, settings.state, store, compiler, memory, backgroundScope, clock), settings)
@@ -234,7 +233,7 @@ class LiveModelTest {
         val treadmillOff = object : BleCentral by FakeCentral() {
             override fun scan(): Flow<FoundDevice> = flow { CompletableDeferred<Unit>().await() }
         }
-        val compiler = TimelineCompiler(WorkoutTypeRegistry(listOf(TreadmillModule)))
+        val compiler = TimelineCompiler()
         val settings = SettingsModel(memory, backgroundScope)
         val devices = DevicesModel(treadmillOff, memory, backgroundScope)
         val live = LiveModel(devices, settings.state, store, compiler, memory, backgroundScope)
@@ -657,7 +656,7 @@ class LiveModelTest {
         }
         val settings = SettingsModel(memory, backgroundScope)
         val devices = DevicesModel(central, memory, backgroundScope, clock)
-        val compiler = TimelineCompiler(WorkoutTypeRegistry(listOf(TreadmillModule)))
+        val compiler = TimelineCompiler()
         val live = LiveModel(devices, settings.state, LocalStore(DriverFactory()), compiler, memory, backgroundScope, clock, languageCode = "fr")
         runCurrent()
         assertEquals("Marche", live.state.value.choice?.name)
