@@ -218,9 +218,12 @@ function css() {
   for (const [name, m] of Object.entries(tokens.motion)) {
     out.push(`  --cp-motion-${name}: ${m.duration}ms${m.easing ? ` cubic-bezier(${m.easing.join(', ')})` : ''};`)
   }
-  out.push('  color-scheme: light dark;', '}', '', '@media (prefers-color-scheme: dark) {', '  :root {')
-  for (const [name, value] of Object.entries(dark)) out.push(`    --cp-${kebab(name)}: ${value};`)
-  out.push('  }', '}', '')
+  out.push('  color-scheme: light dark;', '}', '')
+  // Dark follows the system unless a page pins a theme with data-theme on <html>.
+  const darkValues = (indent) => Object.entries(dark).map(([name, value]) => `${indent}--cp-${kebab(name)}: ${value};`)
+  out.push('@media (prefers-color-scheme: dark) {', '  :root:not([data-theme="light"]) {', ...darkValues('    '), '  }', '}', '')
+  out.push(':root[data-theme="dark"] {', ...darkValues('  '), '  color-scheme: dark;', '}', '')
+  out.push(':root[data-theme="light"] {', '  color-scheme: light;', '}', '')
   return out.join('\n')
 }
 
