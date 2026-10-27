@@ -19,7 +19,7 @@ for (const file of tracked) {
 }
 
 const dist = '.vitepress/dist'
-const base = '/coach-poulpy/'
+const base = process.env.SITE_BASE ?? '/coach-poulpy/'
 const pages = (dir) =>
   readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
     const path = join(dir, entry.name)
@@ -27,8 +27,12 @@ const pages = (dir) =>
     return entry.name.endsWith('.html') && path !== join(dist, '404.html') ? [relative(dist, path)] : []
   })
 // A link like /coach-poulpy/docs/brand#moods is the page docs/brand.html; a folder is its index.
-const toPage = (href) => {
-  const path = decodeURI(href.split(/[?#]/)[0]).slice(base.length).replace(/\/$/, '/index')
+const toPage = (href, from) => {
+  // The address a built page is served at, so a relative link resolves the way a browser does.
+  const served = new URL(base + from.replace(/(^|\/)index\.html$/, '$1').replace(/\.html$/, ''), 'https://site')
+  const url = new URL(href, served)
+  if (url.origin !== served.origin || !url.pathname.startsWith(base)) return null
+  const path = decodeURI(url.pathname).slice(base.length).replace(/\/$/, '/index')
   const page = path === '' ? 'index.html' : path.endsWith('.html') ? path : `${path}.html`
   return existsSync(join(dist, page)) ? page : null
 }
@@ -36,11 +40,11 @@ const toPage = (href) => {
 const reached = new Set(['index.html'])
 const queue = ['index.html']
 while (queue.length > 0) {
-  const html = readFileSync(join(dist, queue.shift()), 'utf8')
+  const from = queue.shift()
+  const html = readFileSync(join(dist, from), 'utf8')
   // src too: the mockup pages show each mockup's HTML in an iframe.
   for (const [, href] of html.matchAll(/(?:href|src)="([^"]+)"/g)) {
-    if (!href.startsWith(base)) continue
-    const page = toPage(href)
+    const page = toPage(href, from)
     if (page && !reached.has(page)) {
       reached.add(page)
       queue.push(page)

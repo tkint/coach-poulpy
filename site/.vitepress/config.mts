@@ -11,7 +11,8 @@ const here = dirname(fileURLToPath(import.meta.url))
 const siteRoot = resolve(here, '..')
 const repoRoot = resolve(siteRoot, '..')
 const repoUrl = 'https://github.com/tkint/coach-poulpy'
-const base = '/coach-poulpy/'
+// A PR preview is built under its own folder of the site, given by the Docs site workflow.
+const base = process.env.SITE_BASE ?? '/coach-poulpy/'
 
 const isPage = (path: string) => existsSync(join(siteRoot, path)) && path.endsWith('.md')
 
