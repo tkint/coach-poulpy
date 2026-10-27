@@ -101,8 +101,9 @@ jobs:
     if: >-
       github.event_name == 'pull_request' &&
       github.event.pull_request.head.repo.full_name == github.repository &&
-      !failure() && !cancelled()
-    needs: [build, check]
+      !cancelled() && needs.build.result != 'failure'
+    # Not on the link check, so a dead link doesn't hold back the preview the owner reviews.
+    needs: build
     runs-on: ubuntu-latest
     concurrency:
       group: gh-pages
@@ -112,6 +113,9 @@ jobs:
       pull-requests: write
     steps:
       - uses: actions/checkout@v5
+        with:
+          # The whole history, to list what the PR changes since it left main.
+          fetch-depth: 0
       - uses: actions/download-artifact@v5
         if: github.event.action != 'closed'
         with:
@@ -123,3 +127,17 @@ jobs:
           source-dir: dist
           preview-branch: gh-pages
           umbrella-dir: pr-preview
+      # A second comment, kept up to date: the docs pages this PR changes, linked into its preview,
+      # so the owner reviews specs, mockups and decisions on the site rather than in the diff.
+      - name: List the docs pages to review
+        if: github.event.action != 'closed'
+        run: >-
+          node site/review-links.mjs
+          ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }}
+          https://${{ github.repository_owner }}.github.io/coach-poulpy/pr-preview/pr-${{ github.event.number }}/
+          dist > review.md
+      - uses: marocchino/sticky-pull-request-comment@v2
+        if: github.event.action != 'closed'
+        with:
+          header: docs-review
+          path: review.md

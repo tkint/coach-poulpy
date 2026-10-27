@@ -55,6 +55,7 @@ Rounded boxes are where work starts; each step leaves something behind, listed i
 - **A decision that would surprise the next reader gets an ADR** in `docs/adr/`, in the same PR that makes it.
 - **Every PR says `Closes #n`**, so merging closes the issue.
 - **Branch names say what the work is**: `<type>/<issue-number>-<short-description>`, in English, like `feat/21-training-plans` or `fix/34-rest-timer-sound`. Leave out the number when there is no issue (`docs/brand-decisions`). Types are `feat`, `fix`, `docs`, `chore` and `design`. No random suffixes, session ids or tool prefixes such as `claude/`.
+- **The docs site is the source of truth, so a PR is reviewed there.** On every PR, the Docs site workflow publishes a preview and posts a "Review in the docs" comment with a direct link to each spec, mockup, decision or guideline the PR adds or changes. The PR body's "Review in the docs" section says what to look at on those pages and why, or that the PR changes none.
 - **Every guideline is on the docs site.** A new rule, glossary or ADR is published in the same PR that adds it: add its file to `site/published.mjs` and a sidebar entry in `site/.vitepress/config.mts`. CI fails on a Markdown file the site doesn't publish or a page no link reaches.
 - **CI is not a phone.** Anything about Bluetooth, sound, haptics, background running or installs carries the `device-test` label and is checked on a real phone before merge.
 
