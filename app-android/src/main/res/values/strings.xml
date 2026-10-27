@@ -62,7 +62,6 @@
         <item quantity="other">%1$d times</item>
     </plurals>
     <string name="workout_minutes">%1$d min</string>
-    <string name="workout_exercises">Exercises</string>
     <string name="workout_start">Start now</string>
     <string name="workout_gone">This workout was deleted.</string>
     <string name="action_start">Start</string>
@@ -162,6 +161,7 @@
     <string name="player_start">Start the session</string>
     <string name="player_set">Set %1$d of %2$d</string>
     <string name="player_next">Next: %1$s · %2$s</string>
+    <string name="player_next_round">Next up · %1$s</string>
     <string name="player_done">Done</string>
     <string name="player_skip">Skip</string>
     <string name="player_skip_rest">Skip rest</string>

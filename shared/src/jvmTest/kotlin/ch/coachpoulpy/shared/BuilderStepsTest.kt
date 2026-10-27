@@ -220,7 +220,7 @@ class BuilderStepsTest {
     }
 
     @Test
-    fun theGuidedSessionSaysTheRoleAndTheRound() {
+    fun theGuidedSessionSaysThePartAndTheRound() {
         val workout = graph.store.latestWorkout(WorkoutId(intervalRun().save()!!))!!
         val player = PlayerModel(
             workout, graph.compiler.compile(workout), graph.catalog, graph.store, "en",
@@ -229,13 +229,13 @@ class BuilderStepsTest {
         )
         player.start()
         with(player.state.value) {
-            assertEquals("Warm-up", roleLabel)
-            assertNull(roundLabel)
+            assertEquals("Warm-up", partLabel)
+            assertNull(roleLabel)
             assertEquals("Until you tap Next", targetLabel)
             assertFalse(isTimed)
         }
         player.done()
-        assertEquals("Round 1 of 4", player.state.value.roundLabel)
+        assertEquals("Work · round 1 of 4", player.state.value.partLabel)
         assertNull(player.state.value.roleLabel)
     }
 
@@ -288,13 +288,12 @@ class BuilderStepsTest {
         val id = intervalRun().save()!!
         val page = WorkoutPageModel(WorkoutId(id), graph.store, graph.compiler, graph.catalog, "en", scope = CoroutineScope(Dispatchers.Default))
         val state = runBlocking { withTimeout(5.seconds) { page.state.first { it.loaded } } }
-        assertEquals(3, state.structure.size)
-        assertEquals("Warm-up", state.structure[0].row?.roleLabel)
-        val repeat = assertNotNull(state.structure[1].repeatGroup)
+        assertEquals(listOf("Warm-up", "Work", "Cool down"), state.parts.map { it.name })
+        val repeat = assertNotNull(state.parts[1].steps.single().repeatGroup)
         assertEquals("4 times", repeat.timesLabel)
         // Units are not saved with the workout (#72), so the page shows the distance in km.
         assertEquals(listOf("0.4 km · 5:00 /km", "1 min 30"), repeat.rows.map { it.prescription })
-        assertEquals("5:45 /km · until the end", state.structure[2].row?.prescription)
+        assertEquals("5:45 /km · until the end", state.parts[2].steps.single().row?.prescription)
         page.close()
     }
 

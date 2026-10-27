@@ -57,7 +57,6 @@
     "usually": "D’habitude",
     "times": "{count, plural, one {# fois} many {# fois} other {# fois}}",
     "minutes": "{minutes, number} min",
-    "exercises": "Exercices",
     "start": "Commencer",
     "gone": "Cette séance a été supprimée."
   },
@@ -167,6 +166,7 @@
     "start": "Lancer la séance",
     "set": "Série {set, number} sur {sets, number}",
     "next": "Ensuite : {name} · {detail}",
+    "nextRound": "Ensuite · {round}",
     "done": "Terminé",
     "skip": "Passer",
     "skipRest": "Passer le repos",

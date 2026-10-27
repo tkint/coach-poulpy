@@ -1,6 +1,7 @@
 package ch.coachpoulpy.shared
 
 import ch.coachpoulpy.catalog.Catalog
+import ch.coachpoulpy.core.engine.Phase
 import ch.coachpoulpy.core.engine.TimelineCompiler
 import ch.coachpoulpy.core.model.Step
 import ch.coachpoulpy.core.model.Workout
@@ -27,9 +28,19 @@ internal class WorkoutFacts(private val compiler: TimelineCompiler, private val 
             .joinToString(", ")
 
     /** Timed phases count for their length; a set of reps is guessed at 40 seconds. */
-    fun minutes(workout: Workout): Int {
-        val length = runCatching { compiler.compile(workout).phases }.getOrDefault(emptyList())
-            .fold(Duration.ZERO) { total, phase -> total + (phase.duration ?: MANUAL_SET) }
+    fun minutes(workout: Workout): Int = minutes(phases(workout))
+
+    /** "about 25 min", or "1 min" when every phase runs on a timer and the length is known. */
+    fun length(workout: Workout): String {
+        val phases = phases(workout)
+        val minutes = minutes(phases)
+        return if (phases.all { it.duration != null }) labels.duration(minutes * 60) else labels.aboutMinutes(minutes)
+    }
+
+    private fun phases(workout: Workout) = runCatching { compiler.compile(workout).phases }.getOrDefault(emptyList())
+
+    private fun minutes(phases: List<Phase>): Int {
+        val length = phases.fold(Duration.ZERO) { total, phase -> total + (phase.duration ?: MANUAL_SET) }
         return ((length.inWholeSeconds + 59) / 60).toInt()
     }
 

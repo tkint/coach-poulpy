@@ -57,7 +57,6 @@
     "usually": "Usually",
     "times": "{count, plural, one {# time} other {# times}}",
     "minutes": "{minutes, number} min",
-    "exercises": "Exercises",
     "start": "Start now",
     "gone": "This workout was deleted."
   },
@@ -167,6 +166,7 @@
     "start": "Start the session",
     "set": "Set {set, number} of {sets, number}",
     "next": "Next: {name} · {detail}",
+    "nextRound": "Next up · {round}",
     "done": "Done",
     "skip": "Skip",
     "skipRest": "Skip rest",

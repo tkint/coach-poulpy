@@ -2,7 +2,9 @@ package ch.coachpoulpy.android.ui
 
 import android.media.AudioManager
 import android.media.ToneGenerator
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -12,6 +14,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
@@ -125,23 +129,27 @@ private fun ColumnScope.Running(state: PlayerState, model: PlayerModel) {
 
     Spacer(Modifier.weight(1f))
     if (!state.isRest) state.pattern?.let { PatternBadge(it, size = 96.dp, modifier = Modifier.padding(bottom = 16.dp)) }
-    // "WARM-UP", "ROUND 2 OF 4": where this step sits in the workout.
-    listOfNotNull(state.roleLabel, state.roundLabel).takeIf { it.isNotEmpty() }?.let { tags ->
+    // "WORK 1 · ROUND 2 OF 4": the part this step is in, with its icon.
+    state.partLabel?.let { part ->
+        Row(Modifier.padding(bottom = 4.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            state.partKind?.let { Icon(it.icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp)) }
+            Text(part.uppercase(), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+        }
+    }
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        state.roleLabel?.let { RecoverTag(it) }
         Text(
-            tags.joinToString(" · ").uppercase(),
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(bottom = 4.dp),
+            state.title,
+            style = MaterialTheme.typography.headlineMedium,
+            textAlign = TextAlign.Center,
+            color = if (state.isRest) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
         )
     }
-    Text(
-        state.title,
-        style = MaterialTheme.typography.headlineMedium,
-        textAlign = TextAlign.Center,
-        color = if (state.isRest) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-    )
     if (!state.isRest) {
-        if (state.setCount > 1) Text(stringResource(R.string.player_set, state.setNumber, state.setCount), style = MaterialTheme.typography.titleMedium)
+        if (state.setCount > 1) {
+            Text(stringResource(R.string.player_set, state.setNumber, state.setCount), style = MaterialTheme.typography.titleMedium)
+            SetDots(state.setNumber, state.setCount)
+        }
         state.sideLabel?.let { Text(it, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary) }
     }
 
@@ -163,6 +171,9 @@ private fun ColumnScope.Running(state: PlayerState, model: PlayerModel) {
     Spacer(Modifier.weight(1f))
     if (state.isRest || remaining != null) {
         state.nextTitle?.let { next ->
+            state.nextRound?.let {
+                Text(stringResource(R.string.player_next_round, it).uppercase(), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
             Text(
                 stringResource(R.string.player_next, next, state.nextDetail ?: ""),
                 style = MaterialTheme.typography.bodyLarge,
@@ -234,3 +245,29 @@ private fun Cues(state: PlayerState) {
 }
 
 private fun clock(seconds: Int): String = "%d:%02d".format(seconds / 60, seconds % 60)
+
+/** The grey Recover tag beside "Rest" or a recover step. */
+@Composable
+private fun RecoverTag(label: String) {
+    Text(
+        label.uppercase(),
+        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.background(MaterialTheme.colorScheme.surfaceVariant, CircleShape).padding(horizontal = 8.dp, vertical = 3.dp),
+    )
+}
+
+/** One dot per set: done ones green, the current one in the primary colour. */
+@Composable
+private fun SetDots(number: Int, count: Int) {
+    Row(Modifier.padding(top = 10.dp, bottom = 6.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        repeat(count) { index ->
+            val color = when {
+                index < number - 1 -> PoulpyTheme.extraColors.success
+                index == number - 1 -> MaterialTheme.colorScheme.primary
+                else -> MaterialTheme.colorScheme.outline
+            }
+            Box(Modifier.size(width = 28.dp, height = 8.dp).background(color, CircleShape))
+        }
+    }
+}

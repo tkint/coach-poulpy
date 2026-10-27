@@ -54,7 +54,8 @@ class PlayerModelTest {
         player.start()
         with(player.state.value) {
             assertEquals("Push-up", title)
-            assertEquals("Round 1 of 2", roundLabel)
+            assertEquals("Work · round 1 of 2", partLabel)
+            assertEquals(0, setCount, "a repeat counts rounds, not sets")
             assertEquals("10 reps", targetLabel)
             assertEquals(false, isTimed)
         }
@@ -64,11 +65,13 @@ class PlayerModelTest {
             assertEquals(true, isRest)
             assertEquals(45, remainingSeconds)
             assertEquals("Push-up", nextTitle)
+            assertEquals("round 2 of 2", nextRound)
+            assertEquals("Recover", roleLabel)
         }
 
         clock.advance(45.seconds)
         player.tick()
-        assertEquals("Round 2 of 2", player.state.value.roundLabel)
+        assertEquals("Work · round 2 of 2", player.state.value.partLabel)
 
         player.done()
         clock.advance(45.seconds)

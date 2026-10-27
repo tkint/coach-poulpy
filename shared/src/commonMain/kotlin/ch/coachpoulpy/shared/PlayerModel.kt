@@ -11,9 +11,12 @@ import ch.coachpoulpy.core.model.ExecutionId
 import ch.coachpoulpy.core.model.ExecutionSource
 import ch.coachpoulpy.core.model.Load
 import ch.coachpoulpy.core.model.MovementPattern
+import ch.coachpoulpy.core.model.PartKind
 import ch.coachpoulpy.core.model.Side
 import ch.coachpoulpy.core.model.Step
+import ch.coachpoulpy.core.model.StepRole
 import ch.coachpoulpy.core.model.Workout
+import ch.coachpoulpy.core.model.WorkoutFormat
 import ch.coachpoulpy.core.model.WorkoutRef
 import ch.coachpoulpy.data.local.LocalStore
 import kotlin.time.Clock
@@ -41,11 +44,14 @@ data class PlayerState(
     val title: String,
     val exerciseSlug: String?,
     val pattern: MovementPattern?,
-    /** The step's role ("Warm-up", "Cool down"); null for plain exercise steps and rests. */
+    /** The part this step is in, for its icon; a rest takes the part of the step before it. */
+    val partKind: PartKind?,
+    /** "Warm-up", "Work 2", or "Work 1 · round 2 of 4" inside a repeat. */
+    val partLabel: String?,
+    /** "Recover" on rests and recover steps; null for work steps. */
     val roleLabel: String?,
-    /** "Round 2 of 4" inside a repeat; null outside one. */
-    val roundLabel: String?,
     val setNumber: Int,
+    /** How many sets "Set 2 of 3" counts; 0 in a circuit or a repeat, which count rounds instead. */
     val setCount: Int,
     val sideLabel: String?,
     val targetLabel: String?,
@@ -58,6 +64,8 @@ data class PlayerState(
     /** The next exercise, so the user can get ready during a rest. */
     val nextTitle: String?,
     val nextDetail: String?,
+    /** "round 3 of 4" when the next exercise starts another round; null otherwise. */
+    val nextRound: String?,
     val phaseNumber: Int,
     val phaseCount: Int,
     val summary: SessionSummary?,
@@ -177,6 +185,10 @@ class PlayerModel internal constructor(
         val step = work?.let { steps[it.step] }
         val exercise = work?.let { catalog[it.exercise] }
         val next = phases.drop(state.phaseIndex + 1).firstOrNull { it is Phase.Work } as? Phase.Work
+        // Where the user is: a rest belongs to the step before it, or to the first one when it opens the workout.
+        val here = work ?: phases.take(state.phaseIndex).lastOrNull { it is Phase.Work } as? Phase.Work ?: next
+        // "Set 2 of 3" only in a Sets workout outside a repeat: a circuit or a repeat counts rounds.
+        val sets = work?.takeIf { workout.format == WorkoutFormat.SETS && it.rounds == 1 }?.let { w -> step?.let { it.setNumber(w.setIndex) to it.setCount() } }
 
         return PlayerState(
             status = when (state.status) {
@@ -194,10 +206,11 @@ class PlayerModel internal constructor(
             },
             exerciseSlug = work?.exercise?.value,
             pattern = exercise?.movementPattern,
-            roleLabel = work?.let { labels.role(it.role, it.part) },
-            roundLabel = work?.takeIf { it.rounds > 1 }?.let { labels.round(it.round, it.rounds) },
-            setNumber = if (work != null && step != null) step.setNumber(work.setIndex) else 0,
-            setCount = step?.setCount() ?: 0,
+            partKind = here?.part,
+            partLabel = here?.let { labels.partLine(labels.part(it.part, it.workPart), it.round, it.rounds) },
+            roleLabel = if (phase is Phase.Rest) labels.role(StepRole.RECOVER) else work?.let { labels.role(it.role) },
+            setNumber = sets?.first ?: 0,
+            setCount = sets?.second ?: 0,
             sideLabel = work?.let { labels.side(it.side) },
             targetLabel = work?.let { labels.target(it.target) },
             loadLabel = work?.let { step?.prescription?.sets?.getOrNull(it.setIndex)?.load?.label() },
@@ -207,6 +220,7 @@ class PlayerModel internal constructor(
             elapsedSeconds = state.phaseElapsed.inWholeSeconds.toInt(),
             nextTitle = next?.let { n -> catalog[n.exercise]?.let { labels.text(it.name) } ?: n.exercise.value },
             nextDetail = next?.let { labels.target(it.target) },
+            nextRound = next?.takeIf { it.rounds > 1 && (here?.rounds != it.rounds || here?.round != it.round) }?.let { labels.roundOf(it.round, it.rounds) },
             phaseNumber = (state.phaseIndex + 1).coerceAtMost(phases.size),
             phaseCount = phases.size,
             summary = if (state.status == SessionState.Status.FINISHED) summary() else null,

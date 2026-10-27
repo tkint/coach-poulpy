@@ -63,7 +63,8 @@
   "part": {
     "warmUp": "Warm-up",
     "work": "Work",
-    "coolDown": "Cool down"
+    "coolDown": "Cool down",
+    "workNumbered": "Work {number, number}"
   },
   "side": {
     "left": "Left side",
@@ -92,9 +93,10 @@
   },
   "count": {
     "position": "{index, number} of {count, number}",
-    "round": "Round {round, number} of {rounds, number}",
+    "roundOf": "round {round, number} of {rounds, number}",
     "times": "{count, number} times",
     "reps": "{count, number} reps",
+    "steps": "{count, plural, one {# step} other {# steps}}",
     "exercises": "{count, plural, one {# exercise} other {# exercises}}",
     "workouts": "{count, plural, one {# workout} other {# workouts}}",
     "matches": "{count, plural, one {# match} other {# matches}}",

@@ -34,7 +34,7 @@ data class WorkoutStepRow(
     val name: String,
     val pattern: MovementPattern?,
     val prescription: String,
-    /** "Warm-up", "Recover", "Cool down"; null for plain exercise steps. */
+    /** "Recover" on rests and recover steps; null for work steps. */
     val roleLabel: String? = null,
     /** A rest, which has no exercise page to open. */
     val isRest: Boolean = false,
@@ -43,8 +43,19 @@ data class WorkoutStepRow(
 /** Steps done several times, as the builder shows them: "Repeat · 4 times". */
 data class WorkoutRepeatBlock(val key: String, val timesLabel: String, val rows: List<WorkoutStepRow>)
 
-/** One step at the top of the workout page: an exercise or rest ([row]), or a repeat ([repeatGroup]). */
+/** One step at the top of a part: an exercise or rest ([row]), or a repeat ([repeatGroup]). */
 data class WorkoutPageStep(val key: String, val row: WorkoutStepRow?, val repeatGroup: WorkoutRepeatBlock?)
+
+/** A part of the workout under its header: "Warm-up", "2 steps · about 6 min", then its steps. */
+data class WorkoutPagePart(
+    val key: String,
+    val kind: PartKind,
+    /** "Warm-up", "Work", or "Work 2" when there are several work parts. */
+    val name: String,
+    /** "4 exercises · about 25 min" for work; steps are counted for a warm-up or cool down. */
+    val summary: String,
+    val steps: List<WorkoutPageStep>,
+)
 
 /** A calendar day, [month] 1 to 12, as the plan sheet picks it. */
 data class PlanDate(val year: Int, val month: Int, val day: Int) {
@@ -68,8 +79,8 @@ data class WorkoutPageState(
     val formatLabel: String = "",
     /** "5 exercises · about 40 min · dumbbells, mat". */
     val details: String = "",
-    /** The workout's structure, as in the builder: steps and repeats. */
-    val structure: List<WorkoutPageStep> = emptyList(),
+    /** The workout's parts in order, each with its steps and repeats. */
+    val parts: List<WorkoutPagePart> = emptyList(),
     val timesDone: Int = 0,
     val lastDoneMillis: Long? = null,
     /** The middle length of the sessions done, in minutes; null before the first. */
@@ -154,7 +165,7 @@ class WorkoutPageModel internal constructor(
             formatLabel = labels.format(workout.format),
             details = (listOf(labels.exercises(exerciseSteps(workout).size), labels.aboutMinutes(facts.minutes(workout))) +
                 listOfNotNull(equipment.takeIf { it.isNotEmpty() }?.joinToString(", "))).joinToString(" · "),
-            structure = structure(workout),
+            parts = parts(workout),
             timesDone = done.size,
             lastDoneMillis = done.maxOfOrNull { it.execution.startedAt }?.toEpochMilliseconds(),
             usualMinutes = minutes.getOrNull(minutes.size / 2)?.coerceAtLeast(1),
@@ -164,12 +175,12 @@ class WorkoutPageModel internal constructor(
         )
     }
 
-    // CLEANUP: #92 groups the page's steps under their parts; until then the warm-up and cool down show as tags.
-    private fun structure(workout: Workout): List<WorkoutPageStep> {
+    private fun parts(workout: Workout): List<WorkoutPagePart> {
         val last = workout.steps.lastOrNull()?.id
-        val partOf = workout.parts.flatMap { part -> part.steps.map { it.id to part.kind } }.toMap()
-        fun leaf(step: Step, part: PartKind): WorkoutStepRow? = when (step) {
-            is Step.ExerciseStep -> stepRow(step, part, last = step.id == last)
+        val severalWorkParts = workout.parts.count { it.kind == PartKind.WORK } > 1
+        var workParts = 0
+        fun leaf(step: Step): WorkoutStepRow? = when (step) {
+            is Step.ExerciseStep -> stepRow(step, last = step.id == last)
             is Step.Rest -> WorkoutStepRow(
                 key = step.id.value,
                 slug = "",
@@ -181,17 +192,28 @@ class WorkoutPageModel internal constructor(
             )
             is Step.Group -> null
         }
-        return workout.steps.map { step ->
-            val part = partOf.getValue(step.id)
-            if (step is Step.Group) {
-                WorkoutPageStep(step.id.value, null, WorkoutRepeatBlock(step.id.value, labels.times(step.rounds), step.children.mapNotNull { leaf(it, part) }))
-            } else {
-                WorkoutPageStep(step.id.value, leaf(step, part), null)
-            }
+        return workout.parts.map { part ->
+            if (part.kind == PartKind.WORK) workParts++
+            val alone = workout.copy(parts = listOf(part))
+            val exercises = exerciseSteps(alone).size
+            val count = if (part.kind == PartKind.WORK) labels.exercises(exercises) else labels.steps(exercises)
+            WorkoutPagePart(
+                key = part.id.value,
+                kind = part.kind,
+                name = labels.part(part.kind, workParts.takeIf { severalWorkParts && part.kind == PartKind.WORK }),
+                summary = "$count · ${facts.length(alone)}",
+                steps = part.steps.map { step ->
+                    if (step is Step.Group) {
+                        WorkoutPageStep(step.id.value, null, WorkoutRepeatBlock(step.id.value, labels.times(step.rounds), step.children.mapNotNull(::leaf)))
+                    } else {
+                        WorkoutPageStep(step.id.value, leaf(step), null)
+                    }
+                },
+            )
         }
     }
 
-    private fun stepRow(step: Step.ExerciseStep, part: PartKind, last: Boolean = false): WorkoutStepRow {
+    private fun stepRow(step: Step.ExerciseStep, last: Boolean = false): WorkoutStepRow {
         val exercise = catalog[step.exercise]
         val entry = DraftEntry.from(step, exercise)
         val prescription = entry?.let { labels.prescription(it, last) } ?: "${step.prescription.sets.size} ×"
@@ -201,7 +223,7 @@ class WorkoutPageModel internal constructor(
             name = exercise?.let { labels.text(it.name) } ?: step.exercise.value,
             pattern = exercise?.movementPattern,
             prescription = prescription,
-            roleLabel = labels.role(step.role, part),
+            roleLabel = labels.role(step.role),
         )
     }
 }

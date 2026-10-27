@@ -21,6 +21,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Bedtime
+import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
@@ -30,6 +32,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
@@ -56,14 +59,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ch.coachpoulpy.android.R
+import ch.coachpoulpy.core.model.PartKind
 import ch.coachpoulpy.shared.AppGraph
 import ch.coachpoulpy.shared.DeletePrompt
+import ch.coachpoulpy.shared.WorkoutPagePart
 import ch.coachpoulpy.shared.WorkoutPageState
 import ch.coachpoulpy.shared.WorkoutStepRow
 import java.time.Instant
@@ -151,40 +157,46 @@ fun WorkoutPageScreen(
             Modifier.padding(padding).fillMaxSize().verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 20.dp, top = 12.dp, bottom = 16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(state.formatLabel.uppercase(Locale.getDefault()), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text(state.name, style = MaterialTheme.typography.headlineMedium)
-                Text(state.details, style = MaterialTheme.typography.bodyLarge)
+                // The format chip leads the details line.
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        state.formatLabel,
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        modifier = Modifier.clip(RoundedCornerShape(PoulpyRadius.pill)).background(MaterialTheme.colorScheme.primaryContainer).padding(horizontal = 10.dp, vertical = 4.dp),
+                    )
+                    Text(state.details, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+                }
             }
             PlanRow(state, onPick = { picking = true })
             Stats(state)
-            Text(
-                stringResource(R.string.workout_exercises).uppercase(Locale.getDefault()),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(start = 4.dp, top = 4.dp),
-            )
-            // Exercises are numbered in order, through repeats; rests show a timer instead.
+            // Exercises are numbered in order, through parts and repeats; rests show a timer instead.
             var number = 0
-            state.structure.forEach { step ->
-                val row = step.row
-                val group = step.repeatGroup
-                if (row != null) {
-                    StructureRow(row, if (row.isRest) null else ++number, onOpenExercise)
-                } else if (group != null) {
-                    Column(
-                        Modifier.fillMaxWidth().clip(RoundedCornerShape(PoulpyRadius.md)).background(MaterialTheme.colorScheme.primaryContainer).padding(10.dp),
-                        verticalArrangement = Arrangement.spacedBy(6.dp),
-                    ) {
-                        Row(Modifier.padding(start = 4.dp, top = 2.dp, bottom = 2.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Icon(Icons.Filled.Repeat, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
-                            Text(
-                                "${stringResource(R.string.builder_repeat)} · ${group.timesLabel}",
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                            )
+            state.parts.forEach { part ->
+                PartHeader(part)
+                part.steps.forEach { step ->
+                    val row = step.row
+                    val group = step.repeatGroup
+                    if (row != null) {
+                        StructureRow(row, if (row.isRest) null else ++number, onOpenExercise)
+                    } else if (group != null) {
+                        Column(
+                            Modifier.fillMaxWidth().clip(RoundedCornerShape(PoulpyRadius.md)).background(MaterialTheme.colorScheme.primaryContainer).padding(10.dp),
+                            verticalArrangement = Arrangement.spacedBy(6.dp),
+                        ) {
+                            Row(Modifier.padding(start = 4.dp, top = 2.dp, bottom = 2.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Icon(Icons.Filled.Repeat, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+                                Text(
+                                    "${stringResource(R.string.builder_repeat)} · ${group.timesLabel}",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                )
+                            }
+                            group.rows.forEach { child -> StructureRow(child, if (child.isRest) null else ++number, onOpenExercise) }
                         }
-                        group.rows.forEach { child -> StructureRow(child, if (child.isRest) null else ++number, onOpenExercise) }
                     }
                 }
             }
@@ -206,7 +218,31 @@ fun WorkoutPageScreen(
     if (deleting) DeleteWorkoutDialog(state.deletePrompt, onDelete = { deleting = false; model.delete() }, onDismiss = { deleting = false })
 }
 
-/** A step of the workout page: its number (a timer for a rest), role, name and prescription; an exercise opens its page. */
+/** "Warm-up", "2 steps · about 6 min" beside the part's icon, as the builder heads a part. */
+@Composable
+private fun PartHeader(part: WorkoutPagePart) {
+    val colors = MaterialTheme.colorScheme
+    val work = part.kind == PartKind.WORK
+    Row(Modifier.padding(start = 2.dp, top = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        Box(Modifier.size(36.dp).clip(CircleShape).background(if (work) colors.primary else colors.primaryContainer), contentAlignment = Alignment.Center) {
+            Icon(part.kind.icon, contentDescription = null, tint = if (work) colors.onPrimary else colors.onPrimaryContainer, modifier = Modifier.size(20.dp))
+        }
+        Column {
+            Text(part.name, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.ExtraBold)
+            Text(part.summary, style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
+        }
+    }
+}
+
+/** The icon of a part, as the builder adds it: the sun for a warm-up, a bolt for work, the moon for a cool down. */
+internal val PartKind.icon: ImageVector
+    get() = when (this) {
+        PartKind.WARM_UP -> Icons.Filled.WbSunny
+        PartKind.WORK -> Icons.Filled.Bolt
+        PartKind.COOL_DOWN -> Icons.Filled.Bedtime
+    }
+
+/** A step of the workout page: its number (a timer for a rest), Recover tag, name and prescription; an exercise opens its page. */
 @Composable
 private fun StructureRow(row: WorkoutStepRow, number: Int?, onOpenExercise: (String) -> Unit) {
     val colors = MaterialTheme.colorScheme
@@ -228,7 +264,7 @@ private fun StructureRow(row: WorkoutStepRow, number: Int?, onOpenExercise: (Str
             }
         }
         Column(Modifier.weight(1f)) {
-            row.roleLabel?.takeIf { !row.isRest }?.let {
+            row.roleLabel?.let {
                 Text(it.uppercase(Locale.getDefault()), style = MaterialTheme.typography.labelSmall, color = colors.primary)
             }
             Text(row.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold)
