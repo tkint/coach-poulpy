@@ -6,6 +6,7 @@ import ch.coachpoulpy.core.model.Step
 import ch.coachpoulpy.core.model.Workout
 import ch.coachpoulpy.core.stats.SessionTotals
 import ch.coachpoulpy.data.local.StoredSession
+import ch.coachpoulpy.types.treadmill.TreadmillModule
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.datetime.LocalDate
@@ -48,6 +49,15 @@ internal fun exerciseSteps(workout: Workout): List<Step.ExerciseStep> {
         }
     }
     return open(workout.steps)
+}
+
+/**
+ * True when every exercise is a walk or a run, which the treadmill can follow from start
+ * to end and a FIT export calls running.
+ */
+internal fun Workout.isWalksAndRuns(catalog: Catalog): Boolean {
+    val steps = exerciseSteps(this)
+    return steps.isNotEmpty() && steps.all { it.exercise == TreadmillModule.treadmillRun || catalog[it.exercise]?.isWalkOrRun == true }
 }
 
 /**

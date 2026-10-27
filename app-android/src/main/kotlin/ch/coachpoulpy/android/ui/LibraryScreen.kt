@@ -21,11 +21,11 @@ import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.EditCalendar
-import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material3.DropdownMenu
@@ -358,5 +358,5 @@ private val LibrarySort.label: Int
 internal val WorkoutFormat.icon: ImageVector
     get() = when (this) {
         WorkoutFormat.CIRCUIT -> Icons.Filled.Repeat
-        WorkoutFormat.SETS -> Icons.Filled.FitnessCenter
+        WorkoutFormat.SETS -> Icons.AutoMirrored.Filled.List
     }
