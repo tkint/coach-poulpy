@@ -37,7 +37,8 @@ const reached = new Set(['index.html'])
 const queue = ['index.html']
 while (queue.length > 0) {
   const html = readFileSync(join(dist, queue.shift()), 'utf8')
-  for (const [, href] of html.matchAll(/href="([^"]+)"/g)) {
+  // src too: the mockup pages show each mockup's HTML in an iframe.
+  for (const [, href] of html.matchAll(/(?:href|src)="([^"]+)"/g)) {
     if (!href.startsWith(base)) continue
     const page = toPage(href)
     if (page && !reached.has(page)) {

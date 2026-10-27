@@ -26,7 +26,8 @@ design/mockups/
 
 ## Rules
 
-- English only, light only. French copy is checked in the apps; the token CSS already handles dark.
+- English only; French copy is checked in the apps.
+- Light and dark from one file: mockups use the theme roles (`--cp-primary`, `--cp-surface`...), never a palette step that stays the same in both themes. `shared/mockup-theme.js` follows the docs site's theme switch, so every mockup changes together, and falls back to the system setting. (Changed on 27 October 2026 at the owner's request; mockups were light only before.)
 - No network: no `fetch`, no scripts or styles from outside the repo except the brand fonts.
 - Real elements (`<button>`, `<a>`, labels), a `data-component` attribute naming the design-system component, and `id`s in glossary terms for the regions an issue would name.
 - Rendered PNGs are uploaded by CI for review, never committed, because renders differ between machines.

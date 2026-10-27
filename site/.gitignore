@@ -9,3 +9,5 @@ node_modules/
 /design/
 /i18n/
 public/poulpy.svg
+/public/design/
+/public/web/
