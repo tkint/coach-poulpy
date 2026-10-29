@@ -99,6 +99,9 @@ private struct GeneralList: View {
             } footer: {
                 Text("settings.language.next.launch") + Text(verbatim: " ") + Text("settings.units.hint")
             }
+            Section {
+                Text(String(format: NSLocalizedString("settings.build.number", comment: ""), Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "—"))
+            }
         }
     }
 
