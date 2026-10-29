@@ -307,6 +307,7 @@
     <string name="units_metric">Métrique</string>
     <string name="units_imperial">Impérial</string>
     <string name="settings_units_hint">Métrique : km et km/h. Impérial : miles et mph. Les poids restent en kg pour l’instant.</string>
+    <string name="settings_build_number">Numéro de build %1$d</string>
     <string name="devices_add">Ajouter un appareil</string>
     <string name="devices_yours">Vos appareils</string>
     <string name="devices_empty_title">Aucun appareil pour l’instant</string>

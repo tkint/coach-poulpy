@@ -63,6 +63,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import ch.coachpoulpy.android.BuildConfig
 import ch.coachpoulpy.android.R
 import ch.coachpoulpy.device.ftms.DeviceKind
 import ch.coachpoulpy.shared.AppGraph
@@ -165,6 +166,13 @@ private fun ColumnScope.General(graph: AppGraph) {
         selected = state.units,
         onSelect = model::setUnits,
         hint = R.string.settings_units_hint,
+    )
+    Text(
+        stringResource(R.string.settings_build_number, BuildConfig.VERSION_CODE),
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        style = MaterialTheme.typography.labelSmall,
+        modifier = Modifier.fillMaxWidth(),
+        textAlign = TextAlign.End,
     )
 }
 

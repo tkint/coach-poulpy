@@ -263,6 +263,7 @@
 "units.metric" = "Metric";
 "units.imperial" = "Imperial";
 "settings.units.hint" = "Metric: km and km/h. Imperial: miles and mph. Weights stay in kg for now.";
+"settings.build.number" = "Build number %@";
 "devices.add" = "Add a device";
 "devices.yours" = "Your devices";
 "devices.empty.title" = "No devices yet";
