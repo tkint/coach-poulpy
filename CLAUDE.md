@@ -30,7 +30,7 @@ Android and iOS only build in CI (`.github/workflows/ci.yml`); a PR is done when
 - Catalog slugs never change; set `"retired": true` instead of deleting, and raise `version`.
 - Poulpy is never guilt: pain or rehab always shows the blue side, and errors are crimson with an icon, never ember.
 - A schema change is a new SQLDelight migration; existing phones keep their data.
-- The docs site is the source of truth: every PR's "Review in the docs" section says what to check on the pages it changes. The preview job comments the direct links to them (`site/review-links.mjs`); if a changed spec, mockup, decision or guideline is missing from that comment, link it yourself in a PR comment.
+- The docs site is the source of truth. The Docs site workflow comments each PR's preview and the docs pages, sections and mockups to review (`site/review-links.mjs`); never post a review comment of your own. Put anything the reviewer must know in the PR description, and say `Closes #n` so the mockups drawn for that issue are linked.
 - Branches are named `<type>/<issue-number>-<short-description>` in English (`feat/21-training-plans`, or `docs/brand-decisions` with no issue); types `feat`, `fix`, `docs`, `chore`, `design`. Never a random suffix, session id or `claude/` prefix, even if a tool suggests one.
 
 ## Agent skills

@@ -127,10 +127,12 @@ jobs:
           source-dir: dist
           preview-branch: gh-pages
           umbrella-dir: pr-preview
-      # A second comment, kept up to date: the docs pages this PR changes, linked into its preview,
-      # so the owner reviews specs, mockups and decisions on the site rather than in the diff.
+      # A second comment, kept up to date: the docs pages, sections and mockups this PR changes or
+      # builds, linked into its preview, so the owner reviews on the site. Agents write none of their own.
       - name: List the docs pages to review
         if: github.event.action != 'closed'
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
         run: >-
           node site/review-links.mjs
           ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }}
