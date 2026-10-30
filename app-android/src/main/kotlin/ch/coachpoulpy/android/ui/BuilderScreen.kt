@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -65,6 +64,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -136,7 +136,6 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
             ?: part.steps.firstNotNullOfOrNull { step -> step.repeatGroup?.rows?.map { it.key }?.takeIf { key in it } }
     }
     val drag = rememberDragReorder(
-        list,
         // The name field, the part headers and the add tiles have keys that are not step keys.
         canDropOn = { key, onto -> onto is String && siblings(key as String)?.contains(onto) == true },
         onMove = { key, toKey ->
@@ -197,7 +196,6 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
             )
         },
     ) { padding ->
-        // No spacing from the list itself: a repeat is drawn as one tinted block out of several items.
         LazyColumn(
             state = list,
             modifier = Modifier.padding(padding).fillMaxSize().navigationBarsPadding(),
@@ -222,38 +220,42 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
                                 model, row, state.parts,
                                 onEdit = { editing = row.key },
                                 handle = Modifier.dragHandle(drag, row.key),
-                                modifier = Modifier.draggedItem(this, drag, row.key).padding(bottom = 12.dp),
+                                modifier = Modifier.draggedItem(drag, row.key, this).padding(bottom = 12.dp),
                             )
                         }
                     } else if (repeat != null) {
-                        // CLEANUP: a repeat is a header item plus one item per step, so dragging it lifts only the
-                        // header and the steps follow on drop. Draw the repeat as one item to drag it whole (#73).
+                        // One item, so dragging the repeat lifts its steps and its add button with it.
                         item(key = repeat.key) {
-                            RepeatHeader(model, repeat, part.key, state.parts, handle = Modifier.dragHandle(drag, repeat.key), modifier = Modifier.draggedItem(this, drag, repeat.key))
-                        }
-                        items(repeat.rows, key = { it.key }) { child ->
-                            Box(Modifier.draggedItem(this, drag, child.key).background(colors.primaryContainer).padding(start = 22.dp, end = 8.dp, bottom = 6.dp)) {
-                                StepCard(
-                                    model, child, state.parts,
-                                    onEdit = { editing = child.key },
-                                    handle = Modifier.dragHandle(drag, child.key),
-                                    modifier = Modifier,
-                                )
-                            }
-                        }
-                        item(key = "add-${repeat.key}") {
-                            Box(
+                            Column(
                                 Modifier
+                                    .draggedItem(drag, repeat.key, this)
                                     .padding(bottom = 12.dp)
-                                    .background(colors.primaryContainer, RoundedCornerShape(bottomStart = PoulpyRadius.md, bottomEnd = PoulpyRadius.md))
-                                    .padding(start = 22.dp, end = 8.dp, bottom = 10.dp, top = 2.dp),
+                                    .background(colors.primaryContainer, RoundedCornerShape(PoulpyRadius.md))
+                                    .padding(bottom = 10.dp),
                             ) {
-                                AddStepButton(
-                                    label = stringResource(R.string.builder_addToRepeat),
-                                    onExercise = { role -> pick(part.key, repeat.key, role) },
-                                    onRest = { model.addRest(part.key, repeat.key) },
-                                    height = 44,
-                                )
+                                RepeatHeader(model, repeat, part.key, state.parts, handle = Modifier.dragHandle(drag, repeat.key))
+                                Column(Modifier.padding(start = 22.dp, end = 8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                                    // CLEANUP: the repeat's steps are not list items, so animateItem() can't slide them out of
+                                    // the way of a dragged step; they jump into place. Animate their placement so they slide like
+                                    // the list's items do.
+                                    repeat.rows.forEach { child ->
+                                        key(child.key) {
+                                            StepCard(
+                                                model, child, state.parts,
+                                                onEdit = { editing = child.key },
+                                                handle = Modifier.dragHandle(drag, child.key),
+                                                modifier = Modifier.draggedItem(drag, child.key),
+                                            )
+                                        }
+                                    }
+                                    AddStepButton(
+                                        label = stringResource(R.string.builder_addToRepeat),
+                                        onExercise = { role -> pick(part.key, repeat.key, role) },
+                                        onRest = { model.addRest(part.key, repeat.key) },
+                                        height = 44,
+                                        modifier = Modifier.padding(top = 2.dp),
+                                    )
+                                }
                             }
                         }
                     }
@@ -441,14 +443,13 @@ private fun PartSheet(options: List<BuilderPartOption>, onPick: (PartKind) -> Un
 
 /** A repeat's header: its handle, "Repeat", how many times as − N times +, and a menu to duplicate, move or remove it. */
 @Composable
-private fun RepeatHeader(model: BuilderModel, repeat: BuilderRepeat, partKey: String, parts: List<BuilderPart>, handle: Modifier, modifier: Modifier) {
+private fun RepeatHeader(model: BuilderModel, repeat: BuilderRepeat, partKey: String, parts: List<BuilderPart>, handle: Modifier) {
     val colors = MaterialTheme.colorScheme
     val moveUp = stringResource(R.string.builder_moveUp)
     val moveDown = stringResource(R.string.builder_moveDown)
     Row(
-        modifier
+        Modifier
             .fillMaxWidth()
-            .background(colors.primaryContainer, RoundedCornerShape(topStart = PoulpyRadius.md, topEnd = PoulpyRadius.md))
             .padding(start = 12.dp, end = 4.dp, top = 8.dp, bottom = 8.dp)
             .semantics {
                 customActions = listOf(
