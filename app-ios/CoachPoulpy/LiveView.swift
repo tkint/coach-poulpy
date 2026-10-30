@@ -472,18 +472,21 @@ struct LiveView: View {
         }
     }
 
-    /// The treadmill went quiet or away for long: blue, never a reproach.
+    /// The treadmill went quiet or away for long, or the app was closed mid-recording: blue, never a reproach.
     private func finishCard(_ prompt: FinishPromptUi) -> some View {
         let lost = prompt.reason == .treadmillLost
+        let closed = prompt.reason == .appClosed
         return VStack(alignment: .leading, spacing: 10) {
             HStack(alignment: .top, spacing: 12) {
                 Image(systemName: "clock").font(.system(size: 22, weight: .semibold)).foregroundStyle(PoulpyColor.primary)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(LocalizedStringKey(lost ? "live.finishLostTitle" : "live.finishStillTitle"))
+                    Text(LocalizedStringKey(lost ? "live.finishLostTitle" : closed ? "live.finishClosedTitle" : "live.finishStillTitle"))
                         .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 19, relativeTo: .title3))
                         .accessibilityAddTraits(.isHeader)
                     Text(prompt.reason == .beltStopped
                          ? L("live.finishStoppedBody %lld %@", Int64(prompt.autoFinishMinutes), clock(prompt.endsAtSeconds))
+                         : closed
+                         ? L("live.finishClosedBody %@ %lld", clock(prompt.endsAtSeconds), Int64(prompt.autoFinishMinutes))
                          : L(lost ? "live.finishLostBody %lld %lld %@" : "live.finishStillBody %lld %lld %@",
                              Int64(prompt.sinceMinutes), Int64(prompt.autoFinishMinutes), clock(prompt.endsAtSeconds)))
                         .font(.poulpy(.subheadline))

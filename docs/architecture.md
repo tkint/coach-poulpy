@@ -64,7 +64,7 @@ A workout's format is chosen when it is created ([ADR 0013](./adr/0013-workouts-
 
 Its parts run in order: an optional warm-up, one or more work parts, an optional cool down. How a step finishes comes from its target alone: a time or a hold runs a timer; reps, a distance (unless a treadmill reports it) or "until button press" wait for a tap.
 
-The engine compiles a workout into a flat **timeline** of work, rest and transition phases, then runs it as a state machine that the UI only observes. The clock is injected, so the engine is testable without waiting. It emits **cues** (3-2-1, switch sides, next exercise) that each platform turns into sound, vibration and text. Every action is a **session event** written at once, so a killed app resumes at the same second.
+The engine compiles a workout into a flat **timeline** of work, rest and transition phases, then runs it as a state machine that the UI only observes. The clock is injected, so the engine is testable without waiting. It emits **cues** (3-2-1, switch sides, next exercise) that each platform turns into sound, vibration and text. Every action is a **session event** written at once, so a killed app resumes at the same second. When the app opens on a session left open, it asks once whether to resume or discard it. A guided session resumes in the player; a Live recording comes back in Live, paused at its last event, with the question whether it is finished. A session closed without being finished, because another one started or its workout is gone, ends at its last event, never at its start, and keeps its totals.
 
 ## Modules
 
@@ -80,8 +80,8 @@ The engine compiles a workout into a flat **timeline** of work, rest and transit
 | `device/ftms` | Android, iOS | FTMS decoding in common code; Bluetooth through Kable |
 | `export/fit` | Android, iOS, JVM | A small .FIT encoder |
 | `shared` | Android, iOS | App view models; exported to iOS as the `Shared` framework |
-| `app-android` | Android | Compose UI, a foreground service for sessions and Bluetooth, Health Connect |
-| `app-ios` | iOS | SwiftUI UI, Bluetooth and audio background modes, HealthKit |
+| `app-android` | Android | Compose UI, a connected-device foreground service for Live recordings, Health Connect |
+| `app-ios` | iOS | SwiftUI UI, the Bluetooth background mode with state restoration, HealthKit |
 | `web` | Browser | Vue 3, TypeScript, Vite, Pinia; the engine through Kotlin/JS |
 | `server` | JVM | http4k routes, Flyway, jOOQ, reusing model and stats for validation |
 | `tools/i18n` | JVM, build time | Generates Android and iOS string files, the shared `DomainText` and the merged catalog from `i18n/messages` |
@@ -100,7 +100,7 @@ Every word a person reads is in `i18n/messages/<locale>/<namespace>.json` ([ADR 
 
 ## Devices
 
-A treadmill is the first **metric source**: anything that turns a device into timestamped samples (speed, incline, distance, heart rate, cadence). The engine only sees samples. On Android a session runs in a connected-device foreground service; on iOS the Bluetooth background mode with state restoration keeps recording on a locked phone. A dropped link is retried for 60 seconds while the session keeps its timer, and the gap is marked in the samples rather than filled. Many treadmills send only some FTMS fields, so the decoder reads the feature flags first and the UI hides what a machine does not send.
+A treadmill is the first **metric source**: anything that turns a device into timestamped samples (speed, incline, distance, heart rate, cadence). The engine only sees samples. On Android a Live recording runs in a connected-device foreground service, from Start until it finishes or is discarded, with an ongoing notification that opens Live; on Android 14 and later it needs the Bluetooth permission, and without it a timer-only recording runs in the app alone. On iOS the Bluetooth background mode keeps recording on a locked phone, and Kable's central has a restore identifier so the system relaunches the app for the device's data after closing it. Guided sessions in the player have neither: they rely on the screen staying on, and on resuming from their events. A dropped link is retried for 60 seconds while the session keeps its timer, and the gap is marked in the samples rather than filled. Many treadmills send only some FTMS fields, so the decoder reads the feature flags first and the UI hides what a machine does not send.
 
 ## Accounts and security
 

@@ -2,6 +2,7 @@ package ch.coachpoulpy.shared
 
 import ch.coachpoulpy.catalog.Catalog
 import ch.coachpoulpy.core.engine.TimelineCompiler
+import ch.coachpoulpy.core.model.Execution
 import ch.coachpoulpy.core.model.Ids
 import ch.coachpoulpy.core.model.Workout
 import ch.coachpoulpy.core.model.WorkoutId
@@ -43,6 +44,9 @@ class AppGraph(driverFactory: DriverFactory) {
     fun devices(memory: KeyValueStore): DevicesModel =
         devicesModel ?: DevicesModel(KableCentral(), memory).also { devicesModel = it }
 
+    /** Live once a screen has opened it, for what follows its recording outside the screens, such as Android's notification. */
+    val liveIfCreated: LiveModel? get() = liveModel
+
     fun live(memory: KeyValueStore, languageCode: String): LiveModel =
         liveModel ?: LiveModel(devices(memory), settings(memory).state, store, compiler, memory, catalog = { catalog }, languageCode = languageCode)
             .also { liveModel = it }
@@ -82,25 +86,74 @@ class AppGraph(driverFactory: DriverFactory) {
     /** A new guided session of the latest version of a workout, ready to start. */
     fun player(workoutId: String, languageCode: String): PlayerModel? {
         val workout = store.latestWorkout(WorkoutId(workoutId)) ?: return null
-        // Only one session is open at a time: one left behind ends where it was left.
-        store.unfinishedExecution()?.let { open ->
-            store.finishExecution(open.id.value, store.events(open.id.value).lastOrNull()?.at ?: open.startedAt)
-        }
+        // Only one session is open at a time: one left behind ends where it was left. Live ends its own, with its summary.
+        liveModel?.stopRecording()
+        store.unfinishedExecution()?.let(::closeLeftOpen)
         return player(workout, Ids.newUuidV7(), languageCode)
     }
 
-    /** The session left open when the app was closed, if any, exactly where it was. */
+    /** The session left open when the app was closed, if any, exactly where it was. Null for a Live recording, which Live brings back. */
     fun resumeSession(languageCode: String): PlayerModel? {
-        val execution = store.unfinishedExecution() ?: return null
+        launchPrompt = null
+        val execution = store.unfinishedExecution()?.takeUnless { it.source.isLive } ?: return null
         val ref = execution.workout
         val workout = ref?.let { store.workout(it.workoutId, it.version) }
         if (workout == null) {
             // Its workout was deleted: close it so it stops being offered.
-            store.finishExecution(execution.id.value, execution.startedAt)
+            closeLeftOpen(execution)
             return null
         }
         return player(workout, execution.id.value, languageCode)
     }
+
+    private var launchChecked = false
+    private var launchPrompt: UnfinishedSessionUi? = null
+
+    /**
+     * The session left open when the app was last closed, asked about once per launch: the same answer until
+     * [dismissUnfinishedSession], [resumeSession] or [discardUnfinishedSession], then null, so a screen rebuilt
+     * mid-launch does not ask twice.
+     */
+    fun unfinishedSessionAtLaunch(): UnfinishedSessionUi? {
+        if (!launchChecked) {
+            launchChecked = true
+            launchPrompt = unfinishedSession()
+        }
+        return launchPrompt?.takeIf { store.unfinishedExecution()?.id?.value == it.executionId }
+    }
+
+    /** "Not now": the session stays open, and Home's Resume card or Live is the way back. */
+    fun dismissUnfinishedSession() {
+        launchPrompt = null
+    }
+
+    /** Deletes the session left open, with everything it recorded: nothing of it shows in History or the totals. */
+    fun discardUnfinishedSession() {
+        launchPrompt = null
+        val open = store.unfinishedExecution() ?: return
+        if (liveModel?.discardRecording(open.id.value) == true) return
+        store.deleteSession(open.id.value)
+    }
+
+    /** The session left open and where it stopped; null when there is none, or when its workout is gone, which closes it. */
+    internal fun unfinishedSession(): UnfinishedSessionUi? {
+        val open = store.unfinishedSession() ?: return null
+        val execution = open.execution
+        val workout = execution.workout?.let { store.workout(it.workoutId, it.version) }
+        if (!execution.source.isLive && workout == null) {
+            closeLeftOpen(execution)
+            return null
+        }
+        val events = store.events(execution.id.value)
+        return UnfinishedSessionUi(
+            executionId = execution.id.value,
+            live = execution.source.isLive,
+            workoutName = if (execution.source.isLive) null else open.title ?: workout?.name,
+            stoppedAtSeconds = activeTime(events, events.lastOrNull()?.at ?: execution.startedAt).inWholeSeconds,
+        )
+    }
+
+    private fun closeLeftOpen(execution: Execution) = store.closeLeftOpen(execution, store.timelineOf(execution, compiler))
 
     private fun player(workout: Workout, executionId: String, languageCode: String) = PlayerModel(
         workout = workout,

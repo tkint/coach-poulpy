@@ -30,12 +30,12 @@ import ch.coachpoulpy.core.model.WorkoutFormat
 import ch.coachpoulpy.core.model.WorkoutId
 import ch.coachpoulpy.core.model.WorkoutRef
 import ch.coachpoulpy.data.local.LocalStore
+import ch.coachpoulpy.data.local.StoredSession
 import ch.coachpoulpy.types.treadmill.StepCounter
 import ch.coachpoulpy.types.treadmill.TreadmillModule
 import ch.coachpoulpy.types.treadmill.TreadmillRecorder
 import ch.coachpoulpy.types.treadmill.TreadmillSummary
 import kotlin.time.Clock
-import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Instant
@@ -77,6 +77,8 @@ data class LiveTile(val metric: LiveMetric, val value: Double?, val decimals: In
 data class LiveChoice(val key: String, val name: String, val note: String)
 
 data class RecordingUi(
+    /** What is being recorded: the walk or run, or the workout's name. */
+    val title: String,
     val paused: Boolean,
     /** Time recorded, without the pauses. */
     val elapsedSeconds: Long,
@@ -131,16 +133,22 @@ enum class FinishReason {
 
     /** Stop was pressed on the console: the user may start another program, or be done. */
     BELT_STOPPED,
+
+    /** The app was closed during the recording, and Live found it again when it reopened, paused at its last event. */
+    APP_CLOSED,
 }
 
 /** "Finish the session?", asked when the treadmill went quiet or away for a long time. */
 data class FinishPromptUi(
     val reason: FinishReason,
-    /** How long ago the belt stopped or the treadmill went away. */
+    /** How long ago the belt stopped, the treadmill went away or the app was closed. */
     val sinceMinutes: Int,
     /** With no answer, the session finishes on its own in this many minutes. */
     val autoFinishMinutes: Int,
-    /** Where the session would end, in seconds since it started: when the belt last moved or the treadmill was last seen. */
+    /**
+     * Where the session would end, in seconds since it started: when the belt last moved, the treadmill was last seen,
+     * or the last thing recorded before the app was closed.
+     */
     val endsAtSeconds: Long,
 )
 
@@ -245,7 +253,13 @@ class LiveModel(
     /** The key Start was tapped with, while the recording waits for the belt to move. */
     private var waiting: String? = null
 
-    private class Recording(val executionId: String, val timeline: Timeline, val session: Session, val freeRun: Boolean) {
+    private class Recording(
+        val executionId: String,
+        val title: String,
+        val timeline: Timeline,
+        val session: Session,
+        val freeRun: Boolean,
+    ) {
         val recorder = TreadmillRecorder(session)
         var ticker: Job? = null
 
@@ -297,7 +311,42 @@ class LiveModel(
         scope.launch { devices.state.collect(::onDevices) }
         scope.launch { devices.available.collect { _state.update { it.copy(tiles = tiles()) } } }
         scope.launch { settings.collect { s -> _state.update { it.copy(units = s.units, tiles = tiles()) } } }
+        store.unfinishedSession()?.takeIf { it.execution.source.isLive }?.let(::recover)
     }
+
+    /**
+     * Brings back a recording the app was closed in, for example killed by the system in the background: paused at
+     * its last event, with the finish question. A recording that cannot be rebuilt is closed at its last event.
+     */
+    private fun recover(open: StoredSession) {
+        val execution = open.execution
+        val id = execution.id.value
+        val events = store.events(id)
+        val freeRun = execution.source == ExecutionSource.DEVICE_ONLY
+        val workout = execution.workout?.let { store.workout(it.workoutId, it.version) }
+        val timeline = when {
+            // begin() puts the key it records first in the recent ones before writing anything.
+            freeRun -> TreadmillModule.freeRecording(lastStartedExercise() ?: TreadmillModule.treadmillRun)
+            workout != null -> compiler.compile(workout)
+            else -> null
+        }
+        val last = events.lastOrNull()
+        if (timeline == null || last == null || Session(timeline, events).state(last.at).status == SessionState.Status.FINISHED) {
+            store.closeLeftOpen(execution, timeline ?: store.timelineOf(execution, compiler))
+            return
+        }
+        val recovered = Recording(id, open.title ?: workout?.name.orEmpty(), timeline, Session(timeline, events), freeRun)
+        recording = recovered
+        if (recovered.session.state(last.at).status == SessionState.Status.RUNNING) {
+            persist(recovered, recovered.session.pause(last.at))
+        }
+        recovered.prompt = Prompt(FinishReason.APP_CLOSED, since = last.at, at = clock.now())
+        startTicker(recovered)
+        refreshRecording(recovered)
+    }
+
+    private fun lastStartedExercise(): ExerciseSlug? =
+        recents.firstOrNull()?.takeIf { it.startsWith(EXERCISE) }?.let { ExerciseSlug(it.removePrefix(EXERCISE)) }
 
     /** Follows the added devices: how many are connected, and whether Live waits for some. */
     private fun onDevices(d: DevicesUiState) {
@@ -474,36 +523,41 @@ class LiveModel(
         val timeline = if (exercise != null) TreadmillModule.freeRecording(exercise.slug) else compiler.compile(workout!!)
         val now = clock.now()
         val executionId = Ids.newUuidV7(now.toEpochMilliseconds())
+        val title = exercise?.let { labels.text(it.name) } ?: workout!!.name
         store.startExecution(
             Execution(
                 id = ExecutionId(executionId),
-                source = if (freeRun) ExecutionSource.DEVICE_ONLY else ExecutionSource.GUIDED,
+                source = if (freeRun) ExecutionSource.DEVICE_ONLY else ExecutionSource.LIVE_WORKOUT,
                 startedAt = now,
                 workout = if (workout != null && workout in savedWorkouts) WorkoutRef(workout.id, workout.version) else null,
             ),
-            title = exercise?.let { labels.text(it.name) } ?: workout!!.name,
+            title = title,
             format = workout?.format,
         )
         recents = (listOf(key) + (recents - key)).take(RECENT_KEPT)
         memory.putString(RECENT, recents.joinToString(","))
         publishChoices()
-        val started = Recording(executionId, timeline, Session(timeline), freeRun)
+        val started = Recording(executionId, title, timeline, Session(timeline), freeRun)
         started.hadTreadmill = devices.hasTreadmill
         if (started.hadTreadmill && _state.value.belt != BeltStatus.MOVING) started.stillSince = now
         recording = started
         persist(started, started.session.start(now))
-        // Timed phases end on the clock even when no reading arrives.
-        started.ticker = scope.launch {
-            while (isActive) {
-                delay(500.milliseconds)
-                persist(started, started.session.tick(clock.now()))
-                checkInactivity(started)
-                refreshRecording(started)
-            }
-        }
+        startTicker(started)
         steps.reset()
         _state.update { it.copy(summary = null) }
         refreshRecording(started)
+    }
+
+    /** Timed phases end on the clock even when no reading arrives. */
+    private fun startTicker(current: Recording) {
+        current.ticker = scope.launch {
+            while (isActive) {
+                delay(500.milliseconds)
+                persist(current, current.session.tick(clock.now()))
+                checkInactivity(current)
+                refreshRecording(current)
+            }
+        }
     }
 
     fun pauseRecording() = act { it.pause(clock.now()) }
@@ -578,13 +632,14 @@ class LiveModel(
      * finishes it when nobody answers within [AUTO_FINISH_AFTER].
      */
     private fun checkInactivity(current: Recording) {
-        if (recording !== current || !current.hadTreadmill) return
+        if (recording !== current) return
         val now = clock.now()
         val prompt = current.prompt
         if (prompt != null) {
             if (now - prompt.at >= AUTO_FINISH_AFTER) finishAt(current, prompt.since)
             return
         }
+        if (!current.hadTreadmill) return
         val lost = current.lostSince
         val still = current.stillSince
         current.prompt = when {
@@ -623,8 +678,21 @@ class LiveModel(
         refreshRecording(current)
     }
 
-    /** Ends the recording; phases not reached are logged as skipped. */
-    fun stopRecording() = stopRecording(clock.now())
+    /**
+     * Ends the recording; phases not reached are logged as skipped. A recording found again after the app was closed
+     * ends where it was left, as its finish question says.
+     */
+    fun stopRecording() = stopRecording(recording?.prompt?.takeIf { it.reason == FinishReason.APP_CLOSED }?.since ?: clock.now())
+
+    /** Drops the recording [executionId] with everything it recorded, as if it never happened. False when it is not this one. */
+    fun discardRecording(executionId: String): Boolean {
+        val current = recording?.takeIf { it.executionId == executionId } ?: return false
+        recording = null
+        current.ticker?.cancel()
+        store.deleteSession(executionId)
+        _state.update { it.copy(recording = null, finishPrompt = null) }
+        return true
+    }
 
     private fun stopRecording(now: Instant) {
         val current = recording ?: return
@@ -672,6 +740,7 @@ class LiveModel(
         _state.update {
             it.copy(
                 recording = RecordingUi(
+                    title = current.title,
                     paused = paused,
                     elapsedSeconds = activeTime(events, now).inWholeSeconds,
                     stepElapsedSeconds = s.phaseElapsed.inWholeSeconds,
@@ -700,23 +769,6 @@ class LiveModel(
                 },
             )
         }
-    }
-
-    /** The time between each start or resume and the next pause or finish. */
-    private fun activeTime(events: List<SessionEvent>, now: Instant): Duration {
-        var total = Duration.ZERO
-        var runningSince: Instant? = null
-        for (event in events) {
-            when (event) {
-                is SessionEvent.Started, is SessionEvent.Resumed -> if (runningSince == null) runningSince = event.at
-                is SessionEvent.Paused, is SessionEvent.Finished -> runningSince?.let {
-                    total += event.at - it
-                    runningSince = null
-                }
-                else -> Unit
-            }
-        }
-        return total + (runningSince?.let { now - it } ?: Duration.ZERO)
     }
 
     /** [events] give the rest after each step: a pause that a step ended in, once it is over. */

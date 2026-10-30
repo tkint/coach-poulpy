@@ -1,5 +1,10 @@
 package ch.coachpoulpy.android.ui
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -38,12 +43,12 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -75,6 +80,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import ch.coachpoulpy.android.LiveRecordingService
 import ch.coachpoulpy.android.R
 import ch.coachpoulpy.shared.AppGraph
 import ch.coachpoulpy.shared.BeltStatus
@@ -104,6 +110,8 @@ fun LiveScreen(graph: AppGraph, language: String, onManageDevices: () -> Unit, m
     val devices = remember(graph) { graph.devices(memory) }
     val state by model.state.collectAsStateWithLifecycle()
     val bluetooth = rememberBluetoothGate()
+    // From now on each recording runs in the foreground service, with its notification.
+    LaunchedEffect(model) { LiveRecordingService.follow(context, model) }
 
     // The phone stays awake while recording, as it sits on the treadmill's console.
     val view = LocalView.current
@@ -302,6 +310,17 @@ private fun Recorder(state: LiveUiState, model: LiveModel) {
 private fun ChoicePicker(state: LiveUiState, model: LiveModel) {
     var picking by rememberSaveable { mutableStateOf(false) }
     val colors = MaterialTheme.colorScheme
+    val context = LocalContext.current
+    // The recording notification needs asking on Android 13+; the answer changes nothing else.
+    val notifications = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
+    val start = {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+        ) {
+            notifications.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+        model.startRecording(state.selected)
+    }
     Text(
         stringResource(R.string.live_whatDoing).uppercase(Locale.getDefault()),
         style = MaterialTheme.typography.labelMedium,
@@ -330,7 +349,7 @@ private fun ChoicePicker(state: LiveUiState, model: LiveModel) {
     }
     if (state.hasTreadmill) FollowMode(state.followTreadmill)
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-        Button(onClick = { model.startRecording(state.selected) }, modifier = Modifier.weight(1f).height(52.dp)) {
+        Button(onClick = start, modifier = Modifier.weight(1f).height(52.dp)) {
             Text(stringResource(if (state.hasTreadmill && state.followTreadmill) R.string.live_waitTreadmill else R.string.treadmill_start))
         }
         if (state.hasTreadmill) FollowToggle(state.followTreadmill, model::setFollowTreadmill)
@@ -576,7 +595,7 @@ private fun Waiting(choice: LiveChoice, model: LiveModel) {
     }
 }
 
-/** The treadmill went quiet or away for long: blue, never a reproach. */
+/** The treadmill went quiet or away for long, or the app was closed mid-recording: blue, never a reproach. */
 @Composable
 private fun FinishCard(prompt: FinishPromptUi, model: LiveModel) {
     val colors = MaterialTheme.colorScheme
@@ -588,7 +607,13 @@ private fun FinishCard(prompt: FinishPromptUi, model: LiveModel) {
                 Column(Modifier.semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite }) {
                     val lost = prompt.reason == FinishReason.TREADMILL_LOST
                     Text(
-                        stringResource(if (lost) R.string.live_finishLostTitle else R.string.live_finishStillTitle),
+                        stringResource(
+                            when (prompt.reason) {
+                                FinishReason.TREADMILL_LOST -> R.string.live_finishLostTitle
+                                FinishReason.APP_CLOSED -> R.string.live_finishClosedTitle
+                                else -> R.string.live_finishStillTitle
+                            },
+                        ),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.ExtraBold,
                         modifier = Modifier.semantics { heading() },
@@ -597,6 +622,8 @@ private fun FinishCard(prompt: FinishPromptUi, model: LiveModel) {
                         when (prompt.reason) {
                             FinishReason.BELT_STOPPED ->
                                 stringResource(R.string.live_finishStoppedBody, prompt.autoFinishMinutes, clock(prompt.endsAtSeconds))
+                            FinishReason.APP_CLOSED ->
+                                stringResource(R.string.live_finishClosedBody, clock(prompt.endsAtSeconds), prompt.autoFinishMinutes)
                             else -> stringResource(
                                 if (lost) R.string.live_finishLostBody else R.string.live_finishStillBody,
                                 prompt.sinceMinutes,

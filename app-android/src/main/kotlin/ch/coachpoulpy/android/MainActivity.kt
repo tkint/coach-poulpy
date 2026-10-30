@@ -1,6 +1,7 @@
 package ch.coachpoulpy.android
 
 import android.content.Context
+import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -10,6 +11,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ch.coachpoulpy.android.ui.AppPreferences
 import ch.coachpoulpy.android.ui.CoachPoulpyRoot
@@ -21,6 +23,9 @@ import java.util.Locale
 
 class MainActivity : ComponentActivity() {
     private var startLanguage: LanguageChoice? = null
+
+    /** Set when the recording notification opened the app, until the Live tab shows. */
+    private val openLive = mutableStateOf(false)
 
     // The language picked in Settings wins over the phone's. "System" leaves the phone's,
     // including the per-app language Android 13 offers in its own settings.
@@ -38,6 +43,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        openLive.value = intent.getBooleanExtra(OPEN_LIVE, false)
         val graph = (application as CoachPoulpyApp).graph
         val settings = graph.settings(AppPreferences(this))
         startLanguage = settings.state.value.language
@@ -52,10 +58,15 @@ class MainActivity : ComponentActivity() {
             }
             CoachPoulpyTheme(dark = dark) {
                 CompositionLocalProvider(LocalUnitSystem provides state.units) {
-                    CoachPoulpyRoot(graph)
+                    CoachPoulpyRoot(graph, openLive = openLive.value, onLiveOpened = { openLive.value = false })
                 }
             }
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        if (intent.getBooleanExtra(OPEN_LIVE, false)) openLive.value = true
     }
 
     private fun savedLanguage(context: Context): LanguageChoice {
@@ -63,8 +74,11 @@ class MainActivity : ComponentActivity() {
         return LanguageChoice.entries.firstOrNull { it.name == saved } ?: LanguageChoice.SYSTEM
     }
 
-    private companion object {
+    companion object {
+        /** An extra that opens the Live tab, from the recording notification. */
+        const val OPEN_LIVE = "openLive"
+
         /** The key SettingsModel saves the language under. */
-        const val LANGUAGE_KEY = "settings.language"
+        private const val LANGUAGE_KEY = "settings.language"
     }
 }

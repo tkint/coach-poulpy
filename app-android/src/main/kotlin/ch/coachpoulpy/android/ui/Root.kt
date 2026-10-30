@@ -19,6 +19,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -43,8 +44,9 @@ private enum class Tab(@StringRes val label: Int, val icon: ImageVector) {
  */
 private typealias Route = String
 
+/** [openLive] shows the Live tab, as when the recording notification is tapped; [onLiveOpened] says it was done. */
 @Composable
-fun CoachPoulpyRoot(graph: AppGraph) {
+fun CoachPoulpyRoot(graph: AppGraph, openLive: Boolean = false, onLiveOpened: () -> Unit = {}) {
     var tab by rememberSaveable { mutableStateOf(Tab.HOME) }
     var libraryView by rememberSaveable { mutableStateOf(LibraryView.WORKOUTS) }
     var route by rememberSaveable { mutableStateOf<Route?>(null) }
@@ -58,6 +60,45 @@ fun CoachPoulpyRoot(graph: AppGraph) {
     }
 
     BackHandler(enabled = route != null) { close() }
+
+    LaunchedEffect(openLive) {
+        if (openLive) {
+            route = null
+            back = null
+            tab = Tab.LIVE
+            onLiveOpened()
+        }
+    }
+
+    // A session left open when the app was last closed: asked once per launch, before anything else.
+    var unfinished by remember(graph) { mutableStateOf(graph.unfinishedSessionAtLaunch()) }
+    // Home reads the session left open when it shows; a discard under the dialog builds it again.
+    var discards by remember { mutableStateOf(0) }
+    unfinished?.let { session ->
+        UnfinishedSessionDialog(
+            session,
+            onResume = {
+                unfinished = null
+                if (session.live) {
+                    graph.dismissUnfinishedSession()
+                    route = null
+                    tab = Tab.LIVE
+                } else {
+                    // The player's resumeSession() closes the question.
+                    route = "resume"
+                }
+            },
+            onDiscard = {
+                unfinished = null
+                graph.discardUnfinishedSession()
+                discards++
+            },
+            onDismiss = {
+                unfinished = null
+                graph.dismissUnfinishedSession()
+            },
+        )
+    }
 
     when (val current = route) {
         null -> Scaffold(
@@ -76,19 +117,21 @@ fun CoachPoulpyRoot(graph: AppGraph) {
         ) { padding ->
             val modifier = Modifier.padding(padding)
             when (tab) {
-                Tab.HOME -> HomeScreen(
-                    graph = graph,
-                    language = language,
-                    onOpenWorkout = { route = "workout:$it" },
-                    onStart = { route = "player:$it" },
-                    onResume = { route = "resume" },
-                    onOpenSession = { route = "session:$it" },
-                    onOpenLibrary = {
-                        libraryView = LibraryView.WORKOUTS
-                        tab = Tab.LIBRARY
-                    },
-                    modifier = modifier,
-                )
+                Tab.HOME -> key(discards) {
+                    HomeScreen(
+                        graph = graph,
+                        language = language,
+                        onOpenWorkout = { route = "workout:$it" },
+                        onStart = { route = "player:$it" },
+                        onResume = { route = "resume" },
+                        onOpenSession = { route = "session:$it" },
+                        onOpenLibrary = {
+                            libraryView = LibraryView.WORKOUTS
+                            tab = Tab.LIBRARY
+                        },
+                        modifier = modifier,
+                    )
+                }
                 Tab.LIBRARY -> LibraryScreen(
                     graph = graph,
                     language = language,

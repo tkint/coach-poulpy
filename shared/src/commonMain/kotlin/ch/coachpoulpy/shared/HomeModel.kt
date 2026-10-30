@@ -82,7 +82,7 @@ class HomeModel internal constructor(
     private val facts = WorkoutFacts(compiler, catalog, labels)
 
     /** The session left open. It is not a flow in the store, so the screens call [refresh] when they show. */
-    private val unfinished = MutableStateFlow(store.unfinishedExecution())
+    private val unfinished = MutableStateFlow(openInPlayer())
 
     val state: StateFlow<HomeState> = combine(
         store.workouts(),
@@ -100,8 +100,11 @@ class HomeModel internal constructor(
 
     /** Reads the session left open again, for example after coming back from the player. */
     fun refresh() {
-        unfinished.value = store.unfinishedExecution()
+        unfinished.value = openInPlayer()
     }
+
+    /** A Live recording left open comes back in Live, not on Home's Resume card. */
+    private fun openInPlayer() = store.unfinishedExecution()?.takeUnless { it.source.isLive }
 
     fun deleteSession(sessionId: String) = store.deleteSession(sessionId)
 
