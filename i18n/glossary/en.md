@@ -48,6 +48,10 @@ Messages not listed here mean what their English says.
 | `history.tentaclesLit` | Out of Poulpy’s eight tentacles; see the Poulpy notes below. |
 | `live.waitingBody`, `live.connectingOne`, `devices.forgetTitle`, `devices.usedInstead` | `{name}` is a device’s name. |
 | `live.finishStillBody`, `live.finishStoppedBody`, `live.finishLostBody` | `{endTime}` is a clock time, already formatted. |
+| `live.finishClosedBody` | `{endTime}` is how far into the session it stopped, like “12:40”, already formatted. |
+| `live.notificationPaused` | `{elapsed}` is the time recorded so far, like “12:40”. |
+| `unfinished.body` | `{time}` is a duration into the session, like “12:40”, not a time of day. |
+| `unfinished.title` | `{workout}` is the workout’s name, chosen by the person. |
 | `devices.openSettings` | iOS only: opens the phone’s Settings app. Use the name the phone uses. |
 | `devices.allowBluetooth` | Android only. |
 | `kind.footPod` | A small sensor clipped to the shoe that measures pace and cadence. |

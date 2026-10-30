@@ -292,9 +292,9 @@
     "groupWorkouts": "Suivre une séance",
     "connected": "{count, plural, one {# connecté} many {# connectés} other {# connectés}}",
     "finishClosedTitle": "Votre séance est à l’abri",
-    "finishClosedBody": "L’application s’est fermée pendant votre séance, et Poulpy en a gardé tout ce qui précède {endTime}. Sans réponse, elle se termine là dans {finishMinutes, number} min.",
+    "finishClosedBody": "L’application s’est fermée pendant votre séance, et Poulpy l’a gardée. Sans réponse, Poulpy la termine dans {finishMinutes, number} min, en l’arrêtant à {endTime}.",
     "notificationChannel": "Enregistrement en direct",
-    "notificationChannelInfo": "S’affiche pendant qu’En direct enregistre une séance, pour qu’elle continue écran éteint ou dans une autre application.",
+    "notificationChannelInfo": "S’affiche pendant l’enregistrement d’une séance en direct, pour qu’il continue écran éteint ou quand une autre application est ouverte.",
     "notificationRecording": "Enregistrement",
     "notificationPaused": "En pause · {elapsed}"
   },
@@ -377,7 +377,7 @@
   "unfinished": {
     "title": "Reprendre {workout} ?",
     "liveTitle": "Reprendre votre séance libre ?",
-    "body": "La séance s’est arrêtée à {time}. Reprenez-la là où vous en étiez, ou abandonnez-la : elle n’apparaîtra pas dans votre historique.",
+    "body": "La séance s’est arrêtée après {time}. Reprenez-la là où vous en étiez, ou abandonnez-la : elle n’apparaîtra pas dans votre historique.",
     "discard": "Abandonner",
     "later": "Plus tard"
   }
