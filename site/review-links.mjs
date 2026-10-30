@@ -89,7 +89,9 @@ function sectionsOf(file, page) {
 
 // The agreed mockups drawn for an issue the PR closes, so an implementation PR links the screens it builds.
 function builtMockups() {
-  const closes = new Set([...(process.env.PR_BODY ?? '').matchAll(/\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?) #(\d+)/gi)].map((m) => m[1]))
+  // Only a line that starts with the keyword, as the PR template does, so prose quoting another PR's
+  // "Closes #n" doesn't count.
+  const closes = new Set([...(process.env.PR_BODY ?? '').matchAll(/^\s*(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?) #(\d+)/gim)].map((m) => m[1]))
   if (closes.size === 0) return []
   const dir = 'design/mockups/agreed'
   if (!existsSync(dir)) return []
