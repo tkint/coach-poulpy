@@ -30,6 +30,7 @@ Messages not listed here mean what their English says.
 | --- | --- |
 | `app.name` | The product name. Never translated. |
 | `common.loading` | Spoken by screen readers while a screen loads; never seen. |
+| `tab.*` | Tab labels at the bottom of the screen: about 12 characters fit before the text shrinks. One word is best. |
 | `tab.live` | The tab for a session recorded from connected devices (treadmill, heart rate band), as it happens. |
 | `home.inDays` | `{date}` is a weekday and date, already formatted for the language. |
 | `library.sort` | iOS only: the label of the sort menu. |
