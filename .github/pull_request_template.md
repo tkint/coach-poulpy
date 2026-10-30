@@ -2,10 +2,6 @@ Closes #
 
 ## What changed
 
-## Review in the docs
-
-What to look at on the pages this PR changes, and why. The "Review in the docs" comment links each one in the preview. Write "None" if the PR changes no page.
-
 ## How it was checked
 
 - [ ] `./gradlew jvmTest jsTest :server:test`
