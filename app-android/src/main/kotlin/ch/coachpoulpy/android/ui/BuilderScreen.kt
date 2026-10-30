@@ -235,6 +235,9 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
                             ) {
                                 RepeatHeader(model, repeat, part.key, state.parts, handle = Modifier.dragHandle(drag, repeat.key))
                                 Column(Modifier.padding(start = 22.dp, end = 8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                                    // CLEANUP: the repeat's steps are not list items, so animateItem() can't slide them out of
+                                    // the way of a dragged step; they jump into place. Animate their placement so they slide like
+                                    // the list's items do.
                                     repeat.rows.forEach { child ->
                                         key(child.key) {
                                             StepCard(
