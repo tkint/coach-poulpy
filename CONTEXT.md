@@ -83,7 +83,7 @@ _Avoid_: Objective
 ### Training
 
 **Session**:
-One workout actually done, from start to end, whether guided, free or recorded from a device only.
+One workout actually done, from start to end, whether guided, free, recorded from a device only, or a treadmill workout followed in Live.
 _Avoid_: Execution, activity, workout log, training
 
 **Session event**:
