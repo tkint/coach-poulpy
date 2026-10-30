@@ -48,6 +48,12 @@ Baloo 2 for display and titles, Nunito for everything else. Platforms map each r
 | `label` | Nunito 800, tracked 0.08 em, upper case | 12.5 / 16 | Eyebrows, tab labels, "Next up" |
 | `timer` | Nunito 800, tabular figures | 64 / 64 | Timers and rep counts, which must not jitter |
 
+**Words never break.** Translations run longer than English (« Bibliothèque », « Échauffement »), so text is laid out for any length:
+
+- Text in a space of fixed width (tab labels, chips, stat tiles, stepper values) stays on one line and shrinks to fit, never below 9 sp / pt; past that it ends in an ellipsis. `FitText` on Android, `.lineLimit(1).minimumScaleFactor(…)` on iOS, whose tab bar already does it.
+- Buttons wrap their label between words rather than shrink it.
+- Every other text wraps between words only, never inside one, and never hyphenates.
+
 ## Space, radius, motion
 
 - Spacing steps: 4, 8, 12, 16, 24, 32, 48 (`xs` to `xxxl`). Pick a step; never a value between them.

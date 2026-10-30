@@ -13,7 +13,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -68,7 +67,7 @@ fun CoachPoulpyRoot(graph: AppGraph) {
                             selected = tab == item,
                             onClick = { tab = item },
                             icon = { Icon(item.icon, contentDescription = null) },
-                            label = { Text(stringResource(item.label)) },
+                            label = { FitText(stringResource(item.label)) },
                         )
                     }
                 }
