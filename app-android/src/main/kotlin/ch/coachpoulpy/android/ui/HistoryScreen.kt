@@ -135,8 +135,8 @@ private fun ViewSwitch(selected: HistoryView, onSelect: (HistoryView) -> Unit) {
         Modifier.fillMaxWidth().clip(pill).background(MaterialTheme.colorScheme.surfaceVariant).padding(4.dp).selectableGroup(),
     ) {
         listOf(
-            Triple(HistoryView.CALENDAR, R.string.history_view_calendar, Icons.Filled.CalendarMonth),
-            Triple(HistoryView.STATS, R.string.history_view_stats, Icons.Filled.BarChart),
+            Triple(HistoryView.CALENDAR, R.string.history_viewCalendar, Icons.Filled.CalendarMonth),
+            Triple(HistoryView.STATS, R.string.history_viewStats, Icons.Filled.BarChart),
         ).forEach { (item, label, icon) ->
             val on = item == selected
             val color = if (on) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
@@ -195,9 +195,9 @@ private fun CalendarView(model: HistoryModel, state: HistoryState, onOpen: (Stri
             if (month.sections.isEmpty() && state.sessions.isEmpty()) {
                 item {
                     Column(Modifier.fillMaxWidth().padding(top = 32.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(stringResource(R.string.history_empty_title), style = MaterialTheme.typography.titleLarge)
+                        Text(stringResource(R.string.history_emptyTitle), style = MaterialTheme.typography.titleLarge)
                         Text(
-                            stringResource(R.string.history_empty_body),
+                            stringResource(R.string.history_emptyBody),
                             style = MaterialTheme.typography.bodyMedium,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.padding(top = 8.dp),
@@ -243,18 +243,18 @@ private fun MonthCard(month: CalendarMonth, selected: Int, onSelect: (Int) -> Un
         Column(Modifier.padding(start = 12.dp, end = 12.dp, top = 10.dp, bottom = 12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = { onMonth(-1) }, enabled = month.canGoBack) {
-                    Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = stringResource(R.string.history_previous_month))
+                    Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = stringResource(R.string.history_previousMonth))
                 }
                 Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(monthTitle(month.monthStartMillis), style = MaterialTheme.typography.titleLarge)
                     Text(
-                        pluralStringResource(R.plurals.history_active_days, month.activeDays, month.activeDays),
+                        pluralStringResource(R.plurals.history_activeDays, month.activeDays, month.activeDays),
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
                 IconButton(onClick = { onMonth(1) }, enabled = month.canGoForward) {
-                    Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = stringResource(R.string.history_next_month))
+                    Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = stringResource(R.string.history_nextMonth))
                 }
             }
             Row(Modifier.fillMaxWidth().padding(vertical = 4.dp).clearAndSetSemantics { }) {
@@ -324,7 +324,7 @@ private fun DayCell(month: CalendarMonth, day: CalendarDay, selected: Boolean, o
 @Composable
 private fun DayHeader(section: DaySection, highlighted: Boolean) {
     val day = dayLabel(section.dateMillis)
-    val label = if (section.isToday) stringResource(R.string.history_today_day, day) else day
+    val label = if (section.isToday) stringResource(R.string.history_todayDay, day) else day
     Row(
         Modifier.fillMaxWidth().padding(start = 4.dp, end = 4.dp, top = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -396,27 +396,27 @@ private fun StatsView(state: HistoryState) {
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            PeriodCard(R.string.history_this_week, state.thisWeek, highlighted = true, Modifier.weight(1f))
-            PeriodCard(R.string.history_this_month, state.thisMonth, highlighted = false, Modifier.weight(1f))
+            PeriodCard(R.string.history_thisWeek, state.thisWeek, highlighted = true, Modifier.weight(1f))
+            PeriodCard(R.string.history_thisMonth, state.thisMonth, highlighted = false, Modifier.weight(1f))
         }
         ChartsCard(state)
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             StatTile(
                 stringResource(R.string.history_total),
                 "${state.totalSessions}",
-                pluralStringResource(R.plurals.history_sessions_unit, state.totalSessions),
+                pluralStringResource(R.plurals.history_sessionsUnit, state.totalSessions),
                 Modifier.weight(1f),
             )
             StatTile(
-                stringResource(R.string.history_longest_run),
+                stringResource(R.string.history_longestRun),
                 state.longestRunMeters?.let { distance(it, 1) } ?: "–",
                 state.longestRunMillis?.let { shortDayMonth(it) } ?: "",
                 Modifier.weight(1f),
             )
             StatTile(
-                stringResource(R.string.history_full_octopus),
+                stringResource(R.string.history_fullOctopus),
                 "×${state.fullOctopuses}",
-                stringResource(R.string.history_tentacles_lit, state.tentaclesLit),
+                stringResource(R.string.history_tentaclesLit, state.tentaclesLit),
                 Modifier.weight(1f),
             )
         }
@@ -461,7 +461,7 @@ private fun ChartsCard(state: HistoryState) {
     ) {
         Column(Modifier.padding(horizontal = 16.dp, vertical = 14.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
             WeekChart(
-                title = stringResource(R.string.history_chart_minutes),
+                title = stringResource(R.string.history_chartMinutes),
                 weeks = state.weeks,
                 value = { it.activeMinutes.toDouble() },
                 label = { it.toInt().toString() },
@@ -472,7 +472,7 @@ private fun ChartsCard(state: HistoryState) {
             if (state.hasDistance) {
                 // Deep blue, not ember: ember is kept for Poulpy's grumpy side.
                 WeekChart(
-                    title = stringResource(R.string.history_chart_distance),
+                    title = stringResource(R.string.history_chartDistance),
                     weeks = state.weeks,
                     value = { it.distanceKm },
                     label = { decimal(it, 1) },
@@ -609,17 +609,17 @@ fun SessionDetailScreen(graph: AppGraph, language: String, sessionId: String, on
                 colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surface),
             ) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Line(R.string.treadmill_summary_duration, clock(session.activeSeconds))
+                    Line(R.string.treadmill_summaryDuration, clock(session.activeSeconds))
                     if (session.kind == SessionKind.WORKOUT) {
                         session.setsDone?.let { done ->
-                            Line(R.string.history_sets_done, session.setsPlanned?.let { "$done / $it" } ?: "$done")
+                            Line(R.string.history_setsDone, session.setsPlanned?.let { "$done / $it" } ?: "$done")
                         }
-                        session.setsSkipped?.takeIf { it > 0 }?.let { Line(R.string.history_sets_skipped, "$it") }
+                        session.setsSkipped?.takeIf { it > 0 }?.let { Line(R.string.history_setsSkipped, "$it") }
                     }
                     session.distanceMeters?.let { Line(R.string.metric_distance, distance(it, 2)) }
-                    session.averageSpeedKmh?.let { kmh -> Line(R.string.treadmill_summary_average_speed, Units.speed(kmh, LocalUnitSystem.current).let { "${decimal(it.value, it.decimals)} ${it.unit}" }) }
-                    session.averageHeartRateBpm?.let { Line(R.string.treadmill_summary_average_hr, "$it bpm") }
-                    session.maxHeartRateBpm?.let { Line(R.string.treadmill_summary_max_hr, "$it bpm") }
+                    session.averageSpeedKmh?.let { kmh -> Line(R.string.treadmill_summaryAverageSpeed, Units.speed(kmh, LocalUnitSystem.current).let { "${decimal(it.value, it.decimals)} ${it.unit}" }) }
+                    session.averageHeartRateBpm?.let { Line(R.string.treadmill_summaryAverageHr, "$it bpm") }
+                    session.maxHeartRateBpm?.let { Line(R.string.treadmill_summaryMaxHr, "$it bpm") }
                     session.energyKcal?.let { Line(R.string.metric_energy, "$it kcal") }
                     session.estimatedSteps?.let { Line(R.string.metric_steps, "≈ $it") }
                 }
@@ -630,8 +630,8 @@ fun SessionDetailScreen(graph: AppGraph, language: String, sessionId: String, on
     if (deleting) {
         AlertDialog(
             onDismissRequest = { deleting = false },
-            title = { Text(stringResource(R.string.history_delete_title)) },
-            text = { Text(stringResource(R.string.history_delete_body)) },
+            title = { Text(stringResource(R.string.history_deleteTitle)) },
+            text = { Text(stringResource(R.string.history_deleteBody)) },
             confirmButton = {
                 TextButton(onClick = { model.delete(sessionId); deleting = false; onBack() }) {
                     Text(stringResource(R.string.action_delete))

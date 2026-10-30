@@ -108,7 +108,7 @@ struct PillSearchField: View {
                         .background(PoulpyColor.surfaceVariant, in: Circle())
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel(Text("exercises.clear.search"))
+                .accessibilityLabel(Text("exercises.clearSearch"))
             }
         }
         .padding(.leading, 18)

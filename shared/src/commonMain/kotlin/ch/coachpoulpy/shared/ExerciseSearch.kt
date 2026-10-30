@@ -30,9 +30,9 @@ internal class ExerciseSearch(exercises: List<Exercise>) {
     }
 
     private inner class Entry(exercise: Exercise) {
-        private val names = listOf(exercise.name.en, exercise.name.fr).map(SearchText::fold)
+        private val names = exercise.name.all.toList().map(SearchText::fold)
         private val compactNames = names.map { it.replace(" ", "") }
-        private val nameWords = (listOf(exercise.name.en, exercise.name.fr) + exercise.aliases.all).flatMap(SearchText::words)
+        private val nameWords = (exercise.name.all.toList() + exercise.aliases.all).flatMap(SearchText::words)
         private val labelWords = labels.flatMap { language ->
             exercise.muscleGroups.map(language::muscle) + exercise.allEquipment.map(language::equipment) +
                 language.pattern(exercise.movementPattern)

@@ -23,7 +23,7 @@ class WorkoutSearch private constructor(private val entries: Map<String, Entry>)
         private val nameWords = SearchText.words(workout.name)
         private val formatWords = languages.flatMap { SearchText.words(it.format(workout.format)) }
         private val exerciseWords = exerciseSteps(workout).mapNotNull { catalog[it.exercise] }.distinct()
-            .flatMap { listOf(it.name.en, it.name.fr) + it.aliases.all }
+            .flatMap { it.name.all + it.aliases.all }
             .flatMap(SearchText::words)
 
         fun rank(words: List<String>): SearchRank? {

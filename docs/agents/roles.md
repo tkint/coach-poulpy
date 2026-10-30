@@ -25,4 +25,4 @@ Roles advise; they don't overrule each other or the owner. A disagreement betwee
 
 Every surface (Android, iOS, the website, the server's API, the exercise catalog) will read its text from one JSON file per language and per namespace, with ICU MessageFormat for plurals and placeholders. Native speakers proofread in [Fink](https://fink.inlang.com/), which opens pull requests from a free GitHub account. A build-time generator writes the Android and iOS string files from the JSON; they are not committed. The server words only what it sends itself (emails, notifications, exports) and returns errors as codes the clients translate.
 
-Until that move is done, the house rule stands: every string exists in English and French in Android `values` and `values-fr`, iOS `en.lproj` and `fr.lproj`, and the shared `Labels`.
+The Android and iOS apps and the shared `DomainText` already read the generated files: a new string goes into `i18n/messages/en` and `i18n/messages/fr`, as [the translation files' README](../../i18n/README.md) says. The website and the server follow when they get text of their own.

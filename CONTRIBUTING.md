@@ -78,7 +78,7 @@ How agents read the tracker and the domain docs is in [`docs/agents/`](docs/agen
 See the [README](README.md) for building each app. Before opening a PR, at least run:
 
 ```sh
-./gradlew jvmTest jsTest :server:test
+./gradlew jvmTest jsTest :server:test :tools:i18n:test
 node design/build-tokens.mjs --check
 node design/build-poulpy.mjs --check
 ```

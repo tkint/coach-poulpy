@@ -152,7 +152,7 @@ private fun PictureArea(detail: ExerciseDetail, onBack: () -> Unit, onVariations
                 }
             }
             if (detail.variations.isNotEmpty()) {
-                val label = stringResource(R.string.exercise_variations_a11y, detail.variationPosition)
+                val label = stringResource(R.string.exercise_variationsA11y, detail.variationPosition)
                 Surface(
                     onClick = onVariations,
                     shape = RoundedCornerShape(PoulpyRadius.pill),
@@ -170,7 +170,7 @@ private fun PictureArea(detail: ExerciseDetail, onBack: () -> Unit, onVariations
                     ) {
                         Icon(Icons.Filled.SignalCellularAlt, contentDescription = null, modifier = Modifier.size(18.dp))
                         Text(
-                            stringResource(R.string.exercise_variation_position, detail.variationPosition),
+                            stringResource(R.string.exercise_variationPosition, detail.variationPosition),
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.ExtraBold,
                         )
@@ -212,7 +212,7 @@ private fun VariationsSheet(variations: List<VariationRow>, onPick: (String) -> 
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(stringResource(R.string.exercise_variations), style = MaterialTheme.typography.titleLarge, modifier = Modifier.semantics { heading() })
-                Text(stringResource(R.string.exercise_variations_hint), style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
+                Text(stringResource(R.string.exercise_variationsHint), style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
             }
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 variations.forEachIndexed { rung, variation ->
@@ -233,7 +233,7 @@ private fun VariationsSheet(variations: List<VariationRow>, onPick: (String) -> 
                             Column(Modifier.weight(1f)) {
                                 Text(variation.name, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.ExtraBold)
                                 Text(
-                                    if (variation.current) stringResource(R.string.exercise_variation_current) else variation.note,
+                                    if (variation.current) stringResource(R.string.exercise_variationCurrent) else variation.note,
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = colors.onSurfaceVariant,
                                 )

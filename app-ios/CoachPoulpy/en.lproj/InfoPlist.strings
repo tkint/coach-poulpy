@@ -1,1 +1,2 @@
+/* CLEANUP: the last hand-written iOS text; move NSBluetoothAlwaysUsageDescription into i18n/messages/<locale>/app.json and generate this file too (#96). */
 "NSBluetoothAlwaysUsageDescription" = "Coach Poulpy connects to your treadmill to show and record your speed, distance and heart rate.";

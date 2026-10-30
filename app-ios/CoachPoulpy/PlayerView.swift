@@ -141,7 +141,7 @@ struct PlayerView: View {
         Spacer()
         if state.isRest || remaining != nil, let next = state.nextTitle {
             if let round = state.nextRound {
-                Text("player.next.round \(round)").textCase(.uppercase).font(PoulpyFont.label).foregroundStyle(.secondary)
+                Text("player.nextRound \(round)").textCase(.uppercase).font(PoulpyFont.label).foregroundStyle(.secondary)
             }
             Text("player.next \(next) \(state.nextDetail ?? "")").multilineTextAlignment(.center)
         }
@@ -156,7 +156,7 @@ struct PlayerView: View {
             Button {
                 model.skip()
             } label: {
-                Label(LocalizedStringKey(state.isRest ? "player.skip.rest" : "player.skip"), systemImage: "forward.fill")
+                Label(LocalizedStringKey(state.isRest ? "player.skipRest" : "player.skip"), systemImage: "forward.fill")
                     .frame(maxWidth: .infinity, minHeight: 36)
             }
             .buttonStyle(.bordered)
@@ -172,10 +172,10 @@ struct PlayerView: View {
             .disabled(paused)
         }
         Color.clear.frame(height: 0)
-            .confirmationDialog("player.stop.title", isPresented: $confirmStop, titleVisibility: .visible) {
+            .confirmationDialog("player.stopTitle", isPresented: $confirmStop, titleVisibility: .visible) {
                 Button("player.stop", role: .destructive) { model.stop() }
             } message: {
-                Text("player.stop.body")
+                Text("player.stopBody")
             }
     }
 
@@ -189,7 +189,7 @@ struct PlayerView: View {
                 .multilineTextAlignment(.center)
                 .padding(.top)
             if summary.setsSkipped > 0 {
-                Text("player.summary.skipped \(Int(summary.setsSkipped))").foregroundStyle(.secondary)
+                Text("player.summarySkipped \(Int(summary.setsSkipped))").foregroundStyle(.secondary)
             }
         }
         Spacer()

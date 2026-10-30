@@ -116,7 +116,7 @@ fun HomeScreen(
             }
             item(key = "library") {
                 TextButton(onClick = onOpenLibrary) {
-                    Text(stringResource(R.string.home_something_else), fontWeight = FontWeight.ExtraBold)
+                    Text(stringResource(R.string.home_somethingElse), fontWeight = FontWeight.ExtraBold)
                     Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null)
                 }
             }
@@ -160,13 +160,13 @@ private fun PlannedCard(item: TodayItem, onOpen: () -> Unit, onGo: () -> Unit) {
                 }
             }
             if (inProgress) {
-                Text(stringResource(R.string.home_in_progress), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.home_inProgress), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
             } else if (item.exercises.isNotEmpty()) {
                 Text(item.exercises, style = MaterialTheme.typography.bodyMedium)
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedButton(onClick = onOpen, enabled = item.workoutId != null, modifier = Modifier.weight(1f).height(48.dp)) {
-                    Text(stringResource(R.string.home_see_workout), fontWeight = FontWeight.ExtraBold)
+                    Text(stringResource(R.string.home_seeWorkout), fontWeight = FontWeight.ExtraBold)
                 }
                 Button(onClick = onGo, modifier = Modifier.weight(1.4f).height(48.dp)) {
                     Icon(Icons.Filled.PlayArrow, contentDescription = null)
@@ -211,7 +211,7 @@ private fun NextCard(next: NextSession, onClick: () -> Unit) {
     val colors = MaterialTheme.colorScheme
     val day = Instant.ofEpochMilli(next.dayMillis).atZone(ZoneId.systemDefault())
     val whenText = if (next.daysAway == 1) stringResource(R.string.home_tomorrow, next.details)
-    else pluralStringResource(R.plurals.home_in_days, next.daysAway, next.daysAway, next.details)
+    else pluralStringResource(R.plurals.home_inDays, next.daysAway, next.daysAway, next.details)
     OutlinedCard(
         onClick = onClick,
         colors = CardDefaults.outlinedCardColors(containerColor = colors.surface),
@@ -260,16 +260,16 @@ private fun RestCard(state: HomeState, onOpenLibrary: () -> Unit) {
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         Text(
-            stringResource(if (state.hasWorkouts) R.string.home_rest_title else R.string.home_first_title),
+            stringResource(if (state.hasWorkouts) R.string.home_restTitle else R.string.home_firstTitle),
             style = MaterialTheme.typography.titleLarge,
         )
         Text(
-            stringResource(if (state.hasWorkouts) R.string.home_rest_body else R.string.home_first_body),
+            stringResource(if (state.hasWorkouts) R.string.home_restBody else R.string.home_firstBody),
             style = MaterialTheme.typography.bodyMedium,
         )
         Button(onClick = onOpenLibrary, modifier = Modifier.padding(top = 8.dp).height(48.dp)) {
             Icon(Icons.AutoMirrored.Filled.LibraryBooks, contentDescription = null)
-            Text(stringResource(R.string.home_open_library), fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 8.dp))
+            Text(stringResource(R.string.home_openLibrary), fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 8.dp))
         }
     }
 }

@@ -119,10 +119,10 @@ struct WorkoutPageView: View {
 
     private func plannedTitle(_ plans: [PlannedDay]) -> String {
         if plans.count > 1 {
-            return String.localizedStringWithFormat(NSLocalizedString("workout.planned.days %lld", comment: ""), Int64(plans.count))
+            return String.localizedStringWithFormat(NSLocalizedString("workout.plannedDays %lld", comment: ""), Int64(plans.count))
         }
         let plan = plans[0]
-        return plan.daysAway == 0 ? NSLocalizedString("workout.planned.today", comment: "") : L("workout.planned %@", dayLabel(plan.dayMillis))
+        return plan.daysAway == 0 ? NSLocalizedString("workout.plannedToday", comment: "") : L("workout.planned %@", dayLabel(plan.dayMillis))
     }
 
     /// "Planned for Tue 27 Oct", or "Planned on 3 days" with each upcoming day as a pill, and
@@ -137,7 +137,7 @@ struct WorkoutPageView: View {
                     Text(plannedTitle(plans))
                         .font(.poulpy(.subheadline).weight(.heavy))
                     Spacer(minLength: 0)
-                    Button("workout.change.days") { picking = true }
+                    Button("workout.changeDays") { picking = true }
                         .font(.poulpy(.subheadline).weight(.heavy))
                         .padding(.horizontal, 14)
                         .frame(minHeight: 40)

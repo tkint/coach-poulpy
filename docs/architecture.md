@@ -74,7 +74,7 @@ The engine compiles a workout into a flat **timeline** of work, rest and transit
 | `core/engine` | Android, iOS, JVM, JS | Timeline compiler, session state machine, event fold |
 | `types/treadmill` | Android, iOS, JVM, JS | Treadmill recording, summaries and step estimate |
 | `core/stats` | Android, iOS, JVM | Metrics, records, goal progress, weekly summaries |
-| `catalog` | Android, iOS, JVM | The bundled, versioned exercise catalog |
+| `catalog` | Android, iOS, JVM | The bundled, versioned exercise catalog, merged with its text at build time |
 | `data/local` | Android, iOS | SQLDelight schema, repositories, event storage, migrations |
 | `data/sync` (later) | Android, iOS | Ktor client and the sync protocol; off for guests |
 | `device/ftms` | Android, iOS | FTMS decoding in common code; Bluetooth through Kable |
@@ -84,6 +84,11 @@ The engine compiles a workout into a flat **timeline** of work, rest and transit
 | `app-ios` | iOS | SwiftUI UI, Bluetooth and audio background modes, HealthKit |
 | `web` | Browser | Vue 3, TypeScript, Vite, Pinia; the engine through Kotlin/JS |
 | `server` | JVM | http4k routes, Flyway, jOOQ, reusing model and stats for validation |
+| `tools/i18n` | JVM, build time | Generates Android and iOS string files, the shared `DomainText` and the merged catalog from `i18n/messages` |
+
+## Text and translations
+
+Every word a person reads is in `i18n/messages/<locale>/<namespace>.json` ([ADR 0014](./adr/0014-text-lives-in-one-json-file-per-language-and-namespace.md)). At build time `tools/i18n`, run by the `coachpoulpy.i18n` Gradle plugin, writes the Android `strings.xml`, the iOS `.strings` and `.stringsdict`, the shared `DomainText` object (one typed function per `domain` message, so a wrong id or argument fails the build) and the catalog with its text merged back in ([ADR 0015](./adr/0015-catalog-text-lives-in-translation-files.md)). None of it is committed, and the build fails when a shipped language lacks a message. How to add a string is in [the translation files' README](../i18n/README.md).
 
 ## Storage and sync
 

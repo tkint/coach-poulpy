@@ -67,7 +67,7 @@ struct LibraryView: View {
                     Button {
                         cover = .builder
                     } label: {
-                        Label("library.new.workout", systemImage: "plus")
+                        Label("library.newWorkout", systemImage: "plus")
                     }
                 }
             }
@@ -122,9 +122,9 @@ struct LibraryView: View {
         } else if state.rows.isEmpty {
             ScrollView {
                 PoulpyCard(
-                    title: Text("library.empty.title"),
-                    message: Text("library.empty.body"),
-                    button: Text("library.build.first"),
+                    title: Text("library.emptyTitle"),
+                    message: Text("library.emptyBody"),
+                    button: Text("library.buildFirst"),
                     systemImage: "plus",
                     poulpySize: 120
                 ) { cover = .builder }
@@ -132,7 +132,7 @@ struct LibraryView: View {
                 .padding(.top, 16)
             }
         } else {
-            ListFilters(query: $query, placeholder: "library.search", label: "library.search.label", countLabel: listing.countLabel) {
+            ListFilters(query: $query, placeholder: "library.search", label: "library.searchLabel", countLabel: listing.countLabel) {
                 PoulpyChip(title: Text("library.all"), selected: kind == nil) { kind = nil }
                 ForEach(state.kinds, id: \.label) { filter in
                     PoulpyChip(title: Text(filter.label), selected: kind == filter.format) {
@@ -160,10 +160,10 @@ struct LibraryView: View {
                     if listing.rows.isEmpty {
                         PoulpyCard(
                             title: listing.searching
-                                ? Text("library.nothing.for \(query.trimmingCharacters(in: .whitespaces))")
-                                : Text("library.no.kind"),
-                            message: Text("library.nothing.hint"),
-                            button: Text("exercises.clear.all")
+                                ? Text("library.nothingFor \(query.trimmingCharacters(in: .whitespaces))")
+                                : Text("library.noKind"),
+                            message: Text("library.nothingHint"),
+                            button: Text("exercises.clearAll")
                         ) {
                             query = ""
                             kind = nil
@@ -197,9 +197,9 @@ struct LibraryView: View {
 
     private func sortTitle(_ sort: LibrarySort) -> LocalizedStringKey {
         switch sort {
-        case .nextPlanned: return "library.sort.planned"
-        case .alphabetical: return "library.sort.name"
-        default: return "library.sort.recent"
+        case .nextPlanned: return "library.sortPlanned"
+        case .alphabetical: return "library.sortName"
+        default: return "library.sortRecent"
         }
     }
 
@@ -241,7 +241,7 @@ struct LibraryView: View {
         .overlay(RoundedRectangle(cornerRadius: 16).stroke(PoulpyColor.outline))
         .contentShape(.contextMenuPreview, RoundedRectangle(cornerRadius: 16))
         .contextMenu {
-            Button { planning = row.id } label: { Label("library.plan.day", systemImage: "calendar.badge.plus") }
+            Button { planning = row.id } label: { Label("library.planDay", systemImage: "calendar.badge.plus") }
             if row.editable {
                 Button { cover = .copy(workoutId: row.id) } label: { Label("action.copy", systemImage: "doc.on.doc") }
             }
@@ -262,11 +262,11 @@ struct LibraryView: View {
                 .padding(.vertical, 2)
                 .background(PoulpyColor.primaryContainer, in: Capsule())
         case .doneToday:
-            Text("library.done.today").font(PoulpyFont.label).foregroundStyle(PoulpyColor.success)
+            Text("library.doneToday").font(PoulpyFont.label).foregroundStyle(PoulpyColor.success)
         case .lastDone:
-            Text(L("library.last.done %@", day)).font(.poulpy(.footnote).weight(.bold)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+            Text(L("library.lastDone %@", day)).font(.poulpy(.footnote).weight(.bold)).foregroundStyle(PoulpyColor.onSurfaceVariant)
         default:
-            Text("library.not.done").font(.poulpy(.footnote).weight(.bold)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+            Text("library.notDone").font(.poulpy(.footnote).weight(.bold)).foregroundStyle(PoulpyColor.onSurfaceVariant)
         }
     }
 }

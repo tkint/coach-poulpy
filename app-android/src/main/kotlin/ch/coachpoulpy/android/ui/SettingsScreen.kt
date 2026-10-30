@@ -149,7 +149,7 @@ private fun ColumnScope.General(graph: AppGraph) {
         options = listOf(ThemeChoice.SYSTEM to stringResource(R.string.theme_system), ThemeChoice.LIGHT to stringResource(R.string.theme_light), ThemeChoice.DARK to stringResource(R.string.theme_dark)),
         selected = state.theme,
         onSelect = model::setTheme,
-        hint = R.string.settings_theme_hint,
+        hint = R.string.settings_themeHint,
     )
     SectionLabel(R.string.settings_region)
     // Language names stay in their own language, so anyone can find theirs.
@@ -164,7 +164,7 @@ private fun ColumnScope.General(graph: AppGraph) {
         options = listOf(UnitSystem.METRIC to stringResource(R.string.units_metric), UnitSystem.IMPERIAL to stringResource(R.string.units_imperial)),
         selected = state.units,
         onSelect = model::setUnits,
-        hint = R.string.settings_units_hint,
+        hint = R.string.settings_unitsHint,
     )
 }
 
@@ -201,14 +201,14 @@ private fun ColumnScope.Devices(graph: AppGraph, onOpen: (DeviceRoute) -> Unit) 
         Surface(Modifier.fillMaxWidth(), shape = RoundedCornerShape(PoulpyRadius.lg), color = MaterialTheme.colorScheme.primaryContainer) {
             Column(Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Image(painterResource(R.drawable.poulpy_pose_standing_tall), contentDescription = null, modifier = Modifier.size(140.dp))
-                Text(stringResource(R.string.devices_empty_title), style = MaterialTheme.typography.headlineSmall, textAlign = TextAlign.Center)
-                Text(stringResource(R.string.devices_empty_body), textAlign = TextAlign.Center)
+                Text(stringResource(R.string.devices_emptyTitle), style = MaterialTheme.typography.headlineSmall, textAlign = TextAlign.Center)
+                Text(stringResource(R.string.devices_emptyBody), textAlign = TextAlign.Center)
                 Button(onClick = { onOpen(DeviceRoute.Add) }, modifier = Modifier.padding(top = 8.dp).height(56.dp)) {
                     Icon(Icons.Filled.Add, contentDescription = null)
                     Spacer(Modifier.size(8.dp))
-                    Text(stringResource(R.string.devices_add_first))
+                    Text(stringResource(R.string.devices_addFirst))
                 }
-                Text(stringResource(R.string.devices_switch_on), style = MaterialTheme.typography.bodySmall)
+                Text(stringResource(R.string.devices_switchOn), style = MaterialTheme.typography.bodySmall)
             }
         }
         return
@@ -224,7 +224,7 @@ private fun ColumnScope.Devices(graph: AppGraph, onOpen: (DeviceRoute) -> Unit) 
                 Spacer(Modifier.size(12.dp))
                 Column(Modifier.weight(1f)) {
                     Text(stringResource(R.string.devices_sources), fontWeight = FontWeight.ExtraBold)
-                    Text(stringResource(R.string.devices_sources_row_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(stringResource(R.string.devices_sourcesRowHint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
             }
@@ -327,9 +327,9 @@ fun DeviceAddScreen(graph: AppGraph, onBack: () -> Unit) {
             Column(Modifier.padding(22.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 if (state.scanning) PoulpyLoader(size = 112.dp)
                 Text(stringResource(R.string.treadmill_scanning), style = MaterialTheme.typography.headlineSmall, textAlign = TextAlign.Center)
-                Text(stringResource(R.string.devices_scan_hint), textAlign = TextAlign.Center)
+                Text(stringResource(R.string.devices_scanHint), textAlign = TextAlign.Center)
                 if (state.scanning) {
-                    OutlinedButton(onClick = onBack) { Text(stringResource(R.string.treadmill_stop_scan)) }
+                    OutlinedButton(onClick = onBack) { Text(stringResource(R.string.treadmill_stopScan)) }
                 }
             }
         }
@@ -344,11 +344,11 @@ fun DeviceAddScreen(graph: AppGraph, onBack: () -> Unit) {
                         Text(device.name, fontWeight = FontWeight.ExtraBold)
                         Text(stringResource(device.kind.label), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
-                    Button(onClick = { model.add(device.key); onBack() }) { Text(stringResource(R.string.devices_add_one)) }
+                    Button(onClick = { model.add(device.key); onBack() }) { Text(stringResource(R.string.devices_addOne)) }
                 }
             }
         }
-        Text(stringResource(R.string.devices_added_hidden), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(stringResource(R.string.devices_addedHidden), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
@@ -390,7 +390,7 @@ fun DeviceScreen(graph: AppGraph, key: String, onBack: () -> Unit, onSources: ()
                             Pill(
                                 when {
                                     used -> stringResource(R.string.devices_used)
-                                    instead != null -> stringResource(R.string.devices_used_instead, instead.name)
+                                    instead != null -> stringResource(R.string.devices_usedInstead, instead.name)
                                     else -> null
                                 },
                                 highlighted = used,
@@ -401,14 +401,14 @@ fun DeviceScreen(graph: AppGraph, key: String, onBack: () -> Unit, onSources: ()
             }
         }
         if (state.sources.isNotEmpty()) {
-            TextButton(onClick = onSources) { Text(stringResource(R.string.devices_change_sources)) }
+            TextButton(onClick = onSources) { Text(stringResource(R.string.devices_changeSources)) }
         }
         SectionLabel(R.string.settings_devices)
         OutlinedSurface {
             Row(Modifier.padding(horizontal = 14.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
-                    Text(stringResource(R.string.devices_auto_connect), fontWeight = FontWeight.ExtraBold)
-                    Text(stringResource(R.string.devices_auto_connect_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(stringResource(R.string.devices_autoConnect), fontWeight = FontWeight.ExtraBold)
+                    Text(stringResource(R.string.devices_autoConnectHint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 Switch(checked = device.autoConnect, onCheckedChange = { model.setAutoConnect(device.key, it) })
             }
@@ -432,8 +432,8 @@ fun DeviceScreen(graph: AppGraph, key: String, onBack: () -> Unit, onSources: ()
     if (confirmForget) {
         AlertDialog(
             onDismissRequest = { confirmForget = false },
-            title = { Text(stringResource(R.string.devices_forget_title, device.name)) },
-            text = { Text(stringResource(R.string.devices_forget_body)) },
+            title = { Text(stringResource(R.string.devices_forgetTitle, device.name)) },
+            text = { Text(stringResource(R.string.devices_forgetBody)) },
             confirmButton = {
                 TextButton(onClick = {
                     confirmForget = false
@@ -453,7 +453,7 @@ fun DataSourcesScreen(graph: AppGraph, onBack: () -> Unit) {
     val state by model.state.collectAsStateWithLifecycle()
 
     PageScaffold(stringResource(R.string.devices_sources), onBack) {
-        Text(stringResource(R.string.devices_sources_hint), style = MaterialTheme.typography.bodyMedium)
+        Text(stringResource(R.string.devices_sourcesHint), style = MaterialTheme.typography.bodyMedium)
         state.sources.forEach { source ->
             OutlinedSurface {
                 Column(Modifier.padding(horizontal = 14.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -462,7 +462,7 @@ fun DataSourcesScreen(graph: AppGraph, onBack: () -> Unit) {
                         FilterChip(
                             selected = source.choiceKey == null,
                             onClick = { model.setSource(source.quantity, null) },
-                            label = { Text(stringResource(R.string.devices_source_automatic)) },
+                            label = { Text(stringResource(R.string.devices_sourceAutomatic)) },
                         )
                         source.options.forEach { option ->
                             FilterChip(
@@ -481,11 +481,11 @@ fun DataSourcesScreen(graph: AppGraph, onBack: () -> Unit) {
 @Composable
 private fun BluetoothProblems(bluetooth: BluetoothGate, onAllow: (() -> Unit)? = null) {
     if (bluetooth.bluetoothOff) {
-        Text(stringResource(R.string.devices_bluetooth_off), color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
+        Text(stringResource(R.string.devices_bluetoothOff), color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
     }
     if (bluetooth.permissionDenied) {
-        Text(stringResource(R.string.devices_permission_needed), color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
-        onAllow?.let { Button(onClick = it) { Text(stringResource(R.string.devices_allow_bluetooth)) } }
+        Text(stringResource(R.string.devices_permissionNeeded), color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
+        onAllow?.let { Button(onClick = it) { Text(stringResource(R.string.devices_allowBluetooth)) } }
     }
 }
 
@@ -524,17 +524,17 @@ private fun OutlinedSurface(onClick: (() -> Unit)? = null, content: @Composable 
 
 private val ConnectionStatus.label: Int
     get() = when (this) {
-        ConnectionStatus.CONNECTED -> R.string.devices_status_connected
-        ConnectionStatus.CONNECTING -> R.string.devices_status_connecting
-        ConnectionStatus.RECONNECTING -> R.string.devices_status_reconnecting
-        ConnectionStatus.FAILED -> R.string.devices_status_failed
-        ConnectionStatus.IDLE -> R.string.devices_status_idle
+        ConnectionStatus.CONNECTED -> R.string.devices_statusConnected
+        ConnectionStatus.CONNECTING -> R.string.devices_statusConnecting
+        ConnectionStatus.RECONNECTING -> R.string.devices_statusReconnecting
+        ConnectionStatus.FAILED -> R.string.devices_statusFailed
+        ConnectionStatus.IDLE -> R.string.devices_statusIdle
     }
 
 private val Quantity.label: Int
     get() = when (this) {
         Quantity.SPEED -> R.string.quantity_speed
-        Quantity.HEART_RATE -> R.string.quantity_heart_rate
+        Quantity.HEART_RATE -> R.string.quantity_heartRate
         Quantity.CADENCE -> R.string.quantity_cadence
         Quantity.INCLINE -> R.string.quantity_incline
         Quantity.ENERGY -> R.string.quantity_energy
@@ -544,8 +544,8 @@ private val Quantity.label: Int
 private val DeviceKind?.label: Int
     get() = when (this) {
         DeviceKind.TREADMILL -> R.string.kind_treadmill
-        DeviceKind.FOOT_POD -> R.string.kind_foot_pod
-        DeviceKind.HEART_RATE -> R.string.kind_heart_rate
+        DeviceKind.FOOT_POD -> R.string.kind_footPod
+        DeviceKind.HEART_RATE -> R.string.kind_heartRate
         null -> R.string.kind_unknown
     }
 

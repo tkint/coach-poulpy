@@ -19,5 +19,9 @@ gradlePlugin {
             id = "coachpoulpy.kmp-web-library"
             implementationClass = "KmpWebLibraryConventionPlugin"
         }
+        register("i18n") {
+            id = "coachpoulpy.i18n"
+            implementationClass = "I18nConventionPlugin"
+        }
     }
 }

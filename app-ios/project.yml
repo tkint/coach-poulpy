@@ -6,6 +6,9 @@ options:
   deploymentTarget:
     iOS: "16.0"
   developmentLanguage: en
+  # The string tables are generated from i18n/messages/*/app.json (ADR 0014) and must exist before
+  # XcodeGen lists them; the pre-build script below regenerates them on every build.
+  preGenCommand: cd .. && ./gradlew :shared:generateAppleStrings
 settings:
   base:
     SWIFT_VERSION: "5.0"
@@ -20,6 +23,9 @@ targets:
     scheme: {}
     sources:
       - path: CoachPoulpy
+      - path: ../shared/build/generated/i18n/apple
+        name: Strings
+        buildPhase: resources
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: ch.coachpoulpy

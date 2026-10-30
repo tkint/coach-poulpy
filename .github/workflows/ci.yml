@@ -20,8 +20,23 @@ jobs:
           distribution: temurin
           java-version: 21
       - uses: gradle/actions/setup-gradle@v5
-      - name: Test shared modules and server
-        run: ./gradlew jvmTest jsTest :server:test
+      - name: Check the catalog version is raised with the catalog
+        # Fink's pull requests change catalog text but never raise its version (ADR 0015), and phones
+        # only take a catalog whose version is higher than the one they have.
+        if: github.event_name == 'pull_request'
+        env:
+          BASE: ${{ github.base_ref }}
+        run: |
+          git fetch --no-tags --depth=1 origin "$BASE"
+          if git diff --quiet FETCH_HEAD -- 'i18n/messages/*/catalog.json' catalog/data/exercises.json; then exit 0; fi
+          before=$(git show FETCH_HEAD:catalog/data/exercises.json | jq .version)
+          after=$(jq .version catalog/data/exercises.json)
+          if [ "$after" -le "$before" ]; then
+            echo "::error file=catalog/data/exercises.json::The catalog changed but its version is still $after. Raise \"version\" to $((before + 1)) before merging."
+            exit 1
+          fi
+      - name: Test shared modules, server and the string generator
+        run: ./gradlew jvmTest jsTest :server:test :tools:i18n:test
       - name: Unpack the signing key
         # Every build is signed with the same key, so a new APK installs over the old one.
         # Pull requests from forks get no secrets and fall back to a throwaway debug key.

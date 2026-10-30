@@ -22,7 +22,7 @@ class CatalogTest {
     fun everyBundledExerciseHasInstructionsInBothLanguages() {
         Catalog.bundled.exercises.forEach { exercise ->
             assertTrue(exercise.instructions.isNotEmpty(), "${exercise.slug.value} has no instructions")
-            exercise.instructions.forEach { assertTrue(it.en.isNotBlank() && it.fr.isNotBlank()) }
+            exercise.instructions.forEach { text -> LANGUAGES.forEach { assertTrue(text.byLanguage[it].orEmpty().isNotBlank()) } }
         }
     }
 
@@ -113,15 +113,15 @@ class CatalogTest {
     @Test
     fun bundledAliasesLoadPerLanguage() {
         val rdl = Catalog.bundled[ExerciseSlug("romanian-deadlift")]!!
-        assertEquals(listOf("RDL"), rdl.aliases.en)
-        assertEquals(listOf("abdos"), Catalog.bundled[ExerciseSlug("plank")]!!.aliases.fr)
+        assertEquals(listOf("RDL"), rdl.aliases["en"])
+        assertEquals(listOf("abdos"), Catalog.bundled[ExerciseSlug("plank")]!!.aliases["fr"])
         assertTrue(Catalog.bundled[ExerciseSlug("wall-sit")]!!.aliases.all.isEmpty())
     }
 
     @Test
     fun anEmptyAliasIsRejected() {
         val exercises = Catalog.bundled.exercises.map {
-            if (it.slug.value == "plank") it.copy(aliases = Aliases(fr = listOf("abdos", " "))) else it
+            if (it.slug.value == "plank") it.copy(aliases = Aliases(mapOf("fr" to listOf("abdos", " ")))) else it
         }
         assertFailsWith<IllegalArgumentException> { Catalog(4, exercises) }
     }
@@ -163,10 +163,36 @@ class CatalogTest {
     }
 
     @Test
+    fun anEntryStoredBeforeTheTextMovedToTranslationFilesDecodesUnchanged() {
+        // Catalog version 8, as phones stored it before the text moved to i18n/messages (ADR 0015).
+        val stored = """{"version": 8, "exercises": [{"slug": "chair-squat", "name": {"en": "Sit to stand", "fr": "Assis-debout sur chaise"},
+            "aliases": {"en": ["chair squat"], "fr": ["squat sur chaise"]}, "movementPattern": "SQUAT", "muscleGroups": ["QUADRICEPS", "GLUTES"],
+            "measurement": "REPS", "variationNote": {"en": "Sit down on a chair and stand back up", "fr": "On s’assoit sur une chaise et on se relève"},
+            "instructions": [{"en": "Sit on the front half of a sturdy chair, feet flat.", "fr": "Asseyez-vous sur l'avant d'une chaise stable, pieds à plat."}]},
+            {"slug": "wall-sit", "name": {"en": "Wall sit", "fr": "Chaise contre le mur"}, "movementPattern": "SQUAT", "muscleGroups": ["QUADRICEPS"],
+            "measurement": "HOLD"}]}"""
+        val (chair, wall) = Catalog.fromJson(stored).exercises
+        assertEquals("Assis-debout sur chaise", chair.name.forLanguage("fr-CH"))
+        assertEquals("Sit to stand", chair.name.forLanguage("de"))
+        assertEquals(listOf("chair squat"), chair.aliases["en"])
+        assertEquals(listOf("squat sur chaise"), chair.aliases["fr"])
+        assertEquals("On s’assoit sur une chaise et on se relève", chair.variationNote?.forLanguage("fr"))
+        assertEquals("Sit on the front half of a sturdy chair, feet flat.", chair.instructions.single().forLanguage("en"))
+        assertTrue(wall.aliases.all.isEmpty())
+        assertEquals(null, wall.variationNote)
+        val again = Catalog.fromJson(Catalog.fromJson(stored).toJson()).exercises
+        assertEquals(listOf(chair, wall), again)
+    }
+
+    @Test
     fun everyExerciseInAVariationGroupHasANoteInBothLanguages() {
         Catalog.bundled.variationGroups.flatten().forEach { slug ->
             val note = Catalog.bundled[slug]?.variationNote
-            assertTrue(note != null && note.en.isNotBlank() && note.fr.isNotBlank(), "${slug.value} has no variation note")
+            assertTrue(note != null && LANGUAGES.all { note.byLanguage[it].orEmpty().isNotBlank() }, "${slug.value} has no variation note")
         }
+    }
+
+    private companion object {
+        val LANGUAGES = listOf("en", "fr")
     }
 }
