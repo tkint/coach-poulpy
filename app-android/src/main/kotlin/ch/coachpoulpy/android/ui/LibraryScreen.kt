@@ -155,9 +155,9 @@ private fun Workouts(
     if (!state.loaded) return
     if (state.rows.isEmpty()) {
         PoulpyCard(
-            title = stringResource(R.string.library_empty_title),
-            body = stringResource(R.string.library_empty_body),
-            button = stringResource(R.string.library_build_first),
+            title = stringResource(R.string.library_emptyTitle),
+            body = stringResource(R.string.library_emptyBody),
+            button = stringResource(R.string.library_buildFirst),
             onClick = onNew,
             buttonIcon = Icons.Filled.Add,
             poulpySize = 120.dp,
@@ -171,7 +171,7 @@ private fun Workouts(
                 query = query,
                 onQuery = { query = it },
                 placeholder = stringResource(R.string.library_search),
-                label = stringResource(R.string.library_search_label),
+                label = stringResource(R.string.library_searchLabel),
                 countLabel = listing.countLabel,
                 chips = {
                     item { PoulpyChip(selected = kind == null, onClick = { kind = null }, label = stringResource(R.string.library_all)) }
@@ -215,9 +215,9 @@ private fun Workouts(
                 if (listing.rows.isEmpty()) {
                     item(key = "none") {
                         PoulpyCard(
-                            title = if (listing.searching) stringResource(R.string.library_nothing_for, query.trim()) else stringResource(R.string.library_no_kind),
-                            body = stringResource(R.string.library_nothing_hint),
-                            button = stringResource(R.string.exercises_clear_all),
+                            title = if (listing.searching) stringResource(R.string.library_nothingFor, query.trim()) else stringResource(R.string.library_noKind),
+                            body = stringResource(R.string.library_nothingHint),
+                            button = stringResource(R.string.exercises_clearAll),
                             onClick = clearAll,
                             modifier = Modifier.padding(top = 8.dp),
                         )
@@ -228,7 +228,7 @@ private fun Workouts(
         ExtendedFloatingActionButton(
             onClick = onNew,
             icon = { Icon(Icons.Filled.Add, contentDescription = null) },
-            text = { Text(stringResource(R.string.library_new_workout)) },
+            text = { Text(stringResource(R.string.library_newWorkout)) },
             modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
         )
     }
@@ -297,7 +297,7 @@ private fun WorkoutCard(row: LibraryRow, onOpen: () -> Unit, onStart: () -> Unit
         }
         DropdownMenu(expanded = menu, onDismissRequest = { menu = false }, offset = DpOffset(12.dp, 4.dp)) {
             DropdownMenuItem(
-                text = { Text(stringResource(R.string.library_plan_day)) },
+                text = { Text(stringResource(R.string.library_planDay)) },
                 leadingIcon = { Icon(Icons.Filled.EditCalendar, contentDescription = null) },
                 onClick = { menu = false; onPlan() },
             )
@@ -326,20 +326,20 @@ private fun Note(row: LibraryRow) {
             modifier = Modifier.padding(top = 3.dp).clip(RoundedCornerShape(PoulpyRadius.pill)).background(colors.primaryContainer).padding(horizontal = 8.dp, vertical = 2.dp),
         )
         LibraryNote.DONE_TODAY -> Text(
-            stringResource(R.string.library_done_today),
+            stringResource(R.string.library_doneToday),
             style = MaterialTheme.typography.labelMedium,
             color = PoulpyTheme.extraColors.success,
             modifier = Modifier.padding(top = 3.dp),
         )
         LibraryNote.LAST_DONE -> Text(
-            stringResource(R.string.library_last_done, millis?.let(::dayLabel) ?: ""),
+            stringResource(R.string.library_lastDone, millis?.let(::dayLabel) ?: ""),
             style = MaterialTheme.typography.bodySmall,
             fontWeight = FontWeight.Bold,
             color = colors.onSurfaceVariant,
             modifier = Modifier.padding(top = 3.dp),
         )
         LibraryNote.NOT_DONE_YET -> Text(
-            stringResource(R.string.library_not_done),
+            stringResource(R.string.library_notDone),
             style = MaterialTheme.typography.bodySmall,
             fontWeight = FontWeight.Bold,
             color = colors.onSurfaceVariant,
@@ -350,9 +350,9 @@ private fun Note(row: LibraryRow) {
 
 private val LibrarySort.label: Int
     get() = when (this) {
-        LibrarySort.RECENT -> R.string.library_sort_recent
-        LibrarySort.NEXT_PLANNED -> R.string.library_sort_planned
-        LibrarySort.ALPHABETICAL -> R.string.library_sort_name
+        LibrarySort.RECENT -> R.string.library_sortRecent
+        LibrarySort.NEXT_PLANNED -> R.string.library_sortPlanned
+        LibrarySort.ALPHABETICAL -> R.string.library_sortName
     }
 
 internal val WorkoutFormat.icon: ImageVector

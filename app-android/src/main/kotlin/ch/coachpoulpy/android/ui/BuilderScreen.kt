@@ -158,7 +158,7 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text(stringResource(R.string.builder_pick_title)) },
+                    title = { Text(stringResource(R.string.builder_pickTitle)) },
                     navigationIcon = { BackButton { pickingPart = null } },
                 )
             },
@@ -177,7 +177,7 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
         containerColor = colors.background,
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(if (model.isEditing) R.string.builder_edit_title else R.string.builder_new_title), style = MaterialTheme.typography.titleLarge) },
+                title = { Text(stringResource(if (model.isEditing) R.string.builder_editTitle else R.string.builder_newTitle), style = MaterialTheme.typography.titleLarge) },
                 navigationIcon = {
                     IconButton(onClick = onClose) {
                         Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.action_close))
@@ -249,7 +249,7 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
                                     .padding(start = 22.dp, end = 8.dp, bottom = 10.dp, top = 2.dp),
                             ) {
                                 AddStepButton(
-                                    label = stringResource(R.string.builder_add_to_repeat),
+                                    label = stringResource(R.string.builder_addToRepeat),
                                     onExercise = { role -> pick(part.key, repeat.key, role) },
                                     onRest = { model.addRest(part.key, repeat.key) },
                                     height = 44,
@@ -269,7 +269,7 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
                 }
             }
             item {
-                DashedTile(stringResource(R.string.builder_add_part), Icons.Filled.Add, onClick = { addingPart = true })
+                DashedTile(stringResource(R.string.builder_addPart), Icons.Filled.Add, onClick = { addingPart = true })
             }
         }
     }
@@ -299,12 +299,12 @@ private fun FormatSheet(options: List<WorkoutFormatOption>, onChoose: (WorkoutFo
             Modifier.padding(horizontal = 20.dp).padding(bottom = 24.dp).navigationBarsPadding(),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            SheetTitle(stringResource(R.string.builder_format_title), stringResource(R.string.builder_format_subtitle))
+            SheetTitle(stringResource(R.string.builder_formatTitle), stringResource(R.string.builder_formatSubtitle))
             options.forEach { option ->
                 val format = option.format
                 val (description, example) = when (format) {
-                    WorkoutFormat.CIRCUIT -> R.string.builder_circuit_description to R.string.builder_circuit_example
-                    WorkoutFormat.SETS -> R.string.builder_sets_description to R.string.builder_sets_example
+                    WorkoutFormat.CIRCUIT -> R.string.builder_circuitDescription to R.string.builder_circuitExample
+                    WorkoutFormat.SETS -> R.string.builder_setsDescription to R.string.builder_setsExample
                 }
                 val selected = chosen == format
                 Surface(
@@ -357,7 +357,7 @@ private fun FormatLine(format: WorkoutFormat, label: String) {
             Text(label, fontWeight = FontWeight.ExtraBold, color = colors.onPrimaryContainer)
         }
         Icon(Icons.Filled.Lock, contentDescription = null, tint = colors.onSurfaceVariant, modifier = Modifier.size(16.dp))
-        Text(stringResource(R.string.builder_format_locked), style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
+        Text(stringResource(R.string.builder_formatLocked), style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
     }
 }
 
@@ -375,19 +375,19 @@ private fun BuilderPartHeader(model: BuilderModel, part: BuilderPart) {
         if (part.canMoveUp || part.canMoveDown || part.canDelete) {
             Box {
                 IconButton(onClick = { expanded = true }) {
-                    Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.builder_more_actions, part.name), tint = colors.onSurfaceVariant)
+                    Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.builder_moreActions, part.name), tint = colors.onSurfaceVariant)
                 }
                 DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                     if (part.canMoveUp) {
                         DropdownMenuItem(
-                            text = { Text(stringResource(R.string.builder_move_up)) },
+                            text = { Text(stringResource(R.string.builder_moveUp)) },
                             leadingIcon = { Icon(Icons.Filled.KeyboardArrowUp, contentDescription = null) },
                             onClick = { expanded = false; model.movePartUp(part.key) },
                         )
                     }
                     if (part.canMoveDown) {
                         DropdownMenuItem(
-                            text = { Text(stringResource(R.string.builder_move_down)) },
+                            text = { Text(stringResource(R.string.builder_moveDown)) },
                             leadingIcon = { Icon(Icons.Filled.KeyboardArrowDown, contentDescription = null) },
                             onClick = { expanded = false; model.movePartDown(part.key) },
                         )
@@ -416,7 +416,7 @@ private fun PartSheet(options: List<BuilderPartOption>, onPick: (PartKind) -> Un
             Modifier.padding(horizontal = 20.dp).padding(bottom = 24.dp).navigationBarsPadding(),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            SheetTitle(stringResource(R.string.builder_add_part), stringResource(R.string.builder_add_part_subtitle))
+            SheetTitle(stringResource(R.string.builder_addPart), stringResource(R.string.builder_addPartSubtitle))
             options.forEach { option ->
                 Surface(
                     onClick = { onPick(option.kind) },
@@ -443,8 +443,8 @@ private fun PartSheet(options: List<BuilderPartOption>, onPick: (PartKind) -> Un
 @Composable
 private fun RepeatHeader(model: BuilderModel, repeat: BuilderRepeat, partKey: String, parts: List<BuilderPart>, handle: Modifier, modifier: Modifier) {
     val colors = MaterialTheme.colorScheme
-    val moveUp = stringResource(R.string.builder_move_up)
-    val moveDown = stringResource(R.string.builder_move_down)
+    val moveUp = stringResource(R.string.builder_moveUp)
+    val moveDown = stringResource(R.string.builder_moveDown)
     Row(
         modifier
             .fillMaxWidth()
@@ -466,12 +466,12 @@ private fun RepeatHeader(model: BuilderModel, repeat: BuilderRepeat, partKey: St
             Modifier.background(colors.surface, CircleShape).padding(4.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            RoundStep("−", stringResource(R.string.builder_repeat_fewer), { model.setRepeatTimes(repeat.key, repeat.times - 1) })
+            RoundStep("−", stringResource(R.string.builder_repeatFewer), { model.setRepeatTimes(repeat.key, repeat.times - 1) })
             Text(repeat.timesLabel, fontWeight = FontWeight.ExtraBold, color = colors.onPrimaryContainer, textAlign = TextAlign.Center, modifier = Modifier.width(64.dp))
-            RoundStep("+", stringResource(R.string.builder_repeat_more), { model.setRepeatTimes(repeat.key, repeat.times + 1) })
+            RoundStep("+", stringResource(R.string.builder_repeatMore), { model.setRepeatTimes(repeat.key, repeat.times + 1) })
         }
         ActionsMenu(
-            description = stringResource(R.string.builder_repeat_actions),
+            description = stringResource(R.string.builder_repeatActions),
             onDuplicate = { model.duplicate(repeat.key) },
             otherParts = parts.filter { it.key != partKey }.map { it.name to { model.moveToPart(repeat.key, it.key) } },
             onRemove = { model.remove(repeat.key) },
@@ -523,10 +523,10 @@ private fun BoxField(
 @Composable
 private fun StepCard(model: BuilderModel, row: BuilderRow, parts: List<BuilderPart>, onEdit: () -> Unit, handle: Modifier, modifier: Modifier) {
     val colors = MaterialTheme.colorScheme
-    val moveUp = stringResource(R.string.builder_move_up)
-    val moveDown = stringResource(R.string.builder_move_down)
-    val moveIn = stringResource(R.string.builder_move_into_repeat)
-    val moveOut = stringResource(R.string.builder_move_out_of_repeat)
+    val moveUp = stringResource(R.string.builder_moveUp)
+    val moveDown = stringResource(R.string.builder_moveDown)
+    val moveIn = stringResource(R.string.builder_moveIntoRepeat)
+    val moveOut = stringResource(R.string.builder_moveOutOfRepeat)
     Surface(
         shape = RoundedCornerShape(PoulpyRadius.md),
         color = colors.surface,
@@ -557,7 +557,7 @@ private fun StepCard(model: BuilderModel, row: BuilderRow, parts: List<BuilderPa
                 Text(row.summary, style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
             }
             ActionsMenu(
-                description = stringResource(R.string.builder_more_actions, row.name),
+                description = stringResource(R.string.builder_moreActions, row.name),
                 onEdit = onEdit,
                 onDuplicate = { model.duplicate(row.key) },
                 onMoveIn = if (row.canMoveIntoRepeat) ({ model.moveIntoRepeatAbove(row.key) }) else null,
@@ -610,14 +610,14 @@ private fun StepSheet(model: BuilderModel, row: BuilderRow, format: WorkoutForma
                         }
                         if (row.showsSets && row.sets >= 2) {
                             StepperCell(
-                                stringResource(R.string.builder_rest_between_sets), row.restBetweenSetsLabel,
+                                stringResource(R.string.builder_restBetweenSets), row.restBetweenSetsLabel,
                                 { model.changeRestBetweenSets(row.key, -1) }, { model.changeRestBetweenSets(row.key, 1) },
                                 Modifier.fillMaxWidth(),
                             )
                         }
                         if (!row.isTimed) WeightCell(model, row, Modifier.fillMaxWidth())
                         Text(
-                            stringResource(if (format == WorkoutFormat.CIRCUIT) R.string.builder_circuit_hint else R.string.builder_sets_hint),
+                            stringResource(if (format == WorkoutFormat.CIRCUIT) R.string.builder_circuitHint else R.string.builder_setsHint),
                             style = MaterialTheme.typography.bodySmall,
                             color = colors.onSurfaceVariant,
                         )
@@ -686,21 +686,21 @@ private fun ActionsMenu(
             )
             onMoveIn?.let { move ->
                 DropdownMenuItem(
-                    text = { Text(stringResource(R.string.builder_move_into_repeat)) },
+                    text = { Text(stringResource(R.string.builder_moveIntoRepeat)) },
                     leadingIcon = { Icon(Icons.Filled.Repeat, contentDescription = null) },
                     onClick = { expanded = false; move() },
                 )
             }
             onMoveOut?.let { move ->
                 DropdownMenuItem(
-                    text = { Text(stringResource(R.string.builder_move_out_of_repeat)) },
+                    text = { Text(stringResource(R.string.builder_moveOutOfRepeat)) },
                     leadingIcon = { Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null) },
                     onClick = { expanded = false; move() },
                 )
             }
             if (otherParts.isNotEmpty()) {
                 DropdownMenuItem(
-                    text = { Text(stringResource(R.string.builder_move_to_part)) },
+                    text = { Text(stringResource(R.string.builder_moveToPart)) },
                     leadingIcon = { Icon(Icons.AutoMirrored.Filled.DriveFileMove, contentDescription = null) },
                     onClick = { expanded = false; choosingPart = true },
                 )
@@ -760,10 +760,10 @@ private fun SettingCell(label: String, modifier: Modifier, content: @Composable 
 @Composable
 private fun StepperCell(label: String, value: String, onLess: () -> Unit, onMore: () -> Unit, modifier: Modifier, onValue: (() -> Unit)? = null) {
     val colors = MaterialTheme.colorScheme
-    val editLabel = stringResource(R.string.builder_edit_value, label)
+    val editLabel = stringResource(R.string.builder_editValue, label)
     SettingCell(label, modifier) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            RoundStep("−", stringResource(R.string.builder_less_named, label), onLess)
+            RoundStep("−", stringResource(R.string.builder_lessNamed, label), onLess)
             BasicText(
                 value,
                 style = MaterialTheme.typography.bodyLarge.copy(
@@ -779,7 +779,7 @@ private fun StepperCell(label: String, value: String, onLess: () -> Unit, onMore
                     .then(if (onValue != null) Modifier.clip(RoundedCornerShape(8.dp)).clickable(onClickLabel = editLabel, onClick = onValue) else Modifier)
                     .padding(horizontal = 2.dp, vertical = 10.dp),
             )
-            RoundStep("+", stringResource(R.string.builder_more_named, label), onMore)
+            RoundStep("+", stringResource(R.string.builder_moreNamed, label), onMore)
         }
     }
 }
@@ -805,7 +805,7 @@ private fun WeightCell(model: BuilderModel, row: BuilderRow, modifier: Modifier)
                     weight = text
                     model.setLoadKg(row.key, text.replace(',', '.').toDoubleOrNull() ?: 0.0)
                 },
-                label = stringResource(R.string.builder_weight_kg),
+                label = stringResource(R.string.builder_weightKg),
                 modifier = Modifier.width(64.dp).height(40.dp),
                 radius = 10,
                 keyboard = KeyboardOptions(keyboardType = KeyboardType.Decimal),
@@ -822,7 +822,7 @@ private enum class TargetField { DURATION, DISTANCE, PACE }
 @Composable
 private fun TargetEditor(model: BuilderModel, row: BuilderRow, target: WalkRunTarget) {
     var editing by rememberSaveable(row.key) { mutableStateOf<TargetField?>(null) }
-    val untilPressed = stringResource(if (row.isLast) R.string.builder_until_end else R.string.builder_until_pressed)
+    val untilPressed = stringResource(if (row.isLast) R.string.builder_untilEnd else R.string.builder_untilPressed)
     val durations = listOf(
         DurationKind.DISTANCE to stringResource(R.string.builder_distance),
         DurationKind.TIME to stringResource(R.string.builder_time),
@@ -869,7 +869,7 @@ private fun TargetEditor(model: BuilderModel, row: BuilderRow, target: WalkRunTa
             )
         }
         Text(
-            listOfNotNull(target.hint?.let { "≈ $it" }, stringResource(R.string.builder_tap_to_type)).joinToString(" · "),
+            listOfNotNull(target.hint?.let { "≈ $it" }, stringResource(R.string.builder_tapToType)).joinToString(" · "),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -936,7 +936,7 @@ private fun ValueSheet(model: BuilderModel, key: String, target: WalkRunTarget, 
             if (invalid) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     Icon(Icons.Filled.ErrorOutline, contentDescription = null, tint = colors.error, modifier = Modifier.size(18.dp))
-                    Text(stringResource(R.string.builder_value_invalid), color = colors.error, style = MaterialTheme.typography.bodySmall)
+                    Text(stringResource(R.string.builder_valueInvalid), color = colors.error, style = MaterialTheme.typography.bodySmall)
                 }
             }
             if (field != TargetField.DURATION) {
@@ -953,7 +953,7 @@ private fun ValueSheet(model: BuilderModel, key: String, target: WalkRunTarget, 
                     }
                 }
             }
-            FieldLabel(stringResource(R.string.builder_quick_picks))
+            FieldLabel(stringResource(R.string.builder_quickPicks))
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 picks.forEach { pick ->
                     PoulpyChip(selected = text == pick.text, onClick = { if (apply(pick.text)) onDone() }, label = pick.label)
@@ -1003,8 +1003,8 @@ private fun AddStepButton(label: String, onExercise: (StepRole) -> Unit, onRest:
         DashedTile(label, Icons.Filled.Add, onClick = { expanded = true }, height = height)
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             listOf(
-                Triple(StepRole.WORK, R.string.builder_add_exercise, Icons.Filled.FitnessCenter),
-                Triple(StepRole.RECOVER, R.string.builder_add_recover, Icons.AutoMirrored.Filled.DirectionsWalk),
+                Triple(StepRole.WORK, R.string.builder_addExercise, Icons.Filled.FitnessCenter),
+                Triple(StepRole.RECOVER, R.string.builder_addRecover, Icons.AutoMirrored.Filled.DirectionsWalk),
             ).forEach { (role, text, icon) ->
                 DropdownMenuItem(
                     text = { Text(stringResource(text)) },
@@ -1013,13 +1013,13 @@ private fun AddStepButton(label: String, onExercise: (StepRole) -> Unit, onRest:
                 )
             }
             DropdownMenuItem(
-                text = { Text(stringResource(R.string.builder_add_rest)) },
+                text = { Text(stringResource(R.string.builder_addRest)) },
                 leadingIcon = { Icon(Icons.Filled.Timer, contentDescription = null) },
                 onClick = { expanded = false; onRest() },
             )
             onRepeat?.let { repeat ->
                 DropdownMenuItem(
-                    text = { Text(stringResource(R.string.builder_add_repeat)) },
+                    text = { Text(stringResource(R.string.builder_addRepeat)) },
                     leadingIcon = { Icon(Icons.Filled.Repeat, contentDescription = null) },
                     onClick = { expanded = false; repeat() },
                 )

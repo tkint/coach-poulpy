@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.compose.compiler)
+    id("coachpoulpy.i18n")
 }
 
 kotlin {
@@ -59,6 +60,9 @@ android {
         buildConfig = true
     }
 }
+
+// values*/strings.xml are generated from i18n/messages/*/app.json (ADR 0014).
+i18n.androidStrings("app")
 
 dependencies {
     implementation(projects.shared)

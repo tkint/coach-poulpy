@@ -45,4 +45,5 @@ include(
     ":shared",
     ":app-android",
     ":server",
+    ":tools:i18n",
 )

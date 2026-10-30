@@ -172,7 +172,7 @@ private fun ColumnScope.Running(state: PlayerState, model: PlayerModel) {
     if (state.isRest || remaining != null) {
         state.nextTitle?.let { next ->
             state.nextRound?.let {
-                Text(stringResource(R.string.player_next_round, it).uppercase(), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(stringResource(R.string.player_nextRound, it).uppercase(), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             Text(
                 stringResource(R.string.player_next, next, state.nextDetail ?: ""),
@@ -190,7 +190,7 @@ private fun ColumnScope.Running(state: PlayerState, model: PlayerModel) {
         }
         FilledTonalButton(onClick = model::skip, enabled = !paused, modifier = Modifier.weight(1f).height(56.dp)) {
             Icon(Icons.Filled.SkipNext, contentDescription = null)
-            Text(stringResource(if (state.isRest) R.string.player_skip_rest else R.string.player_skip), modifier = Modifier.padding(start = 4.dp))
+            Text(stringResource(if (state.isRest) R.string.player_skipRest else R.string.player_skip), modifier = Modifier.padding(start = 4.dp))
         }
     }
     if (!state.isTimed) {
@@ -203,8 +203,8 @@ private fun ColumnScope.Running(state: PlayerState, model: PlayerModel) {
     if (confirmStop) {
         AlertDialog(
             onDismissRequest = { confirmStop = false },
-            title = { Text(stringResource(R.string.player_stop_title)) },
-            text = { Text(stringResource(R.string.player_stop_body)) },
+            title = { Text(stringResource(R.string.player_stopTitle)) },
+            text = { Text(stringResource(R.string.player_stopBody)) },
             confirmButton = { TextButton(onClick = { confirmStop = false; model.stop() }) { Text(stringResource(R.string.player_stop)) } },
             dismissButton = { TextButton(onClick = { confirmStop = false }) { Text(stringResource(R.string.action_cancel)) } },
         )
@@ -224,7 +224,7 @@ private fun ColumnScope.Finished(state: PlayerState, onClose: () -> Unit) {
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(top = 16.dp),
         )
-        if (summary.setsSkipped > 0) Text(stringResource(R.string.player_summary_skipped, summary.setsSkipped), style = MaterialTheme.typography.bodyMedium)
+        if (summary.setsSkipped > 0) Text(stringResource(R.string.player_summarySkipped, summary.setsSkipped), style = MaterialTheme.typography.bodyMedium)
     }
     Spacer(Modifier.weight(1f))
     Button(onClick = onClose, modifier = Modifier.fillMaxWidth().height(56.dp)) { Text(stringResource(R.string.player_close)) }

@@ -1,1 +1,2 @@
+/* CLEANUP: the last hand-written iOS text; move NSBluetoothAlwaysUsageDescription into i18n/messages/<locale>/app.json and generate this file too (#135). */
 "NSBluetoothAlwaysUsageDescription" = "Coach Poulpy se connecte à votre tapis pour afficher et enregistrer votre vitesse, votre distance et votre fréquence cardiaque.";

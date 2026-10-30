@@ -32,8 +32,27 @@ object Ids {
 @Serializable @JvmInline value class GoalId(val value: String)
 @Serializable @JvmInline value class ExecutionId(val value: String)
 
-/** Text shipped in both supported languages. */
+/**
+ * Text in each language it was translated into, keyed by language code (`{"en": "Goblet squat", "fr": "Squat
+ * gobelet"}`), with English always there as the fallback (ADR 0014).
+ */
 @Serializable
-data class LocalizedText(val en: String, val fr: String) {
-    fun forLanguage(languageCode: String): String = if (languageCode.startsWith("fr")) fr else en
+@JvmInline
+value class LocalizedText(val byLanguage: Map<String, String>) {
+    init {
+        require(ENGLISH in byLanguage) { "Text without English: $byLanguage" }
+    }
+
+    /** The text for a language code such as "fr" or "fr-CH", or the English one. */
+    fun forLanguage(languageCode: String): String = byLanguage[language(languageCode)] ?: byLanguage.getValue(ENGLISH)
+
+    /** Every translation, for search. */
+    val all: Collection<String> get() = byLanguage.values
+
+    companion object {
+        const val ENGLISH = "en"
+
+        /** "fr" for "fr", "fr-CH" or "fr_CH". */
+        fun language(languageCode: String): String = languageCode.substringBefore('-').substringBefore('_').lowercase()
+    }
 }

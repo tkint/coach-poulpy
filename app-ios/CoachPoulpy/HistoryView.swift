@@ -52,8 +52,8 @@ struct HistoryView: View {
 
     private var viewSwitch: some View {
         HStack(spacing: 0) {
-            switchButton(.calendar, "history.view.calendar", systemImage: "calendar")
-            switchButton(.stats, "history.view.stats", systemImage: "chart.bar")
+            switchButton(.calendar, "history.viewCalendar", systemImage: "calendar")
+            switchButton(.stats, "history.viewStats", systemImage: "chart.bar")
         }
         .padding(4)
         .background(PoulpyColor.surfaceVariant, in: Capsule())
@@ -87,8 +87,8 @@ struct HistoryView: View {
                     LazyVStack(alignment: .leading, spacing: 8) {
                         if month.sections.isEmpty && state.sessions.isEmpty {
                             VStack(spacing: 8) {
-                                Text("history.empty.title").font(.poulpy(.title2))
-                                Text("history.empty.body")
+                                Text("history.emptyTitle").font(.poulpy(.title2))
+                                Text("history.emptyBody")
                                     .foregroundStyle(.secondary)
                                     .multilineTextAlignment(.center)
                             }
@@ -139,11 +139,11 @@ struct HistoryView: View {
                     Image(systemName: "chevron.left").font(.system(size: 18, weight: .bold)).frame(width: 44, height: 44)
                 }
                 .disabled(!month.canGoBack)
-                .accessibilityLabel(Text("history.previous.month"))
+                .accessibilityLabel(Text("history.previousMonth"))
                 Spacer()
                 VStack(spacing: 0) {
                     Text(monthTitle(month.monthStartMillis)).font(.poulpy(.title3))
-                    Text(L("history.active.days %lld", Int64(month.activeDays)))
+                    Text(L("history.activeDays %lld", Int64(month.activeDays)))
                         .font(.poulpy(.caption).weight(.bold))
                         .foregroundStyle(PoulpyColor.onSurfaceVariant)
                 }
@@ -152,7 +152,7 @@ struct HistoryView: View {
                     Image(systemName: "chevron.right").font(.system(size: 18, weight: .bold)).frame(width: 44, height: 44)
                 }
                 .disabled(!month.canGoForward)
-                .accessibilityLabel(Text("history.next.month"))
+                .accessibilityLabel(Text("history.nextMonth"))
             }
             .foregroundStyle(PoulpyColor.primary)
             HStack(spacing: 0) {
@@ -216,7 +216,7 @@ struct HistoryView: View {
 
     private func dayHeader(_ section: DaySection, highlighted: Bool) -> some View {
         let day = dayLabel(section.dateMillis)
-        let text = section.isToday ? L("history.today.day %@", day) : day
+        let text = section.isToday ? L("history.todayDay %@", day) : day
         return HStack(spacing: 8) {
             Text(text.uppercased())
                 .font(PoulpyFont.label)
@@ -279,12 +279,12 @@ struct HistoryView: View {
     private func statsView(_ state: HistoryState) -> some View {
         VStack(spacing: 12) {
             HStack(alignment: .top, spacing: 12) {
-                period("history.this.week", state.thisWeek, highlighted: true)
-                period("history.this.month", state.thisMonth, highlighted: false)
+                period("history.thisWeek", state.thisWeek, highlighted: true)
+                period("history.thisMonth", state.thisMonth, highlighted: false)
             }
             VStack(alignment: .leading, spacing: 14) {
                 weekChart(
-                    title: "history.chart.minutes",
+                    title: "history.chartMinutes",
                     weeks: state.weeks,
                     value: { Double($0.activeMinutes) },
                     label: { String(Int($0)) },
@@ -295,7 +295,7 @@ struct HistoryView: View {
                 )
                 if state.hasDistance {
                     weekChart(
-                        title: "history.chart.distance",
+                        title: "history.chartDistance",
                         weeks: state.weeks,
                         value: { $0.distanceKm },
                         label: { decimal($0, 1) },
@@ -310,13 +310,13 @@ struct HistoryView: View {
             .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 16))
             .overlay(RoundedRectangle(cornerRadius: 16).stroke(PoulpyColor.outline))
             HStack(alignment: .top, spacing: 12) {
-                tile("history.total", value: "\(state.totalSessions)", caption: L("history.sessions.unit %lld", Int64(state.totalSessions)))
+                tile("history.total", value: "\(state.totalSessions)", caption: L("history.sessionsUnit %lld", Int64(state.totalSessions)))
                 tile(
-                    "history.longest.run",
+                    "history.longestRun",
                     value: state.longestRunMeters.map { Units.shared.distance(meters: $0.doubleValue, system: units, decimals: 1).text } ?? "–",
                     caption: state.longestRunMillis.map { shortDayMonth($0.int64Value) } ?? ""
                 )
-                tile("history.full.octopus", value: "×\(state.fullOctopuses)", caption: L("history.tentacles.lit %lld", Int64(state.tentaclesLit)))
+                tile("history.fullOctopus", value: "×\(state.fullOctopuses)", caption: L("history.tentaclesLit %lld", Int64(state.tentaclesLit)))
             }
         }
         .padding(.horizontal, 20)
@@ -419,24 +419,24 @@ struct SessionDetailView: View {
                 .background(PoulpyColor.primaryContainer, in: RoundedRectangle(cornerRadius: 24))
 
                 VStack(spacing: 0) {
-                    line("treadmill.summary.duration", clock(session.activeSeconds))
+                    line("treadmill.summaryDuration", clock(session.activeSeconds))
                     if session.kind == .workout, let done = session.setsDone {
-                        line("history.sets.done", session.setsPlanned.map { "\(done.intValue) / \($0.intValue)" } ?? "\(done.intValue)")
+                        line("history.setsDone", session.setsPlanned.map { "\(done.intValue) / \($0.intValue)" } ?? "\(done.intValue)")
                     }
                     if session.kind == .workout, let skipped = session.setsSkipped, skipped.intValue > 0 {
-                        line("history.sets.skipped", "\(skipped.intValue)")
+                        line("history.setsSkipped", "\(skipped.intValue)")
                     }
                     if let distance = session.distanceMeters {
                         line("metric.distance", Units.shared.distance(meters: distance.doubleValue, system: units, decimals: 2).text)
                     }
                     if let speed = session.averageSpeedKmh {
-                        line("treadmill.summary.average.speed", Units.shared.speed(kmh: speed.doubleValue, system: units).text)
+                        line("treadmill.summaryAverageSpeed", Units.shared.speed(kmh: speed.doubleValue, system: units).text)
                     }
                     if let hr = session.averageHeartRateBpm {
-                        line("treadmill.summary.average.hr", "\(hr.intValue) bpm")
+                        line("treadmill.summaryAverageHr", "\(hr.intValue) bpm")
                     }
                     if let hr = session.maxHeartRateBpm {
-                        line("treadmill.summary.max.hr", "\(hr.intValue) bpm")
+                        line("treadmill.summaryMaxHr", "\(hr.intValue) bpm")
                     }
                     if let kcal = session.energyKcal {
                         line("metric.energy", "\(kcal.intValue) kcal")
@@ -463,13 +463,13 @@ struct SessionDetailView: View {
                 Label("action.delete", systemImage: "trash")
             }
         }
-        .confirmationDialog("history.delete.title", isPresented: $deleting, titleVisibility: .visible) {
+        .confirmationDialog("history.deleteTitle", isPresented: $deleting, titleVisibility: .visible) {
             Button("action.delete", role: .destructive) {
                 onDelete()
                 dismiss()
             }
         } message: {
-            Text("history.delete.body")
+            Text("history.deleteBody")
         }
     }
 

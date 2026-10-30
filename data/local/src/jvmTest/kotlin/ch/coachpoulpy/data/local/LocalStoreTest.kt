@@ -184,7 +184,7 @@ class LocalStoreTest {
 
     private fun exercise(slug: String) = Exercise(
         slug = ExerciseSlug(slug),
-        name = LocalizedText(slug, slug),
+        name = LocalizedText(mapOf("en" to slug)),
         movementPattern = MovementPattern.SQUAT,
         muscleGroups = listOf(MuscleGroup.QUADRICEPS),
         measurement = MeasurementMode.REPS,

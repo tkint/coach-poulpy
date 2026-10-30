@@ -49,7 +49,7 @@ struct PlanSheet: View {
                     Image(systemName: "chevron.left").frame(width: 44, height: 44)
                 }
                 .disabled(month <= (calendar.dateInterval(of: .month, for: Date())?.start ?? Date()))
-                .accessibilityLabel(Text("plan.previous.month"))
+                .accessibilityLabel(Text("plan.previousMonth"))
                 Spacer()
                 Text(month.formatted(.dateTime.month(.wide).year()))
                     .font(.poulpy(.body).weight(.heavy))
@@ -59,7 +59,7 @@ struct PlanSheet: View {
                 } label: {
                     Image(systemName: "chevron.right").frame(width: 44, height: 44)
                 }
-                .accessibilityLabel(Text("plan.next.month"))
+                .accessibilityLabel(Text("plan.nextMonth"))
             }
             .foregroundStyle(PoulpyColor.onSurfaceVariant)
             let columns = Array(repeating: GridItem(.flexible(), spacing: 0), count: 7)
@@ -81,7 +81,7 @@ struct PlanSheet: View {
                 onSave(upcoming.map { PlanDate(year: Int32($0.year ?? 0), month: Int32($0.month ?? 1), day: Int32($0.day ?? 1)) })
                 dismiss()
             } label: {
-                Text(upcoming.isEmpty ? NSLocalizedString("plan.keep.unplanned", comment: "") : String.localizedStringWithFormat(NSLocalizedString("plan.save %lld", comment: ""), Int64(upcoming.count)))
+                Text(upcoming.isEmpty ? NSLocalizedString("plan.keepUnplanned", comment: "") : String.localizedStringWithFormat(NSLocalizedString("plan.save %lld", comment: ""), Int64(upcoming.count)))
                     .font(.poulpy(.body).weight(.heavy))
                     .frame(maxWidth: .infinity, minHeight: 52)
                     .foregroundStyle(PoulpyColor.onPrimary)

@@ -73,7 +73,7 @@ fun PlanSheet(name: String, planned: List<PlannedDay>, onSave: (List<PlanDate>) 
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = { month = month.minusMonths(1) }, enabled = month > YearMonth.from(today)) {
-                    Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = stringResource(R.string.plan_previous_month))
+                    Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = stringResource(R.string.plan_previousMonth))
                 }
                 Text(
                     month.atDay(1).format(DateTimeFormatter.ofPattern("LLLL yyyy", locale)).replaceFirstChar { it.titlecase(locale) },
@@ -83,7 +83,7 @@ fun PlanSheet(name: String, planned: List<PlannedDay>, onSave: (List<PlanDate>) 
                     textAlign = TextAlign.Center,
                 )
                 IconButton(onClick = { month = month.plusMonths(1) }) {
-                    Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = stringResource(R.string.plan_next_month))
+                    Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = stringResource(R.string.plan_nextMonth))
                 }
             }
             Row(Modifier.fillMaxWidth()) {
@@ -120,7 +120,7 @@ fun PlanSheet(name: String, planned: List<PlannedDay>, onSave: (List<PlanDate>) 
             ) {
                 val count = ticked.count { !it.isBefore(today) }
                 Text(
-                    if (count == 0) stringResource(R.string.plan_keep_unplanned) else pluralStringResource(R.plurals.plan_save, count, count),
+                    if (count == 0) stringResource(R.string.plan_keepUnplanned) else pluralStringResource(R.plurals.plan_save, count, count),
                     fontWeight = FontWeight.ExtraBold,
                 )
             }

@@ -61,7 +61,7 @@ struct BuilderView: View {
                             partBlock(part)
                         }
                         Button { addingPart = true } label: {
-                            dashedTile(Text("builder.add.part"), systemImage: "plus", height: 56)
+                            dashedTile(Text("builder.addPart"), systemImage: "plus", height: 56)
                         }
                         .buttonStyle(.plain)
                     }
@@ -73,7 +73,7 @@ struct BuilderView: View {
                 .onPreferenceChange(CardFrames.self) { frames = $0 }
             }
             .background(PoulpyColor.background)
-            .navigationTitle(LocalizedStringKey(model.isEditing ? "builder.edit.title" : "builder.new.title"))
+            .navigationTitle(LocalizedStringKey(model.isEditing ? "builder.editTitle" : "builder.newTitle"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(PoulpyColor.background, for: .navigationBar)
             .toolbar {
@@ -130,7 +130,7 @@ struct BuilderView: View {
                         }
                         .buttonStyle(.plain)
                     }
-                    .navigationTitle("builder.pick.title")
+                    .navigationTitle("builder.pickTitle")
                     .navigationBarTitleDisplayMode(.inline)
                     .toolbar {
                         ToolbarItem(placement: .cancellationAction) {
@@ -155,7 +155,7 @@ struct BuilderView: View {
                 .padding(.vertical, 6)
                 .background(PoulpyColor.primaryContainer, in: Capsule())
             Image(systemName: "lock.fill").font(.system(size: 13, weight: .bold)).foregroundStyle(PoulpyColor.onSurfaceVariant).accessibilityHidden(true)
-            Text("builder.format.locked").font(.poulpy(.caption)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+            Text("builder.formatLocked").font(.poulpy(.caption)).foregroundStyle(PoulpyColor.onSurfaceVariant)
         }
     }
 
@@ -187,10 +187,10 @@ struct BuilderView: View {
             if part.canMoveUp || part.canMoveDown || part.canDelete {
                 Menu {
                     if part.canMoveUp {
-                        Button { model.movePartUp(key: part.key) } label: { Label("builder.move.up", systemImage: "arrow.up") }
+                        Button { model.movePartUp(key: part.key) } label: { Label("builder.moveUp", systemImage: "arrow.up") }
                     }
                     if part.canMoveDown {
-                        Button { model.movePartDown(key: part.key) } label: { Label("builder.move.down", systemImage: "arrow.down") }
+                        Button { model.movePartDown(key: part.key) } label: { Label("builder.moveDown", systemImage: "arrow.down") }
                     }
                     if part.canDelete {
                         Divider()
@@ -200,7 +200,7 @@ struct BuilderView: View {
                     Image(systemName: "ellipsis").font(.system(size: 17, weight: .bold)).frame(width: 44, height: 44)
                 }
                 .foregroundStyle(PoulpyColor.onSurfaceVariant)
-                .accessibilityLabel(Text(L("builder.more.actions %@", part.name)))
+                .accessibilityLabel(Text(L("builder.moreActions %@", part.name)))
             }
         }
     }
@@ -225,13 +225,13 @@ struct BuilderView: View {
                     .foregroundStyle(PoulpyColor.onPrimaryContainer)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 HStack(spacing: 4) {
-                    timesButton("minus", "builder.repeat.fewer") { model.setRepeatTimes(key: group.key, times: group.times - 1) }
+                    timesButton("minus", "builder.repeatFewer") { model.setRepeatTimes(key: group.key, times: group.times - 1) }
                     Text(group.timesLabel)
                         .font(.poulpy(.subheadline).weight(.heavy))
                         .monospacedDigit()
                         .foregroundStyle(PoulpyColor.onPrimaryContainer)
                         .frame(minWidth: 58)
-                    timesButton("plus", "builder.repeat.more") { model.setRepeatTimes(key: group.key, times: group.times + 1) }
+                    timesButton("plus", "builder.repeatMore") { model.setRepeatTimes(key: group.key, times: group.times + 1) }
                 }
                 .padding(4)
                 .background(PoulpyColor.surface.opacity(0.6), in: Capsule())
@@ -244,16 +244,16 @@ struct BuilderView: View {
                     Image(systemName: "ellipsis").font(.system(size: 17, weight: .bold)).frame(width: 44, height: 44)
                 }
                 .foregroundStyle(PoulpyColor.onSurfaceVariant)
-                .accessibilityLabel(Text("builder.repeat.actions"))
+                .accessibilityLabel(Text("builder.repeatActions"))
             }
             .accessibilityElement(children: .contain)
-            .accessibilityAction(named: Text("builder.move.up")) { model.moveUp(key: group.key) }
-            .accessibilityAction(named: Text("builder.move.down")) { model.moveDown(key: group.key) }
+            .accessibilityAction(named: Text("builder.moveUp")) { model.moveUp(key: group.key) }
+            .accessibilityAction(named: Text("builder.moveDown")) { model.moveDown(key: group.key) }
             VStack(spacing: 6) {
                 ForEach(group.rows, id: \.key) { row in
                     card(row).liftable(row.key, dragging: dragging, dragStart: dragStart, dragY: dragY, frames: frames)
                 }
-                addStepButton(Text("builder.add.to.repeat"), height: 44, part: partKey, repeatKey: group.key)
+                addStepButton(Text("builder.addToRepeat"), height: 44, part: partKey, repeatKey: group.key)
             }
             .padding(.leading, 10)
         }
@@ -291,11 +291,11 @@ struct BuilderView: View {
     /// list; a rest, or a repeat at the end of a part (none inside a repeat), is added right away.
     private func addStepButton(_ label: Text, height: CGFloat, part: String, repeatKey: String?) -> some View {
         Menu {
-            Button { picking = PickTarget(partKey: part, repeatKey: repeatKey, role: .work) } label: { Label("builder.add.exercise", systemImage: "dumbbell") }
-            Button { picking = PickTarget(partKey: part, repeatKey: repeatKey, role: .recover) } label: { Label("builder.add.recover", systemImage: "figure.walk") }
-            Button { model.addRest(partKey: part, repeatKey: repeatKey) } label: { Label("builder.add.rest", systemImage: "timer") }
+            Button { picking = PickTarget(partKey: part, repeatKey: repeatKey, role: .work) } label: { Label("builder.addExercise", systemImage: "dumbbell") }
+            Button { picking = PickTarget(partKey: part, repeatKey: repeatKey, role: .recover) } label: { Label("builder.addRecover", systemImage: "figure.walk") }
+            Button { model.addRest(partKey: part, repeatKey: repeatKey) } label: { Label("builder.addRest", systemImage: "timer") }
             if repeatKey == nil {
-                Button { model.addRepeat(partKey: part) } label: { Label("builder.add.repeat", systemImage: "repeat") }
+                Button { model.addRepeat(partKey: part) } label: { Label("builder.addRepeat", systemImage: "repeat") }
             }
         } label: {
             dashedTile(label, systemImage: "plus", height: height)
@@ -378,7 +378,7 @@ private func moveToPartMenu(_ key: String, from partKey: String, parts: [Builder
                 Button(part.name) { model.moveToPart(key: key, partKey: part.key) }
             }
         } label: {
-            Label("builder.move.to.part", systemImage: "arrow.right.doc.on.clipboard")
+            Label("builder.moveToPart", systemImage: "arrow.right.doc.on.clipboard")
         }
     }
 }
@@ -392,7 +392,7 @@ private struct FormatSheet: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 12) {
-                SheetTitle(title: Text("builder.format.title"), subtitle: Text("builder.format.subtitle"))
+                SheetTitle(title: Text("builder.formatTitle"), subtitle: Text("builder.formatSubtitle"))
                 ForEach(options, id: \.label) { option in
                     card(option)
                 }
@@ -424,10 +424,10 @@ private struct FormatSheet: View {
                         .background(selected ? PoulpyColor.primary : PoulpyColor.primaryContainer, in: Circle())
                     Text(option.label).font(.custom(PoulpyFontFace.baloo2Bold, size: 19, relativeTo: .headline))
                 }
-                Text(LocalizedStringKey(circuit ? "builder.circuit.description" : "builder.sets.description"))
+                Text(LocalizedStringKey(circuit ? "builder.circuitDescription" : "builder.setsDescription"))
                     .font(.poulpy(.subheadline))
                     .fixedSize(horizontal: false, vertical: true)
-                Text(LocalizedStringKey(circuit ? "builder.circuit.example" : "builder.sets.example"))
+                Text(LocalizedStringKey(circuit ? "builder.circuitExample" : "builder.setsExample"))
                     .font(.poulpy(.caption))
                     .foregroundStyle(PoulpyColor.onSurfaceVariant)
             }
@@ -449,7 +449,7 @@ private struct PartSheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            SheetTitle(title: Text("builder.add.part"), subtitle: Text("builder.add.part.subtitle"))
+            SheetTitle(title: Text("builder.addPart"), subtitle: Text("builder.addPartSubtitle"))
             ForEach(options, id: \.name) { option in
                 Button { onPick(option.kind) } label: {
                     HStack(spacing: 12) {
@@ -596,14 +596,14 @@ private struct EntryCard: View {
                 }
                 .buttonStyle(.plain)
                 // Screen readers can't drag: they get the moves as actions.
-                .accessibilityAction(named: Text("builder.move.up")) { model.moveUp(key: row.key) }
-                .accessibilityAction(named: Text("builder.move.down")) { model.moveDown(key: row.key) }
+                .accessibilityAction(named: Text("builder.moveUp")) { model.moveUp(key: row.key) }
+                .accessibilityAction(named: Text("builder.moveDown")) { model.moveDown(key: row.key) }
                 .accessibilityActions {
                     if row.canMoveIntoRepeat {
-                        Button("builder.move.into.repeat") { model.moveIntoRepeatAbove(key: row.key) }
+                        Button("builder.moveIntoRepeat") { model.moveIntoRepeatAbove(key: row.key) }
                     }
                     if row.repeatKey != nil {
-                        Button("builder.move.out.of.repeat") { model.moveOutOfRepeat(key: row.key) }
+                        Button("builder.moveOutOfRepeat") { model.moveOutOfRepeat(key: row.key) }
                     }
                 }
                 if !open {
@@ -633,7 +633,7 @@ private struct EntryCard: View {
                 }
                 .padding(.trailing, 4)
                 if row.showsSets && row.sets >= 2 {
-                    stepper("builder.rest.between.sets", row.restBetweenSetsLabel,
+                    stepper("builder.restBetweenSets", row.restBetweenSetsLabel,
                             less: { model.changeRestBetweenSets(key: row.key, steps: -1) },
                             more: { model.changeRestBetweenSets(key: row.key, steps: 1) })
                         .padding(.trailing, 4)
@@ -641,7 +641,7 @@ private struct EntryCard: View {
                 if !row.isTimed {
                     weightCell.padding(.trailing, 4)
                 }
-                Text(LocalizedStringKey(format == .circuit ? "builder.circuit.hint" : "builder.sets.hint"))
+                Text(LocalizedStringKey(format == .circuit ? "builder.circuitHint" : "builder.setsHint"))
                     .font(.poulpy(.caption))
                     .foregroundStyle(PoulpyColor.onSurfaceVariant)
             }
@@ -670,10 +670,10 @@ private struct EntryCard: View {
             Button(action: onOpen) { Label("builder.edit", systemImage: "pencil") }
             Button { model.duplicate(key: row.key) } label: { Label("builder.duplicate", systemImage: "plus.square.on.square") }
             if row.canMoveIntoRepeat {
-                Button { model.moveIntoRepeatAbove(key: row.key) } label: { Label("builder.move.into.repeat", systemImage: "repeat") }
+                Button { model.moveIntoRepeatAbove(key: row.key) } label: { Label("builder.moveIntoRepeat", systemImage: "repeat") }
             }
             if row.repeatKey != nil {
-                Button { model.moveOutOfRepeat(key: row.key) } label: { Label("builder.move.out.of.repeat", systemImage: "rectangle.portrait.and.arrow.right") }
+                Button { model.moveOutOfRepeat(key: row.key) } label: { Label("builder.moveOutOfRepeat", systemImage: "rectangle.portrait.and.arrow.right") }
             }
             moveToPartMenu(row.key, from: row.partKey, parts: parts, model: model)
             Divider()
@@ -682,7 +682,7 @@ private struct EntryCard: View {
             Image(systemName: "ellipsis").font(.system(size: 17, weight: .bold)).frame(width: 44, height: 44)
         }
         .foregroundStyle(PoulpyColor.onSurfaceVariant)
-        .accessibilityLabel(Text(L("builder.more.actions %@", row.name)))
+        .accessibilityLabel(Text(L("builder.moreActions %@", row.name)))
     }
 
     /// A compact select: its label just above the chosen value, and a chevron; a tap lists the options.
@@ -732,7 +732,7 @@ private struct EntryCard: View {
                 if let onValue {
                     Button(action: onValue) { stepperValue(value, tappable: true) }
                         .buttonStyle(.plain)
-                        .accessibilityHint(Text("builder.tap.to.type"))
+                        .accessibilityHint(Text("builder.tapToType"))
                 } else {
                     stepperValue(value, tappable: false)
                 }
@@ -754,7 +754,7 @@ private struct EntryCard: View {
 
     /// A walk or a run: one block with a duration (time, distance or until button press) and an intensity, instead of sets.
     private func targetEditor(_ target: WalkRunTarget) -> some View {
-        let untilPressed = row.isLast ? "builder.until.end" : "builder.until.pressed"
+        let untilPressed = row.isLast ? "builder.untilEnd" : "builder.untilPressed"
         let durations: [(kind: DurationKind, key: String)] = [(.distance, "builder.distance"), (.time, "builder.time"), (.untilPressed, untilPressed)]
         let intensities: [(kind: IntensityKind, key: String)] = [(.free, "builder.free"), (.pace, "builder.pace")]
         return VStack(alignment: .leading, spacing: 8) {
@@ -788,7 +788,7 @@ private struct EntryCard: View {
                         more: { model.changePace(key: row.key, steps: 1) },
                         onValue: { editing = .pace })
             }
-            Text([target.hint.map { "≈ \($0)" }, NSLocalizedString("builder.tap.to.type", comment: "")].compactMap { $0 }.joined(separator: " · "))
+            Text([target.hint.map { "≈ \($0)" }, NSLocalizedString("builder.tapToType", comment: "")].compactMap { $0 }.joined(separator: " · "))
                 .font(.poulpy(.caption))
                 .foregroundStyle(PoulpyColor.onSurfaceVariant)
         }
@@ -822,7 +822,7 @@ private struct EntryCard: View {
                     .frame(width: 60, height: 40)
                     .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 10))
                     .overlay(RoundedRectangle(cornerRadius: 10).stroke(PoulpyColor.outline, lineWidth: 1.5))
-                    .accessibilityLabel(Text("builder.weight.kg"))
+                    .accessibilityLabel(Text("builder.weightKg"))
                     .onChange(of: weight) { text in
                         model.setLoadKg(key: row.key, kg: Double(text.replacingOccurrences(of: ",", with: ".")) ?? 0)
                     }
@@ -912,7 +912,7 @@ private struct ValueSheet: View {
                 }
             }
             if invalid {
-                Label("builder.value.invalid", systemImage: "exclamationmark.circle")
+                Label("builder.valueInvalid", systemImage: "exclamationmark.circle")
                     .font(.poulpy(.caption))
                     .foregroundStyle(PoulpyColor.error)
             }
@@ -934,7 +934,7 @@ private struct ValueSheet: View {
                     }
                 }
             }
-            sectionLabel("builder.quick.picks")
+            sectionLabel("builder.quickPicks")
             FlowLayout(spacing: 8) {
                 ForEach(picks, id: \.text) { pick in
                     PoulpyChip(title: Text(pick.label), selected: text == pick.text) {

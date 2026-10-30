@@ -16,6 +16,6 @@ struct PoulpyLoader: View {
                 .rotationEffect(.degrees(seconds.truncatingRemainder(dividingBy: period) / period * 360))
         }
         .accessibilityElement()
-        .accessibilityLabel(Text("loading"))
+        .accessibilityLabel(Text("common.loading"))
     }
 }

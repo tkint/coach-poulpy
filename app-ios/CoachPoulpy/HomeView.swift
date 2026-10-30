@@ -51,7 +51,7 @@ struct HomeView: View {
                             }
                             Button(action: onOpenLibrary) {
                                 HStack(spacing: 4) {
-                                    Text("home.something.else")
+                                    Text("home.somethingElse")
                                     Image(systemName: "chevron.right").font(.system(size: 13, weight: .bold))
                                 }
                                 .font(.poulpy(.subheadline).weight(.heavy))
@@ -129,7 +129,7 @@ struct HomeView: View {
                 Spacer(minLength: 0)
             }
             if inProgress {
-                Text("home.in.progress").font(.poulpy(.subheadline).weight(.bold)).foregroundStyle(PoulpyColor.onSurface)
+                Text("home.inProgress").font(.poulpy(.subheadline).weight(.bold)).foregroundStyle(PoulpyColor.onSurface)
             } else if !item.exercises.isEmpty {
                 Text(item.exercises).font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurface)
             }
@@ -138,7 +138,7 @@ struct HomeView: View {
                     NavigationLink {
                         WorkoutPageView(graph: graph, workoutId: workoutId)
                     } label: {
-                        Text("home.see.workout")
+                        Text("home.seeWorkout")
                             .font(.poulpy(.body).weight(.heavy))
                             .frame(maxWidth: .infinity, minHeight: 48)
                             .overlay(Capsule().stroke(PoulpyColor.outline, lineWidth: 2))
@@ -191,7 +191,7 @@ struct HomeView: View {
         let day = Date(timeIntervalSince1970: Double(next.dayMillis) / 1000)
         let when = next.daysAway == 1
             ? L("home.tomorrow %@", next.details)
-            : L("home.in.days %lld %@", Int64(next.daysAway), next.details)
+            : L("home.inDays %lld %@", Int64(next.daysAway), next.details)
         return HStack(spacing: 12) {
             VStack(spacing: 0) {
                 Text(day.formatted(.dateTime.weekday(.abbreviated)).uppercased())
@@ -219,10 +219,10 @@ struct HomeView: View {
     /// Nothing planned or done today: rest, or go and pick something.
     private func restCard(firstTime: Bool) -> some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(LocalizedStringKey(firstTime ? "home.first.title" : "home.rest.title")).font(PoulpyFont.headline)
-            Text(LocalizedStringKey(firstTime ? "home.first.body" : "home.rest.body")).font(.poulpy(.subheadline))
+            Text(LocalizedStringKey(firstTime ? "home.firstTitle" : "home.restTitle")).font(PoulpyFont.headline)
+            Text(LocalizedStringKey(firstTime ? "home.firstBody" : "home.restBody")).font(.poulpy(.subheadline))
             Button(action: onOpenLibrary) {
-                Label("home.open.library", systemImage: "books.vertical")
+                Label("home.openLibrary", systemImage: "books.vertical")
                     .font(.poulpy(.body).weight(.heavy))
                     .padding(.horizontal, 20)
                     .frame(minHeight: 48)

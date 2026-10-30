@@ -78,7 +78,7 @@ private struct GeneralList: View {
             } header: {
                 Text("settings.appearance")
             } footer: {
-                Text("settings.theme.hint")
+                Text("settings.themeHint")
             }
             Section {
                 // Language names stay in their own language, so anyone can find theirs.
@@ -97,10 +97,10 @@ private struct GeneralList: View {
             } header: {
                 Text("settings.region")
             } footer: {
-                Text("settings.language.next.launch") + Text(verbatim: " ") + Text("settings.units.hint")
+                Text("settings.languageNextLaunch") + Text(verbatim: " ") + Text("settings.unitsHint")
             }
             Section {
-                Text(String(format: NSLocalizedString("settings.build.number", comment: ""), Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "—"))
+                Text(String(format: NSLocalizedString("settings.buildNumber %@", comment: ""), Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "—"))
             }
         }
     }
@@ -126,10 +126,10 @@ private struct DevicesList: View {
                 Section {
                     VStack(spacing: 10) {
                         Image("PoulpyPoseStandingTall").resizable().scaledToFit().frame(width: 140, height: 126).accessibilityHidden(true)
-                        Text("devices.empty.title").font(PoulpyFont.headline).multilineTextAlignment(.center)
-                        Text("devices.empty.body").multilineTextAlignment(.center)
+                        Text("devices.emptyTitle").font(PoulpyFont.headline).multilineTextAlignment(.center)
+                        Text("devices.emptyBody").multilineTextAlignment(.center)
                         NavigationLink(value: DeviceRoute.add) {
-                            Label("devices.add.first", systemImage: "plus")
+                            Label("devices.addFirst", systemImage: "plus")
                                 .font(.poulpy(.headline))
                                 .foregroundStyle(PoulpyColor.onPrimary)
                                 .padding(.horizontal, 24)
@@ -138,7 +138,7 @@ private struct DevicesList: View {
                         }
                         .buttonStyle(.plain)
                         .padding(.top, PoulpySpace.sm)
-                        Text("devices.switch.on").font(.poulpy(.footnote))
+                        Text("devices.switchOn").font(.poulpy(.footnote))
                     }
                     .foregroundStyle(PoulpyColor.onPrimaryContainer)
                     .frame(maxWidth: .infinity)
@@ -161,7 +161,7 @@ private struct DevicesList: View {
                             Label {
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text("devices.sources").font(.poulpy(.headline))
-                                    Text("devices.sources.row.hint").font(.poulpy(.footnote)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+                                    Text("devices.sourcesRowHint").font(.poulpy(.footnote)).foregroundStyle(PoulpyColor.onSurfaceVariant)
                                 }
                             } icon: {
                                 Image(systemName: "slider.horizontal.3").foregroundStyle(PoulpyColor.primary)
@@ -216,7 +216,7 @@ private struct StatusLine: View {
             } else {
                 Circle().fill(connected ? PoulpyColor.success : PoulpyColor.outline).frame(width: 8, height: 8)
             }
-            Text([statusLabel(device.status), device.batteryPercent.map { L("devices.battery", Int64($0.intValue)) }].compactMap { $0 }.joined(separator: " · "))
+            Text([statusLabel(device.status), device.batteryPercent.map { L("devices.battery %lld", Int64($0.intValue)) }].compactMap { $0 }.joined(separator: " · "))
                 .font(.custom(PoulpyFontFace.nunitoBold, size: 15, relativeTo: .subheadline))
                 .foregroundStyle(connected ? PoulpyColor.success : PoulpyColor.onSurfaceVariant)
         }
@@ -244,11 +244,11 @@ private struct BluetoothProblems: View {
         if bluetooth.isOff || bluetooth.isDenied {
             Section {
                 if bluetooth.isOff {
-                    Text("devices.bluetooth.off").foregroundStyle(PoulpyColor.error)
+                    Text("devices.bluetoothOff").foregroundStyle(PoulpyColor.error)
                 }
                 if bluetooth.isDenied {
-                    Text("devices.permission.needed").foregroundStyle(PoulpyColor.error)
-                    Button(LocalizedStringKey("devices.open.settings")) {
+                    Text("devices.permissionNeeded").foregroundStyle(PoulpyColor.error)
+                    Button(LocalizedStringKey("devices.openSettings")) {
                         if let url = URL(string: UIApplication.openSettingsURLString) { UIApplication.shared.open(url) }
                     }
                 }
@@ -273,7 +273,7 @@ private struct DeviceAddView: View {
                         PoulpyLoader(size: 112)
                     }
                     Text("treadmill.scanning").font(PoulpyFont.headline).multilineTextAlignment(.center)
-                    Text("devices.scan.hint").multilineTextAlignment(.center)
+                    Text("devices.scanHint").multilineTextAlignment(.center)
                 }
                 .foregroundStyle(PoulpyColor.onPrimaryContainer)
                 .frame(maxWidth: .infinity)
@@ -293,7 +293,7 @@ private struct DeviceAddView: View {
                                 Text(kindLabel(device.kind)).font(.poulpy(.footnote)).foregroundStyle(PoulpyColor.onSurfaceVariant)
                             }
                             Spacer(minLength: 0)
-                            Button(LocalizedStringKey("devices.add.one")) {
+                            Button(LocalizedStringKey("devices.addOne")) {
                                 devices.model.add(key: device.key)
                                 dismiss()
                             }
@@ -305,7 +305,7 @@ private struct DeviceAddView: View {
             }
             Section {
             } footer: {
-                Text("devices.added.hidden")
+                Text("devices.addedHidden")
             }
         }
         .navigationTitle("devices.add")
@@ -354,15 +354,15 @@ private struct DeviceView: View {
                     }
                     if !state.sources.isEmpty {
                         NavigationLink(value: DeviceRoute.sources) {
-                            Text("devices.change.sources").foregroundStyle(PoulpyColor.primary)
+                            Text("devices.changeSources").foregroundStyle(PoulpyColor.primary)
                         }
                     }
                 }
                 Section("settings.devices") {
                     Toggle(isOn: Binding(get: { device.autoConnect }, set: { model.setAutoConnect(key: device.key, on: $0) })) {
                         VStack(alignment: .leading, spacing: 2) {
-                            Text("devices.auto.connect").font(.poulpy(.headline))
-                            Text("devices.auto.connect.hint").font(.poulpy(.footnote)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+                            Text("devices.autoConnect").font(.poulpy(.headline))
+                            Text("devices.autoConnectHint").font(.poulpy(.footnote)).foregroundStyle(PoulpyColor.onSurfaceVariant)
                         }
                     }
                 }
@@ -380,14 +380,14 @@ private struct DeviceView: View {
             }
             .navigationTitle(device.name)
             .navigationBarTitleDisplayMode(.inline)
-            .alert(L("devices.forget.title", device.name), isPresented: $confirmForget) {
+            .alert(L("devices.forgetTitle %@", device.name), isPresented: $confirmForget) {
                 Button(LocalizedStringKey("devices.forget"), role: .destructive) {
                     model.forget(key: device.key)
                     dismiss()
                 }
                 Button(LocalizedStringKey("action.cancel"), role: .cancel) {}
             } message: {
-                Text("devices.forget.body")
+                Text("devices.forgetBody")
             }
         } else {
             Color.clear.onAppear { dismiss() }
@@ -399,7 +399,7 @@ private struct DeviceView: View {
         let used = device.usedFor.contains(quantity)
         let instead = known.first { $0.key != device.key && $0.usedFor.contains(quantity) }
         if used || instead != nil {
-            Text(used ? L("devices.used") : L("devices.used.instead", instead?.name ?? ""))
+            Text(used ? L("devices.used") : L("devices.usedInstead %@", instead?.name ?? ""))
                 .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 13, relativeTo: .footnote))
                 .foregroundStyle(used ? PoulpyColor.onPrimaryContainer : PoulpyColor.onSurfaceVariant)
                 .padding(.horizontal, 10)
@@ -419,12 +419,12 @@ private struct DataSourcesView: View {
         List {
             Section {
             } footer: {
-                Text("devices.sources.hint")
+                Text("devices.sourcesHint")
             }
             ForEach(state.sources, id: \.quantity) { source in
                 Section(quantityLabel(source.quantity)) {
                     Picker(selection: Binding(get: { source.choiceKey }, set: { model.setSource(quantity: source.quantity, key: $0) })) {
-                        Text("devices.source.automatic").tag(String?.none)
+                        Text("devices.sourceAutomatic").tag(String?.none)
                         ForEach(source.options, id: \.key) { option in
                             Text(option.name).tag(String?.some(option.key))
                         }
@@ -443,18 +443,18 @@ private struct DataSourcesView: View {
 
 private func statusLabel(_ status: ConnectionStatus) -> String {
     switch status {
-    case .connected: return L("devices.status.connected")
-    case .connecting: return L("devices.status.connecting")
-    case .reconnecting: return L("devices.status.reconnecting")
-    case .failed: return L("devices.status.failed")
-    default: return L("devices.status.idle")
+    case .connected: return L("devices.statusConnected")
+    case .connecting: return L("devices.statusConnecting")
+    case .reconnecting: return L("devices.statusReconnecting")
+    case .failed: return L("devices.statusFailed")
+    default: return L("devices.statusIdle")
     }
 }
 
 private func quantityLabel(_ quantity: Quantity) -> String {
     switch quantity {
     case .speed: return L("quantity.speed")
-    case .heartRate: return L("quantity.heart.rate")
+    case .heartRate: return L("quantity.heartRate")
     case .cadence: return L("quantity.cadence")
     case .incline: return L("quantity.incline")
     case .energy: return L("quantity.energy")
@@ -464,8 +464,8 @@ private func quantityLabel(_ quantity: Quantity) -> String {
 
 private func kindLabel(_ kind: DeviceKind?) -> String {
     if kind == DeviceKind.treadmill { return L("kind.treadmill") }
-    if kind == DeviceKind.footPod { return L("kind.foot.pod") }
-    if kind == DeviceKind.heartRate { return L("kind.heart.rate") }
+    if kind == DeviceKind.footPod { return L("kind.footPod") }
+    if kind == DeviceKind.heartRate { return L("kind.heartRate") }
     return L("kind.unknown")
 }
 

@@ -40,7 +40,7 @@ Library versions live in `gradle/libs.versions.toml`. Package and app id: `ch.co
 
 ```sh
 # Shared logic (JVM and JavaScript) and server tests, no Android SDK or Mac needed
-./gradlew jvmTest jsTest :server:test
+./gradlew jvmTest jsTest :server:test :tools:i18n:test
 
 # Android: build, or install on a phone connected over USB
 ./gradlew :app-android:assembleDebug
@@ -56,19 +56,19 @@ cd app-ios && xcodegen && open CoachPoulpy.xcodeproj
 cd web && npm install && npm run dev
 ```
 
-The iOS build runs `./gradlew :shared:embedAndSignAppleFrameworkForXcode` itself, so the Kotlin code is rebuilt whenever you build in Xcode.
+The iOS build runs `./gradlew :shared:embedAndSignAppleFrameworkForXcode` itself, so the Kotlin code and the string tables are rebuilt whenever you build in Xcode; `xcodegen` makes them once first (`./gradlew :shared:generateAppleStrings`), since it lists them in the project.
 
 ## The exercise catalog
 
-`catalog/data/exercises.json` is the copy of the catalog shipped in the app. On start, the app copies it into its database when its `version` is higher than the one the phone already has, and every screen reads the catalog from the database.
+`catalog/data/exercises.json` holds the structure of the catalog shipped in the app, and `i18n/messages/<locale>/catalog.json` its text, keyed by slug (`goblet-squat.name`, `goblet-squat.instructions.0`). The build merges the two into one document with every text as a map from language to string, and that is what the app embeds ([ADR 0015](docs/adr/0015-catalog-text-lives-in-translation-files.md)). On start, the app copies it into its database when its `version` is higher than the one the phone already has, and every screen reads the catalog from the database.
 
-To change it today, edit the JSON, raise `version` by one and ship a new build. Keep every `slug`: workouts point at exercises by slug. To stop offering an exercise, set `"retired": true` rather than deleting it, so workouts that use it still open.
+To change it today, edit the JSON or the text, raise `version` by one and ship a new build. CI fails a pull request that changes the catalog text without raising `version`, as Fink's pull requests do: raise it before merging. Keep every `slug`: workouts point at exercises by slug. To stop offering an exercise, set `"retired": true` rather than deleting it, so workouts that use it still open.
 
-`variations` lists the catalog's variation groups: each is the slugs of one movement made easier or harder, ordered from easiest to hardest. An exercise is in at most one group, and a retired one stays in its group but isn't shown. Every exercise in a group carries a `variationNote` in both languages, the one line the variations sheet shows under its name ("Knees down, a shorter lever").
+`variations` lists the catalog's variation groups: each is the slugs of one movement made easier or harder, ordered from easiest to hardest. An exercise is in at most one group, and a retired one stays in its group but isn't shown. Every exercise in a group carries a `variationNote` message in every language, the one line the variations sheet shows under its name ("Knees down, a shorter lever").
 
 An exercise's `equipment` lists what it needs, each need a list of alternatives: `[["DUMBBELL", "KETTLEBELL"]]` is a dumbbell or a kettlebell, `[["DUMBBELL"], ["BENCH"]]` is dumbbells and a bench. No need means bodyweight; `BODYWEIGHT` and `MAT` are never needs. Equipment that helps but isn't needed (a mat, a treadmill for a walk) goes in `optionalEquipment`. The Equipment filter shows an exercise when it uses something ticked, needed or optional, and every need has one alternative ticked; bodyweight-only exercises hide while anything is ticked, unless "No equipment" is.
 
-An exercise's optional `aliases` are other names people search with, per language (`{ "en": ["RDL"], "fr": ["abdos"] }`). The search reads them like names but never shows them, and an alias can't be empty.
+An exercise's optional `aliases` are other names people search with: one comma-separated message per language (`romanian-deadlift.aliases`), which a language may leave out. The search reads them like names but never shows them, and an alias can't be empty.
 
 Later, an admin menu on the server will publish new versions in the same format, and the app will download them on launch with no account needed (`CatalogRepository.apply`). That is separate from syncing a user's own data, so guests get catalog updates too.
 

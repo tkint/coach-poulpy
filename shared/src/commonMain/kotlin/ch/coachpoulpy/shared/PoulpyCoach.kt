@@ -62,19 +62,13 @@ data class PoulpyStatus(
  * new one, so a quiet month never takes anything away.
  */
 class PoulpyCoach(private val languageCode: String, private val timeZone: TimeZone = TimeZone.currentSystemDefault()) {
-    private fun t(en: String, fr: String) = if (languageCode.startsWith("fr")) fr else en
-
     /** [finishedAt] is when each finished session ended, in any order. */
     fun status(finishedAt: List<Instant>, now: Instant): PoulpyStatus {
         val sessions = finishedAt.sorted()
         val total = sessions.size
         val full = total / PoulpyStatus.TENTACLES
         val lit = if (total > 0 && total % PoulpyStatus.TENTACLES == 0) PoulpyStatus.TENTACLES else total % PoulpyStatus.TENTACLES
-        val caption = when {
-            full == 0 -> t("$lit of 8 tentacles lit", "$lit tentacules sur 8 allumés")
-            full == 1 -> t("$lit of 8 tentacles lit · 1 full octopus", "$lit tentacules sur 8 allumés · 1 poulpe complet")
-            else -> t("$lit of 8 tentacles lit · $full full octopuses", "$lit tentacules sur 8 allumés · $full poulpes complets")
-        }
+        val caption = if (full == 0) DomainText.poulpyCaption(languageCode, lit) else DomainText.poulpyCaptionFull(languageCode, full = full, lit = lit)
         val status = { mood: PoulpyStatus.Mood, drawing: PoulpyDrawing, title: String, line: String ->
             PoulpyStatus(mood, drawing, title, line, lit, full, caption)
         }
@@ -82,8 +76,8 @@ class PoulpyCoach(private val languageCode: String, private val timeZone: TimeZo
         if (total == 0) {
             return status(
                 PoulpyStatus.Mood.HAPPY, PoulpyDrawing.MOOD_HAPPY,
-                t("Hi, I'm Poulpy", "Salut, moi c'est Poulpy"),
-                t("Finish a session and I light my first tentacle.", "Termine une séance et j'allume mon premier tentacule."),
+                DomainText.poulpyFirstTitle(languageCode),
+                DomainText.poulpyFirstLine(languageCode),
             )
         }
 
@@ -96,35 +90,33 @@ class PoulpyCoach(private val languageCode: String, private val timeZone: TimeZo
         return when {
             daysSince == 0 && lit == PoulpyStatus.TENTACLES -> status(
                 PoulpyStatus.Mood.PROUD, PoulpyDrawing.CHAMPION,
-                t("Full octopus!", "Poulpe complet !"),
-                t("All eight tentacles lit. Gold for the octopus!", "Les huit tentacules sont allumés. L'or pour le poulpe !"),
+                DomainText.poulpyChampionTitle(languageCode),
+                DomainText.poulpyChampionLine(languageCode),
             )
             daysSince == 0 && gapBeforeLast != null && gapBeforeLast >= LONG_BREAK_DAYS -> status(
                 PoulpyStatus.Mood.HAPPY, PoulpyDrawing.SHY,
-                t("Oh… you're back!", "Oh… te revoilà !"),
-                t("I kept your tentacles lit. One more glows now.", "J'ai gardé tes tentacules allumés. Un de plus brille maintenant."),
+                DomainText.poulpyBackTitle(languageCode),
+                DomainText.poulpyBackLine(languageCode),
             )
             daysSince == 0 -> status(
                 PoulpyStatus.Mood.HAPPY, PoulpyDrawing.MOOD_HAPPY,
-                t("Nice one", "Bien joué"),
-                if (left == 1) t("One more session and I'm a full octopus.", "Encore une séance et je suis un poulpe complet.")
-                else t("Another tentacle lit. $left to go for a full octopus.", "Un tentacule de plus. Encore $left pour un poulpe complet."),
+                DomainText.poulpyLitTitle(languageCode),
+                DomainText.poulpyLitLine(languageCode, left),
             )
             daysSince == 1 -> status(
                 PoulpyStatus.Mood.RECOVERING, PoulpyDrawing.MOOD_RECOVERING,
-                t("Resting", "Repos"),
-                t("Rest is training too. Ready when you are.", "Le repos, c'est aussi de l'entraînement. Prêt quand tu l'es."),
+                DomainText.poulpyRestTitle(languageCode),
+                DomainText.poulpyRestLine(languageCode),
             )
             daysSince < LONG_BREAK_DAYS -> status(
                 PoulpyStatus.Mood.HAPPY, PoulpyDrawing.MOOD_HAPPY,
-                t("Poulpy is happy", "Poulpy est content"),
-                if (lit == PoulpyStatus.TENTACLES) t("A full octopus! The next session starts a new one.", "Un poulpe complet ! La prochaine séance en commence un nouveau.")
-                else t("Shall we light another tentacle?", "On allume un autre tentacule ?"),
+                DomainText.poulpyHappyTitle(languageCode),
+                if (lit == PoulpyStatus.TENTACLES) DomainText.poulpyHappyFullLine(languageCode) else DomainText.poulpyHappyLine(languageCode),
             )
             else -> status(
                 PoulpyStatus.Mood.RECOVERING, PoulpyDrawing.SLEEPING,
-                t("Poulpy is napping", "Poulpy fait la sieste"),
-                t("Your tentacles are still lit. Wake me up with a session.", "Tes tentacules sont toujours allumés. Réveille-moi avec une séance."),
+                DomainText.poulpyNappingTitle(languageCode),
+                DomainText.poulpyNappingLine(languageCode),
             )
         }
     }

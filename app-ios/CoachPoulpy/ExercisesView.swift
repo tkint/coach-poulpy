@@ -36,7 +36,7 @@ struct ExerciseList<Row: View>: View {
         let model = self.model
         let listing = model.filter(query: query, area: area, ticked: ticked, withRecent: withRecent)
         VStack(spacing: 0) {
-            ListFilters(query: $query, placeholder: "exercises.search", label: "exercises.search.label", countLabel: listing.countLabel) {
+            ListFilters(query: $query, placeholder: "exercises.search", label: "exercises.searchLabel", countLabel: listing.countLabel) {
                 EquipmentChip(ticked: ticked) { choosing = true }
                 Rectangle()
                     .fill(PoulpyColor.outline)
@@ -50,7 +50,7 @@ struct ExerciseList<Row: View>: View {
                 }
             } action: {
                 if area != nil || ticked != nil {
-                    Button("exercises.clear.filters") {
+                    Button("exercises.clearFilters") {
                         area = nil
                         tick(nil)
                     }
@@ -128,7 +128,7 @@ private struct EquipmentChip: View {
             .overlay(Capsule().stroke(on ? Color.clear : PoulpyColor.outline, lineWidth: 1.5))
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(ticked.map { Text("exercises.equipment.ticked \($0.count)") } ?? Text("exercises.equipment"))
+        .accessibilityLabel(ticked.map { Text("exercises.equipmentTicked \($0.count)") } ?? Text("exercises.equipment"))
         .accessibilityAddTraits(on ? [.isSelected] : [])
     }
 }
@@ -153,7 +153,7 @@ private struct EquipmentSheet: View {
             VStack(alignment: .leading, spacing: 12) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("exercises.equipment").font(PoulpyFont.headline).accessibilityAddTraits(.isHeader)
-                    Text("exercises.equipment.hint").font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+                    Text("exercises.equipmentHint").font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
                 }
                 VStack(spacing: 0) {
                     ForEach(options, id: \.label) { option in
@@ -182,14 +182,14 @@ private struct EquipmentSheet: View {
                 }
                 HStack(spacing: 8) {
                     Button { apply(nil) } label: {
-                        Text("exercises.equipment.clear")
+                        Text("exercises.equipmentClear")
                             .font(.poulpy(.callout).weight(.heavy))
                             .frame(maxWidth: .infinity)
                             .frame(height: 56)
                             .overlay(Capsule().stroke(PoulpyColor.outline, lineWidth: 2))
                     }
                     Button { apply(pending) } label: {
-                        Text("exercises.equipment.show \(fitting(pending))")
+                        Text("exercises.equipmentShow \(fitting(pending))")
                             .font(.poulpy(.callout).weight(.heavy))
                             .foregroundStyle(PoulpyColor.onPrimary)
                             .frame(maxWidth: .infinity)
@@ -251,9 +251,9 @@ private struct NoExercises: View {
 
     var body: some View {
         PoulpyCard(
-            title: query.isEmpty ? Text("exercises.no.fit") : Text("exercises.nothing.for \(query)"),
-            message: Text(LocalizedStringKey(query.isEmpty ? "exercises.no.fit.hint" : "exercises.nothing.hint")),
-            button: Text("exercises.clear.all"),
+            title: query.isEmpty ? Text("exercises.noFit") : Text("exercises.nothingFor \(query)"),
+            message: Text(LocalizedStringKey(query.isEmpty ? "exercises.noFitHint" : "exercises.nothingHint")),
+            button: Text("exercises.clearAll"),
             action: clear
         )
         .padding(.top, 16)
@@ -378,7 +378,7 @@ struct ExerciseDetailView: View {
                     } label: {
                         HStack(spacing: 8) {
                             Image(systemName: "chart.bar.fill").font(.system(size: 14, weight: .bold))
-                            Text("exercise.variation.position \(detail.variationPosition)")
+                            Text("exercise.variationPosition \(detail.variationPosition)")
                             Image(systemName: "chevron.down").font(.system(size: 12, weight: .bold))
                         }
                         .font(.poulpy(.subheadline).weight(.heavy))
@@ -389,7 +389,7 @@ struct ExerciseDetailView: View {
                         .background(PoulpyColor.surface, in: Capsule())
                     }
                     .accessibilityElement(children: .ignore)
-                    .accessibilityLabel(Text("exercise.variations.a11y \(detail.variationPosition)"))
+                    .accessibilityLabel(Text("exercise.variationsA11y \(detail.variationPosition)"))
                     .accessibilityAddTraits(.isButton)
                 }
             }
@@ -437,7 +437,7 @@ private struct VariationsSheet: View {
             VStack(alignment: .leading, spacing: 12) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("exercise.variations").font(PoulpyFont.headline).accessibilityAddTraits(.isHeader)
-                    Text("exercise.variations.hint").font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+                    Text("exercise.variationsHint").font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
                 }
                 VStack(spacing: 6) {
                     ForEach(Array(variations.enumerated()), id: \.element.slug) { rung, variation in
@@ -473,7 +473,7 @@ private struct VariationsSheet: View {
                 Text(variation.name).font(.poulpy(.callout).weight(.heavy)).foregroundStyle(PoulpyColor.onSurface)
                 Group {
                     if variation.current {
-                        Text("exercise.variation.current")
+                        Text("exercise.variationCurrent")
                     } else {
                         Text(variation.note)
                     }

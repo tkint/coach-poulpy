@@ -92,7 +92,7 @@ struct LiveView: View {
         return Button(action: onManageDevices) {
             HStack(spacing: 6) {
                 Circle().fill(count > 0 ? PoulpyColor.success : PoulpyColor.outline).frame(width: 8, height: 8)
-                Text(count > 0 ? L("live.connected %lld", Int64(count)) : L("live.none.connected"))
+                Text(count > 0 ? L("live.connected %lld", Int64(count)) : L("live.noneConnected"))
                     .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 14, relativeTo: .subheadline))
             }
             .foregroundStyle(PoulpyColor.onSurface)
@@ -106,10 +106,10 @@ struct LiveView: View {
     private var nothingConnected: some View {
         VStack(spacing: 10) {
             Image("PoulpyPoseStandingTall").resizable().scaledToFit().frame(width: 140, height: 140).accessibilityHidden(true)
-            Text("live.empty.title").font(PoulpyFont.headline).multilineTextAlignment(.center)
-            Text("live.empty.body").multilineTextAlignment(.center)
+            Text("live.emptyTitle").font(PoulpyFont.headline).multilineTextAlignment(.center)
+            Text("live.emptyBody").multilineTextAlignment(.center)
             Button(action: onManageDevices) {
-                Text("live.manage.devices").font(.poulpy(.headline)).padding(.horizontal, 20).frame(height: 52)
+                Text("live.manageDevices").font(.poulpy(.headline)).padding(.horizontal, 20).frame(height: 52)
             }
             .buttonStyle(.borderedProminent)
             .buttonBorderShape(.capsule)
@@ -124,7 +124,7 @@ struct LiveView: View {
     private var beltBanner: some View {
         HStack(spacing: 10) {
             Image(systemName: "pause.fill").foregroundStyle(PoulpyColor.grumpy)
-            Text(LocalizedStringKey(state.belt == .paused ? "treadmill.belt.paused" : "treadmill.belt.stopped"))
+            Text(LocalizedStringKey(state.belt == .paused ? "treadmill.beltPaused" : "treadmill.beltStopped"))
                 .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 16, relativeTo: .body))
                 .foregroundStyle(PoulpyColor.onGrumpyContainer)
             Spacer(minLength: 0)
@@ -195,7 +195,7 @@ struct LiveView: View {
     private var connecting: some View {
         VStack(spacing: 10) {
             PoulpyLoader(size: 48)
-            Text(state.connecting.count == 1 ? L("live.connecting.one %@", state.connecting[0]) : L("live.connecting.many"))
+            Text(state.connecting.count == 1 ? L("live.connectingOne %@", state.connecting[0]) : L("live.connectingMany"))
                 .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 16, relativeTo: .body))
                 .multilineTextAlignment(.center)
         }
@@ -225,7 +225,7 @@ struct LiveView: View {
 
     private var choicePicker: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(L("live.what.doing").uppercased())
+            Text(L("live.whatDoing").uppercased())
                 .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 13, relativeTo: .caption))
                 .tracking(1)
                 .foregroundStyle(PoulpyColor.onSurfaceVariant)
@@ -257,7 +257,7 @@ struct LiveView: View {
             }
             HStack(spacing: 8) {
                 Button { model.startRecording(key: state.selected) } label: {
-                    Text(LocalizedStringKey(state.hasTreadmill && state.followTreadmill ? "live.wait.treadmill" : "treadmill.start"))
+                    Text(LocalizedStringKey(state.hasTreadmill && state.followTreadmill ? "live.waitTreadmill" : "treadmill.start"))
                         .font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: 52)
                 }
                 .buttonStyle(.borderedProminent)
@@ -281,7 +281,7 @@ struct LiveView: View {
         return VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 6) {
                 VStack(alignment: .leading, spacing: 0) {
-                    Text("live.session.time")
+                    Text("live.sessionTime")
                         .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 13, relativeTo: .caption))
                         .foregroundStyle(PoulpyColor.onSurfaceVariant)
                     Text(clock(recording.elapsedSeconds))
@@ -299,7 +299,7 @@ struct LiveView: View {
                     if let rest = recording.restSeconds {
                         Text("\(L("treadmill.rest")) · \(clock(rest.int64Value))")
                     } else {
-                        Text("\(L("live.step", Int64(recording.phaseNumber))) · \(clock(recording.stepElapsedSeconds))")
+                        Text("\(L("live.step %lld", Int64(recording.phaseNumber))) · \(clock(recording.stepElapsedSeconds))")
                     }
                 }
                 .font(.poulpy(.subheadline).weight(.bold).monospacedDigit())
@@ -308,7 +308,7 @@ struct LiveView: View {
                     Text(phaseLine(recording)).font(.poulpy(.subheadline))
                     Spacer()
                     if let remaining = recording.phaseRemainingSeconds {
-                        Text(L("treadmill.remaining", clock(remaining.int64Value))).font(.poulpy(.subheadline).monospacedDigit())
+                        Text(L("treadmill.remaining %@", clock(remaining.int64Value))).font(.poulpy(.subheadline).monospacedDigit())
                     }
                 }
             }
@@ -322,7 +322,7 @@ struct LiveView: View {
                     .buttonStyle(.bordered)
                     .buttonBorderShape(.capsule)
                     Button { model.endStep() } label: {
-                        Text("live.end.step").font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: 40)
+                        Text("live.endStep").font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: 40)
                     }
                     .buttonStyle(.bordered)
                     .buttonBorderShape(.capsule)
@@ -356,7 +356,7 @@ struct LiveView: View {
     /// The steps done so far in this session, each with its own time, and the rest between them.
     private func sessionSteps(_ recording: RecordingUi) -> some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(L("live.steps.title").uppercased())
+            Text(L("live.stepsTitle").uppercased())
                 .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 13, relativeTo: .caption))
                 .tracking(1)
                 .foregroundStyle(PoulpyColor.onSurfaceVariant)
@@ -370,7 +370,7 @@ struct LiveView: View {
             if let rest = recording.restSeconds {
                 stepLine(L("treadmill.rest"), clock(rest.int64Value), muted: true, current: true)
             } else {
-                stepLine(L("live.step", Int64(recording.phaseNumber)), clock(recording.stepElapsedSeconds), current: true)
+                stepLine(L("live.step %lld", Int64(recording.phaseNumber)), clock(recording.stepElapsedSeconds), current: true)
             }
         }
         .padding(.horizontal, 14)
@@ -392,13 +392,13 @@ struct LiveView: View {
     }
 
     private func phaseLine(_ recording: RecordingUi) -> String {
-        var parts = [L("treadmill.phase", Int64(recording.phaseNumber), Int64(recording.phaseCount))]
+        var parts = [L("treadmill.phase %lld %lld", Int64(recording.phaseNumber), Int64(recording.phaseCount))]
         if recording.isRest { parts.append(L("treadmill.rest")) }
         if let speed = recording.targetSpeedKmh {
-            parts.append(L("treadmill.target.speed", Units.shared.speed(kmh: speed.doubleValue, system: state.units).text))
+            parts.append(L("treadmill.targetSpeed %@", Units.shared.speed(kmh: speed.doubleValue, system: state.units).text))
         }
         if let distance = recording.targetDistanceMeters {
-            parts.append(L("treadmill.target.distance", Int64(distance.doubleValue)))
+            parts.append(L("treadmill.targetDistance %lld", Int64(distance.doubleValue)))
         }
         return parts.joined(separator: " · ")
     }
@@ -406,7 +406,7 @@ struct LiveView: View {
     /// Which mode Start is in, auto or manual, with what each does behind the info button.
     private var followMode: some View {
         HStack(spacing: 4) {
-            Text(LocalizedStringKey(state.followTreadmill ? "live.mode.auto" : "live.mode.manual"))
+            Text(LocalizedStringKey(state.followTreadmill ? "live.modeAuto" : "live.modeManual"))
                 .font(.poulpy(.footnote))
                 .foregroundStyle(PoulpyColor.onSurfaceVariant)
             Spacer(minLength: 0)
@@ -415,12 +415,12 @@ struct LiveView: View {
             }
             .buttonStyle(.plain)
             .foregroundStyle(PoulpyColor.onSurfaceVariant)
-            .accessibilityLabel(Text("live.mode.info.label"))
+            .accessibilityLabel(Text("live.modeInfoLabel"))
         }
-        .alert(Text("live.follow.treadmill"), isPresented: $modeInfo) {
+        .alert(Text("live.followTreadmill"), isPresented: $modeInfo) {
             Button("action.done", role: .cancel) {}
         } message: {
-            Text("live.mode.info")
+            Text("live.modeInfo")
         }
     }
 
@@ -442,7 +442,7 @@ struct LiveView: View {
                 .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.md).stroke(on ? Color.clear : PoulpyColor.outline, lineWidth: 1.5))
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(Text("live.follow.treadmill"))
+        .accessibilityLabel(Text("live.followTreadmill"))
         .accessibilityAddTraits(on ? .isSelected : [])
     }
 
@@ -452,8 +452,8 @@ struct LiveView: View {
             HStack(spacing: 14) {
                 ProgressView().controlSize(.large).tint(PoulpyColor.primary)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("live.waiting.title").font(.custom(PoulpyFontFace.nunitoExtraBold, size: 19, relativeTo: .title3))
-                    Text(L("live.waiting.body", choice.name)).font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+                    Text("live.waitingTitle").font(.custom(PoulpyFontFace.nunitoExtraBold, size: 19, relativeTo: .title3))
+                    Text(L("live.waitingBody %@", choice.name)).font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
                 }
             }
             .accessibilityElement(children: .combine)
@@ -464,7 +464,7 @@ struct LiveView: View {
                 .buttonStyle(.bordered)
                 .buttonBorderShape(.capsule)
                 Button { model.startNow() } label: {
-                    Text("live.start.now").font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: 40)
+                    Text("live.startNow").font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: 40)
                 }
                 .buttonStyle(.bordered)
                 .buttonBorderShape(.capsule)
@@ -479,19 +479,19 @@ struct LiveView: View {
             HStack(alignment: .top, spacing: 12) {
                 Image(systemName: "clock").font(.system(size: 22, weight: .semibold)).foregroundStyle(PoulpyColor.primary)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(LocalizedStringKey(lost ? "live.finish.lost.title" : "live.finish.still.title"))
+                    Text(LocalizedStringKey(lost ? "live.finishLostTitle" : "live.finishStillTitle"))
                         .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 19, relativeTo: .title3))
                         .accessibilityAddTraits(.isHeader)
                     Text(prompt.reason == .beltStopped
-                         ? L("live.finish.stopped.body", Int64(prompt.autoFinishMinutes), clock(prompt.endsAtSeconds))
-                         : L(lost ? "live.finish.lost.body" : "live.finish.still.body",
+                         ? L("live.finishStoppedBody %lld %@", Int64(prompt.autoFinishMinutes), clock(prompt.endsAtSeconds))
+                         : L(lost ? "live.finishLostBody %lld %lld %@" : "live.finishStillBody %lld %lld %@",
                              Int64(prompt.sinceMinutes), Int64(prompt.autoFinishMinutes), clock(prompt.endsAtSeconds)))
                         .font(.poulpy(.subheadline))
                 }
             }
             HStack(spacing: 8) {
                 Button { model.keepGoing() } label: {
-                    Text("live.keep.going").font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: 40)
+                    Text("live.keepGoing").font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: 40)
                 }
                 .buttonStyle(.bordered)
                 .buttonBorderShape(.capsule)
@@ -519,18 +519,18 @@ private struct SummarySheet: View {
         NavigationStack {
             List {
                 Section {
-                    LabeledContent(LocalizedStringKey("treadmill.summary.duration"), value: clock(summary.durationSeconds))
+                    LabeledContent(LocalizedStringKey("treadmill.summaryDuration"), value: clock(summary.durationSeconds))
                     if let distance = summary.distanceMeters {
                         LabeledContent(LocalizedStringKey("metric.distance"), value: Units.shared.distance(meters: distance.doubleValue, system: units, decimals: 2).text)
                     }
                     if let speed = summary.averageSpeedKmh {
-                        LabeledContent(LocalizedStringKey("treadmill.summary.average.speed"), value: Units.shared.speed(kmh: speed.doubleValue, system: units).text)
+                        LabeledContent(LocalizedStringKey("treadmill.summaryAverageSpeed"), value: Units.shared.speed(kmh: speed.doubleValue, system: units).text)
                     }
                     if let hr = summary.averageHeartRateBpm {
-                        LabeledContent(LocalizedStringKey("treadmill.summary.average.hr"), value: "\(hr.intValue) bpm")
+                        LabeledContent(LocalizedStringKey("treadmill.summaryAverageHr"), value: "\(hr.intValue) bpm")
                     }
                     if let hr = summary.maxHeartRateBpm {
-                        LabeledContent(LocalizedStringKey("treadmill.summary.max.hr"), value: "\(hr.intValue) bpm")
+                        LabeledContent(LocalizedStringKey("treadmill.summaryMaxHr"), value: "\(hr.intValue) bpm")
                     }
                     if let kcal = summary.energyKcal {
                         LabeledContent(LocalizedStringKey("metric.energy"), value: "\(kcal.intValue) kcal")
@@ -547,7 +547,7 @@ private struct SummarySheet: View {
                     }
                 }
             }
-            .navigationTitle("treadmill.summary.title")
+            .navigationTitle("treadmill.summaryTitle")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
@@ -568,14 +568,14 @@ private struct SummarySheet: View {
 }
 
 private func stepTitle(_ step: PhaseResultUi) -> String {
-    step.isRest ? L("treadmill.rest") : L("live.step", Int64(step.phaseNumber))
+    step.isRest ? L("treadmill.rest") : L("live.step %lld", Int64(step.phaseNumber))
 }
 
 private func stepParts(_ step: PhaseResultUi, units: UnitSystem) -> String {
     var parts = [clock(step.durationSeconds)]
     if let d = step.distanceMeters { parts.append(Units.shared.distance(meters: d.doubleValue, system: units, decimals: 2).text) }
     if let s = step.averageSpeedKmh { parts.append(Units.shared.speed(kmh: s.doubleValue, system: units).text) }
-    if let p = step.onTargetPercent { parts.append(L("treadmill.summary.on.target", Int64(p.intValue))) }
+    if let p = step.onTargetPercent { parts.append(L("treadmill.summaryOnTarget %lld", Int64(p.intValue))) }
     return parts.joined(separator: " · ")
 }
 
@@ -584,7 +584,7 @@ private func label(_ metric: LiveMetric) -> String {
     case .speed: return L("metric.speed")
     case .pace: return L("metric.pace")
     case .distance: return L("metric.distance")
-    case .heartRate: return L("metric.heart.rate")
+    case .heartRate: return L("metric.heartRate")
     case .cadence: return L("metric.cadence")
     case .incline: return L("metric.incline")
     case .energy: return L("metric.energy")
@@ -622,11 +622,11 @@ private struct ChoiceSheet: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 4) {
-                Text("live.what.doing").font(PoulpyFont.headline).accessibilityAddTraits(.isHeader)
-                group("live.group.recent", state.recent)
-                group("live.group.walking", state.walking)
-                group("live.group.running", state.running)
-                group("live.group.workouts", state.workouts)
+                Text("live.whatDoing").font(PoulpyFont.headline).accessibilityAddTraits(.isHeader)
+                group("live.groupRecent", state.recent)
+                group("live.groupWalking", state.walking)
+                group("live.groupRunning", state.running)
+                group("live.groupWorkouts", state.workouts)
             }
             .padding(.horizontal, 20)
             .padding(.top, 24)

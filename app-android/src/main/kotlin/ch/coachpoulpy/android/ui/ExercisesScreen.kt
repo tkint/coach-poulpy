@@ -104,7 +104,7 @@ fun ExerciseList(
             query = query,
             onQuery = { query = it },
             placeholder = stringResource(R.string.exercises_search),
-            label = stringResource(R.string.exercises_search_label),
+            label = stringResource(R.string.exercises_searchLabel),
             countLabel = listing.countLabel,
             chips = {
                 item { EquipmentChip(ticked, onClick = { choosing = true }) }
@@ -121,7 +121,7 @@ fun ExerciseList(
             action = {
                 if (area != null || ticked != null) {
                     TextButton(onClick = clearFilters) {
-                        Text(stringResource(R.string.exercises_clear_filters), fontWeight = FontWeight.ExtraBold)
+                        Text(stringResource(R.string.exercises_clearFilters), fontWeight = FontWeight.ExtraBold)
                     }
                 }
             },
@@ -173,7 +173,7 @@ private fun EquipmentChip(ticked: Set<Equipment>?, onClick: () -> Unit) {
     val label = if (ticked == null) {
         stringResource(R.string.exercises_equipment)
     } else {
-        pluralStringResource(R.plurals.exercises_equipment_ticked, ticked.size, ticked.size)
+        pluralStringResource(R.plurals.exercises_equipmentTicked, ticked.size, ticked.size)
     }
     Surface(
         selected = on,
@@ -229,7 +229,7 @@ private fun EquipmentSheet(
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(stringResource(R.string.exercises_equipment), style = MaterialTheme.typography.titleLarge, modifier = Modifier.semantics { heading() })
-                Text(stringResource(R.string.exercises_equipment_hint), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(stringResource(R.string.exercises_equipmentHint), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             Column {
                 options.forEach { option ->
@@ -255,10 +255,10 @@ private fun EquipmentSheet(
                     border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
                     modifier = Modifier.weight(1f).height(56.dp),
                 ) {
-                    Text(stringResource(R.string.exercises_equipment_clear), fontWeight = FontWeight.ExtraBold)
+                    Text(stringResource(R.string.exercises_equipmentClear), fontWeight = FontWeight.ExtraBold)
                 }
                 Button(onClick = { onApply(pending) }, modifier = Modifier.weight(1.6f).height(56.dp)) {
-                    Text(pluralStringResource(R.plurals.exercises_equipment_show, count, count), fontWeight = FontWeight.ExtraBold)
+                    Text(pluralStringResource(R.plurals.exercises_equipmentShow, count, count), fontWeight = FontWeight.ExtraBold)
                 }
             }
         }
@@ -300,9 +300,9 @@ private fun ExerciseCard(row: ExerciseRow, adding: Boolean, onClick: () -> Unit)
 @Composable
 private fun NoExercises(query: String, onClear: () -> Unit) {
     PoulpyCard(
-        title = if (query.isEmpty()) stringResource(R.string.exercises_no_fit) else stringResource(R.string.exercises_nothing_for, query),
-        body = stringResource(if (query.isEmpty()) R.string.exercises_no_fit_hint else R.string.exercises_nothing_hint),
-        button = stringResource(R.string.exercises_clear_all),
+        title = if (query.isEmpty()) stringResource(R.string.exercises_noFit) else stringResource(R.string.exercises_nothingFor, query),
+        body = stringResource(if (query.isEmpty()) R.string.exercises_noFitHint else R.string.exercises_nothingHint),
+        button = stringResource(R.string.exercises_clearAll),
         onClick = onClear,
         modifier = Modifier.padding(top = 16.dp),
     )

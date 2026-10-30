@@ -1,5 +1,6 @@
 package ch.coachpoulpy.core.model
 
+import kotlin.jvm.JvmInline
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
@@ -70,10 +71,13 @@ internal object EquipmentNeedsSerializer : KSerializer<List<List<Equipment>>> {
     }
 }
 
-/** Search-only names for an exercise, per language, like "RDL" or "abdos". */
+/** Search-only names for an exercise, per language code, like "RDL" or "abdos". A language may have none. */
 @Serializable
-data class Aliases(val en: List<String> = emptyList(), val fr: List<String> = emptyList()) {
-    val all: List<String> get() = en + fr
+@JvmInline
+value class Aliases(val byLanguage: Map<String, List<String>> = emptyMap()) {
+    val all: List<String> get() = byLanguage.values.flatten()
+
+    operator fun get(language: String): List<String> = byLanguage[language].orEmpty()
 }
 
 @Serializable

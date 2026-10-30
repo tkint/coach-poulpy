@@ -156,7 +156,7 @@ fun PillSearchField(query: String, onQuery: (String) -> Unit, placeholder: Strin
                 Box(Modifier.size(36.dp).background(colors.surfaceVariant, CircleShape), contentAlignment = Alignment.Center) {
                     Icon(
                         Icons.Filled.Close,
-                        contentDescription = stringResource(R.string.exercises_clear_search),
+                        contentDescription = stringResource(R.string.exercises_clearSearch),
                         tint = colors.onSurfaceVariant,
                         modifier = Modifier.size(16.dp),
                     )

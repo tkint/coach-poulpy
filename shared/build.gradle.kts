@@ -1,6 +1,12 @@
 plugins {
     id("coachpoulpy.kmp-library")
+    id("coachpoulpy.i18n")
 }
+
+// From the translation files (ADR 0014): the domain words Labels and PoulpyCoach read, and the iOS app's
+// string tables, made before Xcode embeds this framework (app-ios/project.yml points at them).
+i18n.kotlinText("domain", "ch.coachpoulpy.shared", "DomainText")
+i18n.appleStrings("app")
 
 kotlin {
     // The framework Swift imports as `import Shared`.

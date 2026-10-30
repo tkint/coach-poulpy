@@ -14,7 +14,7 @@ A training platform: Android and iOS apps first, guest-only and offline, with a 
 ## Prove a change works
 
 ```sh
-./gradlew jvmTest jsTest :server:test   # shared logic and server
+./gradlew jvmTest jsTest :server:test :tools:i18n:test   # shared logic, server and the string generator
 node design/build-tokens.mjs --check    # theme files match design/tokens.json
 node design/build-poulpy.mjs --check    # Poulpy drawings match their generator
 ```
@@ -26,7 +26,7 @@ Android and iOS only build in CI (`.github/workflows/ci.yml`); a PR is done when
 - Logic goes in shared Kotlin with a test; Compose and SwiftUI code stays thin and mirrors the other platform.
 - Theme files and Poulpy drawings are generated: edit `design/tokens.json` or `design/build-poulpy.mjs` and regenerate.
 - Mockups are plain HTML in `design/mockups/` (ADR 0016), styled only with `var(--cp-*)` from the token CSS, `shared/mockup.css` and `design/poulpy/*.svg`. A new screen or redesign starts in `drafts/`; nothing is built until a PR moves it to `agreed/`. The claude.ai canvas is scratch only.
-- Every user-facing string exists in English and French (Android `values` and `values-fr`, iOS `en.lproj` and `fr.lproj`, shared `Labels`).
+- Every user-facing string is added to `i18n/messages/en` and `i18n/messages/fr` (`app.json` for screens, `domain.json` for shared words, `catalog.json` for exercise text). Android, iOS and `DomainText` are generated from them at build time; never write a native string file. See `i18n/README.md`.
 - Catalog slugs never change; set `"retired": true` instead of deleting, and raise `version`.
 - Poulpy is never guilt: pain or rehab always shows the blue side, and errors are crimson with an icon, never ember.
 - A schema change is a new SQLDelight migration; existing phones keep their data.

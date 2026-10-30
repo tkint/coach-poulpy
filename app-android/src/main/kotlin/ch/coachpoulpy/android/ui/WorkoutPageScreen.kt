@@ -325,8 +325,8 @@ private fun PlanRow(state: WorkoutPageState, onPick: () -> Unit) {
                 val single = plans.singleOrNull()
                 Text(
                     when {
-                        single == null -> pluralStringResource(R.plurals.workout_planned_days, plans.size, plans.size)
-                        single.daysAway == 0 -> stringResource(R.string.workout_planned_today)
+                        single == null -> pluralStringResource(R.plurals.workout_plannedDays, plans.size, plans.size)
+                        single.daysAway == 0 -> stringResource(R.string.workout_plannedToday)
                         else -> stringResource(R.string.workout_planned, dayLabel(single.dayMillis))
                     },
                     style = MaterialTheme.typography.titleSmall,
@@ -334,7 +334,7 @@ private fun PlanRow(state: WorkoutPageState, onPick: () -> Unit) {
                     color = colors.onPrimaryContainer,
                     modifier = Modifier.weight(1f),
                 )
-                TextButton(onClick = onPick) { Text(stringResource(R.string.workout_change_days), fontWeight = FontWeight.ExtraBold) }
+                TextButton(onClick = onPick) { Text(stringResource(R.string.workout_changeDays), fontWeight = FontWeight.ExtraBold) }
             }
             if (plans.size > 1) {
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {

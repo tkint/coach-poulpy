@@ -158,7 +158,7 @@ private fun ConnectedChip(count: Int, onClick: () -> Unit) {
             Box(Modifier.size(8.dp).clip(CircleShape).background(if (count > 0) success else MaterialTheme.colorScheme.outline))
             Spacer(Modifier.size(6.dp))
             Text(
-                if (count > 0) pluralStringResource(R.plurals.live_connected, count, count) else stringResource(R.string.live_none_connected),
+                if (count > 0) pluralStringResource(R.plurals.live_connected, count, count) else stringResource(R.string.live_noneConnected),
                 style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.ExtraBold,
             )
@@ -175,10 +175,10 @@ private fun NothingConnected(onManageDevices: () -> Unit, modifier: Modifier) {
             verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterVertically),
         ) {
             Image(painterResource(R.drawable.poulpy_pose_standing_tall), contentDescription = null, modifier = Modifier.size(140.dp))
-            Text(stringResource(R.string.live_empty_title), style = MaterialTheme.typography.headlineSmall, textAlign = TextAlign.Center)
-            Text(stringResource(R.string.live_empty_body), textAlign = TextAlign.Center)
+            Text(stringResource(R.string.live_emptyTitle), style = MaterialTheme.typography.headlineSmall, textAlign = TextAlign.Center)
+            Text(stringResource(R.string.live_emptyBody), textAlign = TextAlign.Center)
             Button(onClick = onManageDevices, modifier = Modifier.padding(top = 8.dp).height(52.dp)) {
-                Text(stringResource(R.string.live_manage_devices))
+                Text(stringResource(R.string.live_manageDevices))
             }
         }
     }
@@ -198,7 +198,7 @@ private fun Connecting(names: List<String>) {
         ) {
             PoulpyLoader(size = 48.dp)
             Text(
-                if (names.size == 1) stringResource(R.string.live_connecting_one, names.single()) else stringResource(R.string.live_connecting_many),
+                if (names.size == 1) stringResource(R.string.live_connectingOne, names.single()) else stringResource(R.string.live_connectingMany),
                 fontWeight = FontWeight.ExtraBold,
                 textAlign = TextAlign.Center,
             )
@@ -216,7 +216,7 @@ private fun BeltBanner(belt: BeltStatus) {
         Icon(Icons.Filled.Pause, contentDescription = null, tint = extras.grumpy, modifier = Modifier.size(18.dp))
         Spacer(Modifier.size(10.dp))
         Text(
-            stringResource(if (belt == BeltStatus.PAUSED) R.string.treadmill_belt_paused else R.string.treadmill_belt_stopped),
+            stringResource(if (belt == BeltStatus.PAUSED) R.string.treadmill_beltPaused else R.string.treadmill_beltStopped),
             color = extras.onGrumpyContainer,
             fontWeight = FontWeight.ExtraBold,
         )
@@ -303,7 +303,7 @@ private fun ChoicePicker(state: LiveUiState, model: LiveModel) {
     var picking by rememberSaveable { mutableStateOf(false) }
     val colors = MaterialTheme.colorScheme
     Text(
-        stringResource(R.string.live_what_doing).uppercase(Locale.getDefault()),
+        stringResource(R.string.live_whatDoing).uppercase(Locale.getDefault()),
         style = MaterialTheme.typography.labelMedium,
         color = colors.onSurfaceVariant,
         modifier = Modifier.semantics { heading() },
@@ -331,7 +331,7 @@ private fun ChoicePicker(state: LiveUiState, model: LiveModel) {
     if (state.hasTreadmill) FollowMode(state.followTreadmill)
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
         Button(onClick = { model.startRecording(state.selected) }, modifier = Modifier.weight(1f).height(52.dp)) {
-            Text(stringResource(if (state.hasTreadmill && state.followTreadmill) R.string.live_wait_treadmill else R.string.treadmill_start))
+            Text(stringResource(if (state.hasTreadmill && state.followTreadmill) R.string.live_waitTreadmill else R.string.treadmill_start))
         }
         if (state.hasTreadmill) FollowToggle(state.followTreadmill, model::setFollowTreadmill)
     }
@@ -350,12 +350,12 @@ private fun ChoiceSheet(state: LiveUiState, onPick: (String) -> Unit, onDismiss:
         containerColor = MaterialTheme.colorScheme.surface,
     ) {
         Column(Modifier.verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 20.dp, bottom = 28.dp).selectableGroup()) {
-            Text(stringResource(R.string.live_what_doing), style = MaterialTheme.typography.titleLarge, modifier = Modifier.semantics { heading() })
+            Text(stringResource(R.string.live_whatDoing), style = MaterialTheme.typography.titleLarge, modifier = Modifier.semantics { heading() })
             listOf(
-                R.string.live_group_recent to state.recent,
-                R.string.live_group_walking to state.walking,
-                R.string.live_group_running to state.running,
-                R.string.live_group_workouts to state.workouts,
+                R.string.live_groupRecent to state.recent,
+                R.string.live_groupWalking to state.walking,
+                R.string.live_groupRunning to state.running,
+                R.string.live_groupWorkouts to state.workouts,
             ).forEach { (title, choices) ->
                 if (choices.isEmpty()) return@forEach
                 Text(
@@ -395,7 +395,7 @@ private fun Recording(recording: RecordingUi, units: UnitSystem, model: LiveMode
     val statusColor = if (recording.paused) PoulpyTheme.extraColors.grumpy else MaterialTheme.colorScheme.error
     Row(verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f)) {
-            Text(stringResource(R.string.live_session_time), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(stringResource(R.string.live_sessionTime), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Text(clock(recording.elapsedSeconds), fontSize = 32.sp, lineHeight = 36.sp, fontWeight = FontWeight.ExtraBold)
         }
         Box(Modifier.size(8.dp).clip(CircleShape).background(statusColor))
@@ -422,8 +422,8 @@ private fun Recording(recording: RecordingUi, units: UnitSystem, model: LiveMode
         val parts = listOfNotNull(
             stringResource(R.string.treadmill_phase, recording.phaseNumber, recording.phaseCount),
             if (recording.isRest) stringResource(R.string.treadmill_rest) else null,
-            recording.targetSpeedKmh?.let { stringResource(R.string.treadmill_target_speed, measure(Units.speed(it, units))) },
-            recording.targetDistanceMeters?.let { stringResource(R.string.treadmill_target_distance, it.toInt()) },
+            recording.targetSpeedKmh?.let { stringResource(R.string.treadmill_targetSpeed, measure(Units.speed(it, units))) },
+            recording.targetDistanceMeters?.let { stringResource(R.string.treadmill_targetDistance, it.toInt()) },
         )
         Row {
             Text(parts.joinToString(" · "), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
@@ -442,7 +442,7 @@ private fun Recording(recording: RecordingUi, units: UnitSystem, model: LiveMode
                 onClick = model::endStep,
                 enabled = recording.restSeconds == null,
                 modifier = Modifier.weight(1f).height(52.dp),
-            ) { Text(stringResource(R.string.live_end_step)) }
+            ) { Text(stringResource(R.string.live_endStep)) }
         }
         Button(onClick = model::stopRecording, modifier = Modifier.fillMaxWidth().height(52.dp)) { Text(stringResource(R.string.treadmill_stop)) }
     } else {
@@ -466,7 +466,7 @@ private fun SessionSteps(recording: RecordingUi, units: UnitSystem) {
     Surface(shape = RoundedCornerShape(PoulpyRadius.lg), color = colors.surface, border = BorderStroke(1.dp, colors.outlineVariant)) {
         Column(Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(
-                stringResource(R.string.live_steps_title).uppercase(),
+                stringResource(R.string.live_stepsTitle).uppercase(),
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.ExtraBold,
                 modifier = Modifier.semantics { heading() },
@@ -506,7 +506,7 @@ private fun stepParts(step: PhaseResultUi, units: UnitSystem): String = listOfNo
     clock(step.durationSeconds),
     step.distanceMeters?.let { measure(Units.distance(it, units)) },
     step.averageSpeedKmh?.let { measure(Units.speed(it, units)) },
-    step.onTargetPercent?.let { stringResource(R.string.treadmill_summary_on_target, it) },
+    step.onTargetPercent?.let { stringResource(R.string.treadmill_summaryOnTarget, it) },
 ).joinToString(" · ")
 
 /** Which mode Start is in, auto or manual, with what each does behind the info button. */
@@ -515,21 +515,21 @@ private fun FollowMode(on: Boolean) {
     var info by rememberSaveable { mutableStateOf(false) }
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(
-            stringResource(if (on) R.string.live_mode_auto else R.string.live_mode_manual),
+            stringResource(if (on) R.string.live_modeAuto else R.string.live_modeManual),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.weight(1f),
         )
         IconButton(onClick = { info = true }, modifier = Modifier.size(40.dp)) {
-            Icon(Icons.Filled.Info, contentDescription = stringResource(R.string.live_mode_info_label), tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp))
+            Icon(Icons.Filled.Info, contentDescription = stringResource(R.string.live_modeInfoLabel), tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp))
         }
     }
     if (info) {
         AlertDialog(
             onDismissRequest = { info = false },
             confirmButton = { TextButton(onClick = { info = false }) { Text(stringResource(R.string.action_done)) } },
-            title = { Text(stringResource(R.string.live_follow_treadmill)) },
-            text = { Text(stringResource(R.string.live_mode_info)) },
+            title = { Text(stringResource(R.string.live_followTreadmill)) },
+            text = { Text(stringResource(R.string.live_modeInfo)) },
         )
     }
 }
@@ -550,7 +550,7 @@ private fun FollowToggle(on: Boolean, onChange: (Boolean) -> Unit) {
             .toggleable(value = on, role = Role.Switch, onValueChange = onChange),
     ) {
         Box(contentAlignment = Alignment.Center) {
-            Icon(if (on) Icons.Filled.Sync else Icons.Filled.SyncDisabled, contentDescription = stringResource(R.string.live_follow_treadmill))
+            Icon(if (on) Icons.Filled.Sync else Icons.Filled.SyncDisabled, contentDescription = stringResource(R.string.live_followTreadmill))
         }
     }
 }
@@ -562,9 +562,9 @@ private fun Waiting(choice: LiveChoice, model: LiveModel) {
         CircularProgressIndicator(Modifier.size(40.dp), strokeWidth = 4.dp)
         Spacer(Modifier.size(14.dp))
         Column {
-            Text(stringResource(R.string.live_waiting_title), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold)
+            Text(stringResource(R.string.live_waitingTitle), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold)
             Text(
-                stringResource(R.string.live_waiting_body, choice.name),
+                stringResource(R.string.live_waitingBody, choice.name),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -572,7 +572,7 @@ private fun Waiting(choice: LiveChoice, model: LiveModel) {
     }
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         OutlinedButton(onClick = model::cancelWaiting, modifier = Modifier.weight(1f).height(52.dp)) { Text(stringResource(R.string.action_cancel)) }
-        OutlinedButton(onClick = model::startNow, modifier = Modifier.weight(1f).height(52.dp)) { Text(stringResource(R.string.live_start_now)) }
+        OutlinedButton(onClick = model::startNow, modifier = Modifier.weight(1f).height(52.dp)) { Text(stringResource(R.string.live_startNow)) }
     }
 }
 
@@ -588,7 +588,7 @@ private fun FinishCard(prompt: FinishPromptUi, model: LiveModel) {
                 Column(Modifier.semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite }) {
                     val lost = prompt.reason == FinishReason.TREADMILL_LOST
                     Text(
-                        stringResource(if (lost) R.string.live_finish_lost_title else R.string.live_finish_still_title),
+                        stringResource(if (lost) R.string.live_finishLostTitle else R.string.live_finishStillTitle),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.ExtraBold,
                         modifier = Modifier.semantics { heading() },
@@ -596,9 +596,9 @@ private fun FinishCard(prompt: FinishPromptUi, model: LiveModel) {
                     Text(
                         when (prompt.reason) {
                             FinishReason.BELT_STOPPED ->
-                                stringResource(R.string.live_finish_stopped_body, prompt.autoFinishMinutes, clock(prompt.endsAtSeconds))
+                                stringResource(R.string.live_finishStoppedBody, prompt.autoFinishMinutes, clock(prompt.endsAtSeconds))
                             else -> stringResource(
-                                if (lost) R.string.live_finish_lost_body else R.string.live_finish_still_body,
+                                if (lost) R.string.live_finishLostBody else R.string.live_finishStillBody,
                                 prompt.sinceMinutes,
                                 prompt.autoFinishMinutes,
                                 clock(prompt.endsAtSeconds),
@@ -609,7 +609,7 @@ private fun FinishCard(prompt: FinishPromptUi, model: LiveModel) {
                 }
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(onClick = model::keepGoing, modifier = Modifier.weight(1f).height(48.dp)) { Text(stringResource(R.string.live_keep_going)) }
+                OutlinedButton(onClick = model::keepGoing, modifier = Modifier.weight(1f).height(48.dp)) { Text(stringResource(R.string.live_keepGoing)) }
                 Button(onClick = model::stopRecording, modifier = Modifier.weight(1f).height(48.dp)) { Text(stringResource(R.string.treadmill_stop)) }
             }
         }
@@ -621,14 +621,14 @@ private fun SummaryDialog(summary: SummaryUi, units: UnitSystem, onDismiss: () -
     AlertDialog(
         onDismissRequest = onDismiss,
         confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_done)) } },
-        title = { Text(stringResource(R.string.treadmill_summary_title)) },
+        title = { Text(stringResource(R.string.treadmill_summaryTitle)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                SummaryLine(R.string.treadmill_summary_duration, clock(summary.durationSeconds))
+                SummaryLine(R.string.treadmill_summaryDuration, clock(summary.durationSeconds))
                 summary.distanceMeters?.let { SummaryLine(R.string.metric_distance, measure(Units.distance(it, units))) }
-                summary.averageSpeedKmh?.let { SummaryLine(R.string.treadmill_summary_average_speed, measure(Units.speed(it, units))) }
-                summary.averageHeartRateBpm?.let { SummaryLine(R.string.treadmill_summary_average_hr, "$it bpm") }
-                summary.maxHeartRateBpm?.let { SummaryLine(R.string.treadmill_summary_max_hr, "$it bpm") }
+                summary.averageSpeedKmh?.let { SummaryLine(R.string.treadmill_summaryAverageSpeed, measure(Units.speed(it, units))) }
+                summary.averageHeartRateBpm?.let { SummaryLine(R.string.treadmill_summaryAverageHr, "$it bpm") }
+                summary.maxHeartRateBpm?.let { SummaryLine(R.string.treadmill_summaryMaxHr, "$it bpm") }
                 summary.energyKcal?.let { SummaryLine(R.string.metric_energy, "$it kcal") }
                 summary.estimatedSteps?.let { SummaryLine(R.string.metric_steps, "≈ $it") }
                 if (summary.phases.size > 1) {
@@ -658,7 +658,7 @@ private val LiveMetric.label: Int
         LiveMetric.SPEED -> R.string.metric_speed
         LiveMetric.PACE -> R.string.metric_pace
         LiveMetric.DISTANCE -> R.string.metric_distance
-        LiveMetric.HEART_RATE -> R.string.metric_heart_rate
+        LiveMetric.HEART_RATE -> R.string.metric_heartRate
         LiveMetric.CADENCE -> R.string.metric_cadence
         LiveMetric.INCLINE -> R.string.metric_incline
         LiveMetric.ENERGY -> R.string.metric_energy

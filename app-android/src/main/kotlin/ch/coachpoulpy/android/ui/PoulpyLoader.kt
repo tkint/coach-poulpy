@@ -41,7 +41,7 @@ fun PoulpyLoader(modifier: Modifier = Modifier, size: Dp = 48.dp) {
     }
     Image(
         painterResource(if (size < SMALL) R.drawable.poulpy_loader_small else R.drawable.poulpy_loader),
-        contentDescription = stringResource(R.string.loading),
+        contentDescription = stringResource(R.string.common_loading),
         modifier = modifier.size(size).graphicsLayer { rotationZ = degrees },
     )
 }
