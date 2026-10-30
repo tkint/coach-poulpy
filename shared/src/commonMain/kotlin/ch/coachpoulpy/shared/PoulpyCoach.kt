@@ -68,7 +68,7 @@ class PoulpyCoach(private val languageCode: String, private val timeZone: TimeZo
         val total = sessions.size
         val full = total / PoulpyStatus.TENTACLES
         val lit = if (total > 0 && total % PoulpyStatus.TENTACLES == 0) PoulpyStatus.TENTACLES else total % PoulpyStatus.TENTACLES
-        val caption = if (full == 0) DomainText.poulpyCaption(languageCode, lit) else DomainText.poulpyCaptionFull(languageCode, full = full, lit = lit)
+        val caption = if (full == 0) DomainText.poulpyCaption(languageCode, lit) else DomainText.poulpyCaptionFull(languageCode, caption = DomainText.poulpyCaption(languageCode, lit), full = full)
         val status = { mood: PoulpyStatus.Mood, drawing: PoulpyDrawing, title: String, line: String ->
             PoulpyStatus(mood, drawing, title, line, lit, full, caption)
         }
