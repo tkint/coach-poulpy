@@ -292,7 +292,7 @@
     "groupWorkouts": "Follow a workout",
     "connected": "{count, plural, one {# connected} other {# connected}}",
     "finishClosedTitle": "Your session is safe",
-    "finishClosedBody": "The app closed during your session, and Poulpy kept everything up to {endTime}. With no answer, Poulpy finishes it there in {finishMinutes, number} min.",
+    "finishClosedBody": "The app closed during your session, and Poulpy kept the first {endTime}. If you don’t answer, it ends there in {finishMinutes, number} min.",
     "notificationChannel": "Live recording",
     "notificationChannelInfo": "Shows while Live records a session, so it keeps going with the screen off or another app open.",
     "notificationRecording": "Recording",
@@ -377,7 +377,7 @@
   "unfinished": {
     "title": "Resume {workout}?",
     "liveTitle": "Resume your Live session?",
-    "body": "You stopped at {time} into the session. Pick it up where you left off, or discard it and it won’t show in your history.",
+    "body": "You stopped {time} into the session. Pick it up where you left off, or discard it and it won’t show in your history.",
     "discard": "Discard",
     "later": "Not now"
   }

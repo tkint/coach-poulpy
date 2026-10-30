@@ -292,7 +292,7 @@
     "groupWorkouts": "Suivre une séance",
     "connected": "{count, plural, one {# connecté} many {# connectés} other {# connectés}}",
     "finishClosedTitle": "Votre séance est à l’abri",
-    "finishClosedBody": "L’application s’est fermée pendant votre séance, et Poulpy a tout gardé jusqu’à {endTime}. Sans réponse, Poulpy la termine à ce moment-là dans {finishMinutes, number} min.",
+    "finishClosedBody": "L’application s’est fermée pendant votre séance, et Poulpy en a gardé tout ce qui précède {endTime}. Sans réponse, elle se termine là dans {finishMinutes, number} min.",
     "notificationChannel": "Enregistrement en direct",
     "notificationChannelInfo": "S’affiche pendant qu’En direct enregistre une séance, pour qu’elle continue écran éteint ou dans une autre application.",
     "notificationRecording": "Enregistrement",
