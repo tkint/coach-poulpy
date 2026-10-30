@@ -53,7 +53,7 @@ class I18nConventionPlugin : Plugin<Project> {
 }
 
 abstract class I18nExtension @Inject constructor(private val project: Project) {
-    /** `values*/strings.xml` from [namespace], added to every variant's resources. */
+    /** `values/strings.xml` and `values-<locale>/strings.xml` from [namespace], added to every variant's resources. */
     fun androidStrings(namespace: String): TaskProvider<GenerateTranslations> {
         val task = register("generateAndroidStrings", "android", listOf(namespace))
         project.extensions.getByType<ApplicationAndroidComponentsExtension>().onVariants { variant ->
