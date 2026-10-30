@@ -105,7 +105,7 @@
     "position": "{index, number} sur {count, number}",
     "roundOf": "tour {round, number} sur {rounds, number}",
     "times": "{count, number} fois",
-    "reps": "{count, number} répétitions",
+    "reps": "{count, plural, one {# répétition} many {# répétitions} other {# répétitions}}",
     "steps": "{count, plural, one {# étape} many {# étapes} other {# étapes}}",
     "exercises": "{count, plural, one {# exercice} many {# exercices} other {# exercices}}",
     "workouts": "{count, plural, one {# séance} many {# séances} other {# séances}}",
@@ -138,8 +138,8 @@
     "deleteFinal": "C’est définitif."
   },
   "poulpy": {
-    "caption": "{lit, number} tentacules sur 8 allumés",
-    "captionFull": "{full, plural, one {{lit, number} tentacules sur 8 allumés · # poulpe complet} many {{lit, number} tentacules sur 8 allumés · # poulpes complets} other {{lit, number} tentacules sur 8 allumés · # poulpes complets}}",
+    "caption": "{lit, plural, one {# tentacule allumé sur 8} many {# tentacules allumés sur 8} other {# tentacules allumés sur 8}}",
+    "captionFull": "{caption} · {full, plural, one {# poulpe complet} many {# poulpes complets} other {# poulpes complets}}",
     "firstTitle": "Salut, moi c’est Poulpy",
     "firstLine": "Termine une séance et j’allume mon premier tentacule.",
     "championTitle": "Poulpe complet !",

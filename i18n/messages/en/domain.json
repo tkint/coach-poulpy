@@ -105,7 +105,7 @@
     "position": "{index, number} of {count, number}",
     "roundOf": "round {round, number} of {rounds, number}",
     "times": "{count, number} times",
-    "reps": "{count, number} reps",
+    "reps": "{count, plural, one {# rep} other {# reps}}",
     "steps": "{count, plural, one {# step} other {# steps}}",
     "exercises": "{count, plural, one {# exercise} other {# exercises}}",
     "workouts": "{count, plural, one {# workout} other {# workouts}}",
@@ -139,7 +139,7 @@
   },
   "poulpy": {
     "caption": "{lit, number} of 8 tentacles lit",
-    "captionFull": "{full, plural, one {{lit, number} of 8 tentacles lit · # full octopus} other {{lit, number} of 8 tentacles lit · # full octopuses}}",
+    "captionFull": "{caption} · {full, plural, one {# full octopus} other {# full octopuses}}",
     "firstTitle": "Hi, I’m Poulpy",
     "firstLine": "Finish a session and I light my first tentacle.",
     "championTitle": "Full octopus!",

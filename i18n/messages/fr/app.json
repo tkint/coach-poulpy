@@ -185,8 +185,8 @@
     "paused": "En pause",
     "step": "Étape {step, number} sur {steps, number}",
     "finished": "Bravo !",
-    "summary": "{done, number} séries sur {planned, number} faites en {duration}",
-    "summarySkipped": "{count, number} passées",
+    "summary": "{done, number} sur {planned, number} séries faites en {duration}",
+    "summarySkipped": "Séries passées : {count, number}",
     "close": "Fermer",
     "stopTitle": "Arrêter la séance maintenant ?",
     "stopBody": "Ce que vous avez déjà fait est conservé."
@@ -238,7 +238,7 @@
     "chartMinutes": "Minutes actives par semaine",
     "chartDistance": "Kilomètres sur le tapis par semaine",
     "sessionsTitle": "Séances",
-    "sets": "{done, number} séries sur {planned, number}",
+    "sets": "{done, number} sur {planned, number} séries",
     "setsDone": "Séries faites",
     "setsSkipped": "Séries passées",
     "deleteTitle": "Retirer cette séance de l’historique ?",
@@ -254,7 +254,7 @@
     "sessionsUnit": "{count, plural, one {séance} many {séances} other {séances}}",
     "longestRun": "Plus longue course",
     "fullOctopus": "Poulpe complet",
-    "tentaclesLit": "{lit, number} sur 8 allumés"
+    "tentaclesLit": "Allumés : {lit, number} sur 8"
   },
   "live": {
     "noneConnected": "Aucun connecté",

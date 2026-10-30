@@ -69,4 +69,12 @@ class PoulpyCoachTest {
     fun comingBackAfterABreakGetsAShyWelcome() {
         assertEquals(PoulpyDrawing.SHY, coach.status(ago(listOf(2.hours, 10.days)), now).drawing)
     }
+
+    @Test
+    fun theFrenchCaptionAgreesWithOneTentacle() {
+        val french = PoulpyCoach("fr", TimeZone.UTC)
+        assertEquals("1 tentacule allumé sur 8", french.status(ago(listOf(3.hours)), now).tentaclesCaption)
+        val ninth = french.status(ago((1..9).map { it.days }), now)
+        assertEquals("1 tentacule allumé sur 8 · 1 poulpe complet", ninth.tentaclesCaption)
+    }
 }
