@@ -128,7 +128,11 @@ abstract class GenerateTranslations : JavaExec() {
     abstract val outputDirectory: DirectoryProperty
 
     override fun exec() {
-        val output = outputDirectory.get().asFile
+        // Start empty, so a locale or message removed from i18n/ doesn't linger in the APK or the iOS bundle.
+        val output = outputDirectory.get().asFile.apply {
+            deleteRecursively()
+            mkdirs()
+        }
         val target = if (catalogStructure.isPresent) output.resolve("exercises.json") else output
         args = listOf(command.get(), messages.get().asFile.parentFile.path) +
             arguments.get() +
