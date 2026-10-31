@@ -1,0 +1,11 @@
+name: Quick idea
+description: A need in a few words; an agent refines it into an agent-ready issue
+labels: [needs-triage]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: What do you want, in your own words?
+      description: A few words are enough. An agent will refine it (docs/agents/refining-issues.md) and ask if a decision is missing.
+    validations:
+      required: true

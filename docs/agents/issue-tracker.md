@@ -16,6 +16,7 @@ Issues and specs for this repo live as GitHub issues on `tkint/coach-poulpy`. La
 - **Apply / remove labels**: `gh issue edit <number> --add-label "..."` / `--remove-label "..."`
 - **Close**: `gh issue close <number> --comment "..."`
 - **Every new issue** gets one type label, one state label, at least one `area:` label, and the milestone of its phase.
+- **A Quick idea** (`needs-triage`, a few words) is refined into an agent-ready issue by hand, following [Refining an issue](refining-issues.md).
 - **Every PR** body says `Closes #<n>` for the issue it finishes.
 
 ## Pull requests as a triage surface
