@@ -143,6 +143,9 @@ class WorkoutPageModel internal constructor(
 
     fun delete() = store.deleteWorkout(workoutId)
 
+    /** The workout as a `.poulpyworkout` file to hand to the share sheet; null once it is gone. */
+    fun exportFile(): WorkoutFileExport? = store.latestWorkout(workoutId)?.let(WorkoutFile::export)
+
     fun close() = scope.cancel()
 
     private fun build(workouts: List<Workout>, plans: List<PlannedWorkout>, sessions: List<StoredSession>): WorkoutPageState {

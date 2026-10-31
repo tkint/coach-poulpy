@@ -175,6 +175,17 @@ internal class Labels(private val languageCode: String) {
     val andWord get() = DomainText.labelAnd(languageCode)
     val timed get() = DomainText.labelTimed(languageCode)
 
+    fun parts(count: Int) = DomainText.countParts(languageCode, count)
+
+    /** Why a workout file was refused; [unknown] are the slugs the catalog lacks. */
+    fun workoutFileProblem(problem: WorkoutFileProblem, unknown: List<String>) = when (problem) {
+        WorkoutFileProblem.UNREADABLE -> DomainText.workoutFileUnreadable(languageCode)
+        WorkoutFileProblem.NOT_A_WORKOUT -> DomainText.workoutFileNotWorkout(languageCode)
+        WorkoutFileProblem.NEWER_VERSION -> DomainText.workoutFileNewer(languageCode)
+        WorkoutFileProblem.UNKNOWN_EXERCISES -> DomainText.workoutFileUnknown(languageCode, unknown.size, unknown.joinToString(", "))
+        WorkoutFileProblem.INVALID_WORKOUT -> DomainText.workoutFileInvalid(languageCode)
+    }
+
     fun steps(count: Int) = DomainText.countSteps(languageCode, count)
 
     fun exercises(count: Int) = DomainText.countExercises(languageCode, count)

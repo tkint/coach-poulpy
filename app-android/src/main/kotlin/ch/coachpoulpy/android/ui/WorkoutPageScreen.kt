@@ -1,5 +1,7 @@
 package ch.coachpoulpy.android.ui
 
+import android.content.Context
+import android.content.Intent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -31,6 +33,7 @@ import androidx.compose.material.icons.filled.EditCalendar
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Repeat
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.AlertDialog
@@ -60,15 +63,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.core.content.FileProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ch.coachpoulpy.android.R
 import ch.coachpoulpy.core.model.PartKind
 import ch.coachpoulpy.shared.AppGraph
 import ch.coachpoulpy.shared.DeletePrompt
+import ch.coachpoulpy.shared.WorkoutFile
+import ch.coachpoulpy.shared.WorkoutFileExport
 import ch.coachpoulpy.shared.WorkoutPagePart
 import ch.coachpoulpy.shared.WorkoutPageState
 import ch.coachpoulpy.shared.WorkoutStepRow
@@ -92,6 +99,8 @@ fun WorkoutPageScreen(
     val model = remember(graph, language, workoutId) { graph.workoutPage(workoutId, language) }
     DisposableEffect(model) { onDispose { model.close() } }
     val state by model.state.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val shareTitle = stringResource(R.string.workout_shareTitle)
     var menu by remember { mutableStateOf(false) }
     var deleting by remember { mutableStateOf(false) }
     var picking by remember { mutableStateOf(false) }
@@ -115,14 +124,19 @@ fun WorkoutPageScreen(
                                 Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.action_more))
                             }
                             DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.action_share)) },
+                                    leadingIcon = { Icon(Icons.Filled.Share, contentDescription = null) },
+                                    onClick = { menu = false; shareWorkout(context, model.exportFile(), shareTitle) },
+                                )
                                 if (state.editable) {
                                     DropdownMenuItem(
                                         text = { Text(stringResource(R.string.action_copy)) },
                                         leadingIcon = { Icon(Icons.Filled.ContentCopy, contentDescription = null) },
                                         onClick = { menu = false; onCopy() },
                                     )
-                                    HorizontalDivider()
                                 }
+                                HorizontalDivider()
                                 DeleteMenuItem(onClick = { menu = false; deleting = true })
                             }
                         }
@@ -389,3 +403,19 @@ private fun StatBox(label: String, value: String, modifier: Modifier) {
 private fun shortDay(millis: Long): String =
     java.time.format.DateTimeFormatter.ofPattern(android.text.format.DateFormat.getBestDateTimePattern(Locale.getDefault(), "dMMM"), Locale.getDefault())
         .format(Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()))
+
+/**
+ * Hands [file] to the system share sheet as a `.poulpyworkout` file. It is written under the cache folder and
+ * shared through [FileProvider] (see `res/xml/file_paths.xml`), so the receiving app can read it and nothing else.
+ */
+private fun shareWorkout(context: Context, file: WorkoutFileExport?, title: String) {
+    if (file == null) return
+    val folder = java.io.File(context.cacheDir, "shared").apply { mkdirs() }
+    val written = java.io.File(folder, file.fileName).apply { writeText(file.content) }
+    val uri = FileProvider.getUriForFile(context, "${context.packageName}.files", written)
+    val send = Intent(Intent.ACTION_SEND)
+        .setType(WorkoutFile.MIME_TYPE)
+        .putExtra(Intent.EXTRA_STREAM, uri)
+        .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    context.startActivity(Intent.createChooser(send, title))
+}

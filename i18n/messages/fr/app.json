@@ -62,7 +62,8 @@
     "times": "{count, plural, one {# fois} many {# fois} other {# fois}}",
     "minutes": "{minutes, number} min",
     "start": "Commencer",
-    "gone": "Cette séance a été supprimée."
+    "gone": "Cette séance a été supprimée.",
+    "shareTitle": "Partager la séance"
   },
   "plan": {
     "title": "Prévoir {name}",
@@ -82,7 +83,8 @@
     "more": "Plus",
     "done": "OK",
     "cancel": "Annuler",
-    "close": "Fermer"
+    "close": "Fermer",
+    "share": "Partager"
   },
   "exercises": {
     "search": "Nom, muscle ou matériel",

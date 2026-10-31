@@ -1,6 +1,7 @@
 plugins {
     id("coachpoulpy.kmp-library")
     id("coachpoulpy.i18n")
+    alias(libs.plugins.kotlin.serialization)
 }
 
 // From the translation files (ADR 0014): the domain words Labels and PoulpyCoach read, and the iOS app's

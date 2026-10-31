@@ -27,6 +27,8 @@ class AppGraph(driverFactory: DriverFactory) {
     fun home(languageCode: String) = HomeModel(store, compiler, catalog, languageCode, discardOpen = ::discardOpen)
     fun library(languageCode: String) = LibraryModel(store, compiler, catalog, languageCode)
     fun workoutPage(workoutId: String, languageCode: String) = WorkoutPageModel(WorkoutId(workoutId), store, compiler, catalog, languageCode)
+    /** A workout file's text, read for the preview before it is added to the library. */
+    fun importWorkout(fileText: String, languageCode: String) = WorkoutImport(fileText, store, catalog, languageCode)
     fun history(languageCode: String) = HistoryModel(store, compiler, languageCode)
 
     private var settingsModel: SettingsModel? = null

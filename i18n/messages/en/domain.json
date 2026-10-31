@@ -119,7 +119,8 @@
     "oncePerRound": "once per round, {rounds}",
     "perRound": "{sets} per round, {rounds}",
     "betweenSets": "{rest} between sets",
-    "hold": "{duration} hold"
+    "hold": "{duration} hold",
+    "parts": "{count, plural, one {# part} other {# parts}}"
   },
   "unit": {
     "seconds": "{seconds, number} s",
@@ -155,5 +156,12 @@
     "happyFullLine": "A full octopus! The next session starts a new one.",
     "nappingTitle": "Poulpy is napping",
     "nappingLine": "Your tentacles are still lit. Wake me up with a session."
+  },
+  "workoutFile": {
+    "unreadable": "This file can’t be read. It may be damaged.",
+    "notWorkout": "This isn’t a Coach Poulpy workout.",
+    "newer": "This workout was made with a newer version of Coach Poulpy. Update the app to open it.",
+    "unknown": "{count, plural, one {This workout uses an exercise this version doesn’t have: {names}. Update the app to open it.} other {This workout uses # exercises this version doesn’t have: {names}. Update the app to open it.}}",
+    "invalid": "This workout is incomplete or broken, so it can’t be added."
   }
 }
