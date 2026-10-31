@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Live · ready</title>
+<meta name="mockup:screen" content="live-ready">
+<meta name="mockup:section" content="Live">
+<meta name="mockup:issue" content="104">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../../../web/src/styles/tokens.css">
+<link rel="stylesheet" href="../../shared/mockup.css">
+<script src="../../shared/mockup-theme.js"></script>
+</head>
+<body>
+<main class="phone">
+  <div class="live-title-bar">
+    <h1>Live</h1>
+    <a class="device-pill" href="#" id="devices-pill"><span class="dot" aria-hidden="true"></span>3 connected</a>
+  </div>
+  <div class="live-body">
+      <section class="live-numbers" id="live-numbers" aria-label="Live numbers" data-component="live-numbers">
+        <div class="grid">
+        <div class="live-tile"><span class="label">Speed</span><span class="big">5.2</span><span class="unit">km/h</span><span class="source">from pod</span></div>
+        <div class="live-tile"><span class="label">Pace</span><span class="big">11:32</span><span class="unit">/km</span><span class="source">from pod</span></div>
+        </div>
+        <div class="grid">
+          <div class="live-tile live-tile--small"><span class="label">Distance <span>· pod</span></span><span class="value">1.86 <small>km</small></span></div>
+          <div class="live-tile live-tile--small"><span class="label">Heart rate <span>· band</span></span><span class="value">118 <small>bpm</small></span></div>
+          <div class="live-tile live-tile--small"><span class="label">Cadence <span>· pod</span></span><span class="value">112 <small>spm</small></span></div>
+          <div class="live-tile live-tile--small"><span class="label">Incline <span>· treadmill</span></span><span class="value">1.0 <small>%</small></span></div>
+        </div>
+      </section>
+      <section class="recorder" id="recorder" aria-label="Recorder" data-component="recorder">
+<div style="display: flex; flex-direction: column; gap: 10px;">
+        <span class="label">What are you doing?</span>
+        <div class="pick-chips" role="radiogroup" aria-label="What are you doing?">
+          <button type="button" role="radio" aria-checked="true">Walk</button>
+          <button type="button" role="radio" aria-checked="false">Brisk walk</button>
+          <button type="button" role="radio" aria-checked="false">Easy run</button>
+          <a href="live-picker.html">More<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
+        </div>
+        <p class="hint">Your last three, then every walk, run and workout under More.</p>
+        <label class="follow-row">
+          <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3-7 4 14 3-7h4"/></svg>
+          <span><strong>Follow the treadmill</strong><small>Starts, pauses and finishes with the belt</small></span>
+          <input type="checkbox" role="switch" checked>
+        </label>
+        <a class="primary-button" href="live-waiting.html" data-component="primary-button"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 5l11 7-11 7z"/></svg>Wait for the treadmill</a>
+        </div>
+      </section>
+  </div>
+  <nav class="nav-bar" aria-label="Main" data-component="nav-bar">
+    <a class="nav-item" href="home-planned.html"><span><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7M5 9.5V20h5v-6h4v6h5V9.5"/></svg></span>Home</a>
+    <a class="nav-item" href="library-workouts.html"><span><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4v16H5zM10 4h4v16h-4zM15.2 5.3l3.9-1 3.4 14.8-3.9 1z"/></svg></span>Library</a>
+    <a class="nav-item" href="live-ready.html" aria-current="page"><span><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3-7 4 14 3-7h4"/></svg></span>Live</a>
+    <a class="nav-item" href="history-calendar.html"><span><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.4-5.7L4 8.5M4 4v4.5h4.5M12 8v4l3 2"/></svg></span>History</a>
+    <a class="nav-item" href="#"><span><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg></span>Settings</a>
+  </nav>
+</main>
+</body>
+</html>
