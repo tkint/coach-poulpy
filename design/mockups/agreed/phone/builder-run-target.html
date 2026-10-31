@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Builder · run target</title>
+<title>Builder · run, edit a step</title>
 <meta name="mockup:screen" content="builder-run-target">
 <meta name="mockup:section" content="Builder">
 <meta name="mockup:issue" content="90">
@@ -98,11 +98,8 @@
   <section class="sheet" id="edit-run" data-component="sheet" role="dialog" aria-label="Edit Run" style="gap: var(--cp-space-md);">
     <span class="sheet-handle" aria-hidden="true"></span>
     <div class="sheet-title"><h2>Run</h2><p>In Warm-up · about 12 min</p></div>
-    <div class="field" style="gap: var(--cp-space-sm);">
-      <span class="label">Target</span>
-      <div class="pill-group" role="radiogroup" aria-label="Target" data-component="pill-group" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));"><button type="button" role="radio" aria-checked="false">Duration</button><button type="button" role="radio" aria-checked="false">Distance</button><button type="button" role="radio" aria-checked="false">Duration + pace</button><button type="button" role="radio" aria-checked="true">Distance + pace</button></div>
-    </div>
-    <div class="steppers">
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--cp-space-sm);"><button class="select-field" data-component="select-field" type="button" aria-haspopup="listbox" aria-label="Step, Exercise" style="grid-column: span 2;"><span><span class="label">Step</span><strong>Exercise</strong></span><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button><button class="select-field" data-component="select-field" type="button" aria-haspopup="listbox" aria-label="Duration, Distance"><span><span class="label">Duration</span><strong>Distance</strong></span><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button><button class="select-field" data-component="select-field" type="button" aria-haspopup="listbox" aria-label="Intensity, Pace"><span><span class="label">Intensity</span><strong>Pace</strong></span><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button></div>
+    <div class="steppers" style="grid-template-columns: 1fr;">
       <div class="stepper" data-component="stepper">
         <span class="label">Distance</span>
         <div><button type="button" aria-label="Shorter">−</button><a class="value-link" href="builder-distance-sheet.html" aria-label="Set distance, 2.0 km">2.0 km</a><button type="button" aria-label="Longer">+</button></div>
