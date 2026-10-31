@@ -391,6 +391,7 @@ svg { flex: none; }
 .tentacle-ring svg { position: absolute; inset: 0; }
 .tentacle-ring path { fill: none; stroke-width: 15; stroke-linecap: round; stroke: color-mix(in srgb, var(--cp-on-primary-container) 25%, transparent); }
 .tentacle-ring path.lit { stroke: var(--cp-primary); }
+.tentacle-ring path.new { stroke: var(--cp-on-primary-container); }
 .tentacle-ring img { position: absolute; left: 17px; top: 20px; width: 71px; height: 64px; }
 .poulpy-card h2 { font-family: var(--cp-font-display); font-size: 22px; line-height: 26px; font-weight: 700; }
 .poulpy-card p { font-size: 15px; line-height: 20px; font-weight: 600; }
