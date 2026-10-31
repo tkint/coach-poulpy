@@ -196,9 +196,10 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
             )
         },
     ) { padding ->
+        DragAutoScroll(drag, list)
         LazyColumn(
             state = list,
-            modifier = Modifier.padding(padding).fillMaxSize().navigationBarsPadding(),
+            modifier = Modifier.padding(padding).fillMaxSize().navigationBarsPadding().dragViewport(drag),
             contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 24.dp),
         ) {
             item {

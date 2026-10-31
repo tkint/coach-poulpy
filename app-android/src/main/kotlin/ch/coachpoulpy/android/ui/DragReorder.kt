@@ -1,10 +1,12 @@
 package ch.coachpoulpy.android.ui
 
 import androidx.compose.foundation.lazy.LazyItemScope
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -13,12 +15,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -41,6 +45,8 @@ class DragReorder internal constructor(
     private val frames = mutableStateMapOf<Any, Frame>()
     private var start = 0f
     private var delta by mutableFloatStateOf(0f)
+    private var viewportTop = 0f
+    private var viewportBottom = 0f
 
     /** How far the dragged item is drawn from where its layout puts it. */
     val offset: Float get() = key?.let { frames[it] }?.let { start + delta - it.top } ?: 0f
@@ -63,6 +69,34 @@ class DragReorder internal constructor(
     /** Follows the finger by [dy]; true when the item moved past another. */
     internal fun drag(dy: Float): Boolean {
         delta += dy
+        return swap()
+    }
+
+    /** Where the scrolling list sits on screen, so a drag near its top or bottom edge can scroll it. */
+    internal fun viewport(top: Float, bottom: Float) {
+        viewportTop = top
+        viewportBottom = bottom
+    }
+
+    /**
+     * How far the list scrolls this frame: 0 while the dragged item is more than [edge] from the
+     * list's top and bottom, then up to [maxStep] (negative toward the top) as it gets closer.
+     */
+    internal fun scrollStep(edge: Float, maxStep: Float): Float {
+        val dragged = key ?: return 0f
+        val frame = frames[dragged] ?: return 0f
+        val top = start + delta
+        val bottom = top + frame.height
+        val near = when {
+            top < viewportTop + edge -> -((viewportTop + edge - top) / edge)
+            bottom > viewportBottom - edge -> (bottom - (viewportBottom - edge)) / edge
+            else -> 0f
+        }
+        return near.coerceIn(-1f, 1f) * maxStep
+    }
+
+    /** True when the dragged item's middle now sits over another item, which it takes the place of. */
+    internal fun swap(): Boolean {
         val dragged = key ?: return false
         val frame = frames[dragged] ?: return false
         val middle = start + delta + frame.height / 2f
@@ -75,6 +109,36 @@ class DragReorder internal constructor(
     internal fun end() {
         key = null
         delta = 0f
+    }
+}
+
+/** Marks the scrolling list a [drag] happens in. */
+fun Modifier.dragViewport(drag: DragReorder): Modifier = onGloballyPositioned {
+    val top = it.positionInRoot().y
+    drag.viewport(top, top + it.size.height)
+}
+
+/**
+ * While an item is dragged within about 64 dp of the list's top or bottom edge, scrolls [list]
+ * toward that edge, faster the closer it gets, and swaps the item with the ones it passes. The item
+ * keeps following the finger, since its offset is measured from where the layout puts it.
+ */
+@Composable
+fun DragAutoScroll(drag: DragReorder, list: LazyListState) {
+    val haptics = LocalHapticFeedback.current
+    val density = LocalDensity.current
+    LaunchedEffect(drag.key) {
+        if (drag.key == null) return@LaunchedEffect
+        val edge = with(density) { 64.dp.toPx() }
+        val maxStep = with(density) { 18.dp.toPx() }
+        while (true) {
+            withFrameNanos { }
+            val step = drag.scrollStep(edge, maxStep)
+            if (step == 0f || list.dispatchRawDelta(step) == 0f) continue
+            // The items have moved with the scroll; wait for them to be measured again before looking for a swap.
+            withFrameNanos { }
+            if (drag.swap()) haptics.performHapticFeedback(HapticFeedbackType.SegmentTick)
+        }
     }
 }
 

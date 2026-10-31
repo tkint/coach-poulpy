@@ -40,6 +40,8 @@ struct BuilderView: View {
     @State private var dragStart: CGFloat = 0
     @State private var dragY: CGFloat = 0
     @State private var frames: [String: CGRect] = [:]
+    // Scrolls the list while a card is dragged near its top or bottom edge.
+    @State private var scroller = DragScroller()
 
     var body: some View {
         NavigationStack {
@@ -71,6 +73,7 @@ struct BuilderView: View {
                 .padding(.bottom, PoulpySpace.xl)
                 .coordinateSpace(name: "builder")
                 .onPreferenceChange(CardFrames.self) { frames = $0 }
+                .background(ScrollViewFinder(scroller: scroller))
             }
             .background(PoulpyColor.background)
             .navigationTitle(LocalizedStringKey(model.isEditing ? "builder.editTitle" : "builder.newTitle"))
@@ -329,9 +332,43 @@ struct BuilderView: View {
         if dragging == nil {
             dragging = key
             dragStart = frames[key]?.midY ?? 0
+            scroller.start { [self] seconds in autoScroll(by: seconds) }
         }
         dragY = y
-        let middle = dragStart + y
+        settle(key)
+    }
+
+    /// Scrolls the list toward the edge the dragged card is within 64 pt of, faster the closer it gets,
+    /// up to the list's ends. The card keeps its place under the finger, so it keeps swapping with the cards it passes.
+    private func autoScroll(by seconds: CGFloat) {
+        guard let key = dragging, let scrollView = scroller.scrollView, let frame = frames[key] else { return }
+        let edge: CGFloat = 64
+        let inset = scrollView.adjustedContentInset
+        let visibleTop = scrollView.contentOffset.y + inset.top
+        let visibleBottom = scrollView.contentOffset.y + scrollView.bounds.height - inset.bottom
+        let top = dragStart + dragY - frame.height / 2
+        let bottom = top + frame.height
+        var near: CGFloat = 0
+        if top < visibleTop + edge {
+            near = -(visibleTop + edge - top) / edge
+        } else if bottom > visibleBottom - edge {
+            near = (bottom - (visibleBottom - edge)) / edge
+        }
+        let speed: CGFloat = 800 // pt per second, at the edge itself
+        let minY = -inset.top
+        let maxY = max(minY, scrollView.contentSize.height - scrollView.bounds.height + inset.bottom)
+        let y = min(max(scrollView.contentOffset.y + max(-1, min(1, near)) * speed * seconds, minY), maxY)
+        let moved = y - scrollView.contentOffset.y
+        guard moved != 0 else { return }
+        scrollView.contentOffset.y = y
+        // The finger stays still while the content moves under it, so the card has moved with the content.
+        dragY += moved
+        settle(key)
+    }
+
+    /// Once the card's middle passes over another step of its list, it takes that step's place.
+    private func settle(_ key: String) {
+        let middle = dragStart + dragY
         let keys = siblings(key)
         guard
             let from = keys.firstIndex(of: key),
@@ -348,6 +385,7 @@ struct BuilderView: View {
     }
 
     private func drop() {
+        scroller.stop()
         withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
             dragging = nil
             dragY = 0
@@ -961,6 +999,45 @@ private struct ValueSheet: View {
 
     private func sectionLabel(_ key: LocalizedStringKey) -> some View {
         Text(key).textCase(.uppercase).font(PoulpyFont.label).kerning(1).foregroundStyle(PoulpyColor.onSurfaceVariant)
+    }
+}
+
+/// Finds the UIScrollView that holds the builder, so a drag can scroll it by itself.
+private struct ScrollViewFinder: UIViewRepresentable {
+    let scroller: DragScroller
+
+    func makeUIView(context: Context) -> UIView { UIView() }
+
+    func updateUIView(_ view: UIView, context: Context) {
+        DispatchQueue.main.async {
+            var parent = view.superview
+            while let current = parent, !(current is UIScrollView) { parent = current.superview }
+            scroller.scrollView = parent as? UIScrollView
+        }
+    }
+}
+
+/// Calls its tick once per screen frame while a card is dragged, with the seconds since the last one.
+private final class DragScroller {
+    weak var scrollView: UIScrollView?
+    private var link: CADisplayLink?
+    private var tick: ((CGFloat) -> Void)?
+
+    func start(_ tick: @escaping (CGFloat) -> Void) {
+        stop()
+        self.tick = tick
+        link = CADisplayLink(target: self, selector: #selector(step(_:)))
+        link?.add(to: .main, forMode: .common)
+    }
+
+    func stop() {
+        link?.invalidate()
+        link = nil
+        tick = nil
+    }
+
+    @objc private func step(_ link: CADisplayLink) {
+        tick?(CGFloat(link.targetTimestamp - link.timestamp))
     }
 }
 
