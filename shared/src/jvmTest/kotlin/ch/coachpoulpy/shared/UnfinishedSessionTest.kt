@@ -126,7 +126,7 @@ class UnfinishedSessionTest {
     @Test
     fun discardingTheCardOfALiveRecordingDeletesIt() {
         val id = leftInLive()
-        val home = graph.home("en")
+        val home = home()
         assertNotNull(home.openCard())
 
         home.discardUnfinished()
