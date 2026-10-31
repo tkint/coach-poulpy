@@ -909,3 +909,33 @@ svg { flex: none; }
 @keyframes poulpy-spin { to { transform: rotate(360deg); } }
 .spin { animation: poulpy-spin 2.4s linear infinite; }
 @media (prefers-reduced-motion: reduce) { .spin { animation-duration: 10s; } }
+
+/* ---------- Exercise search, equipment sheet, variations sheet ---------- */
+
+.filter-chip--have { background: var(--cp-on-primary-container); border-color: transparent; color: var(--cp-on-primary); font-weight: 800; gap: var(--cp-space-xs); }
+.filter-chip--have b { min-width: 18px; height: 18px; padding: 0 var(--cp-space-xs); border-radius: var(--cp-radius-pill); background: var(--cp-surface); color: var(--cp-on-primary-container); font-size: 13px; display: flex; align-items: center; justify-content: center; font-variant-numeric: tabular-nums; }
+.clear-link { min-height: 32px; font-weight: 800; color: var(--cp-primary); }
+.no-results { margin-top: var(--cp-space-lg); padding: var(--cp-space-xl) 20px; border-radius: var(--cp-radius-lg); background: var(--cp-primary-container); color: var(--cp-on-primary-container); display: flex; flex-direction: column; align-items: center; gap: var(--cp-space-sm); text-align: center; }
+.no-results img { width: 96px; height: 86px; object-fit: contain; }
+.no-results h2 { font: var(--cp-type-headline); margin-top: var(--cp-space-xs); }
+.no-results p { font-size: 15px; line-height: 21px; }
+.no-results .primary-button { margin-top: var(--cp-space-sm); height: 48px; padding: 0 22px; font-size: 15px; }
+.check-list { display: flex; flex-direction: column; }
+.check-list label { min-height: 48px; display: flex; align-items: center; gap: 14px; border-bottom: 1px solid var(--cp-outline); font-size: 16px; font-weight: 700; }
+.check-list input { width: 22px; height: 22px; margin: 0; accent-color: var(--cp-primary); }
+.check-list label > span:first-of-type { flex: 1; }
+.check-list label > span:last-child { font-size: 14px; color: var(--cp-on-surface-variant); font-variant-numeric: tabular-nums; }
+.sheet-actions { display: flex; gap: var(--cp-space-sm); margin-top: var(--cp-space-xs); }
+.sheet-actions .secondary-button, .sheet-actions .primary-button { height: 56px; font-size: 16px; }
+.sheet-actions .secondary-button { flex: 1; }
+.sheet-actions .primary-button { flex: 1.6; }
+.rung-list { display: flex; flex-direction: column; gap: 6px; }
+.rung { width: 100%; min-height: 60px; padding: var(--cp-space-sm) var(--cp-space-md); border-radius: var(--cp-radius-md); border: 1px solid var(--cp-outline); background: var(--cp-surface); text-align: left; display: flex; align-items: center; gap: var(--cp-space-md); }
+.rung[aria-current="true"] { border: 1.5px solid var(--cp-primary); background: var(--cp-primary-container); }
+.rung .bars { width: 40px; height: 24px; display: flex; align-items: flex-end; gap: 3px; flex: none; }
+.rung .bars i { width: 5px; border-radius: 2px; background: var(--cp-outline); }
+.rung .bars i.on { background: var(--cp-primary); }
+.rung > span:nth-child(2) { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.rung strong { font-weight: 800; font-size: 16px; line-height: 22px; }
+.rung small { font-size: 14px; line-height: 19px; color: var(--cp-on-surface-variant); }
+.rung svg { color: var(--cp-primary); }
