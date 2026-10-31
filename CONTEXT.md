@@ -122,6 +122,10 @@ _Avoid_: Collection, favourites
 A shared workout or plan saved in a library, either synced to the author's latest version or as a copy.
 _Avoid_: Bookmark, fork
 
+**Workout file**:
+A workout saved as a `.poulpyworkout` file to send to another guest, which opens it in the app to add a copy to their library.
+_Avoid_: Backup
+
 **Coach link**:
 The tie an athlete grants a coach, which the athlete can revoke at any time.
 _Avoid_: Team, connection

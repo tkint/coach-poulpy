@@ -119,7 +119,8 @@
     "oncePerRound": "une fois par tour, {rounds}",
     "perRound": "{sets} par tour, {rounds}",
     "betweenSets": "{rest} entre les séries",
-    "hold": "{duration} de maintien"
+    "hold": "{duration} de maintien",
+    "parts": "{count, plural, one {# partie} many {# parties} other {# parties}}"
   },
   "unit": {
     "seconds": "{seconds, number} s",
@@ -155,5 +156,12 @@
     "happyFullLine": "Un poulpe complet ! La prochaine séance en commence un nouveau.",
     "nappingTitle": "Poulpy fait la sieste",
     "nappingLine": "Tes tentacules sont toujours allumés. Réveille-moi avec une séance."
+  },
+  "workoutFile": {
+    "unreadable": "Ce fichier est illisible. Il est peut-être abîmé.",
+    "notWorkout": "Ce fichier n’est pas une séance Coach Poulpy.",
+    "newer": "Cette séance vient d’une version plus récente de Coach Poulpy. Mettez l’application à jour pour l’ouvrir.",
+    "unknown": "{count, plural, one {Cette séance utilise un exercice que cette version ne connaît pas : {names}. Mettez l’application à jour pour l’ouvrir.} many {Cette séance utilise # exercices que cette version ne connaît pas : {names}. Mettez l’application à jour pour l’ouvrir.} other {Cette séance utilise # exercices que cette version ne connaît pas : {names}. Mettez l’application à jour pour l’ouvrir.}}",
+    "invalid": "Cette séance est incomplète ou abîmée, elle ne peut pas être ajoutée."
   }
 }

@@ -1,5 +1,27 @@
 import SwiftUI
 import Shared
+import UniformTypeIdentifiers
+
+extension UTType {
+    /// The `.poulpyworkout` file, declared as an exported type in Info.plist.
+    static let poulpyWorkout = UTType(exportedAs: "ch.coachpoulpy.workout", conformingTo: .json)
+}
+
+/// A workout as the share sheet takes it: the file is written only when a destination is picked.
+private struct WorkoutFileItem: Transferable {
+    let make: () -> WorkoutFileExport?
+
+    static var transferRepresentation: some TransferRepresentation {
+        FileRepresentation(exportedContentType: .poulpyWorkout) { item in
+            guard let file = item.make() else { throw CocoaError(.fileNoSuchFile) }
+            let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+            try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+            let url = folder.appendingPathComponent(file.fileName)
+            try file.content.write(to: url, atomically: true, encoding: .utf8)
+            return SentTransferredFile(url)
+        }
+    }
+}
 
 /// What to open over the workout page.
 private enum Cover: Identifiable {
@@ -82,10 +104,16 @@ struct WorkoutPageView: View {
         .toolbar {
             if state.found {
                 Menu {
+                    ShareLink(
+                        item: WorkoutFileItem(make: { page.model.exportFile() }),
+                        preview: SharePreview(state.name)
+                    ) {
+                        Label("action.share", systemImage: "square.and.arrow.up")
+                    }
                     if state.editable {
                         Button { cover = .copy } label: { Label("action.copy", systemImage: "doc.on.doc") }
-                        Divider()
                     }
+                    Divider()
                     Button(role: .destructive) { deleting = true } label: { Label("action.delete", systemImage: "trash") }
                 } label: {
                     Label("action.more", systemImage: "ellipsis.circle")
