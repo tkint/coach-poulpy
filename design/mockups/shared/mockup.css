@@ -538,7 +538,12 @@ svg { flex: none; }
 .builder-step--open { border: 1.5px solid color-mix(in srgb, var(--cp-primary) 50%, transparent); padding-bottom: 14px; }
 .builder-step-header { display: flex; align-items: center; gap: 10px; }
 .builder-step-header .row-text strong { font-family: var(--cp-font-display); font-size: 19px; line-height: 23px; font-weight: 700; }
-.drag-handle { color: var(--cp-on-surface-variant); display: flex; }
+.move-buttons { display: flex; flex-direction: column; flex: none; margin-left: calc(var(--cp-space-xs) * -1); color: var(--cp-on-surface-variant); }
+.move-buttons button { width: 44px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: var(--cp-radius-pill); color: var(--cp-primary); }
+.move-buttons button:disabled { color: var(--cp-outline); opacity: .6; }
+.step-card, .builder-repeat { transition: box-shadow .2s; }
+.just-moved { box-shadow: 0 0 0 2px var(--cp-primary); }
+@media (prefers-reduced-motion: reduce) { .step-card, .builder-repeat { transition: none; } }
 
 .steppers { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--cp-space-sm); padding-right: var(--cp-space-xs); }
 .stepper {
