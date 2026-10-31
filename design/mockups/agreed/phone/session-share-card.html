@@ -14,10 +14,10 @@
 <script src="../../shared/mockup-theme.js"></script>
 <style>
   /* The card is a 4:5 picture (1080 x 1350), shown here at a quarter of its size. */
-  .share-stage { display: flex; flex-wrap: wrap; gap: 32px; justify-content: center; padding: 32px 16px; }
+  .share-stage { display: flex; flex-wrap: wrap; gap: var(--cp-space-xxl); justify-content: center; padding: var(--cp-space-xxl) var(--cp-space-lg); }
   .share-card {
     width: 270px; height: 337px; overflow: hidden; box-sizing: border-box; padding: 10px 22px 10px;
-    display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px;
+    display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--cp-space-xs);
     border-radius: 12px; background: var(--cp-primary-container); color: var(--cp-on-primary-container);
     font-family: var(--cp-font-body);
   }
@@ -25,11 +25,11 @@
   .share-card h2 { margin: 0; font-family: var(--cp-font-display); font-size: 22px; line-height: 26px; font-weight: 800; }
   .share-card .date { margin: 0; font-size: 12px; font-weight: 600; opacity: 0.8; }
   .share-card dl { margin: 2px 0 0; width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-  .share-card dl div { background: var(--cp-surface); color: var(--cp-on-surface); border-radius: 10px; padding: 4px 10px; display: flex; flex-direction: column; align-items: flex-start; text-align: left; }
+  .share-card dl div { background: var(--cp-surface); color: var(--cp-on-surface); border-radius: var(--cp-radius-sm); padding: var(--cp-space-xs) 10px; display: flex; flex-direction: column; align-items: flex-start; text-align: left; }
   .share-card dt { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
   .share-card dd { margin: 0; font-family: var(--cp-font-display); font-size: 15px; font-weight: 800; font-variant-numeric: tabular-nums; }
   .share-card footer { margin-top: auto; font-family: var(--cp-font-display); font-size: 13px; font-weight: 700; }
-  .share-stage figure { margin: 0; display: flex; flex-direction: column; gap: 8px; align-items: center; }
+  .share-stage figure { margin: 0; display: flex; flex-direction: column; gap: var(--cp-space-sm); align-items: center; }
   .share-stage figcaption { font-size: 13px; max-width: 270px; text-align: center; color: var(--cp-on-surface-variant); }
 </style>
 </head>

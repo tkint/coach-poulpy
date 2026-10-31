@@ -34,6 +34,6 @@ design/mockups/
 
 ## Consequences
 
-- The canvas's 42 artboards are converted once, section by section, into `agreed/phone/`. Until that lands, the canvas still holds the existing screens.
+- The canvas's artboards were converted once, section by section, into `agreed/phone/` (#104); the canvas is now scratch only. `design/check-mockups.mjs` keeps the rules above in CI.
 - Once a screen ships, screenshot tests become its truth: Roborazzi on Android and swift-snapshot-testing on a pinned iOS simulator in CI. Its agreed mockup is kept, frozen, with `mockup:shipped` pointing at the references, and only changes when the screen is redesigned through a new draft.
 - Canvas comments and free placement are lost; PR comments and the site's gallery replace them.
