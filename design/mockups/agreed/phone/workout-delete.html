@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Workout page · delete</title>
+<meta name="mockup:screen" content="workout-delete">
+<meta name="mockup:section" content="Workout page">
+<meta name="mockup:issue" content="104">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../../../web/src/styles/tokens.css">
+<link rel="stylesheet" href="../../shared/mockup.css">
+<script src="../../shared/mockup-theme.js"></script>
+</head>
+<body>
+<main class="phone">
+<header class="top-bar">
+    <a class="icon-button" href="library-workouts.html" aria-label="Back to the library"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4"><path d="M15 5l-7 7 7 7"/></svg></a>
+    <button class="icon-button" type="button" aria-label="More options" aria-haspopup="menu"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></button>
+  </header>
+
+  <div class="page-body">
+    <div id="workout-summary" style="display: flex; flex-direction: column; gap: 2px;">
+      <span class="label label--primary">Strength</span>
+      <h1 class="title" style="font-size: 30px; line-height: 34px;">Upper body</h1>
+      <p class="workout-details">4 exercises · about 32 min · dumbbells, mat</p>
+    </div>
+
+    <section id="planned-days" data-component="planned-days" aria-label="Planned days" style="border-radius: var(--cp-radius-md); background: var(--cp-primary-container); color: var(--cp-on-primary-container); padding: var(--cp-space-sm) var(--cp-space-sm) 10px 14px; display: flex; flex-direction: column; gap: var(--cp-space-sm);">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+        <span style="flex: 1; font-size: 15px; line-height: 20px; font-weight: 800;">Planned on 3 days</span>
+        <a href="#" style="min-height: 40px; padding: 0 14px; border-radius: var(--cp-radius-pill); background: var(--cp-surface); font-size: 14px; font-weight: 800; display: flex; align-items: center;">Change days</a>
+      </div>
+      <ul style="display: flex; flex-wrap: wrap; gap: 6px;">
+        <li style="height: 32px; padding: 0 var(--cp-space-md); border-radius: var(--cp-radius-pill); background: var(--cp-surface); color: var(--cp-on-surface); font-size: 14px; font-weight: 800; display: flex; align-items: center; font-variant-numeric: tabular-nums;">Tue 27 Oct</li>
+        <li style="height: 32px; padding: 0 var(--cp-space-md); border-radius: var(--cp-radius-pill); background: var(--cp-surface); color: var(--cp-on-surface); font-size: 14px; font-weight: 800; display: flex; align-items: center; font-variant-numeric: tabular-nums;">Fri 30 Oct</li>
+        <li style="height: 32px; padding: 0 var(--cp-space-md); border-radius: var(--cp-radius-pill); background: var(--cp-surface); color: var(--cp-on-surface); font-size: 14px; font-weight: 800; display: flex; align-items: center; font-variant-numeric: tabular-nums;">Tue 3 Nov</li>
+      </ul>
+    </section>
+
+    <div class="stat-tiles">
+      <div class="stat-tile" data-component="stat-tile"><span class="label">Done</span><strong>3 times</strong></div>
+      <div class="stat-tile" data-component="stat-tile"><span class="label">Last time</span><strong>Wed 21</strong></div>
+      <div class="stat-tile" data-component="stat-tile"><span class="label">Usually</span><strong>31 min</strong></div>
+    </div>
+
+    <span class="label" style="margin: var(--cp-space-xs) var(--cp-space-xs) 0;">Exercises</span>
+    <ol class="steps">
+      <li>
+        <a class="step-row" data-component="step-row" href="exercise-page.html">
+          <span class="step-number" aria-hidden="true">1</span>
+          <span class="step-text"><strong>Push-up</strong><span>3 × 12 · rest 60 s</span></span>
+          <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"><path d="M9 5l7 7-7 7"/></svg>
+        </a>
+      </li>
+      <li>
+        <a class="step-row" data-component="step-row" href="#">
+          <span class="step-number" aria-hidden="true">2</span>
+          <span class="step-text"><strong>One-arm dumbbell row</strong><span>3 × 10 each side · 14 kg · rest 60 s</span></span>
+          <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"><path d="M9 5l7 7-7 7"/></svg>
+        </a>
+      </li>
+      <li>
+        <a class="step-row" data-component="step-row" href="#">
+          <span class="step-number" aria-hidden="true">3</span>
+          <span class="step-text"><strong>Dumbbell overhead press</strong><span>3 × 8 · 10 kg · rest 90 s</span></span>
+          <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"><path d="M9 5l7 7-7 7"/></svg>
+        </a>
+      </li>
+      <li>
+        <a class="step-row" data-component="step-row" href="#">
+          <span class="step-number" aria-hidden="true">4</span>
+          <span class="step-text"><strong>Plank</strong><span>3 × 40 s hold · rest 45 s</span></span>
+          <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"><path d="M9 5l7 7-7 7"/></svg>
+        </a>
+      </li>
+    </ol>
+  </div>
+
+  <div class="action-bar">
+    <a class="secondary-button" data-component="secondary-button" href="../../agreed/phone/builder-sets-superset.html" style="flex: 1; font-size: 16px;"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>Edit</a>
+    <a class="primary-button" data-component="primary-button" href="#" style="flex: 1.6;"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M8 5l11 7-11 7z"/></svg>Start now</a>
+  </div>
+  <div class="scrim" aria-hidden="true"></div>
+  <div class="dialog" id="delete-dialog"><div role="alertdialog" aria-modal="true" aria-labelledby="delete-title" aria-describedby="delete-body" data-component="dialog">
+    <img src="../../../poulpy/pose_thinking.svg" alt="">
+    <h2 id="delete-title">Delete Upper body?</h2>
+    <p id="delete-body">It comes off its 3 planned days. The 3 times you did it stay in History.</p>
+    <div class="actions"><a class="secondary-button" href="workout-page-planned.html">Cancel</a><a class="danger-button" href="library-workouts.html"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>Delete</a></div>
+  </div></div>
+</main>
+</body>
+</html>
