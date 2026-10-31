@@ -3,6 +3,8 @@ package ch.coachpoulpy.android
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -27,6 +29,9 @@ class MainActivity : ComponentActivity() {
     /** Set when the recording notification opened the app, until the Live tab shows. */
     private val openLive = mutableStateOf(false)
 
+    /** The text of a workout file another app opened here, until the preview shows. Empty when it couldn't be read. */
+    private val importFile = mutableStateOf<String?>(null)
+
     // The language picked in Settings wins over the phone's. "System" leaves the phone's,
     // including the per-app language Android 13 offers in its own settings.
     override fun attachBaseContext(newBase: Context) {
@@ -44,6 +49,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         openLive.value = intent.getBooleanExtra(OPEN_LIVE, false)
+        // Only on a fresh start: a rotation or language change recreates the activity with the same intent.
+        if (savedInstanceState == null) readWorkoutFile(intent)
         val graph = (application as CoachPoulpyApp).graph
         val settings = graph.settings(AppPreferences(this))
         startLanguage = settings.state.value.language
@@ -58,7 +65,13 @@ class MainActivity : ComponentActivity() {
             }
             CoachPoulpyTheme(dark = dark) {
                 CompositionLocalProvider(LocalUnitSystem provides state.units) {
-                    CoachPoulpyRoot(graph, openLive = openLive.value, onLiveOpened = { openLive.value = false })
+                    CoachPoulpyRoot(
+                        graph,
+                        openLive = openLive.value,
+                        onLiveOpened = { openLive.value = false },
+                        importFile = importFile.value,
+                        onImportOpened = { importFile.value = null },
+                    )
                 }
             }
         }
@@ -67,6 +80,37 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         if (intent.getBooleanExtra(OPEN_LIVE, false)) openLive.value = true
+        readWorkoutFile(intent)
+    }
+
+    /** Reads a shared or opened `.poulpyworkout` into [importFile]; a file too big or unreadable becomes "", which the preview refuses. */
+    private fun readWorkoutFile(intent: Intent) {
+        val uri = when (intent.action) {
+            Intent.ACTION_VIEW -> intent.data
+            Intent.ACTION_SEND -> if (Build.VERSION.SDK_INT >= 33) {
+                intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
+            } else {
+                @Suppress("DEPRECATION") intent.getParcelableExtra(Intent.EXTRA_STREAM)
+            }
+            else -> null
+        } ?: return
+        importFile.value = try {
+            contentResolver.openInputStream(uri)?.use { input ->
+                // One byte over the limit tells a file that is too big from one that just fits.
+                val bytes = ByteArray(MAX_FILE_BYTES + 1)
+                var length = 0
+                while (length < bytes.size) {
+                    val read = input.read(bytes, length, bytes.size - length)
+                    if (read < 0) break
+                    length += read
+                }
+                if (length > MAX_FILE_BYTES) "" else String(bytes, 0, length, Charsets.UTF_8)
+            } ?: ""
+        } catch (_: java.io.IOException) {
+            ""
+        } catch (_: SecurityException) {
+            ""
+        }
     }
 
     private fun savedLanguage(context: Context): LanguageChoice {
@@ -77,6 +121,9 @@ class MainActivity : ComponentActivity() {
     companion object {
         /** An extra that opens the Live tab, from the recording notification. */
         const val OPEN_LIVE = "openLive"
+
+        /** A workout file is a few kilobytes; anything past this is not one. */
+        private const val MAX_FILE_BYTES = 1_000_000
 
         /** The key SettingsModel saves the language under. */
         private const val LANGUAGE_KEY = "settings.language"
