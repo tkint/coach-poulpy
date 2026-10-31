@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Settings · device page</title>
+<meta name="mockup:screen" content="device-detail">
+<meta name="mockup:section" content="Settings and devices">
+<meta name="mockup:issue" content="104">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../../../web/src/styles/tokens.css">
+<link rel="stylesheet" href="../../shared/mockup.css">
+<script src="../../shared/mockup-theme.js"></script>
+</head>
+<body>
+<main class="phone">
+  <header class="page-bar"><a class="icon-button" href="devices-list.html" aria-label="Back to devices"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></a><div><h1>Home treadmill</h1><span class="state">Connected · Treadmill</span></div></header>
+  <div class="settings-body" style="padding-top: 14px; gap: var(--cp-space-md);">
+    <section class="summary-card" id="live-now" style="padding: 18px;">
+      <span class="device-icon" style="width: 56px; height: 56px; background: var(--cp-surface);" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17h14l4-3M6 17l-1 4M16 17l1 4M13 3l2 11"/></svg><span class="presence"></span></span>
+      <div><span class="headline" style="font: var(--cp-type-headline); font-size: 19px; line-height: 23px;">Live now</span><span class="line">9.4 km/h · 1.0 % incline</span></div>
+    </section>
+    <span class="label label-row">What it measures</span>
+    <ul class="measure-list" id="measures"><li><span>Speed and pace</span><span class="use-tag">Pod used instead</span></li><li><span>Distance</span><span class="use-tag">Pod used instead</span></li><li><span>Incline</span><span class="use-tag use-tag--used">Used</span></li><li><span>Energy</span><span class="use-tag use-tag--used">Used</span></li></ul>
+    <a class="section-link" href="data-sources.html">Change which device is used</a>
+    <span class="label label-row" style="margin-top: var(--cp-space-sm);">Device</span>
+    <label class="switch-row"><span><strong>Connect automatically</strong><small>When you open Devices and it is nearby</small></span><input type="checkbox" role="switch" checked></label>
+    <div style="display: flex; gap: var(--cp-space-sm);">
+      <a class="secondary-button text-button" href="devices-list.html" style="border: 2px solid var(--cp-outline);">Disconnect</a>
+      <a class="text-button text-button--danger" href="devices-list.html">Forget this device</a>
+    </div>
+  </div>
+</main>
+</body>
+</html>
