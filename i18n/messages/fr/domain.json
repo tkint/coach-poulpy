@@ -163,5 +163,15 @@
     "newer": "Cette séance vient d’une version plus récente de Coach Poulpy. Mettez l’application à jour pour l’ouvrir.",
     "unknown": "{count, plural, one {Cette séance utilise un exercice que cette version ne connaît pas : {names}. Mettez l’application à jour pour l’ouvrir.} many {Cette séance utilise # exercices que cette version ne connaît pas : {names}. Mettez l’application à jour pour l’ouvrir.} other {Cette séance utilise # exercices que cette version ne connaît pas : {names}. Mettez l’application à jour pour l’ouvrir.}}",
     "invalid": "Cette séance est incomplète ou abîmée, elle ne peut pas être ajoutée."
+  },
+  "share": {
+    "time": "Durée",
+    "sets": "Séries",
+    "setsOf": "{done, number} sur {planned, number}",
+    "distance": "Distance",
+    "averageSpeed": "Vitesse moy.",
+    "energy": "Énergie",
+    "energyValue": "{kcal, number} kcal",
+    "app": "Coach Poulpy"
   }
 }

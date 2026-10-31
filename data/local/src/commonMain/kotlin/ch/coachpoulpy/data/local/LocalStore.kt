@@ -211,6 +211,10 @@ class LocalStore(driverFactory: DriverFactory, private val clock: Clock = Clock.
             .mapToList(Dispatchers.IO)
             .map { ends -> ends.map(Instant::fromEpochMilliseconds) }
 
+    /** [finishedSessionEnds] read once. */
+    fun finishedSessionEndsNow(): List<Instant> =
+        db.executionQueries.finishedSessionEnds().executeAsList().map(Instant::fromEpochMilliseconds)
+
     fun events(executionId: String): List<SessionEvent> =
         db.executionQueries.events(executionId).executeAsList()
             .map { json.decodeFromString(SessionEvent.serializer(), it) }

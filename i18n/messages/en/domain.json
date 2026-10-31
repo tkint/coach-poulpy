@@ -163,5 +163,15 @@
     "newer": "This workout was made with a newer version of Coach Poulpy. Update the app to open it.",
     "unknown": "{count, plural, one {This workout uses an exercise this version doesn’t have: {names}. Update the app to open it.} other {This workout uses # exercises this version doesn’t have: {names}. Update the app to open it.}}",
     "invalid": "This workout is incomplete or broken, so it can’t be added."
+  },
+  "share": {
+    "time": "Time",
+    "sets": "Sets",
+    "setsOf": "{done, number} of {planned, number}",
+    "distance": "Distance",
+    "averageSpeed": "Avg speed",
+    "energy": "Energy",
+    "energyValue": "{kcal, number} kcal",
+    "app": "Coach Poulpy"
   }
 }

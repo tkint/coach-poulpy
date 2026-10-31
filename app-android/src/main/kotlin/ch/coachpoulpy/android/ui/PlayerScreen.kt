@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -42,6 +43,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -83,7 +85,12 @@ fun PlayerScreen(graph: AppGraph, language: String, workoutId: String?, onClose:
         ) {
             when (state.status) {
                 PlayerStatus.READY -> Ready(state, onStart = model::start, onClose = onClose)
-                PlayerStatus.FINISHED -> Finished(state, onClose = onClose)
+                PlayerStatus.FINISHED -> {
+                    val context = LocalContext.current
+                    val units = LocalUnitSystem.current
+                    val chooser = stringResource(R.string.shareImage_chooser)
+                    Finished(state, onShare = { model.shareCard(units)?.let { shareSessionImage(context, it, chooser) } }, onClose = onClose)
+                }
                 PlayerStatus.RUNNING, PlayerStatus.PAUSED -> Running(state, model)
             }
         }
@@ -212,7 +219,7 @@ private fun ColumnScope.Running(state: PlayerState, model: PlayerModel) {
 }
 
 @Composable
-private fun ColumnScope.Finished(state: PlayerState, onClose: () -> Unit) {
+private fun ColumnScope.Finished(state: PlayerState, onShare: () -> Unit, onClose: () -> Unit) {
     val summary = state.summary
     Spacer(Modifier.weight(1f))
     Text(stringResource(R.string.player_finished), style = MaterialTheme.typography.displaySmall)
@@ -227,7 +234,11 @@ private fun ColumnScope.Finished(state: PlayerState, onClose: () -> Unit) {
         if (summary.setsSkipped > 0) Text(stringResource(R.string.player_summarySkipped, summary.setsSkipped), style = MaterialTheme.typography.bodyMedium)
     }
     Spacer(Modifier.weight(1f))
-    Button(onClick = onClose, modifier = Modifier.fillMaxWidth().height(56.dp)) { Text(stringResource(R.string.player_close)) }
+    OutlinedButton(onClick = onShare, modifier = Modifier.fillMaxWidth().height(56.dp)) {
+        Icon(Icons.Filled.Share, contentDescription = null, modifier = Modifier.padding(end = 8.dp))
+        Text(stringResource(R.string.shareImage_button))
+    }
+    Button(onClick = onClose, modifier = Modifier.fillMaxWidth().height(56.dp).padding(top = 8.dp)) { Text(stringResource(R.string.player_close)) }
 }
 
 /** A short beep for the last three seconds of a timer and a longer one when a phase starts. */

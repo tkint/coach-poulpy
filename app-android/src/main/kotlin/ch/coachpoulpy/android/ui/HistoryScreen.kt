@@ -37,6 +37,7 @@ import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -69,6 +70,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -560,6 +562,9 @@ fun SessionDetailScreen(graph: AppGraph, language: String, sessionId: String, on
     val state by model.state.collectAsStateWithLifecycle()
     val session = state.sessions.firstOrNull { it.id == sessionId }
     var deleting by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val units = LocalUnitSystem.current
+    val chooser = stringResource(R.string.shareImage_chooser)
 
     Scaffold(
         topBar = {
@@ -568,6 +573,9 @@ fun SessionDetailScreen(graph: AppGraph, language: String, sessionId: String, on
                 navigationIcon = { BackButton(onBack) },
                 actions = {
                     if (session != null) {
+                        IconButton(onClick = { shareSessionImage(context, model.shareCard(session, units), chooser) }) {
+                            Icon(Icons.Filled.Share, contentDescription = stringResource(R.string.shareImage_button))
+                        }
                         IconButton(onClick = { deleting = true }) {
                             Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.action_delete))
                         }
