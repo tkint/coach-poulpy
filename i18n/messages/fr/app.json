@@ -313,7 +313,7 @@
     "units": "Unités",
     "unitsHint": "Métrique : km et km/h. Impérial : miles et mph. Les poids restent en kg pour l’instant.",
     "languageNextLaunch": "Une nouvelle langue s’affiche à la prochaine ouverture de l’app.",
-    "buildNumber": "Numéro de build {build}"
+    "version": "Version {version}"
   },
   "theme": {
     "system": "Système",

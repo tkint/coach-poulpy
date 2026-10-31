@@ -27,7 +27,7 @@ body:
     id: build
     attributes:
       label: App build
-      description: The build number from Settings, or the CI run the APK came from.
+      description: The version from Settings, or the CI run the APK came from.
   - type: input
     id: device
     attributes:

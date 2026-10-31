@@ -8,11 +8,14 @@ options:
   developmentLanguage: en
   # The string tables are generated from i18n/messages/*/app.json (ADR 0014) and must exist before
   # XcodeGen lists them; the pre-build script below regenerates them on every build.
-  preGenCommand: cd .. && ./gradlew :shared:generateAppleStrings
+  # VERSION at the repository root is the app version; Version.xcconfig (not committed) carries it here.
+  preGenCommand: cd .. && ./gradlew :shared:generateAppleStrings && printf 'MARKETING_VERSION = %s\n' "$(cat VERSION)" > app-ios/Version.xcconfig
+configFiles:
+  Debug: Version.xcconfig
+  Release: Version.xcconfig
 settings:
   base:
     SWIFT_VERSION: "5.0"
-    MARKETING_VERSION: "0.1.0"
     CURRENT_PROJECT_VERSION: "1"
     # Set your Apple team id here or in Xcode to install on a device.
     DEVELOPMENT_TEAM: ""
