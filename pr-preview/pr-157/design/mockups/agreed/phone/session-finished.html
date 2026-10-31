@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Session finished · share</title>
+<meta name="mockup:screen" content="session-finished">
+<meta name="mockup:section" content="Session summary">
+<meta name="mockup:issue" content="125">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../../../web/src/styles/tokens.css">
+<link rel="stylesheet" href="../../shared/mockup.css">
+<script src="../../shared/mockup-theme.js"></script>
+</head>
+<body>
+<main class="phone">
+  <div class="page-body" style="padding-top: 28px; gap: 14px; align-items: center; text-align: center;">
+    <img id="poulpy" src="../../../poulpy/mood_happy.svg" alt="Poulpy, happy" width="180" height="180">
+    <span class="label label--primary">Session finished</span>
+    <h1 class="title">Lower body strength</h1>
+    <p class="muted">Saturday 24 October · 18:05</p>
+    <div class="stat-tiles" id="session-totals" style="width: 100%; text-align: left;">
+      <div class="stat-tile"><span class="label">Time</span><strong>38:24</strong></div>
+      <div class="stat-tile"><span class="label">Sets</span><strong>17 of 18</strong></div>
+      <div class="stat-tile"><span class="label">Distance</span><strong>5.2 km</strong></div>
+    </div>
+  </div>
+
+  <div class="action-bar" id="finished-actions" style="flex-direction: column; gap: var(--cp-space-sm);">
+    <button class="secondary-button secondary-button--large" id="share-session" data-component="secondary-button" type="button" style="width: 100%;">
+      <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M7.5 7.5L12 3l4.5 4.5M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>
+      Share as an image
+    </button>
+    <button class="primary-button primary-button--large" id="done" data-component="primary-button" type="button" style="width: 100%;">Done</button>
+  </div>
+</main>
+</body>
+</html>
