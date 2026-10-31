@@ -21,7 +21,11 @@
     "openLibrary": "Ouvrir la bibliothèque",
     "somethingElse": "Autre chose ? Choisissez dans votre bibliothèque",
     "tomorrow": "Demain · {date}",
-    "inDays": "{days, plural, one {Dans # jour · {date}} many {Dans # jours · {date}} other {Dans # jours · {date}}}"
+    "inDays": "{days, plural, one {Dans # jour · {date}} many {Dans # jours · {date}} other {Dans # jours · {date}}}",
+    "openSession": "Ouvrir",
+    "discard": "Abandonner",
+    "discardTitle": "Abandonner cette séance ?",
+    "discardBody": "Elle n’apparaîtra ni dans votre historique ni dans vos totaux. C’est définitif."
   },
   "library": {
     "workouts": "Séances",
@@ -290,7 +294,13 @@
     "groupWalking": "Marche",
     "groupRunning": "Course",
     "groupWorkouts": "Suivre une séance",
-    "connected": "{count, plural, one {# connecté} many {# connectés} other {# connectés}}"
+    "connected": "{count, plural, one {# connecté} many {# connectés} other {# connectés}}",
+    "finishClosedTitle": "Votre séance est à l’abri",
+    "finishClosedBody": "L’application s’est fermée pendant votre séance, et Poulpy l’a gardée. Sans réponse, Poulpy la termine dans {finishMinutes, number} min, en l’arrêtant à {endTime}.",
+    "notificationChannel": "Enregistrement en direct",
+    "notificationChannelInfo": "S’affiche pendant l’enregistrement d’une séance en direct, pour qu’il continue écran éteint ou quand une autre application est ouverte.",
+    "notificationRecording": "Enregistrement",
+    "notificationPaused": "En pause · {elapsed}"
   },
   "settings": {
     "general": "Général",

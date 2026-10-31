@@ -2,6 +2,7 @@ package ch.coachpoulpy.shared
 
 import ch.coachpoulpy.catalog.Catalog
 import ch.coachpoulpy.core.engine.TimelineCompiler
+import ch.coachpoulpy.core.model.Execution
 import ch.coachpoulpy.core.model.Ids
 import ch.coachpoulpy.core.model.Workout
 import ch.coachpoulpy.core.model.WorkoutId
@@ -23,7 +24,7 @@ class AppGraph(driverFactory: DriverFactory) {
 
     /** What the user ticked in the exercise list's Equipment sheet. The apps pass the same [memory] every time. */
     fun equipmentFilter(memory: KeyValueStore) = EquipmentFilter(memory)
-    fun home(languageCode: String) = HomeModel(store, compiler, catalog, languageCode)
+    fun home(languageCode: String) = HomeModel(store, compiler, catalog, languageCode, discardOpen = ::discardOpen)
     fun library(languageCode: String) = LibraryModel(store, compiler, catalog, languageCode)
     fun workoutPage(workoutId: String, languageCode: String) = WorkoutPageModel(WorkoutId(workoutId), store, compiler, catalog, languageCode)
     fun history(languageCode: String) = HistoryModel(store, compiler, languageCode)
@@ -42,6 +43,9 @@ class AppGraph(driverFactory: DriverFactory) {
      */
     fun devices(memory: KeyValueStore): DevicesModel =
         devicesModel ?: DevicesModel(KableCentral(), memory).also { devicesModel = it }
+
+    /** Live once a screen has opened it, for what follows its recording outside the screens, such as Android's notification. */
+    val liveIfCreated: LiveModel? get() = liveModel
 
     fun live(memory: KeyValueStore, languageCode: String): LiveModel =
         liveModel ?: LiveModel(devices(memory), settings(memory).state, store, compiler, memory, catalog = { catalog }, languageCode = languageCode)
@@ -82,25 +86,35 @@ class AppGraph(driverFactory: DriverFactory) {
     /** A new guided session of the latest version of a workout, ready to start. */
     fun player(workoutId: String, languageCode: String): PlayerModel? {
         val workout = store.latestWorkout(WorkoutId(workoutId)) ?: return null
-        // Only one session is open at a time: one left behind ends where it was left.
-        store.unfinishedExecution()?.let { open ->
-            store.finishExecution(open.id.value, store.events(open.id.value).lastOrNull()?.at ?: open.startedAt)
-        }
+        // Only one session is open at a time: one left behind ends where it was left. Live ends its own, with its summary.
+        liveModel?.stopRecording()
+        store.unfinishedExecution()?.let(::closeLeftOpen)
         return player(workout, Ids.newUuidV7(), languageCode)
     }
 
-    /** The session left open when the app was closed, if any, exactly where it was. */
+    /** The session left open when the app was closed, if any, exactly where it was. Null for a Live recording, which Live brings back. */
     fun resumeSession(languageCode: String): PlayerModel? {
-        val execution = store.unfinishedExecution() ?: return null
+        val execution = store.unfinishedExecution()?.takeUnless { it.source.isLive } ?: return null
         val ref = execution.workout
         val workout = ref?.let { store.workout(it.workoutId, it.version) }
         if (workout == null) {
             // Its workout was deleted: close it so it stops being offered.
-            store.finishExecution(execution.id.value, execution.startedAt)
+            closeLeftOpen(execution)
             return null
         }
         return player(workout, execution.id.value, languageCode)
     }
+
+    /**
+     * Deletes [executionId], the session left open, with everything it recorded: nothing of it shows in the history
+     * or the totals. Live drops it itself when it holds the recording.
+     */
+    private fun discardOpen(executionId: String) {
+        if (liveModel?.discardRecording(executionId) == true) return
+        store.deleteSession(executionId)
+    }
+
+    private fun closeLeftOpen(execution: Execution) = store.closeLeftOpen(execution, store.timelineOf(execution, compiler))
 
     private fun player(workout: Workout, executionId: String, languageCode: String) = PlayerModel(
         workout = workout,

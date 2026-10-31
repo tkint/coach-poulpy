@@ -21,7 +21,11 @@
     "openLibrary": "Open the library",
     "somethingElse": "Something else? Pick from your library",
     "tomorrow": "Tomorrow · {date}",
-    "inDays": "{days, plural, one {In # day · {date}} other {In # days · {date}}}"
+    "inDays": "{days, plural, one {In # day · {date}} other {In # days · {date}}}",
+    "openSession": "Open",
+    "discard": "Discard",
+    "discardTitle": "Discard this session?",
+    "discardBody": "It won’t show in your history or your totals. This can’t be undone."
   },
   "library": {
     "workouts": "Workouts",
@@ -290,7 +294,13 @@
     "groupWalking": "Walking",
     "groupRunning": "Running",
     "groupWorkouts": "Follow a workout",
-    "connected": "{count, plural, one {# connected} other {# connected}}"
+    "connected": "{count, plural, one {# connected} other {# connected}}",
+    "finishClosedTitle": "Your session is safe",
+    "finishClosedBody": "The app closed during your session, and Poulpy kept the first {endTime}. If you don’t answer, it ends there in {finishMinutes, number} min.",
+    "notificationChannel": "Live recording",
+    "notificationChannelInfo": "Shows while Live records a session, so it keeps going with the screen off or another app open.",
+    "notificationRecording": "Recording",
+    "notificationPaused": "Paused · {elapsed}"
   },
   "settings": {
     "general": "General",

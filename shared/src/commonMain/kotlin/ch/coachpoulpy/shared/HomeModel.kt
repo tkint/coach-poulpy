@@ -2,7 +2,6 @@ package ch.coachpoulpy.shared
 
 import ch.coachpoulpy.catalog.Catalog
 import ch.coachpoulpy.core.engine.TimelineCompiler
-import ch.coachpoulpy.core.model.Execution
 import ch.coachpoulpy.core.model.Workout
 import ch.coachpoulpy.core.model.WorkoutId
 import ch.coachpoulpy.data.local.LocalStore
@@ -40,6 +39,8 @@ data class TodayItem(
     val planId: String?,
     /** The finished session, for [TodayStatus.DONE]. */
     val session: SessionRow?,
+    /** A session left open that was recorded in Live: Open brings back Live, not the player. */
+    val live: Boolean = false,
 )
 
 /** The first workout planned after today. [dayMillis] is that day at midnight, local time. */
@@ -76,13 +77,15 @@ class HomeModel internal constructor(
     private val clock: Clock = Clock.System,
     private val zone: TimeZone = TimeZone.currentSystemDefault(),
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main),
+    /** Drops the session left open with everything it recorded; Live must do it for a recording it holds. */
+    private val discardOpen: (String) -> Unit = store::deleteSession,
 ) {
     private val labels = Labels(languageCode)
     private val coach = PoulpyCoach(languageCode, zone)
     private val facts = WorkoutFacts(compiler, catalog, labels)
 
     /** The session left open. It is not a flow in the store, so the screens call [refresh] when they show. */
-    private val unfinished = MutableStateFlow(store.unfinishedExecution())
+    private val unfinished = MutableStateFlow(store.unfinishedSession())
 
     val state: StateFlow<HomeState> = combine(
         store.workouts(),
@@ -100,7 +103,13 @@ class HomeModel internal constructor(
 
     /** Reads the session left open again, for example after coming back from the player. */
     fun refresh() {
-        unfinished.value = store.unfinishedExecution()
+        unfinished.value = store.unfinishedSession()
+    }
+
+    /** Deletes the session left open: it leaves no trace in the history or the totals. */
+    fun discardUnfinished() {
+        store.unfinishedExecution()?.let { discardOpen(it.id.value) }
+        refresh()
     }
 
     fun deleteSession(sessionId: String) = store.deleteSession(sessionId)
@@ -112,7 +121,7 @@ class HomeModel internal constructor(
         plans: List<PlannedWorkout>,
         sessions: List<StoredSession>,
         ends: List<Instant>,
-        open: Execution?,
+        open: StoredSession?,
     ): HomeState {
         val now = clock.now()
         val today = now.toLocalDateTime(zone).date
@@ -131,10 +140,27 @@ class HomeModel internal constructor(
             todo.firstOrNull { it.workoutId == id }?.let(todo::remove)
         }
 
-        val openWorkout = open?.workout?.let { ref -> store.workout(ref.workoutId, ref.version) }
+        val openWorkout = open?.execution?.workout?.let { ref -> store.workout(ref.workoutId, ref.version) }
         val openPlan = openWorkout?.let { workout -> todo.firstOrNull { it.workoutId == workout.id } }
         val items = buildList {
-            if (open != null && openWorkout != null) add(item(TodayStatus.IN_PROGRESS, "open:${open.id.value}", byId[openWorkout.id] ?: openWorkout, openPlan))
+            if (open != null && open.execution.source.isLive) {
+                // Recorded in Live: a free walk or run has no workout behind it.
+                add(
+                    TodayItem(
+                        key = "open:${open.execution.id.value}",
+                        status = TodayStatus.IN_PROGRESS,
+                        title = open.title ?: openWorkout?.name ?: labels.freeRun,
+                        details = openWorkout?.let(facts::details).orEmpty(),
+                        exercises = "",
+                        workoutId = null,
+                        planId = null,
+                        session = null,
+                        live = true,
+                    ),
+                )
+            } else if (open != null && openWorkout != null) {
+                add(item(TodayStatus.IN_PROGRESS, "open:${open.execution.id.value}", byId[openWorkout.id] ?: openWorkout, openPlan))
+            }
             todo.filter { it != openPlan }.forEach { plan -> add(item(TodayStatus.TO_DO, "plan:${plan.id}", byId.getValue(plan.workoutId), plan)) }
             doneToday.forEach { (session, totals) ->
                 val row = sessionRow(session, totals, labels)

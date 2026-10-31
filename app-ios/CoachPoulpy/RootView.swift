@@ -21,7 +21,7 @@ struct RootView: View {
             HomeView(graph: graph, onOpenLibrary: {
                 librarySection = .workouts
                 tab = .library
-            })
+            }, onOpenLive: { tab = .live })
                 .tabItem { Label("tab.home", systemImage: "house") }
                 .tag(AppTab.home)
             LibraryView(graph: graph, section: $librarySection)

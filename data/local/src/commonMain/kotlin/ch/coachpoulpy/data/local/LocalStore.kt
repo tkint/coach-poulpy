@@ -187,12 +187,20 @@ class LocalStore(driverFactory: DriverFactory, private val clock: Clock = Clock.
     }
 
     /** The session left open when the app was closed or killed, if any. */
-    fun unfinishedExecution(): Execution? = db.executionQueries.unfinished().executeAsOneOrNull()?.let { row ->
-        Execution(
-            id = ExecutionId(row.id),
-            source = ExecutionSource.valueOf(row.source),
-            startedAt = Instant.fromEpochMilliseconds(row.started_at),
-            workout = row.workout_id?.let { WorkoutRef(WorkoutId(it), row.workout_version?.toInt() ?: 1) },
+    fun unfinishedExecution(): Execution? = unfinishedSession()?.execution
+
+    /** [unfinishedExecution] with the title it started with. */
+    fun unfinishedSession(): StoredSession? = db.executionQueries.unfinished().executeAsOneOrNull()?.let { row ->
+        StoredSession(
+            execution = Execution(
+                id = ExecutionId(row.id),
+                source = ExecutionSource.valueOf(row.source),
+                startedAt = Instant.fromEpochMilliseconds(row.started_at),
+                workout = row.workout_id?.let { WorkoutRef(WorkoutId(it), row.workout_version?.toInt() ?: 1) },
+            ),
+            title = row.title,
+            format = row.workout_type?.let { name -> WorkoutFormat.entries.firstOrNull { it.name == name } },
+            totals = null,
         )
     }
 

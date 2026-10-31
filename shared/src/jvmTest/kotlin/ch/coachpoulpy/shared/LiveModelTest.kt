@@ -16,6 +16,8 @@ import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
@@ -27,14 +29,19 @@ import kotlinx.coroutines.test.runTest
 class LiveModelTest {
     private class Models(val devices: DevicesModel, val live: LiveModel, val settings: SettingsModel)
 
-    private fun TestScope.models(central: FakeCentral, store: LocalStore, memory: KeyValueStore = MemoryStore()): Models {
+    private fun TestScope.models(
+        central: FakeCentral,
+        store: LocalStore,
+        memory: KeyValueStore = MemoryStore(),
+        scope: CoroutineScope = backgroundScope,
+    ): Models {
         val clock = object : Clock {
             override fun now() = Instant.fromEpochMilliseconds(1_700_000_000_000 + testScheduler.currentTime)
         }
         val compiler = TimelineCompiler()
-        val settings = SettingsModel(memory, backgroundScope)
-        val devices = DevicesModel(central, memory, backgroundScope, clock)
-        return Models(devices, LiveModel(devices, settings.state, store, compiler, memory, backgroundScope, clock), settings)
+        val settings = SettingsModel(memory, scope)
+        val devices = DevicesModel(central, memory, scope, clock)
+        return Models(devices, LiveModel(devices, settings.state, store, compiler, memory, scope, clock), settings)
     }
 
     private fun TestScope.addTreadmill(models: Models) {
@@ -703,5 +710,92 @@ class LiveModelTest {
         assertEquals(listOf("exercise:walk"), m.live.state.value.recent.map { it.key })
         m.live.startRecording("exercise:walk")
         assertEquals("exercise:walk", m.live.state.value.waitingFor?.key)
+    }
+
+    /** A free walk recorded for 30 s with the treadmill, then the app is killed; the next launch has the same database. */
+    private fun TestScope.walkLeftOpen(store: LocalStore, memory: KeyValueStore): Models {
+        val central = FakeCentral()
+        val process = Job()
+        val killed = models(central, store, memory, CoroutineScope(backgroundScope.coroutineContext + process))
+        addTreadmill(killed)
+        killed.live.setFollowTreadmill(false)
+        central.treadmill.send(speedCentiKmh = 500, meters = 0, bpm = 110)
+        runCurrent()
+        killed.live.startRecording("exercise:walk")
+        for (i in 1..30) {
+            advanceTimeBy(1.seconds)
+            central.treadmill.send(speedCentiKmh = 500, meters = i * 2, bpm = 110)
+            runCurrent()
+        }
+        assertNotNull(killed.live.state.value.recording)
+        process.cancel()
+        // Nothing is heard of it again while the app is closed.
+        advanceTimeBy(5.minutes)
+        return models(FakeCentral(), store, memory)
+    }
+
+    @Test
+    fun aWalkLeftOpenComesBackPausedWithTheFinishQuestion() = runTest {
+        val store = LocalStore(DriverFactory())
+        val reopened = walkLeftOpen(store, MemoryStore())
+        runCurrent()
+
+        val state = reopened.live.state.value
+        val recording = assertNotNull(state.recording)
+        assertTrue(recording.paused)
+        assertTrue(recording.freeRun)
+        assertEquals("Walk", recording.title)
+        assertEquals(30, recording.elapsedSeconds)
+        val prompt = assertNotNull(state.finishPrompt)
+        assertEquals(FinishReason.APP_CLOSED, prompt.reason)
+        assertEquals(30, prompt.endsAtSeconds)
+        assertEquals(5, prompt.sinceMinutes)
+    }
+
+    @Test
+    fun finishingAWalkLeftOpenSavesItUpToItsLastEvent() = runTest {
+        val store = LocalStore(DriverFactory())
+        val reopened = walkLeftOpen(store, MemoryStore())
+        runCurrent()
+        val stoppedAt = store.events(store.unfinishedExecution()!!.id.value).last().at
+
+        reopened.live.stopRecording()
+        runCurrent()
+
+        assertNull(reopened.live.state.value.recording)
+        assertEquals(30, reopened.live.state.value.summary?.durationSeconds)
+        assertNull(store.unfinishedExecution())
+        val saved = store.finishedSessions().first().single()
+        assertEquals(stoppedAt, saved.execution.endedAt)
+        assertEquals(30.seconds, saved.totals?.active)
+        assertEquals(58.0, saved.totals?.distanceMeters) // from the first reading in the recording to the last
+    }
+
+    @Test
+    fun aWalkLeftOpenFinishesOnItsOwnWhenNobodyAnswers() = runTest {
+        val store = LocalStore(DriverFactory())
+        val reopened = walkLeftOpen(store, MemoryStore())
+        runCurrent()
+
+        advanceTimeBy(LiveModel.AUTO_FINISH_AFTER + 1.seconds)
+
+        assertNull(reopened.live.state.value.recording)
+        assertEquals(30.seconds, store.finishedSessions().first().single().totals?.active)
+    }
+
+    @Test
+    fun discardingAWalkLeftOpenLeavesNoTrace() = runTest {
+        val store = LocalStore(DriverFactory())
+        val reopened = walkLeftOpen(store, MemoryStore())
+        runCurrent()
+        val id = store.unfinishedExecution()!!.id.value
+
+        assertTrue(reopened.live.discardRecording(id))
+
+        assertNull(reopened.live.state.value.recording)
+        assertNull(reopened.live.state.value.finishPrompt)
+        assertNull(store.unfinishedExecution())
+        assertTrue(store.events(id).isEmpty())
+        assertTrue(store.finishedSessions().first().isEmpty())
     }
 }

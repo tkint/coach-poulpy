@@ -250,7 +250,7 @@ internal fun sessionTotals(events: List<SessionEvent>, timeline: Timeline?): Ses
 internal fun sessionRow(session: StoredSession, totals: SessionTotals, labels: Labels): SessionRow {
     val execution = session.execution
     val freeRun = execution.source == ExecutionSource.DEVICE_ONLY
-    val treadmill = freeRun || execution.workout == null || totals.distanceMeters != null
+    val treadmill = freeRun || execution.source == ExecutionSource.LIVE_WORKOUT || execution.workout == null || totals.distanceMeters != null
     return SessionRow(
         id = execution.id.value,
         title = session.title ?: when {

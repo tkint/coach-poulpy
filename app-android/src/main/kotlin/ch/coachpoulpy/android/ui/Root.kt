@@ -42,8 +42,9 @@ private enum class Tab(@StringRes val label: Int, val icon: ImageVector) {
  */
 private typealias Route = String
 
+/** [openLive] shows the Live tab, as when the recording notification is tapped; [onLiveOpened] says it was done. */
 @Composable
-fun CoachPoulpyRoot(graph: AppGraph) {
+fun CoachPoulpyRoot(graph: AppGraph, openLive: Boolean = false, onLiveOpened: () -> Unit = {}) {
     var tab by rememberSaveable { mutableStateOf(Tab.HOME) }
     var libraryView by rememberSaveable { mutableStateOf(LibraryView.WORKOUTS) }
     var route by rememberSaveable { mutableStateOf<Route?>(null) }
@@ -57,6 +58,15 @@ fun CoachPoulpyRoot(graph: AppGraph) {
     }
 
     BackHandler(enabled = route != null) { close() }
+
+    LaunchedEffect(openLive) {
+        if (openLive) {
+            route = null
+            back = null
+            tab = Tab.LIVE
+            onLiveOpened()
+        }
+    }
 
     when (val current = route) {
         null -> Scaffold(
@@ -81,6 +91,7 @@ fun CoachPoulpyRoot(graph: AppGraph) {
                     onOpenWorkout = { route = "workout:$it" },
                     onStart = { route = "player:$it" },
                     onResume = { route = "resume" },
+                    onOpenLive = { tab = Tab.LIVE },
                     onOpenSession = { route = "session:$it" },
                     onOpenLibrary = {
                         libraryView = LibraryView.WORKOUTS

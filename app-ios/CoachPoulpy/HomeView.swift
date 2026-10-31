@@ -16,12 +16,16 @@ private enum Cover: Identifiable {
 struct HomeView: View {
     let graph: AppGraph
     let onOpenLibrary: () -> Void
+    /// Opens the Live tab, for a Live recording left open.
+    let onOpenLive: () -> Void
     @StateObject private var home: Observed<HomeModel, HomeState>
     @State private var cover: Cover?
+    @State private var discarding = false
 
-    init(graph: AppGraph, onOpenLibrary: @escaping () -> Void) {
+    init(graph: AppGraph, onOpenLibrary: @escaping () -> Void, onOpenLive: @escaping () -> Void) {
         self.graph = graph
         self.onOpenLibrary = onOpenLibrary
+        self.onOpenLive = onOpenLive
         // Built once: StateObject evaluates this only for the first init of the view.
         _home = StateObject(wrappedValue: {
             let model = graph.home(languageCode: Language.code)
@@ -76,6 +80,11 @@ struct HomeView: View {
             .background(PoulpyColor.background)
             .navigationTitle("tab.home")
             .onAppear { home.model.refresh() }
+            .confirmationDialog("home.discardTitle", isPresented: $discarding, titleVisibility: .visible) {
+                Button("home.discard", role: .destructive) { home.model.discardUnfinished() }
+            } message: {
+                Text("home.discardBody")
+            }
             .fullScreenCover(item: $cover, onDismiss: { home.model.refresh() }) { cover in
                 switch cover {
                 case .player(let id): PlayerView(graph: graph, workoutId: id)
@@ -111,7 +120,7 @@ struct HomeView: View {
         }
     }
 
-    /// A workout to do today, or left halfway.
+    /// A workout to do today, or a session left halfway, which can be opened (it comes back paused) or discarded.
     private func plannedCard(_ item: TodayItem) -> some View {
         let inProgress = item.status == .inProgress
         return VStack(alignment: .leading, spacing: 12) {
@@ -124,7 +133,9 @@ struct HomeView: View {
                     .accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(item.title).font(PoulpyFont.headline).foregroundStyle(PoulpyColor.onSurface)
-                    Text(item.details).font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+                    if !item.details.isEmpty {
+                        Text(item.details).font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+                    }
                 }
                 Spacer(minLength: 0)
             }
@@ -134,7 +145,17 @@ struct HomeView: View {
                 Text(item.exercises).font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurface)
             }
             HStack(spacing: 8) {
-                if let workoutId = item.workoutId {
+                if inProgress {
+                    // Destructive, so crimson with an icon, never ember.
+                    Button { discarding = true } label: {
+                        Label("home.discard", systemImage: "trash")
+                            .font(.poulpy(.body).weight(.heavy))
+                            .frame(maxWidth: .infinity, minHeight: 48)
+                            .foregroundStyle(PoulpyColor.error)
+                            .overlay(Capsule().stroke(PoulpyColor.error, lineWidth: 2))
+                    }
+                    .buttonStyle(.plain)
+                } else if let workoutId = item.workoutId {
                     NavigationLink {
                         WorkoutPageView(graph: graph, workoutId: workoutId)
                     } label: {
@@ -146,9 +167,10 @@ struct HomeView: View {
                     .buttonStyle(.plain)
                 }
                 Button {
-                    cover = .player(workoutId: inProgress ? nil : item.workoutId)
+                    if inProgress && item.live { onOpenLive() } else { cover = .player(workoutId: inProgress ? nil : item.workoutId) }
                 } label: {
-                    Label(LocalizedStringKey(inProgress ? "player.resume" : "action.start"), systemImage: "play.fill")
+                    // "Open", not "Resume": the session comes back paused.
+                    Label(LocalizedStringKey(inProgress ? "home.openSession" : "action.start"), systemImage: "play.fill")
                         .font(.poulpy(.body).weight(.heavy))
                         .frame(maxWidth: .infinity, minHeight: 48)
                         .foregroundStyle(PoulpyColor.onPrimary)
