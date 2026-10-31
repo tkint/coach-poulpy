@@ -94,7 +94,11 @@ class DragReorder internal constructor(
             bottom > viewportBottom - edge -> (bottom - (viewportBottom - edge)) / edge
             else -> 0f
         }
-        return near.coerceIn(-1f, 1f) * maxStep
+        val step = near.coerceIn(-1f, 1f) * maxStep
+        // A lazy list drops an item that scrolls out of view, which would end the drag: don't scroll
+        // the item's own place off the screen, even when nothing above or below accepts it.
+        val leaves = if (step > 0f) frame.top + frame.height - step <= viewportTop else frame.top - step >= viewportBottom
+        return if (leaves) 0f else step
     }
 
     /** True when the dragged item's middle now sits over another item, which it takes the place of. */
