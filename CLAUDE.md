@@ -9,7 +9,7 @@ A training platform: Android and iOS apps first, guest-only and offline, with a 
 - `docs/architecture.md`: the overview, for anything spanning modules.
 - `docs/design-system.md` and `docs/brand.md`: before any screen, colour, copy or Poulpy change.
 - `CONTRIBUTING.md`: the issue-to-PR flow and labels.
-- `docs/agents/roles.md`: the long-running role threads (Architect, Designer, Poulpy keeper, Translator, Maintainer), what each owns, and when to consult them and hand back.
+- `docs/agents/areas.md`: the rules per area (model and schema, screens and mockups, Poulpy, translations, housekeeping). Read the sections for the areas you touch; there are no role threads to consult.
 
 ## Prove a change works
 
@@ -31,6 +31,7 @@ Android and iOS only build in CI (`.github/workflows/ci.yml`); a PR is done when
 - Poulpy is never guilt: pain or rehab always shows the blue side, and errors are crimson with an icon, never ember.
 - A schema change is a new SQLDelight migration; existing phones keep their data.
 - The docs site is the source of truth. The Docs site workflow comments each PR's preview and the docs pages, sections and mockups to review (`site/review-links.mjs`); never post a review comment of your own. Put anything the reviewer must know in the PR description, and say `Closes #n` so the mockups drawn for that issue are linked.
+- One review per PR, not one per area. Only the Maintainer is a long-running thread; every other task is a short thread that reads these docs.
 - Branches are named `<type>/<issue-number>-<short-description>` in English (`feat/21-training-plans`, or `docs/brand-decisions` with no issue); types `feat`, `fix`, `docs`, `chore`, `design`. Never a random suffix, session id or `claude/` prefix, even if a tool suggests one.
 
 ## Agent skills
