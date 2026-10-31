@@ -31,6 +31,8 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 
 /** A workout leaves as a `.poulpyworkout` file and comes back as a copy, or is refused with nothing saved. */
 class WorkoutFileTest {
@@ -199,7 +201,7 @@ class WorkoutFileTest {
     @Test
     fun theWorkoutPageHandsOverItsFile() {
         graph.store.saveWorkout(sets())
-        val page = WorkoutPageModel(sets().id, graph.store, graph.compiler, catalog, "en")
+        val page = WorkoutPageModel(sets().id, graph.store, graph.compiler, catalog, "en", scope = CoroutineScope(Dispatchers.Default))
         assertEquals("upper-body.poulpyworkout", page.exportFile()?.fileName)
         page.close()
     }
