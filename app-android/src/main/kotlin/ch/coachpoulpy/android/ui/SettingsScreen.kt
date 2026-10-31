@@ -168,7 +168,7 @@ private fun ColumnScope.General(graph: AppGraph) {
         hint = R.string.settings_unitsHint,
     )
     Text(
-        stringResource(R.string.settings_buildNumber, BuildConfig.VERSION_CODE.toString()),
+        stringResource(R.string.settings_version, BuildConfig.VERSION_NAME),
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         style = MaterialTheme.typography.labelSmall,
         modifier = Modifier.fillMaxWidth(),

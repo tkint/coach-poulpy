@@ -140,6 +140,7 @@ export default withMermaid(
             { text: 'Issues, skills and PRs', link: '/CONTRIBUTING' },
             { text: 'House rules', link: '/CLAUDE' },
             { text: 'Rules by area', link: '/docs/agents/areas' },
+            { text: 'Releasing a beta', link: '/docs/releasing' },
             { text: 'Issue tracker', link: '/docs/agents/issue-tracker' },
             { text: 'Triage labels', link: '/docs/agents/triage-labels' },
             { text: 'Domain docs', link: '/docs/agents/domain' },
