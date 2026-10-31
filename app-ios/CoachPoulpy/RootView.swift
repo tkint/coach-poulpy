@@ -10,6 +10,7 @@ struct RootView: View {
     @State private var tab = AppTab.home
     @State private var librarySection = LibrarySection.workouts
     @State private var settingsSection = SettingsSection.general
+    @State private var incoming: IncomingWorkoutFile?
 
     init(graph: AppGraph) {
         self.graph = graph
@@ -44,5 +45,8 @@ struct RootView: View {
         .font(.poulpy(.body))
         .environment(\.unitSystem, settings.value.units)
         .preferredColorScheme(settings.value.theme.colorScheme)
+        // A .poulpyworkout file opened from another app shows a preview before it is added.
+        .onOpenURL { url in incoming = IncomingWorkoutFile(url: url) }
+        .modifier(ImportPresenter(graph: graph, incoming: $incoming))
     }
 }

@@ -27,6 +27,21 @@
     <string>$(CURRENT_PROJECT_VERSION)</string>
     <key>NSBluetoothAlwaysUsageDescription</key>
     <string>Coach Poulpy connects to your treadmill to show and record your speed, distance and heart rate.</string>
+    <key>CFBundleDocumentTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleTypeName</key>
+            <string>Coach Poulpy workout</string>
+            <key>CFBundleTypeRole</key>
+            <string>Viewer</string>
+            <key>LSHandlerRank</key>
+            <string>Owner</string>
+            <key>LSItemContentTypes</key>
+            <array>
+                <string>ch.coachpoulpy.workout</string>
+            </array>
+        </dict>
+    </array>
     <key>UTExportedTypeDeclarations</key>
     <array>
         <dict>
