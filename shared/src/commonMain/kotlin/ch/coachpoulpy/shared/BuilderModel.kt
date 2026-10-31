@@ -634,8 +634,6 @@ class BuilderModel internal constructor(
             canMoveIntoRepeat = canMoveIntoRepeat,
             canMoveUp = canMoveUp,
             canMoveDown = canMoveDown,
-        canMoveUp = canMoveUp,
-        canMoveDown = canMoveDown,
             isLast = last,
             name = exercise?.let { labels.text(it.name) } ?: entry.exercise.value,
             pattern = exercise?.movementPattern ?: MovementPattern.CORE,
