@@ -217,6 +217,30 @@ class BuilderStepsTest {
     }
 
     @Test
+    fun theChevronsStopAtTheEndsOfThePartAndOfTheRepeat() {
+        val builder = graph.createWorkout("en")
+        builder.chooseFormat(WorkoutFormat.SETS)
+        builder.add("goblet-squat", builder.work)
+        builder.addRepeat(builder.work)
+        val steps = { builder.state.value.parts.single().steps }
+        val repeat = steps().last().key
+        builder.add("push-up", builder.work, repeat)
+        builder.add("plank", builder.work, repeat)
+
+        val squat = steps().first().row!!
+        assertEquals(false to true, squat.canMoveUp to squat.canMoveDown)
+        val group = steps().last().repeatGroup!!
+        assertEquals(true to false, group.canMoveUp to group.canMoveDown)
+        assertEquals(listOf(false to true, true to false), group.rows.map { it.canMoveUp to it.canMoveDown })
+
+        builder.moveDown(group.rows.first().key)
+        assertEquals(listOf("Plank", "Push-up"), steps().last().repeatGroup!!.rows.map { it.name })
+        builder.moveUp(repeat)
+        assertEquals(repeat, steps().first().key)
+        assertEquals(false to true, steps().first().repeatGroup!!.let { it.canMoveUp to it.canMoveDown })
+    }
+
+    @Test
     fun anExerciseAddedToARepeatStartsAtOneSet() {
         val builder = graph.createWorkout("en")
         builder.chooseFormat(WorkoutFormat.SETS)

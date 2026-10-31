@@ -36,7 +36,6 @@ import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.DragIndicator
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -131,22 +130,7 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
     LaunchedEffect(state.addedKey) { state.addedKey?.let { editing = it } }
     val colors = MaterialTheme.colorScheme
     val list = rememberLazyListState()
-    // A step moves among the steps of the list that holds it: its part's, or its repeat's. A drag stays in its part.
-    fun siblings(key: String): List<String>? = state.parts.firstNotNullOfOrNull { part ->
-        part.steps.map { it.key }.takeIf { key in it }
-            ?: part.steps.firstNotNullOfOrNull { step -> step.repeatGroup?.rows?.map { it.key }?.takeIf { key in it } }
-    }
-    val drag = rememberDragReorder(
-        // The name field, the part headers and the add tiles have keys that are not step keys.
-        canDropOn = { key, onto -> onto is String && siblings(key as String)?.contains(onto) == true },
-        onMove = { key, toKey ->
-            val keys = siblings(key as String).orEmpty()
-            val to = if (toKey is String) keys.indexOf(toKey) else -1
-            val moved = to >= 0 && keys.indexOf(key) != to
-            if (moved) model.move(key, to)
-            moved
-        },
-    )
+    val moves = rememberMoveTracker()
     fun pick(part: String, repeat: String?, role: StepRole) {
         pickingRole = role
         pickingRepeat = repeat
@@ -220,34 +204,33 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
                             StepCard(
                                 model, row, state.parts,
                                 onEdit = { editing = row.key },
-                                handle = Modifier.dragHandle(drag, row.key),
-                                modifier = Modifier.draggedItem(drag, row.key, this).padding(bottom = 12.dp),
+                                moves = moves,
+                                modifier = Modifier.animateItem().padding(bottom = 12.dp),
                             )
                         }
                     } else if (repeat != null) {
-                        // One item, so dragging the repeat lifts its steps and its add button with it.
+                        // One item, so moving the repeat carries its steps and its add button with it.
                         item(key = repeat.key) {
                             Column(
                                 Modifier
-                                    .draggedItem(drag, repeat.key, this)
+                                    .animateItem()
+                                    .keepInViewWhenMoved(moves, repeat.key)
                                     .padding(bottom = 12.dp)
                                     // The agreed `.builder-repeat` look: primary container mixed 55% with the background, plus a 1.5dp border.
                                     .background(lerp(colors.background, colors.primaryContainer, 0.55f), RoundedCornerShape(PoulpyRadius.md))
                                     .border(1.5.dp, colors.primaryContainer, RoundedCornerShape(PoulpyRadius.md))
                                     .padding(bottom = 10.dp),
                             ) {
-                                RepeatHeader(model, repeat, part.key, state.parts, handle = Modifier.dragHandle(drag, repeat.key))
+                                RepeatHeader(model, repeat, part.key, state.parts, moves)
                                 Column(Modifier.padding(start = 22.dp, end = 8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                                    // CLEANUP: the repeat's steps are not list items, so animateItem() can't slide them out of
-                                    // the way of a dragged step; they jump into place. Animate their placement so they slide like
-                                    // the list's items do.
+                                    // The repeat's steps are not list items, so animateItem() can't slide them; slideIntoPlace() does.
                                     repeat.rows.forEach { child ->
                                         key(child.key) {
                                             StepCard(
                                                 model, child, state.parts,
                                                 onEdit = { editing = child.key },
-                                                handle = Modifier.dragHandle(drag, child.key),
-                                                modifier = Modifier.draggedItem(drag, child.key),
+                                                moves = moves,
+                                                modifier = Modifier.slideIntoPlace(),
                                             )
                                         }
                                     }
@@ -444,26 +427,23 @@ private fun PartSheet(options: List<BuilderPartOption>, onPick: (PartKind) -> Un
     }
 }
 
-/** A repeat's header: its handle, "Repeat", how many times as − N times +, and a menu to duplicate, move or remove it. */
+/** A repeat's header: its up and down chevrons, "Repeat", how many times as − N times +, and a menu to duplicate, move or remove it. */
 @Composable
-private fun RepeatHeader(model: BuilderModel, repeat: BuilderRepeat, partKey: String, parts: List<BuilderPart>, handle: Modifier) {
+private fun RepeatHeader(model: BuilderModel, repeat: BuilderRepeat, partKey: String, parts: List<BuilderPart>, moves: MoveTracker) {
     val colors = MaterialTheme.colorScheme
-    val moveUp = stringResource(R.string.builder_moveUp)
-    val moveDown = stringResource(R.string.builder_moveDown)
     Row(
-        Modifier
-            .fillMaxWidth()
-            .padding(start = 12.dp, end = 4.dp, top = 8.dp, bottom = 8.dp)
-            .semantics {
-                customActions = listOf(
-                    CustomAccessibilityAction(moveUp) { model.moveUp(repeat.key); true },
-                    CustomAccessibilityAction(moveDown) { model.moveDown(repeat.key); true },
-                )
-            },
+        Modifier.fillMaxWidth().padding(start = 8.dp, end = 4.dp, top = 4.dp, bottom = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Icon(Icons.Filled.DragIndicator, contentDescription = null, tint = PoulpyPalette.Neutral500, modifier = handle.size(28.dp, 44.dp).padding(horizontal = 4.dp, vertical = 12.dp))
+        MoveChevrons(
+            upLabel = stringResource(R.string.builder_moveRepeatUp),
+            downLabel = stringResource(R.string.builder_moveRepeatDown),
+            canMoveUp = repeat.canMoveUp,
+            canMoveDown = repeat.canMoveDown,
+            onMoveUp = { moves.moved(repeat.key); model.moveUp(repeat.key) },
+            onMoveDown = { moves.moved(repeat.key); model.moveDown(repeat.key) },
+        )
         Icon(Icons.Filled.Repeat, contentDescription = null, tint = colors.primary)
         Text(stringResource(R.string.builder_repeat), style = PoulpyTextStyles.Headline.copy(fontSize = 19.sp, lineHeight = 23.sp), color = colors.onPrimaryContainer, modifier = Modifier.weight(1f))
         Row(
@@ -525,32 +505,30 @@ private fun BoxField(
 
 /** A step of the workout, read-only: its role, name and summary. A tap edits it in a sheet; the menu has the rest. */
 @Composable
-private fun StepCard(model: BuilderModel, row: BuilderRow, parts: List<BuilderPart>, onEdit: () -> Unit, handle: Modifier, modifier: Modifier) {
+private fun StepCard(model: BuilderModel, row: BuilderRow, parts: List<BuilderPart>, onEdit: () -> Unit, moves: MoveTracker, modifier: Modifier) {
     val colors = MaterialTheme.colorScheme
-    val moveUp = stringResource(R.string.builder_moveUp)
-    val moveDown = stringResource(R.string.builder_moveDown)
     val moveIn = stringResource(R.string.builder_moveIntoRepeat)
     val moveOut = stringResource(R.string.builder_moveOutOfRepeat)
     Surface(
         shape = RoundedCornerShape(PoulpyRadius.md),
         color = colors.surface,
         border = BorderStroke(1.dp, colors.outline),
-        // Screen readers can't drag: they get the moves as actions on the card.
-        modifier = modifier.fillMaxWidth().semantics {
+        // The chevrons move a step up and down; moving into a repeat or out of it are actions on the card.
+        modifier = modifier.keepInViewWhenMoved(moves, row.key).fillMaxWidth().semantics {
             customActions = listOfNotNull(
-                CustomAccessibilityAction(moveUp) { model.moveUp(row.key); true },
-                CustomAccessibilityAction(moveDown) { model.moveDown(row.key); true },
                 if (row.canMoveIntoRepeat) CustomAccessibilityAction(moveIn) { model.moveIntoRepeatAbove(row.key); true } else null,
                 if (row.repeatKey != null) CustomAccessibilityAction(moveOut) { model.moveOutOfRepeat(row.key); true } else null,
             )
         },
     ) {
-        Row(Modifier.padding(start = 12.dp, end = 4.dp, top = 10.dp, bottom = 10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            Icon(
-                Icons.Filled.DragIndicator,
-                contentDescription = null,
-                tint = PoulpyPalette.Neutral500,
-                modifier = handle.size(28.dp, 44.dp).padding(horizontal = 4.dp, vertical = 12.dp),
+        Row(Modifier.padding(start = 8.dp, end = 4.dp, top = 6.dp, bottom = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            MoveChevrons(
+                upLabel = stringResource(R.string.builder_moveStepUp, row.name),
+                downLabel = stringResource(R.string.builder_moveStepDown, row.name),
+                canMoveUp = row.canMoveUp,
+                canMoveDown = row.canMoveDown,
+                onMoveUp = { moves.moved(row.key); model.moveUp(row.key) },
+                onMoveDown = { moves.moved(row.key); model.moveDown(row.key) },
             )
             Column(
                 Modifier.weight(1f).clickable(onClickLabel = stringResource(R.string.builder_open, row.name), onClick = onEdit),

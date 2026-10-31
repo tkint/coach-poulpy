@@ -35,14 +35,12 @@ struct BuilderView: View {
 
     /// The step being edited in the sheet: the one just added, or the one tapped.
     @State private var editing: String?
-    // The card being dragged, where its middle started and how far the finger went.
-    @State private var dragging: String?
-    @State private var dragStart: CGFloat = 0
-    @State private var dragY: CGFloat = 0
-    @State private var frames: [String: CGRect] = [:]
+    /// The step or repeat the chevrons moved last: the list scrolls just enough to show it.
+    @State private var movedKey: String?
 
     var body: some View {
         NavigationStack {
+            ScrollViewReader { scroller in
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
                     VStack(alignment: .leading, spacing: 6) {
@@ -69,8 +67,15 @@ struct BuilderView: View {
                 .padding(.horizontal, 20)
                 .padding(.top, 8)
                 .padding(.bottom, PoulpySpace.xl)
-                .coordinateSpace(name: "builder")
-                .onPreferenceChange(CardFrames.self) { frames = $0 }
+            }
+            .onChange(of: movedKey) { key in
+                // Once the move has its new place, scroll only as far as it takes to show the step in full.
+                guard let key else { return }
+                DispatchQueue.main.async {
+                    withAnimation(.easeInOut(duration: 0.25)) { scroller.scrollTo(key) }
+                    movedKey = nil
+                }
+            }
             }
             .background(PoulpyColor.background)
             .navigationTitle(LocalizedStringKey(model.isEditing ? "builder.editTitle" : "builder.newTitle"))
@@ -165,9 +170,9 @@ struct BuilderView: View {
             partHeader(part)
             ForEach(part.steps, id: \.key) { step in
                 if let row = step.row {
-                    card(row).liftable(step.key, dragging: dragging, dragStart: dragStart, dragY: dragY, frames: frames)
+                    card(row)
                 } else if let group = step.repeatGroup {
-                    repeatBlock(group, in: part.key).liftable(step.key, dragging: dragging, dragStart: dragStart, dragY: dragY, frames: frames)
+                    repeatBlock(group, in: part.key).id(group.key)
                 }
             }
             addStepButton(Text(part.addLabel), height: 56, part: part.key, repeatKey: nil)
@@ -209,16 +214,22 @@ struct BuilderView: View {
         EntryCard(
             model: model, row: row, roleOptions: model.roleOptions, parts: state.parts, open: false,
             onOpen: { editing = row.key },
-            onDrag: { drag(row.key, by: $0) },
-            onDrop: drop
+            onMove: { move(row.key, by: $0) }
         )
+        .id(row.key)
     }
 
     /// A repeat: its header with − N times +, its steps inside a tinted block, and a way to add one.
     private func repeatBlock(_ group: BuilderRepeat, in partKey: String) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 8) {
-                dragHandle(group.key)
+                MoveChevrons(
+                    upLabel: Text("builder.moveRepeatUp"),
+                    downLabel: Text("builder.moveRepeatDown"),
+                    canMoveUp: group.canMoveUp,
+                    canMoveDown: group.canMoveDown,
+                    onMove: { move(group.key, by: $0) }
+                )
                 Image(systemName: "repeat").font(.system(size: 17, weight: .bold)).foregroundStyle(PoulpyColor.primary)
                 Text("builder.repeat")
                     .font(.custom(PoulpyFontFace.baloo2Bold, size: 19, relativeTo: .headline))
@@ -247,35 +258,19 @@ struct BuilderView: View {
                 .accessibilityLabel(Text("builder.repeatActions"))
             }
             .accessibilityElement(children: .contain)
-            .accessibilityAction(named: Text("builder.moveUp")) { model.moveUp(key: group.key) }
-            .accessibilityAction(named: Text("builder.moveDown")) { model.moveDown(key: group.key) }
             VStack(spacing: 6) {
                 ForEach(group.rows, id: \.key) { row in
-                    card(row).liftable(row.key, dragging: dragging, dragStart: dragStart, dragY: dragY, frames: frames)
+                    card(row)
                 }
                 addStepButton(Text("builder.addToRepeat"), height: 44, part: partKey, repeatKey: group.key)
             }
             .padding(.leading, 10)
         }
-        .padding(EdgeInsets(top: 8, leading: 12, bottom: 10, trailing: 8))
+        .padding(EdgeInsets(top: 4, leading: 6, bottom: 10, trailing: 8))
         // The agreed `.builder-repeat` look: primary container mixed 55% with the background, plus a 1.5pt border.
         .background(PoulpyColor.background, in: RoundedRectangle(cornerRadius: 16))
         .background(PoulpyColor.primaryContainer.opacity(0.55), in: RoundedRectangle(cornerRadius: 16))
         .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(PoulpyColor.primaryContainer, lineWidth: 1.5))
-    }
-
-    private func dragHandle(_ key: String) -> some View {
-        Image(systemName: "line.3.horizontal")
-            .font(.system(size: 16, weight: .bold))
-            .foregroundStyle(PoulpyPalette.neutral500)
-            .frame(width: 28, height: 44)
-            .contentShape(Rectangle())
-            .highPriorityGesture(
-                DragGesture(minimumDistance: 1, coordinateSpace: .named("builder"))
-                    .onChanged { drag(key, by: $0.translation.height) }
-                    .onEnded { _ in drop() }
-            )
-            .accessibilityHidden(true)
     }
 
     private func timesButton(_ symbol: String, _ description: LocalizedStringKey, _ action: @escaping () -> Void) -> some View {
@@ -315,46 +310,13 @@ struct BuilderView: View {
             .contentShape(RoundedRectangle(cornerRadius: 16))
     }
 
-    /// The keys of the list holding [key]: its part's steps, or its repeat's. A drag stays in its part.
-    private func siblings(_ key: String) -> [String] {
-        for part in state.parts {
-            let top = part.steps.map(\.key)
-            if top.contains(key) { return top }
-            for step in part.steps {
-                if let rows = step.repeatGroup?.rows.map(\.key), rows.contains(key) { return rows }
-            }
-        }
-        return []
-    }
-
-    /// Follows the finger; once the card's middle passes over another step of its list, it takes that step's place.
-    private func drag(_ key: String, by y: CGFloat) {
-        if dragging == nil {
-            dragging = key
-            dragStart = frames[key]?.midY ?? 0
-        }
-        dragY = y
-        let middle = dragStart + y
-        let keys = siblings(key)
-        guard
-            let from = keys.firstIndex(of: key),
-            let to = keys.firstIndex(where: { other in
-                guard other != key, let frame = frames[other] else { return false }
-                return frame.minY <= middle && middle < frame.maxY
-            }),
-            to != from
-        else { return }
+    /// Moves a step or a repeat one place up (-1) or down (1) among its siblings, sliding it there.
+    private func move(_ key: String, by direction: Int) {
         withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
-            model.move(key: key, toIndex: Int32(to))
+            if direction < 0 { model.moveUp(key: key) } else { model.moveDown(key: key) }
         }
         UIImpactFeedbackGenerator(style: .light).impactOccurred()
-    }
-
-    private func drop() {
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
-            dragging = nil
-            dragY = 0
-        }
+        movedKey = key
     }
 
     private func fieldLabel(_ key: LocalizedStringKey) -> some View {
@@ -503,7 +465,7 @@ private struct StepSheet: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 14) {
-                EntryCard(model: model, row: row, roleOptions: model.roleOptions, parts: parts, format: format, open: true, onOpen: {}, onDrag: { _ in }, onDrop: {})
+                EntryCard(model: model, row: row, roleOptions: model.roleOptions, parts: parts, format: format, open: true, onOpen: {}, onMove: { _ in })
                     .id(row.key)
                 Button(action: onDone) {
                     Text("action.done")
@@ -522,18 +484,33 @@ private struct StepSheet: View {
     }
 }
 
-extension View {
-    /// Lifts the step being dragged above the others with a shadow, and records where each step sits.
-    fileprivate func liftable(_ key: String, dragging: String?, dragStart: CGFloat, dragY: CGFloat, frames: [String: CGRect]) -> some View {
-        let lifted = dragging == key
-        return self
-            .background(GeometryReader { geometry in
-                Color.clear.preference(key: CardFrames.self, value: [key: geometry.frame(in: .named("builder"))])
-            })
-            .offset(y: lifted ? dragStart + dragY - (frames[key]?.midY ?? dragStart) : 0)
-            .shadow(color: .black.opacity(lifted ? 0.18 : 0), radius: 12, y: 6)
-            .zIndex(lifted ? 1 : 0)
-            .transaction { if lifted { $0.animation = nil } }
+/// The up and down chevrons that move a step or a repeat among its siblings. A chevron at the end of the
+/// list stays in place, dimmed and disabled, so nothing jumps. Each is 44 pt wide and 32 pt tall, as in the agreed mockup.
+private struct MoveChevrons: View {
+    let upLabel: Text
+    let downLabel: Text
+    let canMoveUp: Bool
+    let canMoveDown: Bool
+    let onMove: (Int) -> Void
+
+    var body: some View {
+        VStack(spacing: 0) {
+            chevron("chevron.up", upLabel, enabled: canMoveUp) { onMove(-1) }
+            chevron("chevron.down", downLabel, enabled: canMoveDown) { onMove(1) }
+        }
+    }
+
+    private func chevron(_ symbol: String, _ label: Text, enabled: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: symbol)
+                .font(.system(size: 16, weight: .heavy))
+                .foregroundStyle(enabled ? PoulpyColor.primary : PoulpyColor.outline)
+                .frame(width: 44, height: 32)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .disabled(!enabled)
+        .accessibilityLabel(label)
     }
 }
 
@@ -548,12 +525,11 @@ private struct EntryCard: View {
     let format: WorkoutFormat?
     let open: Bool
     let onOpen: () -> Void
-    let onDrag: (CGFloat) -> Void
-    let onDrop: () -> Void
+    let onMove: (Int) -> Void
     @State private var weight: String
     @State private var editing: TargetField?
 
-    init(model: BuilderModel, row: BuilderRow, roleOptions: [StepRoleOption], parts: [BuilderPart], format: WorkoutFormat? = nil, open: Bool, onOpen: @escaping () -> Void, onDrag: @escaping (CGFloat) -> Void, onDrop: @escaping () -> Void) {
+    init(model: BuilderModel, row: BuilderRow, roleOptions: [StepRoleOption], parts: [BuilderPart], format: WorkoutFormat? = nil, open: Bool, onOpen: @escaping () -> Void, onMove: @escaping (Int) -> Void) {
         self.model = model
         self.row = row
         self.roleOptions = roleOptions
@@ -561,27 +537,21 @@ private struct EntryCard: View {
         self.format = format
         self.open = open
         self.onOpen = onOpen
-        self.onDrag = onDrag
-        self.onDrop = onDrop
+        self.onMove = onMove
         _weight = State(initialValue: row.loadKg.map { EntryCard.format($0.doubleValue) } ?? "")
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 10) {
-                // Only the handle drags, so the rest of the card still scrolls the list.
                 if !open {
-                Image(systemName: "line.3.horizontal")
-                    .font(.system(size: 16, weight: .bold))
-                    .foregroundStyle(PoulpyPalette.neutral500)
-                    .frame(width: 28, height: 44)
-                    .contentShape(Rectangle())
-                    .highPriorityGesture(
-                        DragGesture(minimumDistance: 1, coordinateSpace: .named("builder"))
-                            .onChanged { onDrag($0.translation.height) }
-                            .onEnded { _ in onDrop() }
+                    MoveChevrons(
+                        upLabel: Text(L("builder.moveStepUp %@", row.name)),
+                        downLabel: Text(L("builder.moveStepDown %@", row.name)),
+                        canMoveUp: row.canMoveUp,
+                        canMoveDown: row.canMoveDown,
+                        onMove: onMove
                     )
-                    .accessibilityHidden(true)
                 }
                 Button(action: onOpen) {
                     VStack(alignment: .leading, spacing: 2) {
@@ -598,9 +568,7 @@ private struct EntryCard: View {
                     .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
-                // Screen readers can't drag: they get the moves as actions.
-                .accessibilityAction(named: Text("builder.moveUp")) { model.moveUp(key: row.key) }
-                .accessibilityAction(named: Text("builder.moveDown")) { model.moveDown(key: row.key) }
+                // The chevrons move a step up and down; moving into a repeat or out of it are actions on the card.
                 .accessibilityActions {
                     if row.canMoveIntoRepeat {
                         Button("builder.moveIntoRepeat") { model.moveIntoRepeatAbove(key: row.key) }
@@ -649,7 +617,7 @@ private struct EntryCard: View {
                     .foregroundStyle(PoulpyColor.onSurfaceVariant)
             }
         }
-        .padding(EdgeInsets(top: 10, leading: 12, bottom: open ? 14 : 10, trailing: 8))
+        .padding(EdgeInsets(top: open ? 10 : 6, leading: open ? 12 : 6, bottom: open ? 14 : 6, trailing: 8))
         .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 16))
         .overlay(RoundedRectangle(cornerRadius: 16).stroke(PoulpyColor.outline, lineWidth: 1))
     }
@@ -964,14 +932,6 @@ private struct ValueSheet: View {
 
     private func sectionLabel(_ key: LocalizedStringKey) -> some View {
         Text(key).textCase(.uppercase).font(PoulpyFont.label).kerning(1).foregroundStyle(PoulpyColor.onSurfaceVariant)
-    }
-}
-
-/// Where each exercise card sits in the builder, so a drag knows which card it is over.
-private struct CardFrames: PreferenceKey {
-    static var defaultValue: [String: CGRect] = [:]
-    static func reduce(value: inout [String: CGRect], nextValue: () -> [String: CGRect]) {
-        value.merge(nextValue()) { $1 }
     }
 }
 
