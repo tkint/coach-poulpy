@@ -379,5 +379,13 @@
     "incline": "Inclinaison",
     "energy": "Énergie",
     "power": "Puissance"
+  },
+  "import": {
+    "someoneSent": "Quelqu’un vous a envoyé une séance",
+    "title": "Ajouter cette séance ?",
+    "note": "Elle est ajoutée en copie dans votre bibliothèque. Rien de ce que vous avez déjà ne change.",
+    "add": "Ajouter à ma bibliothèque",
+    "errorTitle": "Impossible d’ajouter cette séance",
+    "nothingAdded": "Rien n’a été ajouté à votre bibliothèque."
   }
 }

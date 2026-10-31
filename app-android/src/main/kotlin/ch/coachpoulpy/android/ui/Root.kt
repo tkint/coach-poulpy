@@ -18,6 +18,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -37,14 +38,21 @@ private enum class Tab(@StringRes val label: Int, val icon: ImageVector) {
 
 /**
  * The screen shown over the tabs, as a string so it survives rotation:
- * "builder:" (new), "builder:<id>", "builder-add:<slug>" (new, holding that exercise), "builder-copy:<id>" (an unsaved copy), "player:<id>", "resume", "workout:<id>", "exercise:<slug>", "session:<id>",
+ * "import" (a workout file opened from another app), "builder:" (new), "builder:<id>", "builder-add:<slug>" (new, holding that exercise), "builder-copy:<id>" (an unsaved copy), "player:<id>", "resume", "workout:<id>", "exercise:<slug>", "session:<id>",
  * "device-add", "device-sources" or "device:<key>".
  */
 private typealias Route = String
 
 /** [openLive] shows the Live tab, as when the recording notification is tapped; [onLiveOpened] says it was done. */
 @Composable
-fun CoachPoulpyRoot(graph: AppGraph, openLive: Boolean = false, onLiveOpened: () -> Unit = {}) {
+fun CoachPoulpyRoot(
+    graph: AppGraph,
+    openLive: Boolean = false,
+    onLiveOpened: () -> Unit = {},
+    /** The text of a workout file opened from another app, until the preview shows; [onImportOpened] says it was. */
+    importFile: String? = null,
+    onImportOpened: () -> Unit = {},
+) {
     var tab by rememberSaveable { mutableStateOf(Tab.HOME) }
     var libraryView by rememberSaveable { mutableStateOf(LibraryView.WORKOUTS) }
     var route by rememberSaveable { mutableStateOf<Route?>(null) }
@@ -58,6 +66,17 @@ fun CoachPoulpyRoot(graph: AppGraph, openLive: Boolean = false, onLiveOpened: ()
     }
 
     BackHandler(enabled = route != null) { close() }
+
+    // The file lives in memory only: after a rotation the preview is gone and the tabs show again.
+    var opened by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(importFile) {
+        if (importFile != null) {
+            opened = importFile
+            back = null
+            route = "import"
+            onImportOpened()
+        }
+    }
 
     LaunchedEffect(openLive) {
         if (openLive) {
@@ -133,6 +152,21 @@ fun CoachPoulpyRoot(graph: AppGraph, openLive: Boolean = false, onLiveOpened: ()
                         }
                     },
                     modifier = modifier,
+                )
+            }
+        }
+        "import" -> {
+            val text = opened
+            if (text == null) {
+                LaunchedEffect(Unit) { close() }
+            } else {
+                ImportScreen(
+                    graph, language, fileText = text,
+                    onAdded = {
+                        opened = null
+                        route = "workout:$it"
+                    },
+                    onClose = { opened = null; close() },
                 )
             }
         }
