@@ -258,7 +258,10 @@ struct BuilderView: View {
             .padding(.leading, 10)
         }
         .padding(EdgeInsets(top: 8, leading: 12, bottom: 10, trailing: 8))
-        .background(PoulpyColor.primaryContainer, in: RoundedRectangle(cornerRadius: 16))
+        // The agreed `.builder-repeat` look: primary container mixed 55% with the background, plus a 1.5pt border.
+        .background(PoulpyColor.background, in: RoundedRectangle(cornerRadius: 16))
+        .background(PoulpyColor.primaryContainer.opacity(0.55), in: RoundedRectangle(cornerRadius: 16))
+        .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(PoulpyColor.primaryContainer, lineWidth: 1.5))
     }
 
     private func dragHandle(_ key: String) -> some View {
