@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Session share card</title>
+<meta name="mockup:screen" content="session-share-card">
+<meta name="mockup:section" content="Session summary">
+<meta name="mockup:issue" content="125">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../../../web/src/styles/tokens.css">
+<link rel="stylesheet" href="../../shared/mockup.css">
+<script src="../../shared/mockup-theme.js"></script>
+<style>
+  /* The card is a 4:5 picture (1080 x 1350), shown here at a quarter of its size. */
+  .share-stage { display: flex; flex-wrap: wrap; gap: 32px; justify-content: center; padding: 32px 16px; }
+  .share-card {
+    width: 270px; height: 337px; overflow: hidden; box-sizing: border-box; padding: 10px 22px 10px;
+    display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px;
+    border-radius: 12px; background: var(--cp-primary-container); color: var(--cp-on-primary-container);
+    font-family: var(--cp-font-body);
+  }
+  .share-card img { width: 64px; height: 64px; }
+  .share-card h2 { margin: 0; font-family: var(--cp-font-display); font-size: 22px; line-height: 26px; font-weight: 800; }
+  .share-card .date { margin: 0; font-size: 12px; font-weight: 600; opacity: 0.8; }
+  .share-card dl { margin: 2px 0 0; width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .share-card dl div { background: var(--cp-surface); color: var(--cp-on-surface); border-radius: 10px; padding: 4px 10px; display: flex; flex-direction: column; align-items: flex-start; text-align: left; }
+  .share-card dt { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+  .share-card dd { margin: 0; font-family: var(--cp-font-display); font-size: 15px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .share-card footer { margin-top: auto; font-family: var(--cp-font-display); font-size: 13px; font-weight: 700; }
+  .share-stage figure { margin: 0; display: flex; flex-direction: column; gap: 8px; align-items: center; }
+  .share-stage figcaption { font-size: 13px; max-width: 270px; text-align: center; color: var(--cp-on-surface-variant); }
+</style>
+</head>
+<body>
+<div class="share-stage">
+  <figure>
+    <article class="share-card" id="card-with-machine" data-component="share-card" aria-label="Share card, with machine values">
+      <img src="../../../poulpy/mood_happy.svg" alt="Poulpy, happy">
+      <h2>Lower body strength</h2>
+      <p class="date">Saturday 24 October</p>
+      <dl>
+        <div><dt>Time</dt><dd>38:24</dd></div>
+        <div><dt>Sets</dt><dd>17 of 18</dd></div>
+        <div><dt>Distance</dt><dd>5.2 km</dd></div>
+        <div><dt>Avg speed</dt><dd>8.1 km/h</dd></div>
+        <div><dt>Energy</dt><dd>412 kcal</dd></div>
+      </dl>
+      <footer>Coach Poulpy</footer>
+    </article>
+    <figcaption>A machine sent distance, speed and energy. Heart rate is never on the card.</figcaption>
+  </figure>
+  <figure>
+    <article class="share-card" id="card-without-machine" data-component="share-card" aria-label="Share card, without machine values">
+      <img src="../../../poulpy/mood_happy.svg" alt="Poulpy, happy">
+      <h2>Upper body</h2>
+      <p class="date">Tuesday 27 October</p>
+      <dl>
+        <div><dt>Time</dt><dd>31:40</dd></div>
+        <div><dt>Sets</dt><dd>12 of 12</dd></div>
+      </dl>
+      <footer>Coach Poulpy</footer>
+    </article>
+    <figcaption>No machine, so no machine lines. A value that is missing is left out, never shown as zero.</figcaption>
+  </figure>
+  <figure>
+    <article class="share-card" id="card-champion" data-component="share-card" aria-label="Share card, eighth tentacle">
+      <img src="../../../poulpy/pose_champion.svg" alt="Poulpy, champion">
+      <h2>Lower body strength</h2>
+      <p class="date">Saturday 31 October</p>
+      <dl>
+        <div><dt>Time</dt><dd>38:24</dd></div>
+        <div><dt>Sets</dt><dd>17 of 18</dd></div>
+      </dl>
+      <footer>Coach Poulpy</footer>
+    </article>
+    <figcaption>The pose follows the PoulpyCoach rules of the end-of-session screen (Champion on the eighth tentacle). Never a guilty one: ember poses are not used.</figcaption>
+  </figure>
+</div>
+</body>
+</html>
