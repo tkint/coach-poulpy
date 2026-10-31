@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Workout import · preview</title>
+<meta name="mockup:screen" content="workout-import">
+<meta name="mockup:section" content="Workout import">
+<meta name="mockup:issue" content="129">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../../../web/src/styles/tokens.css">
+<link rel="stylesheet" href="../../shared/mockup.css">
+<script src="../../shared/mockup-theme.js"></script>
+</head>
+<body>
+<main class="phone" style="--frame-height: 760px">
+  <header class="top-bar" style="justify-content: flex-start;">
+    <a class="icon-button" href="#" aria-label="Close"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></a>
+  </header>
+
+  <div class="page-body" style="gap: var(--cp-space-lg);">
+    <div style="display: flex; flex-direction: column; gap: var(--cp-space-xs);">
+      <span class="label label--primary">Someone sent you a workout</span>
+      <h1 class="title" style="font-size: 30px; line-height: 34px;">Add this workout?</h1>
+    </div>
+
+    <section class="card" id="preview" data-component="card" aria-label="The workout in the file" style="display: flex; flex-direction: column; gap: var(--cp-space-sm);">
+      <h2 class="headline">Morning circuit</h2>
+      <p class="workout-details">
+        <span class="chip" data-component="chip"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2l3 3-3 3"/><path d="M4 11V9a4 4 0 0 1 4-4h12"/><path d="M7 22l-3-3 3-3"/><path d="M20 13v2a4 4 0 0 1-4 4H4"/></svg>Circuit</span>
+        <span>3 parts · 12 steps</span>
+      </p>
+    </section>
+
+    <p class="muted">It is added as a copy in your library. Nothing you already have changes.</p>
+  </div>
+
+  <div class="action-bar" style="flex-direction: column; gap: var(--cp-space-sm);">
+    <a class="primary-button primary-button--large" data-component="primary-button" href="#">Add to my library</a>
+    <a class="text-link" href="#" style="text-align: center;">Cancel</a>
+  </div>
+</main>
+</body>
+</html>
