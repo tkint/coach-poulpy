@@ -10,17 +10,6 @@ import ch.coachpoulpy.types.treadmill.TreadmillModule
 import kotlin.time.Duration
 import kotlin.time.Instant
 
-/** The session left open when the app was last closed, for "Resume or discard?" when it opens again. */
-data class UnfinishedSessionUi(
-    val executionId: String,
-    /** Recorded in Live: Resume opens Live rather than the player. */
-    val live: Boolean,
-    /** The workout followed in the player; null for a Live recording. */
-    val workoutName: String?,
-    /** How far into the session it stopped, pauses left out. */
-    val stoppedAtSeconds: Long,
-)
-
 /** The time between each start or resume and the next pause or finish, up to [now]. */
 internal fun activeTime(events: List<SessionEvent>, now: Instant): Duration {
     var total = Duration.ZERO

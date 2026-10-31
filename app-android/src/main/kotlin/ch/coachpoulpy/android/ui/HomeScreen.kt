@@ -20,8 +20,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.LibraryBooks
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -33,7 +35,10 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -66,6 +71,7 @@ fun HomeScreen(
     onOpenWorkout: (String) -> Unit,
     onStart: (String) -> Unit,
     onResume: () -> Unit,
+    onOpenLive: () -> Unit,
     onOpenSession: (String) -> Unit,
     onOpenLibrary: () -> Unit,
     modifier: Modifier = Modifier,
@@ -110,7 +116,14 @@ fun HomeScreen(
                     else -> PlannedCard(
                         item,
                         onOpen = { item.workoutId?.let(onOpenWorkout) },
-                        onGo = { if (item.status == TodayStatus.IN_PROGRESS) onResume() else item.workoutId?.let(onStart) },
+                        onGo = {
+                            when {
+                                item.status != TodayStatus.IN_PROGRESS -> item.workoutId?.let(onStart)
+                                item.live -> onOpenLive()
+                                else -> onResume()
+                            }
+                        },
+                        onDiscard = model::discardUnfinished,
                     )
                 }
             }
@@ -138,11 +151,12 @@ private fun SectionLabel(text: String, modifier: Modifier = Modifier) {
     )
 }
 
-/** A workout to do today, or left halfway. */
+/** A workout to do today, or a session left halfway, which can be opened (it comes back paused) or discarded. */
 @Composable
-private fun PlannedCard(item: TodayItem, onOpen: () -> Unit, onGo: () -> Unit) {
+private fun PlannedCard(item: TodayItem, onOpen: () -> Unit, onGo: () -> Unit, onDiscard: () -> Unit) {
     val colors = MaterialTheme.colorScheme
     val inProgress = item.status == TodayStatus.IN_PROGRESS
+    var discarding by rememberSaveable { mutableStateOf(false) }
     OutlinedCard(
         colors = CardDefaults.outlinedCardColors(containerColor = colors.surface),
         border = BorderStroke(1.5.dp, PoulpyPalette.Lagoon300),
@@ -156,7 +170,9 @@ private fun PlannedCard(item: TodayItem, onOpen: () -> Unit, onGo: () -> Unit) {
                 }
                 Column(Modifier.weight(1f)) {
                     Text(item.title, style = MaterialTheme.typography.titleLarge)
-                    Text(item.details, style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
+                    if (item.details.isNotEmpty()) {
+                        Text(item.details, style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
+                    }
                 }
             }
             if (inProgress) {
@@ -165,19 +181,50 @@ private fun PlannedCard(item: TodayItem, onOpen: () -> Unit, onGo: () -> Unit) {
                 Text(item.exercises, style = MaterialTheme.typography.bodyMedium)
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(onClick = onOpen, enabled = item.workoutId != null, modifier = Modifier.weight(1f).height(48.dp)) {
-                    Text(stringResource(R.string.home_seeWorkout), fontWeight = FontWeight.ExtraBold)
+                if (inProgress) {
+                    // Destructive, so crimson with an icon, never ember.
+                    OutlinedButton(
+                        onClick = { discarding = true },
+                        border = BorderStroke(1.dp, colors.error),
+                        modifier = Modifier.weight(1f).height(48.dp),
+                    ) {
+                        Icon(Icons.Filled.Delete, contentDescription = null, tint = colors.error)
+                        Text(
+                            stringResource(R.string.home_discard),
+                            color = colors.error,
+                            fontWeight = FontWeight.ExtraBold,
+                            modifier = Modifier.padding(start = 6.dp),
+                        )
+                    }
+                } else {
+                    OutlinedButton(onClick = onOpen, enabled = item.workoutId != null, modifier = Modifier.weight(1f).height(48.dp)) {
+                        Text(stringResource(R.string.home_seeWorkout), fontWeight = FontWeight.ExtraBold)
+                    }
                 }
                 Button(onClick = onGo, modifier = Modifier.weight(1.4f).height(48.dp)) {
                     Icon(Icons.Filled.PlayArrow, contentDescription = null)
+                    // "Open", not "Resume": the session comes back paused.
                     Text(
-                        stringResource(if (inProgress) R.string.player_resume else R.string.action_start),
+                        stringResource(if (inProgress) R.string.home_openSession else R.string.action_start),
                         fontWeight = FontWeight.ExtraBold,
                         modifier = Modifier.padding(start = 6.dp),
                     )
                 }
             }
         }
+    }
+    if (discarding) {
+        AlertDialog(
+            onDismissRequest = { discarding = false },
+            title = { Text(stringResource(R.string.home_discardTitle)) },
+            text = { Text(stringResource(R.string.home_discardBody)) },
+            confirmButton = {
+                TextButton(onClick = { discarding = false; onDiscard() }) {
+                    Text(stringResource(R.string.home_discard), color = colors.error)
+                }
+            },
+            dismissButton = { TextButton(onClick = { discarding = false }) { Text(stringResource(R.string.action_cancel)) } },
+        )
     }
 }
 

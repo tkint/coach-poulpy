@@ -58,5 +58,4 @@ Les règles de `en.md` s’appliquent aussi (identifiants, placeholders, pluriel
 | tentacle | tentacule | Masculin : « un tentacule allumé ». |
 | full octopus | poulpe complet | |
 | Live (tab) | En direct | |
-| Live session (a recording in Live) | séance libre | « Reprendre votre séance libre ? » |
 | Settings | Réglages | Aussi le nom de l’app Réglages sur iPhone. |

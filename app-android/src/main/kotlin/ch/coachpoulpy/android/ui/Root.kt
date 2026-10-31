@@ -19,7 +19,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -70,36 +69,6 @@ fun CoachPoulpyRoot(graph: AppGraph, openLive: Boolean = false, onLiveOpened: ()
         }
     }
 
-    // A session left open when the app was last closed: asked once per launch, before anything else.
-    var unfinished by remember(graph) { mutableStateOf(graph.unfinishedSessionAtLaunch()) }
-    // Home reads the session left open when it shows; a discard under the dialog builds it again.
-    var discards by remember { mutableStateOf(0) }
-    unfinished?.let { session ->
-        UnfinishedSessionDialog(
-            session,
-            onResume = {
-                unfinished = null
-                if (session.live) {
-                    graph.dismissUnfinishedSession()
-                    route = null
-                    tab = Tab.LIVE
-                } else {
-                    // The player's resumeSession() closes the question.
-                    route = "resume"
-                }
-            },
-            onDiscard = {
-                unfinished = null
-                graph.discardUnfinishedSession()
-                discards++
-            },
-            onDismiss = {
-                unfinished = null
-                graph.dismissUnfinishedSession()
-            },
-        )
-    }
-
     when (val current = route) {
         null -> Scaffold(
             bottomBar = {
@@ -117,21 +86,20 @@ fun CoachPoulpyRoot(graph: AppGraph, openLive: Boolean = false, onLiveOpened: ()
         ) { padding ->
             val modifier = Modifier.padding(padding)
             when (tab) {
-                Tab.HOME -> key(discards) {
-                    HomeScreen(
-                        graph = graph,
-                        language = language,
-                        onOpenWorkout = { route = "workout:$it" },
-                        onStart = { route = "player:$it" },
-                        onResume = { route = "resume" },
-                        onOpenSession = { route = "session:$it" },
-                        onOpenLibrary = {
-                            libraryView = LibraryView.WORKOUTS
-                            tab = Tab.LIBRARY
-                        },
-                        modifier = modifier,
-                    )
-                }
+                Tab.HOME -> HomeScreen(
+                    graph = graph,
+                    language = language,
+                    onOpenWorkout = { route = "workout:$it" },
+                    onStart = { route = "player:$it" },
+                    onResume = { route = "resume" },
+                    onOpenLive = { tab = Tab.LIVE },
+                    onOpenSession = { route = "session:$it" },
+                    onOpenLibrary = {
+                        libraryView = LibraryView.WORKOUTS
+                        tab = Tab.LIBRARY
+                    },
+                    modifier = modifier,
+                )
                 Tab.LIBRARY -> LibraryScreen(
                     graph = graph,
                     language = language,

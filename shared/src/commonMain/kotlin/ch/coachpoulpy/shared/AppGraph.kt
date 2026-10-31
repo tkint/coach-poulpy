@@ -24,7 +24,7 @@ class AppGraph(driverFactory: DriverFactory) {
 
     /** What the user ticked in the exercise list's Equipment sheet. The apps pass the same [memory] every time. */
     fun equipmentFilter(memory: KeyValueStore) = EquipmentFilter(memory)
-    fun home(languageCode: String) = HomeModel(store, compiler, catalog, languageCode)
+    fun home(languageCode: String) = HomeModel(store, compiler, catalog, languageCode, discardOpen = ::discardOpen)
     fun library(languageCode: String) = LibraryModel(store, compiler, catalog, languageCode)
     fun workoutPage(workoutId: String, languageCode: String) = WorkoutPageModel(WorkoutId(workoutId), store, compiler, catalog, languageCode)
     fun history(languageCode: String) = HistoryModel(store, compiler, languageCode)
@@ -94,7 +94,6 @@ class AppGraph(driverFactory: DriverFactory) {
 
     /** The session left open when the app was closed, if any, exactly where it was. Null for a Live recording, which Live brings back. */
     fun resumeSession(languageCode: String): PlayerModel? {
-        launchPrompt = null
         val execution = store.unfinishedExecution()?.takeUnless { it.source.isLive } ?: return null
         val ref = execution.workout
         val workout = ref?.let { store.workout(it.workoutId, it.version) }
@@ -106,51 +105,13 @@ class AppGraph(driverFactory: DriverFactory) {
         return player(workout, execution.id.value, languageCode)
     }
 
-    private var launchChecked = false
-    private var launchPrompt: UnfinishedSessionUi? = null
-
     /**
-     * The session left open when the app was last closed, asked about once per launch: the same answer until
-     * [dismissUnfinishedSession], [resumeSession] or [discardUnfinishedSession], then null, so a screen rebuilt
-     * mid-launch does not ask twice.
+     * Deletes [executionId], the session left open, with everything it recorded: nothing of it shows in the history
+     * or the totals. Live drops it itself when it holds the recording.
      */
-    fun unfinishedSessionAtLaunch(): UnfinishedSessionUi? {
-        if (!launchChecked) {
-            launchChecked = true
-            launchPrompt = unfinishedSession()
-        }
-        return launchPrompt?.takeIf { store.unfinishedExecution()?.id?.value == it.executionId }
-    }
-
-    /** "Not now": the session stays open, and Home's Resume card or Live is the way back. */
-    fun dismissUnfinishedSession() {
-        launchPrompt = null
-    }
-
-    /** Deletes the session left open, with everything it recorded: nothing of it shows in History or the totals. */
-    fun discardUnfinishedSession() {
-        launchPrompt = null
-        val open = store.unfinishedExecution() ?: return
-        if (liveModel?.discardRecording(open.id.value) == true) return
-        store.deleteSession(open.id.value)
-    }
-
-    /** The session left open and where it stopped; null when there is none, or when its workout is gone, which closes it. */
-    internal fun unfinishedSession(): UnfinishedSessionUi? {
-        val open = store.unfinishedSession() ?: return null
-        val execution = open.execution
-        val workout = execution.workout?.let { store.workout(it.workoutId, it.version) }
-        if (!execution.source.isLive && workout == null) {
-            closeLeftOpen(execution)
-            return null
-        }
-        val events = store.events(execution.id.value)
-        return UnfinishedSessionUi(
-            executionId = execution.id.value,
-            live = execution.source.isLive,
-            workoutName = if (execution.source.isLive) null else open.title ?: workout?.name,
-            stoppedAtSeconds = activeTime(events, events.lastOrNull()?.at ?: execution.startedAt).inWholeSeconds,
-        )
+    private fun discardOpen(executionId: String) {
+        if (liveModel?.discardRecording(executionId) == true) return
+        store.deleteSession(executionId)
     }
 
     private fun closeLeftOpen(execution: Execution) = store.closeLeftOpen(execution, store.timelineOf(execution, compiler))

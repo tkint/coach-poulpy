@@ -21,7 +21,11 @@
     "openLibrary": "Ouvrir la bibliothèque",
     "somethingElse": "Autre chose ? Choisissez dans votre bibliothèque",
     "tomorrow": "Demain · {date}",
-    "inDays": "{days, plural, one {Dans # jour · {date}} many {Dans # jours · {date}} other {Dans # jours · {date}}}"
+    "inDays": "{days, plural, one {Dans # jour · {date}} many {Dans # jours · {date}} other {Dans # jours · {date}}}",
+    "openSession": "Ouvrir",
+    "discard": "Abandonner",
+    "discardTitle": "Abandonner cette séance ?",
+    "discardBody": "Elle n’apparaîtra ni dans votre historique ni dans vos totaux. C’est définitif."
   },
   "library": {
     "workouts": "Séances",
@@ -373,12 +377,5 @@
     "incline": "Inclinaison",
     "energy": "Énergie",
     "power": "Puissance"
-  },
-  "unfinished": {
-    "title": "Reprendre {workout} ?",
-    "liveTitle": "Reprendre votre séance libre ?",
-    "body": "La séance s’est arrêtée après {time}. Reprenez-la là où vous en étiez, ou abandonnez-la : elle n’apparaîtra pas dans votre historique.",
-    "discard": "Abandonner",
-    "later": "Plus tard"
   }
 }

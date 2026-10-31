@@ -21,7 +21,11 @@
     "openLibrary": "Open the library",
     "somethingElse": "Something else? Pick from your library",
     "tomorrow": "Tomorrow · {date}",
-    "inDays": "{days, plural, one {In # day · {date}} other {In # days · {date}}}"
+    "inDays": "{days, plural, one {In # day · {date}} other {In # days · {date}}}",
+    "openSession": "Open",
+    "discard": "Discard",
+    "discardTitle": "Discard this session?",
+    "discardBody": "It won’t show in your history or your totals. This can’t be undone."
   },
   "library": {
     "workouts": "Workouts",
@@ -373,12 +377,5 @@
     "incline": "Incline",
     "energy": "Energy",
     "power": "Power"
-  },
-  "unfinished": {
-    "title": "Resume {workout}?",
-    "liveTitle": "Resume your Live session?",
-    "body": "You stopped {time} into the session. Pick it up where you left off, or discard it and it won’t show in your history.",
-    "discard": "Discard",
-    "later": "Not now"
   }
 }
