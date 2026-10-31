@@ -939,3 +939,20 @@ svg { flex: none; }
 .rung strong { font-weight: 800; font-size: 16px; line-height: 22px; }
 .rung small { font-size: 14px; line-height: 19px; color: var(--cp-on-surface-variant); }
 .rung svg { color: var(--cp-primary); }
+
+/* ---------- Workouts library and workout page ---------- */
+
+.search-field--filled { border-color: var(--cp-primary); }
+.search-field .clear-button { width: 36px; height: 36px; border-radius: var(--cp-radius-pill); background: var(--cp-surface-variant); color: var(--cp-on-surface-variant); display: flex; align-items: center; justify-content: center; flex: none; }
+.row-menu { position: absolute; left: 20px; right: 20px; top: 302px; display: flex; flex-direction: column; gap: var(--cp-space-sm); }
+.row-menu .list-row { box-shadow: 0 10px 28px color-mix(in srgb, var(--cp-poulpy-ink) 28%, transparent); }
+.popover-menu { min-width: 232px; align-self: flex-start; border-radius: var(--cp-radius-md); background: var(--cp-surface); padding: 6px 0; box-shadow: 0 10px 28px color-mix(in srgb, var(--cp-poulpy-ink) 28%, transparent); display: flex; flex-direction: column; }
+.popover-menu--top { position: absolute; top: 92px; right: 12px; }
+.popover-menu a { min-height: 48px; padding: 0 16px; display: flex; align-items: center; gap: 14px; font-size: 16px; font-weight: 700; color: var(--cp-on-surface); }
+.popover-menu a svg { color: var(--cp-on-surface-variant); }
+.popover-menu hr { height: 1px; margin: var(--cp-space-xs) 0; border: 0; background: var(--cp-surface-variant); }
+.popover-menu a.danger { color: var(--cp-error); }
+.popover-menu a.danger svg { color: inherit; }
+.month-nav { display: flex; align-items: center; justify-content: space-between; font-size: 16px; font-weight: 800; }
+.day--past { color: var(--cp-outline); font-weight: 600; }
+.plan-sheet .weekdays span { font-size: 12.5px; line-height: 20px; font-weight: 800; color: var(--cp-on-surface-variant); }
