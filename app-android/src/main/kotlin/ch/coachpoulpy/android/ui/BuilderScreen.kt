@@ -77,6 +77,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -230,7 +231,9 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
                                 Modifier
                                     .draggedItem(drag, repeat.key, this)
                                     .padding(bottom = 12.dp)
-                                    .background(colors.primaryContainer, RoundedCornerShape(PoulpyRadius.md))
+                                    // The agreed `.builder-repeat` look: primary container mixed 55% with the background, plus a 1.5dp border.
+                                    .background(lerp(colors.background, colors.primaryContainer, 0.55f), RoundedCornerShape(PoulpyRadius.md))
+                                    .border(1.5.dp, colors.primaryContainer, RoundedCornerShape(PoulpyRadius.md))
                                     .padding(bottom = 10.dp),
                             ) {
                                 RepeatHeader(model, repeat, part.key, state.parts, handle = Modifier.dragHandle(drag, repeat.key))
