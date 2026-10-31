@@ -98,8 +98,10 @@ class PlayerModel internal constructor(
     val state: StateFlow<PlayerState> = mutableState.asStateFlow()
 
     init {
-        // A session reopened after the app was killed: catch up on the timers that ran out meanwhile.
-        if (session.state(clock.now()).status == SessionState.Status.RUNNING) startTicker()
+        // A session reopened after the app was closed comes back paused at its last event: the time the app was
+        // gone does not count, and Resume carries on whenever the user is ready.
+        val last = session.events.lastOrNull()
+        if (last != null && session.state(last.at).status == SessionState.Status.RUNNING) act { session.pause(last.at) }
     }
 
     /** The latest state, for Swift, which cannot read a StateFlow's typed value. */

@@ -9,6 +9,7 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.time.Clock
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
 import kotlinx.coroutines.CoroutineScope
@@ -91,21 +92,27 @@ class PlayerModelTest {
     }
 
     @Test
-    fun sessionResumesWhereItWasAfterTheAppIsKilled() {
+    fun sessionComesBackPausedAtItsLastEventAfterTheAppIsKilled() {
         val id = workout()
         val first = player(id)
         first.start()
         first.done()
         clock.advance(10.seconds)
 
-        // The app is killed and reopened 10 s into the rest.
+        // The app is killed 10 s into the rest and reopened an hour later.
+        clock.advance(1.hours)
         val resumed = player(id)
         with(resumed.state.value) {
-            assertEquals(PlayerStatus.RUNNING, status)
+            assertEquals(PlayerStatus.PAUSED, status)
             assertEquals(true, isRest)
-            assertEquals(35, remainingSeconds)
+            assertEquals(45, remainingSeconds) // nothing was written after the set: the rest picks up from its start
         }
         assertNotNull(graph.store.unfinishedExecution())
+
+        resumed.resume()
+        clock.advance(5.seconds)
+        resumed.tick()
+        assertEquals(40, resumed.state.value.remainingSeconds)
     }
 
     @Test

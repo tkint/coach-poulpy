@@ -10,6 +10,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
+import android.graphics.drawable.Icon
 import android.os.Build
 import android.os.IBinder
 import ch.coachpoulpy.shared.Cancellable
@@ -47,6 +48,12 @@ class LiveRecordingService : Service() {
             return START_NOT_STICKY
         }
         if (live == null) return finish()
+        // The buttons on the notification.
+        when (intent?.action) {
+            ACTION_PAUSE -> live.pauseRecording()
+            ACTION_RESUME -> live.resumeRecording()
+            ACTION_FINISH -> live.stopRecording()
+        }
         watch?.cancel()
         watch = live.watch(::onState)
         return START_NOT_STICKY
@@ -104,6 +111,11 @@ class LiveRecordingService : Service() {
                 ?: getString(R.string.live_notificationRecording)
         }
         val running = recording != null && !recording.paused
+        val toggle = if (running) {
+            action(ACTION_PAUSE, android.R.drawable.ic_media_pause, R.string.treadmill_pause)
+        } else {
+            action(ACTION_RESUME, android.R.drawable.ic_media_play, R.string.treadmill_resume)
+        }
         return Notification.Builder(this, CHANNEL)
             .setSmallIcon(R.drawable.ic_launcher_monochrome)
             .setContentTitle(recording?.title?.ifEmpty { null } ?: getString(R.string.tab_live))
@@ -115,18 +127,39 @@ class LiveRecordingService : Service() {
             .setShowWhen(running)
             .setUsesChronometer(running)
             .setWhen(System.currentTimeMillis() - (recording?.elapsedSeconds ?: 0) * 1000)
+            .apply {
+                if (recording != null) {
+                    addAction(toggle)
+                    addAction(action(ACTION_FINISH, android.R.drawable.ic_menu_close_clear_cancel, R.string.treadmill_stop))
+                }
+            }
             .build()
     }
 
+    /** A notification button that sends [action] back to this service. */
+    private fun action(action: String, icon: Int, label: Int): Notification.Action {
+        val intent = PendingIntent.getService(
+            this,
+            action.hashCode(),
+            Intent(this, LiveRecordingService::class.java).setAction(action),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+        return Notification.Action.Builder(Icon.createWithResource(this, icon), getString(label), intent).build()
+    }
+
     private fun channel() {
-        val channel = NotificationChannel(CHANNEL, getString(R.string.live_notificationChannel), NotificationManager.IMPORTANCE_LOW)
+        // Heard once when the recording starts; the updates after it stay quiet (setOnlyAlertOnce).
+        val channel = NotificationChannel(CHANNEL, getString(R.string.live_notificationChannel), NotificationManager.IMPORTANCE_DEFAULT)
         channel.description = getString(R.string.live_notificationChannelInfo)
         channel.setShowBadge(false)
         getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
     }
 
     companion object {
-        private const val CHANNEL = "live-recording"
+        private const val CHANNEL = "live-session"
+        private const val ACTION_PAUSE = "ch.coachpoulpy.live.PAUSE"
+        private const val ACTION_RESUME = "ch.coachpoulpy.live.RESUME"
+        private const val ACTION_FINISH = "ch.coachpoulpy.live.FINISH"
         private const val NOTIFICATION_ID = 1
 
         private var following: Cancellable? = null
