@@ -387,5 +387,9 @@
     "add": "Ajouter à ma bibliothèque",
     "errorTitle": "Impossible d’ajouter cette séance",
     "nothingAdded": "Rien n’a été ajouté à votre bibliothèque."
+  },
+  "shareImage": {
+    "button": "Partager en image",
+    "chooser": "Partager votre séance"
   }
 }

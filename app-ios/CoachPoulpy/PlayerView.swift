@@ -28,6 +28,7 @@ struct PlayerView: View {
     @StateObject private var holder: PlayerHolder
     @State private var confirmStop = false
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.unitSystem) private var units
 
     init(graph: AppGraph, workoutId: String?) {
         // Inside the autoclosure, so the session is opened once, not on every redraw.
@@ -61,7 +62,7 @@ struct PlayerView: View {
             if state.status == .ready {
                 ready(model, state)
             } else if state.status == .finished {
-                finished(state)
+                finished(model, state)
             } else {
                 running(model, state)
             }
@@ -180,7 +181,7 @@ struct PlayerView: View {
     }
 
     @ViewBuilder
-    private func finished(_ state: PlayerState) -> some View {
+    private func finished(_ model: PlayerModel, _ state: PlayerState) -> some View {
         Spacer()
         Text("player.finished").font(.poulpy(.largeTitle))
         Text(state.workoutName).font(.poulpy(.title2))
@@ -193,6 +194,12 @@ struct PlayerView: View {
             }
         }
         Spacer()
+        if let card = model.shareCard(units: units) {
+            ShareLink(item: ShareCardItem(card: card), preview: SharePreview(card.title)) {
+                Label("shareImage.button", systemImage: "square.and.arrow.up").frame(maxWidth: .infinity, minHeight: 44)
+            }
+            .buttonStyle(.bordered)
+        }
         Button {
             dismiss()
         } label: {

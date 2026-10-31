@@ -119,7 +119,7 @@ private fun TentacleRing(lit: Int, on: Color, off: Color, modifier: Modifier = M
     }
 }
 
-private val PoulpyDrawing.drawable: Int
+internal val PoulpyDrawing.drawable: Int
     @DrawableRes get() = when (this) {
         PoulpyDrawing.MOOD_PROUD -> R.drawable.poulpy_mood_proud
         PoulpyDrawing.MOOD_HAPPY -> R.drawable.poulpy_mood_happy

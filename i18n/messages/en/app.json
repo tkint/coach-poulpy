@@ -387,5 +387,9 @@
     "add": "Add to my library",
     "errorTitle": "Can’t add this workout",
     "nothingAdded": "Nothing was added to your library."
+  },
+  "shareImage": {
+    "button": "Share as an image",
+    "chooser": "Share your session"
   }
 }

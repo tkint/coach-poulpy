@@ -457,6 +457,9 @@ struct SessionDetailView: View {
         .navigationTitle(session.title)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
+            ShareLink(item: ShareCardItem(card: ShareCard.companion.of(session: session, units: units, languageCode: Language.code, fullOctopus: false)), preview: SharePreview(session.title)) {
+                Label("shareImage.button", systemImage: "square.and.arrow.up")
+            }
             Button(role: .destructive) {
                 deleting = true
             } label: {

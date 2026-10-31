@@ -87,7 +87,7 @@ private struct TentacleRing: View {
     }
 }
 
-private extension PoulpyDrawing {
+extension PoulpyDrawing {
     /// The generated asset: "pose_side_glance" is PoulpyPoseSideGlance in Assets.xcassets/Poulpy.
     var imageName: String {
         "Poulpy" + assetName.split(separator: "_").map { $0.prefix(1).uppercased() + $0.dropFirst() }.joined()

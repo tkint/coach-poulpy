@@ -126,6 +126,10 @@ _Avoid_: Bookmark, fork
 A workout saved as a `.poulpyworkout` file to send to another guest, which opens it in the app to add a copy to their library.
 _Avoid_: Backup
 
+**Share card**:
+A picture of a finished session (workout name, date, time, sets and any machine values, with Poulpy) sent through the phone's share sheet. It never shows heart rate, and it is a brag card, not a way to share the workout itself (that is the workout file).
+_Avoid_: Screenshot, certificate
+
 **Coach link**:
 The tie an athlete grants a coach, which the athlete can revoke at any time.
 _Avoid_: Team, connection

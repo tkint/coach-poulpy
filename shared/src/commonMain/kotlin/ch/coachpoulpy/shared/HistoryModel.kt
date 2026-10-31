@@ -118,7 +118,7 @@ data class CalendarMonth(
 class HistoryModel internal constructor(
     private val store: LocalStore,
     private val compiler: TimelineCompiler,
-    languageCode: String,
+    private val languageCode: String,
     private val clock: Clock = Clock.System,
     private val zone: TimeZone = TimeZone.currentSystemDefault(),
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main),
@@ -138,6 +138,9 @@ class HistoryModel internal constructor(
 
     /** Removes a session and everything recorded in it, for example a test recording. */
     fun delete(sessionId: String) = store.deleteSession(sessionId)
+
+    /** The picture to share for a session of the history. */
+    fun shareCard(session: SessionRow, units: UnitSystem) = ShareCard.of(session, units, languageCode)
 
     fun close() = scope.cancel()
 
