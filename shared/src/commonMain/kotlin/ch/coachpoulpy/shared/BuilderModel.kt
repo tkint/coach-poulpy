@@ -33,6 +33,9 @@ data class BuilderRow(
     val repeatKey: String?,
     /** Whether the step right above is a repeat this step can move into. */
     val canMoveIntoRepeat: Boolean,
+    /** Whether the up and down chevrons can move the step: not at the top or bottom of its part or repeat. */
+    val canMoveUp: Boolean,
+    val canMoveDown: Boolean,
     /** The workout's last step, where "until button press" reads "until the end". */
     val isLast: Boolean,
     val name: String,
@@ -83,7 +86,15 @@ data class WalkRunTarget(
 )
 
 /** Steps done [times] times in a row, as the builder shows them. */
-data class BuilderRepeat(val key: String, val times: Int, val timesLabel: String, val rows: List<BuilderRow>)
+data class BuilderRepeat(
+    val key: String,
+    val times: Int,
+    val timesLabel: String,
+    val rows: List<BuilderRow>,
+    /** Whether the up and down chevrons can move the repeat: not at the top or bottom of its part. */
+    val canMoveUp: Boolean,
+    val canMoveDown: Boolean,
+)
 
 /** One step at the top of a part: either an exercise or rest ([row]), or a repeat ([repeatGroup]; "repeat" is a Swift keyword). */
 data class BuilderStep(val key: String, val row: BuilderRow?, val repeatGroup: BuilderRepeat?)
@@ -520,21 +531,21 @@ class BuilderModel internal constructor(
             if (part.kind == PartKind.WORK) workNumber++
             val number = workNumber.takeIf { workCount > 1 && part.kind == PartKind.WORK }
             val name = labels.part(part.kind, number)
-            fun row(step: DraftStep, repeat: DraftRepeat?, above: DraftStep?): BuilderRow {
+            fun row(step: DraftStep, repeat: DraftRepeat?, above: DraftStep?, canUp: Boolean, canDown: Boolean): BuilderRow {
                 val place = Place(part.key, labels.inPart(part.kind, number), repeat)
                 val canMoveIn = above is DraftRepeat && repeat == null
                 return when (step) {
-                    is DraftEntry -> entryRow(step, draft.format, place, canMoveIn, step.key == lastKey)
-                    is DraftRest -> restRow(step, place, canMoveIn, step.key == lastKey)
+                    is DraftEntry -> entryRow(step, draft.format, place, canMoveIn, canUp, canDown, step.key == lastKey)
+                    is DraftRest -> restRow(step, place, canMoveIn, canUp, canDown, step.key == lastKey)
                     is DraftRepeat -> error("A repeat holds no repeat")
                 }
             }
             val steps = part.steps.mapIndexed { index, step ->
                 if (step is DraftRepeat) {
-                    val rows = step.steps.mapIndexed { i, child -> row(child, step, step.steps.getOrNull(i - 1)) }
-                    BuilderStep(step.key, null, BuilderRepeat(step.key, step.times, labels.times(step.times), rows))
+                    val rows = step.steps.mapIndexed { i, child -> row(child, step, step.steps.getOrNull(i - 1), i > 0, i < step.steps.lastIndex) }
+                    BuilderStep(step.key, null, BuilderRepeat(step.key, step.times, labels.times(step.times), rows, index > 0, index < part.steps.lastIndex))
                 } else {
-                    BuilderStep(step.key, row(step, null, part.steps.getOrNull(index - 1)), null)
+                    BuilderStep(step.key, row(step, null, part.steps.getOrNull(index - 1), index > 0, index < part.steps.lastIndex), null)
                 }
             }
             val work = part.kind == PartKind.WORK
@@ -577,7 +588,7 @@ class BuilderModel internal constructor(
     /** Where a step sits: its part, "In Work 1", and the repeat around it. */
     private class Place(val partKey: String, val inPart: String, val repeat: DraftRepeat?)
 
-    private fun restRow(rest: DraftRest, place: Place, canMoveIntoRepeat: Boolean, last: Boolean) = BuilderRow(
+    private fun restRow(rest: DraftRest, place: Place, canMoveIntoRepeat: Boolean, canMoveUp: Boolean, canMoveDown: Boolean, last: Boolean) = BuilderRow(
         key = rest.key,
         roleLabel = labels.role(StepRole.RECOVER),
         role = StepRole.RECOVER,
@@ -585,6 +596,8 @@ class BuilderModel internal constructor(
         partKey = place.partKey,
         repeatKey = place.repeat?.key,
         canMoveIntoRepeat = canMoveIntoRepeat,
+        canMoveUp = canMoveUp,
+        canMoveDown = canMoveDown,
         isLast = last,
         name = labels.rest,
         pattern = MovementPattern.MOBILITY,
@@ -603,7 +616,7 @@ class BuilderModel internal constructor(
         summary = labels.longDuration(rest.seconds),
     )
 
-    private fun entryRow(entry: DraftEntry, format: WorkoutFormat?, place: Place, canMoveIntoRepeat: Boolean, last: Boolean): BuilderRow {
+    private fun entryRow(entry: DraftEntry, format: WorkoutFormat?, place: Place, canMoveIntoRepeat: Boolean, canMoveUp: Boolean, canMoveDown: Boolean, last: Boolean): BuilderRow {
         val exercise = catalog[entry.exercise]
         val showsSets = format == WorkoutFormat.SETS && !entry.walkOrRun
         val detail = when {
@@ -619,6 +632,10 @@ class BuilderModel internal constructor(
             partKey = place.partKey,
             repeatKey = place.repeat?.key,
             canMoveIntoRepeat = canMoveIntoRepeat,
+            canMoveUp = canMoveUp,
+            canMoveDown = canMoveDown,
+        canMoveUp = canMoveUp,
+        canMoveDown = canMoveDown,
             isLast = last,
             name = exercise?.let { labels.text(it.name) } ?: entry.exercise.value,
             pattern = exercise?.movementPattern ?: MovementPattern.CORE,
