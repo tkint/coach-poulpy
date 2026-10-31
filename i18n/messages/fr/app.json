@@ -24,7 +24,7 @@
     "inDays": "{days, plural, one {Dans # jour · {date}} many {Dans # jours · {date}} other {Dans # jours · {date}}}",
     "openSession": "Ouvrir",
     "discard": "Abandonner",
-    "discardTitle": "Abandonner cette séance ?",
+    "discardTitle": "Abandonner cette séance ?",
     "discardBody": "Elle n’apparaîtra ni dans votre historique ni dans vos totaux. C’est définitif."
   },
   "library": {
