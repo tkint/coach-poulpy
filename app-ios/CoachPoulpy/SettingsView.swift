@@ -100,7 +100,7 @@ private struct GeneralList: View {
                 Text("settings.languageNextLaunch") + Text(verbatim: " ") + Text("settings.unitsHint")
             }
             Section {
-                Text(String(format: NSLocalizedString("settings.buildNumber %@", comment: ""), Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "—"))
+                Text(String(format: NSLocalizedString("settings.version %@", comment: ""), Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "—"))
             }
         }
     }

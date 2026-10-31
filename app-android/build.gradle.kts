@@ -21,10 +21,11 @@ android {
         applicationId = "ch.coachpoulpy"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
+        // The version people see lives in VERSION at the repository root, read here and by the iOS project.
         // CI numbers each build by the minute it ran, so the APK built last always installs over the one
         // on the phone, whichever branch it came from. Re-running an older run gives it a fresh number.
         versionCode = providers.environmentVariable("POULPY_VERSION_CODE").orNull?.toInt() ?: 1
-        versionName = "0.1.0"
+        versionName = rootProject.file("VERSION").readText().trim()
     }
 
     // One fixed key for every build, so updates install over each other instead of asking to uninstall.

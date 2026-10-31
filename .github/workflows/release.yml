@@ -1,0 +1,57 @@
+name: Release
+
+# Run by hand: Actions > Release > Run workflow, on main. It publishes the version written in the
+# VERSION file as a GitHub pre-release with the signed Android APK attached (docs/releasing.md).
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  android:
+    name: Tag and publish the Android APK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Read the version and refuse one already released
+        run: |
+          version=$(tr -d '[:space:]' < VERSION)
+          if ! echo "$version" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error file=VERSION::VERSION must look like 0.1.0, not '$version'."
+            exit 1
+          fi
+          if git ls-remote --exit-code --tags origin "refs/tags/v$version" > /dev/null; then
+            echo "::error file=VERSION::v$version is already released. Raise VERSION in a pull request first."
+            exit 1
+          fi
+          echo "VERSION_TAG=v$version" >> "$GITHUB_ENV"
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v5
+      - name: Unpack the signing key
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "::error::ANDROID_KEYSTORE_BASE64 is not set. A release must be signed with the key phones already trust."
+            exit 1
+          fi
+          echo "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/poulpy.jks"
+          echo "POULPY_KEYSTORE_FILE=$RUNNER_TEMP/poulpy.jks" >> "$GITHUB_ENV"
+          # Same numbering as ci.yml: minutes since 2026-01-01, so a release installs over any earlier build.
+          echo "POULPY_VERSION_CODE=$(( ($(date +%s) - 1767225600) / 60 ))" >> "$GITHUB_ENV"
+      - name: Build the APK
+        # Debug build type, as ci.yml: it is the one that has been run on phones.
+        env:
+          POULPY_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: ./gradlew :app-android:assembleDebug
+      - name: Publish the pre-release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp app-android/build/outputs/apk/debug/*.apk "coach-poulpy-${VERSION_TAG}.apk"
+          gh release create "$VERSION_TAG" "coach-poulpy-${VERSION_TAG}.apk" \
+            --target "$GITHUB_SHA" --prerelease --generate-notes --title "Coach Poulpy ${VERSION_TAG}"
