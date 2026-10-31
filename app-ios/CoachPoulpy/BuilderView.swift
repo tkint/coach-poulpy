@@ -347,7 +347,8 @@ struct BuilderView: View {
         let visibleTop = scrollView.contentOffset.y + inset.top
         let visibleBottom = scrollView.contentOffset.y + scrollView.bounds.height - inset.bottom
         let top = dragStart + dragY - frame.height / 2
-        let bottom = top + frame.height
+        // Only the first 72 pt count, where the handle and the finger are: a tall repeat would otherwise reach the bottom edge while the finger drags it up.
+        let bottom = top + min(frame.height, 72)
         var near: CGFloat = 0
         if top < visibleTop + edge {
             near = -(visibleTop + edge - top) / edge

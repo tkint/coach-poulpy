@@ -80,13 +80,15 @@ class DragReorder internal constructor(
 
     /**
      * How far the list scrolls this frame: 0 while the dragged item is more than [edge] from the
-     * list's top and bottom, then up to [maxStep] (negative toward the top) as it gets closer.
+     * list's top and bottom, then up to [maxStep] (negative toward the top) as it gets closer. Only
+     * the first [grab] of the item counts, where the handle and the finger are: a tall item, like a
+     * repeat, would otherwise reach the bottom edge while the finger is dragging it up.
      */
-    internal fun scrollStep(edge: Float, maxStep: Float): Float {
+    internal fun scrollStep(edge: Float, maxStep: Float, grab: Float): Float {
         val dragged = key ?: return 0f
         val frame = frames[dragged] ?: return 0f
         val top = start + delta
-        val bottom = top + frame.height
+        val bottom = top + minOf(frame.height.toFloat(), grab)
         val near = when {
             top < viewportTop + edge -> -((viewportTop + edge - top) / edge)
             bottom > viewportBottom - edge -> (bottom - (viewportBottom - edge)) / edge
@@ -131,9 +133,10 @@ fun DragAutoScroll(drag: DragReorder, list: LazyListState) {
         if (drag.key == null) return@LaunchedEffect
         val edge = with(density) { 64.dp.toPx() }
         val maxStep = with(density) { 18.dp.toPx() }
+        val grab = with(density) { 72.dp.toPx() }
         while (true) {
             withFrameNanos { }
-            val step = drag.scrollStep(edge, maxStep)
+            val step = drag.scrollStep(edge, maxStep, grab)
             if (step == 0f || list.dispatchRawDelta(step) == 0f) continue
             // The items have moved with the scroll; wait for them to be measured again before looking for a swap.
             withFrameNanos { }
