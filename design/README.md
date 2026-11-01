@@ -34,7 +34,7 @@ On iOS, also list any new file under `UIAppFonts` in `Info.plist`. Views use `.f
 
 ## Body map figures
 
-`build-body-map.mjs` draws the front and back muscle chart in both builds (wider shoulders, wider hips) and writes it into the profile mockups. Each muscle is authored once for half of the body and mirrored; a build only stretches the half sideways. Edit the muscle outlines in the script, then run:
+`build-body-map.mjs` draws the front and back muscle chart in both builds (wider shoulders, wider hips) and writes it into the profile mockups and into `design/body-map.json`, which the apps read. Each muscle is authored once for half of the body and mirrored; a build only stretches the half sideways. Edit the muscle outlines in the script, then run:
 
 ```sh
 node design/build-body-map.mjs

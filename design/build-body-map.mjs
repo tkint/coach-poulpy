@@ -128,6 +128,31 @@ function rewrite(text) {
     })
 }
 
+// The same shapes as data for the apps: design/body-map.json, per build and view, a list of
+// { key, d, skin } on the 120 x 268 grid with paths of M, C and Z only. skin is true for what is drawn but
+// never tapped (the head outline and the tendon lines).
+function shapes(view, build) {
+  const set = view === 'front' ? FRONT : BACK
+  const lines = view === 'front' ? FRONT_LINES : BACK_LINES
+  const sides = view === 'front' ? [['right', true], ['left', false]] : [['left', true], ['right', false]]
+  const k = 0.5523
+  const head = `M60 5C${num(60 + 11 * k)} 5 71 ${num(19 - 14 * k)} 71 19C71 ${num(19 + 14 * k)} ${num(60 + 11 * k)} 33 60 33C${num(60 - 11 * k)} 33 49 ${num(19 + 14 * k)} 49 19C49 ${num(19 - 14 * k)} ${num(60 - 11 * k)} 5 60 5Z`
+  const out = [{ key: 'head', d: head, skin: true }]
+  for (const [side, mirror] of sides) {
+    for (const [key, { pts }] of Object.entries(set)) {
+      const slug = key.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)
+      out.push({ key: `${slug}-${side}`, d: rounded(place(pts, build, mirror)), skin: false })
+    }
+    lines.forEach((line, i) => {
+      const [a, b] = place(line, build, mirror)
+      out.push({ key: `line-${i + 1}-${side}`, d: `M${num(a[0])} ${num(a[1])}C${num(a[0])} ${num(a[1])} ${num(b[0])} ${num(b[1])} ${num(b[0])} ${num(b[1])}`, skin: true })
+    })
+  }
+  return out
+}
+const json = `${JSON.stringify(Object.fromEntries(Object.keys(BUILDS).map((b) => [b, { front: shapes('front', b), back: shapes('back', b) }])), null, 2)}\n`
+const jsonPath = join(root, 'design/body-map.json')
+
 const check = process.argv.includes('--check')
 let stale = false
 for (const f of files) {
@@ -137,5 +162,10 @@ for (const f of files) {
   if (after !== before) {
     if (check) { console.error(`${f} does not match design/build-body-map.mjs; run it and commit`); stale = true } else writeFileSync(path, after)
   }
+}
+let current = ''
+try { current = readFileSync(jsonPath, 'utf8') } catch {}
+if (current !== json) {
+  if (check) { console.error('design/body-map.json does not match design/build-body-map.mjs; run it and commit'); stale = true } else writeFileSync(jsonPath, json)
 }
 if (stale) process.exit(1)
