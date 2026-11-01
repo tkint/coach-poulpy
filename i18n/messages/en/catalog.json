@@ -236,6 +236,35 @@
     },
     "aliases": "abs"
   },
+  "bird-dog-knee-tuck": {
+    "name": "Bird dog knee tuck",
+    "variationNote": "Hands stay on the floor",
+    "instructions": {
+      "0": "Start on hands and knees, hands under your shoulders.",
+      "1": "Keeping both hands on the floor, draw one knee towards the opposite elbow, rounding your back slightly.",
+      "2": "Return to all fours and switch sides."
+    },
+    "aliases": "abs"
+  },
+  "bird-dog-crunch": {
+    "name": "Bird dog crunch",
+    "variationNote": "Arm lifts, knee meets elbow",
+    "instructions": {
+      "0": "Start on hands and knees, then reach one arm forward and the opposite leg back.",
+      "1": "Bring that knee and elbow together under your body, rounding your back.",
+      "2": "Extend again without touching down, then switch sides."
+    },
+    "aliases": "abs"
+  },
+  "donkey-kick": {
+    "name": "Donkey kick",
+    "instructions": {
+      "0": "Start on hands and knees, hands under your shoulders, back flat.",
+      "1": "Keeping the knee bent, kick one foot up towards the ceiling until your thigh is in line with your back.",
+      "2": "Lower with control without touching down, then switch sides."
+    },
+    "aliases": "glute kickback"
+  },
   "crunch": {
     "name": "Crunch",
     "instructions": {

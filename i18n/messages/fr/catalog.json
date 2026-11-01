@@ -226,6 +226,35 @@
     },
     "aliases": "abdos"
   },
+  "bird-dog-knee-tuck": {
+    "name": "Bird dog genou-coude, mains au sol",
+    "variationNote": "Les mains restent au sol",
+    "instructions": {
+      "0": "À quatre pattes, mains sous les épaules.",
+      "1": "Mains toujours au sol, ramenez un genou vers le coude opposé en arrondissant légèrement le dos.",
+      "2": "Revenez à quatre pattes et changez de côté."
+    },
+    "aliases": "abdos"
+  },
+  "bird-dog-crunch": {
+    "name": "Bird dog crunch",
+    "variationNote": "Le bras se lève, le genou rejoint le coude",
+    "instructions": {
+      "0": "À quatre pattes, tendez un bras devant et la jambe opposée derrière.",
+      "1": "Ramenez ce genou et ce coude l’un vers l’autre sous le corps en arrondissant le dos.",
+      "2": "Tendez à nouveau sans poser, puis changez de côté."
+    },
+    "aliases": "abdos"
+  },
+  "donkey-kick": {
+    "name": "Donkey kick",
+    "instructions": {
+      "0": "À quatre pattes, mains sous les épaules, dos plat.",
+      "1": "Genou plié, poussez un pied vers le plafond jusqu’à aligner la cuisse avec le dos.",
+      "2": "Redescendez avec contrôle sans poser le genou, puis changez de côté."
+    },
+    "aliases": "extension de hanche, fessiers"
+  },
   "crunch": {
     "name": "Crunch",
     "instructions": {
