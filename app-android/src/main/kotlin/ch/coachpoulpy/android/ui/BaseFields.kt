@@ -195,7 +195,7 @@ internal fun SelectField(label: String, value: String, onClick: () -> Unit) {
 /** The frame of every option sheet: a title, a line, the choices, then Save. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SheetFrame(
+internal fun SheetFrame(
     title: String,
     why: String?,
     onDismiss: () -> Unit,

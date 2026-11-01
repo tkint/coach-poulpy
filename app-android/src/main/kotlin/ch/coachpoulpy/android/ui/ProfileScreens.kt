@@ -76,6 +76,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ch.coachpoulpy.android.BuildConfig
 import ch.coachpoulpy.android.R
+import ch.coachpoulpy.core.model.BodyFigure
 import ch.coachpoulpy.core.model.BodyMeasurement
 import ch.coachpoulpy.core.model.BodyMetric
 import ch.coachpoulpy.core.model.BodyRange
@@ -84,6 +85,7 @@ import ch.coachpoulpy.core.model.TrainingGoal
 import ch.coachpoulpy.core.model.Pronouns
 import ch.coachpoulpy.core.model.SexAssignedAtBirth
 import ch.coachpoulpy.shared.AppGraph
+import ch.coachpoulpy.shared.BodyMap
 import ch.coachpoulpy.shared.BodyDisplay
 import ch.coachpoulpy.shared.ChartAxis
 import ch.coachpoulpy.shared.LanguageChoice
@@ -260,10 +262,11 @@ private fun SettingsRow(icon: ImageVector, title: String, subtitle: String?, onC
 
 /** Settings › Your profile. Every field is optional; a change is saved as soon as it is made. */
 @Composable
-internal fun ProfileScreen(graph: AppGraph, onBack: () -> Unit, modifier: Modifier = Modifier) {
+internal fun ProfileScreen(graph: AppGraph, language: String, onBack: () -> Unit, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val model = remember(graph) { graph.profile(AppPreferences(context)) }
     val profile by model.profile.collectAsStateWithLifecycle()
+    val ui by model.ui.collectAsStateWithLifecycle()
     val notSet = stringResource(R.string.profile_notSet)
     var sheet by remember { mutableStateOf<ProfileSheet?>(null) }
     var name by remember { mutableStateOf(profile.displayName.orEmpty()) }
@@ -298,6 +301,9 @@ internal fun ProfileScreen(graph: AppGraph, onBack: () -> Unit, modifier: Modifi
         SelectField(stringResource(R.string.profile_sex), profile.sexAssignedAtBirth?.let { stringResource(it.label) } ?: notSet) { sheet = ProfileSheet.SEX }
         Note(stringResource(R.string.profile_sexNote))
 
+        SelectField(stringResource(R.string.profile_bodyFigure), profile.bodyFigure?.let { stringResource(it.label) } ?: notSet) { sheet = ProfileSheet.FIGURE }
+        Note(stringResource(R.string.profile_figureNote))
+
         SectionLabel(R.string.profile_training)
         SelectField(
             stringResource(R.string.profile_goal),
@@ -322,6 +328,17 @@ internal fun ProfileScreen(graph: AppGraph, onBack: () -> Unit, modifier: Modifi
             )
             Note(stringResource(R.string.profile_restingHrHint))
         }
+        val painAreas = ui.painAreas.joinToString(", ") { BodyMap.label(it, language) }
+        val pain = ui.painUntil?.date?.toJava()
+        SelectField(
+            stringResource(R.string.profile_pain),
+            when {
+                !ui.painActive -> stringResource(R.string.profile_painNone)
+                pain == null -> stringResource(R.string.profile_painUntilCleared, painAreas)
+                else -> stringResource(R.string.profile_painUntil, painAreas, shortDate(pain))
+            },
+        ) { sheet = ProfileSheet.PAIN }
+        Note(stringResource(R.string.profile_painNote))
     }
 
     when (sheet) {
@@ -369,11 +386,32 @@ internal fun ProfileScreen(graph: AppGraph, onBack: () -> Unit, modifier: Modifi
             onSave = model::setExperience,
             onDismiss = { sheet = null },
         )
+        ProfileSheet.FIGURE -> BodyFigureSheet(
+            figure = profile.bodyFigure,
+            language = language,
+            onSave = model::setBodyFigure,
+            onDismiss = { sheet = null },
+        )
+        ProfileSheet.PAIN -> PainSheet(
+            figure = profile.bodyFigure ?: BodyFigure.SHOULDERS,
+            language = language,
+            areas = if (ui.painActive) ui.painAreas else emptyList(),
+            duration = ui.painDuration,
+            onSave = { areas, duration -> model.setPain(areas, duration) },
+            onClear = model::clearPain,
+            onDismiss = { sheet = null },
+        )
         null -> Unit
     }
 }
 
-private enum class ProfileSheet { BIRTHDATE, PRONOUNS, SEX, GOALS, EXPERIENCE }
+private enum class ProfileSheet { BIRTHDATE, PRONOUNS, SEX, GOALS, EXPERIENCE, FIGURE, PAIN }
+
+private val BodyFigure.label: Int
+    get() = when (this) {
+        BodyFigure.SHOULDERS -> R.string.profile_figureShoulders
+        BodyFigure.HIPS -> R.string.profile_figureHips
+    }
 
 private val Pronouns.label: Int
     get() = when (this) {

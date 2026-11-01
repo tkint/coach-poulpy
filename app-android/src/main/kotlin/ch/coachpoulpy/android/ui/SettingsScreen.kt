@@ -80,7 +80,7 @@ fun SettingsScreen(
     val hub = { onPage(SettingsPage.HUB) }
     when (page) {
         SettingsPage.HUB -> SettingsHub(graph, language, onPage, modifier)
-        SettingsPage.PROFILE -> ProfileScreen(graph, hub, modifier)
+        SettingsPage.PROFILE -> ProfileScreen(graph, language, hub, modifier)
         SettingsPage.WEIGHT -> BodyScreen(graph, BodyMetric.WEIGHT, language, hub, modifier)
         SettingsPage.HEIGHT -> BodyScreen(graph, BodyMetric.HEIGHT, language, hub, modifier)
         SettingsPage.PREFERENCES -> PreferencesScreen(graph, hub, modifier)
