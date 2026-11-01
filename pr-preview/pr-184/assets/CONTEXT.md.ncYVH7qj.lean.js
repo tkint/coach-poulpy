@@ -1,0 +1,1 @@
+import{_ as t,o,c as a,a2 as r}from"./chunks/framework.Dtr0k--9.js";const g=JSON.parse('{"title":"Coach Poulpy","description":"","frontmatter":{},"headers":[],"relativePath":"CONTEXT.md","filePath":"CONTEXT.md"}'),n={name:"CONTEXT.md"};function s(i,e,d,p,h,l){return o(),a("div",null,[...e[0]||(e[0]=[r("",51)])])}const u=t(n,[["render",s]]);export{g as __pageData,u as default};
