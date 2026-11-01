@@ -311,7 +311,6 @@
     "notificationPaused": "En pause · {elapsed}"
   },
   "settings": {
-    "general": "Général",
     "devices": "Appareils",
     "appearance": "Apparence",
     "region": "Région",

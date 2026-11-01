@@ -9,7 +9,7 @@ struct RootView: View {
     @StateObject private var settings: Observed<SettingsModel, SettingsUiState>
     @State private var tab = AppTab.home
     @State private var librarySection = LibrarySection.workouts
-    @State private var settingsSection = SettingsSection.general
+    @State private var settingsPath = NavigationPath()
     @State private var incoming: IncomingWorkoutFile?
 
     init(graph: AppGraph) {
@@ -29,7 +29,7 @@ struct RootView: View {
                 .tabItem { Label("tab.library", systemImage: "books.vertical") }
                 .tag(AppTab.library)
             LiveView(graph: graph, onManageDevices: {
-                settingsSection = .devices
+                settingsPath = NavigationPath([SettingsPage.devices])
                 tab = .settings
             })
                 .tabItem { Label("tab.live", systemImage: "waveform.path.ecg") }
@@ -37,7 +37,7 @@ struct RootView: View {
             HistoryView(graph: graph)
                 .tabItem { Label("tab.history", systemImage: "clock.arrow.circlepath") }
                 .tag(AppTab.history)
-            SettingsView(graph: graph, settings: settings, section: $settingsSection)
+            SettingsView(graph: graph, settings: settings, path: $settingsPath)
                 .tabItem { Label("tab.settings", systemImage: "gearshape") }
                 .tag(AppTab.settings)
         }

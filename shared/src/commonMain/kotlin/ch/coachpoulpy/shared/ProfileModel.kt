@@ -9,13 +9,33 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlin.time.Clock
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
+
+/** [Profile] as plain values for Swift: no Kotlin dates, and text where a number may be missing. */
+data class ProfileUi(
+    /** Empty when there is none. */
+    val displayName: String,
+    val birthdate: PlanDate?,
+    val age: Int?,
+    val pronouns: Pronouns?,
+    /** Empty unless the pronouns are custom. */
+    val customPronouns: String,
+    val sexAssignedAtBirth: SexAssignedAtBirth?,
+    /** In the order of the list of goals. */
+    val goals: List<TrainingGoal>,
+    val experience: Experience?,
+    /** Digits, or empty when there is none. */
+    val restingHeartRate: String,
+)
 
 /** Settings › Your profile: every field optional, kept on the phone, and an empty or skipped field simply stays empty. */
 class ProfileModel(
@@ -58,6 +78,9 @@ class ProfileModel(
         change(GOALS, kept.joinToString(",").ifEmpty { null }) { it.copy(goals = kept.toSet()) }
     }
 
+    /** [setGoals] for Swift, which passes a list. */
+    fun setGoalsTo(goals: List<TrainingGoal>) = setGoals(goals.toSet())
+
     fun setExperience(experience: Experience?) = change(EXPERIENCE, experience?.name) { it.copy(experience = experience) }
 
     /** Beats per minute; anything outside 30 to 120 is not a resting heart rate and clears the field. */
@@ -66,10 +89,21 @@ class ProfileModel(
         change(RESTING_HEART_RATE, valid?.toString()) { it.copy(restingHeartRate = valid) }
     }
 
+    /** [profile] in plain values, for the iOS screens. */
+    val ui: StateFlow<ProfileUi> = _profile.map { it.toUi() }.stateIn(scope, SharingStarted.Eagerly, _profile.value.toUi())
+
+    /** [setBirthdate] for Swift, which has no Kotlin date to pass; an impossible date clears the field. */
+    fun setBirthdateTo(date: PlanDate) = setBirthdate(runCatching { date.date }.getOrNull())
+
+    fun clearBirthdate() = setBirthdate(null)
+
+    /** Raw text from a field: its digits are the beats per minute, and anything else clears it. */
+    fun setRestingHeartRateText(text: String) = setRestingHeartRate(text.filter { it.isDigit() }.toIntOrNull())
+
     /** The age in whole years today, from the birthdate; never stored. */
     fun age(of: Profile): Int? = of.age(today())
 
-    fun watch(onChange: (Profile) -> Unit): Cancellable = profile.watchIn(scope, onChange)
+    fun watch(onChange: (ProfileUi) -> Unit): Cancellable = ui.watchIn(scope, onChange)
 
     private fun change(key: String, saved: String?, edit: (Profile) -> Profile) {
         memory.putString(key, saved)
@@ -78,6 +112,18 @@ class ProfileModel(
 
     private inline fun <reified T : Enum<T>> read(key: String): T? =
         memory.getString(key)?.let { saved -> enumValues<T>().firstOrNull { it.name == saved } }
+
+    private fun Profile.toUi() = ProfileUi(
+        displayName = displayName.orEmpty(),
+        birthdate = birthdate?.let { PlanDate.of(it) },
+        age = age(today()),
+        pronouns = pronouns,
+        customPronouns = customPronouns.orEmpty(),
+        sexAssignedAtBirth = sexAssignedAtBirth,
+        goals = TrainingGoal.entries.filter { it in goals },
+        experience = experience,
+        restingHeartRate = restingHeartRate?.toString().orEmpty(),
+    )
 
     companion object {
         private const val NAME = "profile.name"

@@ -50,6 +50,17 @@ extension AppGraph {
         return Observed(model, current: model.state.value as! SettingsUiState, watch: model.watch, close: { _ in })
     }
 
+    func observedProfile() -> Observed<ProfileModel, ProfileUi> {
+        let model = profile(memory: UserDefaultsStore())
+        return Observed(model, current: model.ui.value as! ProfileUi, watch: model.watch, close: { _ in })
+    }
+
+    /// One weight or height log. Closed with its screen, since each follows the database.
+    func observedBody(_ metric: BodyMetric) -> Observed<BodyModel, BodyUi> {
+        let model = body(metric: metric)
+        return Observed(model, current: model.ui.value as! BodyUi, watch: model.watch, close: { $0.close() })
+    }
+
     func observedDevices() -> Observed<DevicesModel, DevicesUiState> {
         let model = devices(memory: UserDefaultsStore())
         return Observed(model, current: model.state.value as! DevicesUiState, watch: model.watch, close: { _ in })
