@@ -194,9 +194,6 @@
     "stop": "End session",
     "paused": "Paused",
     "step": "Step {step, number} of {steps, number}",
-    "finished": "Well done!",
-    "summary": "{done, number} of {planned, number} sets done in {duration}",
-    "summarySkipped": "{count, number} skipped",
     "close": "Close",
     "stopTitle": "End the session now?",
     "stopBody": "What you did so far is kept."

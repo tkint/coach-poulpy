@@ -87,10 +87,11 @@ class PlayerModelTest {
         player.tick()
         with(player.state.value) {
             assertEquals(PlayerStatus.FINISHED, status)
-            assertEquals(SessionSummary("2 min", setsDone = 3, setsSkipped = 0, setsPlanned = 3), summary)
         }
         assertNull(graph.store.unfinishedExecution())
         val finished = player.finished(UnitSystem.METRIC)!!
+        assertEquals("Well done!", finished.heading)
+        assertEquals("3 of 3 sets done in 2 min", finished.summary)
         assertEquals("Quick", finished.workoutName)
         assertEquals(clock.now().toEpochMilliseconds() - 2.minutes.inWholeMilliseconds, finished.startedAtMillis)
         assertEquals(listOf("Time" to "2:00", "Sets" to "3"), finished.stats.map { it.label to it.value })
@@ -134,7 +135,24 @@ class PlayerModelTest {
         player.start()
         player.done()
         player.stop()
-        assertEquals(1, player.state.value.summary?.setsDone)
+        assertEquals(true, player.finished(UnitSystem.METRIC)?.summary?.startsWith("1 of 3 sets done"))
         assertNull(graph.store.unfinishedExecution())
+    }
+
+    @Test
+    fun theSharedImageIsTheSameStraightAfterTheSessionAndFromTheHistory() {
+        val player = player(workout())
+        player.start()
+        player.done()
+        clock.advance(45.seconds)
+        player.tick()
+        player.done()
+        clock.advance(45.seconds)
+        player.tick()
+        clock.advance(30.seconds)
+        player.tick()
+        val fresh = assertNotNull(player.shareCard(UnitSystem.METRIC))
+        assertEquals(PoulpyDrawing.EXHAUSTED, fresh.drawing)
+        assertEquals(fresh, graph.sessionShareCard("run-1", UnitSystem.METRIC, "en"))
     }
 }

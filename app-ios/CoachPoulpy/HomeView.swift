@@ -109,7 +109,7 @@ struct HomeView: View {
         case .done:
             if let session = item.session {
                 NavigationLink {
-                    SessionDetailView(session: session, onDelete: { home.model.deleteSession(sessionId: session.id) })
+                    SessionDetailView(graph: graph, session: session, onDelete: { home.model.deleteSession(sessionId: session.id) })
                 } label: {
                     doneCard(session)
                 }

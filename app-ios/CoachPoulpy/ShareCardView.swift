@@ -19,17 +19,32 @@ struct ShareCardView: View {
                 .scaledToFit()
                 .frame(height: 256)
                 .padding(.top, 56)
-            Text(card.title)
-                .font(.custom(PoulpyFontFace.baloo2ExtraBold, size: 88))
+            Text(card.heading)
+                .font(.custom(PoulpyFontFace.baloo2ExtraBold, size: 84))
                 .foregroundStyle(PoulpyColor.onBackground)
                 .lineLimit(1)
                 .minimumScaleFactor(0.5)
                 .padding(.horizontal, 88)
                 .padding(.top, 8)
+            Text(card.title)
+                .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 60))
+                .foregroundStyle(PoulpyColor.onBackground)
+                .lineLimit(1)
+                .minimumScaleFactor(0.5)
+                .padding(.horizontal, 88)
             Text(Self.dateLabel(card.startedAtMillis))
-                .font(.custom(PoulpyFontFace.nunitoBold, size: 44))
+                .font(.custom(PoulpyFontFace.nunitoBold, size: 40))
                 .foregroundStyle(PoulpyColor.onSurfaceVariant)
                 .padding(.top, 4)
+            if let summary = card.summary {
+                Text(summary)
+                    .font(.custom(PoulpyFontFace.nunitoBold, size: 40))
+                    .foregroundStyle(PoulpyColor.onSurfaceVariant)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.5)
+                    .padding(.horizontal, 88)
+                    .padding(.top, 2)
+            }
             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 24), count: columns), spacing: 24) {
                 ForEach(Array(card.lines.enumerated()), id: \.offset) { _, line in
                     VStack(alignment: .leading, spacing: 4) {
@@ -52,23 +67,22 @@ struct ShareCardView: View {
                 }
             }
             .padding(.horizontal, 88)
-            .padding(.top, 48)
-            if let poulpy = card.poulpy {
-                HStack(spacing: 36) {
-                    TentacleRing(lit: Int(poulpy.tentaclesLit), on: PoulpyColor.primary, off: PoulpyColor.outline)
-                        .frame(width: 168, height: 168)
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text(poulpy.title).font(.custom(PoulpyFontFace.baloo2ExtraBold, size: 56)).lineLimit(1).minimumScaleFactor(0.6)
-                        Text(poulpy.line).font(.custom(PoulpyFontFace.nunitoBold, size: 36)).lineLimit(2)
-                    }
-                    .foregroundStyle(PoulpyColor.onPrimaryContainer)
-                    Spacer(minLength: 0)
+            .padding(.top, 40)
+            let poulpy = card.poulpy
+            HStack(spacing: 36) {
+                TentacleRing(lit: Int(poulpy.tentaclesLit), on: PoulpyColor.primary, off: PoulpyColor.outline)
+                    .frame(width: 168, height: 168)
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(poulpy.title).font(.custom(PoulpyFontFace.baloo2ExtraBold, size: 56)).lineLimit(1).minimumScaleFactor(0.6)
+                    Text(poulpy.line).font(.custom(PoulpyFontFace.nunitoBold, size: 36)).lineLimit(2)
                 }
-                .padding(32)
-                .background(PoulpyColor.primaryContainer, in: RoundedRectangle(cornerRadius: 40))
-                .padding(.horizontal, 88)
-                .padding(.top, 40)
+                .foregroundStyle(PoulpyColor.onPrimaryContainer)
+                Spacer(minLength: 0)
             }
+            .padding(32)
+            .background(PoulpyColor.primaryContainer, in: RoundedRectangle(cornerRadius: 40))
+            .padding(.horizontal, 88)
+            .padding(.top, 40)
             Spacer(minLength: 0)
             Text(card.appName)
                 .font(.custom(PoulpyFontFace.baloo2ExtraBold, size: 52))
@@ -80,10 +94,10 @@ struct ShareCardView: View {
         .environment(\.colorScheme, scheme)
     }
 
-    /// "Saturday 24 October · 18:05", in the user's language.
+    /// "Sat 24 Oct · 18:05", as on the finished screen.
     private static func dateLabel(_ millis: Int64) -> String {
         let date = Date(timeIntervalSince1970: Double(millis) / 1000)
-        return "\(date.formatted(.dateTime.weekday(.wide).day().month(.wide))) · \(date.formatted(date: .omitted, time: .shortened))"
+        return "\(date.formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated))) · \(date.formatted(date: .omitted, time: .shortened))"
     }
 }
 

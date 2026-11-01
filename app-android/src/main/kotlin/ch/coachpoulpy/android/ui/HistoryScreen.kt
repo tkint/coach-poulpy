@@ -574,7 +574,7 @@ fun SessionDetailScreen(graph: AppGraph, language: String, sessionId: String, on
                 navigationIcon = { BackButton(onBack) },
                 actions = {
                     if (session != null) {
-                        IconButton(onClick = { shareSessionImage(context, model.shareCard(session, units), chooser, colors) }) {
+                        IconButton(onClick = { graph.sessionShareCard(session.id, units, language)?.let { shareSessionImage(context, it, chooser, colors) } }) {
                             Icon(Icons.Filled.Share, contentDescription = stringResource(R.string.shareImage_button))
                         }
                         IconButton(onClick = { deleting = true }) {

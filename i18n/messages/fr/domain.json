@@ -175,6 +175,9 @@
     "averageSpeed": "Vitesse moy.",
     "energy": "Énergie",
     "energyValue": "{kcal, number} kcal",
-    "app": "Coach Poulpy"
+    "app": "Coach Poulpy",
+    "wellDone": "Bravo !",
+    "summary": "{done, number} sur {planned, number} séries faites en {duration}",
+    "summarySkipped": "Séries passées : {count, number}"
   }
 }

@@ -187,7 +187,7 @@ struct PlayerView: View {
         ScrollView {
             VStack(spacing: 16) {
                 Image(PoulpyDrawing.exhausted.imageName).resizable().scaledToFit().frame(width: 150, height: 150).accessibilityHidden(true)
-                Text("player.finished").font(.poulpy(.largeTitle))
+                Text(screen?.heading ?? "").font(.poulpy(.largeTitle))
                 VStack(spacing: 2) {
                     Text(state.workoutName).font(.poulpy(.title2).weight(.heavy)).multilineTextAlignment(.center)
                     if let screen {
@@ -195,11 +195,8 @@ struct PlayerView: View {
                         Text("\(date.formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated))) · \(date.formatted(date: .omitted, time: .shortened))")
                             .foregroundStyle(PoulpyColor.onSurfaceVariant)
                     }
-                    if let summary = state.summary {
-                        (Text("player.summary \(Int(summary.setsDone)) \(Int(summary.setsPlanned)) \(summary.durationLabel)")
-                            + (summary.setsSkipped > 0 ? Text(" · ") + Text("player.summarySkipped \(Int(summary.setsSkipped))") : Text("")))
-                            .multilineTextAlignment(.center)
-                            .foregroundStyle(PoulpyColor.onSurfaceVariant)
+                    if let summary = screen?.summary {
+                        Text(summary).multilineTextAlignment(.center).foregroundStyle(PoulpyColor.onSurfaceVariant)
                     }
                 }
                 if let screen {

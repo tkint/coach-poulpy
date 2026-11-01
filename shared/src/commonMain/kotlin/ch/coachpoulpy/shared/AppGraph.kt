@@ -31,6 +31,10 @@ class AppGraph(driverFactory: DriverFactory) {
     fun importWorkout(fileText: String, languageCode: String) = WorkoutImport(fileText, store, catalog, languageCode)
     fun history(languageCode: String) = HistoryModel(store, compiler, languageCode)
 
+    /** The picture to share for a finished session of the history, the same one as straight after the session. */
+    fun sessionShareCard(sessionId: String, units: UnitSystem, languageCode: String): ShareCard? =
+        SessionShare(store, compiler, languageCode).card(sessionId, units)
+
     private var settingsModel: SettingsModel? = null
     private var devicesModel: DevicesModel? = null
     private var liveModel: LiveModel? = null

@@ -194,9 +194,6 @@
     "stop": "Arrêter la séance",
     "paused": "En pause",
     "step": "Étape {step, number} sur {steps, number}",
-    "finished": "Bravo !",
-    "summary": "{done, number} sur {planned, number} séries faites en {duration}",
-    "summarySkipped": "Séries passées : {count, number}",
     "close": "Fermer",
     "stopTitle": "Arrêter la séance maintenant ?",
     "stopBody": "Ce que vous avez déjà fait est conservé."

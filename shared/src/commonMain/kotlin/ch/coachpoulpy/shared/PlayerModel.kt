@@ -15,7 +15,6 @@ import ch.coachpoulpy.core.model.PartKind
 import ch.coachpoulpy.core.model.Side
 import ch.coachpoulpy.core.model.Step
 import ch.coachpoulpy.core.model.StepRole
-import ch.coachpoulpy.core.model.Target
 import ch.coachpoulpy.core.model.Workout
 import ch.coachpoulpy.core.model.WorkoutFormat
 import ch.coachpoulpy.core.model.WorkoutRef
@@ -69,10 +68,7 @@ data class PlayerState(
     val nextRound: String?,
     val phaseNumber: Int,
     val phaseCount: Int,
-    val summary: SessionSummary?,
 )
-
-data class SessionSummary(val durationLabel: String, val setsDone: Int, val setsSkipped: Int, val setsPlanned: Int)
 
 /**
  * The guided session. Every action is written to the phone's database the moment it
@@ -146,43 +142,17 @@ class PlayerModel internal constructor(
         if (status == SessionState.Status.RUNNING || status == SessionState.Status.PAUSED) act { session.finish(clock.now()) }
     }
 
-    /**
-     * The picture to share once the session is finished; null before. Poulpy shows Champion when this session lit the
-     * eighth tentacle.
-     */
-    fun shareCard(units: UnitSystem): ShareCard? {
-        val screen = finished(units) ?: return null
-        return ShareCard.of(screen, languageCode, fullOctopus = screen.poulpy.tentaclesLit == PoulpyStatus.TENTACLES)
-    }
+    /** The picture to share once the session is finished; null before. */
+    fun shareCard(units: UnitSystem): ShareCard? = finished(units)?.let { ShareCard.of(it, languageCode) }
 
     /**
-     * The finished screen's name, date, stats and Poulpy; null before the session is finished. Poulpy's line is the one
-     * for the tentacle this session lit.
+     * The finished screen's heading, name, date, summary, stats and Poulpy; null before the session is finished.
+     * Poulpy's line is the one for the tentacle this session lit.
      */
     fun finished(units: UnitSystem): FinishedScreen? {
         if (current().status != SessionState.Status.FINISHED) return null
-        val phases = session.timeline.phases
-        val doneWork = session.events.mapNotNull { (it as? SessionEvent.PhaseCompleted)?.phaseIndex }.mapNotNull { phases.getOrNull(it) as? Phase.Work }
-        var liftedKg = 0.0
-        var distanceMeters = 0.0
-        for (work in doneWork) {
-            val load = steps[work.step]?.prescription?.sets?.getOrNull(work.setIndex)?.load as? Load.Kilograms
-            val reps = (work.target as? Target.Reps)?.count
-            if (load != null && reps != null) liftedKg += load.kg * reps
-            (work.target as? Target.Distance)?.let { distanceMeters += it.meters }
-        }
-        val facts = FinishedFacts(
-            activeSeconds = sessionTotals(session.events, session.timeline).active.inWholeSeconds,
-            setsDone = doneWork.size,
-            liftedKg = liftedKg,
-            distanceMeters = distanceMeters,
-        )
-        return FinishedScreen(
-            workoutName = workout.name,
-            startedAtMillis = session.events.firstOrNull { it is SessionEvent.Started }?.at?.toEpochMilliseconds() ?: 0L,
-            stats = FinishedStats.of(facts, units, languageCode),
-            poulpy = PoulpyCoach(languageCode).status(store.finishedSessionEndsNow(), clock.now()),
-        )
+        val poulpy = PoulpyCoach(languageCode).status(store.finishedSessionEndsNow(), clock.now())
+        return FinishedScreens.of(workout.name, workout, session.timeline, session.events, poulpy, units, languageCode)
     }
 
     /** Moves timed phases on. The ticker calls it; tests call it with a fake clock. */
@@ -265,20 +235,7 @@ class PlayerModel internal constructor(
             nextRound = next?.takeIf { it.rounds > 1 && (here?.rounds != it.rounds || here?.round != it.round) }?.let { labels.roundOf(it.round, it.rounds) },
             phaseNumber = (state.phaseIndex + 1).coerceAtMost(phases.size),
             phaseCount = phases.size,
-            summary = if (state.status == SessionState.Status.FINISHED) summary() else null,
         )
-    }
-
-    private fun summary(): SessionSummary {
-        val phases = session.timeline.phases
-        val events = session.events
-        fun workIndices(pick: (SessionEvent) -> Int?) = events.mapNotNull(pick).filter { phases.getOrNull(it) is Phase.Work }
-        val done = workIndices { (it as? SessionEvent.PhaseCompleted)?.phaseIndex }.size
-        val skipped = workIndices { (it as? SessionEvent.PhaseSkipped)?.phaseIndex }.size
-        val start = events.firstOrNull { it is SessionEvent.Started }?.at
-        val end = events.lastOrNull { it is SessionEvent.Finished }?.at
-        val seconds = if (start != null && end != null) (end - start).inWholeSeconds.toInt() else 0
-        return SessionSummary(labels.duration(seconds), done, skipped, phases.count { it is Phase.Work })
     }
 
     private fun Load.label(): String? = when (this) {
@@ -291,12 +248,6 @@ class PlayerModel internal constructor(
         val TICK = 200.milliseconds
 
         fun ceilSeconds(millis: Long): Int = ((millis + 999) / 1000).toInt()
-
-        fun Step.exerciseSteps(): List<Step.ExerciseStep> = when (this) {
-            is Step.ExerciseStep -> listOf(this)
-            is Step.Group -> children.flatMap { it.exerciseSteps() }
-            is Step.Rest -> emptyList()
-        }
 
         /** Left and right halves of a set count as one set. */
         fun Step.ExerciseStep.setNumber(index: Int): Int =

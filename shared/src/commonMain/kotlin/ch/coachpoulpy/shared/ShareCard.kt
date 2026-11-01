@@ -1,56 +1,31 @@
 package ch.coachpoulpy.shared
 
-/** One line of the share card, for example "Time" and "38:24". */
-data class ShareLine(val label: String, val value: String)
-
 /**
- * The picture a person shares after a finished session: Poulpy, the workout's name and date, and the numbers of the
- * session. The lines and their order are decided here so Android and iOS print the same card; each platform only
- * draws it, in the colours of the current theme. A value that is missing leaves its line out, and the heart rate is
- * never on the card. Straight after a session the card is the finished screen as a picture (same tiles, same tentacle
- * card); a past session from the history has no tentacle card, since that moment is gone.
+ * The picture a person shares after a session: the finished screen as an image, the same one straight after the
+ * session and from the history. Everything on it is decided in [FinishedScreen]; each platform only draws it, in the
+ * colours of the current theme.
  */
 data class ShareCard(
+    val heading: String,
     val title: String,
     val startedAtMillis: Long,
+    val summary: String?,
     val drawing: PoulpyDrawing,
-    val lines: List<ShareLine>,
+    val lines: List<FinishedStat>,
+    val poulpy: PoulpyStatus,
     val appName: String,
-    /** The tentacle this session lit, shown as on the finished screen; null for a past session. */
-    val poulpy: PoulpyStatus? = null,
 ) {
     companion object {
-        /** The card of a session that has just finished: the tiles and the tentacle card of [screen]. */
-        fun of(screen: FinishedScreen, languageCode: String, fullOctopus: Boolean = false) = ShareCard(
+        fun of(screen: FinishedScreen, languageCode: String) = ShareCard(
+            heading = screen.heading,
             title = screen.workoutName,
             startedAtMillis = screen.startedAtMillis,
-            drawing = if (fullOctopus) PoulpyDrawing.CHAMPION else PoulpyDrawing.MOOD_HAPPY,
-            lines = screen.stats.map { ShareLine(it.label, it.value) },
-            appName = DomainText.shareApp(languageCode),
+            summary = screen.summary,
+            drawing = PoulpyDrawing.EXHAUSTED,
+            lines = screen.stats,
             poulpy = screen.poulpy,
+            appName = DomainText.shareApp(languageCode),
         )
-
-        /** [fullOctopus] is true when this session lit Poulpy's eighth tentacle: he shows Champion instead of Happy. */
-        fun of(session: SessionRow, units: UnitSystem, languageCode: String, fullOctopus: Boolean = false): ShareCard {
-            val lines = buildList {
-                add(ShareLine(DomainText.shareTime(languageCode), clock(session.activeSeconds)))
-                val done = session.setsDone
-                if (session.kind == SessionKind.WORKOUT && done != null) {
-                    val planned = session.setsPlanned
-                    add(ShareLine(DomainText.shareSets(languageCode), if (planned != null) DomainText.shareSetsOf(languageCode, done, planned) else "$done"))
-                }
-                session.distanceMeters?.let { add(ShareLine(DomainText.shareDistance(languageCode), measure(Units.distance(it, units, decimals = 1), languageCode))) }
-                session.averageSpeedKmh?.let { add(ShareLine(DomainText.shareAverageSpeed(languageCode), measure(Units.speed(it, units), languageCode))) }
-                session.energyKcal?.let { add(ShareLine(DomainText.shareEnergy(languageCode), DomainText.shareEnergyValue(languageCode, it))) }
-            }
-            return ShareCard(
-                title = session.title,
-                startedAtMillis = session.startedAtMillis,
-                drawing = if (fullOctopus) PoulpyDrawing.CHAMPION else PoulpyDrawing.MOOD_HAPPY,
-                lines = lines,
-                appName = DomainText.shareApp(languageCode),
-            )
-        }
 
         /** "5.2 km" (the number in the language's decimal sign, a non-breaking space before the unit). */
         internal fun measure(measure: Measure, languageCode: String): String {

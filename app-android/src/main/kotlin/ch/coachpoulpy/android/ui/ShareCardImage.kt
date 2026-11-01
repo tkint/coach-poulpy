@@ -10,7 +10,6 @@ import android.graphics.Typeface
 import android.text.StaticLayout
 import android.text.TextPaint
 import android.text.TextUtils
-import android.text.format.DateFormat
 import androidx.compose.material3.ColorScheme
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.content.ContextCompat
@@ -20,9 +19,6 @@ import ch.coachpoulpy.android.R
 import ch.coachpoulpy.shared.PoulpyStatus
 import ch.coachpoulpy.shared.ShareCard
 import java.io.File
-import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 /**
@@ -76,13 +72,16 @@ internal fun renderShareCard(context: Context, card: ShareCard, colors: ColorSch
         drawing.draw(canvas)
     }
 
-    // The title shrinks until it fits on one line.
-    val title = paint(ink, 88f, display)
+    // Heading, name, date and sets done, as on the finished screen; a line shrinks until it fits on one line.
     val room = WIDTH - 2 * MARGIN
-    while (title.measureText(card.title) > room && title.textSize > 44f) title.textSize -= 4f
-    val titleText = TextUtils.ellipsize(card.title, TextPaint(title), room, TextUtils.TruncateAt.END).toString()
-    canvas.drawText(titleText, WIDTH / 2f, 400f, title)
-    canvas.drawText(dateLabel(card.startedAtMillis), WIDTH / 2f, 470f, paint(muted, 44f, body))
+    fun centered(text: String, baseline: Float, paint: Paint, smallest: Float) {
+        while (paint.measureText(text) > room && paint.textSize > smallest) paint.textSize -= 2f
+        canvas.drawText(TextUtils.ellipsize(text, TextPaint(paint), room, TextUtils.TruncateAt.END).toString(), WIDTH / 2f, baseline, paint)
+    }
+    centered(card.heading, 396f, paint(ink, 84f, display), 48f)
+    centered(card.title, 476f, paint(ink, 60f, bodyHeavy), 36f)
+    centered(dateLabel(card.startedAtMillis), 540f, paint(muted, 40f, body), 28f)
+    card.summary?.let { centered(it, 598f, paint(muted, 40f, body), 26f) }
 
     // Tiles like the finished screen's: label over value, on the surface colour with the outline around.
     val columns = card.lines.size.coerceIn(1, COLUMNS)
@@ -94,7 +93,7 @@ internal fun renderShareCard(context: Context, card: ShareCard, colors: ColorSch
     val value = paint(colors.onSurface.toArgb(), 64f, display).apply { textAlign = Paint.Align.LEFT }
     card.lines.forEachIndexed { index, line ->
         val left = MARGIN + (index % columns) * (tileWidth + GAP)
-        val top = 540f + (index / columns) * (tileHeight + GAP)
+        val top = 656f + (index / columns) * (tileHeight + GAP)
         val tile = RectF(left, top, left + tileWidth, top + tileHeight)
         canvas.drawRoundRect(tile, 40f, 40f, surface)
         canvas.drawRoundRect(tile, 40f, 40f, outline)
@@ -106,10 +105,8 @@ internal fun renderShareCard(context: Context, card: ShareCard, colors: ColorSch
         canvas.drawText(line.value, left + 28f, top + 140f, fitted)
     }
 
-    card.poulpy?.let { poulpy ->
-        val rows = (card.lines.size + columns - 1) / columns
-        drawTentacleCard(canvas, colors, display, bodyHeavy, poulpy, top = 540f + rows * (tileHeight + GAP) + 16f, room = room)
-    }
+    val rows = (card.lines.size + columns - 1) / columns
+    drawTentacleCard(canvas, colors, display, bodyHeavy, card.poulpy, top = 656f + rows * (tileHeight + GAP) + 16f, room = room)
 
     canvas.drawText(card.appName, WIDTH / 2f, HEIGHT - 56f, paint(colors.primary.toArgb(), 52f, display))
     return bitmap
@@ -149,10 +146,5 @@ private fun drawTentacleCard(canvas: Canvas, colors: ColorScheme, display: Typef
     canvas.restore()
 }
 
-/** "Saturday 24 October · 18:05", in the user's language. */
-private fun dateLabel(millis: Long): String {
-    val moment = Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault())
-    val day = DateTimeFormatter.ofPattern(DateFormat.getBestDateTimePattern(Locale.getDefault(), "EEEEdMMMM"), Locale.getDefault()).format(moment)
-    val time = DateTimeFormatter.ofPattern(DateFormat.getBestDateTimePattern(Locale.getDefault(), "jm"), Locale.getDefault()).format(moment)
-    return "$day · $time"
-}
+/** "Sat 24 Oct · 18:05", as on the finished screen. */
+private fun dateLabel(millis: Long): String = "${dayLabel(millis)} · ${time(millis)}"
