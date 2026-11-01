@@ -55,7 +55,7 @@ object FinishedStats {
     /** Metric: "820 kg" below a tonne, "2.1 t" above. Imperial: whole pounds, "1,807 lb" in English. */
     private fun lifted(kg: Double, units: UnitSystem, languageCode: String): String = when {
         units == UnitSystem.IMPERIAL -> DomainText.unitPounds(languageCode, Units.poundsOf(kg).let { kotlin.math.round(it).toLong().toString() })
-        kg < 1000 -> Labels(languageCode).kilograms(kotlin.math.round(kg))
+        kg < 1000 -> Labels(languageCode).weight(kotlin.math.round(kg))
         else -> DomainText.unitTonnes(languageCode, ShareCard.measure(Measure(kg / 1000, 1, ""), languageCode).removeSuffix("\u00a0"))
     }
 }
