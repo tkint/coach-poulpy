@@ -480,8 +480,7 @@
     "painDurationClearedSub": "Rehab with no end date. Clear it here when you are back",
     "painAgain": "Still hurting when the time is up? Set it again, it only takes a tap.",
     "figureFront": "Front",
-    "figureBack": "Back",
-    "bodyOfFigure": "{view} of the body"
+    "figureBack": "Back"
   },
   "body": {
     "weight": "Weight",

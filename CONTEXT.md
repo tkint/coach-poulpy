@@ -126,6 +126,18 @@ _Avoid_: Weigh-in record, vital
 Metric or imperial, chosen once in Settings. Everything is stored metric (kg, cm, km) and converted only for display and input, so switching never changes a stored value.
 _Avoid_: Locale, measurement preference
 
+**Pain window**:
+The time after the person says where it hurts (pain or rehab) during which Poulpy stays on the blue side, in the Patched up pose, and no entry counts as missed. 72 hours by default, or 1 week, 2 weeks, or until the person clears it; setting it again starts the time over.
+_Avoid_: Injury mode, sick leave
+
+**Body map**:
+A front and a back muscle chart whose areas, left and right apart, light up when picked: where it hurts today, and later which muscles a workout works. Skin has no fill, so it implies no skin tone.
+_Avoid_: Anatomy picture, body diagram
+
+**Body figure**:
+Which of the two builds the body map is drawn in, Wider shoulders or Wider hips. A drawing choice only: not gender, not linked to sex assigned at birth, never used for estimates.
+_Avoid_: Avatar, body type, male or female figure
+
 **Pronouns**:
 How the person wants to be addressed, used for French agreement and Poulpy's lines. Never inferred from a name or from sex assigned at birth.
 _Avoid_: Gender (the app does not ask for it)

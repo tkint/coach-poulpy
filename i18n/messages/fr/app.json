@@ -480,8 +480,7 @@
     "painDurationClearedSub": "Rééducation sans date de fin. Efface-la ici quand tu es de retour",
     "painAgain": "Encore mal quand le temps est écoulé ? Règle-la de nouveau, un seul geste suffit.",
     "figureFront": "Face",
-    "figureBack": "Dos",
-    "bodyOfFigure": "{view} du corps"
+    "figureBack": "Dos"
   },
   "body": {
     "weight": "Poids",
