@@ -990,3 +990,23 @@ svg { flex: none; }
 .log-list li { display: flex; justify-content: space-between; align-items: baseline; padding: var(--cp-space-sm) 2px; font-weight: 700; font-variant-numeric: tabular-nums; }
 .log-list li + li { border-top: 1px solid var(--cp-outline); }
 .log-list li span { color: var(--cp-on-surface-variant); font-weight: 600; }
+
+/* ---------- Base fields: number field, number entry, step slider ---------- */
+
+.number-field { height: 52px; border-radius: var(--cp-radius-md); border: 1.5px solid var(--cp-outline); background: var(--cp-surface); padding: 0 var(--cp-space-lg); display: flex; align-items: center; gap: var(--cp-space-sm); min-width: 0; }
+.number-field:focus-within { border-color: var(--cp-primary); }
+.number-field input { flex: 1; min-width: 0; width: 100%; height: 100%; font: inherit; font-size: 17px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--cp-on-surface); background: transparent; }
+.number-field .unit { font-size: 15px; font-weight: 800; color: var(--cp-on-surface-variant); }
+.number-field--large { height: 64px; }
+.number-field--large input { font-size: 28px; text-align: right; }
+.number-entry { display: flex; align-items: center; gap: var(--cp-space-sm); }
+.number-entry > button { width: 48px; height: 48px; flex: none; border-radius: var(--cp-radius-pill); background: var(--cp-surface-variant); color: var(--cp-primary); font-size: 24px; font-weight: 800; }
+.number-entry .number-field { flex: 1; }
+.step-slider { display: flex; flex-direction: column; gap: var(--cp-space-md); padding: var(--cp-space-sm) var(--cp-space-xs); }
+.step-slider-value { font: var(--cp-type-headline); text-align: center; }
+.step-slider input { width: 100%; accent-color: var(--cp-primary); }
+.step-slider-dots { display: flex; justify-content: space-between; padding: 0 10px; margin-top: -10px; }
+.step-slider-dots span { width: 10px; height: 10px; border-radius: var(--cp-radius-pill); background: var(--cp-outline); }
+.step-slider-dots span.on { background: var(--cp-primary); }
+.step-slider-ends { display: flex; justify-content: space-between; font-size: 13px; line-height: 18px; font-weight: 700; color: var(--cp-on-surface-variant); }
+.line-chart .unit { text-anchor: end; }

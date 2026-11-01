@@ -61,6 +61,68 @@ object BodyDisplay {
         }.coerceIn(MIN_CM, MAX_CM)
     }
 
+    /** The text of a weight field: kg or lb to one decimal, with the decimal sign of [languageCode]. */
+    fun weightText(kg: Double, system: UnitSystem, languageCode: String): String =
+        (round(Units.weight(kg, system).value * 10) / 10).toString().withDecimalSign(languageCode)
+
+    /** The kilograms typed in a weight field in [system], or null when it is not a number or not a plausible weight. */
+    fun weightFrom(text: String, system: UnitSystem): Double? {
+        val typed = text.asNumber() ?: return null
+        val kg = if (system == UnitSystem.IMPERIAL) Units.kilogramsOf(typed) else typed
+        return kg.takeIf { it in MIN_KG..MAX_KG }
+    }
+
+    /** The text of a centimetre field, whole centimetres. */
+    fun centimetresText(cm: Double): String = round(cm).toInt().toString()
+
+    /** The centimetres typed in a height field, or null when it is not a number or not a plausible height. */
+    fun centimetresFrom(text: String): Double? = text.asNumber()?.takeIf { it in MIN_CM..MAX_CM }
+
+    /** The feet and the inches of a height as two field texts. */
+    fun feetAndInchesText(cm: Double, languageCode: String): Pair<String, String> {
+        val (feet, inches) = Units.feetAndInches(cm)
+        val shown = if (inches % 1.0 == 0.0) inches.toInt().toString() else inches.toString().withDecimalSign(languageCode)
+        return feet.toString() to shown
+    }
+
+    /** The centimetres of a height typed as feet and inches; empty inches count as 0. Null when it is not a plausible height. */
+    fun centimetresFrom(feet: String, inches: String): Double? {
+        val ft = feet.trim().toIntOrNull() ?: return null
+        val inch = if (inches.isBlank()) 0.0 else inches.asNumber() ?: return null
+        return Units.centimetresOf(ft, inch).takeIf { it in MIN_CM..MAX_CM }
+    }
+
+    /** The value a chart plots, in the unit shown: kg or lb, cm or total inches. */
+    fun chartValue(metric: BodyMetric, stored: Double, system: UnitSystem): Double = when (metric) {
+        BodyMetric.WEIGHT -> Units.weight(stored, system).value
+        BodyMetric.HEIGHT -> if (system == UnitSystem.IMPERIAL) stored / CM_PER_INCH else stored
+    }
+
+    /** The smallest span a chart axis covers, in the unit shown, so a flat series still has a few lines. */
+    fun chartMinSpan(metric: BodyMetric, system: UnitSystem): Double = when (metric) {
+        BodyMetric.WEIGHT -> if (system == UnitSystem.IMPERIAL) 4.0 else 2.0
+        BodyMetric.HEIGHT -> if (system == UnitSystem.IMPERIAL) 2.0 else 4.0
+    }
+
+    /** A grid line's label: "73", "72.5", or "5′9″" for an imperial height. */
+    fun axisLabel(metric: BodyMetric, shown: Double, system: UnitSystem, languageCode: String): String =
+        if (metric == BodyMetric.HEIGHT && system == UnitSystem.IMPERIAL) {
+            val inches = round(shown).toInt()
+            "${inches / 12}′${inches % 12}″"
+        } else if (shown % 1.0 == 0.0) shown.toInt().toString() else shown.toString().withDecimalSign(languageCode)
+
+    /** The unit written once at the top of the axis; an imperial height carries its units in its labels. */
+    fun axisUnit(metric: BodyMetric, system: UnitSystem): String = when (metric) {
+        BodyMetric.WEIGHT -> Units.weight(0.0, system).unit
+        BodyMetric.HEIGHT -> if (system == UnitSystem.IMPERIAL) "ft in" else "cm"
+    }
+
+    private const val CM_PER_INCH = 2.54
+
+    private fun String.asNumber(): Double? = trim().replace(',', '.').toDoubleOrNull()
+
+    private fun String.withDecimalSign(languageCode: String) = if (languageCode == "fr") replace('.', ',') else this
+
     /** What the stepper starts on when nothing was logged yet. */
     fun starting(metric: BodyMetric) = if (metric == BodyMetric.WEIGHT) 70.0 else 170.0
 
