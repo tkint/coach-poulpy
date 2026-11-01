@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Profile · edit</title>
+<meta name="mockup:screen" content="profile-edit">
+<meta name="mockup:section" content="Profile and settings">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../../../web/src/styles/tokens.css">
+<link rel="stylesheet" href="../../shared/mockup.css">
+<script src="../../shared/mockup-theme.js"></script>
+</head>
+<body>
+<main class="phone" style="--frame-height: 1020px;">
+
+  <header class="page-bar"><a class="icon-button" href="settings-general.html" aria-label="Back to settings"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></a><div><h1>Your profile</h1><span class="muted">Everything is optional and stays on this phone</span></div></header>
+  <div class="form-body" style="padding-top: var(--cp-space-lg);">
+    <span class="label label-row">About you</span>
+    <div class="field" id="name"><label class="label" for="display-name">What should Poulpy call you?</label><input class="text-field" id="display-name" value="Alex"></div>
+    <button class="select-field" type="button" data-component="select-field"><span><span class="label">Birthdate</span><strong>14 March 1991 · 34 years</strong></span><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
+    <button class="select-field" type="button" data-component="select-field" id="pronouns"><span><span class="label">Pronouns</span><strong>ze / hir</strong></span><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
+    <span class="field-note">Used for French wording and Poulpy’s lines. A custom entry is repeated as written; French wording that needs a gender stays neutral.</span>
+    <button class="select-field" type="button" data-component="select-field"><span><span class="label">Sex assigned at birth</span><strong>Prefer not to say</strong></span><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
+    <span class="field-note">Only used for estimates such as calories and heart rate zones. Skip it and Poulpy uses a neutral average.</span>
+    <span class="label label-row" style="margin-top: var(--cp-space-sm);">Training</span>
+    <button class="select-field" type="button" data-component="select-field"><span><span class="label">Goals</span><strong>Run further, Build strength</strong></span><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
+    <button class="select-field" type="button" data-component="select-field"><span><span class="label">Experience</span><strong>Regular</strong></span><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
+    <div class="field" id="resting-hr"><label class="label" for="resting-hr-input">Resting heart rate</label><span class="number-field" data-component="number-field"><input id="resting-hr-input" inputmode="numeric" value="58" aria-describedby="resting-hr-note"><span class="unit">bpm</span></span><span class="field-note" id="resting-hr-note">Between 30 and 120. Used for heart rate zones.</span></div>
+    <button class="select-field" type="button" data-component="select-field"><span><span class="label">Pain or rehab</span><strong>Left knee · until 30 Nov</strong></span><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
+    <span class="field-note">When you log pain, Poulpy stays on the blue side for 72 hours.</span>
+  </div>
+</main>
+</body>
+</html>
