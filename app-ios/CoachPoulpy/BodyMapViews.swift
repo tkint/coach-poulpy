@@ -49,7 +49,7 @@ private struct BodyShape: Shape {
 /// Skin has no fill. With `onToggle` each area can be tapped and is its own accessibility element ("Left knee").
 struct BodyMapFigure: View {
     let figure: BodyFigure
-    let view: BodyView
+    let view: Shared.BodyView
     var selected: Set<String> = []
     var width: CGFloat = 140
     var onToggle: ((String) -> Void)?
@@ -105,6 +105,70 @@ struct PainSheet: View {
         if picked.contains(key) { picked.remove(key) } else { picked.insert(key) }
     }
 
+    private var summaryLine: some View {
+        let names: [String] = BodyMap.shared.valid(keys: Array(picked)).map { BodyMap.shared.label(key: $0, languageCode: Language.code) }
+        let summary: String = names.isEmpty ? L("profile.painNothingPicked") : names.joined(separator: ", ")
+        return Text(summary).font(.poulpy(.body).weight(.heavy)).foregroundStyle(PoulpyColor.onPrimaryContainer)
+    }
+
+    private var otherChip: some View {
+        let key: String = BodyMap.shared.OTHER
+        let on: Bool = picked.contains(key)
+        return Button { toggle(key) } label: {
+            Text(BodyMap.shared.label(key: key, languageCode: Language.code))
+                .font(.poulpy(.subheadline).weight(.heavy))
+                .foregroundStyle(on ? PoulpyColor.onPrimary : PoulpyColor.onSurface)
+                .padding(.horizontal, 16)
+                .frame(minHeight: 40)
+                .background(on ? PoulpyColor.primary : Color.clear, in: Capsule())
+                .overlay(Capsule().stroke(PoulpyColor.outline, lineWidth: 1.5))
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(on ? .isSelected : [])
+    }
+
+    private var durationList: some View {
+        let choices: [(PainDuration, LocalizedStringKey, LocalizedStringKey?)] = [
+            (.hours72, "profile.painDuration72", "profile.painDuration72Sub"),
+            (.oneWeek, "profile.painDurationWeek", nil),
+            (.twoWeeks, "profile.painDurationWeeks", nil),
+            (.untilCleared, "profile.painDurationCleared", "profile.painDurationClearedSub"),
+        ]
+        return VStack(spacing: 0) {
+            ForEach(Array(choices.enumerated()), id: \.offset) { index, choice in
+                if index > 0 { Divider().overlay(PoulpyColor.outline) }
+                durationRow(choice.0, choice.1, choice.2)
+            }
+        }
+        .overlay(RoundedRectangle(cornerRadius: 14).stroke(PoulpyColor.outline, lineWidth: 1))
+    }
+
+    private func durationRow(_ value: PainDuration, _ title: LocalizedStringKey, _ sub: LocalizedStringKey?) -> some View {
+        Button { length = value } label: {
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title).font(.poulpy(.body).weight(.bold)).foregroundStyle(PoulpyColor.onSurface)
+                    if let sub { Text(sub).font(.poulpy(.footnote)).foregroundStyle(PoulpyColor.onSurfaceVariant) }
+                }
+                Spacer()
+                if length == value { Image(systemName: "checkmark").foregroundStyle(PoulpyColor.primary) }
+            }
+            .frame(minHeight: 52)
+            .padding(.horizontal, 16)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(length == value ? .isSelected : [])
+    }
+
+    private func sideColumn(_ side: Shared.BodyView, _ label: LocalizedStringKey) -> some View {
+        VStack(spacing: 4) {
+            BodyMapFigure(figure: figure, view: side, selected: picked, width: 128, onToggle: toggle)
+            Text(label).font(.poulpy(.footnote)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -113,56 +177,13 @@ struct PainSheet: View {
                     Text("profile.painWhere").font(.poulpy(.footnote).weight(.heavy)).foregroundStyle(PoulpyColor.onSurfaceVariant)
                     FieldNote("profile.painHint")
                     HStack(alignment: .top, spacing: 0) {
-                        ForEach(Array([(BodyView.front, "profile.figureFront"), (BodyView.back, "profile.figureBack")].enumerated()), id: \.offset) { _, side in
-                            let (view, label) = side
-                            VStack(spacing: 4) {
-                                BodyMapFigure(figure: figure, view: view, selected: picked, width: 128, onToggle: toggle)
-                                Text(LocalizedStringKey(label)).font(.poulpy(.footnote)).foregroundStyle(PoulpyColor.onSurfaceVariant)
-                            }
-                            .frame(maxWidth: .infinity)
-                        }
+                        sideColumn(Shared.BodyView.front, "profile.figureFront")
+                        sideColumn(Shared.BodyView.back, "profile.figureBack")
                     }
-                    let summary = BodyMap.shared.valid(keys: Array(picked)).map { BodyMap.shared.label(key: $0, languageCode: Language.code) }.joined(separator: ", ")
-                    Text(summary.isEmpty ? L("profile.painNothingPicked") : summary)
-                        .font(.poulpy(.body).weight(.heavy)).foregroundStyle(PoulpyColor.onPrimaryContainer)
-                    Button { toggle(BodyMap.shared.OTHER) } label: {
-                        Text(BodyMap.shared.label(key: BodyMap.shared.OTHER, languageCode: Language.code))
-                            .font(.poulpy(.subheadline).weight(.heavy))
-                            .foregroundStyle(picked.contains(BodyMap.shared.OTHER) ? PoulpyColor.onPrimary : PoulpyColor.onSurface)
-                            .padding(.horizontal, 16).frame(minHeight: 40)
-                            .background(picked.contains(BodyMap.shared.OTHER) ? PoulpyColor.primary : Color.clear, in: Capsule())
-                            .overlay(Capsule().stroke(PoulpyColor.outline, lineWidth: 1.5))
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityAddTraits(picked.contains(BodyMap.shared.OTHER) ? .isSelected : [])
+                    summaryLine
+                    otherChip
                     Text("profile.painFor").font(.poulpy(.footnote).weight(.heavy)).foregroundStyle(PoulpyColor.onSurfaceVariant)
-                    VStack(spacing: 0) {
-                        let choices: [(PainDuration, String, String?)] = [
-                            (.hours72, "profile.painDuration72", "profile.painDuration72Sub"),
-                            (.oneWeek, "profile.painDurationWeek", nil),
-                            (.twoWeeks, "profile.painDurationWeeks", nil),
-                            (.untilCleared, "profile.painDurationCleared", "profile.painDurationClearedSub"),
-                        ]
-                        ForEach(Array(choices.enumerated()), id: \.offset) { index, choice in
-                            if index > 0 { Divider().overlay(PoulpyColor.outline) }
-                            Button { length = choice.0 } label: {
-                                HStack {
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        Text(LocalizedStringKey(choice.1)).font(.poulpy(.body).weight(.bold)).foregroundStyle(PoulpyColor.onSurface)
-                                        if let sub = choice.2 { Text(LocalizedStringKey(sub)).font(.poulpy(.footnote)).foregroundStyle(PoulpyColor.onSurfaceVariant) }
-                                    }
-                                    Spacer()
-                                    if length == choice.0 { Image(systemName: "checkmark").foregroundStyle(PoulpyColor.primary) }
-                                }
-                                .frame(minHeight: 52)
-                                .padding(.horizontal, 16)
-                                .contentShape(Rectangle())
-                            }
-                            .buttonStyle(.plain)
-                            .accessibilityAddTraits(length == choice.0 ? .isSelected : [])
-                        }
-                    }
-                    .overlay(RoundedRectangle(cornerRadius: 14).stroke(PoulpyColor.outline, lineWidth: 1))
+                    durationList
                     FieldNote("profile.painAgain")
                     if !areas.isEmpty {
                         Button(LocalizedStringKey("profile.clear")) {
@@ -197,27 +218,29 @@ struct BodyFigureSheet: View {
         _choice = State(initialValue: current)
     }
 
+    private func card(_ value: BodyFigure, _ label: LocalizedStringKey) -> some View {
+        let on = choice == value
+        return Button { choice = value } label: {
+            VStack(spacing: 8) {
+                BodyMapFigure(figure: value, view: Shared.BodyView.front, width: 96)
+                Text(label).font(.poulpy(.body).weight(.heavy)).foregroundStyle(PoulpyColor.onSurface)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 12)
+            .overlay(RoundedRectangle(cornerRadius: 20).stroke(on ? PoulpyColor.primary : PoulpyColor.outline, lineWidth: on ? 2.5 : 1.5))
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(on ? .isSelected : [])
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 12) {
                     Text("profile.figureWhy").font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
                     HStack(spacing: 12) {
-                        ForEach(Array([(BodyFigure.hips, "profile.figureHips"), (BodyFigure.shoulders, "profile.figureShoulders")].enumerated()), id: \.offset) { _, option in
-                            let (value, label) = option
-                            let on = choice == value
-                            Button { choice = value } label: {
-                                VStack(spacing: 8) {
-                                    BodyMapFigure(figure: value, view: .front, width: 96)
-                                    Text(LocalizedStringKey(label)).font(.poulpy(.body).weight(.heavy)).foregroundStyle(PoulpyColor.onSurface)
-                                }
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 12)
-                                .overlay(RoundedRectangle(cornerRadius: 20).stroke(on ? PoulpyColor.primary : PoulpyColor.outline, lineWidth: on ? 2.5 : 1.5))
-                            }
-                            .buttonStyle(.plain)
-                            .accessibilityAddTraits(on ? .isSelected : [])
-                        }
+                        card(.hips, "profile.figureHips")
+                        card(.shoulders, "profile.figureShoulders")
                     }
                     if current != nil {
                         Button(LocalizedStringKey("profile.clear")) {
