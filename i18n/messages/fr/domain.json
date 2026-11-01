@@ -130,7 +130,8 @@
     "hoursMinutes": "{hours, number} h {minutes}",
     "meters": "{meters, number} m",
     "kilograms": "{kilograms} kg",
-    "tonnes": "{tonnes} t"
+    "tonnes": "{tonnes} t",
+    "pounds": "{pounds} lb"
   },
   "workout": {
     "copyName": "{name} (copie)",
