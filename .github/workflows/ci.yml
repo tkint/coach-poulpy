@@ -105,5 +105,7 @@ jobs:
         run: node ../design/build-tokens.mjs --check
       - name: Check the generated Poulpy drawings match design/build-poulpy.mjs
         run: node ../design/build-poulpy.mjs --check
+      - name: Check the HTML mockups use only the design tokens and link only files in the repo
+        run: node ../design/check-mockups.mjs
       - run: npm ci
       - run: npm run build
