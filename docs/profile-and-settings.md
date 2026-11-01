@@ -1,6 +1,6 @@
 # Profile and settings
 
-A proposal for review on this page and the draft [Mockups](/mockups/drafts): the profile, body logging with charts, and a settings hub that reaches the Devices view. Nothing here is built until the drafts are agreed (see [ADR 0016](./adr/0016-mockups-are-plain-html-in-the-repo.md)). The wording rules behind it are in [Inclusive by default](./brand.md#inclusive-by-default).
+A proposal for review on this page and the draft pages under Mockups, Drafts, in the site menu: the profile, body logging with charts, and a settings hub that reaches the Devices view. Nothing here is built until the drafts are agreed (see [ADR 0016](./adr/0016-mockups-are-plain-html-in-the-repo.md)). The wording rules behind it are in [Inclusive by default](./brand.md#inclusive-by-default).
 
 ## Settings, reworked
 
