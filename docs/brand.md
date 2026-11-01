@@ -86,7 +86,7 @@ Poulpy is a plush with a blue side and a grumpy side, and nobody has to be one o
 - **Drawings and stories show a range of people.** Future share cards, the website and store images show different bodies, ages, genders and families, and may use the rainbow only as a deliberate Pride moment, never as decoration on Poulpy.
 - **Review before shipping.** Wording about sex, gender or bodies is read by people from the community before release, and changed when they say so; the owner decides ties.
 
-The reasons and the wording alternatives that were set aside are in [Brand decisions](./brand-decisions.md#13-inclusive-by-default-proposed). The profile fields that follow these rules are on [Profile and settings](./profile-and-settings.md).
+The reasons and the wording alternatives that were set aside are in [Brand decisions](./brand-decisions.md#13-inclusive-by-default). The profile fields that follow these rules are on [Profile and settings](./profile-and-settings.md).
 
 ## Tentacles
 
