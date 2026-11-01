@@ -80,6 +80,20 @@ Baloo 2 for display and titles, Nunito for everything else. Platforms map each r
 | Error banner | `error` tint, icon plus text | Never ember |
 | Loader | Poulpy from above, a blue outline of eight lobes, one turn every 2.4 s | `PoulpyLoader` on both platforms; replaces spinners |
 
+## Base fields
+
+The fields every form is built from. Reference mockups: `profile-edit`, the three `profile-*-sheet` pages, `body-log-sheet`, `body-log-height-sheet`. CSS classes are in `design/mockups/shared/mockup.css`. Build every new form from these, and move old screens to them as they are touched.
+
+| Field | Shape | Behaviour |
+| --- | --- | --- |
+| Text field | 52 high, 10 radius, 1.5 px `outline`, label above, `primary` outline on focus | Free text: a name. A note under it in `onSurfaceVariant` |
+| Select field | Same box, the chosen value (or a muted "Not set") and a chevron | Tapping opens a sheet; nothing else is shown on the screen. Never a row of pills |
+| Option sheet | 24 radius sheet, a title, one row per choice | Single choice: a radio and the sheet closes on tap. Several choices: checkboxes and a Done button. A choice that needs text (Custom pronouns) shows its text field inside the sheet |
+| Number field | Text field with a unit at its right (`bpm`, `kg`, `cm`) | Selects all its text on focus, opens the numeric keyboard, checks the range on leaving. Optional round − and + buttons on both sides (the `number-entry` pattern) for small nudges. Imperial height is two number fields, ft and in |
+| Step slider | A bar of dots, `•--•--•--•--•`, the current label above it, the two ends named below | A fixed scale of five or fewer named steps, inside an option sheet |
+| Line chart | Grid lines behind the line, the unit at the top of the axis, a value at each grid line, the date range under it | No grid colour that implies good or bad; a weight going up is never red |
+| Empty chart card | `PoulpyCard` shape with Poulpy on the blue side, a line and the one action that adds the first entry | Shown instead of the chart when nothing is logged |
+
 ## Screens
 
 Mockups are plain HTML pages in `design/mockups/` ([ADR 0016](adr/0016-mockups-are-plain-html-in-the-repo.md)): drafts in `drafts/`, validated screens in `agreed/`, each split into `phone/`, `tablet/` and `web/`. The docs site shows them on the [Mockups](https://tkint.github.io/coach-poulpy/mockups/) pages, one page per screen, in light or dark. Build a screen from its agreed mockup, and get a mockup agreed, through a PR that moves it out of `drafts/`, before building a screen that has none. The player draws the same screens on both phones (`player-ready`, `player-set`, `player-circuit-round`, `player-repeat-in-sets`, `player-warm-up`, `player-rest`, `player-recover`): pause and end on the bar over the step count, Poulpy straining on an exercise and glancing aside inside the rest ring, a rep target as one big number with its unit under it, a line saying what comes next, and −15 s and +15 s under the ring to lengthen or shorten that one rest. The screen sits on the `background` role, not `surface`, so the cards on it stand out. The finished screen names the workout and its date, then shows three stats picked from what the exercises logged: Time always, then sets and weight lifted for sets and weights, distance and pace for runs and walks, and never heart rate; a stat with nothing logged, such as the weight of a bodyweight session, is left out (`player-finished` and `player-finished-run` on the Mockups pages). CI runs `node design/check-mockups.mjs` on every mockup: no literal colours, no px value where a spacing, radius or headline token has that size, no missing link, no script or style from outside the repo (the brand fonts apart), and the title, screen and section meta tags in place.

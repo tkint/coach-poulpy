@@ -9,6 +9,7 @@ import kotlin.time.Clock
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -58,6 +59,9 @@ class BodyModel(
     }
 
     fun delete(day: LocalDate) = store.deleteBodyMeasurement(metric, day)
+
+    /** Stops following the log once the screen is gone. */
+    fun close() = scope.cancel()
 
     fun watch(onChange: (BodyState) -> Unit): Cancellable = state.watchIn(scope, onChange)
 }

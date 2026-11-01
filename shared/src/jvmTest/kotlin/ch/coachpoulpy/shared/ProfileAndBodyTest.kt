@@ -1,6 +1,8 @@
 package ch.coachpoulpy.shared
 
 import ch.coachpoulpy.core.model.BodyMetric
+import ch.coachpoulpy.core.model.Experience
+import ch.coachpoulpy.core.model.TrainingGoal
 import ch.coachpoulpy.core.model.Pronouns
 import ch.coachpoulpy.core.model.SexAssignedAtBirth
 import ch.coachpoulpy.data.local.DriverFactory
@@ -45,6 +47,22 @@ class ProfileAndBodyTest {
         assertNull(model.profile.value.displayName)
         model.setRestingHeartRate(400)
         assertNull(model.profile.value.restingHeartRate)
+    }
+
+    @Test
+    fun severalGoalsAreKeptAndExperienceHasFiveSteps() {
+        val memory = MemoryStore()
+        val model = ProfileModel(memory, CoroutineScope(Dispatchers.Unconfined))
+        model.setGoals(setOf(TrainingGoal.RUN_FURTHER, TrainingGoal.BUILD_STRENGTH))
+        model.setExperience(Experience.VERY_EXPERIENCED)
+
+        val reopened = ProfileModel(memory, CoroutineScope(Dispatchers.Unconfined)).profile.value
+        assertEquals(setOf(TrainingGoal.BUILD_STRENGTH, TrainingGoal.RUN_FURTHER), reopened.goals)
+        assertEquals(Experience.VERY_EXPERIENCED, reopened.experience)
+        assertEquals(5, Experience.entries.size)
+
+        model.setGoals(emptySet())
+        assertEquals(emptySet(), ProfileModel(memory, CoroutineScope(Dispatchers.Unconfined)).profile.value.goals)
     }
 
     @Test
