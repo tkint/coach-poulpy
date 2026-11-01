@@ -114,6 +114,7 @@ export default withMermaid(
             { text: 'Tokens', link: '/tokens' },
             { text: 'Profile and settings', link: '/docs/profile-and-settings' },
             { text: 'Generating tokens and fonts', link: '/design/README' },
+            { text: 'Body map shapes: credits', link: '/design/body-map-source/NOTICE' },
             { text: 'Mockups', link: '/mockups/', collapsed: false, items: mockupSidebar },
           ],
         },

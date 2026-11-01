@@ -10,9 +10,13 @@ enum class BodyView { FRONT, BACK }
 object BodyMap {
     /** Every area key a figure can show, in reading order. */
     val AREAS: List<String> = listOf(
-        "neck", "trapezius", "deltoid", "pectoral", "biceps", "triceps", "forearm", "elbow", "hand",
-        "abs", "obliques", "lats", "lower-back", "hip", "glutes", "quads", "hamstrings", "knee", "shin", "calves", "foot",
-    ).flatMap { listOf("$it-left", "$it-right") }
+        "neck", "trapezius", "deltoid", "pectoral", "serratus", "biceps", "triceps", "forearm", "elbow",
+        "wrist", "hand", "abs", "obliques", "back", "scapula", "lower-back", "hip", "glutes",
+        "quads", "adductors", "hamstrings", "knee", "shin", "calves", "ankle", "foot",
+    ).flatMap { listOf("$it-left", "$it-right") } + SPINE
+
+    /** The one area that has no side: the spine, drawn down the middle of the back. */
+    const val SPINE = "spine"
 
     /** For pain that no area of the figure names; shown as a chip beside the figure. */
     const val OTHER = "other"
@@ -30,6 +34,8 @@ object BodyMap {
         "deltoid-right" -> DomainText.bodyAreaDeltoidRight(languageCode)
         "pectoral-left" -> DomainText.bodyAreaPectoralLeft(languageCode)
         "pectoral-right" -> DomainText.bodyAreaPectoralRight(languageCode)
+        "serratus-left" -> DomainText.bodyAreaSerratusLeft(languageCode)
+        "serratus-right" -> DomainText.bodyAreaSerratusRight(languageCode)
         "biceps-left" -> DomainText.bodyAreaBicepsLeft(languageCode)
         "biceps-right" -> DomainText.bodyAreaBicepsRight(languageCode)
         "triceps-left" -> DomainText.bodyAreaTricepsLeft(languageCode)
@@ -38,14 +44,18 @@ object BodyMap {
         "forearm-right" -> DomainText.bodyAreaForearmRight(languageCode)
         "elbow-left" -> DomainText.bodyAreaElbowLeft(languageCode)
         "elbow-right" -> DomainText.bodyAreaElbowRight(languageCode)
+        "wrist-left" -> DomainText.bodyAreaWristLeft(languageCode)
+        "wrist-right" -> DomainText.bodyAreaWristRight(languageCode)
         "hand-left" -> DomainText.bodyAreaHandLeft(languageCode)
         "hand-right" -> DomainText.bodyAreaHandRight(languageCode)
         "abs-left" -> DomainText.bodyAreaAbsLeft(languageCode)
         "abs-right" -> DomainText.bodyAreaAbsRight(languageCode)
         "obliques-left" -> DomainText.bodyAreaObliquesLeft(languageCode)
         "obliques-right" -> DomainText.bodyAreaObliquesRight(languageCode)
-        "lats-left" -> DomainText.bodyAreaLatsLeft(languageCode)
-        "lats-right" -> DomainText.bodyAreaLatsRight(languageCode)
+        "back-left" -> DomainText.bodyAreaBackLeft(languageCode)
+        "back-right" -> DomainText.bodyAreaBackRight(languageCode)
+        "scapula-left" -> DomainText.bodyAreaScapulaLeft(languageCode)
+        "scapula-right" -> DomainText.bodyAreaScapulaRight(languageCode)
         "lower-back-left" -> DomainText.bodyAreaLowerBackLeft(languageCode)
         "lower-back-right" -> DomainText.bodyAreaLowerBackRight(languageCode)
         "hip-left" -> DomainText.bodyAreaHipLeft(languageCode)
@@ -54,6 +64,8 @@ object BodyMap {
         "glutes-right" -> DomainText.bodyAreaGlutesRight(languageCode)
         "quads-left" -> DomainText.bodyAreaQuadsLeft(languageCode)
         "quads-right" -> DomainText.bodyAreaQuadsRight(languageCode)
+        "adductors-left" -> DomainText.bodyAreaAdductorsLeft(languageCode)
+        "adductors-right" -> DomainText.bodyAreaAdductorsRight(languageCode)
         "hamstrings-left" -> DomainText.bodyAreaHamstringsLeft(languageCode)
         "hamstrings-right" -> DomainText.bodyAreaHamstringsRight(languageCode)
         "knee-left" -> DomainText.bodyAreaKneeLeft(languageCode)
@@ -62,8 +74,11 @@ object BodyMap {
         "shin-right" -> DomainText.bodyAreaShinRight(languageCode)
         "calves-left" -> DomainText.bodyAreaCalvesLeft(languageCode)
         "calves-right" -> DomainText.bodyAreaCalvesRight(languageCode)
+        "ankle-left" -> DomainText.bodyAreaAnkleLeft(languageCode)
+        "ankle-right" -> DomainText.bodyAreaAnkleRight(languageCode)
         "foot-left" -> DomainText.bodyAreaFootLeft(languageCode)
         "foot-right" -> DomainText.bodyAreaFootRight(languageCode)
+        SPINE -> DomainText.bodyAreaSpine(languageCode)
         OTHER -> DomainText.bodyAreaOther(languageCode)
         else -> key
     }

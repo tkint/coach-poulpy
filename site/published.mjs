@@ -7,6 +7,7 @@ export const shared = [
   'CLAUDE.md',
   'docs',
   'design/README.md',
+  'design/body-map-source/NOTICE.md',
   'i18n/README.md',
   'i18n/glossary',
 ]

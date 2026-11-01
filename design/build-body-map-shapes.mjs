@@ -2,7 +2,7 @@
 //   node design/build-body-map-shapes.mjs          write the generated file
 //   node design/build-body-map-shapes.mjs --check  fail if the generated file is out of date (used by CI)
 //
-// design/body-map.json holds, for each body figure and view, the SVG path of every area in a 120 × 268 box.
+// design/body-map.json is written by design/build-body-map.mjs. It holds, for each body figure and view, the SVG path of every area in a 120 × 268 box.
 // A path is only ever M, C and Z, so Android parses it and iOS draws it with a few lines. Both apps read the shapes
 // through the shared module: shared/src/commonMain/kotlin/ch/coachpoulpy/shared/BodyMapShapes.kt.
 import { readFileSync, writeFileSync } from 'node:fs'
@@ -10,7 +10,8 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
-const map = JSON.parse(readFileSync(join(root, 'design/body-map.json'), 'utf8'))
+const figures = JSON.parse(readFileSync(join(root, 'design/body-map.json'), 'utf8'))
+const VIEW_BOX = [120, 268]
 const target = join(root, 'shared/src/commonMain/kotlin/ch/coachpoulpy/shared/BodyMapShapes.kt')
 
 const figureName = { hips: 'HIPS', shoulders: 'SHOULDERS' }
@@ -23,8 +24,8 @@ const lines = [
   '',
   `/** The size of the box every [BodyRegion] path is drawn in. */`,
   `object BodyMapBox {`,
-  `    const val WIDTH = ${map.viewBox[0]}f`,
-  `    const val HEIGHT = ${map.viewBox[1]}f`,
+  `    const val WIDTH = ${VIEW_BOX[0]}f`,
+  `    const val HEIGHT = ${VIEW_BOX[1]}f`,
   `}`,
   '',
   '/** One shape of the body map. [key] is the area (`knee-left`), or null for the outline of the head. [skin] shapes have no fill. */',
@@ -40,8 +41,9 @@ lines.push('    }', '')
 for (const [name] of Object.entries(figureName)) {
   for (const view of ['front', 'back']) {
     lines.push(`    private val ${name.toUpperCase()}_${view.toUpperCase()} = listOf(`)
-    for (const r of map.figures[name][view]) {
-      lines.push(`        BodyRegion(${r.key ? JSON.stringify(r.key) : 'null'}, ${JSON.stringify(r.d)}, ${r.skin}),`)
+    for (const r of figures[name][view]) {
+      // The head is the one shape that is only an outline: it has no area to pick.
+      lines.push(`        BodyRegion(${r.key && r.key !== 'head' ? JSON.stringify(r.key) : 'null'}, ${JSON.stringify(r.d)}, ${r.skin}),`)
     }
     lines.push('    )', '')
   }
