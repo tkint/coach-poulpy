@@ -416,7 +416,7 @@ class BuilderStepsTest {
         builder.setRest(rest, 0)
         val clamped = builder.state.value.rows
         assertEquals(1, clamped[0].amount)
-        assertEquals(BuilderModel.MAX_REST, clamped[0].restBetweenSets)
+        assertEquals(600, clamped[0].restBetweenSets)
         assertEquals(1, clamped[1].restSeconds)
     }
 }
