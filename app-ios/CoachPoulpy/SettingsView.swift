@@ -1,116 +1,63 @@
 import SwiftUI
 import Shared
 
-enum SettingsSection: Hashable { case general, devices }
-
 /// The screens Settings › Devices opens.
 enum DeviceRoute: Hashable {
     case add, sources
     case device(String)
 }
 
-/// The Settings tab: General first, then Devices.
+/// The Settings tab: a hub that opens the profile, weight, height, appearance and units, and devices.
 struct SettingsView: View {
     @ObservedObject var settings: Observed<SettingsModel, SettingsUiState>
     @StateObject private var devices: Observed<DevicesModel, DevicesUiState>
+    @StateObject private var profile: Observed<ProfileModel, ProfileUi>
+    @StateObject private var weight: Observed<BodyModel, BodyUi>
+    @StateObject private var height: Observed<BodyModel, BodyUi>
     @StateObject private var bluetooth = BluetoothGate()
-    @Binding var section: SettingsSection
+    @Binding var path: NavigationPath
 
-    init(graph: AppGraph, settings: Observed<SettingsModel, SettingsUiState>, section: Binding<SettingsSection>) {
+    init(graph: AppGraph, settings: Observed<SettingsModel, SettingsUiState>, path: Binding<NavigationPath>) {
         self.settings = settings
         _devices = StateObject(wrappedValue: graph.observedDevices())
-        _section = section
+        _profile = StateObject(wrappedValue: graph.observedProfile())
+        _weight = StateObject(wrappedValue: graph.observedBody(.weight))
+        _height = StateObject(wrappedValue: graph.observedBody(.height))
+        _path = path
     }
 
     var body: some View {
-        NavigationStack {
-            VStack(spacing: 0) {
-                Picker(selection: $section) {
-                    Text("settings.general").tag(SettingsSection.general)
-                    Text("settings.devices").tag(SettingsSection.devices)
-                } label: {
-                    EmptyView()
-                }
-                .pickerStyle(.segmented)
-                .padding(.horizontal, 20)
-                .padding(.vertical, PoulpySpace.sm)
-                switch section {
-                case .general: GeneralList(settings: settings)
-                case .devices: DevicesList(devices: devices, bluetooth: bluetooth)
-                }
-            }
-            .background(Color(UIColor.systemGroupedBackground))
-            .navigationTitle("tab.settings")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    if section == .devices {
-                        NavigationLink(value: DeviceRoute.add) {
-                            Image(systemName: "plus")
-                        }
-                        .accessibilityLabel(Text("devices.add"))
+        NavigationStack(path: $path) {
+            SettingsHub(settings: settings, profile: profile, weight: weight, height: height)
+                .navigationTitle("tab.settings")
+                .navigationDestination(for: SettingsPage.self) { page in
+                    switch page {
+                    case .profile: ProfileView(profile: profile)
+                    case .weight: BodyView(metric: .weight, log: weight, units: settings.value.units)
+                    case .height: BodyView(metric: .height, log: height, units: settings.value.units)
+                    case .preferences: PreferencesView(settings: settings)
+                    case .devices:
+                        DevicesList(devices: devices, bluetooth: bluetooth)
+                            .navigationTitle("settings.devices")
+                            .navigationBarTitleDisplayMode(.inline)
+                            .toolbar {
+                                ToolbarItem(placement: .navigationBarTrailing) {
+                                    NavigationLink(value: DeviceRoute.add) {
+                                        Image(systemName: "plus")
+                                    }
+                                    .accessibilityLabel(Text("devices.add"))
+                                }
+                            }
                     }
                 }
-            }
-            .navigationDestination(for: DeviceRoute.self) { route in
-                switch route {
-                case .add: DeviceAddView(devices: devices)
-                case .sources: DataSourcesView(devices: devices)
-                case .device(let key): DeviceView(devices: devices, key: key)
+                .navigationDestination(for: DeviceRoute.self) { route in
+                    switch route {
+                    case .add: DeviceAddView(devices: devices)
+                    case .sources: DataSourcesView(devices: devices)
+                    case .device(let key): DeviceView(devices: devices, key: key)
+                    }
                 }
-            }
         }
-    }
-}
-
-private struct GeneralList: View {
-    @ObservedObject var settings: Observed<SettingsModel, SettingsUiState>
-
-    var body: some View {
-        let state = settings.value
-        let model = settings.model
-        List {
-            Section {
-                choice("settings.theme", selection: Binding(get: { state.theme }, set: { model.setTheme(theme: $0) })) {
-                    Text("theme.system").tag(ThemeChoice.system)
-                    Text("theme.light").tag(ThemeChoice.light)
-                    Text("theme.dark").tag(ThemeChoice.dark)
-                }
-            } header: {
-                Text("settings.appearance")
-            } footer: {
-                Text("settings.themeHint")
-            }
-            Section {
-                // Language names stay in their own language, so anyone can find theirs.
-                choice("settings.language", selection: Binding(get: { state.language }, set: {
-                    model.setLanguage(language: $0)
-                    AppLanguage.apply($0)
-                })) {
-                    Text("language.system").tag(LanguageChoice.system)
-                    Text(verbatim: "English").tag(LanguageChoice.english)
-                    Text(verbatim: "Français").tag(LanguageChoice.french)
-                }
-                choice("settings.units", selection: Binding(get: { state.units }, set: { model.setUnits(units: $0) })) {
-                    Text("units.metric").tag(UnitSystem.metric)
-                    Text("units.imperial").tag(UnitSystem.imperial)
-                }
-            } header: {
-                Text("settings.region")
-            } footer: {
-                Text("settings.languageNextLaunch") + Text(verbatim: " ") + Text("settings.unitsHint")
-            }
-            Section {
-                Text(String(format: NSLocalizedString("settings.version %@", comment: ""), Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "—"))
-            }
-        }
-    }
-
-    private func choice<T: Hashable, Options: View>(_ title: LocalizedStringKey, selection: Binding<T>, @ViewBuilder options: () -> Options) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(title).font(.poulpy(.headline))
-            Picker(selection: selection, content: options) { EmptyView() }.pickerStyle(.segmented)
-        }
-        .padding(.vertical, 4)
     }
 }
 

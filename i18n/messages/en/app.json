@@ -311,7 +311,6 @@
     "notificationPaused": "Paused · {elapsed}"
   },
   "settings": {
-    "general": "General",
     "devices": "Devices",
     "appearance": "Appearance",
     "region": "Region",

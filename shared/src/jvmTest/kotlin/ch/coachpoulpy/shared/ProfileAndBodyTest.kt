@@ -66,4 +66,37 @@ class ProfileAndBodyTest {
         assertEquals(FeetInches(1, 0.0), Units.feetAndInches(30.4))
         assertEquals(175.26, Units.centimetresOf(5, 9.0), 1e-9)
     }
+
+    @Test
+    fun theProfileReachesSwiftAsPlainValues() {
+        val model = ProfileModel(MemoryStore(), CoroutineScope(Dispatchers.Unconfined), { today })
+        assertEquals("", model.ui.value.displayName)
+        assertNull(model.ui.value.birthdate)
+
+        model.setBirthdateTo(PlanDate(1991, 3, 14))
+        model.setRestingHeartRateText("5a8 bpm")
+
+        val ui = model.ui.value
+        assertEquals(PlanDate(1991, 3, 14), ui.birthdate)
+        assertEquals(35, ui.age)
+        assertEquals("58", ui.restingHeartRate)
+
+        model.setBirthdateTo(PlanDate(2001, 2, 31))
+        assertNull(model.ui.value.birthdate)
+        model.clearBirthdate()
+        assertNull(model.ui.value.age)
+    }
+
+    @Test
+    fun theBodyLogReachesSwiftAsPlainPoints() = runTest {
+        val model = BodyModel(BodyMetric.WEIGHT, LocalStore(DriverFactory()), { today }, CoroutineScope(Dispatchers.Unconfined))
+        model.logOn(73.0, PlanDate(2026, 10, 15))
+        model.logOn(72.6, PlanDate(2026, 10, 29))
+
+        val ui = model.ui.first { it.points.size == 2 }
+        assertEquals(listOf(PlanDate(2026, 10, 15), PlanDate(2026, 10, 29)), ui.points.map { it.date })
+        assertEquals(PlanDate(2026, 10, 29), ui.history.first().date)
+        assertEquals(72.6, ui.lowest!!.value)
+        assertEquals(-0.4, ui.change!!, 1e-9)
+    }
 }
