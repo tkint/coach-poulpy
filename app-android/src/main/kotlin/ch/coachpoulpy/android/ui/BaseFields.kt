@@ -1,6 +1,8 @@
 package ch.coachpoulpy.android.ui
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -209,10 +211,13 @@ internal fun SheetFrame(
         containerColor = MaterialTheme.colorScheme.surface,
     ) {
         Column(Modifier.padding(start = 20.dp, end = 20.dp, bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(title, style = MaterialTheme.typography.titleLarge)
-            why?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) }
-            content()
-            clear?.let { TextButton(onClick = { it(); onDismiss() }) { Text(stringResource(R.string.profile_clear), fontWeight = FontWeight.ExtraBold) } }
+            // The content scrolls, so a tall sheet (the body figure) never hides the buttons below it.
+            Column(Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(title, style = MaterialTheme.typography.titleLarge)
+                why?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                content()
+                clear?.let { TextButton(onClick = { it(); onDismiss() }) { Text(stringResource(R.string.profile_clear), fontWeight = FontWeight.ExtraBold) } }
+            }
             Row(Modifier.padding(top = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedButton(
                     onClick = onDismiss,

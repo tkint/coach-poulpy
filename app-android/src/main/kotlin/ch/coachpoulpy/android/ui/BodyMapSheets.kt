@@ -1,6 +1,7 @@
 package ch.coachpoulpy.android.ui
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -28,6 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.asAndroidPath
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -140,6 +142,37 @@ private fun hit(path: Path, point: Offset): Boolean {
     return region.contains(point.x.toInt(), point.y.toInt())
 }
 
+/** Front or back of the figure, as a two-way switch above it. */
+@Composable
+private fun SideSwitch(view: BodyView, onChange: (BodyView) -> Unit) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .selectableGroup()
+            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(50))
+            .padding(4.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        listOf(BodyView.FRONT to R.string.profile_figureFront, BodyView.BACK to R.string.profile_figureBack).forEach { (side, label) ->
+            val on = side == view
+            Box(
+                Modifier
+                    .weight(1f)
+                    .heightIn(min = 40.dp)
+                    .background(if (on) MaterialTheme.colorScheme.surface else Color.Transparent, RoundedCornerShape(50))
+                    .selectable(selected = on, role = Role.RadioButton, onClick = { onChange(side) }),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    stringResource(label),
+                    fontWeight = if (on) FontWeight.ExtraBold else FontWeight.Bold,
+                    color = if (on) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+    }
+}
+
 /** Pain or rehab: where it hurts on the front and back figures, then for how long. */
 @Composable
 internal fun PainSheet(
@@ -153,6 +186,7 @@ internal fun PainSheet(
 ) {
     var picked by remember { mutableStateOf(areas.toSet()) }
     var length by remember { mutableStateOf(duration ?: PainDuration.HOURS_72) }
+    var view by remember { mutableStateOf(BodyView.FRONT) }
     val toggle = { key: String -> picked = if (key in picked) picked - key else picked + key }
     val summary = BodyMap.valid(picked).joinToString(", ") { BodyMap.label(it, language) }
 
@@ -165,13 +199,9 @@ internal fun PainSheet(
     ) {
         Text(stringResource(R.string.profile_painWhere), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Note(stringResource(R.string.profile_painHint))
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-            listOf(BodyView.FRONT to R.string.profile_figureFront, BodyView.BACK to R.string.profile_figureBack).forEach { (view, label) ->
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    BodyMapFigure(figure, view, picked, language, width = 128.dp, onToggle = toggle)
-                    Text(stringResource(label), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-            }
+        SideSwitch(view, onChange = { view = it })
+        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+            BodyMapFigure(figure, view, picked, language, width = 220.dp, onToggle = toggle)
         }
         Text(
             summary.ifEmpty { stringResource(R.string.profile_painNothingPicked) },

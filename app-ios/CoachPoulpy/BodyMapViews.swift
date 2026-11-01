@@ -89,6 +89,7 @@ struct PainSheet: View {
     let onClear: () -> Void
     @State private var picked: Set<String>
     @State private var length: PainDuration
+    @State private var side: Shared.BodyView = .front
     @Environment(\.dismiss) private var dismiss
 
     init(figure: BodyFigure, areas: [String], duration: PainDuration?, onSave: @escaping ([String], PainDuration) -> Void, onClear: @escaping () -> Void) {
@@ -161,12 +162,12 @@ struct PainSheet: View {
         .accessibilityAddTraits(length == value ? .isSelected : [])
     }
 
-    private func sideColumn(_ side: Shared.BodyView, _ label: LocalizedStringKey) -> some View {
-        VStack(spacing: 4) {
-            BodyMapFigure(figure: figure, view: side, selected: picked, width: 128, onToggle: toggle)
-            Text(label).font(.poulpy(.footnote)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+    private var sideSwitch: some View {
+        Picker("profile.painWhere", selection: $side) {
+            Text("profile.figureFront").tag(Shared.BodyView.front)
+            Text("profile.figureBack").tag(Shared.BodyView.back)
         }
-        .frame(maxWidth: .infinity)
+        .pickerStyle(.segmented)
     }
 
     var body: some View {
@@ -176,10 +177,9 @@ struct PainSheet: View {
                     Text("profile.painWhy").font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
                     Text("profile.painWhere").font(.poulpy(.footnote).weight(.heavy)).foregroundStyle(PoulpyColor.onSurfaceVariant)
                     FieldNote("profile.painHint")
-                    HStack(alignment: .top, spacing: 0) {
-                        sideColumn(Shared.BodyView.front, "profile.figureFront")
-                        sideColumn(Shared.BodyView.back, "profile.figureBack")
-                    }
+                    sideSwitch
+                    BodyMapFigure(figure: figure, view: side, selected: picked, width: 220, onToggle: toggle)
+                        .frame(maxWidth: .infinity)
                     summaryLine
                     otherChip
                     Text("profile.painFor").font(.poulpy(.footnote).weight(.heavy)).foregroundStyle(PoulpyColor.onSurfaceVariant)
