@@ -122,10 +122,10 @@ class WorkoutPageModel internal constructor(
     compiler: TimelineCompiler,
     private val catalog: Catalog,
     languageCode: String,
-    units: () -> UnitSystem = { UnitSystem.METRIC },
     private val clock: Clock = Clock.System,
     private val zone: TimeZone = TimeZone.currentSystemDefault(),
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main),
+    units: () -> UnitSystem = { UnitSystem.METRIC },
 ) {
     private val labels = Labels(languageCode, units)
     private val facts = WorkoutFacts(compiler, catalog, labels)
