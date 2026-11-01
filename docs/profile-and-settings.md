@@ -32,7 +32,7 @@ Everything is optional and stays on the phone. Each field is only here because s
 | Main goal | Which workouts Poulpy suggests first | Stay active, Build strength, Run further, Rehab, Something else |
 | Experience | Starting loads and plan suggestions | Just starting, Regular, Experienced |
 | Resting heart rate | Heart rate zones | Typed, or read from a band later |
-| Body figure (draft) | Which body map is drawn for pain and, later, for the muscles a workout uses | Female or Male. It is a drawing only: separate from sex assigned at birth, never used for estimates, and never asked as gender |
+| Body figure (draft) | Which body map is drawn for pain and, later, for the muscles a workout uses | Wider shoulders or Wider hips, so the names describe the drawing and say nothing about gender. It is a drawing only: separate from sex assigned at birth, never used for estimates, and never asked as gender |
 | Pain or rehab | Poulpy's blue side for 72 hours | Where it hurts and until when; see [Character rules](./brand.md#character-rules) |
 
 Suggested for later, not drawn: maximum heart rate override, weekly goal in sessions, dominant side, equipment at home (already a filter), waist and body-fat as optional measurements.
@@ -55,7 +55,7 @@ The unit system chosen in Settings decides how weight (kg or lb), height (cm or 
 
 ## Pain or rehab (draft)
 
-The row is in the profile but nothing sets it yet. The drafts are `profile-edit` (the row filled in, with Poulpy's note) and `profile-pain-sheet` (a front and back body map where it hurts, left and right apart, then for how long: 72 hours by default, 1 week, 2 weeks or until the person clears it). The body map is a new component, `body-map`, meant to be reused later to show the areas an exercise works. It has a female and a male drawing, picked in `profile-body-figure-sheet`, under Mockups, Drafts. Nothing is built until they are agreed. The rules they follow are in [Character rules](./brand.md#character-rules): pain or rehab always shows the blue side and the Patched up pose, never ember, and entries inside the window never count as missed ([decision 8](./brand-decisions.md)).
+The row is in the profile but nothing sets it yet. The drafts are `profile-edit` (the row filled in, with Poulpy's note) and `profile-pain-sheet` (a front and back body map where it hurts, left and right apart, then for how long: 72 hours by default, 1 week, 2 weeks or until the person clears it). The body map is a new component, `body-map`, meant to be reused later to show the areas an exercise works. It is a muscle chart with finer regions (pectoral, biceps, quadriceps, hamstring...) and no fill on skin, hair or face, so it implies no skin tone. It has two builds, picked in `profile-body-figure-sheet`, under Mockups, Drafts. Nothing is built until they are agreed. The rules they follow are in [Character rules](./brand.md#character-rules): pain or rehab always shows the blue side and the Patched up pose, never ember, and entries inside the window never count as missed ([decision 8](./brand-decisions.md)).
 
 ## Still open
 
