@@ -15,6 +15,7 @@ import ch.coachpoulpy.core.model.PartKind
 import ch.coachpoulpy.core.model.Side
 import ch.coachpoulpy.core.model.Step
 import ch.coachpoulpy.core.model.StepRole
+import ch.coachpoulpy.core.model.Target
 import ch.coachpoulpy.core.model.Workout
 import ch.coachpoulpy.core.model.WorkoutFormat
 import ch.coachpoulpy.core.model.WorkoutRef
