@@ -99,12 +99,13 @@ class PlayerModel internal constructor(
     private val catalog: Catalog,
     private val store: LocalStore,
     private val languageCode: String,
+    private val units: () -> UnitSystem = { UnitSystem.METRIC },
     private val executionId: String,
     events: List<SessionEvent>,
     private val clock: Clock = Clock.System,
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main),
 ) {
-    private val labels = Labels(languageCode)
+    private val labels = Labels(languageCode, units)
     private val session = Session(timeline, events)
     private val steps = workout.steps.flatMap { it.exerciseSteps() }.associateBy { it.id }
     private val mutableState = MutableStateFlow(render())
@@ -307,7 +308,7 @@ class PlayerModel internal constructor(
     private fun clockOf(seconds: Int) = "${(seconds / 60).toString().padStart(2, '0')}:${(seconds % 60).toString().padStart(2, '0')}"
 
     private fun Load.label(): String? = when (this) {
-        is Load.Kilograms -> labels.kilograms(kg)
+        is Load.Kilograms -> labels.weight(kg)
         is Load.Band -> label
         is Load.Bodyweight, is Load.PercentOfOneRepMax -> null
     }

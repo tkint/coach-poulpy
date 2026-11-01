@@ -53,11 +53,12 @@ object FinishedScreens {
         val skipped = work { (it as? SessionEvent.PhaseSkipped)?.phaseIndex }.size
         var liftedKg = 0.0
         var targetMeters = 0.0
+        val pickedUnits = mutableSetOf<DistanceUnit?>()
         for (set in doneWork) {
             val load = steps[set.step]?.prescription?.sets?.getOrNull(set.setIndex)?.load as? Load.Kilograms
             val reps = (set.target as? Target.Reps)?.count
             if (load != null && reps != null) liftedKg += load.kg * reps
-            (set.target as? Target.Distance)?.let { targetMeters += it.meters }
+            (set.target as? Target.Distance)?.let { targetMeters += it.meters; pickedUnits += DistanceUnit.signature(it.meters) }
         }
         val totals = sessionTotals(events, timeline)
         val facts = FinishedFacts(
@@ -66,6 +67,12 @@ object FinishedScreens {
             liftedKg = liftedKg,
             // The distance of the sets done, or what a machine reported when the plan has none.
             distanceMeters = if (targetMeters > 0) targetMeters else totals.distanceMeters ?: 0.0,
+            // A run set in miles (or kilometres) reads in them, whatever the unit system.
+            distanceSystem = when (pickedUnits.singleOrNull()) {
+                DistanceUnit.MI -> UnitSystem.IMPERIAL
+                DistanceUnit.KM -> UnitSystem.METRIC
+                else -> null
+            },
         )
         val champion = poulpy.tentaclesLit == PoulpyStatus.TENTACLES
         val start = events.firstOrNull { it is SessionEvent.Started }?.at
@@ -102,6 +109,8 @@ data class FinishedFacts(
     val liftedKg: Double,
     /** Distance of the sets done, in metres; 0 when the workout has no distance target. */
     val distanceMeters: Double,
+    /** The unit system the run's distance was picked in, when it was a whole number of miles or kilometres; null follows Settings. */
+    val distanceSystem: UnitSystem? = null,
 )
 
 /**
@@ -112,8 +121,9 @@ object FinishedStats {
     fun of(facts: FinishedFacts, units: UnitSystem, languageCode: String): List<FinishedStat> = buildList {
         add(FinishedStat(DomainText.shareTime(languageCode), ShareCard.clock(facts.activeSeconds)))
         if (facts.distanceMeters > 0) {
-            add(FinishedStat(DomainText.shareDistance(languageCode), ShareCard.measure(Units.distance(facts.distanceMeters, units, decimals = 1), languageCode)))
-            pace(facts, units)?.let { add(FinishedStat(DomainText.sharePace(languageCode), it)) }
+            val shown = facts.distanceSystem ?: units
+            add(FinishedStat(DomainText.shareDistance(languageCode), ShareCard.measure(Units.distance(facts.distanceMeters, shown, decimals = 1), languageCode)))
+            pace(facts, shown)?.let { add(FinishedStat(DomainText.sharePace(languageCode), it)) }
         } else {
             add(FinishedStat(DomainText.shareSets(languageCode), "${facts.setsDone}"))
             if (facts.liftedKg > 0) add(FinishedStat(DomainText.shareLifted(languageCode), lifted(facts.liftedKg, units, languageCode)))
@@ -131,7 +141,7 @@ object FinishedStats {
     /** Metric: "820 kg" below a tonne, "2.1 t" above. Imperial: whole pounds, "1,807 lb" in English. */
     private fun lifted(kg: Double, units: UnitSystem, languageCode: String): String = when {
         units == UnitSystem.IMPERIAL -> DomainText.unitPounds(languageCode, Units.poundsOf(kg).let { kotlin.math.round(it).toLong().toString() })
-        kg < 1000 -> Labels(languageCode).kilograms(kotlin.math.round(kg))
+        kg < 1000 -> Labels(languageCode).weight(kotlin.math.round(kg))
         else -> DomainText.unitTonnes(languageCode, ShareCard.measure(Measure(kg / 1000, 1, ""), languageCode).removeSuffix("\u00a0"))
     }
 }

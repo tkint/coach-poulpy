@@ -46,7 +46,10 @@ data class BuilderRow(
     /** True when [amount] is a duration in seconds, so the UI can show a timer icon. */
     val isTimed: Boolean,
     val perSideLabel: String?,
-    val loadKg: Double?,
+    /** The weight as typed in [weightUnit], "" for none; stored in kilograms whatever the unit system. */
+    val weight: String,
+    /** "kg" or "lb", from Settings; "" for a rest. */
+    val weightUnit: String,
     /** A rest's length; zero for exercises. */
     val restSeconds: Int,
     val restLabel: String,
@@ -157,7 +160,7 @@ class BuilderModel internal constructor(
     private var pendingSlug: String? = null,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
-    private val labels = Labels(languageCode)
+    private val labels = Labels(languageCode, units)
     private val facts = WorkoutFacts(compiler, catalog, labels)
     private var draft = initial.mapLeaves { (it as? DraftEntry)?.inUnits(units()) ?: it }
     private var addedKey: String? = null
@@ -312,8 +315,18 @@ class BuilderModel internal constructor(
         copy(amount = (amount + steps * step).coerceIn(step, 1000 * step))
     }
 
-    /** Sets the weight; zero or less means no weight. */
-    fun setLoadKg(key: String, kg: Double) = editEntry(key) { copy(loadKg = kg.takeIf { it > 0.0 }) }
+    /** Sets the weight typed in the user's unit (kilograms or pounds, "," or "."); nothing readable or zero or less means no weight. */
+    fun setWeight(key: String, text: String) {
+        val typed = text.replace(',', '.').toDoubleOrNull()?.takeIf { it > 0.0 }
+        val kg = typed?.let { if (units() == UnitSystem.IMPERIAL) Units.kilogramsOf(it) else it }
+        editEntry(key) { copy(loadKg = kg) }
+    }
+
+    /** A stored weight as the field shows it: "16", "17.5", "35.3". */
+    private fun weightText(kg: Double): String {
+        val shown = kotlin.math.round(Units.weight(kg, units()).value * 10) / 10
+        return if (shown % 1.0 == 0.0) shown.toLong().toString() else shown.toString()
+    }
 
     /** Changes the length of a rest step. */
     fun changeRest(key: String, steps: Int) = edit {
@@ -606,7 +619,8 @@ class BuilderModel internal constructor(
         amountLabel = labels.duration(rest.seconds),
         isTimed = true,
         perSideLabel = null,
-        loadKg = null,
+        weight = "",
+        weightUnit = "",
         restSeconds = rest.seconds,
         restLabel = labels.duration(rest.seconds),
         showsSets = false,
@@ -642,7 +656,8 @@ class BuilderModel internal constructor(
             amountLabel = labels.amount(entry.measurement, entry.amount),
             isTimed = entry.measurement == MeasurementMode.TIME || entry.measurement == MeasurementMode.HOLD,
             perSideLabel = if (entry.perSide) labels.perSide else null,
-            loadKg = entry.loadKg,
+            weight = entry.loadKg?.let { weightText(it) } ?: "",
+            weightUnit = Units.weight(0.0, units()).unit,
             restSeconds = 0,
             restLabel = "",
             showsSets = showsSets,

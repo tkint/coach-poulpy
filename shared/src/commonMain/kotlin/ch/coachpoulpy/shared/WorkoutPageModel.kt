@@ -125,8 +125,9 @@ class WorkoutPageModel internal constructor(
     private val clock: Clock = Clock.System,
     private val zone: TimeZone = TimeZone.currentSystemDefault(),
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main),
+    units: () -> UnitSystem = { UnitSystem.METRIC },
 ) {
-    private val labels = Labels(languageCode)
+    private val labels = Labels(languageCode, units)
     private val facts = WorkoutFacts(compiler, catalog, labels)
 
     val state: StateFlow<WorkoutPageState> =
