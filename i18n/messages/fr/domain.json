@@ -176,5 +176,12 @@
     "energy": "Énergie",
     "energyValue": "{kcal, number} kcal",
     "app": "Coach Poulpy"
+  },
+  "player": {
+    "unitReps": "{count, plural, one {répétition} many {répétitions} other {répétitions}}",
+    "unitAtLoad": "{unit} à {load}",
+    "nextRest": "Repos {duration}, puis {then}",
+    "thenSet": "série {set, number}",
+    "nextSet": "{name} · série {set, number} sur {sets, number}"
   }
 }

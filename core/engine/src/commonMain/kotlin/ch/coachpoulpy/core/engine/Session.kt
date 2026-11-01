@@ -2,6 +2,7 @@ package ch.coachpoulpy.core.engine
 
 import ch.coachpoulpy.core.model.DeviceMetrics
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -22,6 +23,9 @@ sealed interface SessionEvent {
     @Serializable @SerialName("resumed") data class Resumed(override val at: Instant) : SessionEvent
     @Serializable @SerialName("finished") data class Finished(override val at: Instant) : SessionEvent
 
+    /** The user made the running rest longer or shorter; [seconds] is negative to shorten it. It counts for that rest only. */
+    @Serializable @SerialName("restAdjusted") data class RestAdjusted(override val at: Instant, val phaseIndex: Int, val seconds: Int) : SessionEvent
+
     /** A reading from a connected machine, stamped by the phone's clock. It never moves the session on by itself. */
     @Serializable @SerialName("sample") data class Sample(override val at: Instant, val metrics: DeviceMetrics) : SessionEvent
 }
@@ -35,6 +39,8 @@ data class SessionState(
     val phaseElapsed: Duration,
     /** Time left in a timed phase, or null for a manual one. */
     val phaseRemaining: Duration?,
+    /** How long the current timed phase lasts, with any adjustment of a rest; null for a manual one. */
+    val phaseDuration: Duration? = null,
 ) {
     enum class Status { NOT_STARTED, RUNNING, PAUSED, FINISHED }
 }
@@ -54,6 +60,13 @@ class Session(val timeline: Timeline, events: List<SessionEvent> = emptyList()) 
     fun completeCurrent(now: Instant): List<SessionEvent> = record(SessionEvent.PhaseCompleted(now, state(now).phaseIndex))
     fun skipCurrent(now: Instant): List<SessionEvent> = record(SessionEvent.PhaseSkipped(now, state(now).phaseIndex))
 
+    /** Adds [seconds] (negative to remove) to the running rest; ignored outside a rest. The rest never goes below zero. */
+    fun adjustRest(now: Instant, seconds: Int): List<SessionEvent> {
+        val state = state(now)
+        if (state.phase !is Phase.Rest || state.status != SessionState.Status.RUNNING) return emptyList()
+        return record(SessionEvent.RestAdjusted(now, state.phaseIndex, seconds))
+    }
+
     /** Ends the session early; the phases not reached simply stay undone. */
     fun finish(now: Instant): List<SessionEvent> = record(SessionEvent.Finished(now))
 
@@ -66,7 +79,7 @@ class Session(val timeline: Timeline, events: List<SessionEvent> = emptyList()) 
         val added = mutableListOf<SessionEvent>()
         while (true) {
             val state = state(now)
-            val duration = state.phase?.duration ?: break
+            val duration = state.phaseDuration ?: break
             if (state.status != SessionState.Status.RUNNING || state.phaseElapsed < duration) break
             // Stamp the completion at the moment the timer ran out, not at the tick,
             // so a late tick (app in background) does not shift the next phases.
@@ -90,6 +103,7 @@ class Session(val timeline: Timeline, events: List<SessionEvent> = emptyList()) 
         var phaseStart: Instant? = null
         var pausedAt: Instant? = null
         var pausedTotal = Duration.ZERO
+        var adjusted = Duration.ZERO
 
         for (event in log) when (event) {
             is SessionEvent.Started -> { status = SessionState.Status.RUNNING; phaseStart = event.at }
@@ -103,10 +117,12 @@ class Session(val timeline: Timeline, events: List<SessionEvent> = emptyList()) 
                 index++
                 phaseStart = event.at
                 pausedTotal = Duration.ZERO
+                adjusted = Duration.ZERO
                 // Ended during a pause: the new phase's share of the pause starts here.
                 if (pausedAt != null) pausedAt = event.at
             }
             is SessionEvent.Finished -> status = SessionState.Status.FINISHED
+            is SessionEvent.RestAdjusted -> if (event.phaseIndex == index) adjusted += event.seconds.seconds
             is SessionEvent.Sample -> Unit
         }
 
@@ -115,8 +131,9 @@ class Session(val timeline: Timeline, events: List<SessionEvent> = emptyList()) 
             null -> Duration.ZERO
             else -> ((pausedAt ?: now) - start - pausedTotal).coerceAtLeast(Duration.ZERO)
         }
-        val remaining = phase?.duration?.let { (it - elapsed).coerceAtLeast(Duration.ZERO) }
-        return SessionState(status, index, phase.takeIf { status != SessionState.Status.FINISHED }, elapsed, remaining)
+        val duration = phase?.duration?.let { (it + adjusted).coerceAtLeast(Duration.ZERO) }
+        val remaining = duration?.let { (it - elapsed).coerceAtLeast(Duration.ZERO) }
+        return SessionState(status, index, phase.takeIf { status != SessionState.Status.FINISHED }, elapsed, remaining, duration.takeIf { status != SessionState.Status.FINISHED })
     }
 }
 
