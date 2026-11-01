@@ -50,7 +50,7 @@ class FinishedStatsTest {
     @Test
     fun aRunSetInMilesStaysInMilesWhateverTheUnitSystem() {
         assertEquals(
-            listOf("Time" to "10:00", "Distance" to "1.0 mi", "Pace" to "10:00 /mi"),
+            listOf("Time" to "10:00", "Distance" to "1.0\u00a0mi", "Pace" to "10:00 /mi"),
             stats(FinishedFacts(600, 1, 0.0, 1609.0, distanceSystem = UnitSystem.IMPERIAL), UnitSystem.METRIC),
         )
     }
