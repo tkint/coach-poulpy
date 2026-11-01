@@ -160,10 +160,10 @@ internal fun NumberEntry(
     onLess: () -> Unit,
     onMore: () -> Unit,
     modifier: Modifier = Modifier,
+    lessLabel: String = stringResource(R.string.body_less),
+    moreLabel: String = stringResource(R.string.body_more),
     field: @Composable (Modifier) -> Unit,
 ) {
-    val lessLabel = stringResource(R.string.body_less)
-    val moreLabel = stringResource(R.string.body_more)
     Row(modifier, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         FilledTonalIconButton(onClick = onLess, modifier = Modifier.size(48.dp).semantics { contentDescription = lessLabel }) {
             Text("−", style = MaterialTheme.typography.headlineSmall)

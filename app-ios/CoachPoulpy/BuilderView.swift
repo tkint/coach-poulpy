@@ -43,16 +43,7 @@ struct BuilderView: View {
             ScrollViewReader { scroller in
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
-                    VStack(alignment: .leading, spacing: 6) {
-                        fieldLabel("builder.name")
-                        TextField("", text: Binding(get: { state.name }, set: { model.rename(name: $0) }))
-                            .font(.poulpy(.body).weight(.bold))
-                            .padding(.horizontal, 16)
-                            .frame(height: 52)
-                            .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 16))
-                            .overlay(RoundedRectangle(cornerRadius: 16).stroke(state.name.isEmpty ? PoulpyColor.outline : PoulpyColor.primary, lineWidth: 1.5))
-                            .accessibilityLabel(Text("builder.name"))
-                    }
+                    PoulpyTextField(label: "builder.name", text: Binding(get: { state.name }, set: { model.rename(name: $0) }))
                     if let format = state.format {
                         formatLine(format)
                         ForEach(state.parts, id: \.key) { part in
@@ -582,7 +573,8 @@ private struct EntryCard: View {
                 }
             }
             if open && row.isRest {
-                stepper("builder.duration", row.restLabel, less: { model.changeRest(key: row.key, steps: -1) }, more: { model.changeRest(key: row.key, steps: 1) })
+                numberCell("builder.duration", row.restSeconds, unit: .seconds, set: { model.setRest(key: row.key, seconds: $0) },
+                           less: { model.changeRest(key: row.key, steps: -1) }, more: { model.changeRest(key: row.key, steps: 1) })
                     .padding(.trailing, 4)
             } else if open {
                 select("builder.step", value: roleOptions.first(where: { $0.role == row.role })?.label ?? "") {
@@ -595,18 +587,17 @@ private struct EntryCard: View {
             if open, !row.isRest, let target = row.target {
                 targetEditor(target)
             } else if open, !row.isRest {
-                let columns = [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)]
-                LazyVGrid(columns: row.showsSets ? columns : [GridItem(.flexible())], spacing: 8) {
-                    if row.showsSets {
-                        stepper("builder.sets", "\(row.sets)", less: { model.setSets(key: row.key, sets: row.sets - 1) }, more: { model.setSets(key: row.key, sets: row.sets + 1) })
-                    }
-                    stepper("builder.target", row.amountLabel, less: { model.changeAmount(key: row.key, steps: -1) }, more: { model.changeAmount(key: row.key, steps: 1) })
+                if row.showsSets {
+                    numberCell("builder.sets", row.sets, unit: nil, set: { model.setSets(key: row.key, sets: $0) },
+                               less: { model.setSets(key: row.key, sets: row.sets - 1) }, more: { model.setSets(key: row.key, sets: row.sets + 1) })
+                        .padding(.trailing, 4)
                 }
-                .padding(.trailing, 4)
+                numberCell("builder.target", row.amount, unit: row.amountUnit, set: { model.setAmount(key: row.key, value: $0) },
+                           less: { model.changeAmount(key: row.key, steps: -1) }, more: { model.changeAmount(key: row.key, steps: 1) })
+                    .padding(.trailing, 4)
                 if row.showsSets && row.sets >= 2 {
-                    stepper("builder.restBetweenSets", row.restBetweenSetsLabel,
-                            less: { model.changeRestBetweenSets(key: row.key, steps: -1) },
-                            more: { model.changeRestBetweenSets(key: row.key, steps: 1) })
+                    numberCell("builder.restBetweenSets", row.restBetweenSets, unit: .seconds, set: { model.setRestBetweenSets(key: row.key, seconds: $0) },
+                               less: { model.changeRestBetweenSets(key: row.key, steps: -1) }, more: { model.changeRestBetweenSets(key: row.key, steps: 1) })
                         .padding(.trailing, 4)
                 }
                 if !row.isTimed {
@@ -783,24 +774,69 @@ private struct EntryCard: View {
         .accessibilityLabel(Text(description))
     }
 
-    private var weightCell: some View {
-        cell("builder.weight") {
-            HStack(spacing: 4) {
-                TextField("0", text: $weight)
-                    .keyboardType(.decimalPad)
-                    .multilineTextAlignment(.center)
-                    .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 22, relativeTo: .title3))
-                    .frame(width: 60, height: 40)
-                    .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 10))
-                    .overlay(RoundedRectangle(cornerRadius: 10).stroke(PoulpyColor.outline, lineWidth: 1.5))
-                    .accessibilityLabel(Text(row.weightUnit == "lb" ? "builder.weightLb" : "builder.weightKg"))
-                    .onChange(of: weight) { text in
-                        model.setWeight(key: row.key, text: text)
-                    }
-                Text(row.weightUnit).font(.poulpy(.body).weight(.bold)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+    /// A label above a number field with − and +: sets, reps, seconds or metres, typed or nudged.
+    private func numberCell(
+        _ label: LocalizedStringKey,
+        _ value: Int32,
+        unit: AmountUnit?,
+        set: @escaping (Int32) -> Void,
+        less: @escaping () -> Void,
+        more: @escaping () -> Void
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            cellLabel(label).padding(.horizontal, 4)
+            NumberEntry(onLess: less, onMore: more, lessLabel: "builder.less", moreLabel: "builder.more") {
+                StepNumberField(value: value, description: label, unit: unit.map(unitText), set: set)
             }
-            .frame(height: 44)
         }
+    }
+
+    private func cellLabel(_ key: LocalizedStringKey) -> some View {
+        Text(key).textCase(.uppercase).font(PoulpyFont.label).kerning(1).foregroundStyle(PoulpyColor.onSurfaceVariant)
+    }
+
+    private func unitText(_ unit: AmountUnit) -> String {
+        switch unit {
+        case .reps: return NSLocalizedString("builder.unitReps", comment: "")
+        case .seconds: return NSLocalizedString("builder.unitSeconds", comment: "")
+        default: return NSLocalizedString("builder.unitMeters", comment: "")
+        }
+    }
+
+    /// The weight in the user's unit, typed with the decimal keyboard.
+    private var weightCell: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            cellLabel("builder.weight").padding(.horizontal, 4)
+            NumberField(text: $weight, description: row.weightUnit == "lb" ? "builder.weightLb" : "builder.weightKg", unit: row.weightUnit, decimal: true)
+                .onChange(of: weight) { text in
+                    model.setWeight(key: row.key, text: text)
+                }
+        }
+    }
+}
+
+/// A `NumberField` over a whole number: typing sets it, and a change from outside (− and +, or a limit) rewrites the text.
+private struct StepNumberField: View {
+    let value: Int32
+    let description: LocalizedStringKey
+    let unit: String?
+    let set: (Int32) -> Void
+    @State private var text: String
+
+    init(value: Int32, description: LocalizedStringKey, unit: String?, set: @escaping (Int32) -> Void) {
+        self.value = value
+        self.description = description
+        self.unit = unit
+        self.set = set
+        _text = State(initialValue: String(value))
+    }
+
+    var body: some View {
+        NumberField(text: $text, description: description, unit: unit)
+            .onChange(of: text) { typed in
+                if let number = Int32(typed) { set(number) }
+            }
+            .onChange(of: value) { text = String($0) }
     }
 }
 

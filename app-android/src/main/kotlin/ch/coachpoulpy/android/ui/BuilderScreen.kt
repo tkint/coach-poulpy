@@ -97,6 +97,7 @@ import ch.coachpoulpy.core.model.PartKind
 import ch.coachpoulpy.core.model.StepRole
 import ch.coachpoulpy.core.model.WorkoutFormat
 import ch.coachpoulpy.shared.AppGraph
+import ch.coachpoulpy.shared.AmountUnit
 import ch.coachpoulpy.shared.BuilderModel
 import ch.coachpoulpy.shared.BuilderPart
 import ch.coachpoulpy.shared.BuilderPartOption
@@ -187,10 +188,7 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
             contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 24.dp),
         ) {
             item {
-                Column(Modifier.padding(bottom = 14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    FieldLabel(stringResource(R.string.builder_name))
-                    BoxField(state.name, model::rename, label = stringResource(R.string.builder_name), modifier = Modifier.fillMaxWidth().height(52.dp))
-                }
+                PoulpyTextField(stringResource(R.string.builder_name), state.name, model::rename, Modifier.padding(bottom = 14.dp).fillMaxWidth())
             }
             val format = state.format ?: return@LazyColumn
             item { FormatLine(format, state.formatLabel) }
@@ -572,7 +570,10 @@ private fun StepSheet(model: BuilderModel, row: BuilderRow, format: WorkoutForma
             }
             val target = row.target
             if (row.isRest) {
-                StepperCell(stringResource(R.string.builder_duration), row.restLabel, { model.changeRest(row.key, -1) }, { model.changeRest(row.key, 1) }, Modifier.fillMaxWidth())
+                NumberCell(
+                    stringResource(R.string.builder_duration), row.restSeconds, AmountUnit.SECONDS,
+                    { model.setRest(row.key, it) }, { model.changeRest(row.key, -1) }, { model.changeRest(row.key, 1) },
+                )
             } else {
                 PoulpySelect(
                     stringResource(R.string.builder_step),
@@ -584,20 +585,23 @@ private fun StepSheet(model: BuilderModel, row: BuilderRow, format: WorkoutForma
                     TargetEditor(model, row, target)
                 } else {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            if (row.showsSets) {
-                                StepperCell(stringResource(R.string.builder_sets), row.sets.toString(), { model.setSets(row.key, row.sets - 1) }, { model.setSets(row.key, row.sets + 1) }, Modifier.weight(1f))
-                            }
-                            StepperCell(stringResource(R.string.builder_target), row.amountLabel, { model.changeAmount(row.key, -1) }, { model.changeAmount(row.key, 1) }, Modifier.weight(1f))
-                        }
-                        if (row.showsSets && row.sets >= 2) {
-                            StepperCell(
-                                stringResource(R.string.builder_restBetweenSets), row.restBetweenSetsLabel,
-                                { model.changeRestBetweenSets(row.key, -1) }, { model.changeRestBetweenSets(row.key, 1) },
-                                Modifier.fillMaxWidth(),
+                        if (row.showsSets) {
+                            NumberCell(
+                                stringResource(R.string.builder_sets), row.sets, null,
+                                { model.setSets(row.key, it) }, { model.setSets(row.key, row.sets - 1) }, { model.setSets(row.key, row.sets + 1) },
                             )
                         }
-                        if (!row.isTimed) WeightCell(model, row, Modifier.fillMaxWidth())
+                        NumberCell(
+                            stringResource(R.string.builder_target), row.amount, row.amountUnit,
+                            { model.setAmount(row.key, it) }, { model.changeAmount(row.key, -1) }, { model.changeAmount(row.key, 1) },
+                        )
+                        if (row.showsSets && row.sets >= 2) {
+                            NumberCell(
+                                stringResource(R.string.builder_restBetweenSets), row.restBetweenSets, AmountUnit.SECONDS,
+                                { model.setRestBetweenSets(row.key, it) }, { model.changeRestBetweenSets(row.key, -1) }, { model.changeRestBetweenSets(row.key, 1) },
+                            )
+                        }
+                        if (!row.isTimed) WeightCell(model, row)
                         Text(
                             stringResource(if (format == WorkoutFormat.CIRCUIT) R.string.builder_circuitHint else R.string.builder_setsHint),
                             style = MaterialTheme.typography.bodySmall,
@@ -776,25 +780,54 @@ private fun RoundStep(sign: String, description: String, onClick: () -> Unit) {
     }
 }
 
+/** A label above a number field with − and +: sets, reps, seconds or metres, typed or nudged. */
 @Composable
-private fun WeightCell(model: BuilderModel, row: BuilderRow, modifier: Modifier) {
-    var weight by remember(row.key) { mutableStateOf(row.weight) }
-    SettingCell(stringResource(R.string.builder_weight), modifier) {
-        Row(Modifier.height(44.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            BoxField(
-                weight,
-                { text ->
-                    weight = text
-                    model.setWeight(row.key, text)
+private fun NumberCell(label: String, value: Int, unit: AmountUnit?, onValue: (Int) -> Unit, onLess: () -> Unit, onMore: () -> Unit) {
+    var text by remember(value) { mutableStateOf(value.toString()) }
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text(label.uppercase(), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(horizontal = 4.dp))
+        NumberEntry(
+            onLess, onMore, Modifier.fillMaxWidth(),
+            lessLabel = stringResource(R.string.builder_lessNamed, label),
+            moreLabel = stringResource(R.string.builder_moreNamed, label),
+        ) { fieldModifier ->
+            NumberField(
+                value = text,
+                onValueChange = { typed ->
+                    text = typed
+                    typed.toIntOrNull()?.let(onValue)
                 },
-                label = stringResource(if (row.weightUnit == "lb") R.string.builder_weightLb else R.string.builder_weightKg),
-                modifier = Modifier.width(64.dp).height(40.dp),
-                radius = 10,
-                keyboard = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                center = true,
+                description = stringResource(R.string.builder_editValue, label),
+                modifier = fieldModifier,
+                unit = unit?.let { stringResource(unitLabel(it)) },
             )
-            Text(row.weightUnit, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
+    }
+}
+
+private fun unitLabel(unit: AmountUnit) = when (unit) {
+    AmountUnit.REPS -> R.string.builder_unitReps
+    AmountUnit.SECONDS -> R.string.builder_unitSeconds
+    AmountUnit.METERS -> R.string.builder_unitMeters
+}
+
+/** The weight in the user's unit, typed with the decimal keyboard. */
+@Composable
+private fun WeightCell(model: BuilderModel, row: BuilderRow) {
+    var weight by remember(row.key) { mutableStateOf(row.weight) }
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text(stringResource(R.string.builder_weight).uppercase(), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(horizontal = 4.dp))
+        NumberField(
+            value = weight,
+            onValueChange = { text ->
+                weight = text
+                model.setWeight(row.key, text)
+            },
+            description = stringResource(if (row.weightUnit == "lb") R.string.builder_weightLb else R.string.builder_weightKg),
+            modifier = Modifier.fillMaxWidth(),
+            unit = row.weightUnit,
+            decimal = true,
+        )
     }
 }
 

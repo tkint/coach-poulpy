@@ -144,13 +144,15 @@ private struct SelectingTextField: UIViewRepresentable {
 struct NumberEntry<Field: View>: View {
     let onLess: () -> Void
     let onMore: () -> Void
+    var lessLabel: LocalizedStringKey = "body.less"
+    var moreLabel: LocalizedStringKey = "body.more"
     @ViewBuilder var field: () -> Field
 
     var body: some View {
         HStack(spacing: 8) {
-            nudge("−", "body.less", onLess)
+            nudge("−", lessLabel, onLess)
             field()
-            nudge("+", "body.more", onMore)
+            nudge("+", moreLabel, onMore)
         }
     }
 

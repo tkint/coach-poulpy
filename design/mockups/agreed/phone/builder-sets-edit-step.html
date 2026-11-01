@@ -114,20 +114,12 @@
   <section class="sheet" id="edit-step" data-component="sheet" role="dialog" aria-label="Edit Bench press" style="gap: var(--cp-space-md);">
     <span class="sheet-handle" aria-hidden="true"></span>
     <div class="sheet-title"><h2>Bench press</h2><p>In Work · 3 sets</p></div>
-    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--cp-space-sm);"><button class="select-field" data-component="select-field" type="button" aria-haspopup="listbox" aria-label="Step, Exercise" style="grid-column: span 2;"><span><span class="label">Step</span><strong>Exercise</strong></span><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"><path d="M6 9l6 6 6-6"/></svg></button><button class="select-field" data-component="select-field" type="button" aria-haspopup="listbox" aria-label="Measured by, Reps"><span><span class="label">Measured by</span><strong>Reps</strong></span><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"><path d="M6 9l6 6 6-6"/></svg></button><button class="select-field" data-component="select-field" type="button" aria-haspopup="listbox" aria-label="Weight, 40 kg"><span><span class="label">Weight</span><strong>40 kg</strong></span><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"><path d="M6 9l6 6 6-6"/></svg></button></div>
-    <div class="steppers">
-        <div class="stepper" data-component="stepper">
-          <span class="label">Sets</span>
-          <div><button type="button" aria-label="Fewer sets">−</button><a class="value-link" href="builder-distance-sheet.html" aria-label="Set sets, 3">3</a><button type="button" aria-label="More sets">+</button></div>
-        </div>
-        <div class="stepper" data-component="stepper">
-          <span class="label">Reps</span>
-          <div><button type="button" aria-label="Fewer reps">−</button><a class="value-link" href="builder-distance-sheet.html" aria-label="Set reps, 8">8</a><button type="button" aria-label="More reps">+</button></div>
-        </div>
-        <div class="stepper" data-component="stepper" style="grid-column: span 2;">
-          <span class="label">Rest between sets</span>
-          <div><button type="button" aria-label="Shorter rest">−</button><a class="value-link" href="builder-distance-sheet.html" aria-label="Set rest between sets, 2 min">2 min</a><button type="button" aria-label="Longer rest">+</button></div>
-        </div>
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--cp-space-sm);"><button class="select-field" data-component="select-field" type="button" aria-haspopup="listbox" aria-label="Step, Exercise" style="grid-column: span 2;"><span><span class="label">Step</span><strong>Exercise</strong></span><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"><path d="M6 9l6 6 6-6"/></svg></button><button class="select-field" data-component="select-field" type="button" aria-haspopup="listbox" aria-label="Measured by, Reps"><span><span class="label">Measured by</span><strong>Reps</strong></span><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"><path d="M6 9l6 6 6-6"/></svg></button></div>
+    <div style="display: flex; flex-direction: column; gap: var(--cp-space-sm);">
+      <div class="field"><span class="label">Sets</span><div class="number-entry" data-component="number-entry"><button type="button" aria-label="Fewer sets">−</button><span class="number-field"><input inputmode="numeric" value="3" aria-label="Sets"></span><button type="button" aria-label="More sets">+</button></div></div>
+      <div class="field"><span class="label">Each set</span><div class="number-entry" data-component="number-entry"><button type="button" aria-label="Fewer reps">−</button><span class="number-field"><input inputmode="numeric" value="8" aria-label="Reps"><span class="unit">reps</span></span><button type="button" aria-label="More reps">+</button></div></div>
+      <div class="field"><span class="label">Rest between sets</span><div class="number-entry" data-component="number-entry"><button type="button" aria-label="Shorter rest">−</button><span class="number-field"><input inputmode="numeric" value="120" aria-label="Rest between sets, in seconds"><span class="unit">s</span></span><button type="button" aria-label="Longer rest">+</button></div></div>
+      <div class="field"><span class="label">Weight</span><span class="number-field"><input inputmode="decimal" value="40" aria-label="Weight in kilograms"><span class="unit">kg</span></span></div>
     </div>
     <span class="hint">Rest between sets shows from 2 sets. A walk or a run has no sets.</span>
     <a class="primary-button" data-component="primary-button" href="builder-sets-superset.html" style="font-size: 16px;">Done</a>
