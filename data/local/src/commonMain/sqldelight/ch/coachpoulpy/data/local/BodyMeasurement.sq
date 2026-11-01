@@ -1,0 +1,25 @@
+-- One dated weight or height entry, in kilograms or centimetres whatever the unit system (ADR 0017).
+-- The day is a local date (2026-11-01), so an entry stays on its day when the phone changes time zone.
+CREATE TABLE body_measurement (
+    id TEXT NOT NULL PRIMARY KEY,
+    metric TEXT NOT NULL,
+    day TEXT NOT NULL,
+    value REAL NOT NULL,
+    created_at INTEGER NOT NULL,
+    UNIQUE (metric, day)
+);
+
+insertMeasurement:
+INSERT INTO body_measurement(id, metric, day, value, created_at) VALUES (?, ?, ?, ?, ?);
+
+correctMeasurement:
+UPDATE body_measurement SET value = ? WHERE metric = ? AND day = ?;
+
+measurementOnDay:
+SELECT id FROM body_measurement WHERE metric = ? AND day = ?;
+
+measurements:
+SELECT * FROM body_measurement WHERE metric = ? ORDER BY day;
+
+deleteMeasurement:
+DELETE FROM body_measurement WHERE metric = ? AND day = ?;

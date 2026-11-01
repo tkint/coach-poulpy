@@ -2,6 +2,8 @@ package ch.coachpoulpy.data.local
 
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import ch.coachpoulpy.core.engine.SessionEvent
+import ch.coachpoulpy.core.model.BodyMeasurement
+import ch.coachpoulpy.core.model.BodyMetric
 import ch.coachpoulpy.core.model.Execution
 import ch.coachpoulpy.core.model.ExecutionId
 import ch.coachpoulpy.core.model.ExecutionSource
@@ -189,4 +191,20 @@ class LocalStoreTest {
         muscleGroups = listOf(MuscleGroup.QUADRICEPS),
         measurement = MeasurementMode.REPS,
     )
+
+    @Test
+    fun aSecondBodyMeasurementOnTheSameDayCorrectsTheFirst() = runTest {
+        val store = LocalStore(DriverFactory())
+        val day = LocalDate(2026, 11, 1)
+        store.logBodyMeasurement(BodyMeasurement(BodyMetric.WEIGHT, day, 72.6))
+        store.logBodyMeasurement(BodyMeasurement(BodyMetric.WEIGHT, day, 72.9))
+        store.logBodyMeasurement(BodyMeasurement(BodyMetric.WEIGHT, LocalDate(2026, 10, 25), 73.1))
+        store.logBodyMeasurement(BodyMeasurement(BodyMetric.HEIGHT, day, 175.0))
+
+        assertEquals(listOf(73.1, 72.9), store.bodyMeasurements(BodyMetric.WEIGHT).first().map { it.value })
+        assertEquals(listOf(175.0), store.bodyMeasurements(BodyMetric.HEIGHT).first().map { it.value })
+
+        store.deleteBodyMeasurement(BodyMetric.WEIGHT, day)
+        assertEquals(listOf(73.1), store.bodyMeasurements(BodyMetric.WEIGHT).first().map { it.value })
+    }
 }

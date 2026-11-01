@@ -2,6 +2,7 @@ package ch.coachpoulpy.shared
 
 import ch.coachpoulpy.catalog.Catalog
 import ch.coachpoulpy.core.engine.TimelineCompiler
+import ch.coachpoulpy.core.model.BodyMetric
 import ch.coachpoulpy.core.model.Execution
 import ch.coachpoulpy.core.model.Ids
 import ch.coachpoulpy.core.model.Workout
@@ -34,6 +35,15 @@ class AppGraph(driverFactory: DriverFactory) {
     /** The picture to share for a finished session of the history, the same one as straight after the session. */
     fun sessionShareCard(sessionId: String, units: UnitSystem, languageCode: String): ShareCard? =
         SessionShare(store, compiler, languageCode).card(sessionId, units)
+
+    private var profileModel: ProfileModel? = null
+
+    /** The profile, created on first use. The apps pass the same [memory] every time. */
+    fun profile(memory: KeyValueStore): ProfileModel =
+        profileModel ?: ProfileModel(memory).also { profileModel = it }
+
+    /** The weight or height page's model; the chart follows the log, so a new one per screen is fine. */
+    fun body(metric: BodyMetric) = BodyModel(metric, store)
 
     private var settingsModel: SettingsModel? = null
     private var devicesModel: DevicesModel? = null
