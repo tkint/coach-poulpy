@@ -43,6 +43,8 @@ data class BuilderRow(
     val sets: Int,
     val amount: Int,
     val amountLabel: String,
+    /** What [amount] counts, for the unit beside the number field. */
+    val amountUnit: AmountUnit = AmountUnit.REPS,
     /** True when [amount] is a duration in seconds, so the UI can show a timer icon. */
     val isTimed: Boolean,
     val perSideLabel: String?,
@@ -65,6 +67,9 @@ data class BuilderRow(
     /** A walk or a run's target, edited instead of sets, reps and weight; null for any other exercise. */
     val target: WalkRunTarget? = null,
 )
+
+/** What a step's amount counts: the unit shown beside its number field. */
+enum class AmountUnit { REPS, SECONDS, METERS }
 
 /**
  * A walk or a run's target as the builder shows it. The texts are what the value sheet
@@ -315,6 +320,12 @@ class BuilderModel internal constructor(
         copy(amount = (amount + steps * step).coerceIn(step, 1000 * step))
     }
 
+    /** Sets the reps, seconds or metres typed in the number field, kept within what the − and + allow. */
+    fun setAmount(key: String, value: Int) = editEntry(key) {
+        val step = DraftEntry.amountStep(measurement)
+        copy(amount = value.coerceIn(1, 1000 * step))
+    }
+
     /** Sets the weight typed in the user's unit (kilograms or pounds, "," or "."); nothing readable or zero or less means no weight. */
     fun setWeight(key: String, text: String) {
         val typed = text.replace(',', '.').toDoubleOrNull()?.takeIf { it > 0.0 }
@@ -332,6 +343,14 @@ class BuilderModel internal constructor(
     fun changeRest(key: String, steps: Int) = edit {
         mapLeaves { if (it is DraftRest && it.key == key) it.copy(seconds = (it.seconds + steps * REST_STEP).coerceIn(REST_STEP, MAX_REST)) else it }
     }
+
+    /** Sets the length of a rest step typed in seconds. */
+    fun setRest(key: String, seconds: Int) = edit {
+        mapLeaves { if (it is DraftRest && it.key == key) it.copy(seconds = seconds.coerceIn(1, MAX_REST)) else it }
+    }
+
+    /** Sets the rest between an exercise's sets typed in seconds, down to none. */
+    fun setRestBetweenSets(key: String, seconds: Int) = editEntry(key) { copy(restBetweenSets = seconds.coerceIn(0, MAX_REST)) }
 
     /** Changes the rest between an exercise's sets, down to none. */
     fun changeRestBetweenSets(key: String, steps: Int) = editEntry(key) {
@@ -617,6 +636,7 @@ class BuilderModel internal constructor(
         sets = 1,
         amount = rest.seconds,
         amountLabel = labels.duration(rest.seconds),
+        amountUnit = AmountUnit.SECONDS,
         isTimed = true,
         perSideLabel = null,
         weight = "",
@@ -654,6 +674,11 @@ class BuilderModel internal constructor(
             sets = entry.sets,
             amount = entry.amount,
             amountLabel = labels.amount(entry.measurement, entry.amount),
+            amountUnit = when (entry.measurement) {
+                MeasurementMode.REPS -> AmountUnit.REPS
+                MeasurementMode.TIME, MeasurementMode.HOLD -> AmountUnit.SECONDS
+                MeasurementMode.DISTANCE -> AmountUnit.METERS
+            },
             isTimed = entry.measurement == MeasurementMode.TIME || entry.measurement == MeasurementMode.HOLD,
             perSideLabel = if (entry.perSide) labels.perSide else null,
             weight = entry.loadKg?.let { weightText(it) } ?: "",

@@ -390,4 +390,33 @@ class BuilderStepsTest {
         assertEquals("5.0 km", builder.state.value.rows.single().summary)
     }
 
+
+    /** The number fields type reps, a rest and the rest between sets; the − and + keep the same limits. */
+    @Test
+    fun typedNumbersAreKeptWithinTheLimits() {
+        val builder = graph.createWorkout("en")
+        builder.chooseFormat(WorkoutFormat.SETS)
+        builder.add("push-up", builder.work)
+        val press = builder.state.value.addedKey!!
+        builder.addRest(builder.work)
+        val rest = builder.state.value.addedKey!!
+
+        builder.setAmount(press, 12)
+        builder.setRestBetweenSets(press, 90)
+        builder.setRest(rest, 45)
+        val rows = builder.state.value.rows
+        assertEquals(12, rows[0].amount)
+        assertEquals(AmountUnit.REPS, rows[0].amountUnit)
+        assertEquals(90, rows[0].restBetweenSets)
+        assertEquals(45, rows[1].restSeconds)
+        assertEquals(AmountUnit.SECONDS, rows[1].amountUnit)
+
+        builder.setAmount(press, 0)
+        builder.setRestBetweenSets(press, 5000)
+        builder.setRest(rest, 0)
+        val clamped = builder.state.value.rows
+        assertEquals(1, clamped[0].amount)
+        assertEquals(600, clamped[0].restBetweenSets)
+        assertEquals(1, clamped[1].restSeconds)
+    }
 }

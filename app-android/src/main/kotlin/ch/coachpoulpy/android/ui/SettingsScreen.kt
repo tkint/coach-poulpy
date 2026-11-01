@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -32,7 +31,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -356,26 +354,21 @@ fun DataSourcesScreen(graph: AppGraph, onBack: () -> Unit) {
 
     PageScaffold(stringResource(R.string.devices_sources), onBack) {
         Text(stringResource(R.string.devices_sourcesHint), style = MaterialTheme.typography.bodyMedium)
+        val automatic = stringResource(R.string.devices_sourceAutomatic)
+        var picking by remember { mutableStateOf<Quantity?>(null) }
         state.sources.forEach { source ->
-            OutlinedSurface {
-                Column(Modifier.padding(horizontal = 14.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(stringResource(source.quantity.label), fontWeight = FontWeight.ExtraBold)
-                    Column(Modifier.selectableGroup(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        FilterChip(
-                            selected = source.choiceKey == null,
-                            onClick = { model.setSource(source.quantity, null) },
-                            label = { Text(stringResource(R.string.devices_sourceAutomatic)) },
-                        )
-                        source.options.forEach { option ->
-                            FilterChip(
-                                selected = source.choiceKey == option.key,
-                                onClick = { model.setSource(source.quantity, option.key) },
-                                label = { Text(option.name) },
-                            )
-                        }
-                    }
-                }
-            }
+            SelectField(stringResource(source.quantity.label), source.options.firstOrNull { it.key == source.choiceKey }?.name ?: automatic) { picking = source.quantity }
+        }
+        state.sources.firstOrNull { it.quantity == picking }?.let { source ->
+            OptionSheet(
+                title = stringResource(source.quantity.label),
+                why = null,
+                options = listOf<Pair<String?, String>>(null to automatic) + source.options.map { it.key to it.name },
+                selected = source.choiceKey,
+                note = null,
+                onSave = { model.setSource(source.quantity, it) },
+                onDismiss = { picking = null },
+            )
         }
     }
 }

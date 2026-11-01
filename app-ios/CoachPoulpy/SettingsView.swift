@@ -359,33 +359,41 @@ private struct DeviceView: View {
 /// For each number two added devices measure: automatic, or one of them.
 private struct DataSourcesView: View {
     @ObservedObject var devices: Observed<DevicesModel, DevicesUiState>
+    @State private var picking: SourceSheet?
 
     var body: some View {
         let state = devices.value
         let model = devices.model
-        List {
-            Section {
-            } footer: {
-                Text("devices.sourcesHint")
-            }
-            ForEach(state.sources, id: \.quantity) { source in
-                Section(quantityLabel(source.quantity)) {
-                    Picker(selection: Binding(get: { source.choiceKey }, set: { model.setSource(quantity: source.quantity, key: $0) })) {
-                        Text("devices.sourceAutomatic").tag(String?.none)
-                        ForEach(source.options, id: \.key) { option in
-                            Text(option.name).tag(String?.some(option.key))
-                        }
-                    } label: {
-                        EmptyView()
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("devices.sourcesHint").font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+                ForEach(state.sources, id: \.quantity) { source in
+                    SelectField(label: LocalizedStringKey(quantityLabel(source.quantity)), value: source.options.first(where: { $0.key == source.choiceKey })?.name ?? L("devices.sourceAutomatic")) {
+                        picking = SourceSheet(quantity: source.quantity)
                     }
-                    .pickerStyle(.inline)
-                    .labelsHidden()
                 }
             }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 16)
         }
+        .background(PoulpyColor.background)
         .navigationTitle("devices.sources")
         .navigationBarTitleDisplayMode(.inline)
+        .sheet(item: $picking) { item in
+            if let source = state.sources.first(where: { $0.quantity == item.quantity }) {
+                OptionSheet(
+                    title: LocalizedStringKey(quantityLabel(item.quantity)), why: nil, note: nil, selected: source.choiceKey,
+                    options: [(String?.none, L("devices.sourceAutomatic"))] + source.options.map { (String?.some($0.key), $0.name) },
+                    onSave: { model.setSource(quantity: item.quantity, key: $0) }
+                )
+            }
+        }
     }
+}
+
+private struct SourceSheet: Identifiable {
+    let quantity: Quantity
+    var id: String { quantityLabel(quantity) }
 }
 
 private func statusLabel(_ status: ConnectionStatus) -> String {

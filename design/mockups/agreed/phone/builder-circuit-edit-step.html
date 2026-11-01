@@ -141,11 +141,8 @@
     <span class="sheet-handle" aria-hidden="true"></span>
     <div class="sheet-title"><h2>Push-up</h2><p>In Work 1 · once per round, 4 rounds</p></div>
     <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--cp-space-sm);"><button class="select-field" data-component="select-field" type="button" aria-haspopup="listbox" aria-label="Step, Exercise" style="grid-column: span 2;"><span><span class="label">Step</span><strong>Exercise</strong></span><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"><path d="M6 9l6 6 6-6"/></svg></button><button class="select-field" data-component="select-field" type="button" aria-haspopup="listbox" aria-label="Measured by, Reps"><span><span class="label">Measured by</span><strong>Reps</strong></span><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"><path d="M6 9l6 6 6-6"/></svg></button><button class="select-field" data-component="select-field" type="button" aria-haspopup="listbox" aria-label="Weight, Bodyweight"><span><span class="label">Weight</span><strong>Bodyweight</strong></span><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"><path d="M6 9l6 6 6-6"/></svg></button></div>
-    <div class="steppers" style="grid-template-columns: 1fr;">
-        <div class="stepper" data-component="stepper">
-          <span class="label">Reps</span>
-          <div><button type="button" aria-label="Fewer reps">−</button><a class="value-link" href="builder-distance-sheet.html" aria-label="Set reps, 10">10</a><button type="button" aria-label="More reps">+</button></div>
-        </div>
+    <div style="display: flex; flex-direction: column; gap: var(--cp-space-sm);">
+      <div class="field"><span class="label">Each round</span><div class="number-entry" data-component="number-entry"><button type="button" aria-label="Fewer reps">−</button><span class="number-field"><input inputmode="numeric" value="10" aria-label="Reps"><span class="unit">reps</span></span><button type="button" aria-label="More reps">+</button></div></div>
     </div>
     <span class="hint">A circuit has no sets: the repeat around it sets the rounds.</span>
     <a class="primary-button" data-component="primary-button" href="builder-circuit-parts.html" style="font-size: 16px;">Done</a>
