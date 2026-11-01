@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.selectable
@@ -26,7 +27,9 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Slider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Surface
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -209,9 +212,14 @@ private fun SheetFrame(
             Text(title, style = MaterialTheme.typography.titleLarge)
             why?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) }
             content()
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                clear?.let { OutlinedButton(onClick = { it(); onDismiss() }, modifier = Modifier.height(52.dp)) { Text(stringResource(R.string.profile_clear)) } }
-                Button(onClick = { onSave(); onDismiss() }, modifier = Modifier.weight(1f).height(52.dp)) {
+            clear?.let { TextButton(onClick = { it(); onDismiss() }) { Text(stringResource(R.string.profile_clear), fontWeight = FontWeight.ExtraBold) } }
+            Row(Modifier.padding(top = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(
+                    onClick = onDismiss,
+                    modifier = Modifier.weight(1f).height(56.dp),
+                    border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
+                ) { Text(stringResource(R.string.action_cancel), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onSurface) }
+                Button(onClick = { onSave(); onDismiss() }, modifier = Modifier.weight(1.6f).height(56.dp)) {
                     Text(stringResource(R.string.action_save), fontWeight = FontWeight.ExtraBold)
                 }
             }
@@ -237,16 +245,18 @@ internal fun <T : Any> OptionSheet(
     var choice by remember { mutableStateOf(selected) }
     SheetFrame(title, why, onDismiss, onSave = { onSave(choice) }) {
         Column(Modifier.selectableGroup()) {
-            options.forEach { (value, label) ->
+            options.forEachIndexed { index, (value, label) ->
+                if (index > 0) HorizontalDivider(color = MaterialTheme.colorScheme.outline)
                 Row(
                     Modifier
                         .fillMaxWidth()
+                        .heightIn(min = 52.dp)
                         .selectable(selected = value == choice, role = Role.RadioButton, onClick = { choice = value })
-                        .padding(vertical = 4.dp),
+                        .padding(horizontal = 16.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    RadioButton(selected = value == choice, onClick = null, modifier = Modifier.padding(end = 12.dp))
-                    Text(label, style = MaterialTheme.typography.bodyLarge)
+                    Text(label, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                    RadioButton(selected = value == choice, onClick = null)
                 }
             }
         }
@@ -268,17 +278,19 @@ internal fun <T : Any> MultiOptionSheet(
     var chosen by remember { mutableStateOf(selected) }
     SheetFrame(title, why, onDismiss, onSave = { onSave(chosen) }) {
         Column {
-            options.forEach { (value, label) ->
+            options.forEachIndexed { index, (value, label) ->
                 val on = value in chosen
+                if (index > 0) HorizontalDivider(color = MaterialTheme.colorScheme.outline)
                 Row(
                     Modifier
                         .fillMaxWidth()
+                        .heightIn(min = 52.dp)
                         .selectable(selected = on, role = Role.Checkbox, onClick = { chosen = if (on) chosen - value else chosen + value })
-                        .padding(vertical = 4.dp),
+                        .padding(horizontal = 16.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Checkbox(checked = on, onCheckedChange = null, modifier = Modifier.padding(end = 12.dp))
-                    Text(label, style = MaterialTheme.typography.bodyLarge)
+                    Text(label, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                    Checkbox(checked = on, onCheckedChange = null)
                 }
             }
         }
