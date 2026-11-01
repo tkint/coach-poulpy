@@ -52,6 +52,10 @@ The only thing the app needs is a physiological input for estimates, so that is 
 
 The unit system chosen in Settings decides how weight (kg or lb), height (cm or ft and in) and distance (km or mi) are shown and typed. Everything is stored metric, so switching converts and never rewrites; see [ADR 0017](./adr/0017-body-measurements-are-stored-metric-and-shown-in-the-persons-units.md). The weight pages are drawn Metric and the height page Imperial so both can be reviewed.
 
+## Pain or rehab (draft)
+
+The row is in the profile but nothing sets it yet. The drafts are `profile-edit` (the row filled in, with Poulpy's note) and `profile-pain-sheet` (where it hurts and for how long), under Mockups, Drafts. Nothing is built until they are agreed. The rules they follow are in [Character rules](./brand.md#character-rules): pain or rehab always shows the blue side and the Patched up pose, never ember, and entries inside the window never count as missed ([decision 8](./brand-decisions.md)).
+
 ## Still open
 
 1. Who reads the sex assigned at birth and pronoun wording from the community (see [decision 13](./brand-decisions.md#13-inclusive-by-default)).
