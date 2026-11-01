@@ -55,8 +55,8 @@ class ProfileAndBodyTest {
         model.log(70.0, LocalDate(2026, 11, 2))
         model.log(-1.0, LocalDate(2026, 10, 1))
 
-        val state = model.state.first { it.history.size == 1 }
-        assertEquals(72.9, state.latest!!.value)
+        val state = model.state.first { it.latest?.value == 72.9 }
+        assertEquals(1, state.history.size)
     }
 
     @Test
