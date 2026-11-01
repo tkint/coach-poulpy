@@ -15,6 +15,7 @@ import ch.coachpoulpy.core.model.PartKind
 import ch.coachpoulpy.core.model.Side
 import ch.coachpoulpy.core.model.Step
 import ch.coachpoulpy.core.model.StepRole
+import ch.coachpoulpy.core.model.Target
 import ch.coachpoulpy.core.model.Workout
 import ch.coachpoulpy.core.model.WorkoutFormat
 import ch.coachpoulpy.core.model.WorkoutRef
@@ -171,6 +172,36 @@ class PlayerModel internal constructor(
         )
         val lit = PoulpyCoach(languageCode).status(store.finishedSessionEndsNow(), clock.now()).tentaclesLit
         return ShareCard.of(row, units, languageCode, fullOctopus = lit == PoulpyStatus.TENTACLES)
+    }
+
+    /**
+     * The finished screen's name, date, stats and Poulpy; null before the session is finished. Poulpy's line is the one
+     * for the tentacle this session lit.
+     */
+    fun finished(units: UnitSystem): FinishedScreen? {
+        if (current().status != SessionState.Status.FINISHED) return null
+        val phases = session.timeline.phases
+        val doneWork = session.events.mapNotNull { (it as? SessionEvent.PhaseCompleted)?.phaseIndex }.mapNotNull { phases.getOrNull(it) as? Phase.Work }
+        var liftedKg = 0.0
+        var distanceMeters = 0.0
+        for (work in doneWork) {
+            val load = steps[work.step]?.prescription?.sets?.getOrNull(work.setIndex)?.load as? Load.Kilograms
+            val reps = (work.target as? Target.Reps)?.count
+            if (load != null && reps != null) liftedKg += load.kg * reps
+            (work.target as? Target.Distance)?.let { distanceMeters += it.meters }
+        }
+        val facts = FinishedFacts(
+            activeSeconds = sessionTotals(session.events, session.timeline).active.inWholeSeconds,
+            setsDone = doneWork.size,
+            liftedKg = liftedKg,
+            distanceMeters = distanceMeters,
+        )
+        return FinishedScreen(
+            workoutName = workout.name,
+            startedAtMillis = session.events.firstOrNull { it is SessionEvent.Started }?.at?.toEpochMilliseconds() ?: 0L,
+            stats = FinishedStats.of(facts, units, languageCode),
+            poulpy = PoulpyCoach(languageCode).status(store.finishedSessionEndsNow(), clock.now()),
+        )
     }
 
     /** Moves timed phases on. The ticker calls it; tests call it with a fake clock. */

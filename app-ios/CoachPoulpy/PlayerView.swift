@@ -182,18 +182,56 @@ struct PlayerView: View {
 
     @ViewBuilder
     private func finished(_ model: PlayerModel, _ state: PlayerState) -> some View {
-        Spacer()
-        Text("player.finished").font(.poulpy(.largeTitle))
-        Text(state.workoutName).font(.poulpy(.title2))
-        if let summary = state.summary {
-            Text("player.summary \(Int(summary.setsDone)) \(Int(summary.setsPlanned)) \(summary.durationLabel)")
-                .multilineTextAlignment(.center)
-                .padding(.top)
-            if summary.setsSkipped > 0 {
-                Text("player.summarySkipped \(Int(summary.setsSkipped))").foregroundStyle(.secondary)
+        let screen = model.finished(units: units)
+        ScrollView {
+            VStack(spacing: 16) {
+                Image(PoulpyDrawing.exhausted.imageName).resizable().scaledToFit().frame(width: 150, height: 150).accessibilityHidden(true)
+                Text("player.finished").font(.poulpy(.largeTitle))
+                VStack(spacing: 2) {
+                    Text(state.workoutName).font(.poulpy(.title2).weight(.heavy)).multilineTextAlignment(.center)
+                    if let screen {
+                        let date = Date(timeIntervalSince1970: Double(screen.startedAtMillis) / 1000)
+                        Text("\(date.formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated))) · \(date.formatted(date: .omitted, time: .shortened))")
+                            .foregroundStyle(PoulpyColor.onSurfaceVariant)
+                    }
+                    if let summary = state.summary {
+                        (Text("player.summary \(Int(summary.setsDone)) \(Int(summary.setsPlanned)) \(summary.durationLabel)")
+                            + (summary.setsSkipped > 0 ? Text(" · ") + Text("player.summarySkipped \(Int(summary.setsSkipped))") : Text("")))
+                            .multilineTextAlignment(.center)
+                            .foregroundStyle(PoulpyColor.onSurfaceVariant)
+                    }
+                }
+                if let screen {
+                    HStack(spacing: 8) {
+                        ForEach(Array(screen.stats.enumerated()), id: \.offset) { _, stat in
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(stat.label).font(PoulpyFont.label).fontWeight(.heavy).foregroundStyle(PoulpyColor.onSurfaceVariant).lineLimit(1)
+                                Text(stat.value).font(PoulpyFont.headline).lineLimit(1).minimumScaleFactor(0.7)
+                            }
+                            .padding(EdgeInsets(top: 12, leading: 10, bottom: 12, trailing: 10))
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.md))
+                            .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.md).stroke(PoulpyColor.outline, lineWidth: 1))
+                        }
+                    }
+                    HStack(spacing: 14) {
+                        TentacleRing(lit: Int(screen.poulpy.tentaclesLit), on: PoulpyColor.primary, off: PoulpyColor.outline)
+                            .frame(width: 64, height: 64)
+                            .accessibilityElement()
+                            .accessibilityLabel(screen.poulpy.tentaclesCaption)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(screen.poulpy.title).font(PoulpyFont.headline)
+                            Text(screen.poulpy.line).font(.poulpy(.subheadline).weight(.semibold))
+                        }
+                        .foregroundStyle(PoulpyColor.onPrimaryContainer)
+                        Spacer(minLength: 0)
+                    }
+                    .padding(PoulpySpace.md)
+                    .background(PoulpyColor.primaryContainer, in: RoundedRectangle(cornerRadius: PoulpyRadius.md))
+                }
             }
+            .frame(maxWidth: .infinity)
         }
-        Spacer()
         if let card = model.shareCard(units: units) {
             ShareLink(item: ShareCardItem(card: card), preview: SharePreview(card.title)) {
                 Label("shareImage.button", systemImage: "square.and.arrow.up").frame(maxWidth: .infinity, minHeight: 44)

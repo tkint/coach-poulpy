@@ -2,6 +2,7 @@ package ch.coachpoulpy.android.ui
 
 import android.media.AudioManager
 import android.media.ToneGenerator
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,7 +16,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
@@ -25,12 +28,15 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -45,7 +51,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -53,9 +62,13 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ch.coachpoulpy.android.R
 import ch.coachpoulpy.shared.AppGraph
+import ch.coachpoulpy.shared.FinishedScreen
+import ch.coachpoulpy.shared.FinishedStat
 import ch.coachpoulpy.shared.PlayerModel
 import ch.coachpoulpy.shared.PlayerState
 import ch.coachpoulpy.shared.PlayerStatus
+import ch.coachpoulpy.shared.PoulpyDrawing
+import ch.coachpoulpy.shared.PoulpyStatus
 
 /** The guided session. [workoutId] null reopens the session left open. */
 @Composable
@@ -89,7 +102,8 @@ fun PlayerScreen(graph: AppGraph, language: String, workoutId: String?, onClose:
                     val context = LocalContext.current
                     val units = LocalUnitSystem.current
                     val chooser = stringResource(R.string.shareImage_chooser)
-                    Finished(state, onShare = { model.shareCard(units)?.let { shareSessionImage(context, it, chooser) } }, onClose = onClose)
+                    val finished = remember(units) { model.finished(units) }
+                    Finished(state, finished, onShare = { model.shareCard(units)?.let { shareSessionImage(context, it, chooser) } }, onClose = onClose)
                 }
                 PlayerStatus.RUNNING, PlayerStatus.PAUSED -> Running(state, model)
             }
@@ -218,27 +232,73 @@ private fun ColumnScope.Running(state: PlayerState, model: PlayerModel) {
     }
 }
 
+/** The merged finished screen (`player-finished` and `player-finished-run` mockups): everything it shows is decided in [PlayerModel.finished]. */
 @Composable
-private fun ColumnScope.Finished(state: PlayerState, onShare: () -> Unit, onClose: () -> Unit) {
+private fun ColumnScope.Finished(state: PlayerState, finished: FinishedScreen?, onShare: () -> Unit, onClose: () -> Unit) {
     val summary = state.summary
-    Spacer(Modifier.weight(1f))
-    Text(stringResource(R.string.player_finished), style = MaterialTheme.typography.displaySmall)
-    Text(state.workoutName, style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(top = 8.dp))
-    if (summary != null) {
-        Text(
-            stringResource(R.string.player_summary, summary.setsDone, summary.setsPlanned, summary.durationLabel),
-            style = MaterialTheme.typography.bodyLarge,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(top = 16.dp),
-        )
-        if (summary.setsSkipped > 0) Text(stringResource(R.string.player_summarySkipped, summary.setsSkipped), style = MaterialTheme.typography.bodyMedium)
+    Column(
+        Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+    ) {
+        Image(painterResource(PoulpyDrawing.EXHAUSTED.drawable), contentDescription = null, modifier = Modifier.size(150.dp))
+        Text(stringResource(R.string.player_finished), style = MaterialTheme.typography.displaySmall)
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(state.workoutName, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.ExtraBold, textAlign = TextAlign.Center)
+            if (finished != null) {
+                Text("${dayLabel(finished.startedAtMillis)} · ${time(finished.startedAtMillis)}", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            if (summary != null) {
+                Text(
+                    stringResource(R.string.player_summary, summary.setsDone, summary.setsPlanned, summary.durationLabel) +
+                        if (summary.setsSkipped > 0) " · " + stringResource(R.string.player_summarySkipped, summary.setsSkipped) else "",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                )
+            }
+        }
+        if (finished != null) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                finished.stats.forEach { FinishedTile(it, Modifier.weight(1f)) }
+            }
+            TentacleLitCard(finished.poulpy)
+        }
     }
-    Spacer(Modifier.weight(1f))
     OutlinedButton(onClick = onShare, modifier = Modifier.fillMaxWidth().height(56.dp)) {
         Icon(Icons.Filled.Share, contentDescription = null, modifier = Modifier.padding(end = 8.dp))
         Text(stringResource(R.string.shareImage_button))
     }
     Button(onClick = onClose, modifier = Modifier.fillMaxWidth().height(56.dp).padding(top = 8.dp)) { Text(stringResource(R.string.player_close)) }
+}
+
+@Composable
+private fun FinishedTile(stat: FinishedStat, modifier: Modifier) {
+    OutlinedCard(modifier, colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surface)) {
+        Column(Modifier.padding(horizontal = 10.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(stat.label, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
+            Text(stat.value, style = MaterialTheme.typography.titleLarge, maxLines = 1)
+        }
+    }
+}
+
+/** The ring with the tentacle this session lit, and what Poulpy says about it. */
+@Composable
+private fun TentacleLitCard(status: PoulpyStatus) {
+    Card(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)) {
+        Row(Modifier.padding(PoulpySpace.md), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+            TentacleRing(
+                lit = status.tentaclesLit,
+                on = MaterialTheme.colorScheme.primary,
+                off = MaterialTheme.colorScheme.outline,
+                modifier = Modifier.size(64.dp).semantics { contentDescription = status.tentaclesCaption },
+            )
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(status.title, style = MaterialTheme.typography.titleLarge)
+                Text(status.line, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
+            }
+        }
+    }
 }
 
 /** A short beep for the last three seconds of a timer and a longer one when a phase starts. */

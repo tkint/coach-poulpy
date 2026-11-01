@@ -129,7 +129,8 @@
     "hours": "{hours, number} h",
     "hoursMinutes": "{hours, number} h {minutes}",
     "meters": "{meters, number} m",
-    "kilograms": "{kilograms} kg"
+    "kilograms": "{kilograms} kg",
+    "tonnes": "{tonnes} t"
   },
   "workout": {
     "copyName": "{name} (copie)",
@@ -169,6 +170,8 @@
     "sets": "Séries",
     "setsOf": "{done, number} sur {planned, number}",
     "distance": "Distance",
+    "pace": "Allure",
+    "lifted": "Soulevé",
     "averageSpeed": "Vitesse moy.",
     "energy": "Énergie",
     "energyValue": "{kcal, number} kcal",
