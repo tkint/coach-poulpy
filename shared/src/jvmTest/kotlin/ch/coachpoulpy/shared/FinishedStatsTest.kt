@@ -48,6 +48,23 @@ class FinishedStatsTest {
     }
 
     @Test
+    fun aRunSetInMilesStaysInMilesWhateverTheUnitSystem() {
+        assertEquals(
+            listOf("Time" to "10:00", "Distance" to "1.0 mi", "Pace" to "10:00 /mi"),
+            stats(FinishedFacts(600, 1, 0.0, 1609.0, distanceSystem = UnitSystem.IMPERIAL), UnitSystem.METRIC),
+        )
+    }
+
+    @Test
+    fun aSignatureDistanceIsReadFromItsValue() {
+        assertEquals(DistanceUnit.MI, DistanceUnit.signature(1609.0))
+        assertEquals(DistanceUnit.MI, DistanceUnit.signature(4828.0))
+        assertEquals(DistanceUnit.KM, DistanceUnit.signature(5000.0))
+        assertEquals(null, DistanceUnit.signature(400.0))
+        assertEquals(null, DistanceUnit.signature(21097.5))
+    }
+
+    @Test
     fun heartRateIsNeverAStat() {
         val labels = stats(FinishedFacts(600, 3, 100.0, 0.0)).map { it.first } + stats(FinishedFacts(600, 3, 0.0, 1000.0)).map { it.first }
         assertEquals(emptyList(), labels.filter { "heart" in it.lowercase() })

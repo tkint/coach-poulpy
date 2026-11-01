@@ -26,7 +26,7 @@ class AppGraph(driverFactory: DriverFactory) {
     fun equipmentFilter(memory: KeyValueStore) = EquipmentFilter(memory)
     fun home(languageCode: String) = HomeModel(store, compiler, catalog, languageCode, discardOpen = ::discardOpen)
     fun library(languageCode: String) = LibraryModel(store, compiler, catalog, languageCode)
-    fun workoutPage(workoutId: String, languageCode: String) = WorkoutPageModel(WorkoutId(workoutId), store, compiler, catalog, languageCode)
+    fun workoutPage(workoutId: String, languageCode: String) = WorkoutPageModel(WorkoutId(workoutId), store, compiler, catalog, languageCode, ::units)
     /** A workout file's text, read for the preview before it is added to the library. */
     fun importWorkout(fileText: String, languageCode: String) = WorkoutImport(fileText, store, catalog, languageCode)
     fun history(languageCode: String) = HistoryModel(store, compiler, languageCode)
@@ -124,6 +124,7 @@ class AppGraph(driverFactory: DriverFactory) {
         catalog = catalog,
         store = store,
         languageCode = languageCode,
+        units = ::units,
         executionId = executionId,
         events = store.events(executionId),
     )

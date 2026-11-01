@@ -16,7 +16,7 @@ Coach Poulpy is **local-first**: the mobile app holds the whole domain model and
 | Sharing | Save to library synced with the author or as a copy | |
 | Coaching | Athlete invites a coach and can revoke; coach edits assigned plans and comments on sessions | |
 | Export | .FIT file for Garmin Connect and Strava; optional Apple Health and Health Connect | Direct Garmin and Strava links |
-| Language and units | French and English, metric and imperial | |
+| Language and units | French and English, metric and imperial: distances, speeds and weights follow the setting (weights are stored in kilograms and shown in pounds in imperial), except a distance picked in whole miles or kilometres, which keeps the unit it was picked in | |
 | Hosting | The whole stack runs on the dev computer; Docker optional | A provider when accounts go live |
 
 ## Delivery phases

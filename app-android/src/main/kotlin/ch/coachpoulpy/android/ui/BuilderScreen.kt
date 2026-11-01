@@ -778,22 +778,22 @@ private fun RoundStep(sign: String, description: String, onClick: () -> Unit) {
 
 @Composable
 private fun WeightCell(model: BuilderModel, row: BuilderRow, modifier: Modifier) {
-    var weight by remember(row.key) { mutableStateOf(row.loadKg?.let(::formatKg) ?: "") }
+    var weight by remember(row.key) { mutableStateOf(row.weight) }
     SettingCell(stringResource(R.string.builder_weight), modifier) {
         Row(Modifier.height(44.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             BoxField(
                 weight,
                 { text ->
                     weight = text
-                    model.setLoadKg(row.key, text.replace(',', '.').toDoubleOrNull() ?: 0.0)
+                    model.setWeight(row.key, text)
                 },
-                label = stringResource(R.string.builder_weightKg),
+                label = stringResource(if (row.weightUnit == "lb") R.string.builder_weightLb else R.string.builder_weightKg),
                 modifier = Modifier.width(64.dp).height(40.dp),
                 radius = 10,
                 keyboard = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 center = true,
             )
-            Text("kg", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(row.weightUnit, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
@@ -1010,4 +1010,3 @@ private fun AddStepButton(label: String, onExercise: (StepRole) -> Unit, onRest:
     }
 }
 
-private fun formatKg(kg: Double): String = if (kg % 1.0 == 0.0) kg.toInt().toString() else kg.toString()

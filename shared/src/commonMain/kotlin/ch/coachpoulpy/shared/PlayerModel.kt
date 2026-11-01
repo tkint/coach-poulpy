@@ -102,12 +102,13 @@ class PlayerModel internal constructor(
     private val catalog: Catalog,
     private val store: LocalStore,
     private val languageCode: String,
+    private val units: () -> UnitSystem = { UnitSystem.METRIC },
     private val executionId: String,
     events: List<SessionEvent>,
     private val clock: Clock = Clock.System,
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main),
 ) {
-    private val labels = Labels(languageCode)
+    private val labels = Labels(languageCode, units)
     private val session = Session(timeline, events)
     private val steps = workout.steps.flatMap { it.exerciseSteps() }.associateBy { it.id }
     private val mutableState = MutableStateFlow(render())
@@ -204,17 +205,24 @@ class PlayerModel internal constructor(
         val doneWork = session.events.mapNotNull { (it as? SessionEvent.PhaseCompleted)?.phaseIndex }.mapNotNull { phases.getOrNull(it) as? Phase.Work }
         var liftedKg = 0.0
         var distanceMeters = 0.0
+        val pickedUnits = mutableSetOf<DistanceUnit?>()
         for (work in doneWork) {
             val load = steps[work.step]?.prescription?.sets?.getOrNull(work.setIndex)?.load as? Load.Kilograms
             val reps = (work.target as? Target.Reps)?.count
             if (load != null && reps != null) liftedKg += load.kg * reps
-            (work.target as? Target.Distance)?.let { distanceMeters += it.meters }
+            (work.target as? Target.Distance)?.let { distanceMeters += it.meters; pickedUnits += DistanceUnit.signature(it.meters) }
         }
         val facts = FinishedFacts(
             activeSeconds = sessionTotals(session.events, session.timeline).active.inWholeSeconds,
             setsDone = doneWork.size,
             liftedKg = liftedKg,
             distanceMeters = distanceMeters,
+            // A run set in miles (or kilometres) reads in them, whatever the unit system.
+            distanceSystem = when (pickedUnits.singleOrNull()) {
+                DistanceUnit.MI -> UnitSystem.IMPERIAL
+                DistanceUnit.KM -> UnitSystem.METRIC
+                else -> null
+            },
         )
         return FinishedScreen(
             workoutName = workout.name,
@@ -368,7 +376,7 @@ class PlayerModel internal constructor(
     private fun clockOf(seconds: Int) = "${(seconds / 60).toString().padStart(2, '0')}:${(seconds % 60).toString().padStart(2, '0')}"
 
     private fun Load.label(): String? = when (this) {
-        is Load.Kilograms -> labels.kilograms(kg)
+        is Load.Kilograms -> labels.weight(kg)
         is Load.Band -> label
         is Load.Bodyweight, is Load.PercentOfOneRepMax -> null
     }

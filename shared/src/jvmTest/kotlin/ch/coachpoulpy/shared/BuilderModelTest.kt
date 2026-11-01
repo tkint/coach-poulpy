@@ -65,6 +65,24 @@ class BuilderModelTest {
     }
 
     @Test
+    fun weightIsTypedAndShownInThePoundsOfTheImperialSystem() {
+        val builder = BuilderModel(WorkoutDraft.empty(), graph.catalog, graph.store, graph.compiler, "en", { UnitSystem.IMPERIAL })
+        builder.rename("Legs")
+        builder.chooseFormat(WorkoutFormat.SETS)
+        builder.add("goblet-squat", builder.work)
+        val key = builder.current.addedKey!!
+        builder.setWeight(key, "45")
+
+        val row = builder.current.rows.single()
+        assertEquals("45", row.weight)
+        assertEquals("lb", row.weightUnit)
+        assertTrue(row.summary.contains("45 lb"), row.summary)
+        val workout = graph.store.latestWorkout(WorkoutId(builder.save()!!))!!
+        val kg = (workout.steps.first() as Step.ExerciseStep).prescription.sets.first().load as ch.coachpoulpy.core.model.Load.Kilograms
+        assertEquals(20.41, kg.kg, 0.01)
+    }
+
+    @Test
     fun aCircuitHasNoSetsTheRepeatSetsTheRounds() {
         val builder = builder(WorkoutFormat.CIRCUIT)
         val repeat = builder.current.parts.single().steps.single().key
@@ -73,7 +91,7 @@ class BuilderModelTest {
         builder.setRepeatTimes(repeat, 4)
         builder.setSets(key, 3)
         builder.changeAmount(key, 5)
-        builder.setLoadKg(key, 16.0)
+        builder.setWeight(key, "16")
 
         val row = builder.current.rows.single()
         assertEquals(1, row.sets, "a circuit refuses sets")
@@ -110,7 +128,7 @@ class BuilderModelTest {
         val key = builder.current.addedKey!!
         builder.setSets(key, 2)
         builder.changeAmount(key, 2)
-        builder.setLoadKg(key, 12.0)
+        builder.setWeight(key, "12")
         assertEquals("2 × 12 · 12 kg · 1 min between sets", builder.current.rows.single().summary)
         builder.changeRestBetweenSets(key, 2)
         assertEquals("1 min 30", builder.current.rows.single().restBetweenSetsLabel)
