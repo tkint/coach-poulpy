@@ -98,4 +98,20 @@ class ShareCardTest {
         val card = ShareCard.of(workout, UnitSystem.METRIC, "fr")
         assertEquals(listOf(ShareLine("Durée", "38:24"), ShareLine("Séries", "17 sur 18")), card.lines)
     }
+
+    @Test
+    fun aJustFinishedSessionSharesTheFinishedScreen() {
+        val status = PoulpyCoach("en").status(emptyList(), kotlin.time.Instant.fromEpochMilliseconds(1_000L))
+        val screen = FinishedScreen("Lower body strength", 1_000L, listOf(FinishedStat("Time", "38:24"), FinishedStat("Sets", "17"), FinishedStat("Lifted", "2.1 t")), status)
+        val card = ShareCard.of(screen, "en")
+        assertEquals(listOf(ShareLine("Time", "38:24"), ShareLine("Sets", "17"), ShareLine("Lifted", "2.1 t")), card.lines)
+        assertEquals(status, card.poulpy)
+        assertEquals(PoulpyDrawing.MOOD_HAPPY, card.drawing)
+        assertEquals(PoulpyDrawing.CHAMPION, ShareCard.of(screen, "en", fullOctopus = true).drawing)
+    }
+
+    @Test
+    fun aPastSessionHasNoTentacleCard() {
+        assertEquals(null, ShareCard.of(workout, UnitSystem.METRIC, "en").poulpy)
+    }
 }

@@ -13,22 +13,27 @@
 <link rel="stylesheet" href="../../shared/mockup.css">
 <script src="../../shared/mockup-theme.js"></script>
 <style>
-  /* The card is a 4:5 picture (1080 x 1350), shown here at a quarter of its size. */
+  /* The card is a 4:5 picture (1080 x 1350), shown here at a quarter of its size. It looks like the finished screen and follows the theme in use, light or dark. */
   .share-stage { display: flex; flex-wrap: wrap; gap: var(--cp-space-xxl); justify-content: center; padding: var(--cp-space-xxl) var(--cp-space-lg); }
   .share-card {
     width: 270px; height: 337px; overflow: hidden; box-sizing: border-box; padding: 10px 22px 10px;
     display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--cp-space-xs);
-    border-radius: 12px; background: var(--cp-primary-container); color: var(--cp-on-primary-container);
+    border-radius: 12px; background: var(--cp-background); color: var(--cp-on-background, var(--cp-on-surface)); border: 1px solid var(--cp-outline);
     font-family: var(--cp-font-body);
   }
   .share-card img { width: 64px; height: 64px; }
   .share-card h2 { margin: 0; font-family: var(--cp-font-display); font-size: 22px; line-height: 26px; font-weight: 800; }
   .share-card .date { margin: 0; font-size: 12px; font-weight: 600; opacity: 0.8; }
-  .share-card dl { margin: 2px 0 0; width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-  .share-card dl div { background: var(--cp-surface); color: var(--cp-on-surface); border-radius: var(--cp-radius-sm); padding: var(--cp-space-xs) 10px; display: flex; flex-direction: column; align-items: flex-start; text-align: left; }
-  .share-card dt { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
-  .share-card dd { margin: 0; font-family: var(--cp-font-display); font-size: 15px; font-weight: 800; font-variant-numeric: tabular-nums; }
-  .share-card footer { margin-top: auto; font-family: var(--cp-font-display); font-size: 13px; font-weight: 700; }
+  .share-card dl { margin: 2px 0 0; width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+  .share-card dl.two { grid-template-columns: 1fr 1fr; }
+  .share-card dl div { background: var(--cp-surface); color: var(--cp-on-surface); border: 1px solid var(--cp-outline); border-radius: var(--cp-radius-sm); padding: var(--cp-space-xs) 8px; display: flex; flex-direction: column; align-items: flex-start; text-align: left; }
+  .share-card dt { color: var(--cp-on-surface-variant); font-size: 9px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
+  .share-card dd { margin: 0; font-family: var(--cp-font-display); font-size: 14px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .share-card .lit-card { width: 100%; box-sizing: border-box; display: flex; align-items: center; gap: 8px; text-align: left; padding: 8px; border-radius: var(--cp-radius-sm); background: var(--cp-primary-container); color: var(--cp-on-primary-container); }
+  .share-card .lit-card .tentacle-ring { width: 42px; height: 42px; }
+  .share-card .lit-card strong { display: block; font-family: var(--cp-font-display); font-size: 13px; line-height: 15px; }
+  .share-card .lit-card span { font-size: 9px; font-weight: 600; line-height: 11px; }
+  .share-card footer { color: var(--cp-primary); margin-top: auto; font-family: var(--cp-font-display); font-size: 13px; font-weight: 700; }
   .share-stage figure { margin: 0; display: flex; flex-direction: column; gap: var(--cp-space-sm); align-items: center; }
   .share-stage figcaption { font-size: 13px; max-width: 270px; text-align: center; color: var(--cp-on-surface-variant); }
 </style>
@@ -49,14 +54,14 @@
       </dl>
       <footer>Coach Poulpy</footer>
     </article>
-    <figcaption>A machine sent distance, speed and energy. Heart rate is never on the card.</figcaption>
+    <figcaption>A past session from the history: its numbers, with the distance, speed and energy a machine sent. Heart rate is never on the card.</figcaption>
   </figure>
   <figure>
     <article class="share-card" id="card-without-machine" data-component="share-card" aria-label="Share card, without machine values">
       <img src="../../../poulpy/mood_happy.svg" alt="Poulpy, happy">
       <h2>Upper body</h2>
       <p class="date">Tuesday 27 October</p>
-      <dl>
+      <dl class="two">
         <div><dt>Time</dt><dd>31:40</dd></div>
         <div><dt>Sets</dt><dd>12 of 12</dd></div>
       </dl>
@@ -71,11 +76,13 @@
       <p class="date">Saturday 31 October</p>
       <dl>
         <div><dt>Time</dt><dd>38:24</dd></div>
-        <div><dt>Sets</dt><dd>17 of 18</dd></div>
+        <div><dt>Sets</dt><dd>17</dd></div>
+        <div><dt>Lifted</dt><dd>2.1 t</dd></div>
       </dl>
+      <div class="lit-card"><div class="tentacle-ring"><svg viewBox="0 0 200 200" aria-hidden="true"><path class="lit" d="M117.9 15.9 A86 86 0 0 1 146.8 27.9"/><path class="lit" d="M172.1 53.2 A86 86 0 0 1 184.1 82.1"/><path class="lit" d="M184.1 117.9 A86 86 0 0 1 172.1 146.8"/><path class="lit" d="M146.8 172.1 A86 86 0 0 1 117.9 184.1"/><path class="lit" d="M82.1 184.1 A86 86 0 0 1 53.2 172.1"/><path class="lit" d="M27.9 146.8 A86 86 0 0 1 15.9 117.9"/><path class="lit" d="M15.9 82.1 A86 86 0 0 1 27.9 53.2"/><path class="lit new" d="M53.2 27.9 A86 86 0 0 1 82.1 15.9"/></svg></div><div><strong>Tentacle 8 lit!</strong><span>Poulpy is a champion.</span></div></div>
       <footer>Coach Poulpy</footer>
     </article>
-    <figcaption>The pose follows the PoulpyCoach rules of the end-of-session screen (Champion on the eighth tentacle). Never a guilty one: ember poses are not used.</figcaption>
+    <figcaption>Shared straight after the session: the finished screen as a picture, with the same tiles and the tentacle card. The pose follows the PoulpyCoach rules (Champion on the eighth tentacle). Never a guilty one: ember poses are not used.</figcaption>
   </figure>
 </div>
 </body>

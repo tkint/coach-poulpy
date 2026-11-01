@@ -396,6 +396,7 @@ struct SessionDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var deleting = false
     @Environment(\.unitSystem) private var units
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         ScrollView {
@@ -457,7 +458,7 @@ struct SessionDetailView: View {
         .navigationTitle(session.title)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ShareLink(item: ShareCardItem(card: ShareCard.companion.of(session: session, units: units, languageCode: Language.code, fullOctopus: false)), preview: SharePreview(session.title)) {
+            ShareLink(item: ShareCardItem(card: ShareCard.companion.of(session: session, units: units, languageCode: Language.code, fullOctopus: false), scheme: colorScheme), preview: SharePreview(session.title)) {
                 Label("shareImage.button", systemImage: "square.and.arrow.up")
             }
             Button(role: .destructive) {

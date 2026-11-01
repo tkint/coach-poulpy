@@ -7,11 +7,17 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.RectF
 import android.graphics.Typeface
+import android.text.StaticLayout
+import android.text.TextPaint
+import android.text.TextUtils
 import android.text.format.DateFormat
+import androidx.compose.material3.ColorScheme
+import androidx.compose.ui.graphics.toArgb
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.content.res.ResourcesCompat
 import ch.coachpoulpy.android.R
+import ch.coachpoulpy.shared.PoulpyStatus
 import ch.coachpoulpy.shared.ShareCard
 import java.io.File
 import java.time.Instant
@@ -22,12 +28,12 @@ import java.util.Locale
 /**
  * Draws [card] as a 1080 x 1350 picture, writes it under the cache folder and hands it to the system share sheet
  * through [FileProvider] (see `res/xml/file_paths.xml`). The lines and their order come from the shared [ShareCard];
- * this only draws them, on the light colours whatever the theme, since the picture leaves the phone.
+ * this only draws them, laid out like the finished screen and in the colours of the theme in use ([colors]).
  */
-fun shareSessionImage(context: Context, card: ShareCard, chooserTitle: String) {
+fun shareSessionImage(context: Context, card: ShareCard, chooserTitle: String, colors: ColorScheme) {
     val folder = File(context.cacheDir, "shared").apply { mkdirs() }
     val file = File(folder, "coach-poulpy-session.png")
-    file.outputStream().use { renderShareCard(context, card).compress(Bitmap.CompressFormat.PNG, 100, it) }
+    file.outputStream().use { renderShareCard(context, card, colors).compress(Bitmap.CompressFormat.PNG, 100, it) }
     val uri = FileProvider.getUriForFile(context, "${context.packageName}.files", file)
     val send = Intent(Intent.ACTION_SEND)
         .setType("image/png")
@@ -40,15 +46,17 @@ private const val WIDTH = 1080
 private const val HEIGHT = 1350
 private const val MARGIN = 88f
 private const val GAP = 24f
+private const val COLUMNS = 3
 
-internal fun renderShareCard(context: Context, card: ShareCard): Bitmap {
+internal fun renderShareCard(context: Context, card: ShareCard, colors: ColorScheme): Bitmap {
     val bitmap = Bitmap.createBitmap(WIDTH, HEIGHT, Bitmap.Config.ARGB_8888)
     val canvas = Canvas(bitmap)
-    val ink = 0xFF082F4A.toInt()
-    val muted = 0xFF374555.toInt()
+    val ink = colors.onBackground.toArgb()
+    val muted = colors.onSurfaceVariant.toArgb()
     fun font(res: Int, fallback: Typeface) = ResourcesCompat.getFont(context, res) ?: fallback
     val display = font(R.font.baloo2_extrabold, Typeface.DEFAULT_BOLD)
     val body = font(R.font.nunito_bold, Typeface.DEFAULT_BOLD)
+    val bodyHeavy = font(R.font.nunito_extrabold, Typeface.DEFAULT_BOLD)
     fun paint(color: Int, size: Float, face: Typeface) = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         this.color = color
         textSize = size
@@ -56,7 +64,7 @@ internal fun renderShareCard(context: Context, card: ShareCard): Bitmap {
         textAlign = Paint.Align.CENTER
     }
 
-    canvas.drawColor(0xFFDDF0FB.toInt())
+    canvas.drawColor(colors.background.toArgb())
 
     // Poulpy, as wide as fits in 256 px, keeping the drawing's proportions.
     ContextCompat.getDrawable(context, card.drawing.drawable)?.let { drawing ->
@@ -72,31 +80,79 @@ internal fun renderShareCard(context: Context, card: ShareCard): Bitmap {
     val title = paint(ink, 88f, display)
     val room = WIDTH - 2 * MARGIN
     while (title.measureText(card.title) > room && title.textSize > 44f) title.textSize -= 4f
-    val titleText = android.text.TextUtils.ellipsize(card.title, android.text.TextPaint(title), room, android.text.TextUtils.TruncateAt.END).toString()
+    val titleText = TextUtils.ellipsize(card.title, TextPaint(title), room, TextUtils.TruncateAt.END).toString()
     canvas.drawText(titleText, WIDTH / 2f, 400f, title)
     canvas.drawText(dateLabel(card.startedAtMillis), WIDTH / 2f, 470f, paint(muted, 44f, body))
 
-    // Two columns of tiles, label over value.
-    val tileWidth = (room - GAP) / 2
+    // Tiles like the finished screen's: label over value, on the surface colour with the outline around.
+    val columns = card.lines.size.coerceIn(1, COLUMNS)
+    val tileWidth = (room - GAP * (columns - 1)) / columns
     val tileHeight = 180f
-    val surface = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFFFFFFFF.toInt() }
-    val label = paint(muted, 36f, body).apply { textAlign = Paint.Align.LEFT; letterSpacing = 0.06f }
-    val value = paint(ink, 64f, display).apply { textAlign = Paint.Align.LEFT }
+    val surface = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = colors.surface.toArgb() }
+    val outline = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = colors.outline.toArgb(); style = Paint.Style.STROKE; strokeWidth = 3f }
+    val label = paint(muted, 32f, bodyHeavy).apply { textAlign = Paint.Align.LEFT; letterSpacing = 0.06f }
+    val value = paint(colors.onSurface.toArgb(), 64f, display).apply { textAlign = Paint.Align.LEFT }
     card.lines.forEachIndexed { index, line ->
-        val left = MARGIN + (index % 2) * (tileWidth + GAP)
-        val top = 540f + (index / 2) * (tileHeight + GAP)
-        canvas.drawRoundRect(RectF(left, top, left + tileWidth, top + tileHeight), 40f, 40f, surface)
-        canvas.drawText(line.label.uppercase(Locale.getDefault()), left + 36f, top + 68f, label)
+        val left = MARGIN + (index % columns) * (tileWidth + GAP)
+        val top = 540f + (index / columns) * (tileHeight + GAP)
+        val tile = RectF(left, top, left + tileWidth, top + tileHeight)
+        canvas.drawRoundRect(tile, 40f, 40f, surface)
+        canvas.drawRoundRect(tile, 40f, 40f, outline)
+        val fittedLabel = Paint(label)
+        while (fittedLabel.measureText(line.label.uppercase(Locale.getDefault())) > tileWidth - 56f && fittedLabel.textSize > 20f) fittedLabel.textSize -= 2f
+        canvas.drawText(line.label.uppercase(Locale.getDefault()), left + 28f, top + 68f, fittedLabel)
         val fitted = Paint(value)
-        while (fitted.measureText(line.value) > tileWidth - 72f && fitted.textSize > 32f) fitted.textSize -= 4f
-        canvas.drawText(line.value, left + 36f, top + 140f, fitted)
+        while (fitted.measureText(line.value) > tileWidth - 56f && fitted.textSize > 28f) fitted.textSize -= 4f
+        canvas.drawText(line.value, left + 28f, top + 140f, fitted)
     }
 
-    canvas.drawText(card.appName, WIDTH / 2f, HEIGHT - 56f, paint(ink, 52f, display))
+    card.poulpy?.let { poulpy ->
+        val rows = (card.lines.size + columns - 1) / columns
+        drawTentacleCard(canvas, colors, display, bodyHeavy, poulpy, top = 540f + rows * (tileHeight + GAP) + 16f, room = room)
+    }
+
+    canvas.drawText(card.appName, WIDTH / 2f, HEIGHT - 56f, paint(colors.primary.toArgb(), 52f, display))
     return bitmap
 }
 
-/** "Saturday 24 October", in the user's language. */
-private fun dateLabel(millis: Long): String =
-    DateTimeFormatter.ofPattern(DateFormat.getBestDateTimePattern(Locale.getDefault(), "EEEEdMMMM"), Locale.getDefault())
-        .format(Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()))
+/** The ring with the tentacle this session lit and Poulpy's line about it, on the primary container. */
+private fun drawTentacleCard(canvas: Canvas, colors: ColorScheme, display: Typeface, body: Typeface, poulpy: PoulpyStatus, top: Float, room: Float) {
+    val ring = 168f
+    val height = ring + 64f
+    val box = RectF(MARGIN, top, MARGIN + room, top + height)
+    canvas.drawRoundRect(box, 40f, 40f, Paint(Paint.ANTI_ALIAS_FLAG).apply { color = colors.primaryContainer.toArgb() })
+
+    // Eight rounded segments clockwise from the top, as TentacleRing draws them on screen.
+    val stroke = ring * 15f / 200f
+    val arc = RectF(MARGIN + 32f + stroke / 2, top + 32f + stroke / 2, MARGIN + 32f + ring - stroke / 2, top + 32f + ring - stroke / 2)
+    val segment = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE; strokeWidth = stroke; strokeCap = Paint.Cap.ROUND }
+    for (i in 0 until PoulpyStatus.TENTACLES) {
+        segment.color = (if (i < poulpy.tentaclesLit) colors.primary else colors.outline).toArgb()
+        canvas.drawArc(arc, i * 45f + 11f - 90f, 23f, false, segment)
+    }
+
+    val textLeft = MARGIN + 32f + ring + 36f
+    val textWidth = (MARGIN + room - 32f - textLeft).toInt()
+    val inkOn = colors.onPrimaryContainer.toArgb()
+    val heading = TextPaint(Paint.ANTI_ALIAS_FLAG).apply { color = inkOn; textSize = 56f; typeface = display }
+    val line = TextPaint(Paint.ANTI_ALIAS_FLAG).apply { color = inkOn; textSize = 36f; typeface = body }
+    fun layout(text: String, paint: TextPaint, maxLines: Int) =
+        StaticLayout.Builder.obtain(text, 0, text.length, paint, textWidth).setMaxLines(maxLines).setEllipsize(TextUtils.TruncateAt.END).build()
+    val headingLayout = layout(poulpy.title, heading, 1)
+    val lineLayout = layout(poulpy.line, line, 2)
+    val block = headingLayout.height + 8f + lineLayout.height
+    canvas.save()
+    canvas.translate(textLeft, top + (height - block) / 2)
+    headingLayout.draw(canvas)
+    canvas.translate(0f, headingLayout.height + 8f)
+    lineLayout.draw(canvas)
+    canvas.restore()
+}
+
+/** "Saturday 24 October · 18:05", in the user's language. */
+private fun dateLabel(millis: Long): String {
+    val moment = Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault())
+    val day = DateTimeFormatter.ofPattern(DateFormat.getBestDateTimePattern(Locale.getDefault(), "EEEEdMMMM"), Locale.getDefault()).format(moment)
+    val time = DateTimeFormatter.ofPattern(DateFormat.getBestDateTimePattern(Locale.getDefault(), "jm"), Locale.getDefault()).format(moment)
+    return "$day · $time"
+}

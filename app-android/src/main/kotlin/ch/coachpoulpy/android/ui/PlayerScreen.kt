@@ -102,8 +102,9 @@ fun PlayerScreen(graph: AppGraph, language: String, workoutId: String?, onClose:
                     val context = LocalContext.current
                     val units = LocalUnitSystem.current
                     val chooser = stringResource(R.string.shareImage_chooser)
+                    val colors = MaterialTheme.colorScheme
                     val finished = remember(units) { model.finished(units) }
-                    Finished(state, finished, onShare = { model.shareCard(units)?.let { shareSessionImage(context, it, chooser) } }, onClose = onClose)
+                    Finished(state, finished, onShare = { model.shareCard(units)?.let { shareSessionImage(context, it, chooser, colors) } }, onClose = onClose)
                 }
                 PlayerStatus.RUNNING, PlayerStatus.PAUSED -> Running(state, model)
             }

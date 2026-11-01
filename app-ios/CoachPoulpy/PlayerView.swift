@@ -29,6 +29,7 @@ struct PlayerView: View {
     @State private var confirmStop = false
     @Environment(\.dismiss) private var dismiss
     @Environment(\.unitSystem) private var units
+    @Environment(\.colorScheme) private var colorScheme
 
     init(graph: AppGraph, workoutId: String?) {
         // Inside the autoclosure, so the session is opened once, not on every redraw.
@@ -233,7 +234,7 @@ struct PlayerView: View {
             .frame(maxWidth: .infinity)
         }
         if let card = model.shareCard(units: units) {
-            ShareLink(item: ShareCardItem(card: card), preview: SharePreview(card.title)) {
+            ShareLink(item: ShareCardItem(card: card, scheme: colorScheme), preview: SharePreview(card.title)) {
                 Label("shareImage.button", systemImage: "square.and.arrow.up").frame(maxWidth: .infinity, minHeight: 44)
             }
             .buttonStyle(.bordered)

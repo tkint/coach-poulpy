@@ -6,7 +6,9 @@ data class ShareLine(val label: String, val value: String)
 /**
  * The picture a person shares after a finished session: Poulpy, the workout's name and date, and the numbers of the
  * session. The lines and their order are decided here so Android and iOS print the same card; each platform only
- * draws it. A value that is missing leaves its line out, and the heart rate is never on the card.
+ * draws it, in the colours of the current theme. A value that is missing leaves its line out, and the heart rate is
+ * never on the card. Straight after a session the card is the finished screen as a picture (same tiles, same tentacle
+ * card); a past session from the history has no tentacle card, since that moment is gone.
  */
 data class ShareCard(
     val title: String,
@@ -14,8 +16,20 @@ data class ShareCard(
     val drawing: PoulpyDrawing,
     val lines: List<ShareLine>,
     val appName: String,
+    /** The tentacle this session lit, shown as on the finished screen; null for a past session. */
+    val poulpy: PoulpyStatus? = null,
 ) {
     companion object {
+        /** The card of a session that has just finished: the tiles and the tentacle card of [screen]. */
+        fun of(screen: FinishedScreen, languageCode: String, fullOctopus: Boolean = false) = ShareCard(
+            title = screen.workoutName,
+            startedAtMillis = screen.startedAtMillis,
+            drawing = if (fullOctopus) PoulpyDrawing.CHAMPION else PoulpyDrawing.MOOD_HAPPY,
+            lines = screen.stats.map { ShareLine(it.label, it.value) },
+            appName = DomainText.shareApp(languageCode),
+            poulpy = screen.poulpy,
+        )
+
         /** [fullOctopus] is true when this session lit Poulpy's eighth tentacle: he shows Champion instead of Happy. */
         fun of(session: SessionRow, units: UnitSystem, languageCode: String, fullOctopus: Boolean = false): ShareCard {
             val lines = buildList {

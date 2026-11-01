@@ -151,27 +151,8 @@ class PlayerModel internal constructor(
      * eighth tentacle.
      */
     fun shareCard(units: UnitSystem): ShareCard? {
-        if (current().status != SessionState.Status.FINISHED) return null
-        val totals = sessionTotals(session.events, session.timeline)
-        val row = SessionRow(
-            id = executionId,
-            title = workout.name,
-            kind = SessionKind.WORKOUT,
-            formatLabel = labels.format(workout.format),
-            startedAtMillis = session.events.firstOrNull { it is SessionEvent.Started }?.at?.toEpochMilliseconds() ?: 0L,
-            activeSeconds = totals.active.inWholeSeconds,
-            setsDone = totals.setsDone,
-            setsSkipped = totals.setsSkipped,
-            setsPlanned = totals.setsPlanned,
-            distanceMeters = totals.distanceMeters,
-            averageSpeedKmh = totals.averageSpeedKmh,
-            averageHeartRateBpm = totals.averageHeartRateBpm,
-            maxHeartRateBpm = totals.maxHeartRateBpm,
-            energyKcal = totals.energyKcal,
-            estimatedSteps = totals.estimatedSteps,
-        )
-        val lit = PoulpyCoach(languageCode).status(store.finishedSessionEndsNow(), clock.now()).tentaclesLit
-        return ShareCard.of(row, units, languageCode, fullOctopus = lit == PoulpyStatus.TENTACLES)
+        val screen = finished(units) ?: return null
+        return ShareCard.of(screen, languageCode, fullOctopus = screen.poulpy.tentaclesLit == PoulpyStatus.TENTACLES)
     }
 
     /**
