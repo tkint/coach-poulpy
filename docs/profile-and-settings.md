@@ -54,7 +54,7 @@ The unit system chosen in Settings decides how weight (kg or lb), height (cm or 
 
 ## Pain or rehab (draft)
 
-The row is in the profile but nothing sets it yet. The drafts are `profile-edit` (the row filled in, with Poulpy's note) and `profile-pain-sheet` (where it hurts and for how long), under Mockups, Drafts. Nothing is built until they are agreed. The rules they follow are in [Character rules](./brand.md#character-rules): pain or rehab always shows the blue side and the Patched up pose, never ember, and entries inside the window never count as missed ([decision 8](./brand-decisions.md)).
+The row is in the profile but nothing sets it yet. The drafts are `profile-edit` (the row filled in, with Poulpy's note) and `profile-pain-sheet` (a front and back body map where it hurts, left and right apart, then for how long: 72 hours by default, 1 week, 2 weeks or until the person clears it). The body map is a new component, `body-map`, meant to be reused later to show the areas an exercise works, under Mockups, Drafts. Nothing is built until they are agreed. The rules they follow are in [Character rules](./brand.md#character-rules): pain or rehab always shows the blue side and the Patched up pose, never ember, and entries inside the window never count as missed ([decision 8](./brand-decisions.md)).
 
 ## Still open
 
