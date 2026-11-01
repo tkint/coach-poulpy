@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Body · height (imperial)</title>
+<meta name="mockup:screen" content="body-height">
+<meta name="mockup:section" content="Profile and settings">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../../../web/src/styles/tokens.css">
+<link rel="stylesheet" href="../../shared/mockup.css">
+<script src="../../shared/mockup-theme.js"></script>
+</head>
+<body>
+<main class="phone">
+
+  <header class="page-bar"><a class="icon-button" href="settings-general.html" aria-label="Back to settings"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></a><div><h1>Height</h1><span class="muted">In ft and in (Imperial)</span></div><button class="small-button" type="button" data-component="small-button">Log</button></header>
+  <div class="settings-body" style="padding-top: var(--cp-space-lg); gap: var(--cp-space-md);">
+    <section class="summary-card" id="now" data-component="summary-card"><img src="../../../poulpy/mood_happy.svg" alt="" aria-hidden="true"><div><span class="distance">5′ 9″</span><span class="line">Same as last time. I’m still shorter, I’m a plush.</span></div></section>
+    <section class="charts" id="height-chart" data-component="line-chart"><span class="label">Height</span><svg class="line-chart" viewBox="0 0 320 140" role="img" aria-label="Height, 4 measurements from January 2025, 5 feet 8.5 inches, to 12 October 2026, 5 feet 9 inches"><line class="grid" x1="46" x2="312" y1="114" y2="114"/><text x="40" y="118" text-anchor="end">5′ 8″</text><line class="grid" x1="46" x2="312" y1="63" y2="63"/><text x="40" y="67" text-anchor="end">5′ 9″</text><line class="grid" x1="46" x2="312" y1="12" y2="12"/><text x="40" y="16" text-anchor="end">5′ 10″</text><path class="line" d="M46.0 88.5L134.7 88.5L223.3 63.0L312.0 63.0"/><circle class="dot" cx="46.0" cy="88.5" r="4.5"/><circle class="dot" cx="134.7" cy="88.5" r="4.5"/><circle class="dot" cx="223.3" cy="63.0" r="4.5"/><circle class="dot dot--now" cx="312.0" cy="63.0" r="4.5"/><text x="46.0" y="134" text-anchor="start">Jan 25</text><text x="223.3" y="134" text-anchor="middle">Jan 26</text><text x="312.0" y="134" text-anchor="end">12 Oct</text></svg><div class="range-row" role="group" aria-label="Range"><button type="button" aria-pressed="false">1M</button><button type="button" aria-pressed="false">3M</button><button type="button" aria-pressed="false">1Y</button><button type="button" aria-pressed="true">All</button></div></section>
+    <span class="field-note">Height rarely changes, so a measure every few months is plenty. Growing teens can log it as often as they like.</span>
+    <span class="label label-row">History</span>
+    <ul class="log-list" id="height-log"><li>5′ 9″ <span>12 Oct 2026</span></li><li>5′ 9″ <span>14 Jan 2026</span></li><li>5′ 8.5″ <span>3 Jan 2025</span></li></ul>
+  </div>
+</main>
+</body>
+</html>
