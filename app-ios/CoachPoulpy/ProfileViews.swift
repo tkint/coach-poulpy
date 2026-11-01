@@ -147,7 +147,7 @@ struct PreferencesView: View {
 // MARK: - Profile
 
 private enum ProfileSheet: Identifiable {
-    case birthdate, pronouns, sex, goals, experience
+    case birthdate, pronouns, sex, figure, goals, experience, pain
     var id: Self { self }
 }
 
@@ -173,6 +173,8 @@ struct ProfileView: View {
                 FieldNote("profile.pronounsNote")
                 SelectField(label: "profile.sex", value: state.sexAssignedAtBirth.map(sexLabel) ?? notSet) { sheet = .sex }
                 FieldNote("profile.sexNote")
+                SelectField(label: "profile.bodyFigure", value: state.bodyFigure.map(figureLabel) ?? notSet) { sheet = .figure }
+                FieldNote("profile.figureNote")
 
                 sectionLabel("profile.training")
                 SelectField(label: "profile.goal", value: state.goals.isEmpty ? notSet : state.goals.map(goalLabel).joined(separator: ", ")) { sheet = .goals }
@@ -183,6 +185,8 @@ struct ProfileView: View {
                         .onChange(of: heartRate) { model.setRestingHeartRateText(text: $0) }
                     FieldNote("profile.restingHrHint")
                 }
+                SelectField(label: "profile.pain", value: painText(state)) { sheet = .pain }
+                FieldNote("profile.painNote")
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 16)
@@ -216,6 +220,16 @@ struct ProfileView: View {
                     options: withNotSet([SexAssignedAtBirth.female, .male, .intersex, .preferNotToSay], sexLabel),
                     onSave: { model.setSexAssignedAtBirth(sex: $0) }
                 )
+            case .figure:
+                BodyFigureSheet(current: state.bodyFigure, onSave: { model.setBodyFigure(figure: $0) })
+            case .pain:
+                PainSheet(
+                    figure: state.bodyFigure ?? .shoulders,
+                    areas: state.painActive ? state.painAreas : [],
+                    duration: state.painDuration,
+                    onSave: { model.setPainTo(areas: $0, duration: $1) },
+                    onClear: { model.clearPain() }
+                )
             case .goals:
                 MultiOptionSheet(
                     title: "profile.goal", why: "profile.goalsNote", selected: state.goals,
@@ -240,6 +254,13 @@ struct ProfileView: View {
         guard let pronouns = state.pronouns else { return notSet }
         if pronouns == Pronouns.custom && !state.customPronouns.isEmpty { return state.customPronouns }
         return pronounLabel(pronouns)
+    }
+
+    private func painText(_ state: ProfileUi) -> String {
+        guard state.painActive else { return L("profile.painNone") }
+        let areas = state.painAreas.map { BodyMap.shared.label(key: $0, languageCode: Language.code) }.joined(separator: ", ")
+        guard let until = state.painUntil else { return L("profile.painUntilCleared %@", areas) }
+        return L("profile.painUntil %@ %@", areas, shown(until))
     }
 
     private func birthdateText(_ born: PlanDate, age: KotlinInt?) -> String {
@@ -305,6 +326,13 @@ private func sexLabel(_ value: SexAssignedAtBirth) -> String {
     case .male: return L("profile.sexMale")
     case .intersex: return L("profile.sexIntersex")
     default: return L("profile.sexPreferNotToSay")
+    }
+}
+
+private func figureLabel(_ value: BodyFigure) -> String {
+    switch value {
+    case .shoulders: return L("profile.figureShoulders")
+    default: return L("profile.figureHips")
     }
 }
 

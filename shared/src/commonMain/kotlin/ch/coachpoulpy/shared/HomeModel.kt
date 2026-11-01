@@ -79,6 +79,8 @@ class HomeModel internal constructor(
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main),
     /** Drops the session left open with everything it recorded; Live must do it for a recording it holds. */
     private val discardOpen: (String) -> Unit = store::deleteSession,
+    /** Pain or rehab is set and its time is not up: Poulpy stays on the blue side. */
+    private val painActive: () -> Boolean = { false },
 ) {
     private val labels = Labels(languageCode)
     private val coach = PoulpyCoach(languageCode, zone)
@@ -175,7 +177,7 @@ class HomeModel internal constructor(
 
         return HomeState(
             loaded = true,
-            poulpy = coach.status(ends, now),
+            poulpy = coach.status(ends, now, painActive()),
             today = items,
             next = next,
             hasWorkouts = workouts.isNotEmpty(),

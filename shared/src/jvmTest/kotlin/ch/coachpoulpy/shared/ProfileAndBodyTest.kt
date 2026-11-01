@@ -1,6 +1,8 @@
 package ch.coachpoulpy.shared
 
+import ch.coachpoulpy.core.model.BodyFigure
 import ch.coachpoulpy.core.model.BodyMetric
+import ch.coachpoulpy.core.model.PainDuration
 import ch.coachpoulpy.core.model.Experience
 import ch.coachpoulpy.core.model.TrainingGoal
 import ch.coachpoulpy.core.model.Pronouns
@@ -14,7 +16,12 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Instant
 
 class ProfileAndBodyTest {
     private val today = LocalDate(2026, 11, 1)
@@ -119,5 +126,87 @@ class ProfileAndBodyTest {
         assertEquals(PlanDate(2026, 10, 29), ui.history.first().date)
         assertEquals(72.6, ui.lowest!!.value)
         assertEquals(-0.4, ui.change!!, 1e-9)
+    }
+
+    private fun profileAt(memory: MemoryStore, now: () -> Instant) =
+        ProfileModel(memory, CoroutineScope(Dispatchers.Unconfined), { today }, now)
+
+    @Test
+    fun painKeepsPoulpyOnTheBlueSideUntilItsTimeIsUp() {
+        var now = Instant.parse("2026-11-01T10:00:00Z")
+        val model = profileAt(MemoryStore()) { now }
+        assertFalse(model.painActive())
+
+        model.setPain(listOf("knee-left", "hip-left"), PainDuration.HOURS_72)
+        assertTrue(model.painActive())
+        assertEquals("Left hip, Left knee", model.painSummary("en"))
+
+        now += 71.hours
+        assertTrue(model.painActive())
+        now += 2.hours
+        assertFalse(model.painActive())
+    }
+
+    @Test
+    fun painLastingUntilClearedNeverEndsAndSettingItAgainStartsTheTimeOver() {
+        var now = Instant.parse("2026-11-01T10:00:00Z")
+        val model = profileAt(MemoryStore()) { now }
+        model.setPain(listOf("back"), PainDuration.UNTIL_CLEARED)
+        assertFalse(model.painActive(), "back is not an area key, so nothing was set")
+        model.setPain(listOf("lower-back-left"), PainDuration.UNTIL_CLEARED)
+        now += 365.days
+        assertTrue(model.painActive())
+    }
+
+    @Test
+    fun painIsKeptOnThePhoneWithItsAreasInReadingOrder() {
+        val memory = MemoryStore()
+        val now = Instant.parse("2026-11-01T10:00:00Z")
+        profileAt(memory) { now }.setPain(listOf("knee-right", "neck-left", "nowhere", "other"), PainDuration.ONE_WEEK)
+
+        val reopened = profileAt(memory) { now + 24.hours }
+        val ui = reopened.ui.value
+        assertEquals(listOf("neck-left", "knee-right", "other"), ui.painAreas)
+        assertEquals(PainDuration.ONE_WEEK, ui.painDuration)
+        assertEquals(PlanDate(2026, 11, 8), ui.painUntil)
+        assertTrue(ui.painActive)
+    }
+
+    @Test
+    fun clearingPainOrChoosingNoAreaEndsIt() {
+        val now = Instant.parse("2026-11-01T10:00:00Z")
+        val model = profileAt(MemoryStore()) { now }
+        model.setPain(listOf("knee-left"), PainDuration.TWO_WEEKS)
+        model.clearPain()
+        assertFalse(model.painActive())
+        assertNull(model.ui.value.painDuration)
+
+        model.setPain(listOf("knee-left"), PainDuration.TWO_WEEKS)
+        model.setPain(emptyList(), PainDuration.TWO_WEEKS)
+        assertFalse(model.painActive())
+    }
+
+    @Test
+    fun theBodyFigureIsItsOwnChoiceAndIsKept() {
+        val memory = MemoryStore()
+        val model = ProfileModel(memory, CoroutineScope(Dispatchers.Unconfined))
+        assertNull(model.profile.value.bodyFigure)
+        assertNull(model.profile.value.sexAssignedAtBirth)
+
+        model.setBodyFigure(BodyFigure.HIPS)
+        assertEquals(BodyFigure.HIPS, ProfileModel(memory, CoroutineScope(Dispatchers.Unconfined)).profile.value.bodyFigure)
+        assertNull(ProfileModel(memory, CoroutineScope(Dispatchers.Unconfined)).profile.value.sexAssignedAtBirth)
+    }
+
+    @Test
+    fun everyAreaOfEveryFigureHasAFrenchAndAnEnglishName() {
+        val keys = BodyFigure.entries.flatMap { figure -> BodyView.entries.flatMap { BodyMapShapes.regions(figure, it) } }.mapNotNull { it.key }.toSet()
+        assertTrue(keys.all { it in BodyMap.AREAS }, "a drawn area that the model does not know")
+        assertTrue(BodyMap.AREAS.all { it in keys }, "an area that no figure draws")
+        BodyMap.AREAS.forEach {
+            assertTrue(BodyMap.label(it, "en") != it && BodyMap.label(it, "fr") != it, it)
+        }
+        assertEquals("Genou gauche", BodyMap.label("knee-left", "fr"))
+        assertEquals("Épaule droite", BodyMap.label("deltoid-right", "fr"))
     }
 }

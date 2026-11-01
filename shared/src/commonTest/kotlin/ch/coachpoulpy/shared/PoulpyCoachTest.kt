@@ -77,4 +77,20 @@ class PoulpyCoachTest {
         val ninth = french.status(ago((1..9).map { it.days }), now)
         assertEquals("1 tentacule allumé sur 8 · 1 poulpe complet", ninth.tentaclesCaption)
     }
+
+    @Test
+    fun painAlwaysWinsWithThePatchedUpPoseOnTheBlueSide() {
+        val status = coach.status(ago(listOf(30.days)), now, painActive = true)
+        assertEquals(PoulpyDrawing.PATCHED_UP, status.drawing)
+        assertEquals(PoulpyStatus.Mood.RECOVERING, status.mood)
+        assertEquals(true, status.blueSide)
+        assertEquals("Taking it easy", status.title)
+    }
+
+    @Test
+    fun painWinsOverAFullOctopusToo() {
+        val sessions = ago((0 until 8).map { it.hours })
+        assertEquals(PoulpyDrawing.PATCHED_UP, coach.status(sessions, now, painActive = true).drawing)
+        assertEquals(PoulpyDrawing.CHAMPION, coach.status(sessions, now).drawing)
+    }
 }

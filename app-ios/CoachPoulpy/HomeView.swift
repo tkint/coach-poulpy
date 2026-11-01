@@ -28,7 +28,7 @@ struct HomeView: View {
         self.onOpenLive = onOpenLive
         // Built once: StateObject evaluates this only for the first init of the view.
         _home = StateObject(wrappedValue: {
-            let model = graph.home(languageCode: Language.code)
+            let model = graph.home(languageCode: Language.code, memory: UserDefaultsStore())
             return Observed(model, current: model.current, watch: model.watch, close: { $0.close() })
         }())
     }

@@ -46,6 +46,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -76,7 +77,8 @@ fun HomeScreen(
     onOpenLibrary: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val model = remember(graph, language) { graph.home(language) }
+    val context = LocalContext.current
+    val model = remember(graph, language) { graph.home(language, AppPreferences(context)) }
     DisposableEffect(model) { onDispose { model.close() } }
     // The session left open changes in the player, which covers this screen.
     LifecycleResumeEffect(model) {

@@ -197,10 +197,10 @@ function figure(view, build, { interactive, checked = [] }) {
 const CHECKED = { front: ['hip-left', 'knee-left'], back: ['knee-left'] }
 
 function rewrite(text) {
-  return text.replace(/<figure data-figure="(\w+)" class="body-view"><svg viewBox="0 0 120 268"(?: [^>]*aria-label="(Front|Back) of the body")?[^>]*>.*?<\/svg>/g,
-    (_, build, label) => {
+  return text.replace(/<figure data-figure="(\w+)" class="body-view"( hidden)?><svg viewBox="0 0 120 268"(?: [^>]*aria-label="(Front|Back) of the body")?[^>]*>.*?<\/svg>/g,
+    (_, build, hidden, label) => {
       const view = label ? label.toLowerCase() : 'front'
-      return `<figure data-figure="${build}" class="body-view">${figure(view, build, { interactive: Boolean(label), checked: CHECKED[view] })}`
+      return `<figure data-figure="${build}" class="body-view"${hidden ?? ''}>${figure(view, build, { interactive: Boolean(label), checked: CHECKED[view] })}`
     })
 }
 
