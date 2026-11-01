@@ -50,20 +50,37 @@ data class PlayerState(
     val partLabel: String?,
     /** "Recover" on rests and recover steps; null for work steps. */
     val roleLabel: String?,
+    /** True inside a repeat, whose rounds a rest shows beside its part. */
+    val inRepeat: Boolean,
     val setNumber: Int,
     /** How many sets "Set 2 of 3" counts; 0 in a circuit or a repeat, which count rounds instead. */
     val setCount: Int,
     val sideLabel: String?,
     val targetLabel: String?,
+    /** The big number of a rep target ("8"); null for a time, a distance or an open target, which [targetLabel] says whole. */
+    val targetValue: String?,
+    /** What goes under [targetValue]: "reps", or "reps at 40 kg" when the set has a load. */
+    val targetUnit: String?,
+    /** What the step asks for, with its load: "8 reps at 16 kg". On the first exercise it is the "first up" line. */
+    val targetDetail: String?,
     val loadLabel: String?,
     /** True when the phase ends by itself; false when it waits for a tap on "done". */
     val isTimed: Boolean,
     val remainingSeconds: Int?,
     val totalSeconds: Int?,
     val elapsedSeconds: Int,
+    /** "5 exercises", on the screen before the first one. */
+    val exerciseCountLabel: String,
+    /** Time since the session started, without the pauses: "09:12". */
+    val sessionClock: String,
     /** The next exercise, so the user can get ready during a rest. */
     val nextTitle: String?,
+    /** [nextTitle] with its set in a Sets workout: "Goblet squat · set 3 of 4". */
+    val nextHeadline: String?,
+    /** What the next exercise asks for, with its load: "8 reps at 16 kg". */
     val nextDetail: String?,
+    /** The one line under "Next" while an exercise runs: "Rest 2 min, then set 3", "Push-up · 10 reps". Null on the last step. */
+    val nextLine: String?,
     /** "round 3 of 4" when the next exercise starts another round; null otherwise. */
     val nextRound: String?,
     val phaseNumber: Int,
@@ -135,6 +152,9 @@ class PlayerModel internal constructor(
         act { session.resume(clock.now()) }
         startTicker()
     }
+
+    /** Adds [seconds] to the running rest, or removes them when negative. */
+    fun adjustRest(seconds: Int) = whileRunning { act { session.adjustRest(clock.now(), seconds) } }
 
     /** Ends the session now; what was done so far is kept. */
     fun stop() {
@@ -225,18 +245,65 @@ class PlayerModel internal constructor(
             setCount = sets?.second ?: 0,
             sideLabel = work?.let { labels.side(it.side) },
             targetLabel = work?.let { labels.target(it.target) },
-            loadLabel = work?.let { step?.prescription?.sets?.getOrNull(it.setIndex)?.load?.label() },
+            targetDetail = (work ?: here)?.let { detailOf(it) },
+            inRepeat = here?.let { it.rounds > 1 } ?: false,
+            targetValue = work?.let { (it.target as? Target.Reps)?.count?.toString() },
+            targetUnit = work?.let { w -> (w.target as? Target.Reps)?.let { labels.repsUnit(it.count, loadOf(w)) } },
+            loadLabel = work?.let { loadOf(it) },
             isTimed = phase?.duration != null,
             remainingSeconds = state.phaseRemaining?.let { ceilSeconds(it.inWholeMilliseconds) },
-            totalSeconds = phase?.duration?.inWholeSeconds?.toInt(),
+            totalSeconds = state.phaseDuration?.inWholeSeconds?.toInt(),
             elapsedSeconds = state.phaseElapsed.inWholeSeconds.toInt(),
-            nextTitle = next?.let { n -> catalog[n.exercise]?.let { labels.text(it.name) } ?: n.exercise.value },
-            nextDetail = next?.let { labels.target(it.target) },
+            exerciseCountLabel = labels.exercises(steps.size),
+            sessionClock = clockOf(activeTime(session.events, now).inWholeSeconds.toInt()),
+            nextTitle = next?.let { nameOf(it) },
+            nextHeadline = next?.let { n -> setsOf(n)?.let { (number, count) -> labels.nameSet(nameOf(n), number, count) } ?: nameOf(n) },
+            nextDetail = next?.let { detailOf(it) },
+            nextLine = nextLine(state.phaseIndex + 1, work, here),
             nextRound = next?.takeIf { it.rounds > 1 && (here?.rounds != it.rounds || here?.round != it.round) }?.let { labels.roundOf(it.round, it.rounds) },
             phaseNumber = (state.phaseIndex + 1).coerceAtMost(phases.size),
             phaseCount = phases.size,
         )
     }
+
+    private fun nameOf(work: Phase.Work) = catalog[work.exercise]?.let { labels.text(it.name) } ?: work.exercise.value
+
+    private fun loadOf(work: Phase.Work) = steps[work.step]?.prescription?.sets?.getOrNull(work.setIndex)?.load?.label()
+
+    /** "8 reps at 16 kg", or "8 reps" for a bodyweight set. */
+    private fun detailOf(work: Phase.Work) = labels.target(work.target).let { target -> loadOf(work)?.let { labels.withLoad(target, it) } ?: target }
+
+    /** The set number and count of [work] in a Sets workout outside a repeat; null elsewhere, where rounds are counted. */
+    private fun setsOf(work: Phase.Work): Pair<Int, Int>? =
+        work.takeIf { workout.format == WorkoutFormat.SETS && it.rounds == 1 }?.let { w -> steps[w.step]?.let { it.setNumber(w.setIndex) to it.setCount() } }
+
+    /**
+     * The line under "Next" while an exercise runs: a rest says how long and what follows it; an exercise names its
+     * part when that changes, and otherwise what it asks for.
+     */
+    private fun nextLine(index: Int, current: Phase.Work?, here: Phase.Work?): String? = when (val after = phases().getOrNull(index)) {
+        null -> null
+        is Phase.Rest -> {
+            val then = phases().drop(index + 1).firstOrNull { it is Phase.Work } as? Phase.Work
+            then?.let { labels.restThen(after.duration.inWholeSeconds.toInt(), thenLabel(it, current)) }
+        }
+        is Phase.Work ->
+            if (here != null && (after.part != here.part || after.workPart != here.workPart)) {
+                labels.part(after.part, after.workPart) + " · " + nameOf(after)
+            } else {
+                nameOf(after) + " · " + detailOf(after)
+            }
+    }
+
+    /** What follows a rest: the next set of the same exercise, or the next exercise. */
+    private fun thenLabel(then: Phase.Work, current: Phase.Work?): String {
+        val sets = setsOf(then)
+        return if (current != null && then.step == current.step && sets != null) labels.thenSet(sets.first) else nameOf(then)
+    }
+
+    private fun phases() = session.timeline.phases
+
+    private fun clockOf(seconds: Int) = "${(seconds / 60).toString().padStart(2, '0')}:${(seconds % 60).toString().padStart(2, '0')}"
 
     private fun Load.label(): String? = when (this) {
         is Load.Kilograms -> labels.kilograms(kg)

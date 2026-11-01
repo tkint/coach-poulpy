@@ -12,13 +12,17 @@ import ch.coachpoulpy.core.model.Workout
 data class FinishedStat(val label: String, val value: String)
 
 /**
- * What the finished screen shows: the heading, the workout's name and date, how many sets were done, up to three stats,
+ * What the finished screen shows: the heading and Poulpy's quote, the workout's name and date, how many sets were done, up to three stats,
  * and Poulpy with the tentacle this session lit. Decided here so Android and iOS draw the same screen (`player-finished`
  * and `player-finished-run` mockups), and the same content is what the shared image shows, straight after the session or
  * from the history ([FinishedScreens.of]).
  */
 data class FinishedScreen(
     val heading: String,
+    /** Poulpy's line under the heading, in quotes. */
+    val quote: String,
+    /** Exhausted after a session; Champion when it lit the eighth tentacle. */
+    val drawing: PoulpyDrawing,
     val workoutName: String,
     val startedAtMillis: Long,
     /** "17 of 18 sets done in 38:24 · 1 skipped"; null when there was no plan to count sets in. */
@@ -63,6 +67,7 @@ object FinishedScreens {
             // The distance of the sets done, or what a machine reported when the plan has none.
             distanceMeters = if (targetMeters > 0) targetMeters else totals.distanceMeters ?: 0.0,
         )
+        val champion = poulpy.tentaclesLit == PoulpyStatus.TENTACLES
         val start = events.firstOrNull { it is SessionEvent.Started }?.at
         val end = events.lastOrNull { it is SessionEvent.Finished }?.at
         val planned = phases.count { it is Phase.Work }
@@ -71,7 +76,9 @@ object FinishedScreens {
             DomainText.shareSummary(languageCode, doneWork.size, planned, labels.duration(seconds)) +
                 if (skipped > 0) " \u00b7 " + DomainText.shareSummarySkipped(languageCode, skipped) else ""
         return FinishedScreen(
-            heading = DomainText.shareWellDone(languageCode),
+            heading = if (champion) DomainText.shareChampionHeading(languageCode) else DomainText.shareWellDone(languageCode),
+            quote = if (champion) DomainText.shareChampionQuote(languageCode) else DomainText.shareQuote(languageCode),
+            drawing = if (champion) PoulpyDrawing.CHAMPION else PoulpyDrawing.EXHAUSTED,
             workoutName = workoutName,
             startedAtMillis = start?.toEpochMilliseconds() ?: 0L,
             summary = summary,
@@ -109,7 +116,7 @@ object FinishedStats {
             pace(facts, units)?.let { add(FinishedStat(DomainText.sharePace(languageCode), it)) }
         } else {
             add(FinishedStat(DomainText.shareSets(languageCode), "${facts.setsDone}"))
-            if (facts.liftedKg > 0) add(FinishedStat(DomainText.shareLifted(languageCode), lifted(facts.liftedKg, languageCode)))
+            if (facts.liftedKg > 0) add(FinishedStat(DomainText.shareLifted(languageCode), lifted(facts.liftedKg, units, languageCode)))
         }
     }
 
@@ -121,8 +128,10 @@ object FinishedStats {
         return "${ShareCard.clock(seconds)} ${Units.paceUnit(units)}"
     }
 
-    /** "820 kg" below a tonne, "2.1 t" above. */
-    private fun lifted(kg: Double, languageCode: String): String =
-        if (kg < 1000) Labels(languageCode).kilograms(kotlin.math.round(kg))
-        else DomainText.unitTonnes(languageCode, ShareCard.measure(Measure(kg / 1000, 1, ""), languageCode).removeSuffix("\u00a0"))
+    /** Metric: "820 kg" below a tonne, "2.1 t" above. Imperial: whole pounds, "1,807 lb" in English. */
+    private fun lifted(kg: Double, units: UnitSystem, languageCode: String): String = when {
+        units == UnitSystem.IMPERIAL -> DomainText.unitPounds(languageCode, Units.poundsOf(kg).let { kotlin.math.round(it).toLong().toString() })
+        kg < 1000 -> Labels(languageCode).kilograms(kotlin.math.round(kg))
+        else -> DomainText.unitTonnes(languageCode, ShareCard.measure(Measure(kg / 1000, 1, ""), languageCode).removeSuffix("\u00a0"))
+    }
 }

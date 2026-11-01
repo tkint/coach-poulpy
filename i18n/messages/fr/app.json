@@ -184,7 +184,7 @@
     "ready": "On y va ?",
     "start": "Lancer la séance",
     "set": "Série {set, number} sur {sets, number}",
-    "next": "Ensuite : {name} · {detail}",
+    "next": "Ensuite",
     "nextRound": "Ensuite · {round}",
     "done": "Terminé",
     "skip": "Passer",
@@ -196,7 +196,11 @@
     "step": "Étape {step, number} sur {steps, number}",
     "close": "Fermer",
     "stopTitle": "Arrêter la séance maintenant ?",
-    "stopBody": "Ce que vous avez déjà fait est conservé."
+    "stopBody": "Ce que vous avez déjà fait est conservé.",
+    "nextUp": "Ensuite",
+    "firstUp": "Pour commencer",
+    "restLess": "−{seconds, number} s",
+    "restMore": "+{seconds, number} s"
   },
   "treadmill": {
     "stopScan": "Arrêter la recherche",

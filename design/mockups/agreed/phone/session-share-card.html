@@ -23,6 +23,7 @@
   }
   .share-card img { width: 64px; height: 58px; }
   .share-card h2 { margin: 0; font-family: var(--cp-font-display); font-size: 22px; line-height: 26px; font-weight: 800; }
+  .share-card .quote { margin: 0; font-size: 11px; font-weight: 700; color: var(--cp-primary); }
   .share-card .name { margin: 0; font-size: 14px; font-weight: 800; }
   .share-card .date { margin: 0; font-size: 11px; font-weight: 600; color: var(--cp-on-surface-variant); }
   .share-card dl { margin: 2px 0 0; width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
@@ -45,9 +46,9 @@
     <article class="share-card" id="card-workout" data-component="share-card" aria-label="Share card, weights workout">
       <img src="../../../poulpy/pose_exhausted.svg" alt="Poulpy exhausted with a sweatband">
       <h2>Well done!</h2>
+      <p class="quote">“Worth it. Probably.”</p>
       <p class="name">Lower body strength</p>
       <p class="date">Sat 24 Oct · 18:05</p>
-      <p class="date">17 of 18 sets done in 38:24 · 1 skipped</p>
       <dl>
         <div><dt>Time</dt><dd>38:24</dd></div>
         <div><dt>Sets</dt><dd>17</dd></div>
@@ -56,15 +57,15 @@
       <div class="lit-card"><div class="tentacle-ring"><svg viewBox="0 0 200 200" aria-hidden="true"><path class="lit" d="M117.9 15.9 A86 86 0 0 1 146.8 27.9"/><path class="lit" d="M172.1 53.2 A86 86 0 0 1 184.1 82.1"/><path class="lit" d="M184.1 117.9 A86 86 0 0 1 172.1 146.8"/><path class="lit" d="M146.8 172.1 A86 86 0 0 1 117.9 184.1"/><path class="lit" d="M82.1 184.1 A86 86 0 0 1 53.2 172.1"/><path class="lit" d="M27.9 146.8 A86 86 0 0 1 15.9 117.9"/><path class="lit new" d="M15.9 82.1 A86 86 0 0 1 27.9 53.2"/><path d="M53.2 27.9 A86 86 0 0 1 82.1 15.9"/></svg></div><div><strong>Tentacle 7 lit!</strong><span>One more and Poulpy is a champion.</span></div></div>
       <footer>Coach Poulpy</footer>
     </article>
-    <figcaption>The finished screen as a picture: same Poulpy, same words, same tiles. Shared straight after the session or from the history, it is the same picture.</figcaption>
+    <figcaption>The finished screen as a picture: same Poulpy, same words, same tiles. Shared straight after the session or from the history, it is the same picture. The sets-done line is left off: it could keep people from sharing a short session.</figcaption>
   </figure>
   <figure>
     <article class="share-card" id="card-run" data-component="share-card" aria-label="Share card, run">
       <img src="../../../poulpy/pose_exhausted.svg" alt="Poulpy exhausted with a sweatband">
       <h2>Well done!</h2>
+      <p class="quote">“Worth it. Probably.”</p>
       <p class="name">Easy run and 400 m</p>
       <p class="date">Sun 25 Oct · 09:10</p>
-      <p class="date">6 of 6 rounds done in 38:24</p>
       <dl>
         <div><dt>Time</dt><dd>38:24</dd></div>
         <div><dt>Distance</dt><dd>5.2 km</dd></div>
@@ -74,6 +75,23 @@
       <footer>Coach Poulpy</footer>
     </article>
     <figcaption>A run shows Time, Distance and Pace. Heart rate is never on the card. The picture follows the theme in use: switch the docs theme to see it dark.</figcaption>
+  </figure>
+  <figure>
+    <article class="share-card" id="card-champion" data-component="share-card" aria-label="Share card, eighth tentacle">
+      <img src="../../../poulpy/pose_champion.svg" alt="Poulpy, champion">
+      <h2>Champion!</h2>
+      <p class="quote">“Eight tentacles. No regrets.”</p>
+      <p class="name">Lower body strength</p>
+      <p class="date">Sat 31 Oct · 18:05</p>
+      <dl>
+        <div><dt>Time</dt><dd>38:24</dd></div>
+        <div><dt>Sets</dt><dd>18</dd></div>
+        <div><dt>Lifted</dt><dd>2.3 t</dd></div>
+      </dl>
+      <div class="lit-card"><div class="tentacle-ring"><svg viewBox="0 0 200 200" aria-hidden="true"><path class="lit" d="M117.9 15.9 A86 86 0 0 1 146.8 27.9"/><path class="lit" d="M172.1 53.2 A86 86 0 0 1 184.1 82.1"/><path class="lit" d="M184.1 117.9 A86 86 0 0 1 172.1 146.8"/><path class="lit" d="M146.8 172.1 A86 86 0 0 1 117.9 184.1"/><path class="lit" d="M82.1 184.1 A86 86 0 0 1 53.2 172.1"/><path class="lit" d="M27.9 146.8 A86 86 0 0 1 15.9 117.9"/><path class="lit new" d="M15.9 82.1 A86 86 0 0 1 27.9 53.2"/><path class="lit" d="M53.2 27.9 A86 86 0 0 1 82.1 15.9"/></svg></div><div><strong>Full octopus!</strong><span>All eight tentacles lit. Gold for the octopus!</span></div></div>
+      <footer>Coach Poulpy</footer>
+    </article>
+    <figcaption>The eighth tentacle: Poulpy is a champion, with his own heading and quote. Never a guilty drawing.</figcaption>
   </figure>
 </div>
 </body>

@@ -21,6 +21,12 @@ class FinishedStatsTest {
     }
 
     @Test
+    fun imperialShowsWeightLiftedInPounds() {
+        assertEquals("4630 lb", stats(FinishedFacts(600, 3, 2100.0, 0.0), UnitSystem.IMPERIAL)[2].second)
+        assertEquals("1808 lb", stats(FinishedFacts(600, 3, 820.0, 0.0), UnitSystem.IMPERIAL)[2].second)
+    }
+
+    @Test
     fun aBodyweightSessionLeavesLiftedOut() {
         assertEquals(listOf("Time" to "10:00", "Sets" to "3"), stats(FinishedFacts(600, 3, 0.0, 0.0)))
     }

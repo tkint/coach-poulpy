@@ -51,6 +51,25 @@ class SessionTest {
     }
 
     @Test
+    fun aRestCanBeMadeLongerOrShorterForItselfOnly() {
+        val session = Session(timeline)
+        session.start(t0)
+        assertEquals(emptyList(), session.adjustRest(t0 + 5.seconds, 15), "a work phase is not a rest")
+        session.tick(t0 + 30.seconds)
+
+        session.adjustRest(t0 + 32.seconds, 15)
+        assertEquals(23.seconds, session.state(t0 + 32.seconds).phaseRemaining)
+        assertEquals(25.seconds, session.state(t0 + 32.seconds).phaseDuration)
+        session.tick(t0 + 40.seconds)
+        assertEquals(1, session.state(t0 + 40.seconds).phaseIndex, "the extra 15 s keeps the rest going")
+
+        session.adjustRest(t0 + 41.seconds, -60)
+        session.tick(t0 + 41.seconds)
+        assertEquals(2, session.state(t0 + 41.seconds).phaseIndex, "a rest never goes below zero")
+        assertEquals(null, session.state(t0 + 41.seconds).phaseDuration, "the adjustment does not follow into the next phase")
+    }
+
+    @Test
     fun manualLastPhaseFinishesTheSessionAndReplayGivesSameState() {
         val session = Session(timeline)
         session.start(t0)

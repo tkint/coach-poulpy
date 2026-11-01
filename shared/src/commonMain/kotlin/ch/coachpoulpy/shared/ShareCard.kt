@@ -7,9 +7,9 @@ package ch.coachpoulpy.shared
  */
 data class ShareCard(
     val heading: String,
+    val quote: String,
     val title: String,
     val startedAtMillis: Long,
-    val summary: String?,
     val drawing: PoulpyDrawing,
     val lines: List<FinishedStat>,
     val poulpy: PoulpyStatus,
@@ -18,10 +18,10 @@ data class ShareCard(
     companion object {
         fun of(screen: FinishedScreen, languageCode: String) = ShareCard(
             heading = screen.heading,
+            quote = screen.quote,
             title = screen.workoutName,
             startedAtMillis = screen.startedAtMillis,
-            summary = screen.summary,
-            drawing = PoulpyDrawing.EXHAUSTED,
+            drawing = screen.drawing,
             lines = screen.stats,
             poulpy = screen.poulpy,
             appName = DomainText.shareApp(languageCode),

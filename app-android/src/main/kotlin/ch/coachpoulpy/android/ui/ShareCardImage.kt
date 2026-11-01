@@ -43,6 +43,7 @@ private const val HEIGHT = 1350
 private const val MARGIN = 88f
 private const val GAP = 24f
 private const val COLUMNS = 3
+private const val TILES_TOP = 670f
 
 internal fun renderShareCard(context: Context, card: ShareCard, colors: ColorScheme): Bitmap {
     val bitmap = Bitmap.createBitmap(WIDTH, HEIGHT, Bitmap.Config.ARGB_8888)
@@ -72,16 +73,16 @@ internal fun renderShareCard(context: Context, card: ShareCard, colors: ColorSch
         drawing.draw(canvas)
     }
 
-    // Heading, name, date and sets done, as on the finished screen; a line shrinks until it fits on one line.
+    // Heading, quote, name and date, as on the finished screen; a line shrinks until it fits on one line.
     val room = WIDTH - 2 * MARGIN
     fun centered(text: String, baseline: Float, paint: Paint, smallest: Float) {
         while (paint.measureText(text) > room && paint.textSize > smallest) paint.textSize -= 2f
         canvas.drawText(TextUtils.ellipsize(text, TextPaint(paint), room, TextUtils.TruncateAt.END).toString(), WIDTH / 2f, baseline, paint)
     }
-    centered(card.heading, 396f, paint(ink, 84f, display), 48f)
-    centered(card.title, 476f, paint(ink, 60f, bodyHeavy), 36f)
-    centered(dateLabel(card.startedAtMillis), 540f, paint(muted, 40f, body), 28f)
-    card.summary?.let { centered(it, 598f, paint(muted, 40f, body), 26f) }
+    centered(card.heading, 384f, paint(ink, 84f, display), 48f)
+    centered(card.quote, 450f, paint(colors.primary.toArgb(), 44f, body), 28f)
+    centered(card.title, 530f, paint(ink, 60f, bodyHeavy), 36f)
+    centered(dateLabel(card.startedAtMillis), 592f, paint(muted, 40f, body), 28f)
 
     // Tiles like the finished screen's: label over value, on the surface colour with the outline around.
     val columns = card.lines.size.coerceIn(1, COLUMNS)
@@ -93,7 +94,7 @@ internal fun renderShareCard(context: Context, card: ShareCard, colors: ColorSch
     val value = paint(colors.onSurface.toArgb(), 64f, display).apply { textAlign = Paint.Align.LEFT }
     card.lines.forEachIndexed { index, line ->
         val left = MARGIN + (index % columns) * (tileWidth + GAP)
-        val top = 656f + (index / columns) * (tileHeight + GAP)
+        val top = TILES_TOP + (index / columns) * (tileHeight + GAP)
         val tile = RectF(left, top, left + tileWidth, top + tileHeight)
         canvas.drawRoundRect(tile, 40f, 40f, surface)
         canvas.drawRoundRect(tile, 40f, 40f, outline)
@@ -106,7 +107,7 @@ internal fun renderShareCard(context: Context, card: ShareCard, colors: ColorSch
     }
 
     val rows = (card.lines.size + columns - 1) / columns
-    drawTentacleCard(canvas, colors, display, bodyHeavy, card.poulpy, top = 656f + rows * (tileHeight + GAP) + 16f, room = room)
+    drawTentacleCard(canvas, colors, display, bodyHeavy, card.poulpy, top = TILES_TOP + rows * (tileHeight + GAP) + 16f, room = room)
 
     canvas.drawText(card.appName, WIDTH / 2f, HEIGHT - 56f, paint(colors.primary.toArgb(), 52f, display))
     return bitmap

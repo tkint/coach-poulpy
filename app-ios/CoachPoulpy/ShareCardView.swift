@@ -26,25 +26,24 @@ struct ShareCardView: View {
                 .minimumScaleFactor(0.5)
                 .padding(.horizontal, 88)
                 .padding(.top, 8)
+            Text(card.quote)
+                .font(.custom(PoulpyFontFace.nunitoBold, size: 44))
+                .foregroundStyle(PoulpyColor.primary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.5)
+                .padding(.horizontal, 88)
+                .padding(.top, 8)
             Text(card.title)
                 .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 60))
                 .foregroundStyle(PoulpyColor.onBackground)
                 .lineLimit(1)
                 .minimumScaleFactor(0.5)
                 .padding(.horizontal, 88)
+                .padding(.top, 12)
             Text(Self.dateLabel(card.startedAtMillis))
                 .font(.custom(PoulpyFontFace.nunitoBold, size: 40))
                 .foregroundStyle(PoulpyColor.onSurfaceVariant)
                 .padding(.top, 4)
-            if let summary = card.summary {
-                Text(summary)
-                    .font(.custom(PoulpyFontFace.nunitoBold, size: 40))
-                    .foregroundStyle(PoulpyColor.onSurfaceVariant)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.5)
-                    .padding(.horizontal, 88)
-                    .padding(.top, 2)
-            }
             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 24), count: columns), spacing: 24) {
                 ForEach(Array(card.lines.enumerated()), id: \.offset) { _, line in
                     VStack(alignment: .leading, spacing: 4) {

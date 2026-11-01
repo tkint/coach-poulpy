@@ -163,6 +163,24 @@ internal class Labels(private val languageCode: String) {
     }
 
     val rest get() = DomainText.labelRest(languageCode)
+
+    /** "reps" beside the big number of a rep target, and "reps at 16 kg" when the set has a load. */
+    fun repsUnit(count: Int, load: String?): String {
+        val unit = DomainText.playerUnitReps(languageCode, count)
+        return if (load != null) withLoad(unit, load) else unit
+    }
+
+    /** "8 reps at 16 kg"; [what] alone when there is no load. */
+    fun withLoad(what: String, load: String) = DomainText.playerUnitAtLoad(languageCode, what, load)
+
+    /** "Rest 2 min, then set 3" or "Rest 30 s, then Push-up". */
+    fun restThen(rest: Int, then: String) = DomainText.playerNextRest(languageCode, duration(rest), then)
+
+    /** "set 3", after "Rest 2 min, then". */
+    fun thenSet(set: Int) = DomainText.playerThenSet(languageCode, set)
+
+    /** "Goblet squat · set 3 of 4". */
+    fun nameSet(name: String, set: Int, sets: Int) = DomainText.playerNextSet(languageCode, name, set, sets)
     val freeRun get() = DomainText.labelFreeRun(languageCode)
     val demoIntervals get() = DomainText.labelDemoIntervals(languageCode)
 

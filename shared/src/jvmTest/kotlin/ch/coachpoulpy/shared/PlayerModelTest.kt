@@ -99,6 +99,45 @@ class PlayerModelTest {
     }
 
     @Test
+    fun saysWhatComesNextOnEachScreen() {
+        val player = player(workout())
+        assertEquals("2 exercises", player.state.value.exerciseCountLabel)
+
+        player.start()
+        with(player.state.value) {
+            assertEquals("10", targetValue)
+            assertEquals("reps", targetUnit)
+            assertEquals("Rest 45 s, then Push-up", nextLine)
+            assertEquals("00:00", sessionClock)
+        }
+
+        clock.advance(75.seconds)
+        player.done()
+        with(player.state.value) {
+            assertEquals("Push-up", nextHeadline)
+            assertEquals("10 reps", nextDetail)
+            assertEquals("01:15", sessionClock)
+            assertEquals("Push-up · 10 reps", nextLine)
+        }
+    }
+
+    @Test
+    fun aRestCanBeMadeLongerOrShorter() {
+        val player = player(workout())
+        player.start()
+        player.adjustRest(15)
+        assertEquals(null, player.state.value.remainingSeconds, "a set is not a rest")
+
+        player.done()
+        player.adjustRest(15)
+        assertEquals(60, player.state.value.remainingSeconds)
+        assertEquals(60, player.state.value.totalSeconds)
+        player.adjustRest(-15)
+        player.adjustRest(-15)
+        assertEquals(30, player.state.value.remainingSeconds)
+    }
+
+    @Test
     fun noFinishedScreenBeforeTheSessionEnds() {
         val player = player(workout())
         player.start()

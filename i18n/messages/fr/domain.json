@@ -130,7 +130,8 @@
     "hoursMinutes": "{hours, number} h {minutes}",
     "meters": "{meters, number} m",
     "kilograms": "{kilograms} kg",
-    "tonnes": "{tonnes} t"
+    "tonnes": "{tonnes} t",
+    "pounds": "{pounds} lb"
   },
   "workout": {
     "copyName": "{name} (copie)",
@@ -178,6 +179,16 @@
     "app": "Coach Poulpy",
     "wellDone": "Bravo !",
     "summary": "{done, number} sur {planned, number} séries faites en {duration}",
-    "summarySkipped": "Séries passées : {count, number}"
+    "summarySkipped": "Séries passées : {count, number}",
+    "championHeading": "Champion !",
+    "quote": "« Ça valait le coup. Probablement. »",
+    "championQuote": "« Huit tentacules. Zéro regret. »"
+  },
+  "player": {
+    "unitReps": "{count, plural, one {répétition} many {répétitions} other {répétitions}}",
+    "unitAtLoad": "{unit} à {load}",
+    "nextRest": "Repos {duration}, puis {then}",
+    "thenSet": "série {set, number}",
+    "nextSet": "{name} · série {set, number} sur {sets, number}"
   }
 }
