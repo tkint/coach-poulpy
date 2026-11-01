@@ -327,7 +327,9 @@
     "about": "About",
     "appearanceUnits": "Appearance and units",
     "editProfile": "Edit your profile",
-    "yourProfile": "Your profile"
+    "yourProfile": "Your profile",
+    "aboutApp": "About Coach Poulpy",
+    "aboutLine": "Version {version} · data stays on this phone"
   },
   "theme": {
     "system": "System",

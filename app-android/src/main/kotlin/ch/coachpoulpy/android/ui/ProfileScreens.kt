@@ -1,9 +1,11 @@
 package ch.coachpoulpy.android.ui
 
 import androidx.annotation.StringRes
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
@@ -11,6 +13,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -20,14 +23,18 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Bluetooth
+import androidx.compose.material.icons.filled.Contrast
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Height
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.MonitorWeight
 import androidx.compose.material3.Button
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilledTonalIconButton
-import androidx.compose.material3.FilterChip
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -47,7 +54,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
@@ -58,6 +67,8 @@ import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -189,29 +200,62 @@ internal fun SettingsHub(graph: AppGraph, language: String, onPage: (SettingsPag
                         if (summary.isNotEmpty()) Text(summary, style = MaterialTheme.typography.bodyMedium)
                         Text(stringResource(R.string.settings_editProfile), style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.ExtraBold)
                     }
+                    Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null)
                 }
             }
             SectionLabel(R.string.settings_body)
-            SettingsRow(stringResource(R.string.body_height), height.latest?.let { BodyDisplay.height(it.value, units.units, language) }) { onPage(SettingsPage.HEIGHT) }
-            SettingsRow(stringResource(R.string.body_weight), weight.latest?.let { BodyDisplay.weight(it.value, units.units, language) }) { onPage(SettingsPage.WEIGHT) }
+            SettingsList {
+                SettingsRow(
+                    Icons.Filled.Height, stringResource(R.string.body_height),
+                    height.latest?.let { BodyDisplay.height(it.value, units.units, language) } ?: stringResource(R.string.body_nothingLogged),
+                ) { onPage(SettingsPage.HEIGHT) }
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                SettingsRow(
+                    Icons.Filled.MonitorWeight, stringResource(R.string.body_weight),
+                    weight.latest?.let { BodyDisplay.weight(it.value, units.units, language) } ?: stringResource(R.string.body_nothingLogged),
+                ) { onPage(SettingsPage.WEIGHT) }
+            }
             SectionLabel(R.string.settings_app)
-            SettingsRow(stringResource(R.string.settings_appearanceUnits), null) { onPage(SettingsPage.PREFERENCES) }
-            SettingsRow(stringResource(R.string.settings_devices), null) { onPage(SettingsPage.DEVICES) }
+            SettingsList {
+                val theme = stringResource(when (units.theme) { ThemeChoice.SYSTEM -> R.string.theme_system; ThemeChoice.LIGHT -> R.string.theme_light; ThemeChoice.DARK -> R.string.theme_dark })
+                val languageName = when (units.language) {
+                    LanguageChoice.SYSTEM -> stringResource(R.string.language_system)
+                    LanguageChoice.ENGLISH -> "English"
+                    LanguageChoice.FRENCH -> "Français"
+                }
+                val system = stringResource(if (units.units == UnitSystem.METRIC) R.string.units_metric else R.string.units_imperial)
+                SettingsRow(Icons.Filled.Contrast, stringResource(R.string.settings_appearanceUnits), "$theme · $languageName · $system") { onPage(SettingsPage.PREFERENCES) }
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                SettingsRow(Icons.Filled.Bluetooth, stringResource(R.string.settings_devices), null) { onPage(SettingsPage.DEVICES) }
+            }
             SectionLabel(R.string.settings_about)
-            SettingsRow(stringResource(R.string.settings_version, BuildConfig.VERSION_NAME), null, onClick = null)
+            SettingsList {
+                SettingsRow(Icons.Filled.Info, stringResource(R.string.settings_aboutApp), stringResource(R.string.settings_aboutLine, BuildConfig.VERSION_NAME), onClick = null)
+            }
         }
     }
 }
 
+/** Rows in one outlined card, a divider between them. */
 @Composable
-private fun SettingsRow(title: String, value: String?, onClick: (() -> Unit)?) {
-    OutlinedSurface(onClick = onClick) {
-        Row(Modifier.padding(horizontal = 14.dp, vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text(title, fontWeight = FontWeight.ExtraBold, modifier = Modifier.weight(1f))
-            value?.let { Text(it, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(end = 4.dp)) }
+private fun SettingsList(content: @Composable ColumnScope.() -> Unit) {
+    OutlinedSurface { Column(content = content) }
+}
+
+/** A leading icon, a bold title with a line under it, and a chevron when it opens something. */
+@Composable
+private fun SettingsRow(icon: ImageVector, title: String, subtitle: String?, onClick: (() -> Unit)?) {
+    val row = @Composable {
+        Row(Modifier.fillMaxWidth().heightIn(min = 60.dp).padding(horizontal = 14.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+            Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(end = 12.dp))
+            Column(Modifier.weight(1f)) {
+                Text(title, fontWeight = FontWeight.ExtraBold)
+                subtitle?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+            }
             if (onClick != null) Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
+    if (onClick != null) Surface(onClick = onClick, color = MaterialTheme.colorScheme.surface, content = row) else row()
 }
 
 /** Settings › Your profile. Every field is optional; a change is saved as soon as it is made. */
@@ -436,7 +480,7 @@ internal fun BodyScreen(graph: AppGraph, metric: BodyMetric, language: String, o
         subtitle = state.latest?.let { stringResource(R.string.body_lastLogged, mediumDate(it.day.toJava())) } ?: stringResource(R.string.body_nothingLogged),
         onBack = onBack,
         modifier = modifier,
-        action = { FilledTonalButton(onClick = { logging = true }) { Text(stringResource(R.string.body_log)) } },
+        action = { Button(onClick = { logging = true }, modifier = Modifier.height(40.dp)) { Text(stringResource(R.string.body_log), fontWeight = FontWeight.ExtraBold) } },
     ) {
         if (state.history.isEmpty()) {
             PoulpyCard(
@@ -463,25 +507,31 @@ internal fun BodyScreen(graph: AppGraph, metric: BodyMetric, language: String, o
         OutlinedSurface {
             Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(stringResource(if (isWeight) R.string.body_weight else R.string.body_height), fontWeight = FontWeight.ExtraBold)
-                Row(Modifier.selectableGroup(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    BodyRange.entries.forEach { range ->
-                        FilterChip(
-                            selected = state.range == range,
-                            onClick = { model.selectRange(range) },
-                            label = { Text(stringResource(range.label), modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center) },
-                            modifier = Modifier.weight(1f),
-                        )
-                    }
-                }
                 val entries = state.trend.entries
-                if (entries.isEmpty()) {
-                    Note(stringResource(R.string.body_chartEmpty))
+                val description = if (entries.isEmpty()) {
+                    stringResource(R.string.body_chartEmpty)
                 } else {
-                    val description = stringResource(
+                    stringResource(
                         R.string.body_chart, show(entries.first().value), mediumDate(entries.first().day.toJava()),
                         show(entries.last().value), mediumDate(entries.last().day.toJava()),
                     )
-                    LineChart(entries, metric, system, language, Modifier.fillMaxWidth().height(200.dp).semantics { contentDescription = description })
+                }
+                // Always drawn: with nothing in the range it is the grid alone, around the latest value.
+                LineChart(entries, state.latest?.value, metric, system, language, Modifier.fillMaxWidth().height(200.dp).semantics { contentDescription = description })
+                Row(Modifier.selectableGroup(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    BodyRange.entries.forEach { range ->
+                        val on = state.range == range
+                        Surface(
+                            onClick = { model.selectRange(range) },
+                            modifier = Modifier.weight(1f).height(36.dp).semantics { selected = on; role = Role.Tab },
+                            shape = RoundedCornerShape(PoulpyRadius.pill),
+                            color = if (on) colors.primary else Color.Transparent,
+                            contentColor = if (on) colors.onPrimary else colors.onSurfaceVariant,
+                            border = BorderStroke(1.5.dp, if (on) colors.primary else colors.outline),
+                        ) {
+                            Box(contentAlignment = Alignment.Center) { Text(stringResource(range.label), fontWeight = FontWeight.ExtraBold, style = MaterialTheme.typography.labelLarge) }
+                        }
+                    }
                 }
             }
         }
@@ -555,18 +605,23 @@ private fun Stat(@StringRes name: Int, value: String, note: String, modifier: Mo
  * axis. A single entry is just its dot. The grid is neutral: a weight going up is never red.
  */
 @Composable
-private fun LineChart(entries: List<BodyMeasurement>, metric: BodyMetric, system: UnitSystem, language: String, modifier: Modifier) {
+private fun LineChart(entries: List<BodyMeasurement>, latest: Double?, metric: BodyMetric, system: UnitSystem, language: String, modifier: Modifier) {
     val colors = MaterialTheme.colorScheme
     val line = colors.primary
     val grid = colors.outlineVariant
     val measurer = rememberTextMeasurer()
     val style = MaterialTheme.typography.labelSmall.copy(color = colors.onSurfaceVariant)
     val shown = entries.map { BodyDisplay.chartValue(metric, it.value, system) }
-    val ticks = ChartAxis.ticks(shown.min(), shown.max(), BodyDisplay.chartMinSpan(metric, system))
+    val ticks = if (entries.isEmpty()) {
+        val centre = BodyDisplay.chartValue(metric, latest ?: BodyDisplay.starting(metric), system)
+        ChartAxis.ticks(centre, centre, BodyDisplay.chartMinSpan(metric, system) * 3)
+    } else {
+        ChartAxis.ticks(shown.min(), shown.max(), BodyDisplay.chartMinSpan(metric, system))
+    }
     val labels = ticks.map { BodyDisplay.axisLabel(metric, it, system, language) }
     val unit = BodyDisplay.axisUnit(metric, system)
-    val firstDay = entries.first().day.toJava()
-    val lastDay = entries.last().day.toJava()
+    val firstDay = entries.firstOrNull()?.day?.toJava()
+    val lastDay = entries.lastOrNull()?.day?.toJava()
     Canvas(modifier) {
         val labelWidth = (labels + unit).maxOf { measurer.measure(it, style).size.width } + 8.dp.toPx()
         val textHeight = measurer.measure("0", style).size.height
@@ -586,6 +641,7 @@ private fun LineChart(entries: List<BodyMeasurement>, metric: BodyMetric, system
             drawText(text, topLeft = Offset(labelWidth - text.size.width, y - text.size.height / 2f))
         }
 
+        if (firstDay == null || lastDay == null) return@Canvas
         val firstEpoch = firstDay.toEpochDay()
         val days = (lastDay.toEpochDay() - firstEpoch).coerceAtLeast(1)
         val points = entries.mapIndexed { i, entry ->
@@ -672,9 +728,13 @@ private fun LogSheet(metric: BodyMetric, system: UnitSystem, language: String, s
                 stringResource(R.string.body_date),
                 if (day == today) stringResource(R.string.body_today, mediumDate(day)) else mediumDate(day),
             ) { pickingDate = true }
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                OutlinedButton(onClick = onDismiss, modifier = Modifier.height(52.dp)) { Text(stringResource(R.string.action_cancel)) }
-                Button(onClick = { typed?.let { onSave(it, day); onDismiss() } }, enabled = typed != null, modifier = Modifier.weight(1f).height(52.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(
+                    onClick = onDismiss,
+                    modifier = Modifier.weight(1f).height(56.dp),
+                    border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
+                ) { Text(stringResource(R.string.action_cancel), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onSurface) }
+                Button(onClick = { typed?.let { onSave(it, day); onDismiss() } }, enabled = typed != null, modifier = Modifier.weight(1.6f).height(56.dp)) {
                     Text(stringResource(R.string.action_save), fontWeight = FontWeight.ExtraBold)
                 }
             }
