@@ -1,0 +1,842 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Poulpy Brand Book</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;500;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one left-aligned reading column (1040px) of sections; the page wears the brand tokens itself. */
+:root {
+  /* mascot colours: identical in both themes, they are Poulpy's fabric */
+  --poulpy-blue: #3AA6E0;
+  --poulpy-ember: #D9622B;
+  --poulpy-ink: #141A26;
+
+  --bg: #F4F9FC;          /* foam */
+  --surface: #FFFFFF;
+  --surface-2: #E6EFF5;
+  --line: #D3E0E9;
+  --fg: #141A26;
+  --muted: #56687A;
+  --primary: #1574B0;     /* lagoon 600 */
+  --on-primary: #FFFFFF;
+  --primary-soft: #DDF0FB;
+  --ember: #B4471C;       /* ember 600, grumpy accent in UI */
+  --on-ember: #FFFFFF;
+  --ember-soft: #FFE6D6;
+  --success: #2E9E6A;
+  --danger: #C8264A;
+  --code-bg: #0F2233;
+  --code-fg: #D7E9F5;
+
+  --font-display: "Baloo 2", "Arial Rounded MT Bold", "Trebuchet MS", sans-serif;
+  --font-body: "Nunito", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  --r-sm: 10px; --r-md: 16px; --r-lg: 24px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0A1520; --surface: #112230; --surface-2: #17303F; --line: #21394A;
+  --fg: #E8F1F7; --muted: #95AABB; --primary: #5BBEF0; --on-primary: #06202F;
+  --primary-soft: #123A52; --ember: #FF9A66; --on-ember: #2A1006; --ember-soft: #3A1E12;
+  --success: #4CC38A; --danger: #FF6B85;
+  --code-bg: #06111A; --code-fg: #D7E9F5; color-scheme: dark;
+} }
+:root[data-theme="dark"] {
+  --bg: #0A1520; --surface: #112230; --surface-2: #17303F; --line: #21394A;
+  --fg: #E8F1F7; --muted: #95AABB; --primary: #5BBEF0; --on-primary: #06202F;
+  --primary-soft: #123A52; --ember: #FF9A66; --on-ember: #2A1006; --ember-soft: #3A1E12;
+  --success: #4CC38A; --danger: #FF6B85;
+  --code-bg: #06111A; --code-fg: #D7E9F5; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 16px; line-height: 1.55; }
+.wrap { max-width: 1040px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0; }
+h1, h2, h3 { font-family: var(--font-display); line-height: 1.1; text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(40px, 7vw, 68px); font-weight: 800; letter-spacing: -0.01em; }
+h2 { font-size: clamp(28px, 4vw, 38px); font-weight: 800; }
+h3 { font-size: 21px; font-weight: 700; }
+p { margin: 0; max-width: 64ch; }
+.muted { color: var(--muted); }
+.eyebrow { font-size: 12.5px; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; color: var(--primary); }
+code, pre { font-family: var(--font-mono); }
+a { color: var(--primary); }
+:focus-visible { outline: 3px solid var(--primary); outline-offset: 3px; border-radius: 6px; }
+
+/* hero */
+.hero { padding-block: 48px 40px; display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 32px; align-items: center; }
+.hero .copy { display: grid; gap: 18px; min-width: 0; }
+.hero h1 .blue { color: var(--poulpy-blue); }
+.hero h1 .ember { color: var(--poulpy-ember); }
+.hero .lede { font-size: 18px; }
+.flipbox { display: grid; justify-items: center; gap: 14px; }
+.stage { width: min(340px, 100%); aspect-ratio: 1 / 1; perspective: 900px; cursor: pointer; border: 0; background: none; padding: 0; }
+.stage .card { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform 700ms cubic-bezier(.5,-0.35,.35,1.4); }
+.stage.flipped .card { transform: rotateY(180deg); }
+.face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 50%; display: grid; place-items: center; }
+.face.front { background: radial-gradient(circle at 50% 60%, var(--primary-soft), transparent 70%); }
+.face.back { transform: rotateY(180deg); background: radial-gradient(circle at 50% 60%, var(--ember-soft), transparent 70%); }
+.face svg { width: 86%; height: auto; }
+.flip-btn { font: 800 15px var(--font-body); border: 2px solid var(--fg); background: var(--surface); color: var(--fg); padding: 10px 18px; border-radius: 999px; cursor: pointer; }
+.flip-btn:hover { background: var(--surface-2); }
+.flip-state { font-size: 14px; color: var(--muted); min-height: 1.5em; text-align: center; }
+
+
+section.block { padding-block: 44px; border-top: 2px dashed var(--line); display: grid; gap: 22px; }
+.sec-head { display: grid; gap: 8px; }
+
+/* logo */
+.logo-final { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+.lf { border-radius: var(--r-lg); aspect-ratio: 1 / 1; max-width: 100%; display: grid; place-items: center; padding: 26px; }
+.lf svg { width: 100%; height: auto; max-width: 200px; }
+.lf.light { background: #FFFFFF; border: 1px solid var(--line); }
+.lf.dark { background: #0A1520; }
+.lf.lagoon { background: #1574B0; }
+.icons { display: flex; gap: 18px; align-items: end; flex-wrap: wrap; }
+.icons figure { margin: 0; display: grid; gap: 6px; justify-items: center; font-size: 12.5px; color: var(--muted); }
+.icons svg { display: block; border-radius: 22%; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
+
+.wordmarks { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; }
+.wm { border-radius: var(--r-lg); padding: 26px 24px; display: flex; align-items: center; gap: 14px; }
+.wm.l { background: #FFFFFF; border: 1px solid var(--line); }
+.wm.d { background: #0A1520; }
+.wm > span svg { width: 70px; height: auto; display: block; }
+.wm .name { font-family: var(--font-display); font-weight: 800; font-size: 36px; line-height: .9; letter-spacing: -0.01em; }
+.wm .name small { display: block; font-size: 15px; font-family: var(--font-body); font-weight: 800; letter-spacing: .32em; text-transform: uppercase; margin-bottom: 4px; }
+.wm.l .name small { color: #1574B0; }
+.wm.d .name small { color: #5BBEF0; }
+.wm .name .p { color: #3AA6E0; }
+
+/* colour */
+.fabric { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+.fab { border-radius: var(--r-lg); padding: 18px; min-height: 150px; display: grid; align-content: end; gap: 2px; font-size: 14px; }
+.fab b { font-family: var(--font-display); font-size: 22px; }
+.fab code { font-size: 13px; opacity: .85; }
+
+.spectrum { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 20px; display: grid; grid-template-columns: minmax(0, 220px) minmax(0, 1fr); gap: 24px; align-items: center; }
+.spec-art { display: grid; place-items: center; border-radius: 50%; aspect-ratio: 1 / 1; max-width: 100%; transition: background-color 300ms; }
+.spec-art svg { width: 88%; height: auto; }
+.spec-info { display: grid; gap: 10px; min-width: 0; }
+.spec-name { font: 800 32px/1 var(--font-display); }
+.spec-side { font: 800 12px var(--font-body); letter-spacing: .08em; text-transform: uppercase; }
+.spec-bar { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 4px; }
+.spec-bar button { height: 46px; border: 3px solid transparent; border-radius: 12px; cursor: pointer; padding: 0; }
+.spec-bar button[aria-pressed="true"] { border-color: var(--fg); transform: translateY(-3px); }
+.spec-labels { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 4px; font-size: 11.5px; font-weight: 700; color: var(--muted); text-align: center; }
+.spec-meta { font: 600 13px var(--font-mono); color: var(--muted); }
+
+.ramps { display: grid; gap: 12px; }
+.ramp { display: grid; grid-template-columns: 110px repeat(7, minmax(0, 1fr)); gap: 6px; align-items: stretch; }
+.ramp .lbl { font-weight: 800; font-size: 14px; align-self: center; }
+.ramp .sw { border-radius: var(--r-sm); min-height: 58px; padding: 6px 7px; display: grid; align-content: end; font: 600 11px var(--font-mono); }
+.roles { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; }
+.role-table { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md); padding: 14px 16px; display: grid; gap: 8px; }
+.role-row { display: grid; grid-template-columns: 22px 1fr auto; gap: 10px; align-items: center; font-size: 14px; }
+.dot { width: 22px; height: 22px; border-radius: 50%; border: 1px solid rgba(0,0,0,.12); }
+
+/* poses */
+.poses { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
+.pose { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 12px 14px 16px; display: grid; gap: 4px; align-content: start; }
+.pose .art { border-radius: var(--r-md); display: grid; place-items: center; padding: 6px; }
+.pose .art.b { background: var(--primary-soft); }
+.pose .art.e { background: var(--ember-soft); }
+.pose .art svg { width: 100%; max-width: 210px; height: auto; }
+.spin-arc { stroke-dasharray: 150 60; animation: poulpy-arc 1.2s linear infinite; }
+@keyframes poulpy-arc { to { stroke-dashoffset: -210; } }
+.pose b { font-family: var(--font-display); font-size: 19px; margin-top: 6px; }
+.pose span { font-size: 13.5px; color: var(--muted); line-height: 1.4; }
+.pose q { font-size: 13.5px; font-weight: 700; quotes: "“" "”"; }
+
+/* type */
+.type-grid { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 18px; }
+.specimen { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 22px; display: grid; gap: 16px; min-width: 0; }
+.spec-row { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 14px; align-items: baseline; }
+.spec-row .k { font: 600 11.5px var(--font-mono); color: var(--muted); }
+.t-display { font: 800 40px/1.05 var(--font-display); }
+.t-title { font: 700 28px/1.15 var(--font-display); }
+.t-headline { font: 700 21px/1.2 var(--font-display); }
+.t-body { font: 500 16px/1.5 var(--font-body); }
+.t-label { font: 800 12.5px/1.2 var(--font-body); letter-spacing: .08em; text-transform: uppercase; }
+.t-timer { font: 800 64px/1 var(--font-body); font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+.faces { display: grid; gap: 14px; align-content: start; }
+.face-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md); padding: 16px 18px; display: grid; gap: 4px; }
+.face-card .big { font-size: 44px; line-height: 1; }
+
+/* tokens */
+.tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.tab { font: 800 14px var(--font-body); padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); cursor: pointer; }
+.tab[aria-selected="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.code { background: var(--code-bg); color: var(--code-fg); border-radius: var(--r-md); padding: 18px 20px; overflow-x: auto; font-size: 13px; line-height: 1.6; margin: 0; }
+.scales { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+.scale { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md); padding: 14px 16px; display: grid; gap: 8px; font-size: 14px; align-content: start; }
+.sp-row { display: grid; grid-template-columns: 70px 1fr; align-items: center; gap: 8px; font: 600 12px var(--font-mono); color: var(--muted); }
+.sp-bar { height: 10px; background: var(--primary); border-radius: 4px; }
+.rad-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.rad-row div { width: 52px; height: 52px; background: var(--primary-soft); border: 2px solid var(--primary); display: grid; place-items: center; font: 600 11px var(--font-mono); color: var(--fg); }
+
+/* phones */
+.phones { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; justify-items: center; align-items: start; }
+.phone-col { display: grid; gap: 10px; justify-items: center; width: 100%; max-width: 320px; }
+.phone { width: 100%; max-width: 310px; border-radius: 38px; border: 8px solid #141A26; background: var(--bg); overflow: hidden; box-shadow: 0 18px 40px -18px rgba(10,30,50,.45); }
+.ph-top { padding: 22px 18px 18px; display: grid; gap: 12px; }
+.ph-top.happy { background: linear-gradient(180deg, var(--primary-soft), var(--bg)); }
+.ph-top.grumpy { background: linear-gradient(180deg, var(--ember-soft), var(--bg)); }
+.ph-date { font: 800 12px var(--font-body); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.ph-hello { font: 800 26px/1.05 var(--font-display); }
+.ring-wrap { position: relative; width: 190px; height: 190px; margin: 0 auto; }
+.ring-wrap > svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.ring-wrap .mini { position: absolute; inset: 42px; display: grid; place-items: center; }
+.ring-wrap .mini svg { width: 100%; height: auto; }
+.bubble { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 10px 14px; font-size: 14.5px; font-weight: 600; }
+.bubble.g { border-color: var(--ember); }
+.ph-body { padding: 4px 16px 20px; display: grid; gap: 12px; }
+.ph-row { display: flex; justify-content: space-between; align-items: center; font-size: 13.5px; font-weight: 700; }
+.ph-row span:last-child { font-variant-numeric: tabular-nums; color: var(--muted); }
+.session { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 14px; display: grid; gap: 6px; }
+.session .t { font: 700 18px/1.2 var(--font-display); }
+.session .m { font-size: 13px; color: var(--muted); }
+.cta { font: 800 15px var(--font-body); border: 0; border-radius: 999px; padding: 12px 16px; margin-top: 6px; color: var(--on-primary); background: var(--primary); }
+.cta.g { background: var(--ember); color: var(--on-ember); }
+.caption { font-size: 13.5px; color: var(--muted); text-align: center; max-width: 34ch; }
+
+/* behaviour */
+.table-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md); }
+table { border-collapse: collapse; width: 100%; min-width: 640px; font-size: 14.5px; }
+th, td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: 12px; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); }
+tr:last-child td { border-bottom: 0; }
+.pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 800; padding: 2px 9px 2px 4px; border-radius: 999px; white-space: nowrap; background: var(--surface-2); }
+.pill i { width: 14px; height: 14px; border-radius: 50%; display: inline-block; }
+
+/* gamification */
+.ideas { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+.idea { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 18px 20px; display: grid; gap: 10px; align-content: start; }
+.idea-head { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+.prio { font-size: 11.5px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; white-space: nowrap; }
+.prio.core { background: var(--primary); color: var(--on-primary); }
+.prio.later { background: var(--surface-2); color: var(--fg); }
+.prio.maybe { border: 1px dashed var(--muted); color: var(--muted); }
+.fact { font-size: 13px; color: var(--muted); border-top: 1px dashed var(--line); padding-top: 8px; }
+.guard { background: var(--surface); border: 2px solid var(--fg); border-radius: var(--r-lg); padding: 18px 22px; display: grid; gap: 8px; }
+.guard ul { margin: 0; padding-left: 20px; display: grid; gap: 6px; max-width: 70ch; }
+
+footer { padding-block: 30px 50px; font-size: 13.5px; color: var(--muted); border-top: 2px dashed var(--line); }
+
+@media (max-width: 760px) {
+  .hero { grid-template-columns: 1fr; padding-block: 28px; }
+  .flipbox { order: -1; }
+  .type-grid { grid-template-columns: 1fr; }
+  .spectrum { grid-template-columns: 1fr; justify-items: stretch; }
+  .spec-art { width: 200px; justify-self: center; }
+  .spec-labels { font-size: 9.5px; }
+  .ramp { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+  .ramp .lbl { grid-column: 1 / -1; }
+  .ramp .sw { min-height: 48px; font-size: 9.5px; padding: 4px; }
+  .spec-row { grid-template-columns: 1fr; gap: 2px; }
+  .t-display { font-size: 32px; } .t-timer { font-size: 52px; }
+}
+@media (prefers-reduced-motion: reduce) { .stage .card, .spec-art { transition: none; } .spin-arc { animation: none; } }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+<header class="hero">
+  <div class="copy">
+    <span class="eyebrow">Coach Poulpy · brand book</span>
+    <h1>One octopus, <span class="blue">two</span> <span class="ember">moods</span>.</h1>
+    <p class="lede">Poulpy is a reversible plush: blue and smiling on one side, grumpy on the other. In the app his grumpy side turns ember, from burnt orange to red, and both sides shift shade with how he feels.</p>
+    <p class="muted">Tap Poulpy to flip him.</p>
+  </div>
+  <div class="flipbox">
+    <button class="stage" id="stage" aria-label="Flip Poulpy" aria-pressed="false">
+      <div class="card">
+        <div class="face front" data-poulpy="happy"></div>
+        <div class="face back" data-poulpy="grumpy"></div>
+      </div>
+    </button>
+    <button class="flip-btn" id="flipBtn" type="button">Flip Poulpy</button>
+    <div class="flip-state" id="flipState" aria-live="polite">Blue side: you trained, Poulpy is happy.</div>
+  </div>
+</header>
+
+<section class="block" id="logo">
+  <div class="sec-head">
+    <span class="eyebrow">1 · Logo</span>
+    <h2>Poulpy as he is</h2>
+    <p class="muted">A faithful front view of the plush: tall soft dome, five visible arms, and the ember lining peeking out underneath, which hints at the other side. The logo and the in-app mascot are the same drawing.</p>
+  </div>
+  <div class="logo-final">
+    <div class="lf light" data-logo="light"></div>
+    <div class="lf dark" data-logo="dark"></div>
+    <div class="lf lagoon" data-logo="lagoon"></div>
+  </div>
+  <div class="icons" id="icons"></div>
+  <div class="wordmarks">
+    <div class="wm l"><span data-poulpy="happy"></span><div class="name"><small>Coach</small><span class="p">poulpy</span></div></div>
+    <div class="wm d"><span data-poulpy="happy"></span><div class="name"><small>Coach</small><span class="p">poulpy</span></div></div>
+  </div>
+</section>
+
+<section class="block" id="color">
+  <div class="sec-head">
+    <span class="eyebrow">2 · Colour</span>
+    <h2>Blue when it goes well, ember when it doesn't</h2>
+    <p class="muted">The grumpy side is a warm ember: burnt orange (#D9622B) for everyday grumpiness, deepening into red when Poulpy gets really cross.</p>
+  </div>
+  <div class="sec-head" style="margin-top:10px">
+    <h3>The mood spectrum</h3>
+    <p class="muted">Poulpy's colour follows his emotion, not just his side. The blue side stays close to the plush: a touch richer when proud, lighter and fresher while recovering. Missed sessions heat the ember up toward red. Tap a shade.</p>
+  </div>
+  <div class="spectrum">
+    <div class="spec-art" id="specArt"></div>
+    <div class="spec-info">
+      <span class="spec-side" id="specSide"></span>
+      <span class="spec-name" id="specName"></span>
+      <p id="specWhen"></p>
+      <span class="spec-meta" id="specHex"></span>
+      <div class="spec-bar" id="specBar" role="group" aria-label="Mood shades"></div>
+      <div class="spec-labels" id="specLabels"></div>
+    </div>
+  </div>
+
+  <div class="ramps" id="ramps"></div>
+  <div class="roles">
+    <div class="role-table" id="rolesLight"><h3>Light theme roles</h3></div>
+    <div class="role-table" id="rolesDark" style="background:#0A1520;color:#E8F1F7;border-color:#21394A"><h3>Dark theme roles</h3></div>
+  </div>
+  <p class="muted">With a red-leaning mascot, error messages move to a crimson (#C8264A) and always come with an icon and text, so a cross Poulpy is never mistaken for an error. The plush ember (#D9622B) is too light for white text, so buttons use the deeper ember 600.</p>
+</section>
+
+<section class="block" id="poses">
+  <div class="sec-head">
+    <span class="eyebrow">3 · Poses</span>
+    <h2>Poulpy in action</h2>
+    <p class="muted">A sticker sheet for the big moments: end of session screens, records, rest days, notifications. The apps draw these same poses, generated from this page's drawing code by <code>design/build-poulpy.mjs</code>.</p>
+  </div>
+  <div class="poses">
+    <div class="pose"><div class="art b" data-pose="flex"></div><b>Cocky</b><span>New personal record. Smug wink, one eyebrow up, a golden glow.</span><q>Yeah. I did that.</q></div>
+    <div class="pose"><div class="art b" data-pose="lift"></div><b>Straining</b><span>Mid-session and during heavy sets. Eyes squeezed, teeth gritted, a dumbbell nearby.</span><q>Hnnngh… one more!</q></div>
+    <div class="pose"><div class="art b" data-pose="champion"></div><b>Champion</b><span>All eight tentacles lit: a full octopus, or a plan block finished.</span><q>Gold for the octopus!</q></div>
+    <div class="pose"><div class="art b" data-pose="tall"></div><b>Standing tall</b><span>Stretched up a little on his tentacles. A new goal set, a level reached.</span><q>Look how big I am now.</q></div>
+    <div class="pose"><div class="art b" data-pose="exhausted"></div><b>Exhausted</b><span>Right after a hard session. Sweatband, panting, dripping.</span><q>Worth it. Probably.</q></div>
+    <div class="pose"><div class="art b" data-pose="side"></div><b>Side glance</b><span>Turned a little to the side. Tired between sets, or quietly waiting. The pose can carry other faces too.</span><q>Just… give me a sec.</q></div>
+    <div class="pose"><div class="art b" data-pose="sleeping"></div><b>Sleeping</b><span>Planned rest day. Nightcap on.</span><q>Rest is training too.</q></div>
+    <div class="pose"><div class="art b" data-pose="hurt"></div><b>Patched up</b><span>Pain logged or a rehab day. A plaster, a soft look, never grumpy.</span><q>Easy today. I'm right here.</q></div>
+    <div class="pose"><div class="art b" data-pose="hide"></div><b>Shy</b><span>Eyes squeezed shut, big blush. Embarrassed, or welcoming you back after a break.</span><q>Oh… you're back!</q></div>
+    <div class="pose"><div class="art b" data-pose="scratch"></div><b>Thinking</b><span>Puzzled look and a thought bubble. Picking a plan, an unknown exercise.</span><q>Hmm, which one…</q></div>
+    <div class="pose"><div class="art b" data-pose="spin"></div><b>Spinning</b><span>He spins on the spot, shown comic-style with motion lines. The loading indicator, with the front arc running in a loop.</span><q>Wheee…</q></div>
+    <div class="pose"><div class="art e" data-pose="crossed"></div><b>Pouting</b><span>A session is overdue. Frowning and looking away.</span><q>Hmph. We had a date.</q></div>
+    <div class="pose"><div class="art e" data-pose="fuming"></div><b>Fuming</b><span>Two sessions missed. Steam, shaking, deep red.</span><q>EIGHT tentacles and none of them trained!</q></div>
+  </div>
+  <p class="muted">Poulpy never lifts his tentacles: every pose keeps the plush's shape and tells the mood with his face, his shade, props and little effects. More ideas for later: stretching, a tiny treadmill, sipping from a water bottle, dancing when the eighth tentacle lights.</p>
+</section>
+
+<section class="block" id="type">
+  <div class="sec-head">
+    <span class="eyebrow">4 · Typography</span>
+    <h2>Round like the plush, readable mid-set</h2>
+    <p class="muted">Both faces are free (SIL Open Font License), so they can ship inside the Android and iOS apps and load from Google Fonts on the web.</p>
+  </div>
+  <div class="type-grid">
+    <div class="specimen">
+      <div class="spec-row"><span class="k">display 40/44</span><span class="t-display">Leg day, Poulpy approves</span></div>
+      <div class="spec-row"><span class="k">title 28/32</span><span class="t-title">Lower body strength</span></div>
+      <div class="spec-row"><span class="k">headline 21/25</span><span class="t-headline">Back squat · 4 × 8 @ 60 kg</span></div>
+      <div class="spec-row"><span class="k">body 16/24</span><span class="t-body">Rest 90 s between sets. Keep the bar over mid-foot and stop one rep before form breaks.</span></div>
+      <div class="spec-row"><span class="k">label 12.5</span><span class="t-label">Next up · Romanian deadlift</span></div>
+      <div class="spec-row"><span class="k">timer 64</span><span class="t-timer">01:27</span></div>
+    </div>
+    <div class="faces">
+      <div class="face-card"><span class="big" style="font-family:var(--font-display);font-weight:800">Baloo 2</span><b>Display and titles</b><span class="muted">Heavy, rounded, friendly. Used for headings, Poulpy's speech and big moments only.</span></div>
+      <div class="face-card"><span class="big" style="font-family:var(--font-body);font-weight:800">Nunito</span><b>Body, labels and numbers</b><span class="muted">Rounded terminals that match Baloo, with tabular figures so timers and rep counts don't jitter while they tick.</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="tokens">
+  <div class="sec-head">
+    <span class="eyebrow">5 · Design tokens</span>
+    <h2>One file, three platforms</h2>
+    <p class="muted">A single <code>design/tokens.json</code> is the source of truth, generated into a Compose theme, SwiftUI colour assets and CSS variables. The mood shades are tokens too, so every platform paints Poulpy the same way.</p>
+  </div>
+  <div class="tabs" role="tablist" aria-label="Token output">
+    <button class="tab" role="tab" aria-selected="true" data-tab="json" id="tab-json">tokens.json</button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="kt" id="tab-kt">Compose (Kotlin)</button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="swift" id="tab-swift">SwiftUI</button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="css" id="tab-css">Vue (CSS)</button>
+  </div>
+<pre class="code" data-panel="json">{
+  "color": {
+    "poulpy": { "blue": "#3AA6E0", "ember": "#D9622B", "ink": "#141A26" },
+    "lagoon": { "50": "#EAF6FD", "100": "#CDEBFA", "300": "#7FCBF0", "400": "#3AA6E0",
+                "600": "#1574B0", "800": "#0C4A73", "900": "#082F4A" },
+    "ember":  { "50": "#FFF1E8", "100": "#FFDCC7", "300": "#F4A473", "400": "#E8873F",
+                "500": "#D9622B", "600": "#B4471C", "800": "#7A2C12" }
+  },
+  "mood": {
+    "proud":   "#2C9CE0", "happy":  "#3AA6E0", "recovering": "#5DB4E6",
+    "annoyed": "#E8873F", "grumpy": "#D9622B", "fuming":     "#C0352B"
+  },
+  "role": {
+    "light": { "primary": "{color.lagoon.600}", "onPrimary": "#FFFFFF",
+               "grumpy": "{color.ember.600}", "error": "#C8264A",
+               "background": "#F4F9FC", "surface": "#FFFFFF" },
+    "dark":  { "primary": "#5BBEF0", "onPrimary": "#06202F",
+               "grumpy": "#FF9A66", "error": "#FF6B85",
+               "background": "#0A1520", "surface": "#112230" }
+  },
+  "font":   { "display": "Baloo 2", "body": "Nunito" },
+  "space":  { "xs": 4, "sm": 8, "md": 12, "lg": 16, "xl": 24, "2xl": 32, "3xl": 48 },
+  "radius": { "sm": 10, "md": 16, "lg": 24, "pill": 999 },
+  "motion": { "flip": { "duration": 700, "easing": [0.5, -0.35, 0.35, 1.4] } }
+}</pre>
+<pre class="code" data-panel="kt" hidden>// app-android/.../theme/PoulpyTokens.kt  (generated)
+object PoulpyColors {
+    val Blue  = Color(0xFF3AA6E0)
+    val Ember = Color(0xFFD9622B)
+    val Ink   = Color(0xFF141A26)
+    val Lagoon600 = Color(0xFF1574B0)
+    val Ember600  = Color(0xFFB4471C)
+}
+
+enum class Mood(val tone: Color) {
+    Proud(Color(0xFF2C9CE0)), Happy(Color(0xFF3AA6E0)), Recovering(Color(0xFF5DB4E6)),
+    Annoyed(Color(0xFFE8873F)), Grumpy(Color(0xFFD9622B)), Fuming(Color(0xFFC0352B)),
+}
+
+val PoulpyLight = lightColorScheme(
+    primary = PoulpyColors.Lagoon600, onPrimary = Color.White,
+    tertiary = PoulpyColors.Ember600,
+    background = Color(0xFFF4F9FC), surface = Color.White,
+    error = Color(0xFFC8264A),
+)</pre>
+<pre class="code" data-panel="swift" hidden>// app-ios/CoachPoulpy/Theme/PoulpyTokens.swift  (generated)
+// Colours live in Assets.xcassets with Any/Dark appearances, generated from tokens.json.
+extension Color {
+    static let poulpyBlue = Color("PoulpyBlue")    // fixed, same in both appearances
+    static let poulpyEmber = Color("PoulpyEmber")
+    static let brandPrimary = Color("Primary")     // #1574B0 light, #5BBEF0 dark
+    static let brandGrumpy = Color("Grumpy")       // #B4471C light, #FF9A66 dark
+}
+
+enum Mood: String, CaseIterable {
+    case proud, happy, recovering, annoyed, grumpy, fuming
+    var tone: Color { Color("Mood/\(rawValue)") }
+}
+
+extension Font {
+    static let poulpyDisplay = Font.custom("Baloo2-ExtraBold", size: 40, relativeTo: .largeTitle)
+    static let poulpyBody = Font.custom("Nunito-Medium", size: 16, relativeTo: .body)
+}</pre>
+<pre class="code" data-panel="css" hidden>/* web/src/styles/tokens.css  (generated) */
+:root {
+  --cp-poulpy-blue: #3AA6E0;
+  --cp-poulpy-ember: #D9622B;
+  --cp-mood-proud: #2C9CE0;  --cp-mood-happy: #3AA6E0;  --cp-mood-recovering: #5DB4E6;
+  --cp-mood-annoyed: #E8873F; --cp-mood-grumpy: #D9622B; --cp-mood-fuming: #C0352B;
+  --cp-primary: #1574B0;
+  --cp-grumpy: #B4471C;
+  --cp-error: #C8264A;
+  --cp-bg: #F4F9FC;
+  --cp-font-display: "Baloo 2", "Arial Rounded MT Bold", sans-serif;
+  --cp-font-body: "Nunito", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --cp-primary: #5BBEF0; --cp-grumpy: #FF9A66; --cp-error: #FF6B85; --cp-bg: #0A1520; }
+}</pre>
+  <div class="scales">
+    <div class="scale"><h3>Spacing</h3><div id="spacing"></div></div>
+    <div class="scale"><h3>Radius</h3><p class="muted">Soft like stitched fabric. No sharp corners anywhere.</p><div class="rad-row"><div style="border-radius:10px">10</div><div style="border-radius:16px">16</div><div style="border-radius:24px">24</div><div style="border-radius:999px">pill</div></div></div>
+    <div class="scale"><h3>Motion</h3><p class="muted">One signature move: the flip, 700 ms with a small overshoot, like turning the plush inside out. Mood shade changes fade over 300 ms. Everything else stays quick (150 to 250 ms) and plain.</p></div>
+  </div>
+</section>
+
+<section class="block" id="screens">
+  <div class="sec-head">
+    <span class="eyebrow">6 · In the app</span>
+    <h2>The Today screen, on both sides</h2>
+    <p class="muted">Poulpy sits in the middle of the tentacle ring. Only Poulpy and the header tint change with his mood; the rest of the screen stays calm so the app never feels like it's shouting at you.</p>
+  </div>
+  <div class="phones">
+    <div class="phone-col">
+      <div class="phone">
+        <div class="ph-top happy">
+          <span class="ph-date">Saturday 24 Oct</span>
+          <span class="ph-hello">Nice streak, 9 days</span>
+          <div class="ring-wrap"><span data-ring="6"></span><div class="mini" data-poulpy="happy"></div></div>
+          <div class="bubble">6 of 8 tentacles lit. One more session and I'm doing a little dance.</div>
+        </div>
+        <div class="ph-body">
+          <div class="ph-row"><span>This week</span><span>3 sessions · 2 h 10</span></div>
+          <div class="session">
+            <span class="t-label" style="color:var(--primary)">Next session</span>
+            <span class="t">Lower body strength</span>
+            <span class="m">45 min · Back squat, Romanian deadlift, split squat</span>
+            <button class="cta" type="button" tabindex="-1">Start session</button>
+          </div>
+        </div>
+      </div>
+      <p class="caption">Happy side. On track with the week, streak alive.</p>
+    </div>
+    <div class="phone-col">
+      <div class="phone">
+        <div class="ph-top grumpy">
+          <span class="ph-date">Saturday 24 Oct</span>
+          <span class="ph-hello">Poulpy is grumpy</span>
+          <div class="ring-wrap"><span data-ring="3" data-ring-mood="ember"></span><div class="mini" data-poulpy="crossedmini"></div></div>
+          <div class="bubble g">Thursday's run is still waiting. 20 minutes and I flip back, promise.</div>
+        </div>
+        <div class="ph-body">
+          <div class="ph-row"><span>This week</span><span>1 session · 35 min</span></div>
+          <div class="session">
+            <span class="t-label" style="color:var(--ember)">Catch up</span>
+            <span class="t">Easy treadmill run</span>
+            <span class="m">20 min · Zone 2, 8.5 km/h, 1% incline</span>
+            <button class="cta g" type="button" tabindex="-1">Flip him back</button>
+          </div>
+        </div>
+      </div>
+      <p class="caption">Grumpy side. A planned session was missed; the fix is offered right away and kept short.</p>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="behaviour">
+  <div class="sec-head">
+    <span class="eyebrow">7 · Poulpy's behaviour</span>
+    <h2>The side is the status, the shade is the feeling</h2>
+    <p class="muted">Which side shows says whether you're keeping your plan. The shade and the face on that side react to what just happened.</p>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>What happens</th><th>Mood</th><th>Pose</th><th>Rule</th></tr></thead>
+      <tbody id="rules"></tbody>
+    </table>
+  </div>
+</section>
+
+<section class="block" id="game">
+  <div class="sec-head">
+    <span class="eyebrow">8 · Gamification</span>
+    <h2>Ideas built from real octopus facts</h2>
+    <p class="muted">Core ideas come first; the others can join later.</p>
+  </div>
+  <div class="ideas">
+    <article class="idea"><div class="idea-head"><h3>The flip</h3><span class="prio core">Core</span></div><p>Poulpy's side follows the mood rules above. Coming back is always one session away, and the flip animation plus a haptic tap is the reward for it.</p><p class="fact">Inspired by the plush itself.</p></article>
+    <article class="idea"><div class="idea-head"><h3>Eight tentacles</h3><span class="prio core">Core</span></div><p>The ring has eight tentacles. Each finished session lights one, and a lit tentacle never goes dark: there is no weekly reset. The eighth gives the Champion pose and a "full octopus", and the next session starts a new ring.</p><p class="fact">Octopuses have eight tentacles, and Poulpy never grows more.</p></article>
+    <article class="idea"><div class="idea-head"><h3>Mood shades</h3><span class="prio core">Core</span></div><p>Poulpy's colour moves along the spectrum with each emotion: a touch richer after a record, lighter while recovering, hotter ember the longer a session waits.</p><p class="fact">Octopuses change colour with their mood.</p></article>
+    <article class="idea"><div class="idea-head"><h3>Shells in the den</h3><span class="prio later">Later</span></div><p>Achievements are shells Poulpy collects in his den: first 5 km on the treadmill, 10 sessions, a squat record, a full rehab block finished.</p><p class="fact">Octopuses decorate their dens with shells and stones.</p></article>
+    <article class="idea"><div class="idea-head"><h3>Colourways</h3><span class="prio maybe">Maybe</span></div><p>Unlock seasonal skins for Poulpy after milestones (a coral reef edition, a deep-sea night edition). Purely cosmetic.</p><p class="fact">Octopuses can camouflage in a fraction of a second.</p></article>
+    <article class="idea"><div class="idea-head"><h3>Flip the real one</h3><span class="prio maybe">Maybe</span></div><p>A home-screen widget and an optional morning nudge that says which side the real plush on your desk should show today.</p><p class="fact">Only works because the real Poulpy exists.</p></article>
+  </div>
+  <div class="guard">
+    <h3>Ground rules for Poulpy</h3>
+    <ul>
+      <li>Grumpy is comic, never guilt. No "you failed", no streak-loss alarms. Even Fuming is a cartoon tantrum.</li>
+      <li>Pain and rehab always win: a hurt user gets the Patched up pose, never the ember side.</li>
+      <li>One way back, always short: the catch-up session offered while ember is the easiest one in the plan.</li>
+      <li>Notifications speak in Poulpy's voice at most once a day, and can be turned off without losing the mascot.</li>
+      <li>All of Poulpy's lines are written in French and English from the start.</li>
+    </ul>
+  </div>
+</section>
+
+<footer>Coach Poulpy brand book. What was decided, and why, is traced on the <a href="/coach-poulpy/docs/brand-decisions" target="_top">brand decisions</a> page.</footer>
+</div>
+
+<script>
+(function () {
+  var INK = "#141A26", BLUE = "#3AA6E0", EMBER = "#D9622B";
+  var MOODS = [
+    { id: "fuming",  name: "Fuming",     tone: "#C0352B", side: "ember", face: "fuming",  when: "Two planned sessions missed." },
+    { id: "grumpy",  name: "Grumpy",     tone: "#D9622B", side: "ember", face: "grumpy",  when: "A planned session is still not done 24 h after its day." },
+    { id: "annoyed", name: "Annoyed",    tone: "#E8873F", side: "ember", face: "annoyed", when: "Today's session isn't done yet and the evening is coming (the grace period)." },
+    { id: "recover", name: "Recovering", tone: "#5DB4E6", side: "blue",  face: "calm",    when: "Rest days, the hours after a hard session, and pain or rehab days. A lighter, fresher blue, never grey." },
+    { id: "happy",   name: "Happy",      tone: "#3AA6E0", side: "blue",  face: "happy",   when: "Session done, plan on track. The plush's own colour and the default." },
+    { id: "proud",   name: "Proud",      tone: "#2C9CE0", side: "blue",  face: "cocky",   when: "Personal record, or a full octopus. Just a touch richer than Happy." }
+  ];
+  var M = {}; MOODS.forEach(function (m) { M[m.id] = m; });
+
+  function s(d, w, c) { return '<path d="' + d + '" fill="none" stroke="' + (c || INK) + '" stroke-width="' + (w || 4.5) + '" stroke-linecap="round" stroke-linejoin="round"/>'; }
+  function f(d, c) { return '<path d="' + d + '" fill="' + (c || INK) + '"/>'; }
+  function eye(x, y, rx, ry, hx) { return '<ellipse cx="' + x + '" cy="' + y + '" rx="' + rx + '" ry="' + ry + '" fill="' + INK + '"/><circle cx="' + (x + (hx || -3)) + '" cy="' + (y - 4) + '" r="2.8" fill="#fff"/>'; }
+  var EYES = eye(80, 96, 9, 10.5) + eye(120, 96, 9, 10.5);
+  function blushB() { return '<ellipse cx="64" cy="112" rx="8" ry="4.5" fill="#F49A6B" opacity=".75"/><ellipse cx="136" cy="112" rx="8" ry="4.5" fill="#F49A6B" opacity=".75"/>'; }
+  function blushE() { return '<ellipse cx="64" cy="114" rx="8" ry="4.5" fill="#8E2414" opacity=".35"/><ellipse cx="136" cy="114" rx="8" ry="4.5" fill="#8E2414" opacity=".35"/>'; }
+  function drop(x, y, k, c) { k = k || 1; return '<path d="M' + x + ' ' + (y - 9 * k) + ' C' + (x + 6 * k) + ' ' + (y - 2 * k) + ' ' + (x + 6 * k) + ' ' + (y + 5 * k) + ' ' + x + ' ' + (y + 5 * k) + ' C' + (x - 6 * k) + ' ' + (y + 5 * k) + ' ' + (x - 6 * k) + ' ' + (y - 2 * k) + ' ' + x + ' ' + (y - 9 * k) + ' Z" fill="' + (c || "#A8DDF7") + '" stroke="#3AA6E0" stroke-width="1.5"/>'; }
+  function spark(x, y, r, c) { return '<path d="M' + x + ' ' + (y - r) + ' L' + (x + r * .3) + ' ' + (y - r * .3) + ' L' + (x + r) + ' ' + y + ' L' + (x + r * .3) + ' ' + (y + r * .3) + ' L' + x + ' ' + (y + r) + ' L' + (x - r * .3) + ' ' + (y + r * .3) + ' L' + (x - r) + ' ' + y + ' L' + (x - r * .3) + ' ' + (y - r * .3) + ' Z" fill="' + (c || "#F0B53A") + '"/>'; }
+
+  var FACES = {
+    happy: EYES + s("M90 112 Q100 123 110 112") + blushB(),
+    calm: s("M71 97 Q80 90 89 97", 4.5) + s("M111 97 Q120 90 129 97", 4.5) + s("M92 113 Q100 119 108 113", 4) + blushB(),
+    cocky: f("M71 97 a9 9 0 0 0 18 0 Z") + s("M68 95 L92 93", 4) + eye(120, 96, 9, 10.5) + s("M109 79 Q120 70 132 77", 4.5) + s("M88 114 Q102 123 115 108", 4.5) + blushB(),
+    proud: s("M70 99 Q80 86 90 99") + s("M110 99 Q120 86 130 99") + f("M87 109 Q100 132 113 109 Z") + blushB(),
+    tired: f("M71 97 a9 9 0 0 0 18 0 Z") + f("M111 97 a9 9 0 0 0 18 0 Z") + s("M69 98 L91 95", 4) + s("M109 95 L131 98", 4) +
+           s("M73 110 Q80 114 87 110", 2.5, "#4B6274") + s("M113 110 Q120 114 127 110", 2.5, "#4B6274") +
+           '<ellipse cx="100" cy="121" rx="8" ry="6.5" fill="' + INK + '"/><ellipse cx="100" cy="125" rx="5" ry="2.6" fill="#F07A7A"/>',
+    hurt: eye(80, 97, 9, 10.5) + eye(120, 97, 9, 10.5) + '<circle cx="84" cy="101" r="2" fill="#fff"/><circle cx="124" cy="101" r="2" fill="#fff"/>' +
+          s("M68 82 Q78 76 88 80", 4) + s("M132 82 Q122 76 112 80", 4) + s("M91 117 q3 -3 6 0 t6 0 t6 0", 3.5) + blushB(),
+    annoyed: f("M71 97 a9 9 0 0 0 18 0 Z") + f("M111 97 a9 9 0 0 0 18 0 Z") + s("M69 96 L91 96", 4) + s("M109 96 L131 96", 4) + s("M110 82 L130 78", 4) + s("M91 116 L109 116", 4.5) + blushE(),
+    grumpy: eye(80, 98, 8.5, 9) + eye(120, 98, 8.5, 9) + s("M66 80 L92 89", 5) + s("M134 80 L108 89", 5) + s("M89 121 Q100 110 111 121") + blushE(),
+    fuming: eye(81, 100, 7, 7.5) + eye(119, 100, 7, 7.5) + s("M64 82 L93 93", 5.5) + s("M136 82 L107 93", 5.5) +
+            '<rect x="86" y="111" width="28" height="13" rx="5" fill="#fff" stroke="' + INK + '" stroke-width="3.5"/>' + s("M86 117.5 L114 117.5", 2.5) + s("M95 111 L95 124", 2) + s("M105 111 L105 124", 2) + blushE(),
+    lift: s("M70 90 L87 96 L70 102", 4.5) + s("M130 90 L113 96 L130 102", 4.5) +
+          '<rect x="87" y="110" width="26" height="12" rx="5" fill="#fff" stroke="' + INK + '" stroke-width="3.5"/>' + s("M87 116 L113 116", 2.5) + blushB(),
+    crossed: eye(84, 94, 8.5, 9.5, -5) + eye(124, 94, 8.5, 9.5, -5) + s("M68 79 L92 85", 5) + s("M134 76 L110 85", 5) + s("M90 110 Q98 104 106 110", 4.5) + blushE()
+  };
+
+  function armsSkirt(fill, dy, raise) {
+    var xs = [[26,126,25,17],[62,139,24,18],[100,143,24,18],[138,139,24,18],[174,126,25,17]];
+    if (raise) xs = xs.filter(function (_, i) { return raise.indexOf(i) < 0; });
+    return xs.map(function (a) { return '<ellipse cx="' + a[0] + '" cy="' + (a[1] + dy) + '" rx="' + a[2] + '" ry="' + a[3] + '" fill="' + fill + '"/>'; }).join("");
+  }
+  function lining(tone) { return MOODS.some(function (m) { return m.tone === tone && m.side === "ember"; }) ? BLUE : EMBER; }
+  function body(tone, raise) {
+    return armsSkirt(lining(tone), 6, raise) + armsSkirt(tone, 0, raise) +
+      '<path d="M37 130 C33 68 64 30 100 30 C136 30 167 68 163 130 Z" fill="' + tone + '"/>' +
+      '<ellipse cx="76" cy="56" rx="17" ry="9" fill="#fff" opacity=".22" transform="rotate(-20 76 56)"/>';
+  }
+  function tentacle(d, tone, w) { return s(d, w || 20, lining(tone)).replace('<path ', '<path transform="translate(0 4)" ') + s(d, w || 20, tone); }
+  function mirror(d) { return d.replace(/(-?\d+(?:\.\d+)?) (-?\d+(?:\.\d+)?)/g, function (_, x, y) { return (200 - +x) + " " + y; }); }
+
+  function svg(inner, vb, label) { return '<svg viewBox="' + (vb || "0 0 200 180") + '" role="img" aria-label="' + label + '">' + inner + '</svg>'; }
+  function poulpy(face, tone, label) {
+    var m = M[face] || null;
+    tone = tone || (m ? m.tone : (["grumpy", "annoyed", "fuming", "crossed"].indexOf(face) > -1 ? EMBER : BLUE));
+    return svg(body(tone) + FACES[(m && m.face) || face], null, label || ("Poulpy, " + face));
+  }
+
+  var VB = "-24 -36 248 226";
+  // A lifted tentacle: one short plush lobe swung from its root. a = angle from hanging down (90 right, 180 up, 270 left).
+  // lining "face" shows the underside towards us (folded over); otherwise the lining peeks along one edge.
+  function lobe(x, y, a, len, wid, tone, opt) {
+    opt = opt || {};
+    var r = a * Math.PI / 180, dx = Math.sin(r), dy = Math.cos(r);
+    var cx = x + dx * len / 2, cy = y + dy * len / 2, rot = (-a).toFixed(1);
+    var el = function (fill, ox, oy, k) { return '<ellipse cx="' + (cx + (ox || 0)).toFixed(1) + '" cy="' + (cy + (oy || 0)).toFixed(1) + '" rx="' + (wid / 2 * (k || 1)).toFixed(1) + '" ry="' + (len / 2 * (k || 1)).toFixed(1) + '" fill="' + fill + '" transform="rotate(' + rot + ' ' + (cx + (ox || 0)).toFixed(1) + ' ' + (cy + (oy || 0)).toFixed(1) + ')"/>'; };
+    var lin = lining(tone), out = "";
+    if (opt.face) { out = el(tone) + el(lin, 0, 0, .8); }
+    else { var px = Math.cos(r) * (opt.side || 4), py = -Math.sin(r) * (opt.side || 4); out = el(lin, px, py) + el(tone); }
+    if (opt.bulge) { var k = opt.bulge, bx = cx + Math.cos(r) * k, by = cy - Math.sin(r) * k; out += '<circle cx="' + bx.toFixed(1) + '" cy="' + by.toFixed(1) + '" r="12" fill="' + tone + '"/><circle cx="' + (bx - 3).toFixed(1) + '" cy="' + (by - 4).toFixed(1) + '" r="3.5" fill="#fff" opacity=".3"/>'; }
+    return out;
+  }
+  function tip(x, y, a, len) { var r = a * Math.PI / 180; return [x + Math.sin(r) * len, y + Math.cos(r) * len]; }
+  function dumbbell(x, y) { return '<rect x="' + (x - 16) + '" y="' + (y - 2.5) + '" width="32" height="5" rx="2.5" fill="#56687A"/><rect x="' + (x - 22) + '" y="' + (y - 11) + '" width="9" height="22" rx="3" fill="' + INK + '"/><rect x="' + (x + 13) + '" y="' + (y - 11) + '" width="9" height="22" rx="3" fill="' + INK + '"/>'; }
+
+  var POSES = {
+    flex: function () {
+      var t = M.proud.tone;
+      return svg('<circle cx="100" cy="90" r="96" fill="#F0B53A" opacity=".12"/>' + body(t) + FACES.cocky +
+        spark(6, 52, 10) + spark(196, 40, 8) + spark(176, 4, 5) + spark(24, 10, 5) +
+        '<rect x="128" y="-12" width="54" height="24" rx="12" fill="' + INK + '"/><text x="155" y="5" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="800" font-size="14" fill="#F0B53A">PR!</text>', VB, "Poulpy looking cocky after a personal record");
+    },
+    lift: function () {
+      var t = M.happy.tone;
+      return svg(body(t) + FACES.lift + drop(152, 50, .9) + drop(46, 64, .7) +
+        s("M12 70 l-12 -4 M10 86 l-14 0", 3, "#56687A") + s("M188 70 l12 -4 M190 86 l14 0", 3, "#56687A") +
+        '<g transform="rotate(-8 196 156)">' + dumbbell(196, 156) + '</g>', VB, "Poulpy straining with gritted teeth, a dumbbell beside him");
+    },
+    champion: function () {
+      var t = M.proud.tone;
+      var conf = [[-8,40,"#F0B53A",20],[20,0,EMBER,-30],[180,4,"#5BBEF0",40],[204,50,"#F0B53A",-15],[150,-14,EMBER,10],[46,-12,"#5BBEF0",60],[100,-24,"#F0B53A",30]]
+        .map(function (c) { return '<rect x="' + c[0] + '" y="' + c[1] + '" width="9" height="5" rx="1.5" fill="' + c[2] + '" transform="rotate(' + c[3] + ' ' + c[0] + ' ' + c[1] + ')"/>'; }).join("");
+      return svg(conf + body(t) + FACES.proud +
+        s("M74 120 L96 146", 7, EMBER) + s("M126 120 L104 146", 7, EMBER) +
+        '<circle cx="100" cy="152" r="14" fill="#F0B53A" stroke="#C98A0C" stroke-width="3"/>' + spark(100, 152, 7, "#FFF3C4"), VB, "Poulpy wearing a gold medal under confetti");
+    },
+    tall: function () {
+      // Same plush, skirt stretched a little from the head's base so he stands taller with no gaps.
+      var t = M.proud.tone;
+      return svg('<ellipse cx="100" cy="172" rx="88" ry="6" fill="' + INK + '" opacity=".1"/>' +
+        '<g transform="translate(0 -12)"><g transform="translate(0 -36) scale(1 1.3)">' + armsSkirt(lining(t), 6) + armsSkirt(t, 0) + '</g>' +
+        '<path d="M37 130 C33 68 64 30 100 30 C136 30 167 68 163 130 Z" fill="' + t + '"/>' +
+        '<ellipse cx="76" cy="56" rx="17" ry="9" fill="#fff" opacity=".22" transform="rotate(-20 76 56)"/>' + FACES.proud + '</g>' +
+        s("M-4 70 l0 -16 M-10 60 l6 -6 6 6", 3, "#56687A") + s("M204 70 l0 -16 M198 60 l6 -6 6 6", 3, "#56687A"), VB, "Poulpy standing a little taller on his tentacles");
+    },
+    exhausted: function () {
+      var t = M.recover.tone;
+      return svg(body(t) +
+        '<path d="M45 60 Q100 38 155 60 L158 76 Q100 54 42 76 Z" fill="#FFFFFF" stroke="' + INK + '" stroke-opacity=".25" stroke-width="1.5"/>' +
+        s("M44 68 Q100 46 156 68", 4, EMBER) +
+        s("M157 66 q16 0 22 12", 6, "#FFFFFF") + s("M157 70 q10 10 6 22", 6, "#FFFFFF") +
+        FACES.tired + drop(30, 76, 1.1) + drop(172, 88, 1) + drop(160, 112, .7) + drop(12, 128, .8) + drop(194, 140, .9), VB, "Poulpy exhausted with a sweatband, dripping with sweat");
+    },
+    side: function () {
+      var t = M.recover.tone;
+      var face = f("M89 99 a8.5 8.5 0 0 0 17 0 Z") + f("M124 98 a6.5 7.5 0 0 0 13 0 Z") + s("M87 98 L108 96", 3.5) + s("M122 96 L139 97", 3.5) +
+        s("M108 117 Q115 120 122 117", 4) + '<ellipse cx="86" cy="112" rx="7" ry="4" fill="#F49A6B" opacity=".7"/><ellipse cx="144" cy="111" rx="5" ry="3.5" fill="#F49A6B" opacity=".7"/>';
+      return svg('<g transform="rotate(-6 100 140)">' + body(t) + '<path d="M70 40 Q56 86 62 128" fill="none" stroke="#fff" stroke-opacity=".25" stroke-width="2"/>' + face + '</g>' +
+        '<text x="160" y="40" font-family="Baloo 2, sans-serif" font-weight="800" font-size="22" fill="#56687A">…</text>', VB, "Poulpy turned slightly to the side, tired");
+    },
+    sleeping: function () {
+      var t = M.recover.tone;
+      return svg(body(t) +
+        '<path d="M62 52 Q100 30 140 46 C132 26 120 10 108 -4 C96 12 78 30 62 52 Z" fill="#1574B0"/>' + s("M62 52 Q100 32 140 46", 8, "#FFFFFF") + '<circle cx="108" cy="-6" r="8" fill="#FFFFFF" stroke="#B6C4D0" stroke-width="1.5"/>' +
+        s("M71 96 Q80 104 89 96") + s("M111 96 Q120 104 129 96") + '<circle cx="100" cy="117" r="4" fill="' + INK + '"/>' + blushB() +
+        '<text x="160" y="70" font-family="Baloo 2, sans-serif" font-weight="800" font-size="24" fill="#1574B0">z</text><text x="178" y="52" font-family="Baloo 2, sans-serif" font-weight="800" font-size="17" fill="#1574B0">z</text>', VB, "Poulpy asleep wearing a nightcap");
+    },
+    hurt: function () {
+      var t = M.recover.tone;
+      return svg(body(t) +
+        '<g transform="rotate(35 132 56)"><rect x="112" y="50" width="40" height="13" rx="5" fill="#F5D7B5" stroke="#D9B48C" stroke-width="1.5"/></g>' +
+        '<g transform="rotate(-35 132 56)"><rect x="112" y="50" width="40" height="13" rx="5" fill="#F5D7B5" stroke="#D9B48C" stroke-width="1.5"/></g>' +
+        FACES.hurt + drop(66, 112, .55), VB, "Poulpy with a plaster on his head");
+    },
+    hide: function () {
+      var t = M.happy.tone;
+      return svg(body(t) + s("M70 100 Q80 92 90 100", 4.5) + s("M110 100 Q120 92 130 100", 4.5) + s("M93 116 Q100 121 107 116", 4) +
+        '<ellipse cx="66" cy="112" rx="12" ry="6" fill="#F49A6B" opacity=".9"/><ellipse cx="134" cy="112" rx="12" ry="6" fill="#F49A6B" opacity=".9"/>' +
+        s("M60 110 l4 4 M66 109 l4 4 M128 109 l4 4 M134 110 l4 4", 2, "#C96A3E") + drop(150, 62, .7), VB, "Poulpy blushing with his eyes squeezed shut");
+    },
+    scratch: function () {
+      var t = M.happy.tone;
+      return svg(body(t) + eye(80, 97, 8, 9.5, 0) + eye(120, 95, 9.5, 11, 0) + s("M66 84 L90 86", 4) + s("M110 78 Q120 70 132 76", 4) +
+        s("M90 116 q5 -4 10 0 t10 0", 4) + blushB() +
+        '<circle cx="160" cy="44" r="4" fill="#B6C4D0"/><circle cx="172" cy="28" r="6" fill="#B6C4D0"/>' +
+        '<ellipse cx="196" cy="-4" rx="24" ry="18" fill="#FFFFFF" stroke="#B6C4D0" stroke-width="2"/>' +
+        '<text x="196" y="6" text-anchor="middle" font-family="Baloo 2, sans-serif" font-weight="800" font-size="26" fill="#1574B0">?</text>', VB, "Poulpy thinking, with a question mark in a thought bubble");
+    },
+    crossed: function () {
+      var t = M.grumpy.tone;
+      return svg(body(t) + FACES.crossed +
+        s("M196 150 q6 -6 12 0", 3, "#7A2C12") + s("M200 140 q8 -8 16 0", 3, "#7A2C12") +
+        '<text x="-16" y="34" font-family="Baloo 2, sans-serif" font-weight="800" font-size="22" fill="#7A2C12">hmph</text>', VB, "Poulpy with two front tentacles crossed, looking away");
+    },
+    fuming: function () {
+      var t = M.fuming.tone;
+      function puff(x, y) { return [[0,0,12],[13,-6,10],[-12,-4,9],[3,-15,9]].map(function (p) { return '<circle cx="' + (x + p[0]) + '" cy="' + (y + p[1]) + '" r="' + p[2] + '" fill="#E6EEF4" stroke="#B6C4D0" stroke-width="1.5"/>'; }).join(""); }
+      return svg(puff(52, 6) + puff(150, -2) + s("M70 30 L64 18", 4, "#B6C4D0") + s("M132 28 L140 14", 4, "#B6C4D0") +
+        body(t) +
+        s("M14 80 l-12 -4 M12 96 l-14 0", 3, "#7A2C12") + s("M186 80 l12 -4 M188 96 l14 0", 3, "#7A2C12") +
+        FACES.fuming +
+        s("M140 50 q6 6 0 12 M152 50 q-6 6 0 12 M140 50 q6 -6 12 0 M140 62 q6 6 12 0", 3.5, "#FFDCC7"), VB, "Poulpy fuming with steam, shaking two side tentacles");
+    },
+    spin: function () {
+      // Comic-style spin: the arc behind him, Poulpy, then the arc in front, plus speed marks.
+      var t = M.happy.tone;
+      var back = s("M186 132 Q100 100 14 132", 4, "#7FCBF0");
+      var front = '<path class="spin-arc" d="M8 140 Q100 192 194 140" fill="none" stroke="#1574B0" stroke-width="5" stroke-linecap="round"/>' +
+        f("M202 132 L188 130 L194 146 Z", "#1574B0");
+      var face = eye(88, 96, 9, 10.5, 2) + eye(128, 96, 9, 10.5, 2) + s("M98 112 Q108 122 118 112") + blushB();
+      return svg(back + body(t) + face + front +
+        s("M-14 70 l18 0 M-18 84 l14 0", 3, "#7FCBF0") + s("M196 64 l18 0 M200 78 l14 0", 3, "#7FCBF0") +
+        '<path d="M150 40 q8 -10 18 -4" fill="none" stroke="#7FCBF0" stroke-width="3" stroke-linecap="round"/>', VB, "Poulpy spinning on the spot, drawn with comic motion lines");
+    }
+  };
+
+  document.querySelectorAll("[data-poulpy]").forEach(function (el) {
+    var k = el.getAttribute("data-poulpy");
+    el.innerHTML = k === "crossedmini" ? poulpy("crossed", M.grumpy.tone, "Poulpy grumpy") : poulpy(k);
+  });
+  document.querySelectorAll("[data-pose]").forEach(function (el) { el.innerHTML = POSES[el.getAttribute("data-pose")](); });
+
+  // logo
+  document.querySelectorAll("[data-logo]").forEach(function (el) { el.innerHTML = poulpy("happy", BLUE, "Coach Poulpy logo"); });
+  var iconInner = function (bg) { return '<rect width="200" height="200" fill="' + bg + '"/><g transform="translate(14 24) scale(.86)">' + body(BLUE) + FACES.happy + '</g>'; };
+  document.getElementById("icons").innerHTML = [["#F4F9FC", 72, "Foam"], ["#0A1520", 72, "Deep sea"], ["#FFFFFF", 48, "48 px"], ["#FFFFFF", 28, "28 px"]].map(function (i) {
+    return '<figure><svg viewBox="0 0 200 200" width="' + i[1] + '" height="' + i[1] + '" role="img" aria-label="App icon, ' + i[2] + '">' + iconInner(i[0]) + '</svg><figcaption>' + i[2] + '</figcaption></figure>';
+  }).join("");
+
+  // spectrum
+  var bar = document.getElementById("specBar"), labels = document.getElementById("specLabels");
+  bar.innerHTML = MOODS.map(function (m, i) { return '<button type="button" id="mood-' + m.id + '" aria-pressed="false" aria-label="' + m.name + '" style="background:' + m.tone + '" data-i="' + i + '"></button>'; }).join("");
+  labels.innerHTML = MOODS.map(function (m) { return '<span>' + m.name + '</span>'; }).join("");
+  function show(i) {
+    var m = MOODS[i];
+    document.getElementById("specArt").innerHTML = poulpy(m.id, m.tone, "Poulpy, " + m.name);
+    document.getElementById("specArt").style.backgroundColor = m.side === "blue" ? "var(--primary-soft)" : "var(--ember-soft)";
+    document.getElementById("specName").textContent = m.name;
+    document.getElementById("specName").style.color = m.tone;
+    var side = document.getElementById("specSide");
+    side.textContent = m.side === "blue" ? "Blue side" : "Ember side";
+    side.style.color = m.side === "blue" ? "var(--primary)" : "var(--ember)";
+    document.getElementById("specWhen").textContent = m.when;
+    document.getElementById("specHex").textContent = "mood." + m.id + " · " + m.tone;
+    bar.querySelectorAll("button").forEach(function (b, j) { b.setAttribute("aria-pressed", j === i ? "true" : "false"); });
+  }
+  bar.addEventListener("click", function (e) { var b = e.target.closest("button"); if (b) show(+b.getAttribute("data-i")); });
+  show(5);
+
+  // ramps
+  var ramps = [
+    ["Lagoon", [["50","#EAF6FD"],["100","#CDEBFA"],["300","#7FCBF0"],["400","#3AA6E0"],["600","#1574B0"],["800","#0C4A73"],["900","#082F4A"]]],
+    ["Ember", [["50","#FFF1E8"],["100","#FFDCC7"],["300","#F4A473"],["400","#E8873F"],["500","#D9622B"],["600","#B4471C"],["800","#7A2C12"]]],
+    ["Neutral", [["0","#FFFFFF"],["50","#F4F9FC"],["100","#E6EFF5"],["300","#B6C4D0"],["500","#6B7C8C"],["700","#374555"],["900","#141A26"]]]
+  ];
+  document.getElementById("ramps").innerHTML = ramps.map(function (r) {
+    return '<div class="ramp"><span class="lbl">' + r[0] + '</span>' + r[1].map(function (sw, i) {
+      var light = i < 4; return '<div class="sw" style="background:' + sw[1] + ';color:' + (light ? "#141A26" : "#F4F9FC") + (sw[1] === "#FFFFFF" ? ";border:1px solid #D3E0E9" : "") + '">' + sw[0] + '<br>' + sw[1] + '</div>';
+    }).join("") + '</div>';
+  }).join("");
+
+  function roles(el, rows) {
+    el.insertAdjacentHTML("beforeend", rows.map(function (r) {
+      return '<div class="role-row"><span class="dot" style="background:' + r[1] + '"></span><span>' + r[0] + '</span><code style="color:inherit;opacity:.7">' + r[1] + '</code></div>';
+    }).join(""));
+  }
+  roles(document.getElementById("rolesLight"), [["Primary · buttons, links", "#1574B0"], ["Grumpy accent", "#B4471C"], ["Background", "#F4F9FC"], ["Surface", "#FFFFFF"], ["Text", "#141A26"], ["Success", "#2E9E6A"], ["Error", "#C8264A"]]);
+  roles(document.getElementById("rolesDark"), [["Primary · buttons, links", "#5BBEF0"], ["Grumpy accent", "#FF9A66"], ["Background · deep sea", "#0A1520"], ["Surface", "#112230"], ["Text", "#E8F1F7"], ["Success", "#4CC38A"], ["Error", "#FF6B85"]]);
+
+  document.getElementById("spacing").innerHTML = [["xs",4],["sm",8],["md",12],["lg",16],["xl",24],["2xl",32],["3xl",48]].map(function (sp) {
+    return '<div class="sp-row"><span>' + sp[0] + ' · ' + sp[1] + '</span><div class="sp-bar" style="width:' + (sp[1] * 2.4) + 'px;max-width:100%"></div></div>';
+  }).join("");
+
+  // behaviour rules
+  var RULES = [
+    ["You finish any session", "happy", "Happy", "Always flips back to blue, with the flip animation. The flip is the reward."],
+    ["You set a record", "proud", "Cocky", "Lasts until the end of the day, then back to Happy."],
+    ["The eighth tentacle lights", "proud", "Champion", "Shown on the end-of-session screen and on Home; the next session starts a new ring."],
+    ["A hard session is finished (effort 8+)", "recover", "Exhausted or Side glance", "For the rest of the day; Poulpy recommends recovery."],
+    ["Today is a planned rest day", "recover", "Sleeping", "Rest days from the plan never count as missed."],
+    ["You log pain, or a rehab session is marked too hard", "recover", "Patched up", "Blocks the ember side for 72 h. Poulpy never gets cross at someone who is hurt."],
+    ["Today's session is not done yet by the evening", "annoyed", "Annoyed", "The grace period: a nudge, not a scolding."],
+    ["A planned session is still not done 24 h after its day", "grumpy", "Pouting", "Flips to the ember side and offers a short catch-up session."],
+    ["Two planned sessions missed", "fuming", "Fuming", "Same short catch-up offer. Any session flips him straight back to Happy."],
+    ["No plan at all (free training)", "happy", "Happy or Sleeping", "With nothing promised, nothing can be missed. Sleeping after 7 days without training."]
+  ];
+  document.getElementById("rules").innerHTML = RULES.map(function (r) {
+    var m = M[r[1]];
+    return '<tr><td>' + r[0] + '</td><td><span class="pill"><i style="background:' + m.tone + '"></i>' + m.name + '</span></td><td>' + r[2] + '</td><td>' + r[3] + '</td></tr>';
+  }).join("");
+
+  // tentacle ring
+  function arc(cx, cy, r, a0, a1) {
+    var p = function (a) { var t = (a - 90) * Math.PI / 180; return [cx + r * Math.cos(t), cy + r * Math.sin(t)]; };
+    var st = p(a0), e = p(a1);
+    return "M" + st[0].toFixed(2) + " " + st[1].toFixed(2) + " A" + r + " " + r + " 0 0 1 " + e[0].toFixed(2) + " " + e[1].toFixed(2);
+  }
+  document.querySelectorAll("[data-ring]").forEach(function (el) {
+    var lit = +el.getAttribute("data-ring"), em = el.getAttribute("data-ring-mood") === "ember";
+    var on = em ? "var(--ember)" : "var(--primary)", segs = "";
+    for (var i = 0; i < 8; i++) segs += '<path d="' + arc(100, 100, 86, i * 45 + 5, i * 45 + 40) + '" fill="none" stroke="' + (i < lit ? on : "var(--line)") + '" stroke-width="15" stroke-linecap="round"/>';
+    el.outerHTML = '<svg viewBox="0 0 200 200" role="img" aria-label="' + lit + ' of 8 tentacles lit">' + segs + '</svg>';
+  });
+
+  // flip
+  var stage = document.getElementById("stage"), state = document.getElementById("flipState");
+  function flip() {
+    var on = stage.classList.toggle("flipped");
+    stage.setAttribute("aria-pressed", on ? "true" : "false");
+    state.textContent = on ? "Ember side: a planned session slipped, Poulpy is grumpy." : "Blue side: you trained, Poulpy is happy.";
+  }
+  stage.addEventListener("click", flip);
+  document.getElementById("flipBtn").addEventListener("click", flip);
+
+  // token tabs
+  document.querySelectorAll(".tab").forEach(function (t) {
+    t.addEventListener("click", function () {
+      document.querySelectorAll(".tab").forEach(function (o) { o.setAttribute("aria-selected", o === t ? "true" : "false"); });
+      document.querySelectorAll("[data-panel]").forEach(function (p) { p.hidden = p.getAttribute("data-panel") !== t.getAttribute("data-tab"); });
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
