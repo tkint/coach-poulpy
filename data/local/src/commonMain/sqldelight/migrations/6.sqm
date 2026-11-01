@@ -1,0 +1,10 @@
+-- Body measurements (ADR 0017): one dated weight or height entry per day, stored in kg and cm.
+-- A new table only; nothing existing changes.
+CREATE TABLE body_measurement (
+    id TEXT NOT NULL PRIMARY KEY,
+    metric TEXT NOT NULL,
+    day TEXT NOT NULL,
+    value REAL NOT NULL,
+    created_at INTEGER NOT NULL,
+    UNIQUE (metric, day)
+);

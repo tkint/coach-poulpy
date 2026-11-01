@@ -65,6 +65,9 @@ class SettingsModel(
 /** A number in the user's units, with the unit to print after it. The apps format [value] in their locale. */
 data class Measure(val value: Double, val decimals: Int, val unit: String)
 
+/** A height in feet and inches, the inches in steps of a half (the input allows no finer). */
+data class FeetInches(val feet: Int, val inches: Double)
+
 /** Distances, speeds and weights in the unit system the user picked. Weights are stored in kilograms and converted to show. */
 object Units {
     private const val METERS_PER_MILE = 1609.344
@@ -78,6 +81,22 @@ object Units {
     fun weight(kg: Double, system: UnitSystem) = when (system) {
         UnitSystem.METRIC -> Measure(kg, 1, "kg")
         UnitSystem.IMPERIAL -> Measure(poundsOf(kg), 1, "lb")
+    }
+
+    private const val CM_PER_INCH = 2.54
+
+    /** Centimetres as feet and inches, rounded to the nearest half inch; 11.75 in is 1 ft 0 in, never 0 ft 12 in. */
+    fun feetAndInches(cm: Double): FeetInches {
+        val halfInches = kotlin.math.round(cm / CM_PER_INCH * 2).toInt()
+        return FeetInches(halfInches / 24, (halfInches % 24) / 2.0)
+    }
+
+    fun centimetresOf(feet: Int, inches: Double) = (feet * 12 + inches) * CM_PER_INCH
+
+    /** A height in the user's unit. Metric shows whole centimetres; imperial uses [feetAndInches] instead. */
+    fun height(cm: Double, system: UnitSystem) = when (system) {
+        UnitSystem.METRIC -> Measure(cm, 0, "cm")
+        UnitSystem.IMPERIAL -> Measure(cm / CM_PER_INCH, 1, "in")
     }
 
     fun distance(meters: Double, system: UnitSystem, decimals: Int = 2) = when (system) {

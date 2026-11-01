@@ -3,6 +3,8 @@ package ch.coachpoulpy.data.local
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
 import ch.coachpoulpy.core.engine.SessionEvent
+import ch.coachpoulpy.core.model.BodyMeasurement
+import ch.coachpoulpy.core.model.BodyMetric
 import ch.coachpoulpy.core.model.Execution
 import ch.coachpoulpy.core.model.ExecutionId
 import ch.coachpoulpy.core.model.ExecutionSource
@@ -91,6 +93,26 @@ class LocalStore(driverFactory: DriverFactory, private val clock: Clock = Clock.
     }
 
     /** The catalog version stored on the phone, or null before the first seed. */
+    /** Adds a body measurement, or corrects the one already logged for that day (ADR 0017). */
+    fun logBodyMeasurement(measurement: BodyMeasurement) = db.transaction {
+        val queries = db.bodyMeasurementQueries
+        val metric = measurement.metric.name
+        val day = measurement.day.toString()
+        if (queries.measurementOnDay(metric, day).executeAsOneOrNull() != null) {
+            queries.correctMeasurement(measurement.value, metric, day)
+        } else {
+            queries.insertMeasurement(Ids.newUuidV7(), metric, day, measurement.value, clock.now().toEpochMilliseconds())
+        }
+    }
+
+    fun bodyMeasurements(metric: BodyMetric): Flow<List<BodyMeasurement>> =
+        db.bodyMeasurementQueries.measurements(metric.name) { _, metricName, day, value, _ ->
+            BodyMeasurement(BodyMetric.valueOf(metricName), LocalDate.parse(day), value)
+        }.asFlow().mapToList(Dispatchers.IO)
+
+    fun deleteBodyMeasurement(metric: BodyMetric, day: LocalDate) =
+        db.bodyMeasurementQueries.deleteMeasurement(metric.name, day.toString())
+
     fun catalogVersion(): Int? = db.catalogEntryQueries.version().executeAsOneOrNull()?.toInt()
 
     fun catalogExercises(): List<Exercise> =
