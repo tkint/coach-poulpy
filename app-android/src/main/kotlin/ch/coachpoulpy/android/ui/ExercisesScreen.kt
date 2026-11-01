@@ -3,6 +3,7 @@ package ch.coachpoulpy.android.ui
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -68,7 +69,8 @@ import ch.coachpoulpy.shared.MuscleArea
  * The searchable catalog, used by the library and by the builder's picker: a pill
  * search, muscle chips, the count line, then card rows grouped by movement pattern,
  * or ranked results while searching. In the picker ([adding]) each row ends with a
- * round plus instead of a chevron, and recently used exercises come first.
+ * round plus instead of a chevron, and recently used exercises come first. With [onOpen]
+ * the row opens the exercise's details and only the plus picks it ([onPick]).
  */
 @Composable
 fun ExerciseList(
@@ -77,6 +79,7 @@ fun ExerciseList(
     onPick: (String) -> Unit,
     modifier: Modifier = Modifier,
     adding: Boolean = false,
+    onOpen: ((String) -> Unit)? = null,
 ) {
     val model = remember(graph, language) { graph.exerciseList(language) }
     val context = LocalContext.current
@@ -143,7 +146,11 @@ fun ExerciseList(
                     }
                 }
                 items(section.rows, key = { "$index:${it.slug}" }) { row ->
-                    ExerciseCard(row, adding, onClick = { onPick(row.slug) })
+                    if (adding && onOpen != null) {
+                        PickerCard(row, onOpen = { onOpen(row.slug) }, onAdd = { onPick(row.slug) })
+                    } else {
+                        ExerciseCard(row, adding, onClick = { onPick(row.slug) })
+                    }
                 }
             }
             if (listing.count == 0) {
@@ -291,6 +298,46 @@ private fun ExerciseCard(row: ExerciseRow, adding: Boolean, onClick: () -> Unit)
                 }
             } else {
                 Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = colors.onSurfaceVariant)
+            }
+        }
+    }
+}
+
+/** A picker row: the card opens the details, and the round plus inside it adds the exercise. */
+@Composable
+private fun PickerCard(row: ExerciseRow, onOpen: () -> Unit, onAdd: () -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    OutlinedCard(
+        colors = CardDefaults.outlinedCardColors(containerColor = colors.surface),
+        border = BorderStroke(1.dp, colors.outline),
+        shape = RoundedCornerShape(PoulpyRadius.md),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Row(Modifier.heightIn(min = 64.dp), verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                Modifier
+                    .weight(1f)
+                    .clickable(onClickLabel = stringResource(R.string.exercise_details, row.name), role = Role.Button, onClick = onOpen)
+                    .padding(start = 12.dp, top = 10.dp, bottom = 10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                PatternBadge(row.pattern, size = 44.dp)
+                Column(Modifier.weight(1f)) {
+                    Text(row.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold)
+                    Text(row.details, style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
+                }
+            }
+            // A 48 dp touch target around the 36 dp plus.
+            Box(
+                Modifier
+                    .size(56.dp)
+                    .clickable(onClickLabel = stringResource(R.string.exercise_addNamed, row.name), role = Role.Button, onClick = onAdd),
+                contentAlignment = Alignment.Center,
+            ) {
+                Box(Modifier.size(36.dp).background(colors.primary, CircleShape), contentAlignment = Alignment.Center) {
+                    Icon(Icons.Filled.Add, contentDescription = null, tint = colors.onPrimary, modifier = Modifier.size(20.dp))
+                }
             }
         }
     }

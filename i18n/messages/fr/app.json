@@ -113,6 +113,10 @@
     "variationPosition": "Variante {position}",
     "variationsA11y": "Variantes, {position}, de la plus facile à la plus difficile",
     "add": "Ajouter à une séance",
+    "addHere": "Ajouter à la séance",
+    "worked": "Muscles sollicités",
+    "details": "Détails de {name}",
+    "addNamed": "Ajouter {name}",
     "picture": "Illustration de l’exercice"
   },
   "builder": {

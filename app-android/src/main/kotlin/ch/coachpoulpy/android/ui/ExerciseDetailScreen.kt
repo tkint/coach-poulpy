@@ -43,6 +43,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -183,10 +184,10 @@ private fun PictureArea(detail: ExerciseDetail, onBack: () -> Unit, onVariations
 }
 
 @Composable
-private fun FactCard(title: String, body: String, modifier: Modifier = Modifier) {
+internal fun FactCard(title: String, body: String, modifier: Modifier = Modifier, color: Color = MaterialTheme.colorScheme.surface) {
     Column(
         modifier
-            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(PoulpyRadius.md))
+            .background(color, RoundedCornerShape(PoulpyRadius.md))
             .padding(horizontal = 14.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {

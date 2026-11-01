@@ -244,6 +244,49 @@ struct ExerciseRowView: View {
     }
 }
 
+/// A picker row: the card opens the exercise's details, and the round plus inside it adds the exercise.
+struct PickerRowView: View {
+    let row: ExerciseRow
+    let onOpen: () -> Void
+    let onAdd: () -> Void
+
+    var body: some View {
+        HStack(spacing: 0) {
+            Button(action: onOpen) {
+                HStack(spacing: 12) {
+                    PatternBadge(pattern: row.pattern, size: 44)
+                        .accessibilityHidden(true)
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text(row.name).font(.poulpy(.headline).weight(.heavy)).foregroundStyle(PoulpyColor.onSurface)
+                        Text(row.details).font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+                    }
+                    .multilineTextAlignment(.leading)
+                    Spacer(minLength: 0)
+                }
+                .padding(EdgeInsets(top: 10, leading: 12, bottom: 10, trailing: 0))
+                .frame(minHeight: 64)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityHint(String(localized: "exercise.details \(row.name)"))
+            // A 56 pt touch target around the 36 pt plus.
+            Button(action: onAdd) {
+                Image(systemName: "plus")
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundStyle(PoulpyColor.onPrimary)
+                    .frame(width: 36, height: 36)
+                    .background(PoulpyColor.primary, in: Circle())
+                    .frame(width: 56, height: 56)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(String(localized: "exercise.addNamed \(row.name)"))
+        }
+        .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 16))
+        .overlay(RoundedRectangle(cornerRadius: 16).stroke(PoulpyColor.outline))
+    }
+}
+
 /// Poulpy's card when nothing matches: a search shows what was typed.
 private struct NoExercises: View {
     let query: String

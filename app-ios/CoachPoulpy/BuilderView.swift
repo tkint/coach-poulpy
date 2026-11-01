@@ -7,6 +7,8 @@ struct BuilderView: View {
     @StateObject private var builder: Observed<BuilderModel, BuilderState>
     /// Where the exercise being picked goes (a part, or one of its repeats) and as what; nil when not picking.
     @State private var picking: PickTarget?
+    /// The exercise whose details are open over the picker; nil when none.
+    @State private var previewing: PreviewTarget?
     @State private var addingPart = false
     @Environment(\.dismiss) private var dismiss
 
@@ -118,13 +120,17 @@ struct BuilderView: View {
             .sheet(item: $picking) { target in
                 NavigationStack {
                     ExerciseList(graph: graph, withRecent: true) { row in
-                        Button {
+                        PickerRowView(row: row, onOpen: { previewing = PreviewTarget(slug: row.slug) }) {
                             model.add(slug: row.slug, partKey: target.partKey, repeatKey: target.repeatKey, role: target.role)
                             picking = nil
-                        } label: {
-                            ExerciseRowView(row: row, adding: true)
                         }
-                        .buttonStyle(.plain)
+                    }
+                    .sheet(item: $previewing) { preview in
+                        ExerciseInfoSheet(graph: graph, slug: preview.slug) { slug in
+                            model.add(slug: slug, partKey: target.partKey, repeatKey: target.repeatKey, role: target.role)
+                            previewing = nil
+                            picking = nil
+                        }
                     }
                     .navigationTitle("builder.pickTitle")
                     .navigationBarTitleDisplayMode(.inline)
@@ -313,6 +319,12 @@ struct BuilderView: View {
     private func fieldLabel(_ key: LocalizedStringKey) -> some View {
         Text(key).textCase(.uppercase).font(PoulpyFont.label).kerning(1).foregroundStyle(PoulpyColor.onSurfaceVariant)
     }
+}
+
+/// An exercise whose details are open over the picker.
+private struct PreviewTarget: Identifiable {
+    let slug: String
+    var id: String { slug }
 }
 
 /// Where a picked exercise goes: the part [partKey], or its repeat [repeatKey]; and what it is for.

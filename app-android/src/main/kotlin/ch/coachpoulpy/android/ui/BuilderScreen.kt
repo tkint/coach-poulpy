@@ -125,6 +125,8 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
     var pickingPart by rememberSaveable { mutableStateOf<String?>(null) }
     var pickingRepeat by rememberSaveable { mutableStateOf<String?>(null) }
     var pickingRole by rememberSaveable { mutableStateOf(StepRole.WORK) }
+    // The exercise whose details are open over the picker; null when none.
+    var previewing by rememberSaveable { mutableStateOf<String?>(null) }
     // The step being edited in the sheet: the one just added, or the one tapped.
     var editing by rememberSaveable { mutableStateOf<String?>(null) }
     var addingPart by rememberSaveable { mutableStateOf(false) }
@@ -153,6 +155,14 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
                 onPick = { model.add(it, part, pickingRepeat, pickingRole); pickingPart = null },
                 modifier = Modifier.padding(padding),
                 adding = true,
+                onOpen = { previewing = it },
+            )
+        }
+        previewing?.let { slug ->
+            ExerciseInfoSheet(
+                graph, language, slug,
+                onAdd = { model.add(it, part, pickingRepeat, pickingRole); previewing = null; pickingPart = null },
+                onDismiss = { previewing = null },
             )
         }
         return
