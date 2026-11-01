@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Body · log a weight</title>
+<meta name="mockup:screen" content="body-log-sheet">
+<meta name="mockup:section" content="Profile and settings">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../../../web/src/styles/tokens.css">
+<link rel="stylesheet" href="../../shared/mockup.css">
+<script src="../../shared/mockup-theme.js"></script>
+</head>
+<body>
+<main class="phone">
+
+  <header class="page-bar"><a class="icon-button" href="body-weight.html" aria-label="Back to weight"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></a><div><h1>Weight</h1></div></header>
+  <div class="scrim"></div>
+  <section class="sheet" id="log-sheet" data-component="sheet" role="dialog" aria-label="Log your weight">
+    <span class="sheet-handle"></span>
+    <div class="sheet-title"><h2>Log your weight</h2><p>Stored in kilograms, shown in your units.</p></div>
+    <div class="steppers" style="grid-template-columns: minmax(0, 1fr);"><div class="stepper" data-component="stepper"><span class="label">Weight</span><div><button type="button" aria-label="Less">−</button><strong>72.6 kg</strong><button type="button" aria-label="More">+</button></div></div></div>
+    <button class="select-field" type="button" data-component="select-field"><span><span class="label">Date</span><strong>Today, 1 November</strong></span><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
+    <div class="sheet-actions"><button class="secondary-button" type="button">Cancel</button><button class="primary-button" type="button" style="flex: 1;">Save</button></div>
+  </section>
+</main>
+</body>
+</html>
