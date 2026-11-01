@@ -112,6 +112,24 @@ _Avoid_: Sensor, integration
 One timestamped reading from a metric source: speed, incline, distance, heart rate or cadence.
 _Avoid_: Data point, packet
 
+### Profile
+
+**Profile**:
+What a person tells the app about themselves, all optional and kept on the phone: a display name, birthdate, pronouns, sex assigned at birth, goal, experience, resting heart rate. Body measurements are logged beside it, not inside it.
+_Avoid_: Account (there is none while the app is guest-only), user data
+
+**Body measurement**:
+One dated weight or height entry in the person's log. Entries are only added or corrected, never summed, and each chart is drawn from them.
+_Avoid_: Weigh-in record, vital
+
+**Unit system**:
+Metric or imperial, chosen once in Settings. Everything is stored metric (kg, cm, km) and converted only for display and input, so switching never changes a stored value.
+_Avoid_: Locale, measurement preference
+
+**Pronouns**:
+How the person wants to be addressed, used for French agreement and Poulpy's lines. Never inferred from a name or from sex assigned at birth.
+_Avoid_: Gender (the app does not ask for it)
+
 ### Sharing and coaching
 
 **Library**:

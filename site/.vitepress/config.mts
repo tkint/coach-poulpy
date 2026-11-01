@@ -112,6 +112,7 @@ export default withMermaid(
           items: [
             { text: 'How to use it', link: '/docs/design-system' },
             { text: 'Tokens', link: '/tokens' },
+            { text: 'Profile and settings', link: '/docs/profile-and-settings' },
             { text: 'Generating tokens and fonts', link: '/design/README' },
             { text: 'Mockups', link: '/mockups/', collapsed: false, items: mockupSidebar },
           ],
