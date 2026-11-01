@@ -1,5 +1,7 @@
 package ch.coachpoulpy.shared
 
+import ch.coachpoulpy.core.model.MuscleGroup
+
 /** The two sides of the body map. */
 enum class BodyView { FRONT, BACK }
 
@@ -23,6 +25,36 @@ object BodyMap {
 
     /** Keeps the keys that are real areas, in reading order, so what is saved never depends on the order they were picked. */
     fun valid(keys: Collection<String>): List<String> = (AREAS + OTHER).filter { it in keys }
+
+    /**
+     * The areas an exercise works, from its coarse [MuscleGroup]s: both sides of each group's areas, in reading
+     * order. Full body lights every muscle area but not the joints, the spine or the head.
+     */
+    fun worked(groups: Collection<MuscleGroup>): List<String> {
+        val areas = groups.flatMap { if (it == MuscleGroup.FULL_BODY) MUSCLES else AREAS_OF.getValue(it) }.toSet()
+        return AREAS.filter { area -> area.removeSuffix("-left").removeSuffix("-right") in areas }
+    }
+
+    private val MUSCLES = listOf(
+        "trapezius", "deltoid", "pectoral", "serratus", "biceps", "triceps", "forearm", "abs", "obliques", "back",
+        "scapula", "lower-back", "glutes", "quads", "adductors", "hamstrings", "calves",
+    )
+
+    private val AREAS_OF: Map<MuscleGroup, List<String>> = mapOf(
+        MuscleGroup.CHEST to listOf("pectoral"),
+        MuscleGroup.BACK to listOf("back", "scapula", "lower-back"),
+        MuscleGroup.SHOULDERS to listOf("deltoid"),
+        MuscleGroup.BICEPS to listOf("biceps"),
+        MuscleGroup.TRICEPS to listOf("triceps"),
+        MuscleGroup.FOREARMS to listOf("forearm"),
+        MuscleGroup.CORE to listOf("abs", "obliques"),
+        MuscleGroup.GLUTES to listOf("glutes"),
+        MuscleGroup.QUADRICEPS to listOf("quads"),
+        MuscleGroup.HAMSTRINGS to listOf("hamstrings"),
+        MuscleGroup.CALVES to listOf("calves"),
+        MuscleGroup.HIPS to listOf("hip", "adductors"),
+        MuscleGroup.NECK to listOf("neck", "trapezius"),
+    )
 
     /** "Left knee", "Genou gauche". */
     fun label(key: String, languageCode: String): String = when (key) {

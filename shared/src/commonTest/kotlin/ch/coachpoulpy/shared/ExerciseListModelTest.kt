@@ -32,6 +32,21 @@ class ExerciseListModelTest {
     }
 
     @Test
+    fun detailLightsBothSidesOfTheMusclesTheExerciseWorks() {
+        assertEquals(
+            setOf("abs-left", "abs-right", "obliques-left", "obliques-right", "glutes-left", "glutes-right", "quads-left", "quads-right"),
+            model("en").detail("goblet-squat")!!.workedAreas,
+        )
+    }
+
+    @Test
+    fun fullBodyLightsMusclesButNotJoints() {
+        val areas = BodyMap.worked(listOf(MuscleGroup.FULL_BODY))
+        assertTrue("quads-left" in areas && "back-right" in areas)
+        assertFalse(areas.any { it.startsWith("knee") || it.startsWith("elbow") || it == BodyMap.SPINE })
+    }
+
+    @Test
     fun detailListsVariationsEasiestToHardestWithTheCurrentOneMarked() {
         val variations = model("fr").detail("diamond-push-up")!!.variations
         assertEquals(
