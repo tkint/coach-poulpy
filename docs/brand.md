@@ -11,6 +11,7 @@ Poulpy is a reversible plush octopus: blue and smiling on one side, grumpy on th
 - **Poulpy never lifts his tentacles.** Every pose keeps the plush's shape and shows the mood with his face, shade, props and small effects.
 - **At most one notification a day** in Poulpy's voice, and turning them off keeps the mascot.
 - **Every line in French and English** from the start.
+- **Inclusive by default.** The app is LGBTQ+ friendly, and that is part of the brand: see [Inclusive by default](#inclusive-by-default).
 
 ## Moods
 
@@ -71,6 +72,21 @@ When several apply, the first wins: pain or rehab, then Fuming, Grumpy, Annoyed,
 | Recovering, rest day | Rest day / Jour de repos | "No training today. I'm napping too." / « Pas d’entraînement aujourd’hui. Moi aussi, je fais la sieste. » |
 
 The catch-up button reads "Catch up: {workout}, {minutes} min" / « Rattrapage : {workout}, {minutes} min », with a non-breaking space before the colon. In the Grumpy and Fuming lines, `{minutes}` is the catch-up's duration, an ICU plural in the translation files so one minute reads "1 minute". In the Grumpy line, `{workout}` and `{day}` are the oldest missed entry's: `{day}` is its weekday while it is less than a week old ("Thursday" / « jeudi »), its date after that ("12 October" / « le 12 octobre »).
+
+## Inclusive by default
+
+Poulpy is a plush with a blue side and a grumpy side, and nobody has to be one or the other. The app and everything around it welcomes LGBTQ+ people, and these rules apply to every screen, string, drawing and notification.
+
+- **Ask only what a feature needs, and make every personal field optional.** Each field says why it is asked and where the answer is used. "Prefer not to say" is always an option and never a dead end: the app works the same without it.
+- **Sex and gender are two questions, and the app asks the first only.** Where an estimate (calories, heart rate zones) depends on physiology, the field is called **Sex assigned at birth**, with Female, Male, Intersex and Prefer not to say, and a line saying it is not about gender. Avoid "biological sex", "birth sex" and "gender" for it. The app never asks about gender identity or orientation, and nothing it shows or says is decided by this field.
+- **Pronouns are their own optional field**: She / her, He / him, They / them, Just my name. They only set French agreement and Poulpy's lines. Without an answer the wording stays neutral, and a pronoun is never guessed from a name, a photo or the sex field.
+- **Neutral wording first.** Write copy that needs no gender, in French too (« Bienvenue », « C'est fait », not « bienvenu(e) »). When agreement cannot be avoided, use the person's pronouns, and fall back to the neutral form.
+- **Poulpy has no gender.** He is a plush; he is "he" only in English by habit and "il" in French because *poulpe* is masculine. Never write a line that depends on who the person is, and never joke about bodies.
+- **No body judgement.** Weight, height and age are data. Poulpy never comments on a weight going up or down, charts use the one accent colour and never red or green for "worse" or "better", and the app shows no BMI and sets no weight goal unless the person asks.
+- **Drawings and stories show a range of people.** Future share cards, the website and store images show different bodies, ages, genders and families, and may use the rainbow only as a deliberate Pride moment, never as decoration on Poulpy.
+- **Review before shipping.** Wording about sex, gender or bodies is read by people from the community before release, and changed when they say so; the owner decides ties.
+
+The reasons and the wording alternatives that were set aside are in [Brand decisions](./brand-decisions.md#13-inclusive-by-default-proposed). The profile fields that follow these rules are on [Profile and settings](./profile-and-settings.md).
 
 ## Tentacles
 

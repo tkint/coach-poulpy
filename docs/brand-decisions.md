@@ -84,3 +84,12 @@ Add a decision here in the same PR as the brand change it explains, newest at th
 **Why:** decision 7 promised a grace period "until 24 hours after its day", and reading it as the whole next day gives a person who trains in the morning a real second chance. Counting only what is still planned keeps the ember side for sessions left hanging, not for honest choices: a skip, a move, a rest day or pain. Forgiving by date rather than by matching each entry keeps "any finished session flips him straight back" literally true.
 
 **Set aside:** a skip counting as missed, which makes skipping feel like a confession; the catch-up marking a missed entry done, which rewrites History.
+
+## 13. Inclusive by default (proposed)
+
+**Proposed, 1 November 2026**, for review on the docs site. The owner wants the app to be LGBTQ+ friendly as part of the brand. The [brand page](./brand.md#inclusive-by-default) turns that into rules: optional fields with a stated reason, **Sex assigned at birth** asked only where an estimate needs it, pronouns as a separate field, neutral wording, no body judgement.
+
+**Why:** "sex assigned at birth" is the wording most inclusive-forms guides recommend for a physiological question, because it describes what was recorded rather than who someone is, and it keeps gender out of it; "biological sex" and "birth sex" read as defining a person and are the terms trans and intersex people most often object to. The app also needs no gender at all: sex assigned at birth drives estimates, and pronouns drive wording.
+
+**Set aside:** one "Gender" field with Male, Female and Other (which mixes the two questions and makes "Other" the label for everyone outside two boxes); free-text sex (cannot feed an estimate); asking nothing (the estimates become less accurate for people who are happy to say). The wording was chosen from published guides and has **not yet been read by LGBTQ+ people**: that read is a condition of accepting this decision.
+
