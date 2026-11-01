@@ -86,7 +86,7 @@ The fields every form is built from. Reference mockups: `profile-edit`, the thre
 
 | Field | Shape | Behaviour |
 | --- | --- | --- |
-| Text field | 56 high, 10 radius, 1.5 px `outline`, label above, `primary` outline on focus | Free text: a name. A note under it in `onSurfaceVariant` |
+| Text field | 52 high, 10 radius, 1.5 px `outline`, label above, `primary` outline on focus | Free text: a name. A note under it in `onSurfaceVariant` |
 | Select field | Same box, the chosen value (or a muted "Not set") and a chevron | Tapping opens a sheet; nothing else is shown on the screen. Never a row of pills |
 | Option sheet | 24 radius sheet, a title, one row per choice | Single choice: a radio and the sheet closes on tap. Several choices: checkboxes and a Done button. A choice that needs text (Custom pronouns) shows its text field inside the sheet |
 | Number field | Text field with a unit at its right (`bpm`, `kg`, `cm`) | Selects all its text on focus, opens the numeric keyboard, checks the range on leaving. Optional round − and + buttons on both sides (the `number-entry` pattern) for small nudges. Imperial height is two number fields, ft and in |
