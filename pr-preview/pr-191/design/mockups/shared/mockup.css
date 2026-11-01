@@ -1028,4 +1028,5 @@ svg { flex: none; }
 .format-card { min-width: 0; }
 .body-skin { fill: transparent; }
 .body-outline { fill: none; stroke: var(--cp-outline); stroke-width: 1.2; }
+.body-line { fill: none; stroke: var(--cp-outline); stroke-width: 1; stroke-linecap: round; }
 .body-area[aria-checked="true"].body-skin { fill: var(--cp-primary); }
