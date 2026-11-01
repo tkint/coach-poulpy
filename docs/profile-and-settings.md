@@ -26,7 +26,7 @@ Everything is optional and stays on the phone. Each field is only here because s
 | --- | --- | --- |
 | Display name | Poulpy's lines and the share card | Default: none, Poulpy says "you" |
 | Birthdate | Age, and the heart rate zones | Age is computed, never stored |
-| Pronouns | French agreement and Poulpy's lines | She / her, He / him, They / them, Just my name, Custom (typed by the person) or Prefer not to say. Default neutral; a custom entry is repeated as written and never drives French agreement |
+| Pronouns | French agreement and Poulpy's lines. A select; choosing Custom shows a text field beneath it | She / her, He / him, They / them, Just my name, Custom (typed by the person) or Prefer not to say. Default neutral; a custom entry is repeated as written and never drives French agreement |
 | Sex assigned at birth | Calorie and heart rate estimates only | Female, Male, Intersex, Prefer not to say. Skipped means a neutral average |
 | Height, weight | Estimates, and the charts | Logged over time, below |
 | Main goal | Which workouts Poulpy suggests first | Stay active, Build strength, Run further, Rehab, Something else |
