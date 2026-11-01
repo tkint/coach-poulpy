@@ -365,7 +365,7 @@ class PlayerModel internal constructor(
 
     private fun phases() = session.timeline.phases
 
-    private fun clockOf(seconds: Int) = "%02d:%02d".format(seconds / 60, seconds % 60)
+    private fun clockOf(seconds: Int) = "${(seconds / 60).toString().padStart(2, '0')}:${(seconds % 60).toString().padStart(2, '0')}"
 
     private fun Load.label(): String? = when (this) {
         is Load.Kilograms -> labels.kilograms(kg)
