@@ -4,6 +4,7 @@ import ch.coachpoulpy.core.engine.SessionEvent
 import ch.coachpoulpy.core.engine.Timeline
 import ch.coachpoulpy.core.engine.TimelineCompiler
 import ch.coachpoulpy.core.model.ExecutionSource
+import ch.coachpoulpy.core.model.Workout
 import ch.coachpoulpy.core.stats.DoneSession
 import ch.coachpoulpy.core.stats.HistoryStats
 import ch.coachpoulpy.core.stats.PeriodTotals
@@ -139,9 +140,6 @@ class HistoryModel internal constructor(
     /** Removes a session and everything recorded in it, for example a test recording. */
     fun delete(sessionId: String) = store.deleteSession(sessionId)
 
-    /** The picture to share for a session of the history. */
-    fun shareCard(session: SessionRow, units: UnitSystem) = ShareCard.of(session, units, languageCode)
-
     fun close() = scope.cancel()
 
     /**
@@ -216,13 +214,7 @@ class HistoryModel internal constructor(
         val events = store.events(id)
         val workout = session.execution.workout?.let { store.workout(it.workoutId, it.version) }
         val format = session.format ?: workout?.format
-        val timeline = when {
-            workout != null -> runCatching { compiler.compile(workout) }.getOrNull()
-            session.execution.source == ExecutionSource.DEVICE_ONLY -> TreadmillModule.freeRun
-            session.execution.workout == null -> compiler.compile(LiveModel.demoIntervals)
-            else -> null
-        }
-        val totals = sessionTotals(events, timeline)
+        val totals = sessionTotals(events, sessionTimeline(session, workout, compiler))
         store.saveDetails(id, session.title ?: workout?.name, format, totals)
         return totals
     }
@@ -247,6 +239,14 @@ internal fun sessionTotals(events: List<SessionEvent>, timeline: Timeline?): Ses
         energyKcal = machine.energyKcal,
         estimatedSteps = machine.estimatedSteps,
     )
+}
+
+/** The plan a stored session followed, or null when its workout is no longer on the phone. */
+internal fun sessionTimeline(session: StoredSession, workout: Workout?, compiler: TimelineCompiler): Timeline? = when {
+    workout != null -> runCatching { compiler.compile(workout) }.getOrNull()
+    session.execution.source == ExecutionSource.DEVICE_ONLY -> TreadmillModule.freeRun
+    session.execution.workout == null -> compiler.compile(LiveModel.demoIntervals)
+    else -> null
 }
 
 /** A finished session as the history and Home show it. */

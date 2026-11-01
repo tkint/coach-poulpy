@@ -29,6 +29,7 @@ struct PlayerView: View {
     @State private var confirmStop = false
     @Environment(\.dismiss) private var dismiss
     @Environment(\.unitSystem) private var units
+    @Environment(\.colorScheme) private var colorScheme
 
     init(graph: AppGraph, workoutId: String?) {
         // Inside the autoclosure, so the session is opened once, not on every redraw.
@@ -322,8 +323,11 @@ struct PlayerView: View {
         let screen = model.finished(units: units)
         ScrollView {
             VStack(spacing: 16) {
-                Image(PoulpyDrawing.exhausted.imageName).resizable().scaledToFit().frame(width: 150, height: 150).accessibilityHidden(true)
-                Text("player.finished").font(.poulpy(.largeTitle))
+                Image((screen?.drawing ?? PoulpyDrawing.exhausted).imageName).resizable().scaledToFit().frame(width: 150, height: 150).accessibilityHidden(true)
+                Text(screen?.heading ?? "").font(.poulpy(.largeTitle))
+                if let quote = screen?.quote {
+                    Text(quote).font(.poulpy(.headline).weight(.semibold)).foregroundStyle(PoulpyColor.primary).multilineTextAlignment(.center)
+                }
                 VStack(spacing: 2) {
                     Text(state.workoutName).font(.poulpy(.title2).weight(.heavy)).multilineTextAlignment(.center)
                     if let screen {
@@ -331,11 +335,8 @@ struct PlayerView: View {
                         Text("\(date.formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated))) · \(date.formatted(date: .omitted, time: .shortened))")
                             .foregroundStyle(PoulpyColor.onSurfaceVariant)
                     }
-                    if let summary = state.summary {
-                        (Text("player.summary \(Int(summary.setsDone)) \(Int(summary.setsPlanned)) \(summary.durationLabel)")
-                            + (summary.setsSkipped > 0 ? Text(" · ") + Text("player.summarySkipped \(Int(summary.setsSkipped))") : Text("")))
-                            .multilineTextAlignment(.center)
-                            .foregroundStyle(PoulpyColor.onSurfaceVariant)
+                    if let summary = screen?.summary {
+                        Text(summary).multilineTextAlignment(.center).foregroundStyle(PoulpyColor.onSurfaceVariant)
                     }
                 }
                 if let screen {
@@ -370,7 +371,7 @@ struct PlayerView: View {
             .frame(maxWidth: .infinity)
         }
         if let card = model.shareCard(units: units) {
-            ShareLink(item: ShareCardItem(card: card), preview: SharePreview(card.title)) {
+            ShareLink(item: ShareCardItem(card: card, scheme: colorScheme), preview: SharePreview(card.title)) {
                 Label("shareImage.button", systemImage: "square.and.arrow.up").frame(maxWidth: .infinity, minHeight: 44)
             }
             .buttonStyle(.bordered)

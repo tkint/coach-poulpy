@@ -176,7 +176,13 @@
     "averageSpeed": "Vitesse moy.",
     "energy": "Énergie",
     "energyValue": "{kcal, number} kcal",
-    "app": "Coach Poulpy"
+    "app": "Coach Poulpy",
+    "wellDone": "Bravo !",
+    "summary": "{done, number} sur {planned, number} séries faites en {duration}",
+    "summarySkipped": "Séries passées : {count, number}",
+    "championHeading": "Champion !",
+    "quote": "« Ça valait le coup. Probablement. »",
+    "championQuote": "« Huit tentacules. Zéro regret. »"
   },
   "player": {
     "unitReps": "{count, plural, one {répétition} many {répétitions} other {répétitions}}",

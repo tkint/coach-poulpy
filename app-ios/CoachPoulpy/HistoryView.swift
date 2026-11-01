@@ -20,7 +20,10 @@ struct HistoryView: View {
     /// This month opens on today; an earlier one opens with no day picked (0).
     @State private var selected: Int32 = todayDay
 
+    let graph: AppGraph
+
     init(graph: AppGraph) {
+        self.graph = graph
         // Built once: StateObject evaluates this only for the first init of the view.
         _history = StateObject(wrappedValue: {
             let model = graph.history(languageCode: Language.code)
@@ -103,7 +106,7 @@ struct HistoryView: View {
                             } else {
                                 ForEach(section.sessions, id: \.id) { session in
                                     NavigationLink {
-                                        SessionDetailView(session: session) { history.model.delete(sessionId: session.id) }
+                                        SessionDetailView(graph: graph, session: session) { history.model.delete(sessionId: session.id) }
                                     } label: {
                                         sessionCard(session, highlighted: highlighted)
                                     }
@@ -391,11 +394,13 @@ struct HistoryView: View {
 }
 
 struct SessionDetailView: View {
+    let graph: AppGraph
     let session: SessionRow
     let onDelete: () -> Void
     @Environment(\.dismiss) private var dismiss
     @State private var deleting = false
     @Environment(\.unitSystem) private var units
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         ScrollView {
@@ -457,8 +462,10 @@ struct SessionDetailView: View {
         .navigationTitle(session.title)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ShareLink(item: ShareCardItem(card: ShareCard.companion.of(session: session, units: units, languageCode: Language.code, fullOctopus: false)), preview: SharePreview(session.title)) {
-                Label("shareImage.button", systemImage: "square.and.arrow.up")
+            if let card = graph.sessionShareCard(sessionId: session.id, units: units, languageCode: Language.code) {
+                ShareLink(item: ShareCardItem(card: card, scheme: colorScheme), preview: SharePreview(session.title)) {
+                    Label("shareImage.button", systemImage: "square.and.arrow.up")
+                }
             }
             Button(role: .destructive) {
                 deleting = true

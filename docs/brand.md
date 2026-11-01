@@ -29,8 +29,8 @@ Poulpy is a reversible plush octopus: blue and smiling on one side, grumpy on th
 | --- | --- | --- |
 | You finish any session | Happy | Flip back to blue with the flip animation; the flip is the reward |
 | You set a record | Proud | Cocky, until the end of the day |
-| The eighth tentacle lights | Proud | Champion, on the end-of-session screen and Home, and on the share card of that session |
-| You share a finished session | Happy | Happy portrait on the share card; never an ember or guilty drawing |
+| The eighth tentacle lights | Proud | Champion, on the end-of-session screen, on the share card and Home, with its own heading ("Champion!") and quote (“Eight tentacles. No regrets.”) |
+| You share a finished session | Happy | Exhausted with a sweatband, under “Well done!” and the quote “Worth it. Probably.”, on the end-of-session screen and on the share card, whether shared straight away or from the history; the card leaves the sets-done line off; never an ember or guilty drawing |
 | A hard session ends (effort 8 or more) | Recovering | Exhausted or Side glance, for the rest of the day |
 | A planned rest day | Recovering | Sleeping |
 | Pain logged, or a rehab session marked too hard | Recovering | Patched up |

@@ -151,21 +151,29 @@ class LocalStore(driverFactory: DriverFactory, private val clock: Clock = Clock.
     /** Sessions that ended, newest first. Emits again when one is added, summed up or deleted. */
     fun finishedSessions(): Flow<List<StoredSession>> =
         db.executionQueries.finished().asFlow().mapToList(Dispatchers.IO).map { rows ->
-            rows.map { row ->
-                StoredSession(
-                    execution = Execution(
-                        id = ExecutionId(row.id),
-                        source = ExecutionSource.valueOf(row.source),
-                        startedAt = Instant.fromEpochMilliseconds(row.started_at),
-                        endedAt = row.ended_at?.let(Instant::fromEpochMilliseconds),
-                        workout = row.workout_id?.let { WorkoutRef(WorkoutId(it), row.workout_version?.toInt() ?: 1) },
-                    ),
-                    title = row.title,
-                    format = row.workout_type?.let { name -> WorkoutFormat.entries.firstOrNull { it.name == name } },
-                    totals = row.summary?.let { runCatching { json.decodeFromString(SessionTotals.serializer(), it) }.getOrNull() },
-                )
-            }
+            rows.map { storedSession(it.id, it.source, it.started_at, it.ended_at, it.workout_id, it.workout_version, it.title, it.workout_type, it.summary) }
         }
+
+    /** One finished session, read once; null when there is none with this id. */
+    fun finishedSession(executionId: String): StoredSession? =
+        db.executionQueries.finished().executeAsList().firstOrNull { it.id == executionId }
+            ?.let { storedSession(it.id, it.source, it.started_at, it.ended_at, it.workout_id, it.workout_version, it.title, it.workout_type, it.summary) }
+
+    private fun storedSession(
+        id: String, source: String, startedAt: Long, endedAt: Long?, workoutId: String?, workoutVersion: Long?,
+        title: String?, workoutType: String?, summary: String?,
+    ) = StoredSession(
+        execution = Execution(
+            id = ExecutionId(id),
+            source = ExecutionSource.valueOf(source),
+            startedAt = Instant.fromEpochMilliseconds(startedAt),
+            endedAt = endedAt?.let(Instant::fromEpochMilliseconds),
+            workout = workoutId?.let { WorkoutRef(WorkoutId(it), workoutVersion?.toInt() ?: 1) },
+        ),
+        title = title,
+        format = workoutType?.let { name -> WorkoutFormat.entries.firstOrNull { it.name == name } },
+        totals = summary?.let { runCatching { json.decodeFromString(SessionTotals.serializer(), it) }.getOrNull() },
+    )
 
     /** The workout version each finished session followed, with when it started, newest first, read once. */
     fun finishedWorkoutRefs(): List<Pair<WorkoutRef, Instant>> =

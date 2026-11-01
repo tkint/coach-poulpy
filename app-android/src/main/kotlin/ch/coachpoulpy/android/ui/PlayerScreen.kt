@@ -116,8 +116,9 @@ fun PlayerScreen(graph: AppGraph, language: String, workoutId: String?, onClose:
                     val context = LocalContext.current
                     val units = LocalUnitSystem.current
                     val chooser = stringResource(R.string.shareImage_chooser)
+                    val colors = MaterialTheme.colorScheme
                     val finished = remember(units) { model.finished(units) }
-                    Finished(state, finished, onShare = { model.shareCard(units)?.let { shareSessionImage(context, it, chooser) } }, onClose = onClose)
+                    Finished(state, finished, onShare = { model.shareCard(units)?.let { shareSessionImage(context, it, chooser, colors) } }, onClose = onClose)
                 }
                 PlayerStatus.RUNNING, PlayerStatus.PAUSED -> Running(state, model)
             }
@@ -353,27 +354,21 @@ private fun PlayerIconButton(icon: ImageVector, description: String, onClick: ()
 /** The merged finished screen (`player-finished` and `player-finished-run` mockups): everything it shows is decided in [PlayerModel.finished]. */
 @Composable
 private fun ColumnScope.Finished(state: PlayerState, finished: FinishedScreen?, onShare: () -> Unit, onClose: () -> Unit) {
-    val summary = state.summary
     Column(
         Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
     ) {
-        Image(painterResource(PoulpyDrawing.EXHAUSTED.drawable), contentDescription = null, modifier = Modifier.size(150.dp))
-        Text(stringResource(R.string.player_finished), style = MaterialTheme.typography.displaySmall)
+        Image(painterResource((finished?.drawing ?: PoulpyDrawing.EXHAUSTED).drawable), contentDescription = null, modifier = Modifier.size(150.dp))
+        Text(finished?.heading.orEmpty(), style = MaterialTheme.typography.displaySmall)
+        finished?.let { Text(it.quote, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary, textAlign = TextAlign.Center) }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(state.workoutName, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.ExtraBold, textAlign = TextAlign.Center)
             if (finished != null) {
                 Text("${dayLabel(finished.startedAtMillis)} · ${time(finished.startedAtMillis)}", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            if (summary != null) {
-                Text(
-                    stringResource(R.string.player_summary, summary.setsDone, summary.setsPlanned, summary.durationLabel) +
-                        if (summary.setsSkipped > 0) " · " + stringResource(R.string.player_summarySkipped, summary.setsSkipped) else "",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
-                )
+            finished?.summary?.let {
+                Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
             }
         }
         if (finished != null) {

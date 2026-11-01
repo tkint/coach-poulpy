@@ -1,42 +1,31 @@
 package ch.coachpoulpy.shared
 
-/** One line of the share card, for example "Time" and "38:24". */
-data class ShareLine(val label: String, val value: String)
-
 /**
- * The picture a person shares after a finished session: Poulpy, the workout's name and date, and the numbers of the
- * session. The lines and their order are decided here so Android and iOS print the same card; each platform only
- * draws it. A value that is missing leaves its line out, and the heart rate is never on the card.
+ * The picture a person shares after a session: the finished screen as an image, the same one straight after the
+ * session and from the history. Everything on it is decided in [FinishedScreen]; each platform only draws it, in the
+ * colours of the current theme.
  */
 data class ShareCard(
+    val heading: String,
+    val quote: String,
     val title: String,
     val startedAtMillis: Long,
     val drawing: PoulpyDrawing,
-    val lines: List<ShareLine>,
+    val lines: List<FinishedStat>,
+    val poulpy: PoulpyStatus,
     val appName: String,
 ) {
     companion object {
-        /** [fullOctopus] is true when this session lit Poulpy's eighth tentacle: he shows Champion instead of Happy. */
-        fun of(session: SessionRow, units: UnitSystem, languageCode: String, fullOctopus: Boolean = false): ShareCard {
-            val lines = buildList {
-                add(ShareLine(DomainText.shareTime(languageCode), clock(session.activeSeconds)))
-                val done = session.setsDone
-                if (session.kind == SessionKind.WORKOUT && done != null) {
-                    val planned = session.setsPlanned
-                    add(ShareLine(DomainText.shareSets(languageCode), if (planned != null) DomainText.shareSetsOf(languageCode, done, planned) else "$done"))
-                }
-                session.distanceMeters?.let { add(ShareLine(DomainText.shareDistance(languageCode), measure(Units.distance(it, units, decimals = 1), languageCode))) }
-                session.averageSpeedKmh?.let { add(ShareLine(DomainText.shareAverageSpeed(languageCode), measure(Units.speed(it, units), languageCode))) }
-                session.energyKcal?.let { add(ShareLine(DomainText.shareEnergy(languageCode), DomainText.shareEnergyValue(languageCode, it))) }
-            }
-            return ShareCard(
-                title = session.title,
-                startedAtMillis = session.startedAtMillis,
-                drawing = if (fullOctopus) PoulpyDrawing.CHAMPION else PoulpyDrawing.MOOD_HAPPY,
-                lines = lines,
-                appName = DomainText.shareApp(languageCode),
-            )
-        }
+        fun of(screen: FinishedScreen, languageCode: String) = ShareCard(
+            heading = screen.heading,
+            quote = screen.quote,
+            title = screen.workoutName,
+            startedAtMillis = screen.startedAtMillis,
+            drawing = screen.drawing,
+            lines = screen.stats,
+            poulpy = screen.poulpy,
+            appName = DomainText.shareApp(languageCode),
+        )
 
         /** "5.2 km" (the number in the language's decimal sign, a non-breaking space before the unit). */
         internal fun measure(measure: Measure, languageCode: String): String {

@@ -565,6 +565,7 @@ fun SessionDetailScreen(graph: AppGraph, language: String, sessionId: String, on
     val context = LocalContext.current
     val units = LocalUnitSystem.current
     val chooser = stringResource(R.string.shareImage_chooser)
+    val colors = MaterialTheme.colorScheme
 
     Scaffold(
         topBar = {
@@ -573,7 +574,7 @@ fun SessionDetailScreen(graph: AppGraph, language: String, sessionId: String, on
                 navigationIcon = { BackButton(onBack) },
                 actions = {
                     if (session != null) {
-                        IconButton(onClick = { shareSessionImage(context, model.shareCard(session, units), chooser) }) {
+                        IconButton(onClick = { graph.sessionShareCard(session.id, units, language)?.let { shareSessionImage(context, it, chooser, colors) } }) {
                             Icon(Icons.Filled.Share, contentDescription = stringResource(R.string.shareImage_button))
                         }
                         IconButton(onClick = { deleting = true }) {
