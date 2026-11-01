@@ -63,7 +63,7 @@ struct PoulpyHeaderView: View {
 }
 
 /// Eight rounded segments clockwise from the top, with clear gaps so each tentacle reads on its own.
-private struct TentacleRing: View {
+struct TentacleRing: View {
     let lit: Int
     let on: Color
     let off: Color

@@ -99,7 +99,7 @@ fun PoulpyHeader(status: PoulpyStatus, modifier: Modifier = Modifier, compact: B
 
 /** Eight rounded segments clockwise from the top, with clear gaps so each tentacle reads on its own. */
 @Composable
-private fun TentacleRing(lit: Int, on: Color, off: Color, modifier: Modifier = Modifier) {
+internal fun TentacleRing(lit: Int, on: Color, off: Color, modifier: Modifier = Modifier) {
     val litColor by animateColorAsState(on, tween(PoulpyMotion.moodMillis), label = "ring")
     Canvas(modifier) {
         val width = size.minDimension * 15f / 200f

@@ -39,7 +39,7 @@ data class ShareCard(
         }
 
         /** "5.2 km" (the number in the language's decimal sign, a non-breaking space before the unit). */
-        private fun measure(measure: Measure, languageCode: String): String {
+        internal fun measure(measure: Measure, languageCode: String): String {
             var scale = 1L
             repeat(measure.decimals) { scale *= 10 }
             val scaled = kotlin.math.round(measure.value * scale).toLong()
@@ -47,7 +47,7 @@ data class ShareCard(
             return "${scaled / scale}$fraction\u00a0${measure.unit}"
         }
 
-        private fun clock(seconds: Long): String {
+        internal fun clock(seconds: Long): String {
             val hours = seconds / 3600
             val minutes = seconds % 3600 / 60
             val rest = seconds % 60

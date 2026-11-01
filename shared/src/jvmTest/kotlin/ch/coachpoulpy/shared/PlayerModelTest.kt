@@ -10,6 +10,7 @@ import kotlin.test.assertNull
 import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
 import kotlinx.coroutines.CoroutineScope
@@ -89,6 +90,18 @@ class PlayerModelTest {
             assertEquals(SessionSummary("2 min", setsDone = 3, setsSkipped = 0, setsPlanned = 3), summary)
         }
         assertNull(graph.store.unfinishedExecution())
+        val finished = player.finished(UnitSystem.METRIC)!!
+        assertEquals("Quick", finished.workoutName)
+        assertEquals(clock.now().toEpochMilliseconds() - 2.minutes.inWholeMilliseconds, finished.startedAtMillis)
+        assertEquals(listOf("Time" to "2:00", "Sets" to "3"), finished.stats.map { it.label to it.value })
+        assertEquals(1, finished.poulpy.tentaclesLit)
+    }
+
+    @Test
+    fun noFinishedScreenBeforeTheSessionEnds() {
+        val player = player(workout())
+        player.start()
+        assertNull(player.finished(UnitSystem.METRIC))
     }
 
     @Test
