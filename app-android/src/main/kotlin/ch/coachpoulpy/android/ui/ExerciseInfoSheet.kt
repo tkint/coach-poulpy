@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -66,9 +67,10 @@ fun ExerciseInfoSheet(
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         containerColor = colors.surface,
     ) {
-        Column(Modifier.fillMaxWidth()) {
+        // Fills the sheet, so the steps scroll inside a fixed height and the sheet itself never moves with them.
+        Column(Modifier.fillMaxWidth().fillMaxHeight()) {
             Column(
-                Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()).padding(horizontal = 20.dp),
+                Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 20.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 Row(verticalAlignment = Alignment.Top) {
