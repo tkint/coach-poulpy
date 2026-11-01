@@ -99,6 +99,9 @@ class ProfileAndBodyTest {
         assertEquals(35, ui.age)
         assertEquals("58", ui.restingHeartRate)
 
+        model.setGoalsTo(listOf(TrainingGoal.RUN_FURTHER, TrainingGoal.STAY_ACTIVE))
+        assertEquals(listOf(TrainingGoal.STAY_ACTIVE, TrainingGoal.RUN_FURTHER), model.ui.value.goals)
+
         model.setBirthdateTo(PlanDate(2001, 2, 31))
         assertNull(model.ui.value.birthdate)
         model.clearBirthdate()

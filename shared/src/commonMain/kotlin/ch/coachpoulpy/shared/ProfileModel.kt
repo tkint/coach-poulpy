@@ -30,7 +30,8 @@ data class ProfileUi(
     /** Empty unless the pronouns are custom. */
     val customPronouns: String,
     val sexAssignedAtBirth: SexAssignedAtBirth?,
-    val mainGoal: MainGoal?,
+    /** In the order of the list of goals. */
+    val goals: List<TrainingGoal>,
     val experience: Experience?,
     /** Digits, or empty when there is none. */
     val restingHeartRate: String,
@@ -77,6 +78,9 @@ class ProfileModel(
         change(GOALS, kept.joinToString(",").ifEmpty { null }) { it.copy(goals = kept.toSet()) }
     }
 
+    /** [setGoals] for Swift, which passes a list. */
+    fun setGoalsTo(goals: List<TrainingGoal>) = setGoals(goals.toSet())
+
     fun setExperience(experience: Experience?) = change(EXPERIENCE, experience?.name) { it.copy(experience = experience) }
 
     /** Beats per minute; anything outside 30 to 120 is not a resting heart rate and clears the field. */
@@ -116,7 +120,7 @@ class ProfileModel(
         pronouns = pronouns,
         customPronouns = customPronouns.orEmpty(),
         sexAssignedAtBirth = sexAssignedAtBirth,
-        mainGoal = mainGoal,
+        goals = TrainingGoal.entries.filter { it in goals },
         experience = experience,
         restingHeartRate = restingHeartRate?.toString().orEmpty(),
     )

@@ -42,11 +42,11 @@ struct SettingsHub: View {
                 .listRowBackground(PoulpyColor.primaryContainer)
             }
             Section("settings.body") {
-                NavigationLink(value: SettingsPage.weight) {
-                    row("body.weight", weight.value.latest.map { bodyText(.weight, $0.value, units) })
-                }
                 NavigationLink(value: SettingsPage.height) {
                     row("body.height", height.value.latest.map { bodyText(.height, $0.value, units) })
+                }
+                NavigationLink(value: SettingsPage.weight) {
+                    row("body.weight", weight.value.latest.map { bodyText(.weight, $0.value, units) })
                 }
             }
             Section("settings.app") {
@@ -120,7 +120,7 @@ struct PreferencesView: View {
 // MARK: - Profile
 
 private enum ProfileSheet: Identifiable {
-    case birthdate, pronouns, sex, goal, experience
+    case birthdate, pronouns, sex, goals, experience
     var id: Self { self }
 }
 
@@ -136,40 +136,32 @@ struct ProfileView: View {
         let state = profile.value
         let model = profile.model
         let notSet = L("profile.notSet")
-        List {
-            Section {
-                TextField("profile.name", text: $name)
+        ScrollView {
+            VStack(alignment: .leading, spacing: 10) {
+                sectionLabel("profile.aboutYou")
+                PoulpyTextField(label: "profile.name", text: $name)
                     .onChange(of: name) { model.setDisplayName(name: $0) }
-                selectRow("profile.birthdate", state.birthdate.map { birthdateText($0, age: state.age) } ?? notSet) { sheet = .birthdate }
-                selectRow("profile.pronouns", state.pronouns.map(pronounLabel) ?? notSet) { sheet = .pronouns }
-                if state.pronouns == Pronouns.custom {
-                    TextField("profile.customPronouns", text: $custom)
-                        .onChange(of: custom) { model.setPronouns(pronouns: Pronouns.custom, custom: $0) }
-                }
-                selectRow("profile.sex", state.sexAssignedAtBirth.map(sexLabel) ?? notSet) { sheet = .sex }
-            } header: {
-                Text("profile.aboutYou")
-            } footer: {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("profile.pronounsNote")
-                    Text("profile.sexNote")
-                }
-            }
-            Section {
-                selectRow("profile.goal", state.mainGoal.map(goalLabel) ?? notSet) { sheet = .goal }
-                selectRow("profile.experience", state.experience.map(experienceLabel) ?? notSet) { sheet = .experience }
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("profile.restingHr").font(.poulpy(.footnote)).foregroundStyle(PoulpyColor.onSurfaceVariant)
-                    TextField("profile.restingHrValue", text: $heartRate)
-                        .keyboardType(.numberPad)
+                SelectField(label: "profile.birthdate", value: state.birthdate.map { birthdateText($0, age: state.age) } ?? notSet) { sheet = .birthdate }
+                SelectField(label: "profile.pronouns", value: pronounsText(state, notSet)) { sheet = .pronouns }
+                FieldNote("profile.pronounsNote")
+                SelectField(label: "profile.sex", value: state.sexAssignedAtBirth.map(sexLabel) ?? notSet) { sheet = .sex }
+                FieldNote("profile.sexNote")
+
+                sectionLabel("profile.training")
+                SelectField(label: "profile.goal", value: state.goals.isEmpty ? notSet : state.goals.map(goalLabel).joined(separator: ", ")) { sheet = .goals }
+                SelectField(label: "profile.experience", value: state.experience.map(experienceLabel) ?? notSet) { sheet = .experience }
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("profile.restingHr").font(.poulpy(.footnote)).foregroundStyle(PoulpyColor.onSurfaceVariant).padding(.horizontal, 4)
+                    NumberField(text: $heartRate, description: "profile.restingHr", unit: L("profile.bpm"))
                         .onChange(of: heartRate) { model.setRestingHeartRateText(text: $0) }
+                    FieldNote("profile.restingHrHint")
                 }
-            } header: {
-                Text("profile.training")
-            } footer: {
-                Text("profile.restingHrHint")
             }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 16)
         }
+        .scrollDismissesKeyboard(.interactively)
+        .background(PoulpyColor.background)
         .navigationTitle("profile.title")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
@@ -183,109 +175,49 @@ struct ProfileView: View {
                 BirthdateSheet(initial: state.birthdate.map(date(from:)), onSave: { model.setBirthdateTo(date: planDate($0)) }, onClear: { model.clearBirthdate() })
             case .pronouns:
                 OptionSheet(
-                    title: "profile.pronouns", why: "profile.pronounsNote", note: nil, selected: state.pronouns,
+                    title: "profile.pronouns", why: "profile.pronounsSheetNote", note: nil, selected: state.pronouns,
                     options: withNotSet([Pronouns.sheHer, .heHim, .theyThem, .justMyName, .custom, .preferNotToSay], pronounLabel),
                     onSave: { model.setPronouns(pronouns: $0, custom: custom) }
-                )
+                ) { choice in
+                    if choice == Pronouns.custom {
+                        PoulpyTextField(label: "profile.customPronouns", text: $custom)
+                    }
+                }
             case .sex:
                 OptionSheet(
                     title: "profile.sex", why: "profile.sexWhy", note: "profile.sexNotGender", selected: state.sexAssignedAtBirth,
                     options: withNotSet([SexAssignedAtBirth.female, .male, .intersex, .preferNotToSay], sexLabel),
                     onSave: { model.setSexAssignedAtBirth(sex: $0) }
                 )
-            case .goal:
-                OptionSheet(
-                    title: "profile.goal", why: nil, note: nil, selected: state.mainGoal,
-                    options: withNotSet([MainGoal.stayActive, .buildStrength, .runFurther, .rehab, .somethingElse], goalLabel),
-                    onSave: { model.setMainGoal(goal: $0) }
+            case .goals:
+                MultiOptionSheet(
+                    title: "profile.goal", why: "profile.goalsNote", selected: state.goals,
+                    options: [TrainingGoal.stayActive, .buildStrength, .runFurther, .rehab, .somethingElse].map { ($0, goalLabel($0)) },
+                    onSave: { model.setGoalsTo(goals: $0) }
                 )
             case .experience:
-                OptionSheet(
-                    title: "profile.experience", why: nil, note: nil, selected: state.experience,
-                    options: withNotSet([Experience.justStarting, .regular, .experienced], experienceLabel),
+                ScaleSheet(
+                    title: "profile.experience", why: "profile.experienceNote", selected: state.experience,
+                    steps: [Experience.justStarting, .gettingGoing, .regular, .experienced, .veryExperienced].map { ($0, experienceLabel($0)) },
                     onSave: { model.setExperience(experience: $0) }
                 )
             }
         }
     }
 
-    private func selectRow(_ title: LocalizedStringKey, _ value: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            HStack {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(title).font(.poulpy(.footnote)).foregroundStyle(PoulpyColor.onSurfaceVariant)
-                    Text(value).font(.poulpy(.headline)).foregroundStyle(PoulpyColor.onSurface)
-                }
-                Spacer()
-                Image(systemName: "chevron.right").font(.footnote).foregroundStyle(PoulpyColor.onSurfaceVariant)
-            }
-        }
+    private func sectionLabel(_ key: LocalizedStringKey) -> some View {
+        Text(key).font(.poulpy(.footnote).weight(.heavy)).foregroundStyle(PoulpyColor.onSurfaceVariant).padding(.horizontal, 4).padding(.top, 8)
+    }
+
+    private func pronounsText(_ state: ProfileUi, _ notSet: String) -> String {
+        guard let pronouns = state.pronouns else { return notSet }
+        if pronouns == Pronouns.custom && !state.customPronouns.isEmpty { return state.customPronouns }
+        return pronounLabel(pronouns)
     }
 
     private func birthdateText(_ born: PlanDate, age: KotlinInt?) -> String {
         guard let age else { return shown(born) }
         return L("profile.birthdateValue %lld %@", Int64(age.intValue), shown(born))
-    }
-}
-
-/// Pick one option and save it. A nil value is "not set".
-private struct OptionSheet<T: Hashable>: View {
-    let title: LocalizedStringKey
-    let why: LocalizedStringKey?
-    let note: LocalizedStringKey?
-    let options: [(T?, String)]
-    let onSave: (T?) -> Void
-    @State private var choice: T?
-    @Environment(\.dismiss) private var dismiss
-
-    init(title: LocalizedStringKey, why: LocalizedStringKey?, note: LocalizedStringKey?, selected: T?, options: [(T?, String)], onSave: @escaping (T?) -> Void) {
-        self.title = title
-        self.why = why
-        self.note = note
-        self.options = options
-        self.onSave = onSave
-        _choice = State(initialValue: selected)
-    }
-
-    var body: some View {
-        NavigationStack {
-            List {
-                if let why {
-                    Section { Text(why) }
-                }
-                Section {
-                    ForEach(options.indices, id: \.self) { index in
-                        Button {
-                            choice = options[index].0
-                        } label: {
-                            HStack {
-                                Text(options[index].1).foregroundStyle(PoulpyColor.onSurface)
-                                Spacer()
-                                if choice == options[index].0 {
-                                    Image(systemName: "checkmark").foregroundStyle(PoulpyColor.primary)
-                                }
-                            }
-                        }
-                    }
-                } footer: {
-                    if let note { Text(note) }
-                }
-            }
-            .navigationTitle(title)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button(LocalizedStringKey("action.cancel")) { dismiss() }
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button(LocalizedStringKey("action.save")) {
-                        onSave(choice)
-                        dismiss()
-                    }
-                }
-            }
-        }
-        .presentationDetents([.medium, .large])
     }
 }
 
@@ -349,7 +281,7 @@ private func sexLabel(_ value: SexAssignedAtBirth) -> String {
     }
 }
 
-private func goalLabel(_ value: MainGoal) -> String {
+private func goalLabel(_ value: TrainingGoal) -> String {
     switch value {
     case .stayActive: return L("profile.goalStayActive")
     case .buildStrength: return L("profile.goalBuildStrength")
@@ -362,8 +294,10 @@ private func goalLabel(_ value: MainGoal) -> String {
 private func experienceLabel(_ value: Experience) -> String {
     switch value {
     case .justStarting: return L("profile.experienceJustStarting")
+    case .gettingGoing: return L("profile.experienceGettingGoing")
     case .regular: return L("profile.experienceRegular")
-    default: return L("profile.experienceExperienced")
+    case .experienced: return L("profile.experienceExperienced")
+    default: return L("profile.experienceVeryExperienced")
     }
 }
 
@@ -384,7 +318,21 @@ struct BodyView: View {
     var body: some View {
         let state = log.value
         let isWeight = metric == BodyMetric.weight
-        List {
+        Group {
+            if state.history.isEmpty {
+                ScrollView {
+                    PoulpyCard(
+                        title: Text(LocalizedStringKey(isWeight ? "body.emptyWeightTitle" : "body.emptyHeightTitle")),
+                        message: Text(LocalizedStringKey(isWeight ? "body.emptyWeightBody" : "body.emptyHeightBody")),
+                        button: Text(LocalizedStringKey(isWeight ? "body.logWeight" : "body.logHeight")),
+                        systemImage: "plus",
+                        poulpySize: 120
+                    ) { logging = true }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 16)
+                }
+            } else {
+                List {
             if let latest = state.latest {
                 Section {
                     HStack(spacing: 14) {
@@ -450,6 +398,8 @@ struct BodyView: View {
                     }
                 }
             }
+                }
+            }
         }
         .navigationTitle(isWeight ? LocalizedStringKey("body.weight") : LocalizedStringKey("body.height"))
         .navigationBarTitleDisplayMode(.inline)
@@ -465,26 +415,53 @@ struct BodyView: View {
         }
     }
 
+    /// A line with a dot per entry over a grid of round values, with the unit above the axis. The grid is neutral:
+    /// a weight going up is never red.
     private func chart(_ state: BodyUi) -> some View {
-        let values = state.points.map { $0.value }
-        let low = values.min() ?? 0
-        let high = values.max() ?? 0
-        let pad = max((high - low) * 0.2, 0.5)
+        let shownValues = state.points.map { BodyDisplay.shared.chartValue(metric: metric, stored: $0.value, system: units) }
+        let ticks = ChartAxis.shared.ticks(
+            low: shownValues.min() ?? 0, high: shownValues.max() ?? 0,
+            minSpan: BodyDisplay.shared.chartMinSpan(metric: metric, system: units), target: 4
+        ).map { $0.doubleValue }
         let first = state.points.first!
         let last = state.points.last!
+        let firstDay = Double(first.epochDay)
+        let lastDay = Double(last.epochDay)
         let description = L("body.chart %@ %@ %@ %@", bodyText(metric, first.value, units), shown(first.date), bodyText(metric, last.value, units), shown(last.date))
-        return Chart(state.points, id: \.epochDay) { point in
-            LineMark(x: .value("", Double(point.epochDay)), y: .value("", point.value))
-                .foregroundStyle(PoulpyColor.primary)
-            PointMark(x: .value("", Double(point.epochDay)), y: .value("", point.value))
-                .foregroundStyle(PoulpyColor.primary)
+        return VStack(alignment: .leading, spacing: 4) {
+            Text(verbatim: BodyDisplay.shared.axisUnit(metric: metric, system: units))
+                .font(.poulpy(.caption2)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+            Chart(Array(state.points.enumerated()), id: \.offset) { index, point in
+                LineMark(x: .value("", Double(point.epochDay)), y: .value("", shownValues[index]))
+                    .foregroundStyle(PoulpyColor.primary)
+                PointMark(x: .value("", Double(point.epochDay)), y: .value("", shownValues[index]))
+                    .foregroundStyle(PoulpyColor.primary)
+            }
+            .chartYScale(domain: (ticks.first ?? 0)...(ticks.last ?? 1))
+            .chartXScale(domain: firstDay...max(lastDay, firstDay + 1), range: .plotDimension(padding: 8))
+            .chartYAxis {
+                AxisMarks(position: .leading, values: ticks) { value in
+                    AxisGridLine().foregroundStyle(PoulpyColor.outline)
+                    AxisValueLabel {
+                        if let number = value.as(Double.self) {
+                            Text(verbatim: BodyDisplay.shared.axisLabel(metric: metric, shown: number, system: units, languageCode: Language.code))
+                        }
+                    }
+                }
+            }
+            .chartXAxis {
+                AxisMarks(values: first.epochDay == last.epochDay ? [firstDay] : [firstDay, lastDay]) { value in
+                    AxisValueLabel {
+                        if let day = value.as(Double.self) {
+                            Text(verbatim: shown(day == firstDay ? first.date : last.date))
+                        }
+                    }
+                }
+            }
+            .frame(height: 190)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(Text(description))
         }
-        .chartYScale(domain: (low - pad)...(high + pad))
-        .chartXAxis(.hidden)
-        .chartYAxis(.hidden)
-        .frame(height: 160)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(Text(description))
     }
 
     private func stat(_ name: LocalizedStringKey, _ value: String, _ note: String) -> some View {
@@ -506,41 +483,68 @@ struct BodyView: View {
     }
 }
 
-/// Log a weight or height: a stepper in the person's units and a date.
+/// Log a weight or height: type the number (the keyboard opens with it selected), nudge with − and +, pick the date.
 private struct LogSheet: View {
     let metric: BodyMetric
     let units: UnitSystem
+    let start: Double
     let onSave: (Double, Date) -> Void
-    @State private var value: Double
+    @State private var text: String
+    @State private var feet: String
+    @State private var inches: String
     @State private var day = Date()
     @Environment(\.dismiss) private var dismiss
 
     init(metric: BodyMetric, units: UnitSystem, start: Double, onSave: @escaping (Double, Date) -> Void) {
         self.metric = metric
         self.units = units
+        self.start = start
         self.onSave = onSave
-        _value = State(initialValue: start)
+        let shared = BodyDisplay.shared
+        _text = State(initialValue: metric == BodyMetric.weight
+            ? shared.weightText(kg: start, system: units, languageCode: Language.code)
+            : shared.centimetresText(cm: start))
+        _feet = State(initialValue: shared.feetText(cm: start))
+        _inches = State(initialValue: shared.inchesText(cm: start, languageCode: Language.code))
+    }
+
+    private var isWeight: Bool { metric == BodyMetric.weight }
+    private var feetAndInches: Bool { !isWeight && units == UnitSystem.imperial }
+
+    /// What the fields hold now, in kilograms or centimetres; nil while they are empty or out of range.
+    private var typed: Double? {
+        let shared = BodyDisplay.shared
+        if isWeight { return shared.weightFrom(text: text, system: units)?.doubleValue }
+        if feetAndInches { return shared.centimetresFrom(feet: feet, inches: inches)?.doubleValue }
+        return shared.centimetresFrom(text: text)?.doubleValue
     }
 
     var body: some View {
-        let isWeight = metric == BodyMetric.weight
         NavigationStack {
-            Form {
-                Section {
-                    HStack {
-                        stepButton("−", "body.less", -1)
-                        Spacer()
-                        Text(bodyText(metric, value, units)).font(.poulpy(.title2))
-                        Spacer()
-                        stepButton("+", "body.more", 1)
-                    }
-                } footer: {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 14) {
                     Text(isWeight ? LocalizedStringKey("body.weightStored") : LocalizedStringKey("body.heightStored"))
+                        .font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+                    NumberEntry(onLess: { nudge(-1) }, onMore: { nudge(1) }) {
+                        if feetAndInches {
+                            HStack(spacing: 8) {
+                                NumberField(text: $feet, description: "body.feet", unit: L("body.feet"), large: true)
+                                NumberField(text: $inches, description: "body.inches", unit: L("body.inches"), decimal: true, large: true)
+                            }
+                        } else {
+                            NumberField(
+                                text: $text, description: isWeight ? "body.weight" : "body.height",
+                                unit: BodyDisplay.shared.axisUnit(metric: metric, system: units), decimal: isWeight, large: true
+                            )
+                        }
+                    }
+                    FieldBox(height: 56) {
+                        DatePicker("body.date", selection: $day, in: ...Date(), displayedComponents: .date)
+                    }
                 }
-                Section {
-                    DatePicker("body.date", selection: $day, in: ...Date(), displayedComponents: .date)
-                }
+                .padding(20)
             }
+            .scrollDismissesKeyboard(.interactively)
             .navigationTitle(isWeight ? LocalizedStringKey("body.logWeight") : LocalizedStringKey("body.logHeight"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -549,26 +553,29 @@ private struct LogSheet: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button(LocalizedStringKey("action.save")) {
-                        onSave(value, day)
-                        dismiss()
+                        if let typed {
+                            onSave(typed, day)
+                            dismiss()
+                        }
                     }
+                    .disabled(typed == nil)
                 }
             }
         }
-        .presentationDetents([.medium])
+        .presentationDetents([.medium, .large])
     }
 
-    private func stepButton(_ symbol: String, _ label: LocalizedStringKey, _ direction: Int32) -> some View {
-        Button {
-            value = BodyDisplay.shared.step(metric: metric, stored: value, system: units, direction: direction)
-        } label: {
-            Text(verbatim: symbol)
-                .font(.poulpy(.title2))
-                .frame(width: 56, height: 44)
-                .background(PoulpyColor.surfaceVariant, in: RoundedRectangle(cornerRadius: 12))
+    private func nudge(_ direction: Int32) {
+        let shared = BodyDisplay.shared
+        let next = shared.step(metric: metric, stored: typed ?? start, system: units, direction: direction)
+        if isWeight {
+            text = shared.weightText(kg: next, system: units, languageCode: Language.code)
+        } else if feetAndInches {
+            feet = shared.feetText(cm: next)
+            inches = shared.inchesText(cm: next, languageCode: Language.code)
+        } else {
+            text = shared.centimetresText(cm: next)
         }
-        .buttonStyle(.borderless)
-        .accessibilityLabel(Text(label))
     }
 }
 
