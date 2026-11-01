@@ -58,6 +58,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -94,7 +95,6 @@ fun WorkoutPageScreen(
     onStart: () -> Unit,
     onEdit: () -> Unit,
     onCopy: () -> Unit,
-    onOpenExercise: (String) -> Unit,
 ) {
     val model = remember(graph, language, workoutId) { graph.workoutPage(workoutId, language) }
     DisposableEffect(model) { onDispose { model.close() } }
@@ -104,6 +104,8 @@ fun WorkoutPageScreen(
     var menu by remember { mutableStateOf(false) }
     var deleting by remember { mutableStateOf(false) }
     var picking by remember { mutableStateOf(false) }
+    // The exercise whose details are open; null when none.
+    var detailing by rememberSaveable { mutableStateOf<String?>(null) }
 
     // Deleted here or elsewhere: nothing left to show.
     LaunchedEffect(state.loaded, state.found) { if (state.loaded && !state.found) onBack() }
@@ -195,7 +197,7 @@ fun WorkoutPageScreen(
                     val row = step.row
                     val group = step.repeatGroup
                     if (row != null) {
-                        StructureRow(row, if (row.isRest) null else ++number, onOpenExercise)
+                        StructureRow(row, if (row.isRest) null else ++number) { detailing = it }
                     } else if (group != null) {
                         Column(
                             Modifier.fillMaxWidth().clip(RoundedCornerShape(PoulpyRadius.md)).background(MaterialTheme.colorScheme.primaryContainer).padding(10.dp),
@@ -209,7 +211,7 @@ fun WorkoutPageScreen(
                                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                                 )
                             }
-                            group.rows.forEach { child -> StructureRow(child, if (child.isRest) null else ++number, onOpenExercise) }
+                            group.rows.forEach { child -> StructureRow(child, if (child.isRest) null else ++number) { detailing = it } }
                         }
                     }
                 }
@@ -230,6 +232,16 @@ fun WorkoutPageScreen(
     }
 
     if (deleting) DeleteWorkoutDialog(state.deletePrompt, onDelete = { deleting = false; model.delete() }, onDismiss = { deleting = false })
+
+    detailing?.let { slug ->
+        ExerciseInfoSheet(
+            graph, language, slug,
+            onAction = { detailing = null },
+            onDismiss = { detailing = null },
+            adding = false,
+            closeLabel = R.string.action_close,
+        )
+    }
 }
 
 /** "Warm-up", "2 steps · about 6 min" beside the part's icon, as the builder heads a part. */
@@ -265,14 +277,14 @@ internal val PartKind.icon: ImageVector
 
 /** A step of the workout page: its number (a timer for a rest), Recover tag, name and prescription; an exercise opens its page. */
 @Composable
-private fun StructureRow(row: WorkoutStepRow, number: Int?, onOpenExercise: (String) -> Unit) {
+private fun StructureRow(row: WorkoutStepRow, number: Int?, onOpen: (String) -> Unit) {
     val colors = MaterialTheme.colorScheme
     Row(
         Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(PoulpyRadius.md))
             .background(colors.surface)
-            .then(if (row.isRest) Modifier else Modifier.clickable { onOpenExercise(row.slug) })
+            .then(if (row.isRest) Modifier else Modifier.clickable { onOpen(row.slug) })
             .padding(horizontal = 12.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
