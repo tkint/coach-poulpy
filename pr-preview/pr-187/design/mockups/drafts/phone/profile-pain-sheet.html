@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Profile · pain or rehab</title>
+<meta name="mockup:screen" content="profile-pain-sheet">
+<meta name="mockup:section" content="Profile and settings">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../../../web/src/styles/tokens.css">
+<link rel="stylesheet" href="../../shared/mockup.css">
+<script src="../../shared/mockup-theme.js"></script>
+</head>
+<body>
+<main class="phone">
+
+  <header class="page-bar"><a class="icon-button" href="profile-edit.html" aria-label="Back to profile"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></a><div><h1>Your profile</h1></div></header>
+  <div class="scrim"></div>
+  <section class="sheet" id="pain-sheet" data-component="sheet" role="dialog" aria-label="Pain or rehab">
+    <span class="sheet-handle"></span>
+    <div class="sheet-title"><h2>Pain or rehab</h2><p>Poulpy stays on the blue side and never asks you to catch up. Nothing leaves this phone.</p></div>
+    <span class="label" id="pain-where">Where does it hurt?</span>
+    <div class="pick-chips" role="group" aria-labelledby="pain-where" id="pain-areas">
+      <button type="button" role="checkbox" aria-checked="false">Neck</button>
+      <button type="button" role="checkbox" aria-checked="false">Shoulder</button>
+      <button type="button" role="checkbox" aria-checked="false">Back</button>
+      <button type="button" role="checkbox" aria-checked="false">Elbow</button>
+      <button type="button" role="checkbox" aria-checked="false">Wrist or hand</button>
+      <button type="button" role="checkbox" aria-checked="true">Hip</button>
+      <button type="button" role="checkbox" aria-checked="true">Knee</button>
+      <button type="button" role="checkbox" aria-checked="false">Ankle or foot</button>
+      <button type="button" role="checkbox" aria-checked="false">Somewhere else</button>
+    </div>
+    <span class="label" id="pain-for">For how long?</span>
+    <div class="option-list" role="radiogroup" aria-labelledby="pain-for" id="pain-duration">
+      <button class="radio-row" type="button" role="radio" aria-checked="true" data-component="radio-row"><span><strong>72 hours</strong><small>Until 4 Nov. Poulpy’s usual</small></span><span class="radio" aria-hidden="true"></span></button>
+      <button class="radio-row" type="button" role="radio" aria-checked="false" data-component="radio-row"><span><strong>1 week</strong><small>Until 8 Nov</small></span><span class="radio" aria-hidden="true"></span></button>
+      <button class="radio-row" type="button" role="radio" aria-checked="false" data-component="radio-row"><span><strong>2 weeks</strong><small>Until 15 Nov</small></span><span class="radio" aria-hidden="true"></span></button>
+      <button class="radio-row" type="button" role="radio" aria-checked="false" data-component="radio-row"><span><strong>Until I say so</strong><small>Rehab with no end date. Clear it here when you are back</small></span><span class="radio" aria-hidden="true"></span></button>
+    </div>
+    <span class="field-note">Still hurting when the time is up? Set it again, it only takes a tap.</span>
+    <div class="sheet-actions"><button class="secondary-button" type="button">Clear</button><button class="primary-button" type="button">Save</button></div>
+  </section>
+</main>
+</body>
+</html>
