@@ -14,7 +14,7 @@ enum class Pronouns { SHE_HER, HE_HIM, THEY_THEM, JUST_MY_NAME, CUSTOM, PREFER_N
 enum class SexAssignedAtBirth { FEMALE, MALE, INTERSEX, PREFER_NOT_TO_SAY }
 
 /** What the person trains for; they may pick several. */
-enum class Goal { STAY_ACTIVE, BUILD_STRENGTH, RUN_FURTHER, REHAB, SOMETHING_ELSE }
+enum class TrainingGoal { STAY_ACTIVE, BUILD_STRENGTH, RUN_FURTHER, REHAB, SOMETHING_ELSE }
 
 /** Five steps on one scale, from the first week to years of training. */
 enum class Experience { JUST_STARTING, GETTING_GOING, REGULAR, EXPERIENCED, VERY_EXPERIENCED }
@@ -28,7 +28,7 @@ data class Profile(
     /** Only kept with [Pronouns.CUSTOM]. */
     val customPronouns: String? = null,
     val sexAssignedAtBirth: SexAssignedAtBirth? = null,
-    val goals: Set<Goal> = emptySet(),
+    val goals: Set<TrainingGoal> = emptySet(),
     val experience: Experience? = null,
     val restingHeartRate: Int? = null,
 ) {

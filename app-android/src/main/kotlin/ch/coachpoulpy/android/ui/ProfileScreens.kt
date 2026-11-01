@@ -69,7 +69,7 @@ import ch.coachpoulpy.core.model.BodyMeasurement
 import ch.coachpoulpy.core.model.BodyMetric
 import ch.coachpoulpy.core.model.BodyRange
 import ch.coachpoulpy.core.model.Experience
-import ch.coachpoulpy.core.model.Goal
+import ch.coachpoulpy.core.model.TrainingGoal
 import ch.coachpoulpy.core.model.Pronouns
 import ch.coachpoulpy.core.model.SexAssignedAtBirth
 import ch.coachpoulpy.shared.AppGraph
@@ -312,7 +312,7 @@ internal fun ProfileScreen(graph: AppGraph, onBack: () -> Unit, modifier: Modifi
         ProfileSheet.GOALS -> MultiOptionSheet(
             title = stringResource(R.string.profile_goal),
             why = stringResource(R.string.profile_goalsNote),
-            options = Goal.entries.map { it to stringResource(it.label) },
+            options = TrainingGoal.entries.map { it to stringResource(it.label) },
             selected = profile.goals,
             onSave = model::setGoals,
             onDismiss = { sheet = null },
@@ -349,13 +349,13 @@ private val SexAssignedAtBirth.label: Int
         SexAssignedAtBirth.PREFER_NOT_TO_SAY -> R.string.profile_sexPreferNotToSay
     }
 
-private val Goal.label: Int
+private val TrainingGoal.label: Int
     get() = when (this) {
-        Goal.STAY_ACTIVE -> R.string.profile_goalStayActive
-        Goal.BUILD_STRENGTH -> R.string.profile_goalBuildStrength
-        Goal.RUN_FURTHER -> R.string.profile_goalRunFurther
-        Goal.REHAB -> R.string.profile_goalRehab
-        Goal.SOMETHING_ELSE -> R.string.profile_goalSomethingElse
+        TrainingGoal.STAY_ACTIVE -> R.string.profile_goalStayActive
+        TrainingGoal.BUILD_STRENGTH -> R.string.profile_goalBuildStrength
+        TrainingGoal.RUN_FURTHER -> R.string.profile_goalRunFurther
+        TrainingGoal.REHAB -> R.string.profile_goalRehab
+        TrainingGoal.SOMETHING_ELSE -> R.string.profile_goalSomethingElse
     }
 
 private val Experience.label: Int

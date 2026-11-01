@@ -1,7 +1,7 @@
 package ch.coachpoulpy.shared
 
 import ch.coachpoulpy.core.model.Experience
-import ch.coachpoulpy.core.model.Goal
+import ch.coachpoulpy.core.model.TrainingGoal
 import ch.coachpoulpy.core.model.Profile
 import ch.coachpoulpy.core.model.Pronouns
 import ch.coachpoulpy.core.model.SexAssignedAtBirth
@@ -49,7 +49,7 @@ class ProfileModel(
             pronouns = read<Pronouns>(PRONOUNS),
             customPronouns = memory.getString(CUSTOM_PRONOUNS),
             sexAssignedAtBirth = read<SexAssignedAtBirth>(SEX),
-            goals = memory.getString(GOALS)?.split(',')?.mapNotNull { saved -> Goal.entries.firstOrNull { it.name == saved } }?.toSet().orEmpty(),
+            goals = memory.getString(GOALS)?.split(',')?.mapNotNull { saved -> TrainingGoal.entries.firstOrNull { it.name == saved } }?.toSet().orEmpty(),
             experience = read<Experience>(EXPERIENCE),
             restingHeartRate = memory.getString(RESTING_HEART_RATE)?.toIntOrNull(),
         ),
@@ -72,8 +72,8 @@ class ProfileModel(
     fun setSexAssignedAtBirth(sex: SexAssignedAtBirth?) = change(SEX, sex?.name) { it.copy(sexAssignedAtBirth = sex) }
 
     /** Several goals at once, kept in the order of the list so the saved text never depends on the order they were ticked. */
-    fun setGoals(goals: Set<Goal>) {
-        val kept = Goal.entries.filter { it in goals }
+    fun setGoals(goals: Set<TrainingGoal>) {
+        val kept = TrainingGoal.entries.filter { it in goals }
         change(GOALS, kept.joinToString(",").ifEmpty { null }) { it.copy(goals = kept.toSet()) }
     }
 
