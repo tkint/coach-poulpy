@@ -11,6 +11,8 @@ Settings stops being two tabs (General, Devices) and becomes a hub, because it n
 | `settings-general` | The hub: a profile card (Poulpy, name, age, height, weight), then **Body** (Weight, Height), **App** (Appearance and units, Devices) and **About** |
 | `profile-edit` | The profile fields below, in two groups, About you and Training |
 | `profile-sex-sheet` | The sex assigned at birth picker, with its reason |
+| `profile-body-figure-sheet` | The body figure picker: Wider shoulders or Wider hips |
+| `profile-pain-sheet` | Pain or rehab: the front and back body map, then for how long |
 | `body-weight`, `body-height` | Latest value, chart with 1M / 3M / 1Y / All, change, lowest, highest and the log. Height is drawn in ft and in to show the Imperial unit system |
 | `body-log-sheet` | Logging a weight: a stepper in the person's units and a date |
 | `settings-preferences` | Theme, Language and Units as selects, moved out of the old General tab |
@@ -32,8 +34,8 @@ Everything is optional and stays on the phone. Each field is only here because s
 | Main goal | Which workouts Poulpy suggests first | Stay active, Build strength, Run further, Rehab, Something else |
 | Experience | Starting loads and plan suggestions | Just starting, Regular, Experienced |
 | Resting heart rate | Heart rate zones | Typed, or read from a band later |
-| Body figure (draft) | Which body map is drawn for pain and, later, for the muscles a workout uses | Wider shoulders or Wider hips, so the names describe the drawing and say nothing about gender. It is a drawing only: separate from sex assigned at birth, never used for estimates, and never asked as gender |
-| Pain or rehab | Poulpy's blue side for 72 hours | Where it hurts and until when; see [Character rules](./brand.md#character-rules) |
+| Body figure | Which body map is drawn for pain and, later, for the muscles a workout uses | Wider shoulders or Wider hips, so the names describe the drawing and say nothing about gender. It is a drawing only: separate from sex assigned at birth, never used for estimates, and never asked as gender |
+| Pain or rehab | Poulpy's blue side for the chosen time | Where it hurts, on the body map, and for how long; see [Character rules](./brand.md#character-rules) |
 
 Suggested for later, not drawn: maximum heart rate override, weekly goal in sessions, dominant side, equipment at home (already a filter), waist and body-fat as optional measurements.
 
@@ -53,9 +55,9 @@ The only thing the app needs is a physiological input for estimates, so that is 
 
 The unit system chosen in Settings decides how weight (kg or lb), height (cm or ft and in) and distance (km or mi) are shown and typed. Everything is stored metric, so switching converts and never rewrites; see [ADR 0017](./adr/0017-body-measurements-are-stored-metric-and-shown-in-the-persons-units.md). The weight pages are drawn Metric and the height page Imperial so both can be reviewed.
 
-## Pain or rehab (draft)
+## Pain or rehab
 
-The row is in the profile but nothing sets it yet. The drafts are `profile-edit` (the row filled in, with Poulpy's note) and `profile-pain-sheet` (a front and back body map where it hurts, left and right apart, then for how long: 72 hours by default, 1 week, 2 weeks or until the person clears it). The body map is a new component, `body-map`, meant to be reused later to show the areas an exercise works. It is a muscle chart with finer regions (pectoral, biceps, quadriceps, hamstring...) and no fill on skin, hair or face, so it implies no skin tone. It has two builds, picked in `profile-body-figure-sheet`, under Mockups, Drafts. Nothing is built until they are agreed. The rules they follow are in [Character rules](./brand.md#character-rules): pain or rehab always shows the blue side and the Patched up pose, never ember, and entries inside the window never count as missed ([decision 8](./brand-decisions.md)).
+The profile row opens a sheet. The screens are `profile-edit` (the row filled in, with Poulpy's note) and `profile-pain-sheet` (a front and back body map where it hurts, left and right apart, then for how long: 72 hours by default, 1 week, 2 weeks or until the person clears it). The body map is a new component, `body-map`, meant to be reused later to show the areas an exercise works. It is a muscle chart with finer regions (pectoral, biceps, quadriceps, hamstring...) and no fill on skin, hair or face, so it implies no skin tone. It has two builds, picked in `profile-body-figure-sheet`, under Mockups, Agreed. Duration is 72 hours by default, with 1 week, 2 weeks or until the person clears it; the window only changes Poulpy (blue side, Patched up pose, no missed entries) and never filters workouts. The rules they follow are in [Character rules](./brand.md#character-rules): pain or rehab always shows the blue side and the Patched up pose, never ember, and entries inside the window never count as missed ([decision 8](./brand-decisions.md)).
 
 ## Still open
 
