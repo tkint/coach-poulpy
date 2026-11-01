@@ -65,9 +65,12 @@ class SettingsModel(
 /** A number in the user's units, with the unit to print after it. The apps format [value] in their locale. */
 data class Measure(val value: Double, val decimals: Int, val unit: String)
 
-/** Distances and speeds in the unit system the user picked. Kilograms are not converted yet. */
+/** Distances and speeds in the unit system the user picked. Weights are stored in kilograms; only the weight lifted on the finished screen is shown in pounds so far. */
 object Units {
     private const val METERS_PER_MILE = 1609.344
+    private const val POUNDS_PER_KG = 2.2046226218
+
+    fun poundsOf(kg: Double) = kg * POUNDS_PER_KG
 
     fun distance(meters: Double, system: UnitSystem, decimals: Int = 2) = when (system) {
         UnitSystem.METRIC -> Measure(meters / 1000, decimals, "km")
