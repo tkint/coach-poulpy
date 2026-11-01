@@ -92,4 +92,3 @@ Add a decision here in the same PR as the brand change it explains, newest at th
 **Why:** "sex assigned at birth" is the wording most inclusive-forms guides recommend for a physiological question, because it describes what was recorded rather than who someone is, and it keeps gender out of it; "biological sex" and "birth sex" read as defining a person and are the terms trans and intersex people most often object to. The app also needs no gender at all: sex assigned at birth drives estimates, and pronouns drive wording.
 
 **Set aside:** one "Gender" field with Male, Female and Other (which mixes the two questions and makes "Other" the label for everyone outside two boxes); free-text sex (cannot feed an estimate); asking nothing (the estimates become less accurate for people who are happy to say). The wording was chosen from published guides and has **not yet been read by LGBTQ+ people**: that read is a condition of accepting this decision.
-
