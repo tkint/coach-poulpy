@@ -201,6 +201,11 @@ function accentColor() {
   }, null, 2) + '\n'
 }
 
+// Android window colours: what shows before the first frame, and behind the system splash screen
+function splashColors(t) {
+  return `<?xml version="1.0" encoding="utf-8"?>\n<!-- ${banner} -->\n<resources>\n    <color name="window_background">${t.background.toUpperCase()}</color>\n</resources>\n`
+}
+
 // Web (CSS custom properties)
 function css() {
   const out = [`/* ${banner} */`, '', ':root {']
@@ -231,6 +236,8 @@ const files = {
   'app-android/src/main/kotlin/ch/coachpoulpy/android/ui/PoulpyTokens.kt': kotlin(),
   'app-ios/CoachPoulpy/Theme/PoulpyTokens.swift': swift(),
   'app-ios/CoachPoulpy/Assets.xcassets/AccentColor.colorset/Contents.json': accentColor(),
+  'app-android/src/main/res/values/window_colors.xml': splashColors(light),
+  'app-android/src/main/res/values-night/window_colors.xml': splashColors(dark),
   'web/src/styles/tokens.css': css(),
 }
 

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The window shows before the first Compose frame, so it takes the app background; dark in values-night. -->
+<resources>
+    <style name="Theme.CoachPoulpy" parent="@android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/window_background</item>
+    </style>
+</resources>
