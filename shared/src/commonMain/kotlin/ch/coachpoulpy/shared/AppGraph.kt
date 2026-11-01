@@ -25,11 +25,16 @@ class AppGraph(driverFactory: DriverFactory) {
 
     /** What the user ticked in the exercise list's Equipment sheet. The apps pass the same [memory] every time. */
     fun equipmentFilter(memory: KeyValueStore) = EquipmentFilter(memory)
-    fun home(languageCode: String) = HomeModel(store, compiler, catalog, languageCode, discardOpen = ::discardOpen)
+    /** [memory] is the one the profile uses, so Poulpy knows about pain or rehab. */
+    fun home(languageCode: String, memory: KeyValueStore): HomeModel {
+        val profile = profile(memory)
+        return HomeModel(store, compiler, catalog, languageCode, discardOpen = ::discardOpen, painActive = profile::painActive)
+    }
     fun library(languageCode: String) = LibraryModel(store, compiler, catalog, languageCode)
     fun workoutPage(workoutId: String, languageCode: String) = WorkoutPageModel(WorkoutId(workoutId), store, compiler, catalog, languageCode, units = ::units)
     /** A workout file's text, read for the preview before it is added to the library. */
     fun importWorkout(fileText: String, languageCode: String) = WorkoutImport(fileText, store, catalog, languageCode)
+    // CLEANUP: History's Poulpy header ignores pain or rehab, so it can show the ember side inside the blue-side window. Pass the profile's painActive here like home() does.
     fun history(languageCode: String) = HistoryModel(store, compiler, languageCode)
 
     /** The picture to share for a finished session of the history, the same one as straight after the session. */

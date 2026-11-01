@@ -62,8 +62,11 @@ data class PoulpyStatus(
  * new one, so a quiet month never takes anything away.
  */
 class PoulpyCoach(private val languageCode: String, private val timeZone: TimeZone = TimeZone.currentSystemDefault()) {
-    /** [finishedAt] is when each finished session ended, in any order. */
-    fun status(finishedAt: List<Instant>, now: Instant): PoulpyStatus {
+    /**
+     * [finishedAt] is when each finished session ended, in any order. While [painActive] (pain or rehab was set and its
+     * time is not up), Poulpy is patched up on the blue side whatever the sessions say, and never turns ember.
+     */
+    fun status(finishedAt: List<Instant>, now: Instant, painActive: Boolean = false): PoulpyStatus {
         val sessions = finishedAt.sorted()
         val total = sessions.size
         val full = total / PoulpyStatus.TENTACLES
@@ -71,6 +74,14 @@ class PoulpyCoach(private val languageCode: String, private val timeZone: TimeZo
         val caption = if (full == 0) DomainText.poulpyCaption(languageCode, lit) else DomainText.poulpyCaptionFull(languageCode, caption = DomainText.poulpyCaption(languageCode, lit), full = full)
         val status = { mood: PoulpyStatus.Mood, drawing: PoulpyDrawing, title: String, line: String ->
             PoulpyStatus(mood, drawing, title, line, lit, full, caption)
+        }
+
+        if (painActive) {
+            return status(
+                PoulpyStatus.Mood.RECOVERING, PoulpyDrawing.PATCHED_UP,
+                DomainText.poulpyPainTitle(languageCode),
+                DomainText.poulpyPainLine(languageCode),
+            )
         }
 
         if (total == 0) {
