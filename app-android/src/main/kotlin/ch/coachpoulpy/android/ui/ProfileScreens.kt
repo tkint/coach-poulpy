@@ -619,8 +619,8 @@ private fun LogSheet(metric: BodyMetric, system: UnitSystem, language: String, s
     val isWeight = metric == BodyMetric.WEIGHT
     val feetAndInches = !isWeight && system == UnitSystem.IMPERIAL
     var text by remember { mutableStateOf(if (isWeight) BodyDisplay.weightText(start, system, language) else BodyDisplay.centimetresText(start)) }
-    var feet by remember { mutableStateOf(BodyDisplay.feetAndInchesText(start, language).first) }
-    var inches by remember { mutableStateOf(BodyDisplay.feetAndInchesText(start, language).second) }
+    var feet by remember { mutableStateOf(BodyDisplay.feetText(start)) }
+    var inches by remember { mutableStateOf(BodyDisplay.inchesText(start, language)) }
     var day by remember { mutableStateOf(today) }
     var pickingDate by remember { mutableStateOf(false) }
 
@@ -633,7 +633,7 @@ private fun LogSheet(metric: BodyMetric, system: UnitSystem, language: String, s
     fun nudge(direction: Int) {
         val next = BodyDisplay.step(metric, typed ?: start, system, direction)
         if (isWeight) text = BodyDisplay.weightText(next, system, language)
-        else if (feetAndInches) BodyDisplay.feetAndInchesText(next, language).let { feet = it.first; inches = it.second }
+        else if (feetAndInches) { feet = BodyDisplay.feetText(next); inches = BodyDisplay.inchesText(next, language) }
         else text = BodyDisplay.centimetresText(next)
     }
 

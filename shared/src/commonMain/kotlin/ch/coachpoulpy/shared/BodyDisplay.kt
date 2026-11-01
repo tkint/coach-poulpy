@@ -78,11 +78,13 @@ object BodyDisplay {
     /** The centimetres typed in a height field, or null when it is not a number or not a plausible height. */
     fun centimetresFrom(text: String): Double? = text.asNumber()?.takeIf { it in MIN_CM..MAX_CM }
 
-    /** The feet and the inches of a height as two field texts. */
-    fun feetAndInchesText(cm: Double, languageCode: String): Pair<String, String> {
-        val (feet, inches) = Units.feetAndInches(cm)
-        val shown = if (inches % 1.0 == 0.0) inches.toInt().toString() else inches.toString().withDecimalSign(languageCode)
-        return feet.toString() to shown
+    /** The feet of a height, for the ft field. */
+    fun feetText(cm: Double): String = Units.feetAndInches(cm).feet.toString()
+
+    /** The inches left over after the feet of a height, for the in field (half inches show with a decimal sign). */
+    fun inchesText(cm: Double, languageCode: String): String {
+        val inches = Units.feetAndInches(cm).inches
+        return if (inches % 1.0 == 0.0) inches.toInt().toString() else inches.toString().withDecimalSign(languageCode)
     }
 
     /** The centimetres of a height typed as feet and inches; empty inches count as 0. Null when it is not a plausible height. */
