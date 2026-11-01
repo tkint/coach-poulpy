@@ -32,6 +32,14 @@ node design/build-tokens.mjs
 
 On iOS, also list any new file under `UIAppFonts` in `Info.plist`. Views use `.font(.poulpy(.headline))` instead of `.font(.headline)` to get the system text styles in the brand fonts. Both fonts are under the SIL Open Font License (`design/fonts/OFL-*.txt`).
 
+## Body map figures
+
+`build-body-map.mjs` draws the front and back muscle chart in both builds (wider shoulders, wider hips) and writes it into the profile mockups. Each muscle is authored once for half of the body and mirrored; a build only stretches the half sideways. Edit the muscle outlines in the script, then run:
+
+```sh
+node design/build-body-map.mjs
+```
+
 ## Poulpy's drawings
 
 `build-poulpy.mjs` draws Poulpy's six mood portraits and twelve poses with the brand book's own drawing code, plus the loading animation's top view and the app icon, and writes them for each platform:
