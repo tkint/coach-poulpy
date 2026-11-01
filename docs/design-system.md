@@ -93,7 +93,7 @@ The fields every form is built from. Reference mockups: `profile-edit`, the thre
 | Step slider | A bar of dots, `•--•--•--•--•`, the current label above it, the two ends named below | A fixed scale of five or fewer named steps, inside an option sheet |
 | Line chart | Grid lines behind the line, the unit at the top of the axis, a value at each grid line, the date range under it | No grid colour that implies good or bad; a weight going up is never red |
 | Empty chart card | `PoulpyCard` shape with Poulpy on the blue side, a line and the one action that adds the first entry | Shown instead of the chart when nothing is logged |
-| Body map (draft) | A front and a back figure side by side, each area a shape that fills with `primary` when picked; left and right are separate areas | Every area is a checkbox with a name ("Left knee"), so a screen reader and the text summary under the figure say the same. Left is the person's left: the right half of the front figure and the left half of the back one. Used to say where it hurts, and meant to show what an exercise works later |
+| Body map (draft) | A front and a back figure, drawn female or male as the person chose in the profile, side by side, each area a shape that fills with `primary` when picked; left and right are separate areas | Every area is a checkbox with a name ("Left knee"), so a screen reader and the text summary under the figure say the same. Left is the person's left: the right half of the front figure and the left half of the back one. Used to say where it hurts, and meant to show what an exercise works later |
 
 ## Screens
 

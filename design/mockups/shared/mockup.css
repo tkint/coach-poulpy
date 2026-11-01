@@ -1023,3 +1023,6 @@ svg { flex: none; }
 .body-area:focus-visible { stroke: var(--cp-primary); stroke-width: 3; }
 .body-area[aria-checked="true"] { fill: var(--cp-primary); stroke: var(--cp-primary); }
 .body-summary { min-height: 24px; font-size: 15px; font-weight: 800; color: var(--cp-on-primary-container); }
+.body-part { fill: var(--cp-surface-variant); stroke: var(--cp-outline); stroke-width: 1.2; }
+.format-card .body-view svg { width: 100px; height: 224px; }
+.format-card { min-width: 0; }
