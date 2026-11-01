@@ -1,5 +1,6 @@
 package ch.coachpoulpy.android.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -16,7 +17,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -32,7 +32,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -53,151 +52,46 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import ch.coachpoulpy.android.BuildConfig
 import ch.coachpoulpy.android.R
+import ch.coachpoulpy.core.model.BodyMetric
 import ch.coachpoulpy.device.ftms.DeviceKind
 import ch.coachpoulpy.shared.AppGraph
 import ch.coachpoulpy.shared.ConnectionStatus
-import ch.coachpoulpy.shared.DevicesModel
 import ch.coachpoulpy.shared.KnownDeviceUi
-import ch.coachpoulpy.shared.LanguageChoice
 import ch.coachpoulpy.shared.Quantity
-import ch.coachpoulpy.shared.ThemeChoice
-import ch.coachpoulpy.shared.UnitSystem
 
-enum class SettingsSection { GENERAL, DEVICES }
-
-/** The Settings tab: General first, then Devices. Device pages open over the tabs through [onOpen]. */
+/** The Settings tab: a hub, and the pages it opens (profile, weight, height, appearance and units, devices). Device pages open over the tabs through [onOpen]. */
 @Composable
 fun SettingsScreen(
     graph: AppGraph,
-    section: SettingsSection,
-    onSection: (SettingsSection) -> Unit,
+    language: String,
+    page: SettingsPage,
+    onPage: (SettingsPage) -> Unit,
     onOpen: (DeviceRoute) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier.fillMaxSize()) {
-        Column(
-            Modifier.padding(start = 20.dp, end = 12.dp, top = PoulpySpace.lg),
-            verticalArrangement = Arrangement.spacedBy(14.dp),
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(stringResource(R.string.tab_settings), style = MaterialTheme.typography.headlineMedium, modifier = Modifier.weight(1f))
-                if (section == SettingsSection.DEVICES) {
-                    FilledTonalIconButton(onClick = { onOpen(DeviceRoute.Add) }, modifier = Modifier.size(48.dp)) {
-                        Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.devices_add))
-                    }
-                } else {
-                    Spacer(Modifier.height(48.dp))
-                }
-            }
-            Box(Modifier.padding(end = 8.dp)) { SectionSwitch(section, onSection) }
-        }
-        Column(
-            Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 20.dp, top = PoulpySpace.lg, bottom = PoulpySpace.lg),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-            when (section) {
-                SettingsSection.GENERAL -> General(graph)
-                SettingsSection.DEVICES -> Devices(graph, onOpen)
-            }
-        }
-    }
-}
-
-/** General | Devices, as a pill with the chosen half raised, like History's switch. */
-@Composable
-private fun SectionSwitch(selected: SettingsSection, onSelect: (SettingsSection) -> Unit) {
-    val pill = RoundedCornerShape(PoulpyRadius.pill)
-    Row(Modifier.fillMaxWidth().clip(pill).background(MaterialTheme.colorScheme.surfaceVariant).padding(4.dp).selectableGroup()) {
-        listOf(SettingsSection.GENERAL to R.string.settings_general, SettingsSection.DEVICES to R.string.settings_devices).forEach { (item, label) ->
-            val on = item == selected
-            val color = if (on) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
-            Box(
-                Modifier
-                    .weight(1f)
-                    .height(40.dp)
-                    .clip(pill)
-                    .background(if (on) MaterialTheme.colorScheme.surface else Color.Transparent)
-                    .selectable(selected = on, role = Role.Tab, onClick = { onSelect(item) }),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(stringResource(label), color = color, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.ExtraBold)
-            }
-        }
+    BackHandler(enabled = page != SettingsPage.HUB) { onPage(SettingsPage.HUB) }
+    val hub = { onPage(SettingsPage.HUB) }
+    when (page) {
+        SettingsPage.HUB -> SettingsHub(graph, language, onPage, modifier)
+        SettingsPage.PROFILE -> ProfileScreen(graph, hub, modifier)
+        SettingsPage.WEIGHT -> BodyScreen(graph, BodyMetric.WEIGHT, language, hub, modifier)
+        SettingsPage.HEIGHT -> BodyScreen(graph, BodyMetric.HEIGHT, language, hub, modifier)
+        SettingsPage.PREFERENCES -> PreferencesScreen(graph, hub, modifier)
+        SettingsPage.DEVICES -> DevicesPage(graph, hub, onOpen, modifier)
     }
 }
 
 @Composable
-private fun ColumnScope.General(graph: AppGraph) {
-    val context = LocalContext.current
-    val model = remember(graph) { graph.settings(AppPreferences(context)) }
-    val state by model.state.collectAsStateWithLifecycle()
-
-    SectionLabel(R.string.settings_appearance)
-    ChoiceCard(
-        title = R.string.settings_theme,
-        options = listOf(ThemeChoice.SYSTEM to stringResource(R.string.theme_system), ThemeChoice.LIGHT to stringResource(R.string.theme_light), ThemeChoice.DARK to stringResource(R.string.theme_dark)),
-        selected = state.theme,
-        onSelect = model::setTheme,
-        hint = R.string.settings_themeHint,
-    )
-    SectionLabel(R.string.settings_region)
-    // Language names stay in their own language, so anyone can find theirs.
-    ChoiceCard(
-        title = R.string.settings_language,
-        options = listOf(LanguageChoice.SYSTEM to stringResource(R.string.language_system), LanguageChoice.ENGLISH to "English", LanguageChoice.FRENCH to "Français"),
-        selected = state.language,
-        onSelect = model::setLanguage,
-    )
-    ChoiceCard(
-        title = R.string.settings_units,
-        options = listOf(UnitSystem.METRIC to stringResource(R.string.units_metric), UnitSystem.IMPERIAL to stringResource(R.string.units_imperial)),
-        selected = state.units,
-        onSelect = model::setUnits,
-        hint = R.string.settings_unitsHint,
-    )
-    Text(
-        stringResource(R.string.settings_version, BuildConfig.VERSION_NAME),
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        style = MaterialTheme.typography.labelSmall,
-        modifier = Modifier.fillMaxWidth(),
-        textAlign = TextAlign.End,
-    )
-}
-
-@Composable
-private fun <T> ChoiceCard(@StringRes title: Int, options: List<Pair<T, String>>, selected: T, onSelect: (T) -> Unit, @StringRes hint: Int? = null) {
-    OutlinedSurface {
-        Column(Modifier.padding(horizontal = 14.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(stringResource(title), fontWeight = FontWeight.ExtraBold)
-            Row(Modifier.selectableGroup(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                options.forEach { (value, label) ->
-                    FilterChip(
-                        selected = value == selected,
-                        onClick = { onSelect(value) },
-                        label = { Text(label, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center) },
-                        modifier = Modifier.weight(1f),
-                    )
-                }
-            }
-            hint?.let { Text(stringResource(it), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
-        }
-    }
-}
-
-@Composable
-private fun ColumnScope.Devices(graph: AppGraph, onOpen: (DeviceRoute) -> Unit) {
+internal fun ColumnScope.Devices(graph: AppGraph, onOpen: (DeviceRoute) -> Unit) {
     val context = LocalContext.current
     val model = remember(graph) { graph.devices(AppPreferences(context)) }
     val state by model.state.collectAsStateWithLifecycle()
@@ -509,7 +403,7 @@ private fun Pill(text: String?, highlighted: Boolean) {
 }
 
 @Composable
-private fun SectionLabel(@StringRes text: Int) {
+internal fun SectionLabel(@StringRes text: Int) {
     Text(
         stringResource(text).uppercase(),
         style = MaterialTheme.typography.labelMedium,
@@ -520,13 +414,13 @@ private fun SectionLabel(@StringRes text: Int) {
 }
 
 @Composable
-private fun OutlinedSurface(onClick: (() -> Unit)? = null, content: @Composable () -> Unit) {
+internal fun OutlinedSurface(onClick: (() -> Unit)? = null, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     val shape = RoundedCornerShape(PoulpyRadius.md)
     val border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
     if (onClick != null) {
-        Surface(onClick = onClick, modifier = Modifier.fillMaxWidth(), shape = shape, color = MaterialTheme.colorScheme.surface, border = border, content = content)
+        Surface(onClick = onClick, modifier = modifier.fillMaxWidth(), shape = shape, color = MaterialTheme.colorScheme.surface, border = border, content = content)
     } else {
-        Surface(Modifier.fillMaxWidth(), shape = shape, color = MaterialTheme.colorScheme.surface, border = border, content = content)
+        Surface(modifier.fillMaxWidth(), shape = shape, color = MaterialTheme.colorScheme.surface, border = border, content = content)
     }
 }
 

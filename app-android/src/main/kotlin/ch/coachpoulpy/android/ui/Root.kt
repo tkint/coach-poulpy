@@ -56,7 +56,7 @@ fun CoachPoulpyRoot(
     var tab by rememberSaveable { mutableStateOf(Tab.HOME) }
     var libraryView by rememberSaveable { mutableStateOf(LibraryView.WORKOUTS) }
     var route by rememberSaveable { mutableStateOf<Route?>(null) }
-    var settingsSection by rememberSaveable { mutableStateOf(SettingsSection.GENERAL) }
+    var settingsPage by rememberSaveable { mutableStateOf(SettingsPage.HUB) }
     val language = LocalConfiguration.current.locales[0].language
     // Where closing goes back to: the workout page for its editor and exercises, else the tabs.
     var back by rememberSaveable { mutableStateOf<Route?>(null) }
@@ -134,7 +134,7 @@ fun CoachPoulpyRoot(
                     graph,
                     language,
                     onManageDevices = {
-                        settingsSection = SettingsSection.DEVICES
+                        settingsPage = SettingsPage.DEVICES
                         tab = Tab.SETTINGS
                     },
                     modifier = modifier,
@@ -142,8 +142,9 @@ fun CoachPoulpyRoot(
                 Tab.HISTORY -> HistoryScreen(graph, language, onOpen = { route = "session:$it" }, modifier = modifier)
                 Tab.SETTINGS -> SettingsScreen(
                     graph,
-                    section = settingsSection,
-                    onSection = { settingsSection = it },
+                    language = language,
+                    page = settingsPage,
+                    onPage = { settingsPage = it },
                     onOpen = { device ->
                         route = when (device) {
                             DeviceRoute.Add -> "device-add"

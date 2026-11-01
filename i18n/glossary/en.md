@@ -55,6 +55,12 @@ Messages not listed here mean what their English says.
 | `devices.allowBluetooth` | Android only. |
 | `kind.footPod` | A small sensor clipped to the shoe that measures pace and cadence. |
 | `settings.languageNextLaunch` | iOS only. |
+| `profile.sex*` | The “sex assigned at birth” wording is deliberate ([decision 13](../../docs/brand-decisions.md#13-inclusive-by-default)): never “biological sex” or “birth sex”, and never gender. Keep it as a question about what was recorded, not about the person. |
+| `profile.pronoun*` | The options of a select. In French the options are the pronouns themselves (Elle, Il, Iel), not “she / her” translated. |
+| `profile.pronounsNote` | A custom entry is shown as the person typed it and is never translated or corrected. |
+| `body.range1m`, `body.range3m`, `body.range1y`, `body.rangeAll` | Chart ranges: 1 month, 3 months, 1 year, all. A few characters only. |
+| `body.change` | The difference between the first and last entry of the range. Neutral: going up or down is never good or bad. |
+| `body.chart` | Spoken description of the chart. `{first}` and `{last}` are weights or heights with their unit, the dates are already formatted. |
 
 ### domain
 

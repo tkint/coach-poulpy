@@ -12,12 +12,16 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlin.time.Clock
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
 
 /** Settings › Your profile: every field optional, kept on the phone, and an empty or skipped field simply stays empty. */
 class ProfileModel(
     private val memory: KeyValueStore,
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main),
+    private val today: () -> LocalDate = { Clock.System.todayIn(TimeZone.currentSystemDefault()) },
 ) {
     private val _profile = MutableStateFlow(
         Profile(
@@ -57,6 +61,9 @@ class ProfileModel(
         val valid = bpm?.takeIf { it in 30..120 }
         change(RESTING_HEART_RATE, valid?.toString()) { it.copy(restingHeartRate = valid) }
     }
+
+    /** The age in whole years today, from the birthdate; never stored. */
+    fun age(of: Profile): Int? = of.age(today())
 
     fun watch(onChange: (Profile) -> Unit): Cancellable = profile.watchIn(scope, onChange)
 
