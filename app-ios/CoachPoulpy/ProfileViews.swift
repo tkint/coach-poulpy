@@ -35,6 +35,7 @@ struct SettingsHub: View {
                             if !parts.isEmpty { Text(parts.joined(separator: " · ")) }
                             Text("settings.editProfile").font(.custom(PoulpyFontFace.nunitoExtraBold, size: 13, relativeTo: .footnote))
                         }
+                        Spacer()
                     }
                     .foregroundStyle(PoulpyColor.onPrimaryContainer)
                     .padding(.vertical, 6)
@@ -43,28 +44,54 @@ struct SettingsHub: View {
             }
             Section("settings.body") {
                 NavigationLink(value: SettingsPage.height) {
-                    row("body.height", height.value.latest.map { bodyText(.height, $0.value, units) })
+                    row("arrow.up.and.down", "body.height", height.value.latest.map { bodyText(.height, $0.value, units) } ?? L("body.nothingLogged"))
                 }
                 NavigationLink(value: SettingsPage.weight) {
-                    row("body.weight", weight.value.latest.map { bodyText(.weight, $0.value, units) })
+                    row("scalemass", "body.weight", weight.value.latest.map { bodyText(.weight, $0.value, units) } ?? L("body.nothingLogged"))
                 }
             }
             Section("settings.app") {
-                NavigationLink(value: SettingsPage.preferences) { row("settings.appearanceUnits", nil) }
-                NavigationLink(value: SettingsPage.devices) { row("settings.devices", nil) }
+                NavigationLink(value: SettingsPage.preferences) {
+                    row("circle.lefthalf.filled", "settings.appearanceUnits", "\(themeName(settings.value.theme)) · \(languageName(settings.value.language)) · \(unitsName(units))")
+                }
+                NavigationLink(value: SettingsPage.devices) { row("antenna.radiowaves.left.and.right", "settings.devices", nil) }
             }
             Section("settings.about") {
-                Text(String(format: NSLocalizedString("settings.version %@", comment: ""), Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "—"))
+                row("info.circle", "settings.aboutApp", L("settings.aboutLine %@", Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "—"))
             }
         }
     }
 
-    private func row(_ title: LocalizedStringKey, _ value: String?) -> some View {
-        HStack {
-            Text(title).font(.poulpy(.headline))
-            Spacer()
-            if let value { Text(value).foregroundStyle(PoulpyColor.onSurfaceVariant) }
+    /// A leading icon, a bold title with a line under it.
+    private func row(_ symbol: String, _ title: LocalizedStringKey, _ subtitle: String?) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: symbol).font(.system(size: 20)).foregroundStyle(PoulpyColor.primary).frame(width: 26)
+            VStack(alignment: .leading, spacing: 0) {
+                Text(title).font(.poulpy(.headline))
+                if let subtitle { Text(subtitle).font(.poulpy(.footnote)).foregroundStyle(PoulpyColor.onSurfaceVariant) }
+            }
         }
+        .frame(minHeight: 44)
+    }
+
+    private func themeName(_ theme: ThemeChoice) -> String {
+        switch theme {
+        case .light: return L("theme.light")
+        case .dark: return L("theme.dark")
+        default: return L("theme.system")
+        }
+    }
+
+    private func languageName(_ language: LanguageChoice) -> String {
+        switch language {
+        case .english: return "English"
+        case .french: return "Français"
+        default: return L("language.system")
+        }
+    }
+
+    private func unitsName(_ units: UnitSystem) -> String {
+        units == UnitSystem.imperial ? L("units.imperial") : L("units.metric")
     }
 }
 
@@ -352,19 +379,21 @@ struct BodyView: View {
                 Section { Text("body.nothingLogged") }
             }
             Section {
-                Picker(selection: Binding(get: { state.range }, set: { log.model.selectRange(selected: $0) })) {
-                    Text("body.range1m").tag(BodyRange.month)
-                    Text("body.range3m").tag(BodyRange.threeMonths)
-                    Text("body.range1y").tag(BodyRange.year)
-                    Text("body.rangeAll").tag(BodyRange.all)
-                } label: {
-                    Text("body.range")
-                }
-                .pickerStyle(.segmented)
-                if state.points.isEmpty {
-                    Text("body.chartEmpty").font(.poulpy(.footnote)).foregroundStyle(PoulpyColor.onSurfaceVariant)
-                } else {
-                    chart(state)
+                chart(state)
+                HStack(spacing: 8) {
+                    ForEach([(BodyRange.month, "body.range1m"), (.threeMonths, "body.range3m"), (.year, "body.range1y"), (.all, "body.rangeAll")], id: \.1) { range, key in
+                        let on = state.range == range
+                        Button { log.model.selectRange(selected: range) } label: {
+                            Text(LocalizedStringKey(key))
+                                .font(.poulpy(.subheadline).weight(.heavy))
+                                .frame(maxWidth: .infinity, minHeight: 36)
+                                .foregroundStyle(on ? PoulpyColor.onPrimary : PoulpyColor.onSurfaceVariant)
+                                .background(on ? PoulpyColor.primary : Color.clear, in: Capsule())
+                                .overlay(Capsule().stroke(on ? PoulpyColor.primary : PoulpyColor.outline, lineWidth: 1.5))
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityAddTraits(on ? .isSelected : [])
+                    }
                 }
             }
             if isWeight, let change = state.change {
@@ -405,7 +434,14 @@ struct BodyView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button(LocalizedStringKey("body.log")) { logging = true }
+                Button { logging = true } label: {
+                    Text("body.log")
+                        .font(.poulpy(.subheadline).weight(.heavy))
+                        .foregroundStyle(PoulpyColor.onPrimary)
+                        .padding(.horizontal, 18)
+                        .frame(height: 40)
+                        .background(PoulpyColor.primary, in: Capsule())
+                }
             }
         }
         .sheet(isPresented: $logging) {
@@ -418,24 +454,32 @@ struct BodyView: View {
     /// A line with a dot per entry over a grid of round values, with the unit above the axis. The grid is neutral:
     /// a weight going up is never red.
     private func chart(_ state: BodyUi) -> some View {
-        let shownValues = state.points.map { BodyDisplay.shared.chartValue(metric: metric, stored: $0.value, system: units) }
-        let ticks = ChartAxis.shared.ticks(
-            low: shownValues.min() ?? 0, high: shownValues.max() ?? 0,
-            minSpan: BodyDisplay.shared.chartMinSpan(metric: metric, system: units), target: 4
+        let shared = BodyDisplay.shared
+        let shownValues = state.points.map { shared.chartValue(metric: metric, stored: $0.value, system: units) }
+        let span = shared.chartMinSpan(metric: metric, system: units)
+        // Always drawn: with nothing in the range it is the grid alone, around the latest value.
+        let centre = shared.chartValue(metric: metric, stored: state.latest?.value ?? shared.starting(metric: metric), system: units)
+        let ticks = (state.points.isEmpty
+            ? ChartAxis.shared.ticks(low: centre, high: centre, minSpan: span * 3, target: 4)
+            : ChartAxis.shared.ticks(low: shownValues.min() ?? 0, high: shownValues.max() ?? 0, minSpan: span, target: 4)
         ).map { $0.doubleValue }
-        let first = state.points.first!
-        let last = state.points.last!
-        let firstDay = Double(first.epochDay)
-        let lastDay = Double(last.epochDay)
-        let description = L("body.chart %@ %@ %@ %@", bodyText(metric, first.value, units), shown(first.date), bodyText(metric, last.value, units), shown(last.date))
+        let first = state.points.first
+        let last = state.points.last
+        let firstDay = Double(first?.epochDay ?? 0)
+        let lastDay = Double(last?.epochDay ?? 1)
+        let description = (first != nil && last != nil)
+            ? L("body.chart %@ %@ %@ %@", bodyText(metric, first!.value, units), shown(first!.date), bodyText(metric, last!.value, units), shown(last!.date))
+            : L("body.chartEmpty")
         return VStack(alignment: .leading, spacing: 4) {
-            Text(verbatim: BodyDisplay.shared.axisUnit(metric: metric, system: units))
+            Text(verbatim: shared.axisUnit(metric: metric, system: units))
                 .font(.poulpy(.caption2)).foregroundStyle(PoulpyColor.onSurfaceVariant)
-            Chart(Array(state.points.enumerated()), id: \.offset) { index, point in
-                LineMark(x: .value("", Double(point.epochDay)), y: .value("", shownValues[index]))
-                    .foregroundStyle(PoulpyColor.primary)
-                PointMark(x: .value("", Double(point.epochDay)), y: .value("", shownValues[index]))
-                    .foregroundStyle(PoulpyColor.primary)
+            Chart {
+                ForEach(Array(state.points.enumerated()), id: \.offset) { index, point in
+                    LineMark(x: .value("", Double(point.epochDay)), y: .value("", shownValues[index]))
+                        .foregroundStyle(PoulpyColor.primary)
+                    PointMark(x: .value("", Double(point.epochDay)), y: .value("", shownValues[index]))
+                        .foregroundStyle(PoulpyColor.primary)
+                }
             }
             .chartYScale(domain: (ticks.first ?? 0)...(ticks.last ?? 1))
             .chartXScale(domain: firstDay...max(lastDay, firstDay + 1), range: .plotDimension(padding: 8))
@@ -444,15 +488,15 @@ struct BodyView: View {
                     AxisGridLine().foregroundStyle(PoulpyColor.outline)
                     AxisValueLabel {
                         if let number = value.as(Double.self) {
-                            Text(verbatim: BodyDisplay.shared.axisLabel(metric: metric, shown: number, system: units, languageCode: Language.code))
+                            Text(verbatim: shared.axisLabel(metric: metric, shown: number, system: units, languageCode: Language.code))
                         }
                     }
                 }
             }
             .chartXAxis {
-                AxisMarks(values: first.epochDay == last.epochDay ? [firstDay] : [firstDay, lastDay]) { value in
+                AxisMarks(values: state.points.isEmpty ? [] : (first?.epochDay == last?.epochDay ? [firstDay] : [firstDay, lastDay])) { value in
                     AxisValueLabel {
-                        if let day = value.as(Double.self) {
+                        if let day = value.as(Double.self), let first, let last {
                             Text(verbatim: shown(day == firstDay ? first.date : last.date))
                         }
                     }
@@ -547,18 +591,9 @@ private struct LogSheet: View {
             .scrollDismissesKeyboard(.interactively)
             .navigationTitle(isWeight ? LocalizedStringKey("body.logWeight") : LocalizedStringKey("body.logHeight"))
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button(LocalizedStringKey("action.cancel")) { dismiss() }
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button(LocalizedStringKey("action.save")) {
-                        if let typed {
-                            onSave(typed, day)
-                            dismiss()
-                        }
-                    }
-                    .disabled(typed == nil)
+            .safeAreaInset(edge: .bottom) {
+                SheetActions(canSave: typed != nil) {
+                    if let typed { onSave(typed, day) }
                 }
             }
         }

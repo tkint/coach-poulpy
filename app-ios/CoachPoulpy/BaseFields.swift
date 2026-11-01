@@ -192,28 +192,52 @@ struct SelectField: View {
 
 // MARK: - Option sheets
 
-/// The toolbar of every option sheet: Cancel and Save.
+/// Cancel and Save as pills at the bottom of a sheet, as in the mockups.
+struct SheetActions: View {
+    var canSave = true
+    let onSave: () -> Void
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Button { dismiss() } label: {
+                Text("action.cancel")
+                    .font(.poulpy(.headline).weight(.heavy))
+                    .foregroundStyle(PoulpyColor.onSurface)
+                    .frame(maxWidth: .infinity, minHeight: 56)
+                    .overlay(Capsule().stroke(PoulpyColor.outline, lineWidth: 2))
+            }
+            .buttonStyle(.plain)
+            Button {
+                onSave()
+                dismiss()
+            } label: {
+                Text("action.save")
+                    .font(.poulpy(.headline).weight(.heavy))
+                    .foregroundStyle(PoulpyColor.onPrimary)
+                    .frame(maxWidth: .infinity, minHeight: 56)
+                    .background(PoulpyColor.primary.opacity(canSave ? 1 : 0.4), in: Capsule())
+            }
+            .buttonStyle(.plain)
+            .disabled(!canSave)
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 12)
+        .background(PoulpyColor.surface)
+    }
+}
+
+/// The frame of every option sheet: the title, then Cancel and Save at the bottom.
 private struct SheetBar: ViewModifier {
     let title: LocalizedStringKey
     let onSave: () -> Void
-    @Environment(\.dismiss) private var dismiss
 
     func body(content: Content) -> some View {
         NavigationStack {
             content
                 .navigationTitle(title)
                 .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button(LocalizedStringKey("action.cancel")) { dismiss() }
-                    }
-                    ToolbarItem(placement: .confirmationAction) {
-                        Button(LocalizedStringKey("action.save")) {
-                            onSave()
-                            dismiss()
-                        }
-                    }
-                }
+                .safeAreaInset(edge: .bottom) { SheetActions(onSave: onSave) }
         }
     }
 }
@@ -252,6 +276,7 @@ struct OptionSheet<T: Hashable, Extra: View>: View {
                 if let why { Text(why).font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant) }
                 VStack(spacing: 0) {
                     ForEach(options.indices, id: \.self) { index in
+                        if index > 0 { Divider().overlay(PoulpyColor.outline) }
                         Button {
                             choice = options[index].0
                         } label: {
@@ -307,6 +332,7 @@ struct MultiOptionSheet<T: Hashable>: View {
             VStack(alignment: .leading, spacing: 12) {
                 if let why { Text(why).font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant) }
                 ForEach(options.indices, id: \.self) { index in
+                    if index > 0 { Divider().overlay(PoulpyColor.outline) }
                     let value = options[index].0
                     let on = chosen.contains(value)
                     Button {
