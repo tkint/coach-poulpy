@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -42,9 +43,10 @@ import ch.coachpoulpy.shared.AppGraph
 import ch.coachpoulpy.shared.BodyView
 
 /**
- * What the builder's picker shows when a row is tapped: the exercise's muscles and equipment, the body map with
- * the muscles it works lit on the person's figure, the steps, and "Add to the workout", which goes on to the
- * add sheet ([onAdd]). Opened in full so the figure and the steps are in view.
+ * What the builder shows of an exercise: its muscles and equipment, the body map with the muscles it works lit on
+ * the person's figure, the steps, and one button ([onAction]). From the picker the button is "Add to the workout"
+ * ([adding]), which goes on to the add sheet; from a step's sheet it is "Back to the step". Opened in full so the
+ * figure and the steps are in view.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,8 +54,9 @@ fun ExerciseInfoSheet(
     graph: AppGraph,
     language: String,
     slug: String,
-    onAdd: (String) -> Unit,
+    onAction: (String) -> Unit,
     onDismiss: () -> Unit,
+    adding: Boolean = true,
 ) {
     val detail = remember(graph, language, slug) { graph.exerciseList(language).detail(slug) } ?: return
     val context = LocalContext.current
@@ -64,9 +67,10 @@ fun ExerciseInfoSheet(
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         containerColor = colors.surface,
     ) {
-        Column(Modifier.fillMaxWidth()) {
+        // Fills the sheet, so the steps scroll inside a fixed height and the sheet itself never moves with them.
+        Column(Modifier.fillMaxWidth().fillMaxHeight()) {
             Column(
-                Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()).padding(horizontal = 20.dp),
+                Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 20.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 Row(verticalAlignment = Alignment.Top) {
@@ -108,9 +112,15 @@ fun ExerciseInfoSheet(
             }
             HorizontalDivider(Modifier.padding(top = 12.dp), color = colors.surfaceVariant)
             Box(Modifier.navigationBarsPadding().padding(start = 20.dp, end = 20.dp, top = 12.dp, bottom = 16.dp)) {
-                Button(onClick = { onAdd(detail.slug) }, modifier = Modifier.fillMaxWidth().height(56.dp)) {
-                    Icon(Icons.Filled.Add, contentDescription = null)
-                    Text(stringResource(R.string.exercise_addHere), fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 8.dp))
+                Button(onClick = { onAction(detail.slug) }, modifier = Modifier.fillMaxWidth().height(56.dp)) {
+                    if (adding) {
+                        Icon(Icons.Filled.Add, contentDescription = null)
+                    }
+                    Text(
+                        stringResource(if (adding) R.string.exercise_addHere else R.string.exercise_backToStep),
+                        fontWeight = FontWeight.ExtraBold,
+                        modifier = Modifier.padding(start = if (adding) 8.dp else 0.dp),
+                    )
                 }
             }
         }

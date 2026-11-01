@@ -114,11 +114,13 @@
     "variationsA11y": "Variations, {position}, easiest first",
     "add": "Add to a workout",
     "addHere": "Add to the workout",
+    "backToStep": "Back to the step",
     "details": "Details of {name}",
     "addNamed": "Add {name}",
     "picture": "Exercise picture"
   },
   "builder": {
+    "details": "Details",
     "newTitle": "New workout",
     "editTitle": "Edit workout",
     "name": "Name",

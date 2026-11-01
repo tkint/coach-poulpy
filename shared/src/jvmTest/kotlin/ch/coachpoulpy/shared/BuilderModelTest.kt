@@ -65,6 +65,14 @@ class BuilderModelTest {
     }
 
     @Test
+    fun anExerciseStepKnowsTheSlugItsDetailsOpenAndARestHasNone() {
+        val builder = graph.createWorkoutWith("diamond-push-up", "en")
+        builder.chooseFormat(WorkoutFormat.CIRCUIT)
+        val repeat = builder.current.parts.single().steps.single().repeatGroup!!
+        assertEquals(listOf("diamond-push-up"), repeat.rows.map { it.slug })
+    }
+
+    @Test
     fun weightIsTypedAndShownInThePoundsOfTheImperialSystem() {
         val builder = BuilderModel(WorkoutDraft.empty(), graph.catalog, graph.store, graph.compiler, "en", { UnitSystem.IMPERIAL })
         builder.rename("Legs")
