@@ -13,7 +13,7 @@ Settings stops being two tabs (General, Devices) and becomes a hub, because it n
 | `profile-sex-sheet` | The sex assigned at birth picker, with its reason |
 | `body-weight`, `body-height` | Latest value, chart with 1M / 3M / 1Y / All, change, lowest, highest and the log. Height is drawn in ft and in to show the Imperial unit system |
 | `body-log-sheet` | Logging a weight: a stepper in the person's units and a date |
-| `settings-preferences` | Theme, Language and Units, moved out of the old General tab |
+| `settings-preferences` | Theme, Language and Units as selects, moved out of the old General tab |
 | `devices-list` | The existing Devices view with a back bar instead of a tab; its detail, add and data source screens stay as agreed |
 
 When the drafts are agreed, they replace `settings-general` and `devices-list` in `agreed/`.
