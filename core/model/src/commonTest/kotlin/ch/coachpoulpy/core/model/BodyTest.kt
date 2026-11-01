@@ -15,6 +15,7 @@ class BodyTest {
         weight("2026-10-15", 73.0),
         weight("2026-10-29", 72.6),
         weight("2026-09-20", 73.9),
+        weight("2026-07-15", 76.0),
     )
 
     @Test
@@ -30,15 +31,15 @@ class BodyTest {
     fun trendOfThreeMonthsLeavesOutOlderEntriesAndReadsChangeLowestHighest() {
         val trend = BodyTrend.of(log, BodyRange.THREE_MONTHS, today)
 
-        assertEquals(listOf("2026-09-20", "2026-10-15", "2026-10-29"), trend.entries.map { it.day.toString() })
-        assertEquals(72.6 - 73.9, trend.change!!, 1e-9)
+        assertEquals(listOf("2026-08-02", "2026-09-20", "2026-10-15", "2026-10-29"), trend.entries.map { it.day.toString() })
+        assertEquals(72.6 - 74.8, trend.change!!, 1e-9)
         assertEquals(72.6, trend.lowest!!.value)
-        assertEquals(73.9, trend.highest!!.value)
+        assertEquals(74.8, trend.highest!!.value)
     }
 
     @Test
     fun allKeepsEveryEntryAndOneEntryHasNoChange() {
-        assertEquals(4, BodyTrend.of(log, BodyRange.ALL, today).entries.size)
+        assertEquals(5, BodyTrend.of(log, BodyRange.ALL, today).entries.size)
         assertNull(BodyTrend.of(log, BodyRange.MONTH, today).entries.let { BodyTrend.of(it.take(1), BodyRange.ALL, today).change })
         assertNull(BodyTrend.of(emptyList(), BodyRange.ALL, today).lowest)
     }
