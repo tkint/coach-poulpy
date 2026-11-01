@@ -176,5 +176,12 @@
     "energy": "Energy",
     "energyValue": "{kcal, number} kcal",
     "app": "Coach Poulpy"
+  },
+  "player": {
+    "unitReps": "{count, plural, one {rep} other {reps}}",
+    "unitAtLoad": "{unit} at {load}",
+    "nextRest": "Rest {duration}, then {then}",
+    "thenSet": "set {set, number}",
+    "nextSet": "{name} · set {set, number} of {sets, number}"
   }
 }

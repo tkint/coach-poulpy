@@ -184,7 +184,7 @@
     "ready": "Ready?",
     "start": "Start the session",
     "set": "Set {set, number} of {sets, number}",
-    "next": "Next: {name} · {detail}",
+    "next": "Next",
     "nextRound": "Next up · {round}",
     "done": "Done",
     "skip": "Skip",
@@ -199,7 +199,11 @@
     "summarySkipped": "{count, number} skipped",
     "close": "Close",
     "stopTitle": "End the session now?",
-    "stopBody": "What you did so far is kept."
+    "stopBody": "What you did so far is kept.",
+    "nextUp": "Next up",
+    "firstUp": "First up",
+    "restLess": "−{seconds, number} s",
+    "restMore": "+{seconds, number} s"
   },
   "treadmill": {
     "stopScan": "Stop searching",
