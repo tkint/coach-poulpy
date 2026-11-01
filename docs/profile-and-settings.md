@@ -1,6 +1,6 @@
 # Profile and settings
 
-A proposal for review on this page and the draft pages under Mockups, Drafts, in the site menu: the profile, body logging with charts, and a settings hub that reaches the Devices view. Nothing here is built until the drafts are agreed (see [ADR 0016](./adr/0016-mockups-are-plain-html-in-the-repo.md)). The wording rules behind it are in [Inclusive by default](./brand.md#inclusive-by-default).
+The profile, body logging with charts, and a settings hub that reaches the Devices view. The screens are agreed (see [ADR 0016](./adr/0016-mockups-are-plain-html-in-the-repo.md)) and are built from the pages under Mockups, Agreed, in the site menu. The wording rules behind it are in [Inclusive by default](./brand.md#inclusive-by-default).
 
 ## Settings, reworked
 
@@ -16,7 +16,7 @@ Settings stops being two tabs (General, Devices) and becomes a hub, because it n
 | `settings-preferences` | Theme, Language and Units as selects, moved out of the old General tab |
 | `devices-list` | The existing Devices view with a back bar instead of a tab; its detail, add and data source screens stay as agreed |
 
-When the drafts are agreed, they replace `settings-general` and `devices-list` in `agreed/`.
+They replace the old `settings-general` and `devices-list`.
 
 ## Profile fields
 
@@ -38,7 +38,7 @@ Suggested for later, not drawn: maximum heart rate override, weekly goal in sess
 
 ### Why "sex assigned at birth"
 
-The only thing the app needs is a physiological input for estimates, so that is all it asks, and it names it as what it is: assigned at birth, not "biological" or "birth" sex, and not gender. Intersex is offered and Prefer not to say is always available. Gender is never asked, because no feature needs it. See [decision 13](./brand-decisions.md#13-inclusive-by-default-proposed) for what was set aside. This wording comes from published inclusive-forms guidance and still needs reading by LGBTQ+ people before it ships.
+The only thing the app needs is a physiological input for estimates, so that is all it asks, and it names it as what it is: assigned at birth, not "biological" or "birth" sex, and not gender. Intersex is offered and Prefer not to say is always available. Gender is never asked, because no feature needs it. See [decision 13](./brand-decisions.md#13-inclusive-by-default) for what was set aside. This wording comes from published inclusive-forms guidance and has not yet been read by LGBTQ+ people; that read is still to do and does not block building.
 
 ## Weight and height logging
 
@@ -52,9 +52,7 @@ The only thing the app needs is a physiological input for estimates, so that is 
 
 The unit system chosen in Settings decides how weight (kg or lb), height (cm or ft and in) and distance (km or mi) are shown and typed. Everything is stored metric, so switching converts and never rewrites; see [ADR 0017](./adr/0017-body-measurements-are-stored-metric-and-shown-in-the-persons-units.md). The weight pages are drawn Metric and the height page Imperial so both can be reviewed.
 
-## Questions for the owner
+## Still open
 
-1. Is the hub right, or should Profile stay a tab beside Devices?
-2. Are the four sex assigned at birth options and the pronoun options right, and who reads them from the community?
-3. Which of the suggested extra fields (goal, experience, resting heart rate, pain or rehab) should be built first, and which dropped?
-4. Should an optional weight goal line exist later, given the no-judgement rule?
+1. Who reads the sex assigned at birth and pronoun wording from the community (see [decision 13](./brand-decisions.md#13-inclusive-by-default)).
+2. Should an optional weight goal line exist later, given the no-judgement rule?
