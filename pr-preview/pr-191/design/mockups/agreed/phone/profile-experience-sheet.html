@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Profile · experience</title>
+<meta name="mockup:screen" content="profile-experience-sheet">
+<meta name="mockup:section" content="Profile and settings">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../../../web/src/styles/tokens.css">
+<link rel="stylesheet" href="../../shared/mockup.css">
+<script src="../../shared/mockup-theme.js"></script>
+</head>
+<body>
+<main class="phone">
+
+  <header class="page-bar"><a class="icon-button" href="profile-edit.html" aria-label="Back to profile"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></a><div><h1>Your profile</h1></div></header>
+  <div class="scrim"></div>
+  <section class="sheet" id="experience-sheet" data-component="sheet" role="dialog" aria-label="Experience">
+    <span class="sheet-handle"></span>
+    <div class="sheet-title"><h2>Experience</h2><p>Used for starting loads and plan suggestions. You can change it any time.</p></div>
+    <div class="step-slider" data-component="step-slider">
+      <strong class="step-slider-value">Regular</strong>
+      <input type="range" min="1" max="5" step="1" value="3" aria-label="Experience" aria-valuetext="Regular">
+      <div class="step-slider-dots" aria-hidden="true"><span></span><span></span><span class="on"></span><span></span><span></span></div>
+      <div class="step-slider-ends"><span>Just starting</span><span>Very experienced</span></div>
+    </div>
+    <div class="sheet-actions"><button class="primary-button" type="button" style="flex: 1;">Save</button></div>
+  </section>
+</main>
+</body>
+</html>
