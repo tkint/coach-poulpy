@@ -431,7 +431,7 @@
     "sexMale": "Male",
     "sexIntersex": "Intersex",
     "sexPreferNotToSay": "Prefer not to say",
-    "goal": "Main goal",
+    "goal": "Goals",
     "goalStayActive": "Stay active",
     "goalBuildStrength": "Build strength",
     "goalRunFurther": "Run further",
@@ -443,7 +443,16 @@
     "experienceExperienced": "Experienced",
     "restingHr": "Resting heart rate",
     "restingHrValue": "{bpm} bpm",
-    "restingHrHint": "Between 30 and 120. Used for heart rate zones."
+    "restingHrHint": "Between 30 and 120. Used for heart rate zones.",
+    "goalsNote": "Pick as many as you like. Poulpy suggests workouts for all of them.",
+    "pronounsSheetNote": "Used for French wording and Poulpy’s lines.",
+    "experienceNote": "Used for starting loads and plan suggestions. You can change it any time.",
+    "experienceGettingGoing": "Getting going",
+    "experienceVeryExperienced": "Very experienced",
+    "save": "Save",
+    "done": "Save",
+    "clear": "Clear",
+    "bpm": "bpm"
   },
   "body": {
     "weight": "Weight",
@@ -467,8 +476,8 @@
     "history": "History",
     "logWeight": "Log your weight",
     "logHeight": "Log your height",
-    "weightStored": "Stored in kilograms, shown in your units.",
-    "heightStored": "Stored in centimetres, shown in your units.",
+    "weightStored": "Type it, or nudge it with − and +. Stored in kilograms, shown in your units.",
+    "heightStored": "Type it, or nudge it with − and +. Stored in centimetres, shown in your units.",
     "date": "Date",
     "today": "Today, {date}",
     "heightNote": "Height changes slowly: a measure every few months is plenty.",
@@ -476,6 +485,13 @@
     "chartEmpty": "Log an entry to see your chart.",
     "less": "Less",
     "more": "More",
-    "deleteEntry": "Delete the entry of {date}"
+    "deleteEntry": "Delete the entry of {date}",
+    "emptyWeightTitle": "No weight yet",
+    "emptyWeightBody": "Log it once to see your chart. It stays on this phone, and only you see it.",
+    "emptyHeightTitle": "No height yet",
+    "emptyHeightBody": "Log it once to see your chart. A measure every few months is plenty.",
+    "enterValue": "Value",
+    "feet": "ft",
+    "inches": "in"
   }
 }

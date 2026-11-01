@@ -14,10 +14,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -35,8 +33,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -58,11 +54,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -72,11 +69,12 @@ import ch.coachpoulpy.core.model.BodyMeasurement
 import ch.coachpoulpy.core.model.BodyMetric
 import ch.coachpoulpy.core.model.BodyRange
 import ch.coachpoulpy.core.model.Experience
-import ch.coachpoulpy.core.model.MainGoal
+import ch.coachpoulpy.core.model.Goal
 import ch.coachpoulpy.core.model.Pronouns
 import ch.coachpoulpy.core.model.SexAssignedAtBirth
 import ch.coachpoulpy.shared.AppGraph
 import ch.coachpoulpy.shared.BodyDisplay
+import ch.coachpoulpy.shared.ChartAxis
 import ch.coachpoulpy.shared.LanguageChoice
 import ch.coachpoulpy.shared.ThemeChoice
 import ch.coachpoulpy.shared.UnitSystem
@@ -116,68 +114,6 @@ internal fun SubPage(
             verticalArrangement = Arrangement.spacedBy(10.dp),
             content = content,
         )
-    }
-}
-
-/** A labelled value that opens a sheet or dialog when pressed. */
-@Composable
-internal fun SelectField(label: String, value: String, onClick: () -> Unit) {
-    OutlinedSurface(onClick = onClick) {
-        Row(Modifier.padding(horizontal = 14.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
-            Column(Modifier.weight(1f)) {
-                Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Text(value, fontWeight = FontWeight.ExtraBold)
-            }
-            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-    }
-}
-
-@Composable
-private fun Note(text: String) {
-    Text(text, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(horizontal = 4.dp))
-}
-
-/** Pick one option in a sheet and save it. A null value is "not set". */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-internal fun <T : Any> OptionSheet(
-    title: String,
-    why: String?,
-    options: List<Pair<T?, String>>,
-    selected: T?,
-    note: String?,
-    onSave: (T?) -> Unit,
-    onDismiss: () -> Unit,
-) {
-    var choice by remember { mutableStateOf(selected) }
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        containerColor = MaterialTheme.colorScheme.surface,
-    ) {
-        Column(Modifier.padding(start = 20.dp, end = 20.dp, bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(title, style = MaterialTheme.typography.titleLarge)
-            why?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) }
-            Column(Modifier.selectableGroup()) {
-                options.forEach { (value, label) ->
-                    Row(
-                        Modifier
-                            .fillMaxWidth()
-                            .selectable(selected = value == choice, role = Role.RadioButton, onClick = { choice = value })
-                            .padding(vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        RadioButton(selected = value == choice, onClick = null, modifier = Modifier.padding(end = 12.dp))
-                        Text(label, style = MaterialTheme.typography.bodyLarge)
-                    }
-                }
-            }
-            note?.let { Note(it) }
-            Button(onClick = { onSave(choice); onDismiss() }, modifier = Modifier.fillMaxWidth().height(52.dp)) {
-                Text(stringResource(R.string.action_save), fontWeight = FontWeight.ExtraBold)
-            }
-        }
     }
 }
 
@@ -256,8 +192,8 @@ internal fun SettingsHub(graph: AppGraph, language: String, onPage: (SettingsPag
                 }
             }
             SectionLabel(R.string.settings_body)
-            SettingsRow(stringResource(R.string.body_weight), weight.latest?.let { BodyDisplay.weight(it.value, units.units, language) }) { onPage(SettingsPage.WEIGHT) }
             SettingsRow(stringResource(R.string.body_height), height.latest?.let { BodyDisplay.height(it.value, units.units, language) }) { onPage(SettingsPage.HEIGHT) }
+            SettingsRow(stringResource(R.string.body_weight), weight.latest?.let { BodyDisplay.weight(it.value, units.units, language) }) { onPage(SettingsPage.WEIGHT) }
             SectionLabel(R.string.settings_app)
             SettingsRow(stringResource(R.string.settings_appearanceUnits), null) { onPage(SettingsPage.PREFERENCES) }
             SettingsRow(stringResource(R.string.settings_devices), null) { onPage(SettingsPage.DEVICES) }
@@ -293,12 +229,10 @@ internal fun ProfileScreen(graph: AppGraph, onBack: () -> Unit, modifier: Modifi
 
     SubPage(stringResource(R.string.profile_title), stringResource(R.string.profile_subtitle), onBack, modifier) {
         SectionLabel(R.string.profile_aboutYou)
-        OutlinedTextField(
+        PoulpyTextField(
+            label = stringResource(R.string.profile_name),
             value = name,
             onValueChange = { name = it; model.setDisplayName(it) },
-            label = { Text(stringResource(R.string.profile_name)) },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
         )
         val born = profile.birthdate?.toJava()
         val age = model.age(profile)
@@ -307,48 +241,64 @@ internal fun ProfileScreen(graph: AppGraph, onBack: () -> Unit, modifier: Modifi
             if (born == null) notSet else if (age == null) mediumDate(born) else pluralStringResource(R.plurals.profile_birthdateValue, age, age, mediumDate(born)),
         ) { sheet = ProfileSheet.BIRTHDATE }
 
-        SelectField(stringResource(R.string.profile_pronouns), profile.pronouns?.let { stringResource(it.label) } ?: notSet) { sheet = ProfileSheet.PRONOUNS }
-        if (profile.pronouns == Pronouns.CUSTOM) {
-            OutlinedTextField(
-                value = custom,
-                onValueChange = { custom = it; model.setPronouns(Pronouns.CUSTOM, it) },
-                label = { Text(stringResource(R.string.profile_customPronouns)) },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-            )
-        }
+        SelectField(
+            stringResource(R.string.profile_pronouns),
+            when (profile.pronouns) {
+                null -> notSet
+                Pronouns.CUSTOM -> profile.customPronouns ?: stringResource(Pronouns.CUSTOM.label)
+                else -> stringResource(profile.pronouns!!.label)
+            },
+        ) { sheet = ProfileSheet.PRONOUNS }
         Note(stringResource(R.string.profile_pronounsNote))
 
         SelectField(stringResource(R.string.profile_sex), profile.sexAssignedAtBirth?.let { stringResource(it.label) } ?: notSet) { sheet = ProfileSheet.SEX }
         Note(stringResource(R.string.profile_sexNote))
 
         SectionLabel(R.string.profile_training)
-        SelectField(stringResource(R.string.profile_goal), profile.mainGoal?.let { stringResource(it.label) } ?: notSet) { sheet = ProfileSheet.GOAL }
+        SelectField(
+            stringResource(R.string.profile_goal),
+            profile.goals.takeIf { it.isNotEmpty() }?.joinToString(", ") { stringResource(it.label) } ?: notSet,
+        ) { sheet = ProfileSheet.GOALS }
         SelectField(stringResource(R.string.profile_experience), profile.experience?.let { stringResource(it.label) } ?: notSet) { sheet = ProfileSheet.EXPERIENCE }
-        OutlinedTextField(
-            value = heartRate,
-            onValueChange = { text ->
-                heartRate = text.filter { it.isDigit() }.take(3)
-                model.setRestingHeartRate(heartRate.toIntOrNull())
-            },
-            label = { Text(stringResource(R.string.profile_restingHr)) },
-            supportingText = { Text(stringResource(R.string.profile_restingHrHint)) },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
-        )
+        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(
+                stringResource(R.string.profile_restingHr),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 4.dp),
+            )
+            NumberField(
+                value = heartRate,
+                onValueChange = {
+                    heartRate = it
+                    model.setRestingHeartRate(it.toIntOrNull())
+                },
+                description = stringResource(R.string.profile_restingHr),
+                unit = stringResource(R.string.profile_bpm),
+            )
+            Note(stringResource(R.string.profile_restingHrHint))
+        }
     }
 
     when (sheet) {
         ProfileSheet.BIRTHDATE -> DateDialog(profile.birthdate?.toJava(), today, onPick = { model.setBirthdate(it.toShared()) }, onDismiss = { sheet = null })
         ProfileSheet.PRONOUNS -> OptionSheet(
             title = stringResource(R.string.profile_pronouns),
-            why = stringResource(R.string.profile_pronounsNote),
+            why = stringResource(R.string.profile_pronounsSheetNote),
             options = listOf<Pair<Pronouns?, String>>(null to notSet) + Pronouns.entries.map { it to stringResource(it.label) },
             selected = profile.pronouns,
             note = null,
             onSave = { model.setPronouns(it, custom) },
             onDismiss = { sheet = null },
+            extra = { choice ->
+                if (choice == Pronouns.CUSTOM) {
+                    PoulpyTextField(
+                        label = stringResource(R.string.profile_customPronouns),
+                        value = custom,
+                        onValueChange = { custom = it },
+                    )
+                }
+            },
         )
         ProfileSheet.SEX -> OptionSheet(
             title = stringResource(R.string.profile_sex),
@@ -359,21 +309,19 @@ internal fun ProfileScreen(graph: AppGraph, onBack: () -> Unit, modifier: Modifi
             onSave = model::setSexAssignedAtBirth,
             onDismiss = { sheet = null },
         )
-        ProfileSheet.GOAL -> OptionSheet(
+        ProfileSheet.GOALS -> MultiOptionSheet(
             title = stringResource(R.string.profile_goal),
-            why = null,
-            options = listOf<Pair<MainGoal?, String>>(null to notSet) + MainGoal.entries.map { it to stringResource(it.label) },
-            selected = profile.mainGoal,
-            note = null,
-            onSave = model::setMainGoal,
+            why = stringResource(R.string.profile_goalsNote),
+            options = Goal.entries.map { it to stringResource(it.label) },
+            selected = profile.goals,
+            onSave = model::setGoals,
             onDismiss = { sheet = null },
         )
-        ProfileSheet.EXPERIENCE -> OptionSheet(
+        ProfileSheet.EXPERIENCE -> StepSheet(
             title = stringResource(R.string.profile_experience),
-            why = null,
-            options = listOf<Pair<Experience?, String>>(null to notSet) + Experience.entries.map { it to stringResource(it.label) },
+            why = stringResource(R.string.profile_experienceNote),
+            steps = Experience.entries.map { it to stringResource(it.label) },
             selected = profile.experience,
-            note = null,
             onSave = model::setExperience,
             onDismiss = { sheet = null },
         )
@@ -381,7 +329,7 @@ internal fun ProfileScreen(graph: AppGraph, onBack: () -> Unit, modifier: Modifi
     }
 }
 
-private enum class ProfileSheet { BIRTHDATE, PRONOUNS, SEX, GOAL, EXPERIENCE }
+private enum class ProfileSheet { BIRTHDATE, PRONOUNS, SEX, GOALS, EXPERIENCE }
 
 private val Pronouns.label: Int
     get() = when (this) {
@@ -401,20 +349,22 @@ private val SexAssignedAtBirth.label: Int
         SexAssignedAtBirth.PREFER_NOT_TO_SAY -> R.string.profile_sexPreferNotToSay
     }
 
-private val MainGoal.label: Int
+private val Goal.label: Int
     get() = when (this) {
-        MainGoal.STAY_ACTIVE -> R.string.profile_goalStayActive
-        MainGoal.BUILD_STRENGTH -> R.string.profile_goalBuildStrength
-        MainGoal.RUN_FURTHER -> R.string.profile_goalRunFurther
-        MainGoal.REHAB -> R.string.profile_goalRehab
-        MainGoal.SOMETHING_ELSE -> R.string.profile_goalSomethingElse
+        Goal.STAY_ACTIVE -> R.string.profile_goalStayActive
+        Goal.BUILD_STRENGTH -> R.string.profile_goalBuildStrength
+        Goal.RUN_FURTHER -> R.string.profile_goalRunFurther
+        Goal.REHAB -> R.string.profile_goalRehab
+        Goal.SOMETHING_ELSE -> R.string.profile_goalSomethingElse
     }
 
 private val Experience.label: Int
     get() = when (this) {
         Experience.JUST_STARTING -> R.string.profile_experienceJustStarting
+        Experience.GETTING_GOING -> R.string.profile_experienceGettingGoing
         Experience.REGULAR -> R.string.profile_experienceRegular
         Experience.EXPERIENCED -> R.string.profile_experienceExperienced
+        Experience.VERY_EXPERIENCED -> R.string.profile_experienceVeryExperienced
     }
 
 /** Settings › Appearance and units: theme, language and units as selects. */
@@ -488,6 +438,16 @@ internal fun BodyScreen(graph: AppGraph, metric: BodyMetric, language: String, o
         modifier = modifier,
         action = { FilledTonalButton(onClick = { logging = true }) { Text(stringResource(R.string.body_log)) } },
     ) {
+        if (state.history.isEmpty()) {
+            PoulpyCard(
+                title = stringResource(if (isWeight) R.string.body_emptyWeightTitle else R.string.body_emptyHeightTitle),
+                body = stringResource(if (isWeight) R.string.body_emptyWeightBody else R.string.body_emptyHeightBody),
+                button = stringResource(if (isWeight) R.string.body_logWeight else R.string.body_logHeight),
+                onClick = { logging = true },
+                buttonIcon = Icons.Filled.Add,
+            )
+            return@SubPage
+        }
         state.latest?.let { latest ->
             Surface(Modifier.fillMaxWidth(), shape = RoundedCornerShape(PoulpyRadius.lg), color = colors.primaryContainer) {
                 Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -521,7 +481,7 @@ internal fun BodyScreen(graph: AppGraph, metric: BodyMetric, language: String, o
                         R.string.body_chart, show(entries.first().value), mediumDate(entries.first().day.toJava()),
                         show(entries.last().value), mediumDate(entries.last().day.toJava()),
                     )
-                    LineChart(entries, Modifier.fillMaxWidth().height(160.dp).semantics { contentDescription = description })
+                    LineChart(entries, metric, system, language, Modifier.fillMaxWidth().height(200.dp).semantics { contentDescription = description })
                 }
             }
         }
@@ -590,43 +550,92 @@ private fun Stat(@StringRes name: Int, value: String, note: String, modifier: Mo
     }
 }
 
-/** A line with a dot per entry, in the one accent colour. A single entry is just its dot. */
+/**
+ * A line with a dot per entry in the one accent colour, over a grid of round values with the unit at the top of the
+ * axis. A single entry is just its dot. The grid is neutral: a weight going up is never red.
+ */
 @Composable
-private fun LineChart(entries: List<BodyMeasurement>, modifier: Modifier) {
-    val color = MaterialTheme.colorScheme.primary
+private fun LineChart(entries: List<BodyMeasurement>, metric: BodyMetric, system: UnitSystem, language: String, modifier: Modifier) {
+    val colors = MaterialTheme.colorScheme
+    val line = colors.primary
+    val grid = colors.outlineVariant
+    val measurer = rememberTextMeasurer()
+    val style = MaterialTheme.typography.labelSmall.copy(color = colors.onSurfaceVariant)
+    val shown = entries.map { BodyDisplay.chartValue(metric, it.value, system) }
+    val ticks = ChartAxis.ticks(shown.min(), shown.max(), BodyDisplay.chartMinSpan(metric, system))
+    val labels = ticks.map { BodyDisplay.axisLabel(metric, it, system, language) }
+    val unit = BodyDisplay.axisUnit(metric, system)
+    val firstDay = entries.first().day.toJava()
+    val lastDay = entries.last().day.toJava()
     Canvas(modifier) {
-        val pad = 8.dp.toPx()
-        val width = size.width - 2 * pad
-        val heightPx = size.height - 2 * pad
-        val first = entries.first().day.toJava().toEpochDay()
-        val span = (entries.last().day.toJava().toEpochDay() - first).coerceAtLeast(1)
-        val low = entries.minOf { it.value }
-        val range = (entries.maxOf { it.value } - low).coerceAtLeast(0.001)
-        val points = entries.map {
-            val x = if (entries.size == 1) size.width / 2 else pad + width * (it.day.toJava().toEpochDay() - first) / span
-            val y = if (entries.size == 1 || range <= 0.001) size.height / 2 else pad + heightPx * (1f - ((it.value - low) / range).toFloat())
-            Offset(x.toFloat(), y.toFloat())
+        val labelWidth = (labels + unit).maxOf { measurer.measure(it, style).size.width } + 8.dp.toPx()
+        val textHeight = measurer.measure("0", style).size.height
+        val left = labelWidth + 6.dp.toPx()
+        val right = size.width - 8.dp.toPx()
+        val top = textHeight + 8.dp.toPx()
+        val bottom = size.height - textHeight - 8.dp.toPx()
+        val low = ticks.first()
+        val span = (ticks.last() - low).coerceAtLeast(0.001)
+        fun yOf(value: Double) = (bottom - (bottom - top) * ((value - low) / span)).toFloat()
+
+        drawText(measurer, unit, Offset(labelWidth - measurer.measure(unit, style).size.width, 0f), style)
+        ticks.forEachIndexed { i, tick ->
+            val y = yOf(tick)
+            drawLine(grid, Offset(left, y), Offset(right, y), strokeWidth = 1.dp.toPx())
+            val text = measurer.measure(labels[i], style)
+            drawText(text, topLeft = Offset(labelWidth - text.size.width, y - text.size.height / 2f))
+        }
+
+        val firstEpoch = firstDay.toEpochDay()
+        val days = (lastDay.toEpochDay() - firstEpoch).coerceAtLeast(1)
+        val points = entries.mapIndexed { i, entry ->
+            val x = if (entries.size == 1) (left + right) / 2 else left + (right - left) * (entry.day.toJava().toEpochDay() - firstEpoch) / days
+            Offset(x.toFloat(), yOf(shown[i]))
         }
         if (points.size > 1) {
             val path = Path().apply {
                 moveTo(points.first().x, points.first().y)
                 points.drop(1).forEach { lineTo(it.x, it.y) }
             }
-            drawPath(path, color, style = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Round))
+            drawPath(path, line, style = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Round))
         }
-        points.forEach { drawCircle(color, radius = 4.dp.toPx(), center = it) }
+        points.forEach { drawCircle(line, radius = 4.5.dp.toPx(), center = it) }
+
+        val dateY = size.height - textHeight
+        val first = measurer.measure(shortDate(firstDay), style)
+        drawText(first, topLeft = Offset(left, dateY))
+        if (entries.size > 1) {
+            val last = measurer.measure(shortDate(lastDay), style)
+            drawText(last, topLeft = Offset(right - last.size.width, dateY))
+        }
     }
 }
 
-/** Log a weight or height: a stepper in the person's units and a date. */
+/** Log a weight or height: type the number (the keyboard opens with it selected), nudge with − and +, pick the date. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun LogSheet(metric: BodyMetric, system: UnitSystem, language: String, start: Double, onSave: (Double, LocalDate) -> Unit, onDismiss: () -> Unit) {
     val today = remember { LocalDate.now() }
-    var value by remember { mutableStateOf(start) }
+    val isWeight = metric == BodyMetric.WEIGHT
+    val feetAndInches = !isWeight && system == UnitSystem.IMPERIAL
+    var text by remember { mutableStateOf(if (isWeight) BodyDisplay.weightText(start, system, language) else BodyDisplay.centimetresText(start)) }
+    var feet by remember { mutableStateOf(BodyDisplay.feetAndInchesText(start, language).first) }
+    var inches by remember { mutableStateOf(BodyDisplay.feetAndInchesText(start, language).second) }
     var day by remember { mutableStateOf(today) }
     var pickingDate by remember { mutableStateOf(false) }
-    val isWeight = metric == BodyMetric.WEIGHT
+
+    // What the fields hold now, in kilograms or centimetres; null while they are empty or out of range.
+    val typed: Double? = when {
+        isWeight -> BodyDisplay.weightFrom(text, system)
+        feetAndInches -> BodyDisplay.centimetresFrom(feet, inches)
+        else -> BodyDisplay.centimetresFrom(text)
+    }
+    fun nudge(direction: Int) {
+        val next = BodyDisplay.step(metric, typed ?: start, system, direction)
+        if (isWeight) text = BodyDisplay.weightText(next, system, language)
+        else if (feetAndInches) BodyDisplay.feetAndInchesText(next, language).let { feet = it.first; inches = it.second }
+        else text = BodyDisplay.centimetresText(next)
+    }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -642,13 +651,21 @@ private fun LogSheet(metric: BodyMetric, system: UnitSystem, language: String, s
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-                OutlinedButton(onClick = { value = BodyDisplay.step(metric, value, system, -1) }, modifier = Modifier.size(56.dp), contentPadding = PaddingValues(0.dp)) {
-                    Text("−", style = MaterialTheme.typography.headlineSmall)
-                }
-                Text(BodyDisplay.value(metric, value, system, language), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.ExtraBold)
-                OutlinedButton(onClick = { value = BodyDisplay.step(metric, value, system, +1) }, modifier = Modifier.size(56.dp), contentPadding = PaddingValues(0.dp)) {
-                    Text("+", style = MaterialTheme.typography.headlineSmall)
+            NumberEntry(onLess = { nudge(-1) }, onMore = { nudge(+1) }) { fieldModifier ->
+                if (feetAndInches) {
+                    Row(fieldModifier, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        NumberField(feet, { feet = it }, stringResource(R.string.body_feet), Modifier.weight(1f), unit = stringResource(R.string.body_feet), large = true)
+                        NumberField(inches, { inches = it }, stringResource(R.string.body_inches), Modifier.weight(1f), unit = stringResource(R.string.body_inches), decimal = true, large = true)
+                    }
+                } else {
+                    NumberField(
+                        text, { text = it },
+                        stringResource(if (isWeight) R.string.body_weight else R.string.body_height),
+                        fieldModifier,
+                        unit = BodyDisplay.axisUnit(metric, system),
+                        decimal = isWeight,
+                        large = true,
+                    )
                 }
             }
             SelectField(
@@ -657,7 +674,7 @@ private fun LogSheet(metric: BodyMetric, system: UnitSystem, language: String, s
             ) { pickingDate = true }
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 OutlinedButton(onClick = onDismiss, modifier = Modifier.height(52.dp)) { Text(stringResource(R.string.action_cancel)) }
-                Button(onClick = { onSave(value, day); onDismiss() }, modifier = Modifier.weight(1f).height(52.dp)) {
+                Button(onClick = { typed?.let { onSave(it, day); onDismiss() } }, enabled = typed != null, modifier = Modifier.weight(1f).height(52.dp)) {
                     Text(stringResource(R.string.action_save), fontWeight = FontWeight.ExtraBold)
                 }
             }

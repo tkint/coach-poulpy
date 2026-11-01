@@ -431,7 +431,7 @@
     "sexMale": "Masculin",
     "sexIntersex": "Intersexe",
     "sexPreferNotToSay": "Je préfère ne pas le dire",
-    "goal": "Objectif principal",
+    "goal": "Objectifs",
     "goalStayActive": "Rester actif",
     "goalBuildStrength": "Gagner en force",
     "goalRunFurther": "Courir plus loin",
@@ -443,7 +443,16 @@
     "experienceExperienced": "Expérimenté",
     "restingHr": "Fréquence cardiaque au repos",
     "restingHrValue": "{bpm} bpm",
-    "restingHrHint": "Entre 30 et 120. Sert aux zones de fréquence cardiaque."
+    "restingHrHint": "Entre 30 et 120. Sert aux zones de fréquence cardiaque.",
+    "goalsNote": "Choisissez-en autant que vous voulez. Poulpy vous suggère des séances pour chacun.",
+    "pronounsSheetNote": "Servent à l’accord en français et aux phrases de Poulpy.",
+    "experienceNote": "Sert aux charges de départ et aux suggestions de plan. Vous pouvez la changer à tout moment.",
+    "experienceGettingGoing": "Je m’y mets",
+    "experienceVeryExperienced": "Très expérimenté",
+    "save": "Enregistrer",
+    "done": "Enregistrer",
+    "clear": "Effacer",
+    "bpm": "bpm"
   },
   "body": {
     "weight": "Poids",
@@ -467,8 +476,8 @@
     "history": "Historique",
     "logWeight": "Noter votre poids",
     "logHeight": "Noter votre taille",
-    "weightStored": "Enregistré en kilogrammes, affiché dans vos unités.",
-    "heightStored": "Enregistrée en centimètres, affichée dans vos unités.",
+    "weightStored": "Saisissez-le, ou ajustez avec − et +. Enregistré en kilogrammes, affiché dans vos unités.",
+    "heightStored": "Saisissez-la, ou ajustez avec − et +. Enregistrée en centimètres, affichée dans vos unités.",
     "date": "Date",
     "today": "Aujourd’hui, {date}",
     "heightNote": "La taille change peu : une mesure tous les quelques mois suffit.",
@@ -476,6 +485,13 @@
     "chartEmpty": "Notez une mesure pour voir votre courbe.",
     "less": "Moins",
     "more": "Plus",
-    "deleteEntry": "Supprimer la mesure du {date}"
+    "deleteEntry": "Supprimer la mesure du {date}",
+    "emptyWeightTitle": "Pas encore de poids",
+    "emptyWeightBody": "Notez-le une fois pour voir votre courbe. Il reste sur ce téléphone, et vous seul·e le voyez.",
+    "emptyHeightTitle": "Pas encore de taille",
+    "emptyHeightBody": "Notez-la une fois pour voir votre courbe. Une mesure tous les quelques mois suffit.",
+    "enterValue": "Valeur",
+    "feet": "ft",
+    "inches": "in"
   }
 }
