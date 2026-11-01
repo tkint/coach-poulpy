@@ -257,7 +257,7 @@ internal fun ProfileScreen(graph: AppGraph, onBack: () -> Unit, modifier: Modifi
         SectionLabel(R.string.profile_training)
         SelectField(
             stringResource(R.string.profile_goal),
-            profile.goals.takeIf { it.isNotEmpty() }?.joinToString(", ") { stringResource(it.label) } ?: notSet,
+            if (profile.goals.isEmpty()) notSet else TrainingGoal.entries.filter { it in profile.goals }.map { stringResource(it.label) }.joinToString(", "),
         ) { sheet = ProfileSheet.GOALS }
         SelectField(stringResource(R.string.profile_experience), profile.experience?.let { stringResource(it.label) } ?: notSet) { sheet = ProfileSheet.EXPERIENCE }
         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
