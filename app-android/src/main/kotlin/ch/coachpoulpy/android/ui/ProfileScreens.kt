@@ -329,7 +329,7 @@ internal fun ProfileScreen(graph: AppGraph, language: String, onBack: () -> Unit
             Note(stringResource(R.string.profile_restingHrHint))
         }
         val painAreas = ui.painAreas.joinToString(", ") { BodyMap.label(it, language) }
-        val pain = ui.painUntil?.date?.toJava()
+        val pain = ui.painUntil?.let { LocalDate.of(it.year, it.month, it.day) }
         SelectField(
             stringResource(R.string.profile_pain),
             when {

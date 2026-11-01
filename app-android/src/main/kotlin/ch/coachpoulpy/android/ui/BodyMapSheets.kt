@@ -111,6 +111,7 @@ internal fun BodyMapFigure(
             // One node per area for TalkBack, over the area's bounds; sighted taps are handled by the canvas above.
             regions.filter { it.region.key != null }.forEach { r ->
                 val key = r.region.key!!
+                val isOn = key in selected
                 val b = r.path.getBounds()
                 Box(
                     Modifier
@@ -119,7 +120,7 @@ internal fun BodyMapFigure(
                         .clearAndSetSemantics {
                             role = Role.Checkbox
                             contentDescription = BodyMap.label(key, language)
-                            selected = key in selected
+                            this.selected = isOn
                             onClick { onToggle(key); true }
                         },
                 )
