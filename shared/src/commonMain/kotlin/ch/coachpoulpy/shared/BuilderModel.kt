@@ -39,6 +39,8 @@ data class BuilderRow(
     /** The workout's last step, where "until button press" reads "until the end". */
     val isLast: Boolean,
     val name: String,
+    /** The catalog slug of the exercise, which the step sheet's Details button opens; empty for a rest. */
+    val slug: String,
     val pattern: MovementPattern,
     val sets: Int,
     val amount: Int,
@@ -632,6 +634,7 @@ class BuilderModel internal constructor(
         canMoveDown = canMoveDown,
         isLast = last,
         name = labels.rest,
+        slug = "",
         pattern = MovementPattern.MOBILITY,
         sets = 1,
         amount = rest.seconds,
@@ -670,6 +673,7 @@ class BuilderModel internal constructor(
             canMoveDown = canMoveDown,
             isLast = last,
             name = exercise?.let { labels.text(it.name) } ?: entry.exercise.value,
+            slug = entry.exercise.value,
             pattern = exercise?.movementPattern ?: MovementPattern.CORE,
             sets = entry.sets,
             amount = entry.amount,

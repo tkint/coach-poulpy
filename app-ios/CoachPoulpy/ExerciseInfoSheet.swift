@@ -1,12 +1,14 @@
 import SwiftUI
 import Shared
 
-/// What the builder's picker shows when a row is tapped: the exercise's muscles and equipment, the body map with the
-/// muscles it works lit on the person's figure, the steps, and "Add to the workout", which goes on to the add sheet.
+/// What the builder shows of an exercise: its muscles and equipment, the body map with the muscles it works lit on the
+/// person's figure, the steps, and one button. From the picker it is "Add to the workout" ([adding]), which goes on to
+/// the add sheet; from a step's sheet it is "Back to the step".
 struct ExerciseInfoSheet: View {
     let graph: AppGraph
     let slug: String
-    let onAdd: (String) -> Void
+    var adding = true
+    let onAction: (String) -> Void
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -66,8 +68,14 @@ struct ExerciseInfoSheet: View {
                     .padding(.bottom, 16)
                 }
                 Divider()
-                Button { onAdd(detail.slug) } label: {
-                    Label("exercise.addHere", systemImage: "plus")
+                Button { onAction(detail.slug) } label: {
+                    Group {
+                        if adding {
+                            Label("exercise.addHere", systemImage: "plus")
+                        } else {
+                            Text("exercise.backToStep")
+                        }
+                    }
                         .font(.poulpy(.callout).weight(.heavy))
                         .foregroundStyle(PoulpyColor.onPrimary)
                         .frame(maxWidth: .infinity)

@@ -104,7 +104,7 @@ struct BuilderView: View {
             }
             .sheet(isPresented: Binding(get: { editingRow != nil }, set: { if !$0 { editing = nil } })) {
                 if let row = editingRow {
-                    StepSheet(model: model, row: row, parts: state.parts, format: state.format) { editing = nil }
+                    StepSheet(graph: graph, model: model, row: row, parts: state.parts, format: state.format) { editing = nil }
                 }
             }
             // A new workout asks for its format first; closing the sheet without one leaves the builder.
@@ -126,11 +126,11 @@ struct BuilderView: View {
                         }
                     }
                     .sheet(item: $previewing) { preview in
-                        ExerciseInfoSheet(graph: graph, slug: preview.slug) { slug in
+                        ExerciseInfoSheet(graph: graph, slug: preview.slug, onAction: { slug in
                             model.add(slug: slug, partKey: target.partKey, repeatKey: target.repeatKey, role: target.role)
                             previewing = nil
                             picking = nil
-                        }
+                        })
                     }
                     .navigationTitle("builder.pickTitle")
                     .navigationBarTitleDisplayMode(.inline)
@@ -459,16 +459,20 @@ private struct SheetTitle: View {
 
 /// Edits one step in a sheet: the open card, and Done.
 private struct StepSheet: View {
+    let graph: AppGraph
     let model: BuilderModel
     let row: BuilderRow
     let parts: [BuilderPart]
     let format: WorkoutFormat?
     let onDone: () -> Void
+    /// The exercise whose details are open over this sheet; nil when none.
+    @State private var detailing: PreviewTarget?
 
     var body: some View {
         ScrollView {
             VStack(spacing: 14) {
-                EntryCard(model: model, row: row, roleOptions: model.roleOptions, parts: parts, format: format, open: true, onOpen: {}, onMove: { _ in })
+                EntryCard(model: model, row: row, roleOptions: model.roleOptions, parts: parts, format: format, open: true, onOpen: {}, onMove: { _ in },
+                          onDetails: { detailing = PreviewTarget(slug: row.slug) })
                     .id(row.key)
                 Button(action: onDone) {
                     Text("action.done")
@@ -484,6 +488,9 @@ private struct StepSheet: View {
         .background(PoulpyColor.background)
         // Opens fully, so every field shows without dragging the sheet up.
         .presentationDetents([.large])
+        .sheet(item: $detailing) { detail in
+            ExerciseInfoSheet(graph: graph, slug: detail.slug, adding: false, onAction: { _ in detailing = nil })
+        }
     }
 }
 
@@ -529,10 +536,12 @@ private struct EntryCard: View {
     let open: Bool
     let onOpen: () -> Void
     let onMove: (Int) -> Void
+    /// Opens the exercise's details, from the step's sheet; nil elsewhere.
+    var onDetails: (() -> Void)?
     @State private var weight: String
     @State private var editing: TargetField?
 
-    init(model: BuilderModel, row: BuilderRow, roleOptions: [StepRoleOption], parts: [BuilderPart], format: WorkoutFormat? = nil, open: Bool, onOpen: @escaping () -> Void, onMove: @escaping (Int) -> Void) {
+    init(model: BuilderModel, row: BuilderRow, roleOptions: [StepRoleOption], parts: [BuilderPart], format: WorkoutFormat? = nil, open: Bool, onOpen: @escaping () -> Void, onMove: @escaping (Int) -> Void, onDetails: (() -> Void)? = nil) {
         self.model = model
         self.row = row
         self.roleOptions = roleOptions
@@ -541,6 +550,7 @@ private struct EntryCard: View {
         self.open = open
         self.onOpen = onOpen
         self.onMove = onMove
+        self.onDetails = onDetails
         _weight = State(initialValue: row.weight)
     }
 
@@ -579,6 +589,18 @@ private struct EntryCard: View {
                     if row.repeatKey != nil {
                         Button("builder.moveOutOfRepeat") { model.moveOutOfRepeat(key: row.key) }
                     }
+                }
+                if open, !row.isRest, let onDetails {
+                    Button(action: onDetails) {
+                        Label("builder.details", systemImage: "info.circle")
+                            .font(.poulpy(.subheadline).weight(.heavy))
+                            .foregroundStyle(PoulpyColor.onSurface)
+                            .padding(.horizontal, 14)
+                            .frame(minHeight: 44)
+                            .background(PoulpyColor.surfaceVariant, in: Capsule())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(Text(L("exercise.details %@", row.name)))
                 }
                 if !open {
                     stepMenu

@@ -44,10 +44,12 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -129,6 +131,8 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
     var previewing by rememberSaveable { mutableStateOf<String?>(null) }
     // The step being edited in the sheet: the one just added, or the one tapped.
     var editing by rememberSaveable { mutableStateOf<String?>(null) }
+    // The exercise whose details are open over the step's sheet; null when none.
+    var detailing by rememberSaveable { mutableStateOf<String?>(null) }
     var addingPart by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(state.addedKey) { state.addedKey?.let { editing = it } }
     val colors = MaterialTheme.colorScheme
@@ -161,7 +165,7 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
         previewing?.let { slug ->
             ExerciseInfoSheet(
                 graph, language, slug,
-                onAdd = { model.add(it, part, pickingRepeat, pickingRole); previewing = null; pickingPart = null },
+                onAction = { model.add(it, part, pickingRepeat, pickingRole); previewing = null; pickingPart = null },
                 onDismiss = { previewing = null },
             )
         }
@@ -277,7 +281,10 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
         PartSheet(state.partOptions, onPick = { model.addPart(it); addingPart = false }, onDone = { addingPart = false })
     }
     state.rows.firstOrNull { it.key == editing }?.let { row ->
-        StepSheet(model, row, state.format, onDone = { editing = null })
+        StepSheet(model, row, state.format, onDone = { editing = null }, onDetails = { detailing = row.slug })
+    }
+    detailing?.let { slug ->
+        ExerciseInfoSheet(graph, language, slug, onAction = { detailing = null }, onDismiss = { detailing = null }, adding = false)
     }
 }
 
@@ -566,7 +573,7 @@ private fun StepCard(model: BuilderModel, row: BuilderRow, parts: List<BuilderPa
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun StepSheet(model: BuilderModel, row: BuilderRow, format: WorkoutFormat?, onDone: () -> Unit) {
+private fun StepSheet(model: BuilderModel, row: BuilderRow, format: WorkoutFormat?, onDone: () -> Unit, onDetails: () -> Unit) {
     val colors = MaterialTheme.colorScheme
     // Opens fully, so every field shows without dragging the sheet up.
     ModalBottomSheet(onDismissRequest = onDone, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), containerColor = colors.surface) {
@@ -574,9 +581,17 @@ private fun StepSheet(model: BuilderModel, row: BuilderRow, format: WorkoutForma
             Modifier.padding(horizontal = 20.dp).padding(bottom = 24.dp).navigationBarsPadding(),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                row.roleLabel?.let { RoleTag(it, row.role) }
-                SheetTitle(row.name, row.place)
+            Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    row.roleLabel?.let { RoleTag(it, row.role) }
+                    SheetTitle(row.name, row.place)
+                }
+                if (!row.isRest) {
+                    FilledTonalButton(onClick = onDetails, contentPadding = PaddingValues(horizontal = 14.dp)) {
+                        Icon(Icons.Outlined.Info, contentDescription = null, modifier = Modifier.size(20.dp))
+                        Text(stringResource(R.string.builder_details), fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 6.dp))
+                    }
+                }
             }
             val target = row.target
             if (row.isRest) {
