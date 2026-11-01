@@ -9,6 +9,21 @@ enum class DistanceUnit(val meters: Double, val symbol: String) {
     M(1.0, "m"),
     KM(1000.0, "km"),
     MI(1609.344, "mi"),
+    ;
+
+    companion object {
+        /**
+         * The unit a distance was picked in, read from its value: a whole number of miles or of kilometres, which a
+         * saved target is the only trace of ("1 mile" is stored as 1609 m). Null for anything else, such as 400 m,
+         * which stays in metres whatever the unit system.
+         */
+        fun signature(meters: Double): DistanceUnit? = when {
+            meters < 1000 -> null
+            abs(meters - (meters / 1000).roundToInt() * 1000.0) <= 1.0 -> KM
+            abs(meters - (meters / MI.meters).roundToInt() * MI.meters) <= 1.0 -> MI
+            else -> null
+        }
+    }
 }
 
 /** How a walk or a run block shows its pace: time per kilometre or mile, or a speed as treadmills show it. */

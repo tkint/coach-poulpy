@@ -131,6 +131,7 @@
     "moveRepeatUp": "Monter cette boucle",
     "moveRepeatDown": "Descendre cette boucle",
     "weightKg": "Charge en kilogrammes",
+    "weightLb": "Charge en livres",
     "lessNamed": "Moins : {label}",
     "moreNamed": "Plus : {label}",
     "open": "Modifier {name}",

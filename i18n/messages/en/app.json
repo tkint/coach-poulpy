@@ -131,6 +131,7 @@
     "moveRepeatUp": "Move this repeat up",
     "moveRepeatDown": "Move this repeat down",
     "weightKg": "Weight in kilograms",
+    "weightLb": "Weight in pounds",
     "lessNamed": "Less: {label}",
     "moreNamed": "More: {label}",
     "open": "Edit {name}",

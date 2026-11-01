@@ -23,6 +23,8 @@ data class FinishedFacts(
     val liftedKg: Double,
     /** Distance of the sets done, in metres; 0 when the workout has no distance target. */
     val distanceMeters: Double,
+    /** The unit system the run's distance was picked in, when it was a whole number of miles or kilometres; null follows Settings. */
+    val distanceSystem: UnitSystem? = null,
 )
 
 /**
@@ -33,8 +35,9 @@ object FinishedStats {
     fun of(facts: FinishedFacts, units: UnitSystem, languageCode: String): List<FinishedStat> = buildList {
         add(FinishedStat(DomainText.shareTime(languageCode), ShareCard.clock(facts.activeSeconds)))
         if (facts.distanceMeters > 0) {
-            add(FinishedStat(DomainText.shareDistance(languageCode), ShareCard.measure(Units.distance(facts.distanceMeters, units, decimals = 1), languageCode)))
-            pace(facts, units)?.let { add(FinishedStat(DomainText.sharePace(languageCode), it)) }
+            val shown = facts.distanceSystem ?: units
+            add(FinishedStat(DomainText.shareDistance(languageCode), ShareCard.measure(Units.distance(facts.distanceMeters, shown, decimals = 1), languageCode)))
+            pace(facts, shown)?.let { add(FinishedStat(DomainText.sharePace(languageCode), it)) }
         } else {
             add(FinishedStat(DomainText.shareSets(languageCode), "${facts.setsDone}"))
             if (facts.liftedKg > 0) add(FinishedStat(DomainText.shareLifted(languageCode), lifted(facts.liftedKg, units, languageCode)))
@@ -52,7 +55,7 @@ object FinishedStats {
     /** Metric: "820 kg" below a tonne, "2.1 t" above. Imperial: whole pounds, "1,807 lb" in English. */
     private fun lifted(kg: Double, units: UnitSystem, languageCode: String): String = when {
         units == UnitSystem.IMPERIAL -> DomainText.unitPounds(languageCode, Units.poundsOf(kg).let { kotlin.math.round(it).toLong().toString() })
-        kg < 1000 -> Labels(languageCode).kilograms(kotlin.math.round(kg))
+        kg < 1000 -> Labels(languageCode).weight(kotlin.math.round(kg))
         else -> DomainText.unitTonnes(languageCode, ShareCard.measure(Measure(kg / 1000, 1, ""), languageCode).removeSuffix("\u00a0"))
     }
 }

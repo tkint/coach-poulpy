@@ -16,7 +16,7 @@ import ch.coachpoulpy.core.model.WorkoutFormat
  * show the same labels. The text is in `i18n/messages/<locale>/domain.json` and reaches this class as the
  * generated [DomainText]; screen text stays in each app's own generated strings.
  */
-internal class Labels(private val languageCode: String) {
+internal class Labels(private val languageCode: String, private val units: () -> UnitSystem = { UnitSystem.METRIC }) {
     fun text(text: LocalizedText) = text.forLanguage(languageCode)
 
     fun muscle(group: MuscleGroup) = when (group) {
@@ -151,9 +151,13 @@ internal class Labels(private val languageCode: String) {
         else -> DomainText.unitMinutesSeconds(languageCode, seconds / 60, (seconds % 60).toString().padStart(2, '0'))
     }
 
-    fun kilograms(kg: Double): String {
-        val text = if (kg % 1.0 == 0.0) kg.toInt().toString() else kg.toString()
-        return DomainText.unitKilograms(languageCode, text)
+    /** "16 kg" or "35.3 lb": a weight stored in kilograms, in the user's unit system. */
+    fun weight(kg: Double): String {
+        val system = units()
+        val value = Units.weight(kg, system)
+        val rounded = kotlin.math.round(value.value * 10) / 10
+        val text = if (rounded % 1.0 == 0.0) rounded.toLong().toString() else rounded.toString()
+        return if (system == UnitSystem.IMPERIAL) DomainText.unitPounds(languageCode, text) else DomainText.unitKilograms(languageCode, text)
     }
 
     fun side(side: Side) = when (side) {
@@ -262,7 +266,7 @@ internal class Labels(private val languageCode: String) {
         return listOfNotNull(
             if (several) "${entry.sets} × $amount" else amount,
             perSide.takeIf { entry.perSide },
-            entry.loadKg?.let(::kilograms),
+            entry.loadKg?.let(::weight),
             entry.restBetweenSets.takeIf { several && it > 0 }?.let { betweenSets(longDuration(it)) },
         ).joinToString(" · ")
     }
@@ -279,7 +283,13 @@ internal class Labels(private val languageCode: String) {
     fun until(last: Boolean) = if (last) DomainText.labelUntilEnd(languageCode) else DomainText.labelUntilPress(languageCode)
 
     /** What a phase asks for in the player: "10 reps", "30 s", "400 m", or "Until you tap Next". */
-    fun target(target: Target) = if (target is Target.Open) DomainText.labelUntilNext(languageCode) else amount(target.measurement, target.amount)
+    fun target(target: Target) = when {
+        target is Target.Open -> DomainText.labelUntilNext(languageCode)
+        // A distance picked in miles or kilometres stays so, whatever the unit system.
+        target is Target.Distance && DistanceUnit.signature(target.meters) != null ->
+            TargetInput.distanceLabel(target.meters, DistanceUnit.signature(target.meters)!!)
+        else -> amount(target.measurement, target.amount)
+    }
 
     /** The Recover tag on rests and recover steps; null for work steps, whose part says where they are. */
     fun role(role: StepRole) = when (role) {

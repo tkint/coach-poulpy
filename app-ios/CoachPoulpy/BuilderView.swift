@@ -538,7 +538,7 @@ private struct EntryCard: View {
         self.open = open
         self.onOpen = onOpen
         self.onMove = onMove
-        _weight = State(initialValue: row.loadKg.map { EntryCard.format($0.doubleValue) } ?? "")
+        _weight = State(initialValue: row.weight)
     }
 
     var body: some View {
@@ -793,18 +793,14 @@ private struct EntryCard: View {
                     .frame(width: 60, height: 40)
                     .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 10))
                     .overlay(RoundedRectangle(cornerRadius: 10).stroke(PoulpyColor.outline, lineWidth: 1.5))
-                    .accessibilityLabel(Text("builder.weightKg"))
+                    .accessibilityLabel(Text(row.weightUnit == "lb" ? "builder.weightLb" : "builder.weightKg"))
                     .onChange(of: weight) { text in
-                        model.setLoadKg(key: row.key, kg: Double(text.replacingOccurrences(of: ",", with: ".")) ?? 0)
+                        model.setWeight(key: row.key, text: text)
                     }
-                Text("kg").font(.poulpy(.body).weight(.bold)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+                Text(row.weightUnit).font(.poulpy(.body).weight(.bold)).foregroundStyle(PoulpyColor.onSurfaceVariant)
             }
             .frame(height: 44)
         }
-    }
-
-    private static func format(_ kg: Double) -> String {
-        kg.truncatingRemainder(dividingBy: 1) == 0 ? String(Int(kg)) : String(kg)
     }
 }
 
