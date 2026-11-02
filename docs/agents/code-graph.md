@@ -11,4 +11,6 @@ The environment every thread runs in has [CodeGraph](https://github.com/colbymch
 
 ## Where it is set up
 
-In the environment's settings, not in the repo, so nothing to install per thread. To change the version or the setup, edit the environment.
+- **Install and index**: the environment's setup script installs `codegraph` and runs `codegraph init` in the repo folder, so every new thread starts with an index.
+- **MCP server**: `.mcp.json` at the repo root starts `codegraph serve --mcp`, which gives the main thread the `codegraph_explore` tool and keeps the index in sync as files change. If the tool is missing in a thread, say so and use the CLI.
+- To change the version or the install, edit the environment.
