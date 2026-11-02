@@ -11,6 +11,7 @@ A training platform: Android and iOS apps first, guest-only and offline, with a 
 - `CONTRIBUTING.md`: the issue-to-PR flow and labels.
 - `docs/agents/refining-issues.md`: how to turn a Quick idea into an agent-ready issue ("refine #N").
 - `docs/agents/refining-issues.md`: how to turn a Quick idea into an agent-ready issue ("refine #N").
+- `docs/agents/code-graph.md`: the code graph (`codegraph_explore` MCP tool, or `codegraph explore` in Bash). Use it first to find code and see what depends on it.
 - `docs/agents/areas.md`: the rules per area (model and schema, screens and mockups, Poulpy, translations, housekeeping). Read the sections for the areas you touch; there are no role threads to consult.
 
 ## Prove a change works

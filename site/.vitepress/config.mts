@@ -148,6 +148,7 @@ export default withMermaid(
             { text: 'Refining an issue', link: '/docs/agents/refining-issues' },
             { text: 'Triage labels', link: '/docs/agents/triage-labels' },
             { text: 'Domain docs', link: '/docs/agents/domain' },
+            { text: 'Code graph', link: '/docs/agents/code-graph' },
           ],
         },
       ],
