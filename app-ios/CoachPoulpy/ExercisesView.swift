@@ -465,11 +465,15 @@ private struct NoExercises: View {
 /// "Variation 3 of 5" button that opens the variations sheet, so it never moves; then the
 /// eyebrow, name, Muscles and Equipment cards and the steps, with "Add to a workout" pinned
 /// at the bottom. Picking another variation replaces the page instead of stacking it.
+/// The two halves of an exercise's page.
+private enum ExerciseTab { case muscles, how }
+
 struct ExerciseDetailView: View {
     let graph: AppGraph
     @State private var slug: String
     @State private var choosing = false
     @State private var adding = false
+    @State private var tab = ExerciseTab.muscles
     @Environment(\.dismiss) private var dismiss
 
     init(graph: AppGraph, slug: String) {
@@ -488,9 +492,9 @@ struct ExerciseDetailView: View {
 
     private func page(_ detail: ExerciseDetail) -> some View {
         VStack(spacing: 0) {
-            pictureArea(detail)
+            topBar(detail)
             ScrollView {
-                VStack(alignment: .leading, spacing: 18) {
+                VStack(alignment: .leading, spacing: 16) {
                     VStack(alignment: .leading, spacing: 6) {
                         Text(detail.eyebrow.uppercased())
                             .font(PoulpyFont.label)
@@ -500,30 +504,45 @@ struct ExerciseDetailView: View {
                             .font(PoulpyFont.title)
                             .foregroundStyle(PoulpyColor.onBackground)
                             .accessibilityAddTraits(.isHeader)
+                        Text("\(String(localized: "exercise.equipment").uppercased()) · \(detail.equipment)")
+                            .font(PoulpyFont.label)
+                            .foregroundStyle(PoulpyColor.onSurfaceVariant)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 4)
+                            .background(PoulpyColor.surfaceVariant, in: Capsule())
                     }
-                    HStack(alignment: .top, spacing: 12) {
-                        factCard("exercise.muscles", detail.muscles)
-                        factCard("exercise.equipment", detail.equipment)
+                    Picker("exercise.muscles", selection: $tab) {
+                        Text("exercise.muscles").tag(ExerciseTab.muscles)
+                        Text("exercise.how").tag(ExerciseTab.how)
                     }
-                    WorkedMuscles(graph: graph, detail: detail)
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text("exercise.how").font(PoulpyFont.headline).accessibilityAddTraits(.isHeader)
-                        ForEach(Array(detail.instructions.enumerated()), id: \.offset) { index, step in
-                            HStack(alignment: .top, spacing: 12) {
-                                Text(verbatim: "\(index + 1)")
-                                    .font(.poulpy(.subheadline).weight(.heavy))
-                                    .foregroundStyle(PoulpyColor.onPrimary)
-                                    .frame(width: 28, height: 28)
-                                    .background(PoulpyColor.primary, in: Circle())
-                                    .accessibilityHidden(true)
-                                Text(step).font(PoulpyFont.body)
+                    .pickerStyle(.segmented)
+                    switch tab {
+                    case .muscles:
+                        WorkedMuscles(graph: graph, detail: detail)
+                        Text(detail.muscles)
+                            .font(.poulpy(.body).weight(.heavy))
+                            .foregroundStyle(PoulpyColor.onPrimaryContainer)
+                            .frame(maxWidth: .infinity)
+                            .multilineTextAlignment(.center)
+                    case .how:
+                        VStack(alignment: .leading, spacing: 10) {
+                            ForEach(Array(detail.instructions.enumerated()), id: \.offset) { index, step in
+                                HStack(alignment: .top, spacing: 12) {
+                                    Text(verbatim: "\(index + 1)")
+                                        .font(.poulpy(.subheadline).weight(.heavy))
+                                        .foregroundStyle(PoulpyColor.onPrimary)
+                                        .frame(width: 28, height: 28)
+                                        .background(PoulpyColor.primary, in: Circle())
+                                        .accessibilityHidden(true)
+                                    Text(step).font(PoulpyFont.body)
+                                }
                             }
                         }
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 20)
-                .padding(.top, 20)
+                .padding(.top, 8)
                 .padding(.bottom, 16)
             }
             Divider()
@@ -555,76 +574,44 @@ struct ExerciseDetailView: View {
         }
     }
 
-    /// The pattern illustration until real pictures exist, with Back and the variations button over it.
-    private func pictureArea(_ detail: ExerciseDetail) -> some View {
-        ZStack(alignment: .top) {
-            PoulpyColor.primaryContainer.ignoresSafeArea(edges: .top)
-            PatternIllustration(pattern: detail.pattern)
-                .padding(.top, 36)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-            HStack {
-                Button {
-                    dismiss()
-                } label: {
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 18, weight: .bold))
-                        .foregroundStyle(PoulpyColor.onSurface)
-                        .frame(width: 44, height: 44)
-                        .background(PoulpyColor.surface, in: Circle())
-                }
-                .accessibilityLabel(Text("action.back"))
-                Spacer()
-                if !detail.variations.isEmpty {
-                    Button {
-                        choosing = true
-                    } label: {
-                        HStack(spacing: 8) {
-                            Image(systemName: "chart.bar.fill").font(.system(size: 14, weight: .bold))
-                            Text("exercise.variationPosition \(detail.variationPosition)")
-                            Image(systemName: "chevron.down").font(.system(size: 12, weight: .bold))
-                        }
-                        .font(.poulpy(.subheadline).weight(.heavy))
-                        .foregroundStyle(PoulpyColor.onPrimaryContainer)
-                        .padding(.leading, 14)
-                        .padding(.trailing, 12)
-                        .frame(height: 44)
-                        .background(PoulpyColor.surface, in: Capsule())
-                    }
-                    .accessibilityElement(children: .ignore)
-                    .accessibilityLabel(Text("exercise.variationsA11y \(detail.variationPosition)"))
-                    .accessibilityAddTraits(.isButton)
-                }
+    /// Back, and the variations button when the exercise is in a variation group.
+    private func topBar(_ detail: ExerciseDetail) -> some View {
+        HStack {
+            Button {
+                dismiss()
+            } label: {
+                Image(systemName: "chevron.left")
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundStyle(PoulpyColor.onSurface)
+                    .frame(width: 44, height: 44)
+                    .background(PoulpyColor.surface, in: Circle())
             }
-            .buttonStyle(.plain)
-            .padding(.horizontal, 16)
-            .padding(.top, 4)
+            .accessibilityLabel(Text("action.back"))
+            Spacer()
+            if !detail.variations.isEmpty {
+                Button {
+                    choosing = true
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "chart.bar.fill").font(.system(size: 14, weight: .bold))
+                        Text("exercise.variationPosition \(detail.variationPosition)")
+                        Image(systemName: "chevron.down").font(.system(size: 12, weight: .bold))
+                    }
+                    .font(.poulpy(.subheadline).weight(.heavy))
+                    .foregroundStyle(PoulpyColor.onPrimaryContainer)
+                    .padding(.leading, 14)
+                    .padding(.trailing, 12)
+                    .frame(height: 44)
+                    .background(PoulpyColor.surfaceVariant, in: Capsule())
+                }
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(Text("exercise.variationsA11y \(detail.variationPosition)"))
+                .accessibilityAddTraits(.isButton)
+            }
         }
-        .frame(height: 212)
-    }
-
-    private func factCard(_ title: LocalizedStringKey, _ body: String) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(title)
-                .textCase(.uppercase)
-                .font(PoulpyFont.label)
-                .tracking(1)
-                .foregroundStyle(PoulpyColor.onSurfaceVariant)
-            Text(body).font(.poulpy(.callout).weight(.bold)).foregroundStyle(PoulpyColor.onSurface)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal, 14)
-        .padding(.vertical, 12)
-        .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 16))
-    }
-}
-
-/// Stands in for the exercise picture: the pattern's symbol, large.
-private struct PatternIllustration: View {
-    let pattern: MovementPattern
-
-    var body: some View {
-        PatternBadge(pattern: pattern, size: 140)
-            .accessibilityLabel(Text("exercise.picture"))
+        .buttonStyle(.plain)
+        .padding(.horizontal, 16)
+        .padding(.top, 4)
     }
 }
 
