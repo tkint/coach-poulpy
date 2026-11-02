@@ -193,16 +193,12 @@ private fun PictureArea(detail: ExerciseDetail, onBack: () -> Unit, onVariations
 internal fun WorkedMuscles(graph: AppGraph, language: String, detail: ExerciseDetail) {
     val context = LocalContext.current
     val figure = remember(graph, context) { graph.profile(AppPreferences(context)).profile.value.bodyFigure ?: BodyFigure.SHOULDERS }
-    // The Muscles card already names the muscles, so the picture is hidden from TalkBack.
-    Row(
-        Modifier.fillMaxWidth().clearAndSetSemantics { },
-        horizontalArrangement = Arrangement.SpaceEvenly,
-    ) {
-        listOf(BodyView.FRONT to R.string.profile_figureFront, BodyView.BACK to R.string.profile_figureBack).forEach { (view, label) ->
-            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                BodyMapFigure(figure, view, detail.workedAreas, language)
-                Text(stringResource(label), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
+    var view by rememberSaveable(detail.slug) { mutableStateOf(detail.workedView) }
+    // The Muscles card already names the muscles, so the picture is hidden from TalkBack; the switch stays reachable.
+    Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        SideSwitch(view, onChange = { view = it })
+        Box(Modifier.clearAndSetSemantics { }) {
+            BodyMapFigure(figure, view, detail.workedAreas, language, width = 200.dp)
         }
     }
 }
