@@ -128,8 +128,7 @@
     "addHere": "Ajouter à la séance",
     "backToStep": "Retour à l’étape",
     "details": "Détails de {name}",
-    "addNamed": "Ajouter {name}",
-    "picture": "Illustration de l’exercice"
+    "addNamed": "Ajouter {name}"
   },
   "builder": {
     "details": "Détails",

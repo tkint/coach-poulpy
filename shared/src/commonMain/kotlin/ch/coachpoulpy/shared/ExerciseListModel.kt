@@ -59,8 +59,6 @@ data class ExerciseDetail(
     val muscles: String,
     /** The body map areas the exercise works, as area keys (`quads-left`); see [BodyMap.worked]. */
     val workedAreas: Set<String>,
-    /** The side of the figure to open on: the one that shows most of [workedAreas]. */
-    val workedView: BodyView,
     val equipment: String,
     val perSide: Boolean,
     val instructions: List<String>,
@@ -174,7 +172,6 @@ class ExerciseListModel internal constructor(
     fun detail(slug: String): ExerciseDetail? = catalog[ExerciseSlug(slug)]?.let { exercise ->
         val variations = catalog.variationsOf(exercise.slug)
         val index = variations.indexOfFirst { it.slug == exercise.slug }
-        val worked = BodyMap.worked(exercise.muscleGroups).toSet()
         ExerciseDetail(
             slug = exercise.slug.value,
             name = labels.text(exercise.name),
@@ -186,8 +183,7 @@ class ExerciseListModel internal constructor(
                 labels.perSide.capitalized().takeIf { exercise.perSide },
             ).joinToString(" · "),
             muscles = exercise.muscleGroups.map(labels::muscle).sentence(),
-            workedAreas = worked,
-            workedView = BodyMap.sideToShow(worked),
+            workedAreas = BodyMap.worked(exercise.muscleGroups).toSet(),
             equipment = when {
                 exercise.equipment.isNotEmpty() -> needs(exercise)
                 exercise.optionalEquipment.isNotEmpty() -> exercise.optionalEquipment.map(labels::equipment).sentence()
