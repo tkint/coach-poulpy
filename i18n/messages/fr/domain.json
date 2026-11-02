@@ -50,6 +50,25 @@
     "mobility": "Mobilité",
     "stretch": "Étirement"
   },
+  "focus": {
+    "strength": "Force",
+    "cardio": "Cardio",
+    "mobility": "Mobilité",
+    "stretching": "Étirements",
+    "warmUp": "Échauffement",
+    "coolDown": "Retour au calme"
+  },
+  "position": {
+    "standing": "Debout",
+    "seated": "Assis",
+    "floor": "Au sol"
+  },
+  "tag": {
+    "noJumping": "Sans sauts",
+    "eachSide": "Chaque côté",
+    "hold": "Maintien",
+    "timed": "Chronométré"
+  },
   "measurement": {
     "reps": "Répétitions",
     "time": "Chronométré",

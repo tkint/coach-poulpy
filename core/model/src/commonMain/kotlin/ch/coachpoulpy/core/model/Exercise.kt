@@ -20,6 +20,11 @@ import kotlinx.serialization.json.jsonArray
  * one of them must be at hand (goblet squat: dumbbell or kettlebell; dumbbell bench
  * press: dumbbells, and a bench). No need means bodyweight. [optionalEquipment] helps
  * but isn't needed, like a mat or a treadmill for a walk.
+ *
+ * [focus] says what the exercise is for and [positions] how the body is placed doing it,
+ * both so people can find exercises they don't know by name; an exercise can have several.
+ * [jumps] marks the exercises where both feet leave the ground, which the "No jumping"
+ * tag leaves out ([tags]).
  */
 @Serializable
 data class Exercise(
@@ -33,6 +38,9 @@ data class Exercise(
     val optionalEquipment: List<Equipment> = emptyList(),
     val measurement: MeasurementMode,
     val perSide: Boolean = false,
+    val focus: List<ExerciseFocus> = emptyList(),
+    val positions: List<BodyPosition> = emptyList(),
+    val jumps: Boolean = false,
     val images: List<String> = emptyList(),
     val instructions: List<LocalizedText> = emptyList(),
     /** How this variation differs from the others in its group, shown only in the variations sheet. */
@@ -41,6 +49,15 @@ data class Exercise(
 ) {
     /** Every piece of equipment named, needed or optional, once each. */
     val allEquipment: List<Equipment> get() = (equipment.flatten() + optionalEquipment).distinct()
+
+    /** The tags the exercise carries: how it is done, worked out from its measurement, sides and [jumps]. */
+    val tags: Set<ExerciseTag>
+        get() = buildSet {
+            if (!jumps) add(ExerciseTag.NO_JUMPING)
+            if (perSide) add(ExerciseTag.EACH_SIDE)
+            if (measurement == MeasurementMode.HOLD) add(ExerciseTag.HOLD)
+            if (measurement == MeasurementMode.TIME) add(ExerciseTag.TIMED)
+        }
 
     /** True when every need has one alternative in [owned]. */
     fun fits(owned: Set<Equipment>): Boolean = equipment.all { need -> need.any { it in owned } }
@@ -93,3 +110,14 @@ enum class Equipment { BODYWEIGHT, DUMBBELL, KETTLEBELL, BARBELL, BAND, MAT, BEN
 
 @Serializable
 enum class MeasurementMode { REPS, TIME, DISTANCE, HOLD }
+
+/** What an exercise is for: the first filter of the exercise list for finding one by purpose. */
+@Serializable
+enum class ExerciseFocus { STRENGTH, CARDIO, MOBILITY, STRETCHING, WARM_UP, COOL_DOWN }
+
+/** How the body is placed during an exercise; [FLOOR] covers lying, kneeling and all fours. */
+@Serializable
+enum class BodyPosition { STANDING, SEATED, FLOOR }
+
+/** What is worth knowing before picking an exercise; never stored, see [Exercise.tags]. */
+enum class ExerciseTag { NO_JUMPING, EACH_SIDE, HOLD, TIMED }

@@ -24,7 +24,19 @@ _Avoid_: Progression, regression, alternative
 
 **Alias**:
 Another name people search an exercise by, like "RDL" or "abdos", kept per language in the catalog and never shown.
-_Avoid_: Tag, keyword
+_Avoid_: Keyword
+
+**Focus**:
+What an exercise is for: strength, cardio, mobility, stretching, warm-up or cool down. An exercise can have several. The exercise list filters by it.
+_Avoid_: Category, type (the movement pattern is how it moves, not what it is for)
+
+**Position**:
+How the body is placed doing an exercise: standing, seated or on the floor (lying, kneeling, all fours). An exercise can have several.
+_Avoid_: Posture, stance
+
+**Tag**:
+A fact worth knowing before picking an exercise, worked out from the catalog rather than stored: no jumping, each side, hold, timed. Not an alias, which is only a search name.
+_Avoid_: Keyword, label
 
 **Format**:
 How a workout is built, chosen when it is created and kept: a **circuit** goes round several exercises, each done once per round, so its exercises have no sets; **sets** does one exercise at a time, all its sets with a rest between them, then the next.
