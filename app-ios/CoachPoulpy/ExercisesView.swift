@@ -133,36 +133,36 @@ struct ExerciseList<Row: View>: View {
         .sheet(item: $sheet) { which in
             switch which {
             case .equipment:
-                OptionSheet(
+                FilterOptionSheet(
                     title: "exercises.equipment", hint: "exercises.equipmentHint",
-                    rows: model.equipmentOptions.map { OptionRow(value: $0.equipment, label: $0.label, countLabel: $0.countLabel) },
+                    rows: model.equipmentOptions.map { FilterOptionRow(value: $0.equipment, label: $0.label, countLabel: $0.countLabel) },
                     ticked: ticked ?? [], fitting: { count(ticked: $0) }
                 ) { value in
                     tick(value.isEmpty ? nil : value)
                     sheet = nil
                 }
             case .focus:
-                OptionSheet(
+                FilterOptionSheet(
                     title: "exercises.focus", hint: "exercises.focusHint",
-                    rows: model.focusOptions.map { OptionRow(value: $0.value, label: $0.label, countLabel: $0.countLabel) },
+                    rows: model.focusOptions.map { FilterOptionRow(value: $0.value, label: $0.label, countLabel: $0.countLabel) },
                     ticked: focus, fitting: { count(focus: $0) }
                 ) { value in
                     focus = value
                     sheet = nil
                 }
             case .position:
-                OptionSheet(
+                FilterOptionSheet(
                     title: "exercises.position", hint: "exercises.positionHint",
-                    rows: model.positionOptions.map { OptionRow(value: $0.value, label: $0.label, countLabel: $0.countLabel) },
+                    rows: model.positionOptions.map { FilterOptionRow(value: $0.value, label: $0.label, countLabel: $0.countLabel) },
                     ticked: positions, fitting: { count(positions: $0) }
                 ) { value in
                     positions = value
                     sheet = nil
                 }
             case .tags:
-                OptionSheet(
+                FilterOptionSheet(
                     title: "exercises.tags", hint: "exercises.tagsHint",
-                    rows: model.tagOptions.map { OptionRow(value: $0.value, label: $0.label, countLabel: $0.countLabel) },
+                    rows: model.tagOptions.map { FilterOptionRow(value: $0.value, label: $0.label, countLabel: $0.countLabel) },
                     ticked: tags, fitting: { count(tags: $0) }
                 ) { value in
                     tags = value
@@ -216,7 +216,7 @@ private struct FilterChipButton: View {
 }
 
 /// One line of an option sheet: what is ticked, its name, and how many exercises it lists.
-private struct OptionRow<Value: Hashable> {
+private struct FilterOptionRow<Value: Hashable> {
     let value: Value
     let label: String
     let countLabel: String
@@ -224,15 +224,15 @@ private struct OptionRow<Value: Hashable> {
 
 /// Tick what you want: the list then only offers exercises that fit. "Show N exercises"
 /// counts live and applies; "Clear" removes the filter.
-private struct OptionSheet<Value: Hashable>: View {
+private struct FilterOptionSheet<Value: Hashable>: View {
     let title: LocalizedStringKey
     let hint: LocalizedStringKey
-    let rows: [OptionRow<Value>]
+    let rows: [FilterOptionRow<Value>]
     let fitting: (Set<Value>) -> Int
     let apply: (Set<Value>) -> Void
     @State private var pending: Set<Value>
 
-    init(title: LocalizedStringKey, hint: LocalizedStringKey, rows: [OptionRow<Value>], ticked: Set<Value>, fitting: @escaping (Set<Value>) -> Int, apply: @escaping (Set<Value>) -> Void) {
+    init(title: LocalizedStringKey, hint: LocalizedStringKey, rows: [FilterOptionRow<Value>], ticked: Set<Value>, fitting: @escaping (Set<Value>) -> Int, apply: @escaping (Set<Value>) -> Void) {
         self.title = title
         self.hint = hint
         self.rows = rows
