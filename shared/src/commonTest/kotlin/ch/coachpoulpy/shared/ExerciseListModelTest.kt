@@ -21,10 +21,10 @@ class ExerciseListModelTest {
     }
 
     @Test
-    fun searchMatchesEitherLanguageAndFiltersByMuscle() {
+    fun searchMatchesEitherLanguageAndFiltersByZone() {
         val list = model("en")
         assertEquals(listOf("push-up"), list.filter("pompe").rows.map { it.slug }.filter { it == "push-up" })
-        assertTrue(list.filter(area = MuscleArea.SHOULDERS).rows.any { it.slug == "neck-stretch" })
+        assertTrue(list.filter(zones = setOf("neck")).rows.any { it.slug == "neck-stretch" })
     }
 
     @Test
@@ -147,7 +147,7 @@ class ExerciseListModelTest {
 
     @Test
     fun filtersStillApplyOnTopOfTheQuery() {
-        assertEquals(listOf("dumbbell-row", "romanian-deadlift"), model("en").filter("dumbbell", MuscleArea.BACK).rows.map { it.slug }.sorted())
+        assertEquals(listOf("dumbbell-row", "romanian-deadlift"), model("en").filter("dumbbell", zones = setOf("back", "scapula", "lower-back")).rows.map { it.slug }.sorted())
     }
 
     @Test
@@ -181,21 +181,6 @@ class ExerciseListModelTest {
         assertEquals("5 résultats", model("fr").filter("pompes").countLabel)
         assertTrue(model("en").filter("zumba").sections.isEmpty())
         assertEquals("0 matches", model("en").filter("zumba").countLabel)
-    }
-
-    @Test
-    fun everyMuscleGroupMapsToExactlyOneChip() {
-        MuscleGroup.entries.forEach { group ->
-            assertEquals(1, MuscleArea.entries.count { group in it.groups }, "${group.name} is not on exactly one chip")
-        }
-        assertEquals(listOf("Legs", "Glutes", "Core", "Back", "Chest", "Shoulders", "Arms", "Full body"), model("en").muscleFilters.map { it.label })
-    }
-
-    @Test
-    fun aChipListsEveryExerciseWithOneOfItsMuscles() {
-        val legs = model("en").filter(area = MuscleArea.LEGS).rows.map { it.slug }
-        assertTrue("calf-raise" in legs && "hip-circles" in legs && "goblet-squat" in legs)
-        assertTrue("push-up" !in legs)
     }
 
     @Test
@@ -291,25 +276,25 @@ class ExerciseListModelTest {
     @Test
     fun focusAndPositionNarrowTheListAndMixWithOtherFilters() {
         val list = model("en")
-        val mobility = list.find(focus = setOf(ExerciseFocus.MOBILITY)).rows.map { it.slug }
+        val mobility = list.filter(focus = setOf(ExerciseFocus.MOBILITY)).rows.map { it.slug }
         assertTrue("cat-cow" in mobility && "plank" !in mobility)
-        val floorMobility = list.find(focus = setOf(ExerciseFocus.MOBILITY), positions = setOf(BodyPosition.FLOOR)).rows.map { it.slug }
+        val floorMobility = list.filter(focus = setOf(ExerciseFocus.MOBILITY), positions = setOf(BodyPosition.FLOOR)).rows.map { it.slug }
         assertTrue("cat-cow" in floorMobility && "arm-circles" !in floorMobility)
-        val either = list.find(focus = setOf(ExerciseFocus.MOBILITY, ExerciseFocus.STRETCHING)).rows.map { it.slug }
+        val either = list.filter(focus = setOf(ExerciseFocus.MOBILITY, ExerciseFocus.STRETCHING)).rows.map { it.slug }
         assertTrue("cat-cow" in either && "hamstring-stretch" in either)
     }
 
     @Test
     fun noJumpingLeavesOutJumpsAndTagsMustAllApply() {
         val list = model("en")
-        assertFalse(list.find(tags = setOf(ExerciseTag.NO_JUMPING)).rows.any { it.slug == "burpee" })
-        val holdEachSide = list.find(tags = setOf(ExerciseTag.HOLD, ExerciseTag.EACH_SIDE)).rows.map { it.slug }
+        assertFalse(list.filter(tags = setOf(ExerciseTag.NO_JUMPING)).rows.any { it.slug == "burpee" })
+        val holdEachSide = list.filter(tags = setOf(ExerciseTag.HOLD, ExerciseTag.EACH_SIDE)).rows.map { it.slug }
         assertTrue("side-plank" in holdEachSide && "plank" !in holdEachSide)
     }
 
     @Test
     fun zonesCountBothSidesTogether() {
-        val rows = model("en").find(zones = setOf("pectoral")).rows.map { it.slug }
+        val rows = model("en").filter(zones = setOf("pectoral")).rows.map { it.slug }
         assertTrue("push-up" in rows && "plank" !in rows)
     }
 
@@ -321,5 +306,27 @@ class ExerciseListModelTest {
         assertEquals(Catalog.bundled.offered.count { ExerciseFocus.MOBILITY in it.focus }, mobility.count)
         assertTrue(list.filter("au sol").rows.any { it.slug == "cat-cow" })
         assertTrue(model("en").filter("mobility").rows.any { it.slug == "arm-circles" })
+    }
+
+    @Test
+    fun tappingOneSideOfAZonePicksBothAndTappingAgainClearsBoth() {
+        val picked = Zones.toggle(emptySet(), "pectoral-left")
+        assertEquals(setOf("pectoral-left", "pectoral-right"), picked)
+        assertEquals(setOf("pectoral"), Zones.zones(picked))
+        assertEquals(emptySet(), Zones.toggle(picked, "pectoral-right"))
+    }
+
+    @Test
+    fun jointsAreNotZones() {
+        assertEquals(emptySet(), Zones.toggle(emptySet(), "knee-left"))
+        assertEquals(emptySet(), Zones.toggle(emptySet(), BodyMap.SPINE))
+    }
+
+    @Test
+    fun theSummaryNamesTheZonesInReadingOrder() {
+        val picked = Zones.toggle(Zones.toggle(emptySet(), "quads-left"), "deltoid-right")
+        assertEquals("Shoulders, quadriceps", Zones.summary(picked, "en"))
+        assertEquals("Épaules, quadriceps", Zones.summary(picked, "fr"))
+        assertEquals("", Zones.summary(emptySet(), "en"))
     }
 }

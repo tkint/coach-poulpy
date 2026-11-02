@@ -25,7 +25,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Accessibility
 import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.GpsFixed
+import androidx.compose.material.icons.filled.SelfImprovement
+import androidx.compose.material.icons.filled.Sell
 import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
@@ -45,6 +49,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -56,21 +61,27 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ch.coachpoulpy.android.R
+import ch.coachpoulpy.core.model.BodyFigure
+import ch.coachpoulpy.core.model.BodyPosition
 import ch.coachpoulpy.core.model.Equipment
+import ch.coachpoulpy.core.model.ExerciseFocus
+import ch.coachpoulpy.core.model.ExerciseTag
 import ch.coachpoulpy.shared.AppGraph
-import ch.coachpoulpy.shared.EquipmentOption
+import ch.coachpoulpy.shared.BodyView
+import ch.coachpoulpy.shared.Zones
 import ch.coachpoulpy.shared.ExerciseRow
-import ch.coachpoulpy.shared.MuscleArea
 
 /**
  * The searchable catalog, used by the library and by the builder's picker: a pill
- * search, muscle chips, the count line, then card rows grouped by movement pattern,
- * or ranked results while searching. In the picker ([adding]) each row ends with a
- * round plus instead of a chevron, and recently used exercises come first. With [onOpen]
- * the row opens the exercise's details and only the plus picks it ([onPick]).
+ * search, five filter chips (equipment, focus, position, zones, tags) that each open a
+ * sheet, the count line, then card rows grouped by movement pattern, or ranked results
+ * while searching. In the picker ([adding]) each row ends with a round plus instead of
+ * a chevron, and recently used exercises come first. With [onOpen] the row opens the
+ * exercise's details and only the plus picks it ([onPick]).
  */
 @Composable
 fun ExerciseList(
@@ -84,18 +95,28 @@ fun ExerciseList(
     val model = remember(graph, language) { graph.exerciseList(language) }
     val context = LocalContext.current
     val equipment = remember(graph, context) { graph.equipmentFilter(AppPreferences(context)) }
+    val figure = remember(graph, context) { graph.profile(AppPreferences(context)).profile.value.bodyFigure ?: BodyFigure.SHOULDERS }
     var query by rememberSaveable { mutableStateOf("") }
-    var area by rememberSaveable { mutableStateOf<MuscleArea?>(null) }
     var ticked by remember(equipment) { mutableStateOf(equipment.ticked) }
-    var choosing by rememberSaveable { mutableStateOf(false) }
-    val listing = remember(model, query, area, ticked) { model.filter(query, area, ticked, withRecent = adding) }
+    var focus by rememberSaveable(stateSaver = enumSetSaver<ExerciseFocus>()) { mutableStateOf(emptySet()) }
+    var positions by rememberSaveable(stateSaver = enumSetSaver<BodyPosition>()) { mutableStateOf(emptySet()) }
+    var tags by rememberSaveable(stateSaver = enumSetSaver<ExerciseTag>()) { mutableStateOf(emptySet()) }
+    var picked by rememberSaveable(stateSaver = stringSetSaver) { mutableStateOf(emptySet()) }
+    var sheet by rememberSaveable { mutableStateOf<FilterSheet?>(null) }
+    val listing = remember(model, query, ticked, focus, positions, tags, picked) {
+        model.filter(query, ticked, adding, focus, positions, tags, Zones.zones(picked))
+    }
     val tick = { value: Set<Equipment>? ->
         equipment.ticked = value
         ticked = equipment.ticked
     }
+    val filtering = ticked != null || focus.isNotEmpty() || positions.isNotEmpty() || tags.isNotEmpty() || picked.isNotEmpty()
     val clearFilters = {
-        area = null
         tick(null)
+        focus = emptySet()
+        positions = emptySet()
+        tags = emptySet()
+        picked = emptySet()
     }
     val clearAll = {
         query = ""
@@ -110,19 +131,40 @@ fun ExerciseList(
             label = stringResource(R.string.exercises_searchLabel),
             countLabel = listing.countLabel,
             chips = {
-                item { EquipmentChip(ticked, onClick = { choosing = true }) }
-                item { VerticalDivider(Modifier.padding(vertical = 6.dp).height(24.dp), color = MaterialTheme.colorScheme.outline) }
-                item { PoulpyChip(selected = area == null, onClick = { area = null }, label = stringResource(R.string.exercises_all)) }
-                items(model.muscleFilters, key = { it.area.name }) { filter ->
-                    PoulpyChip(
-                        selected = area == filter.area,
-                        onClick = { area = if (area == filter.area) null else filter.area },
-                        label = filter.label,
-                    )
+                item {
+                    FilterChipButton(
+                        Icons.Filled.FitnessCenter, ticked?.size ?: 0, stringResource(R.string.exercises_equipment),
+                        pluralStringResource(R.plurals.exercises_equipmentTicked, ticked?.size ?: 0, ticked?.size ?: 0),
+                    ) { sheet = FilterSheet.EQUIPMENT }
+                }
+                item {
+                    FilterChipButton(
+                        Icons.Filled.GpsFixed, focus.size, stringResource(R.string.exercises_focus),
+                        pluralStringResource(R.plurals.exercises_focusTicked, focus.size, focus.size),
+                    ) { sheet = FilterSheet.FOCUS }
+                }
+                item {
+                    FilterChipButton(
+                        Icons.Filled.SelfImprovement, positions.size, stringResource(R.string.exercises_position),
+                        pluralStringResource(R.plurals.exercises_positionTicked, positions.size, positions.size),
+                    ) { sheet = FilterSheet.POSITION }
+                }
+                item {
+                    val zones = Zones.zones(picked).size
+                    FilterChipButton(
+                        Icons.Filled.Accessibility, zones, stringResource(R.string.exercises_zones),
+                        pluralStringResource(R.plurals.exercises_zonesTicked, zones, zones),
+                    ) { sheet = FilterSheet.ZONES }
+                }
+                item {
+                    FilterChipButton(
+                        Icons.Filled.Sell, tags.size, stringResource(R.string.exercises_tags),
+                        pluralStringResource(R.plurals.exercises_tagsTicked, tags.size, tags.size),
+                    ) { sheet = FilterSheet.TAGS }
                 }
             },
             action = {
-                if (area != null || ticked != null) {
+                if (filtering) {
                     TextButton(onClick = clearFilters) {
                         Text(stringResource(R.string.exercises_clearFilters), fontWeight = FontWeight.ExtraBold)
                     }
@@ -158,30 +200,86 @@ fun ExerciseList(
             }
         }
     }
-    if (choosing) {
-        EquipmentSheet(
-            options = model.equipmentOptions,
-            ticked = ticked,
-            fitting = { model.filter(query, area, it).count },
+    val close = { sheet = null }
+    when (sheet) {
+        null -> Unit
+        FilterSheet.EQUIPMENT -> OptionSheet(
+            title = stringResource(R.string.exercises_equipment),
+            hint = stringResource(R.string.exercises_equipmentHint),
+            rows = model.equipmentOptions.map { OptionRow(it.equipment, it.label, it.countLabel) },
+            ticked = ticked ?: emptySet(),
+            fitting = { model.filter(query, it, false, focus, positions, tags, Zones.zones(picked)).count },
             onApply = {
-                tick(it)
-                choosing = false
+                tick(it.takeIf { items -> items.isNotEmpty() })
+                close()
             },
-            onDismiss = { choosing = false },
+            onDismiss = close,
+        )
+        FilterSheet.FOCUS -> OptionSheet(
+            title = stringResource(R.string.exercises_focus),
+            hint = stringResource(R.string.exercises_focusHint),
+            rows = model.focusOptions.map { OptionRow(it.value, it.label, it.countLabel) },
+            ticked = focus,
+            fitting = { model.filter(query, ticked, false, it, positions, tags, Zones.zones(picked)).count },
+            onApply = {
+                focus = it
+                close()
+            },
+            onDismiss = close,
+        )
+        FilterSheet.POSITION -> OptionSheet(
+            title = stringResource(R.string.exercises_position),
+            hint = stringResource(R.string.exercises_positionHint),
+            rows = model.positionOptions.map { OptionRow(it.value, it.label, it.countLabel) },
+            ticked = positions,
+            fitting = { model.filter(query, ticked, false, focus, it, tags, Zones.zones(picked)).count },
+            onApply = {
+                positions = it
+                close()
+            },
+            onDismiss = close,
+        )
+        FilterSheet.TAGS -> OptionSheet(
+            title = stringResource(R.string.exercises_tags),
+            hint = stringResource(R.string.exercises_tagsHint),
+            rows = model.tagOptions.map { OptionRow(it.value, it.label, it.countLabel) },
+            ticked = tags,
+            fitting = { model.filter(query, ticked, false, focus, positions, it, Zones.zones(picked)).count },
+            onApply = {
+                tags = it
+                close()
+            },
+            onDismiss = close,
+        )
+        FilterSheet.ZONES -> ZonesSheet(
+            figure = figure,
+            language = language,
+            picked = picked,
+            fitting = { model.filter(query, ticked, false, focus, positions, tags, Zones.zones(it)).count },
+            onApply = {
+                picked = it
+                close()
+            },
+            onDismiss = close,
         )
     }
 }
 
-/** The icon-only Equipment chip; filled, with how many items are ticked, while the filter is on. */
+/** The sheet a filter chip opens. */
+private enum class FilterSheet { EQUIPMENT, FOCUS, POSITION, ZONES, TAGS }
+
+/** Saves a set of enum values as their names. */
+private inline fun <reified T : Enum<T>> enumSetSaver() =
+    listSaver<Set<T>, String>(save = { set -> set.map { it.name } }, restore = { names -> names.map { enumValueOf<T>(it) }.toSet() })
+
+private val stringSetSaver = listSaver<Set<String>, String>(save = { it.toList() }, restore = { it.toSet() })
+
+/** The icon-only filter chip; filled, with how many are ticked, while its filter is on. */
 @Composable
-private fun EquipmentChip(ticked: Set<Equipment>?, onClick: () -> Unit) {
+private fun FilterChipButton(icon: ImageVector, count: Int, name: String, tickedLabel: String, onClick: () -> Unit) {
     val colors = MaterialTheme.colorScheme
-    val on = ticked != null
-    val label = if (ticked == null) {
-        stringResource(R.string.exercises_equipment)
-    } else {
-        pluralStringResource(R.plurals.exercises_equipmentTicked, ticked.size, ticked.size)
-    }
+    val on = count > 0
+    val label = if (on) tickedLabel else name
     Surface(
         selected = on,
         onClick = onClick,
@@ -196,33 +294,38 @@ private fun EquipmentChip(ticked: Set<Equipment>?, onClick: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            Icon(Icons.Filled.FitnessCenter, contentDescription = null, modifier = Modifier.size(20.dp))
-            if (ticked != null) {
+            Icon(icon, contentDescription = null, modifier = Modifier.size(20.dp))
+            if (on) {
                 Box(
                     Modifier.heightIn(min = 18.dp).background(colors.surface, CircleShape).padding(horizontal = 5.dp),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Text(ticked.size.toString(), style = MaterialTheme.typography.labelMedium, color = colors.onPrimaryContainer)
+                    Text(count.toString(), style = MaterialTheme.typography.labelMedium, color = colors.onPrimaryContainer)
                 }
             }
         }
     }
 }
 
+/** One line of an option sheet: what is ticked, its name, and how many exercises it lists. */
+private class OptionRow<T>(val value: T, val label: String, val countLabel: String)
+
 /**
- * Tick what you own: the list then only offers exercises it fits. "Show N exercises"
+ * Tick what you want: the list then only offers exercises that fit. "Show N exercises"
  * counts live and applies; "Clear" removes the filter.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun EquipmentSheet(
-    options: List<EquipmentOption>,
-    ticked: Set<Equipment>?,
-    fitting: (Set<Equipment>) -> Int,
-    onApply: (Set<Equipment>?) -> Unit,
+private fun <T> OptionSheet(
+    title: String,
+    hint: String,
+    rows: List<OptionRow<T>>,
+    ticked: Set<T>,
+    fitting: (Set<T>) -> Int,
+    onApply: (Set<T>) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    var pending by remember { mutableStateOf(ticked ?: emptySet()) }
+    var pending by remember { mutableStateOf(ticked) }
     val count = remember(pending) { fitting(pending) }
     // Opened in full, so "Show N exercises" is in view without scrolling.
     ModalBottomSheet(
@@ -234,40 +337,88 @@ private fun EquipmentSheet(
             Modifier.verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 20.dp, bottom = 28.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(stringResource(R.string.exercises_equipment), style = MaterialTheme.typography.titleLarge, modifier = Modifier.semantics { heading() })
-                Text(stringResource(R.string.exercises_equipmentHint), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
+            SheetHeading(title, hint)
             Column {
-                options.forEach { option ->
-                    val on = option.equipment in pending
+                rows.forEach { row ->
+                    val on = row.value in pending
                     Row(
                         Modifier
                             .fillMaxWidth()
                             .heightIn(min = 48.dp)
-                            .toggleable(value = on, role = Role.Checkbox) { pending = if (on) pending - option.equipment else pending + option.equipment },
+                            .toggleable(value = on, role = Role.Checkbox) { pending = if (on) pending - row.value else pending + row.value },
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(14.dp),
                     ) {
                         Checkbox(checked = on, onCheckedChange = null)
-                        Text(option.label, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-                        Text(option.countLabel, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(row.label, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                        Text(row.countLabel, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                     HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
                 }
             }
-            Row(Modifier.padding(top = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(
-                    onClick = { onApply(null) },
-                    border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
-                    modifier = Modifier.weight(1f).height(56.dp),
-                ) {
-                    Text(stringResource(R.string.exercises_equipmentClear), fontWeight = FontWeight.ExtraBold)
-                }
-                Button(onClick = { onApply(pending) }, modifier = Modifier.weight(1.6f).height(56.dp)) {
-                    Text(pluralStringResource(R.plurals.exercises_equipmentShow, count, count), fontWeight = FontWeight.ExtraBold)
-                }
+            SheetActions(count, onClear = { onApply(emptySet()) }, onShow = { onApply(pending) })
+        }
+    }
+}
+
+/** Zones: tap the parts of the body to work on the front and back figures; left and right count together. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ZonesSheet(
+    figure: BodyFigure,
+    language: String,
+    picked: Set<String>,
+    fitting: (Set<String>) -> Int,
+    onApply: (Set<String>) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    var pending by remember { mutableStateOf(picked) }
+    var view by remember { mutableStateOf(BodyView.FRONT) }
+    val count = remember(pending) { fitting(pending) }
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        containerColor = MaterialTheme.colorScheme.surface,
+    ) {
+        Column(
+            Modifier.verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 20.dp, bottom = 28.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            SheetHeading(stringResource(R.string.exercises_zones), stringResource(R.string.exercises_zonesHint))
+            SideSwitch(view, onChange = { view = it })
+            Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                BodyMapFigure(figure, view, pending, language, width = 200.dp, onToggle = { pending = Zones.toggle(pending, it) })
             }
+            Text(
+                Zones.summary(pending, language).ifEmpty { stringResource(R.string.exercises_zonesNone) },
+                fontWeight = FontWeight.ExtraBold,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+            )
+            SheetActions(count, onClear = { onApply(emptySet()) }, onShow = { onApply(pending) })
+        }
+    }
+}
+
+@Composable
+private fun SheetHeading(title: String, hint: String) {
+    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Text(title, style = MaterialTheme.typography.titleLarge, modifier = Modifier.semantics { heading() })
+        Text(hint, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+}
+
+@Composable
+private fun SheetActions(count: Int, onClear: () -> Unit, onShow: () -> Unit) {
+    Row(Modifier.padding(top = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        OutlinedButton(
+            onClick = onClear,
+            border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
+            modifier = Modifier.weight(1f).height(56.dp),
+        ) {
+            Text(stringResource(R.string.exercises_filterClear), fontWeight = FontWeight.ExtraBold)
+        }
+        Button(onClick = onShow, modifier = Modifier.weight(1.6f).height(56.dp)) {
+            Text(pluralStringResource(R.plurals.exercises_filterShow, count, count), fontWeight = FontWeight.ExtraBold)
         }
     }
 }

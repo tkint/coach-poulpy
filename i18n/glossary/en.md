@@ -34,7 +34,7 @@ Messages not listed here mean what their English says.
 | `tab.live` | The tab for a session recorded from connected devices (treadmill, heart rate band), as it happens. |
 | `home.inDays` | `{date}` is a weekday and date, already formatted for the language. |
 | `library.sort` | iOS only: the label of the sort menu. |
-| `library.all`, `exercises.all` | Filter chip that clears the filter. Agrees with “workouts” and “exercises” respectively. |
+| `library.all` | Filter chip that clears the filter. Agrees with “workouts”. |
 | `library.planned`, `library.lastDone`, `workout.planned`, `history.todayDay` | `{date}` is a short date or “today”, already formatted. |
 | `exercise.variationPosition`, `exercise.variationsA11y` | `{position}` is already formatted, like “2 of 5”. |
 | `builder.less`, `builder.more` | iOS only: buttons that lower or raise a value. Android uses `builder.lessNamed`/`builder.moreNamed`, where `{label}` names the value. |
@@ -66,7 +66,7 @@ Messages not listed here mean what their English says.
 
 | Id | Note |
 | --- | --- |
-| `muscleArea.*` | Broad body areas for filter chips; shorter than `muscle.*`. |
+| `zone.*` | Body zones of the exercise filter, with left and right together; shorter than `bodyArea.*`. |
 | `pattern.*` | Movement patterns, the families exercises are grouped in. `pattern.hinge` bends at the hips with a flat back. `pattern.carry` walks holding a load. |
 | `role.*` | The tag on a step in a workout. `role.recover` is easy effort between hard efforts, not a full stop. |
 | `label.session` | Shown for a session whose workout was deleted. |

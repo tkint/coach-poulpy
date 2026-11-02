@@ -115,3 +115,59 @@ object BodyMap {
         else -> key
     }
 }
+
+/**
+ * The body zones of the exercise filter: the map's muscle areas, with left and right together. A zone is
+ * picked by its area name without a side (`pectoral`), which is what [ExerciseListModel.filter] takes; the
+ * figure still shows both sides lit, so what is picked is kept as the figure's keys (`pectoral-left`, `pectoral-right`).
+ * Joints, the spine and the head are not zones: no exercise is filed under them.
+ */
+object Zones {
+    private val MUSCLES = listOf(
+        "neck", "trapezius", "deltoid", "pectoral", "serratus", "biceps", "triceps", "forearm", "abs", "obliques",
+        "back", "scapula", "lower-back", "hip", "glutes", "quads", "adductors", "hamstrings", "calves",
+    )
+
+    /** Taps [key] on the figure: both sides of its zone are picked, or both are cleared; a key that is no zone changes nothing. */
+    fun toggle(picked: Set<String>, key: String): Set<String> {
+        val zone = zoneOf(key)
+        if (zone !in MUSCLES) return picked
+        val both = setOf("$zone-left", "$zone-right")
+        return if (key in picked) picked - both else picked + both
+    }
+
+    /** The zones picked, by area name without a side, for [ExerciseListModel.filter]. */
+    fun zones(picked: Set<String>): Set<String> = picked.map(::zoneOf).filter { it in MUSCLES }.toSet()
+
+    /** "Chest, shoulders": the zones picked in reading order, or empty. */
+    fun summary(picked: Set<String>, languageCode: String): String {
+        val zones = zones(picked)
+        return MUSCLES.filter { it in zones }.mapIndexed { index, zone ->
+            label(zone, languageCode).let { if (index == 0) it else it.lowercase() }
+        }.joinToString(", ")
+    }
+
+    private fun zoneOf(key: String) = key.removeSuffix("-left").removeSuffix("-right")
+
+    private fun label(zone: String, languageCode: String): String = when (zone) {
+        "neck" -> DomainText.zoneNeck(languageCode)
+        "trapezius" -> DomainText.zoneTrapezius(languageCode)
+        "deltoid" -> DomainText.zoneDeltoid(languageCode)
+        "pectoral" -> DomainText.zonePectoral(languageCode)
+        "serratus" -> DomainText.zoneSerratus(languageCode)
+        "biceps" -> DomainText.zoneBiceps(languageCode)
+        "triceps" -> DomainText.zoneTriceps(languageCode)
+        "forearm" -> DomainText.zoneForearm(languageCode)
+        "abs" -> DomainText.zoneAbs(languageCode)
+        "obliques" -> DomainText.zoneObliques(languageCode)
+        "back" -> DomainText.zoneBack(languageCode)
+        "scapula" -> DomainText.zoneScapula(languageCode)
+        "lower-back" -> DomainText.zoneLowerBack(languageCode)
+        "hip" -> DomainText.zoneHip(languageCode)
+        "glutes" -> DomainText.zoneGlutes(languageCode)
+        "quads" -> DomainText.zoneQuads(languageCode)
+        "adductors" -> DomainText.zoneAdductors(languageCode)
+        "hamstrings" -> DomainText.zoneHamstrings(languageCode)
+        else -> DomainText.zoneCalves(languageCode)
+    }
+}

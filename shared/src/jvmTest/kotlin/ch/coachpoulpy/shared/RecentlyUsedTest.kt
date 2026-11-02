@@ -5,6 +5,7 @@ import ch.coachpoulpy.core.model.Equipment
 import ch.coachpoulpy.core.model.Execution
 import ch.coachpoulpy.core.model.ExecutionId
 import ch.coachpoulpy.core.model.ExecutionSource
+import ch.coachpoulpy.core.model.ExerciseFocus
 import ch.coachpoulpy.core.model.ExerciseSlug
 import ch.coachpoulpy.core.model.Prescription
 import ch.coachpoulpy.core.model.SetPrescription
@@ -32,9 +33,9 @@ class RecentlyUsedTest {
     private fun picker(
         catalog: Catalog = Catalog.bundled,
         query: String = "",
-        area: MuscleArea? = null,
+        focus: Set<ExerciseFocus> = emptySet(),
         ticked: Set<Equipment>? = null,
-    ) = model(catalog).filter(query, area, ticked, withRecent = true)
+    ) = model(catalog).filter(query, ticked, withRecent = true, focus = focus)
 
     private fun recent(listing: ExerciseListing) =
         listing.sections.firstOrNull { it.title == "Recently used" }?.rows?.map { it.slug }
@@ -92,7 +93,7 @@ class RecentlyUsedTest {
         assertEquals(null, recent(picker()))
         save(workout("Legs", "goblet-squat"))
         assertEquals(null, recent(picker(query = "squat")))
-        assertEquals(null, recent(picker(area = MuscleArea.LEGS)))
+        assertEquals(null, recent(picker(focus = setOf(ExerciseFocus.STRENGTH))))
         assertEquals(null, recent(picker(ticked = setOf(Equipment.DUMBBELL))))
         assertEquals(null, recent(model().filter()))
     }
