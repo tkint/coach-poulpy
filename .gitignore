@@ -26,3 +26,6 @@ web/dist/
 *.keystore
 keystore.properties
 *.jks.base64.txt
+
+# CodeGraph index (local code graph, rebuilt per checkout)
+.codegraph/
