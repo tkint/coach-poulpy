@@ -43,13 +43,6 @@ class ExerciseListModelTest {
     }
 
     @Test
-    fun theFigureOpensOnTheSideWithMostOfTheWorkedAreas() {
-        assertEquals(BodyView.FRONT, model("en").detail("push-up")!!.workedView)
-        assertEquals(BodyView.BACK, BodyMap.sideToShow(BodyMap.worked(listOf(MuscleGroup.GLUTES, MuscleGroup.HAMSTRINGS))))
-        assertEquals(BodyView.FRONT, BodyMap.sideToShow(emptyList()))
-    }
-
-    @Test
     fun fullBodyLightsMusclesButNotJoints() {
         val areas = BodyMap.worked(listOf(MuscleGroup.FULL_BODY))
         assertTrue("quads-left" in areas && "back-right" in areas)

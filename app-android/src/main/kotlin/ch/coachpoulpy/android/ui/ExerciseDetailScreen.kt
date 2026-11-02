@@ -54,6 +54,7 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import ch.coachpoulpy.android.R
 import ch.coachpoulpy.core.model.BodyFigure
@@ -62,11 +63,14 @@ import ch.coachpoulpy.shared.BodyView
 import ch.coachpoulpy.shared.ExerciseDetail
 import ch.coachpoulpy.shared.VariationRow
 
+/** The two halves of an exercise's page. */
+private enum class ExerciseTab { MUSCLES, HOW }
+
 /**
- * An exercise's page: a fixed picture area with Back and, in a variation group, the
- * "Variation 3 of 5" button that opens the variations sheet, so it never moves; then
- * the eyebrow, name, Muscles and Equipment cards and the steps, with "Add to a workout"
- * pinned at the bottom. Picking another variation replaces the page ([onOpenExercise]).
+ * An exercise's page: a slim bar with Back and, in a variation group, the "Variation 3 of 5" button
+ * that opens the variations sheet; then the eyebrow, name and equipment, and two tabs: Muscles (the
+ * front and back figures, open by default) and How to do it. "Add to a workout" is pinned at the
+ * bottom. Picking another variation replaces the page ([onOpenExercise]).
  */
 @Composable
 fun ExerciseDetailScreen(
@@ -79,33 +83,48 @@ fun ExerciseDetailScreen(
 ) {
     val detail = remember(graph, language, slug) { graph.exerciseList(language).detail(slug) } ?: return
     var choosing by rememberSaveable { mutableStateOf(false) }
+    var tab by rememberSaveable(slug) { mutableStateOf(ExerciseTab.MUSCLES) }
     val colors = MaterialTheme.colorScheme
 
     // A Surface, not a background, so text takes onBackground in the dark theme too.
     Surface(Modifier.fillMaxSize(), color = colors.background) {
         Column(Modifier.fillMaxSize()) {
-            PictureArea(detail, onBack, onVariations = { choosing = true })
+            TopBar(detail, onBack, onVariations = { choosing = true })
             Column(
-                Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 20.dp, top = 20.dp, bottom = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(18.dp),
+                Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Text(detail.eyebrow.uppercase(), style = MaterialTheme.typography.labelMedium, color = colors.primary)
                     Text(detail.name, style = MaterialTheme.typography.headlineMedium, modifier = Modifier.semantics { heading() })
+                    Text(
+                        "${stringResource(R.string.exercise_equipment).uppercase()} · ${detail.equipment}",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = colors.onSurfaceVariant,
+                        modifier = Modifier.background(colors.surfaceVariant, RoundedCornerShape(PoulpyRadius.pill)).padding(horizontal = 10.dp, vertical = 4.dp),
+                    )
                 }
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    FactCard(stringResource(R.string.exercise_muscles), detail.muscles, Modifier.weight(1f))
-                    FactCard(stringResource(R.string.exercise_equipment), detail.equipment, Modifier.weight(1f))
-                }
-                WorkedMuscles(graph, language, detail)
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text(stringResource(R.string.exercise_how), style = MaterialTheme.typography.titleLarge, modifier = Modifier.semantics { heading() })
-                    detail.instructions.forEachIndexed { index, step ->
-                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            Box(Modifier.size(28.dp).background(colors.primary, CircleShape), contentAlignment = Alignment.Center) {
-                                Text("${index + 1}", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.ExtraBold, color = colors.onPrimary)
+                PillSwitch(listOf(ExerciseTab.MUSCLES to R.string.exercise_muscles, ExerciseTab.HOW to R.string.exercise_how), tab, onSelect = { tab = it })
+                when (tab) {
+                    ExerciseTab.MUSCLES -> {
+                        WorkedMuscles(graph, language, detail)
+                        Text(
+                            detail.muscles,
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = colors.onPrimaryContainer,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
+                    ExerciseTab.HOW -> Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        detail.instructions.forEachIndexed { index, step ->
+                            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                                Box(Modifier.size(28.dp).background(colors.primary, CircleShape), contentAlignment = Alignment.Center) {
+                                    Text("${index + 1}", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.ExtraBold, color = colors.onPrimary)
+                                }
+                                Text(step, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
                             }
-                            Text(step, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
                         }
                     }
                 }
@@ -131,22 +150,11 @@ fun ExerciseDetailScreen(
     }
 }
 
-/** The pattern illustration until real pictures exist, with Back and the variations button over it. */
+/** Back, and the variations button when the exercise is in a variation group. */
 @Composable
-private fun PictureArea(detail: ExerciseDetail, onBack: () -> Unit, onVariations: () -> Unit) {
+private fun TopBar(detail: ExerciseDetail, onBack: () -> Unit, onVariations: () -> Unit) {
     val colors = MaterialTheme.colorScheme
-    Box(Modifier.fillMaxWidth().background(colors.primaryContainer)) {
-        Box(
-            Modifier.fillMaxWidth().statusBarsPadding().height(212.dp).padding(top = 36.dp),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                detail.pattern.icon(),
-                contentDescription = stringResource(R.string.exercise_picture),
-                tint = colors.onPrimaryContainer,
-                modifier = Modifier.size(112.dp),
-            )
-        }
+    Box(Modifier.fillMaxWidth()) {
         Row(
             Modifier.statusBarsPadding().fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -162,7 +170,7 @@ private fun PictureArea(detail: ExerciseDetail, onBack: () -> Unit, onVariations
                 Surface(
                     onClick = onVariations,
                     shape = RoundedCornerShape(PoulpyRadius.pill),
-                    color = colors.surface,
+                    color = colors.surfaceVariant,
                     contentColor = colors.onPrimaryContainer,
                     modifier = Modifier.height(44.dp).semantics {
                         contentDescription = label
@@ -193,12 +201,16 @@ private fun PictureArea(detail: ExerciseDetail, onBack: () -> Unit, onVariations
 internal fun WorkedMuscles(graph: AppGraph, language: String, detail: ExerciseDetail) {
     val context = LocalContext.current
     val figure = remember(graph, context) { graph.profile(AppPreferences(context)).profile.value.bodyFigure ?: BodyFigure.SHOULDERS }
-    var view by rememberSaveable(detail.slug) { mutableStateOf(detail.workedView) }
-    // The Muscles card already names the muscles, so the picture is hidden from TalkBack; the switch stays reachable.
-    Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        SideSwitch(view, onChange = { view = it })
-        Box(Modifier.clearAndSetSemantics { }) {
-            BodyMapFigure(figure, view, detail.workedAreas, language, width = 200.dp)
+    // The muscles are named in text beside it, so the picture is hidden from TalkBack.
+    Row(
+        Modifier.fillMaxWidth().clearAndSetSemantics { },
+        horizontalArrangement = Arrangement.SpaceEvenly,
+    ) {
+        listOf(BodyView.FRONT to R.string.profile_figureFront, BodyView.BACK to R.string.profile_figureBack).forEach { (view, label) ->
+            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                BodyMapFigure(figure, view, detail.workedAreas, language, width = 136.dp)
+                Text(stringResource(label), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
         }
     }
 }

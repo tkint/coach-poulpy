@@ -99,9 +99,15 @@ fun LibraryScreen(
 /** Workouts | Exercises, as a pill with the chosen half raised, like History's. */
 @Composable
 private fun ViewSwitch(selected: LibraryView, onSelect: (LibraryView) -> Unit) {
+    PillSwitch(listOf(LibraryView.WORKOUTS to R.string.library_workouts, LibraryView.EXERCISES to R.string.library_exercises), selected, onSelect)
+}
+
+/** Two or more halves in a pill, the chosen one raised. */
+@Composable
+internal fun <T> PillSwitch(items: List<Pair<T, Int>>, selected: T, onSelect: (T) -> Unit, modifier: Modifier = Modifier) {
     val pill = RoundedCornerShape(PoulpyRadius.pill)
-    Row(Modifier.fillMaxWidth().clip(pill).background(MaterialTheme.colorScheme.surfaceVariant).padding(4.dp).selectableGroup()) {
-        listOf(LibraryView.WORKOUTS to R.string.library_workouts, LibraryView.EXERCISES to R.string.library_exercises).forEach { (item, label) ->
+    Row(modifier.fillMaxWidth().clip(pill).background(MaterialTheme.colorScheme.surfaceVariant).padding(4.dp).selectableGroup()) {
+        items.forEach { (item, label) ->
             val on = item == selected
             Box(
                 Modifier

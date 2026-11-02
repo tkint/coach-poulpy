@@ -128,8 +128,7 @@
     "addHere": "Add to the workout",
     "backToStep": "Back to the step",
     "details": "Details of {name}",
-    "addNamed": "Add {name}",
-    "picture": "Exercise picture"
+    "addNamed": "Add {name}"
   },
   "builder": {
     "details": "Details",
