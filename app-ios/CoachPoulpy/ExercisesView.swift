@@ -1,9 +1,16 @@
 import SwiftUI
 import Shared
 
+/// The sheet a filter chip opens.
+private enum FilterSheet: Identifiable {
+    case equipment, focus, position, zones, tags
+    var id: Self { self }
+}
+
 /// The searchable catalog, used by the library and by the builder's picker: a pill
-/// search, muscle chips, the count line, then card rows grouped by movement pattern,
-/// or ranked results while searching.
+/// search, five filter chips (equipment, focus, position, zones, tags) that each open a
+/// sheet, the count line, then card rows grouped by movement pattern, or ranked
+/// results while searching.
 struct ExerciseList<Row: View>: View {
     let graph: AppGraph
     /// The builder's picker: recently used exercises come first.
@@ -12,9 +19,13 @@ struct ExerciseList<Row: View>: View {
 
     @State private var model: ExerciseListModel
     @State private var query = ""
-    @State private var area: MuscleArea?
     @State private var ticked: Set<Equipment>?
-    @State private var choosing = false
+    @State private var focus: Set<ExerciseFocus> = []
+    @State private var positions: Set<BodyPosition> = []
+    @State private var tags: Set<ExerciseTag> = []
+    @State private var picked: Set<String> = []
+    @State private var sheet: FilterSheet?
+    private let figure: BodyFigure
 
     init(graph: AppGraph, withRecent: Bool = false, @ViewBuilder row: @escaping (ExerciseRow) -> Row) {
         self.graph = graph
@@ -23,6 +34,7 @@ struct ExerciseList<Row: View>: View {
         // Built once per list, so the search index and the history are read once.
         _model = State(initialValue: graph.exerciseList(languageCode: Language.code))
         _ticked = State(initialValue: graph.equipmentFilter(memory: UserDefaultsStore()).ticked)
+        figure = (graph.profile(memory: UserDefaultsStore()).ui.value as! ProfileUi).bodyFigure ?? .shoulders
     }
 
     /// Keeps the choice on the phone, for the library and the builder's picker alike.
@@ -32,28 +44,62 @@ struct ExerciseList<Row: View>: View {
         ticked = filter.ticked
     }
 
+    private func clearFilters() {
+        tick(nil)
+        focus = []
+        positions = []
+        tags = []
+        picked = []
+    }
+
+    /// How many exercises the list would hold with one filter changed, for "Show N exercises".
+    private func count(
+        ticked: Set<Equipment>? = nil,
+        focus: Set<ExerciseFocus>? = nil,
+        positions: Set<BodyPosition>? = nil,
+        tags: Set<ExerciseTag>? = nil,
+        picked: Set<String>? = nil
+    ) -> Int {
+        let zones = Zones.shared.zones(picked: picked ?? self.picked)
+        return Int(model.filter(
+            query: query, ticked: ticked ?? self.ticked, withRecent: false,
+            focus: focus ?? self.focus, positions: positions ?? self.positions,
+            tags: tags ?? self.tags, zones: zones
+        ).count)
+    }
+
     var body: some View {
         let model = self.model
-        let listing = model.filter(query: query, area: area, ticked: ticked, withRecent: withRecent)
+        let zoneCount = Zones.shared.zones(picked: picked).count
+        let listing = model.filter(
+            query: query, ticked: ticked, withRecent: withRecent,
+            focus: focus, positions: positions, tags: tags, zones: Zones.shared.zones(picked: picked)
+        )
         VStack(spacing: 0) {
             ListFilters(query: $query, placeholder: "exercises.search", label: "exercises.searchLabel", countLabel: listing.countLabel) {
-                EquipmentChip(ticked: ticked) { choosing = true }
-                Rectangle()
-                    .fill(PoulpyColor.outline)
-                    .frame(width: 1, height: 24)
-                    .accessibilityHidden(true)
-                PoulpyChip(title: Text("exercises.all"), selected: area == nil) { area = nil }
-                ForEach(model.muscleFilters, id: \.label) { filter in
-                    PoulpyChip(title: Text(filter.label), selected: area == filter.area) {
-                        area = area == filter.area ? nil : filter.area
-                    }
-                }
+                FilterChipButton(
+                    icon: "dumbbell", count: ticked?.count ?? 0, name: Text("exercises.equipment"),
+                    tickedName: Text("exercises.equipmentTicked \(ticked?.count ?? 0)")
+                ) { sheet = .equipment }
+                FilterChipButton(
+                    icon: "scope", count: focus.count, name: Text("exercises.focus"),
+                    tickedName: Text("exercises.focusTicked \(focus.count)")
+                ) { sheet = .focus }
+                FilterChipButton(
+                    icon: "figure.mind.and.body", count: positions.count, name: Text("exercises.position"),
+                    tickedName: Text("exercises.positionTicked \(positions.count)")
+                ) { sheet = .position }
+                FilterChipButton(
+                    icon: "figure.arms.open", count: zoneCount, name: Text("exercises.zones"),
+                    tickedName: Text("exercises.zonesTicked \(zoneCount)")
+                ) { sheet = .zones }
+                FilterChipButton(
+                    icon: "tag", count: tags.count, name: Text("exercises.tags"),
+                    tickedName: Text("exercises.tagsTicked \(tags.count)")
+                ) { sheet = .tags }
             } action: {
-                if area != nil || ticked != nil {
-                    Button("exercises.clearFilters") {
-                        area = nil
-                        tick(nil)
-                    }
+                if ticked != nil || !focus.isEmpty || !positions.isEmpty || !tags.isEmpty || !picked.isEmpty {
+                    Button("exercises.clearFilters") { clearFilters() }
                         .font(.poulpy(.subheadline).weight(.heavy))
                         .foregroundStyle(PoulpyColor.primary)
                 }
@@ -75,8 +121,7 @@ struct ExerciseList<Row: View>: View {
                     if listing.count == 0 {
                         NoExercises(query: query.trimmingCharacters(in: .whitespaces)) {
                             query = ""
-                            area = nil
-                            tick(nil)
+                            clearFilters()
                         }
                     }
                 }
@@ -85,33 +130,70 @@ struct ExerciseList<Row: View>: View {
             }
         }
         .background(PoulpyColor.background)
-        .sheet(isPresented: $choosing) {
-            EquipmentSheet(
-                options: model.equipmentOptions,
-                ticked: ticked,
-                fitting: { Int(model.filter(query: query, area: area, ticked: $0, withRecent: false).count) }
-            ) { value in
-                tick(value)
-                choosing = false
+        .sheet(item: $sheet) { which in
+            switch which {
+            case .equipment:
+                OptionSheet(
+                    title: "exercises.equipment", hint: "exercises.equipmentHint",
+                    rows: model.equipmentOptions.map { OptionRow(value: $0.equipment, label: $0.label, countLabel: $0.countLabel) },
+                    ticked: ticked ?? [], fitting: { count(ticked: $0) }
+                ) { value in
+                    tick(value.isEmpty ? nil : value)
+                    sheet = nil
+                }
+            case .focus:
+                OptionSheet(
+                    title: "exercises.focus", hint: "exercises.focusHint",
+                    rows: model.focusOptions.map { OptionRow(value: $0.value, label: $0.label, countLabel: $0.countLabel) },
+                    ticked: focus, fitting: { count(focus: $0) }
+                ) { value in
+                    focus = value
+                    sheet = nil
+                }
+            case .position:
+                OptionSheet(
+                    title: "exercises.position", hint: "exercises.positionHint",
+                    rows: model.positionOptions.map { OptionRow(value: $0.value, label: $0.label, countLabel: $0.countLabel) },
+                    ticked: positions, fitting: { count(positions: $0) }
+                ) { value in
+                    positions = value
+                    sheet = nil
+                }
+            case .tags:
+                OptionSheet(
+                    title: "exercises.tags", hint: "exercises.tagsHint",
+                    rows: model.tagOptions.map { OptionRow(value: $0.value, label: $0.label, countLabel: $0.countLabel) },
+                    ticked: tags, fitting: { count(tags: $0) }
+                ) { value in
+                    tags = value
+                    sheet = nil
+                }
+            case .zones:
+                ZonesSheet(figure: figure, picked: picked, fitting: { count(picked: $0) }) { value in
+                    picked = value
+                    sheet = nil
+                }
             }
-            .presentationDetents([.large])
         }
     }
 }
 
-/// The icon-only Equipment chip; filled, with how many items are ticked, while the filter is on.
-private struct EquipmentChip: View {
-    let ticked: Set<Equipment>?
+/// The icon-only filter chip; filled, with how many are ticked, while its filter is on.
+private struct FilterChipButton: View {
+    let icon: String
+    let count: Int
+    let name: Text
+    let tickedName: Text
     let action: () -> Void
 
     var body: some View {
-        let on = ticked != nil
+        let on = count > 0
         Button(action: action) {
             HStack(spacing: 4) {
-                Image(systemName: "dumbbell")
+                Image(systemName: icon)
                     .font(.system(size: 15, weight: .semibold))
-                if let ticked {
-                    Text(verbatim: "\(ticked.count)")
+                if on {
+                    Text(verbatim: "\(count)")
                         .font(PoulpyFont.label)
                         .monospacedDigit()
                         .foregroundStyle(PoulpyColor.onPrimaryContainer)
@@ -128,38 +210,46 @@ private struct EquipmentChip: View {
             .overlay(Capsule().stroke(on ? Color.clear : PoulpyColor.outline, lineWidth: 1.5))
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(ticked.map { Text("exercises.equipmentTicked \($0.count)") } ?? Text("exercises.equipment"))
+        .accessibilityLabel(on ? tickedName : name)
         .accessibilityAddTraits(on ? [.isSelected] : [])
     }
 }
 
-/// Tick what you own: the list then only offers exercises it fits. "Show N exercises"
-/// counts live and applies; "Clear" removes the filter.
-private struct EquipmentSheet: View {
-    let options: [EquipmentOption]
-    let fitting: (Set<Equipment>) -> Int
-    let apply: (Set<Equipment>?) -> Void
-    @State private var pending: Set<Equipment>
+/// One line of an option sheet: what is ticked, its name, and how many exercises it lists.
+private struct OptionRow<Value: Hashable> {
+    let value: Value
+    let label: String
+    let countLabel: String
+}
 
-    init(options: [EquipmentOption], ticked: Set<Equipment>?, fitting: @escaping (Set<Equipment>) -> Int, apply: @escaping (Set<Equipment>?) -> Void) {
-        self.options = options
+/// Tick what you want: the list then only offers exercises that fit. "Show N exercises"
+/// counts live and applies; "Clear" removes the filter.
+private struct OptionSheet<Value: Hashable>: View {
+    let title: LocalizedStringKey
+    let hint: LocalizedStringKey
+    let rows: [OptionRow<Value>]
+    let fitting: (Set<Value>) -> Int
+    let apply: (Set<Value>) -> Void
+    @State private var pending: Set<Value>
+
+    init(title: LocalizedStringKey, hint: LocalizedStringKey, rows: [OptionRow<Value>], ticked: Set<Value>, fitting: @escaping (Set<Value>) -> Int, apply: @escaping (Set<Value>) -> Void) {
+        self.title = title
+        self.hint = hint
+        self.rows = rows
         self.fitting = fitting
         self.apply = apply
-        _pending = State(initialValue: ticked ?? [])
+        _pending = State(initialValue: ticked)
     }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 12) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("exercises.equipment").font(PoulpyFont.headline).accessibilityAddTraits(.isHeader)
-                    Text("exercises.equipmentHint").font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
-                }
+                SheetHeading(title: title, hint: hint)
                 VStack(spacing: 0) {
-                    ForEach(options, id: \.label) { option in
-                        let on = pending.contains(option.equipment)
+                    ForEach(rows, id: \.label) { option in
+                        let on = pending.contains(option.value)
                         Button {
-                            if on { pending.remove(option.equipment) } else { pending.insert(option.equipment) }
+                            if on { pending.remove(option.value) } else { pending.insert(option.value) }
                         } label: {
                             HStack(spacing: 14) {
                                 Image(systemName: on ? "checkmark.square.fill" : "square")
@@ -180,31 +270,99 @@ private struct EquipmentSheet: View {
                         Divider()
                     }
                 }
-                HStack(spacing: 8) {
-                    Button { apply(nil) } label: {
-                        Text("exercises.equipmentClear")
-                            .font(.poulpy(.callout).weight(.heavy))
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 56)
-                            .overlay(Capsule().stroke(PoulpyColor.outline, lineWidth: 2))
-                    }
-                    Button { apply(pending) } label: {
-                        Text("exercises.equipmentShow \(fitting(pending))")
-                            .font(.poulpy(.callout).weight(.heavy))
-                            .foregroundStyle(PoulpyColor.onPrimary)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 56)
-                            .background(PoulpyColor.primary, in: Capsule())
-                    }
-                }
-                .buttonStyle(.plain)
-                .padding(.top, 4)
+                FilterSheetActions(count: fitting(pending), clear: { apply([]) }, show: { apply(pending) })
             }
             .padding(.horizontal, 20)
             .padding(.top, 24)
             .padding(.bottom, 28)
         }
         .background(PoulpyColor.surface)
+        .presentationDetents([.large])
+    }
+}
+
+/// Zones: tap the parts of the body to work on the front and back figures; left and right count together.
+private struct ZonesSheet: View {
+    let figure: BodyFigure
+    let fitting: (Set<String>) -> Int
+    let apply: (Set<String>) -> Void
+    @State private var pending: Set<String>
+    @State private var side: Shared.BodyView = .front
+
+    init(figure: BodyFigure, picked: Set<String>, fitting: @escaping (Set<String>) -> Int, apply: @escaping (Set<String>) -> Void) {
+        self.figure = figure
+        self.fitting = fitting
+        self.apply = apply
+        _pending = State(initialValue: picked)
+    }
+
+    var body: some View {
+        let summary: String = Zones.shared.summary(picked: pending, languageCode: Language.code)
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                SheetHeading(title: "exercises.zones", hint: "exercises.zonesHint")
+                Picker("exercises.zones", selection: $side) {
+                    Text("profile.figureFront").tag(Shared.BodyView.front)
+                    Text("profile.figureBack").tag(Shared.BodyView.back)
+                }
+                .pickerStyle(.segmented)
+                BodyMapFigure(figure: figure, view: side, selected: pending, width: 200) { key in
+                    pending = Zones.shared.toggle(picked: pending, key: key)
+                }
+                .frame(maxWidth: .infinity)
+                if summary.isEmpty {
+                    Text("exercises.zonesNone").font(.poulpy(.body).weight(.heavy)).foregroundStyle(PoulpyColor.onPrimaryContainer)
+                } else {
+                    Text(summary).font(.poulpy(.body).weight(.heavy)).foregroundStyle(PoulpyColor.onPrimaryContainer)
+                }
+                FilterSheetActions(count: fitting(pending), clear: { apply([]) }, show: { apply(pending) })
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 24)
+            .padding(.bottom, 28)
+        }
+        .background(PoulpyColor.surface)
+        .presentationDetents([.large])
+    }
+}
+
+private struct SheetHeading: View {
+    let title: LocalizedStringKey
+    let hint: LocalizedStringKey
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(title).font(PoulpyFont.headline).accessibilityAddTraits(.isHeader)
+            Text(hint).font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+        }
+    }
+}
+
+private struct FilterSheetActions: View {
+    let count: Int
+    let clear: () -> Void
+    let show: () -> Void
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Button(action: clear) {
+                Text("exercises.filterClear")
+                    .font(.poulpy(.callout).weight(.heavy))
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 56)
+                    .overlay(Capsule().stroke(PoulpyColor.outline, lineWidth: 2))
+            }
+            Button(action: show) {
+                Text("exercises.filterShow \(count)")
+                    .font(.poulpy(.callout).weight(.heavy))
+                    .foregroundStyle(PoulpyColor.onPrimary)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 56)
+                    .background(PoulpyColor.primary, in: Capsule())
+            }
+        }
+        .buttonStyle(.plain)
+        .padding(.top, 4)
     }
 }
 

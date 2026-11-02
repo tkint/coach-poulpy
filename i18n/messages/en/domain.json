@@ -15,15 +15,26 @@
     "neck": "Neck",
     "fullBody": "Full body"
   },
-  "muscleArea": {
-    "legs": "Legs",
+  "zone": {
+    "neck": "Neck",
+    "trapezius": "Trapezius",
+    "deltoid": "Shoulders",
+    "pectoral": "Chest",
+    "serratus": "Serratus",
+    "biceps": "Biceps",
+    "triceps": "Triceps",
+    "forearm": "Forearms",
+    "abs": "Abs",
+    "obliques": "Obliques",
+    "back": "Upper back",
+    "scapula": "Shoulder blades",
+    "lowerBack": "Lower back",
+    "hip": "Hips",
     "glutes": "Glutes",
-    "core": "Core",
-    "back": "Back",
-    "chest": "Chest",
-    "shoulders": "Shoulders",
-    "arms": "Arms",
-    "fullBody": "Full body"
+    "quads": "Quadriceps",
+    "adductors": "Adductors",
+    "hamstrings": "Hamstrings",
+    "calves": "Calves"
   },
   "equipment": {
     "bodyweight": "No equipment",

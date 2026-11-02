@@ -39,17 +39,6 @@ internal class Labels(private val languageCode: String, private val units: () ->
         MuscleGroup.FULL_BODY -> DomainText.muscleFullBody(languageCode)
     }
 
-    fun muscleArea(area: MuscleArea) = when (area) {
-        MuscleArea.LEGS -> DomainText.muscleAreaLegs(languageCode)
-        MuscleArea.GLUTES -> DomainText.muscleAreaGlutes(languageCode)
-        MuscleArea.CORE -> DomainText.muscleAreaCore(languageCode)
-        MuscleArea.BACK -> DomainText.muscleAreaBack(languageCode)
-        MuscleArea.CHEST -> DomainText.muscleAreaChest(languageCode)
-        MuscleArea.SHOULDERS -> DomainText.muscleAreaShoulders(languageCode)
-        MuscleArea.ARMS -> DomainText.muscleAreaArms(languageCode)
-        MuscleArea.FULL_BODY -> DomainText.muscleAreaFullBody(languageCode)
-    }
-
     fun equipment(item: Equipment) = when (item) {
         Equipment.BODYWEIGHT -> DomainText.equipmentBodyweight(languageCode)
         Equipment.DUMBBELL -> DomainText.equipmentDumbbell(languageCode)

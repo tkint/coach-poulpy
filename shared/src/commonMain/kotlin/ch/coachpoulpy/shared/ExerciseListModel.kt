@@ -9,7 +9,6 @@ import ch.coachpoulpy.core.model.ExerciseSlug
 import ch.coachpoulpy.core.model.ExerciseTag
 import ch.coachpoulpy.core.model.MeasurementMode
 import ch.coachpoulpy.core.model.MovementPattern
-import ch.coachpoulpy.core.model.MuscleGroup
 
 /**
  * One row of the exercise list, already localized so the UI only renders it.
@@ -37,21 +36,6 @@ data class ExerciseListing(
     /** Every row once, in list order. */
     val rows: List<ExerciseRow> get() = sections.flatMap { it.rows }.distinctBy { it.slug }
 }
-
-/** A broad muscle chip of the exercise list; every [MuscleGroup] belongs to exactly one. */
-enum class MuscleArea(val groups: Set<MuscleGroup>) {
-    LEGS(setOf(MuscleGroup.QUADRICEPS, MuscleGroup.HAMSTRINGS, MuscleGroup.CALVES, MuscleGroup.HIPS)),
-    GLUTES(setOf(MuscleGroup.GLUTES)),
-    CORE(setOf(MuscleGroup.CORE)),
-    BACK(setOf(MuscleGroup.BACK)),
-    CHEST(setOf(MuscleGroup.CHEST)),
-    SHOULDERS(setOf(MuscleGroup.SHOULDERS, MuscleGroup.NECK)),
-    ARMS(setOf(MuscleGroup.BICEPS, MuscleGroup.TRICEPS, MuscleGroup.FOREARMS)),
-    FULL_BODY(setOf(MuscleGroup.FULL_BODY)),
-}
-
-/** A chip the list can be narrowed to; "All" is no filter. */
-data class MuscleFilter(val area: MuscleArea, val label: String)
 
 /** One row of the Equipment sheet, with how many offered exercises use it ("12 exercises"). */
 data class EquipmentOption(val equipment: Equipment, val label: String, val count: Int, val countLabel: String)
@@ -106,8 +90,6 @@ class ExerciseListModel internal constructor(
         { catalog.variationsOf(it.slug).indexOf(it) },
     )
 
-    val muscleFilters: List<MuscleFilter> = MuscleArea.entries.map { MuscleFilter(it, labels.muscleArea(it)) }
-
     /**
      * What the Equipment sheet lists, each with how many exercises use it: "No equipment"
      * ([Equipment.BODYWEIGHT], the exercises needing nothing) first, then the catalog's
@@ -135,14 +117,6 @@ class ExerciseListModel internal constructor(
     }
 
     /**
-     * What the screens call today: [find] with the muscle chip and the equipment filter, as Swift sees no default arguments.
-     * CLEANUP: remove this, [area] and [MuscleArea] once the screens filter by focus, position, tags and zones with [find]
-     * (the Zones sheet replaces the muscle chips).
-     */
-    fun filter(query: String = "", area: MuscleArea? = null, ticked: Set<Equipment>? = null, withRecent: Boolean = false): ExerciseListing =
-        find(query, area, ticked, withRecent)
-
-    /**
      * Offered exercises matching [query] and every filter given. Inside one filter an exercise
      * needs any ticked item ([focus], [positions], [zones] by their area name without a side,
      * `pectoral`, and the equipment [ticked]); [tags] must all apply. An empty or null filter
@@ -151,9 +125,8 @@ class ExerciseListModel internal constructor(
      * [withRecent], for the builder's picker, puts up to 5 recently used exercises
      * first while nothing is typed or filtered; they also stay in their pattern.
      */
-    fun find(
+    fun filter(
         query: String = "",
-        area: MuscleArea? = null,
         ticked: Set<Equipment>? = null,
         withRecent: Boolean = false,
         focus: Set<ExerciseFocus> = emptySet(),
@@ -163,13 +136,12 @@ class ExerciseListModel internal constructor(
     ): ExerciseListing {
         val owned = ticked?.takeIf { it.isNotEmpty() }
         val candidates = catalog.offered
-            .filter { area == null || it.muscleGroups.any { group -> group in area.groups } }
             .filter { owned == null || it.uses(owned) }
             .filter { focus.isEmpty() || it.focus.any { item -> item in focus } }
             .filter { positions.isEmpty() || it.positions.any { item -> item in positions } }
             .filter { it.tags.containsAll(tags) }
             .filter { zones.isEmpty() || it.worksAny(zones) }
-        val narrowed = area != null || focus.isNotEmpty() || positions.isNotEmpty() || tags.isNotEmpty() || zones.isNotEmpty()
+        val narrowed = focus.isNotEmpty() || positions.isNotEmpty() || tags.isNotEmpty() || zones.isNotEmpty()
         val ranks = search.rank(query)
         val sections = if (ranks == null) {
             MovementPattern.entries.mapNotNull { pattern ->
