@@ -466,7 +466,7 @@ private struct NoExercises: View {
 /// eyebrow, name, Muscles and Equipment cards and the steps, with "Add to a workout" pinned
 /// at the bottom. Picking another variation replaces the page instead of stacking it.
 /// The two halves of an exercise's page.
-private enum ExerciseTab { case muscles, how }
+enum ExerciseTab { case muscles, how }
 
 struct ExerciseDetailView: View {
     let graph: AppGraph
@@ -495,50 +495,13 @@ struct ExerciseDetailView: View {
             topBar(detail)
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text(detail.eyebrow.uppercased())
-                            .font(PoulpyFont.label)
-                            .tracking(1)
-                            .foregroundStyle(PoulpyColor.primary)
-                        Text(detail.name)
-                            .font(PoulpyFont.title)
-                            .foregroundStyle(PoulpyColor.onBackground)
-                            .accessibilityAddTraits(.isHeader)
-                        Text("\(String(localized: "exercise.equipment").uppercased()) · \(detail.equipment)")
-                            .font(PoulpyFont.label)
-                            .foregroundStyle(PoulpyColor.onSurfaceVariant)
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 4)
-                            .background(PoulpyColor.surfaceVariant, in: Capsule())
-                    }
+                    ExerciseHeading(detail: detail)
                     Picker("exercise.muscles", selection: $tab) {
                         Text("exercise.muscles").tag(ExerciseTab.muscles)
                         Text("exercise.how").tag(ExerciseTab.how)
                     }
                     .pickerStyle(.segmented)
-                    switch tab {
-                    case .muscles:
-                        WorkedMuscles(graph: graph, detail: detail)
-                        Text(detail.muscles)
-                            .font(.poulpy(.body).weight(.heavy))
-                            .foregroundStyle(PoulpyColor.onPrimaryContainer)
-                            .frame(maxWidth: .infinity)
-                            .multilineTextAlignment(.center)
-                    case .how:
-                        VStack(alignment: .leading, spacing: 10) {
-                            ForEach(Array(detail.instructions.enumerated()), id: \.offset) { index, step in
-                                HStack(alignment: .top, spacing: 12) {
-                                    Text(verbatim: "\(index + 1)")
-                                        .font(.poulpy(.subheadline).weight(.heavy))
-                                        .foregroundStyle(PoulpyColor.onPrimary)
-                                        .frame(width: 28, height: 28)
-                                        .background(PoulpyColor.primary, in: Circle())
-                                        .accessibilityHidden(true)
-                                    Text(step).font(PoulpyFont.body)
-                                }
-                            }
-                        }
-                    }
+                    ExerciseTabContent(graph: graph, detail: detail, tab: tab)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 20)
@@ -592,17 +555,7 @@ struct ExerciseDetailView: View {
                 Button {
                     choosing = true
                 } label: {
-                    HStack(spacing: 8) {
-                        Image(systemName: "chart.bar.fill").font(.system(size: 14, weight: .bold))
-                        Text("exercise.variationPosition \(detail.variationPosition)")
-                        Image(systemName: "chevron.down").font(.system(size: 12, weight: .bold))
-                    }
-                    .font(.poulpy(.subheadline).weight(.heavy))
-                    .foregroundStyle(PoulpyColor.onPrimaryContainer)
-                    .padding(.leading, 14)
-                    .padding(.trailing, 12)
-                    .frame(height: 44)
-                    .background(PoulpyColor.surfaceVariant, in: Capsule())
+                    VariationButtonLabel(detail: detail)
                 }
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel(Text("exercise.variationsA11y \(detail.variationPosition)"))
@@ -628,23 +581,34 @@ private struct VariationsSheet: View {
                     Text("exercise.variations").font(PoulpyFont.headline).accessibilityAddTraits(.isHeader)
                     Text("exercise.variationsHint").font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
                 }
-                VStack(spacing: 6) {
-                    ForEach(Array(variations.enumerated()), id: \.element.slug) { rung, variation in
-                        Button {
-                            if variation.current { dismiss() } else { pick(variation.slug) }
-                        } label: {
-                            row(rung: rung, variation: variation)
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityAddTraits(variation.current ? [.isSelected] : [])
-                    }
-                }
+                VariationRungs(variations: variations, pick: pick, onCurrent: { dismiss() })
             }
             .padding(.horizontal, 20)
             .padding(.top, 24)
             .padding(.bottom, 28)
         }
         .background(PoulpyColor.surface)
+    }
+}
+
+/// The rungs of a variation group; the current one is checked and [onCurrent] runs when it is tapped.
+struct VariationRungs: View {
+    let variations: [VariationRow]
+    let pick: (String) -> Void
+    let onCurrent: () -> Void
+
+    var body: some View {
+        VStack(spacing: 6) {
+            ForEach(Array(variations.enumerated()), id: \.element.slug) { rung, variation in
+                Button {
+                    if variation.current { onCurrent() } else { pick(variation.slug) }
+                } label: {
+                    row(rung: rung, variation: variation)
+                }
+                .buttonStyle(.plain)
+                .accessibilityAddTraits(variation.current ? [.isSelected] : [])
+            }
+        }
     }
 
     private func row(rung: Int, variation: VariationRow) -> some View {
@@ -687,5 +651,83 @@ private struct VariationsSheet: View {
                 .stroke(variation.current ? PoulpyColor.primary : PoulpyColor.outline, lineWidth: variation.current ? 1.5 : 1)
         )
         .contentShape(RoundedRectangle(cornerRadius: 16))
+    }
+}
+
+/// The eyebrow, the name and the equipment chip.
+struct ExerciseHeading: View {
+    let detail: ExerciseDetail
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(detail.eyebrow.uppercased())
+                .font(PoulpyFont.label)
+                .tracking(1)
+                .foregroundStyle(PoulpyColor.primary)
+            Text(detail.name)
+                .font(PoulpyFont.title)
+                .foregroundStyle(PoulpyColor.onBackground)
+                .accessibilityAddTraits(.isHeader)
+            Text("\(String(localized: "exercise.equipment").uppercased()) · \(detail.equipment)")
+                .font(PoulpyFont.label)
+                .foregroundStyle(PoulpyColor.onSurfaceVariant)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 4)
+                .background(PoulpyColor.surfaceVariant, in: Capsule())
+        }
+    }
+}
+
+/// One tab's content: the figures with the muscles named, or the steps.
+struct ExerciseTabContent: View {
+    let graph: AppGraph
+    let detail: ExerciseDetail
+    let tab: ExerciseTab
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            switch tab {
+            case .muscles:
+                WorkedMuscles(graph: graph, detail: detail)
+                Text(detail.muscles)
+                    .font(.poulpy(.body).weight(.heavy))
+                    .foregroundStyle(PoulpyColor.onPrimaryContainer)
+                    .frame(maxWidth: .infinity)
+                    .multilineTextAlignment(.center)
+            case .how:
+                VStack(alignment: .leading, spacing: 10) {
+                    ForEach(Array(detail.instructions.enumerated()), id: \.offset) { index, step in
+                        HStack(alignment: .top, spacing: 12) {
+                            Text(verbatim: "\(index + 1)")
+                                .font(.poulpy(.subheadline).weight(.heavy))
+                                .foregroundStyle(PoulpyColor.onPrimary)
+                                .frame(width: 28, height: 28)
+                                .background(PoulpyColor.primary, in: Circle())
+                                .accessibilityHidden(true)
+                            Text(step).font(PoulpyFont.body)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/// "Variation 3 of 5" with a drop arrow, as the content of the button that opens the group.
+struct VariationButtonLabel: View {
+    let detail: ExerciseDetail
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "chart.bar.fill").font(.system(size: 14, weight: .bold))
+            Text("exercise.variationPosition \(detail.variationPosition)")
+            Image(systemName: "chevron.down").font(.system(size: 12, weight: .bold))
+        }
+        .font(.poulpy(.subheadline).weight(.heavy))
+        .foregroundStyle(PoulpyColor.onPrimaryContainer)
+        .padding(.leading, 14)
+        .padding(.trailing, 12)
+        .frame(height: 44)
+        .background(PoulpyColor.surfaceVariant, in: Capsule())
     }
 }

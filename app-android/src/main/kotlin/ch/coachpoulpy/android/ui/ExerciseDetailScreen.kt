@@ -64,7 +64,7 @@ import ch.coachpoulpy.shared.ExerciseDetail
 import ch.coachpoulpy.shared.VariationRow
 
 /** The two halves of an exercise's page. */
-private enum class ExerciseTab { MUSCLES, HOW }
+internal enum class ExerciseTab { MUSCLES, HOW }
 
 /**
  * An exercise's page: a slim bar with Back and, in a variation group, the "Variation 3 of 5" button
@@ -94,40 +94,9 @@ fun ExerciseDetailScreen(
                 Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text(detail.eyebrow.uppercase(), style = MaterialTheme.typography.labelMedium, color = colors.primary)
-                    Text(detail.name, style = MaterialTheme.typography.headlineMedium, modifier = Modifier.semantics { heading() })
-                    Text(
-                        "${stringResource(R.string.exercise_equipment).uppercase()} · ${detail.equipment}",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = colors.onSurfaceVariant,
-                        modifier = Modifier.background(colors.surfaceVariant, RoundedCornerShape(PoulpyRadius.pill)).padding(horizontal = 10.dp, vertical = 4.dp),
-                    )
-                }
+                ExerciseHeading(detail)
                 PillSwitch(listOf(ExerciseTab.MUSCLES to R.string.exercise_muscles, ExerciseTab.HOW to R.string.exercise_how), tab, onSelect = { tab = it })
-                when (tab) {
-                    ExerciseTab.MUSCLES -> {
-                        WorkedMuscles(graph, language, detail)
-                        Text(
-                            detail.muscles,
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = colors.onPrimaryContainer,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth(),
-                        )
-                    }
-                    ExerciseTab.HOW -> Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        detail.instructions.forEachIndexed { index, step ->
-                            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                                Box(Modifier.size(28.dp).background(colors.primary, CircleShape), contentAlignment = Alignment.Center) {
-                                    Text("${index + 1}", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.ExtraBold, color = colors.onPrimary)
-                                }
-                                Text(step, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
-                            }
-                        }
-                    }
-                }
+                ExerciseTabContent(graph, language, detail, tab)
             }
             HorizontalDivider(color = colors.surfaceVariant)
             Box(Modifier.navigationBarsPadding().padding(start = 20.dp, end = 20.dp, top = 12.dp, bottom = 16.dp)) {
@@ -166,32 +135,84 @@ private fun TopBar(detail: ExerciseDetail, onBack: () -> Unit, onVariations: () 
                 }
             }
             if (detail.variations.isNotEmpty()) {
-                val label = stringResource(R.string.exercise_variationsA11y, detail.variationPosition)
-                Surface(
-                    onClick = onVariations,
-                    shape = RoundedCornerShape(PoulpyRadius.pill),
-                    color = colors.surfaceVariant,
-                    contentColor = colors.onPrimaryContainer,
-                    modifier = Modifier.height(44.dp).semantics {
-                        contentDescription = label
-                        role = Role.Button
-                    },
-                ) {
-                    Row(
-                        Modifier.padding(start = 14.dp, end = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        Icon(Icons.Filled.SignalCellularAlt, contentDescription = null, modifier = Modifier.size(18.dp))
-                        Text(
-                            stringResource(R.string.exercise_variationPosition, detail.variationPosition),
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.ExtraBold,
-                        )
-                        Icon(Icons.Filled.KeyboardArrowDown, contentDescription = null, modifier = Modifier.size(18.dp))
+                VariationButton(detail, onVariations)
+            }
+        }
+    }
+}
+
+/** The eyebrow, the name and the equipment chip. */
+@Composable
+internal fun ExerciseHeading(detail: ExerciseDetail) {
+    val colors = MaterialTheme.colorScheme
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Text(detail.eyebrow.uppercase(), style = MaterialTheme.typography.labelMedium, color = colors.primary)
+        Text(detail.name, style = MaterialTheme.typography.headlineMedium, modifier = Modifier.semantics { heading() })
+        Text(
+            "${stringResource(R.string.exercise_equipment).uppercase()} · ${detail.equipment}",
+            style = MaterialTheme.typography.labelMedium,
+            color = colors.onSurfaceVariant,
+            modifier = Modifier.background(colors.surfaceVariant, RoundedCornerShape(PoulpyRadius.pill)).padding(horizontal = 10.dp, vertical = 4.dp),
+        )
+    }
+}
+
+/** One tab's content: the figures with the muscles named, or the steps. Placed in the caller's column. */
+@Composable
+internal fun ExerciseTabContent(graph: AppGraph, language: String, detail: ExerciseDetail, tab: ExerciseTab) {
+    val colors = MaterialTheme.colorScheme
+    when (tab) {
+        ExerciseTab.MUSCLES -> {
+            WorkedMuscles(graph, language, detail)
+            Text(
+                detail.muscles,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.ExtraBold,
+                color = colors.onPrimaryContainer,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+        ExerciseTab.HOW -> Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            detail.instructions.forEachIndexed { index, step ->
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Box(Modifier.size(28.dp).background(colors.primary, CircleShape), contentAlignment = Alignment.Center) {
+                        Text("${index + 1}", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.ExtraBold, color = colors.onPrimary)
                     }
+                    Text(step, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
                 }
             }
+        }
+    }
+}
+
+/** "Variation 3 of 5" with a drop arrow, which opens the group. */
+@Composable
+internal fun VariationButton(detail: ExerciseDetail, onClick: () -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    val label = stringResource(R.string.exercise_variationsA11y, detail.variationPosition)
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(PoulpyRadius.pill),
+        color = colors.surfaceVariant,
+        contentColor = colors.onPrimaryContainer,
+        modifier = Modifier.height(44.dp).semantics {
+            contentDescription = label
+            role = Role.Button
+        },
+    ) {
+        Row(
+            Modifier.padding(start = 14.dp, end = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Icon(Icons.Filled.SignalCellularAlt, contentDescription = null, modifier = Modifier.size(18.dp))
+            Text(
+                stringResource(R.string.exercise_variationPosition, detail.variationPosition),
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.ExtraBold,
+            )
+            Icon(Icons.Filled.KeyboardArrowDown, contentDescription = null, modifier = Modifier.size(18.dp))
         }
     }
 }
@@ -247,33 +268,39 @@ private fun VariationsSheet(variations: List<VariationRow>, onPick: (String) -> 
                 Text(stringResource(R.string.exercise_variations), style = MaterialTheme.typography.titleLarge, modifier = Modifier.semantics { heading() })
                 Text(stringResource(R.string.exercise_variationsHint), style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
             }
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                variations.forEachIndexed { rung, variation ->
-                    val shape = RoundedCornerShape(PoulpyRadius.md)
-                    Surface(
-                        onClick = { if (variation.current) onDismiss() else onPick(variation.slug) },
-                        shape = shape,
-                        color = if (variation.current) colors.primaryContainer else colors.surface,
-                        border = if (variation.current) BorderStroke(1.5.dp, colors.primary) else BorderStroke(1.dp, colors.outline),
-                        modifier = Modifier.fillMaxWidth().heightIn(min = 60.dp).semantics { selected = variation.current },
-                    ) {
-                        Row(
-                            Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        ) {
-                            Ladder(rung, variations.size)
-                            Column(Modifier.weight(1f)) {
-                                Text(variation.name, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.ExtraBold)
-                                Text(
-                                    if (variation.current) stringResource(R.string.exercise_variationCurrent) else variation.note,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = colors.onSurfaceVariant,
-                                )
-                            }
-                            if (variation.current) Icon(Icons.Filled.Check, contentDescription = null, tint = colors.primary)
-                        }
+            VariationRungs(variations, onPick, onCurrent = onDismiss)
+        }
+    }
+}
+
+/** The rungs of a variation group; the current one is checked and [onCurrent] runs when it is tapped. */
+@Composable
+internal fun VariationRungs(variations: List<VariationRow>, onPick: (String) -> Unit, onCurrent: () -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        variations.forEachIndexed { rung, variation ->
+            Surface(
+                onClick = { if (variation.current) onCurrent() else onPick(variation.slug) },
+                shape = RoundedCornerShape(PoulpyRadius.md),
+                color = if (variation.current) colors.primaryContainer else colors.surface,
+                border = if (variation.current) BorderStroke(1.5.dp, colors.primary) else BorderStroke(1.dp, colors.outline),
+                modifier = Modifier.fillMaxWidth().heightIn(min = 60.dp).semantics { selected = variation.current },
+            ) {
+                Row(
+                    Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    Ladder(rung, variations.size)
+                    Column(Modifier.weight(1f)) {
+                        Text(variation.name, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.ExtraBold)
+                        Text(
+                            if (variation.current) stringResource(R.string.exercise_variationCurrent) else variation.note,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = colors.onSurfaceVariant,
+                        )
                     }
+                    if (variation.current) Icon(Icons.Filled.Check, contentDescription = null, tint = colors.primary)
                 }
             }
         }
