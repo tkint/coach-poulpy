@@ -505,6 +505,7 @@ struct ExerciseDetailView: View {
                         factCard("exercise.muscles", detail.muscles)
                         factCard("exercise.equipment", detail.equipment)
                     }
+                    WorkedMuscles(graph: graph, detail: detail)
                     VStack(alignment: .leading, spacing: 10) {
                         Text("exercise.how").font(PoulpyFont.headline).accessibilityAddTraits(.isHeader)
                         ForEach(Array(detail.instructions.enumerated()), id: \.offset) { index, step in

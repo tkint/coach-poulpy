@@ -35,6 +35,15 @@ object BodyMap {
         return AREAS.filter { area -> area.removeSuffix("-left").removeSuffix("-right") in areas }
     }
 
+    /** Areas drawn on the back figure only; the others (deltoid, forearm, hip, neck...) show on both or on the front. */
+    private val BACK_ONLY = setOf("trapezius", "triceps", "back", "scapula", "lower-back", "glutes", "hamstrings", "calves", SPINE)
+
+    /** The side an exercise's figure opens on: the back when more of the [worked] areas are drawn only there than only on the front. */
+    fun sideToShow(worked: Collection<String>): BodyView {
+        val back = worked.count { it.removeSuffix("-left").removeSuffix("-right") in BACK_ONLY }
+        return if (back * 2 > worked.size) BodyView.BACK else BodyView.FRONT
+    }
+
     private val MUSCLES = listOf(
         "trapezius", "deltoid", "pectoral", "serratus", "biceps", "triceps", "forearm", "abs", "obliques", "back",
         "scapula", "lower-back", "glutes", "quads", "adductors", "hamstrings", "calves",

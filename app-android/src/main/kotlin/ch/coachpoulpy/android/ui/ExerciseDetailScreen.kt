@@ -45,7 +45,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.role
@@ -54,7 +56,9 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ch.coachpoulpy.android.R
+import ch.coachpoulpy.core.model.BodyFigure
 import ch.coachpoulpy.shared.AppGraph
+import ch.coachpoulpy.shared.BodyView
 import ch.coachpoulpy.shared.ExerciseDetail
 import ch.coachpoulpy.shared.VariationRow
 
@@ -93,6 +97,7 @@ fun ExerciseDetailScreen(
                     FactCard(stringResource(R.string.exercise_muscles), detail.muscles, Modifier.weight(1f))
                     FactCard(stringResource(R.string.exercise_equipment), detail.equipment, Modifier.weight(1f))
                 }
+                WorkedMuscles(graph, language, detail)
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(stringResource(R.string.exercise_how), style = MaterialTheme.typography.titleLarge, modifier = Modifier.semantics { heading() })
                     detail.instructions.forEachIndexed { index, step ->
@@ -179,6 +184,21 @@ private fun PictureArea(detail: ExerciseDetail, onBack: () -> Unit, onVariations
                     }
                 }
             }
+        }
+    }
+}
+
+/** Front and back figures, on the person's own figure, with the muscles the exercise works lit. */
+@Composable
+internal fun WorkedMuscles(graph: AppGraph, language: String, detail: ExerciseDetail) {
+    val context = LocalContext.current
+    val figure = remember(graph, context) { graph.profile(AppPreferences(context)).profile.value.bodyFigure ?: BodyFigure.SHOULDERS }
+    var view by rememberSaveable(detail.slug) { mutableStateOf(detail.workedView) }
+    // The Muscles card already names the muscles, so the picture is hidden from TalkBack; the switch stays reachable.
+    Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        SideSwitch(view, onChange = { view = it })
+        Box(Modifier.clearAndSetSemantics { }) {
+            BodyMapFigure(figure, view, detail.workedAreas, language, width = 200.dp)
         }
     }
 }
