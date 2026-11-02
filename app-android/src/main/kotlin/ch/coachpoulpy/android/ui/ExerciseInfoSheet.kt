@@ -1,5 +1,6 @@
 package ch.coachpoulpy.android.ui
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -45,7 +46,7 @@ import ch.coachpoulpy.shared.BodyView
 /**
  * What the builder shows of an exercise: its muscles and equipment, the body map with the muscles it works lit on
  * the person's figure, the steps, and one button ([onAction]). From the picker the button is "Add to the workout"
- * ([adding]), which goes on to the add sheet; from a step's sheet it is "Back to the step". Opened in full so the
+ * ([adding]), which goes on to the add sheet; from a step's sheet it is "Back to the step"; from the workout page it is "Close" ([closeLabel]). Opened in full so the
  * figure and the steps are in view.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -57,6 +58,7 @@ fun ExerciseInfoSheet(
     onAction: (String) -> Unit,
     onDismiss: () -> Unit,
     adding: Boolean = true,
+    @StringRes closeLabel: Int = R.string.exercise_backToStep,
 ) {
     val detail = remember(graph, language, slug) { graph.exerciseList(language).detail(slug) } ?: return
     val context = LocalContext.current
@@ -117,7 +119,7 @@ fun ExerciseInfoSheet(
                         Icon(Icons.Filled.Add, contentDescription = null)
                     }
                     Text(
-                        stringResource(if (adding) R.string.exercise_addHere else R.string.exercise_backToStep),
+                        stringResource(if (adding) R.string.exercise_addHere else closeLabel),
                         fontWeight = FontWeight.ExtraBold,
                         modifier = Modifier.padding(start = if (adding) 8.dp else 0.dp),
                     )

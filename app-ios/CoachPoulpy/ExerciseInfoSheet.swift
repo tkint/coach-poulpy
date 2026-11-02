@@ -3,11 +3,12 @@ import Shared
 
 /// What the builder shows of an exercise: its muscles and equipment, the body map with the muscles it works lit on the
 /// person's figure, the steps, and one button. From the picker it is "Add to the workout" ([adding]), which goes on to
-/// the add sheet; from a step's sheet it is "Back to the step".
+/// the add sheet; from a step's sheet it is "Back to the step"; from the workout page it is "Close" ([closeLabel]).
 struct ExerciseInfoSheet: View {
     let graph: AppGraph
     let slug: String
     var adding = true
+    var closeLabel: LocalizedStringKey = "exercise.backToStep"
     let onAction: (String) -> Void
     @Environment(\.dismiss) private var dismiss
 
@@ -73,7 +74,7 @@ struct ExerciseInfoSheet: View {
                         if adding {
                             Label("exercise.addHere", systemImage: "plus")
                         } else {
-                            Text("exercise.backToStep")
+                            Text(closeLabel)
                         }
                     }
                         .font(.poulpy(.callout).weight(.heavy))
