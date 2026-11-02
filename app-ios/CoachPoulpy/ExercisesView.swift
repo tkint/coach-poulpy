@@ -144,7 +144,7 @@ struct ExerciseList<Row: View>: View {
             case .focus:
                 FilterOptionSheet(
                     title: "exercises.focus", hint: "exercises.focusHint",
-                    rows: model.focusOptions.map { FilterOptionRow(value: $0.value, label: $0.label, countLabel: $0.countLabel) },
+                    rows: model.focusOptions.map { FilterOptionRow(value: $0.value!, label: $0.label, countLabel: $0.countLabel) },
                     ticked: focus, fitting: { count(focus: $0) }
                 ) { value in
                     focus = value
@@ -153,7 +153,7 @@ struct ExerciseList<Row: View>: View {
             case .position:
                 FilterOptionSheet(
                     title: "exercises.position", hint: "exercises.positionHint",
-                    rows: model.positionOptions.map { FilterOptionRow(value: $0.value, label: $0.label, countLabel: $0.countLabel) },
+                    rows: model.positionOptions.map { FilterOptionRow(value: $0.value!, label: $0.label, countLabel: $0.countLabel) },
                     ticked: positions, fitting: { count(positions: $0) }
                 ) { value in
                     positions = value
@@ -162,7 +162,7 @@ struct ExerciseList<Row: View>: View {
             case .tags:
                 FilterOptionSheet(
                     title: "exercises.tags", hint: "exercises.tagsHint",
-                    rows: model.tagOptions.map { FilterOptionRow(value: $0.value, label: $0.label, countLabel: $0.countLabel) },
+                    rows: model.tagOptions.map { FilterOptionRow(value: $0.value!, label: $0.label, countLabel: $0.countLabel) },
                     ticked: tags, fitting: { count(tags: $0) }
                 ) { value in
                     tags = value
