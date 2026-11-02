@@ -31,6 +31,12 @@ private enum Cover: Identifiable {
 }
 
 /// One saved workout: its exercises, how it went before, the day it is planned for, and Start.
+/// An exercise whose details sheet is open.
+private struct DetailTarget: Identifiable {
+    let slug: String
+    var id: String { slug }
+}
+
 struct WorkoutPageView: View {
     let graph: AppGraph
     let workoutId: String
@@ -38,6 +44,8 @@ struct WorkoutPageView: View {
     @State private var cover: Cover?
     @State private var picking = false
     @State private var deleting = false
+    /// The exercise whose details are open; nil when none.
+    @State private var detailing: DetailTarget?
     @Environment(\.dismiss) private var dismiss
 
     init(graph: AppGraph, workoutId: String) {
@@ -126,6 +134,9 @@ struct WorkoutPageView: View {
         .onChange(of: state.loaded && !state.found) { gone in
             // Deleted here or elsewhere: nothing left to show.
             if gone { dismiss() }
+        }
+        .sheet(item: $detailing) { detail in
+            ExerciseInfoSheet(graph: graph, slug: detail.slug, adding: false, closeLabel: "action.close", onAction: { _ in detailing = nil })
         }
         .sheet(isPresented: $picking) {
             PlanSheet(name: state.name, planned: state.plans) { days in page.model.setDays(days: days) }
@@ -247,14 +258,14 @@ struct WorkoutPageView: View {
         return numbers
     }
 
-    /// An exercise opens its page; a rest shows a timer and opens nothing.
+    /// An exercise opens its details sheet; a rest shows a timer and opens nothing.
     @ViewBuilder
     private func structureRow(_ row: WorkoutStepRow, number: Int?) -> some View {
         if row.isRest {
             stepRow(row, number: nil)
         } else {
-            NavigationLink {
-                ExerciseDetailView(graph: graph, slug: row.slug)
+            Button {
+                detailing = DetailTarget(slug: row.slug)
             } label: {
                 stepRow(row, number: number)
             }

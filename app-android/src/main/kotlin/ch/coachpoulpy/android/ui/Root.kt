@@ -193,10 +193,6 @@ fun CoachPoulpyRoot(
                         back = current
                         route = "builder-copy:$arg"
                     },
-                    onOpenExercise = {
-                        back = current
-                        route = "exercise:$it"
-                    },
                 )
                 // A variation replaces the page in place, so back still leads where this page came from.
                 "exercise" -> key(arg) {
