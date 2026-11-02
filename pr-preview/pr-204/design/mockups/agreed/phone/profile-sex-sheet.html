@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Profile · sex assigned at birth</title>
+<meta name="mockup:screen" content="profile-sex-sheet">
+<meta name="mockup:section" content="Profile and settings">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../../../web/src/styles/tokens.css">
+<link rel="stylesheet" href="../../shared/mockup.css">
+<script src="../../shared/mockup-theme.js"></script>
+</head>
+<body>
+<main class="phone">
+
+  <header class="page-bar"><a class="icon-button" href="profile-edit.html" aria-label="Back to profile"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></a><div><h1>Your profile</h1></div></header>
+  <div class="scrim"></div>
+  <section class="sheet" id="sex-sheet" data-component="sheet" role="dialog" aria-label="Sex assigned at birth">
+    <span class="sheet-handle"></span>
+    <div class="sheet-title"><h2>Sex assigned at birth</h2><p>Why we ask: calorie and heart rate estimates differ a little with it. It is never shown to anyone, and you can leave it out.</p></div>
+    <div class="option-list" role="radiogroup" aria-label="Sex assigned at birth">
+      <label class="option-row" data-component="option-row"><span>Female</span><input type="radio" name="sex"></label>
+      <label class="option-row" data-component="option-row"><span>Male</span><input type="radio" name="sex"></label>
+      <label class="option-row" data-component="option-row"><span>Intersex</span><input type="radio" name="sex"></label>
+      <label class="option-row" data-component="option-row"><span>Prefer not to say</span><input type="radio" name="sex" checked></label>
+    </div>
+    <span class="field-note">This is not about your gender, and Poulpy never asks about it. Your pronouns are set separately.</span>
+    <div class="sheet-actions"><button class="primary-button" type="button">Save</button></div>
+  </section>
+</main>
+</body>
+</html>
