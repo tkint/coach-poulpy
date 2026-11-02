@@ -1,58 +1,74 @@
 {
-  "version": 10,
+  "version": 11,
   "exercises": [
     {
       "slug": "goblet-squat",
       "movementPattern": "SQUAT",
       "muscleGroups": ["QUADRICEPS", "GLUTES", "CORE"],
       "equipment": [["DUMBBELL", "KETTLEBELL"]],
-      "measurement": "REPS"
+      "measurement": "REPS",
+      "focus": ["STRENGTH"],
+      "positions": ["STANDING"]
     },
     {
       "slug": "bodyweight-squat",
       "movementPattern": "SQUAT",
       "muscleGroups": ["QUADRICEPS", "GLUTES"],
-      "measurement": "REPS"
+      "measurement": "REPS",
+      "focus": ["STRENGTH"],
+      "positions": ["STANDING"]
     },
     {
       "slug": "chair-squat",
       "movementPattern": "SQUAT",
       "muscleGroups": ["QUADRICEPS", "GLUTES"],
-      "measurement": "REPS"
+      "measurement": "REPS",
+      "focus": ["STRENGTH"],
+      "positions": ["STANDING"]
     },
     {
       "slug": "wall-sit",
       "movementPattern": "SQUAT",
       "muscleGroups": ["QUADRICEPS", "GLUTES"],
-      "measurement": "HOLD"
+      "measurement": "HOLD",
+      "focus": ["STRENGTH"],
+      "positions": ["STANDING"]
     },
     {
       "slug": "glute-bridge",
       "movementPattern": "HINGE",
       "muscleGroups": ["GLUTES", "HAMSTRINGS"],
       "optionalEquipment": ["MAT"],
-      "measurement": "REPS"
+      "measurement": "REPS",
+      "focus": ["STRENGTH"],
+      "positions": ["FLOOR"]
     },
     {
       "slug": "romanian-deadlift",
       "movementPattern": "HINGE",
       "muscleGroups": ["HAMSTRINGS", "GLUTES", "BACK"],
       "equipment": [["DUMBBELL", "BARBELL"]],
-      "measurement": "REPS"
+      "measurement": "REPS",
+      "focus": ["STRENGTH"],
+      "positions": ["STANDING"]
     },
     {
       "slug": "kettlebell-swing",
       "movementPattern": "HINGE",
       "muscleGroups": ["GLUTES", "HAMSTRINGS", "CORE"],
       "equipment": [["KETTLEBELL"]],
-      "measurement": "REPS"
+      "measurement": "REPS",
+      "focus": ["STRENGTH"],
+      "positions": ["STANDING"]
     },
     {
       "slug": "good-morning",
       "movementPattern": "HINGE",
       "muscleGroups": ["HAMSTRINGS", "BACK"],
       "optionalEquipment": ["BAND"],
-      "measurement": "REPS"
+      "measurement": "REPS",
+      "focus": ["STRENGTH"],
+      "positions": ["STANDING"]
     },
     {
       "slug": "reverse-lunge",
@@ -60,14 +76,18 @@
       "muscleGroups": ["QUADRICEPS", "GLUTES"],
       "optionalEquipment": ["DUMBBELL"],
       "measurement": "REPS",
-      "perSide": true
+      "perSide": true,
+      "focus": ["STRENGTH"],
+      "positions": ["STANDING"]
     },
     {
       "slug": "walking-lunge",
       "movementPattern": "LUNGE",
       "muscleGroups": ["QUADRICEPS", "GLUTES", "HAMSTRINGS"],
       "optionalEquipment": ["DUMBBELL"],
-      "measurement": "REPS"
+      "measurement": "REPS",
+      "focus": ["STRENGTH"],
+      "positions": ["STANDING"]
     },
     {
       "slug": "step-up",
@@ -75,61 +95,79 @@
       "muscleGroups": ["QUADRICEPS", "GLUTES"],
       "equipment": [["BENCH"]],
       "measurement": "REPS",
-      "perSide": true
+      "perSide": true,
+      "focus": ["STRENGTH"],
+      "positions": ["STANDING"]
     },
     {
       "slug": "push-up",
       "movementPattern": "PUSH",
       "muscleGroups": ["CHEST", "TRICEPS", "SHOULDERS"],
-      "measurement": "REPS"
+      "measurement": "REPS",
+      "focus": ["STRENGTH"],
+      "positions": ["FLOOR"]
     },
     {
       "slug": "knee-push-up",
       "movementPattern": "PUSH",
       "muscleGroups": ["CHEST", "TRICEPS", "SHOULDERS"],
       "optionalEquipment": ["MAT"],
-      "measurement": "REPS"
+      "measurement": "REPS",
+      "focus": ["STRENGTH"],
+      "positions": ["FLOOR"]
     },
     {
       "slug": "incline-push-up",
       "movementPattern": "PUSH",
       "muscleGroups": ["CHEST", "TRICEPS"],
       "equipment": [["BENCH"]],
-      "measurement": "REPS"
+      "measurement": "REPS",
+      "focus": ["STRENGTH"],
+      "positions": ["FLOOR"]
     },
     {
       "slug": "diamond-push-up",
       "movementPattern": "PUSH",
       "muscleGroups": ["TRICEPS", "CHEST", "SHOULDERS"],
-      "measurement": "REPS"
+      "measurement": "REPS",
+      "focus": ["STRENGTH"],
+      "positions": ["FLOOR"]
     },
     {
       "slug": "one-arm-push-up",
       "movementPattern": "PUSH",
       "muscleGroups": ["CHEST", "TRICEPS", "SHOULDERS", "CORE"],
       "measurement": "REPS",
-      "perSide": true
+      "perSide": true,
+      "focus": ["STRENGTH"],
+      "positions": ["FLOOR"]
     },
     {
       "slug": "dumbbell-bench-press",
       "movementPattern": "PUSH",
       "muscleGroups": ["CHEST", "TRICEPS", "SHOULDERS"],
       "equipment": [["DUMBBELL"], ["BENCH"]],
-      "measurement": "REPS"
+      "measurement": "REPS",
+      "focus": ["STRENGTH"],
+      "positions": ["STANDING"]
     },
     {
       "slug": "overhead-press",
       "movementPattern": "PUSH",
       "muscleGroups": ["SHOULDERS", "TRICEPS"],
       "equipment": [["DUMBBELL"]],
-      "measurement": "REPS"
+      "measurement": "REPS",
+      "focus": ["STRENGTH"],
+      "positions": ["STANDING"]
     },
     {
       "slug": "bench-dip",
       "movementPattern": "PUSH",
       "muscleGroups": ["TRICEPS", "CHEST"],
       "equipment": [["BENCH"]],
-      "measurement": "REPS"
+      "measurement": "REPS",
+      "focus": ["STRENGTH"],
+      "positions": ["STANDING"]
     },
     {
       "slug": "dumbbell-row",
@@ -138,49 +176,63 @@
       "equipment": [["DUMBBELL"]],
       "optionalEquipment": ["BENCH"],
       "measurement": "REPS",
-      "perSide": true
+      "perSide": true,
+      "focus": ["STRENGTH"],
+      "positions": ["STANDING"]
     },
     {
       "slug": "band-row",
       "movementPattern": "PULL",
       "muscleGroups": ["BACK", "BICEPS"],
       "equipment": [["BAND"]],
-      "measurement": "REPS"
+      "measurement": "REPS",
+      "focus": ["STRENGTH"],
+      "positions": ["STANDING"]
     },
     {
       "slug": "band-pull-apart",
       "movementPattern": "PULL",
       "muscleGroups": ["SHOULDERS", "BACK"],
       "equipment": [["BAND"]],
-      "measurement": "REPS"
+      "measurement": "REPS",
+      "focus": ["STRENGTH"],
+      "positions": ["STANDING"]
     },
     {
       "slug": "pull-up",
       "movementPattern": "PULL",
       "muscleGroups": ["BACK", "BICEPS"],
       "equipment": [["PULL_UP_BAR"]],
-      "measurement": "REPS"
+      "measurement": "REPS",
+      "focus": ["STRENGTH"],
+      "positions": ["STANDING"]
     },
     {
       "slug": "biceps-curl",
       "movementPattern": "PULL",
       "muscleGroups": ["BICEPS", "FOREARMS"],
       "equipment": [["DUMBBELL", "BAND"]],
-      "measurement": "REPS"
+      "measurement": "REPS",
+      "focus": ["STRENGTH"],
+      "positions": ["STANDING"]
     },
     {
       "slug": "farmer-carry",
       "movementPattern": "CARRY",
       "muscleGroups": ["FOREARMS", "CORE", "SHOULDERS"],
       "equipment": [["DUMBBELL", "KETTLEBELL"]],
-      "measurement": "TIME"
+      "measurement": "TIME",
+      "focus": ["STRENGTH"],
+      "positions": ["STANDING"]
     },
     {
       "slug": "plank",
       "movementPattern": "CORE",
       "muscleGroups": ["CORE"],
       "optionalEquipment": ["MAT"],
-      "measurement": "HOLD"
+      "measurement": "HOLD",
+      "focus": ["STRENGTH"],
+      "positions": ["FLOOR"]
     },
     {
       "slug": "side-plank",
@@ -188,14 +240,18 @@
       "muscleGroups": ["CORE", "HIPS"],
       "optionalEquipment": ["MAT"],
       "measurement": "HOLD",
-      "perSide": true
+      "perSide": true,
+      "focus": ["STRENGTH"],
+      "positions": ["FLOOR"]
     },
     {
       "slug": "dead-bug",
       "movementPattern": "CORE",
       "muscleGroups": ["CORE"],
       "optionalEquipment": ["MAT"],
-      "measurement": "REPS"
+      "measurement": "REPS",
+      "focus": ["STRENGTH"],
+      "positions": ["FLOOR"]
     },
     {
       "slug": "bird-dog",
@@ -203,7 +259,9 @@
       "muscleGroups": ["CORE", "BACK", "GLUTES"],
       "optionalEquipment": ["MAT"],
       "measurement": "REPS",
-      "perSide": true
+      "perSide": true,
+      "focus": ["STRENGTH"],
+      "positions": ["FLOOR"]
     },
     {
       "slug": "bird-dog-knee-tuck",
@@ -211,7 +269,9 @@
       "muscleGroups": ["CORE", "BACK", "GLUTES"],
       "optionalEquipment": ["MAT"],
       "measurement": "REPS",
-      "perSide": true
+      "perSide": true,
+      "focus": ["STRENGTH"],
+      "positions": ["FLOOR"]
     },
     {
       "slug": "bird-dog-crunch",
@@ -219,7 +279,9 @@
       "muscleGroups": ["CORE", "BACK", "GLUTES"],
       "optionalEquipment": ["MAT"],
       "measurement": "REPS",
-      "perSide": true
+      "perSide": true,
+      "focus": ["STRENGTH"],
+      "positions": ["FLOOR"]
     },
     {
       "slug": "donkey-kick",
@@ -227,120 +289,163 @@
       "muscleGroups": ["GLUTES", "HAMSTRINGS", "CORE"],
       "optionalEquipment": ["MAT"],
       "measurement": "REPS",
-      "perSide": true
+      "perSide": true,
+      "focus": ["STRENGTH"],
+      "positions": ["FLOOR"]
     },
     {
       "slug": "crunch",
       "movementPattern": "CORE",
       "muscleGroups": ["CORE"],
       "optionalEquipment": ["MAT"],
-      "measurement": "REPS"
+      "measurement": "REPS",
+      "focus": ["STRENGTH"],
+      "positions": ["FLOOR"]
     },
     {
       "slug": "hollow-hold",
       "movementPattern": "CORE",
       "muscleGroups": ["CORE"],
       "optionalEquipment": ["MAT"],
-      "measurement": "HOLD"
+      "measurement": "HOLD",
+      "focus": ["STRENGTH"],
+      "positions": ["FLOOR"]
     },
     {
       "slug": "russian-twist",
       "movementPattern": "ROTATION",
       "muscleGroups": ["CORE"],
       "optionalEquipment": ["MAT", "DUMBBELL"],
-      "measurement": "REPS"
+      "measurement": "REPS",
+      "focus": ["STRENGTH"],
+      "positions": ["FLOOR"]
     },
     {
       "slug": "jumping-jack",
       "movementPattern": "LOCOMOTION",
       "muscleGroups": ["FULL_BODY"],
-      "measurement": "TIME"
+      "measurement": "TIME",
+      "focus": ["CARDIO", "WARM_UP"],
+      "positions": ["STANDING"],
+      "jumps": true
     },
     {
       "slug": "high-knees",
       "movementPattern": "LOCOMOTION",
       "muscleGroups": ["FULL_BODY", "HIPS"],
-      "measurement": "TIME"
+      "measurement": "TIME",
+      "focus": ["CARDIO", "WARM_UP"],
+      "positions": ["STANDING"],
+      "jumps": true
     },
     {
       "slug": "mountain-climber",
       "movementPattern": "LOCOMOTION",
       "muscleGroups": ["CORE", "SHOULDERS", "FULL_BODY"],
-      "measurement": "TIME"
+      "measurement": "TIME",
+      "focus": ["CARDIO"],
+      "positions": ["FLOOR"]
     },
     {
       "slug": "burpee",
       "movementPattern": "LOCOMOTION",
       "muscleGroups": ["FULL_BODY"],
-      "measurement": "REPS"
+      "measurement": "REPS",
+      "focus": ["CARDIO", "WARM_UP"],
+      "positions": ["STANDING"],
+      "jumps": true
     },
     {
       "slug": "skater-jump",
       "movementPattern": "LOCOMOTION",
       "muscleGroups": ["GLUTES", "QUADRICEPS", "FULL_BODY"],
-      "measurement": "TIME"
+      "measurement": "TIME",
+      "focus": ["CARDIO", "WARM_UP"],
+      "positions": ["STANDING"],
+      "jumps": true
     },
     {
       "slug": "jump-rope",
       "movementPattern": "LOCOMOTION",
       "muscleGroups": ["CALVES", "FULL_BODY"],
-      "measurement": "TIME"
+      "measurement": "TIME",
+      "focus": ["CARDIO", "WARM_UP"],
+      "positions": ["STANDING"],
+      "jumps": true
     },
     {
       "slug": "walk-with-support",
       "movementPattern": "LOCOMOTION",
       "muscleGroups": ["FULL_BODY"],
       "optionalEquipment": ["TREADMILL"],
-      "measurement": "TIME"
+      "measurement": "TIME",
+      "focus": ["CARDIO", "WARM_UP", "COOL_DOWN"],
+      "positions": ["STANDING"]
     },
     {
       "slug": "gentle-walk",
       "movementPattern": "LOCOMOTION",
       "muscleGroups": ["FULL_BODY"],
       "optionalEquipment": ["TREADMILL"],
-      "measurement": "TIME"
+      "measurement": "TIME",
+      "focus": ["CARDIO", "WARM_UP", "COOL_DOWN"],
+      "positions": ["STANDING"]
     },
     {
       "slug": "walk",
       "movementPattern": "LOCOMOTION",
       "muscleGroups": ["FULL_BODY"],
       "optionalEquipment": ["TREADMILL"],
-      "measurement": "TIME"
+      "measurement": "TIME",
+      "focus": ["CARDIO", "WARM_UP", "COOL_DOWN"],
+      "positions": ["STANDING"]
     },
     {
       "slug": "brisk-walk",
       "movementPattern": "LOCOMOTION",
       "muscleGroups": ["FULL_BODY"],
       "optionalEquipment": ["TREADMILL"],
-      "measurement": "TIME"
+      "measurement": "TIME",
+      "focus": ["CARDIO", "WARM_UP", "COOL_DOWN"],
+      "positions": ["STANDING"]
     },
     {
       "slug": "easy-run",
       "movementPattern": "LOCOMOTION",
       "muscleGroups": ["FULL_BODY", "CALVES"],
       "optionalEquipment": ["TREADMILL"],
-      "measurement": "TIME"
+      "measurement": "TIME",
+      "focus": ["CARDIO", "WARM_UP"],
+      "positions": ["STANDING"],
+      "jumps": true
     },
     {
       "slug": "run",
       "movementPattern": "LOCOMOTION",
       "muscleGroups": ["FULL_BODY", "CALVES"],
       "optionalEquipment": ["TREADMILL"],
-      "measurement": "TIME"
+      "measurement": "TIME",
+      "focus": ["CARDIO", "WARM_UP"],
+      "positions": ["STANDING"],
+      "jumps": true
     },
     {
       "slug": "calf-raise",
       "movementPattern": "SQUAT",
       "muscleGroups": ["CALVES"],
       "optionalEquipment": ["DUMBBELL"],
-      "measurement": "REPS"
+      "measurement": "REPS",
+      "focus": ["STRENGTH"],
+      "positions": ["STANDING"]
     },
     {
       "slug": "cat-cow",
       "movementPattern": "MOBILITY",
       "muscleGroups": ["BACK", "CORE"],
       "optionalEquipment": ["MAT"],
-      "measurement": "REPS"
+      "measurement": "REPS",
+      "focus": ["MOBILITY", "WARM_UP"],
+      "positions": ["FLOOR"]
     },
     {
       "slug": "clamshell",
@@ -348,19 +453,25 @@
       "muscleGroups": ["GLUTES", "HIPS"],
       "optionalEquipment": ["MAT", "BAND"],
       "measurement": "REPS",
-      "perSide": true
+      "perSide": true,
+      "focus": ["MOBILITY", "WARM_UP"],
+      "positions": ["FLOOR"]
     },
     {
       "slug": "arm-circles",
       "movementPattern": "MOBILITY",
       "muscleGroups": ["SHOULDERS"],
-      "measurement": "TIME"
+      "measurement": "TIME",
+      "focus": ["MOBILITY", "WARM_UP"],
+      "positions": ["STANDING"]
     },
     {
       "slug": "hip-circles",
       "movementPattern": "MOBILITY",
       "muscleGroups": ["HIPS"],
-      "measurement": "TIME"
+      "measurement": "TIME",
+      "focus": ["MOBILITY", "WARM_UP"],
+      "positions": ["STANDING"]
     },
     {
       "slug": "worlds-greatest-stretch",
@@ -368,7 +479,9 @@
       "muscleGroups": ["HIPS", "BACK", "HAMSTRINGS"],
       "optionalEquipment": ["MAT"],
       "measurement": "REPS",
-      "perSide": true
+      "perSide": true,
+      "focus": ["MOBILITY", "WARM_UP"],
+      "positions": ["STANDING", "FLOOR"]
     },
     {
       "slug": "hip-flexor-stretch",
@@ -376,42 +489,54 @@
       "muscleGroups": ["HIPS", "QUADRICEPS"],
       "optionalEquipment": ["MAT"],
       "measurement": "HOLD",
-      "perSide": true
+      "perSide": true,
+      "focus": ["STRETCHING", "COOL_DOWN"],
+      "positions": ["FLOOR"]
     },
     {
       "slug": "hamstring-stretch",
       "movementPattern": "STRETCH",
       "muscleGroups": ["HAMSTRINGS"],
       "measurement": "HOLD",
-      "perSide": true
+      "perSide": true,
+      "focus": ["STRETCHING", "COOL_DOWN"],
+      "positions": ["STANDING"]
     },
     {
       "slug": "quad-stretch",
       "movementPattern": "STRETCH",
       "muscleGroups": ["QUADRICEPS"],
       "measurement": "HOLD",
-      "perSide": true
+      "perSide": true,
+      "focus": ["STRETCHING", "COOL_DOWN"],
+      "positions": ["STANDING"]
     },
     {
       "slug": "childs-pose",
       "movementPattern": "STRETCH",
       "muscleGroups": ["BACK", "HIPS"],
       "optionalEquipment": ["MAT"],
-      "measurement": "HOLD"
+      "measurement": "HOLD",
+      "focus": ["STRETCHING", "COOL_DOWN"],
+      "positions": ["FLOOR"]
     },
     {
       "slug": "chest-stretch",
       "movementPattern": "STRETCH",
       "muscleGroups": ["CHEST", "SHOULDERS"],
       "measurement": "HOLD",
-      "perSide": true
+      "perSide": true,
+      "focus": ["STRETCHING", "COOL_DOWN"],
+      "positions": ["STANDING"]
     },
     {
       "slug": "neck-stretch",
       "movementPattern": "STRETCH",
       "muscleGroups": ["NECK"],
       "measurement": "HOLD",
-      "perSide": true
+      "perSide": true,
+      "focus": ["STRETCHING", "COOL_DOWN"],
+      "positions": ["STANDING", "SEATED"]
     }
   ],
   "variations": [

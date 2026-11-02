@@ -1,6 +1,9 @@
 package ch.coachpoulpy.shared
 
+import ch.coachpoulpy.core.model.BodyPosition
 import ch.coachpoulpy.core.model.Equipment
+import ch.coachpoulpy.core.model.ExerciseFocus
+import ch.coachpoulpy.core.model.ExerciseTag
 import ch.coachpoulpy.core.model.LocalizedText
 import ch.coachpoulpy.core.model.MeasurementMode
 import ch.coachpoulpy.core.model.MovementPattern
@@ -58,6 +61,28 @@ internal class Labels(private val languageCode: String, private val units: () ->
         Equipment.PULL_UP_BAR -> DomainText.equipmentPullUpBar(languageCode)
         Equipment.TREADMILL -> DomainText.equipmentTreadmill(languageCode)
         Equipment.MACHINE -> DomainText.equipmentMachine(languageCode)
+    }
+
+    fun focus(focus: ExerciseFocus) = when (focus) {
+        ExerciseFocus.STRENGTH -> DomainText.focusStrength(languageCode)
+        ExerciseFocus.CARDIO -> DomainText.focusCardio(languageCode)
+        ExerciseFocus.MOBILITY -> DomainText.focusMobility(languageCode)
+        ExerciseFocus.STRETCHING -> DomainText.focusStretching(languageCode)
+        ExerciseFocus.WARM_UP -> DomainText.focusWarmUp(languageCode)
+        ExerciseFocus.COOL_DOWN -> DomainText.focusCoolDown(languageCode)
+    }
+
+    fun bodyPosition(position: BodyPosition) = when (position) {
+        BodyPosition.STANDING -> DomainText.positionStanding(languageCode)
+        BodyPosition.SEATED -> DomainText.positionSeated(languageCode)
+        BodyPosition.FLOOR -> DomainText.positionFloor(languageCode)
+    }
+
+    fun tag(tag: ExerciseTag) = when (tag) {
+        ExerciseTag.NO_JUMPING -> DomainText.tagNoJumping(languageCode)
+        ExerciseTag.EACH_SIDE -> DomainText.tagEachSide(languageCode)
+        ExerciseTag.HOLD -> DomainText.tagHold(languageCode)
+        ExerciseTag.TIMED -> DomainText.tagTimed(languageCode)
     }
 
     fun pattern(pattern: MovementPattern) = when (pattern) {

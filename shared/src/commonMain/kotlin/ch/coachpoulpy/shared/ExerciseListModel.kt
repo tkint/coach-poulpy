@@ -1,9 +1,12 @@
 package ch.coachpoulpy.shared
 
 import ch.coachpoulpy.catalog.Catalog
+import ch.coachpoulpy.core.model.BodyPosition
 import ch.coachpoulpy.core.model.Equipment
 import ch.coachpoulpy.core.model.Exercise
+import ch.coachpoulpy.core.model.ExerciseFocus
 import ch.coachpoulpy.core.model.ExerciseSlug
+import ch.coachpoulpy.core.model.ExerciseTag
 import ch.coachpoulpy.core.model.MeasurementMode
 import ch.coachpoulpy.core.model.MovementPattern
 import ch.coachpoulpy.core.model.MuscleGroup
@@ -52,6 +55,9 @@ data class MuscleFilter(val area: MuscleArea, val label: String)
 
 /** One row of the Equipment sheet, with how many offered exercises use it ("12 exercises"). */
 data class EquipmentOption(val equipment: Equipment, val label: String, val count: Int, val countLabel: String)
+
+/** One row of the Focus, Position or Tags sheet: how many offered exercises it lists, as "9 exercises". */
+data class FilterOption<T>(val value: T, val label: String, val count: Int, val countLabel: String)
 
 /**
  * One variation in the exercise page's variations sheet; [current] marks the exercise
@@ -114,24 +120,56 @@ class ExerciseListModel internal constructor(
             if (count == 0) null else EquipmentOption(item, labels.equipment(item), count, labels.exercises(count))
         }
 
+    /** What the Focus sheet lists, in order; one with no exercise is left out. */
+    val focusOptions: List<FilterOption<ExerciseFocus>> = ExerciseFocus.entries.options(labels::focus) { it.focus }
+
+    /** What the Position sheet lists. */
+    val positionOptions: List<FilterOption<BodyPosition>> = BodyPosition.entries.options(labels::bodyPosition) { it.positions }
+
+    /** What the Tags sheet lists. */
+    val tagOptions: List<FilterOption<ExerciseTag>> = ExerciseTag.entries.options(labels::tag) { it.tags }
+
+    private fun <T> List<T>.options(label: (T) -> String, of: (Exercise) -> Collection<T>) = mapNotNull { item ->
+        val count = catalog.offered.count { item in of(it) }
+        if (count == 0) null else FilterOption(item, label(item), count, labels.exercises(count))
+    }
+
     /**
-     * Offered exercises matching [query] and [area]. With [ticked], only those that use a ticked item
-     * and that it fits ([uses]; null or empty is no equipment filter). With a query, one
-     * section of the best matches first ([ExerciseSearch]); without, a section per
-     * movement pattern, by name.
+     * What the screens call today: [find] with the muscle chip and the equipment filter, as Swift sees no default arguments.
+     * CLEANUP: remove this, [area] and [MuscleArea] once the screens filter by focus, position, tags and zones with [find]
+     * (the Zones sheet replaces the muscle chips).
+     */
+    fun filter(query: String = "", area: MuscleArea? = null, ticked: Set<Equipment>? = null, withRecent: Boolean = false): ExerciseListing =
+        find(query, area, ticked, withRecent)
+
+    /**
+     * Offered exercises matching [query] and every filter given. Inside one filter an exercise
+     * needs any ticked item ([focus], [positions], [zones] by their area name without a side,
+     * `pectoral`, and the equipment [ticked]); [tags] must all apply. An empty or null filter
+     * is off. With a query, one section of the best matches first ([ExerciseSearch]); without,
+     * a section per movement pattern, by name.
      * [withRecent], for the builder's picker, puts up to 5 recently used exercises
      * first while nothing is typed or filtered; they also stay in their pattern.
      */
-    fun filter(
+    fun find(
         query: String = "",
         area: MuscleArea? = null,
         ticked: Set<Equipment>? = null,
         withRecent: Boolean = false,
+        focus: Set<ExerciseFocus> = emptySet(),
+        positions: Set<BodyPosition> = emptySet(),
+        tags: Set<ExerciseTag> = emptySet(),
+        zones: Set<String> = emptySet(),
     ): ExerciseListing {
         val owned = ticked?.takeIf { it.isNotEmpty() }
         val candidates = catalog.offered
             .filter { area == null || it.muscleGroups.any { group -> group in area.groups } }
             .filter { owned == null || it.uses(owned) }
+            .filter { focus.isEmpty() || it.focus.any { item -> item in focus } }
+            .filter { positions.isEmpty() || it.positions.any { item -> item in positions } }
+            .filter { it.tags.containsAll(tags) }
+            .filter { zones.isEmpty() || it.worksAny(zones) }
+        val narrowed = area != null || focus.isNotEmpty() || positions.isNotEmpty() || tags.isNotEmpty() || zones.isNotEmpty()
         val ranks = search.rank(query)
         val sections = if (ranks == null) {
             MovementPattern.entries.mapNotNull { pattern ->
@@ -148,7 +186,7 @@ class ExerciseListModel internal constructor(
         val count = sections.sumOf { it.rows.size }
         val searching = ranks != null
         val restricted = owned != null
-        val recentRows = if (withRecent && !searching && area == null && !restricted) recentlyUsedRows() else emptyList()
+        val recentRows = if (withRecent && !searching && !narrowed && !restricted) recentlyUsedRows() else emptyList()
         val shown = if (recentRows.isEmpty()) sections else listOf(ExerciseSection(labels.recentlyUsed, recentRows)) + sections
         val countLabel = when {
             searching && restricted -> labels.matchesYouCanDo(count)
@@ -197,6 +235,10 @@ class ExerciseListModel internal constructor(
      */
     private fun Exercise.uses(ticked: Set<Equipment>) =
         (Equipment.BODYWEIGHT in ticked && equipment.isEmpty()) || (fits(ticked) && allEquipment.any { it in ticked })
+
+    /** True when the exercise works one of the body map areas named in [zones], on either side. */
+    private fun Exercise.worksAny(zones: Set<String>) =
+        BodyMap.worked(muscleGroups).any { it.removeSuffix("-left").removeSuffix("-right") in zones }
 
     private fun recentlyUsedRows(): List<ExerciseRow> = recent.asSequence()
         .mapNotNull { catalog[it] }

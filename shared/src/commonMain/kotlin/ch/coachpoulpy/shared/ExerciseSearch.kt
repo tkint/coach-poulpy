@@ -6,7 +6,7 @@ import ch.coachpoulpy.core.model.ExerciseSlug
 /**
  * How well an exercise matches a search, best first: [tier] is the worst-matching
  * word's tier (1 a name starts with it, 2 a word of a name or alias does, 3 it is
- * inside a name, 4 a muscle, equipment or pattern label starts with it), and [total]
+ * inside a name, 4 a muscle, equipment, pattern, focus or position label starts with it), and [total]
  * sums every word's tier so a closer match wins inside a tier.
  */
 internal data class SearchRank(val tier: Int, val total: Int) : Comparable<SearchRank> {
@@ -35,7 +35,8 @@ internal class ExerciseSearch(exercises: List<Exercise>) {
         private val nameWords = (exercise.name.all.toList() + exercise.aliases.all).flatMap(SearchText::words)
         private val labelWords = labels.flatMap { language ->
             exercise.muscleGroups.map(language::muscle) + exercise.allEquipment.map(language::equipment) +
-                language.pattern(exercise.movementPattern)
+                language.pattern(exercise.movementPattern) + exercise.focus.map(language::focus) +
+                exercise.positions.map(language::bodyPosition)
         }.flatMap(SearchText::words)
 
         fun rank(words: List<String>, compact: String): SearchRank? {

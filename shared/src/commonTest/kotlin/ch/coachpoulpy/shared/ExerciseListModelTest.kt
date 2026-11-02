@@ -1,7 +1,10 @@
 package ch.coachpoulpy.shared
 
 import ch.coachpoulpy.catalog.Catalog
+import ch.coachpoulpy.core.model.BodyPosition
 import ch.coachpoulpy.core.model.Equipment
+import ch.coachpoulpy.core.model.ExerciseFocus
+import ch.coachpoulpy.core.model.ExerciseTag
 import ch.coachpoulpy.core.model.MuscleGroup
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -277,5 +280,46 @@ class ExerciseListModelTest {
         val none = options.first()
         assertEquals("No equipment", none.label)
         assertEquals(Catalog.bundled.offered.count { it.equipment.isEmpty() }, none.count)
+    }
+
+    @Test
+    fun everyOfferedExerciseHasAFocusAndAPosition() {
+        val missing = Catalog.bundled.offered.filter { it.focus.isEmpty() || it.positions.isEmpty() }.map { it.slug.value }
+        assertEquals(emptyList(), missing)
+    }
+
+    @Test
+    fun focusAndPositionNarrowTheListAndMixWithOtherFilters() {
+        val list = model("en")
+        val mobility = list.find(focus = setOf(ExerciseFocus.MOBILITY)).rows.map { it.slug }
+        assertTrue("cat-cow" in mobility && "plank" !in mobility)
+        val floorMobility = list.find(focus = setOf(ExerciseFocus.MOBILITY), positions = setOf(BodyPosition.FLOOR)).rows.map { it.slug }
+        assertTrue("cat-cow" in floorMobility && "arm-circles" !in floorMobility)
+        val either = list.find(focus = setOf(ExerciseFocus.MOBILITY, ExerciseFocus.STRETCHING)).rows.map { it.slug }
+        assertTrue("cat-cow" in either && "hamstring-stretch" in either)
+    }
+
+    @Test
+    fun noJumpingLeavesOutJumpsAndTagsMustAllApply() {
+        val list = model("en")
+        assertFalse(list.find(tags = setOf(ExerciseTag.NO_JUMPING)).rows.any { it.slug == "burpee" })
+        val holdEachSide = list.find(tags = setOf(ExerciseTag.HOLD, ExerciseTag.EACH_SIDE)).rows.map { it.slug }
+        assertTrue("side-plank" in holdEachSide && "plank" !in holdEachSide)
+    }
+
+    @Test
+    fun zonesCountBothSidesTogether() {
+        val rows = model("en").find(zones = setOf("pectoral")).rows.map { it.slug }
+        assertTrue("push-up" in rows && "plank" !in rows)
+    }
+
+    @Test
+    fun optionsCountTheOfferedExercisesAndSearchFindsFocusAndPositionWords() {
+        val list = model("fr")
+        val mobility = list.focusOptions.single { it.value == ExerciseFocus.MOBILITY }
+        assertEquals("Mobilité", mobility.label)
+        assertEquals(Catalog.bundled.offered.count { ExerciseFocus.MOBILITY in it.focus }, mobility.count)
+        assertTrue(list.filter("au sol").rows.any { it.slug == "cat-cow" })
+        assertTrue(model("en").filter("mobility").rows.any { it.slug == "arm-circles" })
     }
 }

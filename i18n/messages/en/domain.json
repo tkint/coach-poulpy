@@ -50,6 +50,25 @@
     "mobility": "Mobility",
     "stretch": "Stretch"
   },
+  "focus": {
+    "strength": "Strength",
+    "cardio": "Cardio",
+    "mobility": "Mobility",
+    "stretching": "Stretching",
+    "warmUp": "Warm-up",
+    "coolDown": "Cool down"
+  },
+  "position": {
+    "standing": "Standing",
+    "seated": "Seated",
+    "floor": "On the floor"
+  },
+  "tag": {
+    "noJumping": "No jumping",
+    "eachSide": "Each side",
+    "hold": "Hold",
+    "timed": "Timed"
+  },
   "measurement": {
     "reps": "Reps",
     "time": "Timed",
