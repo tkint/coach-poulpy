@@ -12,6 +12,6 @@ The environment every thread runs in has [CodeGraph](https://github.com/colbymch
 ## Where it is set up
 
 - **Install and index**: the environment's setup script installs `codegraph` and runs `codegraph init` in the repo folder, so every new thread starts with an index.
-- **MCP server**: `.mcp.json` at the repo root starts `codegraph serve --mcp`, which gives the main thread the `codegraph_explore` tool and keeps the index in sync as files change. If the tool is missing in a thread, say so and use the CLI.
-- **Approval**: a project `.mcp.json` server stays "Pending approval" until someone approves it, and a cloud thread cannot answer that prompt. `.claude/settings.json` lists `codegraph` under `enabledMcpjsonServers` so it is approved ahead of time. `claude mcp list` should show it as connected.
+- **MCP server**: the environment's setup script registers it at user level with `claude mcp add --scope user codegraph -- codegraph serve --mcp`. That gives the main thread the `codegraph_explore` tool and keeps the index in sync as files change. `claude mcp list` should show `codegraph` as connected. If the tool is missing in a thread, say so and use the CLI.
+- **Why not a repo `.mcp.json`**: a project-scoped server stays "Pending approval" until someone approves it, and a cloud thread cannot answer that prompt, even with `enabledMcpjsonServers` set. A user-level server needs no approval.
 - To change the version or the install, edit the environment.
