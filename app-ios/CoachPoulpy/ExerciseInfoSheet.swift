@@ -14,7 +14,6 @@ struct ExerciseInfoSheet: View {
 
     var body: some View {
         if let detail = graph.exerciseList(languageCode: Language.code).detail(slug: slug) {
-            let figure = (graph.profile(memory: UserDefaultsStore()).ui.value as! ProfileUi).bodyFigure ?? .shoulders
             VStack(spacing: 0) {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 16) {
@@ -42,12 +41,7 @@ struct ExerciseInfoSheet: View {
                             factCard("exercise.muscles", detail.muscles)
                             factCard("exercise.equipment", detail.equipment)
                         }
-                        // The text above already names the muscles, so the picture is hidden from VoiceOver.
-                        HStack(alignment: .top, spacing: 0) {
-                            side(figure, .front, "profile.figureFront", detail.workedAreas)
-                            side(figure, .back, "profile.figureBack", detail.workedAreas)
-                        }
-                        .accessibilityHidden(true)
+                        WorkedMuscles(graph: graph, detail: detail)
                         VStack(alignment: .leading, spacing: 10) {
                             Text("exercise.how").font(PoulpyFont.headline).accessibilityAddTraits(.isHeader)
                             ForEach(Array(detail.instructions.enumerated()), id: \.offset) { index, step in
@@ -93,14 +87,6 @@ struct ExerciseInfoSheet: View {
         }
     }
 
-    private func side(_ figure: BodyFigure, _ view: Shared.BodyView, _ caption: LocalizedStringKey, _ worked: Set<String>) -> some View {
-        VStack(spacing: 4) {
-            BodyMapFigure(figure: figure, view: view, selected: worked)
-            Text(caption).font(PoulpyFont.label).foregroundStyle(PoulpyColor.onSurfaceVariant)
-        }
-        .frame(maxWidth: .infinity)
-    }
-
     private func factCard(_ title: LocalizedStringKey, _ body: String) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(title)
@@ -114,5 +100,29 @@ struct ExerciseInfoSheet: View {
         .padding(.horizontal, 14)
         .padding(.vertical, 12)
         .background(PoulpyColor.surfaceVariant, in: RoundedRectangle(cornerRadius: 16))
+    }
+}
+
+/// Front and back figures, on the person's own figure, with the muscles the exercise works lit.
+struct WorkedMuscles: View {
+    let graph: AppGraph
+    let detail: ExerciseDetail
+
+    var body: some View {
+        let figure = (graph.profile(memory: UserDefaultsStore()).ui.value as! ProfileUi).bodyFigure ?? .shoulders
+        // The Muscles card already names the muscles, so the picture is hidden from VoiceOver.
+        HStack(alignment: .top, spacing: 0) {
+            side(figure, .front, "profile.figureFront")
+            side(figure, .back, "profile.figureBack")
+        }
+        .accessibilityHidden(true)
+    }
+
+    private func side(_ figure: BodyFigure, _ view: Shared.BodyView, _ caption: LocalizedStringKey) -> some View {
+        VStack(spacing: 4) {
+            BodyMapFigure(figure: figure, view: view, selected: detail.workedAreas)
+            Text(caption).font(PoulpyFont.label).foregroundStyle(PoulpyColor.onSurfaceVariant)
+        }
+        .frame(maxWidth: .infinity)
     }
 }

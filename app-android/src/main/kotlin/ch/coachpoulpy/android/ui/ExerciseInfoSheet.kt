@@ -31,17 +31,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ch.coachpoulpy.android.R
-import ch.coachpoulpy.core.model.BodyFigure
 import ch.coachpoulpy.shared.AppGraph
-import ch.coachpoulpy.shared.BodyView
 
 /**
  * What the builder shows of an exercise: its muscles and equipment, the body map with the muscles it works lit on
@@ -61,8 +57,6 @@ fun ExerciseInfoSheet(
     @StringRes closeLabel: Int = R.string.exercise_backToStep,
 ) {
     val detail = remember(graph, language, slug) { graph.exerciseList(language).detail(slug) } ?: return
-    val context = LocalContext.current
-    val figure = remember(graph, context) { graph.profile(AppPreferences(context)).profile.value.bodyFigure ?: BodyFigure.SHOULDERS }
     val colors = MaterialTheme.colorScheme
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -88,18 +82,7 @@ fun ExerciseInfoSheet(
                     FactCard(stringResource(R.string.exercise_muscles), detail.muscles, Modifier.weight(1f), colors.surfaceVariant)
                     FactCard(stringResource(R.string.exercise_equipment), detail.equipment, Modifier.weight(1f), colors.surfaceVariant)
                 }
-                // The text above already names the muscles, so the picture is hidden from TalkBack.
-                Row(
-                    Modifier.fillMaxWidth().clearAndSetSemantics { },
-                    horizontalArrangement = Arrangement.SpaceEvenly,
-                ) {
-                    listOf(BodyView.FRONT to R.string.profile_figureFront, BodyView.BACK to R.string.profile_figureBack).forEach { (view, label) ->
-                        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                            BodyMapFigure(figure, view, detail.workedAreas, language)
-                            Text(stringResource(label), style = MaterialTheme.typography.labelMedium, color = colors.onSurfaceVariant)
-                        }
-                    }
-                }
+                WorkedMuscles(graph, language, detail)
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(stringResource(R.string.exercise_how), style = MaterialTheme.typography.titleLarge, modifier = Modifier.semantics { heading() })
                     detail.instructions.forEachIndexed { index, step ->
