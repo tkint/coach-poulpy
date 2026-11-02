@@ -15,15 +15,26 @@
     "neck": "Cou",
     "fullBody": "Corps entier"
   },
-  "muscleArea": {
-    "legs": "Jambes",
+  "zone": {
+    "neck": "Cou",
+    "trapezius": "Trapèzes",
+    "deltoid": "Épaules",
+    "pectoral": "Pectoraux",
+    "serratus": "Dentelés",
+    "biceps": "Biceps",
+    "triceps": "Triceps",
+    "forearm": "Avant-bras",
+    "abs": "Abdominaux",
+    "obliques": "Obliques",
+    "back": "Haut du dos",
+    "scapula": "Omoplates",
+    "lowerBack": "Bas du dos",
+    "hip": "Hanches",
     "glutes": "Fessiers",
-    "core": "Abdos",
-    "back": "Dos",
-    "chest": "Pectoraux",
-    "shoulders": "Épaules",
-    "arms": "Bras",
-    "fullBody": "Corps entier"
+    "quads": "Quadriceps",
+    "adductors": "Adducteurs",
+    "hamstrings": "Ischio-jambiers",
+    "calves": "Mollets"
   },
   "equipment": {
     "bodyweight": "Sans matériel",

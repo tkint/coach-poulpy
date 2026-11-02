@@ -144,7 +144,7 @@ private fun hit(path: Path, point: Offset): Boolean {
 
 /** Front or back of the figure, as a two-way switch above it. */
 @Composable
-private fun SideSwitch(view: BodyView, onChange: (BodyView) -> Unit) {
+internal fun SideSwitch(view: BodyView, onChange: (BodyView) -> Unit) {
     Row(
         Modifier
             .fillMaxWidth()
