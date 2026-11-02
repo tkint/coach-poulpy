@@ -123,7 +123,7 @@ class ExerciseListModelTest {
     fun aliasesAreSearchedButNeverShown() {
         assertEquals(listOf("romanian-deadlift"), search("rdl"))
         assertEquals("Romanian deadlift", model("en").filter("rdl").rows.single().name)
-        val core = listOf("plank", "side-plank", "dead-bug", "bird-dog", "crunch", "hollow-hold", "russian-twist")
+        val core = listOf("plank", "side-plank", "dead-bug", "bird-dog", "bird-dog-knee-tuck", "bird-dog-crunch", "crunch", "hollow-hold", "russian-twist")
         assertEquals(core.toSet(), search("abdos").take(core.size).toSet())
     }
 
