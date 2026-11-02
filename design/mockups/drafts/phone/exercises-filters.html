@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Exercises · filters</title>
+<title>Exercises · focus and position</title>
 <meta name="mockup:screen" content="exercises-filters">
 <meta name="mockup:section" content="Exercises and search">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -25,7 +25,8 @@
       <input type="search" placeholder="Name, muscle, mobility or floor" aria-label="Search exercises">
     </label>
     <div class="chip-row" role="group" aria-label="Filters">
-      <button class="filter-chip filter-chip--have" data-component="filter-chip" type="button" aria-haspopup="dialog" aria-label="Filters, 3 chosen" style="padding: 0 var(--cp-space-md); min-width: 48px;"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg><b aria-hidden="true">3</b></button>
+      <button class="filter-chip filter-chip--have" data-component="filter-chip" type="button" aria-haspopup="dialog" aria-label="Equipment, 2 ticked" style="padding: 0 var(--cp-space-md); min-width: 48px;"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7v10M18 7v10M3 10v4M21 10v4M6 12h12"/></svg><b aria-hidden="true">2</b></button>
+      <button class="filter-chip filter-chip--have" data-component="filter-chip" type="button" aria-haspopup="dialog" aria-label="Focus and position, 2 chosen" style="padding: 0 var(--cp-space-md); min-width: 48px;"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg><b aria-hidden="true">2</b></button>
       <span class="chip-divider" aria-hidden="true"></span>
       <button class="filter-chip" data-component="filter-chip" type="button" aria-pressed="true">All</button>
       <button class="filter-chip" data-component="filter-chip" type="button" aria-pressed="false">Legs</button>
@@ -75,9 +76,9 @@
     <a class="nav-item" href="#"><span><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg></span>Settings</a>
   </nav>
   <div class="scrim" aria-hidden="true"></div>
-  <section class="sheet" id="filters-sheet" role="dialog" aria-modal="true" aria-label="Filters" data-component="sheet">
+  <section class="sheet" id="filters-sheet" role="dialog" aria-modal="true" aria-label="Focus and position" data-component="sheet">
     <span class="sheet-handle" aria-hidden="true"></span>
-    <div class="sheet-title"><h2>Filters</h2><p>Mix them: each one narrows the list.</p></div>
+    <div class="sheet-title"><h2>Focus and position</h2><p>Mix them, and with equipment and muscle: each one narrows the list.</p></div>
     <h3 class="label">Focus</h3>
     <div class="chip-row chip-row--wrap" role="group" aria-label="Focus">
           <button class="filter-chip filter-chip--small" data-component="filter-chip" type="button" aria-pressed="false">Strength</button>
@@ -92,17 +93,6 @@
           <button class="filter-chip filter-chip--small" data-component="filter-chip" type="button" aria-pressed="false">Standing</button>
           <button class="filter-chip filter-chip--small" data-component="filter-chip" type="button" aria-pressed="false">Seated</button>
           <button class="filter-chip filter-chip--small" data-component="filter-chip" type="button" aria-pressed="true">On the floor</button>
-    </div>
-    <h3 class="label">Equipment</h3>
-    <div class="chip-row chip-row--wrap" role="group" aria-label="Equipment">
-          <button class="filter-chip filter-chip--small" data-component="filter-chip" type="button" aria-pressed="true">No equipment</button>
-          <button class="filter-chip filter-chip--small" data-component="filter-chip" type="button" aria-pressed="true">Mat</button>
-          <button class="filter-chip filter-chip--small" data-component="filter-chip" type="button" aria-pressed="false">Dumbbells</button>
-          <button class="filter-chip filter-chip--small" data-component="filter-chip" type="button" aria-pressed="false">Kettlebell</button>
-          <button class="filter-chip filter-chip--small" data-component="filter-chip" type="button" aria-pressed="false">Band</button>
-          <button class="filter-chip filter-chip--small" data-component="filter-chip" type="button" aria-pressed="false">Bench</button>
-          <button class="filter-chip filter-chip--small" data-component="filter-chip" type="button" aria-pressed="false">Pull-up bar</button>
-          <button class="filter-chip filter-chip--small" data-component="filter-chip" type="button" aria-pressed="false">Treadmill</button>
     </div>
     <div class="sheet-actions"><button class="secondary-button" type="button">Clear</button><button class="primary-button" type="button">Show 9 exercises</button></div>
   </section>
