@@ -16,6 +16,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
@@ -28,7 +29,11 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -56,7 +61,11 @@ fun ExerciseInfoSheet(
     adding: Boolean = true,
     @StringRes closeLabel: Int = R.string.exercise_backToStep,
 ) {
-    val detail = remember(graph, language, slug) { graph.exerciseList(language).detail(slug) } ?: return
+    // From the picker the sheet can move along the exercise's variations; [current] is the one shown and added.
+    var current by rememberSaveable(slug) { mutableStateOf(slug) }
+    var listing by rememberSaveable { mutableStateOf(false) }
+    var tab by rememberSaveable(current) { mutableStateOf(ExerciseTab.MUSCLES) }
+    val detail = remember(graph, language, current) { graph.exerciseList(language).detail(current) } ?: return
     val colors = MaterialTheme.colorScheme
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -69,43 +78,71 @@ fun ExerciseInfoSheet(
                 Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 20.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                Row(verticalAlignment = Alignment.Top) {
-                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text(detail.eyebrow.uppercase(), style = MaterialTheme.typography.labelMedium, color = colors.primary)
-                        Text(detail.name, style = MaterialTheme.typography.headlineMedium, modifier = Modifier.semantics { heading() })
+                if (adding && listing) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        IconButton(onClick = { listing = false }) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
+                        }
+                        Column(Modifier.weight(1f)) {
+                            Text(stringResource(R.string.exercise_variations), style = MaterialTheme.typography.titleLarge, modifier = Modifier.semantics { heading() })
+                            Text(stringResource(R.string.exercise_variationsHint), style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
+                        }
+                        IconButton(onClick = onDismiss) {
+                            Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.action_close))
+                        }
                     }
-                    IconButton(onClick = onDismiss) {
-                        Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.action_close))
+                    VariationRungs(detail.variations, onPick = { current = it; listing = false }, onCurrent = { listing = false })
+                } else if (adding) {
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                        if (detail.variations.isNotEmpty()) VariationButton(detail) { listing = true } else Box {}
+                        IconButton(onClick = onDismiss) {
+                            Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.action_close))
+                        }
                     }
-                }
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    FactCard(stringResource(R.string.exercise_muscles), detail.muscles, Modifier.weight(1f), colors.surfaceVariant)
-                    FactCard(stringResource(R.string.exercise_equipment), detail.equipment, Modifier.weight(1f), colors.surfaceVariant)
-                }
-                WorkedMuscles(graph, language, detail)
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text(stringResource(R.string.exercise_how), style = MaterialTheme.typography.titleLarge, modifier = Modifier.semantics { heading() })
-                    detail.instructions.forEachIndexed { index, step ->
-                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            Box(Modifier.size(28.dp).background(colors.primary, CircleShape), contentAlignment = Alignment.Center) {
-                                Text("${index + 1}", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.ExtraBold, color = colors.onPrimary)
+                    ExerciseHeading(detail)
+                    PillSwitch(listOf(ExerciseTab.MUSCLES to R.string.exercise_muscles, ExerciseTab.HOW to R.string.exercise_how), tab, onSelect = { tab = it })
+                    ExerciseTabContent(graph, language, detail, tab)
+                } else {
+                    Row(verticalAlignment = Alignment.Top) {
+                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Text(detail.eyebrow.uppercase(), style = MaterialTheme.typography.labelMedium, color = colors.primary)
+                            Text(detail.name, style = MaterialTheme.typography.headlineMedium, modifier = Modifier.semantics { heading() })
+                        }
+                        IconButton(onClick = onDismiss) {
+                            Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.action_close))
+                        }
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        FactCard(stringResource(R.string.exercise_muscles), detail.muscles, Modifier.weight(1f), colors.surfaceVariant)
+                        FactCard(stringResource(R.string.exercise_equipment), detail.equipment, Modifier.weight(1f), colors.surfaceVariant)
+                    }
+                    WorkedMuscles(graph, language, detail)
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Text(stringResource(R.string.exercise_how), style = MaterialTheme.typography.titleLarge, modifier = Modifier.semantics { heading() })
+                        detail.instructions.forEachIndexed { index, step ->
+                            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                                Box(Modifier.size(28.dp).background(colors.primary, CircleShape), contentAlignment = Alignment.Center) {
+                                    Text("${index + 1}", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.ExtraBold, color = colors.onPrimary)
+                                }
+                                Text(step, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
                             }
-                            Text(step, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
                         }
                     }
                 }
             }
-            HorizontalDivider(Modifier.padding(top = 12.dp), color = colors.surfaceVariant)
-            Box(Modifier.navigationBarsPadding().padding(start = 20.dp, end = 20.dp, top = 12.dp, bottom = 16.dp)) {
-                Button(onClick = { onAction(detail.slug) }, modifier = Modifier.fillMaxWidth().height(56.dp)) {
-                    if (adding) {
-                        Icon(Icons.Filled.Add, contentDescription = null)
+            if (!(adding && listing)) {
+                HorizontalDivider(Modifier.padding(top = 12.dp), color = colors.surfaceVariant)
+                Box(Modifier.navigationBarsPadding().padding(start = 20.dp, end = 20.dp, top = 12.dp, bottom = 16.dp)) {
+                    Button(onClick = { onAction(detail.slug) }, modifier = Modifier.fillMaxWidth().height(56.dp)) {
+                        if (adding) {
+                            Icon(Icons.Filled.Add, contentDescription = null)
+                        }
+                        Text(
+                            stringResource(if (adding) R.string.exercise_addHere else closeLabel),
+                            fontWeight = FontWeight.ExtraBold,
+                            modifier = Modifier.padding(start = if (adding) 8.dp else 0.dp),
+                        )
                     }
-                    Text(
-                        stringResource(if (adding) R.string.exercise_addHere else closeLabel),
-                        fontWeight = FontWeight.ExtraBold,
-                        modifier = Modifier.padding(start = if (adding) 8.dp else 0.dp),
-                    )
                 }
             }
         }
