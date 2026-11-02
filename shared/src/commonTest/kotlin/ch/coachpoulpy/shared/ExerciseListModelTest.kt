@@ -291,25 +291,25 @@ class ExerciseListModelTest {
     @Test
     fun focusAndPositionNarrowTheListAndMixWithOtherFilters() {
         val list = model("en")
-        val mobility = list.filter(focus = setOf(ExerciseFocus.MOBILITY)).rows.map { it.slug }
+        val mobility = list.find(focus = setOf(ExerciseFocus.MOBILITY)).rows.map { it.slug }
         assertTrue("cat-cow" in mobility && "plank" !in mobility)
-        val floorMobility = list.filter(focus = setOf(ExerciseFocus.MOBILITY), positions = setOf(BodyPosition.FLOOR)).rows.map { it.slug }
+        val floorMobility = list.find(focus = setOf(ExerciseFocus.MOBILITY), positions = setOf(BodyPosition.FLOOR)).rows.map { it.slug }
         assertTrue("cat-cow" in floorMobility && "arm-circles" !in floorMobility)
-        val either = list.filter(focus = setOf(ExerciseFocus.MOBILITY, ExerciseFocus.STRETCHING)).rows.map { it.slug }
+        val either = list.find(focus = setOf(ExerciseFocus.MOBILITY, ExerciseFocus.STRETCHING)).rows.map { it.slug }
         assertTrue("cat-cow" in either && "hamstring-stretch" in either)
     }
 
     @Test
     fun noJumpingLeavesOutJumpsAndTagsMustAllApply() {
         val list = model("en")
-        assertFalse(list.filter(tags = setOf(ExerciseTag.NO_JUMPING)).rows.any { it.slug == "burpee" })
-        val holdEachSide = list.filter(tags = setOf(ExerciseTag.HOLD, ExerciseTag.EACH_SIDE)).rows.map { it.slug }
+        assertFalse(list.find(tags = setOf(ExerciseTag.NO_JUMPING)).rows.any { it.slug == "burpee" })
+        val holdEachSide = list.find(tags = setOf(ExerciseTag.HOLD, ExerciseTag.EACH_SIDE)).rows.map { it.slug }
         assertTrue("side-plank" in holdEachSide && "plank" !in holdEachSide)
     }
 
     @Test
     fun zonesCountBothSidesTogether() {
-        val rows = model("en").filter(zones = setOf("pectoral")).rows.map { it.slug }
+        val rows = model("en").find(zones = setOf("pectoral")).rows.map { it.slug }
         assertTrue("push-up" in rows && "plank" !in rows)
     }
 

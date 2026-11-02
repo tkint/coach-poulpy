@@ -135,6 +135,14 @@ class ExerciseListModel internal constructor(
     }
 
     /**
+     * What the screens call today: [find] with the muscle chip and the equipment filter, as Swift sees no default arguments.
+     * CLEANUP: remove this, [area] and [MuscleArea] once the screens filter by focus, position, tags and zones with [find]
+     * (the Zones sheet replaces the muscle chips).
+     */
+    fun filter(query: String = "", area: MuscleArea? = null, ticked: Set<Equipment>? = null, withRecent: Boolean = false): ExerciseListing =
+        find(query, area, ticked, withRecent)
+
+    /**
      * Offered exercises matching [query] and every filter given. Inside one filter an exercise
      * needs any ticked item ([focus], [positions], [zones] by their area name without a side,
      * `pectoral`, and the equipment [ticked]); [tags] must all apply. An empty or null filter
@@ -143,9 +151,8 @@ class ExerciseListModel internal constructor(
      * [withRecent], for the builder's picker, puts up to 5 recently used exercises
      * first while nothing is typed or filtered; they also stay in their pattern.
      */
-    fun filter(
+    fun find(
         query: String = "",
-        // CLEANUP: remove [area] and [MuscleArea] once the screens filter by [zones] (the Zones sheet replaces the muscle chips).
         area: MuscleArea? = null,
         ticked: Set<Equipment>? = null,
         withRecent: Boolean = false,
