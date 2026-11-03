@@ -27,7 +27,6 @@
     "inDays": "{days, plural, one {Dans # jour · {date}} many {Dans # jours · {date}} other {Dans # jours · {date}}}",
     "openSession": "Ouvrir",
     "discard": "Abandonner",
-    "startWhenReady": "Démarrez quand vous voulez",
     "discardTitle": "Abandonner cette séance ?",
     "discardBody": "Elle n’apparaîtra ni dans votre historique ni dans vos totaux. C’est définitif."
   },
@@ -205,6 +204,7 @@
     "setsHint": "Le repos entre les séries apparaît dès 2 séries. Une marche ou une course n’a pas de séries."
   },
   "player": {
+    "startWhenReady": "Démarrez quand vous voulez",
     "ready": "On y va ?",
     "start": "Lancer la séance",
     "set": "Série {set, number} sur {sets, number}",
