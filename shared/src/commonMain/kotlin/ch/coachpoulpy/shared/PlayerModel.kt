@@ -6,9 +6,9 @@ import ch.coachpoulpy.core.engine.Session
 import ch.coachpoulpy.core.engine.SessionEvent
 import ch.coachpoulpy.core.engine.SessionState
 import ch.coachpoulpy.core.engine.Timeline
-import ch.coachpoulpy.core.model.Execution
-import ch.coachpoulpy.core.model.ExecutionId
-import ch.coachpoulpy.core.model.ExecutionSource
+import ch.coachpoulpy.core.model.SessionRecord
+import ch.coachpoulpy.core.model.SessionId
+import ch.coachpoulpy.core.model.SessionSource
 import ch.coachpoulpy.core.model.Load
 import ch.coachpoulpy.core.model.MovementPattern
 import ch.coachpoulpy.core.model.PartKind
@@ -100,7 +100,7 @@ class PlayerModel internal constructor(
     private val store: LocalStore,
     private val languageCode: String,
     private val units: () -> UnitSystem = { UnitSystem.METRIC },
-    private val executionId: String,
+    private val sessionId: String,
     events: List<SessionEvent>,
     private val clock: Clock = Clock.System,
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main),
@@ -128,10 +128,10 @@ class PlayerModel internal constructor(
     fun start() {
         if (session.events.isNotEmpty()) return
         val now = clock.now()
-        store.startExecution(
-            Execution(
-                id = ExecutionId(executionId),
-                source = ExecutionSource.GUIDED,
+        store.startSession(
+            SessionRecord(
+                id = SessionId(sessionId),
+                source = SessionSource.GUIDED,
                 startedAt = now,
                 workout = WorkoutRef(workout.id, workout.version),
             ),
@@ -190,10 +190,10 @@ class PlayerModel internal constructor(
 
     private fun act(action: () -> List<SessionEvent>) {
         action().forEach { event ->
-            store.appendEvent(executionId, event)
+            store.appendEvent(sessionId, event)
             if (event is SessionEvent.Finished) {
-                store.finishExecution(executionId, event.at)
-                store.saveTotals(executionId, sessionTotals(session.events, session.timeline))
+                store.finishSession(sessionId, event.at)
+                store.saveTotals(sessionId, sessionTotals(session.events, session.timeline))
                 ticker?.cancel()
             }
         }

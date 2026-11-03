@@ -348,7 +348,7 @@ class LiveModelTest {
         m.live.stopRecording()
         runCurrent()
         // The session starts with the belt, not with the tap.
-        assertEquals(Instant.fromEpochMilliseconds(1_700_000_000_000 + 30_000), store.finishedSessions().first().single().execution.startedAt)
+        assertEquals(Instant.fromEpochMilliseconds(1_700_000_000_000 + 30_000), store.finishedSessions().first().single().record.startedAt)
     }
 
     @Test
@@ -542,7 +542,7 @@ class LiveModelTest {
         assertNull(m.live.state.value.recording)
         runCurrent()
         val saved = store.finishedSessions().first().single()
-        assertEquals(stoppedAt, saved.execution.endedAt)
+        assertEquals(stoppedAt, saved.record.endedAt)
         assertEquals(5.minutes, saved.totals?.active)
     }
 
@@ -757,16 +757,16 @@ class LiveModelTest {
         val store = LocalStore(DriverFactory())
         val reopened = walkLeftOpen(store, MemoryStore())
         runCurrent()
-        val stoppedAt = store.events(store.unfinishedExecution()!!.id.value).last().at
+        val stoppedAt = store.events(store.unfinishedRecord()!!.id.value).last().at
 
         reopened.live.stopRecording()
         runCurrent()
 
         assertNull(reopened.live.state.value.recording)
         assertEquals(30, reopened.live.state.value.summary?.durationSeconds)
-        assertNull(store.unfinishedExecution())
+        assertNull(store.unfinishedRecord())
         val saved = store.finishedSessions().first().single()
-        assertEquals(stoppedAt, saved.execution.endedAt)
+        assertEquals(stoppedAt, saved.record.endedAt)
         assertEquals(30.seconds, saved.totals?.active)
         assertEquals(58.0, saved.totals?.distanceMeters) // from the first reading in the recording to the last
     }
@@ -788,13 +788,13 @@ class LiveModelTest {
         val store = LocalStore(DriverFactory())
         val reopened = walkLeftOpen(store, MemoryStore())
         runCurrent()
-        val id = store.unfinishedExecution()!!.id.value
+        val id = store.unfinishedRecord()!!.id.value
 
         assertTrue(reopened.live.discardRecording(id))
 
         assertNull(reopened.live.state.value.recording)
         assertNull(reopened.live.state.value.finishPrompt)
-        assertNull(store.unfinishedExecution())
+        assertNull(store.unfinishedRecord())
         assertTrue(store.events(id).isEmpty())
         assertTrue(store.finishedSessions().first().isEmpty())
     }

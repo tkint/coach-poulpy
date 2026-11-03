@@ -66,7 +66,7 @@ class WorkoutPartsTest {
 
     private fun player(workout: Workout) = PlayerModel(
         workout, graph.compiler.compile(workout), graph.catalog, graph.store, "en",
-        executionId = "parts-${workout.id.value}", events = emptyList(),
+        sessionId = "parts-${workout.id.value}", events = emptyList(),
         clock = clock, scope = CoroutineScope(StandardTestDispatcher()),
     )
 
@@ -144,7 +144,7 @@ class WorkoutPartsTest {
         val workout = graph.store.latestWorkout(WorkoutId(builder.save()!!))!!
         val player = PlayerModel(
             workout, graph.compiler.compile(workout), graph.catalog, graph.store, "fr",
-            executionId = "parts-sets", events = emptyList(),
+            sessionId = "parts-sets", events = emptyList(),
             clock = clock, scope = CoroutineScope(StandardTestDispatcher()),
         )
 

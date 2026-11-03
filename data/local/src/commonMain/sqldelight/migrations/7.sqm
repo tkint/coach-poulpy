@@ -1,0 +1,4 @@
+-- Sessions: the execution tables and column are renamed to match the glossary. Rows are kept.
+ALTER TABLE execution RENAME TO session;
+ALTER TABLE execution_event RENAME TO session_event;
+ALTER TABLE session_event RENAME COLUMN execution_id TO session_id;

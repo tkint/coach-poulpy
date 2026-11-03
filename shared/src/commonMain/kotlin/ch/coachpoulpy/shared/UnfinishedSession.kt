@@ -3,8 +3,8 @@ package ch.coachpoulpy.shared
 import ch.coachpoulpy.core.engine.SessionEvent
 import ch.coachpoulpy.core.engine.Timeline
 import ch.coachpoulpy.core.engine.TimelineCompiler
-import ch.coachpoulpy.core.model.Execution
-import ch.coachpoulpy.core.model.ExecutionSource
+import ch.coachpoulpy.core.model.SessionRecord
+import ch.coachpoulpy.core.model.SessionSource
 import ch.coachpoulpy.data.local.LocalStore
 import ch.coachpoulpy.types.treadmill.TreadmillModule
 import kotlin.time.Duration
@@ -27,12 +27,12 @@ internal fun activeTime(events: List<SessionEvent>, now: Instant): Duration {
     return total + (runningSince?.let { now - it } ?: Duration.ZERO)
 }
 
-/** The plan [execution] followed, as far as the phone still has it, for its totals. */
-internal fun LocalStore.timelineOf(execution: Execution, compiler: TimelineCompiler): Timeline? {
-    val workout = execution.workout?.let { workout(it.workoutId, it.version) }
+/** The plan [record] followed, as far as the phone still has it, for its totals. */
+internal fun LocalStore.timelineOf(record: SessionRecord, compiler: TimelineCompiler): Timeline? {
+    val workout = record.workout?.let { workout(it.workoutId, it.version) }
     return when {
         workout != null -> runCatching { compiler.compile(workout) }.getOrNull()
-        execution.source == ExecutionSource.DEVICE_ONLY -> TreadmillModule.freeRun
+        record.source == SessionSource.DEVICE_ONLY -> TreadmillModule.freeRun
         else -> null
     }
 }
@@ -41,9 +41,9 @@ internal fun LocalStore.timelineOf(execution: Execution, compiler: TimelineCompi
  * Closes a session left open at its last event, never at its start, and sums it up, so it shows in
  * History like any finished session.
  */
-internal fun LocalStore.closeLeftOpen(execution: Execution, timeline: Timeline?) {
-    val id = execution.id.value
+internal fun LocalStore.closeLeftOpen(record: SessionRecord, timeline: Timeline?) {
+    val id = record.id.value
     val events = events(id)
-    finishExecution(id, events.lastOrNull()?.at ?: execution.startedAt)
+    finishSession(id, events.lastOrNull()?.at ?: record.startedAt)
     saveTotals(id, sessionTotals(events, timeline))
 }

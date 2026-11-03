@@ -2,9 +2,9 @@ package ch.coachpoulpy.shared
 
 import ch.coachpoulpy.core.engine.SessionEvent
 import ch.coachpoulpy.core.model.DeviceMetrics
-import ch.coachpoulpy.core.model.Execution
-import ch.coachpoulpy.core.model.ExecutionId
-import ch.coachpoulpy.core.model.ExecutionSource
+import ch.coachpoulpy.core.model.SessionRecord
+import ch.coachpoulpy.core.model.SessionId
+import ch.coachpoulpy.core.model.SessionSource
 import ch.coachpoulpy.core.model.WorkoutFormat
 import ch.coachpoulpy.core.model.WorkoutId
 import ch.coachpoulpy.core.model.WorkoutRef
@@ -41,8 +41,8 @@ class UnfinishedSessionTest {
     /** A guided session of [workoutId] left open 12 min 40 s in, after its first set. */
     private fun leftInPlayer(workoutId: WorkoutId): String {
         val workout = graph.store.latestWorkout(workoutId)!!
-        graph.store.startExecution(
-            Execution(ExecutionId("left"), ExecutionSource.GUIDED, startedAt = start, workout = WorkoutRef(workout.id, workout.version)),
+        graph.store.startSession(
+            SessionRecord(SessionId("left"), SessionSource.GUIDED, startedAt = start, workout = WorkoutRef(workout.id, workout.version)),
             title = workout.name,
             format = workout.format,
         )
@@ -53,7 +53,7 @@ class UnfinishedSessionTest {
 
     /** A free walk recorded in Live, killed 20 minutes in, after its last treadmill reading. */
     private fun leftInLive(): String {
-        graph.store.startExecution(Execution(ExecutionId("walk"), ExecutionSource.DEVICE_ONLY, startedAt = start), title = "Walk")
+        graph.store.startSession(SessionRecord(SessionId("walk"), SessionSource.DEVICE_ONLY, startedAt = start), title = "Walk")
         graph.store.appendEvent("walk", SessionEvent.Started(start))
         graph.store.appendEvent("walk", SessionEvent.Sample(start + 1.seconds, DeviceMetrics(speedKmh = 5.0, distanceMeters = 0.0)))
         graph.store.appendEvent("walk", SessionEvent.Sample(start + 20.minutes, DeviceMetrics(speedKmh = 5.0, distanceMeters = 1_600.0)))
@@ -98,7 +98,7 @@ class UnfinishedSessionTest {
         home.discardUnfinished()
 
         home.awaitNoOpenCard()
-        assertNull(graph.store.unfinishedExecution())
+        assertNull(graph.store.unfinishedRecord())
         assertTrue(graph.store.events(id).isEmpty())
         assertTrue(finished().isEmpty())
     }
@@ -131,7 +131,7 @@ class UnfinishedSessionTest {
 
         home.discardUnfinished()
 
-        assertNull(graph.store.unfinishedExecution())
+        assertNull(graph.store.unfinishedRecord())
         assertTrue(graph.store.events(id).isEmpty())
     }
 
@@ -141,7 +141,7 @@ class UnfinishedSessionTest {
 
         assertNull(graph.resumeSession("en"), "Live brings it back, not the player")
 
-        assertEquals(id, graph.store.unfinishedExecution()?.id?.value)
+        assertEquals(id, graph.store.unfinishedRecord()?.id?.value)
         assertTrue(finished().isEmpty())
     }
 
@@ -153,8 +153,8 @@ class UnfinishedSessionTest {
         assertNotNull(graph.player(workout("Second").value, "en"))
 
         val closed = finished().single()
-        assertEquals(id, closed.execution.id.value)
-        assertEquals(start + 12.minutes + 40.seconds, closed.execution.endedAt)
+        assertEquals(id, closed.record.id.value)
+        assertEquals(start + 12.minutes + 40.seconds, closed.record.endedAt)
         val totals = assertNotNull(closed.totals)
         assertEquals(12.minutes + 40.seconds, totals.active)
         assertEquals(1, totals.setsDone)
@@ -167,8 +167,8 @@ class UnfinishedSessionTest {
         assertNotNull(graph.player(workout().value, "en"))
 
         val closed = finished().single()
-        assertEquals(id, closed.execution.id.value)
-        assertEquals(start + 20.minutes, closed.execution.endedAt)
+        assertEquals(id, closed.record.id.value)
+        assertEquals(start + 20.minutes, closed.record.endedAt)
         assertEquals(1_600.0, closed.totals?.distanceMeters)
     }
 }

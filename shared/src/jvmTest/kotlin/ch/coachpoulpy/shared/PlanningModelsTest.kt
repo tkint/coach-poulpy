@@ -55,7 +55,7 @@ class PlanningModelsTest {
         val workout = graph.store.latestWorkout(id)!!
         val player = PlayerModel(
             workout, graph.compiler.compile(workout), graph.catalog, graph.store, "en",
-            executionId = "run-${id.value}", events = emptyList(),
+            sessionId = "run-${id.value}", events = emptyList(),
             clock = object : Clock {
                 var calls = 0
                 override fun now() = now - 30.minutes + (calls++).minutes

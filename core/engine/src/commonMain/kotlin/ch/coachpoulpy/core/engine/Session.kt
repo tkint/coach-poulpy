@@ -46,7 +46,7 @@ data class SessionState(
 }
 
 /**
- * The execution state machine. It is pure: [events] plus the current time give
+ * The session state machine. It is pure: [events] plus the current time give
  * the state, and [tick] says which events the clock has made due. The clock is
  * passed in, so tests never wait.
  */

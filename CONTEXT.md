@@ -98,6 +98,8 @@ _Avoid_: Objective
 One workout actually done, from start to end, whether guided, free, recorded from a device only, or a treadmill workout followed in Live.
 _Avoid_: Execution, activity, workout log, training
 
+In code, the header of a session (its id, source, start and end, workout and notes) is a `SessionRecord`; `Session` is the engine's state machine that folds the event log.
+
 **Session event**:
 One thing that happened during a session (a phase started, a set logged, a pause, a sample), stored in order and never changed.
 _Avoid_: Log entry

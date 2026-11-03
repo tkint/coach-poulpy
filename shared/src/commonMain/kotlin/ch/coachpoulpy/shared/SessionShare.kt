@@ -12,11 +12,11 @@ internal class SessionShare(private val store: LocalStore, private val compiler:
     fun card(sessionId: String, units: UnitSystem): ShareCard? {
         val stored = store.finishedSession(sessionId) ?: return null
         val events = store.events(sessionId)
-        val workout = stored.execution.workout?.let { store.workout(it.workoutId, it.version) }
+        val workout = stored.record.workout?.let { store.workout(it.workoutId, it.version) }
         val timeline = sessionTimeline(stored, workout, compiler)
         val totals = stored.totals ?: sessionTotals(events, timeline)
         val title = sessionRow(stored, totals, Labels(languageCode)).title
-        val endedAt = stored.execution.endedAt ?: events.filterIsInstance<SessionEvent.Finished>().lastOrNull()?.at ?: stored.execution.startedAt
+        val endedAt = stored.record.endedAt ?: events.filterIsInstance<SessionEvent.Finished>().lastOrNull()?.at ?: stored.record.startedAt
         // Only the sessions up to this one count for the tentacle it lit.
         val poulpy = PoulpyCoach(languageCode).status(store.finishedSessionEndsNow().filter { it <= endedAt }, endedAt)
         return ShareCard.of(FinishedScreens.of(title, workout, timeline, events, poulpy, units, languageCode), languageCode)

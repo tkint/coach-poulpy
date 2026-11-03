@@ -254,7 +254,7 @@ class BuilderStepsTest {
         val workout = graph.store.latestWorkout(WorkoutId(intervalRun().save()!!))!!
         val player = PlayerModel(
             workout, graph.compiler.compile(workout), graph.catalog, graph.store, "en",
-            executionId = "steps-1", events = graph.store.events("steps-1"),
+            sessionId = "steps-1", events = graph.store.events("steps-1"),
             scope = CoroutineScope(StandardTestDispatcher()),
         )
         player.start()
