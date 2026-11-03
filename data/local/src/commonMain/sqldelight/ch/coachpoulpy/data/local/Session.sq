@@ -1,0 +1,63 @@
+-- A session is an append-only event log; the session row is its header.
+CREATE TABLE session (
+    id TEXT NOT NULL PRIMARY KEY,
+    source TEXT NOT NULL,
+    workout_id TEXT,
+    workout_version INTEGER,
+    started_at INTEGER NOT NULL,
+    ended_at INTEGER,
+    -- The workout's name and format when the session started: the workout may be renamed or deleted later.
+    -- The format column keeps its older name, from when it held the workout type.
+    title TEXT,
+    workout_type TEXT,
+    -- SessionTotals as JSON, written when the session ends, or later for sessions from before history.
+    summary TEXT
+);
+
+CREATE TABLE session_event (
+    session_id TEXT NOT NULL REFERENCES session(id) ON DELETE CASCADE,
+    seq INTEGER NOT NULL,
+    at INTEGER NOT NULL,
+    payload TEXT NOT NULL,
+    PRIMARY KEY (session_id, seq)
+);
+
+insertSession:
+INSERT INTO session(id, source, workout_id, workout_version, started_at, ended_at, title, workout_type)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+
+finishSession:
+UPDATE session SET ended_at = ? WHERE id = ?;
+
+finished:
+SELECT * FROM session WHERE ended_at IS NOT NULL ORDER BY started_at DESC;
+
+setDetails:
+UPDATE session SET title = ?, workout_type = ?, summary = ? WHERE id = ?;
+
+setSummary:
+UPDATE session SET summary = ? WHERE id = ?;
+
+-- Events are deleted explicitly: SQLite leaves foreign keys off unless asked.
+deleteEvents:
+DELETE FROM session_event WHERE session_id = ?;
+
+deleteSession:
+DELETE FROM session WHERE id = ?;
+
+unfinished:
+SELECT * FROM session WHERE ended_at IS NULL ORDER BY started_at DESC LIMIT 1;
+
+appendEvent:
+INSERT INTO session_event(session_id, seq, at, payload)
+VALUES (:sessionId, (SELECT COALESCE(MAX(seq), -1) + 1 FROM session_event WHERE session_id = :sessionId), :at, :payload);
+
+events:
+SELECT payload FROM session_event WHERE session_id = ? ORDER BY seq;
+
+-- Sessions played to the end (their log ends with "finished"), not ones closed when left behind.
+finishedSessionEnds:
+SELECT e.ended_at FROM session e
+WHERE e.ended_at IS NOT NULL
+  AND (SELECT payload FROM session_event WHERE session_id = e.id ORDER BY seq DESC LIMIT 1) LIKE '{"type":"finished"%'
+ORDER BY e.ended_at;

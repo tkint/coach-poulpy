@@ -3,7 +3,7 @@ package ch.coachpoulpy.shared
 import ch.coachpoulpy.catalog.Catalog
 import ch.coachpoulpy.core.engine.TimelineCompiler
 import ch.coachpoulpy.core.model.BodyMetric
-import ch.coachpoulpy.core.model.Execution
+import ch.coachpoulpy.core.model.SessionRecord
 import ch.coachpoulpy.core.model.Ids
 import ch.coachpoulpy.core.model.Workout
 import ch.coachpoulpy.core.model.WorkoutId
@@ -109,42 +109,42 @@ class AppGraph(driverFactory: DriverFactory) {
         val workout = store.latestWorkout(WorkoutId(workoutId)) ?: return null
         // Only one session is open at a time: one left behind ends where it was left. Live ends its own, with its summary.
         liveModel?.stopRecording()
-        store.unfinishedExecution()?.let(::closeLeftOpen)
+        store.unfinishedRecord()?.let(::closeLeftOpen)
         return player(workout, Ids.newUuidV7(), languageCode)
     }
 
     /** The session left open when the app was closed, if any, exactly where it was. Null for a Live recording, which Live brings back. */
     fun resumeSession(languageCode: String): PlayerModel? {
-        val execution = store.unfinishedExecution()?.takeUnless { it.source.isLive } ?: return null
-        val ref = execution.workout
+        val record = store.unfinishedRecord()?.takeUnless { it.source.isLive } ?: return null
+        val ref = record.workout
         val workout = ref?.let { store.workout(it.workoutId, it.version) }
         if (workout == null) {
             // Its workout was deleted: close it so it stops being offered.
-            closeLeftOpen(execution)
+            closeLeftOpen(record)
             return null
         }
-        return player(workout, execution.id.value, languageCode)
+        return player(workout, record.id.value, languageCode)
     }
 
     /**
-     * Deletes [executionId], the session left open, with everything it recorded: nothing of it shows in the history
+     * Deletes [sessionId], the session left open, with everything it recorded: nothing of it shows in the history
      * or the totals. Live drops it itself when it holds the recording.
      */
-    private fun discardOpen(executionId: String) {
-        if (liveModel?.discardRecording(executionId) == true) return
-        store.deleteSession(executionId)
+    private fun discardOpen(sessionId: String) {
+        if (liveModel?.discardRecording(sessionId) == true) return
+        store.deleteSession(sessionId)
     }
 
-    private fun closeLeftOpen(execution: Execution) = store.closeLeftOpen(execution, store.timelineOf(execution, compiler))
+    private fun closeLeftOpen(record: SessionRecord) = store.closeLeftOpen(record, store.timelineOf(record, compiler))
 
-    private fun player(workout: Workout, executionId: String, languageCode: String) = PlayerModel(
+    private fun player(workout: Workout, sessionId: String, languageCode: String) = PlayerModel(
         workout = workout,
         timeline = compiler.compile(workout),
         catalog = catalog,
         store = store,
         languageCode = languageCode,
         units = ::units,
-        executionId = executionId,
-        events = store.events(executionId),
+        sessionId = sessionId,
+        events = store.events(sessionId),
     )
 }

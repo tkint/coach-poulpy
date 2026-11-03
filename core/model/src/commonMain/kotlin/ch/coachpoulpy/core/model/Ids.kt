@@ -30,7 +30,7 @@ object Ids {
 @Serializable @JvmInline value class PlanId(val value: String)
 @Serializable @JvmInline value class EnrollmentId(val value: String)
 @Serializable @JvmInline value class GoalId(val value: String)
-@Serializable @JvmInline value class ExecutionId(val value: String)
+@Serializable @JvmInline value class SessionId(val value: String)
 
 /**
  * Text in each language it was translated into, keyed by language code (`{"en": "Goblet squat", "fr": "Squat

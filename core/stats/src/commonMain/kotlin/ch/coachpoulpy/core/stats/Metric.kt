@@ -1,7 +1,7 @@
 package ch.coachpoulpy.core.stats
 
 /**
- * Statistics are derived from executions, never typed in. Each workout type
+ * Statistics are derived from sessions, never typed in. Each workout type
  * declares the metrics it produces; this module computes them. History so far
  * uses time and distance ([SessionTotals]); the rest come with per-exercise progress.
  */

@@ -43,7 +43,7 @@ class PlayerModelTest {
         val workout = graph.store.latestWorkout(id)!!
         return PlayerModel(
             workout, graph.compiler.compile(workout), graph.catalog, graph.store, "en",
-            executionId = "run-1", events = graph.store.events("run-1"),
+            sessionId = "run-1", events = graph.store.events("run-1"),
             clock = clock, scope = CoroutineScope(StandardTestDispatcher()),
         )
     }
@@ -88,7 +88,7 @@ class PlayerModelTest {
         with(player.state.value) {
             assertEquals(PlayerStatus.FINISHED, status)
         }
-        assertNull(graph.store.unfinishedExecution())
+        assertNull(graph.store.unfinishedRecord())
         val finished = player.finished(UnitSystem.METRIC)!!
         assertEquals("Well done!", finished.heading)
         assertEquals("3 of 3 sets done in 2 min", finished.summary)
@@ -160,7 +160,7 @@ class PlayerModelTest {
             assertEquals(true, isRest)
             assertEquals(45, remainingSeconds) // nothing was written after the set: the rest picks up from its start
         }
-        assertNotNull(graph.store.unfinishedExecution())
+        assertNotNull(graph.store.unfinishedRecord())
 
         resumed.resume()
         clock.advance(5.seconds)
@@ -175,7 +175,7 @@ class PlayerModelTest {
         player.done()
         player.stop()
         assertEquals(true, player.finished(UnitSystem.METRIC)?.summary?.startsWith("1 of 3 sets done"))
-        assertNull(graph.store.unfinishedExecution())
+        assertNull(graph.store.unfinishedRecord())
     }
 
     @Test

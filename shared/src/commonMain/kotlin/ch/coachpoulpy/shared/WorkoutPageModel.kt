@@ -152,8 +152,8 @@ class WorkoutPageModel internal constructor(
     private fun build(workouts: List<Workout>, plans: List<PlannedWorkout>, sessions: List<StoredSession>): WorkoutPageState {
         val workout = workouts.firstOrNull { it.id == workoutId } ?: return WorkoutPageState(loaded = true, found = false)
         val today = clock.now().toLocalDateTime(zone).date
-        val done = sessions.filter { it.counts && it.execution.workout?.workoutId == workoutId }
-        val doneToday = done.any { it.execution.startedAt.toLocalDateTime(zone).date == today }
+        val done = sessions.filter { it.counts && it.record.workout?.workoutId == workoutId }
+        val doneToday = done.any { it.record.startedAt.toLocalDateTime(zone).date == today }
         val upcoming = upcomingDays(plans, workoutId, today, doneToday, zone)
         val minutes = done.mapNotNull { it.realTotals?.active?.inWholeMinutes?.toInt() }.sorted()
         val equipment = exerciseSteps(workout).mapNotNull { catalog[it.exercise] }
@@ -171,7 +171,7 @@ class WorkoutPageModel internal constructor(
                 listOfNotNull(equipment.takeIf { it.isNotEmpty() }?.joinToString(", "))).joinToString(" · "),
             parts = parts(workout),
             timesDone = done.size,
-            lastDoneMillis = done.maxOfOrNull { it.execution.startedAt }?.toEpochMilliseconds(),
+            lastDoneMillis = done.maxOfOrNull { it.record.startedAt }?.toEpochMilliseconds(),
             usualMinutes = minutes.getOrNull(minutes.size / 2)?.coerceAtLeast(1),
             plans = upcoming,
             deletePrompt = labels.deletePrompt(workout.name, upcoming.size, done.size),

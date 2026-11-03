@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 
 /** How a session was run. Stored by name: a value is never renamed. */
 @Serializable
-enum class ExecutionSource {
+enum class SessionSource {
     /** A workout followed in the player. */
     GUIDED,
     FREE,
@@ -23,9 +23,9 @@ enum class ExecutionSource {
 
 /** The header of one session actually done. Its content is the fold of its event log. */
 @Serializable
-data class Execution(
-    val id: ExecutionId,
-    val source: ExecutionSource,
+data class SessionRecord(
+    val id: SessionId,
+    val source: SessionSource,
     val startedAt: Instant,
     val endedAt: Instant? = null,
     val workout: WorkoutRef? = null,

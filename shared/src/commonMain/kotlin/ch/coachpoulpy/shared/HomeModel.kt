@@ -110,7 +110,7 @@ class HomeModel internal constructor(
 
     /** Deletes the session left open: it leaves no trace in the history or the totals. */
     fun discardUnfinished() {
-        store.unfinishedExecution()?.let { discardOpen(it.id.value) }
+        store.unfinishedRecord()?.let { discardOpen(it.id.value) }
         refresh()
     }
 
@@ -131,25 +131,25 @@ class HomeModel internal constructor(
         val livePlans = plans.filter { it.workoutId in byId }
 
         val doneToday = sessions
-            .filter { it.execution.startedAt.toLocalDateTime(zone).date == today }
+            .filter { it.record.startedAt.toLocalDateTime(zone).date == today }
             .mapNotNull { session -> session.realTotals?.let { session to it } }
-            .sortedBy { (session, _) -> session.execution.startedAt }
+            .sortedBy { (session, _) -> session.record.startedAt }
 
         // Each session done today ticks off one plan of today for the same workout.
         val todo = livePlans.filter { it.day == today }.toMutableList()
         doneToday.forEach { (session, _) ->
-            val id = session.execution.workout?.workoutId ?: return@forEach
+            val id = session.record.workout?.workoutId ?: return@forEach
             todo.firstOrNull { it.workoutId == id }?.let(todo::remove)
         }
 
-        val openWorkout = open?.execution?.workout?.let { ref -> store.workout(ref.workoutId, ref.version) }
+        val openWorkout = open?.record?.workout?.let { ref -> store.workout(ref.workoutId, ref.version) }
         val openPlan = openWorkout?.let { workout -> todo.firstOrNull { it.workoutId == workout.id } }
         val items = buildList {
-            if (open != null && open.execution.source.isLive) {
+            if (open != null && open.record.source.isLive) {
                 // Recorded in Live: a free walk or run has no workout behind it.
                 add(
                     TodayItem(
-                        key = "open:${open.execution.id.value}",
+                        key = "open:${open.record.id.value}",
                         status = TodayStatus.IN_PROGRESS,
                         title = open.title ?: openWorkout?.name ?: labels.freeRun,
                         details = openWorkout?.let(facts::details).orEmpty(),
@@ -161,12 +161,12 @@ class HomeModel internal constructor(
                     ),
                 )
             } else if (open != null && openWorkout != null) {
-                add(item(TodayStatus.IN_PROGRESS, "open:${open.execution.id.value}", byId[openWorkout.id] ?: openWorkout, openPlan))
+                add(item(TodayStatus.IN_PROGRESS, "open:${open.record.id.value}", byId[openWorkout.id] ?: openWorkout, openPlan))
             }
             todo.filter { it != openPlan }.forEach { plan -> add(item(TodayStatus.TO_DO, "plan:${plan.id}", byId.getValue(plan.workoutId), plan)) }
             doneToday.forEach { (session, totals) ->
                 val row = sessionRow(session, totals, labels)
-                add(TodayItem("done:${row.id}", TodayStatus.DONE, row.title, "", "", session.execution.workout?.workoutId?.value?.takeIf { WorkoutId(it) in byId }, null, row))
+                add(TodayItem("done:${row.id}", TodayStatus.DONE, row.title, "", "", session.record.workout?.workoutId?.value?.takeIf { WorkoutId(it) in byId }, null, row))
             }
         }
 

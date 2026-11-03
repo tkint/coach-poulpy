@@ -8,7 +8,7 @@ The brand, design system and architecture are published at [tkint.github.io/coac
 
 | Path | What it is |
 | --- | --- |
-| `core/model` | Domain types: exercises, workouts, steps, prescriptions, plans, executions |
+| `core/model` | Domain types: exercises, workouts, steps, prescriptions, plans, session records |
 | `core/engine` | Timeline compiler, session state machine, event log |
 | `core/stats` | Derived metrics (placeholder) |
 | `types/treadmill` | Treadmill recording, summaries and step estimate |
