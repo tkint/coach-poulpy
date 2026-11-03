@@ -1028,5 +1028,3 @@ svg { flex: none; }
 .body-line { fill: none; stroke: var(--cp-outline); stroke-width: 1; stroke-linecap: round; }
 .body-area[aria-checked="true"].body-skin { fill: var(--cp-primary); }
 
-/* Draft: a mixed workout in the player (#82). */
-.target-value--compact { font-size: 80px; line-height: 84px; }
