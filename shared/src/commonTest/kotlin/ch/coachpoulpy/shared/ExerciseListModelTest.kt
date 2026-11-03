@@ -131,6 +131,32 @@ class ExerciseListModelTest {
     }
 
     @Test
+    fun searchForgivesOneTypoOnWordsOfFiveLettersOrMore() {
+        assertEquals(pushUps.toSet(), search("pusj up").toSet())
+        assertTrue("goblet-squat" in search("squta"))
+        assertTrue("goblet-squat" in search("squatt"))
+        assertTrue("dumbbell-row" in search("dumbell row"))
+        assertTrue("goblet-squat" in search("squta", "fr"))
+    }
+
+    @Test
+    fun noWordUnderFiveLettersGetsATypoMatch() {
+        assertEquals(emptyList(), search("pusj"))
+        assertEquals(emptyList(), search("sqat"))
+        assertEquals(emptyList(), search("rdk"))
+    }
+
+    @Test
+    fun typoMatchesRankAfterEveryExactTier() {
+        val exact = ExerciseSearch(Catalog.bundled.offered).rank("squat")!!
+        val typo = ExerciseSearch(Catalog.bundled.offered).rank("squta")!!
+        assertTrue(typo.isNotEmpty() && typo.values.all { it.tier == 5 })
+        assertTrue(exact.values.all { it.tier < 5 })
+        // A query mixing an exact word and a typo still ranks after exact matches.
+        assertTrue(ExerciseSearch(Catalog.bundled.offered).rank("squat dumbell")!!.values.all { it.tier == 5 })
+    }
+
+    @Test
     fun aNameThatStartsWithTheWordComesFirst() {
         val found = search("push")
         assertEquals("push-up", found.first())
