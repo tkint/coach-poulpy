@@ -68,9 +68,9 @@ object WorkoutFile {
     /**
      * Reads [text] against [catalog]. The workout comes back as a copy: a new id made here, version 1, and the same name,
      * format and parts, so adding it never overwrites or merges into a workout of the library. [existingNames] are the
-     * library's names; one already taken gets [copyName] ("Upper body (copy)").
+     * library's names; a blank name becomes [autoName]; one already taken gets [copyName] ("Upper body (copy)").
      */
-    fun read(text: String, catalog: Catalog, existingNames: Set<String>, copyName: (String) -> String): WorkoutFileReading {
+    fun read(text: String, catalog: Catalog, existingNames: Set<String>, autoName: (Workout) -> String, copyName: (String) -> String): WorkoutFileReading {
         val header = try {
             json.decodeFromString(WorkoutFileHeader.serializer(), text)
         } catch (_: SerializationException) {
@@ -91,7 +91,8 @@ object WorkoutFile {
         val unknown = exerciseSlugs(sent).filter { catalog[it] == null }.map { it.value }.distinct()
         if (unknown.isNotEmpty()) return refused(WorkoutFileProblem.UNKNOWN_EXERCISES, unknown)
         if (sent.problems().isNotEmpty()) return refused(WorkoutFileProblem.INVALID_WORKOUT)
-        val name = if (sent.name in existingNames) copyName(sent.name) else sent.name
+        val named = if (sent.name.isBlank()) autoName(sent) else sent.name
+        val name = if (named in existingNames) copyName(named) else named
         return WorkoutFileReading(sent.copy(id = WorkoutId(Ids.newUuidV7()), version = 1, name = name), null)
     }
 

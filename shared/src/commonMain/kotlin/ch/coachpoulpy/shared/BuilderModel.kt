@@ -498,7 +498,7 @@ class BuilderModel internal constructor(
     /** Saves the workout and returns its id, or null when it is not ready ([BuilderState.canSave]). */
     fun save(): String? {
         if (!state.value.canSave) return null
-        val workout = draft.toWorkout()
+        val workout = draft.toWorkout { it.autoName(catalog, labels) }
         store.saveWorkout(workout)
         draft = draft.copy(id = workout.id, version = workout.version + 1)
         return workout.id.value
@@ -614,7 +614,7 @@ class BuilderModel internal constructor(
             rows = rows,
             partOptions = partOptions,
             addedKey = addedKey,
-            canSave = draft.name.isNotBlank() && draft.format != null && rows.any { !it.isRest } &&
+            canSave = draft.format != null && rows.any { !it.isRest } &&
                 draft.parts.all { it.steps.isNotEmpty() } && parts.all { part -> part.steps.all { it.repeatGroup?.rows?.isNotEmpty() ?: true } },
         )
     }

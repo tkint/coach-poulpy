@@ -46,6 +46,9 @@ _Avoid_: Workout type, kind, sport, category
 A versioned list of parts in one format, ready to be done.
 _Avoid_: Routine, program, training
 
+**Automatic name**:
+The name a workout gets when it is saved or imported with a blank one: its first exercise, then "(+2)" for the other exercises it uses ("Squat (+2)"), in the app's language. A workout always has a name; once saved the automatic name is an ordinary name and can be renamed.
+
 **Part**:
 One section of a workout, holding its steps: the warm-up (at most one, first), a work part (one or more, "Work 1", "Work 2"), or the cool down (at most one, last).
 _Avoid_: Phase (a phase is one stretch of a timeline), block, section

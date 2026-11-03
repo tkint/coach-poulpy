@@ -226,6 +226,12 @@ internal class Labels(private val languageCode: String, private val units: () ->
 
     fun exercises(count: Int) = DomainText.countExercises(languageCode, count)
 
+    /** The name a workout saved without one gets: its first exercise and how many others follow, "Squat (+2)". */
+    fun autoName(first: String, others: Int) = DomainText.workoutAutoName(languageCode, others, first)
+
+    /** The name of a workout with no exercise to name it after. */
+    fun autoNameEmpty() = DomainText.workoutAutoNameEmpty(languageCode)
+
     /** The name a copy starts with: "Upper body (copy)". */
     fun copyName(name: String) = DomainText.workoutCopyName(languageCode, name)
 

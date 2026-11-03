@@ -164,6 +164,8 @@
     "pounds": "{pounds} lb"
   },
   "workout": {
+    "autoName": "{others, plural, =0 {{name}} other {{name} (+#)}}",
+    "autoNameEmpty": "Workout",
     "copyName": "{name} (copy)",
     "deleteTitle": "Delete {name}?",
     "deletePlanned": "{planned, plural, one {It comes off its planned day.} other {It comes off its # planned days.}}",
