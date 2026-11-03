@@ -85,6 +85,24 @@ class GeneratorTest {
     }
 
     @Test
+    fun permissionTextsGoToInfoPlistUnderTheirKey() {
+        val translations = translations(
+            mapOf("permission.bluetooth" to "Connects to \"your\" treadmill", "home.today" to "Today"),
+            mapOf("permission.bluetooth" to "Se connecte à votre tapis", "home.today" to "Aujourd’hui"),
+        )
+        val messages = translations.messages("app")
+        val order = messages.getValue("en").associate { it.id to it.arguments }
+        val permissions = messages.getValue("fr").filter { it.id in Apple.INFO_PLIST_KEYS }
+        assertEquals(1, permissions.size)
+        assertContains(Apple.infoPlist(permissions, order), "\"NSBluetoothAlwaysUsageDescription\" = \"Se connecte à votre tapis\";")
+        assertContains(Apple.infoPlist(messages.getValue("en").filter { it.id in Apple.INFO_PLIST_KEYS }, order), "Connects to \\\"your\\\" treadmill")
+        val dir = kotlin.io.path.createTempDirectory().toFile()
+        Apple.write(translations, "app", dir)
+        assertTrue(java.io.File(dir, "fr.lproj/InfoPlist.strings").exists())
+        assertTrue("permission.bluetooth" !in java.io.File(dir, "fr.lproj/Localizable.strings").readText())
+    }
+
+    @Test
     fun domainTextIsOneTypedFunctionPerMessage() {
         val source = Kotlin.source(
             translations(

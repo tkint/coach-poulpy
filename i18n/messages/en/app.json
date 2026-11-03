@@ -2,6 +2,9 @@
   "app": {
     "name": "Coach Poulpy"
   },
+  "permission": {
+    "bluetooth": "Coach Poulpy connects to your treadmill to show and record your speed, distance and heart rate."
+  },
   "tab": {
     "home": "Home",
     "library": "Library",

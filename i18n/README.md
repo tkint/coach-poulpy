@@ -13,6 +13,7 @@ Every word a person reads lives here, one JSON file per language and namespace (
 2. Read it where it's used. The build generates everything else, nothing generated is committed, and it fails when a shipped language lacks the message or names other arguments:
    - **Android**: `R.string.<id with dots as underscores>` (`home.seeWorkout` is `R.string.home_seeWorkout`), or `R.plurals.…` for a plural, with arguments in order of first appearance in English.
    - **iOS**: the id followed by one format per argument, in the same order: `Text("plan.title \(name)")` reads `plan.title %@`, `L("player.step %lld %lld", index, count)` reads `player.step %lld %lld`.
+   - **iOS permission text**: `permission.bluetooth` is written to `InfoPlist.strings` as `NSBluetoothAlwaysUsageDescription`; a new Info.plist text is added to `Apple.INFO_PLIST_KEYS` in `tools/i18n`.
    - **Shared Kotlin**: `DomainText.<id in camelCase>(language, …)`, for example `DomainText.countRounds(languageCode, 3)`. `Labels` and `PoulpyCoach` wrap these for the view models.
    - **Catalog**: `<slug>.name`, `<slug>.instructions.<n>`, `<slug>.variationNote` and the optional, comma-separated `<slug>.aliases`. Changing them raises the catalog `version`; CI fails a pull request that changes them without.
 3. A message translators could misread gets a note in [the English rules and notes](glossary/en.md), never in the JSON.

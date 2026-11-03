@@ -7,17 +7,22 @@ import java.io.File
  * with a plural. A message's key is its id followed by one format per argument, in order of first
  * appearance in the source locale (`plan.title %@`, `player.step %lld %lld`), which is the key SwiftUI
  * looks up for `Text("player.step \(index) \(count)")`. The text uses positional arguments: `%1$@` for
- * text, `%1$lld` for a number.
+ * text, `%1$lld` for a number. The messages in [INFO_PLIST_KEYS] are the permission texts of Info.plist: they
+ * go to `InfoPlist.strings` under their Info.plist key, not to `Localizable.strings`.
  */
 object Apple {
+    val INFO_PLIST_KEYS = mapOf("permission.bluetooth" to "NSBluetoothAlwaysUsageDescription")
+
     fun write(translations: Translations, namespace: String, outputDir: File) {
         val messages = translations.messages(namespace)
         val order = messages.getValue(translations.baseLocale).associate { it.id to it.arguments }
         outputDir.deleteRecursively()
         messages.forEach { (locale, list) ->
             val folder = File(outputDir, "$locale.lproj").apply { mkdirs() }
-            File(folder, "Localizable.strings").writeText(strings(list.filter { it.plural == null }, order))
-            File(folder, "Localizable.stringsdict").writeText(stringsdict(list.filter { it.plural != null }, order))
+            val (permissions, texts) = list.partition { it.id in INFO_PLIST_KEYS }
+            File(folder, "Localizable.strings").writeText(strings(texts.filter { it.plural == null }, order))
+            File(folder, "Localizable.stringsdict").writeText(stringsdict(texts.filter { it.plural != null }, order))
+            if (permissions.isNotEmpty()) File(folder, "InfoPlist.strings").writeText(infoPlist(permissions, order))
         }
     }
 
@@ -29,6 +34,14 @@ object Apple {
         messages.forEach { message ->
             val arguments = order.getValue(message.id)
             appendLine("\"${quote(key(message.id, arguments))}\" = \"${quote(text(message.parts, arguments))}\";")
+        }
+    }
+
+    fun infoPlist(messages: List<Message>, order: Map<String, List<Argument>>): String = buildString {
+        appendLine("/* Generated from i18n/messages by tools/i18n. Do not edit: change the JSON instead. */")
+        messages.forEach { message ->
+            check(message.plural == null && order.getValue(message.id).isEmpty()) { "${message.id} must be plain text" }
+            appendLine("\"${INFO_PLIST_KEYS.getValue(message.id)}\" = \"${quote(text(message.parts, emptyList()))}\";")
         }
     }
 
