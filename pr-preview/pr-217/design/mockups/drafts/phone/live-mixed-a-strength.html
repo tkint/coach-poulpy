@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Live · mixed workout, option A, strength step</title>
+<meta name="mockup:screen" content="live-mixed-a-strength">
+<meta name="mockup:section" content="Live">
+<meta name="mockup:issue" content="82">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../../../web/src/styles/tokens.css">
+<link rel="stylesheet" href="../../shared/mockup.css">
+<script src="../../shared/mockup-theme.js"></script>
+</head>
+<body>
+<main class="phone">
+  <div class="live-title-bar">
+    <h1>Live</h1>
+    <a class="device-pill" href="#" id="devices-pill"><span class="dot" aria-hidden="true"></span>3 connected</a>
+  </div>
+  <div class="live-body">
+      <section class="treadmill-strip treadmill-strip--idle" id="treadmill-strip" aria-label="Treadmill" data-component="treadmill-strip">
+        <div><span class="label">Speed</span><span class="value">0.0 <small>km/h</small></span></div>
+        <div><span class="label">Distance</span><span class="value">2.00 <small>km</small></span></div>
+        <div><span class="label">Heart rate</span><span class="value">121 <small>bpm</small></span></div>
+      </section>
+      <section class="step-card" id="current-step" aria-label="Current step" data-component="step-card">
+        <img src="../../../poulpy/pose_straining.svg" alt="Poulpy straining" width="86" height="78">
+        <span class="part-line" id="part-line" data-component="part-line">Work</span>
+        <h2 class="title">Bodyweight squats</h2>
+        <span class="set-count numbers">Set 2 of 3</span>
+        <span class="target-value">15</span>
+        <span class="target-unit">reps</span>
+        <div class="actions">
+          <button class="secondary-button" data-component="secondary-button" type="button">Skip</button>
+          <a class="primary-button" data-component="primary-button" href="#">Done</a>
+        </div>
+      </section>
+      <div class="next-card" id="next-step" data-component="next-card"><span class="label">Next</span><span>Rest 1 min, then set 3</span></div>
+      <p class="draft-note">Option A: Live draws the step itself, so the player's step UI becomes shared Compose and SwiftUI components. The belt being still does nothing here.</p>
+  </div>
+  <nav class="nav-bar" aria-label="Main" data-component="nav-bar">
+    <a class="nav-item" href="../../agreed/phone/home-planned.html"><span><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7M5 9.5V20h5v-6h4v6h5V9.5"/></svg></span>Home</a>
+    <a class="nav-item" href="../../agreed/phone/library-workouts.html"><span><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4v16H5zM10 4h4v16h-4zM15.2 5.3l3.9-1 3.4 14.8-3.9 1z"/></svg></span>Library</a>
+    <a class="nav-item" href="../../agreed/phone/live-ready.html" aria-current="page"><span><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3-7 4 14 3-7h4"/></svg></span>Live</a>
+    <a class="nav-item" href="../../agreed/phone/history-calendar.html"><span><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.4-5.7L4 8.5M4 4v4.5h4.5M12 8v4l3 2"/></svg></span>History</a>
+    <a class="nav-item" href="../../agreed/phone/settings-general.html"><span><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg></span>Settings</a>
+  </nav>
+</main>
+</body>
+</html>
