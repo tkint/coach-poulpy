@@ -154,8 +154,13 @@ private fun ColumnScope.Running(state: PlayerState, model: PlayerModel, onClose:
     var confirmStop by remember { mutableStateOf(false) }
     val paused = state.status == PlayerStatus.PAUSED
 
-    PlayerBar(state, paused, onToggle = { if (paused) model.resume() else model.pause() }, onEnd = { confirmStop = true })
-    if (state.isRest) {
+    val waiting = state.waitingToStart
+    PlayerBar(state, paused && !waiting, onToggle = { if (paused) model.resume() else model.pause() }, onEnd = { confirmStop = true }, canToggle = !waiting)
+    if (waiting) {
+        StartStep(state, stringResource(R.string.action_start), onSkip = model::skip, onDone = model::done, onStart = model::startStep) {
+            WaitingLine(stringResource(R.string.player_startWhenReady))
+        }
+    } else if (state.isRest) {
         RestStep(state, paused, onSkip = model::skip, onAdjust = model::adjustRest)
     } else {
         WorkStep(state, paused, onSkip = model::skip, onDone = model::done)

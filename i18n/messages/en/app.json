@@ -27,6 +27,7 @@
     "inDays": "{days, plural, one {In # day · {date}} other {In # days · {date}}}",
     "openSession": "Open",
     "discard": "Discard",
+    "startWhenReady": "Start when you’re ready",
     "discardTitle": "Discard this session?",
     "discardBody": "It won’t show in your history or your totals. This can’t be undone."
   },

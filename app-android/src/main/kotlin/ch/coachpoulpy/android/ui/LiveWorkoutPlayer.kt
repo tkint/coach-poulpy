@@ -91,18 +91,16 @@ internal fun LiveWorkoutPlayer(state: LiveUiState, recording: RecordingUi, playe
         )
 }
 
-/** A walk or run that has not begun: waiting for the belt to move, or for Start when there is no treadmill. */
+/** A walk or run that has not begun, in Live: waiting for the belt to move, for Start, or for the treadmill to connect. */
 @Composable
 private fun ColumnScope.WaitingStep(state: PlayerState, wait: StepWait, onSkip: () -> Unit, onDone: () -> Unit, onStart: () -> Unit) {
-    Column(Modifier.weight(1f).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-        Image(
-            painterResource(PoulpyDrawing.STRAINING.drawable),
-            contentDescription = null,
-            modifier = Modifier.padding(bottom = PoulpySpace.md).size(width = 130.dp, height = 117.dp),
-        )
-        PartLine(state)
-        Text(state.title, style = PoulpyTextStyles.Title, textAlign = TextAlign.Center)
-        Spacer(Modifier.height(PoulpySpace.md))
+    StartStep(
+        state,
+        startLabel = stringResource(if (wait == StepWait.FOR_BELT) R.string.live_startWithoutIt else R.string.action_start),
+        onSkip = onSkip,
+        onDone = onDone,
+        onStart = onStart,
+    ) {
         if (wait == StepWait.FOR_BELT) {
             Column(
                 Modifier.semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite },
@@ -117,14 +115,42 @@ private fun ColumnScope.WaitingStep(state: PlayerState, wait: StepWait, onSkip: 
                 )
             }
         } else {
-            Text(
-                stringResource(if (wait == StepWait.FOR_TAP) R.string.live_stepWaitTap else R.string.live_stepNoTreadmill),
-                fontSize = 17.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-            )
+            WaitingLine(stringResource(if (wait == StepWait.FOR_TAP) R.string.live_stepWaitTap else R.string.live_stepNoTreadmill))
         }
+    }
+}
+
+@Composable
+internal fun WaitingLine(text: String) {
+    Text(
+        text,
+        fontSize = 17.sp,
+        fontWeight = FontWeight.Bold,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        textAlign = TextAlign.Center,
+    )
+}
+
+/** A walk or run that has not begun, shared with the guided player: [message] says what it waits for, Start begins it. */
+@Composable
+internal fun ColumnScope.StartStep(
+    state: PlayerState,
+    startLabel: String,
+    onSkip: () -> Unit,
+    onDone: () -> Unit,
+    onStart: () -> Unit,
+    message: @Composable ColumnScope.() -> Unit,
+) {
+    Column(Modifier.weight(1f).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+        Image(
+            painterResource(PoulpyDrawing.STRAINING.drawable),
+            contentDescription = null,
+            modifier = Modifier.padding(bottom = PoulpySpace.md).size(width = 130.dp, height = 117.dp),
+        )
+        PartLine(state)
+        Text(state.title, style = PoulpyTextStyles.Title, textAlign = TextAlign.Center)
+        Spacer(Modifier.height(PoulpySpace.md))
+        message()
         Spacer(Modifier.height(PoulpySpace.md))
         Text(
             state.targetLabel.orEmpty(),
@@ -134,11 +160,7 @@ private fun ColumnScope.WaitingStep(state: PlayerState, wait: StepWait, onSkip: 
     }
     Spacer(Modifier.height(PoulpySpace.lg))
     Button(onClick = onStart, modifier = Modifier.fillMaxWidth().height(64.dp)) {
-        Text(
-            stringResource(if (wait == StepWait.FOR_BELT) R.string.live_startWithoutIt else R.string.action_start),
-            fontSize = 19.sp,
-            fontWeight = FontWeight.ExtraBold,
-        )
+        Text(startLabel, fontSize = 19.sp, fontWeight = FontWeight.ExtraBold)
     }
     // Done cuts the step short without the feel of skipping it.
     Row(horizontalArrangement = Arrangement.spacedBy(PoulpySpace.md), modifier = Modifier.fillMaxWidth().padding(top = PoulpySpace.md)) {

@@ -105,9 +105,20 @@ struct PlayerView: View {
     private func running(_ model: PlayerModel, _ state: PlayerState) -> some View {
         let paused = state.status == .paused
 
-        PlayerSteps.bar(state, paused: paused, canToggle: true, onToggle: { paused ? model.resume() : model.pause() }, onEnd: { confirmStop = true })
+        let waiting = state.waitingToStart
+        PlayerSteps.bar(state, paused: paused && !waiting, canToggle: !waiting, onToggle: { paused ? model.resume() : model.pause() }, onEnd: { confirmStop = true })
 
-        if state.isRest {
+        if waiting {
+            PlayerSteps.startStep(
+                state,
+                startLabel: "action.start",
+                onSkip: { model.skip() },
+                onDone: { model.done() },
+                onStart: { model.startStep() }
+            ) {
+                PlayerSteps.waitingLine("player.startWhenReady")
+            }
+        } else if state.isRest {
             PlayerSteps.restStep(state, paused: paused, onSkip: { model.skip() }, onAdjust: { model.adjustRest(seconds: Int32($0)) })
         } else {
             PlayerSteps.workStep(state, paused: paused, onSkip: { model.skip() }, onDone: { model.done() })

@@ -19,6 +19,56 @@ enum PlayerSteps {
         }
     }
 
+    static func waitingLine(_ key: LocalizedStringKey) -> some View {
+        Text(key)
+            .font(.custom(PoulpyFontFace.nunitoBold, size: 17, relativeTo: .body))
+            .foregroundStyle(PoulpyColor.onSurfaceVariant)
+            .multilineTextAlignment(.center)
+    }
+
+    /// A walk or run that has not begun, shared with the guided player: `message` says what it waits for, Start begins it.
+    @ViewBuilder
+    static func startStep<Message: View>(
+        _ state: PlayerState,
+        startLabel: LocalizedStringKey,
+        onSkip: @escaping () -> Void,
+        onDone: @escaping () -> Void,
+        onStart: @escaping () -> Void,
+        @ViewBuilder message: () -> Message
+    ) -> some View {
+        Spacer(minLength: 0)
+        Image(PoulpyDrawing.straining.imageName).resizable().scaledToFit().frame(width: 130, height: 117).accessibilityHidden(true)
+        partLine(state)
+        Text(state.title).font(PoulpyFont.title).multilineTextAlignment(.center)
+        message()
+        Text(state.targetLabel ?? "").font(.custom(PoulpyFontFace.nunitoExtraBold, fixedSize: 48)).multilineTextAlignment(.center)
+        Spacer(minLength: 0)
+        Button(action: onStart) {
+            Text(startLabel)
+                .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 19, relativeTo: .body))
+                .foregroundStyle(PoulpyColor.onPrimary)
+                .frame(maxWidth: .infinity, minHeight: 64)
+                .background(PoulpyColor.primary, in: Capsule())
+        }
+        .buttonStyle(.plain)
+        // Done cuts the step short without the feel of skipping it.
+        HStack(spacing: PoulpySpace.md) {
+            outlinedButton("player.skip", action: onSkip)
+            outlinedButton("player.done", action: onDone)
+        }
+    }
+
+    private static func outlinedButton(_ key: LocalizedStringKey, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(key)
+                .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 17, relativeTo: .body))
+                .foregroundStyle(PoulpyColor.onBackground)
+                .frame(maxWidth: .infinity, minHeight: 56)
+                .overlay(Capsule().stroke(PoulpyColor.outline, lineWidth: 2))
+        }
+        .buttonStyle(.plain)
+    }
+
     /// An exercise: Poulpy straining, the part, the name, the set, the big target, what comes next, Skip and Done (`player-set`, `player-circuit-round`).
     @ViewBuilder
     static func workStep(_ state: PlayerState, paused: Bool, alwaysDone: Bool = false, onSkip: @escaping () -> Void, onDone: @escaping () -> Void) -> some View {

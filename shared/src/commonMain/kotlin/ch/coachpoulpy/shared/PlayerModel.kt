@@ -1,6 +1,7 @@
 package ch.coachpoulpy.shared
 
 import ch.coachpoulpy.catalog.Catalog
+import ch.coachpoulpy.core.engine.Phase
 import ch.coachpoulpy.core.engine.Session
 import ch.coachpoulpy.core.engine.SessionEvent
 import ch.coachpoulpy.core.engine.SessionState
@@ -79,6 +80,8 @@ data class PlayerState(
     val nextRound: String?,
     val phaseNumber: Int,
     val phaseCount: Int,
+    /** A walk or run reached from other exercises, paused until the person taps Start. */
+    val waitingToStart: Boolean = false,
 )
 
 /**
@@ -102,6 +105,9 @@ class PlayerModel internal constructor(
     private val session = Session(timeline, events)
     private val mutableState = MutableStateFlow(render())
     private var ticker: Job? = null
+
+    /** A walk or run just reached from other exercises is paused until the person starts it. */
+    private var waiting = false
 
     val state: StateFlow<PlayerState> = mutableState.asStateFlow()
 
@@ -135,14 +141,22 @@ class PlayerModel internal constructor(
     }
 
     /** Marks the current set done (or ends a rest early). */
-    fun done() = whileRunning { act { session.completeCurrent(clock.now()) } }
+    fun done() = whileRunningOrWaiting { act { session.completeCurrent(clock.now()) } }
 
-    fun skip() = whileRunning { act { session.skipCurrent(clock.now()) } }
+    fun skip() = whileRunningOrWaiting { act { session.skipCurrent(clock.now()) } }
+
+    /** Begins the walk or run that waits for the person; the step's clock starts now. */
+    fun startStep() {
+        if (!waiting) return
+        waiting = false
+        act { session.resume(clock.now()) }
+    }
 
     fun pause() = whileRunning { act { session.pause(clock.now()) } }
 
     fun resume() {
         if (current().status != SessionState.Status.PAUSED) return
+        waiting = false
         act { session.resume(clock.now()) }
         startTicker()
     }
@@ -186,8 +200,15 @@ class PlayerModel internal constructor(
         if (current().status == SessionState.Status.RUNNING) action()
     }
 
+    /** Done and Skip also work on a step that has not begun, which ends the wait first. */
+    private fun whileRunningOrWaiting(action: () -> Unit) {
+        if (waiting) startStep()
+        whileRunning(action)
+    }
+
     private fun act(action: () -> List<SessionEvent>) {
-        action().forEach { event ->
+        val events = action()
+        events.forEach { event ->
             store.appendEvent(sessionId, event)
             if (event is SessionEvent.Finished) {
                 store.finishSession(sessionId, event.at)
@@ -195,7 +216,24 @@ class PlayerModel internal constructor(
                 ticker?.cancel()
             }
         }
+        if (events.any { it is SessionEvent.PhaseCompleted || it is SessionEvent.PhaseSkipped }) waitForWalkOrRun()
         mutableState.value = render()
+    }
+
+    /**
+     * A walk or run reached from another exercise does not begin by itself: the person may still be on their way to
+     * the treadmill. One that follows a walk or run, as in intervals, goes straight on.
+     */
+    private fun waitForWalkOrRun() {
+        val now = clock.now()
+        val state = session.state(now)
+        val phases = session.timeline.phases
+        val phase = state.phase as? Phase.Work ?: return
+        if (state.status != SessionState.Status.RUNNING || !phase.exercise.isWalkOrRun(catalog)) return
+        val before = phases.take(state.phaseIndex).lastOrNull { it is Phase.Work } as? Phase.Work
+        if (before == null || before.exercise.isWalkOrRun(catalog)) return
+        waiting = true
+        store.appendEvent(sessionId, session.pause(now).single())
     }
 
     private fun startTicker() {
@@ -208,7 +246,7 @@ class PlayerModel internal constructor(
         }
     }
 
-    private fun render(): PlayerState = face.of(session, clock.now())
+    private fun render(): PlayerState = face.of(session, clock.now()).copy(waitingToStart = waiting)
 
     private companion object {
         val TICK = 200.milliseconds

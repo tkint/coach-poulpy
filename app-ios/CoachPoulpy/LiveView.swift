@@ -136,53 +136,27 @@ struct LiveView: View {
         }
     }
 
-    /// A walk or run that has not begun: waiting for the belt to move, or for Start when there is no treadmill.
+    /// A walk or run that has not begun: waiting for the belt to move, for Start, or for the treadmill to connect.
     @ViewBuilder
     private func waitingStep(_ wait: StepWait, _ player: PlayerState) -> some View {
-        Spacer(minLength: 0)
-        Image(PoulpyDrawing.straining.imageName).resizable().scaledToFit().frame(width: 130, height: 117).accessibilityHidden(true)
-        PlayerSteps.partLine(player)
-        Text(player.title).font(PoulpyFont.title).multilineTextAlignment(.center)
-        if wait == .forBelt {
-            VStack(spacing: 2) {
-                Text("live.stepWaitTitle").font(PoulpyFont.headline)
-                Text("live.stepWaitBody").font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
-            }
-            .multilineTextAlignment(.center)
-            .accessibilityElement(children: .combine)
-        } else {
-            Text(LocalizedStringKey(wait == .forTap ? "live.stepWaitTap" : "live.stepNoTreadmill"))
-                .font(.custom(PoulpyFontFace.nunitoBold, size: 17, relativeTo: .body))
-                .foregroundStyle(PoulpyColor.onSurfaceVariant)
-                .multilineTextAlignment(.center)
-        }
-        Text(player.targetLabel ?? "").font(.custom(PoulpyFontFace.nunitoExtraBold, fixedSize: 48)).multilineTextAlignment(.center)
-        Spacer(minLength: 0)
-        Button {
-            model.startStep()
-        } label: {
-            Text(LocalizedStringKey(wait == .forBelt ? "live.startWithoutIt" : "action.start"))
-                .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 19, relativeTo: .body))
-                .foregroundStyle(PoulpyColor.onPrimary)
-                .frame(maxWidth: .infinity, minHeight: 64)
-                .background(PoulpyColor.primary, in: Capsule())
-        }
-        .buttonStyle(.plain)
-        // Done cuts the step short without the feel of skipping it.
-        HStack(spacing: PoulpySpace.md) {
-            ForEach(["player.skip", "player.done"], id: \.self) { key in
-                Button {
-                    key == "player.skip" ? model.skipPhase() : model.completeStep()
-                } label: {
-                    Text(LocalizedStringKey(key))
-                        .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 17, relativeTo: .body))
-                        .foregroundStyle(PoulpyColor.onBackground)
-                        .frame(maxWidth: .infinity, minHeight: 56)
-                        .overlay(Capsule().stroke(PoulpyColor.outline, lineWidth: 2))
+        PlayerSteps.startStep(
+            player,
+            startLabel: LocalizedStringKey(wait == .forBelt ? "live.startWithoutIt" : "action.start"),
+            onSkip: { model.skipPhase() },
+            onDone: { model.completeStep() },
+            onStart: { model.startStep() }
+        ) {
+            if wait == .forBelt {
+                VStack(spacing: 2) {
+                    Text("live.stepWaitTitle").font(PoulpyFont.headline)
+                    Text("live.stepWaitBody").font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
                 }
+                .multilineTextAlignment(.center)
+                .accessibilityElement(children: .combine)
+            } else {
+                PlayerSteps.waitingLine(LocalizedStringKey(wait == .forTap ? "live.stepWaitTap" : "live.stepNoTreadmill"))
             }
         }
-        .buttonStyle(.plain)
     }
 
     private var connectedChip: some View {
