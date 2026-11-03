@@ -98,8 +98,9 @@ class LocalStoreTest {
     fun databaseFromTheFirstBuildGainsTheCatalogTables() {
         val driver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
         driver.execute(null, "CREATE TABLE workout_version (id TEXT NOT NULL, version INTEGER NOT NULL, type TEXT NOT NULL, name TEXT NOT NULL, content TEXT NOT NULL, created_at INTEGER NOT NULL, PRIMARY KEY (id, version))", 0)
-        driver.execute(null, "CREATE TABLE record (id TEXT NOT NULL PRIMARY KEY, source TEXT NOT NULL, workout_id TEXT, workout_version INTEGER, started_at INTEGER NOT NULL, ended_at INTEGER)", 0)
-        driver.execute(null, "INSERT INTO record VALUES ('old', 'GUIDED', NULL, NULL, 1700000000000, 1700000600000)", 0)
+        driver.execute(null, "CREATE TABLE execution (id TEXT NOT NULL PRIMARY KEY, source TEXT NOT NULL, workout_id TEXT, workout_version INTEGER, started_at INTEGER NOT NULL, ended_at INTEGER)", 0)
+        driver.execute(null, "CREATE TABLE execution_event (execution_id TEXT NOT NULL REFERENCES execution(id) ON DELETE CASCADE, seq INTEGER NOT NULL, at INTEGER NOT NULL, payload TEXT NOT NULL, PRIMARY KEY (execution_id, seq))", 0)
+        driver.execute(null, "INSERT INTO execution VALUES ('old', 'GUIDED', NULL, NULL, 1700000000000, 1700000600000)", 0)
         CoachPoulpyDatabase.Schema.migrate(driver, oldVersion = 1, newVersion = CoachPoulpyDatabase.Schema.version)
 
         val db = CoachPoulpyDatabase(driver)
@@ -118,11 +119,12 @@ class LocalStoreTest {
     fun workoutsWithATypeAreRemovedAndSessionsKeptWithoutIt() {
         val driver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
         driver.execute(null, "CREATE TABLE workout_version (id TEXT NOT NULL, version INTEGER NOT NULL, type TEXT NOT NULL, name TEXT NOT NULL, content TEXT NOT NULL, created_at INTEGER NOT NULL, PRIMARY KEY (id, version))", 0)
-        driver.execute(null, "CREATE TABLE record (id TEXT NOT NULL PRIMARY KEY, source TEXT NOT NULL, workout_id TEXT, workout_version INTEGER, started_at INTEGER NOT NULL, ended_at INTEGER)", 0)
+        driver.execute(null, "CREATE TABLE execution (id TEXT NOT NULL PRIMARY KEY, source TEXT NOT NULL, workout_id TEXT, workout_version INTEGER, started_at INTEGER NOT NULL, ended_at INTEGER)", 0)
+        driver.execute(null, "CREATE TABLE execution_event (execution_id TEXT NOT NULL REFERENCES execution(id) ON DELETE CASCADE, seq INTEGER NOT NULL, at INTEGER NOT NULL, payload TEXT NOT NULL, PRIMARY KEY (execution_id, seq))", 0)
         CoachPoulpyDatabase.Schema.migrate(driver, oldVersion = 1, newVersion = 5)
         driver.execute(null, "INSERT INTO workout_version VALUES ('w1', 1, 'STRENGTH', 'Legs', '{}', 1700000000000)", 0)
         driver.execute(null, "INSERT INTO planned_workout VALUES ('p1', 'w1', '2026-10-27', 1700000000000)", 0)
-        driver.execute(null, "INSERT INTO record(id, source, workout_id, workout_version, started_at, ended_at, title, workout_type) VALUES ('old', 'GUIDED', 'w1', 1, 1700000000000, 1700000600000, 'Legs', 'STRENGTH')", 0)
+        driver.execute(null, "INSERT INTO execution(id, source, workout_id, workout_version, started_at, ended_at, title, workout_type) VALUES ('old', 'GUIDED', 'w1', 1, 1700000000000, 1700000600000, 'Legs', 'STRENGTH')", 0)
 
         CoachPoulpyDatabase.Schema.migrate(driver, oldVersion = 5, newVersion = CoachPoulpyDatabase.Schema.version)
 
