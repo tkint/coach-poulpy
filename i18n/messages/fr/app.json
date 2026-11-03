@@ -2,6 +2,9 @@
   "app": {
     "name": "Coach Poulpy"
   },
+  "permission": {
+    "bluetooth": "Coach Poulpy se connecte à votre tapis pour afficher et enregistrer votre vitesse, votre distance et votre fréquence cardiaque."
+  },
   "tab": {
     "home": "Accueil",
     "library": "Bibliothèque",
