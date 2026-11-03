@@ -2,9 +2,9 @@ package ch.coachpoulpy.shared
 
 import ch.coachpoulpy.core.engine.SessionEvent
 import ch.coachpoulpy.core.model.DeviceMetrics
-import ch.coachpoulpy.core.model.Execution
-import ch.coachpoulpy.core.model.ExecutionId
-import ch.coachpoulpy.core.model.ExecutionSource
+import ch.coachpoulpy.core.model.SessionRecord
+import ch.coachpoulpy.core.model.SessionId
+import ch.coachpoulpy.core.model.SessionSource
 import ch.coachpoulpy.core.model.WorkoutFormat
 import ch.coachpoulpy.core.model.WorkoutId
 import ch.coachpoulpy.core.model.WorkoutRef
@@ -58,7 +58,7 @@ class HistoryModelTest {
         val workout = graph.store.latestWorkout(id)!!
         val player = PlayerModel(
             workout, graph.compiler.compile(workout), graph.catalog, graph.store, "en",
-            executionId = "run-1", events = emptyList(),
+            sessionId = "run-1", events = emptyList(),
             clock = object : Clock {
                 var calls = 0
                 // Each action happens a minute after the last one.
@@ -87,7 +87,7 @@ class HistoryModelTest {
     @Test
     fun sessionsFromBeforeTheHistoryAreSummedUpOnce() {
         val start = now - 2.days
-        graph.store.startExecution(Execution(ExecutionId("old-run"), ExecutionSource.DEVICE_ONLY, startedAt = start))
+        graph.store.startSession(SessionRecord(SessionId("old-run"), SessionSource.DEVICE_ONLY, startedAt = start))
         listOf(
             SessionEvent.Started(start),
             SessionEvent.Sample(start + 1.seconds, DeviceMetrics(speedKmh = 6.0, distanceMeters = 100.0, heartRateBpm = 110)),
@@ -95,7 +95,7 @@ class HistoryModelTest {
             SessionEvent.PhaseCompleted(start + 10.minutes, 0),
             SessionEvent.Finished(start + 10.minutes),
         ).forEach { graph.store.appendEvent("old-run", it) }
-        graph.store.finishExecution("old-run", start + 10.minutes)
+        graph.store.finishSession("old-run", start + 10.minutes)
 
         val row = history().awaitSessions(1).sessions.single()
         assertEquals("Free run", row.title)
@@ -114,31 +114,31 @@ class HistoryModelTest {
     fun keepsTheNameOfAWorkoutDeletedAfterwards() {
         val id = strengthWorkout()
         val start = now - 1.days
-        graph.store.startExecution(Execution(ExecutionId("e1"), ExecutionSource.GUIDED, startedAt = start, workout = WorkoutRef(id, 1)), "Quick", WorkoutFormat.SETS)
+        graph.store.startSession(SessionRecord(SessionId("e1"), SessionSource.GUIDED, startedAt = start, workout = WorkoutRef(id, 1)), "Quick", WorkoutFormat.SETS)
         graph.store.appendEvent("e1", SessionEvent.Started(start))
         graph.store.appendEvent("e1", SessionEvent.Finished(start + 5.minutes))
-        graph.store.finishExecution("e1", start + 5.minutes)
+        graph.store.finishSession("e1", start + 5.minutes)
         graph.deleteWorkout(id.value)
 
         assertEquals("Quick", history().awaitSessions(1).sessions.single().title)
     }
 
     /** A session of five minutes started [daysAgo] days ago, without events in between. */
-    private fun session(id: String, daysAgo: Int, source: ExecutionSource, workout: WorkoutRef?, title: String?, format: WorkoutFormat?) {
+    private fun session(id: String, daysAgo: Int, source: SessionSource, workout: WorkoutRef?, title: String?, format: WorkoutFormat?) {
         val start = now - daysAgo.days
-        graph.store.startExecution(Execution(ExecutionId(id), source, startedAt = start, workout = workout), title, format)
+        graph.store.startSession(SessionRecord(SessionId(id), source, startedAt = start, workout = workout), title, format)
         graph.store.appendEvent(id, SessionEvent.Started(start))
         graph.store.appendEvent(id, SessionEvent.Finished(start + 5.minutes))
-        graph.store.finishExecution(id, start + 5.minutes)
+        graph.store.finishSession(id, start + 5.minutes)
     }
 
     @Test
     fun aSessionIsLabelledByItsWorkoutsFormat() {
-        session("circuit", 1, ExecutionSource.GUIDED, WorkoutRef(WorkoutId("w-circuit"), 1), "Legs circuit", WorkoutFormat.CIRCUIT)
+        session("circuit", 1, SessionSource.GUIDED, WorkoutRef(WorkoutId("w-circuit"), 1), "Legs circuit", WorkoutFormat.CIRCUIT)
         // Recorded before formats: its workout is gone and it never had one.
-        session("before", 2, ExecutionSource.GUIDED, WorkoutRef(WorkoutId("w-gone"), 1), "Old legs", null)
+        session("before", 2, SessionSource.GUIDED, WorkoutRef(WorkoutId("w-gone"), 1), "Old legs", null)
         // The demo intervals followed in Live, with no saved workout.
-        session("demo", 3, ExecutionSource.FREE, null, null, null)
+        session("demo", 3, SessionSource.FREE, null, null, null)
 
         val rows = history().awaitSessions(3).sessions.associateBy { it.id }
         assertEquals("Circuit", rows.getValue("circuit").formatLabel)
@@ -152,13 +152,13 @@ class HistoryModelTest {
 
     @Test
     fun hidesSessionsWhereNothingWasDoneAndDeletesOthers() {
-        graph.store.startExecution(Execution(ExecutionId("nothing"), ExecutionSource.DEVICE_ONLY, startedAt = now))
-        graph.store.finishExecution("nothing", now)
+        graph.store.startSession(SessionRecord(SessionId("nothing"), SessionSource.DEVICE_ONLY, startedAt = now))
+        graph.store.finishSession("nothing", now)
         val start = now - 1.days
-        graph.store.startExecution(Execution(ExecutionId("walk"), ExecutionSource.DEVICE_ONLY, startedAt = start))
+        graph.store.startSession(SessionRecord(SessionId("walk"), SessionSource.DEVICE_ONLY, startedAt = start))
         graph.store.appendEvent("walk", SessionEvent.Started(start))
         graph.store.appendEvent("walk", SessionEvent.Finished(start + 20.minutes))
-        graph.store.finishExecution("walk", start + 20.minutes)
+        graph.store.finishSession("walk", start + 20.minutes)
 
         val model = history()
         assertEquals(listOf("walk"), model.awaitSessions(1).sessions.map { it.id })
@@ -169,14 +169,14 @@ class HistoryModelTest {
     }
 
     private fun walk(id: String, start: Instant, minutes: Int = 20, meters: Double? = null) {
-        graph.store.startExecution(Execution(ExecutionId(id), ExecutionSource.DEVICE_ONLY, startedAt = start))
+        graph.store.startSession(SessionRecord(SessionId(id), SessionSource.DEVICE_ONLY, startedAt = start))
         graph.store.appendEvent(id, SessionEvent.Started(start))
         if (meters != null) {
             graph.store.appendEvent(id, SessionEvent.Sample(start + 1.seconds, DeviceMetrics(speedKmh = 5.0, distanceMeters = 0.0)))
             graph.store.appendEvent(id, SessionEvent.Sample(start + minutes.minutes, DeviceMetrics(speedKmh = 5.0, distanceMeters = meters)))
         }
         graph.store.appendEvent(id, SessionEvent.Finished(start + minutes.minutes))
-        graph.store.finishExecution(id, start + minutes.minutes)
+        graph.store.finishSession(id, start + minutes.minutes)
     }
 
     @Test

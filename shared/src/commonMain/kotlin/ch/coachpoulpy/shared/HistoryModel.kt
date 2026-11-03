@@ -3,7 +3,7 @@ package ch.coachpoulpy.shared
 import ch.coachpoulpy.core.engine.SessionEvent
 import ch.coachpoulpy.core.engine.Timeline
 import ch.coachpoulpy.core.engine.TimelineCompiler
-import ch.coachpoulpy.core.model.ExecutionSource
+import ch.coachpoulpy.core.model.SessionSource
 import ch.coachpoulpy.core.model.Workout
 import ch.coachpoulpy.core.stats.DoneSession
 import ch.coachpoulpy.core.stats.HistoryStats
@@ -181,10 +181,10 @@ class HistoryModel internal constructor(
             if (totals.isEmpty) null else session to totals
         }
         val now = clock.now()
-        val stats = HistoryStats.of(done.map { (s, t) -> DoneSession(s.execution.startedAt, t) }, now, zone)
+        val stats = HistoryStats.of(done.map { (s, t) -> DoneSession(s.record.startedAt, t) }, now, zone)
         val longest = done.filter { (_, t) -> (t.distanceMeters ?: 0.0) > 0 }.maxByOrNull { (_, t) -> t.distanceMeters!! }
         val poulpy = coach.status(finishedEnds, now)
-        val oldest = done.minOfOrNull { (s, _) -> s.execution.startedAt }?.toLocalDateTime(zone)?.date
+        val oldest = done.minOfOrNull { (s, _) -> s.record.startedAt }?.toLocalDateTime(zone)?.date
         val today = now.toLocalDateTime(zone).date
         return HistoryState(
             loaded = true,
@@ -201,7 +201,7 @@ class HistoryModel internal constructor(
             },
             totalSessions = done.size,
             longestRunMeters = longest?.second?.distanceMeters,
-            longestRunMillis = longest?.first?.execution?.startedAt?.toEpochMilliseconds(),
+            longestRunMillis = longest?.first?.record?.startedAt?.toEpochMilliseconds(),
             fullOctopuses = poulpy.fullOctopuses,
             tentaclesLit = poulpy.tentaclesLit,
             firstMonthOffset = oldest?.let { -((today.year - it.year) * 12 + (today.month.number - it.month.number)) }?.coerceAtMost(0) ?: 0,
@@ -210,9 +210,9 @@ class HistoryModel internal constructor(
 
     /** Sums up a session from before the history, and keeps its name and format while its workout is still here. */
     private fun backfill(session: StoredSession): SessionTotals {
-        val id = session.execution.id.value
+        val id = session.record.id.value
         val events = store.events(id)
-        val workout = session.execution.workout?.let { store.workout(it.workoutId, it.version) }
+        val workout = session.record.workout?.let { store.workout(it.workoutId, it.version) }
         val format = session.format ?: workout?.format
         val totals = sessionTotals(events, sessionTimeline(session, workout, compiler))
         store.saveDetails(id, session.title ?: workout?.name, format, totals)
@@ -244,26 +244,26 @@ internal fun sessionTotals(events: List<SessionEvent>, timeline: Timeline?): Ses
 /** The plan a stored session followed, or null when its workout is no longer on the phone. */
 internal fun sessionTimeline(session: StoredSession, workout: Workout?, compiler: TimelineCompiler): Timeline? = when {
     workout != null -> runCatching { compiler.compile(workout) }.getOrNull()
-    session.execution.source == ExecutionSource.DEVICE_ONLY -> TreadmillModule.freeRun
-    session.execution.workout == null -> compiler.compile(LiveModel.demoIntervals)
+    session.record.source == SessionSource.DEVICE_ONLY -> TreadmillModule.freeRun
+    session.record.workout == null -> compiler.compile(LiveModel.demoIntervals)
     else -> null
 }
 
 /** A finished session as the history and Home show it. */
 internal fun sessionRow(session: StoredSession, totals: SessionTotals, labels: Labels): SessionRow {
-    val execution = session.execution
-    val freeRun = execution.source == ExecutionSource.DEVICE_ONLY
-    val treadmill = freeRun || execution.source == ExecutionSource.LIVE_WORKOUT || execution.workout == null || totals.distanceMeters != null
+    val record = session.record
+    val freeRun = record.source == SessionSource.DEVICE_ONLY
+    val treadmill = freeRun || record.source == SessionSource.LIVE_WORKOUT || record.workout == null || totals.distanceMeters != null
     return SessionRow(
-        id = execution.id.value,
+        id = record.id.value,
         title = session.title ?: when {
             freeRun -> labels.freeRun
-            treadmill && execution.workout == null -> labels.demoIntervals
+            treadmill && record.workout == null -> labels.demoIntervals
             else -> labels.session
         },
         kind = if (treadmill) SessionKind.TREADMILL else SessionKind.WORKOUT,
         formatLabel = if (freeRun) null else session.format?.let(labels::format),
-        startedAtMillis = execution.startedAt.toEpochMilliseconds(),
+        startedAtMillis = record.startedAt.toEpochMilliseconds(),
         activeSeconds = totals.active.inWholeSeconds,
         setsDone = totals.setsDone,
         setsSkipped = totals.setsSkipped,

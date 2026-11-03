@@ -5,9 +5,9 @@ import app.cash.sqldelight.coroutines.mapToList
 import ch.coachpoulpy.core.engine.SessionEvent
 import ch.coachpoulpy.core.model.BodyMeasurement
 import ch.coachpoulpy.core.model.BodyMetric
-import ch.coachpoulpy.core.model.Execution
-import ch.coachpoulpy.core.model.ExecutionId
-import ch.coachpoulpy.core.model.ExecutionSource
+import ch.coachpoulpy.core.model.SessionRecord
+import ch.coachpoulpy.core.model.SessionId
+import ch.coachpoulpy.core.model.SessionSource
 import ch.coachpoulpy.core.model.Exercise
 import ch.coachpoulpy.core.model.ExerciseSlug
 import ch.coachpoulpy.core.model.Ids
@@ -145,49 +145,49 @@ class LocalStore(driverFactory: DriverFactory, private val clock: Clock = Clock.
     }
 
     /** [title] and [format] are kept as they were at the start, for the history. */
-    fun startExecution(execution: Execution, title: String? = null, format: WorkoutFormat? = null) {
-        db.executionQueries.insertExecution(
-            id = execution.id.value,
-            source = execution.source.name,
-            workout_id = execution.workout?.workoutId?.value,
-            workout_version = execution.workout?.version?.toLong(),
-            started_at = execution.startedAt.toEpochMilliseconds(),
-            ended_at = execution.endedAt?.toEpochMilliseconds(),
+    fun startSession(record: SessionRecord, title: String? = null, format: WorkoutFormat? = null) {
+        db.sessionQueries.insertSession(
+            id = record.id.value,
+            source = record.source.name,
+            workout_id = record.workout?.workoutId?.value,
+            workout_version = record.workout?.version?.toLong(),
+            started_at = record.startedAt.toEpochMilliseconds(),
+            ended_at = record.endedAt?.toEpochMilliseconds(),
             title = title,
             workout_type = format?.name,
         )
     }
 
     /** Written at once for every session action, so a killed app can replay it. */
-    fun appendEvent(executionId: String, event: SessionEvent) {
-        db.executionQueries.appendEvent(
-            executionId = executionId,
+    fun appendEvent(sessionId: String, event: SessionEvent) {
+        db.sessionQueries.appendEvent(
+            sessionId = sessionId,
             at = event.at.toEpochMilliseconds(),
             payload = json.encodeToString(SessionEvent.serializer(), event),
         )
     }
 
-    fun finishExecution(executionId: String, endedAt: Instant) =
-        db.executionQueries.finishExecution(endedAt.toEpochMilliseconds(), executionId)
+    fun finishSession(sessionId: String, endedAt: Instant) =
+        db.sessionQueries.finishSession(endedAt.toEpochMilliseconds(), sessionId)
 
     /** Sessions that ended, newest first. Emits again when one is added, summed up or deleted. */
     fun finishedSessions(): Flow<List<StoredSession>> =
-        db.executionQueries.finished().asFlow().mapToList(Dispatchers.IO).map { rows ->
+        db.sessionQueries.finished().asFlow().mapToList(Dispatchers.IO).map { rows ->
             rows.map { storedSession(it.id, it.source, it.started_at, it.ended_at, it.workout_id, it.workout_version, it.title, it.workout_type, it.summary) }
         }
 
     /** One finished session, read once; null when there is none with this id. */
-    fun finishedSession(executionId: String): StoredSession? =
-        db.executionQueries.finished().executeAsList().firstOrNull { it.id == executionId }
+    fun finishedSession(sessionId: String): StoredSession? =
+        db.sessionQueries.finished().executeAsList().firstOrNull { it.id == sessionId }
             ?.let { storedSession(it.id, it.source, it.started_at, it.ended_at, it.workout_id, it.workout_version, it.title, it.workout_type, it.summary) }
 
     private fun storedSession(
         id: String, source: String, startedAt: Long, endedAt: Long?, workoutId: String?, workoutVersion: Long?,
         title: String?, workoutType: String?, summary: String?,
     ) = StoredSession(
-        execution = Execution(
-            id = ExecutionId(id),
-            source = ExecutionSource.valueOf(source),
+        record = SessionRecord(
+            id = SessionId(id),
+            source = SessionSource.valueOf(source),
             startedAt = Instant.fromEpochMilliseconds(startedAt),
             endedAt = endedAt?.let(Instant::fromEpochMilliseconds),
             workout = workoutId?.let { WorkoutRef(WorkoutId(it), workoutVersion?.toInt() ?: 1) },
@@ -199,32 +199,32 @@ class LocalStore(driverFactory: DriverFactory, private val clock: Clock = Clock.
 
     /** The workout version each finished session followed, with when it started, newest first, read once. */
     fun finishedWorkoutRefs(): List<Pair<WorkoutRef, Instant>> =
-        db.executionQueries.finished().executeAsList().mapNotNull { row ->
+        db.sessionQueries.finished().executeAsList().mapNotNull { row ->
             val id = row.workout_id ?: return@mapNotNull null
             WorkoutRef(WorkoutId(id), row.workout_version?.toInt() ?: 1) to Instant.fromEpochMilliseconds(row.started_at)
         }
 
-    fun saveTotals(executionId: String, totals: SessionTotals) =
-        db.executionQueries.setSummary(json.encodeToString(SessionTotals.serializer(), totals), executionId)
+    fun saveTotals(sessionId: String, totals: SessionTotals) =
+        db.sessionQueries.setSummary(json.encodeToString(SessionTotals.serializer(), totals), sessionId)
 
     /** Fills in what sessions from before the history did not keep. */
-    fun saveDetails(executionId: String, title: String?, format: WorkoutFormat?, totals: SessionTotals) =
-        db.executionQueries.setDetails(title, format?.name, json.encodeToString(SessionTotals.serializer(), totals), executionId)
+    fun saveDetails(sessionId: String, title: String?, format: WorkoutFormat?, totals: SessionTotals) =
+        db.sessionQueries.setDetails(title, format?.name, json.encodeToString(SessionTotals.serializer(), totals), sessionId)
 
-    fun deleteSession(executionId: String) = db.transaction {
-        db.executionQueries.deleteEvents(executionId)
-        db.executionQueries.deleteExecution(executionId)
+    fun deleteSession(sessionId: String) = db.transaction {
+        db.sessionQueries.deleteEvents(sessionId)
+        db.sessionQueries.deleteSession(sessionId)
     }
 
     /** The session left open when the app was closed or killed, if any. */
-    fun unfinishedExecution(): Execution? = unfinishedSession()?.execution
+    fun unfinishedRecord(): SessionRecord? = unfinishedSession()?.record
 
-    /** [unfinishedExecution] with the title it started with. */
-    fun unfinishedSession(): StoredSession? = db.executionQueries.unfinished().executeAsOneOrNull()?.let { row ->
+    /** [unfinishedRecord] with the title it started with. */
+    fun unfinishedSession(): StoredSession? = db.sessionQueries.unfinished().executeAsOneOrNull()?.let { row ->
         StoredSession(
-            execution = Execution(
-                id = ExecutionId(row.id),
-                source = ExecutionSource.valueOf(row.source),
+            record = SessionRecord(
+                id = SessionId(row.id),
+                source = SessionSource.valueOf(row.source),
                 startedAt = Instant.fromEpochMilliseconds(row.started_at),
                 workout = row.workout_id?.let { WorkoutRef(WorkoutId(it), row.workout_version?.toInt() ?: 1) },
             ),
@@ -236,22 +236,22 @@ class LocalStore(driverFactory: DriverFactory, private val clock: Clock = Clock.
 
     /** When each finished session ended, oldest first, updated as sessions finish. */
     fun finishedSessionEnds(): Flow<List<Instant>> =
-        db.executionQueries.finishedSessionEnds()
+        db.sessionQueries.finishedSessionEnds()
             .asFlow()
             .mapToList(Dispatchers.IO)
             .map { ends -> ends.map(Instant::fromEpochMilliseconds) }
 
     /** [finishedSessionEnds] read once. */
     fun finishedSessionEndsNow(): List<Instant> =
-        db.executionQueries.finishedSessionEnds().executeAsList().map(Instant::fromEpochMilliseconds)
+        db.sessionQueries.finishedSessionEnds().executeAsList().map(Instant::fromEpochMilliseconds)
 
-    fun events(executionId: String): List<SessionEvent> =
-        db.executionQueries.events(executionId).executeAsList()
+    fun events(sessionId: String): List<SessionEvent> =
+        db.sessionQueries.events(sessionId).executeAsList()
             .map { json.decodeFromString(SessionEvent.serializer(), it) }
 }
 
 /** A finished session as stored: [totals] is null until it has been summed up once. */
-data class StoredSession(val execution: Execution, val title: String?, val format: WorkoutFormat?, val totals: SessionTotals?)
+data class StoredSession(val record: SessionRecord, val title: String?, val format: WorkoutFormat?, val totals: SessionTotals?)
 
 /** A workout's latest version and when it was saved. */
 data class SavedWorkout(val workout: Workout, val savedAt: Instant)

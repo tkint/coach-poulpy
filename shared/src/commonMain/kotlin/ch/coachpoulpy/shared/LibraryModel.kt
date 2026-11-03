@@ -115,9 +115,9 @@ class LibraryModel internal constructor(
 
     private fun build(workouts: List<Workout>, plans: List<PlannedWorkout>, sessions: List<StoredSession>): LibraryState {
         val today = clock.now().toLocalDateTime(zone).date
-        val timesDone = sessions.filter { it.counts }.mapNotNull { it.execution.workout?.workoutId }.groupingBy { it }.eachCount()
+        val timesDone = sessions.filter { it.counts }.mapNotNull { it.record.workout?.workoutId }.groupingBy { it }.eachCount()
         val lastDone = sessions.filter { it.counts }
-            .mapNotNull { session -> session.execution.workout?.workoutId?.let { it to session.execution.startedAt } }
+            .mapNotNull { session -> session.record.workout?.workoutId?.let { it to session.record.startedAt } }
             .groupBy({ it.first }, { it.second })
             .mapValues { (_, starts) -> starts.max() }
         val rows = workouts.map { workout ->

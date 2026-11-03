@@ -9,9 +9,9 @@ import ch.coachpoulpy.core.engine.Timeline
 import ch.coachpoulpy.core.engine.TimelineCompiler
 import ch.coachpoulpy.core.engine.covering
 import ch.coachpoulpy.core.model.Equipment
-import ch.coachpoulpy.core.model.Execution
-import ch.coachpoulpy.core.model.ExecutionId
-import ch.coachpoulpy.core.model.ExecutionSource
+import ch.coachpoulpy.core.model.SessionRecord
+import ch.coachpoulpy.core.model.SessionId
+import ch.coachpoulpy.core.model.SessionSource
 import ch.coachpoulpy.core.model.Exercise
 import ch.coachpoulpy.core.model.ExerciseSlug
 import ch.coachpoulpy.core.model.GroupKind
@@ -254,7 +254,7 @@ class LiveModel(
     private var waiting: String? = null
 
     private class Recording(
-        val executionId: String,
+        val sessionId: String,
         val title: String,
         val timeline: Timeline,
         val session: Session,
@@ -311,7 +311,7 @@ class LiveModel(
         scope.launch { devices.state.collect(::onDevices) }
         scope.launch { devices.available.collect { _state.update { it.copy(tiles = tiles()) } } }
         scope.launch { settings.collect { s -> _state.update { it.copy(units = s.units, tiles = tiles()) } } }
-        store.unfinishedSession()?.takeIf { it.execution.source.isLive }?.let(::recover)
+        store.unfinishedSession()?.takeIf { it.record.source.isLive }?.let(::recover)
     }
 
     /**
@@ -319,11 +319,11 @@ class LiveModel(
      * its last event, with the finish question. A recording that cannot be rebuilt is closed at its last event.
      */
     private fun recover(open: StoredSession) {
-        val execution = open.execution
-        val id = execution.id.value
+        val record = open.record
+        val id = record.id.value
         val events = store.events(id)
-        val freeRun = execution.source == ExecutionSource.DEVICE_ONLY
-        val workout = execution.workout?.let { store.workout(it.workoutId, it.version) }
+        val freeRun = record.source == SessionSource.DEVICE_ONLY
+        val workout = record.workout?.let { store.workout(it.workoutId, it.version) }
         val timeline = when {
             // begin() puts the key it records first in the recent ones before writing anything.
             freeRun -> TreadmillModule.freeRecording(lastStartedExercise() ?: TreadmillModule.treadmillRun)
@@ -332,7 +332,7 @@ class LiveModel(
         }
         val last = events.lastOrNull()
         if (timeline == null || last == null || Session(timeline, events).state(last.at).status == SessionState.Status.FINISHED) {
-            store.closeLeftOpen(execution, timeline ?: store.timelineOf(execution, compiler))
+            store.closeLeftOpen(record, timeline ?: store.timelineOf(record, compiler))
             return
         }
         val recovered = Recording(id, open.title ?: workout?.name.orEmpty(), timeline, Session(timeline, events), freeRun)
@@ -522,12 +522,12 @@ class LiveModel(
         val freeRun = exercise != null
         val timeline = if (exercise != null) TreadmillModule.freeRecording(exercise.slug) else compiler.compile(workout!!)
         val now = clock.now()
-        val executionId = Ids.newUuidV7(now.toEpochMilliseconds())
+        val sessionId = Ids.newUuidV7(now.toEpochMilliseconds())
         val title = exercise?.let { labels.text(it.name) } ?: workout!!.name
-        store.startExecution(
-            Execution(
-                id = ExecutionId(executionId),
-                source = if (freeRun) ExecutionSource.DEVICE_ONLY else ExecutionSource.LIVE_WORKOUT,
+        store.startSession(
+            SessionRecord(
+                id = SessionId(sessionId),
+                source = if (freeRun) SessionSource.DEVICE_ONLY else SessionSource.LIVE_WORKOUT,
                 startedAt = now,
                 workout = if (workout != null && workout in savedWorkouts) WorkoutRef(workout.id, workout.version) else null,
             ),
@@ -537,7 +537,7 @@ class LiveModel(
         recents = (listOf(key) + (recents - key)).take(RECENT_KEPT)
         memory.putString(RECENT, recents.joinToString(","))
         publishChoices()
-        val started = Recording(executionId, title, timeline, Session(timeline), freeRun)
+        val started = Recording(sessionId, title, timeline, Session(timeline), freeRun)
         started.hadTreadmill = devices.hasTreadmill
         if (started.hadTreadmill && _state.value.belt != BeltStatus.MOVING) started.stillSince = now
         recording = started
@@ -684,12 +684,12 @@ class LiveModel(
      */
     fun stopRecording() = stopRecording(recording?.prompt?.takeIf { it.reason == FinishReason.APP_CLOSED }?.since ?: clock.now())
 
-    /** Drops the recording [executionId] with everything it recorded, as if it never happened. False when it is not this one. */
-    fun discardRecording(executionId: String): Boolean {
-        val current = recording?.takeIf { it.executionId == executionId } ?: return false
+    /** Drops the recording [sessionId] with everything it recorded, as if it never happened. False when it is not this one. */
+    fun discardRecording(sessionId: String): Boolean {
+        val current = recording?.takeIf { it.sessionId == sessionId } ?: return false
         recording = null
         current.ticker?.cancel()
-        store.deleteSession(executionId)
+        store.deleteSession(sessionId)
         _state.update { it.copy(recording = null, finishPrompt = null) }
         return true
     }
@@ -711,7 +711,7 @@ class LiveModel(
     }
 
     private fun persist(recording: Recording, events: List<SessionEvent>) {
-        events.forEach { store.appendEvent(recording.executionId, it) }
+        events.forEach { store.appendEvent(recording.sessionId, it) }
         events.lastOrNull { it is SessionEvent.Finished }?.let { finish(recording, it.at) }
     }
 
@@ -719,8 +719,8 @@ class LiveModel(
         if (recording !== finished) return
         recording = null
         finished.ticker?.cancel()
-        store.finishExecution(finished.executionId, at)
-        store.saveTotals(finished.executionId, sessionTotals(finished.session.events, finished.timeline))
+        store.finishSession(finished.sessionId, at)
+        store.saveTotals(finished.sessionId, sessionTotals(finished.session.events, finished.timeline))
         val summary = TreadmillSummary.of(finished.timeline, finished.session.events)
         _state.update { it.copy(recording = null, finishPrompt = null, summary = summary.toUi(finished.session.events)) }
     }

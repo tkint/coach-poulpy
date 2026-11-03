@@ -4,9 +4,9 @@ import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import ch.coachpoulpy.core.engine.SessionEvent
 import ch.coachpoulpy.core.model.BodyMeasurement
 import ch.coachpoulpy.core.model.BodyMetric
-import ch.coachpoulpy.core.model.Execution
-import ch.coachpoulpy.core.model.ExecutionId
-import ch.coachpoulpy.core.model.ExecutionSource
+import ch.coachpoulpy.core.model.SessionRecord
+import ch.coachpoulpy.core.model.SessionId
+import ch.coachpoulpy.core.model.SessionSource
 import ch.coachpoulpy.core.model.Exercise
 import ch.coachpoulpy.core.model.ExerciseSlug
 import ch.coachpoulpy.core.model.LocalizedText
@@ -36,7 +36,7 @@ class LocalStoreTest {
     @Test
     fun sessionEventsComeBackInOrder() {
         val store = LocalStore(DriverFactory())
-        store.startExecution(Execution(ExecutionId("e1"), ExecutionSource.GUIDED, startedAt = t0))
+        store.startSession(SessionRecord(SessionId("e1"), SessionSource.GUIDED, startedAt = t0))
 
         val written = listOf(SessionEvent.Started(t0), SessionEvent.PhaseCompleted(t0, 0), SessionEvent.Paused(t0))
         written.forEach { store.appendEvent("e1", it) }
@@ -47,26 +47,26 @@ class LocalStoreTest {
     @Test
     fun finishedSessionIsNoLongerUnfinished() {
         val store = LocalStore(DriverFactory())
-        store.startExecution(Execution(ExecutionId("e1"), ExecutionSource.GUIDED, startedAt = t0))
-        assertEquals(ExecutionId("e1"), store.unfinishedExecution()?.id)
+        store.startSession(SessionRecord(SessionId("e1"), SessionSource.GUIDED, startedAt = t0))
+        assertEquals(SessionId("e1"), store.unfinishedRecord()?.id)
 
-        store.finishExecution("e1", t0)
-        assertNull(store.unfinishedExecution())
+        store.finishSession("e1", t0)
+        assertNull(store.unfinishedRecord())
     }
 
     @Test
     fun onlySessionsPlayedToTheEndCountAsFinished() = runTest {
         val store = LocalStore(DriverFactory())
         val t1 = Instant.fromEpochSeconds(t0.epochSeconds + 600)
-        store.startExecution(Execution(ExecutionId("done"), ExecutionSource.GUIDED, startedAt = t0))
+        store.startSession(SessionRecord(SessionId("done"), SessionSource.GUIDED, startedAt = t0))
         store.appendEvent("done", SessionEvent.Started(t0))
         store.appendEvent("done", SessionEvent.Finished(t1))
-        store.finishExecution("done", t1)
+        store.finishSession("done", t1)
         // Left behind, then closed when another session started.
-        store.startExecution(Execution(ExecutionId("left"), ExecutionSource.GUIDED, startedAt = t0))
+        store.startSession(SessionRecord(SessionId("left"), SessionSource.GUIDED, startedAt = t0))
         store.appendEvent("left", SessionEvent.Started(t0))
-        store.finishExecution("left", t0)
-        store.startExecution(Execution(ExecutionId("open"), ExecutionSource.GUIDED, startedAt = t1))
+        store.finishSession("left", t0)
+        store.startSession(SessionRecord(SessionId("open"), SessionSource.GUIDED, startedAt = t1))
 
         assertEquals(listOf(t1), store.finishedSessionEnds().first())
     }
@@ -98,15 +98,15 @@ class LocalStoreTest {
     fun databaseFromTheFirstBuildGainsTheCatalogTables() {
         val driver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
         driver.execute(null, "CREATE TABLE workout_version (id TEXT NOT NULL, version INTEGER NOT NULL, type TEXT NOT NULL, name TEXT NOT NULL, content TEXT NOT NULL, created_at INTEGER NOT NULL, PRIMARY KEY (id, version))", 0)
-        driver.execute(null, "CREATE TABLE execution (id TEXT NOT NULL PRIMARY KEY, source TEXT NOT NULL, workout_id TEXT, workout_version INTEGER, started_at INTEGER NOT NULL, ended_at INTEGER)", 0)
-        driver.execute(null, "INSERT INTO execution VALUES ('old', 'GUIDED', NULL, NULL, 1700000000000, 1700000600000)", 0)
+        driver.execute(null, "CREATE TABLE record (id TEXT NOT NULL PRIMARY KEY, source TEXT NOT NULL, workout_id TEXT, workout_version INTEGER, started_at INTEGER NOT NULL, ended_at INTEGER)", 0)
+        driver.execute(null, "INSERT INTO record VALUES ('old', 'GUIDED', NULL, NULL, 1700000000000, 1700000600000)", 0)
         CoachPoulpyDatabase.Schema.migrate(driver, oldVersion = 1, newVersion = CoachPoulpyDatabase.Schema.version)
 
         val db = CoachPoulpyDatabase(driver)
         db.catalogEntryQueries.setVersion(2)
         assertEquals(2L, db.catalogEntryQueries.version().executeAsOne())
         // Sessions done before history keep their rows, with nothing summed up yet.
-        val old = db.executionQueries.finished().executeAsOne()
+        val old = db.sessionQueries.finished().executeAsOne()
         assertEquals("old", old.id)
         assertNull(old.summary)
         // The migrations reach the planning and variation tables too.
@@ -118,18 +118,18 @@ class LocalStoreTest {
     fun workoutsWithATypeAreRemovedAndSessionsKeptWithoutIt() {
         val driver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
         driver.execute(null, "CREATE TABLE workout_version (id TEXT NOT NULL, version INTEGER NOT NULL, type TEXT NOT NULL, name TEXT NOT NULL, content TEXT NOT NULL, created_at INTEGER NOT NULL, PRIMARY KEY (id, version))", 0)
-        driver.execute(null, "CREATE TABLE execution (id TEXT NOT NULL PRIMARY KEY, source TEXT NOT NULL, workout_id TEXT, workout_version INTEGER, started_at INTEGER NOT NULL, ended_at INTEGER)", 0)
+        driver.execute(null, "CREATE TABLE record (id TEXT NOT NULL PRIMARY KEY, source TEXT NOT NULL, workout_id TEXT, workout_version INTEGER, started_at INTEGER NOT NULL, ended_at INTEGER)", 0)
         CoachPoulpyDatabase.Schema.migrate(driver, oldVersion = 1, newVersion = 5)
         driver.execute(null, "INSERT INTO workout_version VALUES ('w1', 1, 'STRENGTH', 'Legs', '{}', 1700000000000)", 0)
         driver.execute(null, "INSERT INTO planned_workout VALUES ('p1', 'w1', '2026-10-27', 1700000000000)", 0)
-        driver.execute(null, "INSERT INTO execution(id, source, workout_id, workout_version, started_at, ended_at, title, workout_type) VALUES ('old', 'GUIDED', 'w1', 1, 1700000000000, 1700000600000, 'Legs', 'STRENGTH')", 0)
+        driver.execute(null, "INSERT INTO record(id, source, workout_id, workout_version, started_at, ended_at, title, workout_type) VALUES ('old', 'GUIDED', 'w1', 1, 1700000000000, 1700000600000, 'Legs', 'STRENGTH')", 0)
 
         CoachPoulpyDatabase.Schema.migrate(driver, oldVersion = 5, newVersion = CoachPoulpyDatabase.Schema.version)
 
         val db = CoachPoulpyDatabase(driver)
         assertEquals(0, db.workoutQueries.latestVersions().executeAsList().size)
         assertEquals(0, db.plannedWorkoutQueries.plans().executeAsList().size)
-        val old = db.executionQueries.finished().executeAsOne()
+        val old = db.sessionQueries.finished().executeAsOne()
         assertEquals("Legs", old.title)
         assertNull(old.workout_type)
         db.workoutQueries.insert("w2", 1, "CIRCUIT", "Burner", "{}", 1700000000000)
@@ -157,15 +157,15 @@ class LocalStoreTest {
     @Test
     fun finishedSessionsComeNewestFirstWithTheirTotals() = runTest {
         val store = LocalStore(DriverFactory())
-        store.startExecution(Execution(ExecutionId("a"), ExecutionSource.GUIDED, startedAt = t0), title = "Legs", format = WorkoutFormat.SETS)
-        store.startExecution(Execution(ExecutionId("b"), ExecutionSource.DEVICE_ONLY, startedAt = t0 + 1.days), format = WorkoutFormat.CIRCUIT)
-        store.startExecution(Execution(ExecutionId("open"), ExecutionSource.GUIDED, startedAt = t0 + 2.days))
-        store.finishExecution("a", t0 + 20.minutes)
-        store.finishExecution("b", t0 + 1.days + 30.minutes)
+        store.startSession(SessionRecord(SessionId("a"), SessionSource.GUIDED, startedAt = t0), title = "Legs", format = WorkoutFormat.SETS)
+        store.startSession(SessionRecord(SessionId("b"), SessionSource.DEVICE_ONLY, startedAt = t0 + 1.days), format = WorkoutFormat.CIRCUIT)
+        store.startSession(SessionRecord(SessionId("open"), SessionSource.GUIDED, startedAt = t0 + 2.days))
+        store.finishSession("a", t0 + 20.minutes)
+        store.finishSession("b", t0 + 1.days + 30.minutes)
         store.saveTotals("b", SessionTotals(active = 30.minutes, distanceMeters = 3000.0))
 
         val rows = store.finishedSessions().first()
-        assertEquals(listOf("b", "a"), rows.map { it.execution.id.value })
+        assertEquals(listOf("b", "a"), rows.map { it.record.id.value })
         assertEquals(3000.0, rows[0].totals?.distanceMeters)
         assertEquals(WorkoutFormat.CIRCUIT, rows[0].format)
         assertEquals("Legs", rows[1].title)
@@ -175,13 +175,13 @@ class LocalStoreTest {
     @Test
     fun deletingASessionRemovesItsEvents() {
         val store = LocalStore(DriverFactory())
-        store.startExecution(Execution(ExecutionId("e1"), ExecutionSource.GUIDED, startedAt = t0))
+        store.startSession(SessionRecord(SessionId("e1"), SessionSource.GUIDED, startedAt = t0))
         store.appendEvent("e1", SessionEvent.Started(t0))
-        store.finishExecution("e1", t0)
+        store.finishSession("e1", t0)
 
         store.deleteSession("e1")
         assertEquals(emptyList<SessionEvent>(), store.events("e1"))
-        assertNull(store.unfinishedExecution())
+        assertNull(store.unfinishedRecord())
     }
 
     private fun exercise(slug: String) = Exercise(

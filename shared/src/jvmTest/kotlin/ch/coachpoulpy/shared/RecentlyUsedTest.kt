@@ -2,9 +2,9 @@ package ch.coachpoulpy.shared
 
 import ch.coachpoulpy.catalog.Catalog
 import ch.coachpoulpy.core.model.Equipment
-import ch.coachpoulpy.core.model.Execution
-import ch.coachpoulpy.core.model.ExecutionId
-import ch.coachpoulpy.core.model.ExecutionSource
+import ch.coachpoulpy.core.model.SessionRecord
+import ch.coachpoulpy.core.model.SessionId
+import ch.coachpoulpy.core.model.SessionSource
 import ch.coachpoulpy.core.model.ExerciseFocus
 import ch.coachpoulpy.core.model.ExerciseSlug
 import ch.coachpoulpy.core.model.Prescription
@@ -56,8 +56,8 @@ class RecentlyUsedTest {
     private fun session(workout: Workout) {
         now += 1.minutes
         val id = "session-${now.epochSeconds}"
-        store.startExecution(Execution(ExecutionId(id), ExecutionSource.GUIDED, startedAt = now, workout = WorkoutRef(workout.id, workout.version)))
-        store.finishExecution(id, now + 20.minutes)
+        store.startSession(SessionRecord(SessionId(id), SessionSource.GUIDED, startedAt = now, workout = WorkoutRef(workout.id, workout.version)))
+        store.finishSession(id, now + 20.minutes)
     }
 
     @Test

@@ -13,7 +13,7 @@ import kotlinx.serialization.Serializable
 enum class WorkoutFormat { CIRCUIT, SETS }
 
 /**
- * Planned content is versioned and immutable per version: an execution always
+ * Planned content is versioned and immutable per version: a session record always
  * points at the exact version it followed.
  */
 @Serializable
