@@ -1032,3 +1032,16 @@ svg { flex: none; }
 .body-outline { fill: none; stroke: var(--cp-outline); stroke-width: 1.2; }
 .body-line { fill: none; stroke: var(--cp-outline); stroke-width: 1; stroke-linecap: round; }
 .body-area[aria-checked="true"].body-skin { fill: var(--cp-primary); }
+
+/* Draft: a mixed workout in Live (#82). Treadmill numbers shrink to one strip above a step. */
+.treadmill-strip { display: flex; align-items: center; gap: var(--cp-space-md); border-radius: var(--cp-radius-md); background: var(--cp-primary-container); color: var(--cp-on-primary-container); padding: var(--cp-space-sm) var(--cp-space-md); }
+.treadmill-strip > div { display: flex; flex-direction: column; flex: 1; }
+.treadmill-strip .label { font-size: 11.5px; line-height: 15px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; }
+.treadmill-strip .value { font-size: 20px; line-height: 24px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.treadmill-strip .value small { font-size: 12.5px; font-weight: 800; }
+.treadmill-strip--idle { background: var(--cp-surface-variant); color: var(--cp-on-surface-variant); }
+.step-card { border-radius: 20px; background: var(--cp-surface); border: 1px solid var(--cp-outline); padding: var(--cp-space-lg); display: flex; flex-direction: column; align-items: center; gap: var(--cp-space-sm); text-align: center; }
+.step-card .target-value { font-size: 72px; line-height: 76px; }
+.step-card .actions { display: flex; gap: var(--cp-space-sm); align-self: stretch; }
+.step-card .actions .primary-button, .step-card .actions .secondary-button { flex: 1; height: 52px; font-size: 15px; }
+.draft-note { font-size: 13px; line-height: 18px; color: var(--cp-on-surface-variant); text-align: center; }
