@@ -205,6 +205,34 @@ class LiveMixedWorkoutTest {
     }
 
     @Test
+    fun aWalkWaitsForStartEvenWhenTheBeltAlreadyMoves() = runTest {
+        val central = FakeCentral()
+        val store = LocalStore(DriverFactory())
+        val m = models(central, store)
+        addTreadmill(m)
+        saved(store, m, strengthFirst)
+        moving(central, 0)
+        m.live.startRecording("strength-first")
+        m.live.completeStep()
+        runCurrent()
+        assertEquals(StepWait.FOR_TAP, m.live.state.value.recording?.wait)
+        assertEquals(true, m.live.state.value.recording?.paused)
+        m.live.startStep()
+        assertEquals(StepWait.NOT_WAITING, m.live.state.value.recording?.wait)
+    }
+
+    @Test
+    fun discardingARecordingLeavesNoTrace() = runTest {
+        val store = LocalStore(DriverFactory())
+        val m = models(FakeCentral(), store)
+        saved(store, m, strengthFirst)
+        m.live.startRecording("strength-first")
+        m.live.discardCurrent()
+        assertNull(m.live.state.value.recording)
+        assertNull(store.unfinishedSession())
+    }
+
+    @Test
     fun withoutATreadmillAWalkWaitsForStart() = runTest {
         val store = LocalStore(DriverFactory())
         val m = models(FakeCentral(), store)

@@ -156,6 +156,12 @@ class PlayerModel internal constructor(
         if (status == SessionState.Status.RUNNING || status == SessionState.Status.PAUSED) act { session.finish(clock.now()) }
     }
 
+    /** Drops the session with everything it recorded, as if it never happened. */
+    fun discard() {
+        ticker?.cancel()
+        store.deleteSession(sessionId)
+    }
+
     /** The picture to share once the session is finished; null before. */
     fun shareCard(units: UnitSystem): ShareCard? = finished(units)?.let { ShareCard.of(it, languageCode) }
 

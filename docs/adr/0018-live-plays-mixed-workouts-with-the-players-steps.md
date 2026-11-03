@@ -13,7 +13,7 @@ The step the screen shows comes from one shared piece, `PlayerFace`, which the g
 
 - **A walk or run follows the belt** as in a pure treadmill workout: samples are recorded, a halted belt pauses the recording, a distance target ends when the treadmill reports it. A rest between two walks or runs follows it too.
 - **Any other exercise ignores the belt.** No treadmill samples are recorded, a still belt or a lost treadmill neither pauses the recording nor starts the finish question, and the tiles shrink to what the phone is streamed, such as the heart rate.
-- **A walk or run reached from another exercise waits to begin.** Following the treadmill, it waits for the belt to move, and "Start without it" is the way out. With no treadmill to follow, it shows Start and is timed by the phone. A workout that opens with a walk or run keeps waiting for the belt in the picker, as Start always did; one that opens with another exercise starts at once.
+- **A walk or run reached from another exercise always waits to begin**, as the person may still be on their way to the treadmill, or it may not be connected yet. Following the treadmill with the belt still, it starts when the belt moves, and "Start without it" is the way out. With the belt already moving, or with no treadmill, it shows Start and is timed by the phone. Skip and Done are always there: Done cuts a step short without the feel of skipping it. A workout that opens with a walk or run keeps waiting for the belt in the picker, as Start always did; one that opens with another exercise starts at once.
 - **History** keeps one session. Its treadmill totals come from the samples, so from the walks and runs only.
 
 ## Consequences

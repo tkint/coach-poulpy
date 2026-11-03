@@ -74,9 +74,9 @@ internal fun LiveWorkoutPlayer(state: LiveUiState, recording: RecordingUi, playe
                 LivePanel(state.tiles)
             }
             when {
-                waiting -> WaitingStep(player, recording.wait, onSkip = model::skipPhase, onStart = model::startStep)
+                waiting -> WaitingStep(player, recording.wait, onSkip = model::skipPhase, onDone = model::completeStep, onStart = model::startStep)
                 player.isRest -> RestStep(player, paused, onSkip = model::skipPhase, onAdjust = model::adjustRest)
-                else -> WorkStep(player, paused, onSkip = model::skipPhase, onDone = model::completeStep)
+                else -> WorkStep(player, paused, onSkip = model::skipPhase, onDone = model::completeStep, alwaysDone = true)
             }
             state.finishPrompt?.let {
                 Spacer(Modifier.height(PoulpySpace.md))
@@ -84,12 +84,16 @@ internal fun LiveWorkoutPlayer(state: LiveUiState, recording: RecordingUi, playe
             }
         }
     }
-    if (confirmStop) StopDialog(onConfirm = { confirmStop = false; model.stopRecording() }, onDismiss = { confirmStop = false })
+    if (confirmStop) StopDialog(
+            onConfirm = { confirmStop = false; model.stopRecording() },
+            onDismiss = { confirmStop = false },
+            onDiscard = { confirmStop = false; model.discardCurrent() },
+        )
 }
 
 /** A walk or run that has not begun: waiting for the belt to move, or for Start when there is no treadmill. */
 @Composable
-private fun ColumnScope.WaitingStep(state: PlayerState, wait: StepWait, onSkip: () -> Unit, onStart: () -> Unit) {
+private fun ColumnScope.WaitingStep(state: PlayerState, wait: StepWait, onSkip: () -> Unit, onDone: () -> Unit, onStart: () -> Unit) {
     Column(Modifier.weight(1f).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
         Image(
             painterResource(PoulpyDrawing.STRAINING.drawable),
@@ -114,7 +118,7 @@ private fun ColumnScope.WaitingStep(state: PlayerState, wait: StepWait, onSkip: 
             }
         } else {
             Text(
-                stringResource(R.string.live_stepNoTreadmill),
+                stringResource(if (wait == StepWait.FOR_TAP) R.string.live_stepWaitTap else R.string.live_stepNoTreadmill),
                 fontSize = 17.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -129,18 +133,21 @@ private fun ColumnScope.WaitingStep(state: PlayerState, wait: StepWait, onSkip: 
         )
     }
     Spacer(Modifier.height(PoulpySpace.lg))
-    Row(horizontalArrangement = Arrangement.spacedBy(PoulpySpace.md), modifier = Modifier.fillMaxWidth()) {
-        OutlinedButton(
-            onClick = onSkip,
-            border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
-            modifier = Modifier.height(64.dp),
-        ) { Text(stringResource(R.string.player_skip), fontSize = 19.sp, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onSurface) }
-        Button(onClick = onStart, modifier = Modifier.weight(1f).height(64.dp)) {
-            Text(
-                stringResource(if (wait == StepWait.FOR_BELT) R.string.live_startWithoutIt else R.string.action_start),
-                fontSize = 19.sp,
-                fontWeight = FontWeight.ExtraBold,
-            )
+    Button(onClick = onStart, modifier = Modifier.fillMaxWidth().height(64.dp)) {
+        Text(
+            stringResource(if (wait == StepWait.FOR_BELT) R.string.live_startWithoutIt else R.string.action_start),
+            fontSize = 19.sp,
+            fontWeight = FontWeight.ExtraBold,
+        )
+    }
+    // Done cuts the step short without the feel of skipping it.
+    Row(horizontalArrangement = Arrangement.spacedBy(PoulpySpace.md), modifier = Modifier.fillMaxWidth().padding(top = PoulpySpace.md)) {
+        listOf(R.string.player_skip to onSkip, R.string.player_done to onDone).forEach { (label, action) ->
+            OutlinedButton(
+                onClick = action,
+                border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
+                modifier = Modifier.weight(1f).height(56.dp),
+            ) { Text(stringResource(label), fontSize = 17.sp, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onSurface) }
         }
     }
 }

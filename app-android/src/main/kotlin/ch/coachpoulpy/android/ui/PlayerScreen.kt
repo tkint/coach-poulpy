@@ -120,7 +120,7 @@ fun PlayerScreen(graph: AppGraph, language: String, workoutId: String?, onClose:
                     val finished = remember(units) { model.finished(units) }
                     Finished(state, finished, onShare = { model.shareCard(units)?.let { shareSessionImage(context, it, chooser, colors) } }, onClose = onClose)
                 }
-                PlayerStatus.RUNNING, PlayerStatus.PAUSED -> Running(state, model)
+                PlayerStatus.RUNNING, PlayerStatus.PAUSED -> Running(state, model, onClose)
             }
         }
     }
@@ -150,7 +150,7 @@ private fun ColumnScope.Ready(state: PlayerState, onStart: () -> Unit, onClose: 
 }
 
 @Composable
-private fun ColumnScope.Running(state: PlayerState, model: PlayerModel) {
+private fun ColumnScope.Running(state: PlayerState, model: PlayerModel, onClose: () -> Unit) {
     var confirmStop by remember { mutableStateOf(false) }
     val paused = state.status == PlayerStatus.PAUSED
 
@@ -160,7 +160,13 @@ private fun ColumnScope.Running(state: PlayerState, model: PlayerModel) {
     } else {
         WorkStep(state, paused, onSkip = model::skip, onDone = model::done)
     }
-    if (confirmStop) StopDialog(onConfirm = { confirmStop = false; model.stop() }, onDismiss = { confirmStop = false })
+    if (confirmStop) {
+        StopDialog(
+            onConfirm = { confirmStop = false; model.stop() },
+            onDismiss = { confirmStop = false },
+            onDiscard = { confirmStop = false; model.discard(); onClose() },
+        )
+    }
 }
 
 /** Pause and end sit on the bar over the whole session; the step's own buttons are below. */
@@ -187,11 +193,16 @@ internal fun PlayerBar(state: PlayerState, paused: Boolean, onToggle: () -> Unit
 }
 
 @Composable
-internal fun StopDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
+internal fun StopDialog(onConfirm: () -> Unit, onDismiss: () -> Unit, onDiscard: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.player_stopTitle)) },
-        text = { Text(stringResource(R.string.player_stopBody)) },
+        text = {
+            Column {
+                Text(stringResource(R.string.player_stopBody))
+                TextButton(onClick = onDiscard) { Text(stringResource(R.string.player_discard), color = MaterialTheme.colorScheme.error) }
+            }
+        },
         confirmButton = { TextButton(onClick = onConfirm) { Text(stringResource(R.string.player_stop)) } },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
     )
@@ -199,8 +210,10 @@ internal fun StopDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
 
 /** An exercise: Poulpy straining, the part, the name, the set, the big target, what comes next, Skip and Done (`player-set`, `player-circuit-round`). */
 @Composable
-internal fun ColumnScope.WorkStep(state: PlayerState, paused: Boolean, onSkip: () -> Unit, onDone: () -> Unit) {
+internal fun ColumnScope.WorkStep(state: PlayerState, paused: Boolean, onSkip: () -> Unit, onDone: () -> Unit, alwaysDone: Boolean = false) {
     val remaining = state.remainingSeconds
+    // A timed step ends by itself; Live also offers Done, to cut a step short without skipping it.
+    val showDone = !state.isTimed || alwaysDone
     Column(Modifier.weight(1f).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
         Image(
             painterResource(PoulpyDrawing.STRAINING.drawable),
@@ -256,9 +269,9 @@ internal fun ColumnScope.WorkStep(state: PlayerState, paused: Boolean, onSkip: (
             enabled = !paused,
             border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
             contentPadding = PaddingValues(horizontal = 22.dp),
-            modifier = Modifier.then(if (state.isTimed) Modifier.weight(1f) else Modifier).height(64.dp),
+            modifier = Modifier.then(if (!showDone) Modifier.weight(1f) else Modifier).height(64.dp),
         ) { Text(stringResource(R.string.player_skip), fontSize = 19.sp, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onSurface) }
-        if (!state.isTimed) {
+        if (showDone) {
             Button(onClick = onDone, enabled = !paused, modifier = Modifier.weight(1f).height(64.dp)) {
                 Icon(Icons.Filled.Check, contentDescription = null, modifier = Modifier.size(24.dp))
                 Text(stringResource(R.string.player_done), fontSize = 19.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = PoulpySpace.sm))

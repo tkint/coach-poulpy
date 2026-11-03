@@ -116,6 +116,7 @@ struct PlayerView: View {
         Color.clear.frame(height: 0)
             .confirmationDialog("player.stopTitle", isPresented: $confirmStop, titleVisibility: .visible) {
                 Button("player.stop", role: .destructive) { model.stop() }
+                Button("player.discard", role: .destructive) { model.discard(); dismiss() }
             } message: {
                 Text("player.stopBody")
             }

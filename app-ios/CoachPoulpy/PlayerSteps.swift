@@ -21,8 +21,10 @@ enum PlayerSteps {
 
     /// An exercise: Poulpy straining, the part, the name, the set, the big target, what comes next, Skip and Done (`player-set`, `player-circuit-round`).
     @ViewBuilder
-    static func workStep(_ state: PlayerState, paused: Bool, onSkip: @escaping () -> Void, onDone: @escaping () -> Void) -> some View {
+    static func workStep(_ state: PlayerState, paused: Bool, alwaysDone: Bool = false, onSkip: @escaping () -> Void, onDone: @escaping () -> Void) -> some View {
         let remaining = state.remainingSeconds?.intValue
+        // A timed step ends by itself; Live also offers Done, to cut a step short without skipping it.
+        let showDone = !state.isTimed || alwaysDone
         Spacer(minLength: 0)
         Image(PoulpyDrawing.straining.imageName).resizable().scaledToFit().frame(width: 130, height: 117).accessibilityHidden(true)
         partLine(state)
@@ -70,10 +72,10 @@ enum PlayerSteps {
                     .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 19, relativeTo: .body))
                     .foregroundStyle(PoulpyColor.onBackground)
                     .padding(.horizontal, 22)
-                    .frame(maxWidth: state.isTimed ? .infinity : nil, minHeight: 64)
+                    .frame(maxWidth: showDone ? nil : .infinity, minHeight: 64)
                     .overlay(Capsule().stroke(PoulpyColor.outline, lineWidth: 2))
             }
-            if !state.isTimed {
+            if showDone {
                 Button {
                     onDone()
                 } label: {

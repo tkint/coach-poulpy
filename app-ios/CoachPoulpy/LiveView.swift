@@ -117,7 +117,7 @@ struct LiveView: View {
             } else if player.isRest {
                 PlayerSteps.restStep(player, paused: paused, onSkip: { model.skipPhase() }, onAdjust: { model.adjustRest(seconds: Int32($0)) })
             } else {
-                PlayerSteps.workStep(player, paused: paused, onSkip: { model.skipPhase() }, onDone: { model.completeStep() })
+                PlayerSteps.workStep(player, paused: paused, alwaysDone: true, onSkip: { model.skipPhase() }, onDone: { model.completeStep() })
             }
             if let prompt = state.finishPrompt {
                 finishCard(prompt)
@@ -130,6 +130,7 @@ struct LiveView: View {
         .onChange(of: player.phaseNumber) { _ in AudioServicesPlaySystemSound(1005) }
         .confirmationDialog("player.stopTitle", isPresented: $confirmStop, titleVisibility: .visible) {
             Button("player.stop", role: .destructive) { model.stopRecording() }
+            Button("player.discard", role: .destructive) { model.discardCurrent() }
         } message: {
             Text("player.stopBody")
         }
@@ -150,32 +151,35 @@ struct LiveView: View {
             .multilineTextAlignment(.center)
             .accessibilityElement(children: .combine)
         } else {
-            Text("live.stepNoTreadmill")
+            Text(LocalizedStringKey(wait == .forTap ? "live.stepWaitTap" : "live.stepNoTreadmill"))
                 .font(.custom(PoulpyFontFace.nunitoBold, size: 17, relativeTo: .body))
                 .foregroundStyle(PoulpyColor.onSurfaceVariant)
                 .multilineTextAlignment(.center)
         }
         Text(player.targetLabel ?? "").font(.custom(PoulpyFontFace.nunitoExtraBold, fixedSize: 48)).multilineTextAlignment(.center)
         Spacer(minLength: 0)
+        Button {
+            model.startStep()
+        } label: {
+            Text(LocalizedStringKey(wait == .forBelt ? "live.startWithoutIt" : "action.start"))
+                .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 19, relativeTo: .body))
+                .foregroundStyle(PoulpyColor.onPrimary)
+                .frame(maxWidth: .infinity, minHeight: 64)
+                .background(PoulpyColor.primary, in: Capsule())
+        }
+        .buttonStyle(.plain)
+        // Done cuts the step short without the feel of skipping it.
         HStack(spacing: PoulpySpace.md) {
-            Button {
-                model.skipPhase()
-            } label: {
-                Text("player.skip")
-                    .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 19, relativeTo: .body))
-                    .foregroundStyle(PoulpyColor.onBackground)
-                    .padding(.horizontal, 22)
-                    .frame(minHeight: 64)
-                    .overlay(Capsule().stroke(PoulpyColor.outline, lineWidth: 2))
-            }
-            Button {
-                model.startStep()
-            } label: {
-                Text(LocalizedStringKey(wait == .forBelt ? "live.startWithoutIt" : "action.start"))
-                    .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 19, relativeTo: .body))
-                    .foregroundStyle(PoulpyColor.onPrimary)
-                    .frame(maxWidth: .infinity, minHeight: 64)
-                    .background(PoulpyColor.primary, in: Capsule())
+            ForEach(["player.skip", "player.done"], id: \.self) { key in
+                Button {
+                    key == "player.skip" ? model.skipPhase() : model.completeStep()
+                } label: {
+                    Text(LocalizedStringKey(key))
+                        .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 17, relativeTo: .body))
+                        .foregroundStyle(PoulpyColor.onBackground)
+                        .frame(maxWidth: .infinity, minHeight: 56)
+                        .overlay(Capsule().stroke(PoulpyColor.outline, lineWidth: 2))
+                }
             }
         }
         .buttonStyle(.plain)

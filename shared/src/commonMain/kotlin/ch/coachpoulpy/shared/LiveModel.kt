@@ -115,7 +115,10 @@ enum class StepWait {
     /** Following the treadmill: the step begins when the belt moves. The user can start it without. */
     FOR_BELT,
 
-    /** No treadmill to follow: the step begins when the user taps Start, and is timed by the phone. */
+    /** The belt already moves: the step begins when the user taps Start, as they may not be on the treadmill yet. */
+    FOR_TAP,
+
+    /** No treadmill to follow, or none connected yet: the step begins when the user taps Start, and is timed by the phone. */
     FOR_START,
 }
 
@@ -656,6 +659,11 @@ class LiveModel(
         resumeRecording()
     }
 
+    /** Drops the recording under way with everything it recorded, as if it never happened. */
+    fun discardCurrent() {
+        recording?.let { discardRecording(it.sessionId) }
+    }
+
     /** Marks the step under way done, in a workout: the player's Done. */
     fun completeStep() = act { it.completeCurrent(clock.now()) }
 
@@ -848,12 +856,9 @@ class LiveModel(
         // counter's growth from the first reading to the last (ADR 0018); sum the growth per step instead.
         current.recorder.restart()
         val auto = _state.value.followTreadmill && devices.hasTreadmill
-        if (auto && _state.value.belt == BeltStatus.MOVING) {
-            current.stillSince = null
-            return
-        }
+        // Always wait: the person may still be on their way to the treadmill, or it may not be connected yet.
         current.waiting = true
-        if (auto) {
+        if (auto && _state.value.belt != BeltStatus.MOVING) {
             // Waiting for the belt counts as the belt being still, but is not a Stop pressed on the console.
             current.stillSince = now
             current.stopAnswered = true
@@ -907,7 +912,8 @@ class LiveModel(
                     onTreadmill = current.followsNow(now),
                     wait = when {
                         !current.waiting -> StepWait.NOT_WAITING
-                        it.followTreadmill && devices.hasTreadmill -> StepWait.FOR_BELT
+                        it.followTreadmill && devices.hasTreadmill && it.belt != BeltStatus.MOVING -> StepWait.FOR_BELT
+                        devices.hasTreadmill -> StepWait.FOR_TAP
                         else -> StepWait.FOR_START
                     },
                 ),
