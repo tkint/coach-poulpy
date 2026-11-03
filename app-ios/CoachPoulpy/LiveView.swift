@@ -1,3 +1,4 @@
+import AudioToolbox
 import SwiftUI
 import UIKit
 import Shared
@@ -9,6 +10,7 @@ struct LiveView: View {
     @StateObject private var bluetooth = BluetoothGate()
     @State private var choosing = false
     @State private var modeInfo = false
+    @State private var confirmStop = false
     let onManageDevices: () -> Void
 
     init(graph: AppGraph, onManageDevices: @escaping () -> Void) {
@@ -22,6 +24,19 @@ struct LiveView: View {
     private var model: LiveModel { live.model }
 
     var body: some View {
+        // A workout that mixes walks and runs with other exercises plays full screen, with the treadmill numbers on top (#82).
+        if let recording = state.recording, let player = recording.player {
+            NavigationStack {
+                workoutPlayer(recording, player)
+                    .toolbar(.hidden, for: .tabBar)
+                    .toolbar(.hidden, for: .navigationBar)
+            }
+        } else {
+            tab
+        }
+    }
+
+    private var tab: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 10) {
@@ -83,6 +98,63 @@ struct LiveView: View {
                 if let summary = state.summary {
                     SummarySheet(summary: summary, units: state.units, onDone: { model.clearSummary() })
                 }
+            }
+        }
+    }
+
+    /// The workout player's steps full screen with Live's numbers on top (`live-mixed-player-*` mockups).
+    private func workoutPlayer(_ recording: RecordingUi, _ player: PlayerState) -> some View {
+        let waiting = recording.wait != .notWaiting
+        // A step waiting to begin is paused by the app, not by the user: Start is its button, not the pause one.
+        let paused = player.status == .paused && !waiting
+        return VStack(spacing: 12) {
+            PlayerSteps.bar(player, paused: paused, canToggle: !waiting, onToggle: { paused ? model.resumeRecording() : model.pauseRecording() }, onEnd: { confirmStop = true })
+            if !state.tiles.isEmpty {
+                panel
+            }
+            if waiting {
+                waitingStep(recording.wait, player)
+            } else if player.isRest {
+                PlayerSteps.restStep(player, paused: paused, onSkip: { model.skipPhase() }, onAdjust: { model.adjustRest(seconds: Int32($0)) })
+            } else {
+                PlayerSteps.workStep(player, paused: paused, alwaysDone: true, onSkip: { model.skipPhase() }, onDone: { model.completeStep() })
+            }
+            if let prompt = state.finishPrompt {
+                finishCard(prompt)
+            }
+        }
+        .padding(24)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(PoulpyColor.background.ignoresSafeArea())
+        .onAppear { UIApplication.shared.isIdleTimerDisabled = true }
+        .onChange(of: player.phaseNumber) { _ in AudioServicesPlaySystemSound(1005) }
+        .confirmationDialog("player.stopTitle", isPresented: $confirmStop, titleVisibility: .visible) {
+            Button("player.stop", role: .destructive) { model.stopRecording() }
+            Button("player.discard", role: .destructive) { model.discardCurrent() }
+        } message: {
+            Text("player.stopBody")
+        }
+    }
+
+    /// A walk or run that has not begun: waiting for the belt to move, for Start, or for the treadmill to connect.
+    @ViewBuilder
+    private func waitingStep(_ wait: StepWait, _ player: PlayerState) -> some View {
+        PlayerSteps.startStep(
+            player,
+            startLabel: LocalizedStringKey(wait == .forBelt ? "live.startWithoutIt" : "action.start"),
+            onSkip: { model.skipPhase() },
+            onDone: { model.completeStep() },
+            onStart: { model.startStep() }
+        ) {
+            if wait == .forBelt {
+                VStack(spacing: 2) {
+                    Text("live.stepWaitTitle").font(PoulpyFont.headline)
+                    Text("live.stepWaitBody").font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+                }
+                .multilineTextAlignment(.center)
+                .accessibilityElement(children: .combine)
+            } else {
+                PlayerSteps.waitingLine(LocalizedStringKey(wait == .forTap ? "live.stepWaitTap" : "live.stepNoTreadmill"))
             }
         }
     }

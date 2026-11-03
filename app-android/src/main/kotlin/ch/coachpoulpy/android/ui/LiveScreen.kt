@@ -102,7 +102,14 @@ import java.util.Locale
 
 /** The Live tab: every connected device's numbers together, the recorder under them, all on one screen. */
 @Composable
-fun LiveScreen(graph: AppGraph, language: String, onManageDevices: () -> Unit, modifier: Modifier = Modifier) {
+fun LiveScreen(
+    graph: AppGraph,
+    language: String,
+    onManageDevices: () -> Unit,
+    modifier: Modifier = Modifier,
+    /** Says whether the screen takes the whole display, tab bar included: a mixed workout plays full screen (#82). */
+    onFullScreen: (Boolean) -> Unit = {},
+) {
     val context = LocalContext.current
     val memory = remember(context) { AppPreferences(context) }
     // Shared by the whole app: leaving the tab keeps the devices connected and the recording going.
@@ -121,6 +128,16 @@ fun LiveScreen(graph: AppGraph, language: String, onManageDevices: () -> Unit, m
     }
     // Opening the tab connects the added devices, without asking for anything.
     LaunchedEffect(devices) { if (bluetooth.isReady) devices.connectAutomatically() }
+
+    // A workout that mixes walks and runs with other exercises plays full screen, with the treadmill numbers on top.
+    val recording = state.recording
+    val player = recording?.player
+    LaunchedEffect(player != null) { onFullScreen(player != null) }
+    DisposableEffect(Unit) { onDispose { onFullScreen(false) } }
+    if (recording != null && player != null) {
+        LiveWorkoutPlayer(state, recording, player, model, modifier)
+        return
+    }
 
     Column(
         modifier.fillMaxSize().padding(start = 20.dp, end = 20.dp, top = PoulpySpace.lg, bottom = PoulpySpace.md),
@@ -233,7 +250,7 @@ private fun BeltBanner(belt: BeltStatus) {
 
 /** Speed and pace large, the rest two by two. Six small tiles at most, so the screen never scrolls. */
 @Composable
-private fun LivePanel(tiles: List<LiveTile>) {
+internal fun LivePanel(tiles: List<LiveTile>) {
     val big = tiles.filter { it.metric == LiveMetric.SPEED || it.metric == LiveMetric.PACE }
     val small = (tiles - big.toSet()).take(6)
     Surface(shape = RoundedCornerShape(PoulpyRadius.lg), color = MaterialTheme.colorScheme.primaryContainer) {
@@ -597,7 +614,7 @@ private fun Waiting(choice: LiveChoice, model: LiveModel) {
 
 /** The treadmill went quiet or away for long, or the app was closed mid-recording: blue, never a reproach. */
 @Composable
-private fun FinishCard(prompt: FinishPromptUi, model: LiveModel) {
+internal fun FinishCard(prompt: FinishPromptUi, model: LiveModel) {
     val colors = MaterialTheme.colorScheme
     Surface(shape = RoundedCornerShape(20.dp), color = colors.primaryContainer, contentColor = colors.onPrimaryContainer) {
         Column(Modifier.fillMaxWidth().padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {

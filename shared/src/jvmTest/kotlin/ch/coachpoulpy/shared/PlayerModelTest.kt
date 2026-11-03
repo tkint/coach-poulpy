@@ -1,5 +1,11 @@
 package ch.coachpoulpy.shared
 
+import ch.coachpoulpy.core.model.ExerciseSlug
+import ch.coachpoulpy.core.model.Prescription
+import ch.coachpoulpy.core.model.SetPrescription
+import ch.coachpoulpy.core.model.Step
+import ch.coachpoulpy.core.model.StepId
+import ch.coachpoulpy.core.model.Target
 import ch.coachpoulpy.core.model.WorkoutFormat
 import ch.coachpoulpy.core.model.WorkoutId
 import ch.coachpoulpy.data.local.DriverFactory
@@ -193,5 +199,37 @@ class PlayerModelTest {
         val fresh = assertNotNull(player.shareCard(UnitSystem.METRIC))
         assertEquals(PoulpyDrawing.EXHAUSTED, fresh.drawing)
         assertEquals(fresh, graph.sessionShareCard("run-1", UnitSystem.METRIC, "en"))
+    }
+
+    @Test
+    fun aTimedWalkReachedFromAnotherExerciseWaitsForStart() {
+        fun step(id: String, slug: String, target: Target) =
+            Step.ExerciseStep(StepId(id), ExerciseSlug(slug), Prescription(listOf(SetPrescription(target))))
+        val workout = workoutOf(
+            "squat-walk", "Squat, walk",
+            listOf(step("squat", "bodyweight-squat", Target.Reps(10)), step("walk", "walk", Target.Time(20.minutes))),
+            WorkoutFormat.CIRCUIT,
+        )
+        graph.store.saveWorkout(workout)
+        val player = PlayerModel(
+            workout, graph.compiler.compile(workout), graph.catalog, graph.store, "en",
+            sessionId = "run-2", events = emptyList(),
+            clock = clock, scope = CoroutineScope(StandardTestDispatcher()),
+        )
+        player.start()
+        player.done()
+        assertEquals(true, player.state.value.waitingToStart)
+        assertEquals(PlayerStatus.PAUSED, player.state.value.status)
+
+        clock.advance(5.minutes)
+        player.tick()
+        assertEquals(1200, player.state.value.remainingSeconds, "the wait is not part of the walk")
+
+        player.startStep()
+        assertEquals(false, player.state.value.waitingToStart)
+        assertEquals(PlayerStatus.RUNNING, player.state.value.status)
+        clock.advance(1.minutes)
+        player.tick()
+        assertEquals(1140, player.state.value.remainingSeconds)
     }
 }

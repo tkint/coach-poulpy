@@ -9,15 +9,9 @@ import ch.coachpoulpy.core.engine.Timeline
 import ch.coachpoulpy.core.model.SessionRecord
 import ch.coachpoulpy.core.model.SessionId
 import ch.coachpoulpy.core.model.SessionSource
-import ch.coachpoulpy.core.model.Load
 import ch.coachpoulpy.core.model.MovementPattern
 import ch.coachpoulpy.core.model.PartKind
-import ch.coachpoulpy.core.model.Side
-import ch.coachpoulpy.core.model.Step
-import ch.coachpoulpy.core.model.StepRole
-import ch.coachpoulpy.core.model.Target
 import ch.coachpoulpy.core.model.Workout
-import ch.coachpoulpy.core.model.WorkoutFormat
 import ch.coachpoulpy.core.model.WorkoutRef
 import ch.coachpoulpy.data.local.LocalStore
 import kotlin.time.Clock
@@ -86,6 +80,8 @@ data class PlayerState(
     val nextRound: String?,
     val phaseNumber: Int,
     val phaseCount: Int,
+    /** A walk or run reached from other exercises, paused until the person taps Start. */
+    val waitingToStart: Boolean = false,
 )
 
 /**
@@ -105,11 +101,13 @@ class PlayerModel internal constructor(
     private val clock: Clock = Clock.System,
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main),
 ) {
-    private val labels = Labels(languageCode, units)
+    private val face = PlayerFace(workout, catalog, languageCode, units)
     private val session = Session(timeline, events)
-    private val steps = workout.steps.flatMap { it.exerciseSteps() }.associateBy { it.id }
     private val mutableState = MutableStateFlow(render())
     private var ticker: Job? = null
+
+    /** A walk or run just reached from other exercises is paused until the person starts it. */
+    private var waiting = false
 
     val state: StateFlow<PlayerState> = mutableState.asStateFlow()
 
@@ -143,14 +141,22 @@ class PlayerModel internal constructor(
     }
 
     /** Marks the current set done (or ends a rest early). */
-    fun done() = whileRunning { act { session.completeCurrent(clock.now()) } }
+    fun done() = whileRunningOrWaiting { act { session.completeCurrent(clock.now()) } }
 
-    fun skip() = whileRunning { act { session.skipCurrent(clock.now()) } }
+    fun skip() = whileRunningOrWaiting { act { session.skipCurrent(clock.now()) } }
+
+    /** Begins the walk or run that waits for the person; the step's clock starts now. */
+    fun startStep() {
+        if (!waiting) return
+        waiting = false
+        act { session.resume(clock.now()) }
+    }
 
     fun pause() = whileRunning { act { session.pause(clock.now()) } }
 
     fun resume() {
         if (current().status != SessionState.Status.PAUSED) return
+        waiting = false
         act { session.resume(clock.now()) }
         startTicker()
     }
@@ -162,6 +168,12 @@ class PlayerModel internal constructor(
     fun stop() {
         val status = current().status
         if (status == SessionState.Status.RUNNING || status == SessionState.Status.PAUSED) act { session.finish(clock.now()) }
+    }
+
+    /** Drops the session with everything it recorded, as if it never happened. */
+    fun discard() {
+        ticker?.cancel()
+        store.deleteSession(sessionId)
     }
 
     /** The picture to share once the session is finished; null before. */
@@ -188,8 +200,15 @@ class PlayerModel internal constructor(
         if (current().status == SessionState.Status.RUNNING) action()
     }
 
+    /** Done and Skip also work on a step that has not begun, which ends the wait first. */
+    private fun whileRunningOrWaiting(action: () -> Unit) {
+        if (waiting) startStep()
+        whileRunning(action)
+    }
+
     private fun act(action: () -> List<SessionEvent>) {
-        action().forEach { event ->
+        val events = action()
+        events.forEach { event ->
             store.appendEvent(sessionId, event)
             if (event is SessionEvent.Finished) {
                 store.finishSession(sessionId, event.at)
@@ -197,7 +216,24 @@ class PlayerModel internal constructor(
                 ticker?.cancel()
             }
         }
+        if (events.any { it is SessionEvent.PhaseCompleted || it is SessionEvent.PhaseSkipped }) waitForWalkOrRun()
         mutableState.value = render()
+    }
+
+    /**
+     * A walk or run reached from another exercise does not begin by itself: the person may still be on their way to
+     * the treadmill. One that follows a walk or run, as in intervals, goes straight on.
+     */
+    private fun waitForWalkOrRun() {
+        val now = clock.now()
+        val state = session.state(now)
+        val phases = session.timeline.phases
+        val phase = state.phase as? Phase.Work ?: return
+        if (state.status != SessionState.Status.RUNNING || !phase.exercise.isWalkOrRun(catalog)) return
+        val before = phases.take(state.phaseIndex).lastOrNull { it is Phase.Work } as? Phase.Work
+        if (before == null || before.exercise.isWalkOrRun(catalog)) return
+        waiting = true
+        store.appendEvent(sessionId, session.pause(now).single())
     }
 
     private fun startTicker() {
@@ -210,118 +246,9 @@ class PlayerModel internal constructor(
         }
     }
 
-    private fun render(): PlayerState {
-        val now = clock.now()
-        val state = session.state(now)
-        val phases = session.timeline.phases
-        val phase = state.phase
-        val work = phase as? Phase.Work
-        val step = work?.let { steps[it.step] }
-        val exercise = work?.let { catalog[it.exercise] }
-        val next = phases.drop(state.phaseIndex + 1).firstOrNull { it is Phase.Work } as? Phase.Work
-        // Where the user is: a rest belongs to the step before it, or to the first one when it opens the workout.
-        val here = work ?: phases.take(state.phaseIndex).lastOrNull { it is Phase.Work } as? Phase.Work ?: next
-        // "Set 2 of 3" only in a Sets workout outside a repeat: a circuit or a repeat counts rounds.
-        val sets = work?.takeIf { workout.format == WorkoutFormat.SETS && it.rounds == 1 }?.let { w -> step?.let { it.setNumber(w.setIndex) to it.setCount() } }
-
-        return PlayerState(
-            status = when (state.status) {
-                SessionState.Status.NOT_STARTED -> PlayerStatus.READY
-                SessionState.Status.RUNNING -> PlayerStatus.RUNNING
-                SessionState.Status.PAUSED -> PlayerStatus.PAUSED
-                SessionState.Status.FINISHED -> PlayerStatus.FINISHED
-            },
-            workoutName = workout.name,
-            isRest = phase is Phase.Rest,
-            title = when {
-                phase is Phase.Rest -> labels.rest
-                exercise != null -> labels.text(exercise.name)
-                else -> work?.exercise?.value ?: ""
-            },
-            exerciseSlug = work?.exercise?.value,
-            pattern = exercise?.movementPattern,
-            partKind = here?.part,
-            partLabel = here?.let { labels.partLine(labels.part(it.part, it.workPart), it.round, it.rounds) },
-            roleLabel = if (phase is Phase.Rest) labels.role(StepRole.RECOVER) else work?.let { labels.role(it.role) },
-            setNumber = sets?.first ?: 0,
-            setCount = sets?.second ?: 0,
-            sideLabel = work?.let { labels.side(it.side) },
-            targetLabel = work?.let { labels.target(it.target) },
-            targetDetail = (work ?: here)?.let { detailOf(it) },
-            inRepeat = here?.let { it.rounds > 1 } ?: false,
-            targetValue = work?.let { (it.target as? Target.Reps)?.count?.toString() },
-            targetUnit = work?.let { w -> (w.target as? Target.Reps)?.let { labels.repsUnit(it.count, loadOf(w)) } },
-            loadLabel = work?.let { loadOf(it) },
-            isTimed = phase?.duration != null,
-            remainingSeconds = state.phaseRemaining?.let { ceilSeconds(it.inWholeMilliseconds) },
-            totalSeconds = state.phaseDuration?.inWholeSeconds?.toInt(),
-            elapsedSeconds = state.phaseElapsed.inWholeSeconds.toInt(),
-            exerciseCountLabel = labels.exercises(steps.size),
-            sessionClock = clockOf(activeTime(session.events, now).inWholeSeconds.toInt()),
-            nextTitle = next?.let { nameOf(it) },
-            nextHeadline = next?.let { n -> setsOf(n)?.let { (number, count) -> labels.nameSet(nameOf(n), number, count) } ?: nameOf(n) },
-            nextDetail = next?.let { detailOf(it) },
-            nextLine = nextLine(state.phaseIndex + 1, work, here),
-            nextRound = next?.takeIf { it.rounds > 1 && (here?.rounds != it.rounds || here?.round != it.round) }?.let { labels.roundOf(it.round, it.rounds) },
-            phaseNumber = (state.phaseIndex + 1).coerceAtMost(phases.size),
-            phaseCount = phases.size,
-        )
-    }
-
-    private fun nameOf(work: Phase.Work) = catalog[work.exercise]?.let { labels.text(it.name) } ?: work.exercise.value
-
-    private fun loadOf(work: Phase.Work) = steps[work.step]?.prescription?.sets?.getOrNull(work.setIndex)?.load?.label()
-
-    /** "8 reps at 16 kg", or "8 reps" for a bodyweight set. */
-    private fun detailOf(work: Phase.Work) = labels.target(work.target).let { target -> loadOf(work)?.let { labels.withLoad(target, it) } ?: target }
-
-    /** The set number and count of [work] in a Sets workout outside a repeat; null elsewhere, where rounds are counted. */
-    private fun setsOf(work: Phase.Work): Pair<Int, Int>? =
-        work.takeIf { workout.format == WorkoutFormat.SETS && it.rounds == 1 }?.let { w -> steps[w.step]?.let { it.setNumber(w.setIndex) to it.setCount() } }
-
-    /**
-     * The line under "Next" while an exercise runs: a rest says how long and what follows it; an exercise names its
-     * part when that changes, and otherwise what it asks for.
-     */
-    private fun nextLine(index: Int, current: Phase.Work?, here: Phase.Work?): String? = when (val after = phases().getOrNull(index)) {
-        null -> null
-        is Phase.Rest -> {
-            val then = phases().drop(index + 1).firstOrNull { it is Phase.Work } as? Phase.Work
-            then?.let { labels.restThen(after.duration.inWholeSeconds.toInt(), thenLabel(it, current)) }
-        }
-        is Phase.Work ->
-            if (here != null && (after.part != here.part || after.workPart != here.workPart)) {
-                labels.part(after.part, after.workPart) + " · " + nameOf(after)
-            } else {
-                nameOf(after) + " · " + detailOf(after)
-            }
-    }
-
-    /** What follows a rest: the next set of the same exercise, or the next exercise. */
-    private fun thenLabel(then: Phase.Work, current: Phase.Work?): String {
-        val sets = setsOf(then)
-        return if (current != null && then.step == current.step && sets != null) labels.thenSet(sets.first) else nameOf(then)
-    }
-
-    private fun phases() = session.timeline.phases
-
-    private fun clockOf(seconds: Int) = "${(seconds / 60).toString().padStart(2, '0')}:${(seconds % 60).toString().padStart(2, '0')}"
-
-    private fun Load.label(): String? = when (this) {
-        is Load.Kilograms -> labels.weight(kg)
-        is Load.Band -> label
-        is Load.Bodyweight, is Load.PercentOfOneRepMax -> null
-    }
+    private fun render(): PlayerState = face.of(session, clock.now()).copy(waitingToStart = waiting)
 
     private companion object {
         val TICK = 200.milliseconds
-
-        fun ceilSeconds(millis: Long): Int = ((millis + 999) / 1000).toInt()
-
-        /** Left and right halves of a set count as one set. */
-        fun Step.ExerciseStep.setNumber(index: Int): Int =
-            prescription.sets.take(index + 1).count { it.side != Side.RIGHT }
-
-        fun Step.ExerciseStep.setCount(): Int = prescription.sets.count { it.side != Side.RIGHT }
     }
 }
