@@ -73,12 +73,19 @@ class WorkoutFileTest {
     )
 
     private fun read(text: String, catalog: Catalog = this.catalog, existing: Set<String> = emptySet()) =
-        WorkoutFile.read(text, catalog, existing) { "$it (copy)" }
+        WorkoutFile.read(text, catalog, existing, { "Auto" }) { "$it (copy)" }
 
     private fun assertRefused(problem: WorkoutFileProblem, text: String, catalog: Catalog = this.catalog) {
         val reading = read(text, catalog)
         assertEquals(problem, reading.problem)
         assertNull(reading.workout)
+    }
+
+    @Test
+    fun aFileWithoutANameIsNamedLikeABuilderWorkout() {
+        val text = WorkoutFile.export(sets().copy(name = "  ")).content
+        assertEquals("Auto", read(text).workout!!.name)
+        assertEquals("Auto (copy)", read(text, existing = setOf("Auto")).workout!!.name)
     }
 
     @Test

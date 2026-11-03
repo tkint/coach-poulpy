@@ -259,6 +259,23 @@ class BuilderModelTest {
     }
 
     @Test
+    fun aWorkoutSavedWithoutANameIsNamedAfterItsExercises() {
+        fun saved(vararg slugs: String, name: String = "  ", language: String = "en"): String {
+            val builder = graph.createWorkout(language)
+            builder.rename(name)
+            builder.chooseFormat(WorkoutFormat.SETS)
+            slugs.forEach { builder.add(it, builder.work) }
+            assertTrue(builder.current.canSave, "a blank name does not stop the save")
+            return graph.store.latestWorkout(WorkoutId(builder.save()!!))!!.name
+        }
+        assertEquals("Push-up", saved("push-up"))
+        assertEquals("Push-up (+1)", saved("push-up", "plank"))
+        assertEquals("Push-up (+1)", saved("push-up", "plank", "push-up"), "an exercise done twice counts once")
+        assertEquals("Monday", saved("push-up", name = " Monday "), "a name the person typed is kept")
+        assertTrue(saved("push-up", "plank", language = "fr").endsWith("(+1)"))
+    }
+
+    @Test
     fun everyPartNeedsAStepToSave() {
         val builder = builder(WorkoutFormat.SETS)
         builder.add("push-up", builder.work)
