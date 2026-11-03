@@ -122,6 +122,7 @@ export default withMermaid(
           text: 'Architecture',
           items: [
             { text: 'Overview', link: '/docs/architecture' },
+            { text: 'Roadmap', link: '/docs/roadmap' },
             { text: 'Glossary', link: '/CONTEXT' },
             { text: 'The workout file', link: '/docs/workout-file' },
             { text: 'Decisions', link: '/decisions/', collapsed: true, items: adrs },
