@@ -164,6 +164,8 @@
     "pounds": "{pounds} lb"
   },
   "workout": {
+    "autoName": "{others, plural, =0 {{name}} other {{name} (+#)}}",
+    "autoNameEmpty": "Séance",
     "copyName": "{name} (copie)",
     "deleteTitle": "Supprimer « {name} » ?",
     "deletePlanned": "{planned, plural, one {Elle est retirée de son jour prévu.} many {Elle est retirée de ses # jours prévus.} other {Elle est retirée de ses # jours prévus.}}",

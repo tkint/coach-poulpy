@@ -233,13 +233,16 @@ data class WorkoutDraft(
     val parts: List<DraftPart>,
 ) {
     /** Only call once [format] is chosen. */
-    internal fun toWorkout() = Workout(
-        id = id ?: WorkoutId(Ids.newUuidV7()),
-        version = version,
-        name = name.trim(),
-        format = format!!,
-        parts = parts.map { it.toPart() },
-    )
+    internal fun toWorkout(autoName: (Workout) -> String): Workout {
+        val workout = Workout(
+            id = id ?: WorkoutId(Ids.newUuidV7()),
+            version = version,
+            name = name.trim(),
+            format = format!!,
+            parts = parts.map { it.toPart() },
+        )
+        return if (workout.name.isEmpty()) workout.copy(name = autoName(workout)) else workout
+    }
 
     /** Every exercise and rest of every part, repeats opened up, in order. */
     internal val leaves: List<DraftStep> get() = parts.flatMap { part -> part.steps.flatMap { if (it is DraftRepeat) it.steps else listOf(it) } }

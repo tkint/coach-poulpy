@@ -32,6 +32,7 @@ class WorkoutImport internal constructor(
         text = fileText,
         catalog = catalog,
         existingNames = store.savedWorkouts().map { it.workout.name }.toSet(),
+        autoName = { it.autoName(catalog, labels) },
         copyName = labels::copyName,
     )
 
