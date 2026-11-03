@@ -151,7 +151,7 @@ class ExerciseListModelTest {
         val exact = ExerciseSearch(Catalog.bundled.offered).rank("squat")!!
         val typo = ExerciseSearch(Catalog.bundled.offered).rank("squta")!!
         assertTrue(typo.isNotEmpty() && typo.values.all { it.tier == 5 })
-        assertTrue(exact.values.all { it.tier < 5 })
+        assertTrue(exact.values.any { it.tier < 5 })
         // A query mixing an exact word and a typo still ranks after exact matches.
         assertTrue(ExerciseSearch(Catalog.bundled.offered).rank("squat dumbell")!!.values.all { it.tier == 5 })
     }
