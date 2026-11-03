@@ -1,1 +1,0 @@
-import{_ as t,o,c as a,a2 as s}from"./chunks/framework.DQ_NmnG6.js";const u=JSON.parse('{"title":"Coach Poulpy","description":"","frontmatter":{},"headers":[],"relativePath":"CONTEXT.md","filePath":"CONTEXT.md"}'),r={name:"CONTEXT.md"};function n(i,e,d,h,p,l){return o(),a("div",null,[...e[0]||(e[0]=[s("",60)])])}const m=t(r,[["render",n]]);export{u as __pageData,m as default};
