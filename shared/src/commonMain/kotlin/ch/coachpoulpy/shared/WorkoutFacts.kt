@@ -3,6 +3,7 @@ package ch.coachpoulpy.shared
 import ch.coachpoulpy.catalog.Catalog
 import ch.coachpoulpy.core.engine.Phase
 import ch.coachpoulpy.core.engine.TimelineCompiler
+import ch.coachpoulpy.core.model.ExerciseSlug
 import ch.coachpoulpy.core.model.Intensity
 import ch.coachpoulpy.core.model.Part
 import ch.coachpoulpy.core.model.PartKind
@@ -101,14 +102,21 @@ internal fun exerciseSteps(workout: Workout): List<Step.ExerciseStep> {
     return open(workout.steps)
 }
 
+/** True for a walk or a run from the catalog, or the treadmill run of the demo: what the treadmill can follow. */
+internal fun ExerciseSlug.isWalkOrRun(catalog: Catalog): Boolean =
+    this == TreadmillModule.treadmillRun || catalog[this]?.isWalkOrRun == true
+
 /**
  * True when every exercise is a walk or a run, which the treadmill can follow from start
  * to end and a FIT export calls running.
  */
 internal fun Workout.isWalksAndRuns(catalog: Catalog): Boolean {
     val steps = exerciseSteps(this)
-    return steps.isNotEmpty() && steps.all { it.exercise == TreadmillModule.treadmillRun || catalog[it.exercise]?.isWalkOrRun == true }
+    return steps.isNotEmpty() && steps.all { it.exercise.isWalkOrRun(catalog) }
 }
+
+/** True when at least one exercise is a walk or a run, whatever else the workout holds: Live offers it (#82). */
+internal fun Workout.hasWalkOrRun(catalog: Catalog): Boolean = exerciseSteps(this).any { it.exercise.isWalkOrRun(catalog) }
 
 /**
  * A session that really happened: summed up with something done, or from before the

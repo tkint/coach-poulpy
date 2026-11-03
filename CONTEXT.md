@@ -66,6 +66,10 @@ _Avoid_: Loop, set (a set belongs to one exercise's prescription)
 A walk or run's duration with no set amount: the step ends when the person taps Next. On the last step it reads **until the end**, and the tap finishes the session.
 _Avoid_: Lap, open-ended
 
+**Mixed workout**:
+A workout with at least one walk or run and at least one other exercise, such as a run warm-up then squats. Live offers it after the workouts made only of walks and runs, and plays it with the workout player's steps; only the walk and run steps follow the treadmill ([ADR 0018](docs/adr/0018-live-plays-mixed-workouts-with-the-players-steps.md)).
+_Avoid_: Hybrid
+
 **Prescription**:
 What an exercise step asks for: its sets, and per set a target, load, intensity, tempo and the rest before the next set, none after the last. In a circuit an exercise holds one set, and the repeat around it does the rounds.
 _Avoid_: Target (a target is one part of a prescription), plan
@@ -95,7 +99,7 @@ _Avoid_: Objective
 ### Training
 
 **Session**:
-One workout actually done, from start to end, whether guided, free, recorded from a device only, or a treadmill workout followed in Live.
+One workout actually done, from start to end, whether guided, free, recorded from a device only, or a workout with a walk or run followed in Live.
 _Avoid_: Execution, activity, workout log, training
 
 In code, the header of a session (its id, source, start and end, workout and notes) is a `SessionRecord`; `Session` is the engine's state machine that folds the event log.

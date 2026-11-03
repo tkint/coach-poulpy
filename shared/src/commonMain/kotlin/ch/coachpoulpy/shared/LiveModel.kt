@@ -96,7 +96,28 @@ data class RecordingUi(
     val targetSpeedKmh: Double?,
     val targetDistanceMeters: Double?,
     val freeRun: Boolean,
+    /**
+     * The step as the workout player draws it, for a workout that mixes walks and runs with other exercises (#82):
+     * the apps then show that player full screen, with [LiveUiState.tiles] on top. Null for a walk, a run and a
+     * workout of walks and runs only, which keep the Live layout.
+     */
+    val player: PlayerState? = null,
+    /** Whether the step under way is a walk or a run, which follows the belt and records treadmill readings. */
+    val onTreadmill: Boolean = true,
+    /** Why the step under way has not begun, in a mixed workout. */
+    val wait: StepWait = StepWait.NOT_WAITING,
 )
+
+/** What a walk or run step of a mixed workout waits for before it begins. */
+enum class StepWait {
+    NOT_WAITING,
+
+    /** Following the treadmill: the step begins when the belt moves. The user can start it without. */
+    FOR_BELT,
+
+    /** No treadmill to follow: the step begins when the user taps Start, and is timed by the phone. */
+    FOR_START,
+}
 
 data class PhaseResultUi(
     val phaseNumber: Int,
@@ -199,7 +220,7 @@ data class LiveUiState(
     val walking: List<LiveChoice> = emptyList(),
     /** Every treadmill-ready run not in [recent], easiest first. */
     val running: List<LiveChoice> = emptyList(),
-    /** The saved treadmill workouts not in [recent]. */
+    /** The saved workouts with a walk or a run not in [recent]: walks and runs only first, then the ones that mix in other exercises. */
     val workouts: List<LiveChoice> = emptyList(),
     /** The [LiveChoice.key] that Start records. */
     val selected: String = "",
@@ -224,6 +245,7 @@ class LiveModel(
     languageCode: String = "en",
 ) {
     private val labels = Labels(languageCode)
+    private val language = languageCode
 
     /** The keys last started, most recent first. */
     private var recents = memory.getString(RECENT)?.split(',')?.filter { it.isNotBlank() }.orEmpty()
@@ -259,9 +281,22 @@ class LiveModel(
         val timeline: Timeline,
         val session: Session,
         val freeRun: Boolean,
+        /** How the workout player draws a step, for a workout that mixes walks and runs with other exercises; null otherwise. */
+        val face: PlayerFace? = null,
+        /** Whether the phase at an index follows the belt: a walk or a run, or a rest between them. */
+        val follows: (Int) -> Boolean = { true },
     ) {
         val recorder = TreadmillRecorder(session)
         var ticker: Job? = null
+
+        /** A walk or run step is paused before it begins, waiting for the belt or for Start. */
+        var waiting = false
+
+        /** The session is being ended: the steps left are skipped without waiting for any belt. */
+        var ending = false
+
+        /** Whether the step under way follows the belt: strength steps of a mixed workout do not. */
+        fun followsNow(now: Instant): Boolean = follows(session.state(now).phaseIndex)
 
         /** Whether a treadmill took part, so its going quiet or away can end the session. */
         var hadTreadmill = false
@@ -294,7 +329,8 @@ class LiveModel(
     init {
         scope.launch {
             store.workouts().collect { workouts ->
-                savedWorkouts = workouts.filter { it.isWalksAndRuns(catalog()) }
+                // Workouts of walks and runs only come first; the ones that mix in other exercises follow.
+                savedWorkouts = workouts.filter { it.hasWalkOrRun(catalog()) }.sortedBy { !it.isWalksAndRuns(catalog()) }
                 publishChoices()
             }
         }
@@ -335,7 +371,7 @@ class LiveModel(
             store.closeLeftOpen(record, timeline ?: store.timelineOf(record, compiler))
             return
         }
-        val recovered = Recording(id, open.title ?: workout?.name.orEmpty(), timeline, Session(timeline, events), freeRun)
+        val recovered = newRecording(id, open.title ?: workout?.name.orEmpty(), timeline, Session(timeline, events), freeRun, workout)
         recording = recovered
         if (recovered.session.state(last.at).status == SessionState.Status.RUNNING) {
             persist(recovered, recovered.session.pause(last.at))
@@ -389,7 +425,8 @@ class LiveModel(
             // Switched off, then on again: another run, like after a Stop.
             current.stoppedOnConsole = true
             val running = current.session.state(clock.now()).status == SessionState.Status.RUNNING
-            if (_state.value.followTreadmill && running) {
+            // A treadmill switched off during a strength step changes nothing.
+            if (_state.value.followTreadmill && running && current.followsNow(clock.now())) {
                 pausedByBelt = true
                 persist(current, current.session.pause(clock.now()))
             }
@@ -402,7 +439,8 @@ class LiveModel(
         reading.metrics.speedKmh?.let { steps.add(clock.now(), it) }
         _state.update { it.copy(tiles = tiles()) }
         val current = recording ?: return
-        persist(current, current.recorder.onReading(clock.now(), reading.metrics))
+        // Off the belt, in a strength step of a mixed workout, no treadmill samples are recorded.
+        if (current.followsNow(clock.now())) persist(current, current.recorder.onReading(clock.now(), reading.metrics))
         refreshRecording(current)
     }
 
@@ -442,7 +480,35 @@ class LiveModel(
         if (Quantity.SPEED in available && Quantity.CADENCE !in available) {
             tiles += LiveTile(LiveMetric.STEPS_ESTIMATED, steps.steps.toDouble().takeIf { m?.speedKmh != null }, 0, "", speedFrom)
         }
-        return tiles
+        // A strength step of a mixed workout shows what is streamed to the phone, like the heart rate, not the treadmill's numbers.
+        val off = recording?.let { it.face != null && !it.followsNow(clock.now()) } == true
+        return if (off) tiles.filter { it.metric == LiveMetric.HEART_RATE } else tiles
+    }
+
+    /** The recording of [workout], drawn with the workout player when it mixes walks and runs with other exercises. */
+    private fun newRecording(sessionId: String, title: String, timeline: Timeline, session: Session, freeRun: Boolean, workout: Workout?): Recording {
+        if (workout == null || freeRun || workout.isWalksAndRuns(catalog())) return Recording(sessionId, title, timeline, session, freeRun)
+        return Recording(
+            sessionId, title, timeline, session, freeRun,
+            face = PlayerFace(workout, catalog(), language) { settings.value.units },
+            follows = { index -> followsTreadmill(timeline, index) },
+        )
+    }
+
+    /**
+     * Whether the phase at [index] follows the belt: a walk or a run does, and a rest between them, or next to the
+     * start or end, does too. A step that is not a walk or a run, and the rest next to it, does not (#82).
+     */
+    private fun followsTreadmill(timeline: Timeline, index: Int): Boolean {
+        val catalog = catalog()
+        fun onBelt(phase: Phase?) = phase !is Phase.Work || phase.exercise.isWalkOrRun(catalog)
+        return when (val phase = timeline.phaseAt(index)) {
+            null -> true
+            is Phase.Work -> onBelt(phase)
+            is Phase.Rest ->
+                onBelt(timeline.phases.take(index).lastOrNull { it is Phase.Work }) &&
+                    onBelt(timeline.phases.drop(index + 1).firstOrNull { it is Phase.Work })
+        }
     }
 
     /** Every walk and run that can be done on a treadmill, as Walking then Running. */
@@ -495,12 +561,18 @@ class LiveModel(
     fun startRecording(key: String) {
         if (recording != null || waiting != null || _state.value.connection == LiveConnection.CONNECTING) return
         val choice = with(_state.value) { recent + walking + running + workouts }.firstOrNull { it.key == key } ?: return
-        if (_state.value.followTreadmill && devices.hasTreadmill && _state.value.belt != BeltStatus.MOVING) {
+        if (_state.value.followTreadmill && devices.hasTreadmill && _state.value.belt != BeltStatus.MOVING && startsOnBelt(key)) {
             waiting = key
             _state.update { it.copy(waitingFor = choice, summary = null) }
             return
         }
         begin(key)
+    }
+
+    /** Whether the first step of [key] is a walk or a run: a mixed workout that opens with strength does not wait for the belt. */
+    private fun startsOnBelt(key: String): Boolean {
+        val workout = savedWorkouts.firstOrNull { it.id.value == key } ?: return true
+        return followsTreadmill(compiler.compile(workout), 0)
     }
 
     /** While waiting for the belt: records right away, belt or not. */
@@ -537,9 +609,9 @@ class LiveModel(
         recents = (listOf(key) + (recents - key)).take(RECENT_KEPT)
         memory.putString(RECENT, recents.joinToString(","))
         publishChoices()
-        val started = Recording(sessionId, title, timeline, Session(timeline), freeRun)
+        val started = newRecording(sessionId, title, timeline, Session(timeline), freeRun, workout)
         started.hadTreadmill = devices.hasTreadmill
-        if (started.hadTreadmill && _state.value.belt != BeltStatus.MOVING) started.stillSince = now
+        if (started.hadTreadmill && _state.value.belt != BeltStatus.MOVING && started.follows(0)) started.stillSince = now
         recording = started
         persist(started, started.session.start(now))
         startTicker(started)
@@ -565,8 +637,30 @@ class LiveModel(
     fun resumeRecording() {
         pausedByBelt = false
         recording?.stoppedOnConsole = false
+        recording?.waiting = false
         act { it.resume(clock.now()) }
     }
+
+    /**
+     * Begins the walk or run step of a mixed workout that is waiting, belt or no belt. Without a treadmill it is
+     * timed by the phone, and a treadmill that is not there stops being a reason to ask whether the session is over.
+     */
+    fun startStep() {
+        val current = recording ?: return
+        if (!current.waiting) return
+        current.stillSince = null
+        if (!devices.hasTreadmill) {
+            current.hadTreadmill = false
+            current.lostSince = null
+        }
+        resumeRecording()
+    }
+
+    /** Marks the step under way done, in a workout: the player's Done. */
+    fun completeStep() = act { it.completeCurrent(clock.now()) }
+
+    /** Adds [seconds] to the running rest of a workout, or removes them when negative. */
+    fun adjustRest(seconds: Int) = act { it.adjustRest(clock.now(), seconds) }
 
     /**
      * While paused, in a free recording: closes the current step, and the next one starts on resume. The pause
@@ -591,8 +685,9 @@ class LiveModel(
             return
         }
         val current = recording ?: return
-        current.stillSince = when (belt) {
-            BeltStatus.MOVING, BeltStatus.UNKNOWN -> null
+        // The belt is nothing to a strength step of a mixed workout.
+        current.stillSince = when {
+            belt == BeltStatus.MOVING || belt == BeltStatus.UNKNOWN || !current.followsNow(clock.now()) -> null
             else -> current.stillSince ?: clock.now()
         }
         if (belt != BeltStatus.STOPPED) current.stopAnswered = false
@@ -615,10 +710,11 @@ class LiveModel(
         val status = current.session.state(clock.now()).status
         when {
             belt in HALTED && status == SessionState.Status.RUNNING -> {
+                if (!current.followsNow(clock.now())) return
                 pausedByBelt = true
                 act { it.pause(clock.now()) }
             }
-            belt == BeltStatus.MOVING && status == SessionState.Status.PAUSED && pausedByBelt -> {
+            belt == BeltStatus.MOVING && status == SessionState.Status.PAUSED && (pausedByBelt || current.waiting) -> {
                 // After a Stop, the belt restarting is another run: a new step, the stop its rest.
                 if (current.stoppedOnConsole && current.freeRun) endStep()
                 resumeRecording()
@@ -639,8 +735,9 @@ class LiveModel(
             if (now - prompt.at >= AUTO_FINISH_AFTER) finishAt(current, prompt.since)
             return
         }
-        if (!current.hadTreadmill) return
-        val lost = current.lostSince
+        // A lost treadmill or a still belt during a strength step, or before a walk or run begins, is no reason to ask.
+        if (!current.hadTreadmill || !current.followsNow(now)) return
+        val lost = current.lostSince.takeIf { !current.waiting }
         val still = current.stillSince
         current.prompt = when {
             lost != null && now - lost >= LOST_AFTER -> Prompt(FinishReason.TREADMILL_LOST, lost, now)
@@ -703,6 +800,8 @@ class LiveModel(
             refreshRecording(current)
             return
         }
+        current.ending = true
+        current.waiting = false
         if (current.session.state(now).status == SessionState.Status.PAUSED) persist(current, current.session.resume(now))
         while (current.session.state(now).status != SessionState.Status.FINISHED) {
             persist(current, if (current.freeRun) current.session.completeCurrent(now) else current.session.skipCurrent(now))
@@ -713,6 +812,53 @@ class LiveModel(
     private fun persist(recording: Recording, events: List<SessionEvent>) {
         events.forEach { store.appendEvent(recording.sessionId, it) }
         events.lastOrNull { it is SessionEvent.Finished }?.let { finish(recording, it.at) }
+        if (this.recording === recording && events.any { it is SessionEvent.PhaseCompleted || it is SessionEvent.PhaseSkipped }) enteredPhase(recording)
+    }
+
+    /**
+     * A mixed workout moved on to another step. A walk or run reached from other exercises waits for the belt to
+     * move, or for Start without a treadmill; a strength step ignores the belt, and ends a wait that was skipped.
+     */
+    private fun enteredPhase(current: Recording) {
+        if (current.face == null || current.ending) return
+        val now = clock.now()
+        var state = current.session.state(now)
+        if (state.status == SessionState.Status.FINISHED) return
+        val index = state.phaseIndex
+        val follows = current.follows(index)
+        val wasWaiting = current.waiting
+        current.waiting = false
+        // The pause was the app's own, for a step that is no longer there to wait for.
+        if (state.status == SessionState.Status.PAUSED && (wasWaiting || (pausedByBelt && !follows))) {
+            pausedByBelt = false
+            persist(current, current.session.resume(now))
+            state = current.session.state(now)
+        }
+        if (!follows) {
+            current.stillSince = null
+            if (current.prompt?.reason in BELT_REASONS || current.prompt?.reason == FinishReason.TREADMILL_LOST) current.prompt = null
+            return
+        }
+        if (index == 0 || current.follows(index - 1) || state.status != SessionState.Status.RUNNING) {
+            if (current.hadTreadmill && _state.value.belt != BeltStatus.MOVING && current.stillSince == null) current.stillSince = now
+            return
+        }
+        // Coming from other exercises: the first reading of this step is where it counts from.
+        // CLEANUP: a console that reset its distance counter between two walks skews the session's distance, which is the
+        // counter's growth from the first reading to the last (ADR 0018); sum the growth per step instead.
+        current.recorder.restart()
+        val auto = _state.value.followTreadmill && devices.hasTreadmill
+        if (auto && _state.value.belt == BeltStatus.MOVING) {
+            current.stillSince = null
+            return
+        }
+        current.waiting = true
+        if (auto) {
+            // Waiting for the belt counts as the belt being still, but is not a Stop pressed on the console.
+            current.stillSince = now
+            current.stopAnswered = true
+        }
+        persist(current, current.session.pause(now))
     }
 
     private fun finish(finished: Recording, at: Instant) {
@@ -757,7 +903,15 @@ class LiveModel(
                     targetSpeedKmh = (work?.intensity as? Intensity.Speed)?.kmh,
                     targetDistanceMeters = (work?.target as? Target.Distance)?.meters,
                     freeRun = current.freeRun,
+                    player = current.face?.of(current.session, now),
+                    onTreadmill = current.followsNow(now),
+                    wait = when {
+                        !current.waiting -> StepWait.NOT_WAITING
+                        it.followTreadmill && devices.hasTreadmill -> StepWait.FOR_BELT
+                        else -> StepWait.FOR_START
+                    },
                 ),
+                tiles = tiles(),
                 finishPrompt = current.prompt?.let { p ->
                     val left = AUTO_FINISH_AFTER - (now - p.at)
                     FinishPromptUi(

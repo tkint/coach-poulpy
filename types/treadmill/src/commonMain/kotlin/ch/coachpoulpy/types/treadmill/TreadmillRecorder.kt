@@ -20,6 +20,16 @@ class TreadmillRecorder(private val session: Session) {
     private var phaseStartDistance: Double? = null
     private var lastDistance: Double? = null
 
+    /**
+     * Forgets where the last step stopped, for a step that follows work done off the treadmill: the console's distance
+     * counter may have been reset in between, so the next distance target counts from the next reading.
+     */
+    fun restart() {
+        phaseIndex = -1
+        phaseStartDistance = null
+        lastDistance = null
+    }
+
     fun onReading(now: Instant, metrics: DeviceMetrics): List<SessionEvent> {
         // Tick first so a timed phase that just ran out is closed before this reading is
         // logged: the summary then reads each reading's phase from the log order.

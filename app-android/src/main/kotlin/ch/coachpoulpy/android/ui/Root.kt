@@ -57,6 +57,8 @@ fun CoachPoulpyRoot(
     var libraryView by rememberSaveable { mutableStateOf(LibraryView.WORKOUTS) }
     var route by rememberSaveable { mutableStateOf<Route?>(null) }
     var settingsPage by rememberSaveable { mutableStateOf(SettingsPage.HUB) }
+    // A mixed workout played from Live (#82) takes the whole display, tab bar included.
+    var liveFullScreen by remember { mutableStateOf(false) }
     val language = LocalConfiguration.current.locales[0].language
     // Where closing goes back to: the workout page for its editor and exercises, else the tabs.
     var back by rememberSaveable { mutableStateOf<Route?>(null) }
@@ -90,7 +92,7 @@ fun CoachPoulpyRoot(
     when (val current = route) {
         null -> Scaffold(
             bottomBar = {
-                NavigationBar {
+                if (!(tab == Tab.LIVE && liveFullScreen)) NavigationBar {
                     Tab.entries.forEach { item ->
                         NavigationBarItem(
                             selected = tab == item,
@@ -138,6 +140,7 @@ fun CoachPoulpyRoot(
                         tab = Tab.SETTINGS
                     },
                     modifier = modifier,
+                    onFullScreen = { liveFullScreen = it },
                 )
                 Tab.HISTORY -> HistoryScreen(graph, language, onOpen = { route = "session:$it" }, modifier = modifier)
                 Tab.SETTINGS -> SettingsScreen(
