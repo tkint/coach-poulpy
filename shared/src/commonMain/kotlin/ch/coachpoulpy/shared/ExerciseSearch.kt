@@ -52,7 +52,7 @@ internal class ExerciseSearch(exercises: List<Exercise>) {
             // "pushup" for "push-up": the query without spaces inside a name without spaces.
             if (compact.length >= 4 && compactNames.any { compact in it }) return SearchRank(3, 3)
             // "pusj up" for "push-up": the same, one typo away.
-            if (compact.length >= SearchText.TYPO_MIN && compactTypoNames.any { SearchText.oneTypoAway(compact, it) }) return SearchRank(TYPO_TIER, TYPO_TIER)
+            if (compact.length >= SearchText.TYPO_MIN && compactTypoNames.any { SearchText.typoInside(compact, it) }) return SearchRank(TYPO_TIER, TYPO_TIER)
             return null
         }
 
@@ -112,6 +112,12 @@ internal object SearchText {
             else -> a.substring(i) == b.substring(i + 1)
         }
     }
+
+    /** True when some stretch of [text] is one typo away from [word]. */
+    fun typoInside(word: String, text: String): Boolean =
+        listOf(word.length - 1, word.length, word.length + 1).any { size ->
+            size > 0 && (0..text.length - size).any { oneTypoAway(word, text.substring(it, it + size)) }
+        }
 
     fun words(text: String): List<String> = fold(text).split(' ').filter { it.isNotEmpty() }.map(::stem)
 }
