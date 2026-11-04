@@ -172,7 +172,7 @@ private fun PlannedCard(item: TodayItem, onOpen: () -> Unit, onGo: () -> Unit, o
                     Icon(Icons.Filled.FitnessCenter, contentDescription = null, tint = colors.onPrimaryContainer)
                 }
                 Column(Modifier.weight(1f)) {
-                    Text(item.title, style = MaterialTheme.typography.titleLarge)
+                    Text(item.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold)
                     if (item.details.isNotEmpty()) {
                         Text(item.details, style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
                     }
@@ -252,7 +252,7 @@ private fun DoneCard(item: TodayItem, onClick: () -> Unit) {
                 Icon(Icons.Filled.Check, contentDescription = stringResource(R.string.workout_done), tint = colors.surface)
             }
             Column(Modifier.weight(1f)) {
-                Text(session.title, style = MaterialTheme.typography.titleLarge)
+                Text(session.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold)
                 Text("${time(session.startedAtMillis)} · ${clock(session.activeSeconds)}", style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
             }
             Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = colors.onSurfaceVariant)

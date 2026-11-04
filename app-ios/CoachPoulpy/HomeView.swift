@@ -132,7 +132,7 @@ struct HomeView: View {
                     .background(PoulpyColor.primaryContainer, in: Circle())
                     .accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(item.title).font(PoulpyFont.headline).foregroundStyle(PoulpyColor.onSurface)
+                    Text(item.title).font(.poulpy(.headline)).foregroundStyle(PoulpyColor.onSurface)
                     if !item.details.isEmpty {
                         Text(item.details).font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
                     }
@@ -195,7 +195,7 @@ struct HomeView: View {
                 .background(PoulpyColor.success, in: Circle())
                 .accessibilityLabel(Text("workout.done"))
             VStack(alignment: .leading, spacing: 2) {
-                Text(session.title).font(PoulpyFont.headline).foregroundStyle(PoulpyColor.onSurface)
+                Text(session.title).font(.poulpy(.headline)).foregroundStyle(PoulpyColor.onSurface)
                 Text("\(time(session.startedAtMillis)) · \(clock(session.activeSeconds))")
                     .font(.poulpy(.subheadline))
                     .monospacedDigit()
