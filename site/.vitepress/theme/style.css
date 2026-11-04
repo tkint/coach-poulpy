@@ -39,7 +39,8 @@
     min-width: 0;
   }
 
-  .VPDoc.has-aside .content-container {
+  /* Beats VitePress's scoped 688px cap, which has the same specificity as the rule above. */
+  .VPDoc.has-sidebar.has-aside .content .content-container {
     max-width: none;
   }
 }
