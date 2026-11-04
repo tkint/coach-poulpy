@@ -22,3 +22,17 @@
   font-family: 'Baloo 2', 'Arial Rounded MT Bold', sans-serif;
   letter-spacing: 0;
 }
+
+:root:has(.vp-doc[class*='docs_architecture']) {
+  --vp-layout-max-width: 1680px;
+}
+
+@media (min-width: 1280px) {
+  .VPDoc.has-aside:has(.vp-doc[class*='docs_architecture']) .content-container {
+    max-width: 1120px;
+  }
+
+  .vp-doc[class*='docs_architecture'] > :not(.mermaid) {
+    max-width: 688px;
+  }
+}
