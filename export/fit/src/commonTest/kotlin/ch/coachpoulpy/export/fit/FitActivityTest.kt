@@ -98,6 +98,8 @@ class FitActivityTest {
         assertEquals(listOf(10L, null, 10L, null, null), sets.map { it[3] })
         assertEquals(listOf(256L, null, 256L, null, null), sets.map { it[4] })
         assertEquals(listOf(1L, null, 1L, null, null), sets.map { it[9] })
+        // Garmin Connect and Strava name a set after its exercise category: squat, then plank.
+        assertEquals(listOf(28L, null, 28L, null, 19L), sets.map { it[7] })
         assertEquals(listOf(40_000L, 60_000L, 40_000L, 60_000L, 35_000L), sets.map { it[0] })
         assertEquals(listOf(fitT0, fitT0 + 40, fitT0 + 100, fitT0 + 140, fitT0 + 210), sets.map { it[6] })
         assertEquals(listOf(0L, 1L, 2L, 3L, 4L), sets.map { it[10] })

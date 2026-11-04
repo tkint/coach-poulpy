@@ -101,6 +101,7 @@ object FitActivity {
                     set.put(3, FitType.UINT16, (phase.target as? Target.Reps)?.count?.toLong())
                         .put(4, FitType.UINT16, kg?.let { (it * 16).roundToLong() })
                         .put(5, FitType.UINT8, SET_ACTIVE)
+                        .put(7, FitType.UINT16, FitExerciseCategory.of(phase.exercise))
                         .put(9, FitType.UINT16, kg?.let { UNIT_KILOGRAM })
                 } else {
                     set.put(5, FitType.UINT8, SET_REST)
