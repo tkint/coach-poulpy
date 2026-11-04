@@ -10,6 +10,8 @@ struct RootView: View {
     @State private var tab = AppTab.home
     @State private var librarySection = LibrarySection.workouts
     @State private var settingsPath = NavigationPath()
+    /// The tab that opened Settings › Devices (Live's Manage devices), so back from it returns there instead of the hub.
+    @State private var devicesFrom: AppTab?
     @State private var incoming: IncomingWorkoutFile?
 
     init(graph: AppGraph) {
@@ -30,6 +32,7 @@ struct RootView: View {
                 .tag(AppTab.library)
             LiveView(graph: graph, onManageDevices: {
                 settingsPath = NavigationPath([SettingsPage.devices])
+                devicesFrom = .live
                 tab = .settings
             })
                 .tabItem { Label("tab.live", systemImage: "waveform.path.ecg") }
@@ -40,6 +43,15 @@ struct RootView: View {
             SettingsView(graph: graph, settings: settings, path: $settingsPath)
                 .tabItem { Label("tab.settings", systemImage: "gearshape") }
                 .tag(AppTab.settings)
+        }
+        .onChange(of: settingsPath.count) { depth in
+            if depth == 0, let from = devicesFrom {
+                devicesFrom = nil
+                tab = from
+            }
+        }
+        .onChange(of: tab) { selected in
+            if selected != .settings { devicesFrom = nil }
         }
         // Text without its own font (list rows, buttons, forms) is set in Nunito.
         .font(.poulpy(.body))

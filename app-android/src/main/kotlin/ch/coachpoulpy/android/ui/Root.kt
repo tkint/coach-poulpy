@@ -57,6 +57,8 @@ fun CoachPoulpyRoot(
     var libraryView by rememberSaveable { mutableStateOf(LibraryView.WORKOUTS) }
     var route by rememberSaveable { mutableStateOf<Route?>(null) }
     var settingsPage by rememberSaveable { mutableStateOf(SettingsPage.HUB) }
+    // The tab that opened Settings › Devices (Live's Manage devices), so back from it returns there instead of the hub.
+    var devicesFrom by rememberSaveable { mutableStateOf<Tab?>(null) }
     // A mixed workout played from Live (#82) takes the whole display, tab bar included.
     var liveFullScreen by remember { mutableStateOf(false) }
     val language = LocalConfiguration.current.locales[0].language
@@ -84,6 +86,7 @@ fun CoachPoulpyRoot(
         if (openLive) {
             route = null
             back = null
+            devicesFrom = null
             tab = Tab.LIVE
             onLiveOpened()
         }
@@ -96,7 +99,10 @@ fun CoachPoulpyRoot(
                     Tab.entries.forEach { item ->
                         NavigationBarItem(
                             selected = tab == item,
-                            onClick = { tab = item },
+                            onClick = {
+                                devicesFrom = null
+                                tab = item
+                            },
                             icon = { Icon(item.icon, contentDescription = null) },
                             label = { FitText(stringResource(item.label)) },
                         )
@@ -137,6 +143,7 @@ fun CoachPoulpyRoot(
                     language,
                     onManageDevices = {
                         settingsPage = SettingsPage.DEVICES
+                        devicesFrom = Tab.LIVE
                         tab = Tab.SETTINGS
                     },
                     modifier = modifier,
@@ -147,7 +154,12 @@ fun CoachPoulpyRoot(
                     graph,
                     language = language,
                     page = settingsPage,
-                    onPage = { settingsPage = it },
+                    onPage = {
+                        settingsPage = it
+                        val from = devicesFrom
+                        devicesFrom = null
+                        if (it == SettingsPage.HUB && from != null) tab = from
+                    },
                     onOpen = { device ->
                         route = when (device) {
                             DeviceRoute.Add -> "device-add"
