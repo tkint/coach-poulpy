@@ -434,6 +434,10 @@
     "button": "Partager en image",
     "chooser": "Partager votre séance"
   },
+  "exportFit": {
+    "button": "Exporter en .FIT",
+    "chooser": "Envoyer vers Garmin Connect ou Strava"
+  },
   "profile": {
     "title": "Votre profil",
     "subtitle": "Tout est facultatif et reste sur ce téléphone",

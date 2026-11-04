@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <paths>
-    <!-- Workout files written by the Share action. -->
+    <!-- Workout files, session pictures and .FIT files written by the Share and Export actions. -->
     <cache-path name="shared" path="shared/" />
 </paths>

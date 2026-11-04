@@ -46,6 +46,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -565,6 +566,7 @@ fun SessionDetailScreen(graph: AppGraph, language: String, sessionId: String, on
     val context = LocalContext.current
     val units = LocalUnitSystem.current
     val chooser = stringResource(R.string.shareImage_chooser)
+    val fitChooser = stringResource(R.string.exportFit_chooser)
     val colors = MaterialTheme.colorScheme
 
     Scaffold(
@@ -632,6 +634,12 @@ fun SessionDetailScreen(graph: AppGraph, language: String, sessionId: String, on
                     session.energyKcal?.let { Line(R.string.metric_energy, "$it kcal") }
                     session.estimatedSteps?.let { Line(R.string.metric_steps, "≈ $it") }
                 }
+            }
+            OutlinedButton(
+                onClick = { graph.sessionFitFile(session.id)?.let { shareFitFile(context, it, fitChooser) } },
+                modifier = Modifier.fillMaxWidth().height(56.dp),
+            ) {
+                Text(stringResource(R.string.exportFit_button))
             }
         }
     }

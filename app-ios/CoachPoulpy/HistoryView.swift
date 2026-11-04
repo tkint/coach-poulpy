@@ -1,6 +1,7 @@
 import Charts
 import SwiftUI
 import Shared
+import UniformTypeIdentifiers
 
 private enum HistoryTab { case calendar, stats }
 
@@ -454,6 +455,11 @@ struct SessionDetailView: View {
                 .padding(.vertical, 4)
                 .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 16))
                 .overlay(RoundedRectangle(cornerRadius: 16).stroke(PoulpyColor.outline))
+
+                ShareLink(item: FitFileItem(make: { [graph, id = session.id] in graph.sessionFitFile(sessionId: id) }), preview: SharePreview(session.title)) {
+                    Text("exportFit.button").frame(maxWidth: .infinity, minHeight: 44)
+                }
+                .buttonStyle(.bordered)
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 12)
@@ -490,6 +496,25 @@ struct SessionDetailView: View {
             Text(value).font(.poulpy(.body).weight(.heavy)).monospacedDigit()
         }
         .padding(.vertical, 12)
+    }
+}
+
+/// A session's .FIT file as the share sheet takes it: written only when a destination is picked, for Garmin Connect or
+/// a files app to upload to Strava.
+private struct FitFileItem: Transferable {
+    let make: () -> SessionFitFile?
+
+    static var transferRepresentation: some TransferRepresentation {
+        FileRepresentation(exportedContentType: .data) { item in
+            guard let file = item.make() else { throw CocoaError(.fileNoSuchFile) }
+            let bytes = file.bytes
+            let data = Data((0..<bytes.size).map { UInt8(bitPattern: bytes.get(index: $0)) })
+            let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+            try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+            let url = folder.appendingPathComponent(file.fileName)
+            try data.write(to: url)
+            return SentTransferredFile(url)
+        }
     }
 }
 

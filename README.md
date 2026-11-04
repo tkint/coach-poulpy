@@ -15,7 +15,7 @@ The brand, design system and architecture are published at [tkint.github.io/coac
 | `catalog` | Bundled exercise catalog, edited as JSON in `catalog/data/` |
 | `data/local` | SQLDelight database on the phone |
 | `device/ftms` | Bluetooth treadmills (FTMS): decoding, connection with reconnect, Bluetooth through Kable |
-| `export/fit` | .FIT export for Garmin Connect and Strava (placeholder) |
+| `export/fit` | .FIT export for Garmin Connect and Strava: a session written as an activity file |
 | `shared` | Umbrella module the apps use; exported to iOS as the `Shared` framework |
 | `app-android` | Jetpack Compose app |
 | `app-ios` | SwiftUI app, project generated with XcodeGen |
