@@ -24,15 +24,21 @@
 }
 
 :root:has(.vp-doc[class*='docs_architecture']) {
-  --vp-layout-max-width: 1680px;
+  --vp-layout-max-width: 100vw;
 }
 
 @media (min-width: 1280px) {
-  .VPDoc.has-aside:has(.vp-doc[class*='docs_architecture']) .content-container {
-    max-width: 1120px;
+  .VPDoc.has-aside:has(.vp-doc[class*='docs_architecture']) .container {
+    max-width: none;
+    justify-content: stretch;
   }
 
-  .vp-doc[class*='docs_architecture'] > :not(.mermaid) {
-    max-width: 688px;
+  .VPDoc.has-aside:has(.vp-doc[class*='docs_architecture']) .content {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .VPDoc.has-aside:has(.vp-doc[class*='docs_architecture']) .content-container {
+    max-width: none;
   }
 }
