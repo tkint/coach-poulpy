@@ -182,7 +182,7 @@ A picture of a finished session (workout name, date, time, sets and any machine 
 _Avoid_: Screenshot, certificate
 
 **FIT export**:
-A finished session written as a `.fit` activity file, sent through the share sheet to import into Garmin Connect or upload to Strava (ADR 0011). Its FIT sport follows what the session holds: only walks and runs are running (treadmill running when a treadmill sent readings), anything else is strength training for Sets and cardio for Circuit. Strength sets carry their planned reps and weight; a walk or run writes a lap per phase and a record per sample.
+A finished session written as a `.fit` activity file, saved on the phone, opened in another app such as Garmin Connect, or shared, then imported into Garmin Connect or uploaded to Strava (ADR 0011). Its FIT sport follows what the session holds: only walks and runs are running (treadmill running when a treadmill sent readings), anything else is strength training for Sets and cardio for Circuit. Strength sets carry their planned reps and weight; a walk or run writes a lap per phase and a record per sample.
 _Avoid_: Sync, upload (nothing leaves the phone by itself)
 
 **Coach link**:

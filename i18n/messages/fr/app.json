@@ -436,7 +436,10 @@
   },
   "exportFit": {
     "button": "Exporter en .FIT",
-    "chooser": "Envoyer vers Garmin Connect ou Strava"
+    "chooser": "Ouvrir ou envoyer le fichier .FIT",
+    "open": "Ouvrir dans Garmin Connect ou une autre app",
+    "save": "Enregistrer sur le téléphone",
+    "share": "Partager"
   },
   "profile": {
     "title": "Votre profil",

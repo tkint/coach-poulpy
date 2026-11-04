@@ -1,5 +1,7 @@
 package ch.coachpoulpy.android.ui
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -33,14 +35,18 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.DirectionsRun
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -567,6 +573,10 @@ fun SessionDetailScreen(graph: AppGraph, language: String, sessionId: String, on
     val units = LocalUnitSystem.current
     val chooser = stringResource(R.string.shareImage_chooser)
     val fitChooser = stringResource(R.string.exportFit_chooser)
+    var exporting by remember { mutableStateOf(false) }
+    val saveFit = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument(FIT_MIME_TYPE)) { target ->
+        target?.let { graph.sessionFitFile(sessionId)?.let { file -> saveFitFile(context, file, it) } }
+    }
     val colors = MaterialTheme.colorScheme
 
     Scaffold(
@@ -635,11 +645,27 @@ fun SessionDetailScreen(graph: AppGraph, language: String, sessionId: String, on
                     session.estimatedSteps?.let { Line(R.string.metric_steps, "≈ $it") }
                 }
             }
-            OutlinedButton(
-                onClick = { graph.sessionFitFile(session.id)?.let { shareFitFile(context, it, fitChooser) } },
-                modifier = Modifier.fillMaxWidth().height(56.dp),
-            ) {
-                Text(stringResource(R.string.exportFit_button))
+            Box {
+                OutlinedButton(onClick = { exporting = true }, modifier = Modifier.fillMaxWidth().height(56.dp)) {
+                    Text(stringResource(R.string.exportFit_button))
+                }
+                DropdownMenu(expanded = exporting, onDismissRequest = { exporting = false }) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.exportFit_save)) },
+                        leadingIcon = { Icon(Icons.Filled.Download, contentDescription = null) },
+                        onClick = { exporting = false; graph.sessionFitFile(session.id)?.let { saveFit.launch(it.fileName) } },
+                    )
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.exportFit_open)) },
+                        leadingIcon = { Icon(Icons.AutoMirrored.Filled.OpenInNew, contentDescription = null) },
+                        onClick = { exporting = false; graph.sessionFitFile(session.id)?.let { openFitFile(context, it, fitChooser) } },
+                    )
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.exportFit_share)) },
+                        leadingIcon = { Icon(Icons.Filled.Share, contentDescription = null) },
+                        onClick = { exporting = false; graph.sessionFitFile(session.id)?.let { shareFitFile(context, it, fitChooser) } },
+                    )
+                }
             }
         }
     }

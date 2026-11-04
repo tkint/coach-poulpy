@@ -400,6 +400,7 @@ struct SessionDetailView: View {
     let onDelete: () -> Void
     @Environment(\.dismiss) private var dismiss
     @State private var deleting = false
+    @State private var saving: FitDocument?
     @Environment(\.unitSystem) private var units
     @Environment(\.colorScheme) private var colorScheme
 
@@ -456,10 +457,25 @@ struct SessionDetailView: View {
                 .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 16))
                 .overlay(RoundedRectangle(cornerRadius: 16).stroke(PoulpyColor.outline))
 
-                ShareLink(item: FitFileItem(make: { [graph, id = session.id] in graph.sessionFitFile(sessionId: id) }), preview: SharePreview(session.title)) {
+                Menu {
+                    Button {
+                        saving = graph.sessionFitFile(sessionId: session.id).map { FitDocument($0) }
+                    } label: {
+                        Label("exportFit.save", systemImage: "square.and.arrow.down")
+                    }
+                    ShareLink(item: FitFileItem(make: { [graph, id = session.id] in graph.sessionFitFile(sessionId: id) }), preview: SharePreview(session.title)) {
+                        Label("exportFit.open", systemImage: "arrow.up.forward.app")
+                    }
+                } label: {
                     Text("exportFit.button").frame(maxWidth: .infinity, minHeight: 44)
                 }
                 .buttonStyle(.bordered)
+                .fileExporter(
+                    isPresented: Binding(get: { saving != nil }, set: { if !$0 { saving = nil } }),
+                    document: saving,
+                    contentType: FitDocument.contentType,
+                    defaultFilename: saving?.fileName
+                ) { _ in saving = nil }
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 12)
@@ -505,16 +521,39 @@ private struct FitFileItem: Transferable {
     let make: () -> SessionFitFile?
 
     static var transferRepresentation: some TransferRepresentation {
-        FileRepresentation(exportedContentType: .data) { item in
+        FileRepresentation(exportedContentType: FitDocument.contentType) { item in
             guard let file = item.make() else { throw CocoaError(.fileNoSuchFile) }
-            let bytes = file.bytes
-            let data = Data((0..<bytes.size).map { UInt8(bitPattern: bytes.get(index: $0)) })
+            let data = FitDocument(file).data
             let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
             try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
             let url = folder.appendingPathComponent(file.fileName)
             try data.write(to: url)
             return SentTransferredFile(url)
         }
+    }
+}
+
+/// A session's .FIT file for the system's save dialog, to keep it in Files on the phone.
+private struct FitDocument: FileDocument {
+    /// The type an installed app such as Garmin Connect declares for `.fit`, so the share sheet offers it; plain data otherwise.
+    static let contentType = UTType(filenameExtension: "fit", conformingTo: .data) ?? .data
+    static var readableContentTypes: [UTType] { [contentType] }
+
+    let fileName: String
+    let data: Data
+
+    init(_ file: SessionFitFile) {
+        let bytes = file.bytes
+        fileName = file.fileName
+        data = Data((0..<bytes.size).map { UInt8(bitPattern: bytes.get(index: $0)) })
+    }
+
+    init(configuration: ReadConfiguration) throws {
+        throw CocoaError(.fileReadUnsupportedScheme)
+    }
+
+    func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
+        FileWrapper(regularFileWithContents: data)
     }
 }
 
