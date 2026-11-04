@@ -23,23 +23,24 @@
   letter-spacing: 0;
 }
 
-/* The architecture page uses the full viewport for its navigation, content, and outline columns. */
-:root:has(.vp-doc[class*='docs_architecture']) {
+/* Every docs page uses the full viewport for its navigation, content, and outline columns. */
+:root {
   --vp-layout-max-width: 100vw;
 }
 
 @media (min-width: 1280px) {
-  .VPDoc.has-aside:has(.vp-doc[class*='docs_architecture']) .container {
+  .VPDoc.has-aside .container {
     max-width: none;
     justify-content: stretch;
   }
 
-  .VPDoc.has-aside:has(.vp-doc[class*='docs_architecture']) .content {
+  .VPDoc.has-aside .content {
     flex: 1 1 0;
     min-width: 0;
   }
 
-  .VPDoc.has-aside:has(.vp-doc[class*='docs_architecture']) .content-container {
+  /* Beats VitePress's scoped 688px cap, which has the same specificity as the rule above. */
+  .VPDoc.has-sidebar.has-aside .content .content-container {
     max-width: none;
   }
 }
