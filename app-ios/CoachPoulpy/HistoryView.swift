@@ -476,7 +476,13 @@ struct SessionDetailView: View {
                 Label("action.delete", systemImage: "trash")
             }
         }
-        .sheet(isPresented: $sharing) { shareSheet }
+        .sheet(isPresented: $sharing) {
+            if #available(iOS 16.4, *) {
+                shareSheet.presentationCornerRadius(24)
+            } else {
+                shareSheet
+            }
+        }
         .fileExporter(
             isPresented: Binding(get: { saving != nil }, set: { if !$0 { saving = nil } }),
             document: saving,
@@ -521,7 +527,6 @@ struct SessionDetailView: View {
         .padding(20)
         .frame(maxWidth: .infinity, alignment: .leading)
         .presentationDetents([.height(260)])
-        .presentationCornerRadius(24)
     }
 
     private func shareFormat(_ title: LocalizedStringKey, _ note: LocalizedStringKey, systemImage: String) -> some View {
