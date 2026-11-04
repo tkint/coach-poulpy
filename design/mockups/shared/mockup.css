@@ -240,6 +240,37 @@ svg { flex: none; }
 .progress-track { height: 8px; border-radius: var(--cp-radius-pill); background: var(--cp-surface-variant); overflow: hidden; }
 .progress-track > div { height: 100%; border-radius: var(--cp-radius-pill); background: var(--cp-primary); }
 
+/* Pause and resume on the player bar (#220): the one filled blue button up there, 56 across. */
+.pause-button {
+  width: 56px;
+  height: 56px;
+  flex: none;
+  border-radius: var(--cp-radius-pill);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--cp-primary);
+  color: var(--cp-on-primary);
+}
+/* Paused: a soft blue halo around Resume, never ember or crimson. */
+.pause-button--paused { box-shadow: 0 0 0 6px var(--cp-primary-container); }
+.paused-card {
+  border-radius: var(--cp-radius-md);
+  background: var(--cp-primary-container);
+  color: var(--cp-on-primary-container);
+  padding: var(--cp-space-sm) var(--cp-space-lg);
+  display: flex;
+  align-items: center;
+  gap: var(--cp-space-md);
+}
+.paused-card strong { font: var(--cp-type-headline); }
+/* While paused the step stays readable but steps back, so the paused card is what the eye meets. */
+.player--paused .player-step,
+.player--paused .next-card,
+.player--paused .live-numbers,
+.player--paused .player-actions { opacity: .45; }
+.player--paused .player-step img { margin-bottom: 0; }
+
 .player-step {
   flex: 1;
   display: flex;
