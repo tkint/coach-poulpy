@@ -62,29 +62,58 @@ A workout's format is chosen when it is created ([ADR 0013](./adr/0013-workouts-
 | Circuit | Rounds through several exercises: a repeat around them | One set: reps, time or hold and a load; a walk or run has a duration and an intensity |
 | Sets | One exercise at a time, all its sets, then the next; repeats for supersets | Its sets, each with a target and load, and the rest between sets |
 
-Its parts run in order: an optional warm-up, one or more work parts, an optional cool down. How a step finishes comes from its target alone: a time or a hold runs a timer; reps, a distance (unless a treadmill reports it) or "until button press" wait for a tap.
+```mermaid
+flowchart LR
+    workout["Workout<br/>format and version"] --> parts["Parts<br/>warm-up · work · cool down"]
+    parts --> steps["Steps<br/>exercise · group · rest"]
+    steps --> compiler["Timeline compiler"]
+    compiler --> timeline["Timeline<br/>flat run of Work and Rest Phases"]
+    timeline --> session["Session<br/>engine state machine"]
+    session -->|appends| events["Session events<br/>append-only log"]
+    events -->|folded into| session
+    session --> state["Session state"]
+    state --> ui["App renders state"]
+```
 
-The engine compiles a workout into a flat **timeline** of work, rest and transition phases, then runs it as a state machine that the UI only observes. The clock is injected, so the engine is testable without waiting. It emits **cues** (3-2-1, switch sides, next exercise) that each platform turns into sound, vibration and text. Every action is a **session event** written at once, so a killed app resumes at the same second. Home shows a session left open as a card with Open and Discard; Discard deletes it, with everything it recorded. Open brings it back paused at its last event, so the time the app was gone never counts: a guided session in the player, a Live recording in Live with the question whether it is finished. A session closed without being finished, because another one started or its workout is gone, ends at its last event, never at its start, and keeps its totals.
+How a step finishes comes from its target alone: a time or a hold runs a timer; reps, a distance (unless a treadmill reports it) or "until button press" wait for a tap.
+
+The clock is injected, so tests never wait; each platform turns cues (3-2-1, switch sides, next exercise) into sound, vibration and text. A killed app resumes from the event log: Open restores a session paused at its last event (guided sessions in the player, Live recordings in Live); Discard deletes it. A session closed without finishing ends at its last event and keeps its totals.
+
+The shared engine runs on each platform ([ADR 0002](./adr/0002-one-kotlin-multiplatform-core.md)); session state is folded from its append-only events ([ADR 0003](./adr/0003-sessions-are-append-only-event-logs.md)).
 
 ## Modules
 
-| Module | Runs on | Responsibility |
-| --- | --- | --- |
-| `core/model` | Android, iOS, JVM, JS | Domain types, serializable, no dependencies |
-| `core/engine` | Android, iOS, JVM, JS | Timeline compiler, session state machine, event fold |
-| `types/treadmill` | Android, iOS, JVM, JS | Treadmill recording, summaries and step estimate |
-| `core/stats` | Android, iOS, JVM | Metrics, records, goal progress, weekly summaries |
-| `catalog` | Android, iOS, JVM | The bundled, versioned exercise catalog, merged with its text at build time |
-| `data/local` | Android, iOS | SQLDelight schema, repositories, event storage, migrations |
-| `data/sync` (later) | Android, iOS | Ktor client and the sync protocol; off for guests |
-| `device/ftms` | Android, iOS | FTMS decoding in common code; Bluetooth through Kable |
-| `export/fit` | Android, iOS, JVM | A small .FIT encoder |
-| `shared` | Android, iOS | App view models; exported to iOS as the `Shared` framework |
-| `app-android` | Android | Compose UI, a connected-device foreground service for Live recordings, Health Connect |
-| `app-ios` | iOS | SwiftUI UI, the Bluetooth background mode with state restoration, HealthKit |
-| `web` | Browser | Vue 3, TypeScript, Vite, Pinia; the engine through Kotlin/JS |
-| `server` | JVM | http4k routes, Flyway, jOOQ, reusing model and stats for validation |
-| `tools/i18n` | JVM, build time | Generates Android and iOS string files, the shared `DomainText` and the merged catalog from `i18n/messages` |
+Solid arrows are module dependencies in the current Gradle build; arrows labelled "planned" are not built in v1.
+
+```mermaid
+flowchart LR
+    android["app-android<br/>Compose"] --> shared
+    ios["app-ios<br/>SwiftUI"] --> shared
+
+    shared["shared<br/>view models · iOS framework"] --> model["core/model<br/>domain types"]
+    shared --> engine["core/engine<br/>timeline · Session"]
+    shared --> catalog["catalog<br/>bundled exercises"]
+    shared --> local["data/local<br/>SQLite · repositories"]
+    shared --> ftms["device/ftms<br/>FTMS decoding"]
+    shared --> treadmill["types/treadmill<br/>treadmill logic"]
+    engine --> model
+    stats["core/stats<br/>session metrics"] --> engine
+    local --> stats
+    local --> engine
+    catalog --> model
+    ftms --> model
+    treadmill --> engine
+    fit["export/fit<br/>FIT encoder"] --> model
+    i18n["tools/i18n<br/>build-time text"] -. generates .-> catalog
+    i18n -. generates .-> shared
+
+    server["server · later, not in v1<br/>JVM"] --> model
+    web["web · later, not in v1<br/>browser"] -. planned Kotlin/JS engine .-> engine
+    sync["data/sync · later, not in v1"] -. planned phone sync .-> local
+    sync -. planned sync .-> server
+```
+
+Android and iOS both depend on `shared`; iOS consumes its `Shared` framework.
 
 ## Text and translations
 
@@ -92,15 +121,41 @@ Every word a person reads is in `i18n/messages/<locale>/<namespace>.json` ([ADR 
 
 ## Storage and sync
 
-- The phone database is the source of truth; the server is a replica ([ADR 0001](./adr/0001-local-first-phone-is-the-source-of-truth.md)).
+The phone database is the source of truth and the server is a replica ([ADR 0001](./adr/0001-local-first-phone-is-the-source-of-truth.md)); sync and the website are later work.
+
+```mermaid
+flowchart LR
+    phone["Phone<br/>guest · SQLite source of truth"] -. "sign-up: upload local database" .-> server["Server replica · later, not in v1"]
+    phone -. "push changes with base versions" .-> server
+    server -. "pull changes since cursor" .-> phone
+    web["Website · later, not in v1<br/>online-first"] -. "same push and pull calls" .-> server
+    web -.-> buffer["IndexedDB<br/>buffers running Session events"]
+    phone --> records["Session events<br/>append-only"]
+    records -. "sync as union; no conflicts" .-> server
+    edits["Workout and Plan edits"] -. "on conflict, keep both versions" .-> server
+    fields["Small fields"] -. "latest write wins" .-> server
+```
+
+Sync follows [ADR 0006](./adr/0006-sync-keeps-both-edits.md).
+
 - Ids are UUIDv7 made on the device ([ADR 0005](./adr/0005-ids-are-uuidv7-made-on-the-device.md)).
-- Sessions never conflict; workouts and plans keep both edits; small fields take the latest write ([ADR 0006](./adr/0006-sync-keeps-both-edits.md)).
-- The website is online-first, using the same push and pull calls, and buffers a running session's events in IndexedDB.
+- Workouts and Plans keep both edits; small fields take the latest write ([ADR 0006](./adr/0006-sync-keeps-both-edits.md)).
 - The catalog ships with the app and updates without an account ([ADR 0008](./adr/0008-curated-catalog-with-stable-slugs.md)).
 
 ## Devices
 
-A treadmill is the first **metric source**: anything that turns a device into timestamped samples (speed, incline, distance, heart rate, cadence). The engine only sees samples. On Android a Live recording runs in a connected-device foreground service, from Start until it finishes or is discarded, with an ongoing notification that opens Live and has Pause or Resume and Finish buttons; on Android 14 and later it needs the Bluetooth permission, and without it a timer-only recording runs in the app alone. On iOS the Bluetooth background mode keeps recording on a locked phone, and Kable's central has a restore identifier so the system relaunches the app for the device's data after closing it. Guided sessions in the player have neither: they rely on the screen staying on, and on resuming from their events. A dropped link is retried for 60 seconds while the session keeps its timer, and the gap is marked in the samples rather than filled. Many treadmills send only some FTMS fields, so the decoder reads the feature flags first and the UI hides what a machine does not send.
+```mermaid
+flowchart LR
+    source["Metric source<br/>FTMS treadmill in v1"] -->|streams| samples["Timestamped Samples<br/>speed · incline · distance · heart rate · cadence"]
+    samples -->|recorded as| events["Session events<br/>Sample"]
+    events -->|folded with other events| session["Session<br/>state machine"]
+    session --> state["Session state"]
+    note["Samples are recorded;<br/>they do not advance a Phase"] -.-> session
+```
+
+Treadmills are read-only metric sources in v1 ([ADR 0010](./adr/0010-treadmills-are-read-only-metric-sources.md)).
+
+On Android a Live recording runs in a connected-device foreground service, from Start until it finishes or is discarded, with an ongoing notification that opens Live and has Pause or Resume and Finish buttons; on Android 14 and later it needs the Bluetooth permission, and without it a timer-only recording runs in the app alone. On iOS the Bluetooth background mode keeps recording on a locked phone, and Kable's central has a restore identifier so the system relaunches the app for the device's data after closing it. Guided sessions in the player have neither: they rely on the screen staying on, and on resuming from their events. A dropped link is retried for 60 seconds while the session keeps its timer, and the gap is marked in the samples rather than filled. Many treadmills send only some FTMS fields, so the decoder reads the feature flags first and the UI hides what a machine does not send.
 
 ## Accounts and security
 
