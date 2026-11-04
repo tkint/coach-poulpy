@@ -78,6 +78,10 @@ class FitActivityTest {
         assertEquals(42L, id.fields[3])
         assertEquals(fitT0, id.fields[4])
         assertEquals(listOf(18, 34), messages.takeLast(2).map { it.global })
+        // The creating device and the sport come right after the id.
+        assertEquals(listOf(0, 23, 12), messages.take(3).map { it.global })
+        assertEquals(listOf(255L, 42L), messages[1].fields.let { listOf(it[2], it[3]) })
+        assertEquals(listOf(10L, 20L), messages[2].fields.let { listOf(it[0], it[1]) })
         val activity = messages.last().fields
         assertEquals(fitT0 + 245, activity[253])
         assertEquals(fitT0 + 245 + 3600, activity[5])

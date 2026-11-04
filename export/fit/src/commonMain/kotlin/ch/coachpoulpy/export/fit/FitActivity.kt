@@ -155,6 +155,20 @@ object FitActivity {
                 .put(3, FitType.UINT32Z, serialNumber and 0xFFFFFFFFL)
                 .time(4, start),
         )
+        // The device that made the file and the sport it holds: every activity file from a watch or a bike computer has both.
+        writer.write(
+            FitMessage(DEVICE_INFO)
+                .time(TIMESTAMP, start)
+                .put(0, FitType.UINT8, 0) // the file's creator
+                .put(2, FitType.UINT16, MANUFACTURER_DEVELOPMENT)
+                .put(3, FitType.UINT32Z, serialNumber and 0xFFFFFFFFL)
+                .put(4, FitType.UINT16, 0),
+        )
+        writer.write(
+            FitMessage(SPORT_MESSAGE)
+                .put(0, FitType.ENUM, sport.sport.toLong())
+                .put(1, FitType.ENUM, sport.subSport.toLong()),
+        )
         timed.sortedWith(compareBy<Timed> { it.at }.thenBy { it.order }).forEach { writer.write(it.message) }
 
         val session = Totals(
@@ -296,10 +310,12 @@ object FitActivity {
 
     // Message numbers and values from the FIT profile.
     private const val FILE_ID = 0
+    private const val SPORT_MESSAGE = 12
     private const val SESSION = 18
     private const val LAP = 19
     private const val RECORD = 20
     private const val EVENT = 21
+    private const val DEVICE_INFO = 23
     private const val ACTIVITY = 34
     private const val SET = 225
 
