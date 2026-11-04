@@ -23,6 +23,7 @@
   letter-spacing: 0;
 }
 
+/* The architecture page uses the full viewport for its navigation, content, and outline columns. */
 :root:has(.vp-doc[class*='docs_architecture']) {
   --vp-layout-max-width: 100vw;
 }
