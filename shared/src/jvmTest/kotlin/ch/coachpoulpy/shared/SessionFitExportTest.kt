@@ -36,7 +36,7 @@ class SessionFitExportTest {
 
     /** A finished session of [workout] (or a free recording when null) with [samples] taken along the way. */
     private fun session(id: String, workout: Workout?, source: SessionSource = SessionSource.GUIDED, vararg samples: DeviceMetrics) {
-        workout?.let(graph.store::saveWorkout)
+        workout?.takeIf { graph.store.workout(it.id, it.version) == null }?.let(graph.store::saveWorkout)
         graph.store.startSession(SessionRecord(SessionId(id), source, startedAt = start, workout = workout?.let { WorkoutRef(it.id, it.version) }), workout?.name, workout?.format)
         graph.store.appendEvent(id, SessionEvent.Started(start))
         samples.forEachIndexed { i, metrics -> graph.store.appendEvent(id, SessionEvent.Sample(start + (i * 10).seconds, metrics)) }
