@@ -181,6 +181,10 @@ _Avoid_: Backup
 A picture of a finished session (workout name, date, time, sets and any machine values, with Poulpy) sent through the phone's share sheet. It never shows heart rate, and it is a brag card, not a way to share the workout itself (that is the workout file).
 _Avoid_: Screenshot, certificate
 
+**FIT export**:
+A finished session written as a `.fit` activity file, saved on the phone from the share sheet of a session (which also offers the session as an image), then uploaded on the websites: Garmin Connect's import page (connect.garmin.com/modern/import-data) and Strava's upload page (strava.com/upload/select). Opening the file in the Garmin Connect app does not import it: the app reads it as a course and asks for a point on a map (ADR 0011). Its FIT sport follows what the session holds: only walks and runs are running (treadmill running when a treadmill sent readings), anything else is strength training for Sets and cardio for Circuit. Strength sets carry their planned reps and weight; a walk or run writes a lap per phase and a record per sample.
+_Avoid_: Sync, upload (nothing leaves the phone by itself)
+
 **Coach link**:
 The tie an athlete grants a coach, which the athlete can revoke at any time.
 _Avoid_: Team, connection

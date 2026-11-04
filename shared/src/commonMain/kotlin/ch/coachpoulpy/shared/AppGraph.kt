@@ -10,6 +10,7 @@ import ch.coachpoulpy.core.model.WorkoutId
 import ch.coachpoulpy.data.local.DriverFactory
 import ch.coachpoulpy.data.local.LocalStore
 import ch.coachpoulpy.device.ftms.KableCentral
+import kotlinx.datetime.TimeZone
 
 /**
  * Wires the app together once at start-up. Android builds it in its Application,
@@ -40,6 +41,10 @@ class AppGraph(driverFactory: DriverFactory) {
     /** The picture to share for a finished session of the history, the same one as straight after the session. */
     fun sessionShareCard(sessionId: String, units: UnitSystem, languageCode: String): ShareCard? =
         SessionShare(store, compiler, languageCode).card(sessionId, units)
+
+    /** The .FIT file of a finished session, to import into Garmin Connect or upload to Strava; null when it never started. */
+    fun sessionFitFile(sessionId: String): SessionFitFile? =
+        SessionFitExport(store, compiler, catalog).file(sessionId, TimeZone.currentSystemDefault())
 
     private var profileModel: ProfileModel? = null
 

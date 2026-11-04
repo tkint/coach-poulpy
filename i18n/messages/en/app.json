@@ -434,6 +434,14 @@
     "button": "Share as an image",
     "chooser": "Share your session"
   },
+  "shareSession": {
+    "title": "Share this session",
+    "why": "Pick a format.",
+    "fit": ".FIT file",
+    "fitNote": "Save it, then import it on the Garmin Connect or Strava website",
+    "image": "Image",
+    "imageNote": "A card with your numbers to send or post"
+  },
   "profile": {
     "title": "Your profile",
     "subtitle": "Everything is optional and stays on this phone",

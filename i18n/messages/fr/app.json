@@ -434,6 +434,14 @@
     "button": "Partager en image",
     "chooser": "Partager votre séance"
   },
+  "shareSession": {
+    "title": "Partager cette séance",
+    "why": "Choisissez un format.",
+    "fit": "Fichier .FIT",
+    "fitNote": "Enregistrez-le, puis importez-le sur le site de Garmin Connect ou de Strava",
+    "image": "Image",
+    "imageNote": "Une carte avec vos chiffres à envoyer ou à publier"
+  },
   "profile": {
     "title": "Votre profil",
     "subtitle": "Tout est facultatif et reste sur ce téléphone",

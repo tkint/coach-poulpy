@@ -1,6 +1,7 @@
 import Charts
 import SwiftUI
 import Shared
+import UniformTypeIdentifiers
 
 private enum HistoryTab { case calendar, stats }
 
@@ -399,6 +400,8 @@ struct SessionDetailView: View {
     let onDelete: () -> Void
     @Environment(\.dismiss) private var dismiss
     @State private var deleting = false
+    @State private var sharing = false
+    @State private var saving: FitDocument?
     @Environment(\.unitSystem) private var units
     @Environment(\.colorScheme) private var colorScheme
 
@@ -462,10 +465,10 @@ struct SessionDetailView: View {
         .navigationTitle(session.title)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            if let card = graph.sessionShareCard(sessionId: session.id, units: units, languageCode: Language.code) {
-                ShareLink(item: ShareCardItem(card: card, scheme: colorScheme), preview: SharePreview(session.title)) {
-                    Label("shareImage.button", systemImage: "square.and.arrow.up")
-                }
+            Button {
+                sharing = true
+            } label: {
+                Label("shareSession.title", systemImage: "square.and.arrow.up")
             }
             Button(role: .destructive) {
                 deleting = true
@@ -473,6 +476,19 @@ struct SessionDetailView: View {
                 Label("action.delete", systemImage: "trash")
             }
         }
+        .sheet(isPresented: $sharing) {
+            if #available(iOS 16.4, *) {
+                shareSheet.presentationCornerRadius(24)
+            } else {
+                shareSheet
+            }
+        }
+        .fileExporter(
+            isPresented: Binding(get: { saving != nil }, set: { if !$0 { saving = nil } }),
+            document: saving,
+            contentType: FitDocument.contentType,
+            defaultFilename: saving?.fileName
+        ) { _ in saving = nil }
         .confirmationDialog("history.deleteTitle", isPresented: $deleting, titleVisibility: .visible) {
             Button("action.delete", role: .destructive) {
                 onDelete()
@@ -483,6 +499,51 @@ struct SessionDetailView: View {
         }
     }
 
+    /// The formats a session goes out in: a .FIT file to save, or an image to share.
+    private var shareSheet: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("shareSession.title").font(.poulpy(.title2).weight(.heavy)).accessibilityAddTraits(.isHeader)
+                Text("shareSession.why").font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+            }
+            VStack(spacing: 0) {
+                Button {
+                    sharing = false
+                    saving = graph.sessionFitFile(sessionId: session.id).map { FitDocument($0) }
+                } label: {
+                    shareFormat("shareSession.fit", "shareSession.fitNote", systemImage: "square.and.arrow.down")
+                }
+                .buttonStyle(.plain)
+                Divider().overlay(PoulpyColor.outline)
+                if let card = graph.sessionShareCard(sessionId: session.id, units: units, languageCode: Language.code) {
+                    ShareLink(item: ShareCardItem(card: card, scheme: colorScheme), preview: SharePreview(session.title)) {
+                        shareFormat("shareSession.image", "shareSession.imageNote", systemImage: "photo")
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .background(PoulpyColor.surfaceVariant, in: RoundedRectangle(cornerRadius: 16))
+        }
+        .padding(20)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .presentationDetents([.height(260)])
+    }
+
+    private func shareFormat(_ title: LocalizedStringKey, _ note: LocalizedStringKey, systemImage: String) -> some View {
+        HStack(spacing: 14) {
+            Image(systemName: systemImage).frame(width: 24)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title).font(.poulpy(.body).weight(.bold)).foregroundStyle(PoulpyColor.onSurface)
+                Text(note).font(.poulpy(.footnote)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+            }
+            Spacer()
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+        .frame(minHeight: 52)
+        .contentShape(Rectangle())
+    }
+
     private func line(_ label: String, _ value: String) -> some View {
         HStack {
             Text(LocalizedStringKey(label)).font(.poulpy(.body).weight(.semibold)).foregroundStyle(PoulpyColor.onSurfaceVariant)
@@ -490,6 +551,30 @@ struct SessionDetailView: View {
             Text(value).font(.poulpy(.body).weight(.heavy)).monospacedDigit()
         }
         .padding(.vertical, 12)
+    }
+}
+
+/// A session's .FIT file for the system's save dialog, to keep it in Files on the phone.
+private struct FitDocument: FileDocument {
+    /// The type a `.fit` file is saved with; plain data when the system knows none.
+    static let contentType = UTType(filenameExtension: "fit", conformingTo: .data) ?? .data
+    static var readableContentTypes: [UTType] { [contentType] }
+
+    let fileName: String
+    let data: Data
+
+    init(_ file: SessionFitFile) {
+        let bytes = file.bytes
+        fileName = file.fileName
+        data = Data((0..<bytes.size).map { UInt8(bitPattern: bytes.get(index: $0)) })
+    }
+
+    init(configuration: ReadConfiguration) throws {
+        throw CocoaError(.fileReadUnsupportedScheme)
+    }
+
+    func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
+        FileWrapper(regularFileWithContents: data)
     }
 }
 
