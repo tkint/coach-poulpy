@@ -1,0 +1,1 @@
+import{_ as t,o,c as a,a2 as n}from"./chunks/framework.wSSsINBh.js";const u=JSON.parse('{"title":"Coach Poulpy","description":"","frontmatter":{},"headers":[],"relativePath":"CONTEXT.md","filePath":"CONTEXT.md"}'),s={name:"CONTEXT.md"};function r(i,e,d,h,p,l){return o(),a("div",null,[...e[0]||(e[0]=[n("",61)])])}const m=t(s,[["render",r]]);export{u as __pageData,m as default};
