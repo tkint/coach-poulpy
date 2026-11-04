@@ -35,7 +35,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.DirectionsRun
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Delete
@@ -654,11 +653,6 @@ fun SessionDetailScreen(graph: AppGraph, language: String, sessionId: String, on
                         text = { Text(stringResource(R.string.exportFit_save)) },
                         leadingIcon = { Icon(Icons.Filled.Download, contentDescription = null) },
                         onClick = { exporting = false; graph.sessionFitFile(session.id)?.let { saveFit.launch(it.fileName) } },
-                    )
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.exportFit_open)) },
-                        leadingIcon = { Icon(Icons.AutoMirrored.Filled.OpenInNew, contentDescription = null) },
-                        onClick = { exporting = false; graph.sessionFitFile(session.id)?.let { openFitFile(context, it, fitChooser) } },
                     )
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.exportFit_share)) },

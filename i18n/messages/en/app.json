@@ -436,8 +436,7 @@
   },
   "exportFit": {
     "button": "Export .FIT",
-    "chooser": "Open or send the .FIT file",
-    "open": "Open in Garmin Connect or another app",
+    "chooser": "Send the .FIT file",
     "save": "Save to phone",
     "share": "Share"
   },

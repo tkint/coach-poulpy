@@ -8,8 +8,8 @@ import ch.coachpoulpy.shared.SessionFitFile
 import java.io.File
 
 /**
- * The type a .FIT file goes out with. Android knows no type for `.fit`, and the apps that open one (Garmin Connect
- * among them) listen for plain binary files, so the generic type reaches them where `application/vnd.ant.fit` does not.
+ * The type a .FIT file goes out with. Android knows no type for `.fit`, so the generic binary type is used. Garmin
+ * Connect's app opens a .FIT file as a course to place on a map, so the file is only saved or shared, never opened in it.
  */
 const val FIT_MIME_TYPE = "application/octet-stream"
 
@@ -27,14 +27,6 @@ fun shareFitFile(context: Context, file: SessionFitFile, chooserTitle: String) {
         .putExtra(Intent.EXTRA_STREAM, fitUri(context, file))
         .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
     context.startActivity(Intent.createChooser(send, chooserTitle))
-}
-
-/** Offers the session's .FIT [file] to the apps that open files, such as Garmin Connect. */
-fun openFitFile(context: Context, file: SessionFitFile, chooserTitle: String) {
-    val view = Intent(Intent.ACTION_VIEW)
-        .setDataAndType(fitUri(context, file), FIT_MIME_TYPE)
-        .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-    context.startActivity(Intent.createChooser(view, chooserTitle))
 }
 
 /** Writes the session's .FIT [file] to [target], the place picked in the system's save dialog. */

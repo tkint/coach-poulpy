@@ -464,7 +464,7 @@ struct SessionDetailView: View {
                         Label("exportFit.save", systemImage: "square.and.arrow.down")
                     }
                     ShareLink(item: FitFileItem(make: { [graph, id = session.id] in graph.sessionFitFile(sessionId: id) }), preview: SharePreview(session.title)) {
-                        Label("exportFit.open", systemImage: "arrow.up.forward.app")
+                        Label("exportFit.share", systemImage: "square.and.arrow.up")
                     }
                 } label: {
                     Text("exportFit.button").frame(maxWidth: .infinity, minHeight: 44)
