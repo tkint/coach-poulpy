@@ -400,6 +400,7 @@ struct SessionDetailView: View {
     let onDelete: () -> Void
     @Environment(\.dismiss) private var dismiss
     @State private var deleting = false
+    @State private var sharing = false
     @State private var saving: FitDocument?
     @Environment(\.unitSystem) private var units
     @Environment(\.colorScheme) private var colorScheme
@@ -456,26 +457,6 @@ struct SessionDetailView: View {
                 .padding(.vertical, 4)
                 .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 16))
                 .overlay(RoundedRectangle(cornerRadius: 16).stroke(PoulpyColor.outline))
-
-                Menu {
-                    Button {
-                        saving = graph.sessionFitFile(sessionId: session.id).map { FitDocument($0) }
-                    } label: {
-                        Label("exportFit.save", systemImage: "square.and.arrow.down")
-                    }
-                    ShareLink(item: FitFileItem(make: { [graph, id = session.id] in graph.sessionFitFile(sessionId: id) }), preview: SharePreview(session.title)) {
-                        Label("exportFit.share", systemImage: "square.and.arrow.up")
-                    }
-                } label: {
-                    Text("exportFit.button").frame(maxWidth: .infinity, minHeight: 44)
-                }
-                .buttonStyle(.bordered)
-                .fileExporter(
-                    isPresented: Binding(get: { saving != nil }, set: { if !$0 { saving = nil } }),
-                    document: saving,
-                    contentType: FitDocument.contentType,
-                    defaultFilename: saving?.fileName
-                ) { _ in saving = nil }
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 12)
@@ -484,10 +465,10 @@ struct SessionDetailView: View {
         .navigationTitle(session.title)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            if let card = graph.sessionShareCard(sessionId: session.id, units: units, languageCode: Language.code) {
-                ShareLink(item: ShareCardItem(card: card, scheme: colorScheme), preview: SharePreview(session.title)) {
-                    Label("shareImage.button", systemImage: "square.and.arrow.up")
-                }
+            Button {
+                sharing = true
+            } label: {
+                Label("shareSession.title", systemImage: "square.and.arrow.up")
             }
             Button(role: .destructive) {
                 deleting = true
@@ -495,6 +476,13 @@ struct SessionDetailView: View {
                 Label("action.delete", systemImage: "trash")
             }
         }
+        .sheet(isPresented: $sharing) { shareSheet }
+        .fileExporter(
+            isPresented: Binding(get: { saving != nil }, set: { if !$0 { saving = nil } }),
+            document: saving,
+            contentType: FitDocument.contentType,
+            defaultFilename: saving?.fileName
+        ) { _ in saving = nil }
         .confirmationDialog("history.deleteTitle", isPresented: $deleting, titleVisibility: .visible) {
             Button("action.delete", role: .destructive) {
                 onDelete()
@@ -503,6 +491,52 @@ struct SessionDetailView: View {
         } message: {
             Text("history.deleteBody")
         }
+    }
+
+    /// The formats a session goes out in: a .FIT file to save, or an image to share.
+    private var shareSheet: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("shareSession.title").font(.poulpy(.title2).weight(.heavy)).accessibilityAddTraits(.isHeader)
+                Text("shareSession.why").font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+            }
+            VStack(spacing: 0) {
+                Button {
+                    sharing = false
+                    saving = graph.sessionFitFile(sessionId: session.id).map { FitDocument($0) }
+                } label: {
+                    shareFormat("shareSession.fit", "shareSession.fitNote", systemImage: "square.and.arrow.down")
+                }
+                .buttonStyle(.plain)
+                Divider().overlay(PoulpyColor.outline)
+                if let card = graph.sessionShareCard(sessionId: session.id, units: units, languageCode: Language.code) {
+                    ShareLink(item: ShareCardItem(card: card, scheme: colorScheme), preview: SharePreview(session.title)) {
+                        shareFormat("shareSession.image", "shareSession.imageNote", systemImage: "photo")
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .background(PoulpyColor.surfaceVariant, in: RoundedRectangle(cornerRadius: 16))
+        }
+        .padding(20)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .presentationDetents([.height(260)])
+        .presentationCornerRadius(24)
+    }
+
+    private func shareFormat(_ title: LocalizedStringKey, _ note: LocalizedStringKey, systemImage: String) -> some View {
+        HStack(spacing: 14) {
+            Image(systemName: systemImage).frame(width: 24)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title).font(.poulpy(.body).weight(.bold)).foregroundStyle(PoulpyColor.onSurface)
+                Text(note).font(.poulpy(.footnote)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+            }
+            Spacer()
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+        .frame(minHeight: 52)
+        .contentShape(Rectangle())
     }
 
     private func line(_ label: String, _ value: String) -> some View {
@@ -515,27 +549,9 @@ struct SessionDetailView: View {
     }
 }
 
-/// A session's .FIT file as the share sheet takes it: written only when a destination is picked, for Garmin Connect or
-/// a files app to upload to Strava.
-private struct FitFileItem: Transferable {
-    let make: () -> SessionFitFile?
-
-    static var transferRepresentation: some TransferRepresentation {
-        FileRepresentation(exportedContentType: FitDocument.contentType) { item in
-            guard let file = item.make() else { throw CocoaError(.fileNoSuchFile) }
-            let data = FitDocument(file).data
-            let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
-            try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
-            let url = folder.appendingPathComponent(file.fileName)
-            try data.write(to: url)
-            return SentTransferredFile(url)
-        }
-    }
-}
-
 /// A session's .FIT file for the system's save dialog, to keep it in Files on the phone.
 private struct FitDocument: FileDocument {
-    /// The type an installed app such as Garmin Connect declares for `.fit`, so the share sheet offers it; plain data otherwise.
+    /// The type a `.fit` file is saved with; plain data when the system knows none.
     static let contentType = UTType(filenameExtension: "fit", conformingTo: .data) ?? .data
     static var readableContentTypes: [UTType] { [contentType] }
 

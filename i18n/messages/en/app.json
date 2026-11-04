@@ -434,11 +434,13 @@
     "button": "Share as an image",
     "chooser": "Share your session"
   },
-  "exportFit": {
-    "button": "Export .FIT",
-    "chooser": "Send the .FIT file",
-    "save": "Save to phone",
-    "share": "Share"
+  "shareSession": {
+    "title": "Share this session",
+    "why": "Pick a format.",
+    "fit": ".FIT file",
+    "fitNote": "Save it, then import it on the Garmin Connect or Strava website",
+    "image": "Image",
+    "imageNote": "A card with your numbers to send or post"
   },
   "profile": {
     "title": "Your profile",

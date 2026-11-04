@@ -7,6 +7,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -19,6 +20,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -40,23 +42,23 @@ import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -75,6 +77,7 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -83,6 +86,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -571,8 +575,7 @@ fun SessionDetailScreen(graph: AppGraph, language: String, sessionId: String, on
     val context = LocalContext.current
     val units = LocalUnitSystem.current
     val chooser = stringResource(R.string.shareImage_chooser)
-    val fitChooser = stringResource(R.string.exportFit_chooser)
-    var exporting by remember { mutableStateOf(false) }
+    var sharing by remember { mutableStateOf(false) }
     val saveFit = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument(FIT_MIME_TYPE)) { target ->
         target?.let { graph.sessionFitFile(sessionId)?.let { file -> saveFitFile(context, file, it) } }
     }
@@ -585,8 +588,8 @@ fun SessionDetailScreen(graph: AppGraph, language: String, sessionId: String, on
                 navigationIcon = { BackButton(onBack) },
                 actions = {
                     if (session != null) {
-                        IconButton(onClick = { graph.sessionShareCard(session.id, units, language)?.let { shareSessionImage(context, it, chooser, colors) } }) {
-                            Icon(Icons.Filled.Share, contentDescription = stringResource(R.string.shareImage_button))
+                        IconButton(onClick = { sharing = true }) {
+                            Icon(Icons.Filled.Share, contentDescription = stringResource(R.string.shareSession_title))
                         }
                         IconButton(onClick = { deleting = true }) {
                             Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.action_delete))
@@ -644,24 +647,15 @@ fun SessionDetailScreen(graph: AppGraph, language: String, sessionId: String, on
                     session.estimatedSteps?.let { Line(R.string.metric_steps, "≈ $it") }
                 }
             }
-            Box {
-                OutlinedButton(onClick = { exporting = true }, modifier = Modifier.fillMaxWidth().height(56.dp)) {
-                    Text(stringResource(R.string.exportFit_button))
-                }
-                DropdownMenu(expanded = exporting, onDismissRequest = { exporting = false }) {
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.exportFit_save)) },
-                        leadingIcon = { Icon(Icons.Filled.Download, contentDescription = null) },
-                        onClick = { exporting = false; graph.sessionFitFile(session.id)?.let { saveFit.launch(it.fileName) } },
-                    )
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.exportFit_share)) },
-                        leadingIcon = { Icon(Icons.Filled.Share, contentDescription = null) },
-                        onClick = { exporting = false; graph.sessionFitFile(session.id)?.let { shareFitFile(context, it, fitChooser) } },
-                    )
-                }
-            }
         }
+    }
+
+    if (sharing && session != null) {
+        ShareSheet(
+            onFit = { sharing = false; graph.sessionFitFile(session.id)?.let { saveFit.launch(it.fileName) } },
+            onImage = { sharing = false; graph.sessionShareCard(session.id, units, language)?.let { shareSessionImage(context, it, chooser, colors) } },
+            onDismiss = { sharing = false },
+        )
     }
 
     if (deleting) {
@@ -676,6 +670,44 @@ fun SessionDetailScreen(graph: AppGraph, language: String, sessionId: String, on
             },
             dismissButton = { TextButton(onClick = { deleting = false }) { Text(stringResource(R.string.action_cancel)) } },
         )
+    }
+}
+
+/** The formats a session goes out in: a .FIT file to save, or an image to share. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ShareSheet(onFit: () -> Unit, onImage: () -> Unit, onDismiss: () -> Unit) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        containerColor = MaterialTheme.colorScheme.surface,
+    ) {
+        Column(Modifier.padding(start = 20.dp, end = 20.dp, bottom = 28.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column {
+                Text(stringResource(R.string.shareSession_title), style = MaterialTheme.typography.titleLarge, modifier = Modifier.semantics { heading() })
+                Text(stringResource(R.string.shareSession_why), color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            Column(Modifier.clip(RoundedCornerShape(PoulpyRadius.md)).background(MaterialTheme.colorScheme.surfaceVariant)) {
+                ShareFormat(Icons.Filled.Download, R.string.shareSession_fit, R.string.shareSession_fitNote, onFit)
+                HorizontalDivider(color = MaterialTheme.colorScheme.outline)
+                ShareFormat(Icons.Filled.Image, R.string.shareSession_image, R.string.shareSession_imageNote, onImage)
+            }
+        }
+    }
+}
+
+@Composable
+private fun ShareFormat(icon: ImageVector, @StringRes title: Int, @StringRes note: Int, onClick: () -> Unit) {
+    Row(
+        Modifier.fillMaxWidth().heightIn(min = 52.dp).clickable(onClick = onClick).padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(14.dp),
+    ) {
+        Icon(icon, contentDescription = null)
+        Column {
+            Text(stringResource(title), fontWeight = FontWeight.Bold)
+            Text(stringResource(note), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
     }
 }
 
