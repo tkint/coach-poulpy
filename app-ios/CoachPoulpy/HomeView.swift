@@ -37,7 +37,7 @@ struct HomeView: View {
         let state = home.value
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 10) {
+                VStack(alignment: .leading, spacing: PoulpySpace.sm) {
                     Text(Date().formatted(.dateTime.weekday(.wide).day().month(.wide)).uppercased())
                         .font(PoulpyFont.label)
                         .kerning(1)
@@ -64,7 +64,7 @@ struct HomeView: View {
                             .padding(.horizontal, 4)
                         }
                         if let next = state.next {
-                            sectionLabel("home.next").padding(.top, 8)
+                            sectionLabel("home.next").padding(.top, PoulpySpace.xs)
                             NavigationLink {
                                 WorkoutPageView(graph: graph, workoutId: next.workoutId)
                             } label: {
@@ -123,8 +123,8 @@ struct HomeView: View {
     /// A workout to do today, or a session left halfway, which can be opened (it comes back paused) or discarded.
     private func plannedCard(_ item: TodayItem) -> some View {
         let inProgress = item.status == .inProgress
-        return VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 12) {
+        return VStack(alignment: .leading, spacing: PoulpySpace.sm) {
+            HStack(spacing: PoulpySpace.sm) {
                 Image(systemName: "dumbbell")
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundStyle(PoulpyColor.onPrimaryContainer)
@@ -132,7 +132,7 @@ struct HomeView: View {
                     .background(PoulpyColor.primaryContainer, in: Circle())
                     .accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(item.title).font(PoulpyFont.headline).foregroundStyle(PoulpyColor.onSurface)
+                    Text(item.title).font(.poulpy(.headline)).foregroundStyle(PoulpyColor.onSurface)
                     if !item.details.isEmpty {
                         Text(item.details).font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
                     }
@@ -140,11 +140,11 @@ struct HomeView: View {
                 Spacer(minLength: 0)
             }
             if inProgress {
-                Text("home.inProgress").font(.poulpy(.subheadline).weight(.bold)).foregroundStyle(PoulpyColor.onSurface)
+                Text("home.inProgress").font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
             } else if !item.exercises.isEmpty {
-                Text(item.exercises).font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurface)
+                Text(item.exercises).font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
             }
-            HStack(spacing: 8) {
+            HStack(spacing: PoulpySpace.sm) {
                 if inProgress {
                     // Destructive, so crimson with an icon, never ember.
                     Button { discarding = true } label: {
@@ -180,14 +180,14 @@ struct HomeView: View {
                 .layoutPriority(1)
             }
         }
-        .padding(14)
+        .padding(PoulpySpace.sm)
         .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 20))
         .overlay(RoundedRectangle(cornerRadius: 20).stroke(PoulpyPalette.lagoon300, lineWidth: 1.5))
     }
 
     /// A session finished today, opening its page as in the history.
     private func doneCard(_ session: SessionRow) -> some View {
-        HStack(spacing: 12) {
+        HStack(spacing: PoulpySpace.sm) {
             Image(systemName: "checkmark")
                 .font(.system(size: 18, weight: .heavy))
                 .foregroundStyle(PoulpyColor.surface)
@@ -195,7 +195,7 @@ struct HomeView: View {
                 .background(PoulpyColor.success, in: Circle())
                 .accessibilityLabel(Text("workout.done"))
             VStack(alignment: .leading, spacing: 2) {
-                Text(session.title).font(PoulpyFont.headline).foregroundStyle(PoulpyColor.onSurface)
+                Text(session.title).font(.poulpy(.headline)).foregroundStyle(PoulpyColor.onSurface)
                 Text("\(time(session.startedAtMillis)) · \(clock(session.activeSeconds))")
                     .font(.poulpy(.subheadline))
                     .monospacedDigit()
@@ -204,7 +204,8 @@ struct HomeView: View {
             Spacer(minLength: 0)
             Image(systemName: "chevron.right").foregroundStyle(PoulpyColor.onSurfaceVariant)
         }
-        .padding(14)
+        .padding(PoulpySpace.sm)
+        .frame(minHeight: 60)
         .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 20))
         .overlay(RoundedRectangle(cornerRadius: 20).stroke(PoulpyColor.outline))
     }
@@ -220,12 +221,12 @@ struct HomeView: View {
                     .font(.poulpy(.caption2).weight(.heavy))
                     .foregroundStyle(PoulpyColor.primary)
                 Text(day.formatted(.dateTime.day()))
-                    .font(PoulpyFont.headline)
+                    .font(.poulpy(.headline))
                     .foregroundStyle(PoulpyColor.onPrimaryContainer)
             }
-            .frame(width: 52, height: 56)
-            .background(PoulpyColor.background, in: RoundedRectangle(cornerRadius: 14))
-            .overlay(RoundedRectangle(cornerRadius: 14).stroke(PoulpyColor.outline))
+            .frame(width: 44, height: 48)
+            .background(PoulpyColor.background, in: RoundedRectangle(cornerRadius: PoulpyRadius.md))
+            .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.md).stroke(PoulpyColor.outline))
             VStack(alignment: .leading, spacing: 2) {
                 Text(next.title).font(.poulpy(.headline)).foregroundStyle(PoulpyColor.onSurface)
                 Text(when).font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
@@ -233,14 +234,14 @@ struct HomeView: View {
             Spacer(minLength: 0)
             Image(systemName: "chevron.right").foregroundStyle(PoulpyColor.onSurfaceVariant)
         }
-        .padding(12)
-        .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 20))
-        .overlay(RoundedRectangle(cornerRadius: 20).stroke(PoulpyColor.outline))
+        .padding(PoulpySpace.sm)
+        .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
+        .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(PoulpyColor.outline))
     }
 
     /// Nothing planned or done today: rest, or go and pick something.
     private func restCard(firstTime: Bool) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: PoulpySpace.xs) {
             Text(LocalizedStringKey(firstTime ? "home.firstTitle" : "home.restTitle")).font(PoulpyFont.headline)
             Text(LocalizedStringKey(firstTime ? "home.firstBody" : "home.restBody")).font(.poulpy(.subheadline))
             Button(action: onOpenLibrary) {
@@ -252,17 +253,16 @@ struct HomeView: View {
                     .background(PoulpyColor.primary, in: Capsule())
             }
             .buttonStyle(.plain)
-            .padding(.top, 8)
+            .padding(.top, PoulpySpace.xs)
         }
         .foregroundStyle(PoulpyColor.onSurface)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal, 16)
-        .padding(.vertical, 18)
+        .padding(PoulpySpace.md)
         .overlay(
             RoundedRectangle(cornerRadius: 20)
                 .stroke(PoulpyColor.onSurfaceVariant.opacity(0.5), style: StrokeStyle(lineWidth: 1.5, dash: [6, 4]))
         )
-        .padding(.top, 6)
+        .padding(.top, PoulpySpace.xs)
     }
 }
 

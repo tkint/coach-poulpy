@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -90,7 +91,7 @@ fun HomeScreen(
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = PoulpySpace.lg, bottom = PoulpySpace.xl),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
+        verticalArrangement = Arrangement.spacedBy(PoulpySpace.sm),
     ) {
         item(key = "title") {
             Column {
@@ -137,7 +138,7 @@ fun HomeScreen(
             }
         }
         state.next?.let { next ->
-            item(key = "next-label") { SectionLabel(stringResource(R.string.home_next), Modifier.padding(top = 8.dp)) }
+            item(key = "next-label") { SectionLabel(stringResource(R.string.home_next), Modifier.padding(top = PoulpySpace.xs)) }
             item(key = "next") { NextCard(next) { onOpenWorkout(next.workoutId) } }
         }
     }
@@ -165,24 +166,24 @@ private fun PlannedCard(item: TodayItem, onOpen: () -> Unit, onGo: () -> Unit, o
         shape = RoundedCornerShape(20.dp),
         modifier = Modifier.fillMaxWidth(),
     ) {
-        Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(Modifier.padding(PoulpySpace.sm), verticalArrangement = Arrangement.spacedBy(PoulpySpace.sm)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(PoulpySpace.sm)) {
                 Box(Modifier.size(44.dp).clip(CircleShape).background(colors.primaryContainer), contentAlignment = Alignment.Center) {
                     Icon(Icons.Filled.FitnessCenter, contentDescription = null, tint = colors.onPrimaryContainer)
                 }
                 Column(Modifier.weight(1f)) {
-                    Text(item.title, style = MaterialTheme.typography.titleLarge)
+                    Text(item.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold)
                     if (item.details.isNotEmpty()) {
                         Text(item.details, style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
                     }
                 }
             }
             if (inProgress) {
-                Text(stringResource(R.string.home_inProgress), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.home_inProgress), style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
             } else if (item.exercises.isNotEmpty()) {
-                Text(item.exercises, style = MaterialTheme.typography.bodyMedium)
+                Text(item.exercises, style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
             }
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(PoulpySpace.sm)) {
                 if (inProgress) {
                     // Destructive, so crimson with an icon, never ember.
                     OutlinedButton(
@@ -242,12 +243,16 @@ private fun DoneCard(item: TodayItem, onClick: () -> Unit) {
         shape = RoundedCornerShape(20.dp),
         modifier = Modifier.fillMaxWidth(),
     ) {
-        Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(
+            Modifier.heightIn(min = 60.dp).padding(PoulpySpace.sm),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(PoulpySpace.sm),
+        ) {
             Box(Modifier.size(44.dp).clip(CircleShape).background(PoulpyTheme.extraColors.success), contentAlignment = Alignment.Center) {
                 Icon(Icons.Filled.Check, contentDescription = stringResource(R.string.workout_done), tint = colors.surface)
             }
             Column(Modifier.weight(1f)) {
-                Text(session.title, style = MaterialTheme.typography.titleLarge)
+                Text(session.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold)
                 Text("${time(session.startedAtMillis)} · ${clock(session.activeSeconds)}", style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
             }
             Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = colors.onSurfaceVariant)
@@ -265,12 +270,12 @@ private fun NextCard(next: NextSession, onClick: () -> Unit) {
         onClick = onClick,
         colors = CardDefaults.outlinedCardColors(containerColor = colors.surface),
         border = BorderStroke(1.dp, colors.outline),
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(PoulpyRadius.lg),
         modifier = Modifier.fillMaxWidth(),
     ) {
-        Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(Modifier.padding(PoulpySpace.sm), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Column(
-                Modifier.size(52.dp, 56.dp).clip(RoundedCornerShape(14.dp)).background(colors.background),
+                Modifier.size(44.dp, 48.dp).clip(RoundedCornerShape(PoulpyRadius.md)).background(colors.background),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
             ) {
@@ -279,7 +284,7 @@ private fun NextCard(next: NextSession, onClick: () -> Unit) {
                     style = MaterialTheme.typography.labelSmall,
                     color = colors.primary,
                 )
-                Text(day.dayOfMonth.toString(), style = MaterialTheme.typography.titleLarge, color = colors.onPrimaryContainer)
+                Text(day.dayOfMonth.toString(), style = MaterialTheme.typography.titleMedium, color = colors.onPrimaryContainer)
             }
             Column(Modifier.weight(1f)) {
                 Text(next.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold)
@@ -297,7 +302,7 @@ private fun RestCard(state: HomeState, onOpenLibrary: () -> Unit) {
     Column(
         Modifier
             .fillMaxWidth()
-            .padding(top = 6.dp)
+            .padding(top = PoulpySpace.xs)
             .drawBehind {
                 drawRoundRect(
                     dash,
@@ -305,8 +310,8 @@ private fun RestCard(state: HomeState, onOpenLibrary: () -> Unit) {
                     style = Stroke(width = 1.5.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(6.dp.toPx(), 4.dp.toPx()))),
                 )
             }
-            .padding(horizontal = 16.dp, vertical = 18.dp),
-        verticalArrangement = Arrangement.spacedBy(6.dp),
+            .padding(PoulpySpace.md),
+        verticalArrangement = Arrangement.spacedBy(PoulpySpace.xs),
     ) {
         Text(
             stringResource(if (state.hasWorkouts) R.string.home_restTitle else R.string.home_firstTitle),
@@ -316,7 +321,7 @@ private fun RestCard(state: HomeState, onOpenLibrary: () -> Unit) {
             stringResource(if (state.hasWorkouts) R.string.home_restBody else R.string.home_firstBody),
             style = MaterialTheme.typography.bodyMedium,
         )
-        Button(onClick = onOpenLibrary, modifier = Modifier.padding(top = 8.dp).height(48.dp)) {
+        Button(onClick = onOpenLibrary, modifier = Modifier.padding(top = PoulpySpace.xs).height(48.dp)) {
             Icon(Icons.AutoMirrored.Filled.LibraryBooks, contentDescription = null)
             Text(stringResource(R.string.home_openLibrary), fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 8.dp))
         }
