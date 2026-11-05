@@ -34,7 +34,7 @@ Everything is optional and stays on the phone. Each field is only here because s
 | Main goal | Which workouts Poulpy suggests first | Stay active, Build strength, Run further, Rehab, Something else |
 | Experience | Starting loads and plan suggestions | Just starting, Regular, Experienced |
 | Resting heart rate | Heart rate zones | Typed, or read from a band later |
-| Body figure | Which body map is drawn for pain and, later, for the muscles a workout uses | Wider shoulders or Wider hips, so the names describe the drawing and say nothing about gender. It is a drawing only: separate from sex assigned at birth, never used for estimates, and never asked as gender |
+| Body figure | Which body map is drawn for pain and for the muscles an exercise or a workout works | Wider shoulders or Wider hips, so the names describe the drawing and say nothing about gender. It is a drawing only: separate from sex assigned at birth, never used for estimates, and never asked as gender |
 | Pain or rehab | Poulpy's blue side for the chosen time | Where it hurts, on the body map, and for how long; see [Character rules](./brand.md#character-rules) |
 
 Suggested for later, not drawn: maximum heart rate override, weekly goal in sessions, dominant side, equipment at home (already a filter), waist and body-fat as optional measurements.

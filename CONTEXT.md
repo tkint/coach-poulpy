@@ -152,7 +152,7 @@ The time after the person says where it hurts (pain or rehab) during which Poulp
 _Avoid_: Injury mode, sick leave
 
 **Body map**:
-A front and a back muscle chart whose areas, left and right apart, light up when picked: where it hurts today, and later which muscles a workout works. Skin has no fill, so it implies no skin tone.
+A front and a back muscle chart whose areas, left and right apart, light up: where it hurts today when picked, what an exercise works, and, as a heat map, how much a workout works each muscle. Skin has no fill, so it implies no skin tone.
 _Avoid_: Anatomy picture, body diagram
 
 **Body figure**:
