@@ -103,7 +103,7 @@ The **History** tab has two views. **Calendar** shows a month, Monday first, wit
 
 ## Releasing
 
-The app version is the `VERSION` file. To publish a beta (a GitHub pre-release with the APK), raise it in a PR, then run Actions > Release. See [Releasing a beta](docs/releasing.md).
+The app version is the release tag, and "dev" on any other build. To publish a beta (a GitHub pre-release with the APK), push a tag such as `v0.6.0` on `main`: the Release workflow runs CI, then publishes. See [Releasing a beta](docs/releasing.md).
 
 ## Continuous integration
 

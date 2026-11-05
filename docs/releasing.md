@@ -1,23 +1,33 @@
 # Releasing a beta
 
-Coach Poulpy is in beta. A release is a GitHub pre-release with the Android APK attached, plus the server image on the GitHub Container Registry, made by one button and no agent. Deploying the server is a second button.
+Coach Poulpy is in beta. **Pushing a version tag is the release:** the tag is the version, CI runs in full, then a GitHub pre-release with the Android APK and the server image on the GitHub Container Registry are published. No version pull request, no button, no agent. Deploying the server is a separate button.
 
 ## The version
 
-The version people see (Settings, "Version 0.1.0") is the one line in [`VERSION`](https://github.com/tkint/coach-poulpy/blob/main/VERSION) at the repository root. Android reads it for `versionName` and iOS gets it as `MARKETING_VERSION`, so there is nowhere else to change it. It is three numbers, like `0.2.0`; while in beta it stays `0.x.y`.
+The version people see (Settings, "Version 0.6.0") is the tag without its `v`. The Release workflow passes it to the builds as `POULPY_VERSION_NAME`: Android uses it as `versionName` and iOS as `MARKETING_VERSION`. Every other build, on a computer or in CI, says "Version dev". A tag is three numbers after a `v`, like `v0.6.0`; while in beta it stays `v0.x.y`, and a release is a pre-release until the first `v1.0.0`.
+
+The Android `versionCode` is the minute the build ran (minutes since 2026-01-01), as in CI, so a release installs over any earlier build.
 
 ## Cut a release
 
-1. Raise `VERSION` in a pull request (`chore/release-0.2.0`) and merge it once CI is green.
-2. On GitHub, open **Actions > Release > Run workflow**, keep the branch `main`, and run it.
-3. A few minutes later the **Releases** page has a pre-release `v0.2.0` with `coach-poulpy-v0.2.0.apk`, `coach-poulpy-deploy.tar.gz` and notes listing the merged pull requests since the last one.
-4. On a phone, download the APK from that page and install it over the old one; the phone's data is kept.
+1. Make sure `main` is where you want it and CI is green on it.
+2. Tag it and push the tag:
 
-The workflow stops with a message, and publishes nothing, if `VERSION` is not three numbers, if the tag for that version already exists (raise `VERSION` first), or if the signing key secrets are missing (see the README, "The signing key").
+   ```sh
+   git switch main && git pull
+   git tag v0.6.0
+   git push origin v0.6.0
+   ```
+
+3. **Actions > Release** starts on its own. It runs the whole of CI (shared tests, server, Android APK, iOS build, website), then publishes.
+4. Once it is done, the **Releases** page has `v0.6.0` with `coach-poulpy-v0.6.0.apk`, `coach-poulpy-deploy.tar.gz` and notes listing the merged pull requests since the last one.
+5. On a phone, download the APK from that page and install it over the old one; the phone's data is kept.
+
+The workflow stops with a message, and publishes nothing, if the tag is not `v` and three numbers, if the signing key secrets are missing (see the README, "The signing key"), or if any CI check fails. To try again, delete the tag (`git push origin :refs/tags/v0.6.0` and `git tag -d v0.6.0`), fix `main`, and tag again.
 
 ## The server
 
-The same workflow builds the server image (amd64 only, like the server: [ADR 0019](./adr/0019-the-server-runs-with-docker-compose-on-one-server.md)) and pushes it as `ghcr.io/tkint/coach-poulpy-server` with three tags: `0.2.0`, `0.2` and `latest`. The pre-release is created only once the image is pushed. `coach-poulpy-deploy.tar.gz` holds the Compose and Caddy files of that version, unpacked on the machine as in [Deploying the server](./deploying-the-server.md).
+After CI, the same workflow builds the server image (amd64 only, like the server: [ADR 0019](./adr/0019-the-server-runs-with-docker-compose-on-one-server.md)) and pushes it as `ghcr.io/tkint/coach-poulpy-server` with three tags: `0.2.0`, `0.2` and `latest`. The pre-release is created only once the image is pushed. `coach-poulpy-deploy.tar.gz` holds the Compose and Caddy files of that version, unpacked on the machine as in [Deploying the server](./deploying-the-server.md).
 
 The first push creates the package as private. Either make it public once (the package's **Package settings > Change visibility**), or log the machine in with a token that can read packages (`docker login ghcr.io`).
 
@@ -50,4 +60,4 @@ The workflow stops with a message, and changes nothing, if a setting is missing 
 
 - **iPhone:** no file is attached. A phone build needs an Apple Developer account and signing; until then iOS is built from Xcode (README).
 - **Debug build type:** the APK is the same `assembleDebug` build CI makes, the one that has been run on phones. A smaller, minified `assembleRelease` build is a later step once it has been tried on a phone.
-- **Not a store release:** the pre-release flag keeps it off the "latest" release, and nothing goes to Google Play or TestFlight.
+- **Not a store release:** while the major is 0, the pre-release flag keeps it off the "latest" release, and nothing goes to Google Play or TestFlight.
