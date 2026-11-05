@@ -16,4 +16,5 @@ export const unpublished = {
   'README.md': 'the GitHub front page; the site home and Contributing cover it',
   'AGENTS.md': 'a link to CLAUDE.md, which is published',
   '.github/pull_request_template.md': 'a form GitHub fills in, not a guideline',
+  '.github/copilot-instructions.md': "the Copilot cloud agent's sandbox, not a guideline; CLAUDE.md holds the rules",
 }
