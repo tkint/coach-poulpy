@@ -131,11 +131,24 @@ jobs:
           cp -r deploy/compose.yaml deploy/.env.example deploy/coach-poulpy.caddy deploy/edge dist/coach-poulpy/
           tar -C dist -czf coach-poulpy-deploy.tar.gz coach-poulpy
       - name: Publish the release
+        # Notes list the pull requests merged since the last release, as GitHub generates them. A
+        # release already drafted or published from the Releases page is completed instead: assets
+        # added, title and pre-release flag set, and notes filled in only if it has none.
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           cp app-android/build/outputs/apk/debug/*.apk "coach-poulpy-${VERSION_TAG}.apk"
-          flag=""
-          [ "$PRERELEASE" = true ] && flag="--prerelease"
-          gh release create "$VERSION_TAG" "coach-poulpy-${VERSION_TAG}.apk" coach-poulpy-deploy.tar.gz \
-            --verify-tag $flag --generate-notes --title "Coach Poulpy ${VERSION_TAG}"
+          assets=("coach-poulpy-${VERSION_TAG}.apk" coach-poulpy-deploy.tar.gz)
+          title="Coach Poulpy ${VERSION_TAG}"
+          gh api "repos/$GITHUB_REPOSITORY/releases/generate-notes" -f tag_name="$VERSION_TAG" --jq .body > notes.md
+          if gh release view "$VERSION_TAG" > /dev/null 2>&1; then
+            gh release upload "$VERSION_TAG" "${assets[@]}" --clobber
+            if [ -z "$(gh release view "$VERSION_TAG" --json body --jq '.body | gsub("\\s"; "")')" ]; then
+              gh release edit "$VERSION_TAG" --title "$title" --prerelease="$PRERELEASE" --notes-file notes.md
+            else
+              gh release edit "$VERSION_TAG" --title "$title" --prerelease="$PRERELEASE"
+            fi
+          else
+            gh release create "$VERSION_TAG" "${assets[@]}" --verify-tag --prerelease="$PRERELEASE" \
+              --title "$title" --notes-file notes.md
+          fi

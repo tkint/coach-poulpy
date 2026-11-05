@@ -23,6 +23,8 @@ The Android `versionCode` is the minute the build ran (minutes since 2026-01-01)
 4. Once it is done, the **Releases** page has `v0.6.0` with `coach-poulpy-v0.6.0.apk`, `coach-poulpy-deploy.tar.gz` and notes listing the merged pull requests since the last one.
 5. On a phone, download the APK from that page and install it over the old one; the phone's data is kept.
 
+Publishing a release from GitHub's **Releases** page with a new tag also works, as it pushes the tag. But that release is visible straight away, before CI has passed, and stays without an APK if CI fails. The workflow then adds the APK and the deploy bundle to it, sets its title, and writes the same notes if you left them empty. Pushing the tag is the better way.
+
 The workflow stops with a message, and publishes nothing, if the tag is not `v` and three numbers, if the signing key secrets are missing (see the README, "The signing key"), or if any CI check fails. To try again, delete the tag (`git push origin :refs/tags/v0.6.0` and `git tag -d v0.6.0`), fix `main`, and tag again.
 
 ## The server
