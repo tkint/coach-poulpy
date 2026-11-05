@@ -17,7 +17,7 @@ The server, its Postgres and the Caddy that serves them over HTTPS run as Docker
 ## How it is released and deployed
 
 - **The Release workflow publishes everything together.** The same tag push that publishes the APK pushes the server image to the GitHub Container Registry, tagged with the version (`0.3.0`, `0.3`, `latest`). It also attaches `coach-poulpy-deploy.tar.gz` (the Compose files and the Caddy files) to the release.
-- **Deploying is a separate, manual step.** Actions > Deploy SSHes into the server and pulls the chosen image, so a release never reaches the server on its own.
+- **Deploying is a separate, manual step.** Actions > Deploy uploads the deployment files, pulls the chosen image and reconciles the shared Caddy, so a release never reaches the server on its own. It creates or starts Caddy if necessary and automatically migrates a standard app-owned Docker Caddy while preserving existing sites and certificates.
 - **The image is built for amd64 only,** like the server. Building for arm64 under emulation would multiply the release time for a machine we don't have.
 
 ## Consequences

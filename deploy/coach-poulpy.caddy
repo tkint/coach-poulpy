@@ -1,7 +1,6 @@
-# Coach Poulpy's site for a Caddy on the edge network. Copy it into the edge's sites/ folder and
-# replace the domain with the server's; its DNS record must point to this machine.
+# deploy.py renders DOMAIN from the app's .env into the shared edge's sites/ folder.
 
-api.coachpoulpy.example {
+{$DOMAIN} {
 	encode zstd gzip
 
 	header {
