@@ -1,0 +1,15 @@
+# Coach Poulpy's site for a Caddy on the edge network. Copy it into the edge's sites/ folder and
+# replace the domain with the server's; its DNS record must point to this machine.
+
+api.coachpoulpy.example {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "no-referrer"
+		-Server
+	}
+
+	reverse_proxy coach-poulpy-server:8080
+}
