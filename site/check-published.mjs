@@ -19,14 +19,14 @@ for (const file of tracked) {
 }
 
 const dist = '.vitepress/dist'
-const base = process.env.SITE_BASE ?? '/coach-poulpy/'
+const base = process.env.SITE_BASE ?? '/'
 const pages = (dir) =>
   readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
     const path = join(dir, entry.name)
     if (entry.isDirectory()) return pages(path)
     return entry.name.endsWith('.html') && path !== join(dist, '404.html') ? [relative(dist, path)] : []
   })
-// A link like /coach-poulpy/docs/brand#moods is the page docs/brand.html; a folder is its index.
+// A link like /docs/brand#moods is the page docs/brand.html; a folder is its index.
 const toPage = (href, from) => {
   // The address a built page is served at, so a relative link resolves the way a browser does.
   const served = new URL(base + from.replace(/(^|\/)index\.html$/, '$1').replace(/\.html$/, ''), 'https://site')

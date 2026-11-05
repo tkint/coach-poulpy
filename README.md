@@ -2,7 +2,7 @@
 
 A personal training platform: build workouts, follow plans, run guided sessions and track progress. The first release is a guest-only mobile app for Android and iPhone that keeps everything on the phone. The backend and website join later as a sync and sharing layer over the same Kotlin domain.
 
-The brand, design system and architecture are published at [tkint.github.io/coach-poulpy](https://tkint.github.io/coach-poulpy/), built from `docs/`, `CONTEXT.md` and `CONTRIBUTING.md` by the VitePress project in `site/`. How work moves from an idea to a merged PR is in [CONTRIBUTING.md](CONTRIBUTING.md).
+The brand, design system and architecture are published at [doc.coach-poulpy.com](https://doc.coach-poulpy.com/), built from `docs/`, `CONTEXT.md` and `CONTRIBUTING.md` by the VitePress project in `site/`. The main site is served at `/`, with PR previews under `/pr-preview/pr-<number>/`; `SITE_BASE` sets the build path, and `site/public/CNAME` keeps the custom domain configured when publishing. How work moves from an idea to a merged PR is in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Layout
 

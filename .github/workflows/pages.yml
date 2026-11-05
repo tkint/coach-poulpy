@@ -23,7 +23,7 @@ jobs:
     if: github.event.action != 'closed'
     runs-on: ubuntu-latest
     env:
-      SITE_BASE: ${{ github.event_name == 'pull_request' && format('/coach-poulpy/pr-preview/pr-{0}/', github.event.number) || '/coach-poulpy/' }}
+      SITE_BASE: ${{ github.event_name == 'pull_request' && format('/pr-preview/pr-{0}/', github.event.number) || '/' }}
     defaults:
       run:
         working-directory: site
@@ -127,6 +127,7 @@ jobs:
           source-dir: dist
           preview-branch: gh-pages
           umbrella-dir: pr-preview
+          pages-base-url: doc.coach-poulpy.com
       # A second comment, kept up to date: the docs pages, sections and mockups this PR changes or
       # builds, linked into its preview, so the owner reviews on the site. Agents write none of their own.
       - name: List the docs pages to review
@@ -136,7 +137,7 @@ jobs:
         run: >-
           node site/review-links.mjs
           ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }}
-          https://${{ github.repository_owner }}.github.io/coach-poulpy/pr-preview/pr-${{ github.event.number }}/
+          https://doc.coach-poulpy.com/pr-preview/pr-${{ github.event.number }}/
           dist > review.md
       - uses: marocchino/sticky-pull-request-comment@v2
         if: github.event.action != 'closed'
