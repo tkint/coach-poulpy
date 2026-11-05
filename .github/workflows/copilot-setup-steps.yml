@@ -1,0 +1,57 @@
+name: Copilot Setup Steps
+
+# Prepares the Copilot cloud agent's sandbox. These steps run before the agent's firewall is up, so
+# everything it needs is downloaded here: inside the sandbox it can't reach nodejs.org, Gradle's
+# plugin portal or most registries. .github/copilot-instructions.md tells it what is ready and what
+# is left to CI. Runs on its own when this file changes, and by hand from the Actions tab.
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+  pull_request:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+
+jobs:
+  # The job must be called copilot-setup-steps or Copilot won't pick it up.
+  copilot-setup-steps:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            web/package-lock.json
+            site/package-lock.json
+      - name: Install the website's packages
+        run: npm ci --no-audit --no-fund
+        working-directory: web
+      - name: Install the docs site's packages
+        run: npm ci --no-audit --no-fund
+        working-directory: site
+      - name: Install the Markdown linter and CodeGraph (docs/agents/code-graph.md)
+        run: npm install --global --no-audit --no-fund markdownlint-cli2@0.24.0 @colbymchenry/codegraph@1.6.2
+      - name: Index the code graph
+        env:
+          CODEGRAPH_TELEMETRY: 0
+        run: codegraph init
+      # Running the same tests as CI downloads every plugin and dependency, the Kotlin/Native
+      # compiler, and the Node.js and Yarn that jsTest uses, and fills the build cache. A failing
+      # test mustn't stop the steps after it, so the agent still gets a usable sandbox.
+      - name: Download Gradle dependencies by running the shared, server and i18n tests
+        continue-on-error: true
+        run: ./gradlew jvmTest jsTest :server:test :tools:i18n:test
+      - name: Download the Android dependencies by compiling the app
+        continue-on-error: true
+        run: ./gradlew :app-android:compileDebugKotlin
