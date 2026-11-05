@@ -1,0 +1,61 @@
+# Coach Poulpy on one server: the API and its Postgres. HTTPS comes from a Caddy on the shared
+# `edge` network (deploy/edge, or one already on the server). See docs/deploying-the-server.md.
+#   cp .env.example .env    # then fill it in
+#   docker compose up -d
+
+name: coach-poulpy
+
+x-logging: &logging
+  driver: json-file
+  options: { max-size: "10m", max-file: "3" }
+
+services:
+  server:
+    image: ghcr.io/tkint/coach-poulpy-server:${IMAGE_TAG:-latest}
+    build:
+      context: ..
+      dockerfile: server/Dockerfile
+    restart: unless-stopped
+    environment:
+      PORT: "8080"
+    # The heap is 75% of this (server/Dockerfile), which leaves room for the JVM itself.
+    mem_limit: 512m
+    # No published ports: only Caddy reaches the server, through the edge network.
+    expose:
+      - "8080"
+    networks:
+      internal:
+      edge:
+        # Containers of every app share the edge network, so the server gets a name no other
+        # app uses; Caddy proxies to it.
+        aliases: [coach-poulpy-server]
+    logging: *logging
+
+  # Not used by the server yet: it connects once accounts arrive (ADR 0007).
+  postgres:
+    # The same major version as the local Postgres in tools/compose.yaml.
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: coachpoulpy
+      POSTGRES_USER: coachpoulpy
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    # Only on the internal network: nothing outside this project can reach the database.
+    networks: [internal]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U coachpoulpy -d coachpoulpy"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    logging: *logging
+
+networks:
+  internal:
+  edge:
+    external: true
+    name: ${EDGE_NETWORK:-edge}
+
+volumes:
+  postgres-data:

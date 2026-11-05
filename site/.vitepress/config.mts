@@ -145,6 +145,7 @@ export default withMermaid(
             { text: 'House rules', link: '/CLAUDE' },
             { text: 'Rules by area', link: '/docs/agents/areas' },
             { text: 'Releasing a beta', link: '/docs/releasing' },
+            { text: 'Deploying the server', link: '/docs/deploying-the-server' },
             { text: 'Issue tracker', link: '/docs/agents/issue-tracker' },
             { text: 'Refining an issue', link: '/docs/agents/refining-issues' },
             { text: 'Triage labels', link: '/docs/agents/triage-labels' },

@@ -29,3 +29,7 @@ keystore.properties
 
 # CodeGraph index (local code graph, rebuilt per checkout)
 .codegraph/
+
+# Deploy secrets and machine-specific overrides (docs/deploying-the-server.md)
+.env
+deploy/compose.override.yaml

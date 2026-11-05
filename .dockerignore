@@ -1,0 +1,16 @@
+# Only what the server image build needs from the repository (server/Dockerfile).
+.git
+.github
+**/.gradle
+**/build
+**/.kotlin
+**/node_modules
+local.properties
+app-ios
+site
+web/dist
+deploy
+*.jks
+*.keystore
+keystore.properties
+.env

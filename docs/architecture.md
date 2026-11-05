@@ -168,4 +168,4 @@ On Android a Live recording runs in a connected-device foreground service, from 
 
 ## Deployment
 
-The first release needs no server. Android phones install the signed APK from CI; iPhones need Xcode (7-day installs with a free account) or TestFlight with a paid Apple Developer membership. The server builds into one JVM program that can run in a container, on a VPS or on a managed platform, chosen when accounts go live.
+The first release needs no server. Android phones install the signed APK from CI; iPhones need Xcode (7-day installs with a free account) or TestFlight with a paid Apple Developer membership. The server builds into one JVM program that can run in a container, on a VPS or on a managed platform, chosen when accounts go live. [Deploying the server](./deploying-the-server.md) runs it with Docker on one machine, behind a Caddy that other apps can share.
