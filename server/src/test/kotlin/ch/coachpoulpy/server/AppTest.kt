@@ -11,4 +11,20 @@ class AppTest {
     fun healthAnswersOk() {
         assertEquals(OK, app()(Request(GET, "/health")).status)
     }
+
+    @Test
+    fun healthReportsTheVersion() {
+        assertEquals("ok 0.6.0", app("0.6.0")(Request(GET, "/health")).bodyString())
+    }
+
+    @Test
+    fun versionComesFromAppVersion() {
+        assertEquals("0.6.0", appVersion { if (it == "APP_VERSION") "0.6.0" else null })
+    }
+
+    @Test
+    fun versionIsDevWhenUnset() {
+        assertEquals("dev", appVersion { null })
+        assertEquals("dev", appVersion { " " })
+    }
 }

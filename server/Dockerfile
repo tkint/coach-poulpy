@@ -9,10 +9,13 @@ RUN --mount=type=cache,target=/root/.gradle \
     ./gradlew --no-daemon -q :server:installDist
 
 FROM eclipse-temurin:21-jre
+# The release, reported on /health; the Release workflow passes it, any other build says "dev".
+ARG APP_VERSION=dev
 RUN useradd --system --uid 10001 --no-create-home coach
 COPY --from=build /src/server/build/install/server /opt/server
 USER coach
-ENV PORT=8080 \
+ENV APP_VERSION=${APP_VERSION} \
+    PORT=8080 \
     JAVA_OPTS="-XX:MaxRAMPercentage=75 -XX:+ExitOnOutOfMemoryError"
 EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=3s --start-period=20s --retries=3 \
