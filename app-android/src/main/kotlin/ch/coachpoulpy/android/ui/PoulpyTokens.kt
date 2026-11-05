@@ -88,10 +88,13 @@ data class PoulpyExtraColors(
     val grumpyContainer: Color,
     val onGrumpyContainer: Color,
     val success: Color,
+    val heat1: Color,
+    val heat2: Color,
+    val heat3: Color,
 )
 
-internal val PoulpyLightExtras = PoulpyExtraColors(Color(0xFFB4471C), Color(0xFFFFFFFF), Color(0xFFFFE6D6), Color(0xFF4A1A0B), Color(0xFF2E9E6A))
-internal val PoulpyDarkExtras = PoulpyExtraColors(Color(0xFFFF9A66), Color(0xFF2A1006), Color(0xFF3A1E12), Color(0xFFFFDCC7), Color(0xFF4CC38A))
+internal val PoulpyLightExtras = PoulpyExtraColors(Color(0xFFB4471C), Color(0xFFFFFFFF), Color(0xFFFFE6D6), Color(0xFF4A1A0B), Color(0xFF2E9E6A), Color(0xFFE3D9FA), Color(0xFFA98BEB), Color(0xFF6B3FD1))
+internal val PoulpyDarkExtras = PoulpyExtraColors(Color(0xFFFF9A66), Color(0xFF2A1006), Color(0xFF3A1E12), Color(0xFFFFDCC7), Color(0xFF4CC38A), Color(0xFF2E2752), Color(0xFF6E55C4), Color(0xFFB59CFF))
 
 /** Baloo 2 (display) and Nunito (body), bundled in res/font. */
 object PoulpyFonts {

@@ -49,6 +49,9 @@
   --cp-success: #2E9E6A;
   --cp-error: #C8264A;
   --cp-on-error: #FFFFFF;
+  --cp-heat1: #E3D9FA;
+  --cp-heat2: #A98BEB;
+  --cp-heat3: #6B3FD1;
   --cp-font-display: "Baloo 2", "Arial Rounded MT Bold", "Trebuchet MS", sans-serif;
   --cp-font-body: "Nunito", "Segoe UI", system-ui, sans-serif;
   --cp-type-display: 800 40px/44px var(--cp-font-display);
@@ -94,6 +97,9 @@
     --cp-success: #4CC38A;
     --cp-error: #FF6B85;
     --cp-on-error: #2A0610;
+    --cp-heat1: #2E2752;
+    --cp-heat2: #6E55C4;
+    --cp-heat3: #B59CFF;
   }
 }
 
@@ -116,6 +122,9 @@
   --cp-success: #4CC38A;
   --cp-error: #FF6B85;
   --cp-on-error: #2A0610;
+  --cp-heat1: #2E2752;
+  --cp-heat2: #6E55C4;
+  --cp-heat3: #B59CFF;
   color-scheme: dark;
 }
 

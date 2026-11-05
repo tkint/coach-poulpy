@@ -71,8 +71,8 @@ function kotlin() {
   out.push('internal val PoulpyDarkColors = darkColorScheme(', ...scheme(dark), ')', '')
   out.push('/** Brand colours that Material 3 has no slot for. */')
   out.push('data class PoulpyExtraColors(')
-  out.push('    val grumpy: Color,', '    val onGrumpy: Color,', '    val grumpyContainer: Color,', '    val onGrumpyContainer: Color,', '    val success: Color,', ')', '')
-  const extras = (t) => `PoulpyExtraColors(${kotlinColor(t.grumpy)}, ${kotlinColor(t.onGrumpy)}, ${kotlinColor(t.grumpyContainer)}, ${kotlinColor(t.onGrumpyContainer)}, ${kotlinColor(t.success)})`
+  out.push('    val grumpy: Color,', '    val onGrumpy: Color,', '    val grumpyContainer: Color,', '    val onGrumpyContainer: Color,', '    val success: Color,', '    val heat1: Color,', '    val heat2: Color,', '    val heat3: Color,', ')', '')
+  const extras = (t) => `PoulpyExtraColors(${kotlinColor(t.grumpy)}, ${kotlinColor(t.onGrumpy)}, ${kotlinColor(t.grumpyContainer)}, ${kotlinColor(t.onGrumpyContainer)}, ${kotlinColor(t.success)}, ${kotlinColor(t.heat1)}, ${kotlinColor(t.heat2)}, ${kotlinColor(t.heat3)})`
   out.push(`internal val PoulpyLightExtras = ${extras(light)}`)
   out.push(`internal val PoulpyDarkExtras = ${extras(dark)}`, '')
   const style = (t) => {

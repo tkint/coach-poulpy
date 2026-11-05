@@ -51,6 +51,9 @@ enum PoulpyColor {
     static let success = Color(light: 0x2E9E6A, dark: 0x4CC38A)
     static let error = Color(light: 0xC8264A, dark: 0xFF6B85)
     static let onError = Color(light: 0xFFFFFF, dark: 0x2A0610)
+    static let heat1 = Color(light: 0xE3D9FA, dark: 0x2E2752)
+    static let heat2 = Color(light: 0xA98BEB, dark: 0x6E55C4)
+    static let heat3 = Color(light: 0x6B3FD1, dark: 0xB59CFF)
 }
 
 /// Poulpy's mood shades, from the blue side to the ember side.

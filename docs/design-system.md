@@ -16,6 +16,7 @@ Use roles, never raw palette steps, in screens. Each role has a light and a dark
 | `onSurfaceVariant`, `outline` | Secondary text and captions; card borders and dividers |
 | `success` | A confirmed save or a finished phase, with a check icon |
 | `error` / `onError` | Errors only: crimson, always with an icon and words |
+| `heat1`, `heat2`, `heat3` | How much a workout works each muscle on the body map, from a little to most. Violet, so it never reads as Poulpy's blue or ember side, as pain, or as an error |
 
 Rules:
 
