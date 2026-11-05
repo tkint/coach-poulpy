@@ -1,5 +1,5 @@
 # Coach Poulpy on one server: the API and its Postgres. HTTPS comes from a Caddy on the shared
-# `edge` network (deploy/edge, or one already on the server). See docs/deploying-the-server.md.
+# `edge` network (edge/, or one already on the server). See docs/deploying-the-server.md.
 #   cp .env.example .env    # then fill it in
 #   docker compose up -d
 
@@ -11,10 +11,8 @@ x-logging: &logging
 
 services:
   server:
+    # Published by the Release workflow; never built on the server (ADR 0019).
     image: ghcr.io/tkint/coach-poulpy-server:${IMAGE_TAG:-latest}
-    build:
-      context: ..
-      dockerfile: server/Dockerfile
     restart: unless-stopped
     environment:
       PORT: "8080"

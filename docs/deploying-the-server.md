@@ -1,8 +1,8 @@
 # Deploying the server
 
-The server runs on one Linux machine (a small VPS is enough) as Docker containers. Caddy in front serves it over HTTPS. Health data must stay in the EU or Switzerland under the GDPR, so pick a host there ([architecture](./architecture.md#accounts-and-security)).
+The server runs on one Linux machine as Docker containers. Caddy in front serves it over HTTPS. Health data must stay in the EU or Switzerland under the GDPR, so pick a host there ([architecture](./architecture.md#accounts-and-security)).
 
-The server is still a placeholder that answers `/health`. Postgres is deployed beside it but stays empty until accounts arrive ([#25](https://github.com/tkint/coach-poulpy/issues/25)). The files are in [`deploy/`](https://github.com/tkint/coach-poulpy/tree/main/deploy) and the image is built from [`server/Dockerfile`](https://github.com/tkint/coach-poulpy/blob/main/server/Dockerfile).
+The server is still a placeholder that answers `/health`. Postgres is deployed beside it but stays empty until accounts arrive ([#25](https://github.com/tkint/coach-poulpy/issues/25)). Why this host and this setup: [ADR 0019](./adr/0019-the-server-runs-with-docker-compose-on-one-server.md). The files are in [`deploy/`](https://github.com/tkint/coach-poulpy/tree/main/deploy), and the image is built from [`server/Dockerfile`](https://github.com/tkint/coach-poulpy/blob/main/server/Dockerfile). Each release publishes both ([Releasing](./releasing.md#the-server)).
 
 ## The containers
 
@@ -10,11 +10,11 @@ The server is still a placeholder that answers `/health`. Postgres is deployed b
 flowchart LR
     internet(("Internet")) -- "80 and 443" --> caddy
 
-    subgraph edgeproj["edge project · deploy/edge"]
+    subgraph edgeproj["edge project · ~/edge"]
         caddy["caddy<br/>HTTPS certificates,<br/>one file per site in sites/"]
     end
 
-    subgraph cpproj["coach-poulpy project · deploy/compose.yaml"]
+    subgraph cpproj["coach-poulpy project · ~/coach-poulpy"]
         server["server<br/>http4k on the JVM, port 8080<br/>alias coach-poulpy-server"]
         postgres[("postgres<br/>volume postgres-data")]
     end
@@ -35,31 +35,22 @@ flowchart LR
 ## What you need
 
 - A Linux machine with Docker Engine and the Compose plugin (`docker compose version`).
-- About 1 GB of free memory: the server is capped at 512 MB and Postgres needs a little more. Building the image on the machine itself takes about 2 GB more.
+- About 1 GB of free memory: the server is capped at 512 MB and Postgres needs a little more. The image is built in CI, never on the machine.
 - A domain for the API, such as `api.example.com`, whose DNS A (and AAAA) record points to the machine.
 - Ports 80 and 443 open (TCP, plus UDP 443 for HTTP/3), and SSH.
 
-## 1. Get the files and the image
+## 1. Get the files
+
+Each release has a `coach-poulpy-deploy.tar.gz` with the Compose and Caddy files. Unpack the one from the [Releases](https://github.com/tkint/coach-poulpy/releases) page (here `v0.3.0`) into `~/coach-poulpy`:
 
 ```sh
-git clone https://github.com/tkint/coach-poulpy.git ~/coach-poulpy
-cd ~/coach-poulpy/deploy
+mkdir -p ~/coach-poulpy && cd ~/coach-poulpy
+curl -fsSL https://github.com/tkint/coach-poulpy/releases/download/v0.3.0/coach-poulpy-deploy.tar.gz | tar xz --strip-components=1
 cp .env.example .env && chmod 600 .env
 # Set POSTGRES_PASSWORD in .env, e.g. to the output of: openssl rand -hex 24
 ```
 
-CI checks that the image builds but doesn't publish it yet, so build it yourself. With enough memory, build on the machine:
-
-```sh
-docker compose build
-```
-
-On a smaller machine, build on your computer from the repository root, then send the image over SSH:
-
-```sh
-docker build -f server/Dockerfile -t ghcr.io/tkint/coach-poulpy-server:latest .
-docker save ghcr.io/tkint/coach-poulpy-server:latest | ssh my-server docker load
-```
+The image, `ghcr.io/tkint/coach-poulpy-server`, is pulled from the GitHub Container Registry when Coach Poulpy starts. If the package is private, log in once with a token that can read packages: `docker login ghcr.io`.
 
 ## 2. Give it a Caddy
 
@@ -71,11 +62,11 @@ docker network create edge
 
 ### No Caddy on the machine yet
 
-Set up the edge from `deploy/edge`. It lives in its own folder, so updating Coach Poulpy never touches it:
+Set up the edge from the bundle's `edge` folder. It lives in its own folder, so updating Coach Poulpy never touches it:
 
 ```sh
-cp -r ~/coach-poulpy/deploy/edge ~/edge
-cp ~/coach-poulpy/deploy/coach-poulpy.caddy ~/edge/sites/
+cp -r ~/coach-poulpy/edge ~/edge
+cp ~/coach-poulpy/coach-poulpy.caddy ~/edge/sites/
 # In ~/edge/sites/coach-poulpy.caddy, replace api.coachpoulpy.example with your domain.
 # Optionally, set an email in ~/edge/Caddyfile for certificate expiry notices.
 cd ~/edge && docker compose up -d
@@ -109,7 +100,7 @@ Reuse it rather than starting a second one: two Caddies can't both have ports 80
    import /etc/caddy/sites/*.caddy
    ```
 
-3. Create the `sites` folder, copy `deploy/coach-poulpy.caddy` into it and set your domain. Then recreate Caddy so it joins the network: `docker compose up -d caddy`.
+3. Create the `sites` folder, copy `~/coach-poulpy/coach-poulpy.caddy` into it and set your domain. Then recreate Caddy so it joins the network: `docker compose up -d caddy`.
 
 To add or change a site later, edit its file in `sites/`, then reload Caddy with no downtime:
 
@@ -117,7 +108,7 @@ To add or change a site later, edit its file in `sites/`, then reload Caddy with
 docker compose exec caddy caddy reload --config /etc/caddy/Caddyfile
 ```
 
-**If it is installed on the machine itself** (a system package, not a container), it can't resolve container names. Publish the server on the loopback address only, in `~/coach-poulpy/deploy/compose.override.yaml`:
+**If it is installed on the machine itself** (a system package, not a container), it can't resolve container names. Publish the server on the loopback address only, in `~/coach-poulpy/compose.override.yaml`:
 
 ```yaml
 services:
@@ -130,7 +121,7 @@ Then add the site to that Caddy's configuration with `reverse_proxy 127.0.0.1:80
 ## 3. Start Coach Poulpy and check it
 
 ```sh
-cd ~/coach-poulpy/deploy && docker compose up -d
+cd ~/coach-poulpy && docker compose up -d
 docker compose ps                      # server and postgres show "healthy"
 curl https://api.example.com/health    # prints: ok
 ```
@@ -141,7 +132,7 @@ Caddy gets the HTTPS certificate on the first request. If that fails, the DNS re
 
 A Caddy that lives in another app's compose project goes down whenever that app is updated or removed, taking Coach Poulpy with it. Moving it to its own edge project makes it independent of every app. The swap takes a few seconds of downtime, and the certificates are kept.
 
-1. **Prepare the edge.** Create the network (`docker network create edge`) and copy `deploy/edge` to `~/edge`.
+1. **Prepare the edge.** Create the network (`docker network create edge`) and copy `~/coach-poulpy/edge` to `~/edge`.
 2. **Move the sites.** Put each site block from the old Caddyfile in its own file in `~/edge/sites/`, such as `other-app.caddy`, and add `coach-poulpy.caddy`. Replace every `{$VARIABLE}` placeholder with its value, since the edge doesn't have the old project's environment.
 3. **Give each app a unique name on the edge network.** In the other app's `compose.yaml`, attach the service Caddy proxied to and give it an alias, then point its site file at the alias (`reverse_proxy other-app:8000` instead of `app:8000`):
 
@@ -172,20 +163,23 @@ Once the swap works, delete the old Caddyfile and volume from the other app.
 
 ## Updating
 
+Once the Release workflow has published a version, run **Actions > Deploy > Run workflow** on GitHub with `latest` or the version, such as `0.3.0`. It connects over SSH and runs the same commands as by hand:
+
 ```sh
-cd ~/coach-poulpy && git pull
-cd deploy && docker compose build && docker compose up -d   # or load an image built elsewhere
+cd ~/coach-poulpy
+export IMAGE_TAG=0.3.0   # skip to use IMAGE_TAG from .env, normally latest
+docker compose pull && docker compose up -d
 docker image prune -f
 ```
 
-Only the server container is replaced: Caddy, Postgres and their data stay as they are.
+Only the server container is replaced: Caddy, Postgres and their data stay as they are. Setting up the workflow's SSH key and secrets: [Releasing](./releasing.md#deploy-the-server). If a release changes the Compose or Caddy files, its notes say so; unpack its bundle over `~/coach-poulpy` again (`.env` is kept, as the bundle only has `.env.example`).
 
 ## Backups
 
 Postgres has nothing to back up until accounts arrive, but from then on, dump it every night with cron and copy the dumps off the machine, for example with restic to object storage in the EU or Switzerland:
 
 ```sh
-cd ~/coach-poulpy/deploy
+cd ~/coach-poulpy
 docker compose exec -T postgres pg_dump -U coachpoulpy -Fc coachpoulpy > ~/backups/coachpoulpy-$(date +%F).dump
 ```
 
@@ -193,5 +187,4 @@ A dump is restored with `pg_restore -U coachpoulpy -d coachpoulpy --clean`, fed 
 
 ## Not done yet
 
-- CI builds and checks the image but doesn't publish it to the GitHub Container Registry, and there is no deploy workflow ([#28](https://github.com/tkint/coach-poulpy/issues/28)).
 - The server doesn't connect to Postgres until accounts arrive ([#25](https://github.com/tkint/coach-poulpy/issues/25)).

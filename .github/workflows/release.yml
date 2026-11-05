@@ -1,20 +1,28 @@
 name: Release
 
 # Run by hand: Actions > Release > Run workflow, on main. It publishes the version written in the
-# VERSION file as a GitHub pre-release with the signed Android APK attached (docs/releasing.md).
+# VERSION file: the server image on the GitHub Container Registry, then a GitHub pre-release with
+# the signed Android APK and the server's deploy bundle attached (docs/releasing.md). Deploying the
+# server is a separate step, the Deploy workflow (ADR 0019).
 on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
+
+env:
+  IMAGE: ghcr.io/${{ github.repository_owner }}/coach-poulpy-server
 
 jobs:
-  android:
-    name: Tag and publish the Android APK
+  version:
+    name: Check the version
     runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.read.outputs.tag }}
     steps:
       - uses: actions/checkout@v5
       - name: Read the version and refuse one already released
+        id: read
         run: |
           version=$(tr -d '[:space:]' < VERSION)
           if ! echo "$version" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
@@ -25,7 +33,54 @@ jobs:
             echo "::error file=VERSION::v$version is already released. Raise VERSION in a pull request first."
             exit 1
           fi
-          echo "VERSION_TAG=v$version" >> "$GITHUB_ENV"
+          echo "tag=v$version" >> "$GITHUB_OUTPUT"
+
+  server-image:
+    name: Publish the server image
+    needs: version
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v5
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE }}
+          tags: |
+            type=semver,pattern={{version}},value=${{ needs.version.outputs.tag }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ needs.version.outputs.tag }}
+            type=raw,value=latest
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: server/Dockerfile
+          # The machine is amd64 (ADR 0019); arm64 under emulation would multiply the build time.
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  android:
+    name: Tag and publish the APK and the deploy bundle
+    # After the image, so a release only exists once its server image does.
+    needs: [version, server-image]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      VERSION_TAG: ${{ needs.version.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v5
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
@@ -48,10 +103,17 @@ jobs:
         env:
           POULPY_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
         run: ./gradlew :app-android:assembleDebug
+      - name: Bundle the server's deploy files
+        # Unpacked into ~/coach-poulpy on the machine (docs/deploying-the-server.md). IMAGE_TAG in
+        # .env.example stays "latest", so `docker compose pull` follows new releases.
+        run: |
+          mkdir -p dist/coach-poulpy
+          cp -r deploy/compose.yaml deploy/.env.example deploy/coach-poulpy.caddy deploy/edge dist/coach-poulpy/
+          tar -C dist -czf coach-poulpy-deploy.tar.gz coach-poulpy
       - name: Publish the pre-release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           cp app-android/build/outputs/apk/debug/*.apk "coach-poulpy-${VERSION_TAG}.apk"
-          gh release create "$VERSION_TAG" "coach-poulpy-${VERSION_TAG}.apk" \
+          gh release create "$VERSION_TAG" "coach-poulpy-${VERSION_TAG}.apk" coach-poulpy-deploy.tar.gz \
             --target "$GITHUB_SHA" --prerelease --generate-notes --title "Coach Poulpy ${VERSION_TAG}"

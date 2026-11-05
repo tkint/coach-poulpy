@@ -17,7 +17,7 @@ Coach Poulpy is **local-first**: the mobile app holds the whole domain model and
 | Coaching | Athlete invites a coach and can revoke; coach edits assigned plans and comments on sessions | |
 | Export | .FIT file for Garmin Connect and Strava; optional Apple Health and Health Connect | Direct Garmin and Strava links |
 | Language and units | French and English, metric and imperial: distances, speeds and weights follow the setting (weights are stored in kilograms and shown in pounds in imperial), except a distance picked in whole miles or kilometres, which keeps the unit it was picked in | |
-| Hosting | The whole stack runs on the dev computer; Docker optional | A provider when accounts go live |
+| Hosting | The whole stack runs on the dev computer; the server deploys with Docker to one server ([ADR 0019](./adr/0019-the-server-runs-with-docker-compose-on-one-server.md)) | A bigger machine or a managed database when it runs short |
 
 ## Delivery phases
 
@@ -168,4 +168,4 @@ On Android a Live recording runs in a connected-device foreground service, from 
 
 ## Deployment
 
-The first release needs no server. Android phones install the signed APK from CI; iPhones need Xcode (7-day installs with a free account) or TestFlight with a paid Apple Developer membership. The server builds into one JVM program that can run in a container, on a VPS or on a managed platform, chosen when accounts go live. [Deploying the server](./deploying-the-server.md) runs it with Docker on one machine, behind a Caddy that other apps can share.
+The first release needs no server. Android phones install the signed APK from CI; iPhones need Xcode (7-day installs with a free account) or TestFlight with a paid Apple Developer membership. The server builds into one JVM program in a Docker image, published with each release and run on one server with Docker ([ADR 0019](./adr/0019-the-server-runs-with-docker-compose-on-one-server.md)). [Deploying the server](./deploying-the-server.md) runs it there behind a Caddy that other apps can share.

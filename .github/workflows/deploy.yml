@@ -1,0 +1,63 @@
+name: Deploy
+
+# Run by hand: Actions > Deploy > Run workflow. It SSHes into the machine and pulls the server image of
+# the chosen version (ADR 0019). Setup and secrets: docs/releasing.md, "Deploy the server".
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Server image to deploy: latest, or a version such as 0.3.0"
+        default: latest
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Update the server
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Update the machine
+        env:
+          SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          HOST: ${{ vars.DEPLOY_HOST || secrets.DEPLOY_HOST }}
+          SSH_USER: ${{ vars.DEPLOY_USER || secrets.DEPLOY_USER }}
+          SSH_PORT: ${{ vars.DEPLOY_PORT || secrets.DEPLOY_PORT || '22' }}
+          DEPLOY_DIR: ${{ vars.DEPLOY_DIR || secrets.DEPLOY_DIR || '~/coach-poulpy' }}
+          HOST_KEY: ${{ vars.DEPLOY_HOST_KEY || secrets.DEPLOY_HOST_KEY }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          missing=0
+          for name in SSH_KEY HOST SSH_USER HOST_KEY; do
+            if [ -z "${!name}" ]; then
+              case "$name" in
+                SSH_KEY) setting="DEPLOY_SSH_KEY (a secret)" ;;
+                HOST) setting="DEPLOY_HOST" ;;
+                SSH_USER) setting="DEPLOY_USER" ;;
+                HOST_KEY) setting="DEPLOY_HOST_KEY" ;;
+              esac
+              echo "::error::Missing $setting. Add it under Settings > Secrets and variables > Actions."
+              missing=1
+            fi
+          done
+          if [ "$missing" -ne 0 ]; then
+            echo "::error::Nothing was deployed."
+            exit 1
+          fi
+          if ! printf '%s' "$VERSION" | grep -Eq '^[A-Za-z0-9._-]+$'; then
+            echo "::error::'$VERSION' is not a version. Use latest or a version such as 0.3.0."
+            exit 1
+          fi
+          install -m 700 -d ~/.ssh
+          install -m 600 /dev/null ~/.ssh/id_deploy
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_deploy
+          # The server's pinned host key: the output of `ssh-keyscan -t ed25519 HOST`.
+          printf '%s\n' "$HOST_KEY" > ~/.ssh/known_hosts
+          ssh -i ~/.ssh/id_deploy -p "$SSH_PORT" -o StrictHostKeyChecking=yes "$SSH_USER@$HOST" \
+            "cd $DEPLOY_DIR && export IMAGE_TAG=$VERSION && docker compose pull && docker compose up -d && docker image prune -f"
