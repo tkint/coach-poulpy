@@ -54,11 +54,47 @@ The image, `ghcr.io/tkint/coach-poulpy-server`, is pulled from the GitHub Contai
 
 ## 2. Give it a Caddy
 
-Follow one of the two cases below, depending on whether a Caddy already runs on the machine. Both need the edge network, created once per machine:
+Follow the matching case below, depending on whether a Caddy already runs on the machine. All cases need the edge network, created once per machine:
 
 ```sh
+docker network inspect edge
+# Only if it does not exist:
 docker network create edge
 ```
+
+The `edge/compose.yaml` and `edge/Caddyfile` shipped here are identical to
+Study Companion's `deploy/edge/` files. They are two copies of the same infrastructure,
+not two stacks to start: install **one** in `~/edge` and manage it separately from both
+apps. Do not combine the edge file with an app using `docker compose -f ... -f ...`.
+Use the default `EDGE_NETWORK=edge` in Coach Poulpy's `.env` for this shared setup.
+Only trusted apps should join it: containers on `edge` can reach each other's app ports.
+
+### Study Companion already runs on this server
+
+If Study Companion still owns Caddy in its original `docker-compose.yml`, follow its
+[one-time migration](https://github.com/tkint/study-companion/blob/main/docs/server-setup.md#migrate-the-existing-study-companion-caddy)
+first. It moves Caddy to `~/edge`, reuses the existing certificate volumes and keeps the
+app's data volume and `.env`. Study Companion's new Compose file runs only its app and
+gives it the unique edge alias `study-companion-app`.
+
+Once `~/edge` is running, install only Coach Poulpy's site; do not copy another edge:
+
+```sh
+cp ~/coach-poulpy/coach-poulpy.caddy ~/edge/sites/
+# Replace api.coachpoulpy.example with your API domain.
+```
+
+Start Coach Poulpy as in step 3, then validate and reload the existing Caddy:
+
+```sh
+cd ~/edge
+docker compose exec caddy caddy validate --config /etc/caddy/Caddyfile
+docker compose exec caddy caddy reload --config /etc/caddy/Caddyfile
+```
+
+The edge then has `sites/study-companion.caddy` pointing at `study-companion-app:8000`
+and `sites/coach-poulpy.caddy` pointing at `coach-poulpy-server:8080`. Each app's normal
+`docker compose up -d` or `down` affects only that app, never Caddy or the other app.
 
 ### No Caddy on the machine yet
 
@@ -130,6 +166,9 @@ Caddy gets the HTTPS certificate on the first request. If that fails, the DNS re
 
 ## Make an existing Caddy the edge
 
+For Study Companion, use its dedicated migration linked above instead; it covers the
+already deployed Compose project, certificate volumes and rollback.
+
 A Caddy that lives in another app's compose project goes down whenever that app is updated or removed, taking Coach Poulpy with it. Moving it to its own edge project makes it independent of every app. The swap takes a few seconds of downtime, and the certificates are kept.
 
 1. **Prepare the edge.** Create the network (`docker network create edge`) and copy `~/coach-poulpy/edge` to `~/edge`.
@@ -149,17 +188,27 @@ A Caddy that lives in another app's compose project goes down whenever that app 
        external: true
    ```
 
-4. **Keep the certificates.** Find the old Caddy's data volume (`docker volume ls | grep caddy`), then copy it into the edge's volume:
+4. **Keep the certificates.** Inspect the old Caddy's mounts (`docker inspect` on its
+   container) to find the volumes at `/data` and `/config`. Reuse them without copying
+   live data: create `~/edge/compose.override.yaml`, replacing the example names with
+   the actual volume names:
 
-   ```sh
-   docker volume create edge_caddy-data
-   docker run --rm -v OLD_caddy-data:/from:ro -v edge_caddy-data:/to alpine cp -a /from/. /to/
+   ```yaml
+   volumes:
+     caddy-data:
+       external: true
+       name: OLD_caddy-data
+     caddy-config:
+       external: true
+       name: OLD_caddy-config
    ```
 
-5. **Swap.** Remove the `caddy` service from the other app's `compose.yaml`, then run `docker compose up -d --remove-orphans` there. This stops the old Caddy and attaches the app to the edge. Then start the new one with `cd ~/edge && docker compose up -d`.
+5. **Swap.** Stop and remove only the old Caddy (`docker compose stop caddy && docker compose rm -f caddy`) before removing its service and volume declarations from the other app's `compose.yaml`. Run `docker compose up -d` there to attach the app to the edge. Then start the new one with `cd ~/edge && docker compose up -d`. Never run both Caddies against the same certificate volume.
 6. **Check** that every domain still answers. The edge's log (`docker logs edge-caddy-1`) should not mention "obtaining certificate" for the sites that moved.
 
-Once the swap works, delete the old Caddyfile and volume from the other app.
+Once the swap works, the old Caddyfile can be removed. **Keep the old certificate volumes
+and the edge override**: the edge now actively uses them. Never use `docker compose down -v`
+to clean up the old stack.
 
 ## Updating
 
@@ -173,6 +222,11 @@ docker image prune -f
 ```
 
 Check it with `curl https://api.example.com/health`, which prints the version now running. Only the server container is replaced: Caddy, Postgres and their data stay as they are. Setting up the workflow's SSH key and secrets: [Releasing](./releasing.md#deploy-the-server). If a release changes the Compose or Caddy files, its notes say so; unpack its bundle over `~/coach-poulpy` again (`.env` is kept, as the bundle only has `.env.example`).
+
+Unpacking does not update the live edge. Merge any site changes into
+`~/edge/sites/coach-poulpy.caddy`, keeping your hostname, then validate and reload Caddy.
+Upgrade Caddy separately with `cd ~/edge && docker compose pull && docker compose up -d`.
+Never overwrite the live `~/edge/sites/` folder from either app's release bundle.
 
 ## Backups
 

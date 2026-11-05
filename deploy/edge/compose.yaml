@@ -1,5 +1,6 @@
 # The edge: one Caddy that owns ports 80 and 443 and serves every app on the server over HTTPS.
-# Each app joins the `edge` network and drops one file in sites/. See docs/deploying-the-server.md.
+# Shared unchanged by study-companion and coach-poulpy; install only one copy in ~/edge.
+# Each app joins the `edge` network and drops one file in sites/. See the app's deployment guide.
 #   docker network create edge    # once per server
 #   docker compose up -d
 
