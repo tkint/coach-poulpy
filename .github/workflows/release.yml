@@ -87,6 +87,7 @@ jobs:
           # The machine is amd64 (ADR 0019); arm64 under emulation would multiply the build time.
           platforms: linux/amd64
           push: true
+          build-args: APP_VERSION=${{ needs.version.outputs.version }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
@@ -129,6 +130,7 @@ jobs:
         run: |
           mkdir -p dist/coach-poulpy
           cp -r deploy/compose.yaml deploy/.env.example deploy/coach-poulpy.caddy deploy/edge dist/coach-poulpy/
+          cp docs/deploying-the-server.md dist/coach-poulpy/DEPLOYING.md
           tar -C dist -czf coach-poulpy-deploy.tar.gz coach-poulpy
       - name: Publish the release
         # Notes list the pull requests merged since the last release, as GitHub generates them. A

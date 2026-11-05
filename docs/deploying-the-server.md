@@ -2,7 +2,7 @@
 
 The server runs on one Linux machine as Docker containers. Caddy in front serves it over HTTPS. Health data must stay in the EU or Switzerland under the GDPR, so pick a host there ([architecture](./architecture.md#accounts-and-security)).
 
-The server is still a placeholder that answers `/health`. Postgres is deployed beside it but stays empty until accounts arrive ([#25](https://github.com/tkint/coach-poulpy/issues/25)). Why this host and this setup: [ADR 0019](./adr/0019-the-server-runs-with-docker-compose-on-one-server.md). The files are in [`deploy/`](https://github.com/tkint/coach-poulpy/tree/main/deploy), and the image is built from [`server/Dockerfile`](https://github.com/tkint/coach-poulpy/blob/main/server/Dockerfile). Each release publishes both ([Releasing](./releasing.md#the-server)).
+The server is still a placeholder that answers `/health` with its version (`ok 0.3.0`, or `ok dev` when built outside a release). Postgres is deployed beside it but stays empty until accounts arrive ([#25](https://github.com/tkint/coach-poulpy/issues/25)). Why this host and this setup: [ADR 0019](./adr/0019-the-server-runs-with-docker-compose-on-one-server.md). The files are in [`deploy/`](https://github.com/tkint/coach-poulpy/tree/main/deploy), and the image is built from [`server/Dockerfile`](https://github.com/tkint/coach-poulpy/blob/main/server/Dockerfile). Each release publishes both ([Releasing](./releasing.md#the-server)).
 
 ## The containers
 
@@ -41,7 +41,7 @@ flowchart LR
 
 ## 1. Get the files
 
-Each release has a `coach-poulpy-deploy.tar.gz` with the Compose and Caddy files. Unpack the one from the [Releases](https://github.com/tkint/coach-poulpy/releases) page (here `v0.3.0`) into `~/coach-poulpy`:
+Each release has a `coach-poulpy-deploy.tar.gz` with the Compose and Caddy files, and this page as `DEPLOYING.md`. Unpack the one from the [Releases](https://github.com/tkint/coach-poulpy/releases) page (here `v0.3.0`) into `~/coach-poulpy`:
 
 ```sh
 mkdir -p ~/coach-poulpy && cd ~/coach-poulpy
@@ -123,7 +123,7 @@ Then add the site to that Caddy's configuration with `reverse_proxy 127.0.0.1:80
 ```sh
 cd ~/coach-poulpy && docker compose up -d
 docker compose ps                      # server and postgres show "healthy"
-curl https://api.example.com/health    # prints: ok
+curl https://api.example.com/health    # prints: ok 0.3.0
 ```
 
 Caddy gets the HTTPS certificate on the first request. If that fails, the DNS record or ports 80 and 443 are usually the cause: `docker logs edge-caddy-1` says which.
@@ -172,7 +172,7 @@ docker compose pull && docker compose up -d
 docker image prune -f
 ```
 
-Only the server container is replaced: Caddy, Postgres and their data stay as they are. Setting up the workflow's SSH key and secrets: [Releasing](./releasing.md#deploy-the-server). If a release changes the Compose or Caddy files, its notes say so; unpack its bundle over `~/coach-poulpy` again (`.env` is kept, as the bundle only has `.env.example`).
+Check it with `curl https://api.example.com/health`, which prints the version now running. Only the server container is replaced: Caddy, Postgres and their data stay as they are. Setting up the workflow's SSH key and secrets: [Releasing](./releasing.md#deploy-the-server). If a release changes the Compose or Caddy files, its notes say so; unpack its bundle over `~/coach-poulpy` again (`.env` is kept, as the bundle only has `.env.example`).
 
 ## Backups
 

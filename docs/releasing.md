@@ -29,7 +29,7 @@ The workflow stops with a message, and publishes nothing, if the tag is not `v` 
 
 ## The server
 
-After CI, the same workflow builds the server image (amd64 only, like the server: [ADR 0019](./adr/0019-the-server-runs-with-docker-compose-on-one-server.md)) and pushes it as `ghcr.io/tkint/coach-poulpy-server` with three tags: `0.2.0`, `0.2` and `latest`. The pre-release is created only once the image is pushed. `coach-poulpy-deploy.tar.gz` holds the Compose and Caddy files of that version, unpacked on the machine as in [Deploying the server](./deploying-the-server.md).
+After CI, the same workflow builds the server image (amd64 only, like the server: [ADR 0019](./adr/0019-the-server-runs-with-docker-compose-on-one-server.md)) with the version baked in (the server's `/health` answers `ok 0.2.0`; any other build says `ok dev`), and pushes it as `ghcr.io/tkint/coach-poulpy-server` with three tags: `0.2.0`, `0.2` and `latest`. The pre-release is created only once the image is pushed. `coach-poulpy-deploy.tar.gz` holds the Compose and Caddy files of that version and the deploying page as `DEPLOYING.md`, unpacked on the machine as in [Deploying the server](./deploying-the-server.md).
 
 The first push creates the package as private. Either make it public once (the package's **Package settings > Change visibility**), or log the machine in with a token that can read packages (`docker login ghcr.io`).
 
@@ -56,7 +56,9 @@ Set it up once:
    | `DEPLOY_PORT` | Optional, `22` by default |
    | `DEPLOY_DIR` | Optional, `~/coach-poulpy` by default |
 
-The workflow stops with a message, and changes nothing, if a setting is missing or the version has characters other than letters, digits, `.`, `_` and `-`. Deploying an older version is the way back if a release goes wrong.
+3. In the same `production` environment, tick **Required reviewers** and add yourself, so a deploy waits for your approval before it touches the machine.
+
+The workflow stops with a message, and changes nothing, if a setting is missing or the version has characters other than letters, digits, `.`, `_` and `-`. Until there is a server, a run failing on missing settings is expected. Once it succeeds, `curl https://api.example.com/health` prints the version deployed. Deploying an older version is the way back if a release goes wrong.
 
 ## What a release does not do yet
 
