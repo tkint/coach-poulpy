@@ -71,9 +71,10 @@ Only trusted apps should join it: containers on `edge` can reach each other's ap
 
 ### Study Companion already runs on this server
 
-If Study Companion still owns Caddy in its original `docker-compose.yml`, follow its
-[one-time migration](https://github.com/tkint/study-companion/blob/main/docs/server-setup.md#migrate-the-existing-study-companion-caddy)
-first. It moves Caddy to `~/edge`, reuses the existing certificate volumes and keeps the
+If Study Companion still owns Caddy in its original `docker-compose.yml`, follow
+**Migrate the existing Study Companion Caddy** in its
+[server setup guide](https://github.com/tkint/study-companion/blob/main/docs/server-setup.md)
+first (available with the shared-edge release). It moves Caddy to `~/edge`, reuses the existing certificate volumes and keeps the
 app's data volume and `.env`. Study Companion's new Compose file runs only its app and
 gives it the unique edge alias `study-companion-app`.
 
