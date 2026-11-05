@@ -18,12 +18,25 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  pages:
+    name: Read GitHub Pages settings
+    runs-on: ubuntu-latest
+    permissions:
+      pages: read
+    outputs:
+      base_path: ${{ steps.pages.outputs.base_path }}
+      base_url: ${{ steps.pages.outputs.host }}${{ steps.pages.outputs.base_path }}
+    steps:
+      - uses: actions/configure-pages@v5
+        id: pages
+
   build:
     name: Build the docs site
     if: github.event.action != 'closed'
+    needs: pages
     runs-on: ubuntu-latest
     env:
-      SITE_BASE: ${{ github.event_name == 'pull_request' && format('/pr-preview/pr-{0}/', github.event.number) || '/' }}
+      SITE_BASE: ${{ format('{0}{1}', needs.pages.outputs.base_path, github.event_name == 'pull_request' && format('/pr-preview/pr-{0}/', github.event.number) || '/') }}
     defaults:
       run:
         working-directory: site
@@ -92,8 +105,10 @@ jobs:
         with:
           folder: dist
           branch: gh-pages
-          # Keep the open PRs' previews when main is published.
-          clean-exclude: pr-preview/
+          # Keep the open PRs' previews and the CNAME managed by Pages settings.
+          clean-exclude: |
+            pr-preview/
+            CNAME
 
   preview:
     name: Preview this PR on GitHub Pages
@@ -103,7 +118,7 @@ jobs:
       github.event.pull_request.head.repo.full_name == github.repository &&
       !cancelled() && needs.build.result != 'failure'
     # Not on the link check, so a dead link doesn't hold back the preview the owner reviews.
-    needs: build
+    needs: [build, pages]
     runs-on: ubuntu-latest
     concurrency:
       group: gh-pages
@@ -123,11 +138,12 @@ jobs:
           path: dist
       # Publishes dist under pr-preview/pr-<number>/ and comments the link; removes it on close.
       - uses: rossjrw/pr-preview-action@v1
+        id: preview
         with:
           source-dir: dist
           preview-branch: gh-pages
           umbrella-dir: pr-preview
-          pages-base-url: doc.coach-poulpy.com
+          pages-base-url: ${{ needs.pages.outputs.base_url }}
       # A second comment, kept up to date: the docs pages, sections and mockups this PR changes or
       # builds, linked into its preview, so the owner reviews on the site. Agents write none of their own.
       - name: List the docs pages to review
@@ -137,7 +153,7 @@ jobs:
         run: >-
           node site/review-links.mjs
           ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }}
-          https://doc.coach-poulpy.com/pr-preview/pr-${{ github.event.number }}/
+          ${{ steps.preview.outputs.preview-url }}
           dist > review.md
       - uses: marocchino/sticky-pull-request-comment@v2
         if: github.event.action != 'closed'
