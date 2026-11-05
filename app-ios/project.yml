@@ -8,8 +8,9 @@ options:
   developmentLanguage: en
   # The string tables are generated from i18n/messages/*/app.json (ADR 0014) and must exist before
   # XcodeGen lists them; the pre-build script below regenerates them on every build.
-  # VERSION at the repository root is the app version; Version.xcconfig (not committed) carries it here.
-  preGenCommand: cd .. && ./gradlew :shared:generateAppleStrings && printf 'MARKETING_VERSION = %s\n' "$(cat VERSION)" > app-ios/Version.xcconfig
+  # The app version is POULPY_VERSION_NAME, set from the release tag, or "dev" for any other build
+  # (docs/releasing.md); Version.xcconfig (not committed) carries it here.
+  preGenCommand: cd .. && ./gradlew :shared:generateAppleStrings && printf 'MARKETING_VERSION = %s\n' "${POULPY_VERSION_NAME:-dev}" > app-ios/Version.xcconfig
 configFiles:
   Debug: Version.xcconfig
   Release: Version.xcconfig

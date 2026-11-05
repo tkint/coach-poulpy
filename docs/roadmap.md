@@ -2,7 +2,7 @@
 
 What ships and in which order. A **phase** is a layer of the product ([architecture](./architecture.md#delivery-phases)); a **release** is a set of features inside a phase that makes sense together, cut when it is ready, not on a date.
 
-> **Proposal.** The grouping below is a draft for the maintainer to approve in [#229](https://github.com/tkint/coach-poulpy/issues/229). Version numbers and release names are not final, and the GitHub milestones still follow the phases until it is decided. The current version is in the `VERSION` file.
+> **Proposal.** The grouping below is a draft for the maintainer to approve in [#229](https://github.com/tkint/coach-poulpy/issues/229). Version numbers and release names are not final, and the GitHub milestones still follow the phases until it is decided. The current version is the latest tag on the [Releases](https://github.com/tkint/coach-poulpy/releases) page.
 
 ## Phase 1 · Guest app
 
