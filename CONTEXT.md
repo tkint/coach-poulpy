@@ -195,6 +195,22 @@ _Avoid_: Team, connection
 A person using the app with no account; everything stays on their phone.
 _Avoid_: Anonymous user, offline user
 
+**Account**:
+A person's identity on the server, made when a guest signs up; their phones and the website sync through it.
+_Avoid_: User, profile (the profile is what the person tells the app about themselves)
+
+**Caller**:
+Whoever an API request comes from, as the server sees it: an account, the client it comes through and that client's scopes.
+_Avoid_: Principal, user
+
+**Scope**:
+One right a token grants, named `resource:action` (`sessions:read`).
+_Avoid_: Permission, role (a role, like admin, belongs to the account)
+
+**Personal access token**:
+A token a person makes in Settings for their own scripts or the MCP server: named, scoped, with an expiry, revocable.
+_Avoid_: API key
+
 ### Poulpy
 
 **Poulpy**:
