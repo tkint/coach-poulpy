@@ -62,11 +62,11 @@ python3 deploy/edge/deploy.py --app-dir ~/coach-poulpy \
 
 The deployer creates the external network if needed, renders this app's `DOMAIN` into its site file, validates the proposed route against Caddy's current config, pulls the images and starts the app and Caddy projects. It handles an absent, running or stopped shared Caddy, with or without the app already deployed.
 
-The shared Caddy lives in `~/edge` by default; `--edge-dir` changes that location. Every deployment sharing Caddy must use the same directory, Compose project and network. `EDGE_NETWORK` defaults to `edge`; custom values must match the edge's network. Do not combine the edge and app Compose files into one project.
+The deployment workflow installs the app in `~/coach-poulpy` and the shared Caddy in `~/caddy`. Every deployment sharing Caddy must use the same directory, Compose project and network. `EDGE_NETWORK` defaults to `edge`; custom values must match the edge's network. Do not combine the edge and app Compose files into one project.
 
 Existing site files and a customized edge `Caddyfile` are preserved. Deployment creates or replaces only this app's identified route through Caddy's local admin REST API. Caddy persists accepted API updates to its `/config` volume and resumes that configuration after restart. The admin API stays bound to localhost; deployment calls it from inside the container. A host-level lock serializes independent deployments, preventing concurrent site updates from being lost.
 
-`generated/bootstrap.json` is used only for the first start when no saved Caddy config exists. After that, Caddy runs `caddy run --resume` from its persistent `caddy-config` volume. Do not edit the bootstrap file by hand; change `.env` or the source site template and redeploy. HTTPS errors are usually caused by DNS or blocked ports; inspect `cd ~/edge && docker compose logs caddy`.
+`generated/bootstrap.json` is used only for the first start when no saved Caddy config exists. After that, Caddy runs `caddy run --resume` from its persistent `caddy-config` volume. Do not edit the bootstrap file by hand; change `.env` or the source site template and redeploy. HTTPS errors are usually caused by DNS or blocked ports; inspect `cd ~/caddy && docker compose logs caddy`.
 
 ## Existing app-owned Caddy
 
@@ -96,7 +96,7 @@ Omit `--version` to use `IMAGE_TAG` from `.env`. Neither deployment path overwri
 For direct edge inspection after migration, include its override:
 
 ```sh
-cd ~/edge
+cd ~/caddy
 docker compose -f compose.yaml -f migration.compose.json ps
 ```
 

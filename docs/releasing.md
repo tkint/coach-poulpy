@@ -54,8 +54,6 @@ Set it up once:
    | `DEPLOY_USER` | The user from step 1 |
    | `DEPLOY_HOST_KEY` | The output of `ssh-keyscan -t ed25519 HOST`, so the workflow refuses any other machine |
    | `DEPLOY_PORT` | Optional, `22` by default |
-   | `DEPLOY_DIR` | Optional, `~/coach-poulpy` by default |
-   | `EDGE_DIR` | Optional, `~/edge` by default; use the same directory for all shared-edge deployments |
 
 3. In the same `production` environment, tick **Required reviewers** and add yourself, so a deploy waits for your approval before it touches the machine.
 
