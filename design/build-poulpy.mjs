@@ -12,6 +12,9 @@
 //   design/poulpy/app_icon*.svg                                 reference copies
 //   app-android/src/main/res/drawable/ic_launcher_*.xml         adaptive icon layers, with a themed (monochrome) layer
 //   app-ios/CoachPoulpy/Assets.xcassets/AppIcon.appiconset      1024 px PNGs: light, dark and tinted
+// and one alternate app icon per face the person can choose in Settings (ALTERNATE_ICONS below), the same way:
+//   design/poulpy/app_icon_<id>*.svg, app-android/.../ic_launcher_<id>_*.xml and mipmap-anydpi-v26/ic_launcher_<id>.xml,
+//   app-ios/CoachPoulpy/Assets.xcassets/AppIcon<Id>.appiconset
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs'
 import { deflateSync, inflateSync } from 'node:zlib'
 import { dirname, join } from 'node:path'
@@ -175,10 +178,10 @@ const icon = (bg) => `<rect x="0" y="0" width="200" height="200" fill="${bg}"/><
 // whose alpha is the drawing: the body as one lighter silhouette, the eyes and smile at full strength.
 const LAUNCHER_VIEW = { x: 0, y: 0, width: 108, height: 108 }
 const POULPY_BOX = { x0: 1, y0: 30, x1: 199, y1: 167 }
-function launcherFrame() {
-  const cx = (POULPY_BOX.x0 + POULPY_BOX.x1) / 2, cy = (POULPY_BOX.y0 + POULPY_BOX.y1) / 2
+function launcherFrame(art = ICON_POULPY, box = POULPY_BOX) {
+  const cx = (box.x0 + box.x1) / 2, cy = (box.y0 + box.y1) / 2
   let reach = 0
-  for (const poly of flatten(normalise(parse(ICON_POULPY)), [1, 0, 0, 1, 0, 0]).flatMap((shape) => shape.polys)) {
+  for (const poly of flatten(normalise(parse(art)), [1, 0, 0, 1, 0, 0]).flatMap((shape) => shape.polys)) {
     for (const [x, y] of poly) reach = Math.max(reach, Math.hypot(x - cx, y - cy))
   }
   const k = Math.floor((33 / reach) * 1000) / 1000
@@ -189,6 +192,35 @@ const ARM_XS = [[26, 126, 25, 17], [62, 139, 24, 18], [100, 143, 24, 18], [138, 
 const silhouette = () => [6, 0].flatMap((dy) => ARM_XS.map((a) => ellipsePath(a[0], a[1] + dy, a[2], a[3]))).concat(HEAD_CCW).join(' ')
 const monochrome = () => `<path d="${silhouette()}" fill="#000" opacity=".5"/>` +
   `<ellipse cx="80" cy="96" rx="9" ry="10.5" fill="#000"/><ellipse cx="120" cy="96" rx="9" ry="10.5" fill="#000"/>` + s('M90 112 Q100 123 110 112', 4.5, '#000')
+
+// The alternate icons: the drawings the person can pick in Settings (the happy default is the icon above). Each is
+// the same drawing the app shows for that mood or pose, fitted into the icon square, with a themed layer of the
+// body silhouette and the face. The face's white highlights and blush are left out of the one-colour layer.
+const ALTERNATE_ICONS = {
+  proud: { art: portrait('proud'), face: FACES[MOODS.proud.face] },
+  annoyed: { art: portrait('annoyed'), face: FACES.annoyed },
+  grumpy: { art: portrait('grumpy'), face: FACES.grumpy },
+  champion: { art: POSES.champion(), face: FACES.proud },
+  cocky: { art: POSES.cocky(), face: FACES.cocky },
+}
+function boundsOf(art) {
+  const box = { x0: Infinity, y0: Infinity, x1: -Infinity, y1: -Infinity }
+  for (const poly of flatten(normalise(parse(art)), [1, 0, 0, 1, 0, 0]).flatMap((shape) => shape.polys)) {
+    for (const [x, y] of poly) {
+      box.x0 = Math.min(box.x0, x); box.y0 = Math.min(box.y0, y); box.x1 = Math.max(box.x1, x); box.y1 = Math.max(box.y1, y)
+    }
+  }
+  return box
+}
+// Scales a drawing until its longest side is 170 (the happy icon's 198 wide at .86) and centres it in the 200 square.
+function iconFit(art) {
+  const box = boundsOf(art)
+  const k = Math.floor((170 / Math.max(box.x1 - box.x0, box.y1 - box.y0)) * 1000) / 1000
+  return `translate(${fmt(100 - ((box.x0 + box.x1) / 2) * k)} ${fmt(100 - ((box.y0 + box.y1) / 2) * k)}) scale(${k})`
+}
+const alternateIcon = (bg, art) => `<rect x="0" y="0" width="200" height="200" fill="${bg}"/><g transform="${iconFit(art)}">${art}</g>`
+const monoFace = (face) => face.replace(/<circle[^>]*fill="#fff"[^>]*\/>/g, '').replace(/<ellipse[^>]*opacity="[^"]*"[^>]*\/>/g, '').replaceAll(INK, '#000')
+const monochromeOf = (face) => `<path d="${silhouette()}" fill="#000" opacity=".5"/>${monoFace(face)}`
 
 function snake(name) { return name.replace(/[A-Z]/g, (c) => '_' + c.toLowerCase()) }
 function pascalOf(name) { return name.split('_').map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join('') }
@@ -591,6 +623,38 @@ files[`${ICONSET}/Contents.json`] = JSON.stringify({
   ],
   info: { author: 'xcode', version: 1 },
 }, null, 2) + '\n'
+
+for (const [id, { art, face }] of Object.entries(ALTERNATE_ICONS)) {
+  const light = normalise(parse(alternateIcon(FOAM, art))), dark = normalise(parse(alternateIcon(DEEP_SEA, art)))
+  files[`design/poulpy/app_icon_${id}.svg`] = svgOut(light, ICON_VIEW)
+  files[`design/poulpy/app_icon_${id}_dark.svg`] = svgOut(dark, ICON_VIEW)
+  const layerFrame = launcherFrame(art, boundsOf(art))
+  files[`app-android/src/main/res/drawable/ic_launcher_${id}_foreground.xml`] = vectorOut(normalise(parse(`<g transform="${layerFrame}">${art}</g>`)), LAUNCHER_VIEW)
+  files[`app-android/src/main/res/drawable/ic_launcher_${id}_monochrome.xml`] = vectorOut(normalise(parse(`<g transform="${layerFrame}">${monochromeOf(face)}</g>`)), LAUNCHER_VIEW)
+  files[`app-android/src/main/res/mipmap-anydpi-v26/ic_launcher_${id}.xml`] = [
+    '<?xml version="1.0" encoding="utf-8"?>',
+    `<!-- ${banner} -->`,
+    '<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">',
+    '    <background android:drawable="@drawable/ic_launcher_background" />',
+    `    <foreground android:drawable="@drawable/ic_launcher_${id}_foreground" />`,
+    `    <monochrome android:drawable="@drawable/ic_launcher_${id}_monochrome" />`,
+    '</adaptive-icon>',
+    '',
+  ].join('\n')
+  const altSet = `app-ios/CoachPoulpy/Assets.xcassets/AppIcon${pascalOf(id)}.appiconset`
+  const altDark = rasterise(dark, ICON_VIEW, ICON_SIZE)
+  files[`${altSet}/AppIcon${pascalOf(id)}.png`] = pngOut(rasterise(light, ICON_VIEW, ICON_SIZE), ICON_SIZE)
+  files[`${altSet}/AppIcon${pascalOf(id)}Dark.png`] = pngOut(altDark, ICON_SIZE)
+  files[`${altSet}/AppIcon${pascalOf(id)}Tinted.png`] = pngOut(grey(altDark), ICON_SIZE)
+  files[`${altSet}/Contents.json`] = JSON.stringify({
+    images: [
+      { filename: `AppIcon${pascalOf(id)}.png`, idiom: 'universal', platform: 'ios', size: '1024x1024' },
+      { ...appearance('dark'), filename: `AppIcon${pascalOf(id)}Dark.png`, idiom: 'universal', platform: 'ios', size: '1024x1024' },
+      { ...appearance('tinted'), filename: `AppIcon${pascalOf(id)}Tinted.png`, idiom: 'universal', platform: 'ios', size: '1024x1024' },
+    ],
+    info: { author: 'xcode', version: 1 },
+  }, null, 2) + '\n'
+}
 
 // A PNG is up to date when its pixels match, give or take rounding, whatever compressed them.
 function upToDate(full, content) {

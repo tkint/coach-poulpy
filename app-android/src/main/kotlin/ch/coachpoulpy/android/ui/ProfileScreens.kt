@@ -229,6 +229,22 @@ internal fun SettingsHub(graph: AppGraph, language: String, onPage: (SettingsPag
                 SettingsRow(Icons.Filled.Contrast, stringResource(R.string.settings_appearanceUnits), "$theme · $languageName · $system") { onPage(SettingsPage.PREFERENCES) }
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 SettingsRow(Icons.Filled.Bluetooth, stringResource(R.string.settings_devices), null) { onPage(SettingsPage.DEVICES) }
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                var appIcon by remember { mutableStateOf(AppIconSwitch.current(context)) }
+                var pickingIcon by remember { mutableStateOf(false) }
+                SettingsRow(
+                    leading = { Image(painterResource(appIcon.drawingRes), contentDescription = null, modifier = Modifier.size(44.dp)) },
+                    title = stringResource(R.string.settings_appIcon),
+                    subtitle = appIcon.label(),
+                    onClick = { pickingIcon = true },
+                )
+                if (pickingIcon) {
+                    AppIconSheet(
+                        selected = appIcon,
+                        onPick = { picked -> AppIconSwitch.apply(context, picked); appIcon = picked },
+                        onDismiss = { pickingIcon = false },
+                    )
+                }
             }
             SectionLabel(R.string.settings_about)
             SettingsList {
@@ -247,9 +263,20 @@ private fun SettingsList(content: @Composable ColumnScope.() -> Unit) {
 /** A leading icon, a bold title with a line under it, and a chevron when it opens something. */
 @Composable
 private fun SettingsRow(icon: ImageVector, title: String, subtitle: String?, onClick: (() -> Unit)?) {
+    SettingsRow(
+        leading = { Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
+        title = title,
+        subtitle = subtitle,
+        onClick = onClick,
+    )
+}
+
+/** The same row with any leading content, such as one of Poulpy's drawings. */
+@Composable
+private fun SettingsRow(leading: @Composable () -> Unit, title: String, subtitle: String?, onClick: (() -> Unit)?) {
     val row = @Composable {
         Row(Modifier.fillMaxWidth().heightIn(min = 60.dp).padding(horizontal = 14.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-            Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(end = 12.dp))
+            Box(Modifier.padding(end = 12.dp)) { leading() }
             Column(Modifier.weight(1f)) {
                 Text(title, fontWeight = FontWeight.ExtraBold)
                 subtitle?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }

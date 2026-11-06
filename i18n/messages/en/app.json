@@ -357,7 +357,8 @@
     "editProfile": "Edit your profile",
     "yourProfile": "Your profile",
     "aboutApp": "About Coach Poulpy",
-    "aboutLine": "Version {version} · data stays on this phone"
+    "aboutLine": "Version {version} · data stays on this phone",
+    "appIcon": "App icon"
   },
   "theme": {
     "system": "System",
@@ -555,5 +556,17 @@
     "enterValue": "Value",
     "feet": "ft",
     "inches": "in"
+  },
+  "appIcon": {
+    "description": "Pick Poulpy’s face for your home screen. This doesn’t change Poulpy’s mood in the app.",
+    "tapNote": "Tap an icon to apply it and close this sheet.",
+    "iosNote": "On iOS, your phone shows a system alert after the icon changes.",
+    "defaultName": "{name} · default",
+    "happy": "Happy",
+    "proud": "Proud",
+    "annoyed": "Annoyed",
+    "grumpy": "Grumpy",
+    "champion": "Champion",
+    "cocky": "Cocky"
   }
 }

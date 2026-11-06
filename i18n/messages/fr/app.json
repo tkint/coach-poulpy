@@ -357,7 +357,8 @@
     "editProfile": "Modifier votre profil",
     "yourProfile": "Votre profil",
     "aboutApp": "À propos de Coach Poulpy",
-    "aboutLine": "Version {version} · les données restent sur ce téléphone"
+    "aboutLine": "Version {version} · les données restent sur ce téléphone",
+    "appIcon": "Icône de l’app"
   },
   "theme": {
     "system": "Système",
@@ -555,5 +556,17 @@
     "enterValue": "Valeur",
     "feet": "ft",
     "inches": "in"
+  },
+  "appIcon": {
+    "description": "Choisissez la tête de Poulpy pour votre écran d’accueil. Cela ne change pas l’humeur de Poulpy dans l’app.",
+    "tapNote": "Touchez une icône pour l’appliquer et fermer cette feuille.",
+    "iosNote": "Sur iOS, votre téléphone affiche une alerte système après le changement d’icône.",
+    "defaultName": "{name} · par défaut",
+    "happy": "Content",
+    "proud": "Fier",
+    "annoyed": "Agacé",
+    "grumpy": "Grognon",
+    "champion": "Champion",
+    "cocky": "Frimeur"
   }
 }
