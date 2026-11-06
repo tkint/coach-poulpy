@@ -129,7 +129,7 @@ jobs:
         # .env.example stays "latest", so `docker compose pull` follows new releases.
         run: |
           mkdir -p dist/coach-poulpy
-          cp -r deploy/compose.yaml deploy/.env.example deploy/coach-poulpy.caddy deploy/edge dist/coach-poulpy/
+          cp -r deploy/compose.yaml deploy/.env.example deploy/coach-poulpy.caddy deploy/caddy dist/coach-poulpy/
           cp docs/deploying-the-server.md dist/coach-poulpy/DEPLOYING.md
           tar -C dist -czf coach-poulpy-deploy.tar.gz coach-poulpy
       - name: Publish the release

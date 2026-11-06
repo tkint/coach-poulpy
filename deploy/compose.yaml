@@ -1,7 +1,6 @@
-# Coach Poulpy on one server: the API and its Postgres. HTTPS comes from a Caddy on the shared
-# `edge` network (edge/, or one already on the server). See docs/deploying-the-server.md.
-#   cp .env.example .env    # then fill it in
-#   python3 edge/deploy.py --app-dir . --compose-file compose.yaml --site-file coach-poulpy.caddy
+# Coach Poulpy on one server: the API and its Postgres. HTTPS comes from the shared Caddy
+# (deploy/caddy/) on the external `edge` network. Deployed by the Deploy workflow; see
+# docs/deploying-the-server.md.
 
 name: coach-poulpy
 
@@ -53,7 +52,6 @@ networks:
   internal:
   edge:
     external: true
-    name: ${EDGE_NETWORK:-edge}
 
 volumes:
   postgres-data:
