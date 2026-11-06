@@ -1,7 +1,8 @@
 name: Deploy
 
-# Run by hand: Actions > Deploy > Run workflow. It SSHes into the machine and pulls the server image of
-# the chosen version (ADR 0019). Setup and secrets: docs/releasing.md, "Deploy the server".
+# Run by hand: Actions > Deploy > Run workflow. It writes the app's .env from the production
+# environment, uploads it with the server and shared Caddy files over SSH and deploys the chosen
+# server image (ADR 0019). Setup and secrets: docs/releasing.md, "Deploy the server".
 on:
   workflow_dispatch:
     inputs:
@@ -30,8 +31,33 @@ jobs:
           HOST: ${{ vars.DEPLOY_HOST || secrets.DEPLOY_HOST }}
           SSH_USER: ${{ vars.DEPLOY_USER || secrets.DEPLOY_USER }}
           SSH_PORT: ${{ vars.DEPLOY_PORT || secrets.DEPLOY_PORT || '22' }}
-          DEPLOY_DIR: ~/coach-poulpy
-          EDGE_DIR: ~/caddy
           HOST_KEY: ${{ vars.DEPLOY_HOST_KEY || secrets.DEPLOY_HOST_KEY }}
           VERSION: ${{ inputs.version }}
-        run: bash deploy/edge/remote-deploy.sh deploy/compose.yaml deploy/coach-poulpy.caddy
+          # Written to the app's .env on the server.
+          DOMAIN: ${{ vars.DOMAIN }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+        run: |
+          for name in DEPLOY_SSH_KEY:SSH_KEY DEPLOY_HOST:HOST DEPLOY_USER:SSH_USER \
+            DEPLOY_HOST_KEY:HOST_KEY DOMAIN:DOMAIN POSTGRES_PASSWORD:POSTGRES_PASSWORD; do
+            if [ -z "$(printenv "${name#*:}")" ]; then
+              echo "::error::Missing ${name%%:*} in the production environment."; exit 1
+            fi
+          done
+          if ! printf '%s' "$VERSION" | grep -Eq '^[A-Za-z0-9._-]+$'; then
+            echo "::error::Invalid image version."; exit 1
+          fi
+
+          umask 077
+          printf 'DOMAIN=%s\nIMAGE_TAG=%s\nPOSTGRES_PASSWORD=%s\n' \
+            "$DOMAIN" "$VERSION" "$POSTGRES_PASSWORD" > "$RUNNER_TEMP/.env"
+          printf '%s\n' "$SSH_KEY" > "$RUNNER_TEMP/key"
+          printf '%s\n' "$HOST_KEY" > "$RUNNER_TEMP/known_hosts"
+          remote() {
+            ssh -i "$RUNNER_TEMP/key" -p "$SSH_PORT" -o BatchMode=yes -o StrictHostKeyChecking=yes \
+              -o UserKnownHostsFile="$RUNNER_TEMP/known_hosts" "$SSH_USER@$HOST" "$1"
+          }
+
+          tar -C deploy/caddy -czf - compose.yaml bootstrap.json deploy.py | remote 'mkdir -p ~/caddy && tar -xzf - -C ~/caddy'
+          tar -C deploy -czf - compose.yaml coach-poulpy.caddy -C "$RUNNER_TEMP" .env |
+            remote 'mkdir -p ~/coach-poulpy && tar -xzf - -C ~/coach-poulpy'
+          remote 'python3 ~/caddy/deploy.py ~/coach-poulpy compose.yaml coach-poulpy.caddy'

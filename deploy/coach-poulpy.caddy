@@ -1,4 +1,4 @@
-# deploy.py renders DOMAIN from the app's .env into the shared edge's sites/ folder.
+# The site served by the shared Caddy; deploy/caddy/deploy.py fills in DOMAIN from the app's .env.
 
 {$DOMAIN} {
 	encode zstd gzip

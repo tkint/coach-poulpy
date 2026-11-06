@@ -35,31 +35,34 @@ The first push creates the package as private. Either make it public once (the p
 
 ## Deploy the server
 
-A release never reaches the machine on its own. Open **Actions > Deploy > Run workflow**, enter `latest` or a version such as `0.2.0`, and run it. It uploads deployment files from the selected workflow ref, deploys that server image and reconciles the shared Caddy. The machine needs Python 3 and Docker Compose 2.24.4 or newer, and `~/coach-poulpy/.env` must already contain `DOMAIN` and `POSTGRES_PASSWORD`.
+A release never reaches the machine on its own. Open **Actions > Deploy > Run workflow**, enter `latest` or a version such as `0.2.0`, and run it. It writes the app's `.env` from the `production` environment, uploads it with the deploy files from the selected workflow ref and deploys that server image behind the shared Caddy. The machine needs Python 3 and Docker Compose.
 
 Set it up once:
 
-1. On the machine, create a user in the `docker` group that owns `~/coach-poulpy`, and give it a key used only for deploys:
+1. On the machine, create a user in the `docker` group, and give it a key used only for deploys:
 
    ```sh
    ssh-keygen -t ed25519 -N '' -f coach-poulpy-deploy -C coach-poulpy-deploy
    # Add coach-poulpy-deploy.pub to that user's ~/.ssh/authorized_keys on the machine.
    ```
 
-2. On GitHub, **Settings > Environments**, create `production`. Add the secret `DEPLOY_SSH_KEY` (the private key file) and these variables (or secrets):
+2. On GitHub, **Settings > Environments**, create `production` and add:
 
-   | Name | Value |
-   | --- | --- |
-   | `DEPLOY_HOST` | The machine's address |
-   | `DEPLOY_USER` | The user from step 1 |
-   | `DEPLOY_HOST_KEY` | The output of `ssh-keyscan -t ed25519 HOST`, so the workflow refuses any other machine |
-   | `DEPLOY_PORT` | Optional, `22` by default |
+   | Name | Kind | Value |
+   | --- | --- | --- |
+   | `DEPLOY_SSH_KEY` | secret | The private key file |
+   | `DEPLOY_HOST` | variable | The machine's address |
+   | `DEPLOY_USER` | variable | The user from step 1 |
+   | `DEPLOY_HOST_KEY` | variable | The output of `ssh-keyscan -t ed25519 HOST`, so the workflow refuses any other machine |
+   | `DEPLOY_PORT` | variable | Optional, `22` by default |
+   | `DOMAIN` | variable | The API hostname, without scheme, port or path |
+   | `POSTGRES_PASSWORD` | secret | For example `openssl rand -hex 24`; used when the Postgres volume is created |
 
 3. In the same `production` environment, tick **Required reviewers** and add yourself, so a deploy waits for your approval before it touches the machine.
 
 The workflow stops with a message, and changes nothing, if a setting is missing or the version has characters other than letters, digits, `.`, `_` and `-`. Until there is a server, a run failing on missing settings is expected. Once it succeeds, `curl https://api.example.com/health` prints the version deployed. Deploying an older version is the way back if a release goes wrong.
 
-The deployer creates or starts Caddy when needed, updates only this app's identified route through the local admin REST API, and preserves existing sites. Caddy autosaves API updates and resumes the saved config after restart. It automatically migrates a standard app-owned Docker Caddy with its certificate volume and also works when the app has not been started yet. Shared configuration updates are serialized on the server. Details and migration limits: [Deploying the server](./deploying-the-server.md).
+The deployer creates or starts Caddy when needed and adds or replaces only this app's site through Caddy's admin API, leaving other sites alone. Caddy autosaves API updates and resumes them after a restart. Details: [Deploying the server](./deploying-the-server.md).
 
 ## What a release does not do yet
 

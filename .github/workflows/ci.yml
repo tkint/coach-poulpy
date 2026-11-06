@@ -110,7 +110,7 @@ jobs:
       - name: Check the deploy files (docs/deploying-the-server.md)
         run: |
           POSTGRES_PASSWORD=ci docker compose -f deploy/compose.yaml config -q
-          docker compose -f deploy/edge/compose.yaml config -q
+          docker compose -f deploy/caddy/compose.yaml config -q
           docker run --rm -e DOMAIN=api.example.com -v "$PWD/deploy/coach-poulpy.caddy:/etc/caddy/site.caddy:ro" \
             caddy:2 caddy validate --config /etc/caddy/site.caddy --adapter caddyfile
 
