@@ -26,14 +26,14 @@ Only Caddy publishes ports. The server joins the external `edge` network using a
 
 - Linux with Python 3, Docker Engine and Docker Compose.
 - About 1 GB of free memory; the server is capped at 512 MB. Images are built in CI, not on the machine.
-- An API hostname whose DNS A/AAAA records point to the machine.
+- An API hostname (`api.coach-poulpy.com`) whose DNS A/AAAA records point to the machine. The landing site and the web app get their own hostnames and containers later ([ADR 0021](./adr/0021-the-landing-site-the-app-and-the-api-have-their-own-hostname.md)).
 - SSH and ports 80/443 open (TCP, plus UDP 443 for HTTP/3).
 
 If `ghcr.io/tkint/coach-poulpy-server` is private, log the machine in once with a token that can read packages: `docker login ghcr.io`.
 
 ## Deploy
 
-Everything is deployed from GitHub; you don't log in to the machine for it. Set up the **Deploy** workflow once ([Releasing](./releasing.md#deploy-the-server)), with `DOMAIN` and `POSTGRES_PASSWORD` in the `production` environment, then run **Actions > Deploy > Run workflow** with `latest` or a version. Check it with `curl https://api.example.com/health`.
+Everything is deployed from GitHub; you don't log in to the machine for it. Set up the **Deploy** workflow once ([Releasing](./releasing.md#deploy-the-server)), with `DOMAIN` and `POSTGRES_PASSWORD` in the `production` environment, then run **Actions > Deploy > Run workflow** with `latest` or a version. Check it with `curl https://api.coach-poulpy.com/health`.
 
 The workflow writes `~/coach-poulpy/.env` from those settings (replaced on every run, so change settings in GitHub, not on the machine), uploads `compose.yaml` and the site file to `~/coach-poulpy`, and the shared Caddy to `~/caddy`. On the machine, `~/caddy/deploy.py` then:
 
