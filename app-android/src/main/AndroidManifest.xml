@@ -32,10 +32,6 @@
             android:name=".MainActivity"
             android:exported="true"
             android:windowSoftInputMode="adjustResize">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
             <!-- A .poulpyworkout file opened or shared from another app: the app shows what is in it before adding it. -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -66,6 +62,75 @@
                 <data android:mimeType="application/vnd.coachpoulpy.workout+json" />
             </intent-filter>
         </activity>
+        <!-- The home screen icon is one alias per face of Poulpy (Settings › App icon), and exactly one is enabled; the
+             launcher shows the enabled one. The ids and order are those of AppIcon in the shared code, and the
+             icons are drawn by design/build-poulpy.mjs. -->
+        <activity-alias
+            android:name=".AppIconHappy"
+            android:enabled="true"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".AppIconProud"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_proud"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".AppIconAnnoyed"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_annoyed"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".AppIconGrumpy"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_grumpy"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".AppIconChampion"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_champion"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".AppIconCocky"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_cocky"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
         <!-- Shares a workout file from the cache folder with the app the person picks (res/xml/file_paths.xml). -->
         <provider
             android:name="androidx.core.content.FileProvider"

@@ -13,6 +13,8 @@ struct SettingsHub: View {
     @ObservedObject var profile: Observed<ProfileModel, ProfileUi>
     @ObservedObject var weight: Observed<BodyModel, BodyUi>
     @ObservedObject var height: Observed<BodyModel, BodyUi>
+    @State private var appIcon = AppIcon.current
+    @State private var pickingIcon = false
 
     var body: some View {
         let units = settings.value.units
@@ -55,9 +57,27 @@ struct SettingsHub: View {
                     row("circle.lefthalf.filled", "settings.appearanceUnits", "\(themeName(settings.value.theme)) · \(languageName(settings.value.language)) · \(unitsName(units))")
                 }
                 NavigationLink(value: SettingsPage.devices) { row("antenna.radiowaves.left.and.right", "settings.devices", nil) }
+                Button { pickingIcon = true } label: {
+                    HStack(spacing: 12) {
+                        Image(appIcon.drawing).resizable().scaledToFit().frame(width: 44, height: 44).accessibilityHidden(true)
+                        VStack(alignment: .leading, spacing: 0) {
+                            Text("settings.appIcon").font(.poulpy(.headline)).foregroundStyle(PoulpyColor.onSurface)
+                            Text(appIcon.label).font(.poulpy(.footnote)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+                        }
+                        Spacer()
+                        Image(systemName: "chevron.right").font(.system(size: 13, weight: .semibold)).foregroundStyle(PoulpyColor.onSurfaceVariant.opacity(0.6))
+                    }
+                    .frame(minHeight: 44)
+                }
             }
             Section("settings.about") {
                 row("info.circle", "settings.aboutApp", L("settings.aboutLine %@", Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "—"))
+            }
+        }
+        .sheet(isPresented: $pickingIcon) {
+            AppIconSheet(selected: appIcon) { picked in
+                appIcon = picked
+                picked.apply()
             }
         }
     }

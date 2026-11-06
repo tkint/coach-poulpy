@@ -55,9 +55,12 @@ node design/build-poulpy.mjs
 | `app-ios/CoachPoulpy/Assets.xcassets/Poulpy/*.imageset` | iOS vector assets (`Image("PoulpyPoseChampion")`) |
 | `app-android/src/main/res/drawable/ic_launcher_*.xml`, `mipmap-anydpi-v26/ic_launcher.xml` | The Android launcher icon: an adaptive icon with a themed (monochrome) layer |
 | `app-ios/CoachPoulpy/Assets.xcassets/AppIcon.appiconset` | The iOS app icon: 1024 px PNGs for light, dark and tinted |
+| `ic_launcher_<id>_*.xml`, `mipmap-anydpi-v26/ic_launcher_<id>.xml`, `AppIcon<Id>.appiconset` | The alternate icons Settings › App icon offers (`proud`, `annoyed`, `grumpy`, `champion`, `cocky`), built the same way |
 
 Portraits and poses share one 248 × 226 frame, so they can replace each other without moving. The loader (`loader`, and `loader_small` with a thicker line for sizes under 32) is Poulpy seen from above as a blue outline of eight round lobes with short tails; `PoulpyLoader` on Android and iOS turns it clockwise once every 2.4 s (10 s when animations are reduced) and replaces the old Spinning pose. CI runs it with `--check` too. The shared `PoulpyDrawing` enum names each drawing, and `PoulpyCoach` picks which one Today shows.
 
 The app icon is the brand book's: the happy blue Poulpy on Foam (`neutral.50`), and on Deep sea (`theme.dark.background`) for the iOS dark icon. On Android, Poulpy is scaled so his farthest arm sits on the 66 dp circle every launcher mask keeps; the themed icon is his silhouette at half strength with the eyes and smile at full. iOS only takes PNGs, so the script rasterises the icon itself, in plain JavaScript so every machine gets the same pixels; `--check` compares those pixels, not the compressed bytes.
+
+The alternate icons use the portrait or pose of the same name, scaled until its longest side fills 170 of the 200 square (on Android, until its farthest point sits on the 66 dp circle), so a pose with props or confetti draws Poulpy smaller. Their ids are those of `AppIcon` in the shared code and never change. Android switches between launcher aliases in the manifest; iOS lists the sets in `ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES` in `app-ios/project.yml`.
 
 The rules for using Poulpy are in [`docs/brand.md`](../docs/brand.md); the full brand book is in `site/public/brand/book.html` and on the docs site, and the decisions behind it are in [`docs/brand-decisions.md`](../docs/brand-decisions.md).
