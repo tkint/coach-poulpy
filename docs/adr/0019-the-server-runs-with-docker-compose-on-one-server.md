@@ -12,12 +12,12 @@ The server, its Postgres and the Caddy that serves them over HTTPS run as Docker
 - **Cheap enough to start before anyone pays.** The family and early users need far less than one small machine.
 - **The GDPR is met.** The server is hosted in the EU or a country with an EU adequacy decision, as health data requires.
 - **Docker keeps it portable.** The same Compose files run on the dev computer, and moving to another host means copying a folder and a database dump. A managed platform would tie the server to its own build and database offers.
-- **One Caddy for the whole machine.** Caddy owns ports 80 and 443 and gets every site's certificate. Each app joins a shared `edge` network and brings one site file, so apps can be added or removed without touching each other.
+- **One Caddy for the whole machine.** Caddy owns ports 80 and 443 and gets every site's certificate. Each app joins a shared `edge` network and updates only its identified route through Caddy's local admin API, so apps can be added or removed without replacing the full config.
 
 ## How it is released and deployed
 
 - **The Release workflow publishes everything together.** The same tag push that publishes the APK pushes the server image to the GitHub Container Registry, tagged with the version (`0.3.0`, `0.3`, `latest`). It also attaches `coach-poulpy-deploy.tar.gz` (the Compose files and the Caddy files) to the release.
-- **Deploying is a separate, manual step.** Actions > Deploy SSHes into the server and pulls the chosen image, so a release never reaches the server on its own.
+- **Deploying is a separate, manual step.** Actions > Deploy uploads the deployment files, pulls the chosen image and updates the app's route through the shared Caddy API, so a release never reaches the server on its own. It creates or starts Caddy if necessary, which autosaves API changes for restart, and automatically migrates a standard app-owned Docker Caddy while preserving existing sites and certificates.
 - **The image is built for amd64 only,** like the server. Building for arm64 under emulation would multiply the release time for a machine we don't have.
 
 ## Consequences

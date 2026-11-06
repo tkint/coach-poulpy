@@ -35,7 +35,7 @@ The first push creates the package as private. Either make it public once (the p
 
 ## Deploy the server
 
-A release never reaches the machine on its own. Open **Actions > Deploy > Run workflow**, enter `latest` or a version such as `0.2.0`, and run it. It SSHes into the machine, pulls that image and restarts the server.
+A release never reaches the machine on its own. Open **Actions > Deploy > Run workflow**, enter `latest` or a version such as `0.2.0`, and run it. It uploads deployment files from the selected workflow ref, deploys that server image and reconciles the shared Caddy. The machine needs Python 3 and Docker Compose 2.24.4 or newer, and `~/coach-poulpy/.env` must already contain `DOMAIN` and `POSTGRES_PASSWORD`.
 
 Set it up once:
 
@@ -54,11 +54,12 @@ Set it up once:
    | `DEPLOY_USER` | The user from step 1 |
    | `DEPLOY_HOST_KEY` | The output of `ssh-keyscan -t ed25519 HOST`, so the workflow refuses any other machine |
    | `DEPLOY_PORT` | Optional, `22` by default |
-   | `DEPLOY_DIR` | Optional, `~/coach-poulpy` by default |
 
 3. In the same `production` environment, tick **Required reviewers** and add yourself, so a deploy waits for your approval before it touches the machine.
 
 The workflow stops with a message, and changes nothing, if a setting is missing or the version has characters other than letters, digits, `.`, `_` and `-`. Until there is a server, a run failing on missing settings is expected. Once it succeeds, `curl https://api.example.com/health` prints the version deployed. Deploying an older version is the way back if a release goes wrong.
+
+The deployer creates or starts Caddy when needed, updates only this app's identified route through the local admin REST API, and preserves existing sites. Caddy autosaves API updates and resumes the saved config after restart. It automatically migrates a standard app-owned Docker Caddy with its certificate volume and also works when the app has not been started yet. Shared configuration updates are serialized on the server. Details and migration limits: [Deploying the server](./deploying-the-server.md).
 
 ## What a release does not do yet
 
