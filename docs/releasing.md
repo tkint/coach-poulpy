@@ -61,7 +61,7 @@ Set it up once:
 
 The workflow stops with a message, and changes nothing, if a setting is missing or the version has characters other than letters, digits, `.`, `_` and `-`. Until there is a server, a run failing on missing settings is expected. Once it succeeds, `curl https://api.example.com/health` prints the version deployed. Deploying an older version is the way back if a release goes wrong.
 
-The deployer creates or starts Caddy when needed, updates only this app's site, preserves existing sites and automatically migrates a standard app-owned Docker Caddy with its certificate volumes. It also works when the app has not been started yet. Shared configuration updates are serialized on the server. Details and migration limits: [Deploying the server](./deploying-the-server.md).
+The deployer creates or starts Caddy when needed, updates only this app's identified route through the local admin REST API, and preserves existing sites. Caddy autosaves API updates and resumes the saved config after restart. It automatically migrates a standard app-owned Docker Caddy with its certificate volume and also works when the app has not been started yet. Shared configuration updates are serialized on the server. Details and migration limits: [Deploying the server](./deploying-the-server.md).
 
 ## What a release does not do yet
 
