@@ -114,23 +114,6 @@ jobs:
           docker run --rm -e DOMAIN=api.example.com -e APP_NAME=coach-poulpy -v "$PWD/deploy/coach-poulpy.caddy:/etc/caddy/site.caddy:ro" \
             caddy:2 caddy validate --config /etc/caddy/site.caddy --adapter caddyfile
 
-  preview:
-    name: Deploy to preview
-    # Manual: it waits until a maintainer approves it on the run (the preview environment's required
-    # reviewers), then deploys this pull request (docs/releasing.md, "Deploy a pull request"). Only
-    # for this repository's own branches, so a fork never reaches the deploy secrets.
-    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
-    needs: [android-and-shared, server-image]
-    permissions:
-      contents: read
-      packages: write
-    uses: ./.github/workflows/deploy.yml
-    with:
-      environment: preview
-      version: pr-${{ github.event.pull_request.number }}
-      ref: ${{ github.event.pull_request.head.sha }}
-    secrets: inherit
-
   web:
     name: Website build
     runs-on: ubuntu-latest

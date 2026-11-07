@@ -35,7 +35,7 @@ The first push creates the package as private. Either make it public once (the p
 
 ## Deploy the server
 
-A release never reaches the machine on its own. Open **Actions > Deploy > Run workflow**, enter `latest` or a version such as `0.2.0`, and run it. It writes the app's `.env` from that GitHub environment, uploads it with the deploy files from the selected workflow ref and deploys that server image behind the shared Caddy. The machine needs Python 3 and Docker Compose.
+A release never reaches the machine on its own. Open **Actions > Deploy > Run workflow**, pick the `production` environment, enter `latest` or a version such as `0.2.0`, and run it. It writes the app's `.env` from that GitHub environment, uploads it with the deploy files from the selected workflow ref and deploys that server image behind the shared Caddy. The machine needs Python 3 and Docker Compose.
 
 Set it up once:
 
@@ -66,18 +66,18 @@ The deployer creates or starts Caddy when needed and adds or replaces only this 
 
 ## Deploy a pull request
 
-Every pull request's CI run ends with a **Deploy to preview** job that waits for you. To try the pull request on the machine before it merges, open its run from the PR's checks, choose **Review deployments**, tick `preview` and approve. The job builds the pull request's server image, pushes it as `ghcr.io/tkint/coach-poulpy-server:pr-<number>`, and deploys it with the pull request's own Compose and Caddy files, since it may change them. `/health` then answers `ok pr-<number>`. A new push cancels a job still waiting and starts a new one. Pull requests from forks never get the job, so they never reach the deploy secrets.
+To try a pull request on the machine before it merges, open **Actions > Deploy > Run workflow**, pick its branch under **Use workflow from**, pick the `preview` environment and enter the version `branch`. The workflow builds that branch's server image, pushes it as `ghcr.io/tkint/coach-poulpy-server:branch-<branch name>` (slashes become dashes), and deploys it with the branch's own Compose and Caddy files, since it may change them. `/health` then answers `ok branch-<branch name>`. Nothing runs until you start it.
 
-Set up the `preview` environment once, like `production` above: the same `DEPLOY_*` settings, and **Required reviewers** with yourself, which is what makes the job wait. Without it, every push would deploy on its own. Until the environment is set up, the job fails on missing settings. Its `APP_NAME` decides where the pull request lands:
+Set up the `preview` environment once, like `production` above (the same `DEPLOY_*` settings). Its `APP_NAME` decides where the branch lands:
 
 | `APP_NAME` in `preview` | `DOMAIN` in `preview` | Result |
 | --- | --- | --- |
 | Another name, such as `coach-poulpy-preview` | Its own hostname, such as `preview.api.coach-poulpy.com` | A second server and Postgres in `~/coach-poulpy-preview`, beside production, with its own data |
 | Unset, or `coach-poulpy` | Production's | Replaces production until the next production deploy |
 
-`APP_NAME` has lowercase letters, digits and dashes; production leaves it unset (`coach-poulpy`). It names the folder on the machine, the Compose project, the server's alias on the `edge` network and its Caddy route. Nothing is cleaned up on its own: deploy another pull request over it, or stop it on the machine with `cd ~/coach-poulpy-preview && docker compose down`. A separate preview needs about as much memory as production (512 MB for the server, plus its Postgres), so check the machine has room.
+`APP_NAME` has lowercase letters, digits and dashes; production leaves it unset (`coach-poulpy`). It names the folder on the machine, the Compose project, the server's alias on the `edge` network and its Caddy route. Nothing is cleaned up on its own: deploy another branch over it, or stop it on the machine with `cd ~/coach-poulpy-preview && docker compose down`. A separate preview needs about as much memory as production (512 MB for the server, plus its Postgres), so check the machine has room.
 
-Deploying runs the pull request's deploy files on the machine and replaces the shared `~/caddy/deploy.py` with its copy, so only deploy a pull request you have read.
+Deploying runs the branch's deploy files on the machine and replaces the shared `~/caddy/deploy.py` with its copy, so only deploy a branch you have read.
 
 ## What a release does not do yet
 
