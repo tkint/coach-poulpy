@@ -61,3 +61,4 @@ Les règles de `en.md` s’appliquent aussi (identifiants, placeholders, pluriel
 | Settings | Réglages | Aussi le nom de l’app Réglages sur iPhone. |
 | account | compte | |
 | email (the address) | adresse e-mail | « e-mail » seul pour le message. |
+| password | mot de passe | |

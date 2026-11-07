@@ -1,0 +1,10 @@
+-- Forgotten passwords (#271). A link mailed to a confirmed address sets a new password once,
+-- within an hour; only the SHA-256 of its token is kept.
+CREATE TABLE password_reset_token (
+    token_hash BYTEA PRIMARY KEY,
+    account_id UUID NOT NULL REFERENCES account (id) ON DELETE CASCADE,
+    created_at TIMESTAMPTZ NOT NULL,
+    expires_at TIMESTAMPTZ NOT NULL
+);
+
+CREATE INDEX password_reset_token_account ON password_reset_token (account_id, created_at);

@@ -2,15 +2,14 @@ package ch.coachpoulpy.server.accounts
 
 import ch.coachpoulpy.core.model.Ids
 import ch.coachpoulpy.server.ServerText
+import ch.coachpoulpy.server.auth.Secrets.hashOf
+import ch.coachpoulpy.server.auth.Secrets.newToken
 import ch.coachpoulpy.server.db.Database
 import ch.coachpoulpy.server.mail.Email
 import ch.coachpoulpy.server.mail.Mailer
-import java.security.MessageDigest
-import java.security.SecureRandom
 import java.time.Clock
 import java.time.Duration
 import java.time.OffsetDateTime
-import java.util.Base64
 import java.util.UUID
 
 /** What a guest gives to sign up (docs/accounts.md). */
@@ -84,15 +83,6 @@ class Accounts(
     companion object {
         /** How long a confirmation link works. */
         val CONFIRMATION_LIFETIME: Duration = Duration.ofHours(24)
-
-        private val random = SecureRandom()
-
-        /** 32 random bytes, URL-safe. */
-        private fun newToken(): String =
-            Base64.getUrlEncoder().withoutPadding().encodeToString(ByteArray(32).also(random::nextBytes))
-
-        /** Only this is stored, so a leaked table confirms nothing. */
-        private fun hashOf(token: String): ByteArray = MessageDigest.getInstance("SHA-256").digest(token.toByteArray())
     }
 }
 

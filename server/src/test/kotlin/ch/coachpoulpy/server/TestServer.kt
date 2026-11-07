@@ -1,7 +1,9 @@
 package ch.coachpoulpy.server
 
 import ch.coachpoulpy.catalog.Catalog
+import ch.coachpoulpy.server.accounts.AccountDeletion
 import ch.coachpoulpy.server.accounts.Accounts
+import ch.coachpoulpy.server.accounts.PasswordResets
 import ch.coachpoulpy.server.accounts.Passwords
 import ch.coachpoulpy.server.auth.SignIns
 import ch.coachpoulpy.server.db.Database
@@ -52,5 +54,7 @@ class TestServer {
     val accounts = Accounts(database, mailer, "https://app.example.com", passwords, clock)
     val catalog: Catalog = Catalog.bundled
     val signIns = SignIns(database, passwords, clock)
-    val http = app("0.7.0", catalog, database, accounts, signIns)
+    val passwordResets = PasswordResets(database, mailer, "https://app.example.com", signIns, passwords, clock)
+    val accountDeletion = AccountDeletion(database, passwords)
+    val http = app("0.7.0", catalog, database, accounts, signIns, passwordResets, accountDeletion)
 }

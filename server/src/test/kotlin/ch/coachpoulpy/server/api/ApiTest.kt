@@ -20,7 +20,7 @@ class ApiTest {
 
     @Test
     fun everyRouteIsPublicOrDeclaresItsScopes() {
-        val undeclared = apiRoutes(catalog, test.accounts, test.signIns, test.database).filter { it.meta.security == null }
+        val undeclared = apiRoutes(catalog, test.accounts, test.signIns, test.passwordResets, test.accountDeletion, test.database).filter { it.meta.security == null }
         assertEquals(emptyList(), undeclared.map { it.toString() }, "Routes with no security: set Public or the scopes they need")
     }
 
