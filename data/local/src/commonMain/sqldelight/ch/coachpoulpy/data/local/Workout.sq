@@ -28,3 +28,6 @@ SELECT * FROM workout_version WHERE id = ? ORDER BY version DESC LIMIT 1;
 -- Sessions already done keep their session rows; only the plan is removed.
 deleteWorkout:
 DELETE FROM workout_version WHERE id = ?;
+
+allVersions:
+SELECT * FROM workout_version ORDER BY id, version;

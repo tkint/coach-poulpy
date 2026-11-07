@@ -57,8 +57,8 @@ class SettingsModel(
 
     companion object {
         private const val THEME = "settings.theme"
-        private const val LANGUAGE = "settings.language"
-        private const val UNITS = "settings.units"
+        internal const val LANGUAGE = "settings.language"
+        internal const val UNITS = "settings.units"
     }
 }
 

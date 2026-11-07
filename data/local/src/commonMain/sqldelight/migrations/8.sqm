@@ -1,0 +1,10 @@
+-- Sync (docs/accounts.md): the outbox of changes waiting to be pushed, and whether writes add to it.
+-- New tables only; nothing existing changes, and a guest's phone records nothing.
+CREATE TABLE sync_outbox (
+    seq INTEGER PRIMARY KEY AUTOINCREMENT,
+    change_json TEXT NOT NULL
+);
+CREATE TABLE sync_state (
+    id INTEGER NOT NULL PRIMARY KEY CHECK (id = 0),
+    recording INTEGER NOT NULL
+);

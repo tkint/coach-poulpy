@@ -21,3 +21,9 @@ DELETE FROM planned_workout WHERE id = ?;
 
 deletePlansOfWorkout:
 DELETE FROM planned_workout WHERE workout_id = ?;
+
+planById:
+SELECT * FROM planned_workout WHERE id = ?;
+
+planIdsOfWorkout:
+SELECT id FROM planned_workout WHERE workout_id = ?;

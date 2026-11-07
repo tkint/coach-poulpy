@@ -1,0 +1,30 @@
+-- The outbox (docs/accounts.md, Sync): each change a write made, as SyncChange JSON, oldest first.
+-- It is filled only while the phone is signed in with a confirmed email.
+CREATE TABLE sync_outbox (
+    seq INTEGER PRIMARY KEY AUTOINCREMENT,
+    change_json TEXT NOT NULL
+);
+
+-- One row, id 0: whether writes add their change to the outbox (1) or not (0, or no row: a guest).
+CREATE TABLE sync_state (
+    id INTEGER NOT NULL PRIMARY KEY CHECK (id = 0),
+    recording INTEGER NOT NULL
+);
+
+recording:
+SELECT recording FROM sync_state WHERE id = 0;
+
+setRecording:
+INSERT OR REPLACE INTO sync_state(id, recording) VALUES (0, ?);
+
+addChange:
+INSERT INTO sync_outbox(change_json) VALUES (?);
+
+outbox:
+SELECT seq, change_json FROM sync_outbox ORDER BY seq LIMIT ?;
+
+removeUpTo:
+DELETE FROM sync_outbox WHERE seq <= ?;
+
+clearOutbox:
+DELETE FROM sync_outbox;

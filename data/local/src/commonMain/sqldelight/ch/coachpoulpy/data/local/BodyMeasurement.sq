@@ -23,3 +23,6 @@ SELECT * FROM body_measurement WHERE metric = ? ORDER BY day;
 
 deleteMeasurement:
 DELETE FROM body_measurement WHERE metric = ? AND day = ?;
+
+allMeasurements:
+SELECT * FROM body_measurement ORDER BY metric, day;
