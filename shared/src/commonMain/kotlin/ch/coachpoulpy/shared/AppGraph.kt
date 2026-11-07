@@ -108,27 +108,19 @@ class AppGraph(driverFactory: DriverFactory) {
         return BuilderModel(copy, catalog, store, compiler, languageCode, ::units)
     }
 
-    /**
-     * Starts adding every change to the outbox, first filled with the whole phone: its database
-     * and the profile, units and language in [memory]. For a phone signed in with a confirmed email.
-     */
-    fun startRecordingChanges(memory: KeyValueStore) = store.startRecordingChanges(SyncedSettings.values(memory))
-
-    /** Stops adding changes to the outbox and empties it, as on sign-out. */
-    fun stopRecordingChanges() = store.stopRecordingChanges()
+    private var accountModel: AccountModel? = null
 
     /**
-     * The sync client of a signed-in phone, named [deviceName] in the copies it makes of a workout
-     * edited on two phones. [memory] is the apps' own store, the one the profile and settings use.
+     * The account at [baseUrl], such as https://api.coach-poulpy.com, and its sync: one for the app's
+     * life. [secrets] keeps the tokens, the Keychain on iOS and the Android Keystore; [deviceName]
+     * names this phone in the server's device list and in the copies of a workout edited on two phones.
+     * [memory] is the apps' own store, the one the profile and settings use.
      */
-    /**
-     * The account API at [baseUrl], such as https://api.coach-poulpy.com, signed in with the tokens kept
-     * in [secrets]: the Keychain on iOS, the Android Keystore.
-     */
-    fun accountClient(baseUrl: String, secrets: SecretStore) = AccountClient(baseUrl, SecretTokenStore(secrets))
-
-    fun syncClient(server: SyncServer, deviceName: String, memory: KeyValueStore, languageCode: String, onSignInRefused: () -> Unit = {}) =
-        SyncClient(store, memory, server, deviceName, { languageCode }, CoroutineScope(SupervisorJob() + Dispatchers.Main), onSignInRefused)
+    fun account(baseUrl: String, secrets: SecretStore, memory: KeyValueStore, deviceName: String, languageCode: String): AccountModel =
+        accountModel ?: AccountModel(
+            store, memory, secrets, AccountClient(baseUrl, SecretTokenStore(secrets)), deviceName, { languageCode },
+            CoroutineScope(SupervisorJob() + Dispatchers.Main),
+        ).also { accountModel = it }
 
     /** The units chosen in Settings, once the app has opened them; metric until then. */
     private fun units() = settingsModel?.state?.value?.units ?: UnitSystem.METRIC

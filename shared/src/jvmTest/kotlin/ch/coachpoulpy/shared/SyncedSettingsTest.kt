@@ -14,7 +14,7 @@ class SyncedSettingsTest {
 
     @Test
     fun theProfileUnitsAndLanguageAreRecordedButNotTheTheme() {
-        graph.startRecordingChanges(memory)
+        graph.store.startRecordingChanges(SyncedSettings.values(memory))
         synced.putString("profile.name", "Sam")
         synced.putString("profile.name", "Sam") // Unchanged: nothing more to send.
         synced.putString("settings.units", "IMPERIAL")
@@ -47,7 +47,7 @@ class SyncedSettingsTest {
         memory.putString("settings.language", "FR")
         memory.putString("settings.theme", "DARK")
 
-        graph.startRecordingChanges(memory)
+        graph.store.startRecordingChanges(SyncedSettings.values(memory))
 
         assertEquals(listOf("profile.name" to "Sam", "settings.language" to "FR"), recordedKeys())
     }

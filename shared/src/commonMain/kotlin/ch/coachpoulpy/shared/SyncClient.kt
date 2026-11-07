@@ -14,11 +14,16 @@ import ch.coachpoulpy.data.local.forkUnsent
 import ch.coachpoulpy.data.local.outboxSize
 import ch.coachpoulpy.data.local.syncCursor
 import kotlin.coroutines.cancellation.CancellationException
+import kotlin.time.Clock
 import kotlin.time.Duration
+import kotlin.time.Instant
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -89,9 +94,14 @@ class SyncClient(
     private val scope: CoroutineScope,
     private val onSignInRefused: () -> Unit = {},
     private val afterChange: Duration = 5.seconds,
+    private val clock: Clock = Clock.System,
 ) {
     private val running = Mutex()
     private var again = false
+    private val _lastSyncedAt = MutableStateFlow(memory.getString(LAST_SYNCED)?.let { runCatching { Instant.parse(it) }.getOrNull() })
+
+    /** When a run last pulled and pushed everything, kept between launches; null before the first. */
+    val lastSyncedAt: StateFlow<Instant?> = _lastSyncedAt.asStateFlow()
 
     /** Runs once now, then [afterChange] after each change while [scope] lives. */
     fun start(): Job = scope.launch {
@@ -138,6 +148,8 @@ class SyncClient(
         }
         store.clearAccountData()
         SyncedSettings.KEYS.forEach { memory.putString(it, null) }
+        memory.putString(LAST_SYNCED, null)
+        _lastSyncedAt.value = null
         SignOutResult.SIGNED_OUT
     }
 
@@ -146,7 +158,7 @@ class SyncClient(
         return try {
             pullAll()
             repeat(STALE_BASE_ATTEMPTS) {
-                val stale = pushAll() ?: return SyncResult.SYNCED
+                val stale = pushAll() ?: return SyncResult.SYNCED.also { synced() }
                 // Another phone pushed first: pulling forks what clashes, and what is left is forked here.
                 pullAll()
                 store.forkUnsent(stale.workouts, ::forkName)
@@ -161,6 +173,12 @@ class SyncClient(
         } catch (_: Exception) {
             SyncResult.FAILED
         }
+    }
+
+    private fun synced() {
+        val now = clock.now()
+        memory.putString(LAST_SYNCED, now.toString())
+        _lastSyncedAt.value = now
     }
 
     private suspend fun pullAll() {
@@ -208,5 +226,6 @@ class SyncClient(
         /** Under the server's 1 MB, leaving room for the wrapping object. */
         const val PUSH_BYTES = 900_000
         const val STALE_BASE_ATTEMPTS = 3
+        const val LAST_SYNCED = "account.lastSyncedAt"
     }
 }
