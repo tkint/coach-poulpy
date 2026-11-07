@@ -283,7 +283,7 @@ private struct SyncState: View {
 
 // MARK: - Screens over the tabs
 
-/// The screens that open over the tabs, by step: "sign-up", "sign-in", "sign-in:reset-done", "forgot",
+/// The screens that open over the tabs, by step: "sign-up", "sign-up:<email>" (the address typed on sign-in), "sign-in", "sign-in:reset-done", "forgot",
 /// "forgot-sent:<email>", "check-email", "check-email:resent", "welcome", "confirmed", "confirm:<token>" and
 /// "reset:<token>" (the email links), "link-expired".
 struct AccountFlowView: View {
@@ -304,7 +304,7 @@ struct AccountFlowView: View {
         let go: (String) -> Void = { step = $0 }
         Group {
             switch name {
-            case "sign-up": SignUpScreen(account: account, onStep: go, onClose: onClose)
+            case "sign-up": SignUpScreen(account: account, typedEmail: arg, onStep: go, onClose: onClose)
             case "sign-in": SignInScreen(account: account, resetDone: arg == "reset-done", onStep: go, onClose: onClose)
             case "forgot": ForgotScreen(account: account, onStep: go)
             case "forgot-sent": ForgotSentScreen(account: account, email: arg, onStep: go)
@@ -339,21 +339,21 @@ private struct SignUpScreen: View {
     @State private var busy = false
     @State private var why = false
 
-    init(account: AccountModel, onStep: @escaping (String) -> Void, onClose: @escaping () -> Void) {
+    init(account: AccountModel, typedEmail: String, onStep: @escaping (String) -> Void, onClose: @escaping () -> Void) {
         self.account = account
         self.onStep = onStep
         self.onClose = onClose
-        _email = State(initialValue: account.knownEmail ?? "")
+        _email = State(initialValue: typedEmail.isEmpty ? account.knownEmail ?? "" : typedEmail)
     }
 
     var body: some View {
         AccountFrame(onClose: onClose, action: "account.createAccount", busy: busy, onAction: send) {
             Intro(title: L("account.signUpTitle"), body: Text("account.signUpIntro"))
             if offline { ErrorCard(L("account.errorOffline")) }
-            PoulpyTextField(label: "account.email", text: $email, error: problems.email ? L("account.errorEmail") : nil, keyboard: .emailAddress)
+            PoulpyTextField(label: "account.email", text: $email, error: problems.email ? L("account.errorEmail") : nil, keyboard: .emailAddress, contentType: .username)
             PoulpyTextField(
                 label: "account.password", text: $password, note: "account.passwordHint",
-                error: problems.password ? L("account.errorPasswordShort") : nil, secure: true
+                error: problems.password ? L("account.errorPasswordShort") : nil, secure: true, contentType: .newPassword
             )
             VStack(alignment: .leading, spacing: 6) {
                 HStack(alignment: .top, spacing: 10) {
@@ -443,10 +443,13 @@ private struct SignInScreen: View {
             } else if resetDone {
                 InfoCard(L("account.passwordChanged"))
             }
-            PoulpyTextField(label: "account.email", text: $email, keyboard: .emailAddress)
-            PoulpyTextField(label: "account.password", text: $password, secure: true)
+            PoulpyTextField(label: "account.email", text: $email, keyboard: .emailAddress, contentType: .username)
+            PoulpyTextField(label: "account.password", text: $password, secure: true, contentType: .password)
             Button { onStep("forgot") } label: { Text("account.forgot").font(.poulpy(.callout).weight(.heavy)) }
-            HelpLine(question: "account.noAccount", link: "account.createOne") { onStep("sign-up") }
+            HelpLine(question: "account.noAccount", link: "account.createOne") {
+                let typed = email.trimmingCharacters(in: .whitespaces)
+                onStep(typed.isEmpty ? "sign-up" : "sign-up:\(typed)")
+            }
         }
     }
 
@@ -523,7 +526,7 @@ private struct ForgotScreen: View {
         AccountFrame(onClose: { onStep("sign-in") }, action: "account.sendLink", busy: busy || email.isEmpty, onAction: send) {
             Intro(title: L("account.forgotTitle"), body: Text("account.forgotIntro"))
             if offline { ErrorCard(L("account.errorOffline")) }
-            PoulpyTextField(label: "account.email", text: $email, keyboard: .emailAddress)
+            PoulpyTextField(label: "account.email", text: $email, keyboard: .emailAddress, contentType: .username)
         }
     }
 
@@ -656,7 +659,7 @@ private struct ResetScreen: View {
             if problem == NewPasswordResult.offline { ErrorCard(L("account.errorOffline")) }
             PoulpyTextField(
                 label: "account.newPassword", text: $password, note: "account.passwordHint",
-                error: problem == NewPasswordResult.tooShort ? L("account.errorPasswordShort") : nil, secure: true
+                error: problem == NewPasswordResult.tooShort ? L("account.errorPasswordShort") : nil, secure: true, contentType: .newPassword
             )
         }
     }
