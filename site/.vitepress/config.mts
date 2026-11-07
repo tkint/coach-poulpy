@@ -126,10 +126,12 @@ export default withMermaid(
         { text: 'Contributing', link: '/CONTRIBUTING' },
       ],
       // Each section shows only its own menu: a page gets the menu of the longest key its path starts
-      // with, so every page of a section is listed under one of its keys.
+      // with, so every page of a section is listed under one of its keys. Each menu is one group
+      // titled with the section's name.
       sidebar: Object.fromEntries(
         [
           [
+            'Brand',
             ['/docs/brand', '/drawings', '/brand-book'],
             [
               { text: 'Poulpy and his moods', link: '/docs/brand' },
@@ -139,6 +141,7 @@ export default withMermaid(
             ],
           ],
           [
+            'Design system',
             ['/docs/design-system', '/tokens', '/mobile-components', '/web-components', '/mockups/', '/docs/profile-and-settings', '/design/'],
             [
               { text: 'How to use it', link: '/docs/design-system' },
@@ -159,6 +162,7 @@ export default withMermaid(
             ],
           ],
           [
+            'Architecture',
             ['/docs/architecture', '/docs/roadmap', '/CONTEXT', '/docs/workout-file', '/docs/the-api', '/docs/accounts', '/decisions/', '/docs/adr/', '/docs/research/'],
             [
               { text: 'Overview', link: '/docs/architecture' },
@@ -172,6 +176,7 @@ export default withMermaid(
             ],
           ],
           [
+            'Translations',
             ['/translations', '/i18n/'],
             [
               { text: 'Proofread and translate', link: '/translations' },
@@ -181,6 +186,7 @@ export default withMermaid(
             ],
           ],
           [
+            'Contributing',
             ['/CONTRIBUTING', '/CLAUDE', '/docs/agents/', '/docs/releasing', '/docs/deploying-the-server'],
             [
               { text: 'Issues, skills and PRs', link: '/CONTRIBUTING' },
@@ -195,7 +201,11 @@ export default withMermaid(
               { text: 'Code graph', link: '/docs/agents/code-graph' },
             ],
           ],
-        ].flatMap(([prefixes, items]) => (prefixes as string[]).map((prefix) => [prefix, items])),
+        ].flatMap(([title, prefixes, items]) => {
+          // The menu opens with the section's title (the same word as the top nav), then its pages.
+          const menu = [{ text: title, items }]
+          return (prefixes as string[]).map((prefix) => [prefix, menu])
+        }),
       ),
       socialLinks: [{ icon: 'github', link: repoUrl }],
       search: { provider: 'local' },
