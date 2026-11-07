@@ -1,0 +1,41 @@
+-- Signing in (#270, ADR 0020). A sign_in is one phone or browser signed in to an account: its
+-- tokens live and die together. Tokens are random 256-bit values; only their SHA-256 is kept.
+CREATE TABLE sign_in (
+    id UUID PRIMARY KEY,
+    account_id UUID NOT NULL REFERENCES account (id) ON DELETE CASCADE,
+    device_name TEXT NOT NULL,
+    client TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL,
+    last_refreshed_at TIMESTAMPTZ NOT NULL,
+    revoked_at TIMESTAMPTZ
+);
+
+CREATE INDEX sign_in_account ON sign_in (account_id);
+
+-- Short-lived tokens sent with every request.
+CREATE TABLE access_token (
+    token_hash BYTEA PRIMARY KEY,
+    sign_in_id UUID NOT NULL REFERENCES sign_in (id) ON DELETE CASCADE,
+    expires_at TIMESTAMPTZ NOT NULL
+);
+
+CREATE INDEX access_token_sign_in ON access_token (sign_in_id);
+
+-- Each refresh token works once and is kept after use, so a second use is noticed and its
+-- whole sign-in revoked.
+CREATE TABLE refresh_token (
+    token_hash BYTEA PRIMARY KEY,
+    sign_in_id UUID NOT NULL REFERENCES sign_in (id) ON DELETE CASCADE,
+    expires_at TIMESTAMPTZ NOT NULL,
+    used_at TIMESTAMPTZ
+);
+
+CREATE INDEX refresh_token_sign_in ON refresh_token (sign_in_id);
+
+-- Failed sign-ins per address, to slow down password guessing.
+CREATE TABLE sign_in_failure (
+    email TEXT NOT NULL,
+    failed_at TIMESTAMPTZ NOT NULL
+);
+
+CREATE INDEX sign_in_failure_email ON sign_in_failure (email, failed_at);

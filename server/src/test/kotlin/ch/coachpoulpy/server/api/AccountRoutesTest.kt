@@ -118,7 +118,7 @@ class AccountRoutesTest {
     @Test
     fun aFailingMailerStillAnswersTheSame() {
         val accounts = Accounts(test.database, { error("SMTP down") }, "https://app.example.com", test.passwords, test.clock)
-        val http = app("0.7.0", test.catalog, accounts, databaseAnswers = { true })
+        val http = app("0.7.0", test.catalog, test.database, accounts, test.signIns)
         val response = http(
             Request(POST, "/api/v1/accounts").header("Content-Type", "application/json")
                 .body("""{"email":"guest@example.com","password":"correct horse","healthDataConsent":true}"""),

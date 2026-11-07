@@ -1,0 +1,46 @@
+insert:
+INSERT INTO sign_in (id, account_id, device_name, client, created_at, last_refreshed_at) VALUES (?, ?, ?, ?, ?, ?);
+
+refreshed:
+UPDATE sign_in SET last_refreshed_at = ? WHERE id = ?;
+
+revoke:
+UPDATE sign_in SET revoked_at = :revokedAt WHERE id = :id AND revoked_at IS NULL;
+
+insertAccessToken:
+INSERT INTO access_token (token_hash, sign_in_id, expires_at) VALUES (?, ?, ?);
+
+insertRefreshToken:
+INSERT INTO refresh_token (token_hash, sign_in_id, expires_at) VALUES (?, ?, ?);
+
+deleteAccessTokens:
+DELETE FROM access_token WHERE sign_in_id = ?;
+
+deleteExpiredAccessTokens:
+DELETE FROM access_token WHERE sign_in_id = :signInId AND expires_at <= :now;
+
+-- The caller of a live access token.
+liveCaller:
+SELECT s.id, s.account_id, s.client
+FROM access_token t JOIN sign_in s ON s.id = t.sign_in_id
+WHERE t.token_hash = :tokenHash AND t.expires_at > :now AND s.revoked_at IS NULL;
+
+-- Marks a refresh token used, once: no row when it is unknown or already used.
+useRefreshToken:
+UPDATE refresh_token SET used_at = :now WHERE token_hash = :tokenHash AND used_at IS NULL
+RETURNING sign_in_id, expires_at;
+
+refreshTokenSignIn:
+SELECT sign_in_id FROM refresh_token WHERE token_hash = ?;
+
+isLive:
+SELECT revoked_at IS NULL FROM sign_in WHERE id = ?;
+
+recordFailure:
+INSERT INTO sign_in_failure (email, failed_at) VALUES (lower(:email), :failedAt);
+
+failuresSince:
+SELECT count(*) FROM sign_in_failure WHERE email = lower(:email) AND failed_at > :since;
+
+forgetFailures:
+DELETE FROM sign_in_failure WHERE email = lower(:email) OR failed_at < :before;

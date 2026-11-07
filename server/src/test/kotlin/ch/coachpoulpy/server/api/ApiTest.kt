@@ -20,7 +20,7 @@ class ApiTest {
 
     @Test
     fun everyRouteIsPublicOrDeclaresItsScopes() {
-        val undeclared = apiRoutes(catalog, test.accounts).filter { it.meta.security == null }
+        val undeclared = apiRoutes(catalog, test.accounts, test.signIns, test.database).filter { it.meta.security == null }
         assertEquals(emptyList(), undeclared.map { it.toString() }, "Routes with no security: set Public or the scopes they need")
     }
 
@@ -29,7 +29,7 @@ class ApiTest {
         val response = server(Request(GET, "/api/v1/openapi.json"))
         assertEquals(OK, response.status)
         val paths = Json.parseToJsonElement(response.bodyString()).jsonObject.getValue("paths").jsonObject
-        for (path in listOf("/api/v1/catalog", "/api/v1/accounts", "/api/v1/accounts/confirm")) {
+        for (path in listOf("/api/v1/catalog", "/api/v1/accounts", "/api/v1/accounts/confirm", "/api/v1/me", "/oauth/token", "/oauth/revoke")) {
             assertTrue(path in paths, "paths were ${paths.keys}")
         }
     }
@@ -55,7 +55,7 @@ class ApiTest {
     }
 
     @Test
-    fun aTokenIsRefusedUntilAccountsExist() {
+    fun anUnknownTokenIsRefusedEvenOnAPublicRoute() {
         val response = server(Request(GET, "/api/v1/catalog").header("Authorization", "Bearer cp_at_anything"))
         assertEquals(UNAUTHORIZED, response.status)
     }
