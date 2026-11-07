@@ -165,6 +165,26 @@ class AccountModelTest {
     }
 
     @Test
+    fun aPhoneWaitingForTheEmailSignsInOnceItIsConfirmedElsewhere() = runTest {
+        answers["POST /api/v1/accounts"] = { respond("", HttpStatusCode.Accepted) }
+        answers["POST /oauth/token"] = { json("""{"error":"invalid_grant"}""", HttpStatusCode.BadRequest) }
+        store.saveWorkout(legs)
+        val account = model()
+        account.signUp("ana@example.com", "secret-pass", healthDataConsent = true)
+
+        assertEquals(false, account.checkConfirmed())
+        assertEquals(AccountState.Pending("ana@example.com"), account.state.value)
+
+        // The link was opened on the website; the app opens again.
+        serverAccepts()
+        val reopened = model()
+
+        reopened.becomes { it is AccountState.SignedIn && it.upToDate }
+        assertNull(secrets.getSecret(AccountModel.PENDING))
+        assertTrue(calls.contains("POST /api/v1/sync/push"))
+    }
+
+    @Test
     fun theConfirmationLinkOnAnotherPhoneAsksToSignIn() = runTest {
         answers["POST /api/v1/accounts/confirm"] = { respond("", HttpStatusCode.NoContent) }
 

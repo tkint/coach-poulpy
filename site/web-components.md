@@ -61,6 +61,16 @@ Primary, tonal, outline and grumpy: `CpButton`.
 | --- | --- |
 | `<CpSelectField>` | `label.cp-fieldset`, a `span.cp-type-label` and `select.cp-select` |
 
+## Password field
+
+`CpPasswordField`, with a button that shows the password. In error, it turns crimson and a `CpErrorNote` under the form says why.
+
+<WebComponentSamples part="password-field" />
+
+| Vue | Classes |
+| --- | --- |
+| `<CpPasswordField>` | `div.cp-fieldset` around a `label.cp-type-label`, `label.cp-input` (`cp-input-error` in error) holding the `input` and a `cp-btn cp-btn-circle cp-btn-ghost cp-btn-sm`, and `span.cp-label` for the hint |
+
 ## Poulpy card
 
 `CpPoulpyCard`: no results, an empty list.

@@ -1,0 +1,23 @@
+{
+  "account": {
+    "checking": "Vérification du lien…",
+    "confirmedTitle": "Adresse e-mail confirmée",
+    "confirmedBody": "Ouvrez Coach Poulpy sur le téléphone avec lequel vous vous êtes inscrit : il vous connecte et envoie votre entraînement.",
+    "confirmedPoulpy": "Je hisse ton entraînement dans le cloud. Huit tentacules, zéro attente.",
+    "linkExpiredTitle": "Ce lien ne fonctionne plus",
+    "confirmExpiredBody": "Il a peut-être déjà servi, ou il a expiré au bout de 24 heures. Inscrivez-vous de nouveau dans l’app avec la même adresse et nous en enverrons un nouveau.",
+    "resetExpiredBody": "Il a peut-être déjà servi, ou il a expiré au bout d’une heure. Dans l’app, touchez « Mot de passe oublié ? » pour en recevoir un nouveau.",
+    "resetTitle": "Choisir un nouveau mot de passe",
+    "resetIntro": "Tous les téléphones connectés à ce compte seront déconnectés.",
+    "newPassword": "Nouveau mot de passe",
+    "passwordHint": "8 caractères ou plus.",
+    "showPassword": "Afficher le mot de passe",
+    "hidePassword": "Masquer le mot de passe",
+    "savePassword": "Enregistrer le mot de passe",
+    "errorPasswordShort": "Utilisez au moins 8 caractères.",
+    "savedTitle": "Mot de passe enregistré",
+    "savedBody": "Tous les téléphones ont été déconnectés. Ouvrez Coach Poulpy et connectez-vous avec votre nouveau mot de passe.",
+    "errorOffline": "Impossible de joindre Coach Poulpy. Vérifiez votre connexion et réessayez.",
+    "tryAgain": "Réessayer"
+  }
+}

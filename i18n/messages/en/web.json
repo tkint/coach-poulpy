@@ -1,0 +1,23 @@
+{
+  "account": {
+    "checking": "Checking your link…",
+    "confirmedTitle": "Email confirmed",
+    "confirmedBody": "Open Coach Poulpy on the phone you signed up with: it signs you in and sends your training.",
+    "confirmedPoulpy": "Lifting your training into the cloud. Eight tentacles, no waiting.",
+    "linkExpiredTitle": "This link doesn’t work anymore",
+    "confirmExpiredBody": "It may have been used already, or it expired after 24 hours. Sign up again in the app with the same address and we’ll send a new one.",
+    "resetExpiredBody": "It may have been used already, or it expired after an hour. In the app, tap “Forgot your password?” to get a new one.",
+    "resetTitle": "Choose a new password",
+    "resetIntro": "Every phone signed in to this account will be signed out.",
+    "newPassword": "New password",
+    "passwordHint": "8 characters or more.",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "savePassword": "Save password",
+    "errorPasswordShort": "Use at least 8 characters.",
+    "savedTitle": "Password saved",
+    "savedBody": "Every phone was signed out. Open Coach Poulpy and sign in with your new password.",
+    "errorOffline": "Coach Poulpy can’t be reached. Check your connection and try again.",
+    "tryAgain": "Try again"
+  }
+}

@@ -1,30 +1,32 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
 import { CpPoulpy } from '@coach-poulpy/ui'
+import ConfirmEmailPage from './pages/ConfirmEmailPage.vue'
+import ResetPasswordPage from './pages/ResetPasswordPage.vue'
+import { locale } from './i18n'
 
-// Placeholder page: shows whether the local server is running.
-const server = ref<'checking' | 'up' | 'down'>('checking')
-
-onMounted(async () => {
-  try {
-    const response = await fetch('/api/health')
-    server.value = response.ok ? 'up' : 'down'
-  } catch {
-    server.value = 'down'
-  }
-})
+// The account email links, /confirm-email#<token> and /reset-password#<token>, open here when
+// they don't open the app. The token stays in the fragment, which never reaches a server log, and
+// is taken off the address so a reload or the history doesn't keep it.
+const page = location.pathname.replace(/\/+$/, '')
+const token = location.hash.slice(1)
+if (token) history.replaceState(null, '', location.pathname + location.search)
+document.documentElement.lang = locale
 </script>
 
 <template>
-  <main class="mx-auto my-16 max-w-xl px-4">
+  <ConfirmEmailPage v-if="page === '/confirm-email'" :token="token" />
+  <ResetPasswordPage v-else-if="page === '/reset-password'" :token="token" />
+  <main v-else class="mx-auto my-16 max-w-xl px-4">
     <CpPoulpy drawing="mood_happy" :size="96" />
     <h1 class="cp-type-display">Coach <span class="text-primary">poulpy</span></h1>
-    <p>The website arrives with accounts. Local server: {{ server }}</p>
+    <p>The website arrives with accounts.</p>
   </main>
 </template>
 
 <style>
+html,
 body {
+  min-height: 100%;
   background: var(--cp-background);
   color: var(--cp-on-background);
 }
