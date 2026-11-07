@@ -9,6 +9,7 @@ import ch.coachpoulpy.server.auth.SignIns
 import ch.coachpoulpy.server.db.Database
 import ch.coachpoulpy.server.mail.Email
 import ch.coachpoulpy.server.mail.Mailer
+import ch.coachpoulpy.server.sync.Sync
 import io.zonky.test.db.postgres.embedded.EmbeddedPostgres
 import java.time.Clock
 import java.time.Instant
@@ -56,5 +57,6 @@ class TestServer {
     val signIns = SignIns(database, passwords, clock)
     val passwordResets = PasswordResets(database, mailer, "https://app.example.com", signIns, passwords, clock)
     val accountDeletion = AccountDeletion(database, passwords)
-    val http = app("0.7.0", catalog, database, accounts, signIns, passwordResets, accountDeletion)
+    val sync = Sync(database)
+    val http = app("0.7.0", catalog, database, accounts, signIns, passwordResets, accountDeletion, sync)
 }

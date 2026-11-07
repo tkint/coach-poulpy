@@ -2,6 +2,7 @@ package ch.coachpoulpy.server.api
 
 import ch.coachpoulpy.catalog.Catalog
 import ch.coachpoulpy.server.TestServer
+import ch.coachpoulpy.server.sync.Sync
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import org.http4k.core.Method.GET
@@ -20,7 +21,7 @@ class ApiTest {
 
     @Test
     fun everyRouteIsPublicOrDeclaresItsScopes() {
-        val undeclared = apiRoutes(catalog, test.accounts, test.signIns, test.passwordResets, test.accountDeletion, test.database).filter { it.meta.security == null }
+        val undeclared = apiRoutes(catalog, test.accounts, test.signIns, test.passwordResets, test.accountDeletion, Sync(test.database), test.database).filter { it.meta.security == null }
         assertEquals(emptyList(), undeclared.map { it.toString() }, "Routes with no security: set Public or the scopes they need")
     }
 

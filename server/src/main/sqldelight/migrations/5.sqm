@@ -1,0 +1,38 @@
+-- Sync (#285, docs/accounts.md, ADR 0025). Every row written for an account takes the next value
+-- of its change_count, under a lock on the account row, so a pull after a change number never
+-- misses a row. Sessions are the first kind of change; their content is JSONB (ADR 0007).
+ALTER TABLE account ADD COLUMN change_count BIGINT NOT NULL DEFAULT 0;
+
+-- A session's header. A deleted session keeps its row, with deleted_at set and no events, so
+-- the deletion reaches every phone and the session can't come back.
+CREATE TABLE session (
+    account_id UUID NOT NULL REFERENCES account (id) ON DELETE CASCADE,
+    id UUID NOT NULL,
+    source TEXT NOT NULL,
+    started_at TIMESTAMPTZ NOT NULL,
+    ended_at TIMESTAMPTZ,
+    workout_id UUID,
+    workout_version INTEGER,
+    title TEXT,
+    format TEXT,
+    totals JSONB,
+    deleted_at TIMESTAMPTZ,
+    change_number BIGINT NOT NULL,
+    PRIMARY KEY (account_id, id)
+);
+
+CREATE INDEX session_changes ON session (account_id, change_number);
+
+-- The events of a session, never changed once stored (ADR 0003).
+CREATE TABLE session_event (
+    account_id UUID NOT NULL,
+    session_id UUID NOT NULL,
+    seq BIGINT NOT NULL,
+    at TIMESTAMPTZ NOT NULL,
+    payload JSONB NOT NULL,
+    change_number BIGINT NOT NULL,
+    PRIMARY KEY (account_id, session_id, seq),
+    FOREIGN KEY (account_id, session_id) REFERENCES session (account_id, id) ON DELETE CASCADE
+);
+
+CREATE INDEX session_event_changes ON session_event (account_id, change_number);

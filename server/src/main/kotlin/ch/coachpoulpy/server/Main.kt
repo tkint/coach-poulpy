@@ -13,6 +13,7 @@ import ch.coachpoulpy.server.api.api
 import ch.coachpoulpy.server.auth.authenticate
 import ch.coachpoulpy.server.db.Database
 import ch.coachpoulpy.server.db.DatabaseSettings
+import ch.coachpoulpy.server.sync.Sync
 import org.http4k.core.HttpHandler
 import org.http4k.core.Method.GET
 import org.http4k.core.Response
@@ -51,12 +52,13 @@ fun app(
     signIns: SignIns,
     passwordResets: PasswordResets,
     accountDeletion: AccountDeletion,
+    sync: Sync = Sync(database),
     databaseAnswers: () -> Boolean = database::answers,
 ): HttpHandler = routes(
     "/health" bind GET to {
         if (databaseAnswers()) Response(OK).body("ok $version") else Response(SERVICE_UNAVAILABLE).body("database unavailable")
     },
-    authenticate(mapOf(SignIns.ACCESS_PREFIX to signIns.authenticator)).then(api(version, catalog, accounts, signIns, passwordResets, accountDeletion, database)),
+    authenticate(mapOf(SignIns.ACCESS_PREFIX to signIns.authenticator)).then(api(version, catalog, accounts, signIns, passwordResets, accountDeletion, sync, database)),
 )
 
 fun main() {
