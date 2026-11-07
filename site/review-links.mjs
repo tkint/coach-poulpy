@@ -44,7 +44,7 @@ function pageOf(file) {
   if (file === 'design/tokens.json') return { group: 'design', page: 'tokens' }
   if (file === 'design/build-poulpy.mjs' || file.startsWith('design/poulpy/')) return { group: 'design', page: 'drawings' }
   if (file.startsWith('site/.vitepress/theme/brand-book/')) return { group: 'design', page: 'brand-book' }
-  if (!file.endsWith('.md')) return null
+  if (!file.endsWith('.md') || file.includes('[')) return null // a [param].md route has no page of its own
   const isShared = shared.some((path) => file === path || file.startsWith(`${path}/`))
   const path = isShared ? file : file.startsWith('site/') ? file.slice('site/'.length) : null
   if (path === null) return null
