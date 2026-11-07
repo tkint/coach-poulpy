@@ -1059,3 +1059,51 @@ svg { flex: none; }
 .body-line { fill: none; stroke: var(--cp-outline); stroke-width: 1; stroke-linecap: round; }
 .body-area[aria-checked="true"].body-skin { fill: var(--cp-primary); }
 
+
+/* ---------- Accounts (drafts): sign-up, sign-in, the account page ---------- */
+
+.intro { display: flex; flex-direction: column; gap: var(--cp-space-xs); }
+.intro p { font-size: 15px; line-height: 21px; }
+.text-field--error { border-color: var(--cp-error); }
+.field-error { display: flex; align-items: flex-start; gap: 6px; font-size: 13px; line-height: 18px; font-weight: 700; color: var(--cp-error); }
+.field-error svg { flex: none; margin-top: 0; }
+.error-card { display: flex; align-items: flex-start; gap: var(--cp-space-sm); border-radius: var(--cp-radius-md); background: var(--cp-surface-variant); border: 1.5px solid var(--cp-error); color: var(--cp-error); padding: 12px 14px; }
+.error-card svg { flex: none; margin-top: 1px; }
+.error-card p { font-size: 15px; line-height: 21px; font-weight: 700; }
+.password-field { position: relative; display: flex; }
+.password-field .text-field { flex: 1; min-width: 0; padding-right: 56px; }
+.password-field button { position: absolute; right: 4px; top: 4px; width: 44px; height: 44px; color: var(--cp-on-surface-variant); }
+.check-row { display: flex; align-items: flex-start; gap: var(--cp-space-md); font-size: 14px; line-height: 20px; font-weight: 600; }
+.check-row input { flex: none; width: 22px; height: 22px; margin: 0; accent-color: var(--cp-primary); }
+.link { color: var(--cp-primary); font-weight: 800; text-decoration: underline; text-underline-offset: 3px; }
+.forgot-link { align-self: flex-start; min-height: 44px; display: flex; align-items: center; margin-top: -6px; }
+.tick-list { display: flex; flex-direction: column; gap: var(--cp-space-sm); }
+.tick-list li { display: flex; align-items: flex-start; gap: var(--cp-space-sm); font-size: 15px; line-height: 21px; font-weight: 700; }
+.tick-list svg { flex: none; margin-top: 2px; color: var(--cp-primary); }
+.info-card { display: flex; align-items: flex-start; gap: var(--cp-space-md); border-radius: var(--cp-radius-md); background: var(--cp-primary-container); color: var(--cp-on-primary-container); padding: 12px 14px; }
+.info-card > svg { flex: none; }
+.info-card p { font-size: 15px; line-height: 21px; font-weight: 600; }
+.info-card--stack { flex-direction: column; align-items: stretch; gap: var(--cp-space-sm); }
+.info-card--stack .info-title { display: flex; align-items: center; gap: var(--cp-space-sm); font: var(--cp-type-headline); font-size: 18px; }
+.poulpy-line { font-family: var(--cp-font-display); font-size: 19px; line-height: 24px; font-weight: 700; text-align: center; }
+.done-line { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 14px; font-weight: 800; color: var(--cp-success); }
+.progress-card { display: flex; flex-direction: column; gap: 10px; }
+.progress-card small { font-size: 13px; color: var(--cp-on-surface-variant); }
+.progress-track { height: 10px; border-radius: var(--cp-radius-pill); background: var(--cp-surface-variant); overflow: hidden; }
+.progress-track span { display: block; height: 100%; border-radius: inherit; background: var(--cp-primary); }
+.account-card { display: flex; flex-direction: column; gap: 2px; }
+.account-card strong { font-size: 17px; line-height: 23px; font-weight: 800; overflow-wrap: anywhere; }
+.sync-state { display: flex; align-items: center; gap: var(--cp-space-md); padding: 4px var(--cp-space-xs); }
+.sync-state > span:last-child { display: flex; flex-direction: column; }
+.sync-state strong { font-size: 16px; line-height: 22px; font-weight: 800; }
+.sync-state small { font-size: 13px; line-height: 18px; font-weight: 600; color: var(--cp-on-surface-variant); }
+.sync-state .dot { flex: none; width: 10px; height: 10px; border-radius: var(--cp-radius-pill); background: var(--cp-success); }
+.sync-state .dot--idle { background: var(--cp-outline); }
+.leave-actions { margin-top: auto; display: flex; flex-direction: column; gap: var(--cp-space-xs); }
+.dialog-icon { align-self: center; width: 56px; height: 56px; border-radius: var(--cp-radius-pill); background: var(--cp-primary-container); color: var(--cp-on-primary-container); display: flex; align-items: center; justify-content: center; }
+.dialog .actions--stack { flex-direction: column; gap: var(--cp-space-xs); }
+.dialog .actions--stack > * { flex: none; }
+
+.help-lines { display: flex; flex-direction: column; gap: 2px; text-align: center; font-size: 14px; line-height: 20px; color: var(--cp-on-surface-variant); }
+.info-card--stack .help-lines { text-align: left; }
+.alt-line { font-size: 15px; line-height: 21px; color: var(--cp-on-surface-variant); text-align: center; margin-top: var(--cp-space-xs); }
