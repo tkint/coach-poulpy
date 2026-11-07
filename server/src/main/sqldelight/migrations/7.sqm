@@ -1,0 +1,41 @@
+-- Planned workouts, the body log and settings in sync (#287). Each keeps the latest write by the
+-- time the phone gave with it (docs/accounts.md, Sync); a deletion is a write too, kept as a row
+-- so it reaches every phone.
+CREATE TABLE planned_workout (
+    account_id UUID NOT NULL REFERENCES account (id) ON DELETE CASCADE,
+    id UUID NOT NULL,
+    workout_id UUID NOT NULL,
+    day DATE NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL,
+    changed_at TIMESTAMPTZ NOT NULL,
+    deleted BOOLEAN NOT NULL,
+    change_number BIGINT NOT NULL,
+    PRIMARY KEY (account_id, id)
+);
+
+CREATE INDEX planned_workout_changes ON planned_workout (account_id, change_number);
+
+-- One entry per metric and day, in kg or cm (ADR 0017); no value once deleted.
+CREATE TABLE body_measurement (
+    account_id UUID NOT NULL REFERENCES account (id) ON DELETE CASCADE,
+    metric TEXT NOT NULL,
+    day DATE NOT NULL,
+    value DOUBLE PRECISION,
+    changed_at TIMESTAMPTZ NOT NULL,
+    change_number BIGINT NOT NULL,
+    PRIMARY KEY (account_id, metric, day)
+);
+
+CREATE INDEX body_measurement_changes ON body_measurement (account_id, change_number);
+
+-- The profile's fields, units and language, by the phone's key; no value once cleared.
+CREATE TABLE setting (
+    account_id UUID NOT NULL REFERENCES account (id) ON DELETE CASCADE,
+    key TEXT NOT NULL,
+    value TEXT,
+    changed_at TIMESTAMPTZ NOT NULL,
+    change_number BIGINT NOT NULL,
+    PRIMARY KEY (account_id, key)
+);
+
+CREATE INDEX setting_changes ON setting (account_id, change_number);

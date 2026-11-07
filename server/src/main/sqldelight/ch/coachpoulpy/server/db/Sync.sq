@@ -69,3 +69,47 @@ FROM workout_version WHERE account_id = :accountId AND change_number > :after OR
 workoutDeletionsAfter:
 SELECT workout_id, version, deleted_at, change_number
 FROM workout_deletion WHERE account_id = :accountId AND change_number > :after ORDER BY change_number LIMIT :limit;
+
+plannedWorkoutChangedAt:
+SELECT changed_at FROM planned_workout WHERE account_id = :accountId AND id = :id;
+
+-- Inserts or replaces a planned workout; the caller has checked the write is the latest.
+writePlannedWorkout:
+INSERT INTO planned_workout (account_id, id, workout_id, day, created_at, changed_at, deleted, change_number)
+VALUES (:accountId, :id, :workoutId, :day, :createdAt, :changedAt, :deleted, :changeNumber)
+ON CONFLICT (account_id, id) DO UPDATE SET workout_id = EXCLUDED.workout_id, day = EXCLUDED.day,
+    changed_at = EXCLUDED.changed_at, deleted = EXCLUDED.deleted, change_number = EXCLUDED.change_number;
+
+markPlannedWorkoutDeleted:
+UPDATE planned_workout SET deleted = TRUE, changed_at = :changedAt, change_number = :changeNumber
+WHERE account_id = :accountId AND id = :id;
+
+measurementChangedAt:
+SELECT changed_at FROM body_measurement WHERE account_id = :accountId AND metric = :metric AND day = :day;
+
+writeMeasurement:
+INSERT INTO body_measurement (account_id, metric, day, value, changed_at, change_number)
+VALUES (:accountId, :metric, :day, :value, :changedAt, :changeNumber)
+ON CONFLICT (account_id, metric, day) DO UPDATE SET value = EXCLUDED.value, changed_at = EXCLUDED.changed_at,
+    change_number = EXCLUDED.change_number;
+
+settingChangedAt:
+SELECT changed_at FROM setting WHERE account_id = :accountId AND key = :key;
+
+writeSetting:
+INSERT INTO setting (account_id, key, value, changed_at, change_number)
+VALUES (:accountId, :key, :value, :changedAt, :changeNumber)
+ON CONFLICT (account_id, key) DO UPDATE SET value = EXCLUDED.value, changed_at = EXCLUDED.changed_at,
+    change_number = EXCLUDED.change_number;
+
+plannedWorkoutsAfter:
+SELECT id, workout_id, day, created_at, changed_at, deleted, change_number
+FROM planned_workout WHERE account_id = :accountId AND change_number > :after ORDER BY change_number LIMIT :limit;
+
+measurementsAfter:
+SELECT metric, day, value, changed_at, change_number
+FROM body_measurement WHERE account_id = :accountId AND change_number > :after ORDER BY change_number LIMIT :limit;
+
+settingsAfter:
+SELECT key, value, changed_at, change_number
+FROM setting WHERE account_id = :accountId AND change_number > :after ORDER BY change_number LIMIT :limit;

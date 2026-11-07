@@ -3,8 +3,10 @@ package ch.coachpoulpy.core.model
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.minus
 import kotlinx.datetime.DatePeriod
+import kotlinx.serialization.Serializable
 
 /** What is measured. Weight is stored in kilograms and height in centimetres (ADR 0017). */
+@Serializable
 enum class BodyMetric { WEIGHT, HEIGHT }
 
 /** One dated entry of the log. [value] is in kg or cm; a second entry on the same day replaces the first. */
