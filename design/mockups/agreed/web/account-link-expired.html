@@ -14,15 +14,17 @@
 <script src="../../shared/mockup-theme.js"></script>
 </head>
 <body class="bg-base-100 text-base-content min-h-screen">
-<header class="mx-auto flex max-w-md items-center gap-2 px-4 pt-6" data-component="site-header">
+<header class="mx-auto flex max-w-5xl items-center gap-2 px-4 pt-6 md:px-8" data-component="site-header">
   <img src="../../../poulpy/mood_happy.svg" alt="" width="36" height="36">
   <span class="cp-type-headline">Coach <span class="text-primary">poulpy</span></span>
 </header>
-<main class="mx-auto flex max-w-md flex-col gap-6 px-4 py-12" id="link-expired">
-  <img src="../../../poulpy/pose_thinking.svg" alt="" width="140" height="127" class="self-center">
-  <div class="flex flex-col gap-2 text-center">
-    <h1 class="cp-type-title">This link doesn’t work anymore</h1>
-    <p>It may have been used already, or it expired after 24 hours. Sign up again in the app with the same address and we’ll send a new one.</p>
+<main class="mx-auto grid max-w-5xl items-center gap-8 px-4 py-10 md:grid-cols-2 md:gap-16 md:px-8 md:py-24" id="link-expired">
+  <img src="../../../poulpy/pose_thinking.svg" alt="" width="320" height="290" class="w-40 justify-self-center md:w-80">
+  <div class="flex max-w-md flex-col gap-6">
+    <div class="flex flex-col gap-2">
+      <h1 class="cp-type-display">This link doesn’t work anymore</h1>
+      <p>It may have been used already, or it expired after 24 hours. Sign up again in the app with the same address and we’ll send a new one.</p>
+    </div>
   </div>
 </main>
 </body>

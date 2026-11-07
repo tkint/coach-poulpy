@@ -14,17 +14,19 @@
 <script src="../../shared/mockup-theme.js"></script>
 </head>
 <body class="bg-base-100 text-base-content min-h-screen">
-<header class="mx-auto flex max-w-md items-center gap-2 px-4 pt-6" data-component="site-header">
+<header class="mx-auto flex max-w-5xl items-center gap-2 px-4 pt-6 md:px-8" data-component="site-header">
   <img src="../../../poulpy/mood_happy.svg" alt="" width="36" height="36">
   <span class="cp-type-headline">Coach <span class="text-primary">poulpy</span></span>
 </header>
-<main class="mx-auto flex max-w-md flex-col gap-6 px-4 py-12" id="confirmed">
-  <img src="../../../poulpy/pose_champion.svg" alt="" width="140" height="127" class="self-center">
-  <div class="flex flex-col gap-2 text-center">
-    <h1 class="cp-type-title">Email confirmed</h1>
-    <p>Open Coach Poulpy on the phone you signed up with: it signs you in and sends your training.</p>
+<main class="mx-auto grid max-w-5xl items-center gap-8 px-4 py-10 md:grid-cols-2 md:gap-16 md:px-8 md:py-24" id="confirmed">
+  <img src="../../../poulpy/pose_champion.svg" alt="" width="320" height="290" class="w-40 justify-self-center md:w-80">
+  <div class="flex max-w-md flex-col gap-6">
+    <div class="flex flex-col gap-2">
+      <h1 class="cp-type-display">Email confirmed</h1>
+      <p>Open Coach Poulpy on the phone you signed up with: it signs you in and sends your training.</p>
+    </div>
+    <p class="font-bold text-primary" id="poulpy-line">Lifting your training into the cloud. Eight tentacles, no waiting.</p>
   </div>
-  <p class="text-center font-bold text-primary" id="poulpy-line">Lifting your training into the cloud. Eight tentacles, no waiting.</p>
 </main>
 </body>
 </html>
