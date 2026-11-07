@@ -3,6 +3,7 @@ package ch.coachpoulpy.server
 import ch.coachpoulpy.catalog.Catalog
 import ch.coachpoulpy.server.accounts.Accounts
 import ch.coachpoulpy.server.accounts.Passwords
+import ch.coachpoulpy.server.auth.SignIns
 import ch.coachpoulpy.server.db.Database
 import ch.coachpoulpy.server.mail.Email
 import ch.coachpoulpy.server.mail.Mailer
@@ -50,5 +51,6 @@ class TestServer {
     val passwords = Passwords(memoryKib = 64, iterations = 1)
     val accounts = Accounts(database, mailer, "https://app.example.com", passwords, clock)
     val catalog: Catalog = Catalog.bundled
-    val http = app("0.7.0", catalog, accounts, databaseAnswers = { true })
+    val signIns = SignIns(database, passwords, clock)
+    val http = app("0.7.0", catalog, database, accounts, signIns)
 }

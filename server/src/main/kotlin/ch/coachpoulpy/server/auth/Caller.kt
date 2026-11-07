@@ -23,7 +23,12 @@ value class AccountId(val value: String)
 
 /** What holds the credential: the phone app, the website, a personal access token or a third-party app. */
 @JvmInline
-value class Client(val value: String)
+value class Client(val value: String) {
+    companion object {
+        /** The Android and iOS apps. */
+        val App = Client("app")
+    }
+}
 
 /** What a caller may do, as `resource:action` (ADR 0020). */
 enum class Scope(val value: String) {

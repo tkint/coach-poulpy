@@ -11,3 +11,9 @@ UPDATE account SET confirmed_at = :confirmedAt WHERE id = :id AND confirmed_at I
 
 passwordHash:
 SELECT password_hash FROM account WHERE lower(email) = lower(:email);
+
+forSignIn:
+SELECT id, password_hash, confirmed_at FROM account WHERE lower(email) = lower(:email);
+
+byId:
+SELECT id, email, role FROM account WHERE id = ?;
