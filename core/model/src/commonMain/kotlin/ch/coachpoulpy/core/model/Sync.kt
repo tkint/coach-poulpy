@@ -1,6 +1,7 @@
 package ch.coachpoulpy.core.model
 
 import kotlin.time.Instant
+import kotlinx.datetime.LocalDate
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
@@ -56,6 +57,37 @@ data class WorkoutVersionChange(val workout: Workout, val baseVersion: Int?, val
 @Serializable
 @SerialName("workout-deleted")
 data class WorkoutDeletedChange(val workoutId: WorkoutId, val version: Int, val deletedAt: Instant) : SyncChange
+
+/** A planned workout put on [day], or moved there at [dayChangedAt]; the latest write wins. */
+@Serializable
+@SerialName("planned-workout")
+data class PlannedWorkoutChange(
+    val id: String,
+    val workoutId: WorkoutId,
+    val day: LocalDate,
+    val createdAt: Instant,
+    val dayChangedAt: Instant,
+) : SyncChange
+
+/** A planned workout taken off its day; it loses to a move made later. */
+@Serializable
+@SerialName("planned-workout-deleted")
+data class PlannedWorkoutDeletedChange(val id: String, val deletedAt: Instant) : SyncChange
+
+/** The [metric] logged on [day], or none to delete it; one per metric and day, the latest write wins. */
+@Serializable
+@SerialName("body-measurement")
+data class BodyMeasurementChange(val metric: BodyMetric, val day: LocalDate, val value: Double?, val changedAt: Instant) : SyncChange
+
+/** One profile field, the units or the language, or none to clear it; the latest write wins per key. */
+@Serializable
+@SerialName("setting")
+data class SettingChange(val key: String, val value: String?, val changedAt: Instant) : SyncChange {
+    companion object {
+        /** The keys that follow the account. Theme, app icon and paired devices stay on each phone. */
+        fun follows(key: String): Boolean = key.startsWith("profile.") || key in setOf("settings.units", "settings.language")
+    }
+}
 
 /** What a phone pushes: its outbox, oldest first. */
 @Serializable

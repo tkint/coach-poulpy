@@ -1,10 +1,15 @@
 package ch.coachpoulpy.server.sync
 
+import ch.coachpoulpy.core.model.BodyMeasurementChange
+import ch.coachpoulpy.core.model.BodyMetric
+import ch.coachpoulpy.core.model.PlannedWorkoutChange
+import ch.coachpoulpy.core.model.PlannedWorkoutDeletedChange
 import ch.coachpoulpy.core.model.SessionChange
 import ch.coachpoulpy.core.model.SessionDeletedChange
 import ch.coachpoulpy.core.model.SessionEventsChange
 import ch.coachpoulpy.core.model.SessionId
 import ch.coachpoulpy.core.model.SessionSource
+import ch.coachpoulpy.core.model.SettingChange
 import ch.coachpoulpy.core.model.SyncChange
 import ch.coachpoulpy.core.model.SyncPage
 import ch.coachpoulpy.core.model.SyncedEvent
@@ -22,6 +27,8 @@ import java.util.UUID
 import kotlin.time.Instant
 import kotlin.time.toJavaInstant
 import kotlin.time.toKotlinInstant
+import kotlinx.datetime.toJavaLocalDate
+import kotlinx.datetime.toKotlinLocalDate
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 
@@ -54,6 +61,10 @@ class Sync(private val database: Database) {
                 // Later versions of a stale workout are stale too; every one is named in the answer.
                 is WorkoutVersionChange -> if (change.workout.id in stale || !apply(account, index, change)) stale += change.workout.id
                 is WorkoutDeletedChange -> if (change.workoutId !in stale) apply(account, index, change)
+                is PlannedWorkoutChange -> apply(account, index, change)
+                is PlannedWorkoutDeletedChange -> apply(account, index, change)
+                is BodyMeasurementChange -> apply(account, index, change)
+                is SettingChange -> apply(account, index, change)
             }
         }
         if (stale.isNotEmpty()) throw StaleBase(stale.toList())
@@ -73,7 +84,24 @@ class Sync(private val database: Database) {
         val deletions = queries.workoutDeletionsAfter(account, after, fetch).executeAsList().map {
             Row(it.change_number, change = WorkoutDeletedChange(WorkoutId(it.workout_id.toString()), it.version, it.deleted_at.toKotlin()))
         }
-        val rows = (sessions + events + versions + deletions).sortedBy { it.number }
+        val planned = queries.plannedWorkoutsAfter(account, after, fetch).executeAsList().map {
+            val id = it.id.toString()
+            Row(
+                it.change_number,
+                change = if (it.deleted) {
+                    PlannedWorkoutDeletedChange(id, it.changed_at.toKotlin())
+                } else {
+                    PlannedWorkoutChange(id, WorkoutId(it.workout_id.toString()), it.day.toKotlinLocalDate(), it.created_at.toKotlin(), it.changed_at.toKotlin())
+                },
+            )
+        }
+        val measurements = queries.measurementsAfter(account, after, fetch).executeAsList().map {
+            Row(it.change_number, change = BodyMeasurementChange(BodyMetric.valueOf(it.metric), it.day.toKotlinLocalDate(), it.value_, it.changed_at.toKotlin()))
+        }
+        val settings = queries.settingsAfter(account, after, fetch).executeAsList().map {
+            Row(it.change_number, change = SettingChange(it.key, it.value_, it.changed_at.toKotlin()))
+        }
+        val rows = (sessions + events + versions + deletions + planned + measurements + settings).sortedBy { it.number }
         val page = rows.take(limit)
         val cursor = page.lastOrNull()?.number ?: after
         SyncPage(group(account, page, after), cursor.toString(), more = rows.size > limit)
@@ -149,6 +177,42 @@ class Sync(private val database: Database) {
         val latest = queries.latestWorkoutVersion(account, id).executeAsOne().latest ?: return
         if (latest > change.version || queries.workoutDeletion(account, id).executeAsOneOrNull() != null) return
         queries.insertWorkoutDeletion(account, id, change.version, change.deletedAt.toOffset(), next(account))
+    }
+
+    // The small fields keep the latest write by the phone's time; an older or equal one changes nothing.
+
+    private fun apply(account: UUID, index: Int, change: PlannedWorkoutChange) {
+        val id = uuid(index, change.id)
+        val workoutId = uuid(index, change.workoutId.value)
+        val changedAt = change.dayChangedAt.toOffset()
+        if (queries.plannedWorkoutChangedAt(account, id).executeAsOneOrNull()?.isBefore(changedAt) == false) return
+        queries.writePlannedWorkout(
+            account, id, workoutId, change.day.toJavaLocalDate(), change.createdAt.toOffset(), changedAt, false, next(account),
+        )
+    }
+
+    private fun apply(account: UUID, index: Int, change: PlannedWorkoutDeletedChange) {
+        val id = uuid(index, change.id)
+        val deletedAt = change.deletedAt.toOffset()
+        // A planned workout the server never had was never on another phone.
+        val stored = queries.plannedWorkoutChangedAt(account, id).executeAsOneOrNull() ?: return
+        if (!stored.isBefore(deletedAt)) return
+        queries.markPlannedWorkoutDeleted(deletedAt, next(account), account, id)
+    }
+
+    private fun apply(account: UUID, index: Int, change: BodyMeasurementChange) {
+        if (change.value?.let { it.isFinite() && it > 0 } == false) throw InvalidChange(index, "A measurement is a positive number")
+        val changedAt = change.changedAt.toOffset()
+        val day = change.day.toJavaLocalDate()
+        if (queries.measurementChangedAt(account, change.metric.name, day).executeAsOneOrNull()?.isBefore(changedAt) == false) return
+        queries.writeMeasurement(account, change.metric.name, day, change.value, changedAt, next(account))
+    }
+
+    private fun apply(account: UUID, index: Int, change: SettingChange) {
+        if (!SettingChange.follows(change.key)) throw InvalidChange(index, "${change.key} doesn't follow the account")
+        val changedAt = change.changedAt.toOffset()
+        if (queries.settingChangedAt(account, change.key).executeAsOneOrNull()?.isBefore(changedAt) == false) return
+        queries.writeSetting(account, change.key, change.value, changedAt, next(account))
     }
 
     /**
