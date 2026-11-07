@@ -56,7 +56,6 @@ Primary, tonal, outline and grumpy: `CpButton`.
 
 <WebComponentSamples part="sheet" />
 
-
 ## Classes
 
 A web mockup is plain HTML, so it writes the classes the Vue components render. Every DaisyUI class carries the `cp-` prefix (`cp-btn`, not `btn`); the few classes of our own (`cp-chip`, `cp-stepper`, `cp-type-*`...) never reuse a DaisyUI name. Tailwind's own utilities (`w-full`, `bg-secondary`) have no prefix.
