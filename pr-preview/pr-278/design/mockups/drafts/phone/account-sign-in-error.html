@@ -17,13 +17,14 @@
 <main class="phone">
   <header class="top-bar" style="justify-content: flex-start;"><a class="icon-button" href="account-settings-guest.html" aria-label="Close"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></a></header>
   <div class="form-body" style="padding-top: var(--cp-space-sm);">
-    <div class="intro"><h1 class="title" style="font-size: 30px; line-height: 34px;">Sign in</h1><p class="muted">Use the account you made on another phone. What is on this phone joins your account; nothing is replaced.</p></div>
+    <div class="intro"><h1 class="title" style="font-size: 30px; line-height: 34px;">Your account</h1><p class="muted">Back up your training and pick it up on any phone. The app keeps working without a connection.</p></div>
+    <div class="segmented" role="tablist" aria-label="Your account" id="entry-tabs" data-component="segmented"><a role="tab" href="account-sign-up.html" aria-checked="false">Create account</a><a role="tab" href="account-sign-in.html" aria-checked="true">Sign in</a></div>
     
     <section class="error-card" id="sign-in-error" data-component="error-card" role="alert"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.5v.5"/></svg><p>Wrong email or password. Check both and try again.</p></section>
     <div class="field" id="email-field"><label class="label" for="email">Email</label><input class="text-field" id="email" type="email" value="alex@example.com" autocomplete="email"></div>
     <div class="field" id="password-field"><label class="label" for="password">Password</label><span class="password-field"><input class="text-field" id="password" type="password" value="poulpy123" autocomplete="current-password"><button type="button" class="icon-button" aria-label="Show password" aria-pressed="false"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></span></div>
     <a class="link forgot-link" href="account-forgot-password.html" id="forgot">Forgot your password?</a>
-    <p class="alt-line" id="alt-line">No account yet? <a class="link" href="account-sign-up.html">Create one</a></p>
+    <p class="field-note" id="merge-note">Use the account you made on another phone. What is on this phone joins your account; nothing is replaced.</p>
   </div>
   <div class="action-bar">
     <a class="primary-button" data-component="primary-button" href="account-sign-in-merge.html" style="flex: 1;">Sign in</a>
