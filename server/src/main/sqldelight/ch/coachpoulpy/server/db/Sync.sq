@@ -41,3 +41,31 @@ FROM session WHERE account_id = :accountId AND change_number > :after ORDER BY c
 eventsAfter:
 SELECT session_id, seq, at, CAST(payload AS TEXT) AS payload, change_number
 FROM session_event WHERE account_id = :accountId AND change_number > :after ORDER BY change_number LIMIT :limit;
+
+workoutVersion:
+SELECT CAST(content AS TEXT) FROM workout_version WHERE account_id = :accountId AND workout_id = :workoutId AND version = :version;
+
+latestWorkoutVersion:
+SELECT max(version) AS latest FROM workout_version WHERE account_id = :accountId AND workout_id = :workoutId;
+
+insertWorkoutVersion:
+INSERT INTO workout_version (account_id, workout_id, version, format, name, content, created_at, change_number)
+VALUES (:accountId, :workoutId, :version, :format, :name, CAST(:content AS JSONB), :createdAt, :changeNumber);
+
+workoutDeletion:
+SELECT version FROM workout_deletion WHERE account_id = :accountId AND workout_id = :workoutId;
+
+insertWorkoutDeletion:
+INSERT INTO workout_deletion (account_id, workout_id, version, deleted_at, change_number)
+VALUES (:accountId, :workoutId, :version, :deletedAt, :changeNumber);
+
+undeleteWorkout:
+DELETE FROM workout_deletion WHERE account_id = :accountId AND workout_id = :workoutId;
+
+workoutVersionsAfter:
+SELECT CAST(content AS TEXT) AS content, version, created_at, change_number
+FROM workout_version WHERE account_id = :accountId AND change_number > :after ORDER BY change_number LIMIT :limit;
+
+workoutDeletionsAfter:
+SELECT workout_id, version, deleted_at, change_number
+FROM workout_deletion WHERE account_id = :accountId AND change_number > :after ORDER BY change_number LIMIT :limit;

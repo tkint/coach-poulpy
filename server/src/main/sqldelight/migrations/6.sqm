@@ -1,0 +1,28 @@
+-- Workouts in sync (#286, ADR 0006, ADR 0025). Versions never change once stored: a push may only
+-- add the version that follows the latest. The workout itself is JSONB, read with the shared
+-- Kotlin types (ADR 0007); its format and name are columns too.
+CREATE TABLE workout_version (
+    account_id UUID NOT NULL REFERENCES account (id) ON DELETE CASCADE,
+    workout_id UUID NOT NULL,
+    version INTEGER NOT NULL,
+    format TEXT NOT NULL,
+    name TEXT NOT NULL,
+    content JSONB NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL,
+    change_number BIGINT NOT NULL,
+    PRIMARY KEY (account_id, workout_id, version)
+);
+
+CREATE INDEX workout_version_changes ON workout_version (account_id, change_number);
+
+-- A workout deleted at a version. A newer version pushed later removes this row: the edit wins.
+CREATE TABLE workout_deletion (
+    account_id UUID NOT NULL REFERENCES account (id) ON DELETE CASCADE,
+    workout_id UUID NOT NULL,
+    version INTEGER NOT NULL,
+    deleted_at TIMESTAMPTZ NOT NULL,
+    change_number BIGINT NOT NULL,
+    PRIMARY KEY (account_id, workout_id)
+);
+
+CREATE INDEX workout_deletion_changes ON workout_deletion (account_id, change_number);
