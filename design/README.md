@@ -63,4 +63,4 @@ The app icon is the brand book's: the happy blue Poulpy on Foam (`neutral.50`), 
 
 The alternate icons use the portrait or pose of the same name, scaled until its longest side fills 170 of the 200 square (on Android, until its farthest point sits on the 66 dp circle), so a pose with props or confetti draws Poulpy smaller. Their ids are those of `AppIcon` in the shared code and never change. Android switches between launcher aliases in the manifest; iOS lists the sets in `ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES` in `app-ios/project.yml`.
 
-The rules for using Poulpy are in [`docs/brand.md`](../docs/brand.md); the full brand book is in `site/public/brand/book.html` and on the docs site, and the decisions behind it are in [`docs/brand-decisions.md`](../docs/brand-decisions.md).
+The rules for using Poulpy are in [`docs/brand.md`](../docs/brand.md); the full brand book is in `site/.vitepress/theme/brand-book/` and on the docs site, and the decisions behind it are in [`docs/brand-decisions.md`](../docs/brand-decisions.md).
