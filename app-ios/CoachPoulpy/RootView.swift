@@ -6,7 +6,11 @@ private enum AppTab: Hashable { case home, library, live, history, settings }
 
 struct RootView: View {
     let graph: AppGraph
+    let account: AccountModel
     @StateObject private var settings: Observed<SettingsModel, SettingsUiState>
+    @StateObject private var accountState: Observed<AccountModel, AccountState>
+    /// A sign-in, sign-up or email-link screen shown over the tabs.
+    @State private var accountFlow: AccountFlowStart?
     @State private var tab = AppTab.home
     @State private var librarySection = LibrarySection.workouts
     @State private var settingsPath = NavigationPath()
@@ -14,9 +18,11 @@ struct RootView: View {
     @State private var devicesFrom: AppTab?
     @State private var incoming: IncomingWorkoutFile?
 
-    init(graph: AppGraph) {
+    init(graph: AppGraph, account: AccountModel) {
         self.graph = graph
+        self.account = account
         _settings = StateObject(wrappedValue: graph.observedSettings())
+        _accountState = StateObject(wrappedValue: account.observedState())
     }
 
     var body: some View {
@@ -40,7 +46,9 @@ struct RootView: View {
             HistoryView(graph: graph)
                 .tabItem { Label("tab.history", systemImage: "clock.arrow.circlepath") }
                 .tag(AppTab.history)
-            SettingsView(graph: graph, settings: settings, path: $settingsPath)
+            SettingsView(graph: graph, settings: settings, account: accountState, path: $settingsPath) { step in
+                accountFlow = AccountFlowStart(step: step)
+            }
                 .tabItem { Label("tab.settings", systemImage: "gearshape") }
                 .tag(AppTab.settings)
         }
@@ -57,8 +65,29 @@ struct RootView: View {
         .font(.poulpy(.body))
         .environment(\.unitSystem, settings.value.units)
         .preferredColorScheme(settings.value.theme.colorScheme)
-        // A .poulpyworkout file opened from another app shows a preview before it is added.
-        .onOpenURL { url in incoming = IncomingWorkoutFile(url: url) }
+        // An account email link opens its screen over Settings; a .poulpyworkout file opened from another app shows a
+        // preview before it is added.
+        .onOpenURL { url in
+            if let step = accountStep(for: url) {
+                openFromLink(step)
+            } else {
+                incoming = IncomingWorkoutFile(url: url)
+            }
+        }
+        .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { activity in
+            if let url = activity.webpageURL, let step = accountStep(for: url) { openFromLink(step) }
+        }
+        .fullScreenCover(item: $accountFlow) { start in
+            AccountFlowView(account: account, start: start.step) { accountFlow = nil }
+        }
         .modifier(ImportPresenter(graph: graph, incoming: $incoming))
+    }
+
+    /// Universal Links need the Associated Domains entitlement and app.coach-poulpy.com's apple-app-site-association (#24).
+    private func openFromLink(_ step: String) {
+        tab = .settings
+        settingsPath = NavigationPath()
+        devicesFrom = nil
+        accountFlow = AccountFlowStart(step: step)
     }
 }

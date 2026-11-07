@@ -3,13 +3,15 @@ import Charts
 import Shared
 
 /// The pages the Settings hub opens inside its tab. Device pages open through `DeviceRoute`.
-enum SettingsPage: Hashable { case profile, weight, height, preferences, devices }
+enum SettingsPage: Hashable { case account, profile, weight, height, preferences, devices }
 
 // MARK: - Hub
 
-/// Settings: the profile card, Body, App and About.
+/// Settings: the profile card, Account, Body, App and About. `onAccount` opens a sign-in or sign-up screen over the tabs.
 struct SettingsHub: View {
     @ObservedObject var settings: Observed<SettingsModel, SettingsUiState>
+    @ObservedObject var account: Observed<AccountModel, AccountState>
+    let onAccount: (String) -> Void
     @ObservedObject var profile: Observed<ProfileModel, ProfileUi>
     @ObservedObject var weight: Observed<BodyModel, BodyUi>
     @ObservedObject var height: Observed<BodyModel, BodyUi>
@@ -44,6 +46,7 @@ struct SettingsHub: View {
                 }
                 .listRowBackground(PoulpyColor.primaryContainer)
             }
+            AccountSection(account: account, onFlow: onAccount)
             Section("settings.body") {
                 NavigationLink(value: SettingsPage.height) {
                     row("arrow.up.and.down", "body.height", height.value.latest.map { bodyText(.height, $0.value, units) } ?? L("body.nothingLogged"))
