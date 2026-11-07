@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vitepress'
 import { withMermaid } from 'vitepress-plugin-mermaid'
 import { listMockups, platforms, stages } from './mockups.mts'
-import { groupOf, slug } from './mockup-labels'
+import { slug } from './mockup-labels'
 
 const here = dirname(fileURLToPath(import.meta.url))
 // copy-docs.mjs mirrors the repo's shared Markdown into site/ at the same paths, so a path from
@@ -57,10 +57,10 @@ const mockupSidebar = (platform: keyof typeof platforms) => ({
     text: stages[stage],
     link: `/mockups/${platform}/${stage}`,
     collapsed: true,
-    // One entry per section of the stage page, never one per screen state.
-    items: [...new Set(mockups.filter((m) => m.stage === stage && m.platform === platform).map(groupOf))].map((group) => ({
-      text: group,
-      link: `/mockups/${platform}/${stage}#${slug(group)}`,
+    // One entry per section, whose page shows all its states, never one per screen state.
+    items: [...new Map(mockups.filter((m) => m.stage === stage && m.platform === platform).map((m) => [m.sectionPath, m])).values()].map((m) => ({
+      text: m.group,
+      link: m.sectionPath,
     })),
   })),
 })
@@ -109,6 +109,10 @@ export default withMermaid(
       ],
     ],
     markdown: { config: linksToGitHub },
+    // A generated page (a mockups section) is named by its params.
+    transformPageData: (pageData) => {
+      if (pageData.params?.title) pageData.title = pageData.params.title
+    },
     // The web design system (web/ui, ADR 0023) is imported from its source; dedupe keeps its
     // components on the site's own copy of Vue.
     vite: { server: { fs: { allow: [repoRoot] } }, resolve: { dedupe: ['vue'] } },

@@ -4,7 +4,7 @@ aside: false
 
 # Mockups
 
-The screen mockups from [`design/mockups/`](https://github.com/tkint/coach-poulpy/tree/main/design/mockups), as they are on `main` ([ADR 0016](/docs/adr/0016-mockups-are-plain-html-in-the-repo)). Each one is a plain HTML page styled with the design tokens, and each has its own page here, where you can try it and reset it without reloading.
+The screen mockups from [`design/mockups/`](https://github.com/tkint/coach-poulpy/tree/main/design/mockups), as they are on `main` ([ADR 0016](/docs/adr/0016-mockups-are-plain-html-in-the-repo)). Each one is a plain HTML page styled with the design tokens, and each section (Home, Builder, Profile and settings...) has one page here with all its states one after the other, where you can try each one and reset it without reloading.
 
 Mockups are split by platform, then by stage:
 

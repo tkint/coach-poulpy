@@ -26,7 +26,7 @@ const groups = computed(() => {
   <p>{{ blurbs[stage] }}</p>
   <p v-if="groups.length === 0">None yet.</p>
   <template v-for="[group, items] in groups" :key="group">
-    <h2 :id="slug(group)">{{ group }}</h2>
+    <h2 :id="slug(group)"><a :href="withBase(items[0].sectionPath)">{{ group }}</a></h2>
     <ul>
       <li v-for="m in items" :key="m.path">
         <a :href="withBase(m.link)">{{ m.title }}</a>
