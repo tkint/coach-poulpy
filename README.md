@@ -50,7 +50,8 @@ Library versions live in `gradle/libs.versions.toml`. Package and app id: `ch.co
 # iOS: generate the Xcode project, then open it and press Run
 cd app-ios && xcodegen && open CoachPoulpy.xcodeproj
 
-# Server on http://localhost:8080
+# Server on http://localhost:8080, with its local Postgres
+docker compose -f tools/compose.yaml up -d
 ./gradlew :server:run
 
 # Website on http://localhost:5173 (talks to the server through /api)

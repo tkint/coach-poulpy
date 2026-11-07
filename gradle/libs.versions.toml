@@ -7,6 +7,11 @@ datetime = "0.8.0"
 sqldelight = "2.4.1"
 http4k = "6.61.0.0"
 slf4j = "2.0.20"
+postgresql = "42.7.14"
+hikaricp = "7.1.0"
+embedded-postgres = "2.2.2"
+# The same major version as the postgres image in deploy/compose.yaml.
+embedded-postgres-binaries = "17.11.0"
 compose-bom = "2025.09.01"
 activity-compose = "1.11.0"
 lifecycle = "2.9.4"
@@ -26,6 +31,12 @@ sqldelight-coroutines = { module = "app.cash.sqldelight:coroutines-extensions", 
 sqldelight-android-driver = { module = "app.cash.sqldelight:android-driver", version.ref = "sqldelight" }
 sqldelight-native-driver = { module = "app.cash.sqldelight:native-driver", version.ref = "sqldelight" }
 sqldelight-sqlite-driver = { module = "app.cash.sqldelight:sqlite-driver", version.ref = "sqldelight" }
+sqldelight-jdbc-driver = { module = "app.cash.sqldelight:jdbc-driver", version.ref = "sqldelight" }
+sqldelight-postgresql-dialect = { module = "app.cash.sqldelight:postgresql-dialect", version.ref = "sqldelight" }
+postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql" }
+hikaricp = { module = "com.zaxxer:HikariCP", version.ref = "hikaricp" }
+embedded-postgres = { module = "io.zonky.test:embedded-postgres", version.ref = "embedded-postgres" }
+embedded-postgres-binaries-bom = { module = "io.zonky.test.postgres:embedded-postgres-binaries-bom", version.ref = "embedded-postgres-binaries" }
 
 kable-core = { module = "com.juul.kable:kable-core", version.ref = "kable" }
 

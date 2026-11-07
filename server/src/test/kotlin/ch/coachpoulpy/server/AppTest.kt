@@ -1,20 +1,25 @@
 package ch.coachpoulpy.server
 
+import ch.coachpoulpy.catalog.Catalog
 import org.http4k.core.Method.GET
 import org.http4k.core.Request
 import org.http4k.core.Status.Companion.OK
+import org.http4k.core.Status.Companion.SERVICE_UNAVAILABLE
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class AppTest {
     @Test
-    fun healthAnswersOk() {
-        assertEquals(OK, app()(Request(GET, "/health")).status)
+    fun healthReportsTheVersion() {
+        val response = app("0.6.0", Catalog.bundled, databaseAnswers = { true })(Request(GET, "/health"))
+        assertEquals(OK, response.status)
+        assertEquals("ok 0.6.0", response.bodyString())
     }
 
     @Test
-    fun healthReportsTheVersion() {
-        assertEquals("ok 0.6.0", app("0.6.0")(Request(GET, "/health")).bodyString())
+    fun healthIsUnavailableWhileTheDatabaseIsDown() {
+        val response = app("0.6.0", Catalog.bundled, databaseAnswers = { false })(Request(GET, "/health"))
+        assertEquals(SERVICE_UNAVAILABLE, response.status)
     }
 
     @Test

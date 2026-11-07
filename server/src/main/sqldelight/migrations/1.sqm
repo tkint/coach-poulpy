@@ -1,0 +1,5 @@
+-- The version of this schema in the database, kept by Database.migrate: one row, the number of the
+-- next migration file to apply. Every later table comes in a new numbered file (ADR 0022).
+CREATE TABLE schema_version (
+    version BIGINT NOT NULL
+);

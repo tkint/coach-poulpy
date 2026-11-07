@@ -1,0 +1,8 @@
+current:
+SELECT version FROM schema_version;
+
+record:
+INSERT INTO schema_version (version) VALUES (?);
+
+advance:
+UPDATE schema_version SET version = ?;

@@ -1,5 +1,5 @@
-# Optional: a local Postgres for when the server gets a database.
-# Nothing depends on it yet. Start with: docker compose -f tools/compose.yaml up -d
+# The local Postgres that ./gradlew :server:run connects to by default (DATABASE_URL and the rest
+# are only needed elsewhere). Start it with: docker compose -f tools/compose.yaml up -d
 services:
   postgres:
     image: postgres:17

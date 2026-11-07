@@ -141,6 +141,7 @@ Sync follows [ADR 0006](./adr/0006-sync-keeps-both-edits.md).
 - Ids are UUIDv7 made on the device ([ADR 0005](./adr/0005-ids-are-uuidv7-made-on-the-device.md)).
 - Workouts and Plans keep both edits; small fields take the latest write ([ADR 0006](./adr/0006-sync-keeps-both-edits.md)).
 - The catalog ships with the app and updates without an account ([ADR 0008](./adr/0008-curated-catalog-with-stable-slugs.md)).
+- The server's Postgres schema is its own numbered SQLDelight migrations, applied on start ([ADR 0022](./adr/0022-the-servers-schema-is-sqldelight-migrations-on-postgres.md)).
 
 ## Devices
 
