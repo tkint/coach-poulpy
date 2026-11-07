@@ -66,7 +66,9 @@ The deployer creates or starts Caddy when needed and adds or replaces only this 
 
 ## Deploy a pull request
 
-To try a pull request on the machine before it merges, open **Actions > Deploy > Run workflow**, pick its branch under **Use workflow from**, pick the `preview` environment and enter the version `branch`. The workflow builds that branch's server image, pushes it as `ghcr.io/tkint/coach-poulpy-server:branch-<branch name>` (slashes become dashes), and deploys it with the branch's own Compose and Caddy files, since it may change them. `/health` then answers `ok branch-<branch name>`. Nothing runs until you start it.
+To try a pull request on the machine before it merges, open **Actions > Deploy > Run workflow**, keep `main` under **Use workflow from**, pick the environment and enter the pull request's number as the version, such as `275`. The workflow builds the pull request's latest commit, pushes it as `ghcr.io/tkint/coach-poulpy-server:pr-<number>`, and deploys it with the pull request's own Compose and Caddy files, since it may change them. `/health` then answers `ok pr-<number>`. Only open pull requests from branches of this repository are deployed, never forks. Nothing runs until you start it.
+
+A branch with no pull request works too: pick it under **Use workflow from** and enter the version `branch`. Its image is `branch-<branch name>` (slashes become dashes).
 
 Set up the `preview` environment once, like `production` above (the same `DEPLOY_*` settings). Its `APP_NAME` decides where the branch lands:
 
@@ -77,7 +79,7 @@ Set up the `preview` environment once, like `production` above (the same `DEPLOY
 
 `APP_NAME` has lowercase letters, digits and dashes; production leaves it unset (`coach-poulpy`). It names the folder on the machine, the Compose project, the server's alias on the `edge` network and its Caddy route. Nothing is cleaned up on its own: deploy another branch over it, or stop it on the machine with `cd ~/coach-poulpy-preview && docker compose down`. A separate preview needs about as much memory as production (512 MB for the server, plus its Postgres), so check the machine has room.
 
-Deploying runs the branch's deploy files on the machine and replaces the shared `~/caddy/deploy.py` with its copy, so only deploy a branch you have read.
+Deploying runs the pull request's or branch's deploy files on the machine and replaces the shared `~/caddy/deploy.py` with its copy, so only deploy code you have read.
 
 ## What a release does not do yet
 

@@ -1,10 +1,10 @@
 name: Deploy
 
 # Run by hand: Actions > Deploy > Run workflow. It writes the app's .env from the chosen GitHub
-# environment, uploads it with the server and shared Caddy files of the selected branch over SSH and
-# deploys a server image (ADR 0019). The version "branch" builds the selected branch's server image
-# first, to try a pull request before it merges. Setup and secrets: docs/releasing.md, "Deploy the
-# server".
+# environment, uploads it with the server and shared Caddy files over SSH and deploys a server image
+# (ADR 0019). A pull request number builds that pull request's server image first and deploys it
+# with its own files, to try it before it merges; "branch" does the same for the selected branch.
+# Setup and secrets: docs/releasing.md, "Deploy the server".
 on:
   workflow_dispatch:
     inputs:
@@ -14,7 +14,7 @@ on:
         options: [production, preview]
         default: production
       version:
-        description: "Server image: latest, a version such as 0.3.0, or branch to build the selected branch"
+        description: "latest, a release such as 0.3.0, a pull request number such as 275, or branch for the branch above"
         default: latest
         required: true
 
@@ -33,32 +33,56 @@ jobs:
     permissions:
       contents: read
       packages: write
+      pull-requests: read
     steps:
       - name: Pick the image
         id: image
         env:
           VERSION: ${{ inputs.version }}
           BRANCH: ${{ github.ref_name }}
+          REPOSITORY: ${{ github.repository }}
+          GH_TOKEN: ${{ github.token }}
         run: |
-          if [ "$VERSION" = branch ]; then
-            # A branch has no published image: it is built below, tagged with the branch's name.
+          # What to check out (empty: the selected branch) and whether to build the image first.
+          REF=""
+          BUILD=false
+          if printf '%s' "$VERSION" | grep -Eq '^(#|pr-)?[0-9]+$'; then
+            NUMBER="${VERSION##*[#-]}"
+            PR="$(gh api "repos/$REPOSITORY/pulls/$NUMBER")" || { echo "::error::No pull request #$NUMBER."; exit 1; }
+            if [ "$(jq -r .state <<<"$PR")" != open ]; then
+              echo "::error::Pull request #$NUMBER isn't open."; exit 1
+            fi
+            # Its code runs with the deploy secrets, so only branches of this repository, never forks.
+            if [ "$(jq -r .head.repo.full_name <<<"$PR")" != "$REPOSITORY" ]; then
+              echo "::error::Pull request #$NUMBER comes from a fork, which is never deployed."; exit 1
+            fi
+            REF="$(jq -r .head.sha <<<"$PR")"
+            VERSION="pr-$NUMBER"
+            BUILD=true
+            echo "Deploying pull request #$NUMBER at $REF"
+          elif [ "$VERSION" = branch ]; then
             VERSION="branch-$(printf '%s' "$BRANCH" | tr -c 'A-Za-z0-9._-' '-' | cut -c1-100)"
+            BUILD=true
           fi
           if ! printf '%s' "$VERSION" | grep -Eq '^[A-Za-z0-9._-]+$'; then
             echo "::error::Invalid image version."; exit 1
           fi
-          echo "tag=$VERSION" >> "$GITHUB_OUTPUT"
+          { echo "tag=$VERSION"; echo "ref=$REF"; echo "build=$BUILD"; } >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v5
+        with:
+          ref: ${{ steps.image.outputs.ref }}
 
-      - if: inputs.version == 'branch'
+      # A pull request or a branch has no published image: it is built here, tagged pr-<number>
+      # or branch-<name>.
+      - if: steps.image.outputs.build == 'true'
         uses: docker/setup-buildx-action@v3
-      - if: inputs.version == 'branch'
+      - if: steps.image.outputs.build == 'true'
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - if: inputs.version == 'branch'
+      - if: steps.image.outputs.build == 'true'
         uses: docker/build-push-action@v6
         with:
           context: .
