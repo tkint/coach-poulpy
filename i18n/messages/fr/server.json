@@ -3,6 +3,10 @@
     "confirm": {
       "subject": "Confirmez votre adresse e-mail pour Coach Poulpy",
       "body": "Bonjour,\n\nOuvrez ce lien pour confirmer votre adresse e-mail et synchroniser vos séances entre vos appareils :\n\n{link}\n\nLe lien est valable 24 heures. D’ici là, vos séances restent seulement sur votre téléphone.\n\nSi vous ne vous êtes pas inscrit·e sur Coach Poulpy, ignorez cet e-mail : aucun compte n’est utilisé sans cette confirmation."
+    },
+    "reset": {
+      "subject": "Réinitialisez votre mot de passe Coach Poulpy",
+      "body": "Bonjour,\n\nOuvrez ce lien pour choisir un nouveau mot de passe :\n\n{link}\n\nLe lien ne sert qu'une fois, pendant 1 heure. Choisir un nouveau mot de passe vous déconnecte sur tous vos appareils.\n\nSi vous n'avez rien demandé, ignorez cet e-mail : votre mot de passe ne change pas."
     }
   }
 }

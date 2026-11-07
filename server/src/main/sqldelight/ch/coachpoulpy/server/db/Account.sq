@@ -17,3 +17,13 @@ SELECT id, password_hash, confirmed_at FROM account WHERE lower(email) = lower(:
 
 byId:
 SELECT id, email, role FROM account WHERE id = ?;
+
+setPassword:
+UPDATE account SET password_hash = :passwordHash WHERE id = :id;
+
+passwordHashById:
+SELECT password_hash FROM account WHERE id = ?;
+
+-- Every row of the account goes with it: its tokens, sign-ins and links cascade.
+delete:
+DELETE FROM account WHERE id = ? RETURNING email;

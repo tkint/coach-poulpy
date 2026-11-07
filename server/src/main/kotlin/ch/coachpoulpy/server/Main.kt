@@ -1,7 +1,9 @@
 package ch.coachpoulpy.server
 
 import ch.coachpoulpy.catalog.Catalog
+import ch.coachpoulpy.server.accounts.AccountDeletion
 import ch.coachpoulpy.server.accounts.Accounts
+import ch.coachpoulpy.server.accounts.PasswordResets
 import ch.coachpoulpy.server.accounts.Passwords
 import ch.coachpoulpy.server.auth.SignIns
 import ch.coachpoulpy.server.mail.ConsoleMailer
@@ -47,12 +49,14 @@ fun app(
     database: Database,
     accounts: Accounts,
     signIns: SignIns,
+    passwordResets: PasswordResets,
+    accountDeletion: AccountDeletion,
     databaseAnswers: () -> Boolean = database::answers,
 ): HttpHandler = routes(
     "/health" bind GET to {
         if (databaseAnswers()) Response(OK).body("ok $version") else Response(SERVICE_UNAVAILABLE).body("database unavailable")
     },
-    authenticate(mapOf(SignIns.ACCESS_PREFIX to signIns.authenticator)).then(api(version, catalog, accounts, signIns, database)),
+    authenticate(mapOf(SignIns.ACCESS_PREFIX to signIns.authenticator)).then(api(version, catalog, accounts, signIns, passwordResets, accountDeletion, database)),
 )
 
 fun main() {
@@ -64,6 +68,8 @@ fun main() {
     val passwords = Passwords()
     val accounts = Accounts(database, mailer, websiteUrl = websiteUrl(System::getenv), passwords = passwords)
     val signIns = SignIns(database, passwords)
-    app(version, Catalog.bundled, database, accounts, signIns).asServer(SunHttp(port)).start()
+    val passwordResets = PasswordResets(database, mailer, websiteUrl(System::getenv), signIns, passwords)
+    val accountDeletion = AccountDeletion(database, passwords)
+    app(version, Catalog.bundled, database, accounts, signIns, passwordResets, accountDeletion).asServer(SunHttp(port)).start()
     println("Coach Poulpy server $version listening on http://localhost:$port")
 }

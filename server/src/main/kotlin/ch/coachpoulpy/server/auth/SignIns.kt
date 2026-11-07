@@ -2,13 +2,12 @@ package ch.coachpoulpy.server.auth
 
 import ch.coachpoulpy.core.model.Ids
 import ch.coachpoulpy.server.accounts.Passwords
+import ch.coachpoulpy.server.auth.Secrets.hashOf
+import ch.coachpoulpy.server.auth.Secrets.newToken
 import ch.coachpoulpy.server.db.Database
-import java.security.MessageDigest
-import java.security.SecureRandom
 import java.time.Clock
 import java.time.Duration
 import java.time.OffsetDateTime
-import java.util.Base64
 import java.util.UUID
 
 /** The tokens a sign-in or a refresh hands out (ADR 0020). */
@@ -99,6 +98,12 @@ class SignIns(
         }
     }
 
+    /** Signs every device of [account] out, as a new password does. Call it inside a transaction. */
+    internal fun revokeAll(account: UUID, now: OffsetDateTime) {
+        queries.revokeAll(now, account)
+        queries.deleteAllAccessTokens(account)
+    }
+
     private fun revoke(signIn: UUID, now: OffsetDateTime) {
         queries.revoke(now, signIn)
         queries.deleteAccessTokens(signIn)
@@ -126,13 +131,5 @@ class SignIns(
 
         /** What the app and the website get: every user scope, and `sync` (ADR 0020). */
         val FIRST_PARTY_SCOPES: Set<Scope> = Scope.entries.toSet()
-
-        private val random = SecureRandom()
-
-        /** A readable prefix, so secret scanners spot a leak, and 256 random bits. */
-        private fun newToken(prefix: String): String =
-            prefix + Base64.getUrlEncoder().withoutPadding().encodeToString(ByteArray(32).also(random::nextBytes))
-
-        private fun hashOf(token: String): ByteArray = MessageDigest.getInstance("SHA-256").digest(token.toByteArray())
     }
 }

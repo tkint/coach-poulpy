@@ -13,14 +13,14 @@ class AppTest {
 
     @Test
     fun healthReportsTheVersion() {
-        val response = app("0.6.0", Catalog.bundled, test.database, test.accounts, test.signIns, databaseAnswers = { true })(Request(GET, "/health"))
+        val response = app("0.6.0", Catalog.bundled, test.database, test.accounts, test.signIns, test.passwordResets, test.accountDeletion, databaseAnswers = { true })(Request(GET, "/health"))
         assertEquals(OK, response.status)
         assertEquals("ok 0.6.0", response.bodyString())
     }
 
     @Test
     fun healthIsUnavailableWhileTheDatabaseIsDown() {
-        val response = app("0.6.0", Catalog.bundled, test.database, test.accounts, test.signIns, databaseAnswers = { false })(Request(GET, "/health"))
+        val response = app("0.6.0", Catalog.bundled, test.database, test.accounts, test.signIns, test.passwordResets, test.accountDeletion, databaseAnswers = { false })(Request(GET, "/health"))
         assertEquals(SERVICE_UNAVAILABLE, response.status)
     }
 

@@ -3,6 +3,10 @@
     "confirm": {
       "subject": "Confirm your email for Coach Poulpy",
       "body": "Hello,\n\nOpen this link to confirm your email and start syncing your training between your devices:\n\n{link}\n\nThe link works for 24 hours. Until then, your training stays on your phone only.\n\nIf you didn’t sign up for Coach Poulpy, ignore this email: no account is used without this confirmation."
+    },
+    "reset": {
+      "subject": "Reset your Coach Poulpy password",
+      "body": "Hello,\n\nOpen this link to choose a new password:\n\n{link}\n\nThe link works once, for 1 hour. Choosing a new password signs you out on every device.\n\nIf you didn't ask for this, ignore this email: your password stays as it is."
     }
   }
 }

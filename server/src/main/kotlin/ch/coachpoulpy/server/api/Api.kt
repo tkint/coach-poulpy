@@ -1,7 +1,9 @@
 package ch.coachpoulpy.server.api
 
 import ch.coachpoulpy.catalog.Catalog
+import ch.coachpoulpy.server.accounts.AccountDeletion
 import ch.coachpoulpy.server.accounts.Accounts
+import ch.coachpoulpy.server.accounts.PasswordResets
 import ch.coachpoulpy.server.auth.SignIns
 import ch.coachpoulpy.server.db.Database
 import org.http4k.contract.ContractRoute
@@ -26,17 +28,35 @@ const val API_PREFIX = "/api/v1"
 val Public: Security = NoSecurity
 
 /** Every route: those under [API_PREFIX], and OAuth's under `/oauth`. */
-fun apiRoutes(catalog: Catalog, accounts: Accounts, signIns: SignIns, database: Database): List<ContractRoute> = listOf(
+fun apiRoutes(
+    catalog: Catalog,
+    accounts: Accounts,
+    signIns: SignIns,
+    passwordResets: PasswordResets,
+    accountDeletion: AccountDeletion,
+    database: Database,
+): List<ContractRoute> = listOf(
     catalogRoute(catalog),
     signUpRoute(accounts),
     confirmEmailRoute(accounts),
+    passwordResetRoute(passwordResets),
+    newPasswordRoute(passwordResets),
     meRoute(database),
+    deleteMeRoute(accountDeletion),
     tokenRoute(signIns),
     revokeRoute(signIns),
 )
 
 /** The API, described in OpenAPI at `/api/v1/openapi.json`, OAuth routes included. */
-fun api(version: String, catalog: Catalog, accounts: Accounts, signIns: SignIns, database: Database): RoutingHttpHandler = contract {
+fun api(
+    version: String,
+    catalog: Catalog,
+    accounts: Accounts,
+    signIns: SignIns,
+    passwordResets: PasswordResets,
+    accountDeletion: AccountDeletion,
+    database: Database,
+): RoutingHttpHandler = contract {
     // The description is built as JSON nodes: kotlinx.serialization has no serializer for
     // http4k's own description classes, which the auto-marshalling renderer would need.
     renderer = OpenApi3(
@@ -45,5 +65,5 @@ fun api(version: String, catalog: Catalog, accounts: Accounts, signIns: SignIns,
         apiRenderer = OpenApi3ApiRenderer(KotlinxSerialization),
     )
     descriptionPath = "$API_PREFIX/openapi.json"
-    routes += apiRoutes(catalog, accounts, signIns, database)
+    routes += apiRoutes(catalog, accounts, signIns, passwordResets, accountDeletion, database)
 }
