@@ -1,6 +1,6 @@
 /*
  * Shared styles for the screen mockups (ADR 0016).
- * Colours, type, spacing and radii come only from web/src/styles/tokens.css,
+ * Colours, type, spacing and radii come only from web/ui/src/tokens.css,
  * which each mockup links before this file. No raw values beyond sizes.
  */
 

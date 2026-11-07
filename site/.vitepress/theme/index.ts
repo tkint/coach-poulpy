@@ -6,6 +6,7 @@ import MockupList from './MockupList.vue'
 import MockupPage from './MockupPage.vue'
 import PoulpyGallery from './PoulpyGallery.vue'
 import TokenSwatches from './TokenSwatches.vue'
+import WebComponentSamples from './WebComponentSamples.vue'
 import './style.css'
 
 export default {
@@ -17,5 +18,6 @@ export default {
     app.component('MockupPage', MockupPage)
     app.component('PoulpyGallery', PoulpyGallery)
     app.component('TokenSwatches', TokenSwatches)
+    app.component('WebComponentSamples', WebComponentSamples)
   },
 } satisfies Theme

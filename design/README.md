@@ -11,7 +11,7 @@ node design/build-tokens.mjs
 | `app-android/.../ui/PoulpyTokens.kt` | `CoachPoulpyTheme` (Material 3 colour scheme, typography, shapes) plus `PoulpyPalette`, `PoulpyMood`, `PoulpySpace`, `PoulpyRadius`, `PoulpyMotion` |
 | `app-ios/CoachPoulpy/Theme/PoulpyTokens.swift` | `PoulpyColor` (light and dark), `PoulpyPalette`, `PoulpyMood`, `PoulpyFont`, `PoulpySpace`, `PoulpyRadius`, `PoulpyMotion` |
 | `app-ios/.../AccentColor.colorset/Contents.json` | The iOS accent colour (buttons, links, toggles) |
-| `web/src/styles/tokens.css` | CSS custom properties (`--cp-*`), with dark values under `prefers-color-scheme` |
+| `web/ui/src/tokens.css` | CSS custom properties (`--cp-*`), with dark values under `prefers-color-scheme`, and `cp-theme-light` / `cp-theme-dark` to pin one theme on part of a page. The websites' DaisyUI theme (`web/ui/src/theme.css`) points at them ([ADR 0023](../docs/adr/0023-the-websites-share-one-vue-and-daisyui-design-system.md)) |
 
 CI runs `node design/build-tokens.mjs --check` and fails if a generated file no longer matches `tokens.json`.
 
