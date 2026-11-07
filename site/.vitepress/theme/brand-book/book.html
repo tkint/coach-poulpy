@@ -1,0 +1,305 @@
+<div class="wrap">
+
+<header class="hero">
+  <div class="copy">
+    <span class="eyebrow">Coach Poulpy · brand book</span>
+    <p class="hero-title">One octopus, <span class="blue">two</span> <span class="ember">moods</span>.</p>
+    <p class="lede">Poulpy is a reversible plush: blue and smiling on one side, grumpy on the other. In the app his grumpy side turns ember, from burnt orange to red, and both sides shift shade with how he feels.</p>
+    <p class="muted">Tap Poulpy to flip him.</p>
+  </div>
+  <div class="flipbox">
+    <button class="stage" id="stage" aria-label="Flip Poulpy" aria-pressed="false">
+      <div class="card">
+        <div class="face front" data-poulpy="happy"></div>
+        <div class="face back" data-poulpy="grumpy"></div>
+      </div>
+    </button>
+    <button class="flip-btn" id="flipBtn" type="button">Flip Poulpy</button>
+    <div class="flip-state" id="flipState" aria-live="polite">Blue side: you trained, Poulpy is happy.</div>
+  </div>
+</header>
+
+<section class="block">
+  <div class="sec-head">
+    <span class="eyebrow">1 · Logo</span>
+    <h2 id="logo">Poulpy as he is</h2>
+    <p class="muted">A faithful front view of the plush: tall soft dome, five visible arms, and the ember lining peeking out underneath, which hints at the other side. The logo and the in-app mascot are the same drawing.</p>
+  </div>
+  <div class="logo-final">
+    <div class="lf light" data-logo="light"></div>
+    <div class="lf dark" data-logo="dark"></div>
+    <div class="lf lagoon" data-logo="lagoon"></div>
+  </div>
+  <div class="icons" id="icons"></div>
+  <div class="wordmarks">
+    <div class="wm l"><span data-poulpy="happy"></span><div class="name"><small>Coach</small><span class="p">poulpy</span></div></div>
+    <div class="wm d"><span data-poulpy="happy"></span><div class="name"><small>Coach</small><span class="p">poulpy</span></div></div>
+  </div>
+</section>
+
+<section class="block">
+  <div class="sec-head">
+    <span class="eyebrow">2 · Colour</span>
+    <h2 id="color">Blue when it goes well, ember when it doesn't</h2>
+    <p class="muted">The grumpy side is a warm ember: burnt orange (#D9622B) for everyday grumpiness, deepening into red when Poulpy gets really cross.</p>
+  </div>
+  <div class="sec-head" style="margin-top:10px">
+    <h3>The mood spectrum</h3>
+    <p class="muted">Poulpy's colour follows his emotion, not just his side. The blue side stays close to the plush: a touch richer when proud, lighter and fresher while recovering. Missed sessions heat the ember up toward red. Tap a shade.</p>
+  </div>
+  <div class="spectrum">
+    <div class="spec-art" id="specArt"></div>
+    <div class="spec-info">
+      <span class="spec-side" id="specSide"></span>
+      <span class="spec-name" id="specName"></span>
+      <p id="specWhen"></p>
+      <span class="spec-meta" id="specHex"></span>
+      <div class="spec-bar" id="specBar" role="group" aria-label="Mood shades"></div>
+      <div class="spec-labels" id="specLabels"></div>
+    </div>
+  </div>
+
+  <div class="ramps" id="ramps"></div>
+  <div class="roles">
+    <div class="role-table" id="rolesLight"><h3>Light theme roles</h3></div>
+    <div class="role-table" id="rolesDark" style="background:#0A1520;color:#E8F1F7;border-color:#21394A"><h3>Dark theme roles</h3></div>
+  </div>
+  <p class="muted">With a red-leaning mascot, error messages move to a crimson (#C8264A) and always come with an icon and text, so a cross Poulpy is never mistaken for an error. The plush ember (#D9622B) is too light for white text, so buttons use the deeper ember 600.</p>
+</section>
+
+<section class="block">
+  <div class="sec-head">
+    <span class="eyebrow">3 · Poses</span>
+    <h2 id="poses">Poulpy in action</h2>
+    <p class="muted">A sticker sheet for the big moments: end of session screens, records, rest days, notifications. The apps draw these same poses, generated from this page's drawing code by <code>design/build-poulpy.mjs</code>.</p>
+  </div>
+  <div class="poses">
+    <div class="pose"><div class="art b" data-pose="flex"></div><b>Cocky</b><span>New personal record. Smug wink, one eyebrow up, a golden glow.</span><q>Yeah. I did that.</q></div>
+    <div class="pose"><div class="art b" data-pose="lift"></div><b>Straining</b><span>Mid-session and during heavy sets. Eyes squeezed, teeth gritted, a dumbbell nearby.</span><q>Hnnngh… one more!</q></div>
+    <div class="pose"><div class="art b" data-pose="champion"></div><b>Champion</b><span>All eight tentacles lit: a full octopus, or a plan block finished.</span><q>Gold for the octopus!</q></div>
+    <div class="pose"><div class="art b" data-pose="tall"></div><b>Standing tall</b><span>Stretched up a little on his tentacles. A new goal set, a level reached.</span><q>Look how big I am now.</q></div>
+    <div class="pose"><div class="art b" data-pose="exhausted"></div><b>Exhausted</b><span>Right after a hard session. Sweatband, panting, dripping.</span><q>Worth it. Probably.</q></div>
+    <div class="pose"><div class="art b" data-pose="side"></div><b>Side glance</b><span>Turned a little to the side. Tired between sets, or quietly waiting. The pose can carry other faces too.</span><q>Just… give me a sec.</q></div>
+    <div class="pose"><div class="art b" data-pose="sleeping"></div><b>Sleeping</b><span>Planned rest day. Nightcap on.</span><q>Rest is training too.</q></div>
+    <div class="pose"><div class="art b" data-pose="hurt"></div><b>Patched up</b><span>Pain logged or a rehab day. A plaster, a soft look, never grumpy.</span><q>Easy today. I'm right here.</q></div>
+    <div class="pose"><div class="art b" data-pose="hide"></div><b>Shy</b><span>Eyes squeezed shut, big blush. Embarrassed, or welcoming you back after a break.</span><q>Oh… you're back!</q></div>
+    <div class="pose"><div class="art b" data-pose="scratch"></div><b>Thinking</b><span>Puzzled look and a thought bubble. Picking a plan, an unknown exercise.</span><q>Hmm, which one…</q></div>
+    <div class="pose"><div class="art b" data-pose="spin"></div><b>Spinning</b><span>He spins on the spot, shown comic-style with motion lines. The loading indicator, with the front arc running in a loop.</span><q>Wheee…</q></div>
+    <div class="pose"><div class="art e" data-pose="crossed"></div><b>Pouting</b><span>A session is overdue. Frowning and looking away.</span><q>Hmph. We had a date.</q></div>
+    <div class="pose"><div class="art e" data-pose="fuming"></div><b>Fuming</b><span>Two sessions missed. Steam, shaking, deep red.</span><q>EIGHT tentacles and none of them trained!</q></div>
+  </div>
+  <p class="muted">Poulpy never lifts his tentacles: every pose keeps the plush's shape and tells the mood with his face, his shade, props and little effects. More ideas for later: stretching, a tiny treadmill, sipping from a water bottle, dancing when the eighth tentacle lights.</p>
+</section>
+
+<section class="block">
+  <div class="sec-head">
+    <span class="eyebrow">4 · Typography</span>
+    <h2 id="type">Round like the plush, readable mid-set</h2>
+    <p class="muted">Both faces are free (SIL Open Font License), so they can ship inside the Android and iOS apps and load from Google Fonts on the web.</p>
+  </div>
+  <div class="type-grid">
+    <div class="specimen">
+      <div class="spec-row"><span class="k">display 40/44</span><span class="t-display">Leg day, Poulpy approves</span></div>
+      <div class="spec-row"><span class="k">title 28/32</span><span class="t-title">Lower body strength</span></div>
+      <div class="spec-row"><span class="k">headline 21/25</span><span class="t-headline">Back squat · 4 × 8 @ 60 kg</span></div>
+      <div class="spec-row"><span class="k">body 16/24</span><span class="t-body">Rest 90 s between sets. Keep the bar over mid-foot and stop one rep before form breaks.</span></div>
+      <div class="spec-row"><span class="k">label 12.5</span><span class="t-label">Next up · Romanian deadlift</span></div>
+      <div class="spec-row"><span class="k">timer 64</span><span class="t-timer">01:27</span></div>
+    </div>
+    <div class="faces">
+      <div class="face-card"><span class="big" style="font-family:var(--font-display);font-weight:800">Baloo 2</span><b>Display and titles</b><span class="muted">Heavy, rounded, friendly. Used for headings, Poulpy's speech and big moments only.</span></div>
+      <div class="face-card"><span class="big" style="font-family:var(--font-body);font-weight:800">Nunito</span><b>Body, labels and numbers</b><span class="muted">Rounded terminals that match Baloo, with tabular figures so timers and rep counts don't jitter while they tick.</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="block">
+  <div class="sec-head">
+    <span class="eyebrow">5 · Design tokens</span>
+    <h2 id="tokens">One file, three platforms</h2>
+    <p class="muted">A single <code>design/tokens.json</code> is the source of truth, generated into a Compose theme, SwiftUI colour assets and CSS variables. The mood shades are tokens too, so every platform paints Poulpy the same way.</p>
+  </div>
+  <div class="tabs" role="tablist" aria-label="Token output">
+    <button class="tab" role="tab" aria-selected="true" data-tab="json" id="tab-json">tokens.json</button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="kt" id="tab-kt">Compose (Kotlin)</button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="swift" id="tab-swift">SwiftUI</button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="css" id="tab-css">Vue (CSS)</button>
+  </div>
+<pre class="code" data-panel="json">{
+  "color": {
+    "poulpy": { "blue": "#3AA6E0", "ember": "#D9622B", "ink": "#141A26" },
+    "lagoon": { "50": "#EAF6FD", "100": "#CDEBFA", "300": "#7FCBF0", "400": "#3AA6E0",
+                "600": "#1574B0", "800": "#0C4A73", "900": "#082F4A" },
+    "ember":  { "50": "#FFF1E8", "100": "#FFDCC7", "300": "#F4A473", "400": "#E8873F",
+                "500": "#D9622B", "600": "#B4471C", "800": "#7A2C12" }
+  },
+  "mood": {
+    "proud":   "#2C9CE0", "happy":  "#3AA6E0", "recovering": "#5DB4E6",
+    "annoyed": "#E8873F", "grumpy": "#D9622B", "fuming":     "#C0352B"
+  },
+  "role": {
+    "light": { "primary": "{color.lagoon.600}", "onPrimary": "#FFFFFF",
+               "grumpy": "{color.ember.600}", "error": "#C8264A",
+               "background": "#F4F9FC", "surface": "#FFFFFF" },
+    "dark":  { "primary": "#5BBEF0", "onPrimary": "#06202F",
+               "grumpy": "#FF9A66", "error": "#FF6B85",
+               "background": "#0A1520", "surface": "#112230" }
+  },
+  "font":   { "display": "Baloo 2", "body": "Nunito" },
+  "space":  { "xs": 4, "sm": 8, "md": 12, "lg": 16, "xl": 24, "2xl": 32, "3xl": 48 },
+  "radius": { "sm": 10, "md": 16, "lg": 24, "pill": 999 },
+  "motion": { "flip": { "duration": 700, "easing": [0.5, -0.35, 0.35, 1.4] } }
+}</pre>
+<pre class="code" data-panel="kt" hidden>// app-android/.../theme/PoulpyTokens.kt  (generated)
+object PoulpyColors {
+    val Blue  = Color(0xFF3AA6E0)
+    val Ember = Color(0xFFD9622B)
+    val Ink   = Color(0xFF141A26)
+    val Lagoon600 = Color(0xFF1574B0)
+    val Ember600  = Color(0xFFB4471C)
+}
+
+enum class Mood(val tone: Color) {
+    Proud(Color(0xFF2C9CE0)), Happy(Color(0xFF3AA6E0)), Recovering(Color(0xFF5DB4E6)),
+    Annoyed(Color(0xFFE8873F)), Grumpy(Color(0xFFD9622B)), Fuming(Color(0xFFC0352B)),
+}
+
+val PoulpyLight = lightColorScheme(
+    primary = PoulpyColors.Lagoon600, onPrimary = Color.White,
+    tertiary = PoulpyColors.Ember600,
+    background = Color(0xFFF4F9FC), surface = Color.White,
+    error = Color(0xFFC8264A),
+)</pre>
+<pre class="code" data-panel="swift" hidden>// app-ios/CoachPoulpy/Theme/PoulpyTokens.swift  (generated)
+// Colours live in Assets.xcassets with Any/Dark appearances, generated from tokens.json.
+extension Color {
+    static let poulpyBlue = Color("PoulpyBlue")    // fixed, same in both appearances
+    static let poulpyEmber = Color("PoulpyEmber")
+    static let brandPrimary = Color("Primary")     // #1574B0 light, #5BBEF0 dark
+    static let brandGrumpy = Color("Grumpy")       // #B4471C light, #FF9A66 dark
+}
+
+enum Mood: String, CaseIterable {
+    case proud, happy, recovering, annoyed, grumpy, fuming
+    var tone: Color { Color("Mood/\(rawValue)") }
+}
+
+extension Font {
+    static let poulpyDisplay = Font.custom("Baloo2-ExtraBold", size: 40, relativeTo: .largeTitle)
+    static let poulpyBody = Font.custom("Nunito-Medium", size: 16, relativeTo: .body)
+}</pre>
+<pre class="code" data-panel="css" hidden>/* web/ui/src/tokens.css  (generated) */
+:root {
+  --cp-poulpy-blue: #3AA6E0;
+  --cp-poulpy-ember: #D9622B;
+  --cp-mood-proud: #2C9CE0;  --cp-mood-happy: #3AA6E0;  --cp-mood-recovering: #5DB4E6;
+  --cp-mood-annoyed: #E8873F; --cp-mood-grumpy: #D9622B; --cp-mood-fuming: #C0352B;
+  --cp-primary: #1574B0;
+  --cp-grumpy: #B4471C;
+  --cp-error: #C8264A;
+  --cp-bg: #F4F9FC;
+  --cp-font-display: "Baloo 2", "Arial Rounded MT Bold", sans-serif;
+  --cp-font-body: "Nunito", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --cp-primary: #5BBEF0; --cp-grumpy: #FF9A66; --cp-error: #FF6B85; --cp-bg: #0A1520; }
+}</pre>
+  <div class="scales">
+    <div class="scale"><h3>Spacing</h3><div id="spacing"></div></div>
+    <div class="scale"><h3>Radius</h3><p class="muted">Soft like stitched fabric. No sharp corners anywhere.</p><div class="rad-row"><div style="border-radius:10px">10</div><div style="border-radius:16px">16</div><div style="border-radius:24px">24</div><div style="border-radius:999px">pill</div></div></div>
+    <div class="scale"><h3>Motion</h3><p class="muted">One signature move: the flip, 700 ms with a small overshoot, like turning the plush inside out. Mood shade changes fade over 300 ms. Everything else stays quick (150 to 250 ms) and plain.</p></div>
+  </div>
+</section>
+
+<section class="block">
+  <div class="sec-head">
+    <span class="eyebrow">6 · In the app</span>
+    <h2 id="screens">The Today screen, on both sides</h2>
+    <p class="muted">Poulpy sits in the middle of the tentacle ring. Only Poulpy and the header tint change with his mood; the rest of the screen stays calm so the app never feels like it's shouting at you.</p>
+  </div>
+  <div class="phones">
+    <div class="phone-col">
+      <div class="phone">
+        <div class="ph-top happy">
+          <span class="ph-date">Saturday 24 Oct</span>
+          <span class="ph-hello">Nice streak, 9 days</span>
+          <div class="ring-wrap"><span data-ring="6"></span><div class="mini" data-poulpy="happy"></div></div>
+          <div class="bubble">6 of 8 tentacles lit. One more session and I'm doing a little dance.</div>
+        </div>
+        <div class="ph-body">
+          <div class="ph-row"><span>This week</span><span>3 sessions · 2 h 10</span></div>
+          <div class="session">
+            <span class="t-label" style="color:var(--primary)">Next session</span>
+            <span class="t">Lower body strength</span>
+            <span class="m">45 min · Back squat, Romanian deadlift, split squat</span>
+            <button class="cta" type="button" tabindex="-1">Start session</button>
+          </div>
+        </div>
+      </div>
+      <p class="caption">Happy side. On track with the week, streak alive.</p>
+    </div>
+    <div class="phone-col">
+      <div class="phone">
+        <div class="ph-top grumpy">
+          <span class="ph-date">Saturday 24 Oct</span>
+          <span class="ph-hello">Poulpy is grumpy</span>
+          <div class="ring-wrap"><span data-ring="3" data-ring-mood="ember"></span><div class="mini" data-poulpy="crossedmini"></div></div>
+          <div class="bubble g">Thursday's run is still waiting. 20 minutes and I flip back, promise.</div>
+        </div>
+        <div class="ph-body">
+          <div class="ph-row"><span>This week</span><span>1 session · 35 min</span></div>
+          <div class="session">
+            <span class="t-label" style="color:var(--ember)">Catch up</span>
+            <span class="t">Easy treadmill run</span>
+            <span class="m">20 min · Zone 2, 8.5 km/h, 1% incline</span>
+            <button class="cta g" type="button" tabindex="-1">Flip him back</button>
+          </div>
+        </div>
+      </div>
+      <p class="caption">Grumpy side. A planned session was missed; the fix is offered right away and kept short.</p>
+    </div>
+  </div>
+</section>
+
+<section class="block">
+  <div class="sec-head">
+    <span class="eyebrow">7 · Poulpy's behaviour</span>
+    <h2 id="behaviour">The side is the status, the shade is the feeling</h2>
+    <p class="muted">Which side shows says whether you're keeping your plan. The shade and the face on that side react to what just happened.</p>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>What happens</th><th>Mood</th><th>Pose</th><th>Rule</th></tr></thead>
+      <tbody id="rules"></tbody>
+    </table>
+  </div>
+</section>
+
+<section class="block">
+  <div class="sec-head">
+    <span class="eyebrow">8 · Gamification</span>
+    <h2 id="game">Ideas built from real octopus facts</h2>
+    <p class="muted">Core ideas come first; the others can join later.</p>
+  </div>
+  <div class="ideas">
+    <article class="idea"><div class="idea-head"><h3>The flip</h3><span class="prio core">Core</span></div><p>Poulpy's side follows the mood rules above. Coming back is always one session away, and the flip animation plus a haptic tap is the reward for it.</p><p class="fact">Inspired by the plush itself.</p></article>
+    <article class="idea"><div class="idea-head"><h3>Eight tentacles</h3><span class="prio core">Core</span></div><p>The ring has eight tentacles. Each finished session lights one, and a lit tentacle never goes dark: there is no weekly reset. The eighth gives the Champion pose and a "full octopus", and the next session starts a new ring.</p><p class="fact">Octopuses have eight tentacles, and Poulpy never grows more.</p></article>
+    <article class="idea"><div class="idea-head"><h3>Mood shades</h3><span class="prio core">Core</span></div><p>Poulpy's colour moves along the spectrum with each emotion: a touch richer after a record, lighter while recovering, hotter ember the longer a session waits.</p><p class="fact">Octopuses change colour with their mood.</p></article>
+    <article class="idea"><div class="idea-head"><h3>Shells in the den</h3><span class="prio later">Later</span></div><p>Achievements are shells Poulpy collects in his den: first 5 km on the treadmill, 10 sessions, a squat record, a full rehab block finished.</p><p class="fact">Octopuses decorate their dens with shells and stones.</p></article>
+    <article class="idea"><div class="idea-head"><h3>Colourways</h3><span class="prio maybe">Maybe</span></div><p>Unlock seasonal skins for Poulpy after milestones (a coral reef edition, a deep-sea night edition). Purely cosmetic.</p><p class="fact">Octopuses can camouflage in a fraction of a second.</p></article>
+    <article class="idea"><div class="idea-head"><h3>Flip the real one</h3><span class="prio maybe">Maybe</span></div><p>A home-screen widget and an optional morning nudge that says which side the real plush on your desk should show today.</p><p class="fact">Only works because the real Poulpy exists.</p></article>
+  </div>
+  <div class="guard">
+    <h3>Ground rules for Poulpy</h3>
+    <ul>
+      <li>Grumpy is comic, never guilt. No "you failed", no streak-loss alarms. Even Fuming is a cartoon tantrum.</li>
+      <li>Pain and rehab always win: a hurt user gets the Patched up pose, never the ember side.</li>
+      <li>One way back, always short: the catch-up session offered while ember is the easiest one in the plan.</li>
+      <li>Notifications speak in Poulpy's voice at most once a day, and can be turned off without losing the mascot.</li>
+      <li>All of Poulpy's lines are written in French and English from the start.</li>
+    </ul>
+  </div>
+</section>
+
+<footer>Coach Poulpy brand book. What was decided, and why, is traced on the <a href="__BRAND_DECISIONS__">brand decisions</a> page.</footer>
+</div>

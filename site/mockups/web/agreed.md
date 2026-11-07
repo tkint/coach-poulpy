@@ -5,4 +5,4 @@ prev: false
 next: false
 ---
 
-<MockupList stage="agreed" />
+<MockupList platform="web" stage="agreed" />

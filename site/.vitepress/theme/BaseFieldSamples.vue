@@ -1,7 +1,11 @@
 <script setup lang="ts">
-// The design system's base fields drawn with the tokens' own values, in light and dark.
-// Each sample has an id, so the "Base fields" table in the design system links straight to it.
+// One base field drawn with the tokens' own values, in the theme the page's switch chose. Each has its own
+// heading on the mobile components page, so the "Base fields" table in the design system links to it.
 import tokens from '../../../design/tokens.json'
+import { useSampleTheme } from './useSampleTheme'
+
+defineProps<{ part: string }>()
+const { mode } = useSampleTheme()
 
 const theme = tokens.theme as Record<'light' | 'dark', Record<string, string>>
 const vars = (mode: 'light' | 'dark') =>
@@ -13,24 +17,20 @@ const points = '8,62 60,56 112,58 164,44 216,40 268,30'
 
 <template>
   <div class="samples">
-    <div v-for="mode in ['light', 'dark'] as const" :key="mode" class="panel" :style="vars(mode)">
-      <span class="eyebrow">{{ mode }}</span>
+    <div class="panel" :style="vars(mode)">
 
-      <section :id="`text-field-${mode}`" class="sample">
-        <span class="name">Text field</span>
+      <section v-if="part === 'text-field'" class="sample">
         <label class="label">Name</label>
         <div class="box"><input value="Alex" aria-label="Name" /></div>
         <span class="note">Shown to you only, on this phone.</span>
       </section>
 
-      <section :id="`select-field-${mode}`" class="sample">
-        <span class="name">Select field</span>
+      <section v-if="part === 'select-field'" class="sample">
         <button type="button" class="box select"><span><span class="label">Experience</span><strong>Getting going</strong></span><span aria-hidden="true">›</span></button>
         <button type="button" class="box select"><span><span class="label">Sex</span><strong class="muted">Not set</strong></span><span aria-hidden="true">›</span></button>
       </section>
 
-      <section :id="`option-sheet-${mode}`" class="sample">
-        <span class="name">Option sheet</span>
+      <section v-if="part === 'option-sheet'" class="sample">
         <div class="sheet">
           <strong class="sheet-title">Pronouns</strong>
           <div class="option"><span class="radio on" aria-hidden="true"></span>They / them</div>
@@ -41,8 +41,7 @@ const points = '8,62 60,56 112,58 164,44 216,40 268,30'
         </div>
       </section>
 
-      <section :id="`number-field-${mode}`" class="sample">
-        <span class="name">Number field</span>
+      <section v-if="part === 'number-field'" class="sample">
         <div class="box number"><input inputmode="decimal" value="64" aria-label="Resting heart rate" /><span class="unit">bpm</span></div>
         <div class="entry">
           <button type="button" aria-label="Less">−</button>
@@ -51,8 +50,7 @@ const points = '8,62 60,56 112,58 164,44 216,40 268,30'
         </div>
       </section>
 
-      <section :id="`step-slider-${mode}`" class="sample">
-        <span class="name">Step slider</span>
+      <section v-if="part === 'step-slider'" class="sample">
         <strong>Getting going</strong>
         <div class="slider" aria-hidden="true">
           <span class="dot" /><span class="bar" /><span class="dot" /><span class="bar on" /><span class="dot on" /><span class="bar off" /><span class="dot off" /><span class="bar off" /><span class="dot off" />
@@ -60,8 +58,7 @@ const points = '8,62 60,56 112,58 164,44 216,40 268,30'
         <div class="ends"><span>Just starting</span><span>Very experienced</span></div>
       </section>
 
-      <section :id="`line-chart-${mode}`" class="sample">
-        <span class="name">Line chart</span>
+      <section v-if="part === 'line-chart'" class="sample">
         <svg viewBox="0 0 290 100" class="chart" role="img" aria-label="Weight from 72 kg to 70 kg over three months">
           <text x="0" y="8" class="tick">kg</text>
           <g v-for="line in grid" :key="line">
@@ -73,8 +70,7 @@ const points = '8,62 60,56 112,58 164,44 216,40 268,30'
         <div class="ends"><span>1 Aug</span><span>1 Nov</span></div>
       </section>
 
-      <section :id="`empty-chart-card-${mode}`" class="sample">
-        <span class="name">Empty chart card</span>
+      <section v-if="part === 'empty-chart-card'" class="sample">
         <div class="empty">
           <strong>No weight yet</strong>
           <span>Log it once to see your chart. It stays on this phone, and only you see it.</span>
