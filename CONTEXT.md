@@ -207,6 +207,14 @@ _Avoid_: Verified account, activated account
 One phone or browser signed in to an account, named by its device, with its own tokens; revoking a token or reusing a refresh token ends it alone.
 _Avoid_: Session (a session is a workout done), login
 
+**Outbox**:
+The changes a signed-in phone has made and not yet pushed to the account; signing out waits for it to be empty ([Accounts](docs/accounts.md#sync)).
+_Avoid_: Queue, pending uploads
+
+**Cursor**:
+Where a phone's last pull stopped: a number counting every change the server stored for the account, never a time.
+_Avoid_: Last sync date, timestamp
+
 **Caller**:
 Whoever an API request comes from, as the server sees it: an account, the client it comes through and that client's scopes.
 _Avoid_: Principal, user
