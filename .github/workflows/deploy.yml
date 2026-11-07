@@ -1,13 +1,20 @@
 name: Deploy
 
-# Run by hand: Actions > Deploy > Run workflow. It writes the app's .env from the production
+# Run by hand: Actions > Deploy > Run workflow. It writes the app's .env from the chosen GitHub
 # environment, uploads it with the server and shared Caddy files over SSH and deploys the chosen
-# server image (ADR 0019). Setup and secrets: docs/releasing.md, "Deploy the server".
+# server image (ADR 0019). A version pr-<n> first builds that pull request's server image and
+# deploys it with that pull request's deploy files, to try it before it merges. Setup and secrets:
+# docs/releasing.md, "Deploy the server".
 on:
   workflow_dispatch:
     inputs:
+      environment:
+        description: "Where to deploy: production, or preview to try a pull request"
+        type: choice
+        options: [production, preview]
+        default: production
       version:
-        description: "Server image to deploy: latest, or a version such as 0.3.0"
+        description: "Server image: latest, a version such as 0.3.0, or pr-<number> to build a pull request"
         default: latest
         required: true
 
@@ -19,12 +26,75 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  deploy:
-    name: Update the server
+  source:
+    name: Pick the source
     runs-on: ubuntu-latest
-    environment: production
+    outputs:
+      ref: ${{ steps.pick.outputs.ref }}
+      pull-request: ${{ steps.pick.outputs.pull-request }}
+    steps:
+      - id: pick
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          if ! printf '%s' "$APP_NAME" | grep -Eq '^[a-z0-9][a-z0-9-]*$'; then
+            echo "::error::APP_NAME may only have lowercase letters, digits and dashes."; exit 1
+          fi
+          case "$VERSION" in
+            pr-*)
+              number="${VERSION#pr-}"
+              if ! printf '%s' "$number" | grep -Eq '^[0-9]+$'; then
+                echo "::error::A pull request is deployed as pr- and its number, such as pr-42."; exit 1
+              fi
+              echo "ref=refs/pull/$number/head" >> "$GITHUB_OUTPUT"
+              echo "pull-request=true" >> "$GITHUB_OUTPUT" ;;
+            *)
+              echo "ref=$GITHUB_SHA" >> "$GITHUB_OUTPUT"
+              echo "pull-request=false" >> "$GITHUB_OUTPUT" ;;
+          esac
+
+  image:
+    name: Build the pull request's server image
+    needs: source
+    if: needs.source.outputs.pull-request == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.source.outputs.ref }}
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: server/Dockerfile
+          # The machine is amd64 (ADR 0019), as in the Release workflow.
+          platforms: linux/amd64
+          push: true
+          build-args: APP_VERSION=${{ inputs.version }}
+          tags: ghcr.io/${{ github.repository_owner }}/coach-poulpy-server:${{ inputs.version }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    name: Update the server
+    needs: [source, image]
+    # Runs after the image when there is one to build, and straight away for a release.
+    if: ${{ !cancelled() && needs.source.result == 'success' && needs.image.result != 'failure' }}
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # A pull request is deployed with its own Compose and Caddy files, which it may change.
+          ref: ${{ needs.source.outputs.ref }}
       - name: Update the machine
         env:
           SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
@@ -33,23 +103,27 @@ jobs:
           SSH_PORT: ${{ vars.DEPLOY_PORT || secrets.DEPLOY_PORT || '22' }}
           HOST_KEY: ${{ vars.DEPLOY_HOST_KEY || secrets.DEPLOY_HOST_KEY }}
           VERSION: ${{ inputs.version }}
+          ENVIRONMENT: ${{ inputs.environment }}
           # Written to the app's .env on the server.
           DOMAIN: ${{ vars.DOMAIN }}
+          # Names the folder, the Compose project, the server's alias and its Caddy route: another
+          # name runs beside production, the same name replaces it.
+          APP_NAME: ${{ vars.APP_NAME || 'coach-poulpy' }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
         run: |
           for name in DEPLOY_SSH_KEY:SSH_KEY DEPLOY_HOST:HOST DEPLOY_USER:SSH_USER \
             DEPLOY_HOST_KEY:HOST_KEY DOMAIN:DOMAIN POSTGRES_PASSWORD:POSTGRES_PASSWORD; do
             if [ -z "$(printenv "${name#*:}")" ]; then
-              echo "::error::Missing ${name%%:*} in the production environment."; exit 1
+              echo "::error::Missing ${name%%:*} in the $ENVIRONMENT environment."; exit 1
             fi
           done
-          if ! printf '%s' "$VERSION" | grep -Eq '^[A-Za-z0-9._-]+$'; then
-            echo "::error::Invalid image version."; exit 1
+          if ! printf '%s' "$APP_NAME" | grep -Eq '^[a-z0-9][a-z0-9-]*$'; then
+            echo "::error::APP_NAME may only have lowercase letters, digits and dashes."; exit 1
           fi
 
           umask 077
-          printf 'DOMAIN=%s\nIMAGE_TAG=%s\nPOSTGRES_PASSWORD=%s\n' \
-            "$DOMAIN" "$VERSION" "$POSTGRES_PASSWORD" > "$RUNNER_TEMP/.env"
+          printf 'APP_NAME=%s\nDOMAIN=%s\nIMAGE_TAG=%s\nPOSTGRES_PASSWORD=%s\n' \
+            "$APP_NAME" "$DOMAIN" "$VERSION" "$POSTGRES_PASSWORD" > "$RUNNER_TEMP/.env"
           printf '%s\n' "$SSH_KEY" > "$RUNNER_TEMP/key"
           printf '%s\n' "$HOST_KEY" > "$RUNNER_TEMP/known_hosts"
           remote() {
@@ -59,5 +133,5 @@ jobs:
 
           tar -C deploy/caddy -czf - compose.yaml bootstrap.json deploy.py | remote 'mkdir -p ~/caddy && tar -xzf - -C ~/caddy'
           tar -C deploy -czf - compose.yaml coach-poulpy.caddy -C "$RUNNER_TEMP" .env |
-            remote 'mkdir -p ~/coach-poulpy && tar -xzf - -C ~/coach-poulpy'
-          remote 'python3 ~/caddy/deploy.py ~/coach-poulpy compose.yaml coach-poulpy.caddy'
+            remote "mkdir -p ~/$APP_NAME && tar -xzf - -C ~/$APP_NAME"
+          remote "python3 ~/caddy/deploy.py ~/$APP_NAME compose.yaml coach-poulpy.caddy"

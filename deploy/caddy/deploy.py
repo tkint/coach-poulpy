@@ -3,8 +3,9 @@
 
 Usage: python3 ~/caddy/deploy.py APP_DIR COMPOSE_FILE SITE_FILE
 
-APP_DIR holds the app's .env (with DOMAIN). The site's route gets the site file's name as its
-@id, so each deployment replaces only its own site. Caddy autosaves every API change.
+APP_DIR holds the app's .env (with DOMAIN, and APP_NAME unless it is the site file's name). The
+site's route gets APP_NAME as its @id, so each deployment replaces only its own site, and a preview
+with its own APP_NAME sits beside production. Caddy autosaves every API change.
 """
 
 import fcntl
@@ -52,6 +53,7 @@ def main(app_dir, compose_file, site_file):
     domain = settings.get("DOMAIN", "").strip()
     if not domain:
         sys.exit(f"DOMAIN is missing from {app / '.env'}.")
+    app_name = settings.get("APP_NAME", "").strip() or Path(site_file).stem
 
     if run("docker", "network", "inspect", "edge", check=False).returncode:
         run("docker", "network", "create", "edge")
@@ -68,13 +70,13 @@ def main(app_dir, compose_file, site_file):
     run("docker", "compose", "--project-directory", str(app), "--env-file", str(app / ".env"),
         "-f", str(app / compose_file), "up", "-d", "--wait")
 
-    site = (app / site_file).read_text().replace("{$DOMAIN}", domain)
+    site = (app / site_file).read_text().replace("{$DOMAIN}", domain).replace("{$APP_NAME}", app_name)
     adapted = json.loads(caddy("exec", "-T", "caddy", "caddy", "adapt", "--adapter", "caddyfile",
                                "--config", "/dev/stdin", input=site).stdout)
     server = next(iter(adapted["apps"]["http"]["servers"].values()))
     if len(server["routes"]) != 1:
         sys.exit(f"{site_file} must define exactly one site.")
-    route = {**server["routes"][0], "@id": Path(site_file).stem}
+    route = {**server["routes"][0], "@id": app_name}
 
     config = api("GET", "/config/") or {}
     new_logs = adapted.get("logging", {}).get("logs", {})
