@@ -199,6 +199,10 @@ _Avoid_: Anonymous user, offline user
 A person's identity on the server, made when a guest signs up; their phones and the website sync through it.
 _Avoid_: User, profile (the profile is what the person tells the app about themselves)
 
+**Confirmed email**:
+An account's address once its owner has tapped the link sent to it; nothing leaves the phone before ([Accounts](docs/accounts.md)).
+_Avoid_: Verified account, activated account
+
 **Caller**:
 Whoever an API request comes from, as the server sees it: an account, the client it comes through and that client's scopes.
 _Avoid_: Principal, user
