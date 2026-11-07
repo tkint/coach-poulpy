@@ -108,7 +108,7 @@ internal fun AccountRow(onPage: () -> Unit, onFlow: (String) -> Unit, row: @Comp
     val account = rememberAccount()
     val state by account.state.collectAsStateWithLifecycle()
     when (val current = state) {
-        AccountState.Guest -> row(stringResource(R.string.account_guestRow), stringResource(R.string.account_guestRowHint)) { onFlow("sign-up") }
+        AccountState.Guest -> row(stringResource(R.string.account_guestRow), stringResource(R.string.account_guestRowHint)) { onFlow("sign-in") }
         is AccountState.Pending -> row(stringResource(R.string.account_rowPending), stringResource(R.string.account_rowPendingHint, current.email), onPage)
         is AccountState.SignedIn -> row(current.email, syncSummary(current), onPage)
     }

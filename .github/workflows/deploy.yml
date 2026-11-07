@@ -145,12 +145,13 @@ jobs:
           # name runs beside production, the same name replaces it.
           APP_NAME: ${{ vars.APP_NAME || 'coach-poulpy' }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          # Mail; optional until a provider is chosen (docs/deploying-the-server.md).
-          SMTP_HOST: ${{ vars.SMTP_HOST }}
-          SMTP_PORT: ${{ vars.SMTP_PORT }}
+          # Mail (docs/deploying-the-server.md). Each setting may be a variable or a secret, of the
+          # environment or the repository; an environment's value wins over the repository's.
+          SMTP_HOST: ${{ vars.SMTP_HOST || secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ vars.SMTP_PORT || secrets.SMTP_PORT }}
           SMTP_USER: ${{ vars.SMTP_USER || secrets.SMTP_USER }}
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
-          MAIL_FROM: ${{ vars.MAIL_FROM }}
+          MAIL_FROM: ${{ vars.MAIL_FROM || secrets.MAIL_FROM }}
           WEBSITE_URL: ${{ vars.WEBSITE_URL }}
         run: |
           if [ "$PART" = website ]; then
@@ -168,7 +169,7 @@ jobs:
             echo "::error::APP_NAME may only have lowercase letters, digits and dashes."; exit 1
           fi
           if [ "$PART" = server ] && [ -z "$SMTP_HOST" ]; then
-            echo "::warning::No SMTP_HOST in the $ENVIRONMENT environment: the server will print emails to its log instead of sending them."
+            echo "::warning::No SMTP_HOST variable or secret in the $ENVIRONMENT environment or the repository: the server will print emails to its log instead of sending them."
           elif [ "$PART" = server ] && [ -z "$MAIL_FROM" ]; then
             echo "::error::Missing MAIL_FROM in the $ENVIRONMENT environment, needed with SMTP_HOST."; exit 1
           fi

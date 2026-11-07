@@ -586,7 +586,7 @@
     "noEmail": "Vous n’avez rien reçu ?",
     "sendAgain": "Renvoyez-le",
     "wrongAddress": "Mauvaise adresse ?",
-    "changeAddress": "Modifiez-la",
+    "changeAddress": "Réessayez avec une autre adresse",
     "email": "Adresse e-mail",
     "password": "Mot de passe",
     "passwordHint": "8 caractères ou plus.",

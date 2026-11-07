@@ -65,6 +65,8 @@ Set it up once:
    | `WEBSITE_URL` | variable | Optional, `https://app.coach-poulpy.com` by default: where the links in emails point |
    | `WEB_DOMAIN` | variable | The web app's hostname, such as `app.coach-poulpy.com`; needed only to deploy `website` |
 
+   The mail settings (`SMTP_*`, `MAIL_FROM`) may be variables or secrets, in the environment or in the repository's **Settings > Secrets and variables > Actions**; a value in the environment wins.
+
 3. In the same `production` environment, tick **Required reviewers** and add yourself, so a deploy waits for your approval before it touches the machine.
 
 The workflow stops with a message, and changes nothing, if a setting is missing or the version has characters other than letters, digits, `.`, `_` and `-`. Until there is a server, a run failing on missing settings is expected. Once it succeeds, `curl https://api.coach-poulpy.com/health` prints the version deployed. Deploying an older version is the way back if a release goes wrong.
