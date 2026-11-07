@@ -2,6 +2,8 @@ package ch.coachpoulpy.server
 
 import ch.coachpoulpy.catalog.Catalog
 import ch.coachpoulpy.server.accounts.Accounts
+import ch.coachpoulpy.server.accounts.Passwords
+import ch.coachpoulpy.server.auth.SignIns
 import ch.coachpoulpy.server.mail.ConsoleMailer
 import ch.coachpoulpy.server.mail.MailSettings
 import ch.coachpoulpy.server.mail.SmtpMailer
@@ -33,17 +35,24 @@ fun websiteUrl(env: (String) -> String?): String =
 
 /**
  * The server: `/health` for the Docker health check, and the API under `/api/v1`, where every
- * request first gets its caller (ADR 0020). No authenticator is registered until signing in
- * arrives (#270), so for now every caller is anonymous and any token is refused.
+ * request first gets its caller (ADR 0020): anonymous, or the account of a `cp_at_` access token.
+ * Any other token is refused.
  *
  * `/health` answers 503 while [databaseAnswers] says the database doesn't, so Docker reports the
  * server unhealthy rather than serving requests that would fail.
  */
-fun app(version: String, catalog: Catalog, accounts: Accounts, databaseAnswers: () -> Boolean): HttpHandler = routes(
+fun app(
+    version: String,
+    catalog: Catalog,
+    database: Database,
+    accounts: Accounts,
+    signIns: SignIns,
+    databaseAnswers: () -> Boolean = database::answers,
+): HttpHandler = routes(
     "/health" bind GET to {
         if (databaseAnswers()) Response(OK).body("ok $version") else Response(SERVICE_UNAVAILABLE).body("database unavailable")
     },
-    authenticate(authenticators = emptyMap()).then(api(version, catalog, accounts)),
+    authenticate(mapOf(SignIns.ACCESS_PREFIX to signIns.authenticator)).then(api(version, catalog, accounts, signIns, database)),
 )
 
 fun main() {
@@ -52,7 +61,9 @@ fun main() {
     // Migrations run before the server listens; a failed one throws and stops it here.
     val database = Database.connect(DatabaseSettings.from(System::getenv)).apply { migrate() }
     val mailer = MailSettings.from(System::getenv)?.let(::SmtpMailer) ?: ConsoleMailer
-    val accounts = Accounts(database, mailer, websiteUrl = websiteUrl(System::getenv))
-    app(version, Catalog.bundled, accounts, database::answers).asServer(SunHttp(port)).start()
+    val passwords = Passwords()
+    val accounts = Accounts(database, mailer, websiteUrl = websiteUrl(System::getenv), passwords = passwords)
+    val signIns = SignIns(database, passwords)
+    app(version, Catalog.bundled, database, accounts, signIns).asServer(SunHttp(port)).start()
     println("Coach Poulpy server $version listening on http://localhost:$port")
 }
