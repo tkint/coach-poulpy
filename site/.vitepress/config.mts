@@ -126,6 +126,7 @@ export default withMermaid(
             { text: 'Glossary', link: '/CONTEXT' },
             { text: 'The workout file', link: '/docs/workout-file' },
             { text: 'The API', link: '/docs/the-api' },
+            { text: 'Accounts', link: '/docs/accounts' },
             { text: 'Decisions', link: '/decisions/', collapsed: true, items: adrs },
             { text: 'Research', collapsed: true, items: research },
           ],
