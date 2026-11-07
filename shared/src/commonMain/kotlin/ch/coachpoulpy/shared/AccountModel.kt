@@ -111,7 +111,12 @@ class AccountModel(
     private var watching: Job? = null
 
     init {
-        if (_state.value is AccountState.SignedIn) startSyncing()
+        when (_state.value) {
+            is AccountState.SignedIn -> startSyncing()
+            // The link may have been opened elsewhere, such as on the website: try the kept password.
+            is AccountState.Pending -> scope.launch { checkConfirmed() }
+            AccountState.Guest -> Unit
+        }
     }
 
     fun watch(onChange: (AccountState) -> Unit): Cancellable = state.watchIn(scope, onChange)
@@ -177,6 +182,18 @@ class AccountModel(
             }
             else -> ConfirmResult.CONFIRMED_SIGN_IN
         }
+    }
+
+    /**
+     * While the email waits for confirmation: signs in with the kept password, which works once the
+     * link was opened anywhere, such as on the website. False while it is still unconfirmed or offline.
+     */
+    suspend fun checkConfirmed(): Boolean = offlineAs(false) {
+        val waiting = pending() ?: return@offlineAs false
+        if (client.signIn(waiting.email, waiting.password, deviceName) != SignInAnswer.SignedIn) return@offlineAs false
+        forgetPending()
+        signedIn(waiting.email)
+        true
     }
 
     /** Forgot your password: mails a link when the address has an account, without saying whether. */
