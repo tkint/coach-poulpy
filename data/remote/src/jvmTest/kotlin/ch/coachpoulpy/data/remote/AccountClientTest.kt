@@ -177,3 +177,34 @@ class AccountClientTest {
         override fun write(tokens: Tokens?) { this.tokens = tokens }
     }
 }
+
+class AccountLinksTest {
+    private var status = HttpStatusCode.NoContent
+    private var body = ""
+    private val client = AccountClient(
+        "https://api.example.com",
+        object : TokenStore {
+            override fun read(): Tokens? = null
+            override fun write(tokens: Tokens?) {}
+        },
+        MockEngine { respond(body, status, headersOf(HttpHeaders.ContentType, "application/json")) },
+    )
+
+    @Test
+    fun aConfirmLinkWorksOnce() = runTest {
+        assertTrue(client.confirmEmail("t1"))
+        status = HttpStatusCode.BadRequest
+        body = """{"error":"invalid-token"}"""
+        assertEquals(false, client.confirmEmail("t1"))
+    }
+
+    @Test
+    fun aNewPasswordIsSavedOrRefused() = runTest {
+        assertEquals(NewPasswordAnswer.SAVED, client.setNewPassword("t1", "a-new-password"))
+        status = HttpStatusCode.BadRequest
+        body = """{"error":"invalid-password"}"""
+        assertEquals(NewPasswordAnswer.INVALID_PASSWORD, client.setNewPassword("t1", "short"))
+        body = """{"error":"invalid-token"}"""
+        assertEquals(NewPasswordAnswer.INVALID_TOKEN, client.setNewPassword("t1", "a-new-password"))
+    }
+}

@@ -1,0 +1,298 @@
+package ch.coachpoulpy.shared
+
+import ch.coachpoulpy.data.local.LocalStore
+import ch.coachpoulpy.data.local.outboxSize
+import ch.coachpoulpy.data.remote.AccountClient
+import ch.coachpoulpy.data.remote.DeleteAnswer
+import ch.coachpoulpy.data.remote.NewPasswordAnswer
+import ch.coachpoulpy.data.remote.SignInAnswer
+import ch.coachpoulpy.data.remote.SignInRefusedByServer
+import ch.coachpoulpy.data.remote.SignUpAnswer
+import kotlin.coroutines.cancellation.CancellationException
+import kotlin.time.Instant
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+
+/** Where the phone stands with its account (docs/accounts.md, Screens). */
+sealed interface AccountState {
+    /** All data on the phone, nothing sent. */
+    data object Guest : AccountState
+
+    /** Signed up, waiting for the link in the email to [email] to be opened on this phone. */
+    data class Pending(val email: String) : AccountState
+
+    /** Signed in: [waiting] changes not sent yet, and when a sync last finished. */
+    data class SignedIn(val email: String, val waiting: Long, val lastSyncedAt: Instant?) : AccountState {
+        val upToDate: Boolean get() = waiting == 0L
+    }
+}
+
+/** The first upload after signing in or confirming the email: [sent] of [total] changes. */
+data class UploadProgress(val sent: Long, val total: Long) {
+    val done: Boolean get() = sent >= total
+}
+
+sealed interface SignInResult {
+    /** Signed in on a phone with nothing to send. */
+    data object SignedIn : SignInResult
+    /** Signed in on a phone with guest data, which now joins the account: Welcome back, with the upload. */
+    data object Joining : SignInResult
+    /** One message for both: the server never says which was wrong. */
+    data object WrongEmailOrPassword : SignInResult
+    data class TooManyTries(val retryAfterSeconds: Long) : SignInResult
+    data object Offline : SignInResult
+}
+
+/** What is wrong in the sign-up form, checked on the phone before anything is sent. */
+data class SignUpProblems(val email: Boolean = false, val password: Boolean = false, val consent: Boolean = false) {
+    val none: Boolean get() = !email && !password && !consent
+}
+
+sealed interface SignUpResult {
+    /** Check your email: the answer is the same whether or not the address had an account. */
+    data object Sent : SignUpResult
+    data class Invalid(val problems: SignUpProblems) : SignUpResult
+    data object Offline : SignUpResult
+}
+
+enum class ConfirmResult {
+    /** Confirmed and signed in: Email confirmed, with the upload. */
+    CONFIRMED,
+    /** Confirmed, but this phone didn't sign up: Sign in. */
+    CONFIRMED_SIGN_IN,
+    /** Used or older than 24 hours: This link doesn't work anymore. */
+    LINK_EXPIRED,
+    OFFLINE,
+}
+
+enum class NewPasswordResult { SAVED, LINK_EXPIRED, TOO_SHORT, OFFLINE }
+
+enum class DeleteResult { DELETED, WRONG_PASSWORD, OFFLINE }
+
+/**
+ * The account behind Settings' Account section, its screens and the email links: sign in, sign up
+ * and confirm, reset a password, sign out and delete. While signed in, [sync] keeps the phone and
+ * the account in step. [memory] is the apps' own store; [secrets] keeps the password between
+ * signing up and opening the link, then forgets it.
+ */
+class AccountModel(
+    private val store: LocalStore,
+    private val memory: KeyValueStore,
+    private val secrets: SecretStore,
+    private val client: AccountClient,
+    private val deviceName: String,
+    private val languageCode: () -> String,
+    private val scope: CoroutineScope,
+) {
+    val sync = SyncClient(
+        store, memory, RemoteSyncServer(client), deviceName, languageCode, scope,
+        onSignInRefused = { becomeGuest() },
+    )
+
+    private val _state = MutableStateFlow(initialState())
+    val state: StateFlow<AccountState> = _state.asStateFlow()
+
+    private val _upload = MutableStateFlow<UploadProgress?>(null)
+    /** The first upload, while Email confirmed or Welcome back shows it; null otherwise. */
+    val upload: StateFlow<UploadProgress?> = _upload.asStateFlow()
+
+    private var syncing: Job? = null
+    private var watching: Job? = null
+
+    init {
+        if (_state.value is AccountState.SignedIn) startSyncing()
+    }
+
+    fun watch(onChange: (AccountState) -> Unit): Cancellable = state.watchIn(scope, onChange)
+    fun watchUpload(onChange: (UploadProgress?) -> Unit): Cancellable = upload.watchIn(scope, onChange)
+
+    /** The email to fill in the forms with: the one waiting for confirmation, or the last one used. */
+    val knownEmail: String? get() = pending()?.email ?: memory.getString(EMAIL)
+
+    suspend fun signIn(email: String, password: String): SignInResult = offlineAs(SignInResult.Offline) {
+        when (val answer = client.signIn(email.trim(), password, deviceName)) {
+            SignInAnswer.SignedIn -> {
+                forgetPending()
+                if (signedIn(email.trim())) SignInResult.Joining else SignInResult.SignedIn
+            }
+            SignInAnswer.Refused -> SignInResult.WrongEmailOrPassword
+            is SignInAnswer.TooManyTries -> SignInResult.TooManyTries(answer.retryAfterSeconds)
+        }
+    }
+
+    suspend fun signUp(email: String, password: String, healthDataConsent: Boolean): SignUpResult {
+        val address = email.trim()
+        val problems = SignUpProblems(
+            email = !EMAIL_SHAPE.matches(address),
+            password = password.length !in PASSWORD_LENGTH,
+            consent = !healthDataConsent,
+        )
+        if (!problems.none) return SignUpResult.Invalid(problems)
+        return offlineAs(SignUpResult.Offline) {
+            when (client.signUp(address, password, languageCode(), healthDataConsent)) {
+                SignUpAnswer.ACCEPTED -> {
+                    keepPending(Pending(address, password))
+                    _state.value = AccountState.Pending(address)
+                    SignUpResult.Sent
+                }
+                SignUpAnswer.INVALID_EMAIL -> SignUpResult.Invalid(SignUpProblems(email = true))
+                SignUpAnswer.INVALID_PASSWORD -> SignUpResult.Invalid(SignUpProblems(password = true))
+                SignUpAnswer.CONSENT_REQUIRED -> SignUpResult.Invalid(SignUpProblems(consent = true))
+            }
+        }
+    }
+
+    /** Didn't get the email: signs up again with the same address, which sends a new link. */
+    suspend fun sendAgain(): SignUpResult {
+        val waiting = pending() ?: return SignUpResult.Invalid(SignUpProblems(email = true))
+        return signUp(waiting.email, waiting.password, healthDataConsent = true)
+    }
+
+    /** Wrong address: back to the form. Nothing left the phone, and the address stays unconfirmed. */
+    fun changeAddress() {
+        forgetPending()
+        _state.value = AccountState.Guest
+    }
+
+    /** The link in the confirmation email, `…/confirm-email#<token>`, opened on this phone. */
+    suspend fun confirmEmail(token: String): ConfirmResult = offlineAs(ConfirmResult.OFFLINE) {
+        if (!client.confirmEmail(token)) return@offlineAs ConfirmResult.LINK_EXPIRED
+        val waiting = pending() ?: return@offlineAs ConfirmResult.CONFIRMED_SIGN_IN
+        when (client.signIn(waiting.email, waiting.password, deviceName)) {
+            SignInAnswer.SignedIn -> {
+                forgetPending()
+                signedIn(waiting.email)
+                ConfirmResult.CONFIRMED
+            }
+            else -> ConfirmResult.CONFIRMED_SIGN_IN
+        }
+    }
+
+    /** Forgot your password: mails a link when the address has an account, without saying whether. */
+    suspend fun requestPasswordReset(email: String): Boolean = offlineAs(false) {
+        client.requestPasswordReset(email.trim())
+        true
+    }
+
+    /** The link in the reset email, `…/reset-password#<token>`: every phone is signed out, this one included. */
+    suspend fun setNewPassword(token: String, password: String): NewPasswordResult {
+        if (password.length !in PASSWORD_LENGTH) return NewPasswordResult.TOO_SHORT
+        return offlineAs(NewPasswordResult.OFFLINE) {
+            when (client.setNewPassword(token, password)) {
+                NewPasswordAnswer.SAVED -> NewPasswordResult.SAVED.also { if (_state.value is AccountState.SignedIn) becomeGuest() }
+                NewPasswordAnswer.INVALID_TOKEN -> NewPasswordResult.LINK_EXPIRED
+                NewPasswordAnswer.INVALID_PASSWORD -> NewPasswordResult.TOO_SHORT
+            }
+        }
+    }
+
+    /**
+     * Back to an empty guest: workouts, sessions and what else follows the account leave the phone.
+     * With changes still waiting it signs out only when [evenWithChanges].
+     */
+    suspend fun signOut(evenWithChanges: Boolean = false): SignOutResult {
+        val result = sync.signOut(evenWithChanges)
+        if (result == SignOutResult.SIGNED_OUT) {
+            stopSyncing()
+            _state.value = AccountState.Guest
+        }
+        return result
+    }
+
+    /** Deletes the account at once; this phone, like every other, goes back to a guest that keeps its copy. */
+    suspend fun deleteAccount(password: String): DeleteResult = offlineAs(DeleteResult.OFFLINE) {
+        when (client.deleteAccount(password)) {
+            DeleteAnswer.DELETED -> DeleteResult.DELETED.also { becomeGuest() }
+            DeleteAnswer.WRONG_PASSWORD -> DeleteResult.WRONG_PASSWORD
+        }
+    }
+
+    /** Pull to refresh. */
+    suspend fun refresh(): SyncResult = sync.run()
+
+    /** Starts recording and syncing, and says whether the phone has guest data to send. */
+    private fun signedIn(email: String): Boolean {
+        memory.putString(EMAIL, email)
+        store.startRecordingChanges(SyncedSettings.values(memory))
+        val total = store.outbox(Int.MAX_VALUE).size.toLong()
+        _upload.value = if (total > 0) UploadProgress(0, total) else null
+        _state.value = AccountState.SignedIn(email, total, sync.lastSyncedAt.value)
+        startSyncing()
+        return total > 0
+    }
+
+    private fun startSyncing() {
+        stopSyncing(keepUpload = true)
+        syncing = sync.start()
+        watching = scope.launch {
+            combine(store.outboxSize(), sync.lastSyncedAt) { waiting, last -> waiting to last }.collect { (waiting, last) ->
+                _state.update { current ->
+                    if (current is AccountState.SignedIn) current.copy(waiting = waiting, lastSyncedAt = last) else current
+                }
+                _upload.update { progress -> progress?.copy(sent = (progress.total - waiting).coerceIn(0, progress.total)) }
+            }
+        }
+    }
+
+    private fun stopSyncing(keepUpload: Boolean = false) {
+        syncing?.cancel()
+        watching?.cancel()
+        syncing = null
+        watching = null
+        if (!keepUpload) _upload.value = null
+    }
+
+    /** A refused sign-in, a deleted account or a new password: a guest again, keeping the phone's data. */
+    private fun becomeGuest() {
+        stopSyncing()
+        store.stopRecordingChanges()
+        secrets.putSecret(TOKENS, null)
+        _state.value = AccountState.Guest
+    }
+
+    private fun initialState(): AccountState = when {
+        secrets.getSecret(TOKENS) != null && memory.getString(EMAIL) != null ->
+            AccountState.SignedIn(memory.getString(EMAIL)!!, 0, sync.lastSyncedAt.value)
+        else -> pending()?.let { AccountState.Pending(it.email) } ?: AccountState.Guest
+    }
+
+    @Serializable
+    private data class Pending(val email: String, val password: String)
+
+    private fun pending(): Pending? =
+        secrets.getSecret(PENDING)?.let { runCatching { json.decodeFromString(Pending.serializer(), it) }.getOrNull() }
+
+    private fun keepPending(pending: Pending) = secrets.putSecret(PENDING, json.encodeToString(Pending.serializer(), pending))
+
+    private fun forgetPending() = secrets.putSecret(PENDING, null)
+
+    /** Any failure to reach the server, or an answer it shouldn't give, reads as no connection. */
+    private suspend fun <T> offlineAs(offline: T, call: suspend () -> T): T = try {
+        call()
+    } catch (e: CancellationException) {
+        throw e
+    } catch (_: SignInRefusedByServer) {
+        becomeGuest()
+        offline
+    } catch (_: Exception) {
+        offline
+    }
+
+    internal companion object {
+        const val EMAIL = "account.email"
+        const val PENDING = "account.pending"
+        /** The key [SecretTokenStore] keeps the tokens under. */
+        const val TOKENS = "account.tokens"
+        val PASSWORD_LENGTH = 8..256
+        val EMAIL_SHAPE = Regex("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")
+        private val json = Json { ignoreUnknownKeys = true }
+    }
+}

@@ -59,6 +59,8 @@ sealed interface SignInAnswer {
 
 enum class DeleteAnswer { DELETED, WRONG_PASSWORD }
 
+enum class NewPasswordAnswer { SAVED, INVALID_TOKEN, INVALID_PASSWORD }
+
 sealed interface PushResult {
     data object Accepted : PushResult
     data class StaleBase(val workouts: List<WorkoutId>) : PushResult
@@ -142,6 +144,33 @@ class AccountClient(
             setBody(EmailRequest(email))
         }
         if (response.status != HttpStatusCode.Accepted) throw UnexpectedAnswer(response.status.value)
+    }
+
+    /** Confirms the address with the token from the email link; false for a token unknown, used or expired. */
+    suspend fun confirmEmail(token: String): Boolean {
+        val response = http.post("$base/api/v1/accounts/confirm") {
+            contentType(ContentType.Application.Json)
+            setBody(TokenRequest(token))
+        }
+        return when (response.status) {
+            HttpStatusCode.NoContent -> true
+            HttpStatusCode.BadRequest -> false
+            else -> throw UnexpectedAnswer(response.status.value)
+        }
+    }
+
+    /** Sets a new password with the token from the reset link; every phone of the account is signed out. */
+    suspend fun setNewPassword(token: String, password: String): NewPasswordAnswer {
+        val response = http.post("$base/api/v1/password-resets/confirm") {
+            contentType(ContentType.Application.Json)
+            setBody(NewPasswordRequest(token, password))
+        }
+        return when (response.status) {
+            HttpStatusCode.NoContent -> NewPasswordAnswer.SAVED
+            HttpStatusCode.BadRequest ->
+                if (response.body<Problem>().error == "invalid-password") NewPasswordAnswer.INVALID_PASSWORD else NewPasswordAnswer.INVALID_TOKEN
+            else -> throw UnexpectedAnswer(response.status.value)
+        }
     }
 
     suspend fun me(): Me = signedInCall { get("$base/api/v1/me", it) }.let { response ->
@@ -261,6 +290,12 @@ private data class EmailRequest(val email: String)
 
 @Serializable
 private data class PasswordRequest(val password: String)
+
+@Serializable
+private data class TokenRequest(val token: String)
+
+@Serializable
+private data class NewPasswordRequest(val token: String, val password: String)
 
 @Serializable
 private data class Problem(val error: String)
