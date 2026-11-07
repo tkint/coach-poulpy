@@ -1,6 +1,6 @@
 # The API
 
-The server is an API only, at `https://api.coach-poulpy.com/api/v1` ([ADR 0021](./adr/0021-the-landing-site-the-app-and-the-api-have-their-own-hostname.md)). Its routes are described in OpenAPI at [`/api/v1/openapi.json`](https://api.coach-poulpy.com/api/v1/openapi.json), generated from the code, so that file, not this page, is the full reference. This page says how a request is handled and which routes exist so far.
+The server is an API only, at `https://api.coach-poulpy.com/api/v1` ([ADR 0021](./adr/0021-the-landing-site-the-app-and-the-api-have-their-own-hostname.md)). Its routes are described in OpenAPI at `/api/v1/openapi.json`, generated from the code, so that file, not this page, is the full reference. This page says how a request is handled and which routes exist so far.
 
 ## How a request is handled
 
