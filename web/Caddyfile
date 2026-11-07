@@ -1,0 +1,26 @@
+# Inside the web image (web/Dockerfile). HTTPS and the hostname come from the shared Caddy in front
+# (deploy/web/coach-poulpy-web.caddy); this one only serves the built files.
+{
+	admin off
+	auto_https off
+}
+
+:8080 {
+	root * /srv
+
+	# Hashed by Vite, so they never change under the same name.
+	@assets path /assets/*
+	header @assets Cache-Control "public, max-age=31536000, immutable"
+
+	# The app link files, such as assetlinks.json: a missing one is a 404, never the app.
+	@wellknown path /.well-known/*
+	handle @wellknown {
+		file_server
+	}
+
+	# Every other path is a page of the single-page app, such as /confirm-email.
+	handle {
+		try_files {path} /index.html
+		file_server
+	}
+}

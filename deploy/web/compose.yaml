@@ -1,0 +1,26 @@
+# The web app (app.coach-poulpy.com) on the same machine as the server: one static container behind
+# the shared Caddy, in its own Compose project so it deploys without touching the API (ADR 0021).
+# Deployed by the Deploy workflow with "website"; see docs/deploying-the-server.md.
+
+# APP_NAME (in .env) is the server's APP_NAME followed by -web, such as coach-poulpy-web.
+name: ${APP_NAME:-coach-poulpy-web}
+
+services:
+  web:
+    # Published by the Release workflow; never built on the server (ADR 0019).
+    image: ghcr.io/tkint/coach-poulpy-web:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    # Static files only; Caddy needs a few tens of megabytes.
+    mem_limit: 64m
+    expose:
+      - "8080"
+    networks:
+      edge:
+        aliases: ["${APP_NAME:-coach-poulpy-web}"]
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+
+networks:
+  edge:
+    external: true

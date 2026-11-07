@@ -4,10 +4,17 @@ name: Deploy
 # environment, uploads it with the server and shared Caddy files over SSH and deploys a server image
 # (ADR 0019). A pull request number builds that pull request's server image first and deploys it
 # with its own files, to try it before it merges; "branch" does the same for the selected branch.
+# "website" deploys the web app (app.coach-poulpy.com) the same way instead, in its own container
+# and Caddy route, without touching the server (ADR 0021).
 # Setup and secrets: docs/releasing.md, "Deploy the server".
 on:
   workflow_dispatch:
     inputs:
+      part:
+        description: "What to deploy"
+        type: choice
+        options: [server, website]
+        default: server
       environment:
         description: "Where to deploy"
         type: choice
@@ -39,6 +46,7 @@ jobs:
         id: image
         env:
           VERSION: ${{ inputs.version }}
+          PART: ${{ inputs.part }}
           BRANCH: ${{ github.ref_name }}
           REPOSITORY: ${{ github.repository }}
           GH_TOKEN: ${{ github.token }}
@@ -68,12 +76,34 @@ jobs:
             echo "::error::Invalid image version."; exit 1
           fi
           { echo "tag=$VERSION"; echo "ref=$REF"; echo "build=$BUILD"; } >> "$GITHUB_OUTPUT"
+          if [ "$PART" = website ]; then
+            { echo "name=coach-poulpy-web"; echo "dockerfile=web/Dockerfile"; } >> "$GITHUB_OUTPUT"
+          else
+            { echo "name=coach-poulpy-server"; echo "dockerfile=server/Dockerfile"; } >> "$GITHUB_OUTPUT"
+          fi
       - uses: actions/checkout@v5
         with:
           ref: ${{ steps.image.outputs.ref }}
 
       # A pull request or a branch has no published image: it is built here, tagged pr-<number>
       # or branch-<name>.
+      - name: Read the Android signing key's fingerprint for assetlinks.json
+        id: cert
+        if: steps.image.outputs.build == 'true' && inputs.part == 'website'
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ] || [ -z "$KEYSTORE_PASSWORD" ]; then
+            echo "::warning::No signing key: the website has no assetlinks.json, so email links open the browser instead of the app."
+            exit 0
+          fi
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/poulpy.jks"
+          sha="$(keytool -list -v -keystore "$RUNNER_TEMP/poulpy.jks" -storepass "$KEYSTORE_PASSWORD" -alias poulpy |
+            sed -n 's/^[[:space:]]*SHA256: *//p')"
+          rm -f "$RUNNER_TEMP/poulpy.jks"
+          [ -n "$sha" ] || { echo "::error::keytool printed no SHA256 for the alias poulpy."; exit 1; }
+          echo "sha256=$sha" >> "$GITHUB_OUTPUT"
       - if: steps.image.outputs.build == 'true'
         uses: docker/setup-buildx-action@v3
       - if: steps.image.outputs.build == 'true'
@@ -86,12 +116,14 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: server/Dockerfile
+          file: ${{ steps.image.outputs.dockerfile }}
           # The machine is amd64 (ADR 0019), as in the Release workflow.
           platforms: linux/amd64
           push: true
-          build-args: APP_VERSION=${{ steps.image.outputs.tag }}
-          tags: ghcr.io/${{ github.repository_owner }}/coach-poulpy-server:${{ steps.image.outputs.tag }}
+          build-args: |
+            APP_VERSION=${{ steps.image.outputs.tag }}
+            ANDROID_CERT_SHA256=${{ steps.cert.outputs.sha256 }}
+          tags: ghcr.io/${{ github.repository_owner }}/${{ steps.image.outputs.name }}:${{ steps.image.outputs.tag }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -104,6 +136,9 @@ jobs:
           HOST_KEY: ${{ vars.DEPLOY_HOST_KEY || secrets.DEPLOY_HOST_KEY }}
           VERSION: ${{ steps.image.outputs.tag }}
           ENVIRONMENT: ${{ inputs.environment }}
+          PART: ${{ inputs.part }}
+          # The web app's hostname, for "website".
+          WEB_DOMAIN: ${{ vars.WEB_DOMAIN }}
           # Written to the app's .env on the server.
           DOMAIN: ${{ vars.DOMAIN }}
           # Names the folder, the Compose project, the server's alias and its Caddy route: another
@@ -118,8 +153,13 @@ jobs:
           MAIL_FROM: ${{ vars.MAIL_FROM }}
           WEBSITE_URL: ${{ vars.WEBSITE_URL }}
         run: |
+          if [ "$PART" = website ]; then
+            required="WEB_DOMAIN:WEB_DOMAIN"
+          else
+            required="DOMAIN:DOMAIN POSTGRES_PASSWORD:POSTGRES_PASSWORD"
+          fi
           for name in DEPLOY_SSH_KEY:SSH_KEY DEPLOY_HOST:HOST DEPLOY_USER:SSH_USER \
-            DEPLOY_HOST_KEY:HOST_KEY DOMAIN:DOMAIN POSTGRES_PASSWORD:POSTGRES_PASSWORD; do
+            DEPLOY_HOST_KEY:HOST_KEY $required; do
             if [ -z "$(printenv "${name#*:}")" ]; then
               echo "::error::Missing ${name%%:*} in the $ENVIRONMENT environment."; exit 1
             fi
@@ -127,9 +167,9 @@ jobs:
           if ! printf '%s' "$APP_NAME" | grep -Eq '^[a-z0-9][a-z0-9-]*$'; then
             echo "::error::APP_NAME may only have lowercase letters, digits and dashes."; exit 1
           fi
-          if [ -z "$SMTP_HOST" ]; then
+          if [ "$PART" = server ] && [ -z "$SMTP_HOST" ]; then
             echo "::warning::No SMTP_HOST in the $ENVIRONMENT environment: the server will print emails to its log instead of sending them."
-          elif [ -z "$MAIL_FROM" ]; then
+          elif [ "$PART" = server ] && [ -z "$MAIL_FROM" ]; then
             echo "::error::Missing MAIL_FROM in the $ENVIRONMENT environment, needed with SMTP_HOST."; exit 1
           fi
           for name in SMTP_HOST SMTP_PORT SMTP_USER SMTP_PASSWORD MAIL_FROM WEBSITE_URL; do
@@ -138,12 +178,17 @@ jobs:
           done
 
           umask 077
-          {
-            printf 'APP_NAME=%s\nDOMAIN=%s\nIMAGE_TAG=%s\nPOSTGRES_PASSWORD=%s\n' \
-              "$APP_NAME" "$DOMAIN" "$VERSION" "$POSTGRES_PASSWORD"
-            printf "SMTP_HOST='%s'\nSMTP_PORT='%s'\nSMTP_USER='%s'\nSMTP_PASSWORD='%s'\nMAIL_FROM='%s'\nWEBSITE_URL='%s'\n" \
-              "$SMTP_HOST" "$SMTP_PORT" "$SMTP_USER" "$SMTP_PASSWORD" "$MAIL_FROM" "$WEBSITE_URL"
-          } > "$RUNNER_TEMP/.env"
+          if [ "$PART" = website ]; then
+            # Its own folder, Compose project, alias and Caddy route: <APP_NAME>-web.
+            printf 'APP_NAME=%s-web\nDOMAIN=%s\nIMAGE_TAG=%s\n' "$APP_NAME" "$WEB_DOMAIN" "$VERSION" > "$RUNNER_TEMP/.env"
+          else
+            {
+              printf 'APP_NAME=%s\nDOMAIN=%s\nIMAGE_TAG=%s\nPOSTGRES_PASSWORD=%s\n' \
+                "$APP_NAME" "$DOMAIN" "$VERSION" "$POSTGRES_PASSWORD"
+              printf "SMTP_HOST='%s'\nSMTP_PORT='%s'\nSMTP_USER='%s'\nSMTP_PASSWORD='%s'\nMAIL_FROM='%s'\nWEBSITE_URL='%s'\n" \
+                "$SMTP_HOST" "$SMTP_PORT" "$SMTP_USER" "$SMTP_PASSWORD" "$MAIL_FROM" "$WEBSITE_URL"
+            } > "$RUNNER_TEMP/.env"
+          fi
           printf '%s\n' "$SSH_KEY" > "$RUNNER_TEMP/key"
           printf '%s\n' "$HOST_KEY" > "$RUNNER_TEMP/known_hosts"
           remote() {
@@ -152,6 +197,12 @@ jobs:
           }
 
           tar -C deploy/caddy -czf - compose.yaml bootstrap.json deploy.py | remote 'mkdir -p ~/caddy && tar -xzf - -C ~/caddy'
-          tar -C deploy -czf - compose.yaml coach-poulpy.caddy -C "$RUNNER_TEMP" .env |
-            remote "mkdir -p ~/$APP_NAME && tar -xzf - -C ~/$APP_NAME"
-          remote "python3 ~/caddy/deploy.py ~/$APP_NAME compose.yaml coach-poulpy.caddy"
+          if [ "$PART" = website ]; then
+            tar -C deploy/web -czf - compose.yaml coach-poulpy-web.caddy -C "$RUNNER_TEMP" .env |
+              remote "mkdir -p ~/$APP_NAME-web && tar -xzf - -C ~/$APP_NAME-web"
+            remote "python3 ~/caddy/deploy.py ~/$APP_NAME-web compose.yaml coach-poulpy-web.caddy"
+          else
+            tar -C deploy -czf - compose.yaml coach-poulpy.caddy -C "$RUNNER_TEMP" .env |
+              remote "mkdir -p ~/$APP_NAME && tar -xzf - -C ~/$APP_NAME"
+            remote "python3 ~/caddy/deploy.py ~/$APP_NAME compose.yaml coach-poulpy.caddy"
+          fi
