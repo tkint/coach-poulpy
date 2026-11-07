@@ -13,6 +13,7 @@ import ch.coachpoulpy.server.auth.Scope
 import ch.coachpoulpy.server.auth.caller
 import ch.coachpoulpy.server.auth.requires
 import ch.coachpoulpy.server.sync.InvalidChange
+import ch.coachpoulpy.server.sync.StaleBase
 import ch.coachpoulpy.server.sync.Sync
 import java.util.UUID
 import kotlin.time.Instant
@@ -33,6 +34,7 @@ import org.http4k.core.Method.POST
 import org.http4k.core.Request
 import org.http4k.core.Response
 import org.http4k.core.Status.Companion.BAD_REQUEST
+import org.http4k.core.Status.Companion.CONFLICT
 import org.http4k.core.Status.Companion.OK
 import org.http4k.core.Status.Companion.REQUEST_ENTITY_TOO_LARGE
 import org.http4k.core.with
@@ -42,7 +44,13 @@ import org.http4k.lens.int
 
 /** A refused change: its place in the push, and why, for the developer reading the logs. */
 @Serializable
-data class ChangeProblem(val error: String, val index: Int? = null, val description: String? = null)
+data class ChangeProblem(
+    val error: String,
+    val index: Int? = null,
+    val description: String? = null,
+    /** stale-base: the workouts to pull, fork and push again. */
+    val workouts: List<String>? = null,
+)
 
 private val pushBody = Body.auto<SyncPush>().toLens()
 private val pageBody = Body.auto<SyncPage>().toLens()
@@ -79,7 +87,9 @@ fun pushRoute(sync: Sync): ContractRoute = "$API_PREFIX/sync/push" meta {
     summary = "Push the phone's changes"
     description = "Takes the outbox, oldest first: at most $PAGE_MAX changes and ${PUSH_MAX_BYTES / 1_000_000} MB. " +
         "All of it is stored or none of it. Sending the same changes again changes nothing, so a push whose answer was lost " +
-        "is simply sent again. A change that doesn't parse or breaks a rule gets 400 invalid-change with its index."
+        "is simply sent again. A change that doesn't parse or breaks a rule gets 400 invalid-change with its index. " +
+        "A workout version that doesn't follow the server's latest gets 409 stale-base naming the workouts: pull, keep " +
+        "the phone's edit as a copy and push again. A deleted workout comes back when another phone pushed a newer version."
     operationId = "syncPush"
     // The handler reads the changes one by one, so a bad one gets invalid-change with its index.
     preFlightExtraction = PreFlightExtraction.IgnoreBody
@@ -88,6 +98,7 @@ fun pushRoute(sync: Sync): ContractRoute = "$API_PREFIX/sync/push" meta {
     receiving(pushBody to SyncPush(listOf(exampleSession, exampleEvents)), definitionId = "SyncPush")
     returning(OK to "Stored")
     returning(BAD_REQUEST, changeProblemBody to ChangeProblem("invalid-change", 0, "…"), "invalid-change", definitionId = "ChangeProblem")
+    returning(CONFLICT, changeProblemBody to ChangeProblem("stale-base", workouts = listOf("0190d4d2-0000-7000-8000-000000000009")), "stale-base")
     returning(REQUEST_ENTITY_TOO_LARGE, changeProblemBody to ChangeProblem("too-large"), "More than $PAGE_MAX changes or ${PUSH_MAX_BYTES / 1_000_000} MB")
 } bindContract POST to { request ->
     val bytes = request.body.payload.remaining()
@@ -105,6 +116,8 @@ fun pushRoute(sync: Sync): ContractRoute = "$API_PREFIX/sync/push" meta {
                         Response(OK)
                     } catch (e: InvalidChange) {
                         Response(BAD_REQUEST).with(changeProblemBody of ChangeProblem("invalid-change", e.index, e.message))
+                    } catch (e: StaleBase) {
+                        Response(CONFLICT).with(changeProblemBody of ChangeProblem("stale-base", workouts = e.workouts.map { it.value }))
                     }
                 }
         }

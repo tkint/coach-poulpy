@@ -44,6 +44,19 @@ data class SyncedEvent(val seq: Long, val at: Instant, val payload: JsonObject)
 @SerialName("session-deleted")
 data class SessionDeletedChange(val sessionId: SessionId, val deletedAt: Instant) : SyncChange
 
+/**
+ * A new version of a workout, made from [baseVersion] (none for the first). Versions never change
+ * once made, so the server takes one only when it follows its own latest (ADR 0025).
+ */
+@Serializable
+@SerialName("workout-version")
+data class WorkoutVersionChange(val workout: Workout, val baseVersion: Int?, val createdAt: Instant) : SyncChange
+
+/** A workout deleted at [version]; a newer version pushed by another phone wins over it (ADR 0025). */
+@Serializable
+@SerialName("workout-deleted")
+data class WorkoutDeletedChange(val workoutId: WorkoutId, val version: Int, val deletedAt: Instant) : SyncChange
+
 /** What a phone pushes: its outbox, oldest first. */
 @Serializable
 data class SyncPush(val changes: List<SyncChange>)
