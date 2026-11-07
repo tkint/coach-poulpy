@@ -1,4 +1,5 @@
-# The site served by the shared Caddy; deploy/caddy/deploy.py fills in DOMAIN from the app's .env.
+# The site served by the shared Caddy; deploy/caddy/deploy.py fills in DOMAIN and APP_NAME
+# from the app's .env.
 
 {$DOMAIN} {
 	encode zstd gzip
@@ -10,5 +11,5 @@
 		-Server
 	}
 
-	reverse_proxy coach-poulpy-server:8080
+	reverse_proxy {$APP_NAME}-server:8080
 }

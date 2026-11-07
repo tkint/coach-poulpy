@@ -2,7 +2,8 @@
 # (deploy/caddy/) on the external `edge` network. Deployed by the Deploy workflow; see
 # docs/deploying-the-server.md.
 
-name: coach-poulpy
+# APP_NAME (in .env) names the project, so a preview with its own name runs beside production.
+name: ${APP_NAME:-coach-poulpy}
 
 x-logging: &logging
   driver: json-file
@@ -25,7 +26,7 @@ services:
       edge:
         # Containers of every app share the edge network, so the server gets a name no other
         # app uses; Caddy proxies to it.
-        aliases: [coach-poulpy-server]
+        aliases: ["${APP_NAME:-coach-poulpy}-server"]
     logging: *logging
 
   # Not used by the server yet: it connects once accounts arrive (ADR 0007).
