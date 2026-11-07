@@ -1,4 +1,4 @@
-# Only what the server image build needs from the repository (server/Dockerfile).
+# Kept out of the image builds (server/Dockerfile, web/Dockerfile).
 .git
 .github
 **/.gradle

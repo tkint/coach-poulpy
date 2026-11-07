@@ -1,8 +1,8 @@
 name: Release
 
 # Pushing a tag such as v0.6.0 is the release (docs/releasing.md): the tag is the version. The run
-# checks the tag and the signing key, runs the whole of ci.yml, then publishes the server image on
-# the GitHub Container Registry and a GitHub release with the signed Android APK and the server's
+# checks the tag and the signing key, runs the whole of ci.yml, then publishes the server and web
+# images on the GitHub Container Registry and a GitHub release with the signed Android APK and the server's
 # deploy bundle attached. A failing step publishes nothing. Deploying the server is a separate step,
 # the Deploy workflow (ADR 0019).
 on:
@@ -93,10 +93,57 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+  web-image:
+    name: Publish the web image
+    needs: [version, test]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v5
+      - name: Read the Android signing key's fingerprint for assetlinks.json
+        id: cert
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/poulpy.jks"
+          sha="$(keytool -list -v -keystore "$RUNNER_TEMP/poulpy.jks" -storepass "$KEYSTORE_PASSWORD" -alias poulpy |
+            sed -n 's/^[[:space:]]*SHA256: *//p')"
+          rm -f "$RUNNER_TEMP/poulpy.jks"
+          [ -n "$sha" ] || { echo "::error::keytool printed no SHA256 for the alias poulpy."; exit 1; }
+          echo "sha256=$sha" >> "$GITHUB_OUTPUT"
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/coach-poulpy-web
+          tags: |
+            type=semver,pattern={{version}},value=${{ needs.version.outputs.tag }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ needs.version.outputs.tag }}
+            type=raw,value=latest
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: web/Dockerfile
+          platforms: linux/amd64
+          push: true
+          build-args: ANDROID_CERT_SHA256=${{ steps.cert.outputs.sha256 }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=web
+          cache-to: type=gha,mode=max,scope=web
+
   android:
     name: Publish the APK and the deploy bundle
-    # After the image, so a release only exists once its server image does.
-    needs: [version, server-image]
+    # After the images, so a release only exists once they do.
+    needs: [version, server-image, web-image]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -129,7 +176,7 @@ jobs:
         # .env.example stays "latest", so `docker compose pull` follows new releases.
         run: |
           mkdir -p dist/coach-poulpy
-          cp -r deploy/compose.yaml deploy/.env.example deploy/coach-poulpy.caddy deploy/caddy dist/coach-poulpy/
+          cp -r deploy/compose.yaml deploy/.env.example deploy/coach-poulpy.caddy deploy/caddy deploy/web dist/coach-poulpy/
           cp docs/deploying-the-server.md dist/coach-poulpy/DEPLOYING.md
           tar -C dist -czf coach-poulpy-deploy.tar.gz coach-poulpy
       - name: Publish the release

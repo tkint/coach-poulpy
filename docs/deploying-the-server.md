@@ -26,10 +26,10 @@ Only Caddy publishes ports. The server reaches Postgres at `postgres:5432` with 
 
 - Linux with Python 3, Docker Engine and Docker Compose.
 - About 1 GB of free memory; the server is capped at 512 MB. Images are built in CI, not on the machine.
-- An API hostname (`api.coach-poulpy.com`) whose DNS A/AAAA records point to the machine. The landing site and the web app get their own hostnames and containers later ([ADR 0021](./adr/0021-the-landing-site-the-app-and-the-api-have-their-own-hostname.md)).
+- An API hostname (`api.coach-poulpy.com`) and a web app hostname (`app.coach-poulpy.com`) whose DNS A/AAAA records point to the machine. The landing site gets its own hostname and container later ([ADR 0021](./adr/0021-the-landing-site-the-app-and-the-api-have-their-own-hostname.md)).
 - SSH and ports 80/443 open (TCP, plus UDP 443 for HTTP/3).
 
-If `ghcr.io/tkint/coach-poulpy-server` is private, log the machine in once with a token that can read packages: `docker login ghcr.io`.
+If `ghcr.io/tkint/coach-poulpy-server` or `ghcr.io/tkint/coach-poulpy-web` is private (a package's first push makes it private), log the machine in once with a token that can read packages: `docker login ghcr.io`.
 
 ## Deploy
 
@@ -48,6 +48,12 @@ Mail goes out over SMTP to the provider in `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`
 `POSTGRES_PASSWORD` only takes effect when the Postgres volume is first created; changing it later needs a password change inside Postgres too.
 
 If another Caddy already holds ports 80/443, remove that container once before the first deploy (`docker rm -f <container>`); the shared Caddy requests the certificates again. Never use `docker compose down -v`: it deletes the volumes.
+
+## The web app
+
+`app.coach-poulpy.com` is a separate container and Caddy route ([ADR 0021](./adr/0021-the-landing-site-the-app-and-the-api-have-their-own-hostname.md)): the Vue app from `web/`, served as static files, with every page path answered by the app. Deploy it with **Actions > Deploy > Run workflow**, **What to deploy** `website`, after setting `WEB_DOMAIN` in the environment ([Releasing](./releasing.md#deploy-the-server)). It lands in `~/coach-poulpy-web` (the server's `APP_NAME` followed by `-web`), from [`deploy/web/`](https://github.com/tkint/coach-poulpy/tree/main/deploy/web), and never restarts the server. Check it with `curl https://app.coach-poulpy.com/.well-known/assetlinks.json`.
+
+The account emails link to `/confirm-email#<token>` and `/reset-password#<token>` there. The image carries `/.well-known/assetlinks.json`, built from the Android signing key, so Android opens those links in the app; a build without the key (a deploy with no `ANDROID_KEYSTORE_*` secrets) leaves it out and the links open in the browser. The iPhone's `apple-app-site-association` waits on an Apple Developer account ([#24](https://github.com/tkint/coach-poulpy/issues/24)).
 
 ## Backups
 

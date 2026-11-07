@@ -1,0 +1,16 @@
+# The web app's site on the shared Caddy; deploy/caddy/deploy.py fills in DOMAIN and APP_NAME from
+# the website's .env (DOMAIN is the WEB_DOMAIN setting, APP_NAME ends in -web).
+
+{$DOMAIN} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "no-referrer"
+		X-Frame-Options "DENY"
+		-Server
+	}
+
+	reverse_proxy {$APP_NAME}:8080
+}

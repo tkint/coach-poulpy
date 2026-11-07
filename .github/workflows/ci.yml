@@ -119,6 +119,16 @@ jobs:
           docker compose -f deploy/caddy/compose.yaml config -q
           docker run --rm -e DOMAIN=api.example.com -e APP_NAME=coach-poulpy -v "$PWD/deploy/coach-poulpy.caddy:/etc/caddy/site.caddy:ro" \
             caddy:2 caddy validate --config /etc/caddy/site.caddy --adapter caddyfile
+      - name: Build the web image and check its deploy files
+        run: |
+          docker build -f web/Dockerfile --build-arg ANDROID_CERT_SHA256=00:11 -t coach-poulpy-web:ci .
+          docker run -d --name web -p 8081:8080 coach-poulpy-web:ci
+          for _ in $(seq 15); do curl -fsS -o /dev/null http://localhost:8081/ && break; sleep 1; done
+          curl -fsS http://localhost:8081/confirm-email | grep -q '<div id="app"' || { echo "::error::/confirm-email isn't the app"; exit 1; }
+          curl -fsSI http://localhost:8081/.well-known/assetlinks.json | grep -qi 'content-type: application/json' || { echo "::error::No assetlinks.json"; exit 1; }
+          docker compose -f deploy/web/compose.yaml config -q
+          docker run --rm -e DOMAIN=app.example.com -e APP_NAME=coach-poulpy-web -v "$PWD/deploy/web/coach-poulpy-web.caddy:/etc/caddy/site.caddy:ro" \
+            caddy:2 caddy validate --config /etc/caddy/site.caddy --adapter caddyfile
 
   web:
     name: Website build
