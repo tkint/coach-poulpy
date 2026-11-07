@@ -15,7 +15,7 @@ import kotlin.test.assertTrue
 
 class ApiTest {
     private val catalog = Catalog.bundled
-    private val server = app("0.7.0", catalog)
+    private val server = app("0.7.0", catalog, databaseAnswers = { true })
 
     @Test
     fun everyRouteIsPublicOrDeclaresItsScopes() {

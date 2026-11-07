@@ -26,13 +26,14 @@ flowchart LR
 
 | Route | Who | What it does |
 | --- | --- | --- |
-| `GET /health` | Anyone | `ok` and the version; the Docker health check. Outside `/api/v1`, so it never changes with the API's version. |
+| `GET /health` | Anyone | `ok` and the version, or 503 while the database doesn't answer; the Docker health check. Outside `/api/v1`, so it never changes with the API's version. |
 | `GET /api/v1/openapi.json` | Anyone | The OpenAPI description of every route below. |
 | `GET /api/v1/catalog` | Anyone | The exercise catalog the server was built with, the same JSON the app bundles. With `?newerThan=<version>` it answers 204 when the phone already has that version or a newer one, so phones download it only when it changed ([#27](https://github.com/tkint/coach-poulpy/issues/27)). |
 
 ## Trying it locally
 
 ```sh
+docker compose -f tools/compose.yaml up -d   # the local Postgres
 ./gradlew :server:run
 curl http://localhost:8080/api/v1/openapi.json
 curl -i "http://localhost:8080/api/v1/catalog?newerThan=1"
