@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Builder · choose the format</title>
+<meta name="mockup:screen" content="builder-choose-format">
+<meta name="mockup:section" content="Builder">
+<meta name="mockup:issue" content="90">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../../../web/src/styles/tokens.css">
+<link rel="stylesheet" href="../../shared/mockup.css">
+<script src="../../shared/mockup-theme.js"></script>
+</head>
+<body>
+<main class="phone">
+<header class="top-bar" style="padding: var(--cp-space-xxxl) var(--cp-space-md) var(--cp-space-sm); justify-content: flex-start; gap: var(--cp-space-xs);">
+    <a class="icon-button" href="home-planned.html" aria-label="Close"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4"><path d="M6 6l12 12M18 6L6 18"/></svg></a>
+    <h1 class="headline" style="flex: 1;">New workout</h1>
+    <a class="small-button" data-component="primary-button" href="#">Save</a>
+  </header>
+
+  <div class="form-body">
+    <label class="field">
+      <span class="label">Name</span>
+      <input class="text-field" type="text" value="">
+    </label>
+  </div>
+
+  <div class="scrim" aria-hidden="true"></div>
+  <section class="sheet" id="choose-format" data-component="sheet" role="dialog" aria-label="Choose a format" style="gap: var(--cp-space-md);">
+    <span class="sheet-handle" aria-hidden="true"></span>
+    <div class="sheet-title"><h2>How is this workout built?</h2><p>You choose once: the format stays for this workout.</p></div>
+    <button class="format-card" data-component="format-card" type="button" aria-pressed="true">
+      <span><span class="round-icon round-icon--strong" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"><path d="M17 2l3 3-3 3"/><path d="M4 11V9a4 4 0 0 1 4-4h12"/><path d="M7 22l-3-3 3-3"/><path d="M20 13v2a4 4 0 0 1-4 4H4"/></svg></span>Circuit</span>
+      <p>Rounds through several exercises, each done once per round. Fits HIIT, bodyweight circuits and runs.</p>
+      <span class="example">Squat 15 · Push-up 10 · Run 200 m, 4 rounds</span>
+    </button>
+    <button class="format-card" data-component="format-card" type="button" aria-pressed="false">
+      <span><span class="round-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4"><path d="M5 7h14M5 12h14M5 17h14"/></svg></span>Sets</span>
+      <p>One exercise at a time: all its sets, then the next. Fits gym and strength training.</p>
+      <span class="example">Bench press 3 × 8, then Row 3 × 10</span>
+    </button>
+    <a class="primary-button" data-component="primary-button" href="builder-circuit-parts.html" style="font-size: 16px;">Continue</a>
+  </section>
+</main>
+</body>
+</html>
