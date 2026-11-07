@@ -52,7 +52,7 @@ private val statusRequestBody = Body.auto<ConfirmationStatusRequest>().toLens()
 private val statusBody = Body.auto<ConfirmationStatus>().toLens()
 
 /** Long enough to be unguessable, short enough to bound what is hashed. */
-private val PENDING_KEY_LENGTH = 32..128
+internal val PENDING_KEY_LENGTH = 32..128
 
 private val accountsTag = Tag("accounts")
 

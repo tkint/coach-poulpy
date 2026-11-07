@@ -38,6 +38,8 @@ dependencies {
     implementation(libs.http4k.core)
     implementation(libs.http4k.api.openapi)
     implementation(libs.http4k.format.kotlinx.serialization)
+    implementation(libs.http4k.realtime.core)
+    implementation(libs.http4k.server.jetty)
     implementation(libs.sqldelight.jdbc.driver)
     implementation(libs.hikaricp)
     implementation(libs.bouncycastle.provider)

@@ -25,7 +25,6 @@ import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
@@ -52,7 +51,7 @@ class AccountModelTest {
     private fun model() = AccountModel(
         store, memory, secrets, AccountClient("https://api.example.com", SecretTokenStore(secrets), engine),
         "Ana's iPhone", { "en" }, CoroutineScope(SupervisorJob() + Dispatchers.Default),
-        confirmationCheckEvery = 20.milliseconds,
+        reconnectAfter = 20.milliseconds,
     )
 
     /** Whether the server says the link was opened, as confirmation-status answers. */
@@ -197,22 +196,28 @@ class AccountModelTest {
     }
 
     @Test
-    fun checkYourEmailMovesOnByItselfOnceTheLinkIsOpenedElsewhere() = runTest {
+    fun checkYourEmailMovesOnTheMomentTheServerSaysTheLinkWasOpened() = runTest {
         answers["POST /api/v1/accounts"] = { respond("", HttpStatusCode.Accepted) }
         linkOpened(false)
+        // The stream drops twice with nothing, then says confirmed.
+        var streams = 0
+        answers["GET /api/v1/accounts/confirmation-events"] = {
+            streams++
+            if (streams < 3) {
+                respond(":\n\n", HttpStatusCode.OK, headersOf(HttpHeaders.ContentType, "text/event-stream"))
+            } else {
+                serverAccepts()
+                linkOpened(true)
+                respond("event:confirmed\ndata:{}\n\n", HttpStatusCode.OK, headersOf(HttpHeaders.ContentType, "text/event-stream"))
+            }
+        }
         val account = model()
         account.signUp("ana@example.com", "secret-pass", healthDataConsent = true)
 
         val watching = account.watchConfirmation()
-        withContext(Dispatchers.Default) {
-            withTimeout(5.seconds) { while (calls.count { it.endsWith("confirmation-status") } < 3) delay(5) }
-        }
-        assertIs<AccountState.Pending>(account.state.value)
-
-        serverAccepts()
-        linkOpened(true)
         account.becomes { it is AccountState.SignedIn }
         watching.cancel()
+        assertEquals(3, streams)
         assertEquals(1, calls.count { it == "POST /oauth/token" })
     }
 

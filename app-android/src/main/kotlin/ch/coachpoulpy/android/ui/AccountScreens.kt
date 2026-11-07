@@ -455,7 +455,7 @@ private fun CheckEmailScreen(account: AccountModel, resent: Boolean, onStep: (St
     var offline by remember { mutableStateOf(false) }
     var changingAddress by remember { mutableStateOf(false) }
 
-    // The link may be opened on a computer: ask every few seconds while this screen is in front.
+    // The link may be opened on a computer: listen for it while this screen is in front.
     LifecycleResumeEffect(account) {
         val watching = account.watchConfirmation()
         onPauseOrDispose { watching.cancel() }

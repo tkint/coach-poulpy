@@ -508,7 +508,7 @@ private struct CheckEmailScreen: View {
                 onStep("sign-up")
             }
         }
-        // The link may be opened on a computer: ask every few seconds while this screen is shown.
+        // The link may be opened on a computer: listen for it while this screen is shown.
         .onAppear { watching = account.watchConfirmation() }
         .onDisappear { watching?.cancel() }
         .onReceive(state.$value) { value in

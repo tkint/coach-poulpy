@@ -100,8 +100,8 @@ class AccountModel(
     private val deviceName: String,
     private val languageCode: () -> String,
     private val scope: CoroutineScope,
-    /** How often [watchConfirmation] asks while Check your email is on screen. */
-    private val confirmationCheckEvery: Duration = 3.seconds,
+    /** How long [watchConfirmation] waits before opening a dropped stream again. */
+    private val reconnectAfter: Duration = 3.seconds,
 ) {
     val sync = SyncClient(
         store, memory, RemoteSyncServer(client), deviceName, languageCode, scope,
@@ -216,12 +216,25 @@ class AccountModel(
     }
 
     /**
-     * Asks every few seconds whether the email is confirmed, while Check your email is on screen,
-     * and stops once it is: the state turns [AccountState.SignedIn]. Cancel it when the screen goes.
+     * While Check your email is on screen: listens for the server to say the link was opened, on any
+     * device, and then signs in, turning the state [AccountState.SignedIn]. A dropped stream is
+     * opened again after [reconnectAfter], with a check first for what it missed. Cancel it when
+     * the screen goes. A sign-up from before the key existed is only checked once, since trying the
+     * password again and again would lock the address.
      */
     fun watchConfirmation(): Cancellable {
         val job = scope.launch {
-            while (_state.value is AccountState.Pending && !checkConfirmed()) delay(confirmationCheckEvery)
+            while (_state.value is AccountState.Pending && !checkConfirmed()) {
+                val key = pending()?.key ?: break
+                val heard = try {
+                    client.awaitConfirmation(key)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (_: Exception) {
+                    false
+                }
+                if (!heard) delay(reconnectAfter)
+            }
         }
         return Cancellable { job.cancel() }
     }

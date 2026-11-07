@@ -1,9 +1,9 @@
 insert:
 INSERT INTO confirmation_watch (token_hash, key_hash, account_id, expires_at) VALUES (?, ?, ?, ?);
 
--- The link mailed with this watch was opened.
+-- The link mailed with this watch was opened: gives the key, so a phone listening for it hears.
 markConfirmed:
-UPDATE confirmation_watch SET confirmed = TRUE WHERE token_hash = ?;
+UPDATE confirmation_watch SET confirmed = TRUE WHERE token_hash = ? RETURNING key_hash;
 
 -- Whether a link mailed with this key was opened, while the key still works.
 isConfirmed:

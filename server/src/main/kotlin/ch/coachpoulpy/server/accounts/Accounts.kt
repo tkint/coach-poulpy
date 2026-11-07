@@ -11,6 +11,8 @@ import java.time.Clock
 import java.time.Duration
 import java.time.OffsetDateTime
 import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.CopyOnWriteArrayList
 
 /**
  * What a guest gives to sign up (docs/accounts.md). [pendingKey] is a random key the phone keeps,
@@ -83,15 +85,37 @@ class Accounts(
      * Marks the email of [token]'s account confirmed. False for a token that is unknown, already
      * used or more than [CONFIRMATION_LIFETIME] old; a token works once.
      */
-    fun confirm(token: String): Boolean = database.queries.transactionWithResult {
-        val used = database.queries.confirmationTokenQueries.consume(hashOf(token)).executeAsOneOrNull()
-        val now = OffsetDateTime.now(clock)
-        if (used == null || !used.expires_at.isAfter(now)) return@transactionWithResult false
-        database.queries.accountQueries.confirm(now, used.account_id)
-        database.queries.confirmationWatchQueries.markConfirmed(hashOf(token))
-        database.queries.confirmationTokenQueries.deleteForAccount(used.account_id)
-        true
+    fun confirm(token: String): Boolean {
+        val heard = database.queries.transactionWithResult<ByteArray?> {
+            val used = database.queries.confirmationTokenQueries.consume(hashOf(token)).executeAsOneOrNull()
+            val now = OffsetDateTime.now(clock)
+            if (used == null || !used.expires_at.isAfter(now)) return@transactionWithResult null
+            database.queries.accountQueries.confirm(now, used.account_id)
+            database.queries.confirmationTokenQueries.deleteForAccount(used.account_id)
+            database.queries.confirmationWatchQueries.markConfirmed(hashOf(token)).executeAsOneOrNull() ?: ByteArray(0)
+        } ?: return false
+        if (heard.isNotEmpty()) listeners.remove(heard.toHex())?.forEach { it() }
+        return true
     }
+
+    /**
+     * Calls [onConfirmed] once the link mailed with [pendingKey] is opened, or at once if it already
+     * was, until the returned handle is closed. It may be called twice; a caller acts on the first.
+     * Listeners live in this process only: the server runs as one instance (docs/deploying-the-server.md).
+     */
+    fun listen(pendingKey: String, onConfirmed: () -> Unit): AutoCloseable {
+        val key = hashOf(pendingKey).toHex()
+        listeners.compute(key) { _, held -> (held ?: CopyOnWriteArrayList()).apply { add(onConfirmed) } }
+        // Registered first, then checked, so a link opened in between is heard either way.
+        if (isConfirmed(pendingKey)) onConfirmed()
+        return AutoCloseable {
+            listeners.computeIfPresent(key) { _, held -> held.apply { remove(onConfirmed) }.takeIf { it.isNotEmpty() } }
+        }
+    }
+
+    private val listeners = ConcurrentHashMap<String, CopyOnWriteArrayList<() -> Unit>>()
+
+    private fun ByteArray.toHex(): String = joinToString("") { "%02x".format(it) }
 
     /**
      * Whether the link mailed with [pendingKey] was opened, for [WATCH_LIFETIME] after sign-up. A key
