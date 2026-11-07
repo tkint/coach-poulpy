@@ -7,16 +7,53 @@ enum PlayerSteps {
     /// Pause and end sit on the bar over the whole session; the step's own buttons are below.
     @ViewBuilder
     static func bar(_ state: PlayerState, paused: Bool, canToggle: Bool, onToggle: @escaping () -> Void, onEnd: @escaping () -> Void) -> some View {
-        HStack(spacing: PoulpySpace.md) {
-            iconButton(paused ? "play.fill" : "pause.fill", paused ? "player.resume" : "player.pause", action: onToggle)
-                .disabled(!canToggle)
-                .opacity(canToggle ? 1 : 0.4)
-            VStack(alignment: .leading, spacing: 6) {
-                capsLabel(Text("player.step \(Int(state.phaseNumber)) \(Int(state.phaseCount))") + Text(" · \(state.sessionClock)"))
-                progressTrack(Double(state.phaseNumber) / Double(max(state.phaseCount, 1)))
+        VStack(spacing: PoulpySpace.md) {
+            HStack(spacing: PoulpySpace.md) {
+                pauseButton(paused: paused, action: onToggle)
+                    .disabled(!canToggle)
+                    .opacity(canToggle ? 1 : 0.4)
+                VStack(alignment: .leading, spacing: 6) {
+                    capsLabel(Text("player.step \(Int(state.phaseNumber)) \(Int(state.phaseCount))") + Text(" · \(state.sessionClock)"))
+                    progressTrack(Double(state.phaseNumber) / Double(max(state.phaseCount, 1)))
+                }
+                iconButton("xmark", "player.stop", action: onEnd)
             }
-            iconButton("xmark", "player.stop", action: onEnd)
+            if paused { pausedCard }
         }
+    }
+
+    /// How much the step, what is next and the buttons step back while paused, so the paused card is what the eye meets.
+    static let pausedDim = 0.45
+
+    /// Pause and Resume: the one big round button of the bar, with a soft blue halo while paused (`player-paused`). Never ember or crimson.
+    static func pauseButton(paused: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: paused ? "play.fill" : "pause.fill")
+                .font(.system(size: paused ? 28 : 26, weight: .bold))
+                .foregroundStyle(PoulpyColor.onPrimary)
+                .frame(width: 56, height: 56)
+                .background(PoulpyColor.primary, in: Circle())
+                .background {
+                    if paused { Circle().fill(PoulpyColor.primaryContainer).frame(width: 68, height: 68) }
+                }
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(Text(paused ? "player.resume" : "player.pause"))
+    }
+
+    /// "Paused", under the bar, in the blue container: the state is told by more than the icon.
+    static var pausedCard: some View {
+        HStack(spacing: PoulpySpace.md) {
+            Image(systemName: "pause.fill").font(.system(size: 20, weight: .bold)).accessibilityHidden(true)
+            Text("player.paused").font(.poulpy(.headline))
+            Spacer(minLength: 0)
+        }
+        .foregroundStyle(PoulpyColor.onPrimaryContainer)
+        .padding(.horizontal, PoulpySpace.lg)
+        .padding(.vertical, PoulpySpace.sm)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(PoulpyColor.primaryContainer, in: RoundedRectangle(cornerRadius: PoulpyRadius.md))
+        .accessibilityElement(children: .combine)
     }
 
     static func waitingLine(_ key: LocalizedStringKey) -> some View {
@@ -75,6 +112,7 @@ enum PlayerSteps {
         let remaining = state.remainingSeconds?.intValue
         // A timed step ends by itself; Live also offers Done, to cut a step short without skipping it.
         let showDone = !state.isTimed || alwaysDone
+        Group {
         Spacer(minLength: 0)
         Image(PoulpyDrawing.straining.imageName).resizable().scaledToFit().frame(width: 130, height: 117).accessibilityHidden(true)
         partLine(state)
@@ -100,7 +138,6 @@ enum PlayerSteps {
         if let unit = state.targetUnit ?? state.loadLabel {
             Text(unit).font(.custom(PoulpyFontFace.nunitoBold, size: 21, relativeTo: .title3)).multilineTextAlignment(.center)
         }
-        if paused { Text("player.paused").font(.poulpy(.headline)).foregroundStyle(PoulpyColor.error) }
         Spacer(minLength: 0)
 
         if let line = state.nextLine {
@@ -139,7 +176,8 @@ enum PlayerSteps {
         }
         .buttonStyle(.plain)
         .disabled(paused)
-        .opacity(paused ? 0.4 : 1)
+        }
+        .opacity(paused ? pausedDim : 1)
     }
 
     /// A rest: the ring running down around Poulpy catching his breath, ±15 s, what is next, Skip rest (`player-rest`, `player-recover`).
@@ -147,6 +185,7 @@ enum PlayerSteps {
     static func restStep(_ state: PlayerState, paused: Bool, onSkip: @escaping () -> Void, onAdjust: @escaping (Int) -> Void) -> some View {
         let remaining = state.remainingSeconds?.intValue ?? 0
         let total = max(state.totalSeconds?.intValue ?? 0, 1)
+        Group {
         Spacer(minLength: 0)
         if state.inRepeat { partLine(state) }
         HStack(spacing: 10) {
@@ -170,7 +209,6 @@ enum PlayerSteps {
             adjustButton("player.restLess \(Self.restAdjustSeconds)", paused: paused) { onAdjust(-Self.restAdjustSeconds) }
             adjustButton("player.restMore \(Self.restAdjustSeconds)", paused: paused) { onAdjust(Self.restAdjustSeconds) }
         }
-        if paused { Text("player.paused").font(.poulpy(.headline)).foregroundStyle(PoulpyColor.error) }
         Spacer(minLength: 0)
 
         if let headline = state.nextHeadline {
@@ -201,7 +239,8 @@ enum PlayerSteps {
         }
         .buttonStyle(.plain)
         .disabled(paused)
-        .opacity(paused ? 0.4 : 1)
+        }
+        .opacity(paused ? pausedDim : 1)
     }
 
     /// How much the two buttons under the rest ring add or take away.
@@ -218,7 +257,6 @@ enum PlayerSteps {
         }
         .buttonStyle(.plain)
         .disabled(paused)
-        .opacity(paused ? 0.4 : 1)
     }
 
     /// "WORK 1 · ROUND 2 OF 4": the part this step is in, with its icon.
