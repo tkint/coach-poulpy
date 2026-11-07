@@ -10,20 +10,20 @@ The landing site, the web app, the web mockups and this site draw with one packa
 
 ## Classes
 
-A web mockup is plain HTML, so it writes the classes the Vue components render:
+A web mockup is plain HTML, so it writes the classes the Vue components render. Every DaisyUI class carries the `cp-` prefix (`cp-btn`, not `btn`); the few classes of our own (`cp-chip`, `cp-stepper`, `cp-type-*`...) never reuse a DaisyUI name. Tailwind's own utilities (`w-full`, `bg-secondary`) have no prefix.
 
 | Component | Vue | Classes |
 | --- | --- | --- |
-| Primary button | `<CpButton>` | `btn cp-button btn-primary` |
-| Tonal button | `<CpButton variant="tonal">` | `btn cp-button btn-secondary` |
-| Outline button | `<CpButton variant="outline">` | `btn cp-button btn-outline` |
-| Grumpy button | `<CpButton variant="grumpy">` | `btn cp-button btn-accent` |
-| Chip | `<CpChip v-model>` | `btn cp-chip btn-primary` when on, `btn cp-chip btn-outline` when off, with `aria-pressed` |
-| Search field | `<CpSearchField>` | `label.input.cp-search-field` around the icon and an `input type="search"` |
-| Select field | `<CpSelectField>` | `label.fieldset`, a `span.cp-label` and `select.select` |
-| Stepper | `<CpStepper>` | `.cp-stepper`, `.cp-stepper-row`, `btn btn-circle btn-outline`, `output.cp-stepper-value` |
+| Primary button | `<CpButton>` | `cp-btn cp-btn-xl cp-btn-primary` |
+| Tonal button | `<CpButton variant="tonal">` | `cp-btn cp-btn-xl cp-btn-secondary` |
+| Outline button | `<CpButton variant="outline">` | `cp-btn cp-btn-xl cp-btn-outline` |
+| Grumpy button | `<CpButton variant="grumpy">` | `cp-btn cp-btn-xl cp-btn-accent` |
+| Chip | `<CpChip v-model>` | `cp-btn cp-chip cp-btn-primary` when on, `cp-btn cp-chip cp-btn-outline` when off, with `aria-pressed` |
+| Search field | `<CpSearchField>` | `label.cp-input.cp-search-field` around the icon and an `input type="search"` |
+| Select field | `<CpSelectField>` | `label.cp-fieldset`, a `span.cp-type-label` and `select.cp-select` |
+| Stepper | `<CpStepper>` | `.cp-stepper`, `.cp-stepper-row`, `cp-btn cp-btn-circle cp-btn-outline`, `output.cp-stepper-value` |
 | Poulpy | `<CpPoulpy>` | `img.cp-poulpy` from `design/poulpy/` |
-| Poulpy card | `<CpPoulpyCard>` | `card bg-secondary text-secondary-content cp-poulpy-card` |
-| Error | `<CpErrorNote>` | `alert alert-error cp-error-note` with an icon, `role="alert"` |
-| Sheet | `<CpSheet>` | `dialog.modal.modal-bottom.sm:modal-middle.cp-sheet` and `.modal-box` |
-| Type | | `cp-display`, `cp-title`, `cp-headline`, `cp-label` |
+| Poulpy card | `<CpPoulpyCard>` | `cp-card bg-secondary text-secondary-content cp-poulpy-card` |
+| Error | `<CpErrorNote>` | `cp-alert cp-alert-error cp-error-note` with an icon, `role="alert"` |
+| Sheet | `<CpSheet>` | `dialog.cp-modal.cp-modal-bottom.sm:cp-modal-middle.cp-sheet` and `.cp-modal-box` |
+| Type | | `cp-type-display`, `cp-type-title`, `cp-type-headline`, `cp-type-label` |

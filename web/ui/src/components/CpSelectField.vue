@@ -5,9 +5,9 @@ const value = defineModel<string>()
 </script>
 
 <template>
-  <label class="fieldset" data-component="select-field">
-    <span class="cp-label">{{ label }}</span>
-    <select v-model="value" class="select w-full">
+  <label class="cp-fieldset" data-component="select-field">
+    <span class="cp-type-label">{{ label }}</span>
+    <select v-model="value" class="cp-select w-full">
       <option v-for="option in options" :key="option.value" :value="option.value">{{ option.text }}</option>
     </select>
   </label>

@@ -18,7 +18,7 @@ onMounted(async () => {
 <template>
   <main class="mx-auto my-16 max-w-xl px-4">
     <CpPoulpy drawing="mood_happy" :size="96" />
-    <h1 class="cp-display">Coach <span class="text-primary">poulpy</span></h1>
+    <h1 class="cp-type-display">Coach <span class="text-primary">poulpy</span></h1>
     <p>The website arrives with accounts. Local server: {{ server }}</p>
   </main>
 </template>

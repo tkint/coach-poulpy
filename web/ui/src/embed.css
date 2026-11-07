@@ -6,6 +6,7 @@
 @import "tailwindcss/utilities" layer(utilities) source(none);
 @plugin "daisyui" {
   themes: false;
+  prefix: "cp-";
   logs: false;
   exclude: reset, rootcolor, rootscrollgutter, rootscrolllock, scrollbar;
 }

@@ -16,7 +16,13 @@
  *   info               -> primary
  *   warning            -> error: ember never means a warning, so a warning is an error
  *
- * Load it after `@plugin "daisyui" { themes: false; }` (see prebuilt.css).
+ * Load it after `@plugin "daisyui" { themes: false; prefix: "cp-"; }` (see prebuilt.css). Every DaisyUI
+ * class is prefixed (`cp-btn cp-btn-primary`), so the classes of ours below are named apart from
+ * DaisyUI's: `cp-chip`, `cp-stepper`, `cp-type-*`... never a DaisyUI name.
+ *
+ * They sit in DaisyUI's own layer (utilities), after it, so they win over its defaults. The prefix
+ * also names DaisyUI's inner variables (`--cp-size`, `--cp-btn-p`), which the rules below set; they
+ * share the --cp-* namespace with tokens.css, so a new token never takes one of DaisyUI's names.
  */
 
 @plugin "daisyui/theme" {
@@ -50,7 +56,7 @@
   --radius-field: var(--cp-radius-pill);
   --radius-box: var(--cp-radius-md);
   --size-selector: 0.25rem;
-  --size-field: 0.3rem;
+  --size-field: 0.25rem;
   --border: 1.5px;
   --depth: 0;
   --noise: 0;
@@ -61,48 +67,45 @@
   --font-display: var(--cp-font-display);
 }
 
-@layer components {
+@layer utilities {
   /* Pages and embedded samples draw in the brand's body font. */
   :where(body, [data-theme="poulpy"]) {
     font: var(--cp-type-body);
   }
 
-  /* Buttons: 56 high, pill, wrapping their label between words rather than shrinking it. */
-  .cp-button {
-    --size: 56px;
-    --btn-p: var(--cp-space-xl);
-    font-family: var(--cp-font-body);
+  /* Buttons (cp-btn cp-btn-xl): 56 high, pill, Nunito 800 at 16, wrapping their label between
+     words rather than shrinking it. */
+  .cp-btn-xl {
+    --cp-fontsize: 16px;
+    --cp-btn-p: var(--cp-space-xl);
     font-weight: 800;
-    font-size: 16px;
     white-space: normal;
-    overflow-wrap: normal;
   }
-  .cp-button.btn-outline {
-    --btn-border: var(--cp-outline);
-    --btn-rest-fg: var(--cp-on-surface);
+  .cp-btn-outline {
+    --cp-btn-border: var(--cp-outline);
+    --cp-btn-rest-fg: var(--cp-on-surface);
+  }
+  .cp-btn-xl.cp-btn-outline {
     border-width: 2px;
   }
 
   /* Chips: 36 high, pill; on is primary, off is a 1.5 px outline. Filters only. */
   .cp-chip {
-    --size: 36px;
-    --btn-p: var(--cp-space-lg);
+    --cp-size: 36px;
+    --cp-btn-p: var(--cp-space-lg);
     font-weight: 700;
     white-space: nowrap;
-  }
-  .cp-chip.btn-outline {
-    --btn-border: var(--cp-outline);
-    --btn-rest-fg: var(--cp-on-surface);
   }
 
   /* Search field: 48 high, pill, primary while it holds text, with a round clear button. */
   .cp-search-field {
-    --input-color: var(--cp-outline);
+    --cp-size: 48px;
+    --cp-input-color: var(--cp-outline);
     width: 100%;
     gap: var(--cp-space-sm);
   }
   .cp-search-field:has(input:not(:placeholder-shown)) {
-    --input-color: var(--cp-primary);
+    --cp-input-color: var(--cp-primary);
   }
   .cp-search-field input::-webkit-search-cancel-button {
     display: none;
@@ -123,8 +126,8 @@
     align-items: center;
     gap: var(--cp-space-md);
   }
-  .cp-stepper-row .btn {
-    --size: 44px;
+  .cp-stepper-row .cp-btn {
+    --cp-size: 44px;
   }
   .cp-stepper-value {
     min-width: 4ch;
@@ -133,18 +136,16 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* Eyebrows and labels: Nunito 800, tracked, upper case. */
-  .cp-label {
+  /* Type roles, as in design-system.md: Baloo 2 titles, and the tracked upper-case label. */
+  .cp-type-display { font: var(--cp-type-display); }
+  .cp-type-title { font: var(--cp-type-title); }
+  .cp-type-headline { font: var(--cp-type-headline); }
+  .cp-type-label {
     font: var(--cp-type-label);
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--cp-on-surface-variant);
   }
-
-  /* Titles in Baloo 2. */
-  .cp-display { font: var(--cp-type-display); }
-  .cp-title { font: var(--cp-type-title); }
-  .cp-headline { font: var(--cp-type-headline); }
 
   /* Poulpy card: 24 radius, primaryContainer, Poulpy on the blue side, a title, a line, one button. */
   .cp-poulpy-card {
@@ -152,7 +153,7 @@
     align-items: center;
     text-align: center;
   }
-  .cp-poulpy-card .card-title {
+  .cp-poulpy-card .cp-card-title {
     font: var(--cp-type-headline);
   }
 
@@ -169,8 +170,8 @@
     align-items: flex-start;
   }
 
-  /* Sheets: 24 radius at the top on a phone-width page, a dialog beside it on a wide one. */
-  .cp-sheet .modal-box {
+  /* Sheets: 24 radius, rising from the bottom on a phone-width page, a dialog on a wide one. */
+  .cp-sheet .cp-modal-box {
     border-radius: var(--cp-radius-lg);
     background: var(--cp-surface);
   }

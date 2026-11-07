@@ -32,7 +32,7 @@ const formats = [
 <template>
   <div class="web-samples">
     <div v-for="mode in modes" :key="mode" :class="`cp-theme-${mode}`" class="panel" data-theme="poulpy">
-      <span class="cp-label">{{ mode }}</span>
+      <span class="cp-type-label">{{ mode }}</span>
       <div class="row">
         <CpButton variant="primary">Start session</CpButton>
         <CpButton variant="tonal">Edit</CpButton>

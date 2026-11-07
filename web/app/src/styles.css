@@ -3,6 +3,7 @@
 @import "@coach-poulpy/ui/tokens.css";
 @plugin "daisyui" {
   themes: false;
+  prefix: "cp-";
   logs: false;
 }
 @import "@coach-poulpy/ui/theme.css";

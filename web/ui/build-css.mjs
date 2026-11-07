@@ -29,9 +29,12 @@ const unlayer = (css) => {
   }
   return ast.toString()
 }
+// CLEANUP: DaisyUI 5.7.50 prefixes the decimals of its rotator keyframes (`89.cp-9999%`), which
+// browsers reject. Remove this once a DaisyUI release keeps keyframe percentages as they are.
+const unprefixKeyframes = (css) => css.replace(/(\d)\.cp-(\d)/g, '$1.$2')
 const outputs = {
-  'poulpy-ui.css': { input: 'src/prebuilt.css', post: (css) => css },
-  'poulpy-ui-embed.css': { input: 'src/embed.css', post: unlayer },
+  'poulpy-ui.css': { input: 'src/prebuilt.css', post: unprefixKeyframes },
+  'poulpy-ui-embed.css': { input: 'src/embed.css', post: (css) => unlayer(unprefixKeyframes(css)) },
 }
 const check = process.argv.includes('--check')
 let stale = 0

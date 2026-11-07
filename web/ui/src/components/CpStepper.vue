@@ -12,11 +12,11 @@ const change = (by: number) => (value.value = Math.min(props.max, Math.max(props
 
 <template>
   <div class="cp-stepper" role="group" :aria-label="label" data-component="stepper">
-    <span class="cp-label">{{ label }}</span>
+    <span class="cp-type-label">{{ label }}</span>
     <div class="cp-stepper-row">
-      <button type="button" class="btn btn-circle btn-outline" :aria-label="lessLabel" :disabled="value <= min" @click="change(-step)">−</button>
+      <button type="button" class="cp-btn cp-btn-circle cp-btn-outline" :aria-label="lessLabel" :disabled="value <= min" @click="change(-step)">−</button>
       <output class="cp-stepper-value" aria-live="polite">{{ valueText }}</output>
-      <button type="button" class="btn btn-circle btn-outline" :aria-label="moreLabel" :disabled="value >= max" @click="change(step)">+</button>
+      <button type="button" class="cp-btn cp-btn-circle cp-btn-outline" :aria-label="moreLabel" :disabled="value >= max" @click="change(step)">+</button>
     </div>
   </div>
 </template>

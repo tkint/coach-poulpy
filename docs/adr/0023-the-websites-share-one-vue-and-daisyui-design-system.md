@@ -5,7 +5,7 @@ date: 2026-11-07
 
 # The websites share one Vue and DaisyUI design system
 
-The landing site, the web app ([ADR 0021](./0021-the-landing-site-the-app-and-the-api-have-their-own-hostname.md)), the web mockups and the docs site draw with one package, `web/ui` (`@coach-poulpy/ui`). It is [DaisyUI 5](https://daisyui.com) on Tailwind CSS 4 with one Poulpy theme, a few `cp-*` classes for the shapes DaisyUI lacks, and thin Vue components named after the [design system](../design-system.md#components)'s table (`CpButton`, `CpChip`, `CpSearchField`, `CpSelectField`, `CpStepper`, `CpPoulpy`, `CpPoulpyCard`, `CpErrorNote`, `CpSheet`). The class names are the contract: a Vue component renders them, and a plain-HTML web mockup writes them.
+The landing site, the web app ([ADR 0021](./0021-the-landing-site-the-app-and-the-api-have-their-own-hostname.md)), the web mockups and the docs site draw with one package, `web/ui` (`@coach-poulpy/ui`). It is [DaisyUI 5](https://daisyui.com) on Tailwind CSS 4 with one Poulpy theme, a few `cp-*` classes for the shapes DaisyUI lacks, and thin Vue components named after the [design system](../design-system.md#components)'s table (`CpButton`, `CpChip`, `CpSearchField`, `CpSelectField`, `CpStepper`, `CpPoulpy`, `CpPoulpyCard`, `CpErrorNote`, `CpSheet`). The class names are the contract: a Vue component renders them, and a plain-HTML web mockup writes them. DaisyUI's classes carry the `cp-` prefix (`cp-btn cp-btn-primary`), so every class of the design system reads as ours, and our own classes never reuse a DaisyUI name.
 
 ## How it fits together
 

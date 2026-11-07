@@ -6,9 +6,9 @@ withDefaults(defineProps<{ variant?: 'primary' | 'tonal' | 'outline' | 'grumpy';
   type: 'button',
 })
 
-const classes = { primary: 'btn-primary', tonal: 'btn-secondary', outline: 'btn-outline', grumpy: 'btn-accent' }
+const classes = { primary: 'cp-btn-primary', tonal: 'cp-btn-secondary', outline: 'cp-btn-outline', grumpy: 'cp-btn-accent' }
 </script>
 
 <template>
-  <button :type="type" class="btn cp-button" :class="classes[variant]" data-component="button"><slot /></button>
+  <button :type="type" class="cp-btn cp-btn-xl" :class="classes[variant]" data-component="button"><slot /></button>
 </template>

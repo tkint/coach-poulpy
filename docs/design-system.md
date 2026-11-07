@@ -109,7 +109,8 @@ Mockups are plain HTML pages in `design/mockups/` ([ADR 0016](adr/0016-mockups-a
 The landing site, the web app, the web mockups and the docs site share one package, `web/ui`: DaisyUI with the Poulpy theme and a few Vue components ([ADR 0023](adr/0023-the-websites-share-one-vue-and-daisyui-design-system.md)). The live samples and the class of each component are on the [Web components](https://tkint.github.io/coach-poulpy/web-components) page.
 
 - Use the shared components (`CpButton`, `CpChip`...) in Vue, and their classes in a web mockup; never restyle a DaisyUI class in an app. A missing shape goes in `web/ui`.
-- The roles above keep their meaning: `btn-primary` is `primary`, `btn-secondary` is the tonal `primaryContainer`, `btn-accent` is `grumpy` and only for the catch-up action. Never use DaisyUI's `warning` classes: ember is not a warning, and a problem is an `error`.
+- Every DaisyUI class carries the `cp-` prefix (`cp-btn cp-btn-primary`). Our own classes (`cp-chip`, `cp-stepper`, `cp-type-label`...) never reuse a DaisyUI name, so the two cannot clash.
+- The roles above keep their meaning: `cp-btn-primary` is `primary`, `cp-btn-secondary` is the tonal `primaryContainer`, `cp-btn-accent` is `grumpy` and only for the catch-up action. Never use DaisyUI's `warning` classes: ember is not a warning, and a problem is an `error`.
 - Web mockups link `web/ui/src/tokens.css` then `web/ui/poulpy-ui.css`. After using a class no component or web mockup used before, run `npm run build -w ui` in `web/` and commit `poulpy-ui.css`; CI checks it.
 - Phone and tablet mockups keep `design/mockups/shared/mockup.css`: they draw the native screens.
 

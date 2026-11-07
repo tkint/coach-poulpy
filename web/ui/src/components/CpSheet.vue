@@ -17,12 +17,12 @@ watch(open, sync)
 </script>
 
 <template>
-  <dialog ref="dialog" class="modal modal-bottom sm:modal-middle cp-sheet" data-component="sheet" @close="open = false">
-    <div class="modal-box">
-      <h2 class="cp-headline">{{ title }}</h2>
+  <dialog ref="dialog" class="cp-modal cp-modal-bottom sm:cp-modal-middle cp-sheet" data-component="sheet" @close="open = false">
+    <div class="cp-modal-box">
+      <h2 class="cp-type-headline">{{ title }}</h2>
       <slot />
-      <div v-if="$slots.actions" class="modal-action"><slot name="actions" /></div>
+      <div v-if="$slots.actions" class="cp-modal-action"><slot name="actions" /></div>
     </div>
-    <form method="dialog" class="modal-backdrop"><button>{{ closeLabel }}</button></form>
+    <form method="dialog" class="cp-modal-backdrop"><button>{{ closeLabel }}</button></form>
   </dialog>
 </template>

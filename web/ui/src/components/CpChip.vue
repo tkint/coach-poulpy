@@ -7,8 +7,8 @@ const pressed = defineModel<boolean>({ default: false })
 <template>
   <button
     type="button"
-    class="btn cp-chip"
-    :class="pressed ? 'btn-primary' : 'btn-outline'"
+    class="cp-btn cp-chip"
+    :class="pressed ? 'cp-btn-primary' : 'cp-btn-outline'"
     :aria-pressed="pressed"
     data-component="chip"
     @click="pressed = !pressed"

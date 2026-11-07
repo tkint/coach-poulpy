@@ -7,12 +7,12 @@ defineProps<{ title: string }>()
 </script>
 
 <template>
-  <section class="card bg-secondary text-secondary-content cp-poulpy-card" data-component="poulpy-card">
-    <div class="card-body items-center">
+  <section class="cp-card bg-secondary text-secondary-content cp-poulpy-card" data-component="poulpy-card">
+    <div class="cp-card-body items-center">
       <CpPoulpy drawing="mood_happy" :size="96" />
-      <h2 class="card-title">{{ title }}</h2>
+      <h2 class="cp-card-title">{{ title }}</h2>
       <p><slot /></p>
-      <div v-if="$slots.actions" class="card-actions"><slot name="actions" /></div>
+      <div v-if="$slots.actions" class="cp-card-actions"><slot name="actions" /></div>
     </div>
   </section>
 </template>
