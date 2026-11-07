@@ -59,7 +59,7 @@ struct AccountSection: View {
             case let signedIn as AccountStateSignedIn:
                 NavigationLink(value: SettingsPage.account) { row(Text(verbatim: signedIn.email), syncSummary(signedIn)) }
             default:
-                Button { onFlow("sign-up") } label: {
+                Button { onFlow("sign-in") } label: {
                     HStack {
                         row(Text("account.guestRow"), L("account.guestRowHint"))
                         Spacer()
