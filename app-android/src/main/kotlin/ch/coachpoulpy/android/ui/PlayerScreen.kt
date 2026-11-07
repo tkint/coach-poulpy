@@ -54,7 +54,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -177,23 +179,61 @@ private fun ColumnScope.Running(state: PlayerState, model: PlayerModel, onClose:
 /** Pause and end sit on the bar over the whole session; the step's own buttons are below. */
 @Composable
 internal fun PlayerBar(state: PlayerState, paused: Boolean, onToggle: () -> Unit, onEnd: () -> Unit, canToggle: Boolean = true) {
-    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(PoulpySpace.md)) {
-        PlayerIconButton(
-            if (paused) Icons.Filled.PlayArrow else Icons.Filled.Pause,
-            stringResource(if (paused) R.string.player_resume else R.string.player_pause),
-            onClick = onToggle,
-            enabled = canToggle,
-        )
-        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            PlayerLabel("${stringResource(R.string.player_step, state.phaseNumber, state.phaseCount)} · ${state.sessionClock}")
-            Box(Modifier.fillMaxWidth().height(8.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceVariant)) {
-                Box(
-                    Modifier.fillMaxWidth(state.phaseNumber.toFloat() / state.phaseCount.coerceAtLeast(1)).fillMaxHeight()
-                        .background(MaterialTheme.colorScheme.primary, CircleShape),
-                )
+    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(PoulpySpace.md)) {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(PoulpySpace.md)) {
+            PauseButton(paused, onClick = onToggle, enabled = canToggle)
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                PlayerLabel("${stringResource(R.string.player_step, state.phaseNumber, state.phaseCount)} · ${state.sessionClock}")
+                Box(Modifier.fillMaxWidth().height(8.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceVariant)) {
+                    Box(
+                        Modifier.fillMaxWidth(state.phaseNumber.toFloat() / state.phaseCount.coerceAtLeast(1)).fillMaxHeight()
+                            .background(MaterialTheme.colorScheme.primary, CircleShape),
+                    )
+                }
             }
+            PlayerIconButton(Icons.Filled.Close, stringResource(R.string.player_stop), onClick = onEnd)
         }
-        PlayerIconButton(Icons.Filled.Close, stringResource(R.string.player_stop), onClick = onEnd)
+        if (paused) PausedCard()
+    }
+}
+
+/** How much the step, what is next and the buttons step back while paused, so the paused card is what the eye meets. */
+internal const val PAUSED_DIM = 0.45f
+
+/** Pause and Resume: the one big round button of the bar, with a soft blue halo while paused (`player-paused`). Never ember or crimson. */
+@Composable
+private fun PauseButton(paused: Boolean, onClick: () -> Unit, enabled: Boolean) {
+    val colors = MaterialTheme.colorScheme
+    FilledIconButton(
+        onClick = onClick,
+        enabled = enabled,
+        modifier = Modifier
+            .size(56.dp)
+            .drawBehind { if (paused) drawCircle(colors.primaryContainer, radius = size.minDimension / 2 + 6.dp.toPx()) },
+        colors = IconButtonDefaults.filledIconButtonColors(containerColor = colors.primary, contentColor = colors.onPrimary),
+    ) {
+        Icon(
+            if (paused) Icons.Filled.PlayArrow else Icons.Filled.Pause,
+            contentDescription = stringResource(if (paused) R.string.player_resume else R.string.player_pause),
+            modifier = Modifier.size(if (paused) 28.dp else 26.dp),
+        )
+    }
+}
+
+/** "Paused", under the bar, in the blue container: the state is told by more than the icon. */
+@Composable
+private fun PausedCard() {
+    val colors = MaterialTheme.colorScheme
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .background(colors.primaryContainer, RoundedCornerShape(PoulpyRadius.md))
+            .padding(horizontal = PoulpySpace.lg, vertical = PoulpySpace.sm),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(PoulpySpace.md),
+    ) {
+        Icon(Icons.Filled.Pause, contentDescription = null, tint = colors.onPrimaryContainer, modifier = Modifier.size(24.dp))
+        Text(stringResource(R.string.player_paused), style = PoulpyTextStyles.Headline, color = colors.onPrimaryContainer)
     }
 }
 
@@ -219,7 +259,7 @@ internal fun ColumnScope.WorkStep(state: PlayerState, paused: Boolean, onSkip: (
     val remaining = state.remainingSeconds
     // A timed step ends by itself; Live also offers Done, to cut a step short without skipping it.
     val showDone = !state.isTimed || alwaysDone
-    Column(Modifier.weight(1f).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+    Column(Modifier.weight(1f).fillMaxWidth().alpha(if (paused) PAUSED_DIM else 1f), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
         Image(
             painterResource(PoulpyDrawing.STRAINING.drawable),
             contentDescription = null,
@@ -254,12 +294,11 @@ internal fun ColumnScope.WorkStep(state: PlayerState, paused: Boolean, onSkip: (
             textAlign = TextAlign.Center,
         )
         (state.targetUnit ?: state.loadLabel)?.let { Text(it, fontSize = 21.sp, lineHeight = 28.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center) }
-        if (paused) Text(stringResource(R.string.player_paused), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(top = PoulpySpace.sm))
     }
 
     state.nextLine?.let { line ->
         Row(
-            Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface, RoundedCornerShape(PoulpyRadius.md)).padding(horizontal = PoulpySpace.lg, vertical = PoulpySpace.md),
+            Modifier.fillMaxWidth().alpha(if (paused) PAUSED_DIM else 1f).background(MaterialTheme.colorScheme.surface, RoundedCornerShape(PoulpyRadius.md)).padding(horizontal = PoulpySpace.lg, vertical = PoulpySpace.md),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
@@ -268,16 +307,22 @@ internal fun ColumnScope.WorkStep(state: PlayerState, paused: Boolean, onSkip: (
         }
     }
     Spacer(Modifier.height(PoulpySpace.lg))
-    Row(horizontalArrangement = Arrangement.spacedBy(PoulpySpace.md), modifier = Modifier.fillMaxWidth()) {
+    Row(horizontalArrangement = Arrangement.spacedBy(PoulpySpace.md), modifier = Modifier.fillMaxWidth().alpha(if (paused) PAUSED_DIM else 1f)) {
         OutlinedButton(
             onClick = onSkip,
             enabled = !paused,
+            colors = ButtonDefaults.outlinedButtonColors(disabledContentColor = MaterialTheme.colorScheme.onSurface),
             border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
             contentPadding = PaddingValues(horizontal = 22.dp),
             modifier = Modifier.then(if (!showDone) Modifier.weight(1f) else Modifier).height(64.dp),
         ) { Text(stringResource(R.string.player_skip), fontSize = 19.sp, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onSurface) }
         if (showDone) {
-            Button(onClick = onDone, enabled = !paused, modifier = Modifier.weight(1f).height(64.dp)) {
+            Button(
+                onClick = onDone,
+                enabled = !paused,
+                colors = ButtonDefaults.buttonColors(disabledContainerColor = MaterialTheme.colorScheme.primary, disabledContentColor = MaterialTheme.colorScheme.onPrimary),
+                modifier = Modifier.weight(1f).height(64.dp),
+            ) {
                 Icon(Icons.Filled.Check, contentDescription = null, modifier = Modifier.size(24.dp))
                 Text(stringResource(R.string.player_done), fontSize = 19.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = PoulpySpace.sm))
             }
@@ -290,7 +335,7 @@ internal fun ColumnScope.WorkStep(state: PlayerState, paused: Boolean, onSkip: (
 internal fun ColumnScope.RestStep(state: PlayerState, paused: Boolean, onSkip: () -> Unit, onAdjust: (Int) -> Unit) {
     val remaining = state.remainingSeconds ?: 0
     val total = (state.totalSeconds ?: 0).coerceAtLeast(1)
-    Column(Modifier.weight(1f).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(14.dp, Alignment.CenterVertically)) {
+    Column(Modifier.weight(1f).fillMaxWidth().alpha(if (paused) PAUSED_DIM else 1f), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(14.dp, Alignment.CenterVertically)) {
         if (state.inRepeat) PartLine(state)
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             if (state.inRepeat) state.roleLabel?.let { RecoverTag(it) }
@@ -315,12 +360,11 @@ internal fun ColumnScope.RestStep(state: PlayerState, paused: Boolean, onSkip: (
             AdjustButton(stringResource(R.string.player_restLess, REST_STEP), enabled = !paused) { onAdjust(-REST_STEP) }
             AdjustButton(stringResource(R.string.player_restMore, REST_STEP), enabled = !paused) { onAdjust(REST_STEP) }
         }
-        if (paused) Text(stringResource(R.string.player_paused), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.error)
     }
 
     state.nextHeadline?.let { headline ->
         Column(
-            Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface, RoundedCornerShape(PoulpyRadius.md)).padding(horizontal = PoulpySpace.lg, vertical = 14.dp),
+            Modifier.fillMaxWidth().alpha(if (paused) PAUSED_DIM else 1f).background(MaterialTheme.colorScheme.surface, RoundedCornerShape(PoulpyRadius.md)).padding(horizontal = PoulpySpace.lg, vertical = 14.dp),
             verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
             PlayerLabel(state.nextRound?.let { stringResource(R.string.player_nextRound, it) } ?: stringResource(R.string.player_nextUp))
@@ -332,8 +376,13 @@ internal fun ColumnScope.RestStep(state: PlayerState, paused: Boolean, onSkip: (
     Button(
         onClick = onSkip,
         enabled = !paused,
-        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primaryContainer, contentColor = MaterialTheme.colorScheme.onPrimaryContainer),
-        modifier = Modifier.fillMaxWidth().height(64.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            disabledContainerColor = MaterialTheme.colorScheme.primaryContainer,
+            disabledContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        ),
+        modifier = Modifier.fillMaxWidth().alpha(if (paused) PAUSED_DIM else 1f).height(64.dp),
     ) {
         Icon(Icons.Filled.SkipNext, contentDescription = null, modifier = Modifier.size(22.dp))
         Text(stringResource(R.string.player_skipRest), fontSize = 19.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = PoulpySpace.sm))

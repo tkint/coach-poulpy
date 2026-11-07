@@ -110,7 +110,7 @@ struct LiveView: View {
         return VStack(spacing: 12) {
             PlayerSteps.bar(player, paused: paused, canToggle: !waiting, onToggle: { paused ? model.resumeRecording() : model.pauseRecording() }, onEnd: { confirmStop = true })
             if !state.tiles.isEmpty {
-                panel
+                panel.opacity(paused ? PlayerSteps.pausedDim : 1)
             }
             if waiting {
                 waitingStep(recording.wait, player)

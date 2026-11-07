@@ -3,6 +3,7 @@ package ch.coachpoulpy.android.ui
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -25,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
@@ -71,7 +73,7 @@ internal fun LiveWorkoutPlayer(state: LiveUiState, recording: RecordingUi, playe
             )
             if (state.tiles.isNotEmpty()) {
                 Spacer(Modifier.height(PoulpySpace.md))
-                LivePanel(state.tiles)
+                Box(Modifier.alpha(if (paused) PAUSED_DIM else 1f)) { LivePanel(state.tiles) }
             }
             when {
                 waiting -> WaitingStep(player, recording.wait, onSkip = model::skipPhase, onDone = model::completeStep, onStart = model::startStep)
