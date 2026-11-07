@@ -15,7 +15,7 @@ const counterpart = (m: (typeof mockups)[number]) =>
 </script>
 
 <template>
-  <div v-if="first" class="mockup-page">
+  <div v-if="first" class="mockup-page" :class="{ wide: first.platform === 'web' }">
     <p class="crumbs">
       <a :href="withBase(`/mockups/${first.platform}/${first.stage}`)">{{ platforms[first.platform] }} · {{ stages[first.stage] }}</a>
     </p>
@@ -44,4 +44,12 @@ h1 { margin: 0 0 16px; }
 .state { min-width: 0; scroll-margin-top: 80px; }
 .state h2 { margin: 0 0 8px; padding: 0; border: 0; font-size: 20px; line-height: 28px; }
 .device { color: var(--vp-c-text-2); font-weight: 500; }
+</style>
+
+<style>
+/* Web mockups are drawn at computer widths: their pages drop the outline and use the whole width. */
+.VPDoc:has(.mockup-page.wide) .aside { display: none; }
+.VPDoc:has(.mockup-page.wide) .container,
+.VPDoc:has(.mockup-page.wide) .content,
+.VPDoc:has(.mockup-page.wide) .content-container { max-width: none !important; }
 </style>
