@@ -59,3 +59,5 @@ Les règles de `en.md` s’appliquent aussi (identifiants, placeholders, pluriel
 | full octopus | poulpe complet | |
 | Live (tab) | En direct | |
 | Settings | Réglages | Aussi le nom de l’app Réglages sur iPhone. |
+| account | compte | |
+| email (the address) | adresse e-mail | « e-mail » seul pour le message. |

@@ -1,6 +1,10 @@
 package ch.coachpoulpy.server
 
 import ch.coachpoulpy.catalog.Catalog
+import ch.coachpoulpy.server.accounts.Accounts
+import ch.coachpoulpy.server.mail.ConsoleMailer
+import ch.coachpoulpy.server.mail.MailSettings
+import ch.coachpoulpy.server.mail.SmtpMailer
 import ch.coachpoulpy.server.api.api
 import ch.coachpoulpy.server.auth.authenticate
 import ch.coachpoulpy.server.db.Database
@@ -23,19 +27,23 @@ import org.http4k.server.asServer
 fun appVersion(env: (String) -> String? = System::getenv): String =
     env("APP_VERSION")?.takeIf { it.isNotBlank() } ?: "dev"
 
+/** Where the links in emails point: `WEBSITE_URL`, or the website (ADR 0021). */
+fun websiteUrl(env: (String) -> String?): String =
+    env("WEBSITE_URL")?.takeIf { it.isNotBlank() } ?: "https://app.coach-poulpy.com"
+
 /**
  * The server: `/health` for the Docker health check, and the API under `/api/v1`, where every
- * request first gets its caller (ADR 0020). No authenticator is registered until accounts
- * arrive (#25), so for now every caller is anonymous and any token is refused.
+ * request first gets its caller (ADR 0020). No authenticator is registered until signing in
+ * arrives (#270), so for now every caller is anonymous and any token is refused.
  *
  * `/health` answers 503 while [databaseAnswers] says the database doesn't, so Docker reports the
  * server unhealthy rather than serving requests that would fail.
  */
-fun app(version: String, catalog: Catalog, databaseAnswers: () -> Boolean): HttpHandler = routes(
+fun app(version: String, catalog: Catalog, accounts: Accounts, databaseAnswers: () -> Boolean): HttpHandler = routes(
     "/health" bind GET to {
         if (databaseAnswers()) Response(OK).body("ok $version") else Response(SERVICE_UNAVAILABLE).body("database unavailable")
     },
-    authenticate(authenticators = emptyMap()).then(api(version, catalog)),
+    authenticate(authenticators = emptyMap()).then(api(version, catalog, accounts)),
 )
 
 fun main() {
@@ -43,6 +51,8 @@ fun main() {
     val version = appVersion()
     // Migrations run before the server listens; a failed one throws and stops it here.
     val database = Database.connect(DatabaseSettings.from(System::getenv)).apply { migrate() }
-    app(version, Catalog.bundled, database::answers).asServer(SunHttp(port)).start()
+    val mailer = MailSettings.from(System::getenv)?.let(::SmtpMailer) ?: ConsoleMailer
+    val accounts = Accounts(database, mailer, websiteUrl = websiteUrl(System::getenv))
+    app(version, Catalog.bundled, accounts, database::answers).asServer(SunHttp(port)).start()
     println("Coach Poulpy server $version listening on http://localhost:$port")
 }

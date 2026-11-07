@@ -1,0 +1,26 @@
+-- Accounts (#25, docs/accounts.md). An account exists from sign-up; until confirmed_at is set its
+-- phone stays a guest and uploads nothing. The password is an Argon2id hash in PHC form, and
+-- health_consent_at records when the person agreed to their health data being stored.
+CREATE TABLE account (
+    id UUID PRIMARY KEY,
+    email TEXT NOT NULL,
+    password_hash TEXT NOT NULL,
+    language TEXT NOT NULL,
+    role TEXT NOT NULL DEFAULT 'member' CHECK (role IN ('member', 'admin')),
+    health_consent_at TIMESTAMPTZ NOT NULL,
+    confirmed_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ NOT NULL
+);
+
+-- One account per address, whatever its case.
+CREATE UNIQUE INDEX account_email ON account (lower(email));
+
+-- The links sent to confirm an email. Only the SHA-256 of a token is kept, so a leaked table
+-- confirms nothing; a token is deleted once used.
+CREATE TABLE confirmation_token (
+    token_hash BYTEA PRIMARY KEY,
+    account_id UUID NOT NULL REFERENCES account (id) ON DELETE CASCADE,
+    expires_at TIMESTAMPTZ NOT NULL
+);
+
+CREATE INDEX confirmation_token_account ON confirmation_token (account_id);

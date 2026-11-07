@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.sqldelight)
+    id("coachpoulpy.i18n")
     application
 }
 
@@ -27,6 +28,9 @@ sqldelight {
     }
 }
 
+// The emails' text, in the account's language, from i18n/messages/*/server.json.
+i18n.kotlinText("server", "ch.coachpoulpy.server", "ServerText")
+
 dependencies {
     implementation(projects.core.model)
     implementation(projects.catalog)
@@ -36,6 +40,8 @@ dependencies {
     implementation(libs.http4k.format.kotlinx.serialization)
     implementation(libs.sqldelight.jdbc.driver)
     implementation(libs.hikaricp)
+    implementation(libs.bouncycastle.provider)
+    implementation(libs.angus.mail)
     runtimeOnly(libs.postgresql)
     runtimeOnly(libs.slf4j.simple)
     testImplementation(kotlin("test"))

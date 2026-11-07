@@ -9,16 +9,18 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class AppTest {
+    private val accounts = TestServer().accounts
+
     @Test
     fun healthReportsTheVersion() {
-        val response = app("0.6.0", Catalog.bundled, databaseAnswers = { true })(Request(GET, "/health"))
+        val response = app("0.6.0", Catalog.bundled, accounts, databaseAnswers = { true })(Request(GET, "/health"))
         assertEquals(OK, response.status)
         assertEquals("ok 0.6.0", response.bodyString())
     }
 
     @Test
     fun healthIsUnavailableWhileTheDatabaseIsDown() {
-        val response = app("0.6.0", Catalog.bundled, databaseAnswers = { false })(Request(GET, "/health"))
+        val response = app("0.6.0", Catalog.bundled, accounts, databaseAnswers = { false })(Request(GET, "/health"))
         assertEquals(SERVICE_UNAVAILABLE, response.status)
     }
 
