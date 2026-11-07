@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vitepress'
 import { withMermaid } from 'vitepress-plugin-mermaid'
 import { listMockups, platforms, stages } from './mockups.mts'
+import { groupOf, slug } from './mockup-labels'
 
 const here = dirname(fileURLToPath(import.meta.url))
 // copy-docs.mjs mirrors the repo's shared Markdown into site/ at the same paths, so a path from
@@ -34,7 +35,6 @@ const research = readdirSync(join(repoRoot, 'docs/research'))
 
 // The "## " headings of a page, as sidebar entries that jump to them, so a components page lists its
 // components in the menu without a second list to keep in step.
-const slug = (title: string) => title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 const headings = (page: string) =>
   [...readFileSync(join(siteRoot, `${page}.md`), 'utf8').matchAll(/^## (.+)$/gm)].map((m) => ({
     text: m[1],
@@ -57,9 +57,11 @@ const mockupSidebar = (platform: keyof typeof platforms) => ({
     text: stages[stage],
     link: `/mockups/${platform}/${stage}`,
     collapsed: true,
-    items: mockups
-      .filter((m) => m.stage === stage && m.platform === platform)
-      .map((m) => ({ text: m.device === 'tablet' ? `Tablet · ${m.title}` : m.title, link: m.link })),
+    // One entry per section of the stage page, never one per screen state.
+    items: [...new Set(mockups.filter((m) => m.stage === stage && m.platform === platform).map(groupOf))].map((group) => ({
+      text: group,
+      link: `/mockups/${platform}/${stage}#${slug(group)}`,
+    })),
   })),
 })
 

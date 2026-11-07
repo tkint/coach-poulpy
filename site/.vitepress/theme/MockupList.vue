@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { withBase } from 'vitepress'
 import { data as mockups } from '../../mockups.data.ts'
-import { platforms, stages } from '../mockup-labels'
+import { groupOf, platforms, slug, stages } from '../mockup-labels'
 import type { Mockup } from '../mockups.mts'
 
 // Links only: a mockup is shown on its own page, never in a list.
@@ -14,7 +14,7 @@ const blurbs = {
 const groups = computed(() => {
   const byGroup = new Map<string, Mockup[]>()
   for (const m of mockups.filter((m) => m.stage === props.stage && m.platform === props.platform)) {
-    const key = m.device === 'tablet' ? `Tablet · ${m.section}` : m.section
+    const key = groupOf(m)
     byGroup.set(key, [...(byGroup.get(key) ?? []), m])
   }
   return [...byGroup.entries()]
@@ -26,7 +26,7 @@ const groups = computed(() => {
   <p>{{ blurbs[stage] }}</p>
   <p v-if="groups.length === 0">None yet.</p>
   <template v-for="[group, items] in groups" :key="group">
-    <h2>{{ group }}</h2>
+    <h2 :id="slug(group)">{{ group }}</h2>
     <ul>
       <li v-for="m in items" :key="m.path">
         <a :href="withBase(m.link)">{{ m.title }}</a>
