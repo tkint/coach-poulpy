@@ -40,9 +40,9 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 
 /** The phone's database: the source of truth for a guest. */
-class LocalStore(driverFactory: DriverFactory, private val clock: Clock = Clock.System) {
-    private val db = CoachPoulpyDatabase(driverFactory.create())
-    private val json = Json { ignoreUnknownKeys = true }
+class LocalStore(driverFactory: DriverFactory, internal val clock: Clock = Clock.System) {
+    internal val db = CoachPoulpyDatabase(driverFactory.create())
+    internal val json = Json { ignoreUnknownKeys = true }
     private val slugList = ListSerializer(ExerciseSlug.serializer())
 
     fun saveWorkout(workout: Workout) = db.transaction {
@@ -309,6 +309,7 @@ class LocalStore(driverFactory: DriverFactory, private val clock: Clock = Clock.
      */
     fun startRecordingChanges(settings: Map<String, String>) = db.transaction {
         db.syncQueries.clearOutbox()
+        db.syncQueries.ensureState()
         db.syncQueries.setRecording(1)
         val now = clock.now()
         var previous: Pair<String, Int>? = null
@@ -334,9 +335,11 @@ class LocalStore(driverFactory: DriverFactory, private val clock: Clock = Clock.
         settings.filterKeys(SettingChange::follows).forEach { (key, value) -> add(SettingChange(key, value, now)) }
     }
 
-    /** Stops adding writes to the outbox and empties it, as on sign-out. */
+    /** Stops adding writes to the outbox and empties it and the cursor, as on sign-out. */
     fun stopRecordingChanges() = db.transaction {
+        db.syncQueries.ensureState()
         db.syncQueries.setRecording(0)
+        db.syncQueries.setCursor(null)
         db.syncQueries.clearOutbox()
     }
 
@@ -348,7 +351,7 @@ class LocalStore(driverFactory: DriverFactory, private val clock: Clock = Clock.
     /** The oldest [limit] changes waiting to be pushed, with their place in the outbox. */
     fun outbox(limit: Int): List<OutboxEntry> =
         db.syncQueries.outbox(limit.toLong()).executeAsList()
-            .map { OutboxEntry(it.seq, json.decodeFromString(SyncChange.serializer(), it.change_json)) }
+            .map { OutboxEntry(it.seq, json.decodeFromString(SyncChange.serializer(), it.change_json), it.change_json.encodeToByteArray().size) }
 
     /** Removes the changes pushed, up to and including [seq]. */
     fun removeFromOutbox(upToSeq: Long) = db.syncQueries.removeUpTo(upToSeq)
@@ -357,14 +360,14 @@ class LocalStore(driverFactory: DriverFactory, private val clock: Clock = Clock.
         if (recordingChanges()) add(change())
     }
 
-    private fun add(change: SyncChange) = db.syncQueries.addChange(json.encodeToString(SyncChange.serializer(), change))
+    internal fun add(change: SyncChange) = db.syncQueries.addChange(json.encodeToString(SyncChange.serializer(), change))
 
     private fun recordHeader(sessionId: String) {
         if (!recordingChanges()) return
         db.sessionQueries.byId(sessionId).executeAsOneOrNull()?.let { add(headerChange(it)) }
     }
 
-    private fun headerChange(row: Session) = SessionChange(
+    internal fun headerChange(row: Session) = SessionChange(
         id = SessionId(row.id),
         source = SessionSource.valueOf(row.source),
         startedAt = Instant.fromEpochMilliseconds(row.started_at),
@@ -381,8 +384,8 @@ class LocalStore(driverFactory: DriverFactory, private val clock: Clock = Clock.
     }
 }
 
-/** A change waiting in the outbox, at [seq]. */
-data class OutboxEntry(val seq: Long, val change: SyncChange)
+/** A change waiting in the outbox, at [seq], [bytes] long as JSON. */
+data class OutboxEntry(val seq: Long, val change: SyncChange, val bytes: Int)
 
 /** A finished session as stored: [totals] is null until it has been summed up once. */
 data class StoredSession(val record: SessionRecord, val title: String?, val format: WorkoutFormat?, val totals: SessionTotals?)

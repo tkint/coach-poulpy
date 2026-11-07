@@ -167,6 +167,7 @@
     "autoName": "{others, plural, =0 {{name}} other {{name} (+#)}}",
     "autoNameEmpty": "Séance",
     "copyName": "{name} (copie)",
+    "forkName": "{name} ({device})",
     "deleteTitle": "Supprimer « {name} » ?",
     "deletePlanned": "{planned, plural, one {Elle est retirée de son jour prévu.} many {Elle est retirée de ses # jours prévus.} other {Elle est retirée de ses # jours prévus.}}",
     "deleteDone": "{done, plural, one {La fois où vous l’avez faite reste dans l’historique.} many {Les # fois où vous l’avez faite restent dans l’historique.} other {Les # fois où vous l’avez faite restent dans l’historique.}}",

@@ -27,3 +27,12 @@ SELECT * FROM planned_workout WHERE id = ?;
 
 planIdsOfWorkout:
 SELECT id FROM planned_workout WHERE workout_id = ?;
+
+upsertPlan:
+INSERT OR REPLACE INTO planned_workout(id, workout_id, day, created_at) VALUES (?, ?, ?, ?);
+
+setPlanWorkout:
+UPDATE planned_workout SET workout_id = ? WHERE id = ?;
+
+deleteAllPlans:
+DELETE FROM planned_workout;

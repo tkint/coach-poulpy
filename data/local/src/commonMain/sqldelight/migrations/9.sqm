@@ -1,0 +1,2 @@
+-- Sync: where the phone's last pull stopped (docs/accounts.md, Pull). Nothing existing changes.
+ALTER TABLE sync_state ADD COLUMN cursor TEXT;

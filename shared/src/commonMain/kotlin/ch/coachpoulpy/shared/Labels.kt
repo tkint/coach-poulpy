@@ -235,6 +235,9 @@ internal class Labels(private val languageCode: String, private val units: () ->
     /** The name a copy starts with: "Upper body (copy)". */
     fun copyName(name: String) = DomainText.workoutCopyName(languageCode, name)
 
+    /** The name of a workout edited on two phones, kept as a copy on the second: "Leg day (Ana's iPhone)". */
+    fun forkName(name: String, device: String) = DomainText.workoutForkName(languageCode, name, device)
+
     /** Only says what applies: the planned days it comes off, the sessions that stay in History. */
     fun deletePrompt(name: String, planned: Int, done: Int): DeletePrompt {
         val goes = if (planned == 0) null else DomainText.workoutDeletePlanned(languageCode, planned)
