@@ -94,6 +94,8 @@ flowchart LR
     shared --> engine["core/engine<br/>timeline · Session"]
     shared --> catalog["catalog<br/>bundled exercises"]
     shared --> local["data/local<br/>SQLite · repositories"]
+    shared --> remote["data/remote<br/>account API over HTTP"]
+    remote --> model
     shared --> ftms["device/ftms<br/>FTMS decoding"]
     shared --> treadmill["types/treadmill<br/>treadmill logic"]
     engine --> model

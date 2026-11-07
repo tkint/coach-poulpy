@@ -14,6 +14,7 @@ The brand, design system and architecture are published at [docs.coach-poulpy.co
 | `types/treadmill` | Treadmill recording, summaries and step estimate |
 | `catalog` | Bundled exercise catalog, edited as JSON in `catalog/data/` |
 | `data/local` | SQLDelight database on the phone |
+| `data/remote` | The phone's calls to the account API (Ktor), with token refresh |
 | `device/ftms` | Bluetooth treadmills (FTMS): decoding, connection with reconnect, Bluetooth through Kable |
 | `export/fit` | .FIT export for Garmin Connect and Strava: a session written as an activity file |
 | `shared` | Umbrella module the apps use; exported to iOS as the `Shared` framework |
