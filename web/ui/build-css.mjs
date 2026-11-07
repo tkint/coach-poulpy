@@ -1,0 +1,54 @@
+// Builds poulpy-ui.css and poulpy-ui-embed.css from src/prebuilt.css and src/embed.css (ADR 0023).
+//   node build-css.mjs          writes them
+//   node build-css.mjs --check  fails when a committed file no longer matches (CI)
+// They are committed so plain-HTML web mockups can link them with no build, as tokens.css is.
+// Run it after changing theme.css, a component's classes, or the classes a web mockup uses.
+import { execFileSync } from 'node:child_process'
+import { existsSync, readFileSync, writeFileSync } from 'node:fs'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import postcss from 'postcss'
+
+const here = dirname(fileURLToPath(import.meta.url))
+const cli = join(here, 'node_modules/.bin/tailwindcss')
+const bin = existsSync(cli) ? cli : join(here, '../node_modules/.bin/tailwindcss')
+const banner = '/* Generated from web/ui/src by web/ui/build-css.mjs. Do not edit by hand. */\n'
+
+// The embed build leaves its cascade layers: a page that has its own unlayered styles, as the
+// docs site does (VitePress resets every button), would otherwise win over every DaisyUI class.
+const unlayer = (css) => {
+  const ast = postcss.parse(css)
+  // Layers nest, so unwrap until none is left.
+  for (let found = true; found; ) {
+    found = false
+    ast.walkAtRules('layer', (rule) => {
+      found = true
+      if (rule.nodes) rule.replaceWith(rule.nodes)
+      else rule.remove()
+    })
+  }
+  return ast.toString()
+}
+const outputs = {
+  'poulpy-ui.css': { input: 'src/prebuilt.css', post: (css) => css },
+  'poulpy-ui-embed.css': { input: 'src/embed.css', post: unlayer },
+}
+const check = process.argv.includes('--check')
+let stale = 0
+for (const [out, { input, post }] of Object.entries(outputs)) {
+  const css = banner + post(execFileSync(bin, ['--input', join(here, input)], { cwd: here, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }))
+  const path = join(here, out)
+  const current = existsSync(path) ? readFileSync(path, 'utf8') : null
+  if (current === css) continue
+  if (check) {
+    console.error(`Out of date: web/ui/${out}`)
+    stale++
+  } else {
+    writeFileSync(path, css)
+    console.log(`Wrote web/ui/${out}`)
+  }
+}
+if (stale) {
+  console.error('Run `npm run build -w ui` in web/ and commit the result.')
+  process.exit(1)
+}

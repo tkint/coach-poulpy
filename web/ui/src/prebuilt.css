@@ -1,0 +1,11 @@
+/* Entry for poulpy-ui.css, the prebuilt stylesheet that plain-HTML web mockups link (ADR 0016,
+   ADR 0023). Tailwind keeps only the classes it finds in the components and the web mockups. */
+@import "tailwindcss" source(none);
+@plugin "daisyui" {
+  themes: false;
+  logs: false;
+}
+@import "./theme.css";
+@source "./components";
+@source "../../../design/mockups/drafts/web";
+@source "../../../design/mockups/agreed/web";

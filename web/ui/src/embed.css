@@ -1,0 +1,15 @@
+/* Entry for poulpy-ui-embed.css: the same theme and classes as poulpy-ui.css without any page-wide
+   rule (no reset, no root colours or scrollbars), so the docs site can show the components inside
+   its own pages, and without cascade layers, so the site's own unlayered resets cannot win over it.
+   Samples sit in an element with data-theme="poulpy" and a cp-theme-* class. */
+@import "tailwindcss/theme" layer(theme);
+@import "tailwindcss/utilities" layer(utilities) source(none);
+@plugin "daisyui" {
+  themes: false;
+  logs: false;
+  exclude: reset, rootcolor, rootscrollgutter, rootscrolllock, scrollbar;
+}
+@import "./theme.css";
+@source "./components";
+@source "../../../design/mockups/drafts/web";
+@source "../../../design/mockups/agreed/web";

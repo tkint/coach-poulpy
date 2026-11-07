@@ -21,7 +21,7 @@ The brand, design system and architecture are published at [docs.coach-poulpy.co
 | `app-ios` | SwiftUI app, project generated with XcodeGen |
 | `server` | http4k API under `/api/v1` ([The API](docs/the-api.md)) and `/health`; image built from `server/Dockerfile` |
 | `deploy` | Docker Compose files to run the server, Postgres and Caddy on one machine; see [Deploying the server](docs/deploying-the-server.md) |
-| `web` | Vue 3 + TypeScript website (placeholder) |
+| `web` | The websites, an npm workspace: `web/ui`, the shared Vue and DaisyUI design system ([ADR 0023](docs/adr/0023-the-websites-share-one-vue-and-daisyui-design-system.md)), and `web/app`, the web app (placeholder) |
 | `build-logic` | Gradle convention plugins: `coachpoulpy.kmp-library` (Android, iOS, JVM) and `coachpoulpy.kmp-web-library` (the same plus JavaScript, for the modules the website runs) |
 | `design` | Brand tokens (`tokens.json`) and the script that generates the Android, iOS and web theme files from them |
 | `docs` | Architecture, ADRs, design system and brand, read by agents and published on the docs site |

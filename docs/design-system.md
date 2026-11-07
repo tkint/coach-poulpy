@@ -104,6 +104,15 @@ The fields every form is built from. Reference mockups: `profile-edit`, the thre
 
 Mockups are plain HTML pages in `design/mockups/` ([ADR 0016](adr/0016-mockups-are-plain-html-in-the-repo.md)): drafts in `drafts/`, validated screens in `agreed/`, each split into `phone/`, `tablet/` and `web/`. The docs site shows them on the [Mockups](https://tkint.github.io/coach-poulpy/mockups/) pages, one page per screen, in light or dark. Build a screen from its agreed mockup, and get a mockup agreed, through a PR that moves it out of `drafts/`, before building a screen that has none. The player draws the same screens on both phones (`player-ready`, `player-set`, `player-circuit-round`, `player-repeat-in-sets`, `player-warm-up`, `player-rest`, `player-recover`): pause and end on the bar over the step count, Poulpy straining on an exercise and glancing aside inside the rest ring, a rep target as one big number with its unit under it, a line saying what comes next, and −15 s and +15 s under the ring to lengthen or shorten that one rest. The screen sits on the `background` role, not `surface`, so the cards on it stand out. The finished screen names the workout and its date, then shows three stats picked from what the exercises logged: Time always, then sets and weight lifted for sets and weights, distance and pace for runs and walks, and never heart rate; a stat with nothing logged, such as the weight of a bodyweight session, is left out (`player-finished` and `player-finished-run` on the Mockups pages). CI runs `node design/check-mockups.mjs` on every mockup: no literal colours, no px value where a spacing, radius or headline token has that size, no missing link, no script or style from outside the repo (the brand fonts apart), and the title, screen and section meta tags in place.
 
+## Websites
+
+The landing site, the web app, the web mockups and the docs site share one package, `web/ui`: DaisyUI with the Poulpy theme and a few Vue components ([ADR 0023](adr/0023-the-websites-share-one-vue-and-daisyui-design-system.md)). The live samples and the class of each component are on the [Web components](https://tkint.github.io/coach-poulpy/web-components) page.
+
+- Use the shared components (`CpButton`, `CpChip`...) in Vue, and their classes in a web mockup; never restyle a DaisyUI class in an app. A missing shape goes in `web/ui`.
+- The roles above keep their meaning: `btn-primary` is `primary`, `btn-secondary` is the tonal `primaryContainer`, `btn-accent` is `grumpy` and only for the catch-up action. Never use DaisyUI's `warning` classes: ember is not a warning, and a problem is an `error`.
+- Web mockups link `web/ui/src/tokens.css` then `web/ui/poulpy-ui.css`. After using a class no component or web mockup used before, run `npm run build -w ui` in `web/` and commit `poulpy-ui.css`; CI checks it.
+- Phone and tablet mockups keep `design/mockups/shared/mockup.css`: they draw the native screens.
+
 ## Accessibility
 
 - Touch targets at least 44 by 44.

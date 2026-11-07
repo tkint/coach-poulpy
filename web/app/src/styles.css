@@ -1,0 +1,9 @@
+/* The web app's styles: Tailwind, DaisyUI and the Poulpy theme from @coach-poulpy/ui (ADR 0023). */
+@import "tailwindcss";
+@import "@coach-poulpy/ui/tokens.css";
+@plugin "daisyui" {
+  themes: false;
+  logs: false;
+}
+@import "@coach-poulpy/ui/theme.css";
+@source "../../ui/src/components";
