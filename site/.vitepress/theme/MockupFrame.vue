@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { withBase } from 'vitepress'
 import type { Mockup } from '../mockups.mts'
+import { useMockupWidth } from './useMockupWidth'
 
 const props = defineProps<{ mockup: Mockup }>()
 // The mockups' own theme, apart from the docs site's: shared/mockup-theme.js in every mockup reads
@@ -28,28 +29,96 @@ const onStorage = (event: StorageEvent) => {
 const run = ref(0)
 const src = () => withBase('/' + props.mockup.path)
 
-// The frame is drawn at its real size and scaled down to fit the column, so a phone screen never
+// The frame is drawn at its real size and scaled down to fit the column, so a screen never
 // scrolls inside its frame, even on a narrow screen.
-const width = 438
-const height = () => props.mockup.height + 48
+const isWeb = computed(() => props.mockup.device === 'web')
+// A web page is drawn at a browser width chosen in the toolbar or by dragging the frame's edge,
+// shared by every frame, and is as tall as its content at that width. Full is the column's width.
+const sizes = [
+  { name: 'Phone', width: 390 },
+  { name: 'Medium', width: 768 },
+  { name: 'Large', width: 1280 },
+]
+const minWidth = 320
+const maxWidth = 1600
+const { width: chosen, set: choose } = useMockupWidth()
 const box = ref<HTMLElement>()
-const scale = ref(1)
+const boxWidth = ref(438)
+// Full leaves room for the resize handle.
+const viewport = computed(() => (chosen.value === 'full' ? Math.max(minWidth, Math.floor(boxWidth.value - 16)) : chosen.value))
+const pageHeight = ref(800)
+const width = computed(() => (isWeb.value ? viewport.value : 438))
+const height = computed(() => (isWeb.value ? pageHeight.value : props.mockup.height + 48))
+const scale = computed(() => Math.min(1, boxWidth.value / width.value))
+
+const frame = ref<HTMLIFrameElement>()
+let pageObserver: ResizeObserver | undefined
+// The bottom of what the page draws, not the document's height, which is at least the frame's
+// own height with a full-screen body and so would never shrink.
+function measure() {
+  const body = frame.value?.contentDocument?.body
+  if (!body) return
+  const bottom = Math.max(0, ...[...body.children].map((child) => child.getBoundingClientRect().bottom))
+  pageHeight.value = Math.max(480, Math.ceil(bottom) + 24)
+}
+function onLoad() {
+  if (!isWeb.value) return
+  pageObserver?.disconnect()
+  const body = frame.value?.contentDocument?.body
+  if (!body) return
+  measure()
+  pageObserver = new ResizeObserver(measure)
+  // The body follows the frame's width even when a centred column inside it keeps its size.
+  for (const element of [body, ...body.children]) pageObserver.observe(element)
+}
+
+let start: { x: number; width: number } | undefined
+function startResize(event: PointerEvent) {
+  start = { x: event.clientX, width: viewport.value }
+  ;(event.currentTarget as HTMLElement).setPointerCapture(event.pointerId)
+}
+function resize(event: PointerEvent) {
+  if (!start) return
+  const next = start.width + (event.clientX - start.x) / scale.value
+  choose(Math.round(Math.min(maxWidth, Math.max(minWidth, next))))
+}
+function stopResize() {
+  start = undefined
+}
+function resizeByKey(event: KeyboardEvent) {
+  const step = event.shiftKey ? 100 : 10
+  if (event.key === 'ArrowLeft') choose(Math.max(minWidth, viewport.value - step))
+  else if (event.key === 'ArrowRight') choose(Math.min(maxWidth, viewport.value + step))
+  else return
+  event.preventDefault()
+}
+
 let observer: ResizeObserver | undefined
 onMounted(() => {
   readTheme()
   addEventListener('storage', onStorage)
-  observer = new ResizeObserver(([entry]) => (scale.value = Math.min(1, entry.contentRect.width / width)))
+  observer = new ResizeObserver(([entry]) => (boxWidth.value = entry.contentRect.width))
   observer.observe(box.value!)
+  // The server-rendered frame may have loaded before this page came alive and missed its load event.
+  if (frame.value?.contentDocument?.readyState === 'complete') onLoad()
 })
 onBeforeUnmount(() => {
   observer?.disconnect()
+  pageObserver?.disconnect()
   removeEventListener('storage', onStorage)
 })
 </script>
 
 <template>
-  <div class="mockup-frame">
+  <div class="mockup-frame" :class="{ web: isWeb }">
     <div class="mockup-toolbar">
+      <div v-if="isWeb" class="mockup-sizes" role="group" aria-label="Browser width">
+        <button v-for="size in sizes" :key="size.name" type="button" :aria-pressed="chosen === size.width" @click="choose(size.width)">
+          {{ size.name }}
+        </button>
+        <button type="button" :aria-pressed="chosen === 'full'" @click="choose('full')">Full</button>
+        <span class="mockup-width">{{ viewport }} px</span>
+      </div>
       <button type="button" @click="run++">
         <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
         Reset
@@ -63,14 +132,32 @@ onBeforeUnmount(() => {
       <a :href="`https://github.com/tkint/coach-poulpy/blob/main/${mockup.path}`">Source</a>
       <a v-if="mockup.issue" :href="`https://github.com/tkint/coach-poulpy/issues/${mockup.issue}`">#{{ mockup.issue }}</a>
     </div>
-    <div ref="box" class="mockup-box" :style="{ height: height() * scale + 'px' }">
+    <div ref="box" class="mockup-box" :style="{ height: height * scale + 'px' }">
       <iframe
+        ref="frame"
         :key="run"
         :src="src()"
         :title="mockup.title"
         scrolling="no"
-        :style="{ width: width + 'px', height: height() + 'px', transform: `scale(${scale})`, colorScheme: isDark ? 'dark' : 'light' }"
+        :style="{ width: width + 'px', height: height + 'px', transform: `scale(${scale})`, colorScheme: isDark ? 'dark' : 'light' }"
+        @load="onLoad"
       ></iframe>
+      <div
+        v-if="isWeb"
+        class="mockup-handle"
+        :style="{ left: width * scale + 'px' }"
+        role="slider"
+        tabindex="0"
+        aria-label="Browser width"
+        :aria-valuemin="minWidth"
+        :aria-valuemax="maxWidth"
+        :aria-valuenow="viewport"
+        @pointerdown="startResize"
+        @pointermove="resize"
+        @pointerup="stopResize"
+        @pointercancel="stopResize"
+        @keydown="resizeByKey"
+      ></div>
     </div>
   </div>
 </template>
@@ -85,6 +172,19 @@ onBeforeUnmount(() => {
 }
 .mockup-toolbar button:hover { border-color: var(--vp-c-brand-1); color: var(--vp-c-brand-1); }
 .mockup-toolbar a { color: var(--vp-c-brand-1); font-weight: 500; }
-.mockup-box { width: 100%; overflow: hidden; }
+.mockup-toolbar button[aria-pressed='true'] { border-color: var(--vp-c-brand-1); color: var(--vp-c-brand-1); background: var(--vp-c-brand-soft); }
+.mockup-box { width: 100%; overflow: hidden; position: relative; }
 iframe { border: 0; display: block; transform-origin: top left; }
+/* A web page takes the whole column, framed like a browser window, with a handle on its right edge. */
+.mockup-frame.web { width: 100%; }
+.mockup-frame.web .mockup-box { overflow: visible; padding-right: 16px; }
+.mockup-frame.web iframe { outline: 1px solid var(--vp-c-divider); border-radius: 0; }
+.mockup-sizes { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.mockup-width { color: var(--vp-c-text-2); font-variant-numeric: tabular-nums; min-width: 64px; }
+.mockup-handle {
+  position: absolute; top: 0; bottom: 0; width: 14px; cursor: ew-resize; touch-action: none;
+  display: flex; align-items: center; justify-content: center;
+}
+.mockup-handle::after { content: ''; width: 4px; height: 48px; border-radius: 2px; background: var(--vp-c-divider); }
+.mockup-handle:hover::after, .mockup-handle:focus-visible::after { background: var(--vp-c-brand-1); }
 </style>
