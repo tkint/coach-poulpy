@@ -625,6 +625,7 @@
     "signInIntro": "Use the account you made on another phone. What is on this phone joins your account; nothing is replaced.",
     "forgot": "Forgot your password?",
     "errorSignIn": "Wrong email or password. Check both and try again.",
+    "errorTooManyTries": "Too many tries. Wait a few minutes, then try again.",
     "passwordChanged": "Password changed. Sign in with the new one.",
     "forgotTitle": "Reset your password",
     "forgotIntro": "Enter your email and we’ll send a link to choose a new password.",

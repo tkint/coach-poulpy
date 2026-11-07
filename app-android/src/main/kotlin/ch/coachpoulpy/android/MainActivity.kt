@@ -32,6 +32,9 @@ class MainActivity : ComponentActivity() {
     /** The text of a workout file another app opened here, until the preview shows. Empty when it couldn't be read. */
     private val importFile = mutableStateOf<String?>(null)
 
+    /** The account screen an email link opens, such as "confirm:<token>", until it shows. */
+    private val accountLink = mutableStateOf<String?>(null)
+
     // The language picked in Settings wins over the phone's. "System" leaves the phone's,
     // including the per-app language Android 13 offers in its own settings.
     override fun attachBaseContext(newBase: Context) {
@@ -50,7 +53,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         openLive.value = intent.getBooleanExtra(OPEN_LIVE, false)
         // Only on a fresh start: a rotation or language change recreates the activity with the same intent.
-        if (savedInstanceState == null) readWorkoutFile(intent)
+        if (savedInstanceState == null) readIntent(intent)
         val graph = (application as CoachPoulpyApp).graph
         val settings = graph.settings(AppPreferences(this))
         startLanguage = settings.state.value.language
@@ -71,6 +74,8 @@ class MainActivity : ComponentActivity() {
                         onLiveOpened = { openLive.value = false },
                         importFile = importFile.value,
                         onImportOpened = { importFile.value = null },
+                        accountLink = accountLink.value,
+                        onAccountLinkOpened = { accountLink.value = null },
                     )
                 }
             }
@@ -80,7 +85,25 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         if (intent.getBooleanExtra(OPEN_LIVE, false)) openLive.value = true
-        readWorkoutFile(intent)
+        readIntent(intent)
+    }
+
+    private fun readIntent(intent: Intent) {
+        val link = intent.data?.takeIf { intent.action == Intent.ACTION_VIEW && it.scheme == "https" }
+        if (link != null) readAccountLink(link) else readWorkoutFile(intent)
+    }
+
+    /**
+     * The links in the account emails, `https://app.coach-poulpy.com/confirm-email#<token>` and
+     * `/reset-password#<token>` (App Links, in the manifest). The token sits in the fragment.
+     */
+    private fun readAccountLink(link: Uri) {
+        val token = link.fragment?.takeIf { it.isNotBlank() } ?: return
+        accountLink.value = when (link.path?.trimEnd('/')) {
+            "/confirm-email" -> "confirm:$token"
+            "/reset-password" -> "reset:$token"
+            else -> null
+        }
     }
 
     /** Reads a shared or opened `.poulpyworkout` into [importFile]; a file too big or unreadable becomes "", which the preview refuses. */

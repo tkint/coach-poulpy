@@ -23,6 +23,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Bluetooth
 import androidx.compose.material.icons.filled.Contrast
 import androidx.compose.material.icons.filled.Delete
@@ -101,7 +102,7 @@ import kotlinx.datetime.number
 import kotlinx.datetime.LocalDate as KDate
 
 /** The pages Settings opens inside its tab. Device pages open over the tabs instead, through [DeviceRoute]. */
-enum class SettingsPage { HUB, PROFILE, WEIGHT, HEIGHT, PREFERENCES, DEVICES }
+enum class SettingsPage { HUB, ACCOUNT, PROFILE, WEIGHT, HEIGHT, PREFERENCES, DEVICES }
 
 /** A Settings page: a back arrow, a title with an optional line under it, an optional action, then [content] scrolling. */
 @Composable
@@ -158,9 +159,9 @@ private fun mediumDate(date: LocalDate) = date.format(DateTimeFormatter.ofLocali
 
 private fun shortDate(date: LocalDate) = date.format(DateTimeFormatter.ofPattern("d MMM", Locale.getDefault()))
 
-/** Settings › hub: the profile card, Body, App and About. */
+/** Settings › hub: the profile card, Account, Body, App and About. [onAccount] opens a sign-in or sign-up screen over the tabs. */
 @Composable
-internal fun SettingsHub(graph: AppGraph, language: String, onPage: (SettingsPage) -> Unit, modifier: Modifier = Modifier) {
+internal fun SettingsHub(graph: AppGraph, language: String, onPage: (SettingsPage) -> Unit, onAccount: (String) -> Unit, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val memory = remember { AppPreferences(context) }
     val profileModel = remember(graph) { graph.profile(memory) }
@@ -203,6 +204,12 @@ internal fun SettingsHub(graph: AppGraph, language: String, onPage: (SettingsPag
                         Text(stringResource(R.string.settings_editProfile), style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.ExtraBold)
                     }
                     Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null)
+                }
+            }
+            SectionLabel(R.string.account_sectionLabel)
+            SettingsList {
+                AccountRow(onPage = { onPage(SettingsPage.ACCOUNT) }, onFlow = onAccount) { title, subtitle, onClick ->
+                    SettingsRow(Icons.Filled.AccountCircle, title, subtitle, onClick)
                 }
             }
             SectionLabel(R.string.settings_body)

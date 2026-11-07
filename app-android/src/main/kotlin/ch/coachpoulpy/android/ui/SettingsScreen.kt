@@ -66,7 +66,10 @@ import ch.coachpoulpy.shared.ConnectionStatus
 import ch.coachpoulpy.shared.KnownDeviceUi
 import ch.coachpoulpy.shared.Quantity
 
-/** The Settings tab: a hub, and the pages it opens (profile, weight, height, appearance and units, devices). Device pages open over the tabs through [onOpen]. */
+/**
+ * The Settings tab: a hub, and the pages it opens (account, profile, weight, height, appearance and units,
+ * devices). Device pages open over the tabs through [onOpen], the account's screens through [onAccount].
+ */
 @Composable
 fun SettingsScreen(
     graph: AppGraph,
@@ -74,12 +77,14 @@ fun SettingsScreen(
     page: SettingsPage,
     onPage: (SettingsPage) -> Unit,
     onOpen: (DeviceRoute) -> Unit,
+    onAccount: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     BackHandler(enabled = page != SettingsPage.HUB) { onPage(SettingsPage.HUB) }
     val hub = { onPage(SettingsPage.HUB) }
     when (page) {
-        SettingsPage.HUB -> SettingsHub(graph, language, onPage, modifier)
+        SettingsPage.HUB -> SettingsHub(graph, language, onPage, onAccount, modifier)
+        SettingsPage.ACCOUNT -> AccountPage(hub, onAccount, modifier)
         SettingsPage.PROFILE -> ProfileScreen(graph, language, hub, modifier)
         SettingsPage.WEIGHT -> BodyScreen(graph, BodyMetric.WEIGHT, language, hub, modifier)
         SettingsPage.HEIGHT -> BodyScreen(graph, BodyMetric.HEIGHT, language, hub, modifier)

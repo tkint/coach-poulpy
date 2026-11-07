@@ -20,6 +20,9 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
+    <!-- The account and its sync (docs/accounts.md); a guest never uses the network. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:name=".CoachPoulpyApp"
         android:allowBackup="false"
@@ -55,6 +58,18 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:scheme="content" />
                 <data android:mimeType="application/octet-stream" />
+            </intent-filter>
+            <!-- The links in the account emails open the app (App Links). Android checks them against
+                 https://app.coach-poulpy.com/.well-known/assetlinks.json; until that file is served, a
+                 link opens in the browser unless the app is allowed in Android's "Open supported links". -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" />
+                <data android:host="app.coach-poulpy.com" />
+                <data android:path="/confirm-email" />
+                <data android:path="/reset-password" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />

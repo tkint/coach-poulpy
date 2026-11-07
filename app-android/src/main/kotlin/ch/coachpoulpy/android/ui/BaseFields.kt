@@ -19,11 +19,15 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.ErrorOutline
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
@@ -52,6 +56,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -68,18 +74,21 @@ import kotlin.math.roundToInt
 
 /** The box shared by the text and number fields: 52 high, 16 radius, a 1.5 outline that turns primary on focus. */
 @Composable
-private fun FieldBox(focused: Boolean, height: Dp, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+private fun FieldBox(focused: Boolean, height: Dp, modifier: Modifier = Modifier, error: Boolean = false, content: @Composable () -> Unit) {
     val colors = MaterialTheme.colorScheme
     Surface(
         modifier = modifier.fillMaxWidth().height(height),
         shape = RoundedCornerShape(PoulpyRadius.md),
         color = colors.surface,
-        border = BorderStroke(1.5.dp, if (focused) colors.primary else colors.outline),
+        border = BorderStroke(1.5.dp, when { error -> colors.error; focused -> colors.primary; else -> colors.outline }),
         content = content,
     )
 }
 
-/** A labelled free-text field, with an optional note under it. */
+/**
+ * A labelled free-text field, with an optional note under it, or an [error] in crimson with an icon in
+ * its place. A [password] field hides what is typed, with a button to show it.
+ */
 @Composable
 internal fun PoulpyTextField(
     label: String,
@@ -87,24 +96,54 @@ internal fun PoulpyTextField(
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
     note: String? = null,
+    error: String? = null,
+    keyboardType: KeyboardType = KeyboardType.Text,
+    password: Boolean = false,
 ) {
     var focused by remember { mutableStateOf(false) }
+    var shown by remember { mutableStateOf(false) }
     val colors = MaterialTheme.colorScheme
     Column(modifier, verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Text(label, style = MaterialTheme.typography.labelMedium, color = colors.onSurfaceVariant, modifier = Modifier.padding(horizontal = 4.dp))
-        FieldBox(focused, 52.dp) {
-            Box(Modifier.padding(horizontal = 16.dp), contentAlignment = Alignment.CenterStart) {
+        FieldBox(focused, 52.dp, error = error != null) {
+            Row(Modifier.padding(start = 16.dp, end = if (password) 4.dp else 16.dp), verticalAlignment = Alignment.CenterVertically) {
                 BasicTextField(
                     value = value,
                     onValueChange = onValueChange,
                     singleLine = true,
                     textStyle = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold, color = colors.onSurface),
                     cursorBrush = SolidColor(colors.primary),
-                    modifier = Modifier.fillMaxWidth().onFocusChanged { focused = it.isFocused },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = if (password) KeyboardType.Password else keyboardType,
+                        autoCorrectEnabled = !password && keyboardType == KeyboardType.Text,
+                    ),
+                    visualTransformation = if (password && !shown) PasswordVisualTransformation() else VisualTransformation.None,
+                    modifier = Modifier.weight(1f).onFocusChanged { focused = it.isFocused },
                 )
+                if (password) {
+                    IconButton(onClick = { shown = !shown }) {
+                        Icon(
+                            if (shown) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
+                            contentDescription = stringResource(if (shown) R.string.account_hidePassword else R.string.account_showPassword),
+                            tint = colors.onSurfaceVariant,
+                        )
+                    }
+                }
             }
         }
-        note?.let { Note(it) }
+        when {
+            error != null -> FieldError(error)
+            note != null -> Note(note)
+        }
+    }
+}
+
+/** What is wrong with a field: crimson, with an icon (docs/design-system.md). */
+@Composable
+internal fun FieldError(text: String) {
+    Row(Modifier.padding(horizontal = 4.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        Icon(Icons.Filled.ErrorOutline, contentDescription = null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(18.dp))
+        Text(text, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.error)
     }
 }
 
