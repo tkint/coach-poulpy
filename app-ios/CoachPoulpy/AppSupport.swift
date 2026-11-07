@@ -1,5 +1,6 @@
 import SwiftUI
 import CoreBluetooth
+import Security
 import Shared
 
 /// Remembers devices and settings between launches.
@@ -8,6 +9,38 @@ final class UserDefaultsStore: NSObject, KeyValueStore {
 
     func putString(key: String, value: String?) {
         if let value { UserDefaults.standard.set(value, forKey: key) } else { UserDefaults.standard.removeObject(forKey: key) }
+    }
+}
+
+/// Keeps the sign-in in the Keychain, on this device only and readable once it was unlocked after a restart.
+final class KeychainStore: NSObject, SecretStore {
+    private let service = "ch.coachpoulpy.account"
+
+    func getSecret(key: String) -> String? {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: key,
+            kSecReturnData as String: true,
+            kSecMatchLimit as String: kSecMatchLimitOne,
+        ]
+        var item: CFTypeRef?
+        guard SecItemCopyMatching(query as CFDictionary, &item) == errSecSuccess, let data = item as? Data else { return nil }
+        return String(data: data, encoding: .utf8)
+    }
+
+    func putSecret(key: String, value: String?) {
+        let match: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: key,
+        ]
+        SecItemDelete(match as CFDictionary)
+        guard let value, let data = value.data(using: .utf8) else { return }
+        var item = match
+        item[kSecValueData as String] = data
+        item[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
+        SecItemAdd(item as CFDictionary, nil)
     }
 }
 
