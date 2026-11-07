@@ -32,6 +32,9 @@ sealed interface AccountState {
     /** Signed in: [waiting] changes not sent yet, and when a sync last finished. */
     data class SignedIn(val email: String, val waiting: Long, val lastSyncedAt: Instant?) : AccountState {
         val upToDate: Boolean get() = waiting == 0L
+
+        /** [lastSyncedAt] for Swift, which has no Kotlin Instant. */
+        val lastSyncedEpochMillis: Long? get() = lastSyncedAt?.toEpochMilliseconds()
     }
 }
 

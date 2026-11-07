@@ -7,9 +7,12 @@ enum DeviceRoute: Hashable {
     case device(String)
 }
 
-/// The Settings tab: a hub that opens the profile, weight, height, appearance and units, and devices.
+/// The Settings tab: a hub that opens the account, profile, weight, height, appearance and units, and devices.
+/// The account's screens open over the tabs through `onAccount`.
 struct SettingsView: View {
     @ObservedObject var settings: Observed<SettingsModel, SettingsUiState>
+    @ObservedObject var account: Observed<AccountModel, AccountState>
+    let onAccount: (String) -> Void
     @StateObject private var devices: Observed<DevicesModel, DevicesUiState>
     @StateObject private var profile: Observed<ProfileModel, ProfileUi>
     @StateObject private var weight: Observed<BodyModel, BodyUi>
@@ -17,8 +20,16 @@ struct SettingsView: View {
     @StateObject private var bluetooth = BluetoothGate()
     @Binding var path: NavigationPath
 
-    init(graph: AppGraph, settings: Observed<SettingsModel, SettingsUiState>, path: Binding<NavigationPath>) {
+    init(
+        graph: AppGraph,
+        settings: Observed<SettingsModel, SettingsUiState>,
+        account: Observed<AccountModel, AccountState>,
+        path: Binding<NavigationPath>,
+        onAccount: @escaping (String) -> Void
+    ) {
         self.settings = settings
+        self.account = account
+        self.onAccount = onAccount
         _devices = StateObject(wrappedValue: graph.observedDevices())
         _profile = StateObject(wrappedValue: graph.observedProfile())
         _weight = StateObject(wrappedValue: graph.observedBody(.weight))
@@ -28,10 +39,11 @@ struct SettingsView: View {
 
     var body: some View {
         NavigationStack(path: $path) {
-            SettingsHub(settings: settings, profile: profile, weight: weight, height: height)
+            SettingsHub(settings: settings, account: account, onAccount: onAccount, profile: profile, weight: weight, height: height)
                 .navigationTitle("tab.settings")
                 .navigationDestination(for: SettingsPage.self) { page in
                     switch page {
+                    case .account: AccountPage(account: account, onFlow: onAccount)
                     case .profile: ProfileView(profile: profile)
                     case .weight: BodyView(metric: .weight, log: weight, units: settings.value.units)
                     case .height: BodyView(metric: .height, log: height, units: settings.value.units)

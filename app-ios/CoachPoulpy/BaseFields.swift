@@ -6,10 +6,12 @@ import UIKit
 // text and opens the numeric keyboard, and option sheets (one choice, several, or a
 // step slider). Mockups: profile-edit, profile-*-sheet, body-log-sheet.
 
-/// The box shared by the text, number and select fields: 16 radius, a 1.5 outline that turns primary on focus.
+/// The box shared by the text, number and select fields: 16 radius, a 1.5 outline that turns primary on focus,
+/// crimson on an error.
 struct FieldBox<Content: View>: View {
     var focused = false
     var height: CGFloat = 52
+    var error = false
     @ViewBuilder var content: () -> Content
 
     var body: some View {
@@ -17,21 +19,26 @@ struct FieldBox<Content: View>: View {
             .padding(.horizontal, 16)
             .frame(maxWidth: .infinity, minHeight: height, alignment: .leading)
             .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 16))
-            .overlay(RoundedRectangle(cornerRadius: 16).stroke(focused ? PoulpyColor.primary : PoulpyColor.outline, lineWidth: 1.5))
+            .overlay(RoundedRectangle(cornerRadius: 16).stroke(error ? PoulpyColor.error : focused ? PoulpyColor.primary : PoulpyColor.outline, lineWidth: 1.5))
     }
 }
 
-/// A label above, the note under it.
+/// A label above, the note under it, or the error in its place.
 private struct Labelled<Content: View>: View {
     let label: LocalizedStringKey
     let note: LocalizedStringKey?
+    var error: String? = nil
     @ViewBuilder var content: () -> Content
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(label).font(.poulpy(.footnote)).foregroundStyle(PoulpyColor.onSurfaceVariant).padding(.horizontal, 4)
             content()
-            if let note { FieldNote(note) }
+            if let error {
+                FieldError(error)
+            } else if let note {
+                FieldNote(note)
+            }
         }
     }
 }
@@ -45,20 +52,58 @@ struct FieldNote: View {
     }
 }
 
-/// A labelled free-text field, with an optional note under it.
+/// What is wrong with a field: crimson, with an icon (docs/design-system.md).
+struct FieldError: View {
+    let text: String
+    init(_ text: String) { self.text = text }
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 6) {
+            Image(systemName: "exclamationmark.circle").font(.system(size: 15, weight: .semibold))
+            Text(text).font(.poulpy(.footnote).weight(.bold))
+        }
+        .foregroundStyle(PoulpyColor.error)
+        .padding(.horizontal, 4)
+    }
+}
+
+/// A labelled free-text field, with an optional note under it, or an `error` in its place. A `secure` field
+/// hides what is typed, with a button to show it.
 struct PoulpyTextField: View {
     let label: LocalizedStringKey
     @Binding var text: String
     var note: LocalizedStringKey? = nil
+    var error: String? = nil
+    var keyboard: UIKeyboardType = .default
+    var secure = false
     @FocusState private var focused: Bool
+    @State private var shown = false
 
     var body: some View {
-        Labelled(label: label, note: note) {
-            FieldBox(focused: focused) {
-                TextField("", text: $text)
+        Labelled(label: label, note: note, error: error) {
+            FieldBox(focused: focused, error: error != nil) {
+                HStack(spacing: 8) {
+                    Group {
+                        if secure && !shown {
+                            SecureField("", text: $text)
+                        } else {
+                            TextField("", text: $text)
+                        }
+                    }
                     .font(.poulpy(.headline))
+                    .keyboardType(secure ? .default : keyboard)
+                    .textInputAutocapitalization(secure || keyboard != .default ? .never : .sentences)
+                    .autocorrectionDisabled(secure || keyboard != .default)
                     .focused($focused)
                     .accessibilityLabel(Text(label))
+                    if secure {
+                        Button { shown.toggle() } label: {
+                            Image(systemName: shown ? "eye.slash" : "eye").foregroundStyle(PoulpyColor.onSurfaceVariant)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(Text(LocalizedStringKey(shown ? "account.hidePassword" : "account.showPassword")))
+                    }
+                }
             }
         }
     }
