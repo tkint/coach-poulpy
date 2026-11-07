@@ -31,3 +31,16 @@ DELETE FROM workout_version WHERE id = ?;
 
 allVersions:
 SELECT * FROM workout_version ORDER BY id, version;
+
+versionsFrom:
+SELECT * FROM workout_version WHERE id = ? AND version >= ? ORDER BY version;
+
+insertIfMissing:
+INSERT OR IGNORE INTO workout_version(id, version, format, name, content, created_at)
+VALUES (?, ?, ?, ?, ?, ?);
+
+deleteVersionsFrom:
+DELETE FROM workout_version WHERE id = ? AND version >= ?;
+
+deleteAllWorkouts:
+DELETE FROM workout_version;

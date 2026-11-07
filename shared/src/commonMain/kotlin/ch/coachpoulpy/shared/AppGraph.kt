@@ -10,6 +10,9 @@ import ch.coachpoulpy.core.model.WorkoutId
 import ch.coachpoulpy.data.local.DriverFactory
 import ch.coachpoulpy.data.local.LocalStore
 import ch.coachpoulpy.device.ftms.KableCentral
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.datetime.TimeZone
 
 /**
@@ -112,6 +115,13 @@ class AppGraph(driverFactory: DriverFactory) {
 
     /** Stops adding changes to the outbox and empties it, as on sign-out. */
     fun stopRecordingChanges() = store.stopRecordingChanges()
+
+    /**
+     * The sync client of a signed-in phone, named [deviceName] in the copies it makes of a workout
+     * edited on two phones. [memory] is the apps' own store, the one the profile and settings use.
+     */
+    fun syncClient(server: SyncServer, deviceName: String, memory: KeyValueStore, languageCode: String, onSignInRefused: () -> Unit = {}) =
+        SyncClient(store, memory, server, deviceName, { languageCode }, CoroutineScope(SupervisorJob() + Dispatchers.Main), onSignInRefused)
 
     /** The units chosen in Settings, once the app has opened them; metric until then. */
     private fun units() = settingsModel?.state?.value?.units ?: UnitSystem.METRIC

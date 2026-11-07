@@ -50,7 +50,7 @@ Only once the email is confirmed, and only while the app is open: when it opens,
 
 The cursor is a counter on the account, not a time. Every row the server writes for the account, a deletion included, takes the next number, under a lock on the account row, so two pushes never interleave their numbers and a pull never skips one. The phones' clocks play no part.
 
-A pull also returns the phone's own changes. Applying a change twice changes nothing, so the phone doesn't need to tell them apart.
+A pull also returns the phone's own changes. Applying a change twice changes nothing, so the phone doesn't need to tell them apart. A plan, body measurement, setting or session header whose own change still waits in the outbox keeps the phone's value: the push that follows sends it, and the server keeps the later write.
 
 ### Push
 
@@ -59,7 +59,7 @@ A pull also returns the phone's own changes. Applying a change twice changes not
 - **One push is one transaction**: all of it is stored, or none of it.
 - **Every change is idempotent**, so a push whose answer was lost is simply sent again.
 - **409 `stale-base`** names the workouts whose starting version is out of date. The phone pulls, forks them (below) and pushes again.
-- **400 `invalid-change`** gives the index of a change that doesn't parse or breaks a rule. The server checks workout content with the shared Kotlin types ([ADR 0007](./adr/0007-postgres-columns-for-structure-jsonb-for-content.md)).
+- **400 `invalid-change`** gives the index of a change that doesn't parse or breaks a rule. The server checks workout content with the shared Kotlin types ([ADR 0007](./adr/0007-postgres-columns-for-structure-jsonb-for-content.md)). The phone drops that change from its outbox, since it would be refused again and hold back the ones after it.
 
 ### How each kind of change merges
 

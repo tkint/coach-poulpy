@@ -73,3 +73,25 @@ SELECT COALESCE(MAX(seq), -1) FROM session_event WHERE session_id = ?;
 
 storedEvents:
 SELECT seq, at, payload FROM session_event WHERE session_id = ? ORDER BY seq;
+
+-- A pulled header: INSERT OR REPLACE would delete the row first, so the update and insert are separate.
+updateHeader:
+UPDATE session SET source = ?, workout_id = ?, workout_version = ?, started_at = ?, ended_at = ?, title = ?, workout_type = ?, summary = ?
+WHERE id = ?;
+
+insertHeader:
+INSERT OR IGNORE INTO session(id, source, workout_id, workout_version, started_at, ended_at, title, workout_type, summary)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+insertEventIfMissing:
+INSERT OR IGNORE INTO session_event(session_id, seq, at, payload) VALUES (?, ?, ?, ?);
+
+-- Sessions that followed versions of a workout from [version] on now follow its copy.
+repointSessions:
+UPDATE session SET workout_id = :copyId, workout_version = 1 WHERE workout_id = :workoutId AND workout_version >= :fromVersion;
+
+deleteAllEvents:
+DELETE FROM session_event;
+
+deleteAllSessions:
+DELETE FROM session;

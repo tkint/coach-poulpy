@@ -8,20 +8,43 @@ CREATE TABLE sync_outbox (
 -- One row, id 0: whether writes add their change to the outbox (1) or not (0, or no row: a guest).
 CREATE TABLE sync_state (
     id INTEGER NOT NULL PRIMARY KEY CHECK (id = 0),
-    recording INTEGER NOT NULL
+    recording INTEGER NOT NULL,
+    -- Where the last pull stopped; none before the first.
+    cursor TEXT
 );
 
 recording:
 SELECT recording FROM sync_state WHERE id = 0;
 
+ensureState:
+INSERT OR IGNORE INTO sync_state(id, recording) VALUES (0, 0);
+
 setRecording:
-INSERT OR REPLACE INTO sync_state(id, recording) VALUES (0, ?);
+UPDATE sync_state SET recording = ? WHERE id = 0;
+
+cursor:
+SELECT cursor FROM sync_state WHERE id = 0;
+
+setCursor:
+UPDATE sync_state SET cursor = ? WHERE id = 0;
 
 addChange:
 INSERT INTO sync_outbox(change_json) VALUES (?);
 
 outbox:
 SELECT seq, change_json FROM sync_outbox ORDER BY seq LIMIT ?;
+
+wholeOutbox:
+SELECT seq, change_json FROM sync_outbox ORDER BY seq;
+
+outboxSize:
+SELECT COUNT(*) FROM sync_outbox;
+
+rewriteChange:
+UPDATE sync_outbox SET change_json = ? WHERE seq = ?;
+
+removeChange:
+DELETE FROM sync_outbox WHERE seq = ?;
 
 removeUpTo:
 DELETE FROM sync_outbox WHERE seq <= ?;

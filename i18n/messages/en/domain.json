@@ -167,6 +167,7 @@
     "autoName": "{others, plural, =0 {{name}} other {{name} (+#)}}",
     "autoNameEmpty": "Workout",
     "copyName": "{name} (copy)",
+    "forkName": "{name} ({device})",
     "deleteTitle": "Delete {name}?",
     "deletePlanned": "{planned, plural, one {It comes off its planned day.} other {It comes off its # planned days.}}",
     "deleteDone": "{done, plural, one {The time you did it stays in History.} other {The # times you did it stay in History.}}",
