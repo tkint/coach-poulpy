@@ -40,7 +40,7 @@ const counterpart = (m: (typeof mockups)[number]) =>
 h1 { margin: 0 0 16px; }
 .note { color: var(--vp-c-text-2); margin: 0 0 12px; }
 .note a { color: var(--vp-c-brand-1); }
-.states { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 438px), 438px)); gap: 40px 32px; margin-top: 24px; }
+.states { display: grid; gap: 48px; margin-top: 24px; }
 .state { min-width: 0; scroll-margin-top: 80px; }
 .state h2 { margin: 0 0 8px; padding: 0; border: 0; font-size: 20px; line-height: 28px; }
 .device { color: var(--vp-c-text-2); font-weight: 500; }

@@ -51,7 +51,7 @@ const brandBookSections = [
 const mockups = listMockups()
 const mockupSidebar = (platform: keyof typeof platforms) => ({
   text: 'Mockups',
-  link: '/mockups/',
+  link: `/mockups/${platform}/`,
   collapsed: true,
   items: (Object.keys(stages) as (keyof typeof stages)[]).map((stage) => ({
     text: stages[stage],
