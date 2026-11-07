@@ -35,7 +35,7 @@ The first push creates the package as private. Either make it public once (the p
 
 ## Deploy the server
 
-A release never reaches the machine on its own. Open **Actions > Deploy > Run workflow**, pick the `production` environment, enter `latest` or a version such as `0.2.0`, and run it. It writes the app's `.env` from that GitHub environment, uploads it with the deploy files from the selected workflow ref and deploys that server image behind the shared Caddy. The machine needs Python 3 and Docker Compose.
+A release never reaches the machine on its own. Open **Actions > Deploy > Run workflow**, enter `latest` or a version such as `0.2.0`, and run it. It writes the app's `.env` from that GitHub environment, uploads it with the deploy files from the selected workflow ref and deploys that server image behind the shared Caddy. The machine needs Python 3 and Docker Compose.
 
 Set it up once:
 
@@ -66,9 +66,9 @@ The deployer creates or starts Caddy when needed and adds or replaces only this 
 
 ## Deploy a pull request
 
-To try a pull request on the machine before it merges, run **Actions > Deploy** with the `preview` environment and the version `pr-<number>`, such as `pr-262`. The workflow builds that pull request's server image, pushes it as `ghcr.io/tkint/coach-poulpy-server:pr-262`, and deploys it with the pull request's own Compose and Caddy files, since it may change them. `/health` then answers `ok pr-262`.
+Every pull request's CI run ends with a **Deploy to preview** job that waits for you. To try the pull request on the machine before it merges, open its run from the PR's checks, choose **Review deployments**, tick `preview` and approve. The job builds the pull request's server image, pushes it as `ghcr.io/tkint/coach-poulpy-server:pr-<number>`, and deploys it with the pull request's own Compose and Caddy files, since it may change them. `/health` then answers `ok pr-<number>`. A new push cancels a job still waiting and starts a new one. Pull requests from forks never get the job, so they never reach the deploy secrets.
 
-Set up the `preview` environment once, like `production` above (the same `DEPLOY_*` settings). Its `APP_NAME` decides where the pull request lands:
+Set up the `preview` environment once, like `production` above: the same `DEPLOY_*` settings, and **Required reviewers** with yourself, which is what makes the job wait. Without it, every push would deploy on its own. Until the environment is set up, the job fails on missing settings. Its `APP_NAME` decides where the pull request lands:
 
 | `APP_NAME` in `preview` | `DOMAIN` in `preview` | Result |
 | --- | --- | --- |

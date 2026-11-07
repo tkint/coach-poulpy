@@ -1,81 +1,75 @@
 name: Deploy
 
-# Run by hand: Actions > Deploy > Run workflow. It writes the app's .env from the chosen GitHub
-# environment, uploads it with the server and shared Caddy files over SSH and deploys the chosen
-# server image (ADR 0019). A version pr-<n> first builds that pull request's server image and
-# deploys it with that pull request's deploy files, to try it before it merges. Setup and secrets:
-# docs/releasing.md, "Deploy the server".
+# Updates the machine (ADR 0019): writes the app's .env from a GitHub environment, uploads it with
+# the server and shared Caddy files over SSH and deploys a server image. Production is deployed by
+# hand: Actions > Deploy > Run workflow. A pull request is deployed to the preview environment from
+# its own CI run, once a maintainer approves the "Deploy to preview" job; that builds its server
+# image first. Setup and secrets: docs/releasing.md, "Deploy the server".
 on:
   workflow_dispatch:
     inputs:
-      environment:
-        description: "Where to deploy: production, or preview to try a pull request"
-        type: choice
-        options: [production, preview]
-        default: production
       version:
-        description: "Server image: latest, a version such as 0.3.0, or pr-<number> to build a pull request"
+        description: "Server image to deploy: latest, or a version such as 0.3.0"
         default: latest
+        required: true
+  workflow_call:
+    inputs:
+      environment:
+        description: "The GitHub environment whose settings are deployed"
+        type: string
+        required: true
+      version:
+        description: "The image tag; pr-<n> builds it from ref first"
+        type: string
+        required: true
+      ref:
+        description: "The commit whose server and deploy files are used"
+        type: string
         required: true
 
 permissions:
   contents: read
 
-concurrency:
-  group: deploy
-  cancel-in-progress: false
-
 jobs:
-  source:
-    name: Pick the source
+  deploy:
+    name: Update the server
     runs-on: ubuntu-latest
-    outputs:
-      ref: ${{ steps.pick.outputs.ref }}
-      pull-request: ${{ steps.pick.outputs.pull-request }}
-    steps:
-      - id: pick
-        env:
-          VERSION: ${{ inputs.version }}
-        run: |
-          if ! printf '%s' "$APP_NAME" | grep -Eq '^[a-z0-9][a-z0-9-]*$'; then
-            echo "::error::APP_NAME may only have lowercase letters, digits and dashes."; exit 1
-          fi
-          case "$VERSION" in
-            pr-*)
-              number="${VERSION#pr-}"
-              if ! printf '%s' "$number" | grep -Eq '^[0-9]+$'; then
-                echo "::error::A pull request is deployed as pr- and its number, such as pr-42."; exit 1
-              fi
-              echo "ref=refs/pull/$number/head" >> "$GITHUB_OUTPUT"
-              echo "pull-request=true" >> "$GITHUB_OUTPUT" ;;
-            *)
-              echo "ref=$GITHUB_SHA" >> "$GITHUB_OUTPUT"
-              echo "pull-request=false" >> "$GITHUB_OUTPUT" ;;
-          esac
-
-  image:
-    name: Build the pull request's server image
-    needs: source
-    if: needs.source.outputs.pull-request == 'true'
-    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment || 'production' }}
+    # One deploy at a time on the machine, whichever workflow starts it.
+    concurrency:
+      group: deploy
+      cancel-in-progress: false
     permissions:
       contents: read
       packages: write
     steps:
+      - name: Check the version
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          if ! printf '%s' "$VERSION" | grep -Eq '^[A-Za-z0-9._-]+$'; then
+            echo "::error::Invalid image version."; exit 1
+          fi
       - uses: actions/checkout@v5
         with:
-          ref: ${{ needs.source.outputs.ref }}
-      - uses: docker/setup-buildx-action@v3
-      - uses: docker/login-action@v3
+          # A pull request is deployed with its own Compose and Caddy files, which it may change.
+          ref: ${{ inputs.ref || github.sha }}
+
+      # A pull request has no published image: build it, tagged pr-<n>, as the Release workflow does.
+      - if: startsWith(inputs.version, 'pr-')
+        uses: docker/setup-buildx-action@v3
+      - if: startsWith(inputs.version, 'pr-')
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - uses: docker/build-push-action@v6
+      - if: startsWith(inputs.version, 'pr-')
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: server/Dockerfile
-          # The machine is amd64 (ADR 0019), as in the Release workflow.
+          # The machine is amd64 (ADR 0019).
           platforms: linux/amd64
           push: true
           build-args: APP_VERSION=${{ inputs.version }}
@@ -83,18 +77,6 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  deploy:
-    name: Update the server
-    needs: [source, image]
-    # Runs after the image when there is one to build, and straight away for a release.
-    if: ${{ !cancelled() && needs.source.result == 'success' && needs.image.result != 'failure' }}
-    runs-on: ubuntu-latest
-    environment: ${{ inputs.environment }}
-    steps:
-      - uses: actions/checkout@v5
-        with:
-          # A pull request is deployed with its own Compose and Caddy files, which it may change.
-          ref: ${{ needs.source.outputs.ref }}
       - name: Update the machine
         env:
           SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
@@ -103,7 +85,7 @@ jobs:
           SSH_PORT: ${{ vars.DEPLOY_PORT || secrets.DEPLOY_PORT || '22' }}
           HOST_KEY: ${{ vars.DEPLOY_HOST_KEY || secrets.DEPLOY_HOST_KEY }}
           VERSION: ${{ inputs.version }}
-          ENVIRONMENT: ${{ inputs.environment }}
+          ENVIRONMENT: ${{ inputs.environment || 'production' }}
           # Written to the app's .env on the server.
           DOMAIN: ${{ vars.DOMAIN }}
           # Names the folder, the Compose project, the server's alias and its Caddy route: another
