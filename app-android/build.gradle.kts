@@ -26,6 +26,8 @@ android {
         // on the phone, whichever branch it came from. Re-running an older run gives it a fresh number.
         versionCode = providers.environmentVariable("POULPY_VERSION_CODE").orNull?.toInt() ?: 1
         versionName = providers.environmentVariable("POULPY_VERSION_NAME").orNull?.takeIf { it.isNotBlank() } ?: "dev"
+        // The account API (ADR 0021).
+        buildConfigField("String", "API_URL", "\"https://api.coach-poulpy.com\"")
     }
 
     // One fixed key for every build, so updates install over each other instead of asking to uninstall.

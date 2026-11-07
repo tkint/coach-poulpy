@@ -39,7 +39,7 @@ private enum class Tab(@StringRes val label: Int, val icon: ImageVector) {
 /**
  * The screen shown over the tabs, as a string so it survives rotation:
  * "import" (a workout file opened from another app), "builder:" (new), "builder:<id>", "builder-add:<slug>" (new, holding that exercise), "builder-copy:<id>" (an unsaved copy), "player:<id>", "resume", "workout:<id>", "exercise:<slug>", "session:<id>",
- * "device-add", "device-sources" or "device:<key>".
+ * "device-add", "device-sources", "device:<key>", or "account:<step>" (see [AccountFlow]).
  */
 private typealias Route = String
 
@@ -52,6 +52,9 @@ fun CoachPoulpyRoot(
     /** The text of a workout file opened from another app, until the preview shows; [onImportOpened] says it was. */
     importFile: String? = null,
     onImportOpened: () -> Unit = {},
+    /** An account step from an email link, such as "confirm:<token>"; [onAccountLinkOpened] says it showed. */
+    accountLink: String? = null,
+    onAccountLinkOpened: () -> Unit = {},
 ) {
     var tab by rememberSaveable { mutableStateOf(Tab.HOME) }
     var libraryView by rememberSaveable { mutableStateOf(LibraryView.WORKOUTS) }
@@ -79,6 +82,18 @@ fun CoachPoulpyRoot(
             back = null
             route = "import"
             onImportOpened()
+        }
+    }
+
+    // An email link opens its screen over the Settings tab, where Continue or Close leads.
+    LaunchedEffect(accountLink) {
+        if (accountLink != null) {
+            tab = Tab.SETTINGS
+            settingsPage = SettingsPage.HUB
+            devicesFrom = null
+            back = null
+            route = "account:$accountLink"
+            onAccountLinkOpened()
         }
     }
 
@@ -167,6 +182,7 @@ fun CoachPoulpyRoot(
                             is DeviceRoute.Device -> "device:${device.key}"
                         }
                     },
+                    onAccount = { route = "account:$it" },
                     modifier = modifier,
                 )
             }
@@ -222,6 +238,7 @@ fun CoachPoulpyRoot(
                     )
                 }
                 "session" -> SessionDetailScreen(graph, language, sessionId = arg, onBack = close)
+                "account" -> AccountFlow(arg, onStep = { route = "account:$it" }, onClose = close)
                 "device" -> DeviceScreen(graph, key = arg, onBack = close, onSources = { route = "device-sources" })
                 else -> LaunchedEffect(current) { close() }
             }

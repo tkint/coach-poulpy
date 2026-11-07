@@ -625,6 +625,7 @@
     "signInIntro": "Utilisez le compte créé sur un autre téléphone. Ce qui se trouve sur ce téléphone rejoint votre compte, rien n’est remplacé.",
     "forgot": "Mot de passe oublié ?",
     "errorSignIn": "Adresse e-mail ou mot de passe incorrect. Vérifiez les deux et réessayez.",
+    "errorTooManyTries": "Trop d’essais. Attendez quelques minutes, puis réessayez.",
     "passwordChanged": "Mot de passe modifié. Connectez-vous avec le nouveau.",
     "forgotTitle": "Réinitialiser votre mot de passe",
     "forgotIntro": "Saisissez votre adresse e-mail et nous vous enverrons un lien pour choisir un nouveau mot de passe.",

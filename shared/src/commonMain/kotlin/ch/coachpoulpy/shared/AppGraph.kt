@@ -114,11 +114,13 @@ class AppGraph(driverFactory: DriverFactory) {
      * The account at [baseUrl], such as https://api.coach-poulpy.com, and its sync: one for the app's
      * life. [secrets] keeps the tokens, the Keychain on iOS and the Android Keystore; [deviceName]
      * names this phone in the server's device list and in the copies of a workout edited on two phones.
-     * [memory] is the apps' own store, the one the profile and settings use.
+     * [memory] is the apps' own store, the one the profile and settings use. The emails are in the
+     * language picked in Settings, or else in [languageCode], the phone's.
      */
     fun account(baseUrl: String, secrets: SecretStore, memory: KeyValueStore, deviceName: String, languageCode: String): AccountModel =
         accountModel ?: AccountModel(
-            store, memory, secrets, AccountClient(baseUrl, SecretTokenStore(secrets)), deviceName, { languageCode },
+            store, memory, secrets, AccountClient(baseUrl, SecretTokenStore(secrets)), deviceName,
+            { LanguageChoice.entries.firstOrNull { it.name == memory.getString(SettingsModel.LANGUAGE) }?.code ?: languageCode },
             CoroutineScope(SupervisorJob() + Dispatchers.Main),
         ).also { accountModel = it }
 
