@@ -16,10 +16,15 @@ import ch.coachpoulpy.server.db.DatabaseSettings
 import ch.coachpoulpy.server.sync.Sync
 import org.http4k.core.HttpHandler
 import org.http4k.core.Method.GET
+import org.http4k.core.Method.POST
 import org.http4k.core.Response
 import org.http4k.core.Status.Companion.OK
 import org.http4k.core.Status.Companion.SERVICE_UNAVAILABLE
 import org.http4k.core.then
+import org.http4k.filter.CorsPolicy
+import org.http4k.filter.Only
+import org.http4k.filter.OriginPolicy
+import org.http4k.filter.ServerFilters
 import org.http4k.routing.bind
 import org.http4k.routing.routes
 import org.http4k.server.SunHttp
@@ -35,6 +40,19 @@ fun appVersion(env: (String) -> String? = System::getenv): String =
 /** Where the links in emails point: `WEBSITE_URL`, or the website (ADR 0021). */
 fun websiteUrl(env: (String) -> String?): String =
     env("WEBSITE_URL")?.takeIf { it.isNotBlank() } ?: "https://app.coach-poulpy.com"
+
+/** The website's origin, such as `https://app.coach-poulpy.com`: the scheme and host of [websiteUrl]. */
+fun websiteOrigin(websiteUrl: String): String = java.net.URI(websiteUrl).let { uri ->
+    "${uri.scheme}://${uri.authority}"
+}
+
+/**
+ * Browsers may call the API from the website only (ADR 0021): its confirm-email and
+ * reset-password pages post JSON. No cookie or credential is involved yet.
+ */
+fun websiteCors(origin: String) = ServerFilters.Cors(
+    CorsPolicy(OriginPolicy.Only(origin), headers = listOf("content-type"), methods = listOf(GET, POST)),
+)
 
 /**
  * The server: `/health` for the Docker health check, and the API under `/api/v1`, where every
@@ -54,12 +72,13 @@ fun app(
     accountDeletion: AccountDeletion,
     sync: Sync = Sync(database),
     databaseAnswers: () -> Boolean = database::answers,
-): HttpHandler = routes(
+    websiteOrigin: String = websiteOrigin(websiteUrl { null }),
+): HttpHandler = websiteCors(websiteOrigin).then(routes(
     "/health" bind GET to {
         if (databaseAnswers()) Response(OK).body("ok $version") else Response(SERVICE_UNAVAILABLE).body("database unavailable")
     },
     authenticate(mapOf(SignIns.ACCESS_PREFIX to signIns.authenticator)).then(api(version, catalog, accounts, signIns, passwordResets, accountDeletion, sync, database)),
-)
+))
 
 fun main() {
     val port = System.getenv("PORT")?.toIntOrNull() ?: 8080
@@ -72,6 +91,7 @@ fun main() {
     val signIns = SignIns(database, passwords)
     val passwordResets = PasswordResets(database, mailer, websiteUrl(System::getenv), signIns, passwords)
     val accountDeletion = AccountDeletion(database, passwords)
-    app(version, Catalog.bundled, database, accounts, signIns, passwordResets, accountDeletion).asServer(SunHttp(port)).start()
+    val origin = websiteOrigin(websiteUrl(System::getenv))
+    app(version, Catalog.bundled, database, accounts, signIns, passwordResets, accountDeletion, websiteOrigin = origin).asServer(SunHttp(port)).start()
     println("Coach Poulpy server $version listening on http://localhost:$port")
 }

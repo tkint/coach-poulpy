@@ -3,6 +3,7 @@
 export { default as CpButton } from './components/CpButton.vue'
 export { default as CpChip } from './components/CpChip.vue'
 export { default as CpErrorNote } from './components/CpErrorNote.vue'
+export { default as CpPasswordField } from './components/CpPasswordField.vue'
 export { default as CpPoulpy } from './components/CpPoulpy.vue'
 export { default as CpPoulpyCard } from './components/CpPoulpyCard.vue'
 export { default as CpSearchField } from './components/CpSearchField.vue'

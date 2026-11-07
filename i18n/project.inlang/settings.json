@@ -1,7 +1,10 @@
 {
   "$schema": "https://inlang.com/schema/project-settings",
   "baseLocale": "en",
-  "locales": ["en", "fr"],
+  "locales": [
+    "en",
+    "fr"
+  ],
   "modules": [
     "https://cdn.jsdelivr.net/npm/@inlang/plugin-next-intl@2/dist/index.js"
   ],
@@ -10,7 +13,8 @@
       "app": "./messages/{locale}/app.json",
       "domain": "./messages/{locale}/domain.json",
       "catalog": "./messages/{locale}/catalog.json",
-      "server": "./messages/{locale}/server.json"
+      "server": "./messages/{locale}/server.json",
+      "web": "./messages/{locale}/web.json"
     }
   }
 }
