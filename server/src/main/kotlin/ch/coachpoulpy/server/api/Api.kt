@@ -6,6 +6,7 @@ import ch.coachpoulpy.server.accounts.Accounts
 import ch.coachpoulpy.server.accounts.PasswordResets
 import ch.coachpoulpy.server.auth.SignIns
 import ch.coachpoulpy.server.db.Database
+import ch.coachpoulpy.server.sync.Sync
 import org.http4k.contract.ContractRoute
 import org.http4k.contract.contract
 import org.http4k.contract.openapi.ApiInfo
@@ -34,6 +35,7 @@ fun apiRoutes(
     signIns: SignIns,
     passwordResets: PasswordResets,
     accountDeletion: AccountDeletion,
+    sync: Sync,
     database: Database,
 ): List<ContractRoute> = listOf(
     catalogRoute(catalog),
@@ -43,6 +45,8 @@ fun apiRoutes(
     newPasswordRoute(passwordResets),
     meRoute(database),
     deleteMeRoute(accountDeletion),
+    pushRoute(sync),
+    pullRoute(sync),
     tokenRoute(signIns),
     revokeRoute(signIns),
 )
@@ -55,6 +59,7 @@ fun api(
     signIns: SignIns,
     passwordResets: PasswordResets,
     accountDeletion: AccountDeletion,
+    sync: Sync,
     database: Database,
 ): RoutingHttpHandler = contract {
     // The description is built as JSON nodes: kotlinx.serialization has no serializer for
@@ -65,5 +70,5 @@ fun api(
         apiRenderer = OpenApi3ApiRenderer(KotlinxSerialization),
     )
     descriptionPath = "$API_PREFIX/openapi.json"
-    routes += apiRoutes(catalog, accounts, signIns, passwordResets, accountDeletion, database)
+    routes += apiRoutes(catalog, accounts, signIns, passwordResets, accountDeletion, sync, database)
 }

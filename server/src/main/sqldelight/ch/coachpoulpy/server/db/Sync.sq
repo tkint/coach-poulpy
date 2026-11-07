@@ -1,0 +1,43 @@
+-- Locks the account row for the rest of the transaction, so two pushes never interleave.
+lockAccount:
+SELECT id FROM account WHERE id = :accountId FOR UPDATE;
+
+nextChange:
+UPDATE account SET change_count = change_count + 1 WHERE id = :accountId RETURNING change_count;
+
+lastChange:
+SELECT change_count FROM account WHERE id = :accountId;
+
+sessionById:
+SELECT * FROM session WHERE account_id = :accountId AND id = :id;
+
+insertSession:
+INSERT INTO session (account_id, id, source, started_at, ended_at, workout_id, workout_version, title, format, totals, change_number)
+VALUES (:accountId, :id, :source, :startedAt, :endedAt, :workoutId, :workoutVersion, :title, :format, CAST(:totals AS JSONB), :changeNumber);
+
+updateSession:
+UPDATE session SET source = :source, started_at = :startedAt, ended_at = :endedAt, workout_id = :workoutId,
+    workout_version = :workoutVersion, title = :title, format = :format, totals = CAST(:totals AS JSONB), change_number = :changeNumber
+WHERE account_id = :accountId AND id = :id;
+
+markSessionDeleted:
+UPDATE session SET deleted_at = :deletedAt, change_number = :changeNumber, totals = NULL, title = NULL
+WHERE account_id = :accountId AND id = :id;
+
+deleteEvents:
+DELETE FROM session_event WHERE account_id = :accountId AND session_id = :sessionId;
+
+hasEvent:
+SELECT EXISTS (SELECT 1 FROM session_event WHERE account_id = :accountId AND session_id = :sessionId AND seq = :seq);
+
+insertEvent:
+INSERT INTO session_event (account_id, session_id, seq, at, payload, change_number)
+VALUES (:accountId, :sessionId, :seq, :at, CAST(:payload AS JSONB), :changeNumber);
+
+sessionsAfter:
+SELECT id, source, started_at, ended_at, workout_id, workout_version, title, format, CAST(totals AS TEXT) AS totals, deleted_at, change_number
+FROM session WHERE account_id = :accountId AND change_number > :after ORDER BY change_number LIMIT :limit;
+
+eventsAfter:
+SELECT session_id, seq, at, CAST(payload AS TEXT) AS payload, change_number
+FROM session_event WHERE account_id = :accountId AND change_number > :after ORDER BY change_number LIMIT :limit;
