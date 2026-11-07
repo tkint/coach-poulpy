@@ -1,6 +1,7 @@
 package ch.coachpoulpy.server.api
 
 import ch.coachpoulpy.catalog.Catalog
+import ch.coachpoulpy.server.accounts.Accounts
 import org.http4k.contract.ContractRoute
 import org.http4k.contract.contract
 import org.http4k.contract.openapi.ApiInfo
@@ -24,12 +25,14 @@ const val API_PREFIX = "/api/v1"
 val Public: Security = NoSecurity
 
 /** Every route under [API_PREFIX]. */
-fun apiRoutes(catalog: Catalog): List<ContractRoute> = listOf(
+fun apiRoutes(catalog: Catalog, accounts: Accounts): List<ContractRoute> = listOf(
     catalogRoute(catalog),
+    signUpRoute(accounts),
+    confirmEmailRoute(accounts),
 )
 
 /** The API, described in OpenAPI at `/api/v1/openapi.json`. */
-fun api(version: String, catalog: Catalog): RoutingHttpHandler = API_PREFIX bind contract {
+fun api(version: String, catalog: Catalog, accounts: Accounts): RoutingHttpHandler = API_PREFIX bind contract {
     // The description is built as JSON nodes: kotlinx.serialization has no serializer for
     // http4k's own description classes, which the auto-marshalling renderer would need.
     renderer = OpenApi3(
@@ -38,5 +41,5 @@ fun api(version: String, catalog: Catalog): RoutingHttpHandler = API_PREFIX bind
         apiRenderer = OpenApi3ApiRenderer(KotlinxSerialization),
     )
     descriptionPath = "/openapi.json"
-    routes += apiRoutes(catalog)
+    routes += apiRoutes(catalog, accounts)
 }

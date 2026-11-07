@@ -110,6 +110,13 @@ jobs:
           # name runs beside production, the same name replaces it.
           APP_NAME: ${{ vars.APP_NAME || 'coach-poulpy' }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          # Mail; optional until a provider is chosen (docs/deploying-the-server.md).
+          SMTP_HOST: ${{ vars.SMTP_HOST }}
+          SMTP_PORT: ${{ vars.SMTP_PORT }}
+          SMTP_USER: ${{ vars.SMTP_USER || secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          MAIL_FROM: ${{ vars.MAIL_FROM }}
+          WEBSITE_URL: ${{ vars.WEBSITE_URL }}
         run: |
           for name in DEPLOY_SSH_KEY:SSH_KEY DEPLOY_HOST:HOST DEPLOY_USER:SSH_USER \
             DEPLOY_HOST_KEY:HOST_KEY DOMAIN:DOMAIN POSTGRES_PASSWORD:POSTGRES_PASSWORD; do
@@ -120,10 +127,23 @@ jobs:
           if ! printf '%s' "$APP_NAME" | grep -Eq '^[a-z0-9][a-z0-9-]*$'; then
             echo "::error::APP_NAME may only have lowercase letters, digits and dashes."; exit 1
           fi
+          if [ -z "$SMTP_HOST" ]; then
+            echo "::warning::No SMTP_HOST in the $ENVIRONMENT environment: the server will print emails to its log instead of sending them."
+          elif [ -z "$MAIL_FROM" ]; then
+            echo "::error::Missing MAIL_FROM in the $ENVIRONMENT environment, needed with SMTP_HOST."; exit 1
+          fi
+          for name in SMTP_HOST SMTP_PORT SMTP_USER SMTP_PASSWORD MAIL_FROM WEBSITE_URL; do
+            # Written in single quotes below, so Compose reads a $ in a password as itself.
+            case "$(printenv "$name")" in *\'*|*$'\n'*) echo "::error::$name may not hold a quote or a line break."; exit 1;; esac
+          done
 
           umask 077
-          printf 'APP_NAME=%s\nDOMAIN=%s\nIMAGE_TAG=%s\nPOSTGRES_PASSWORD=%s\n' \
-            "$APP_NAME" "$DOMAIN" "$VERSION" "$POSTGRES_PASSWORD" > "$RUNNER_TEMP/.env"
+          {
+            printf 'APP_NAME=%s\nDOMAIN=%s\nIMAGE_TAG=%s\nPOSTGRES_PASSWORD=%s\n' \
+              "$APP_NAME" "$DOMAIN" "$VERSION" "$POSTGRES_PASSWORD"
+            printf "SMTP_HOST='%s'\nSMTP_PORT='%s'\nSMTP_USER='%s'\nSMTP_PASSWORD='%s'\nMAIL_FROM='%s'\nWEBSITE_URL='%s'\n" \
+              "$SMTP_HOST" "$SMTP_PORT" "$SMTP_USER" "$SMTP_PASSWORD" "$MAIL_FROM" "$WEBSITE_URL"
+          } > "$RUNNER_TEMP/.env"
           printf '%s\n' "$SSH_KEY" > "$RUNNER_TEMP/key"
           printf '%s\n' "$HOST_KEY" > "$RUNNER_TEMP/known_hosts"
           remote() {

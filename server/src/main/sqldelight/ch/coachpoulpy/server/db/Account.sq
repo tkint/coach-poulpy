@@ -1,0 +1,13 @@
+insert:
+INSERT INTO account (id, email, password_hash, language, health_consent_at, created_at)
+VALUES (?, ?, ?, ?, ?, ?)
+ON CONFLICT DO NOTHING;
+
+byEmail:
+SELECT id, email, language, confirmed_at FROM account WHERE lower(email) = lower(:email);
+
+confirm:
+UPDATE account SET confirmed_at = :confirmedAt WHERE id = :id AND confirmed_at IS NULL;
+
+passwordHash:
+SELECT password_hash FROM account WHERE lower(email) = lower(:email);

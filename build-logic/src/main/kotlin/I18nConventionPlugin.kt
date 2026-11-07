@@ -27,6 +27,7 @@ import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.register
+import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
 /**
@@ -69,10 +70,16 @@ abstract class I18nExtension @Inject constructor(private val project: Project) {
         return task
     }
 
-    /** The internal object [objectName] in [packageName], one function per message of [namespace], in `commonMain`. */
+    /**
+     * The internal object [objectName] in [packageName], one function per message of [namespace], in
+     * `commonMain` of a multiplatform module or `main` of a JVM one.
+     */
     fun kotlinText(namespace: String, packageName: String, objectName: String): TaskProvider<GenerateTranslations> {
         val task = register("generate${objectName}", "kotlin", listOf(namespace, packageName, objectName))
-        project.extensions.getByType<KotlinMultiplatformExtension>().sourceSets.getByName("commonMain").kotlin.srcDir(task)
+        val multiplatform = project.extensions.findByType(KotlinMultiplatformExtension::class.java)
+        val sources = multiplatform?.sourceSets?.getByName("commonMain")
+            ?: project.extensions.getByType<KotlinJvmProjectExtension>().sourceSets.getByName("main")
+        sources.kotlin.srcDir(task)
         return task
     }
 

@@ -1,0 +1,10 @@
+insert:
+INSERT INTO confirmation_token (token_hash, account_id, expires_at) VALUES (?, ?, ?);
+
+-- Removes the token and gives its account, so a token works once.
+consume:
+DELETE FROM confirmation_token WHERE token_hash = ? RETURNING account_id, expires_at;
+
+-- The other links of a confirmed account no longer serve.
+deleteForAccount:
+DELETE FROM confirmation_token WHERE account_id = ?;

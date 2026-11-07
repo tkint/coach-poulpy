@@ -9,6 +9,8 @@ http4k = "6.61.0.0"
 slf4j = "2.0.20"
 postgresql = "42.7.14"
 hikaricp = "7.1.0"
+bouncycastle = "1.86"
+angus-mail = "2.0.5"
 embedded-postgres = "2.2.2"
 # The same major version as the postgres image in deploy/compose.yaml.
 embedded-postgres-binaries = "17.11.0"
@@ -35,6 +37,8 @@ sqldelight-jdbc-driver = { module = "app.cash.sqldelight:jdbc-driver", version.r
 sqldelight-postgresql-dialect = { module = "app.cash.sqldelight:postgresql-dialect", version.ref = "sqldelight" }
 postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql" }
 hikaricp = { module = "com.zaxxer:HikariCP", version.ref = "hikaricp" }
+bouncycastle-provider = { module = "org.bouncycastle:bcprov-jdk18on", version.ref = "bouncycastle" }
+angus-mail = { module = "org.eclipse.angus:angus-mail", version.ref = "angus-mail" }
 embedded-postgres = { module = "io.zonky.test:embedded-postgres", version.ref = "embedded-postgres" }
 embedded-postgres-binaries-bom = { module = "io.zonky.test.postgres:embedded-postgres-binaries-bom", version.ref = "embedded-postgres-binaries" }
 

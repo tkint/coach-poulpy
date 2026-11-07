@@ -57,6 +57,12 @@ Set it up once:
    | `DEPLOY_PORT` | variable | Optional, `22` by default |
    | `DOMAIN` | variable | The API hostname, without scheme, port or path |
    | `POSTGRES_PASSWORD` | secret | For example `openssl rand -hex 24`; used when the Postgres volume is created |
+   | `SMTP_HOST` | variable | The EU mail provider's SMTP server. Optional until one is chosen: without it the server prints emails to its log instead of sending them |
+   | `SMTP_PORT` | variable | Optional, `587` (STARTTLS) by default; `465` for implicit TLS |
+   | `SMTP_USER` | variable | The SMTP login |
+   | `SMTP_PASSWORD` | secret | The SMTP password |
+   | `MAIL_FROM` | variable | The sender, for example `Coach Poulpy <hello@coach-poulpy.com>`; needed with `SMTP_HOST` |
+   | `WEBSITE_URL` | variable | Optional, `https://app.coach-poulpy.com` by default: where the links in emails point |
 
 3. In the same `production` environment, tick **Required reviewers** and add yourself, so a deploy waits for your approval before it touches the machine.
 

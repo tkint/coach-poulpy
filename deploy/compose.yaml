@@ -20,6 +20,13 @@ services:
       DATABASE_URL: jdbc:postgresql://postgres:5432/coachpoulpy
       DATABASE_USER: coachpoulpy
       DATABASE_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      # Mail (docs/deploying-the-server.md). With no SMTP_HOST, emails are printed to the log.
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      MAIL_FROM: ${MAIL_FROM:-}
+      WEBSITE_URL: ${WEBSITE_URL:-}
     depends_on:
       postgres:
         condition: service_healthy
