@@ -2,6 +2,7 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { withBase } from 'vitepress'
 import type { Mockup } from '../mockups.mts'
+import { useMockupWidth } from './useMockupWidth'
 
 const props = defineProps<{ mockup: Mockup }>()
 // The mockups' own theme, apart from the docs site's: shared/mockup-theme.js in every mockup reads
@@ -32,7 +33,7 @@ const src = () => withBase('/' + props.mockup.path)
 // scrolls inside its frame, even on a narrow screen.
 const isWeb = computed(() => props.mockup.device === 'web')
 // A web page is drawn at a browser width chosen in the toolbar or by dragging the frame's edge,
-// and is as tall as its content at that width.
+// shared by every frame, and is as tall as its content at that width. Full is the column's width.
 const sizes = [
   { name: 'Phone', width: 390 },
   { name: 'Medium', width: 768 },
@@ -40,12 +41,14 @@ const sizes = [
 ]
 const minWidth = 320
 const maxWidth = 1600
-const viewport = ref(1280)
+const { width: chosen, set: choose } = useMockupWidth()
+const box = ref<HTMLElement>()
+const boxWidth = ref(438)
+// Full leaves room for the resize handle.
+const viewport = computed(() => (chosen.value === 'full' ? Math.max(minWidth, Math.floor(boxWidth.value - 16)) : chosen.value))
 const pageHeight = ref(800)
 const width = computed(() => (isWeb.value ? viewport.value : 438))
 const height = computed(() => (isWeb.value ? pageHeight.value : props.mockup.height + 48))
-const box = ref<HTMLElement>()
-const boxWidth = ref(width.value)
 const scale = computed(() => Math.min(1, boxWidth.value / width.value))
 
 const frame = ref<HTMLIFrameElement>()
@@ -65,7 +68,8 @@ function onLoad() {
   if (!body) return
   measure()
   pageObserver = new ResizeObserver(measure)
-  for (const child of body.children) pageObserver.observe(child)
+  // The body follows the frame's width even when a centred column inside it keeps its size.
+  for (const element of [body, ...body.children]) pageObserver.observe(element)
 }
 
 let start: { x: number; width: number } | undefined
@@ -76,15 +80,15 @@ function startResize(event: PointerEvent) {
 function resize(event: PointerEvent) {
   if (!start) return
   const next = start.width + (event.clientX - start.x) / scale.value
-  viewport.value = Math.round(Math.min(maxWidth, Math.max(minWidth, next)))
+  choose(Math.round(Math.min(maxWidth, Math.max(minWidth, next))))
 }
 function stopResize() {
   start = undefined
 }
 function resizeByKey(event: KeyboardEvent) {
   const step = event.shiftKey ? 100 : 10
-  if (event.key === 'ArrowLeft') viewport.value = Math.max(minWidth, viewport.value - step)
-  else if (event.key === 'ArrowRight') viewport.value = Math.min(maxWidth, viewport.value + step)
+  if (event.key === 'ArrowLeft') choose(Math.max(minWidth, viewport.value - step))
+  else if (event.key === 'ArrowRight') choose(Math.min(maxWidth, viewport.value + step))
   else return
   event.preventDefault()
 }
@@ -95,6 +99,8 @@ onMounted(() => {
   addEventListener('storage', onStorage)
   observer = new ResizeObserver(([entry]) => (boxWidth.value = entry.contentRect.width))
   observer.observe(box.value!)
+  // The server-rendered frame may have loaded before this page came alive and missed its load event.
+  if (frame.value?.contentDocument?.readyState === 'complete') onLoad()
 })
 onBeforeUnmount(() => {
   observer?.disconnect()
@@ -107,9 +113,10 @@ onBeforeUnmount(() => {
   <div class="mockup-frame" :class="{ web: isWeb }">
     <div class="mockup-toolbar">
       <div v-if="isWeb" class="mockup-sizes" role="group" aria-label="Browser width">
-        <button v-for="size in sizes" :key="size.name" type="button" :aria-pressed="viewport === size.width" @click="viewport = size.width">
+        <button v-for="size in sizes" :key="size.name" type="button" :aria-pressed="chosen === size.width" @click="choose(size.width)">
           {{ size.name }}
         </button>
+        <button type="button" :aria-pressed="chosen === 'full'" @click="choose('full')">Full</button>
         <span class="mockup-width">{{ viewport }} px</span>
       </div>
       <button type="button" @click="run++">
