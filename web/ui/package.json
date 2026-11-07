@@ -1,0 +1,29 @@
+{
+  "name": "@coach-poulpy/ui",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "The websites' design system: the Poulpy DaisyUI theme and the Vue components shared by the landing site, the web app, the web mockups and the docs site (ADR 0023).",
+  "exports": {
+    ".": "./src/index.ts",
+    "./tokens.css": "./src/tokens.css",
+    "./theme.css": "./src/theme.css",
+    "./poulpy-ui.css": "./poulpy-ui.css",
+    "./poulpy-ui-embed.css": "./poulpy-ui-embed.css"
+  },
+  "scripts": {
+    "build": "node build-css.mjs",
+    "check": "node build-css.mjs --check"
+  },
+  "peerDependencies": {
+    "vue": "^3.5.44"
+  },
+  "dependencies": {
+    "daisyui": "5.7.50"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "4.3.5",
+    "tailwindcss": "4.3.5",
+    "postcss": "8.5.32"
+  }
+}

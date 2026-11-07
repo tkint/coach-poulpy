@@ -144,4 +144,5 @@ jobs:
       - name: Check the HTML mockups use only the design tokens and link only files in the repo
         run: node ../design/check-mockups.mjs
       - run: npm ci
-      - run: npm run build
+      - name: Check the web design system's CSS is current (ADR 0023), then build the web app
+        run: npm run build
