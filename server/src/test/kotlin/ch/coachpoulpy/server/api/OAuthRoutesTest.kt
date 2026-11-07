@@ -17,23 +17,23 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import org.http4k.contract.contract
 import org.http4k.contract.meta
-import org.http4k.core.Method.DELETE
 import org.http4k.core.Method.GET
 import org.http4k.core.Method.POST
 import org.http4k.core.Request
 import org.http4k.core.Response
+import org.http4k.core.Status.Companion.BAD_REQUEST
 import org.http4k.core.Status.Companion.FORBIDDEN
-import org.http4k.core.Status.Companion.NO_CONTENT
 import org.http4k.core.Status.Companion.OK
 import org.http4k.core.Status.Companion.TOO_MANY_REQUESTS
 import org.http4k.core.Status.Companion.UNAUTHORIZED
+import org.http4k.core.body.form
 import org.http4k.core.then
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
-class SignInRoutesTest {
+class OAuthRoutesTest {
     private val test = TestServer()
 
     init {
@@ -46,30 +46,60 @@ class SignInRoutesTest {
 
     private fun JsonObject.text(key: String) = getValue(key).jsonPrimitive.content
 
-    private fun signIn(email: String = "ana@example.com", password: String = "correct horse", device: String = "Ana's iPhone"): Response =
-        test.http(
-            Request(POST, "/api/v1/sign-ins").header("Content-Type", "application/json")
-                .body("""{"email":"$email","password":"$password","deviceName":"$device"}"""),
-        )
-
-    private fun refresh(token: String): Response = test.http(
-        Request(POST, "/api/v1/sign-ins/refresh").header("Content-Type", "application/json").body("""{"refreshToken":"$token"}"""),
+    private fun form(path: String, vararg fields: Pair<String, String>): Response = test.http(
+        fields.fold(Request(POST, path).header("Content-Type", "application/x-www-form-urlencoded")) { request, (name, value) ->
+            request.form(name, value)
+        },
     )
+
+    private fun signIn(email: String = "ana@example.com", password: String = "correct horse", device: String = "Ana's iPhone"): Response =
+        form("/oauth/token", "grant_type" to "password", "username" to email, "password" to password, "device_name" to device)
+
+    private fun refresh(token: String): Response = form("/oauth/token", "grant_type" to "refresh_token", "refresh_token" to token)
+
+    private fun revoke(token: String): Response = form("/oauth/revoke", "token" to token)
+
+    private fun assertInvalidGrant(response: Response) {
+        assertEquals(BAD_REQUEST, response.status)
+        assertEquals("invalid_grant", json(response).text("error"))
+    }
 
     private fun me(accessToken: String): Response = test.http(Request(GET, "/api/v1/me").header("Authorization", "Bearer $accessToken"))
 
-    private fun tokens(): Pair<String, String> = json(signIn()).let { it.text("accessToken") to it.text("refreshToken") }
+    private fun tokens(): Pair<String, String> = json(signIn()).let { it.text("access_token") to it.text("refresh_token") }
 
     @Test
-    fun signingInGivesAShortAccessTokenAndARefreshToken() {
+    fun thePasswordGrantGivesAShortAccessTokenAndARefreshToken() {
         val response = signIn(email = "ANA@example.com")
         assertEquals(OK, response.status)
+        assertEquals("no-store", response.header("Cache-Control"))
         val body = json(response)
-        assertTrue(body.text("accessToken").startsWith("cp_at_"))
-        assertTrue(body.text("refreshToken").startsWith("cp_rt_"))
-        assertEquals("Bearer", body.text("tokenType"))
-        assertEquals("900", body.text("expiresIn"))
-        assertEquals(6 + 43, body.text("accessToken").length)
+        assertTrue(body.text("access_token").startsWith("cp_at_"))
+        assertTrue(body.text("refresh_token").startsWith("cp_rt_"))
+        assertEquals("Bearer", body.text("token_type"))
+        assertEquals("900", body.text("expires_in"))
+        assertTrue("sync" in body.text("scope").split(" "))
+        assertEquals(6 + 43, body.text("access_token").length)
+    }
+
+    @Test
+    fun aMissingFieldIsAnInvalidRequest() {
+        val response = form("/oauth/token", "grant_type" to "password", "username" to "ana@example.com")
+        assertEquals(BAD_REQUEST, response.status)
+        assertEquals("invalid_request", json(response).text("error"))
+        assertEquals("invalid_request", json(form("/oauth/token")).text("error"))
+    }
+
+    @Test
+    fun anotherGrantTypeIsUnsupported() {
+        assertEquals("unsupported_grant_type", json(form("/oauth/token", "grant_type" to "client_credentials")).text("error"))
+    }
+
+    @Test
+    fun anUnknownClientIsRefused() {
+        val response = form("/oauth/token", "grant_type" to "password", "username" to "ana@example.com", "password" to "correct horse", "client_id" to "other")
+        assertEquals(UNAUTHORIZED, response.status)
+        assertEquals("invalid_client", json(response).text("error"))
     }
 
     @Test
@@ -95,19 +125,18 @@ class SignInRoutesTest {
     fun aWrongPasswordAnUnknownAddressAndAnUnconfirmedEmailGetTheSameAnswer() {
         test.accounts.signUp(SignUp("new@example.com", "correct horse", "en", healthDataConsent = true))
         for (response in listOf(signIn(password = "wrong password"), signIn(email = "nobody@example.com"), signIn(email = "new@example.com"))) {
-            assertEquals(UNAUTHORIZED, response.status)
-            assertEquals("invalid-credentials", json(response).text("error"))
+            assertInvalidGrant(response)
         }
     }
 
     @Test
     fun repeatedFailuresAreThrottledPerAddress() {
-        repeat(5) { assertEquals(UNAUTHORIZED, signIn(password = "wrong password").status) }
+        repeat(5) { assertInvalidGrant(signIn(password = "wrong password")) }
         val throttled = signIn()
         assertEquals(TOO_MANY_REQUESTS, throttled.status)
         assertEquals("900", throttled.header("Retry-After"))
         // Another address is not slowed down.
-        assertEquals(UNAUTHORIZED, signIn(email = "other@example.com").status)
+        assertInvalidGrant(signIn(email = "other@example.com"))
         test.clock.now = test.clock.now.plus(Duration.ofMinutes(16))
         assertEquals(OK, signIn().status)
     }
@@ -126,27 +155,25 @@ class SignInRoutesTest {
         val response = refresh(refresh)
         assertEquals(OK, response.status)
         val next = json(response)
-        assertNotEquals(refresh, next.text("refreshToken"))
-        assertEquals(OK, me(next.text("accessToken")).status)
-        assertEquals(OK, refresh(next.text("refreshToken")).status)
+        assertNotEquals(refresh, next.text("refresh_token"))
+        assertEquals(OK, me(next.text("access_token")).status)
+        assertEquals(OK, refresh(next.text("refresh_token")).status)
     }
 
     @Test
     fun reusingARefreshTokenSignsTheDeviceOut() {
         val (_, first) = tokens()
         val second = json(refresh(first))
-        val reused = refresh(first)
-        assertEquals(UNAUTHORIZED, reused.status)
-        assertEquals("invalid-token", json(reused).text("error"))
+        assertInvalidGrant(refresh(first))
         // Both holders are out: the new access token and the new refresh token stop working too.
-        assertEquals(UNAUTHORIZED, me(second.text("accessToken")).status)
-        assertEquals(UNAUTHORIZED, refresh(second.text("refreshToken")).status)
+        assertEquals(UNAUTHORIZED, me(second.text("access_token")).status)
+        assertInvalidGrant(refresh(second.text("refresh_token")))
     }
 
     @Test
     fun anotherDeviceStaysSignedInWhenOneIsRevoked() {
         val (_, phone) = tokens()
-        val (tablet, _) = json(signIn(device = "Ana's iPad")).let { it.text("accessToken") to it.text("refreshToken") }
+        val (tablet, _) = json(signIn(device = "Ana's iPad")).let { it.text("access_token") to it.text("refresh_token") }
         refresh(phone)
         refresh(phone)
         assertEquals(OK, me(tablet).status)
@@ -156,26 +183,33 @@ class SignInRoutesTest {
     fun aRefreshTokenExpiresAfterNinetyDaysUnused() {
         val (_, refresh) = tokens()
         test.clock.now = test.clock.now.plus(Duration.ofDays(90))
-        assertEquals(UNAUTHORIZED, refresh(refresh).status)
+        assertInvalidGrant(refresh(refresh))
     }
 
     @Test
     fun anUnknownRefreshTokenIsRefused() {
-        assertEquals(UNAUTHORIZED, refresh("cp_rt_unknown").status)
+        assertInvalidGrant(refresh("cp_rt_unknown"))
     }
 
     @Test
-    fun signingOutRevokesTheDevicesTokens() {
+    fun revokingTheAccessTokenSignsTheDeviceOut() {
         val (access, refresh) = tokens()
-        val response = test.http(Request(DELETE, "/api/v1/sign-ins/current").header("Authorization", "Bearer $access"))
-        assertEquals(NO_CONTENT, response.status)
+        assertEquals(OK, revoke(access).status)
         assertEquals(UNAUTHORIZED, me(access).status)
-        assertEquals(UNAUTHORIZED, refresh(refresh).status)
+        assertInvalidGrant(refresh(refresh))
     }
 
     @Test
-    fun signingOutNeedsASignedInCaller() {
-        assertEquals(UNAUTHORIZED, test.http(Request(DELETE, "/api/v1/sign-ins/current")).status)
+    fun revokingTheRefreshTokenSignsTheDeviceOut() {
+        val (access, refresh) = tokens()
+        assertEquals(OK, revoke(refresh).status)
+        assertEquals(UNAUTHORIZED, me(access).status)
+    }
+
+    @Test
+    fun revokingAnUnknownTokenStillAnswers200() {
+        assertEquals(OK, revoke("cp_at_unknown").status)
+        assertEquals("invalid_request", json(form("/oauth/revoke")).text("error"))
     }
 
     @Test

@@ -204,7 +204,7 @@ An account's address once its owner has tapped the link sent to it; nothing leav
 _Avoid_: Verified account, activated account
 
 **Sign-in**:
-One phone or browser signed in to an account, named by its device, with its own tokens; signing out or a reused refresh token ends it alone.
+One phone or browser signed in to an account, named by its device, with its own tokens; revoking a token or reusing a refresh token ends it alone.
 _Avoid_: Session (a session is a workout done), login
 
 **Caller**:

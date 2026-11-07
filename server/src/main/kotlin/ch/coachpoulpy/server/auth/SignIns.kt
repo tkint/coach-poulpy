@@ -80,12 +80,16 @@ class SignIns(
         issue(used.sign_in_id, now)
     }
 
-    /** Revokes the sign-in [accessToken] belongs to, with all its tokens. False when it isn't live. */
-    fun signOut(accessToken: String): Boolean = database.queries.transactionWithResult {
+    /**
+     * Signs out the device [token] belongs to, an access or a refresh token: every token of its
+     * sign-in stops working. Nothing happens for an unknown token.
+     */
+    fun revoke(token: String) = database.queries.transaction {
         val now = OffsetDateTime.now(clock)
-        val live = queries.liveCaller(hashOf(accessToken), now).executeAsOneOrNull() ?: return@transactionWithResult false
-        revoke(live.id, now)
-        true
+        val hash = hashOf(token)
+        val signIn = queries.liveCaller(hash, now).executeAsOneOrNull()?.id
+            ?: queries.refreshTokenSignIn(hash).executeAsOneOrNull()
+        signIn?.let { revoke(it, now) }
     }
 
     /** The `cp_at_` authenticator: a live access token gives its account, client and scopes. */

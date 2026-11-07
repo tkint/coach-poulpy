@@ -13,7 +13,6 @@ import org.http4k.contract.security.NoSecurity
 import org.http4k.contract.security.Security
 import org.http4k.format.KotlinxSerialization
 import org.http4k.routing.RoutingHttpHandler
-import org.http4k.routing.bind
 
 /** The path every API route lives under, on `api.coach-poulpy.com` (ADR 0021). */
 const val API_PREFIX = "/api/v1"
@@ -26,19 +25,18 @@ const val API_PREFIX = "/api/v1"
  */
 val Public: Security = NoSecurity
 
-/** Every route under [API_PREFIX]. */
+/** Every route: those under [API_PREFIX], and OAuth's under `/oauth`. */
 fun apiRoutes(catalog: Catalog, accounts: Accounts, signIns: SignIns, database: Database): List<ContractRoute> = listOf(
     catalogRoute(catalog),
     signUpRoute(accounts),
     confirmEmailRoute(accounts),
-    signInRoute(signIns),
-    refreshRoute(signIns),
-    signOutRoute(signIns),
     meRoute(database),
+    tokenRoute(signIns),
+    revokeRoute(signIns),
 )
 
-/** The API, described in OpenAPI at `/api/v1/openapi.json`. */
-fun api(version: String, catalog: Catalog, accounts: Accounts, signIns: SignIns, database: Database): RoutingHttpHandler = API_PREFIX bind contract {
+/** The API, described in OpenAPI at `/api/v1/openapi.json`, OAuth routes included. */
+fun api(version: String, catalog: Catalog, accounts: Accounts, signIns: SignIns, database: Database): RoutingHttpHandler = contract {
     // The description is built as JSON nodes: kotlinx.serialization has no serializer for
     // http4k's own description classes, which the auto-marshalling renderer would need.
     renderer = OpenApi3(
@@ -46,6 +44,6 @@ fun api(version: String, catalog: Catalog, accounts: Accounts, signIns: SignIns,
         KotlinxSerialization,
         apiRenderer = OpenApi3ApiRenderer(KotlinxSerialization),
     )
-    descriptionPath = "/openapi.json"
+    descriptionPath = "$API_PREFIX/openapi.json"
     routes += apiRoutes(catalog, accounts, signIns, database)
 }

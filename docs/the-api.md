@@ -27,13 +27,12 @@ flowchart LR
 | Route | Who | What it does |
 | --- | --- | --- |
 | `GET /health` | Anyone | `ok` and the version, or 503 while the database doesn't answer; the Docker health check. Outside `/api/v1`, so it never changes with the API's version. |
-| `GET /api/v1/openapi.json` | Anyone | The OpenAPI description of every route below. |
+| `GET /api/v1/openapi.json` | Anyone | The OpenAPI description of every route below, the OAuth ones included. |
 | `GET /api/v1/catalog` | Anyone | The exercise catalog the server was built with, the same JSON the app bundles. With `?newerThan=<version>` it answers 204 when the phone already has that version or a newer one, so phones download it only when it changed ([#27](https://github.com/tkint/coach-poulpy/issues/27)). |
 | `POST /api/v1/accounts` | Anyone | Signs up ([#25](https://github.com/tkint/coach-poulpy/issues/25)): `email`, `password` (8 to 256 characters), `language` such as `fr` for the account's emails, and `healthDataConsent`, which must be `true`. Creates an account whose email isn't confirmed and mails it a link valid 24 hours. Answers 202 whether or not the address already has an account, so addresses can't be probed; a 400 carries `{"error": "invalid-email"}`, `invalid-password` or `consent-required`. |
 | `POST /api/v1/accounts/confirm` | Anyone | Takes `{"token": …}` from the link, which reads `<website>/confirm-email#<token>`, and confirms the email: 204, or 400 `invalid-token` for a token unknown, used or expired. A token works once. |
-| `POST /api/v1/sign-ins` | Anyone | Signs a device in: `email`, `password` and `deviceName`, such as `Ana's iPhone`. Answers `accessToken` (`cp_at_`, 15 minutes), `refreshToken` (`cp_rt_`), `tokenType` and `expiresIn` in seconds. A wrong address or password and an unconfirmed email all get the same 401 `invalid-credentials`; after 5 failures for one address within 15 minutes it answers 429 `too-many-attempts` with `Retry-After`. |
-| `POST /api/v1/sign-ins/refresh` | Anyone | Takes `{"refreshToken": …}` and answers new tokens; each refresh token works once. Using one a second time signs that device out, since someone may hold a copy. A refresh token unused for 90 days expires. 401 `invalid-token` otherwise. |
-| `DELETE /api/v1/sign-ins/current` | Signed in | Signs out the device whose access token is sent: its access and refresh tokens stop working. 204. |
+| `POST /oauth/token` | Anyone | The OAuth 2.0 token endpoint ([RFC 6749](https://www.rfc-editor.org/rfc/rfc6749)), with form fields. `grant_type=password` with `username` (the email), `password` and `device_name`, such as `Ana's iPhone`, signs a device in. `grant_type=refresh_token` with `refresh_token` gives new tokens; each refresh token works once, and using one a second time signs that device out, since someone may hold a copy. Answers `access_token` (`cp_at_`, 15 minutes), `token_type`, `expires_in`, `refresh_token` (`cp_rt_`, expires after 90 days unused) and `scope`. A wrong email or password, an unconfirmed email, or a used or expired refresh token get 400 `invalid_grant`; after 5 failures for one email within 15 minutes the password grant answers 429 with `Retry-After`. `client_id` is optional and only `app` is known. |
+| `POST /oauth/revoke` | Anyone | Token revocation ([RFC 7009](https://www.rfc-editor.org/rfc/rfc7009)): `token`, an access or a refresh token, signs its device out, both tokens included. Always 200, even for an unknown token. |
 | `GET /api/v1/me` | Signed in | The `accountId`, `email`, `role`, and the `client` and `scopes` of the token sent ([ADR 0020](./adr/0020-every-credential-resolves-to-one-caller.md)). |
 
 ## Trying it locally
@@ -50,8 +49,8 @@ curl -i http://localhost:8080/api/v1/accounts -H 'Content-Type: application/json
 Confirm the email with the token at the end of the printed link (`POST /api/v1/accounts/confirm`), then sign in:
 
 ```sh
-curl -s http://localhost:8080/api/v1/sign-ins -H 'Content-Type: application/json' \
-  -d '{"email":"guest@example.com","password":"correct horse","deviceName":"curl"}'
+curl -s http://localhost:8080/oauth/token -d grant_type=password \
+  -d username=guest@example.com -d 'password=correct horse' -d device_name=curl
 curl -i http://localhost:8080/api/v1/me -H 'Authorization: Bearer cp_at_…'
 ```
 

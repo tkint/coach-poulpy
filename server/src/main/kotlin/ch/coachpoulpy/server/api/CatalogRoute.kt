@@ -22,7 +22,7 @@ private val newerThan = Query.int().optional("newerThan", "The catalog version t
  */
 fun catalogRoute(catalog: Catalog): ContractRoute {
     val document = catalog.toJson()
-    return "/catalog" meta {
+    return "$API_PREFIX/catalog" meta {
         summary = "The latest exercise catalog"
         description = "Answers 204 when the version given in newerThan is already this one or newer, so a phone downloads the catalog only when it has changed."
         operationId = "getCatalog"

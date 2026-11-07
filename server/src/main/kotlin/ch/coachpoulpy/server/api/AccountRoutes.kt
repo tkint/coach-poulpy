@@ -43,7 +43,7 @@ private val accountsTag = Tag("accounts")
  * Sign-up: creates an unconfirmed account and mails it a link. The answer is the same whether the
  * address was free or not, so nobody learns who has an account.
  */
-fun signUpRoute(accounts: Accounts): ContractRoute = "/accounts" meta {
+fun signUpRoute(accounts: Accounts): ContractRoute = "$API_PREFIX/accounts" meta {
     summary = "Sign up with an email and a password"
     description = "Creates an account whose email isn't confirmed yet and mails it a link to confirm it. " +
         "An address that already has an account gets the same 202, so addresses can't be probed. " +
@@ -67,7 +67,7 @@ fun signUpRoute(accounts: Accounts): ContractRoute = "/accounts" meta {
 }
 
 /** Confirms the email of the account a link was mailed to, with the token from that link. */
-fun confirmEmailRoute(accounts: Accounts): ContractRoute = "/accounts/confirm" meta {
+fun confirmEmailRoute(accounts: Accounts): ContractRoute = "$API_PREFIX/accounts/confirm" meta {
     summary = "Confirm an account's email"
     description = "Takes the token from the link mailed at sign-up. A token works once, for " +
         "${Accounts.CONFIRMATION_LIFETIME.toHours()} hours; signing up again with the same address mails a new one."

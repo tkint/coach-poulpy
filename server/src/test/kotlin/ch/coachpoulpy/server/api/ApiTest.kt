@@ -29,7 +29,7 @@ class ApiTest {
         val response = server(Request(GET, "/api/v1/openapi.json"))
         assertEquals(OK, response.status)
         val paths = Json.parseToJsonElement(response.bodyString()).jsonObject.getValue("paths").jsonObject
-        for (path in listOf("/api/v1/catalog", "/api/v1/accounts", "/api/v1/accounts/confirm", "/api/v1/sign-ins", "/api/v1/sign-ins/refresh", "/api/v1/sign-ins/current", "/api/v1/me")) {
+        for (path in listOf("/api/v1/catalog", "/api/v1/accounts", "/api/v1/accounts/confirm", "/api/v1/me", "/oauth/token", "/oauth/revoke")) {
             assertTrue(path in paths, "paths were ${paths.keys}")
         }
     }
