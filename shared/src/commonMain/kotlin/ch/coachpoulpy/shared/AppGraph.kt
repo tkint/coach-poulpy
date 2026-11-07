@@ -10,7 +10,6 @@ import ch.coachpoulpy.core.model.WorkoutId
 import ch.coachpoulpy.data.local.DriverFactory
 import ch.coachpoulpy.data.local.LocalStore
 import ch.coachpoulpy.data.remote.AccountClient
-import ch.coachpoulpy.data.remote.TokenStore
 import ch.coachpoulpy.device.ftms.KableCentral
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -122,8 +121,11 @@ class AppGraph(driverFactory: DriverFactory) {
      * The sync client of a signed-in phone, named [deviceName] in the copies it makes of a workout
      * edited on two phones. [memory] is the apps' own store, the one the profile and settings use.
      */
-    /** The account API at [baseUrl], such as https://api.coach-poulpy.com, signed in with the [tokens] the app keeps. */
-    fun accountClient(baseUrl: String, tokens: TokenStore) = AccountClient(baseUrl, tokens)
+    /**
+     * The account API at [baseUrl], such as https://api.coach-poulpy.com, signed in with the tokens kept
+     * in [secrets]: the Keychain on iOS, the Android Keystore.
+     */
+    fun accountClient(baseUrl: String, secrets: SecretStore) = AccountClient(baseUrl, SecretTokenStore(secrets))
 
     fun syncClient(server: SyncServer, deviceName: String, memory: KeyValueStore, languageCode: String, onSignInRefused: () -> Unit = {}) =
         SyncClient(store, memory, server, deviceName, { languageCode }, CoroutineScope(SupervisorJob() + Dispatchers.Main), onSignInRefused)
