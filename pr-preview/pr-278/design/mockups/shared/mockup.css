@@ -1,6 +1,6 @@
 /*
  * Shared styles for the screen mockups (ADR 0016).
- * Colours, type, spacing and radii come only from web/src/styles/tokens.css,
+ * Colours, type, spacing and radii come only from web/ui/src/tokens.css,
  * which each mockup links before this file. No raw values beyond sizes.
  */
 
@@ -524,8 +524,8 @@ svg { flex: none; }
 .sheet h2 { font: var(--cp-type-headline); font-size: 23px; line-height: 27px; }
 
 .segmented { display: flex; gap: var(--cp-space-xs); padding: var(--cp-space-xs); border-radius: var(--cp-radius-pill); background: var(--cp-surface-variant); }
-.segmented button, .segmented a { flex: 1; display: flex; align-items: center; justify-content: center; height: 40px; border-radius: var(--cp-radius-pill); font-size: 15px; font-weight: 700; color: var(--cp-on-surface-variant); }
-.segmented button[aria-checked="true"], .segmented a[aria-checked="true"] { background: var(--cp-surface); color: var(--cp-on-primary-container); font-weight: 800; box-shadow: 0 1px 3px color-mix(in srgb, var(--cp-poulpy-ink) 18%, transparent); }
+.segmented button { flex: 1; height: 40px; border-radius: var(--cp-radius-pill); font-size: 15px; font-weight: 700; color: var(--cp-on-surface-variant); }
+.segmented button[aria-checked="true"] { background: var(--cp-surface); color: var(--cp-on-primary-container); font-weight: 800; box-shadow: 0 1px 3px color-mix(in srgb, var(--cp-poulpy-ink) 18%, transparent); }
 
 /* ---------- Empty states ---------- */
 
@@ -1106,3 +1106,4 @@ svg { flex: none; }
 
 .help-lines { display: flex; flex-direction: column; gap: 2px; text-align: center; font-size: 14px; line-height: 20px; color: var(--cp-on-surface-variant); }
 .info-card--stack .help-lines { text-align: left; }
+.alt-line { font-size: 15px; line-height: 21px; color: var(--cp-on-surface-variant); text-align: center; margin-top: var(--cp-space-xs); }
