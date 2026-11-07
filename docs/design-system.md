@@ -114,6 +114,11 @@ The landing site, the web app, the web mockups and the docs site share one packa
 - The roles above keep their meaning: `cp-btn-primary` is `primary`, `cp-btn-secondary` is the tonal `primaryContainer`, `cp-btn-accent` is `grumpy` and only for the catch-up action. Never use DaisyUI's `warning` classes: ember is not a warning, and a problem is an `error`.
 - Web mockups link `web/ui/src/tokens.css` then `web/ui/poulpy-ui.css`. After using a class no component or web mockup used before, run `npm run build -w ui` in `web/` and commit `poulpy-ui.css`; CI checks it.
 - Phone and tablet mockups keep `design/mockups/shared/mockup.css`: they draw the native screens.
+- Icons on the websites and in web mockups come from Lucide, as in the [Icons](#icons) section ([ADR 0024](adr/0024-lucide-is-the-icon-set.md)).
+
+## Icons
+
+Every icon is from [Lucide](https://lucide.dev), on every platform ([ADR 0024](adr/0024-lucide-is-the-icon-set.md)). Use its name for the action, never a home-made drawing of one Lucide already has. Icons take their colour from the roles above, and an error keeps its icon. The existing icons are being moved to Lucide in a follow-up issue; the Android and iOS Lucide packages are chosen there.
 
 ## Accessibility
 
