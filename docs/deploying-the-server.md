@@ -43,6 +43,8 @@ The workflow writes `~/coach-poulpy/.env` from those settings (replaced on every
 
 Caddy keeps the configuration it receives through the API in its `caddy-config` volume and resumes it after a restart; `bootstrap.json` is only used before the first site is added. Other sites on the same Caddy are left alone, and deployments wait for each other. To change the hostname, update `DOMAIN` in GitHub and deploy again. Any branch can be deployed by hand to a `preview` environment, beside production or in its place ([Deploy a pull request](./releasing.md#deploy-a-pull-request)). HTTPS errors are usually caused by DNS or blocked ports; inspect `cd ~/caddy && docker compose logs caddy`.
 
+Mail goes out over SMTP to the provider in `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD` and `MAIL_FROM`, which the Deploy workflow writes to `.env` from the environment ([Releasing](./releasing.md#deploy-the-server)); changing provider is a new deploy, not a code change. Port 465 uses implicit TLS, any other requires STARTTLS. Until `SMTP_HOST` is set, the server prints each email, confirmation link included, to `docker compose logs server` instead of sending it. The links point at `WEBSITE_URL`, the website by default.
+
 `POSTGRES_PASSWORD` only takes effect when the Postgres volume is first created; changing it later needs a password change inside Postgres too.
 
 If another Caddy already holds ports 80/443, remove that container once before the first deploy (`docker rm -f <container>`); the shared Caddy requests the certificates again. Never use `docker compose down -v`: it deletes the volumes.

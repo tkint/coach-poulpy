@@ -9,7 +9,8 @@
     "pathPattern": {
       "app": "./messages/{locale}/app.json",
       "domain": "./messages/{locale}/domain.json",
-      "catalog": "./messages/{locale}/catalog.json"
+      "catalog": "./messages/{locale}/catalog.json",
+      "server": "./messages/{locale}/server.json"
     }
   }
 }

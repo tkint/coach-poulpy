@@ -25,7 +25,8 @@ data class DatabaseSettings(val url: String, val user: String, val password: Str
  */
 class Database(dataSource: DataSource) {
     private val driver: SqlDriver = dataSource.asJdbcDriver()
-    private val queries = ServerDatabase(driver)
+    /** The typed queries, for the server's own code. */
+    internal val queries = ServerDatabase(driver)
 
     /** The schema version this database is at, or null before the first [migrate]. */
     fun version(): Long? = if (hasSchema()) queries.schemaVersionQueries.current().executeAsOneOrNull() else null
