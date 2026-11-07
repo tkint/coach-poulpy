@@ -1,8 +1,8 @@
 <script setup lang="ts">
-// The websites' real components from web/ui (ADR 0023), in light and dark side by side. Each panel
-// pins one theme with a cp-theme-* class from tokens.css, and data-theme="poulpy" so DaisyUI
-// reads that panel's colours. The embed build adds no page-wide rule, so the site keeps its look.
+// One of the websites' real components from web/ui (ADR 0023), in the theme the page's switch chose. The panel
+// pins it with a cp-theme-* class from tokens.css, and data-theme="poulpy" so DaisyUI reads the panel's colours. The embed build adds no page-wide rule, so the site keeps its look.
 import { ref } from 'vue'
+import { useSampleTheme } from './useSampleTheme'
 import '../../../web/ui/src/tokens.css'
 import '../../../web/ui/poulpy-ui-embed.css'
 import {
@@ -16,12 +16,13 @@ import {
   CpStepper,
 } from '../../../web/ui/src/index'
 
-const modes = ['light', 'dark'] as const
-const chips = ref({ light: { legs: true, core: false }, dark: { legs: true, core: false } })
-const query = ref({ light: 'squat', dark: '' })
-const rest = ref({ light: 90, dark: 90 })
-const format = ref({ light: 'circuit', dark: 'circuit' })
-const sheet = ref({ light: false, dark: false })
+defineProps<{ part: 'button' | 'chip' | 'search-field' | 'stepper' | 'select-field' | 'poulpy-card' | 'error' | 'sheet' }>()
+const { mode } = useSampleTheme()
+const chips = ref({ legs: true, core: false })
+const query = ref('squat')
+const rest = ref(90)
+const format = ref('circuit')
+const sheet = ref(false)
 const formats = [
   { value: 'sets', text: 'Sets' },
   { value: 'circuit', text: 'Circuit' },
@@ -31,38 +32,41 @@ const formats = [
 
 <template>
   <div class="web-samples">
-    <div v-for="mode in modes" :key="mode" :class="`cp-theme-${mode}`" class="panel" data-theme="poulpy">
-      <span class="cp-type-label">{{ mode }}</span>
-      <div class="row">
+    <div :class="`cp-theme-${mode}`" class="panel" data-theme="poulpy">
+      <div v-if="part === 'button'" class="row">
         <CpButton variant="primary">Start session</CpButton>
         <CpButton variant="tonal">Edit</CpButton>
         <CpButton variant="outline">Cancel</CpButton>
         <CpButton variant="grumpy">Catch up</CpButton>
       </div>
-      <div class="row">
-        <CpChip v-model="chips[mode].legs">Legs</CpChip>
-        <CpChip v-model="chips[mode].core">Core</CpChip>
+      <div v-else-if="part === 'chip'" class="row">
+        <CpChip v-model="chips.legs">Legs</CpChip>
+        <CpChip v-model="chips.core">Core</CpChip>
       </div>
-      <CpSearchField v-model="query[mode]" label="Search exercises" clear-label="Clear the search" placeholder="Search exercises" />
-      <div class="row">
-        <CpStepper v-model="rest[mode]" label="Rest" :value-text="`${rest[mode]} s`" less-label="Less rest" more-label="More rest" :step="15" />
-        <CpSelectField v-model="format[mode]" label="Format" :options="formats" />
+      <CpSearchField v-else-if="part === 'search-field'" v-model="query" label="Search exercises" clear-label="Clear the search" placeholder="Search exercises" />
+      <div v-else-if="part === 'stepper'" class="row">
+        <CpStepper v-model="rest" label="Rest" :value-text="`${rest} s`" less-label="Less rest" more-label="More rest" :step="15" />
       </div>
-      <CpPoulpyCard title="No workouts yet">
+      <div v-else-if="part === 'select-field'" class="row">
+        <CpSelectField v-model="format" label="Format" :options="formats" />
+      </div>
+      <CpPoulpyCard v-else-if="part === 'poulpy-card'" title="No workouts yet">
         Build one, or start from a plan.
         <template #actions><CpButton>New workout</CpButton></template>
       </CpPoulpyCard>
-      <CpErrorNote>We couldn't save your workout. Check your connection and try again.</CpErrorNote>
-      <div class="row">
-        <CpButton variant="outline" @click="sheet[mode] = true">Open a sheet</CpButton>
-      </div>
-      <CpSheet v-model:open="sheet[mode]" :class="`cp-theme-${mode}`" data-theme="poulpy" title="Delete this workout?" close-label="Close">
-        <p>Its sessions stay in your history.</p>
-        <template #actions>
-          <CpButton variant="outline" @click="sheet[mode] = false">Keep it</CpButton>
-          <CpButton @click="sheet[mode] = false">Delete</CpButton>
-        </template>
-      </CpSheet>
+      <CpErrorNote v-else-if="part === 'error'">We couldn't save your workout. Check your connection and try again.</CpErrorNote>
+      <template v-else-if="part === 'sheet'">
+        <div class="row">
+          <CpButton variant="outline" @click="sheet = true">Open a sheet</CpButton>
+        </div>
+        <CpSheet v-model:open="sheet" :class="`cp-theme-${mode}`" data-theme="poulpy" title="Delete this workout?" close-label="Close">
+          <p>Its sessions stay in your history.</p>
+          <template #actions>
+            <CpButton variant="outline" @click="sheet = false">Keep it</CpButton>
+            <CpButton @click="sheet = false">Delete</CpButton>
+          </template>
+        </CpSheet>
+      </template>
     </div>
   </div>
 </template>
@@ -70,7 +74,7 @@ const formats = [
 <style scoped>
 .web-samples {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 16px;
   margin: 16px 0;
 }

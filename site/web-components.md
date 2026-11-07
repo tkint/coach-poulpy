@@ -4,9 +4,58 @@ outline: [2, 2]
 
 # Web components
 
-The landing site, the web app, the web mockups and this site draw with one package, [`web/ui`](web/ui/package.json): DaisyUI with the Poulpy theme, and a few Vue components on top ([ADR 0023](/docs/adr/0023-the-websites-share-one-vue-and-daisyui-design-system)). The samples below are those components, in light and dark. The rules for using them are in the [design system](/docs/design-system#websites).
+The landing site, the web app, the web mockups and this site draw with one package, [`web/ui`](web/ui/package.json): DaisyUI with the Poulpy theme, and a few Vue components on top ([ADR 0023](/docs/adr/0023-the-websites-share-one-vue-and-daisyui-design-system)). The samples below are those components, in light or dark with the switch (remembered apart from the site's own theme). The rules for using them are in the [design system](/docs/design-system#websites).
 
-<WebComponentSamples />
+<SampleThemeSwitch />
+
+## Button
+
+Primary, tonal, outline and grumpy: `CpButton`.
+
+<WebComponentSamples part="button" />
+
+## Chip
+
+`CpChip`, a toggle with `aria-pressed`.
+
+<WebComponentSamples part="chip" />
+
+## Search field
+
+`CpSearchField`.
+
+<WebComponentSamples part="search-field" />
+
+## Stepper
+
+`CpStepper`.
+
+<WebComponentSamples part="stepper" />
+
+## Select field
+
+`CpSelectField`.
+
+<WebComponentSamples part="select-field" />
+
+## Poulpy card
+
+`CpPoulpyCard`: no results, an empty list.
+
+<WebComponentSamples part="poulpy-card" />
+
+## Error
+
+`CpErrorNote`: crimson with an icon, never ember.
+
+<WebComponentSamples part="error" />
+
+## Sheet
+
+`CpSheet`: a bottom sheet on a phone, a dialog on a wider screen.
+
+<WebComponentSamples part="sheet" />
+
 
 ## Classes
 

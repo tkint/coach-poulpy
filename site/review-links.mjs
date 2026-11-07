@@ -27,7 +27,7 @@ function pageOf(file) {
   if (file.startsWith('design/mockups/shared/')) return { group: 'mockups', page: 'mockups/' }
   if (file === 'design/tokens.json') return { group: 'design', page: 'tokens' }
   if (file === 'design/build-poulpy.mjs' || file.startsWith('design/poulpy/')) return { group: 'design', page: 'drawings' }
-  if (file.startsWith('site/public/brand/')) return { group: 'design', page: 'brand-book' }
+  if (file.startsWith('site/.vitepress/theme/brand-book/')) return { group: 'design', page: 'brand-book' }
   if (!file.endsWith('.md')) return null
   const isShared = shared.some((path) => file === path || file.startsWith(`${path}/`))
   const path = isShared ? file : file.startsWith('site/') ? file.slice('site/'.length) : null

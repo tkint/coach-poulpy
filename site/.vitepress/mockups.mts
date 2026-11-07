@@ -1,9 +1,9 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { devices, stages } from './mockup-labels'
+import { devices, platformOf, platforms, stages } from './mockup-labels'
 
-export { devices, stages }
+export { devices, platforms, stages }
 
 // Lists the mockups from the tags each file carries in its <head> (ADR 0016): no index to keep in step.
 // Shared by the sidebar, the gallery pages and the one page per mockup.
@@ -11,6 +11,7 @@ export { devices, stages }
 export interface Mockup {
   stage: 'agreed' | 'drafts'
   device: 'phone' | 'tablet' | 'web'
+  platform: 'mobile' | 'web'
   screen: string
   title: string
   section: string
@@ -37,6 +38,7 @@ export function listMockups(): Mockup[] {
         mockups.push({
           stage,
           device,
+          platform: platformOf(device),
           screen,
           title: html.match(/<title>([^<]*)<\/title>/)?.[1] ?? screen,
           section: meta(html, 'section'),

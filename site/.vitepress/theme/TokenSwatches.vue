@@ -1,6 +1,9 @@
 <script setup lang="ts">
 // Read straight from design/tokens.json at build time, so this page can never drift from the apps.
 import tokens from '../../../design/tokens.json'
+import { useSampleTheme } from './useSampleTheme'
+
+const { mode: sampleMode } = useSampleTheme()
 
 const palettes = Object.entries(tokens.color) as [string, Record<string, string>][]
 const moods = Object.entries(tokens.mood) as [string, string][]
@@ -20,9 +23,9 @@ const motion = Object.entries(tokens.motion) as [string, any][]
 <template>
   <div class="tokens">
     <h2 id="roles">Colour roles</h2>
-    <p>Each role with its text colour, in light and dark.</p>
+    <p>Each role with its text colour, in the theme chosen with the switch at the top of the page.</p>
     <div class="themes">
-      <div v-for="mode in ['light', 'dark']" :key="mode" class="theme" :style="{ background: theme[mode as 'light'].background }">
+      <div v-for="mode in [sampleMode]" :key="mode" class="theme" :style="{ background: theme[mode as 'light'].background }">
         <strong :style="{ color: theme[mode as 'light'].onBackground }">{{ mode }}</strong>
         <div class="roles">
           <div

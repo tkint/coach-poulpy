@@ -2,11 +2,12 @@
 import { computed } from 'vue'
 import { withBase } from 'vitepress'
 import { data as mockups } from '../../mockups.data.ts'
-import { devices, stages } from '../mockup-labels'
+import { devices, platforms, stages } from '../mockup-labels'
 import MockupFrame from './MockupFrame.vue'
 
 const props = defineProps<{ stage: string; device: string; screen: string }>()
-const siblings = computed(() => mockups.filter((m) => m.stage === props.stage))
+const platform = computed(() => mockups.find((m) => m.stage === props.stage && m.device === props.device)!.platform)
+const siblings = computed(() => mockups.filter((m) => m.stage === props.stage && m.platform === platform.value))
 const index = computed(() => siblings.value.findIndex((m) => m.device === props.device && m.screen === props.screen))
 const mockup = computed(() => siblings.value[index.value])
 const previous = computed(() => siblings.value[index.value - 1])
@@ -20,7 +21,7 @@ const counterpart = computed(() =>
 <template>
   <div v-if="mockup" class="mockup-page">
     <p class="crumbs">
-      <a :href="withBase(`/mockups/${mockup.stage}`)">{{ stages[mockup.stage] }}</a> · {{ devices[mockup.device] }} · {{ mockup.section }}
+      <a :href="withBase(`/mockups/${mockup.platform}/${mockup.stage}`)">{{ platforms[mockup.platform] }} · {{ stages[mockup.stage] }}</a> · {{ devices[mockup.device] }} · {{ mockup.section }}
     </p>
     <h1>{{ mockup.title }}</h1>
     <p v-if="mockup.stage === 'drafts'" class="note">A draft: nothing is built from it until a pull request moves it to Agreed.</p>
