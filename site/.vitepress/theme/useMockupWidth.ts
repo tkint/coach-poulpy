@@ -6,7 +6,7 @@ import { ref } from 'vue'
 export type MockupWidth = number | 'full'
 
 const key = 'coach-poulpy-mockup-width'
-const width = ref<MockupWidth>(1280)
+const width = ref<MockupWidth>('full')
 let started = false
 
 function parse(value: string | null): MockupWidth | undefined {
