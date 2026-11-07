@@ -75,7 +75,7 @@ struct AccountSection: View {
         HStack(spacing: 12) {
             Image(systemName: "person.crop.circle").font(.system(size: 20)).foregroundStyle(PoulpyColor.primary).frame(width: 26)
             VStack(alignment: .leading, spacing: 0) {
-                Text(title).font(.poulpy(.headline))
+                title.font(.poulpy(.headline))
                 Text(subtitle).font(.poulpy(.footnote)).foregroundStyle(PoulpyColor.onSurfaceVariant)
             }
         }
@@ -484,7 +484,7 @@ private struct CheckEmailScreen: View {
         let email = (account.state.value as? AccountStatePending)?.email ?? account.knownEmail ?? ""
         AccountFrame(onClose: onClose, action: "account.ok", onAction: onClose) {
             Poulpy(pose: "PoulpyPoseStandingTall", line: "account.checkEmailPoulpy")
-            Intro(title: L("account.checkEmailTitle"), body: bold(L("account.checkEmailBody %@", email), email))
+            Intro(title: L("account.checkEmailTitle"), body: emphasizing(L("account.checkEmailBody %@", email), email))
             InfoCard(L("account.checkEmailGuest"))
             if offline {
                 ErrorCard(L("account.errorOffline"))
@@ -551,7 +551,7 @@ private struct ForgotSentScreen: View {
     var body: some View {
         AccountFrame(onClose: { onStep("sign-in") }, action: "account.ok", onAction: { onStep("sign-in") }) {
             Poulpy(pose: "PoulpyPoseStandingTall", line: nil)
-            Intro(title: L("account.checkEmailTitle"), body: bold(L("account.forgotSentBody %@", email), email))
+            Intro(title: L("account.checkEmailTitle"), body: emphasizing(L("account.forgotSentBody %@", email), email))
             InfoCard(L("account.forgotSentNote"))
             if offline {
                 ErrorCard(L("account.errorOffline"))
@@ -824,7 +824,7 @@ private struct HelpLine: View {
 }
 
 /// `text` with `part` in bold, as the address in "Check your email".
-private func bold(_ text: String, _ part: String) -> Text {
+private func emphasizing(_ text: String, _ part: String) -> Text {
     guard !part.isEmpty, let range = text.range(of: part) else { return Text(verbatim: text) }
     return Text(verbatim: String(text[..<range.lowerBound])) + Text(verbatim: part).bold() + Text(verbatim: String(text[range.upperBound...]))
 }
