@@ -31,6 +31,8 @@ kable-core = { module = "com.juul.kable:kable-core", version.ref = "kable" }
 
 http4k-bom = { module = "org.http4k:http4k-bom", version.ref = "http4k" }
 http4k-core = { module = "org.http4k:http4k-core" }
+http4k-api-openapi = { module = "org.http4k:http4k-api-openapi" }
+http4k-format-kotlinx-serialization = { module = "org.http4k:http4k-format-kotlinx-serialization" }
 slf4j-simple = { module = "org.slf4j:slf4j-simple", version.ref = "slf4j" }
 
 androidx-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "compose-bom" }
