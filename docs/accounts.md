@@ -54,7 +54,7 @@ A pull also returns the phone's own changes. Applying a change twice changes not
 
 ### Push
 
-`POST /api/v1/sync/push` sends `{"changes": [...]}`, at most 500 changes or 1 MB, oldest first. The phone keeps an outbox: each local write adds its change in the same transaction, and a push that is accepted removes what it carried.
+`POST /api/v1/sync/push` sends `{"changes": [...]}`, at most 500 changes or 1 MB, oldest first. The phone keeps an outbox: each local write adds its change in the same transaction, and a push that is accepted removes what it carried. The profile, units and language live in the phone's small key-value store rather than its database, so their change is added just after the write instead. Nothing is added while the phone is a guest or its email is unconfirmed.
 
 - **One push is one transaction**: all of it is stored, or none of it.
 - **Every change is idempotent**, so a push whose answer was lost is simply sent again.

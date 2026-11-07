@@ -199,17 +199,17 @@ class ProfileModel(
     }
 
     companion object {
-        private const val NAME = "profile.name"
-        private const val BIRTHDATE = "profile.birthdate"
-        private const val PRONOUNS = "profile.pronouns"
-        private const val CUSTOM_PRONOUNS = "profile.customPronouns"
-        private const val SEX = "profile.sexAssignedAtBirth"
-        private const val GOALS = "profile.goals"
-        private const val EXPERIENCE = "profile.experience"
-        private const val RESTING_HEART_RATE = "profile.restingHeartRate"
-        private const val BODY_FIGURE = "profile.bodyFigure"
-        private const val PAIN_AREAS = "profile.pain.areas"
-        private const val PAIN_SINCE = "profile.pain.since"
-        private const val PAIN_DURATION = "profile.pain.duration"
+        internal const val NAME = "profile.name"
+        internal const val BIRTHDATE = "profile.birthdate"
+        internal const val PRONOUNS = "profile.pronouns"
+        internal const val CUSTOM_PRONOUNS = "profile.customPronouns"
+        internal const val SEX = "profile.sexAssignedAtBirth"
+        internal const val GOALS = "profile.goals"
+        internal const val EXPERIENCE = "profile.experience"
+        internal const val RESTING_HEART_RATE = "profile.restingHeartRate"
+        internal const val BODY_FIGURE = "profile.bodyFigure"
+        internal const val PAIN_AREAS = "profile.pain.areas"
+        internal const val PAIN_SINCE = "profile.pain.since"
+        internal const val PAIN_DURATION = "profile.pain.duration"
     }
 }

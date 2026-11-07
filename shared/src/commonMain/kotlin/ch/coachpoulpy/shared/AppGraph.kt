@@ -50,7 +50,7 @@ class AppGraph(driverFactory: DriverFactory) {
 
     /** The profile, created on first use. The apps pass the same [memory] every time. */
     fun profile(memory: KeyValueStore): ProfileModel =
-        profileModel ?: ProfileModel(memory).also { profileModel = it }
+        profileModel ?: ProfileModel(SyncedSettings(memory, store)).also { profileModel = it }
 
     /** The weight or height page's model; the chart follows the log, so a new one per screen is fine. */
     fun body(metric: BodyMetric) = BodyModel(metric, store)
@@ -61,7 +61,7 @@ class AppGraph(driverFactory: DriverFactory) {
 
     /** The app's settings, created on first use. The apps pass the same [memory] every time. */
     fun settings(memory: KeyValueStore): SettingsModel =
-        settingsModel ?: SettingsModel(memory).also { settingsModel = it }
+        settingsModel ?: SettingsModel(SyncedSettings(memory, store)).also { settingsModel = it }
 
     /**
      * The one devices model of the app. Like [live], it outlives the screens so that
@@ -103,6 +103,15 @@ class AppGraph(driverFactory: DriverFactory) {
         val copy = draft.copy(id = null, version = 1, name = Labels(languageCode).copyName(workout.name))
         return BuilderModel(copy, catalog, store, compiler, languageCode, ::units)
     }
+
+    /**
+     * Starts adding every change to the outbox, first filled with the whole phone: its database
+     * and the profile, units and language in [memory]. For a phone signed in with a confirmed email.
+     */
+    fun startRecordingChanges(memory: KeyValueStore) = store.startRecordingChanges(SyncedSettings.values(memory))
+
+    /** Stops adding changes to the outbox and empties it, as on sign-out. */
+    fun stopRecordingChanges() = store.stopRecordingChanges()
 
     /** The units chosen in Settings, once the app has opened them; metric until then. */
     private fun units() = settingsModel?.state?.value?.units ?: UnitSystem.METRIC
