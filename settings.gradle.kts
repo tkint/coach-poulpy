@@ -40,6 +40,7 @@ include(
     ":types:treadmill",
     ":catalog",
     ":data:local",
+    ":data:remote",
     ":device:ftms",
     ":export:fit",
     ":shared",

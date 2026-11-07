@@ -27,6 +27,7 @@ kotlin {
             api(projects.core.engine)
             api(projects.catalog)
             api(projects.data.local)
+            api(projects.data.remote)
             api(projects.device.ftms)
             api(projects.types.treadmill)
             implementation(projects.export.fit)
@@ -34,6 +35,7 @@ kotlin {
         }
         jvmTest.dependencies {
             implementation(libs.kotlinx.coroutines.test)
+            implementation(libs.ktor.client.mock)
         }
     }
 }
