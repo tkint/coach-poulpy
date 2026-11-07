@@ -1,9 +1,9 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { devices, stages } from './mockup-labels'
+import { devices, groupOf, platformOf, platforms, slug, stages } from './mockup-labels'
 
-export { devices, stages }
+export { devices, platforms, stages }
 
 // Lists the mockups from the tags each file carries in its <head> (ADR 0016): no index to keep in step.
 // Shared by the sidebar, the gallery pages and the one page per mockup.
@@ -11,6 +11,7 @@ export { devices, stages }
 export interface Mockup {
   stage: 'agreed' | 'drafts'
   device: 'phone' | 'tablet' | 'web'
+  platform: 'mobile' | 'web'
   screen: string
   title: string
   section: string
@@ -18,7 +19,12 @@ export interface Mockup {
   height: number
   /** The file, from the repo root and from the site's public folder. */
   path: string
-  /** The mockup's own page on the site. */
+  /** The heading it is listed under: its section, apart for tablets. */
+  group: string
+  sectionSlug: string
+  /** The page of its section, which shows every state of it. */
+  sectionPath: string
+  /** The mockup itself: its place on the page of its section. */
   link: string
 }
 
@@ -37,16 +43,26 @@ export function listMockups(): Mockup[] {
         mockups.push({
           stage,
           device,
+          platform: platformOf(device),
+          group: '',
+          sectionSlug: '',
+          sectionPath: '',
           screen,
           title: html.match(/<title>([^<]*)<\/title>/)?.[1] ?? screen,
           section: meta(html, 'section'),
           issue: meta(html, 'issue'),
           height: Number(html.match(/--frame-height:\s*(\d+)px/)?.[1] ?? 844),
           path: `design/mockups/${stage}/${device}/${file}`,
-          link: `/mockups/${stage}/${device}/${screen}`,
+          link: '',
         })
       }
     }
+  }
+  for (const m of mockups) {
+    m.group = groupOf(m)
+    m.sectionSlug = slug(m.group)
+    m.sectionPath = `/mockups/${m.platform}/${m.stage}/${m.sectionSlug}`
+    m.link = `${m.sectionPath}#${m.screen}`
   }
   return mockups
 }

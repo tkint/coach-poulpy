@@ -18,17 +18,33 @@ const groups = {
   design: 'Design system and brand',
 }
 
+// A mockup shows on the page of its section, with the other states of it (keep in step with
+// .vitepress/mockup-labels.ts). The file may be gone at the head, so its tag is read from the base then.
+function mockupPage(file, stage, device) {
+  let html = ''
+  for (const ref of [head, base]) {
+    try {
+      html = git('show', `${ref}:${file}`)
+      break
+    } catch {}
+  }
+  const section = html.match(/<meta name="mockup:section" content="([^"]*)"/)?.[1] ?? ''
+  const group = device === 'tablet' ? `Tablet · ${section}` : section
+  const slug = group.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+  return `mockups/${device === 'web' ? 'web' : 'mobile'}/${stage}/${slug}`
+}
+
 // The page a changed file shows up on, or null when no page shows it.
 function pageOf(file) {
   let m
   if ((m = file.match(/^design\/mockups\/(agreed|drafts)\/(\w+)\/(.+)\.html$/))) {
-    return { group: 'mockups', page: `mockups/${m[1]}/${m[2]}/${m[3]}` }
+    return { group: 'mockups', page: mockupPage(file, m[1], m[2]) }
   }
   if (file.startsWith('design/mockups/shared/')) return { group: 'mockups', page: 'mockups/' }
   if (file === 'design/tokens.json') return { group: 'design', page: 'tokens' }
   if (file === 'design/build-poulpy.mjs' || file.startsWith('design/poulpy/')) return { group: 'design', page: 'drawings' }
-  if (file.startsWith('site/public/brand/')) return { group: 'design', page: 'brand-book' }
-  if (!file.endsWith('.md')) return null
+  if (file.startsWith('site/.vitepress/theme/brand-book/')) return { group: 'design', page: 'brand-book' }
+  if (!file.endsWith('.md') || file.includes('[')) return null // a [param].md route has no page of its own
   const isShared = shared.some((path) => file === path || file.startsWith(`${path}/`))
   const path = isShared ? file : file.startsWith('site/') ? file.slice('site/'.length) : null
   if (path === null) return null

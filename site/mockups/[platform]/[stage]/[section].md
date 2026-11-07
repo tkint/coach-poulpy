@@ -1,6 +1,5 @@
 ---
-aside: false
-outline: false
+outline: [2, 2]
 prev: false
 next: false
 ---
@@ -10,4 +9,4 @@ import { useData } from 'vitepress'
 const { params } = useData()
 </script>
 
-<MockupPage :stage="params.stage" :device="params.device" :screen="params.screen" />
+<MockupPage :platform="params.platform" :stage="params.stage" :section="params.section" />

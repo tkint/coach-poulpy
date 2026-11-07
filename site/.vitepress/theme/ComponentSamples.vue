@@ -1,6 +1,10 @@
 <script setup lang="ts">
-// The design system's components drawn with the tokens' own values, in light and dark.
+// One mobile component drawn with the tokens' own values, in the theme the page's switch chose.
 import tokens from '../../../design/tokens.json'
+import { useSampleTheme } from './useSampleTheme'
+
+defineProps<{ part: 'buttons' | 'chips' | 'card' | 'stepper' | 'alert' }>()
+const { mode } = useSampleTheme()
 
 const theme = tokens.theme as Record<'light' | 'dark', Record<string, string>>
 const vars = (mode: 'light' | 'dark') =>
@@ -9,24 +13,25 @@ const vars = (mode: 'light' | 'dark') =>
 
 <template>
   <div class="samples">
-    <div v-for="mode in ['light', 'dark'] as const" :key="mode" class="panel" :style="vars(mode)">
-      <span class="eyebrow">{{ mode }}</span>
-      <div class="row">
+    <div class="panel" :style="vars(mode)">
+      <div v-if="part === 'buttons'" class="row">
         <button type="button" class="btn primary">Start session</button>
         <button type="button" class="btn tonal">Edit</button>
         <button type="button" class="btn outline">Cancel</button>
         <button type="button" class="btn grumpy">Catch up</button>
       </div>
-      <div class="row">
+      <div v-else-if="part === 'chips'" class="row">
         <button type="button" class="chip on" aria-pressed="true">Legs</button>
         <button type="button" class="chip" aria-pressed="false">Core</button>
         <button type="button" class="chip" aria-pressed="false">Dumbbell</button>
       </div>
-      <div class="row">
+      <div v-else-if="part === 'card'" class="row">
         <div class="card">
           <span class="badge" aria-hidden="true">SQ</span>
           <span class="card-text"><strong>Goblet squat</strong><span>4 × 8 at 16 kg</span></span>
         </div>
+      </div>
+      <div v-else-if="part === 'stepper'" class="row">
         <div class="stepper">
           <span class="eyebrow">Rest</span>
           <div class="stepper-row">
@@ -36,7 +41,7 @@ const vars = (mode: 'light' | 'dark') =>
           </div>
         </div>
       </div>
-      <div class="error" role="note">
+      <div v-else-if="part === 'alert'" class="error" role="note">
         <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9" /><path d="M12 7v6M12 16.5v.5" /></svg>
         The treadmill stopped answering. Recording resumes when it's back.
       </div>
