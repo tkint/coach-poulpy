@@ -19,7 +19,7 @@ The brand, design system and architecture are published at [docs.coach-poulpy.co
 | `shared` | Umbrella module the apps use; exported to iOS as the `Shared` framework |
 | `app-android` | Jetpack Compose app |
 | `app-ios` | SwiftUI app, project generated with XcodeGen |
-| `server` | http4k API (placeholder with `/health`); image built from `server/Dockerfile` |
+| `server` | http4k API under `/api/v1` ([The API](docs/the-api.md)) and `/health`; image built from `server/Dockerfile` |
 | `deploy` | Docker Compose files to run the server, Postgres and Caddy on one machine; see [Deploying the server](docs/deploying-the-server.md) |
 | `web` | Vue 3 + TypeScript website (placeholder) |
 | `build-logic` | Gradle convention plugins: `coachpoulpy.kmp-library` (Android, iOS, JVM) and `coachpoulpy.kmp-web-library` (the same plus JavaScript, for the modules the website runs) |

@@ -1,0 +1,42 @@
+package ch.coachpoulpy.server.api
+
+import ch.coachpoulpy.catalog.Catalog
+import org.http4k.contract.ContractRoute
+import org.http4k.contract.contract
+import org.http4k.contract.openapi.ApiInfo
+import org.http4k.contract.openapi.v3.OpenApi3
+import org.http4k.contract.openapi.v3.OpenApi3ApiRenderer
+import org.http4k.contract.security.NoSecurity
+import org.http4k.contract.security.Security
+import org.http4k.format.KotlinxSerialization
+import org.http4k.routing.RoutingHttpHandler
+import org.http4k.routing.bind
+
+/** The path every API route lives under, on `api.coach-poulpy.com` (ADR 0021). */
+const val API_PREFIX = "/api/v1"
+
+/**
+ * Marks a route anyone may call, signed in or not. Every route sets its `security` to this
+ * or to the scopes it needs, never leaving it out ([ADR 0020]); a test checks it.
+ *
+ * [ADR 0020]: https://github.com/tkint/coach-poulpy/blob/main/docs/adr/0020-every-credential-resolves-to-one-caller.md
+ */
+val Public: Security = NoSecurity
+
+/** Every route under [API_PREFIX]. */
+fun apiRoutes(catalog: Catalog): List<ContractRoute> = listOf(
+    catalogRoute(catalog),
+)
+
+/** The API, described in OpenAPI at `/api/v1/openapi.json`. */
+fun api(version: String, catalog: Catalog): RoutingHttpHandler = API_PREFIX bind contract {
+    // The description is built as JSON nodes: kotlinx.serialization has no serializer for
+    // http4k's own description classes, which the auto-marshalling renderer would need.
+    renderer = OpenApi3(
+        ApiInfo("Coach Poulpy API", version),
+        KotlinxSerialization,
+        apiRenderer = OpenApi3ApiRenderer(KotlinxSerialization),
+    )
+    descriptionPath = "/openapi.json"
+    routes += apiRoutes(catalog)
+}

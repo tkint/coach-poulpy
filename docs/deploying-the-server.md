@@ -1,6 +1,6 @@
 # Deploying the server
 
-The server runs on one Linux machine as Docker containers, behind a shared Caddy for HTTPS. Health data must stay in the EU or Switzerland under the GDPR, so pick a host there ([architecture](./architecture.md#accounts-and-security)). The server currently answers `/health` with its version; Postgres stays empty until accounts arrive ([#25](https://github.com/tkint/coach-poulpy/issues/25)).
+The server runs on one Linux machine as Docker containers, behind a shared Caddy for HTTPS. Health data must stay in the EU or Switzerland under the GDPR, so pick a host there ([architecture](./architecture.md#accounts-and-security)). The server answers `/health` with its version and serves [the API](./the-api.md) under `/api/v1`; Postgres stays empty until accounts arrive ([#25](https://github.com/tkint/coach-poulpy/issues/25)).
 
 The setup follows [ADR 0019](./adr/0019-the-server-runs-with-docker-compose-on-one-server.md). Deployment files are in [`deploy/`](https://github.com/tkint/coach-poulpy/tree/main/deploy), and each [release](./releasing.md#the-server) includes a deployment bundle.
 

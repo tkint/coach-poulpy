@@ -162,7 +162,7 @@ On Android a Live recording runs in a connected-device foreground service, from 
 - A guest's data never leaves the phone; the operating system's file encryption protects it.
 - Sign-up pushes the whole local database as a first sync, keeping ids.
 - Email and password hashed with Argon2id, plus Sign in with Apple and Google, whose ID tokens the server verifies.
-- Every credential resolves to one caller (account, client, scopes) through one http4k filter; routes check scopes, every query is scoped by owner, and coach access is checked against an active coach link on each request ([ADR 0020](./adr/0020-every-credential-resolves-to-one-caller.md)).
+- Every credential resolves to one caller (account, client, scopes) through one http4k filter ([the API](./the-api.md)); routes check scopes, every query is scoped by owner, and coach access is checked against an active coach link on each request ([ADR 0020](./adr/0020-every-credential-resolves-to-one-caller.md)).
 - Tokens are opaque and stored hashed: 15-minute access tokens and rotating refresh tokens, in Keychain or Android Keystore on phones and an HttpOnly, SameSite cookie on the website. `GET /api/v1/me` tells a client who it is. Personal access tokens, then OAuth 2.1 for third-party apps and the MCP server, come with [#228](https://github.com/tkint/coach-poulpy/issues/228).
 - The landing site, the web app and the API each have their own hostname and container: `coach-poulpy.com`, `app.coach-poulpy.com`, `api.coach-poulpy.com` ([ADR 0021](./adr/0021-the-landing-site-the-app-and-the-api-have-their-own-hostname.md)).
 - Health data is sensitive under the GDPR: consent at sign-up, export as JSON and FIT, full deletion, hosting in the EU; token reads of health data are logged.
