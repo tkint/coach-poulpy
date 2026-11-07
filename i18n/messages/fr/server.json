@@ -2,7 +2,7 @@
   "email": {
     "confirm": {
       "subject": "Confirmez votre adresse e-mail pour Coach Poulpy",
-      "body": "Bonjour,\n\nOuvrez ce lien pour confirmer votre adresse e-mail et synchroniser vos séances entre vos appareils :\n\n{link}\n\nLe lien est valable 24 heures. D'ici là, vos séances restent seulement sur votre téléphone.\n\nSi vous ne vous êtes pas inscrit·e sur Coach Poulpy, ignorez cet e-mail : aucun compte n'est utilisé sans cette confirmation."
+      "body": "Bonjour,\n\nOuvrez ce lien pour confirmer votre adresse e-mail et synchroniser vos séances entre vos appareils :\n\n{link}\n\nLe lien est valable 24 heures. D’ici là, vos séances restent seulement sur votre téléphone.\n\nSi vous ne vous êtes pas inscrit·e sur Coach Poulpy, ignorez cet e-mail : aucun compte n’est utilisé sans cette confirmation."
     }
   }
 }

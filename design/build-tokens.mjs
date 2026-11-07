@@ -229,6 +229,10 @@ function css() {
   out.push('@media (prefers-color-scheme: dark) {', '  :root:not([data-theme="light"]) {', ...darkValues('    '), '  }', '}', '')
   out.push(':root[data-theme="dark"] {', ...darkValues('  '), '  color-scheme: dark;', '}', '')
   out.push(':root[data-theme="light"] {', '  color-scheme: light;', '}', '')
+  // One theme for a part of a page, whatever the page uses: the docs site's samples (ADR 0023).
+  const lightValues = Object.entries(light).map(([name, value]) => `  --cp-${kebab(name)}: ${value};`)
+  out.push('.cp-theme-light {', ...lightValues, '  color-scheme: light;', '}', '')
+  out.push('.cp-theme-dark {', ...darkValues('  '), '  color-scheme: dark;', '}', '')
   return out.join('\n')
 }
 
@@ -238,7 +242,7 @@ const files = {
   'app-ios/CoachPoulpy/Assets.xcassets/AccentColor.colorset/Contents.json': accentColor(),
   'app-android/src/main/res/values/window_colors.xml': splashColors(light),
   'app-android/src/main/res/values-night/window_colors.xml': splashColors(dark),
-  'web/src/styles/tokens.css': css(),
+  'web/ui/src/tokens.css': css(),
 }
 
 const check = process.argv.includes('--check')

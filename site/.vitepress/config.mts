@@ -87,7 +87,9 @@ export default withMermaid(
       ],
     ],
     markdown: { config: linksToGitHub },
-    vite: { server: { fs: { allow: [repoRoot] } } },
+    // The web design system (web/ui, ADR 0023) is imported from its source; dedupe keeps its
+    // components on the site's own copy of Vue.
+    vite: { server: { fs: { allow: [repoRoot] } }, resolve: { dedupe: ['vue'] } },
     themeConfig: {
       logo: '/poulpy.svg',
       nav: [
@@ -112,6 +114,7 @@ export default withMermaid(
           items: [
             { text: 'How to use it', link: '/docs/design-system' },
             { text: 'Tokens', link: '/tokens' },
+            { text: 'Web components', link: '/web-components' },
             { text: 'Profile and settings', link: '/docs/profile-and-settings' },
             { text: 'Generating tokens and fonts', link: '/design/README' },
             { text: 'Body map shapes: credits', link: '/design/body-map-source/NOTICE' },

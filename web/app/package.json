@@ -1,0 +1,25 @@
+{
+  "name": "coach-poulpy-app",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@coach-poulpy/ui": "*",
+    "pinia": "^4.1.0",
+    "vue": "^3.5.44"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "4.3.5",
+    "@vitejs/plugin-vue": "^6.0.10",
+    "@vue/tsconfig": "^0.9.1",
+    "tailwindcss": "4.3.5",
+    "typescript": "~5.9",
+    "vite": "^8.3.5",
+    "vue-tsc": "^3.3.13"
+  }
+}

@@ -8,7 +8,7 @@
 local.properties
 app-ios
 site
-web/dist
+web/app/dist
 deploy
 *.jks
 *.keystore

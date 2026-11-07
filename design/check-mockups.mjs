@@ -4,13 +4,15 @@
 //   - carry a <title>, mockup:screen and mockup:section meta tags, and data-component on what it draws
 //   - style only with var(--cp-*): no literal colours, and no px value where a spacing, radius or type token has that size
 //   - link only files that exist, and load no script or stylesheet from outside the repo (brand fonts are the one exception)
+//   - on the web, draw with the websites' shared classes: link web/ui/poulpy-ui.css, not mockup.css,
+//     and never DaisyUI's warning colour, since ember is not a warning (ADR 0023)
 import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs'
 import { dirname, join, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const mockups = join(root, 'design/mockups')
-const tokens = readFileSync(join(root, 'web/src/styles/tokens.css'), 'utf8')
+const tokens = readFileSync(join(root, 'web/ui/src/tokens.css'), 'utf8')
 
 // px sizes that have a token, so a literal of that size should use it.
 const tokenPx = (prefix) =>
@@ -55,6 +57,12 @@ for (const file of walk(mockups).filter((f) => f.endsWith('.html'))) {
   }
   if (!/data-component="/.test(html)) fail(file, 'no data-component: name what the screen is made of')
   if (/<style[\s>]/.test(html) === false && /<script[^>]*>[^<]+<\/script>/.test(html)) fail(file, 'inline script')
+
+  if (/\/web\/[^/]+\.html$/.test(file)) {
+    if (!/href="[^"]*web\/ui\/poulpy-ui\.css"/.test(html)) fail(file, 'a web mockup links web/ui/poulpy-ui.css (ADR 0023)')
+    if (/href="[^"]*shared\/mockup\.css"/.test(html)) fail(file, 'a web mockup draws with web/ui/poulpy-ui.css, not shared/mockup.css (ADR 0023)')
+    if (/class="[^"]*\b[a-z]+-warning\b/.test(html)) fail(file, 'no warning classes: ember is not a warning, a problem is an error (ADR 0023)')
+  }
 
   for (const m of html.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)) checkStyle(file, m[1], '<style>')
   for (const m of html.matchAll(/\sstyle="([^"]*)"/g)) checkStyle(file, m[1], 'style attribute')
