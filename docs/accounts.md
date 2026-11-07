@@ -6,6 +6,7 @@ What a guest gets by signing up, and what the server and the phones do with an *
 
 - **Email and password only, for now.** Sign in with Apple and Google come later, each as one new authenticator; no route changes. Passwords are hashed with Argon2id.
 - **The email is confirmed before any data leaves the phone.** Signing up sends a link; until it is tapped, the phone keeps working as a guest and uploads nothing. A typo in the address can never tie health data to someone else's mailbox.
+- **The link can be opened anywhere**, on the phone or on a computer. While Check your email is on screen the phone asks every 3 seconds whether it was opened, and on each app open once; when it was, the phone signs in with the password it kept and moves on to Email confirmed ([#319](https://github.com/tkint/coach-poulpy/issues/319)). It asks with a random key sent at sign-up rather than by trying the password, which would count towards the 5 refused sign-ins that lock an address. The key follows only the link mailed with it, so it never tells who owns an address.
 - **Health data consent is asked at sign-up**, with a link to what is stored and why.
 - **Forgotten password**: the person asks for a reset link by email and chooses a new password; every phone is signed out.
 - **Mail goes out over plain SMTP** to an EU provider set in the server's settings, so the provider can change without a code change.

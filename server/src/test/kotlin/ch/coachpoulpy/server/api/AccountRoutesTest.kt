@@ -14,8 +14,10 @@ import org.http4k.core.Response
 import org.http4k.core.Status.Companion.ACCEPTED
 import org.http4k.core.Status.Companion.BAD_REQUEST
 import org.http4k.core.Status.Companion.NO_CONTENT
+import org.http4k.core.Status.Companion.OK
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -28,10 +30,22 @@ class AccountRoutesTest {
         password: String = "correct horse",
         language: String = "fr-CH",
         consent: Boolean = true,
+        key: String? = null,
     ): Response = test.http(
         Request(POST, "/api/v1/accounts").header("Content-Type", "application/json")
-            .body("""{"email":"$email","password":"$password","language":"$language","healthDataConsent":$consent}"""),
+            .body(
+                """{"email":"$email","password":"$password","language":"$language","healthDataConsent":$consent""" +
+                    (key?.let { ""","pendingKey":"$it"""" } ?: "") + "}",
+            ),
     )
+
+    private fun confirmed(key: String): Boolean {
+        val response = test.http(
+            Request(POST, "/api/v1/accounts/confirmation-status").header("Content-Type", "application/json").body("""{"key":"$key"}"""),
+        )
+        assertEquals(OK, response.status)
+        return Json.parseToJsonElement(response.bodyString()).jsonObject.getValue("confirmed").jsonPrimitive.content.toBooleanStrict()
+    }
 
     private fun confirm(token: String): Response = test.http(
         Request(POST, "/api/v1/accounts/confirm").header("Content-Type", "application/json").body("""{"token":"$token"}"""),
@@ -139,5 +153,49 @@ class AccountRoutesTest {
     fun aMalformedBodyIsABadRequest() {
         val response = test.http(Request(POST, "/api/v1/accounts").header("Content-Type", "application/json").body("""{"email":"guest@example.com"}"""))
         assertEquals(BAD_REQUEST, response.status)
+    }
+
+    private val phoneKey = "k".repeat(43)
+
+    @Test
+    fun thePhoneLearnsWithItsKeyOnceTheLinkIsOpened() {
+        signUp(key = phoneKey)
+        assertFalse(confirmed(phoneKey))
+        confirm(test.mailer.sent.single().token())
+        assertTrue(confirmed(phoneKey))
+        assertFalse(confirmed("x".repeat(43)))
+    }
+
+    @Test
+    fun aKeyOnlyFollowsTheLinkOfItsOwnSignUp() {
+        // Someone signs up with an address they don't own: when its owner opens their own link,
+        // the stranger's key still answers false.
+        signUp()
+        signUp(key = phoneKey)
+        confirm(test.mailer.sent[0].token())
+        assertFalse(confirmed(phoneKey))
+    }
+
+    @Test
+    fun aKeySentForAConfirmedAddressNeverAnswersTrue() {
+        signUp()
+        confirm(test.mailer.sent.single().token())
+        signUp(key = phoneKey)
+        assertFalse(confirmed(phoneKey))
+    }
+
+    @Test
+    fun aKeyStopsAnsweringAfterThirtyDays() {
+        signUp(key = phoneKey)
+        confirm(test.mailer.sent.single().token())
+        test.clock.now = test.clock.now.plus(Accounts.WATCH_LIFETIME)
+        assertFalse(confirmed(phoneKey))
+    }
+
+    @Test
+    fun aKeyTooShortIsRefusedAtSignUp() {
+        assertEquals("invalid-key", signUp(key = "short").error())
+        assertEquals(emptyList(), test.mailer.sent)
+        assertFalse(confirmed("short"))
     }
 }

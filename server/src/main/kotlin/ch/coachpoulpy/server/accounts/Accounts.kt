@@ -12,8 +12,17 @@ import java.time.Duration
 import java.time.OffsetDateTime
 import java.util.UUID
 
-/** What a guest gives to sign up (docs/accounts.md). */
-data class SignUp(val email: String, val password: String, val language: String, val healthDataConsent: Boolean)
+/**
+ * What a guest gives to sign up (docs/accounts.md). [pendingKey] is a random key the phone keeps,
+ * to ask later whether the link mailed in this sign-up was opened ([Accounts.isConfirmed]).
+ */
+data class SignUp(
+    val email: String,
+    val password: String,
+    val language: String,
+    val healthDataConsent: Boolean,
+    val pendingKey: String? = null,
+)
 
 /**
  * Signing up and confirming the email (docs/accounts.md). An account starts unconfirmed; the
@@ -53,7 +62,12 @@ class Accounts(
                 account.confirmed_at != null -> null
                 else -> Recipient(account.id, account.email, account.language)
             }
-            recipient?.also { database.queries.confirmationTokenQueries.insert(hashOf(token), it.id, now.plus(CONFIRMATION_LIFETIME)) }
+            recipient?.also {
+                database.queries.confirmationTokenQueries.insert(hashOf(token), it.id, now.plus(CONFIRMATION_LIFETIME))
+                signUp.pendingKey?.let { key ->
+                    database.queries.confirmationWatchQueries.insert(hashOf(token), hashOf(key), it.id, now.plus(WATCH_LIFETIME))
+                }
+            }
         } ?: return
         val link = "${websiteUrl.trimEnd('/')}/confirm-email#$token"
         val email = Email(
@@ -74,15 +88,27 @@ class Accounts(
         val now = OffsetDateTime.now(clock)
         if (used == null || !used.expires_at.isAfter(now)) return@transactionWithResult false
         database.queries.accountQueries.confirm(now, used.account_id)
+        database.queries.confirmationWatchQueries.markConfirmed(hashOf(token))
         database.queries.confirmationTokenQueries.deleteForAccount(used.account_id)
         true
     }
+
+    /**
+     * Whether the link mailed with [pendingKey] was opened, for [WATCH_LIFETIME] after sign-up. A key
+     * that is unknown, expired or was sent for an address already confirmed answers false: a key
+     * only follows the one link of its own sign-up, so it never tells who owns an address.
+     */
+    fun isConfirmed(pendingKey: String): Boolean =
+        database.queries.confirmationWatchQueries.isConfirmed(hashOf(pendingKey), OffsetDateTime.now(clock)).executeAsOne()
 
     private data class Recipient(val id: UUID, val email: String, val language: String)
 
     companion object {
         /** How long a confirmation link works. */
         val CONFIRMATION_LIFETIME: Duration = Duration.ofHours(24)
+
+        /** How long a phone can ask whether its link was opened. */
+        val WATCH_LIFETIME: Duration = Duration.ofDays(30)
     }
 }
 

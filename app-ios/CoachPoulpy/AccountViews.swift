@@ -472,12 +472,16 @@ private struct CheckEmailScreen: View {
     let onClose: () -> Void
     @State private var sentAgain: Bool
     @State private var offline = false
+    @State private var changingAddress = false
+    @State private var watching: Cancellable?
+    @StateObject private var state: Observed<AccountModel, AccountState>
 
     init(account: AccountModel, resent: Bool, onStep: @escaping (String) -> Void, onClose: @escaping () -> Void) {
         self.account = account
         self.onStep = onStep
         self.onClose = onClose
         _sentAgain = State(initialValue: resent)
+        _state = StateObject(wrappedValue: account.observedState())
     }
 
     var body: some View {
@@ -499,8 +503,20 @@ private struct CheckEmailScreen: View {
                 }
             }
             HelpLine(question: "account.wrongAddress", link: "account.changeAddress") {
+                changingAddress = true
                 account.changeAddress()
                 onStep("sign-up")
+            }
+        }
+        // The link may be opened on a computer: ask every few seconds while this screen is shown.
+        .onAppear { watching = account.watchConfirmation() }
+        .onDisappear { watching?.cancel() }
+        .onReceive(state.$value) { value in
+            if value is AccountStateSignedIn {
+                onStep("confirmed")
+            } else if value is AccountStateGuest, !changingAddress {
+                // Confirmed, but the password changed meanwhile: sign in with the new one.
+                onStep("sign-in")
             }
         }
     }

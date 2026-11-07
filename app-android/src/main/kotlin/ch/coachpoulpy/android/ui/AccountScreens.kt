@@ -73,6 +73,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ch.coachpoulpy.android.CoachPoulpyApp
 import ch.coachpoulpy.android.R
@@ -452,6 +453,21 @@ private fun CheckEmailScreen(account: AccountModel, resent: Boolean, onStep: (St
     val email = (state as? AccountState.Pending)?.email ?: account.knownEmail.orEmpty()
     var sentAgain by rememberSaveable { mutableStateOf(resent) }
     var offline by remember { mutableStateOf(false) }
+    var changingAddress by remember { mutableStateOf(false) }
+
+    // The link may be opened on a computer: ask every few seconds while this screen is in front.
+    LifecycleResumeEffect(account) {
+        val watching = account.watchConfirmation()
+        onPauseOrDispose { watching.cancel() }
+    }
+    LaunchedEffect(state) {
+        when (state) {
+            is AccountState.SignedIn -> onStep("confirmed")
+            // Confirmed, but the password changed meanwhile: sign in with the new one.
+            AccountState.Guest -> if (!changingAddress) onStep("sign-in")
+            is AccountState.Pending -> Unit
+        }
+    }
 
     AccountFrame(onClose, R.string.account_ok, busy = false, onAction = onClose) {
         Poulpy(R.drawable.poulpy_pose_standing_tall, R.string.account_checkEmailPoulpy)
@@ -466,6 +482,7 @@ private fun CheckEmailScreen(account: AccountModel, resent: Boolean, onStep: (St
             }
         }
         HelpLine(R.string.account_wrongAddress, R.string.account_changeAddress) {
+            changingAddress = true
             account.changeAddress()
             onStep("sign-up")
         }

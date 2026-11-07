@@ -9,15 +9,21 @@ import ch.coachpoulpy.data.remote.SignInAnswer
 import ch.coachpoulpy.data.remote.SignInRefusedByServer
 import ch.coachpoulpy.data.remote.SignUpAnswer
 import kotlin.coroutines.cancellation.CancellationException
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
+import kotlin.uuid.Uuid
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
@@ -26,7 +32,7 @@ sealed interface AccountState {
     /** All data on the phone, nothing sent. */
     data object Guest : AccountState
 
-    /** Signed up, waiting for the link in the email to [email] to be opened on this phone. */
+    /** Signed up, waiting for the link in the email to [email] to be opened, on this phone or anywhere else. */
     data class Pending(val email: String) : AccountState
 
     /** Signed in: [waiting] changes not sent yet, and when a sync last finished. */
@@ -94,6 +100,8 @@ class AccountModel(
     private val deviceName: String,
     private val languageCode: () -> String,
     private val scope: CoroutineScope,
+    /** How often [watchConfirmation] asks while Check your email is on screen. */
+    private val confirmationCheckEvery: Duration = 3.seconds,
 ) {
     val sync = SyncClient(
         store, memory, RemoteSyncServer(client), deviceName, languageCode, scope,
@@ -109,11 +117,12 @@ class AccountModel(
 
     private var syncing: Job? = null
     private var watching: Job? = null
+    private val checking = Mutex()
 
     init {
         when (_state.value) {
             is AccountState.SignedIn -> startSyncing()
-            // The link may have been opened elsewhere, such as on the website: try the kept password.
+            // The link may have been opened elsewhere, such as on the website.
             is AccountState.Pending -> scope.launch { checkConfirmed() }
             AccountState.Guest -> Unit
         }
@@ -145,9 +154,11 @@ class AccountModel(
         )
         if (!problems.none) return SignUpResult.Invalid(problems)
         return offlineAs(SignUpResult.Offline) {
-            when (client.signUp(address, password, languageCode(), healthDataConsent)) {
+            // Sending again keeps the key, so the first link moves the phone on too.
+            val key = pending()?.takeIf { it.email == address }?.key ?: newPendingKey()
+            when (client.signUp(address, password, languageCode(), healthDataConsent, key)) {
                 SignUpAnswer.ACCEPTED -> {
-                    keepPending(Pending(address, password))
+                    keepPending(Pending(address, password, key))
                     _state.value = AccountState.Pending(address)
                     SignUpResult.Sent
                 }
@@ -173,27 +184,46 @@ class AccountModel(
     /** The link in the confirmation email, `…/confirm-email#<token>`, opened on this phone. */
     suspend fun confirmEmail(token: String): ConfirmResult = offlineAs(ConfirmResult.OFFLINE) {
         if (!client.confirmEmail(token)) return@offlineAs ConfirmResult.LINK_EXPIRED
-        val waiting = pending() ?: return@offlineAs ConfirmResult.CONFIRMED_SIGN_IN
-        when (client.signIn(waiting.email, waiting.password, deviceName)) {
-            SignInAnswer.SignedIn -> {
-                forgetPending()
-                signedIn(waiting.email)
-                ConfirmResult.CONFIRMED
+        if (pending() == null) return@offlineAs ConfirmResult.CONFIRMED_SIGN_IN
+        // The check on Check your email may have signed in a moment before.
+        if (checkConfirmed() || _state.value is AccountState.SignedIn) ConfirmResult.CONFIRMED else ConfirmResult.CONFIRMED_SIGN_IN
+    }
+
+    /**
+     * While the email waits for confirmation: asks whether the link was opened anywhere, such as on
+     * the website, and if so signs in with the kept password. False while it is still unconfirmed or
+     * offline. Asking costs no sign-in try, so the address is never throttled by it; a phone that
+     * signed up before the key existed tries the password instead.
+     */
+    suspend fun checkConfirmed(): Boolean = checking.withLock {
+        offlineAs(false) {
+            val waiting = pending() ?: return@offlineAs false
+            if (waiting.key != null && !client.isConfirmed(waiting.key)) return@offlineAs false
+            when (client.signIn(waiting.email, waiting.password, deviceName)) {
+                SignInAnswer.SignedIn -> {
+                    forgetPending()
+                    signedIn(waiting.email)
+                    true
+                }
+                // Confirmed, but the password changed since: the person signs in themselves.
+                SignInAnswer.Refused -> {
+                    if (waiting.key != null) changeAddress()
+                    false
+                }
+                is SignInAnswer.TooManyTries -> false
             }
-            else -> ConfirmResult.CONFIRMED_SIGN_IN
         }
     }
 
     /**
-     * While the email waits for confirmation: signs in with the kept password, which works once the
-     * link was opened anywhere, such as on the website. False while it is still unconfirmed or offline.
+     * Asks every few seconds whether the email is confirmed, while Check your email is on screen,
+     * and stops once it is: the state turns [AccountState.SignedIn]. Cancel it when the screen goes.
      */
-    suspend fun checkConfirmed(): Boolean = offlineAs(false) {
-        val waiting = pending() ?: return@offlineAs false
-        if (client.signIn(waiting.email, waiting.password, deviceName) != SignInAnswer.SignedIn) return@offlineAs false
-        forgetPending()
-        signedIn(waiting.email)
-        true
+    fun watchConfirmation(): Cancellable {
+        val job = scope.launch {
+            while (_state.value is AccountState.Pending && !checkConfirmed()) delay(confirmationCheckEvery)
+        }
+        return Cancellable { job.cancel() }
     }
 
     /** Forgot your password: mails a link when the address has an account, without saying whether. */
@@ -284,8 +314,12 @@ class AccountModel(
         else -> pending()?.let { AccountState.Pending(it.email) } ?: AccountState.Guest
     }
 
+    /** [key] is null for a sign-up from before the phone sent one. */
     @Serializable
-    private data class Pending(val email: String, val password: String)
+    private data class Pending(val email: String, val password: String, val key: String? = null)
+
+    /** 244 random bits from a secure generator, as 64 hex characters. */
+    private fun newPendingKey(): String = Uuid.random().toHexString() + Uuid.random().toHexString()
 
     private fun pending(): Pending? =
         secrets.getSecret(PENDING)?.let { runCatching { json.decodeFromString(Pending.serializer(), it) }.getOrNull() }

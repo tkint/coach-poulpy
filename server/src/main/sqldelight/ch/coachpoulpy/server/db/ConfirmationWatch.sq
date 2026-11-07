@@ -1,0 +1,10 @@
+insert:
+INSERT INTO confirmation_watch (token_hash, key_hash, account_id, expires_at) VALUES (?, ?, ?, ?);
+
+-- The link mailed with this watch was opened.
+markConfirmed:
+UPDATE confirmation_watch SET confirmed = TRUE WHERE token_hash = ?;
+
+-- Whether a link mailed with this key was opened, while the key still works.
+isConfirmed:
+SELECT EXISTS (SELECT 1 FROM confirmation_watch WHERE key_hash = :keyHash AND confirmed AND expires_at > :now);

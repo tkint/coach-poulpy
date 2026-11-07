@@ -20,10 +20,12 @@ import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
@@ -50,7 +52,13 @@ class AccountModelTest {
     private fun model() = AccountModel(
         store, memory, secrets, AccountClient("https://api.example.com", SecretTokenStore(secrets), engine),
         "Ana's iPhone", { "en" }, CoroutineScope(SupervisorJob() + Dispatchers.Default),
+        confirmationCheckEvery = 20.milliseconds,
     )
+
+    /** Whether the server says the link was opened, as confirmation-status answers. */
+    private fun linkOpened(opened: Boolean) {
+        answers["POST /api/v1/accounts/confirmation-status"] = { json("""{"confirmed":$opened}""") }
+    }
 
     private fun MockRequestHandleScope.json(text: String, status: HttpStatusCode = HttpStatusCode.OK) =
         respond(text, status, headersOf(HttpHeaders.ContentType, "application/json"))
@@ -156,6 +164,7 @@ class AccountModelTest {
         store.saveWorkout(legs)
         val account = model()
         account.signUp("ana@example.com", "secret-pass", healthDataConsent = true)
+        linkOpened(true)
 
         assertEquals(ConfirmResult.CONFIRMED, account.confirmEmail("token"))
 
@@ -167,21 +176,72 @@ class AccountModelTest {
     @Test
     fun aPhoneWaitingForTheEmailSignsInOnceItIsConfirmedElsewhere() = runTest {
         answers["POST /api/v1/accounts"] = { respond("", HttpStatusCode.Accepted) }
-        answers["POST /oauth/token"] = { json("""{"error":"invalid_grant"}""", HttpStatusCode.BadRequest) }
+        linkOpened(false)
         store.saveWorkout(legs)
         val account = model()
         account.signUp("ana@example.com", "secret-pass", healthDataConsent = true)
 
         assertEquals(false, account.checkConfirmed())
         assertEquals(AccountState.Pending("ana@example.com"), account.state.value)
+        // Asking costs no sign-in try, so the address is never throttled.
+        assertEquals(0, calls.count { it == "POST /oauth/token" })
 
         // The link was opened on the website; the app opens again.
         serverAccepts()
+        linkOpened(true)
         val reopened = model()
 
         reopened.becomes { it is AccountState.SignedIn && it.upToDate }
         assertNull(secrets.getSecret(AccountModel.PENDING))
         assertTrue(calls.contains("POST /api/v1/sync/push"))
+    }
+
+    @Test
+    fun checkYourEmailMovesOnByItselfOnceTheLinkIsOpenedElsewhere() = runTest {
+        answers["POST /api/v1/accounts"] = { respond("", HttpStatusCode.Accepted) }
+        linkOpened(false)
+        val account = model()
+        account.signUp("ana@example.com", "secret-pass", healthDataConsent = true)
+
+        val watching = account.watchConfirmation()
+        withContext(Dispatchers.Default) {
+            withTimeout(5.seconds) { while (calls.count { it.endsWith("confirmation-status") } < 3) delay(5) }
+        }
+        assertIs<AccountState.Pending>(account.state.value)
+
+        serverAccepts()
+        linkOpened(true)
+        account.becomes { it is AccountState.SignedIn }
+        watching.cancel()
+        assertEquals(1, calls.count { it == "POST /oauth/token" })
+    }
+
+    @Test
+    fun sendingAgainKeepsTheKeySoTheFirstLinkStillMovesThePhoneOn() = runTest {
+        val keys = mutableListOf<String>()
+        answers["POST /api/v1/accounts"] = { respond("", HttpStatusCode.Accepted) }
+        val account = model()
+        account.signUp("ana@example.com", "secret-pass", healthDataConsent = true)
+        keys += secrets.getSecret(AccountModel.PENDING)!!
+        account.sendAgain()
+        keys += secrets.getSecret(AccountModel.PENDING)!!
+
+        assertEquals(keys[0], keys[1])
+        assertTrue(Regex("\"key\":\"[0-9a-f]{64}\"").containsMatchIn(keys[0]), keys[0])
+    }
+
+    @Test
+    fun aConfirmedEmailWhosePasswordChangedAsksToSignIn() = runTest {
+        answers["POST /api/v1/accounts"] = { respond("", HttpStatusCode.Accepted) }
+        answers["POST /oauth/token"] = { json("""{"error":"invalid_grant"}""", HttpStatusCode.BadRequest) }
+        linkOpened(true)
+        val account = model()
+        account.signUp("ana@example.com", "secret-pass", healthDataConsent = true)
+
+        val watching = account.watchConfirmation()
+        account.becomes { it == AccountState.Guest }
+        watching.cancel()
+        assertEquals(1, calls.count { it == "POST /oauth/token" })
     }
 
     @Test

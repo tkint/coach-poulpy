@@ -96,10 +96,17 @@ class AccountClient(
     /** Whether this phone holds a sign-in. */
     val signedIn: Boolean get() = tokens.read() != null
 
-    suspend fun signUp(email: String, password: String, language: String, healthDataConsent: Boolean): SignUpAnswer {
+    /** [pendingKey] lets the phone ask later, with [isConfirmed], whether the link mailed now was opened. */
+    suspend fun signUp(
+        email: String,
+        password: String,
+        language: String,
+        healthDataConsent: Boolean,
+        pendingKey: String? = null,
+    ): SignUpAnswer {
         val response = http.post("$base/api/v1/accounts") {
             contentType(ContentType.Application.Json)
-            setBody(SignUpRequest(email, password, language, healthDataConsent))
+            setBody(SignUpRequest(email, password, language, healthDataConsent, pendingKey))
         }
         return when (response.status) {
             HttpStatusCode.Accepted -> SignUpAnswer.ACCEPTED
@@ -157,6 +164,16 @@ class AccountClient(
             HttpStatusCode.BadRequest -> false
             else -> throw UnexpectedAnswer(response.status.value)
         }
+    }
+
+    /** Whether the link mailed in the sign-up that sent [pendingKey] was opened, on any device. */
+    suspend fun isConfirmed(pendingKey: String): Boolean {
+        val response = http.post("$base/api/v1/accounts/confirmation-status") {
+            contentType(ContentType.Application.Json)
+            setBody(KeyRequest(pendingKey))
+        }
+        if (response.status != HttpStatusCode.OK) throw UnexpectedAnswer(response.status.value)
+        return response.body<ConfirmationStatus>().confirmed
     }
 
     /** Sets a new password with the token from the reset link; every phone of the account is signed out. */
@@ -283,7 +300,19 @@ class AccountClient(
 }
 
 @Serializable
-private data class SignUpRequest(val email: String, val password: String, val language: String, val healthDataConsent: Boolean)
+private data class SignUpRequest(
+    val email: String,
+    val password: String,
+    val language: String,
+    val healthDataConsent: Boolean,
+    val pendingKey: String? = null,
+)
+
+@Serializable
+private data class KeyRequest(val key: String)
+
+@Serializable
+private data class ConfirmationStatus(val confirmed: Boolean)
 
 @Serializable
 private data class EmailRequest(val email: String)
