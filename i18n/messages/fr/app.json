@@ -662,5 +662,11 @@
     "deleteBody": "Cela supprime tout ce que contient votre compte, tout de suite et définitivement. Chaque téléphone connecté redevient un invité et garde sa propre copie. Les sauvegardes disparaissent sous 30 jours.",
     "deletePassword": "Saisissez votre mot de passe pour confirmer",
     "errorDeletePassword": "Ce mot de passe n’est pas le bon. Rien n’a été supprimé."
+  },
+  "crash": {
+    "title": "Coach Poulpy s’est fermé sur une erreur",
+    "body": "Envoyer le rapport aide à la corriger. Il ne dit que ce qui s’est mal passé, et vous pouvez le lire avant de l’envoyer.",
+    "send": "Envoyer le rapport",
+    "notNow": "Plus tard"
   }
 }
