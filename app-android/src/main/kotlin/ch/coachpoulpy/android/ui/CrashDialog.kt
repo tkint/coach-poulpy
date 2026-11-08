@@ -16,16 +16,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import ch.coachpoulpy.android.R
 
-/** The app closed on an error last time: offers to send the [report] as text, through any app the person picks. */
+/**
+ * Offers to send the [report] as text, through any app the person picks. [closed] is true when the app
+ * closed on the error last time, false when it is still running after one.
+ */
 @Composable
-fun CrashDialog(report: String, onDismiss: () -> Unit) {
+fun CrashDialog(report: String, closed: Boolean, onDismiss: () -> Unit) {
     val context = LocalContext.current
     val chooserTitle = stringResource(R.string.crash_send)
     AlertDialog(
         onDismissRequest = onDismiss,
         icon = { Icon(Icons.Filled.ErrorOutline, contentDescription = null, tint = MaterialTheme.colorScheme.error) },
-        title = { Text(stringResource(R.string.crash_title), textAlign = TextAlign.Center) },
-        text = { Text(stringResource(R.string.crash_body), textAlign = TextAlign.Center) },
+        title = { Text(stringResource(if (closed) R.string.crash_title else R.string.crash_titleRunning), textAlign = TextAlign.Center) },
+        text = { Text(stringResource(if (closed) R.string.crash_body else R.string.crash_bodyRunning), textAlign = TextAlign.Center) },
         confirmButton = {
             Button(onClick = {
                 val send = Intent(Intent.ACTION_SEND)
