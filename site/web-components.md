@@ -168,6 +168,15 @@ Primary, tonal, outline and grumpy: `CpButton`.
 | `<CpNavMenu>` | `ul.cp-menu.cp-menu-md.w-full.gap-1.p-0` |
 | `<CpNavItem active>` | `li` and `a.cp-menu-active` with `aria-current="page"` |
 
+## Drawer
+
+`CpDrawer`: the admin's page frame. A full-height sidebar from a large screen up, folded to icons by the button in the top bar; on a smaller screen it slides over the page. It fills the browser window, so it has no live sample here: see it in the [Admin mockup](/mockups/web/drafts/admin).
+
+| Vue | Classes |
+| --- | --- |
+| `<CpDrawer>` | `cp-drawer lg:cp-drawer-open` with `input.cp-drawer-toggle`, `div.cp-drawer-content` (a `cp-navbar` and the page) and `div.cp-drawer-side` with `label.cp-drawer-overlay` |
+| In the sidebar | `cp-is-drawer-close:hidden` hides a label when folded, `cp-is-drawer-close:cp-tooltip cp-is-drawer-close:cp-tooltip-right` with `data-tip` names the icon. The variants carry the `cp-` prefix. |
+
 ## Type
 
 Plain classes, no component: `cp-type-display`, `cp-type-title`, `cp-type-headline`, `cp-type-label`.

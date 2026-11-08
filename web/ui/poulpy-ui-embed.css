@@ -13,7 +13,6 @@
     --text-2xl: 1.5rem;
     --text-2xl--line-height: calc(2 / 1.5);
     --font-weight-bold: 700;
-    --leading-tight: 1.25;
   }
 .cp-modal {
       pointer-events: none;
@@ -153,6 +152,180 @@
       .cp-modal-toggle:checked + .cp-modal {
         opacity: 0%;
       }
+    }
+:where(.cp-drawer-side) {
+      overflow-x: hidden;
+      overflow-y: hidden;
+    }
+.cp-drawer-side {
+      pointer-events: none;
+      visibility: hidden;
+      position: fixed;
+      inset-inline-start: calc(0.25rem * 0);
+      top: 0px;
+      z-index: 10;
+      grid-column-start: 1;
+      grid-row-start: 1;
+      display: grid;
+      width: 100%;
+      grid-template-columns: repeat(1, minmax(0, 1fr));
+      grid-template-rows: repeat(1, minmax(0, 1fr));
+      align-items: flex-start;
+      justify-items: start;
+      overscroll-behavior: contain;
+      background-color: transparent;
+      opacity: 0%;
+      transition: opacity 0.2s ease-out 0.1s allow-discrete, visibility 0.3s ease-out 0.1s allow-discrete;
+      height: 100vh;
+      height: 100dvh;
+    }
+.cp-drawer-side > .cp-drawer-overlay {
+      position: sticky;
+      top: 0px;
+      cursor: pointer;
+      place-self: stretch;
+      background-color: oklch(0% 0 0 / 40%);
+    }
+.cp-drawer-side > * {
+      grid-column-start: 1;
+      grid-row-start: 1;
+    }
+.cp-drawer-side > :not(.cp-drawer-overlay) {
+      will-change: transform;
+      transition: translate 0.3s ease-out, width 0.2s ease-out;
+      translate: -100%;
+    }
+[dir="rtl"] :is(.cp-drawer-side > :not(.cp-drawer-overlay)) {
+      translate: 100%;
+    }
+:where(.cp-drawer-toggle:checked ~ .cp-drawer-side) {
+      scrollbar-color: currentColor oklch(0 0 0 / calc(var(--cp-page-has-backdrop, 0) * 0.4));
+    }
+@supports (color: color-mix(in lab, red, red)) {
+      :where(.cp-drawer-toggle:checked ~ .cp-drawer-side) {
+        scrollbar-color: color-mix(in oklch, currentColor 35%, #0000) oklch(0 0 0 / calc(var(--cp-page-has-backdrop, 0) * 0.4));
+      }
+    }
+:where(.cp-drawer-toggle:checked ~ .cp-drawer-side)  > :not(.cp-drawer-overlay) {
+      transform: none;
+      will-change: auto;
+    }
+:where(.cp-drawer-toggle:checked ~ .cp-drawer-side) {
+      pointer-events: auto;
+      visibility: visible;
+      overflow-y: auto;
+      opacity: 100%;
+    }
+:where(.cp-drawer-toggle:checked ~ .cp-drawer-side)  > :not(.cp-drawer-overlay) {
+      translate: 0%;
+    }
+.cp-drawer-open > .cp-drawer-toggle:checked ~ .cp-drawer-side {
+      scrollbar-color: revert-layer;
+    }
+.cp-drawer-end > .cp-drawer-toggle ~ .cp-drawer-side {
+      grid-column-start: 2;
+      justify-items: end;
+    }
+.cp-drawer-end > .cp-drawer-toggle ~ .cp-drawer-side > :not(.cp-drawer-overlay) {
+      translate: 100%;
+    }
+[dir="rtl"] :is(.cp-drawer-end > .cp-drawer-toggle ~ .cp-drawer-side > :not(.cp-drawer-overlay)) {
+      translate: -100%;
+    }
+.cp-drawer-end > .cp-drawer-toggle:checked ~ .cp-drawer-side > :not(.cp-drawer-overlay) {
+      translate: 0%;
+    }
+.cp-drawer-open > .cp-drawer-side {
+      overflow-y: auto;
+    }
+.cp-drawer-open > .cp-drawer-toggle ~ .cp-drawer-side > :not(.cp-drawer-overlay) {
+      translate: 0%;
+    }
+[dir="rtl"] :is(.cp-drawer-open > .cp-drawer-toggle ~ .cp-drawer-side > :not(.cp-drawer-overlay)) {
+      translate: 0%;
+    }
+.cp-drawer-toggle {
+      position: fixed;
+      height: 0px;
+      width: 0px;
+      appearance: none;
+      opacity: 0%;
+    }
+:where(.cp-drawer-toggle:checked ~ .cp-drawer-side) {
+      scrollbar-color: currentColor oklch(0 0 0 / calc(var(--cp-page-has-backdrop, 0) * 0.4));
+    }
+@supports (color: color-mix(in lab, red, red)) {
+      :where(.cp-drawer-toggle:checked ~ .cp-drawer-side) {
+        scrollbar-color: color-mix(in oklch, currentColor 35%, #0000) oklch(0 0 0 / calc(var(--cp-page-has-backdrop, 0) * 0.4));
+      }
+    }
+:where(.cp-drawer-toggle:checked ~ .cp-drawer-side)  > :not(.cp-drawer-overlay) {
+      transform: none;
+      will-change: auto;
+    }
+:where(.cp-drawer-toggle:checked ~ .cp-drawer-side) {
+      pointer-events: auto;
+      visibility: visible;
+      overflow-y: auto;
+      opacity: 100%;
+    }
+:where(.cp-drawer-toggle:checked ~ .cp-drawer-side)  > :not(.cp-drawer-overlay) {
+      translate: 0%;
+    }
+:where(:root:has(.cp-drawer-toggle:checked)) {
+      --cp-page-scroll-lock:  ;
+    }
+.cp-drawer-open > .cp-drawer-toggle:checked ~ .cp-drawer-side {
+      scrollbar-color: revert-layer;
+    }
+:root:has(.cp-drawer-open > .cp-drawer-toggle:checked) {
+      --cp-page-scroll-lock: revert-layer;
+    }
+.cp-drawer-toggle:focus-visible ~ .cp-drawer-content label.cp-drawer-button {
+      outline: 2px solid;
+      outline-offset: 2px;
+    }
+.cp-drawer-end > .cp-drawer-toggle ~ .cp-drawer-content {
+      grid-column-start: 1;
+    }
+.cp-drawer-end > .cp-drawer-toggle ~ .cp-drawer-side {
+      grid-column-start: 2;
+      justify-items: end;
+    }
+.cp-drawer-end > .cp-drawer-toggle ~ .cp-drawer-side > :not(.cp-drawer-overlay) {
+      translate: 100%;
+    }
+[dir="rtl"] :is(.cp-drawer-end > .cp-drawer-toggle ~ .cp-drawer-side > :not(.cp-drawer-overlay)) {
+      translate: -100%;
+    }
+.cp-drawer-end > .cp-drawer-toggle:checked ~ .cp-drawer-side > :not(.cp-drawer-overlay) {
+      translate: 0%;
+    }
+.cp-drawer-open > .cp-drawer-toggle {
+      display: none;
+    }
+.cp-drawer-open > .cp-drawer-toggle  ~ .cp-drawer-side {
+      pointer-events: auto;
+      visibility: visible;
+      position: sticky;
+      display: block;
+      width: auto;
+      overscroll-behavior: auto;
+      opacity: 100%;
+       > .cp-drawer-overlay {
+        cursor: default;
+        background-color: transparent;
+      }
+    }
+.cp-drawer-open > .cp-drawer-toggle:checked ~ .cp-drawer-side {
+      pointer-events: auto;
+      visibility: visible;
+    }
+.cp-drawer-open > .cp-drawer-toggle ~ .cp-drawer-side > :not(.cp-drawer-overlay) {
+      translate: 0%;
+    }
+[dir="rtl"] :is(.cp-drawer-open > .cp-drawer-toggle ~ .cp-drawer-side > :not(.cp-drawer-overlay)) {
+      translate: 0%;
     }
 .cp-menu {
       display: flex;
@@ -890,6 +1063,13 @@ fieldset:disabled .cp-input::placeholder, fieldset:disabled .cp-input  ::placeho
         border-bottom: var(--border) solid color-mix(in oklch, var(--color-base-content) 5%, #0000);
       }
     }
+.cp-drawer-side > .cp-drawer-overlay {
+      position: sticky;
+      top: 0px;
+      cursor: pointer;
+      place-self: stretch;
+      background-color: oklch(0% 0 0 / 40%);
+    }
 .cp-select {
       position: relative;
       display: inline-flex;
@@ -1192,6 +1372,22 @@ fieldset:disabled .cp-select::placeholder, fieldset:disabled .cp-select  ::place
       width: 100%;
       object-fit: cover;
     }
+.cp-navbar {
+      display: flex;
+      width: 100%;
+      align-items: center;
+      padding: 0.5rem;
+      min-height: 4rem;
+    }
+:where(.cp-navbar) {
+      position: relative;
+    }
+.cp-drawer {
+      position: relative;
+      display: grid;
+      width: 100%;
+      grid-auto-columns: max-content auto;
+    }
 .cp-card-body {
       display: flex;
       flex: auto;
@@ -1392,6 +1588,18 @@ fieldset:disabled .cp-select::placeholder, fieldset:disabled .cp-select  ::place
       --cp-modal-bl: 0;
       --cp-modal-br: var(--radius-box);
     }
+.cp-drawer-content {
+      grid-column-start: 2;
+      grid-row-start: 1;
+      min-width: 0px;
+    }
+.cp-drawer-toggle:focus-visible ~ .cp-drawer-content label.cp-drawer-button {
+      outline: 2px solid;
+      outline-offset: 2px;
+    }
+.cp-drawer-end > .cp-drawer-toggle ~ .cp-drawer-content {
+      grid-column-start: 1;
+    }
 .cp-stat-value {
       grid-column-start: 1;
       white-space: nowrap;
@@ -1520,9 +1728,6 @@ fieldset:disabled .cp-select::placeholder, fieldset:disabled .cp-select  ::place
       justify-content: flex-end;
       gap: calc(0.25rem * 2);
     }
-.mt-1 {
-    margin-top: var(--spacing);
-  }
 .cp-badge {
       display: inline-flex;
       flex-shrink: 0;
@@ -1684,17 +1889,24 @@ fieldset:disabled .cp-select::placeholder, fieldset:disabled .cp-select  ::place
       width: var(--cp-size);
       height: var(--cp-size);
     }
+.cp-btn-square {
+      padding-inline: 0px;
+      width: var(--cp-size);
+      height: var(--cp-size);
+    }
 .size-3 {
     width: calc(var(--spacing) * 3);
     height: calc(var(--spacing) * 3);
   }
-.size-4 {
-    width: calc(var(--spacing) * 4);
-    height: calc(var(--spacing) * 4);
-  }
 .size-5 {
     width: calc(var(--spacing) * 5);
     height: calc(var(--spacing) * 5);
+  }
+.h-16 {
+    height: calc(var(--spacing) * 16);
+  }
+.min-h-full {
+    min-height: 100%;
   }
 .min-h-screen {
     min-height: 100vh;
@@ -1726,6 +1938,9 @@ fieldset:disabled .cp-select::placeholder, fieldset:disabled .cp-select  ::place
 .flex-1 {
     flex: 1;
   }
+.shrink-0 {
+    flex-shrink: 0;
+  }
 .grow {
     flex-grow: 1;
   }
@@ -1747,6 +1962,9 @@ fieldset:disabled .cp-select::placeholder, fieldset:disabled .cp-select  ::place
   }
 .items-center {
     align-items: center;
+  }
+.items-start {
+    align-items: flex-start;
   }
 .gap-1 {
     gap: var(--spacing);
@@ -1799,6 +2017,10 @@ fieldset:disabled .cp-select::placeholder, fieldset:disabled .cp-select  ::place
 .rounded-full {
     border-radius: calc(infinity * 1px);
   }
+.border-r {
+    border-right-style: var(--tw-border-style);
+    border-right-width: 1px;
+  }
 .cp-badge-soft {
       color: var(--cp-badge-color, var(--color-base-content));
       background-color: var(--cp-badge-color, var(--color-base-content));
@@ -1825,6 +2047,9 @@ fieldset:disabled .cp-select::placeholder, fieldset:disabled .cp-select  ::place
       background-image: none;
       border-color: currentColor;
     }
+.border-base-300 {
+    border-color: var(--color-base-300);
+  }
 :where(:not(ul, menu, details, .cp-menu-title, .cp-btn)).cp-menu-active {
       --tw-outline-style: none;
       outline-style: none;
@@ -1871,8 +2096,14 @@ fieldset:disabled .cp-select::placeholder, fieldset:disabled .cp-select  ::place
 .p-0 {
     padding: 0px;
   }
+.p-2 {
+    padding: calc(var(--spacing) * 2);
+  }
 .p-4 {
     padding: calc(var(--spacing) * 4);
+  }
+.px-2 {
+    padding-inline: calc(var(--spacing) * 2);
   }
 .px-4 {
     padding-inline: calc(var(--spacing) * 4);
@@ -1902,10 +2133,6 @@ fieldset:disabled .cp-select::placeholder, fieldset:disabled .cp-select  ::place
       --cp-size: calc(var(--size-selector, 0.25rem) * 5);
       font-size: 0.75rem;
     }
-.leading-tight {
-    --tw-leading: var(--leading-tight);
-    line-height: var(--leading-tight);
-  }
 .font-bold {
     --tw-font-weight: var(--font-weight-bold);
     font-weight: var(--font-weight-bold);
@@ -2031,17 +2258,8 @@ fieldset:disabled .cp-select::placeholder, fieldset:disabled .cp-select  ::place
       }
   }
 @media (width >= 48rem) {
-    .md\:mt-auto {
-      margin-top: auto;
-    }
-    .md\:w-64 {
-      width: calc(var(--spacing) * 64);
-    }
     .md\:w-80 {
       width: calc(var(--spacing) * 80);
-    }
-    .md\:shrink-0 {
-      flex-shrink: 0;
     }
       .md\:cp-stats-horizontal {
         grid-auto-flow: column;
@@ -2061,9 +2279,6 @@ fieldset:disabled .cp-select::placeholder, fieldset:disabled .cp-select  ::place
     .md\:grid-cols-2 {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
-    .md\:flex-row {
-      flex-direction: row;
-    }
     .md\:gap-16 {
       gap: calc(var(--spacing) * 16);
     }
@@ -2073,12 +2288,247 @@ fieldset:disabled .cp-select::placeholder, fieldset:disabled .cp-select  ::place
     .md\:p-8 {
       padding: calc(var(--spacing) * 8);
     }
+    .md\:px-4 {
+      padding-inline: calc(var(--spacing) * 4);
+    }
     .md\:px-8 {
       padding-inline: calc(var(--spacing) * 8);
     }
     .md\:py-24 {
       padding-block: calc(var(--spacing) * 24);
     }
+  }
+@media (width >= 64rem) {
+      .lg\:cp-drawer-open > .cp-drawer-toggle:checked ~ .cp-drawer-side {
+        scrollbar-color: revert-layer;
+      }
+      :root:has(.lg\:cp-drawer-open > .cp-drawer-toggle:checked) {
+        --cp-page-scroll-lock: revert-layer;
+      }
+      .lg\:cp-drawer-open > .cp-drawer-side {
+        overflow-y: auto;
+      }
+      .lg\:cp-drawer-open > .cp-drawer-toggle {
+        display: none;
+      }
+      .lg\:cp-drawer-open > .cp-drawer-toggle  ~ .cp-drawer-side {
+        pointer-events: auto;
+        visibility: visible;
+        position: sticky;
+        display: block;
+        width: auto;
+        overscroll-behavior: auto;
+        opacity: 100%;
+         > .cp-drawer-overlay {
+          cursor: default;
+          background-color: transparent;
+        }
+      }
+      .lg\:cp-drawer-open > .cp-drawer-toggle:checked ~ .cp-drawer-side {
+        pointer-events: auto;
+        visibility: visible;
+      }
+      .lg\:cp-drawer-open > .cp-drawer-toggle ~ .cp-drawer-side > :not(.cp-drawer-overlay) {
+        translate: 0%;
+      }
+      [dir="rtl"] :is(.lg\:cp-drawer-open > .cp-drawer-toggle ~ .cp-drawer-side > :not(.cp-drawer-overlay)) {
+        translate: 0%;
+      }
+  }
+.cp-is-drawer-close\:cp-tooltip:where(.cp-drawer-toggle:not(:checked) ~ .cp-drawer-side, .cp-drawer-toggle:not(:checked) ~ .cp-drawer-side *) {
+      position: relative;
+      display: inline-block;
+      --cp-tt-bg: var(--color-neutral);
+      --cp-tt-off: calc(100% + 0.5rem);
+      --cp-tt-radius: min(var(--radius-field), 0.8rem);
+      --cp-tt-overlap: clamp(1px, calc(var(--radius-field) / 8), 2px);
+      --cp-tt-tail: calc(100% + var(--cp-tt-overlap) + 0.25rem);
+      --cp-tt-tail-off: max(0.5rem, var(--cp-tt-radius));
+    }
+.cp-is-drawer-close\:cp-tooltip:where(.cp-drawer-toggle:not(:checked) ~ .cp-drawer-side, .cp-drawer-toggle:not(:checked) ~ .cp-drawer-side *) > .cp-tooltip-content {
+      position: absolute;
+      max-width: 20rem;
+      border-radius: var(--radius-field);
+      padding-inline: calc(0.25rem * 2);
+      padding-block: 0.25rem;
+      text-align: center;
+      white-space: normal;
+      color: var(--color-neutral-content);
+      opacity: 0%;
+      font-size: 0.875rem;
+      font-weight: 400;
+      line-height: 1.25;
+      background-color: var(--cp-tt-bg);
+      width: max-content;
+      pointer-events: none;
+      z-index: 2;
+      --tw-content: attr(data-tip);
+      content: var(--tw-content);
+      transform: translateX(var(--cp-tt-trans, -50%)) translateY(var(--cp-tt-pos, 0.25rem));
+      inset: auto auto var(--cp-tt-off) 50%;
+    }
+.cp-is-drawer-close\:cp-tooltip:where(.cp-drawer-toggle:not(:checked) ~ .cp-drawer-side, .cp-drawer-toggle:not(:checked) ~ .cp-drawer-side *)[data-tip]:before {
+      position: absolute;
+      max-width: 20rem;
+      border-radius: var(--radius-field);
+      padding-inline: calc(0.25rem * 2);
+      padding-block: 0.25rem;
+      text-align: center;
+      white-space: normal;
+      color: var(--color-neutral-content);
+      opacity: 0%;
+      font-size: 0.875rem;
+      font-weight: 400;
+      line-height: 1.25;
+      background-color: var(--cp-tt-bg);
+      width: max-content;
+      pointer-events: none;
+      z-index: 2;
+      --tw-content: attr(data-tip);
+      content: var(--tw-content);
+      transform: translateX(var(--cp-tt-trans, -50%)) translateY(var(--cp-tt-pos, 0.25rem));
+      inset: auto auto var(--cp-tt-off) 50%;
+    }
+.cp-is-drawer-close\:cp-tooltip:where(.cp-drawer-toggle:not(:checked) ~ .cp-drawer-side, .cp-drawer-toggle:not(:checked) ~ .cp-drawer-side *):after {
+      opacity: 0%;
+      background-color: var(--cp-tt-bg);
+      content: "";
+      pointer-events: none;
+      width: 0.625rem;
+      height: 0.25rem;
+      display: block;
+      position: absolute;
+      mask-repeat: no-repeat;
+      mask-position: -1px 0;
+      --cp-mask-tooltip: url("data:image/svg+xml,%3Csvg width='10' height='4' viewBox='0 0 8 4' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0.500009 1C3.5 1 3.00001 4 5.00001 4C7 4 6.5 1 9.5 1C10 1 10 0.499897 10 0H0C-1.99338e-08 0.5 0 1 0.500009 1Z' fill='black'/%3E%3C/svg%3E%0A");
+      mask-image: var(--cp-mask-tooltip);
+      transform: translateX(var(--cp-tt-trans, -50%)) translateY(var(--cp-tt-pos, 0.25rem));
+      inset: auto auto var(--cp-tt-tail) 50%;
+    }
+@media (prefers-reduced-motion: no-preference) {
+      .cp-is-drawer-close\:cp-tooltip:where(.cp-drawer-toggle:not(:checked) ~ .cp-drawer-side, .cp-drawer-toggle:not(:checked) ~ .cp-drawer-side *) > .cp-tooltip-content {
+        transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1) 75ms, transform 0.2s cubic-bezier(0.4, 0, 0.2, 1) 75ms;
+      }
+      .cp-is-drawer-close\:cp-tooltip:where(.cp-drawer-toggle:not(:checked) ~ .cp-drawer-side, .cp-drawer-toggle:not(:checked) ~ .cp-drawer-side *)[data-tip]:before {
+        transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1) 75ms, transform 0.2s cubic-bezier(0.4, 0, 0.2, 1) 75ms;
+      }
+      .cp-is-drawer-close\:cp-tooltip:where(.cp-drawer-toggle:not(:checked) ~ .cp-drawer-side, .cp-drawer-toggle:not(:checked) ~ .cp-drawer-side *):after {
+        transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1) 75ms, transform 0.2s cubic-bezier(0.4, 0, 0.2, 1) 75ms;
+      }
+    }
+:is(.cp-is-drawer-close\:cp-tooltip:where(.cp-drawer-toggle:not(:checked) ~ .cp-drawer-side, .cp-drawer-toggle:not(:checked) ~ .cp-drawer-side *):is([data-tip]:not([data-tip=""]), :has(.cp-tooltip-content:not(:empty))).cp-tooltip-open, .cp-is-drawer-close\:cp-tooltip:is([data-tip]:not([data-tip=""]), :has(.cp-tooltip-content:not(:empty))):hover, .cp-is-drawer-close\:cp-tooltip:is([data-tip]:not([data-tip=""]), :has(.cp-tooltip-content:not(:empty))):has(:focus-visible)) > .cp-tooltip-content {
+      opacity: 100%;
+      --cp-tt-pos: 0rem;
+    }
+@media (prefers-reduced-motion: no-preference) {
+      :is(.cp-is-drawer-close\:cp-tooltip:where(.cp-drawer-toggle:not(:checked) ~ .cp-drawer-side, .cp-drawer-toggle:not(:checked) ~ .cp-drawer-side *):is([data-tip]:not([data-tip=""]), :has(.cp-tooltip-content:not(:empty))).cp-tooltip-open, .cp-is-drawer-close\:cp-tooltip:is([data-tip]:not([data-tip=""]), :has(.cp-tooltip-content:not(:empty))):hover, .cp-is-drawer-close\:cp-tooltip:is([data-tip]:not([data-tip=""]), :has(.cp-tooltip-content:not(:empty))):has(:focus-visible)) > .cp-tooltip-content {
+        transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1) 0s, transform 0.2s cubic-bezier(0.4, 0, 0.2, 1) 0s;
+      }
+    }
+:is(.cp-is-drawer-close\:cp-tooltip:is([data-tip]:not([data-tip=""]), :has(.cp-tooltip-content:not(:empty))).cp-tooltip-open, .cp-is-drawer-close\:cp-tooltip:where(.cp-drawer-toggle:not(:checked) ~ .cp-drawer-side, .cp-drawer-toggle:not(:checked) ~ .cp-drawer-side *):is([data-tip]:not([data-tip=""]), :has(.cp-tooltip-content:not(:empty))):hover, .cp-is-drawer-close\:cp-tooltip:is([data-tip]:not([data-tip=""]), :has(.cp-tooltip-content:not(:empty))):has(:focus-visible)) > .cp-tooltip-content {
+      opacity: 100%;
+      --cp-tt-pos: 0rem;
+    }
+@media (prefers-reduced-motion: no-preference) {
+      :is(.cp-is-drawer-close\:cp-tooltip:is([data-tip]:not([data-tip=""]), :has(.cp-tooltip-content:not(:empty))).cp-tooltip-open, .cp-is-drawer-close\:cp-tooltip:where(.cp-drawer-toggle:not(:checked) ~ .cp-drawer-side, .cp-drawer-toggle:not(:checked) ~ .cp-drawer-side *):is([data-tip]:not([data-tip=""]), :has(.cp-tooltip-content:not(:empty))):hover, .cp-is-drawer-close\:cp-tooltip:is([data-tip]:not([data-tip=""]), :has(.cp-tooltip-content:not(:empty))):has(:focus-visible)) > .cp-tooltip-content {
+        transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1) 0s, transform 0.2s cubic-bezier(0.4, 0, 0.2, 1) 0s;
+      }
+    }
+:is(.cp-is-drawer-close\:cp-tooltip:is([data-tip]:not([data-tip=""]), :has(.cp-tooltip-content:not(:empty))).cp-tooltip-open, .cp-is-drawer-close\:cp-tooltip:is([data-tip]:not([data-tip=""]), :has(.cp-tooltip-content:not(:empty))):hover, .cp-is-drawer-close\:cp-tooltip:where(.cp-drawer-toggle:not(:checked) ~ .cp-drawer-side, .cp-drawer-toggle:not(:checked) ~ .cp-drawer-side *):is([data-tip]:not([data-tip=""]), :has(.cp-tooltip-content:not(:empty))):has(:focus-visible)) > .cp-tooltip-content {
+      opacity: 100%;
+      --cp-tt-pos: 0rem;
+    }
+@media (prefers-reduced-motion: no-preference) {
+      :is(.cp-is-drawer-close\:cp-tooltip:is([data-tip]:not([data-tip=""]), :has(.cp-tooltip-content:not(:empty))).cp-tooltip-open, .cp-is-drawer-close\:cp-tooltip:is([data-tip]:not([data-tip=""]), :has(.cp-tooltip-content:not(:empty))):hover, .cp-is-drawer-close\:cp-tooltip:where(.cp-drawer-toggle:not(:checked) ~ .cp-drawer-side, .cp-drawer-toggle:not(:checked) ~ .cp-drawer-side *):is([data-tip]:not([data-tip=""]), :has(.cp-tooltip-content:not(:empty))):has(:focus-visible)) > .cp-tooltip-content {
+        transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1) 0s, transform 0.2s cubic-bezier(0.4, 0, 0.2, 1) 0s;
+      }
+    }
+:is(.cp-is-drawer-close\:cp-tooltip:where(.cp-drawer-toggle:not(:checked) ~ .cp-drawer-side, .cp-drawer-toggle:not(:checked) ~ .cp-drawer-side *):is([data-tip]:not([data-tip=""]), :has(.cp-tooltip-content:not(:empty))).cp-tooltip-open, .cp-is-drawer-close\:cp-tooltip:is([data-tip]:not([data-tip=""]), :has(.cp-tooltip-content:not(:empty))):hover, .cp-is-drawer-close\:cp-tooltip:is([data-tip]:not([data-tip=""]), :has(.cp-tooltip-content:not(:empty))):has(:focus-visible))[data-tip]:before {
+      opacity: 100%;
+      --cp-tt-pos: 0rem;
+    }
+@media (prefers-reduced-motion: no-preference) {
+      :is(.cp-is-drawer-close\:cp-tooltip:where(.cp-drawer-toggle:not(:checked) ~ .cp-drawer-side, .cp-drawer-toggle:not(:checked) ~ .cp-drawer-side *):is([data-tip]:not([data-tip=""]), :has(.cp-tooltip-content:not(:empty))).cp-tooltip-open, .cp-is-drawer-close\:cp-tooltip:is([data-tip]:not([data-tip=""]), :has(.cp-tooltip-content:not(:empty))):hover, .cp-is-drawer-close\:cp-tooltip:is([data-tip]:not([data-tip=""]), :has(.cp-tooltip-content:not(:empty))):has(:focus-visible))[data-tip]:before {
+        transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1) 0s, transform 0.2s cubic-bezier(0.4, 0, 0.2, 1) 0s;
+      }
+    }
+:is(.cp-is-drawer-close\:cp-tooltip:is([data-tip]:not([data-tip=""]), :has(.cp-tooltip-content:not(:empty))).cp-tooltip-open, .cp-is-drawer-close\:cp-tooltip:where(.cp-drawer-toggle:not(:checked) ~ .cp-drawer-side, .cp-drawer-toggle:not(:checked) ~ .cp-drawer-side *):is([data-tip]:not([data-tip=""]), :has(.cp-tooltip-content:not(:empty))):hover, .cp-is-drawer-close\:cp-tooltip:is([data-tip]:not([data-tip=""]), :has(.cp-tooltip-content:not(:empty))):has(:focus-visible))[data-tip]:before {
+      opacity: 100%;
+      --cp-tt-pos: 0rem;
+    }
+@media (prefers-reduced-motion: no-preference) {
+      :is(.cp-is-drawer-close\:cp-tooltip:is([data-tip]:not([data-tip=""]), :has(.cp-tooltip-content:not(:empty))).cp-tooltip-open, .cp-is-drawer-close\:cp-tooltip:where(.cp-drawer-toggle:not(:checked) ~ .cp-drawer-side, .cp-drawer-toggle:not(:checked) ~ .cp-drawer-side *):is([data-tip]:not([data-tip=""]), :has(.cp-tooltip-content:not(:empty))):hover, .cp-is-drawer-close\:cp-tooltip:is([data-tip]:not([data-tip=""]), :has(.cp-tooltip-content:not(:empty))):has(:focus-visible))[data-tip]:before {
+        transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1) 0s, transform 0.2s cubic-bezier(0.4, 0, 0.2, 1) 0s;
+      }
+    }
+:is(.cp-is-drawer-close\:cp-tooltip:is([data-tip]:not([data-tip=""]), :has(.cp-tooltip-content:not(:empty))).cp-tooltip-open, .cp-is-drawer-close\:cp-tooltip:is([data-tip]:not([data-tip=""]), :has(.cp-tooltip-content:not(:empty))):hover, .cp-is-drawer-close\:cp-tooltip:where(.cp-drawer-toggle:not(:checked) ~ .cp-drawer-side, .cp-drawer-toggle:not(:checked) ~ .cp-drawer-side *):is([data-tip]:not([data-tip=""]), :has(.cp-tooltip-content:not(:empty))):has(:focus-visible))[data-tip]:before {
+      opacity: 100%;
+      --cp-tt-pos: 0rem;
+    }
+@media (prefers-reduced-motion: no-preference) {
+      :is(.cp-is-drawer-close\:cp-tooltip:is([data-tip]:not([data-tip=""]), :has(.cp-tooltip-content:not(:empty))).cp-tooltip-open, .cp-is-drawer-close\:cp-tooltip:is([data-tip]:not([data-tip=""]), :has(.cp-tooltip-content:not(:empty))):hover, .cp-is-drawer-close\:cp-tooltip:where(.cp-drawer-toggle:not(:checked) ~ .cp-drawer-side, .cp-drawer-toggle:not(:checked) ~ .cp-drawer-side *):is([data-tip]:not([data-tip=""]), :has(.cp-tooltip-content:not(:empty))):has(:focus-visible))[data-tip]:before {
+        transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1) 0s, transform 0.2s cubic-bezier(0.4, 0, 0.2, 1) 0s;
+      }
+    }
+:is(.cp-is-drawer-close\:cp-tooltip:where(.cp-drawer-toggle:not(:checked) ~ .cp-drawer-side, .cp-drawer-toggle:not(:checked) ~ .cp-drawer-side *):is([data-tip]:not([data-tip=""]), :has(.cp-tooltip-content:not(:empty))).cp-tooltip-open, .cp-is-drawer-close\:cp-tooltip:is([data-tip]:not([data-tip=""]), :has(.cp-tooltip-content:not(:empty))):hover, .cp-is-drawer-close\:cp-tooltip:is([data-tip]:not([data-tip=""]), :has(.cp-tooltip-content:not(:empty))):has(:focus-visible)):after {
+      opacity: 100%;
+      --cp-tt-pos: 0rem;
+    }
+@media (prefers-reduced-motion: no-preference) {
+      :is(.cp-is-drawer-close\:cp-tooltip:where(.cp-drawer-toggle:not(:checked) ~ .cp-drawer-side, .cp-drawer-toggle:not(:checked) ~ .cp-drawer-side *):is([data-tip]:not([data-tip=""]), :has(.cp-tooltip-content:not(:empty))).cp-tooltip-open, .cp-is-drawer-close\:cp-tooltip:is([data-tip]:not([data-tip=""]), :has(.cp-tooltip-content:not(:empty))):hover, .cp-is-drawer-close\:cp-tooltip:is([data-tip]:not([data-tip=""]), :has(.cp-tooltip-content:not(:empty))):has(:focus-visible)):after {
+        transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1) 0s, transform 0.2s cubic-bezier(0.4, 0, 0.2, 1) 0s;
+      }
+    }
+:is(.cp-is-drawer-close\:cp-tooltip:is([data-tip]:not([data-tip=""]), :has(.cp-tooltip-content:not(:empty))).cp-tooltip-open, .cp-is-drawer-close\:cp-tooltip:where(.cp-drawer-toggle:not(:checked) ~ .cp-drawer-side, .cp-drawer-toggle:not(:checked) ~ .cp-drawer-side *):is([data-tip]:not([data-tip=""]), :has(.cp-tooltip-content:not(:empty))):hover, .cp-is-drawer-close\:cp-tooltip:is([data-tip]:not([data-tip=""]), :has(.cp-tooltip-content:not(:empty))):has(:focus-visible)):after {
+      opacity: 100%;
+      --cp-tt-pos: 0rem;
+    }
+@media (prefers-reduced-motion: no-preference) {
+      :is(.cp-is-drawer-close\:cp-tooltip:is([data-tip]:not([data-tip=""]), :has(.cp-tooltip-content:not(:empty))).cp-tooltip-open, .cp-is-drawer-close\:cp-tooltip:where(.cp-drawer-toggle:not(:checked) ~ .cp-drawer-side, .cp-drawer-toggle:not(:checked) ~ .cp-drawer-side *):is([data-tip]:not([data-tip=""]), :has(.cp-tooltip-content:not(:empty))):hover, .cp-is-drawer-close\:cp-tooltip:is([data-tip]:not([data-tip=""]), :has(.cp-tooltip-content:not(:empty))):has(:focus-visible)):after {
+        transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1) 0s, transform 0.2s cubic-bezier(0.4, 0, 0.2, 1) 0s;
+      }
+    }
+:is(.cp-is-drawer-close\:cp-tooltip:is([data-tip]:not([data-tip=""]), :has(.cp-tooltip-content:not(:empty))).cp-tooltip-open, .cp-is-drawer-close\:cp-tooltip:is([data-tip]:not([data-tip=""]), :has(.cp-tooltip-content:not(:empty))):hover, .cp-is-drawer-close\:cp-tooltip:where(.cp-drawer-toggle:not(:checked) ~ .cp-drawer-side, .cp-drawer-toggle:not(:checked) ~ .cp-drawer-side *):is([data-tip]:not([data-tip=""]), :has(.cp-tooltip-content:not(:empty))):has(:focus-visible)):after {
+      opacity: 100%;
+      --cp-tt-pos: 0rem;
+    }
+@media (prefers-reduced-motion: no-preference) {
+      :is(.cp-is-drawer-close\:cp-tooltip:is([data-tip]:not([data-tip=""]), :has(.cp-tooltip-content:not(:empty))).cp-tooltip-open, .cp-is-drawer-close\:cp-tooltip:is([data-tip]:not([data-tip=""]), :has(.cp-tooltip-content:not(:empty))):hover, .cp-is-drawer-close\:cp-tooltip:where(.cp-drawer-toggle:not(:checked) ~ .cp-drawer-side, .cp-drawer-toggle:not(:checked) ~ .cp-drawer-side *):is([data-tip]:not([data-tip=""]), :has(.cp-tooltip-content:not(:empty))):has(:focus-visible)):after {
+        transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1) 0s, transform 0.2s cubic-bezier(0.4, 0, 0.2, 1) 0s;
+      }
+    }
+.cp-is-drawer-close\:cp-tooltip-right:where(.cp-drawer-toggle:not(:checked) ~ .cp-drawer-side, .cp-drawer-toggle:not(:checked) ~ .cp-drawer-side *) {
+      --cp-tt-tail-off: clamp(0.5rem, var(--cp-tt-radius) + 3px, 0.8rem - 2px);
+    }
+.cp-is-drawer-close\:cp-tooltip-right:where(.cp-drawer-toggle:not(:checked) ~ .cp-drawer-side, .cp-drawer-toggle:not(:checked) ~ .cp-drawer-side *) > .cp-tooltip-content {
+      transform: translateX(calc(var(--cp-tt-pos, -0.25rem) + 0.25rem)) translateY(var(--cp-tt-trans, -50%));
+      left: var(--cp-tt-off);
+      right: auto;
+      inset-block: var(--cp-tt-inset, 50% auto);
+    }
+.cp-is-drawer-close\:cp-tooltip-right:where(.cp-drawer-toggle:not(:checked) ~ .cp-drawer-side, .cp-drawer-toggle:not(:checked) ~ .cp-drawer-side *)[data-tip]:before {
+      transform: translateX(calc(var(--cp-tt-pos, -0.25rem) + 0.25rem)) translateY(var(--cp-tt-trans, -50%));
+      left: var(--cp-tt-off);
+      right: auto;
+      inset-block: var(--cp-tt-inset, 50% auto);
+    }
+.cp-is-drawer-close\:cp-tooltip-right:where(.cp-drawer-toggle:not(:checked) ~ .cp-drawer-side, .cp-drawer-toggle:not(:checked) ~ .cp-drawer-side *):after {
+      transform: translateX(var(--cp-tt-pos, -0.25rem)) translateY(var(--cp-tt-trans, -50%)) rotate(90deg);
+      left: calc(var(--cp-tt-tail) + 1px);
+      right: auto;
+      inset-block: var(--cp-tt-tail-inset, 50% auto);
+    }
+.cp-is-drawer-close\:hidden:where(.cp-drawer-toggle:not(:checked) ~ .cp-drawer-side, .cp-drawer-toggle:not(:checked) ~ .cp-drawer-side *) {
+    display: none;
+  }
+.cp-is-drawer-close\:w-16:where(.cp-drawer-toggle:not(:checked) ~ .cp-drawer-side, .cp-drawer-toggle:not(:checked) ~ .cp-drawer-side *) {
+    width: calc(var(--spacing) * 16);
+  }
+.cp-is-drawer-close\:overflow-visible:where(.cp-drawer-toggle:not(:checked) ~ .cp-drawer-side, .cp-drawer-toggle:not(:checked) ~ .cp-drawer-side *) {
+    overflow: visible;
+  }
+.cp-is-drawer-open\:w-64:where(.cp-drawer-toggle:checked ~ .cp-drawer-side, .cp-drawer-toggle:checked ~ .cp-drawer-side *) {
+    width: calc(var(--spacing) * 64);
   }
 :where(body, [data-theme="poulpy"]) {
     font: var(--cp-type-body);
@@ -2301,9 +2751,10 @@ fieldset:disabled .cp-select::placeholder, fieldset:disabled .cp-select  ::place
     --depth: 0;
     --noise: 0;
   }
-@property --tw-leading {
+@property --tw-border-style {
   syntax: "*";
   inherits: false;
+  initial-value: solid;
 }
 @property --tw-font-weight {
   syntax: "*";
@@ -2434,7 +2885,7 @@ fieldset:disabled .cp-select::placeholder, fieldset:disabled .cp-select  ::place
 }
 @supports ((-webkit-hyphens: none) and (not (margin-trim: block))) or ((-moz-orient: inline) and (not (color:rgb(from red r g b)))) {
     *, ::before, ::after, ::backdrop {
-      --tw-leading: initial;
+      --tw-border-style: solid;
       --tw-font-weight: initial;
       --tw-shadow: 0 0 #0000;
       --tw-shadow-color: initial;

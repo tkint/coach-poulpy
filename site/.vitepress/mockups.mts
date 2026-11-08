@@ -17,6 +17,8 @@ export interface Mockup {
   section: string
   issue: string
   height: number
+  /** For a web page that fills the browser window, as a layout with a side drawer does: the window's height in px, which the page then scrolls in. 0 for a page the frame sizes to its content. */
+  viewport: number
   /** The file, from the repo root and from the site's public folder. */
   path: string
   /** The heading it is listed under: its section, apart for tablets. */
@@ -52,6 +54,7 @@ export function listMockups(): Mockup[] {
           section: meta(html, 'section'),
           issue: meta(html, 'issue'),
           height: Number(html.match(/--frame-height:\s*(\d+)px/)?.[1] ?? 844),
+          viewport: Number(meta(html, 'viewport') || 0),
           path: `design/mockups/${stage}/${device}/${file}`,
           link: '',
         })
