@@ -283,8 +283,8 @@ private struct SyncState: View {
 
 // MARK: - Screens over the tabs
 
-/// The screens that open over the tabs, by step: "sign-up", "sign-up:<email>" (the address typed on sign-in), "sign-in", "sign-in:reset-done", "forgot",
-/// "forgot-sent:<email>", "check-email", "check-email:resent", "welcome", "confirmed", "confirm:<token>" and
+/// The screens that open over the tabs, by step: "sign-up", "sign-in" and "forgot", each with ":<email>" for the
+/// address typed on the form before, "sign-in:reset-done", "forgot-sent:<email>", "check-email", "check-email:resent", "welcome", "confirmed", "confirm:<token>" and
 /// "reset:<token>" (the email links), "link-expired".
 struct AccountFlowView: View {
     let account: AccountModel
@@ -305,8 +305,9 @@ struct AccountFlowView: View {
         Group {
             switch name {
             case "sign-up": SignUpScreen(account: account, typedEmail: arg, onStep: go, onClose: onClose)
-            case "sign-in": SignInScreen(account: account, resetDone: arg == "reset-done", onStep: go, onClose: onClose)
-            case "forgot": ForgotScreen(account: account, onStep: go)
+            case "sign-in":
+                SignInScreen(account: account, resetDone: arg == "reset-done", typedEmail: arg.contains("@") ? arg : "", onStep: go, onClose: onClose)
+            case "forgot": ForgotScreen(account: account, typedEmail: arg, onStep: go)
             case "forgot-sent": ForgotSentScreen(account: account, email: arg, onStep: go)
             case "check-email": CheckEmailScreen(account: account, resent: arg == "resent", onStep: go, onClose: onClose)
             case "welcome":
@@ -325,6 +326,12 @@ struct AccountFlowView: View {
         // Each step starts afresh, as its own screen.
         .id(step)
     }
+}
+
+/// `step` with the address typed on this form, so the next form starts with it.
+private func withEmail(_ step: String, _ email: String) -> String {
+    let typed = email.trimmingCharacters(in: .whitespaces)
+    return typed.isEmpty ? step : "\(step):\(typed)"
 }
 
 private struct SignUpScreen: View {
@@ -372,7 +379,7 @@ private struct SignUpScreen: View {
                 }
                 if problems.consent { FieldError(L("account.errorConsent")) }
             }
-            HelpLine(question: "account.haveAccount", link: "account.signIn") { onStep("sign-in") }
+            HelpLine(question: "account.haveAccount", link: "account.signIn") { onStep(withEmail("sign-in", email)) }
         }
         .sheet(isPresented: $why) { ConsentSheet() }
     }
@@ -427,12 +434,12 @@ private struct SignInScreen: View {
     @State private var problem: String?
     @State private var busy = false
 
-    init(account: AccountModel, resetDone: Bool, onStep: @escaping (String) -> Void, onClose: @escaping () -> Void) {
+    init(account: AccountModel, resetDone: Bool, typedEmail: String, onStep: @escaping (String) -> Void, onClose: @escaping () -> Void) {
         self.account = account
         self.resetDone = resetDone
         self.onStep = onStep
         self.onClose = onClose
-        _email = State(initialValue: account.knownEmail ?? "")
+        _email = State(initialValue: typedEmail.isEmpty ? account.knownEmail ?? "" : typedEmail)
     }
 
     var body: some View {
@@ -445,11 +452,8 @@ private struct SignInScreen: View {
             }
             PoulpyTextField(label: "account.email", text: $email, keyboard: .emailAddress, contentType: .username)
             PoulpyTextField(label: "account.password", text: $password, secure: true, contentType: .password)
-            Button { onStep("forgot") } label: { Text("account.forgot").font(.poulpy(.callout).weight(.heavy)) }
-            HelpLine(question: "account.noAccount", link: "account.createOne") {
-                let typed = email.trimmingCharacters(in: .whitespaces)
-                onStep(typed.isEmpty ? "sign-up" : "sign-up:\(typed)")
-            }
+            Button { onStep(withEmail("forgot", email)) } label: { Text("account.forgot").font(.poulpy(.callout).weight(.heavy)) }
+            HelpLine(question: "account.noAccount", link: "account.createOne") { onStep(withEmail("sign-up", email)) }
         }
     }
 
@@ -516,14 +520,14 @@ private struct ForgotScreen: View {
     @State private var offline = false
     @State private var busy = false
 
-    init(account: AccountModel, onStep: @escaping (String) -> Void) {
+    init(account: AccountModel, typedEmail: String, onStep: @escaping (String) -> Void) {
         self.account = account
         self.onStep = onStep
-        _email = State(initialValue: account.knownEmail ?? "")
+        _email = State(initialValue: typedEmail.isEmpty ? account.knownEmail ?? "" : typedEmail)
     }
 
     var body: some View {
-        AccountFrame(onClose: { onStep("sign-in") }, action: "account.sendLink", busy: busy || email.isEmpty, onAction: send) {
+        AccountFrame(onClose: { onStep(withEmail("sign-in", email)) }, action: "account.sendLink", busy: busy || email.isEmpty, onAction: send) {
             Intro(title: L("account.forgotTitle"), body: Text("account.forgotIntro"))
             if offline { ErrorCard(L("account.errorOffline")) }
             PoulpyTextField(label: "account.email", text: $email, keyboard: .emailAddress, contentType: .username)
