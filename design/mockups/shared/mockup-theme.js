@@ -13,6 +13,9 @@ function apply() {
   else delete document.documentElement.dataset.theme
 }
 
+// A mockup shown behind a sheet or dialog in another mockup (`?embedded`) drops its device frame.
+if (new URLSearchParams(location.search).has('embedded')) document.documentElement.dataset.embedded = ''
+
 apply()
 addEventListener('storage', (event) => {
   if (event.key === key || event.key === null) apply()
