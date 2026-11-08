@@ -665,6 +665,8 @@
   "crash": {
     "title": "Coach Poulpy s’est fermé sur une erreur",
     "body": "Envoyer le rapport aide à la corriger. Il ne dit que ce qui s’est mal passé, et vous pouvez le lire avant de l’envoyer.",
+    "titleRunning": "Quelque chose s’est mal passé",
+    "bodyRunning": "Coach Poulpy a rencontré une erreur mais reste ouvert. Envoyer le rapport aide à la corriger. Il ne dit que ce qui s’est mal passé, et vous pouvez le lire avant de l’envoyer.",
     "send": "Envoyer le rapport",
     "notNow": "Plus tard"
   }
