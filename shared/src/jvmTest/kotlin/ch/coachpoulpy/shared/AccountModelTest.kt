@@ -217,10 +217,10 @@ class AccountModelTest {
         account.signUp("ana@example.com", "secret-pass", healthDataConsent = true)
 
         val watching = account.watchConfirmation()
-        account.becomes { it is AccountState.SignedIn }
+        // The app shows Email confirmed over whatever is on screen, once, after signing in.
+        withContext(Dispatchers.Default) { withTimeout(5.seconds) { account.confirmedElsewhere.first { it } } }
         watching.cancel()
-        // The app shows Email confirmed over whatever is on screen, once.
-        assertTrue(account.confirmedElsewhere.value)
+        assertIs<AccountState.SignedIn>(account.state.value)
         account.confirmedShown()
         assertEquals(false, account.confirmedElsewhere.value)
         assertEquals(3, streams)
