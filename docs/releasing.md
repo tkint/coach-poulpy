@@ -63,6 +63,9 @@ Set it up once:
    | `SMTP_PASSWORD` | secret | The SMTP password |
    | `MAIL_FROM` | variable | The sender, for example `Coach Poulpy <hello@coach-poulpy.com>`; needed with `SMTP_HOST` |
    | `WEBSITE_URL` | variable | Optional, `https://app.coach-poulpy.com` by default: where the links in emails point |
+   | `LOKI_URL` | variable | Optional: the push URL of a Grafana Cloud Loki, `https://logs-prod-XXX.grafana.net/loki/api/v1/push`. With it, the deploy starts a container that ships the logs there ([Logs](./deploying-the-server.md#logs)) |
+   | `LOKI_USER` | variable | The Loki user ID, a number; needed with `LOKI_URL` |
+   | `LOKI_PASSWORD` | secret | A Grafana Cloud access policy token that can only write logs; needed with `LOKI_URL` |
    | `WEB_DOMAIN` | variable | The web app's hostname, such as `app.coach-poulpy.com`; needed only to deploy `website` |
 
    The mail settings (`SMTP_*`, `MAIL_FROM`) may be variables or secrets, in the environment or in the repository's **Settings > Secrets and variables > Actions**; a value in the environment wins.
