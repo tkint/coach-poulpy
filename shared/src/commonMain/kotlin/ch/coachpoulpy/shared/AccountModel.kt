@@ -14,6 +14,7 @@ import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
 import kotlin.uuid.Uuid
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -24,6 +25,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
@@ -227,7 +229,9 @@ class AccountModel(
             while (_state.value is AccountState.Pending && !checkConfirmed()) {
                 val key = pending()?.key ?: break
                 val heard = try {
-                    client.awaitConfirmation(key)
+                    // Off the main thread: Android forbids network there, and closing a stream
+                    // mid-read writes to its socket.
+                    withContext(Dispatchers.Default) { client.awaitConfirmation(key) }
                 } catch (e: CancellationException) {
                     throw e
                 } catch (_: Exception) {
@@ -236,7 +240,8 @@ class AccountModel(
                 if (!heard) delay(reconnectAfter)
             }
         }
-        return Cancellable { job.cancel() }
+        // Cancelled off the main thread too, since cancelling closes the stream.
+        return Cancellable { CoroutineScope(Dispatchers.Default).launch { job.cancel() } }
     }
 
     /** Forgot your password: mails a link when the address has an account, without saying whether. */
