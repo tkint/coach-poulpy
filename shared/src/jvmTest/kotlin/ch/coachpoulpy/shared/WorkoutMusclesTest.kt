@@ -108,7 +108,7 @@ class WorkoutMusclesTest {
 
         val shoulder = page(listOf("deltoid-left")).loaded()
         assertEquals(listOf("deltoid-left"), shoulder.painAreas)
-        assertEquals("Your left shoulder still hurts. Go gently, I'll keep an eye on it with you.", shoulder.painNote)
+        assertEquals("Your left shoulder still hurts. Go gently, I’ll keep an eye on it with you.", shoulder.painNote)
 
         // A hurt knee is not worked by this circuit, so the page stays quiet about it.
         val knee = page(listOf("knee-left")).loaded()
