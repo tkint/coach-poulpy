@@ -92,67 +92,80 @@ private fun Tile(tile: RecapTile, modifier: Modifier) {
     }
 }
 
-/** A part as an outlined block, its icon and name sitting on the top border; the unnamed block of steps has no header. */
+/** A part as an outlined block, its icon and name on the top border's left and its time on the right. */
 @Composable
 private fun PartBlock(part: RecapPart) {
     val colors = MaterialTheme.colorScheme
-    val named = part.kind != null
     var headerWidth by remember { mutableIntStateOf(0) }
-    Box(Modifier.fillMaxWidth().padding(top = if (named) 13.dp else 0.dp)) {
+    var timeWidth by remember { mutableIntStateOf(0) }
+    Box(Modifier.fillMaxWidth().padding(top = 13.dp)) {
         Column(
             Modifier
                 .fillMaxWidth()
-                // The border breaks around the title, so the title needs no background of its own.
+                // The border breaks around the title and the time, so neither needs a background of its own.
                 .drawBehind {
                     val stroke = 1.dp.toPx()
-                    fun outline() = drawRoundRect(
-                        color = colors.outline,
-                        topLeft = Offset(stroke / 2, stroke / 2),
-                        size = Size(size.width - stroke, size.height - stroke),
-                        cornerRadius = CornerRadius(PoulpyRadius.sm.toPx()),
-                        style = Stroke(stroke),
-                    )
-                    if (named) {
-                        val gapStart = PoulpySpace.sm.toPx()
-                        clipRect(gapStart, -13.dp.toPx(), gapStart + headerWidth, 13.dp.toPx(), ClipOp.Difference) { outline() }
-                    } else {
-                        outline()
+                    val gap = PoulpySpace.sm.toPx()
+                    val top = -13.dp.toPx()
+                    val bottom = 13.dp.toPx()
+                    clipRect(gap, top, gap + headerWidth, bottom, ClipOp.Difference) {
+                        clipRect(size.width - gap - timeWidth, top, size.width - gap, bottom, ClipOp.Difference) {
+                            drawRoundRect(
+                                color = colors.outline,
+                                topLeft = Offset(stroke / 2, stroke / 2),
+                                size = Size(size.width - stroke, size.height - stroke),
+                                cornerRadius = CornerRadius(PoulpyRadius.sm.toPx()),
+                                style = Stroke(stroke),
+                            )
+                        }
                     }
                 }
-                .padding(start = 10.dp, end = 10.dp, top = if (named) PoulpySpace.md else 0.dp),
+                .padding(start = 10.dp, end = 10.dp, top = PoulpySpace.md),
         ) {
             part.rows.forEachIndexed { index, row ->
                 if (index > 0) HorizontalDivider(color = colors.outline)
                 RecapRowView(row)
             }
         }
-        part.kind?.let { kind ->
-            Row(
-                Modifier
-                    .align(Alignment.TopStart)
-                    .offset(x = PoulpySpace.sm, y = (-13).dp)
-                    .onSizeChanged { headerWidth = it.width }
-                    .padding(horizontal = 6.dp)
-                    .semantics(mergeDescendants = true) { heading() },
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
+        val work = part.kind == PartKind.WORK
+        Row(
+            Modifier
+                .align(Alignment.TopStart)
+                .offset(x = PoulpySpace.sm, y = (-13).dp)
+                .onSizeChanged { headerWidth = it.width }
+                .padding(horizontal = 6.dp)
+                .semantics(mergeDescendants = true) { heading() },
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            Box(
+                Modifier.size(24.dp).clip(CircleShape).background(if (work) colors.primary else colors.primaryContainer),
+                contentAlignment = Alignment.Center,
             ) {
-                val work = kind == PartKind.WORK
-                Box(
-                    Modifier.size(24.dp).clip(CircleShape).background(if (work) colors.primary else colors.primaryContainer),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(kind.icon, contentDescription = null, tint = if (work) colors.onPrimary else colors.onPrimaryContainer, modifier = Modifier.size(14.dp))
-                }
-                Text(part.name, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.ExtraBold, color = colors.primary, maxLines = 1)
-                Text(
-                    part.summary,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = colors.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
+                Icon(part.kind.icon, contentDescription = null, tint = if (work) colors.onPrimary else colors.onPrimaryContainer, modifier = Modifier.size(14.dp))
             }
+            Text(part.name, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.ExtraBold, color = colors.primary, maxLines = 1)
+            Text(
+                part.summary,
+                style = MaterialTheme.typography.labelSmall,
+                color = colors.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+        if (part.time.isNotEmpty()) {
+            Text(
+                part.time,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.ExtraBold,
+                color = colors.onSurfaceVariant,
+                maxLines = 1,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .offset(x = -PoulpySpace.sm, y = (-11).dp)
+                    .onSizeChanged { timeWidth = it.width }
+                    .padding(horizontal = 6.dp),
+            )
         }
     }
 }
@@ -170,6 +183,9 @@ private fun RecapRowView(row: RecapRow) {
             if (row.detail.isNotEmpty()) {
                 Text(row.detail, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
+        }
+        if (row.time.isNotEmpty()) {
+            Text(row.time, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
         }
     }
 }

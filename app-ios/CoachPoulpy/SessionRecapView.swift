@@ -54,15 +54,15 @@ struct SessionRecapView: View {
     }
 }
 
-/// A part as an outlined block, its icon and name sitting on the top border; the unnamed block of steps has no header.
-/// The border breaks around the title, so the title needs no background of its own.
+/// A part as an outlined block, its icon and name sitting on the top border's left and its time on the right.
+/// The border breaks around both, so neither needs a background of its own.
 private struct PartBlockView: View {
     let part: RecapPart
     @State private var headerWidth: CGFloat = 0
+    @State private var timeWidth: CGFloat = 0
 
     var body: some View {
-        let named = part.kind != nil
-        let gapStart = PoulpySpace.sm
+        let gap = PoulpySpace.sm
         return VStack(spacing: 0) {
             ForEach(Array(part.rows.enumerated()), id: \.element.key) { index, row in
                 if index > 0 { Divider().overlay(PoulpyColor.outline) }
@@ -70,20 +70,31 @@ private struct PartBlockView: View {
             }
         }
         .padding(.horizontal, 10)
-        .padding(.top, named ? PoulpySpace.md : 0)
+        .padding(.top, PoulpySpace.md)
         .overlay(
-            GappedOutline(gapStart: gapStart, gapEnd: named ? gapStart + headerWidth : 0, radius: PoulpyRadius.sm)
+            GappedOutline(gap: gap, headerWidth: headerWidth, timeWidth: part.time.isEmpty ? 0 : timeWidth, radius: PoulpyRadius.sm)
                 .stroke(PoulpyColor.outline, lineWidth: 1)
         )
         .overlay(alignment: .topLeading) {
-            if let kind = part.kind {
-                partHeader(kind)
-                    .background(GeometryReader { proxy in Color.clear.preference(key: HeaderWidthKey.self, value: proxy.size.width) })
-                    .offset(x: gapStart, y: -13)
+            partHeader(part.kind)
+                .background(GeometryReader { proxy in Color.clear.preference(key: HeaderWidthKey.self, value: proxy.size.width) })
+                .offset(x: gap, y: -13)
+        }
+        .overlay(alignment: .topTrailing) {
+            if !part.time.isEmpty {
+                timeLabel(part.time)
+                    .padding(.horizontal, 6)
+                    .background(GeometryReader { proxy in Color.clear.preference(key: TimeWidthKey.self, value: proxy.size.width) })
+                    .offset(x: -gap, y: -11)
             }
         }
         .onPreferenceChange(HeaderWidthKey.self) { headerWidth = $0 }
-        .padding(.top, named ? 13 : 0)
+        .onPreferenceChange(TimeWidthKey.self) { timeWidth = $0 }
+        .padding(.top, 13)
+    }
+
+    private func timeLabel(_ time: String) -> some View {
+        Text(time).font(.poulpy(.callout).weight(.heavy)).monospacedDigit().foregroundStyle(PoulpyColor.onSurfaceVariant).lineLimit(1)
     }
 
     private func partHeader(_ kind: PartKind) -> some View {
@@ -113,6 +124,7 @@ private struct PartBlockView: View {
                 }
             }
             Spacer(minLength: 0)
+            if !row.time.isEmpty { timeLabel(row.time) }
         }
         .padding(.vertical, 6)
         .accessibilityElement(children: .combine)
@@ -124,18 +136,30 @@ private struct HeaderWidthKey: PreferenceKey {
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = max(value, nextValue()) }
 }
 
-/// A rounded outline whose top edge is open from `gapStart` to `gapEnd` (from the left edge); closed when `gapEnd` is not past `gapStart`.
+private struct TimeWidthKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = max(value, nextValue()) }
+}
+
+/// A rounded outline whose top edge is open for the title (`headerWidth` from `gap`) and, when `timeWidth` is not zero, for the time (that wide, `gap` from the right edge).
 private struct GappedOutline: Shape {
-    let gapStart: CGFloat
-    let gapEnd: CGFloat
+    let gap: CGFloat
+    let headerWidth: CGFloat
+    let timeWidth: CGFloat
     let radius: CGFloat
 
     func path(in bounds: CGRect) -> Path {
         let rect = bounds.insetBy(dx: 0.5, dy: 0.5)
         let r = radius
-        let broken = gapEnd > gapStart
+        let titleEnd = rect.minX + gap + headerWidth
         var path = Path()
-        path.move(to: CGPoint(x: rect.minX + (broken ? gapEnd : r), y: rect.minY))
+        if timeWidth > 0 {
+            path.move(to: CGPoint(x: titleEnd, y: rect.minY))
+            path.addLine(to: CGPoint(x: rect.maxX - gap - timeWidth, y: rect.minY))
+            path.move(to: CGPoint(x: rect.maxX - gap, y: rect.minY))
+        } else {
+            path.move(to: CGPoint(x: titleEnd, y: rect.minY))
+        }
         path.addLine(to: CGPoint(x: rect.maxX - r, y: rect.minY))
         path.addArc(tangent1End: CGPoint(x: rect.maxX, y: rect.minY), tangent2End: CGPoint(x: rect.maxX, y: rect.minY + r), radius: r)
         path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY - r))
@@ -144,11 +168,7 @@ private struct GappedOutline: Shape {
         path.addArc(tangent1End: CGPoint(x: rect.minX, y: rect.maxY), tangent2End: CGPoint(x: rect.minX, y: rect.maxY - r), radius: r)
         path.addLine(to: CGPoint(x: rect.minX, y: rect.minY + r))
         path.addArc(tangent1End: CGPoint(x: rect.minX, y: rect.minY), tangent2End: CGPoint(x: rect.minX + r, y: rect.minY), radius: r)
-        if broken {
-            path.addLine(to: CGPoint(x: rect.minX + gapStart, y: rect.minY))
-        } else {
-            path.closeSubpath()
-        }
+        path.addLine(to: CGPoint(x: rect.minX + gap, y: rect.minY))
         return path
     }
 }

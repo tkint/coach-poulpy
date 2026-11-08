@@ -14,6 +14,7 @@ import ch.coachpoulpy.core.model.Workout
 import ch.coachpoulpy.core.model.WorkoutFormat
 import ch.coachpoulpy.data.local.LocalStore
 import ch.coachpoulpy.types.treadmill.TreadmillSummary
+import kotlin.time.Duration
 
 /** One figure of the recap, for example "Duration" and "31:40". */
 data class RecapTile(val label: String, val value: String)
@@ -28,13 +29,12 @@ data class RecapRow(
     val name: String,
     val pattern: MovementPattern?,
     val detail: String,
+    /** Time spent on it, rests included ("3:20"), or empty when the events do not say. */
+    val time: String,
 )
 
-/**
- * A part of the workout with the exercises done in it. [kind] is null, and [name] and [summary] are empty, for the
- * one unnamed block that holds the steps of a walk or a run, which has no parts worth naming.
- */
-data class RecapPart(val key: String, val kind: PartKind?, val name: String, val summary: String, val rows: List<RecapRow>)
+/** A part of the workout with the exercises done in it, and the time spent in it ("8:00", empty when the events do not say). */
+data class RecapPart(val key: String, val kind: PartKind, val name: String, val summary: String, val time: String, val rows: List<RecapRow>)
 
 /**
  * What opening a finished session shows (`session-recap-*` mockups): the figures, then the exercises it went through
@@ -77,7 +77,9 @@ internal class SessionRecaps(
         val skipped = events.mapNotNull { (it as? SessionEvent.PhaseSkipped)?.phaseIndex }.toSet()
         val machine = if (timeline != null && events.any { it is SessionEvent.Sample }) TreadmillSummary.of(timeline, events) else null
         val format = stored.format ?: workout?.format
-        val parts = workout?.let { listing(it, phases, done, skipped, machine) }.orEmpty()
+        // A walk or a run is made of steps, not exercises.
+        val walksOnly = workout?.steps?.flatMap { it.exerciseSteps() }?.let { steps -> steps.isNotEmpty() && steps.all { it.exercise.isWalkOrRun(catalog) } } == true
+        val parts = workout?.let { listing(it, phases, done, skipped, machine, phaseSeconds(events, phases), walksOnly) }.orEmpty()
         return SessionRecap(
             id = row.id,
             title = row.title,
@@ -85,7 +87,7 @@ internal class SessionRecaps(
             startedAtMillis = row.startedAtMillis,
             kind = row.kind,
             tiles = tiles(row, format, phases, done, skipped),
-            listTitle = if (parts.singleOrNull()?.name == "") DomainText.recapListSteps(languageCode) else DomainText.recapListExercises(languageCode),
+            listTitle = if (walksOnly) DomainText.recapListSteps(languageCode) else DomainText.recapListExercises(languageCode),
             parts = parts,
         )
     }
@@ -126,10 +128,12 @@ internal class SessionRecaps(
         done: Set<Int>,
         skipped: Set<Int>,
         machine: TreadmillSummary?,
+        seconds: Map<Int, Long>,
+        walksOnly: Boolean,
     ): List<RecapPart> {
         val severalWorkParts = workout.parts.count { it.kind == PartKind.WORK } > 1
         var workParts = 0
-        val parts = workout.parts.mapNotNull { part ->
+        return workout.parts.mapNotNull { part ->
             if (part.kind == PartKind.WORK) workParts++
             val steps = part.steps.flatMap { it.exerciseSteps() }.mapNotNull { step ->
                 val own = phases.indices.filter { (phases[it] as? Phase.Work)?.step == step.id }
@@ -138,39 +142,61 @@ internal class SessionRecaps(
             }
             if (steps.isEmpty()) return@mapNotNull null
             val rows = steps.flatMap { (step, own, ended) ->
-                if (step.exercise.isWalkOrRun(catalog)) walkRows(step, ended, phases, done, machine) else listOf(row(step, own, phases, done, skipped))
+                if (step.exercise.isWalkOrRun(catalog)) walkRows(step, ended, phases, done, machine, seconds) else listOf(row(step, own, phases, done, skipped, seconds))
             }
             val strength = steps.filterNot { it.first.exercise.isWalkOrRun(catalog) }
-            val summary = when {
-                part.kind == PartKind.WORK && strength.isNotEmpty() ->
-                    DomainText.recapSetsDone(languageCode, strength.sumOf { (_, own, _) -> own.count { it in done } }, strength.sumOf { it.second.size })
-                else -> timedSeconds(steps.flatMap { it.third }.filter { it in done }, phases).takeIf { it > 0 }?.let { labels.duration(it) }
+            val summary = if (part.kind == PartKind.WORK && strength.isNotEmpty()) {
+                DomainText.recapSetsDone(languageCode, strength.sumOf { (_, own, _) -> own.count { it in done } }, strength.sumOf { it.second.size })
+            } else {
+                null
             }
             RecapPart(
                 key = part.id.value,
                 kind = part.kind,
                 name = labels.part(part.kind, workParts.takeIf { severalWorkParts && part.kind == PartKind.WORK }),
-                summary = listOfNotNull(labels.exercises(steps.size), summary).joinToString(" · "),
+                summary = listOfNotNull(if (walksOnly) DomainText.countSteps(languageCode, steps.size) else labels.exercises(steps.size), summary).joinToString(" · "),
+                time = clock(steps.sumOf { it.third.sumOf { index -> seconds[index] ?: 0L } }),
                 rows = rows,
             )
         }
-        // Only walks and runs: one block of steps, with no part to name.
-        val onlyWalks = parts.isNotEmpty() && workout.parts.flatMap { it.steps }.flatMap { it.exerciseSteps() }.all { it.exercise.isWalkOrRun(catalog) }
-        return if (onlyWalks) listOf(RecapPart("steps", null, "", "", parts.flatMap { it.rows })) else parts
     }
 
-    private fun timedSeconds(indices: List<Int>, phases: List<Phase>): Int = indices.sumOf { index ->
-        when (val target = (phases[index] as? Phase.Work)?.target) {
-            is Target.Time -> target.duration.inWholeSeconds.toInt()
-            is Target.Hold -> target.duration.inWholeSeconds.toInt()
-            else -> 0
+    private fun clock(seconds: Long) = if (seconds > 0) ShareCard.clock(seconds) else ""
+
+    /**
+     * Seconds spent per phase, without pauses: a phase runs from the end of the one before it to its own end. A rest
+     * counts for the work it follows, so an exercise's time includes the rests between its sets.
+     */
+    private fun phaseSeconds(events: List<SessionEvent>, phases: List<Phase>): Map<Int, Long> {
+        val start = events.firstOrNull { it is SessionEvent.Started }?.at ?: return emptyMap()
+        val end = events.lastOrNull { it is SessionEvent.Finished }?.at ?: events.maxOf { it.at }
+        val pauses = TreadmillSummary.pauses(events, end)
+        val ends = events.mapNotNull {
+            when (it) {
+                is SessionEvent.PhaseCompleted -> it.phaseIndex to it.at
+                is SessionEvent.PhaseSkipped -> it.phaseIndex to it.at
+                else -> null
+            }
+        }.toMap()
+        val result = mutableMapOf<Int, Long>()
+        var owner = -1
+        for (index in phases.indices) {
+            if (phases[index] is Phase.Work) owner = index
+            val to = ends[index] ?: continue
+            val from = if (index == 0) start else ends[index - 1] ?: continue
+            if (owner < 0 || from > to) continue
+            val paused = pauses.sumOf { (pausedAt, resumedAt) ->
+                (minOf(to, resumedAt) - maxOf(from, pausedAt)).coerceAtLeast(Duration.ZERO).inWholeMilliseconds
+            }
+            result[owner] = (result[owner] ?: 0L) + ((to - from).inWholeMilliseconds - paused).coerceAtLeast(0L) / 1000
         }
+        return result
     }
 
     private fun name(step: Step.ExerciseStep) = catalog[step.exercise]?.let { labels.text(it.name) } ?: step.exercise.value
 
     /** An exercise: the sets done as "3 × 10", its load, and what was skipped. */
-    private fun row(step: Step.ExerciseStep, own: List<Int>, phases: List<Phase>, done: Set<Int>, skipped: Set<Int>): RecapRow {
+    private fun row(step: Step.ExerciseStep, own: List<Int>, phases: List<Phase>, done: Set<Int>, skipped: Set<Int>, seconds: Map<Int, Long>): RecapRow {
         val works = own.filter { it in done }.map { phases[it] as Phase.Work }
         val skips = own.count { it in skipped }
         val loads = works.mapNotNull { (step.prescription.sets.getOrNull(it.setIndex)?.load as? Load.Kilograms)?.kg }.distinct()
@@ -185,6 +211,7 @@ internal class SessionRecaps(
                 loads.singleOrNull()?.let(labels::weight),
                 skips.takeIf { it > 0 }?.let { if (inRepeat) DomainText.recapSkippedRounds(languageCode, it) else DomainText.recapSkippedSets(languageCode, it) },
             ).joinToString(" · "),
+            time = clock(own.filter { it in done || it in skipped }.sumOf { seconds[it] ?: 0L }),
         )
     }
 
@@ -198,20 +225,25 @@ internal class SessionRecaps(
     }
 
     /** A walk or a run is listed block by block, with what the machine reported for each. */
-    private fun walkRows(step: Step.ExerciseStep, ended: List<Int>, phases: List<Phase>, done: Set<Int>, machine: TreadmillSummary?): List<RecapRow> =
+    private fun walkRows(
+        step: Step.ExerciseStep,
+        ended: List<Int>,
+        phases: List<Phase>,
+        done: Set<Int>,
+        machine: TreadmillSummary?,
+        seconds: Map<Int, Long>,
+    ): List<RecapRow> =
         ended.mapIndexed { turn, index ->
             val result = machine?.phases?.firstOrNull { it.phaseIndex == index }
             val detail = if (index !in done) {
                 DomainText.recapSkippedStep(languageCode)
             } else {
-                val planned = (phases[index] as Phase.Work).target
                 listOfNotNull(
-                    result?.duration?.inWholeSeconds?.let { ShareCard.clock(it) } ?: planned.takeIf { it !is Target.Open }?.let(labels::target),
                     result?.distanceMeters?.let { ShareCard.measure(Units.distance(it, units(), 1), languageCode) },
                     result?.averageSpeedKmh?.let { ShareCard.measure(Units.speed(it, units()), languageCode) },
                     result?.averageHeartRateBpm?.let { DomainText.recapBpm(languageCode, it) },
                 ).joinToString(" · ")
             }
-            RecapRow("${step.id.value}-$turn", step.exercise.value, name(step), catalog[step.exercise]?.movementPattern, detail)
+            RecapRow("${step.id.value}-$turn", step.exercise.value, name(step), catalog[step.exercise]?.movementPattern, detail, clock(seconds[index] ?: 0L))
         }
 }

@@ -91,6 +91,12 @@ fieldset.recap-part { min-inline-size: 0; margin: var(--cp-space-md) 0 0; paddin
 fieldset.recap-part .part-header { position: static; display: block; max-width: 100%; margin-left: 2px; padding: 0 6px; background: transparent; }
 fieldset.recap-part .part-header > .part-title { display: flex; align-items: center; gap: 6px; padding: 0; }
 fieldset.recap-part .part-title > div { display: flex; align-items: baseline; gap: var(--cp-space-sm); min-width: 0; }
+
+.recap-row .row-time, .part-time { font-size: 15px; line-height: 20px; font-weight: 800; color: var(--cp-on-surface-variant); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.recap-row .row-time { margin-left: auto; }
+fieldset.recap-part { position: relative; }
+/* The time sits on the top border like the title; its background is the screen's, so the border seems to break around it. */
+.part-time { position: absolute; top: -24px; right: 8px; padding: 0 6px; background: var(--cp-surface); }
 </style>
 </head>
 <body>
@@ -105,22 +111,25 @@ fieldset.recap-part .part-title > div { display: flex; align-items: baseline; ga
       </div>
       <div class="stat-tiles" id="session-facts"><div class="stat-tile" data-component="stat-tile"><span class="label">Time</span><strong>38:24</strong></div><div class="stat-tile" data-component="stat-tile"><span class="label">Distance</span><strong>5.2 km</strong></div><div class="stat-tile" data-component="stat-tile"><span class="label">Speed</span><strong>8.1 km/h</strong></div></div>
       <span class="label section-label">Steps</span><fieldset class="recap-part" data-component="recap-part" aria-label="Warm-up">
-        <legend class="part-header" data-component="part-header"><div class="part-title"><span class="part-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></span><div><h2>Warm-up</h2><p>1 step · 5:00</p></div></div></legend>
+        <legend class="part-header" data-component="part-header"><div class="part-title"><span class="part-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></span><div><h2>Warm-up</h2><p>1 step</p></div></div></legend><span class="part-time">5:00</span>
         <ol class="steps"><li><div class="list-row recap-row" data-component="exercise-row">
             <span class="row-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="14" cy="4.5" r="2"/><path d="M12 8l-3 4 3 2 1 5M12 8l4 3 3-1M9 12l-3 2"/></svg></span>
-            <span class="row-text"><strong>Walk</strong><span>5:00 · 0.5 km · 6.0 km/h · 102 bpm</span></span>
+            <span class="row-text"><strong>Walk</strong><span>0.5 km · 6.0 km/h · 102 bpm</span></span>
+            <span class="row-time">5:00</span>
           </div></li></ol>
       </fieldset><fieldset class="recap-part" data-component="recap-part" aria-label="Work 1">
-        <legend class="part-header" data-component="part-header"><div class="part-title"><span class="part-icon part-icon--work" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg></span><div><h2>Work 1</h2><p>1 step · 28:24</p></div></div></legend>
+        <legend class="part-header" data-component="part-header"><div class="part-title"><span class="part-icon part-icon--work" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg></span><div><h2>Work 1</h2><p>1 step</p></div></div></legend><span class="part-time">28:24</span>
         <ol class="steps"><li><div class="list-row recap-row" data-component="exercise-row">
             <span class="row-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="14" cy="4.5" r="2"/><path d="M12 8l-3 4 3 2 1 5M12 8l4 3 3-1M9 12l-3 2"/></svg></span>
-            <span class="row-text"><strong>Run</strong><span>28:24 · 4.2 km · 8.9 km/h · 148 bpm</span></span>
+            <span class="row-text"><strong>Run</strong><span>4.2 km · 8.9 km/h · 148 bpm</span></span>
+            <span class="row-time">28:24</span>
           </div></li></ol>
       </fieldset><fieldset class="recap-part" data-component="recap-part" aria-label="Cool down">
-        <legend class="part-header" data-component="part-header"><div class="part-title"><span class="part-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M5 7l14 10M19 7L5 17"/></svg></span><div><h2>Cool down</h2><p>1 step · 5:00</p></div></div></legend>
+        <legend class="part-header" data-component="part-header"><div class="part-title"><span class="part-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M5 7l14 10M19 7L5 17"/></svg></span><div><h2>Cool down</h2><p>1 step</p></div></div></legend><span class="part-time">5:00</span>
         <ol class="steps"><li><div class="list-row recap-row" data-component="exercise-row">
             <span class="row-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="14" cy="4.5" r="2"/><path d="M12 8l-3 4 3 2 1 5M12 8l4 3 3-1M9 12l-3 2"/></svg></span>
-            <span class="row-text"><strong>Walk</strong><span>5:00 · 0.5 km · 6.0 km/h · 121 bpm</span></span>
+            <span class="row-text"><strong>Walk</strong><span>0.5 km · 6.0 km/h · 121 bpm</span></span>
+            <span class="row-time">5:00</span>
           </div></li></ol>
       </fieldset>
     </div>

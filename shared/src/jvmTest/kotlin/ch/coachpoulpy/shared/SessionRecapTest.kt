@@ -99,10 +99,13 @@ class SessionRecapTest {
         assertEquals("3 exercises · 7 of 8 sets", work.summary)
         assertEquals(listOf("3 × 12", "2 × 8 · 10 kg · 1 set skipped", "2 × 40 s"), work.rows.map { it.detail })
         assertEquals("Push-up", work.rows[0].name)
-        assertEquals("1 exercise · 30 s", recap.parts[0].summary)
+        assertEquals("1 exercise", recap.parts[0].summary)
         // An exercise the catalog no longer names is listed by its slug.
         assertEquals("not-in-the-catalog", recap.parts[2].rows.single().name)
         assertEquals("1 min 30", recap.parts[2].rows.single().detail)
+        // Each phase took a minute: the time is on every exercise and every part, skipped sets included.
+        assertEquals(listOf("3:00", "3:00", "2:00"), work.rows.map { it.time })
+        assertEquals(listOf("1:00", "8:00", "1:00"), recap.parts.map { it.time })
         assertEquals(listOf("Duration" to "10:00", "Sets done" to "9 / 10", "Skipped" to "1"), recap.tiles.map { it.label to it.value })
     }
 
@@ -154,6 +157,29 @@ class SessionRecapTest {
     }
 
     @Test
+    fun aRestCountsForTheExerciseItFollows() {
+        val workout = save(
+            Workout(
+                WorkoutId("rests"), 1, "Rests", WorkoutFormat.SETS,
+                listOf(
+                    Part(
+                        PartId("w"), PartKind.WORK,
+                        listOf(
+                            exercise("push", "push-up", SetPrescription(Target.Reps(10), restAfter = 30.seconds), reps(10)),
+                            exercise("plank", "plank", SetPrescription(Target.Hold(30.seconds))),
+                        ),
+                    ),
+                ),
+            ),
+        )
+        // Phases: push-up, rest, push-up, plank, a minute each.
+        val recap = run("rests-1", workout)
+
+        assertEquals(listOf("3:00", "1:00"), recap.parts.single().rows.map { it.time })
+        assertEquals("4:00", recap.parts.single().time)
+    }
+
+    @Test
     fun aWalkAndARunAreListedBlockByBlockWithWhatTheTreadmillSaid() {
         val workout = save(
             Workout(
@@ -179,10 +205,11 @@ class SessionRecapTest {
 
         assertEquals("Steps", recap.listTitle)
         val block = recap.parts.single()
-        assertEquals("", block.name)
+        assertEquals("2 steps", block.summary)
         assertEquals(listOf("Walk", "Run"), block.rows.map { it.name })
-        assertEquals("1:00 · 0.1\u00a0km · 6.0\u00a0km/h · 112 bpm", block.rows[0].detail)
-        assertEquals("1:00 · 0.1\u00a0km · 9.0\u00a0km/h · 150 bpm", block.rows[1].detail)
+        assertEquals("0.1\u00a0km · 6.0\u00a0km/h · 112 bpm", block.rows[0].detail)
+        assertEquals(listOf("1:00", "1:00"), block.rows.map { it.time })
+        assertEquals("0.1\u00a0km · 9.0\u00a0km/h · 150 bpm", block.rows[1].detail)
         assertEquals(SessionKind.TREADMILL, recap.kind)
         assertEquals("Time", recap.tiles.first().label)
     }
