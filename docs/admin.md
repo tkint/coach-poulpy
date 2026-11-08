@@ -1,0 +1,21 @@
+# The admin area
+
+The admin area is where the maintainer looks after the catalog, the accounts and the server's settings. It is a section of the website under `/admin`, backed by routes under `/api/v1/admin/`. The work is tracked in [#26](https://github.com/tkint/coach-poulpy/issues/26).
+
+## Who can open it
+
+- **Admin is a role on the account** (`member` or `admin`), not a scope anyone can ask for ([ADR 0020](./adr/0020-every-credential-resolves-to-one-caller.md)).
+- **Only the website's sign-in reaches it.** An admin route answers 401 to an anonymous caller and 403 to anyone who is not an admin signed in through the website: a member, an admin on the phone app, a personal access token or a third-party app.
+- **One admin for now.** There are no finer rights.
+
+## Making the first admin
+
+No endpoint makes an admin. Set `ADMIN_EMAIL` in the `production` environment ([Releasing](./releasing.md#deploy-the-server)) and deploy: when the server starts, the confirmed account with that address becomes an admin. An address with no confirmed account does nothing, so signing up first with someone else's address cannot take the role. The promotion is written to the audit log.
+
+## The audit log
+
+Every admin write adds a row to `admin_audit`: who (empty when the server itself did it, as at start-up), what, the target (an account id, an exercise slug) and when. Rows stay when the admin's own account is deleted. `GET /api/v1/admin/audit` returns the last 100, and the first screen of the admin shows them. Each admin feature calls `AdminAudit.record` for its writes.
+
+## What comes next
+
+Accounts ([#336](https://github.com/tkint/coach-poulpy/issues/336)), the mail from-address ([#339](https://github.com/tkint/coach-poulpy/issues/339)), the status view ([#340](https://github.com/tkint/coach-poulpy/issues/340)), and the catalog ([#337](https://github.com/tkint/coach-poulpy/issues/337), [#338](https://github.com/tkint/coach-poulpy/issues/338)).

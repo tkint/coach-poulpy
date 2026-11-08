@@ -1,0 +1,9 @@
+insert:
+INSERT INTO admin_audit (id, actor_id, action, target, at) VALUES (?, ?, ?, ?, ?);
+
+-- Newest first.
+recent:
+SELECT a.id, a.actor_id, acc.email AS actor_email, a.action, a.target, a.at
+FROM admin_audit a LEFT JOIN account acc ON acc.id = a.actor_id
+ORDER BY a.at DESC, a.id DESC
+LIMIT :limit;

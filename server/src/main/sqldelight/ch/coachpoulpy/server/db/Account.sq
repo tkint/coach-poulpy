@@ -18,6 +18,12 @@ SELECT id, password_hash, confirmed_at FROM account WHERE lower(email) = lower(:
 byId:
 SELECT id, email, role FROM account WHERE id = ?;
 
+-- Makes the confirmed account with this address an admin. No row when there is none: an address
+-- nobody confirmed can't be promoted by signing up with it first.
+promote:
+UPDATE account SET role = 'admin' WHERE lower(email) = lower(:email) AND confirmed_at IS NOT NULL AND role <> 'admin'
+RETURNING id;
+
 setPassword:
 UPDATE account SET password_hash = :passwordHash WHERE id = :id;
 

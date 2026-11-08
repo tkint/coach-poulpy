@@ -153,6 +153,7 @@ jobs:
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
           MAIL_FROM: ${{ vars.MAIL_FROM || secrets.MAIL_FROM }}
           WEBSITE_URL: ${{ vars.WEBSITE_URL }}
+          ADMIN_EMAIL: ${{ vars.ADMIN_EMAIL }}
         run: |
           if [ "$PART" = website ]; then
             required="WEB_DOMAIN:WEB_DOMAIN"
@@ -173,7 +174,7 @@ jobs:
           elif [ "$PART" = server ] && [ -z "$MAIL_FROM" ]; then
             echo "::error::Missing MAIL_FROM in the $ENVIRONMENT environment, needed with SMTP_HOST."; exit 1
           fi
-          for name in SMTP_HOST SMTP_PORT SMTP_USER SMTP_PASSWORD MAIL_FROM WEBSITE_URL; do
+          for name in SMTP_HOST SMTP_PORT SMTP_USER SMTP_PASSWORD MAIL_FROM WEBSITE_URL ADMIN_EMAIL; do
             # Written in single quotes below, so Compose reads a $ in a password as itself.
             case "$(printenv "$name")" in *\'*|*$'\n'*) echo "::error::$name may not hold a quote or a line break."; exit 1;; esac
           done
@@ -186,8 +187,8 @@ jobs:
             {
               printf 'APP_NAME=%s\nDOMAIN=%s\nIMAGE_TAG=%s\nPOSTGRES_PASSWORD=%s\n' \
                 "$APP_NAME" "$DOMAIN" "$VERSION" "$POSTGRES_PASSWORD"
-              printf "SMTP_HOST='%s'\nSMTP_PORT='%s'\nSMTP_USER='%s'\nSMTP_PASSWORD='%s'\nMAIL_FROM='%s'\nWEBSITE_URL='%s'\n" \
-                "$SMTP_HOST" "$SMTP_PORT" "$SMTP_USER" "$SMTP_PASSWORD" "$MAIL_FROM" "$WEBSITE_URL"
+              printf "SMTP_HOST='%s'\nSMTP_PORT='%s'\nSMTP_USER='%s'\nSMTP_PASSWORD='%s'\nMAIL_FROM='%s'\nWEBSITE_URL='%s'\nADMIN_EMAIL='%s'\n" \
+                "$SMTP_HOST" "$SMTP_PORT" "$SMTP_USER" "$SMTP_PASSWORD" "$MAIL_FROM" "$WEBSITE_URL" "$ADMIN_EMAIL"
             } > "$RUNNER_TEMP/.env"
           fi
           printf '%s\n' "$SSH_KEY" > "$RUNNER_TEMP/key"

@@ -15,11 +15,27 @@ sealed interface Caller {
     /** A request with no credential. Only public routes accept it. */
     data object Anonymous : Caller
 
-    data class Signed(val accountId: AccountId, val client: Client, val scopes: Set<Scope>) : Caller
+    data class Signed(
+        val accountId: AccountId,
+        val client: Client,
+        val scopes: Set<Scope>,
+        val role: Role = Role.Member,
+    ) : Caller
 }
 
 @JvmInline
 value class AccountId(val value: String)
+
+/** The account's role, which is not a scope anyone can ask for (ADR 0020). */
+enum class Role(val value: String) {
+    Member("member"),
+    Admin("admin"),
+    ;
+
+    companion object {
+        fun of(value: String): Role = entries.first { it.value == value }
+    }
+}
 
 /** What holds the credential: the phone app, the website, a personal access token or a third-party app. */
 @JvmInline
@@ -27,6 +43,9 @@ value class Client(val value: String) {
     companion object {
         /** The Android and iOS apps. */
         val App = Client("app")
+
+        /** The website, the only client the admin area accepts. */
+        val Website = Client("website")
     }
 }
 

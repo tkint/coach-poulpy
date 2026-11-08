@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin · shell and audit log</title>
+<meta name="mockup:screen" content="admin-shell">
+<meta name="mockup:section" content="Admin">
+<meta name="mockup:issue" content="335">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../../../web/ui/src/tokens.css">
+<link rel="stylesheet" href="../../../../web/ui/poulpy-ui.css">
+<script src="../../shared/mockup-theme.js"></script>
+</head>
+<body class="bg-base-100 text-base-content min-h-screen">
+<div class="flex min-h-screen flex-col md:flex-row">
+  <aside class="flex flex-col gap-4 border-b border-base-300 p-4 md:w-60 md:border-b-0 md:border-r" data-component="admin-nav">
+    <div class="flex items-center gap-2">
+      <img src="../../../poulpy/mood_happy.svg" alt="" width="36" height="36">
+      <span class="cp-type-headline">Coach <span class="text-primary">poulpy</span></span>
+    </div>
+    <span class="badge badge-primary badge-outline w-fit">Admin</span>
+    <ul class="menu w-full gap-1 p-0">
+      <li><a class="menu-active" href="#audit">Audit log</a></li>
+      <li><a href="#accounts">Accounts</a></li>
+      <li><a href="#catalog">Catalog</a></li>
+      <li><a href="#settings">Settings</a></li>
+      <li><a href="#status">Status</a></li>
+    </ul>
+    <div class="mt-auto flex flex-col gap-1 text-sm">
+      <span class="text-base-content/70">ana@example.com</span>
+      <a class="link" href="#sign-out">Sign out</a>
+    </div>
+  </aside>
+  <main class="flex max-w-4xl flex-1 flex-col gap-6 p-4 md:p-8" id="audit">
+    <div class="flex flex-col gap-2">
+      <h1 class="cp-type-display">Audit log</h1>
+      <p>Everything an admin changed, newest first. Only you and other admins see this.</p>
+    </div>
+    <div class="overflow-x-auto rounded-box border border-base-300">
+      <table class="table">
+        <thead>
+          <tr><th>When</th><th>Who</th><th>What</th><th>Target</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>8 Nov 2026, 14:20</td><td>ana@example.com</td><td>Published catalog version</td><td>12</td></tr>
+          <tr><td>8 Nov 2026, 14:02</td><td>ana@example.com</td><td>Disabled an account</td><td>0190d4d2-…-0042</td></tr>
+          <tr><td>8 Nov 2026, 13:40</td><td>The server</td><td>Made an account an admin</td><td>0190d4d2-…-0001</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>
+</body>
+</html>

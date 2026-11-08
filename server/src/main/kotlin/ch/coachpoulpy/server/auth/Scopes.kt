@@ -30,3 +30,20 @@ fun requires(vararg scopes: Scope): Security = BearerAuthSecurity(
         }
     },
 )
+
+/**
+ * Marks a route for the admin area (#335): an anonymous caller gets 401, and a caller that isn't
+ * an admin signed in through the website gets 403. Admin is a role on the account, never a scope,
+ * and a personal access token or a third-party app never reaches these routes (ADR 0020).
+ */
+fun requiresAdmin(): Security = BearerAuthSecurity(
+    Filter { next ->
+        { request ->
+            when (val caller = request.caller) {
+                Caller.Anonymous -> Response(UNAUTHORIZED).header("WWW-Authenticate", "Bearer")
+                is Caller.Signed ->
+                    if (caller.role == Role.Admin && caller.client == Client.Website) next(request) else Response(FORBIDDEN)
+            }
+        }
+    },
+)

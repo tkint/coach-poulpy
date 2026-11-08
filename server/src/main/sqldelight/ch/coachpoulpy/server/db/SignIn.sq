@@ -21,8 +21,8 @@ DELETE FROM access_token WHERE sign_in_id = :signInId AND expires_at <= :now;
 
 -- The caller of a live access token.
 liveCaller:
-SELECT s.id, s.account_id, s.client
-FROM access_token t JOIN sign_in s ON s.id = t.sign_in_id
+SELECT s.id, s.account_id, s.client, a.role
+FROM access_token t JOIN sign_in s ON s.id = t.sign_in_id JOIN account a ON a.id = s.account_id
 WHERE t.token_hash = :tokenHash AND t.expires_at > :now AND s.revoked_at IS NULL;
 
 -- Marks a refresh token used, once: no row when it is unknown or already used.

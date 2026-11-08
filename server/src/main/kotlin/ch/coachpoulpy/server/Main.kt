@@ -9,6 +9,8 @@ import ch.coachpoulpy.server.auth.SignIns
 import ch.coachpoulpy.server.mail.ConsoleMailer
 import ch.coachpoulpy.server.mail.MailSettings
 import ch.coachpoulpy.server.mail.SmtpMailer
+import ch.coachpoulpy.server.admin.AdminAudit
+import ch.coachpoulpy.server.admin.promoteFirstAdmin
 import ch.coachpoulpy.server.api.api
 import ch.coachpoulpy.server.api.confirmationEvents
 import ch.coachpoulpy.server.auth.authenticate
@@ -73,13 +75,14 @@ fun app(
     passwordResets: PasswordResets,
     accountDeletion: AccountDeletion,
     sync: Sync = Sync(database),
+    audit: AdminAudit = AdminAudit(database),
     databaseAnswers: () -> Boolean = database::answers,
     websiteOrigin: String = websiteOrigin(websiteUrl { null }),
 ): HttpHandler = websiteCors(websiteOrigin).then(routes(
     "/health" bind GET to {
         if (databaseAnswers()) Response(OK).body("ok $version") else Response(SERVICE_UNAVAILABLE).body("database unavailable")
     },
-    authenticate(mapOf(SignIns.ACCESS_PREFIX to signIns.authenticator)).then(api(version, catalog, accounts, signIns, passwordResets, accountDeletion, sync, database)),
+    authenticate(mapOf(SignIns.ACCESS_PREFIX to signIns.authenticator)).then(api(version, catalog, accounts, signIns, passwordResets, accountDeletion, sync, database, audit)),
 ))
 
 fun main() {
@@ -96,7 +99,11 @@ fun main() {
     val passwordResets = PasswordResets(database, mailer, websiteUrl(System::getenv), signIns, passwords)
     val accountDeletion = AccountDeletion(database, passwords)
     val origin = websiteOrigin(websiteUrl(System::getenv))
-    val http = app(version, Catalog.bundled, database, accounts, signIns, passwordResets, accountDeletion, websiteOrigin = origin)
+    val audit = AdminAudit(database)
+    System.getenv("ADMIN_EMAIL")?.takeIf { it.isNotBlank() }?.let { email ->
+        if (promoteFirstAdmin(database, audit, email)) println("$email is now an admin")
+    }
+    val http = app(version, Catalog.bundled, database, accounts, signIns, passwordResets, accountDeletion, audit = audit, websiteOrigin = origin)
     // Jetty, for the server-sent events SunHttp can't hold open (#319).
     PolyHandler(http, sse = confirmationEvents(accounts)).asServer(Jetty(port)).start()
     println("Coach Poulpy server $version listening on http://localhost:$port")
