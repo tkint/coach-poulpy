@@ -7,6 +7,7 @@
 <meta name="mockup:screen" content="admin-shell">
 <meta name="mockup:section" content="Admin">
 <meta name="mockup:issue" content="335">
+<meta name="mockup:viewport" content="800">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../../../../web/ui/src/tokens.css">
@@ -14,71 +15,54 @@
 <script src="../../shared/mockup-theme.js"></script>
 </head>
 <body class="bg-base-200 text-base-content min-h-screen">
-<!-- No viewport-height box here: the docs site sizes this frame to the bottom of the page, and a
-     box as tall as the viewport would make it grow forever. The navigation and the page share the
-     page colour, so the strip the frame adds under them looks like part of both. -->
-<div class="flex flex-col md:flex-row">
-  <aside class="flex flex-col gap-6 p-4 md:w-64 md:shrink-0 md:p-6" data-component="admin-nav">
-    <div class="flex items-center gap-2">
-      <img src="../../../poulpy/mood_happy.svg" alt="" width="40" height="40">
-      <div class="flex flex-col leading-tight">
-        <span class="cp-type-headline">Coach <span class="text-primary">poulpy</span></span>
-        <span class="cp-badge cp-badge-primary cp-badge-soft cp-badge-sm mt-1 w-fit gap-1"><svg xmlns="http://www.w3.org/2000/svg" class="size-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>Admin</span>
+<!-- The page fills the browser window (mockup:viewport), so the docs site shows it in a window of
+     that height and the page scrolls inside it. DaisyUI's responsive drawer: a full-height sidebar from a large screen up, which the button in
+     the top bar folds to icons only; on a smaller screen it slides over the page. The page opens it
+     on a large screen, as the app will. -->
+<div class="cp-drawer lg:cp-drawer-open">
+  <input id="admin-drawer" type="checkbox" class="cp-drawer-toggle" aria-label="Toggle the navigation">
+  <div class="cp-drawer-content flex flex-col">
+    <nav class="cp-navbar w-full bg-base-100 px-2 shadow-sm md:px-4">
+      <label for="admin-drawer" aria-label="Toggle the navigation" class="cp-btn cp-btn-square cp-btn-ghost"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/></svg></label>
+      <div class="px-2 font-bold">Audit log</div>
+    </nav>
+    <main class="flex flex-col gap-6 p-4 md:p-8" id="audit">
+      <div class="flex flex-col gap-1">
+        <h1 class="cp-type-display">Audit log</h1>
+        <p class="text-base-content/70">Everything an admin changed, newest first. Only admins see this.</p>
       </div>
-    </div>
-    <ul class="cp-menu cp-menu-md w-full gap-1 p-0">
-      <li><a class="cp-menu-active"><svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>Audit log</a></li>
-      <li><a><svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Accounts</a></li>
-      <li><a><svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>Catalog</a></li>
-      <li><a><svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="21" x2="14" y1="4" y2="4"/><line x1="10" x2="3" y1="4" y2="4"/><line x1="21" x2="12" y1="12" y2="12"/><line x1="8" x2="3" y1="12" y2="12"/><line x1="21" x2="16" y1="20" y2="20"/><line x1="12" x2="3" y1="20" y2="20"/><line x1="14" x2="14" y1="2" y2="6"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="16" x2="16" y1="18" y2="22"/></svg>Settings</a></li>
-      <li><a><svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/></svg>Status</a></li>
-    </ul>
-    <div class="flex items-center gap-3 md:mt-auto">
-      <div class="cp-avatar cp-avatar-placeholder"><div class="bg-primary text-primary-content w-10 rounded-full"><span>A</span></div></div>
-      <div class="flex min-w-0 flex-1 flex-col text-sm">
-        <span class="font-bold">Ana</span>
-        <span class="truncate text-base-content/70">ana@example.com</span>
+      <div class="cp-stats cp-stats-vertical md:cp-stats-horizontal bg-base-100 shadow-sm">
+        <div class="cp-stat">
+          <div class="cp-stat-title">Changes this week</div>
+          <div class="cp-stat-value text-primary">12</div>
+          <div class="cp-stat-desc">Since Monday</div>
+        </div>
+        <div class="cp-stat">
+          <div class="cp-stat-title">Admins</div>
+          <div class="cp-stat-value">1</div>
+          <div class="cp-stat-desc">Ana</div>
+        </div>
+        <div class="cp-stat">
+          <div class="cp-stat-title">Last change</div>
+          <div class="cp-stat-value text-2xl">14:20</div>
+          <div class="cp-stat-desc">Today, by Ana</div>
+        </div>
       </div>
-      <button class="cp-btn cp-btn-ghost cp-btn-sm cp-btn-circle" aria-label="Sign out"><svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg></button>
-    </div>
-  </aside>
-  <main class="flex min-w-0 flex-1 flex-col gap-6 p-4 md:p-8" id="audit">
-    <div class="flex flex-col gap-1">
-      <h1 class="cp-type-display">Audit log</h1>
-      <p class="text-base-content/70">Everything an admin changed, newest first. Only admins see this.</p>
-    </div>
-    <div class="cp-stats cp-stats-vertical md:cp-stats-horizontal bg-base-100 shadow-sm">
-      <div class="cp-stat">
-        <div class="cp-stat-title">Changes this week</div>
-        <div class="cp-stat-value text-primary">12</div>
-        <div class="cp-stat-desc">Since Monday</div>
-      </div>
-      <div class="cp-stat">
-        <div class="cp-stat-title">Admins</div>
-        <div class="cp-stat-value">1</div>
-        <div class="cp-stat-desc">Ana</div>
-      </div>
-      <div class="cp-stat">
-        <div class="cp-stat-title">Last change</div>
-        <div class="cp-stat-value text-2xl">14:20</div>
-        <div class="cp-stat-desc">Today, by Ana</div>
-      </div>
-    </div>
-    <div class="cp-card bg-base-100 shadow-sm">
-      <div class="cp-card-body gap-4 p-4 md:p-6">
-        <h2 class="cp-card-title">Latest changes</h2>
-        <div class="overflow-x-auto">
-          <table class="cp-table">
-            <thead>
-              <tr><th>When</th><th>Who</th><th>What</th><th>Target</th></tr>
-            </thead>
-            <tbody>
+      <div class="cp-card bg-base-100 shadow-sm">
+        <div class="cp-card-body gap-4 p-4 md:p-6">
+          <h2 class="cp-card-title">Latest changes</h2>
+          <div class="overflow-x-auto">
+            <table class="cp-table">
+              <thead>
+                <tr><th>When</th><th>Who</th><th>What</th><th>Target</th></tr>
+              </thead>
+              <tbody>
           <tr>
             <td class="whitespace-nowrap">8 Nov, 14:20</td>
             <td>
               <div class="flex items-center gap-3">
                 <div class="cp-avatar cp-avatar-placeholder"><div class="bg-secondary text-secondary-content w-8 rounded-full"><span class="text-xs">A</span></div></div>
-                <span>Ana</span>
+                <span class="whitespace-nowrap">Ana</span>
               </div>
             </td>
             <td><span class="cp-badge cp-badge-soft cp-badge-primary whitespace-nowrap">Published catalog</span></td>
@@ -89,7 +73,7 @@
             <td>
               <div class="flex items-center gap-3">
                 <div class="cp-avatar cp-avatar-placeholder"><div class="bg-secondary text-secondary-content w-8 rounded-full"><span class="text-xs">A</span></div></div>
-                <span>Ana</span>
+                <span class="whitespace-nowrap">Ana</span>
               </div>
             </td>
             <td><span class="cp-badge cp-badge-outline whitespace-nowrap">Disabled account</span></td>
@@ -106,12 +90,43 @@
             <td><span class="cp-badge cp-badge-soft cp-badge-neutral whitespace-nowrap">Made admin</span></td>
             <td class="font-mono text-sm">0190d4d2-…-0001</td>
           </tr>
-            </tbody>
-          </table>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
+    </main>
+  </div>
+  <div class="cp-drawer-side cp-is-drawer-close:overflow-visible" data-component="admin-nav">
+    <label for="admin-drawer" aria-label="Close the navigation" class="cp-drawer-overlay"></label>
+    <div class="flex min-h-full flex-col items-start border-r border-base-300 bg-base-100 cp-is-drawer-close:w-16 cp-is-drawer-open:w-64">
+      <div class="flex h-16 w-full items-center gap-2 px-4">
+        <img src="../../../poulpy/mood_happy.svg" alt="" width="32" height="32" class="shrink-0">
+        <span class="cp-type-headline cp-is-drawer-close:hidden">Coach <span class="text-primary">poulpy</span></span>
+      </div>
+      <ul class="cp-menu w-full grow gap-1 px-2">
+        <li><button class="cp-menu-active cp-is-drawer-close:cp-tooltip cp-is-drawer-close:cp-tooltip-right" data-tip="Audit log" aria-current="page"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg><span class="cp-is-drawer-close:hidden">Audit log</span></button></li>
+        <li><button class="cp-is-drawer-close:cp-tooltip cp-is-drawer-close:cp-tooltip-right" data-tip="Accounts"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span class="cp-is-drawer-close:hidden">Accounts</span></button></li>
+        <li><button class="cp-is-drawer-close:cp-tooltip cp-is-drawer-close:cp-tooltip-right" data-tip="Catalog"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg><span class="cp-is-drawer-close:hidden">Catalog</span></button></li>
+        <li><button class="cp-is-drawer-close:cp-tooltip cp-is-drawer-close:cp-tooltip-right" data-tip="Settings"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="21" x2="14" y1="4" y2="4"/><line x1="10" x2="3" y1="4" y2="4"/><line x1="21" x2="12" y1="12" y2="12"/><line x1="8" x2="3" y1="12" y2="12"/><line x1="21" x2="16" y1="20" y2="20"/><line x1="12" x2="3" y1="20" y2="20"/><line x1="14" x2="14" y1="2" y2="6"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="16" x2="16" y1="18" y2="22"/></svg><span class="cp-is-drawer-close:hidden">Settings</span></button></li>
+        <li><button class="cp-is-drawer-close:cp-tooltip cp-is-drawer-close:cp-tooltip-right" data-tip="Status"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/></svg><span class="cp-is-drawer-close:hidden">Status</span></button></li>
+      </ul>
+      <div class="flex w-full flex-col gap-2 p-2">
+        <span class="cp-badge cp-badge-primary cp-badge-soft cp-badge-sm w-fit gap-1 whitespace-nowrap cp-is-drawer-close:hidden"><svg xmlns="http://www.w3.org/2000/svg" class="size-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>Admin</span>
+        <div class="flex items-center gap-3 px-2">
+          <div class="cp-avatar cp-avatar-placeholder"><div class="bg-primary text-primary-content w-10 rounded-full"><span>A</span></div></div>
+          <div class="flex min-w-0 flex-1 flex-col text-sm cp-is-drawer-close:hidden">
+            <span class="font-bold">Ana</span>
+            <span class="truncate text-base-content/70">ana@example.com</span>
+          </div>
+        </div>
+        <ul class="cp-menu w-full p-0">
+          <li><button class="cp-is-drawer-close:cp-tooltip cp-is-drawer-close:cp-tooltip-right" data-tip="Sign out"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg><span class="cp-is-drawer-close:hidden">Sign out</span></button></li>
+        </ul>
+      </div>
     </div>
-  </main>
+  </div>
 </div>
+<script src="../../shared/mockup-drawer.js"></script>
 </body>
 </html>
