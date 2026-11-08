@@ -69,8 +69,14 @@ class SmtpMailer(private val settings: MailSettings) : Mailer {
             setText(email.text, "UTF-8")
         }
         Transport.send(message)
+        // Accepted by the SMTP server: if it never arrives, the provider's own log says why.
+        println("Email \"${email.subject}\" to ${masked(email.to)} accepted by ${settings.host}")
     }
 }
+
+/** `a…@example.com`: enough to tell which sign-up a log line is about, without the whole address. */
+fun masked(address: String): String =
+    address.substringBefore('@').take(1) + "…@" + address.substringAfter('@', "")
 
 /** Prints each email instead of sending it, for a server with no SMTP settings, such as on a laptop. */
 object ConsoleMailer : Mailer {
