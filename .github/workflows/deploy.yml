@@ -5,7 +5,8 @@ name: Deploy
 # (ADR 0019). A pull request number builds that pull request's server image first and deploys it
 # with its own files, to try it before it merges; "branch" does the same for the selected branch.
 # "website" deploys the web app (app.coach-poulpy.com) the same way instead, in its own container
-# and Caddy route, without touching the server (ADR 0021).
+# and Caddy route, without touching the server (ADR 0021). "all" does both in one run, the server
+# first, so a change that spans the API and the website goes out together.
 # Setup and secrets: docs/releasing.md, "Deploy the server".
 on:
   workflow_dispatch:
@@ -13,7 +14,7 @@ on:
       part:
         description: "What to deploy"
         type: choice
-        options: [server, website]
+        options: [server, website, all]
         default: server
       environment:
         description: "Where to deploy"
@@ -34,8 +35,13 @@ concurrency:
 
 jobs:
   deploy:
-    name: Update the server
+    name: Deploy the ${{ matrix.part }}
     runs-on: ubuntu-latest
+    strategy:
+      # One part after the other, the server first; a failed server leaves the website as it was.
+      max-parallel: 1
+      matrix:
+        part: ${{ fromJSON(inputs.part == 'all' && '["server","website"]' || format('["{0}"]', inputs.part)) }}
     environment: ${{ inputs.environment }}
     permissions:
       contents: read
@@ -46,7 +52,7 @@ jobs:
         id: image
         env:
           VERSION: ${{ inputs.version }}
-          PART: ${{ inputs.part }}
+          PART: ${{ matrix.part }}
           BRANCH: ${{ github.ref_name }}
           REPOSITORY: ${{ github.repository }}
           GH_TOKEN: ${{ github.token }}
@@ -89,7 +95,7 @@ jobs:
       # or branch-<name>.
       - name: Read the Android signing key's fingerprint for assetlinks.json
         id: cert
-        if: steps.image.outputs.build == 'true' && inputs.part == 'website'
+        if: steps.image.outputs.build == 'true' && matrix.part == 'website'
         env:
           KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
@@ -136,7 +142,7 @@ jobs:
           HOST_KEY: ${{ vars.DEPLOY_HOST_KEY || secrets.DEPLOY_HOST_KEY }}
           VERSION: ${{ steps.image.outputs.tag }}
           ENVIRONMENT: ${{ inputs.environment }}
-          PART: ${{ inputs.part }}
+          PART: ${{ matrix.part }}
           # The web app's hostname, for "website".
           WEB_DOMAIN: ${{ vars.WEB_DOMAIN }}
           # Written to the app's .env on the server.
