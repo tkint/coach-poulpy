@@ -275,8 +275,6 @@
     "chartDistance": "Treadmill km per week",
     "sessionsTitle": "Sessions",
     "sets": "{done, number} of {planned, number} sets",
-    "setsDone": "Sets done",
-    "setsSkipped": "Sets skipped",
     "deleteTitle": "Delete this session?",
     "deleteBody": "It leaves your history and stats. This can’t be undone.",
     "viewCalendar": "Calendar",

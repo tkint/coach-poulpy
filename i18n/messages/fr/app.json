@@ -275,8 +275,6 @@
     "chartDistance": "Kilomètres sur le tapis par semaine",
     "sessionsTitle": "Séances",
     "sets": "{done, number} sur {planned, number} séries",
-    "setsDone": "Séries faites",
-    "setsSkipped": "Séries passées",
     "deleteTitle": "Retirer cette séance de l’historique ?",
     "deleteBody": "Elle disparaît de votre historique et de vos statistiques. C’est définitif.",
     "viewCalendar": "Calendrier",

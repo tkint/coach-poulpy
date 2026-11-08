@@ -584,7 +584,7 @@ fun SessionDetailScreen(graph: AppGraph, language: String, sessionId: String, on
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(session?.title ?: "") },
+                title = {},
                 navigationIcon = { BackButton(onBack) },
                 actions = {
                     if (session != null) {
@@ -600,54 +600,12 @@ fun SessionDetailScreen(graph: AppGraph, language: String, sessionId: String, on
         },
     ) { padding ->
         if (session == null) return@Scaffold
-        Column(
-            modifier = Modifier.padding(padding).fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = PoulpySpace.lg, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp),
-        ) {
-            Card(
-                Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(PoulpyRadius.lg),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
-            ) {
-                Row(
-                    Modifier.padding(horizontal = 18.dp, vertical = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(14.dp),
-                ) {
-                    Image(painterResource(R.drawable.poulpy_pose_exhausted), contentDescription = null, modifier = Modifier.width(96.dp).height(86.dp))
-                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                        session.formatLabel?.let {
-                            Text(
-                                it.uppercase(Locale.getDefault()),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                            )
-                        }
-                        Text(dateTime(session.startedAtMillis), style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onPrimaryContainer)
-                    }
-                }
-            }
-            OutlinedCard(
-                Modifier.fillMaxWidth(),
-                colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surface),
-            ) {
-                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Line(R.string.treadmill_summaryDuration, clock(session.activeSeconds))
-                    if (session.kind == SessionKind.WORKOUT) {
-                        session.setsDone?.let { done ->
-                            Line(R.string.history_setsDone, session.setsPlanned?.let { "$done / $it" } ?: "$done")
-                        }
-                        session.setsSkipped?.takeIf { it > 0 }?.let { Line(R.string.history_setsSkipped, "$it") }
-                    }
-                    session.distanceMeters?.let { Line(R.string.metric_distance, distance(it, 2)) }
-                    session.averageSpeedKmh?.let { kmh -> Line(R.string.treadmill_summaryAverageSpeed, Units.speed(kmh, LocalUnitSystem.current).let { "${decimal(it.value, it.decimals)} ${it.unit}" }) }
-                    session.averageHeartRateBpm?.let { Line(R.string.treadmill_summaryAverageHr, "$it bpm") }
-                    session.maxHeartRateBpm?.let { Line(R.string.treadmill_summaryMaxHr, "$it bpm") }
-                    session.energyKcal?.let { Line(R.string.metric_energy, "$it kcal") }
-                    session.estimatedSteps?.let { Line(R.string.metric_steps, "≈ $it") }
-                }
-            }
-        }
+        val recap = remember(graph, language, sessionId) { graph.sessionRecap(sessionId, language) } ?: return@Scaffold
+        SessionRecapContent(
+            recap = recap,
+            dateLine = listOfNotNull(dateTime(recap.startedAtMillis), recap.formatLabel).joinToString(" · "),
+            modifier = Modifier.padding(padding),
+        )
     }
 
     if (sharing && session != null) {
@@ -708,14 +666,6 @@ private fun ShareFormat(icon: ImageVector, @StringRes title: Int, @StringRes not
             Text(stringResource(title), fontWeight = FontWeight.Bold)
             Text(stringResource(note), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
-    }
-}
-
-@Composable
-private fun Line(@StringRes label: Int, value: String) {
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-        Text(stringResource(label), color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.SemiBold)
-        Text(value, fontWeight = FontWeight.ExtraBold)
     }
 }
 

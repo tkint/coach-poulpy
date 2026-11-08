@@ -86,6 +86,11 @@
 .recap-part .part-header h2 { color: var(--cp-primary); font-size: 15px; line-height: 20px; white-space: nowrap; }
 .recap-part .part-header p { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .recap-part .steps > li:first-child .recap-row.list-row { border-top: 0; }
+/* Part titles are legends: the border breaks around them, so they need no background of their own. */
+fieldset.recap-part { min-inline-size: 0; margin: var(--cp-space-md) 0 0; padding: 0 10px; border: 1px solid var(--cp-outline); border-radius: var(--recap-radius); }
+fieldset.recap-part .part-header { position: static; display: block; max-width: 100%; margin-left: 2px; padding: 0 6px; background: transparent; }
+fieldset.recap-part .part-header > .part-title { display: flex; align-items: center; gap: 6px; padding: 0; }
+fieldset.recap-part .part-title > div { display: flex; align-items: baseline; gap: var(--cp-space-sm); min-width: 0; }
 </style>
 </head>
 <body>
