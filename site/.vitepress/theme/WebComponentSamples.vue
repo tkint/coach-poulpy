@@ -23,9 +23,10 @@ import {
   CpSelectField,
   CpSheet,
   CpStepper,
+  CpTextField,
 } from '../../../web/ui/src/index'
 
-defineProps<{ part: 'badge' | 'avatar' | 'card' | 'table' | 'stats' | 'nav-menu' | 'button' | 'chip' | 'search-field' | 'stepper' | 'select-field' | 'password-field' | 'poulpy-card' | 'error' | 'sheet' }>()
+defineProps<{ part: 'badge' | 'avatar' | 'card' | 'table' | 'stats' | 'nav-menu' | 'button' | 'chip' | 'search-field' | 'stepper' | 'select-field' | 'text-field' | 'password-field' | 'poulpy-card' | 'error' | 'sheet' }>()
 const { mode } = useSampleTheme()
 const chips = ref({ legs: true, core: false })
 const query = ref('squat')
@@ -33,6 +34,7 @@ const rest = ref(90)
 const format = ref('circuit')
 const sheet = ref(false)
 const password = ref('correct horse')
+const email = ref('ana@example.com')
 const formats = [
   { value: 'sets', text: 'Sets' },
   { value: 'circuit', text: 'Circuit' },
@@ -88,6 +90,9 @@ const formats = [
       </div>
       <div v-else-if="part === 'select-field'" class="row">
         <CpSelectField v-model="format" label="Format" :options="formats" />
+      </div>
+      <div v-else-if="part === 'text-field'" class="row">
+        <CpTextField v-model="email" label="Email" type="email" autocomplete="username" />
       </div>
       <div v-else-if="part === 'password-field'" class="row">
         <CpPasswordField v-model="password" label="New password" hint="8 characters or more." show-label="Show password" hide-label="Hide password" autocomplete="new-password" />

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { CpPoulpy } from '@coach-poulpy/ui'
+import AdminPage from './pages/AdminPage.vue'
 import ConfirmEmailPage from './pages/ConfirmEmailPage.vue'
 import ResetPasswordPage from './pages/ResetPasswordPage.vue'
 import { locale } from './i18n'
@@ -14,7 +15,8 @@ document.documentElement.lang = locale
 </script>
 
 <template>
-  <ConfirmEmailPage v-if="page === '/confirm-email'" :token="token" />
+  <AdminPage v-if="page === '/admin' || page.startsWith('/admin/')" />
+  <ConfirmEmailPage v-else-if="page === '/confirm-email'" :token="token" />
   <ResetPasswordPage v-else-if="page === '/reset-password'" :token="token" />
   <main v-else class="mx-auto my-16 max-w-xl px-4">
     <CpPoulpy drawing="mood_happy" :size="96" />

@@ -61,6 +61,16 @@ Primary, tonal, outline and grumpy: `CpButton`.
 | --- | --- |
 | `<CpSelectField>` | `label.cp-fieldset`, a `span.cp-type-label` and `select.cp-select` |
 
+## Text field
+
+`CpTextField`, a one-line field such as an email. In error, it turns crimson and a `CpErrorNote` under the form says why.
+
+<WebComponentSamples part="text-field" />
+
+| Vue | Classes |
+| --- | --- |
+| `<CpTextField>` | `div.cp-fieldset` around a `label.cp-type-label` and `label.cp-input` (`cp-input-error` in error) holding the `input` |
+
 ## Password field
 
 `CpPasswordField`, with a button that shows the password. In error, it turns crimson and a `CpErrorNote` under the form says why.
@@ -175,6 +185,7 @@ Primary, tonal, outline and grumpy: `CpButton`.
 | Vue | Classes |
 | --- | --- |
 | `<CpDrawer>` | `cp-drawer lg:cp-drawer-open` with `input.cp-drawer-toggle`, `div.cp-drawer-content` (a `cp-navbar` and the page) and `div.cp-drawer-side` with `label.cp-drawer-overlay` |
+| `<CpDrawerItem label>` | `li` and a `button` with `cp-is-drawer-close:cp-tooltip cp-is-drawer-close:cp-tooltip-right` and `data-tip`; `cp-menu-active` when current |
 | In the sidebar | `cp-is-drawer-close:hidden` hides a label when folded, `cp-is-drawer-close:cp-tooltip cp-is-drawer-close:cp-tooltip-right` with `data-tip` names the icon. The variants carry the `cp-` prefix. |
 
 ## Type
