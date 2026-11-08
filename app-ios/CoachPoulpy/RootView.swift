@@ -15,6 +15,10 @@ struct RootView: View {
     @State private var watchingConfirmation: Cancellable?
     /// A sign-in, sign-up or email-link screen shown over the tabs.
     @State private var accountFlow: AccountFlowStart?
+    /// Email confirmed, in a sheet over the tabs.
+    @State private var emailConfirmed = false
+    /// Email confirmed waits for the account screens to close, since a sheet can't show under them.
+    @State private var confirmedAfterFlow = false
     @State private var tab = AppTab.home
     @State private var librarySection = LibrarySection.workouts
     @State private var settingsPath = NavigationPath()
@@ -82,18 +86,24 @@ struct RootView: View {
         .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { activity in
             if let url = activity.webpageURL, let step = accountStep(for: url) { openFromLink(step) }
         }
-        .fullScreenCover(item: $accountFlow) { start in
-            AccountFlowView(account: account, start: start.step) { accountFlow = nil }
+        .fullScreenCover(item: $accountFlow, onDismiss: {
+            if confirmedAfterFlow {
+                confirmedAfterFlow = false
+                emailConfirmed = true
+            }
+        }) { start in
+            AccountFlowView(account: account, start: start.step, onClose: { accountFlow = nil }, onConfirmed: showConfirmed)
         }
+        .sheet(isPresented: $emailConfirmed) { EmailConfirmedSheet(account: account) }
         .modifier(ImportPresenter(graph: graph, incoming: $incoming))
-        // The email confirmed on another device while the app is open: Email confirmed, over Settings.
+        // The email confirmed on another device while the app is open: Email confirmed, over whatever is on screen.
         .onAppear(perform: updateConfirmationWatch)
         .onChange(of: scenePhase) { _ in updateConfirmationWatch() }
         .onReceive(accountState.$value) { _ in updateConfirmationWatch() }
         .onReceive(confirmedElsewhere.$value) { confirmed in
             guard confirmed else { return }
             account.confirmedShown()
-            openFromLink("confirmed")
+            showConfirmed()
         }
     }
 
@@ -104,6 +114,16 @@ struct RootView: View {
         } else if !waiting, let watching = watchingConfirmation {
             watching.cancel()
             watchingConfirmation = nil
+        }
+    }
+
+    /// Shows Email confirmed, after closing the account screens if they are open.
+    private func showConfirmed() {
+        if accountFlow != nil {
+            confirmedAfterFlow = true
+            accountFlow = nil
+        } else {
+            emailConfirmed = true
         }
     }
 
