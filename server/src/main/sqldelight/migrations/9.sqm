@@ -1,0 +1,12 @@
+-- What the admin did (#335): one row per admin write, kept after the admin's own account is
+-- deleted (actor_id then becomes null). `target` names what changed, such as an account id or an
+-- exercise slug.
+CREATE TABLE admin_audit (
+    id UUID PRIMARY KEY,
+    actor_id UUID REFERENCES account (id) ON DELETE SET NULL,
+    action TEXT NOT NULL,
+    target TEXT NOT NULL,
+    at TIMESTAMPTZ NOT NULL
+);
+
+CREATE INDEX admin_audit_at ON admin_audit (at DESC);

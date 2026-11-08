@@ -219,7 +219,7 @@ class OAuthRoutesTest {
 
     @Test
     fun aRouteNeedingAScopeTheCallerLacksIs403() {
-        val limited = Caller.Signed(AccountId("0190d4d2-0000-7000-8000-000000000001"), Client("pat"), setOf(Scope.WorkoutsRead))
+        val limited = Caller.Signed(AccountId.parse("0190d4d2-0000-7000-8000-000000000001"), Client("pat"), setOf(Scope.WorkoutsRead))
         val handler = authenticate(mapOf("cp_pat_" to Authenticator { limited })).then(
             contract {
                 routes += "/workouts" meta { security = requires(Scope.WorkoutsWrite) } bindContract POST to { _ -> Response(OK) }

@@ -27,6 +27,8 @@ services:
       SMTP_PASSWORD: ${SMTP_PASSWORD:-}
       MAIL_FROM: ${MAIL_FROM:-}
       WEBSITE_URL: ${WEBSITE_URL:-}
+      # The confirmed account with this address becomes an admin on start (docs/admin.md).
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
     depends_on:
       postgres:
         condition: service_healthy

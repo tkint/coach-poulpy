@@ -48,7 +48,9 @@ const boxWidth = ref(438)
 const viewport = computed(() => (chosen.value === 'full' ? Math.max(minWidth, Math.floor(boxWidth.value - 16)) : chosen.value))
 const pageHeight = ref(800)
 const width = computed(() => (isWeb.value ? viewport.value : 438))
-const height = computed(() => (isWeb.value ? pageHeight.value : props.mockup.height + 48))
+// A page that fills the window (`mockup:viewport`) gets a window of that height and scrolls inside it, since
+// sizing the frame to a page that is as tall as the frame would make it grow forever.
+const height = computed(() => (isWeb.value ? props.mockup.viewport || pageHeight.value : props.mockup.height + 48))
 const scale = computed(() => Math.min(1, boxWidth.value / width.value))
 
 const frame = ref<HTMLIFrameElement>()
@@ -62,7 +64,7 @@ function measure() {
   pageHeight.value = Math.max(480, Math.ceil(bottom) + 24)
 }
 function onLoad() {
-  if (!isWeb.value) return
+  if (!isWeb.value || props.mockup.viewport) return
   pageObserver?.disconnect()
   const body = frame.value?.contentDocument?.body
   if (!body) return

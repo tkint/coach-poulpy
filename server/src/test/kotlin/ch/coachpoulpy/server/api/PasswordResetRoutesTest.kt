@@ -159,7 +159,7 @@ class PasswordResetRoutesTest {
     @Test
     fun onlyAFirstPartyClientMayDelete() {
         val id = test.database.queries.accountQueries.byEmail("ana@example.com").executeAsOne().id
-        val website = Caller.Signed(AccountId(id.toString()), Client("partner"), emptySet())
+        val website = Caller.Signed(AccountId.of(id), Client("partner"), emptySet())
         assertEquals(AccountProblem.NotFirstParty, test.accountDeletion.deleteAccount(website, "correct horse"))
     }
 }

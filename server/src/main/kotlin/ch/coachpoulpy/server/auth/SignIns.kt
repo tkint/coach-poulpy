@@ -94,7 +94,7 @@ class SignIns(
     /** The `cp_at_` authenticator: a live access token gives its account, client and scopes. */
     val authenticator = Authenticator { token ->
         queries.liveCaller(hashOf(token), OffsetDateTime.now(clock)).executeAsOneOrNull()?.let {
-            Caller.Signed(AccountId(it.account_id.toString()), Client(it.client), FIRST_PARTY_SCOPES)
+            Caller.Signed(AccountId.of(it.account_id), Client(it.client), FIRST_PARTY_SCOPES, Role.of(it.role))
         }
     }
 

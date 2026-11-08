@@ -36,10 +36,10 @@ fun meRoute(database: Database): ContractRoute = "$API_PREFIX/me" meta {
     )
 } bindContract GET to { request ->
     val caller = request.caller as Caller.Signed
-    val account = database.queries.accountQueries.byId(UUID.fromString(caller.accountId.value)).executeAsOne()
+    val account = database.queries.accountQueries.byId(caller.accountId.value).executeAsOne()
     Response(OK).with(
         meBody of MeResponse(
-            accountId = caller.accountId.value,
+            accountId = caller.accountId.value.toString(),
             email = account.email,
             role = account.role,
             client = caller.client.value,

@@ -92,7 +92,7 @@ class AccountDeletion(
      */
     fun deleteAccount(caller: Caller.Signed, password: String): AccountProblem? {
         if (caller.client !in FIRST_PARTY_CLIENTS) return AccountProblem.NotFirstParty
-        val id = UUID.fromString(caller.accountId.value)
+        val id = caller.accountId.value
         val stored = database.queries.accountQueries.passwordHashById(id).executeAsOneOrNull() ?: return AccountProblem.WrongPassword
         if (!passwords.verify(password, stored)) return AccountProblem.WrongPassword
         database.queries.transaction {

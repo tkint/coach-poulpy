@@ -80,7 +80,7 @@ private val exampleEvents = SessionEventsChange(
     listOf(SyncedEvent(1, Instant.parse("2026-11-07T07:30:00Z"), JsonObject(mapOf("type" to JsonPrimitive("started"))))),
 )
 
-private val Request.account: UUID get() = UUID.fromString((caller as Caller.Signed).accountId.value)
+private val Request.account: UUID get() = (caller as Caller.Signed).accountId.value
 
 /** Takes a phone's outbox: stored whole, or refused whole. */
 fun pushRoute(sync: Sync): ContractRoute = "$API_PREFIX/sync/push" meta {

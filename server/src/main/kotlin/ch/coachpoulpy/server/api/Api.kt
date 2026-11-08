@@ -1,6 +1,7 @@
 package ch.coachpoulpy.server.api
 
 import ch.coachpoulpy.catalog.Catalog
+import ch.coachpoulpy.server.admin.AdminAudit
 import ch.coachpoulpy.server.accounts.AccountDeletion
 import ch.coachpoulpy.server.accounts.Accounts
 import ch.coachpoulpy.server.accounts.PasswordResets
@@ -37,6 +38,7 @@ fun apiRoutes(
     accountDeletion: AccountDeletion,
     sync: Sync,
     database: Database,
+    audit: AdminAudit = AdminAudit(database),
 ): List<ContractRoute> = listOf(
     catalogRoute(catalog),
     signUpRoute(accounts),
@@ -50,7 +52,7 @@ fun apiRoutes(
     pullRoute(sync),
     tokenRoute(signIns),
     revokeRoute(signIns),
-)
+) + adminRoutes(audit)
 
 /** The API, described in OpenAPI at `/api/v1/openapi.json`, OAuth routes included. */
 fun api(
@@ -62,6 +64,7 @@ fun api(
     accountDeletion: AccountDeletion,
     sync: Sync,
     database: Database,
+    audit: AdminAudit = AdminAudit(database),
 ): RoutingHttpHandler = contract {
     // The description is built as JSON nodes: kotlinx.serialization has no serializer for
     // http4k's own description classes, which the auto-marshalling renderer would need.
@@ -71,5 +74,5 @@ fun api(
         apiRenderer = OpenApi3ApiRenderer(KotlinxSerialization),
     )
     descriptionPath = "$API_PREFIX/openapi.json"
-    routes += apiRoutes(catalog, accounts, signIns, passwordResets, accountDeletion, sync, database)
+    routes += apiRoutes(catalog, accounts, signIns, passwordResets, accountDeletion, sync, database, audit)
 }

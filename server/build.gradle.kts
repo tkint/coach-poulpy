@@ -35,6 +35,8 @@ dependencies {
     implementation(projects.core.model)
     implementation(projects.catalog)
     implementation(platform(libs.http4k.bom))
+    implementation(platform(libs.forkhandles.bom))
+    implementation(libs.values4k)
     implementation(libs.http4k.core)
     implementation(libs.http4k.api.openapi)
     implementation(libs.http4k.format.kotlinx.serialization)

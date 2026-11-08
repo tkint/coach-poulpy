@@ -153,6 +153,7 @@ jobs:
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
           MAIL_FROM: ${{ vars.MAIL_FROM || secrets.MAIL_FROM }}
           WEBSITE_URL: ${{ vars.WEBSITE_URL }}
+          ADMIN_EMAIL: ${{ vars.ADMIN_EMAIL }}
           # Logs shipped to Grafana Cloud Loki (docs/deploying-the-server.md): all three, or none.
           LOKI_URL: ${{ vars.LOKI_URL }}
           LOKI_USER: ${{ vars.LOKI_USER }}
@@ -187,7 +188,7 @@ jobs:
               echo "::warning::No LOKI_URL in the $ENVIRONMENT environment: logs stay on the machine."
             fi
           fi
-          for name in SMTP_HOST SMTP_PORT SMTP_USER SMTP_PASSWORD MAIL_FROM WEBSITE_URL LOKI_URL LOKI_USER LOKI_PASSWORD; do
+          for name in SMTP_HOST SMTP_PORT SMTP_USER SMTP_PASSWORD MAIL_FROM WEBSITE_URL LOKI_URL LOKI_USER LOKI_PASSWORD ADMIN_EMAIL; do
             # Written in single quotes below, so Compose reads a $ in a password as itself.
             case "$(printenv "$name")" in *\'*|*$'\n'*) echo "::error::$name may not hold a quote or a line break."; exit 1;; esac
           done
@@ -200,8 +201,8 @@ jobs:
             {
               printf 'APP_NAME=%s\nDOMAIN=%s\nIMAGE_TAG=%s\nPOSTGRES_PASSWORD=%s\n' \
                 "$APP_NAME" "$DOMAIN" "$VERSION" "$POSTGRES_PASSWORD"
-              printf "SMTP_HOST='%s'\nSMTP_PORT='%s'\nSMTP_USER='%s'\nSMTP_PASSWORD='%s'\nMAIL_FROM='%s'\nWEBSITE_URL='%s'\n" \
-                "$SMTP_HOST" "$SMTP_PORT" "$SMTP_USER" "$SMTP_PASSWORD" "$MAIL_FROM" "$WEBSITE_URL"
+              printf "SMTP_HOST='%s'\nSMTP_PORT='%s'\nSMTP_USER='%s'\nSMTP_PASSWORD='%s'\nMAIL_FROM='%s'\nWEBSITE_URL='%s'\nADMIN_EMAIL='%s'\n" \
+                "$SMTP_HOST" "$SMTP_PORT" "$SMTP_USER" "$SMTP_PASSWORD" "$MAIL_FROM" "$WEBSITE_URL" "$ADMIN_EMAIL"
               # The alloy service (log shipping) only starts under this profile.
               printf "DEPLOY_ENVIRONMENT=%s\nCOMPOSE_PROFILES=%s\n" "$ENVIRONMENT" "$($LOGS && echo logs)"
               if $LOGS; then

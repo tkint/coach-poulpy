@@ -5,6 +5,7 @@ import ch.coachpoulpy.server.accounts.AccountDeletion
 import ch.coachpoulpy.server.accounts.Accounts
 import ch.coachpoulpy.server.accounts.PasswordResets
 import ch.coachpoulpy.server.accounts.Passwords
+import ch.coachpoulpy.server.admin.AdminAudit
 import ch.coachpoulpy.server.auth.SignIns
 import ch.coachpoulpy.server.db.Database
 import ch.coachpoulpy.server.mail.Email
@@ -58,5 +59,6 @@ class TestServer {
     val passwordResets = PasswordResets(database, mailer, "https://app.example.com", signIns, passwords, clock)
     val accountDeletion = AccountDeletion(database, passwords)
     val sync = Sync(database)
-    val http = app("0.7.0", catalog, database, accounts, signIns, passwordResets, accountDeletion, sync)
+    val audit = AdminAudit(database, clock)
+    val http = app("0.7.0", catalog, database, accounts, signIns, passwordResets, accountDeletion, sync, audit)
 }

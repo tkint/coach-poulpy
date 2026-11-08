@@ -21,6 +21,7 @@ Read [the design system](../design-system.md) and [ADR 0016](../adr/0016-mockups
 
 - A screen starts as an HTML mockup in `design/mockups/drafts/`. A separate, later PR moves it to `agreed/` once the owner has reviewed it on the docs site. Nothing is built from a draft, and a ticket with no agreed mockup waits for one.
 - Mockups use `var(--cp-*)` roles only, so one file works in light and dark. Check both on the docs site before opening the PR.
+- A web screen or mockup that needs a DaisyUI component `web/ui` doesn't have yet adds it there first, in the same PR: a `Cp` Vue component with the `cp-` prefix, a sample in `WebComponentSamples.vue` and a section on `site/web-components.md` (the classes it renders), then `npm run build -w ui` in `web/`. A web mockup is plain HTML that writes those classes; never an unprefixed DaisyUI class, which draws nothing, and never a one-off style.
 - Android and iOS mirror each other. When they disagree, the agreed mockup wins; when the mockup is wrong, fix it in a PR rather than diverging in code.
 - Words never break: text is laid out for the longest language. A tab label has about 12 characters of room; shrink or shorten it before letting a word wrap.
 - The warm-up is headed by the builder's sun icon in every mockup and screen.
