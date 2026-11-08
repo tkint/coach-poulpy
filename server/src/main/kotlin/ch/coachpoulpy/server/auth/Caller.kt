@@ -50,7 +50,7 @@ value class Client(val value: String) {
         /** The Android and iOS apps. */
         val App = Client("app")
 
-        /** The website, the only client the admin area accepts. */
+        /** The website, signed in with cookies (ADR 0020): the only client the admin area accepts. */
         val Website = Client("website")
     }
 }
