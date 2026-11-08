@@ -506,7 +506,9 @@ svg { flex: none; }
 
 /* ---------- Sheets and dialogs ---------- */
 
-.scrim { position: absolute; inset: 0; background: color-mix(in srgb, var(--cp-poulpy-ink) 45%, transparent); }
+.scrim { position: absolute; inset: 0; z-index: 10; background: color-mix(in srgb, var(--cp-poulpy-ink) 45%, transparent); }
+/* Above the screen behind it, floating buttons included. */
+.scrim ~ .sheet, .scrim ~ .dialog { z-index: 11; }
 .sheet {
   position: absolute;
   left: 0;
