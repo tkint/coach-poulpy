@@ -245,3 +245,7 @@ private struct GappedOutline: Shape {
         return path
     }
 }
+
+private func L(_ key: String, _ args: CVarArg...) -> String {
+    String(format: NSLocalizedString(key, comment: ""), locale: Locale.current, arguments: args)
+}
