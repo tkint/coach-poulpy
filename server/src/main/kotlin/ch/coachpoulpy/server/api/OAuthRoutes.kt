@@ -66,8 +66,7 @@ private val revokeForm = Body.webForm(
 private val oauthTag = Tag("oauth")
 
 /** The clients that may use the password grant: Coach Poulpy's own apps (ADR 0020). */
-// CLEANUP: the website signs in through this token endpoint until its HttpOnly-cookie sign-in (ADR 0020, Phase 4) exists; then move Client.Website there. Issue #343.
-private val firstPartyClients = setOf(Client.App, Client.Website)
+private val firstPartyClients = setOf(Client.App)
 
 private const val DEVICE_NAME_MAX = 100
 

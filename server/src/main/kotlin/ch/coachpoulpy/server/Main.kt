@@ -6,6 +6,7 @@ import ch.coachpoulpy.server.accounts.Accounts
 import ch.coachpoulpy.server.accounts.PasswordResets
 import ch.coachpoulpy.server.accounts.Passwords
 import ch.coachpoulpy.server.auth.SignIns
+import ch.coachpoulpy.server.auth.WebCookies
 import ch.coachpoulpy.server.mail.ConsoleMailer
 import ch.coachpoulpy.server.mail.MailSettings
 import ch.coachpoulpy.server.mail.SmtpMailer
@@ -22,6 +23,7 @@ import ch.coachpoulpy.server.db.Database
 import ch.coachpoulpy.server.db.DatabaseSettings
 import ch.coachpoulpy.server.sync.Sync
 import org.http4k.core.HttpHandler
+import org.http4k.core.Method.DELETE
 import org.http4k.core.Method.GET
 import org.http4k.core.Method.POST
 import org.http4k.core.PolyHandler
@@ -56,10 +58,10 @@ fun websiteOrigin(websiteUrl: String): String = java.net.URI(websiteUrl).let { u
 
 /**
  * Browsers may call the API from the website only (ADR 0021): its confirm-email and
- * reset-password pages post JSON. No cookie or credential is involved yet.
+ * reset-password pages post JSON, and its admin signs in with cookies, which is why credentials are allowed.
  */
 fun websiteCors(origin: String) = ServerFilters.Cors(
-    CorsPolicy(OriginPolicy.Only(origin), headers = listOf("content-type"), methods = listOf(GET, POST)),
+    CorsPolicy(OriginPolicy.Only(origin), headers = listOf("content-type"), methods = listOf(GET, POST, DELETE), credentials = true),
 )
 
 /**
@@ -82,12 +84,12 @@ fun app(
     audit: AdminAudit = AdminAudit(database),
     databaseAnswers: () -> Boolean = database::answers,
     websiteOrigin: String = websiteOrigin(websiteUrl { null }),
-): HttpHandler = websiteCors(websiteOrigin).then(routes(
+): HttpHandler = WebCookies(websiteOrigin).let { cookies -> websiteCors(websiteOrigin).then(routes(
     "/health" bind GET to {
         if (databaseAnswers()) Response(OK).body("ok $version") else Response(SERVICE_UNAVAILABLE).body("database unavailable")
     },
-    authenticate(mapOf(SignIns.ACCESS_PREFIX to signIns.authenticator)).then(api(version, catalog, accounts, signIns, passwordResets, accountDeletion, sync, database, audit)),
-))
+    authenticate(mapOf(SignIns.ACCESS_PREFIX to signIns.authenticator), cookies).then(api(version, catalog, accounts, signIns, passwordResets, accountDeletion, sync, database, audit, cookies)),
+)) }
 
 fun main() {
     val port = System.getenv("PORT")?.toIntOrNull() ?: 8080
