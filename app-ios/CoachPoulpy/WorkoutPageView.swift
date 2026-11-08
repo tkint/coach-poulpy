@@ -30,13 +30,14 @@ private enum Cover: Identifiable {
     var id: Self { self }
 }
 
-/// One saved workout: its exercises, how it went before, the day it is planned for, and Start.
 /// An exercise whose details sheet is open.
 private struct DetailTarget: Identifiable {
     let slug: String
     var id: String { slug }
 }
 
+/// One saved workout: the muscles it works on a body map, and over it a sheet you drag up for its exercises,
+/// how it went before, the days it is planned for, and Start.
 struct WorkoutPageView: View {
     let graph: AppGraph
     let workoutId: String
@@ -46,91 +47,43 @@ struct WorkoutPageView: View {
     @State private var deleting = false
     /// The exercise whose details are open; nil when none.
     @State private var detailing: DetailTarget?
+    private let figure: BodyFigure
     @Environment(\.dismiss) private var dismiss
 
     init(graph: AppGraph, workoutId: String) {
         self.graph = graph
         self.workoutId = workoutId
+        let memory = UserDefaultsStore()
+        figure = (graph.profile(memory: memory).ui.value as! ProfileUi).bodyFigure ?? .shoulders
         // Built once: StateObject evaluates this only for the first init of the view.
         _page = StateObject(wrappedValue: {
-            let model = graph.workoutPage(workoutId: workoutId, languageCode: Language.code)
+            let model = graph.workoutPage(workoutId: workoutId, languageCode: Language.code, memory: memory)
             return Observed(model, current: model.current, watch: model.watch, close: { $0.close() })
         }())
     }
 
+
     var body: some View {
         let state = page.value
-        ScrollView {
+        ZStack {
+            PoulpyColor.background.ignoresSafeArea()
             if state.found {
-                VStack(alignment: .leading, spacing: 12) {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text(state.name).font(PoulpyFont.title)
-                        // The format chip leads the details line.
-                        HStack(spacing: 8) {
-                            Text(state.formatLabel)
-                                .font(.poulpy(.subheadline).weight(.heavy))
-                                .foregroundStyle(PoulpyColor.onPrimaryContainer)
-                                .padding(EdgeInsets(top: 4, leading: 10, bottom: 4, trailing: 10))
-                                .background(PoulpyColor.primaryContainer, in: Capsule())
-                            Text(state.details).font(.poulpy(.callout)).foregroundStyle(PoulpyColor.onSurface)
-                        }
-                    }
-                    planRow(state)
-                    stats(state)
-                    let numbers = exerciseNumbers(state)
-                    ForEach(state.parts, id: \.key) { part in
-                        partHeader(part)
-                        ForEach(part.steps, id: \.key) { step in
-                            if let row = step.row {
-                                structureRow(row, number: numbers[row.key])
-                            } else if let group = step.repeatGroup {
-                                VStack(alignment: .leading, spacing: 6) {
-                                    HStack(spacing: 8) {
-                                        Image(systemName: "repeat").font(.system(size: 16, weight: .bold)).foregroundStyle(PoulpyColor.primary)
-                                        Text("\(NSLocalizedString("builder.repeat", comment: "")) · \(group.timesLabel)")
-                                            .font(.poulpy(.headline))
-                                            .foregroundStyle(PoulpyColor.onPrimaryContainer)
-                                    }
-                                    .padding(EdgeInsets(top: 2, leading: 4, bottom: 2, trailing: 4))
-                                    ForEach(group.rows, id: \.key) { row in
-                                        structureRow(row, number: numbers[row.key])
-                                    }
-                                }
-                                .padding(10)
-                                .background(PoulpyColor.primaryContainer, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
-                            }
-                        }
-                    }
-                }
-                .padding(.horizontal, PoulpySpace.lg)
-                .padding(.top, 12)
-                .padding(.bottom, PoulpySpace.lg)
+                DetailSheet(
+                    showBackgroundLabel: "workout.showMap",
+                    showDetailsLabel: "workout.showExercises",
+                    background: { room, safeTop in
+                        bodyMap(state, room: room - safeTop - 48 - PoulpySpace.md)
+                            .frame(maxWidth: .infinity)
+                            .padding(.top, safeTop + PoulpySpace.lg)
+                    },
+                    floating: { floatingButtons(state) },
+                    actions: { actions(state) },
+                    content: { details(state) }
+                )
             }
         }
-        .background(PoulpyColor.background)
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            if state.found {
-                Menu {
-                    ShareLink(
-                        item: WorkoutFileItem(make: { page.model.exportFile() }),
-                        preview: SharePreview(state.name)
-                    ) {
-                        Label("action.share", systemImage: "square.and.arrow.up")
-                    }
-                    if state.editable {
-                        Button { cover = .copy } label: { Label("action.copy", systemImage: "doc.on.doc") }
-                    }
-                    Divider()
-                    Button(role: .destructive) { deleting = true } label: { Label("action.delete", systemImage: "trash") }
-                } label: {
-                    Label("action.more", systemImage: "ellipsis.circle")
-                }
-            }
-        }
-        .safeAreaInset(edge: .bottom) {
-            if state.found { actions(state) }
-        }
+        .navigationBarBackButtonHidden(true)
+        .toolbar(.hidden, for: .navigationBar)
         .onChange(of: state.loaded && !state.found) { gone in
             // Deleted here or elsewhere: nothing left to show.
             if gone { dismiss() }
@@ -156,49 +109,177 @@ struct WorkoutPageView: View {
         }
     }
 
-    private func plannedTitle(_ plans: [PlannedDay]) -> String {
-        if plans.count > 1 {
-            return String.localizedStringWithFormat(NSLocalizedString("workout.plannedDays %lld", comment: ""), Int64(plans.count))
+    /// The legend, then the front and back figures, as tall as the room above the sheet allows.
+    private func bodyMap(_ state: WorkoutPageState, room: CGFloat) -> some View {
+        // Collapsed, the map fills the room: as wide as two figures side by side fit the screen.
+        let maxFigure = (UIScreen.main.bounds.width - PoulpySpace.lg * 2 - PoulpySpace.sm) / 2
+        let width = min(max(room / CGFloat(BodyMapBox.shared.HEIGHT / BodyMapBox.shared.WIDTH), 56), maxFigure)
+        let muscles = state.muscles.map(\.label).joined(separator: ", ")
+        let mapText = L("workout.mapLabel %@", muscles)
+        return VStack(spacing: PoulpySpace.lg) {
+            HeatLegend(showPain: !state.painAreas.isEmpty)
+            HStack(spacing: PoulpySpace.sm) {
+                HeatMapFigure(figure: figure, view: .front, heat: state.heat, hurting: Set(state.painAreas), width: width)
+                HeatMapFigure(figure: figure, view: .back, heat: state.heat, hurting: Set(state.painAreas), width: width)
+            }
         }
-        let plan = plans[0]
-        return plan.daysAway == 0 ? NSLocalizedString("workout.plannedToday", comment: "") : L("workout.planned %@", dayLabel(plan.dayMillis))
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(state.painNote.isEmpty ? mapText : "\(mapText). \(state.painNote)")
     }
 
-    /// "Planned for Tue 27 Oct", or "Planned on 3 days" with each upcoming day as a pill, and
-    /// "Change days"; a dashed button to plan it while it waits in the library.
-    @ViewBuilder
-    private func planRow(_ state: WorkoutPageState) -> some View {
-        let plans = state.plans
-        if !plans.isEmpty {
-            VStack(alignment: .leading, spacing: 8) {
-                HStack(spacing: 10) {
-                    Image(systemName: "calendar").accessibilityHidden(true)
-                    Text(plannedTitle(plans))
-                        .font(.poulpy(.subheadline).weight(.heavy))
-                    Spacer(minLength: 0)
-                    Button("workout.changeDays") { picking = true }
-                        .font(.poulpy(.subheadline).weight(.heavy))
-                        .padding(.horizontal, 14)
-                        .frame(minHeight: 40)
-                        .background(PoulpyColor.surface, in: Capsule())
-                        .buttonStyle(.plain)
+    /// A round filled button over the map: back, and the menu of share, copy and delete.
+    private func floatingButtons(_ state: WorkoutPageState) -> some View {
+        HStack {
+            Button { dismiss() } label: {
+                Image(systemName: "chevron.left").font(.system(size: 17, weight: .bold)).modifier(FloatingButtonLook())
+            }
+            .accessibilityLabel("action.back")
+            Spacer()
+            Menu {
+                ShareLink(
+                    item: WorkoutFileItem(make: { page.model.exportFile() }),
+                    preview: SharePreview(state.name)
+                ) {
+                    Label("action.share", systemImage: "square.and.arrow.up")
                 }
-                if plans.count > 1 {
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 6) {
-                            ForEach(plans, id: \.planId) { plan in
-                                Text(plan.daysAway == 0 ? NSLocalizedString("home.today", comment: "") : dayLabel(plan.dayMillis))
-                                    .font(.poulpy(.subheadline).weight(.heavy))
-                                    .padding(.horizontal, 12)
-                                    .frame(height: 32)
-                                    .background(PoulpyColor.surface, in: Capsule())
+                if state.editable {
+                    Button { cover = .copy } label: { Label("action.copy", systemImage: "doc.on.doc") }
+                }
+                Divider()
+                Button(role: .destructive) { deleting = true } label: { Label("action.delete", systemImage: "trash") }
+            } label: {
+                Image(systemName: "ellipsis").font(.system(size: 17, weight: .bold)).modifier(FloatingButtonLook())
+            }
+            .accessibilityLabel("action.more")
+        }
+    }
+
+    /// What the sheet holds, top to bottom: name and details, badges, Poulpy's pain note, planned days, stats, exercises, muscles.
+    private func details(_ state: WorkoutPageState) -> some View {
+        let equipment: [String] = state.equipment
+        return VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(state.name).font(PoulpyFont.title)
+                Text(state.details).font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+            }
+            FlowLayout(spacing: 6) {
+                badge(state.formatLabel, icon: "bolt.fill", primary: true)
+                ForEach(equipment, id: \.self) { badge($0, icon: "dumbbell.fill", primary: false) }
+            }
+            if !state.painNote.isEmpty {
+                HStack(spacing: 10) {
+                    Image(PoulpyDrawing.moodRecovering.imageName).resizable().scaledToFit().frame(width: 44, height: 44).accessibilityHidden(true)
+                    Text(state.painNote).font(.poulpy(.subheadline).weight(.bold)).foregroundStyle(PoulpyColor.onPrimaryContainer)
+                    Spacer(minLength: 0)
+                }
+                .padding(EdgeInsets(top: 10, leading: 10, bottom: 10, trailing: PoulpySpace.md))
+                .background(PoulpyColor.primaryContainer, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
+            }
+            planRow(state)
+            stats(state)
+            sectionLabel("workout.exercises")
+            ForEach(state.parts, id: \.key) { part in
+                partHeader(part)
+                ForEach(part.steps, id: \.key) { step in
+                    if let row = step.row {
+                        structureRow(row)
+                    } else if let group = step.repeatGroup {
+                        VStack(alignment: .leading, spacing: 6) {
+                            HStack(spacing: 8) {
+                                Image(systemName: "repeat").font(.system(size: 16, weight: .bold)).foregroundStyle(PoulpyColor.primary)
+                                Text("\(NSLocalizedString("builder.repeat", comment: "")) · \(group.timesLabel)")
+                                    .font(.poulpy(.headline))
+                                    .foregroundStyle(PoulpyColor.onPrimaryContainer)
+                            }
+                            .padding(EdgeInsets(top: 2, leading: 4, bottom: 2, trailing: 4))
+                            ForEach(group.rows, id: \.key) { row in
+                                structureRow(row)
                             }
                         }
+                        .padding(10)
+                        .background(PoulpyColor.primaryContainer, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
                     }
                 }
             }
+            if !state.muscles.isEmpty {
+                sectionLabel("workout.musclesWorked")
+                VStack(spacing: 10) {
+                    ForEach(state.muscles, id: \.label) { muscleRow($0) }
+                }
+                .padding(.horizontal, 4)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.bottom, PoulpySpace.lg)
+    }
+
+    private func sectionLabel(_ key: LocalizedStringKey) -> some View {
+        Text(key)
+            .textCase(.uppercase)
+            .font(.poulpy(.caption).weight(.heavy))
+            .foregroundStyle(PoulpyColor.onSurfaceVariant)
+            .padding(.leading, 4)
+            .padding(.top, 4)
+    }
+
+    /// The format (filled with the primary container) or one piece of equipment (outlined), as a small pill.
+    private func badge(_ text: String, icon: String, primary: Bool) -> some View {
+        HStack(spacing: 6) {
+            Image(systemName: icon).font(.system(size: 13, weight: .bold)).accessibilityHidden(true)
+            Text(text).font(.poulpy(.subheadline).weight(.heavy)).lineLimit(1)
+        }
+        .foregroundStyle(primary ? PoulpyColor.onPrimaryContainer : PoulpyColor.onSurface)
+        .padding(.leading, 10)
+        .padding(.trailing, PoulpySpace.md)
+        .frame(height: 30)
+        .background(primary ? PoulpyColor.primaryContainer : PoulpyColor.surface, in: Capsule())
+        .overlay(primary ? nil : Capsule().stroke(PoulpyColor.outline))
+    }
+
+    /// "Shoulders", a bar as long as its share of the busiest muscle in that muscle's heat, and "6 sets".
+    private func muscleRow(_ load: MuscleLoad) -> some View {
+        HStack(spacing: 10) {
+            Text(load.label).font(.poulpy(.subheadline).weight(.heavy)).lineLimit(1)
+                .foregroundStyle(PoulpyColor.onSurface)
+                .frame(width: 92, alignment: .leading)
+            GeometryReader { bar in
+                Capsule().fill(PoulpyColor.surfaceVariant)
+                    .overlay(alignment: .leading) {
+                        Capsule().fill(heatFill(Int(load.heat)) ?? PoulpyColor.heat3)
+                            .frame(width: bar.size.width * CGFloat(load.percent) / 100)
+                    }
+            }
+            .frame(height: 10)
+            Text(load.setsLabel).font(.poulpy(.subheadline).weight(.heavy)).monospacedDigit().lineLimit(1)
+                .foregroundStyle(PoulpyColor.onSurfaceVariant)
+                .frame(width: 52, alignment: .trailing)
+        }
+    }
+
+    /// "3 sessions planned" and "Next on Fri 30 Oct" with "Change days"; a dashed button to plan it while it waits in the library.
+    @ViewBuilder
+    private func planRow(_ state: WorkoutPageState) -> some View {
+        if let next = state.plans.first {
+            HStack(spacing: 10) {
+                Image(systemName: "calendar").font(.system(size: 18, weight: .semibold)).accessibilityHidden(true)
+                VStack(alignment: .leading, spacing: 0) {
+                    Text(String.localizedStringWithFormat(NSLocalizedString("workout.plannedSessions %lld", comment: ""), Int64(state.plans.count)))
+                        .font(.poulpy(.subheadline).weight(.heavy))
+                    Text(next.daysAway == 0 ? NSLocalizedString("workout.nextToday", comment: "") : L("workout.nextOn %@", dayLabel(next.dayMillis)))
+                        .font(.poulpy(.subheadline).weight(.bold))
+                        .monospacedDigit()
+                }
+                Spacer(minLength: 0)
+                Button("workout.changeDays") { picking = true }
+                    .font(.poulpy(.subheadline).weight(.heavy))
+                    .foregroundStyle(PoulpyColor.onSurface)
+                    .padding(.horizontal, PoulpySpace.md)
+                    .frame(minHeight: 40)
+                    .background(PoulpyColor.surface, in: Capsule())
+                    .buttonStyle(.plain)
+            }
             .foregroundStyle(PoulpyColor.onPrimaryContainer)
-            .padding(EdgeInsets(top: 6, leading: 14, bottom: 10, trailing: 6))
+            .padding(EdgeInsets(top: 10, leading: PoulpySpace.md, bottom: 10, trailing: 10))
             .background(PoulpyColor.primaryContainer, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
         } else {
             Button {
@@ -249,42 +330,31 @@ struct WorkoutPageView: View {
         .padding(.top, 8)
     }
 
-    /// Exercises are numbered in order, through parts and repeats; rests aren't.
-    private func exerciseNumbers(_ state: WorkoutPageState) -> [String: Int] {
-        let steps = state.parts.flatMap { $0.steps }
-        let rows = steps.flatMap { step in step.row.map { [$0] } ?? step.repeatGroup?.rows ?? [] }
-        var numbers: [String: Int] = [:]
-        for row in rows where !row.isRest { numbers[row.key] = numbers.count + 1 }
-        return numbers
-    }
-
     /// An exercise opens its details sheet; a rest shows a timer and opens nothing.
     @ViewBuilder
-    private func structureRow(_ row: WorkoutStepRow, number: Int?) -> some View {
+    private func structureRow(_ row: WorkoutStepRow) -> some View {
         if row.isRest {
-            stepRow(row, number: nil)
+            stepRow(row)
         } else {
             Button {
                 detailing = DetailTarget(slug: row.slug)
             } label: {
-                stepRow(row, number: number)
+                stepRow(row)
             }
             .buttonStyle(.plain)
         }
     }
 
-    private func stepRow(_ step: WorkoutStepRow, number: Int?) -> some View {
+    private func stepRow(_ step: WorkoutStepRow) -> some View {
         HStack(spacing: 12) {
-            Group {
-                if let number {
-                    Text("\(number)").font(.poulpy(.title3)).foregroundStyle(PoulpyColor.onPrimaryContainer)
-                } else {
-                    Image(systemName: "timer").font(.system(size: 15, weight: .bold)).foregroundStyle(PoulpyColor.onSurfaceVariant)
-                }
+            if step.isRest {
+                Image(systemName: "timer").font(.system(size: 16, weight: .bold)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+                    .frame(width: 40, height: 40)
+                    .background(PoulpyColor.surfaceVariant, in: Circle())
+                    .accessibilityHidden(true)
+            } else {
+                PatternBadge(pattern: step.pattern, size: 40)
             }
-            .frame(width: 32, height: 32)
-            .background(step.isRest ? PoulpyColor.surfaceVariant : PoulpyColor.primaryContainer, in: Circle())
-            .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 1) {
                 if let role = step.roleLabel {
                     Text(role)
@@ -301,8 +371,10 @@ struct WorkoutPageView: View {
                 Image(systemName: "chevron.right").foregroundStyle(PoulpyColor.onSurfaceVariant)
             }
         }
-        .padding(EdgeInsets(top: 10, leading: 12, bottom: 10, trailing: 12))
+        .padding(EdgeInsets(top: 8, leading: 12, bottom: 8, trailing: 12))
+        .frame(minHeight: 56)
         .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
+        .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(PoulpyColor.outline))
     }
 
     private func actions(_ state: WorkoutPageState) -> some View {
@@ -333,7 +405,6 @@ struct WorkoutPageView: View {
         }
         .padding(.horizontal, PoulpySpace.lg)
         .padding(.vertical, 12)
-        .background(PoulpyColor.surface.ignoresSafeArea())
         .overlay(alignment: .top) { Divider() }
     }
 }
@@ -379,5 +450,16 @@ func partIcon(_ kind: PartKind) -> String {
     case .warmUp: return "sun.max"
     case .coolDown: return "moon"
     default: return "bolt.fill"
+    }
+}
+
+/// The round, outlined look of the buttons floating over the map.
+private struct FloatingButtonLook: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .foregroundStyle(PoulpyColor.onSurface)
+            .frame(width: 40, height: 40)
+            .background(PoulpyColor.surface, in: Circle())
+            .overlay(Circle().stroke(PoulpyColor.outline))
     }
 }

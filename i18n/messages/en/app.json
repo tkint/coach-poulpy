@@ -54,11 +54,8 @@
     "sort": "Sort"
   },
   "workout": {
-    "planned": "Planned for {date}",
-    "plannedToday": "Planned for today",
     "plan": "Plan it for a day",
     "changeDays": "Change days",
-    "plannedDays": "{days, plural, one {Planned on # day} other {Planned on # days}}",
     "done": "Done",
     "last": "Last time",
     "usually": "Usually",
@@ -66,7 +63,18 @@
     "minutes": "{minutes, number} min",
     "start": "Start now",
     "gone": "This workout was deleted.",
-    "shareTitle": "Share workout"
+    "shareTitle": "Share workout",
+    "musclesWorked": "Muscles worked",
+    "exercises": "Exercises",
+    "less": "Less",
+    "more": "More",
+    "hurts": "Hurts",
+    "mapLabel": "Muscles worked: {muscles}",
+    "plannedSessions": "{count, plural, one {# session planned} other {# sessions planned}}",
+    "nextOn": "Next on {date}",
+    "nextToday": "Next is today",
+    "showExercises": "Show the exercises",
+    "showMap": "Show the body map"
   },
   "plan": {
     "title": "Plan {name}",

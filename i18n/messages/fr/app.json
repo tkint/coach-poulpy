@@ -54,11 +54,8 @@
     "sort": "Trier"
   },
   "workout": {
-    "planned": "Prévue le {date}",
-    "plannedToday": "Prévue aujourd’hui",
     "plan": "La prévoir pour un jour",
     "changeDays": "Changer les jours",
-    "plannedDays": "{days, plural, one {# jour prévu} many {# jours prévus} other {# jours prévus}}",
     "done": "Faite",
     "last": "Dernière fois",
     "usually": "D’habitude",
@@ -66,7 +63,18 @@
     "minutes": "{minutes, number} min",
     "start": "Commencer",
     "gone": "Cette séance a été supprimée.",
-    "shareTitle": "Partager la séance"
+    "shareTitle": "Partager la séance",
+    "musclesWorked": "Muscles sollicités",
+    "exercises": "Exercices",
+    "less": "Moins",
+    "more": "Plus",
+    "hurts": "Douleur",
+    "mapLabel": "Muscles sollicités : {muscles}",
+    "plannedSessions": "{count, plural, one {# séance prévue} many {# séances prévues} other {# séances prévues}}",
+    "nextOn": "Prochaine le {date}",
+    "nextToday": "Prochaine aujourd’hui",
+    "showExercises": "Afficher les exercices",
+    "showMap": "Afficher le schéma du corps"
   },
   "plan": {
     "title": "Prévoir {name}",
