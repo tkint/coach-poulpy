@@ -18,10 +18,17 @@
 .recap-head { display: flex; flex-direction: column; gap: 2px; }
 .recap-part { display: flex; flex-direction: column; gap: var(--cp-space-sm); }
 .recap-exercise { border-radius: var(--cp-radius-md); background: var(--cp-background); border: 1px solid var(--cp-outline); padding: 10px var(--cp-space-md) var(--cp-space-md); display: flex; flex-direction: column; gap: 10px; }
-.recap-exercise header { display: flex; align-items: baseline; gap: 10px; }
+.recap-exercise header { display: flex; align-items: center; gap: 10px; }
 .recap-exercise header strong { flex: 1; min-width: 0; font-weight: 800; font-size: 16px; line-height: 22px; }
-.recap-exercise header span { font-size: 13.5px; font-weight: 700; color: var(--cp-on-surface-variant); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.recap-exercise header .row-icon { width: 36px; height: 36px; align-self: center; }
+.recap-exercise header > span:last-child { font-size: 13.5px; font-weight: 700; color: var(--cp-on-surface-variant); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .recap-exercise .note { font-size: 14px; line-height: 19px; color: var(--cp-on-surface-variant); font-variant-numeric: tabular-nums; margin-top: -6px; }
+.recap-row { min-height: 64px; }
+.recap-row .row-icon { flex: none; }
+.recap-row .row-count { flex: none; display: flex; flex-direction: column; align-items: flex-end; text-align: right; font-variant-numeric: tabular-nums; }
+.recap-row .row-count strong { font-weight: 800; font-size: 16px; line-height: 22px; }
+.recap-row .row-count span { font-size: 13.5px; line-height: 18px; color: var(--cp-on-surface-variant); font-weight: 700; }
+.recap-row .row-count .skip { display: inline-flex; align-items: center; gap: var(--cp-space-xs); }
 .set-chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .set-chip { height: 30px; padding: 0 var(--cp-space-md) 0 var(--cp-space-xs); border-radius: var(--cp-radius-pill); background: var(--cp-primary-container); color: var(--cp-on-primary-container); font-size: 13.5px; font-weight: 800; font-variant-numeric: tabular-nums; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
 .set-chip b { width: 22px; height: 22px; border-radius: var(--cp-radius-pill); background: var(--cp-surface); color: var(--cp-on-surface); font-size: 12px; display: flex; align-items: center; justify-content: center; }
