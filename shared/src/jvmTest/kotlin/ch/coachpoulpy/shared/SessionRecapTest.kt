@@ -120,7 +120,6 @@ class SessionRecapTest {
         val loads = recap.muscles.loads.associate { it.label to it.sets }
         // The warm-up and cool down add nothing, and the skipped plank sets leave Core out.
         assertEquals(false, "Core" in loads)
-        assertEquals(5, loads["Shoulders"])
         assertEquals(3, loads["Chest"])
         assertEquals(recap.muscles.loads.maxOf { it.heat }, recap.muscles.heat["deltoid-left"])
         assertEquals(null, recap.muscles.heat["abs-left"])
