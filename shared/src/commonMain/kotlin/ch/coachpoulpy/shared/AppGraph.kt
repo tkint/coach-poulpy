@@ -45,7 +45,14 @@ class AppGraph(driverFactory: DriverFactory) {
         return HomeModel(store, compiler, catalog, languageCode, discardOpen = ::discardOpen, painActive = profile::painActive)
     }
     fun library(languageCode: String) = LibraryModel(store, compiler, catalog, languageCode)
-    fun workoutPage(workoutId: String, languageCode: String) = WorkoutPageModel(WorkoutId(workoutId), store, compiler, catalog, languageCode, units = ::units)
+    /** [memory] is the one the profile uses, so the page can show the worked muscles that hurt. */
+    fun workoutPage(workoutId: String, languageCode: String, memory: KeyValueStore): WorkoutPageModel {
+        val profile = profile(memory)
+        return WorkoutPageModel(
+            WorkoutId(workoutId), store, compiler, catalog, languageCode, units = ::units,
+            painAreas = { if (profile.painActive()) profile.pain.value?.areas.orEmpty().toList() else emptyList() },
+        )
+    }
     /** A workout file's text, read for the preview before it is added to the library. */
     fun importWorkout(fileText: String, languageCode: String) = WorkoutImport(fileText, store, catalog, languageCode)
     // CLEANUP: History's Poulpy header ignores pain or rehab, so it can show the ember side inside the blue-side window. Pass the profile's painActive here like home() does.

@@ -57,9 +57,9 @@ import ch.coachpoulpy.shared.BodyRegion
 import ch.coachpoulpy.shared.BodyView
 
 /** The shapes of one figure and view, parsed once: an area's path in the 120 × 268 box, and its key. */
-private class DrawnRegion(val region: BodyRegion, val path: Path)
+internal class DrawnRegion(val region: BodyRegion, val path: Path)
 
-private fun drawn(figure: BodyFigure, view: BodyView): List<DrawnRegion> =
+internal fun drawn(figure: BodyFigure, view: BodyView): List<DrawnRegion> =
     BodyMapShapes.regions(figure, view).map { DrawnRegion(it, PathParser().parsePathString(it.path).toPath()) }
 
 /**
