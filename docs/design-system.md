@@ -59,26 +59,27 @@ Baloo 2 for display and titles, Nunito for everything else. Platforms map each r
 ## Space, radius, motion
 
 - Spacing steps: 4, 8, 12, 16, 24, 32, 48 (`xs` to `xxxl`). Pick a step; never a value between them.
-- Radius: 10 for chips and small fields, 16 for cards, 24 for sheets, pill for buttons.
+- Radius: 8 for chips and small fields, 10 for cards and rows, 14 for sheets, pill for buttons. Small cards stay close to square so their text reads first.
+- Controls stay compact: a standard button is 44 high, a large one 52, an icon button 40 (its touch area stays 44), a small button 34. The side gutter of a screen is 16, and rows are 56 high with a 32 to 40 avatar.
 - Motion: the flip (700 ms with overshoot) is the one signature move, used only when Poulpy changes side. Mood shades fade in 300 ms. Everything else is 150 to 250 ms and plain. With reduced motion on, the loader slows to one turn in 10 s.
 
 ## Components
 
 | Component | Shape | Notes |
 | --- | --- | --- |
-| Primary button | 56 high, pill, `primary` | One per screen |
-| Tonal button | 56 high, pill, `primaryContainer` | Secondary actions |
-| Outline button | 56 high, pill, 2 px `outline` | Cancel, less important choices |
-| Grumpy button | 56 high, pill, `grumpy` | Only the catch-up action while Poulpy is ember |
-| Chip | 36 high, pill; on = `primary`, off = 1.5 px `outline` | Filters (muscle, equipment, format), with `aria-pressed` or selected state; `PoulpyChip` on both platforms |
+| Primary button | 44 high, pill, `primary` | One per screen |
+| Tonal button | 44 high, pill, `primaryContainer` | Secondary actions |
+| Outline button | 44 high, pill, 2 px `outline` | Cancel, less important choices |
+| Grumpy button | 44 high, pill, `grumpy` | Only the catch-up action while Poulpy is ember |
+| Chip | 32 high, pill; on = `primary`, off = 1.5 px `outline` | Filters (muscle, equipment, format), with `aria-pressed` or selected state; `PoulpyChip` on both platforms |
 | Choosing one value | A select field that opens a sheet for a longer list, or a native menu for a short one | Pills and chips are for filters and for view switches; a form asks for a value with a select, never a row of pills |
-| Search field | 48 high, pill, 1.5 px `outline`, `primary` while it holds text, a round clear button | `PillSearchField` on both platforms |
+| Search field | 44 high, pill, 1.5 px `outline`, `primary` while it holds text, a round clear button | `PillSearchField` on both platforms |
 | Stepper | Inset `surfaceVariant` box, label, minus and plus round buttons of 44 | Sets, reps, load, rest |
 | Pattern badge | 44 round, `primaryContainer`, one icon per movement pattern in `onPrimaryContainer` | Stands in for exercise pictures until real images exist |
 | Filter row | Search field, a row of chips, then the count line with one action at its right | `ListFilters` on both platforms, shared by the exercise and workout lists |
-| Poulpy card | 24 radius, `primaryContainer`, Poulpy happy on the blue side, a title, a line and one primary button | `PoulpyCard`: no results, an empty list |
+| Poulpy card | 14 radius, `primaryContainer`, Poulpy happy on the blue side, a title, a line and one primary button | `PoulpyCard`: no results, an empty list |
 | Item menu | A long press (iOS context menu) or ⋮; actions with icons, a divider, then the destructive one | Destructive items and their confirmation are `error` with an icon, never ember; the confirmation says what goes and what stays |
-| Plan sheet | 24 radius sheet, a month from Monday; past days dimmed, today outlined, planned days `primary` | `PlanSheet` on both platforms; tick several days, save once |
+| Plan sheet | 14 radius sheet, a month from Monday; past days dimmed, today outlined, planned days `primary` | `PlanSheet` on both platforms; tick several days, save once |
 | Error banner | `error` tint, icon plus text | Never ember |
 | Loader | Poulpy from above, a blue outline of eight lobes, one turn every 2.4 s | `PoulpyLoader` on both platforms; replaces spinners |
 
@@ -88,9 +89,9 @@ The fields every form is built from. Reference mockups: `profile-edit`, the thre
 
 | Field | Shape | Behaviour |
 | --- | --- | --- |
-| [Text field](https://tkint.github.io/coach-poulpy/mobile-components#text-field) | 52 high, 10 radius, 1.5 px `outline`, label above, `primary` outline on focus | Free text: a name. A note under it in `onSurfaceVariant` |
+| [Text field](https://tkint.github.io/coach-poulpy/mobile-components#text-field) | 46 high, 8 radius, 1.5 px `outline`, label above, `primary` outline on focus | Free text: a name. A note under it in `onSurfaceVariant` |
 | [Select field](https://tkint.github.io/coach-poulpy/mobile-components#select-field) | Same box, the chosen value (or a muted "Not set") and a chevron | Tapping opens a sheet; nothing else is shown on the screen. Never a row of pills |
-| [Option sheet](https://tkint.github.io/coach-poulpy/mobile-components#option-sheet) | 24 radius sheet, a title, one row per choice | Single choice: a radio and the sheet closes on tap. Several choices: checkboxes and a Done button. A choice that needs text (Custom pronouns) shows its text field inside the sheet |
+| [Option sheet](https://tkint.github.io/coach-poulpy/mobile-components#option-sheet) | 14 radius sheet, a title, one row per choice | Single choice: a radio and the sheet closes on tap. Several choices: checkboxes and a Done button. A choice that needs text (Custom pronouns) shows its text field inside the sheet |
 | [Number field](https://tkint.github.io/coach-poulpy/mobile-components#number-field) | Text field with a unit at its right (`bpm`, `kg`, `cm`) | Selects all its text on focus, opens the numeric keyboard, checks the range on leaving. Optional round − and + buttons on both sides (the `number-entry` pattern) for small nudges. Imperial height is two number fields, ft and in. Every numeric value in the app uses it, including the builder's sets, reps, rest between sets, rest and weight (`builder-sets-edit-step`, `builder-circuit-edit-step`); the − and + step by the same amount as before, and the typed value keeps the same limits |
 | [Step slider](https://tkint.github.io/coach-poulpy/mobile-components#step-slider) | A bar of dots, `•--•--•--•--•`, the current label above it, the two ends named below | A fixed scale of five or fewer named steps, inside an option sheet |
 | Password field (draft, #272) | Text field with a show or hide eye button inside its right end; a hint under it (`8 characters or more.`) | `password-field` in the mockups. Errors under a field are `error` text with an icon and the field outline turns `error`; a message about the whole form is an error card (`error` outline and text on `surfaceVariant`, with an icon) |
@@ -98,7 +99,7 @@ The fields every form is built from. Reference mockups: `profile-edit`, the thre
 | [Empty chart card](https://tkint.github.io/coach-poulpy/mobile-components#empty-chart-card) | `PoulpyCard` shape with Poulpy on the blue side, a line and the one action that adds the first entry | Shown instead of the chart when nothing is logged |
 | Body map | A front and a back figure, drawn in the build the person chose in the profile, as a muscle chart with transparent skin, side by side, each area a shape that fills with `primary` when picked; left and right are separate areas | Every area is a checkbox with a name ("Left knee"), so a screen reader and the text summary under the figure say the same. Left is the person's left: the right half of the front figure and the left half of the back one. Used to say where it hurts, and to show what an exercise works |
 | Body map heat map (draft, #244) | The body map read-only for a whole workout: areas it doesn't work are outlines only, worked areas fill with `heat1`, `heat2` or `heat3` by sets per muscle group compared with the most-worked one (below 40 %, from 40 %, from 75 %); a worked area that hurts gets a 3 px `pain` outline on a `background` halo, drawn above its neighbours; a Less / More legend, with Hurts when something hurts | The figure is one image whose label is the text summary ("shoulders and triceps most, then chest, back and biceps, a little core"), and the heat steps differ in lightness, so nothing depends on colour alone. On the workout page, with the format and equipment badges at its bottom right |
-| Details sheet (draft, #244) | 24 radius sheet over the body map with no scrim; a handle, the workout name at its top, its content, then the action bar | Three stops: dragged down it shows only the name and actions under a full-screen map; half up by default; full screen its content scrolls. The back and menu buttons float above it at every stop |
+| Details sheet (draft, #244) | 14 radius sheet over the body map with no scrim; a handle, the workout name at its top, its content, then the action bar | Three stops: dragged down it shows only the name and actions under a full-screen map; half up by default; full screen its content scrolls. The back and menu buttons float above it at every stop |
 | Plan summary (draft, #244) | `primaryContainer` row: a calendar icon, "3 sessions planned" over "Next on Fri 30 Oct", and a Change days button | Replaces one pill per planned day on the workout page |
 
 ## Screens
@@ -122,7 +123,7 @@ Every icon is from [Lucide](https://lucide.dev), on every platform ([ADR 0024](a
 
 ## Accessibility
 
-- Touch targets at least 44 by 44.
+- Touch targets at least 44 by 44; a visually smaller control, such as the 40 icon button, extends its touch area to 44.
 - Text contrast at least 4.5:1, including small grey labels; 3:1 only for text 24 px and up.
 - Every icon-only button has a label; decorative drawings of Poulpy are hidden from screen readers, and a pose that carries meaning has a description.
 - Nothing depends on colour alone: mood changes also change Poulpy's face and words, errors carry an icon.

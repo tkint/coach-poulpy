@@ -144,13 +144,13 @@ object PoulpySpace {
 }
 
 object PoulpyRadius {
-    val sm = 10.dp
-    val md = 16.dp
-    val lg = 24.dp
+    val sm = 8.dp
+    val md = 10.dp
+    val lg = 14.dp
     val pill = 999.dp
 }
 
-internal val PoulpyShapes = Shapes(small = RoundedCornerShape(10.dp), medium = RoundedCornerShape(16.dp), large = RoundedCornerShape(24.dp))
+internal val PoulpyShapes = Shapes(small = RoundedCornerShape(8.dp), medium = RoundedCornerShape(10.dp), large = RoundedCornerShape(14.dp))
 
 object PoulpyMotion {
     const val flipMillis = 700
