@@ -13,6 +13,7 @@ function apply() {
   else delete document.documentElement.dataset.theme
 }
 
+// CLEANUP: stopgap until #353 picks how mockups handle overlays and states.
 // A mockup shown behind a sheet or dialog in another mockup (`?embedded`) drops its device frame.
 if (new URLSearchParams(location.search).has('embedded')) document.documentElement.dataset.embedded = ''
 
