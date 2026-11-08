@@ -2,7 +2,8 @@ name: Docs site
 
 # Builds and checks the docs site on every pull request so a broken page, a dead link or an
 # unpublished guideline fails CI. Main is published at the root of the gh-pages branch, and each
-# PR as a preview under pr-preview/pr-<number>/, linked from a comment and removed on close.
+# PR as a preview under pr-preview/pr-<number>/, linked from a comment and removed by the cleanup
+# job when the PR closes.
 # GitHub Pages serves the gh-pages branch (Settings > Pages > Deploy from a branch).
 on:
   pull_request:
@@ -112,9 +113,11 @@ jobs:
 
   preview:
     name: Preview this PR on GitHub Pages
-    # A fork's PR gets a read-only token, so it can't publish a preview.
+    # A fork's PR gets a read-only token, so it can't publish a preview. A closed PR is cleaned up
+    # by the cleanup job instead.
     if: >-
       github.event_name == 'pull_request' &&
+      github.event.action != 'closed' &&
       github.event.pull_request.head.repo.full_name == github.repository &&
       !cancelled() && needs.build.result != 'failure'
     # Not on the link check, so a dead link doesn't hold back the preview the owner reviews.
@@ -132,11 +135,10 @@ jobs:
           # The whole history, to list what the PR changes since it left main.
           fetch-depth: 0
       - uses: actions/download-artifact@v5
-        if: github.event.action != 'closed'
         with:
           name: site
           path: dist
-      # Publishes dist under pr-preview/pr-<number>/ and comments the link; removes it on close.
+      # Publishes dist under pr-preview/pr-<number>/ and comments the link.
       - uses: rossjrw/pr-preview-action@v1
         id: preview
         with:
@@ -147,7 +149,6 @@ jobs:
       # A second comment, kept up to date: the docs pages, sections and mockups this PR changes or
       # builds, linked into its preview, so the owner reviews on the site. Agents write none of their own.
       - name: List the docs pages to review
-        if: github.event.action != 'closed'
         env:
           PR_BODY: ${{ github.event.pull_request.body }}
         run: >-
@@ -156,7 +157,47 @@ jobs:
           ${{ steps.preview.outputs.preview-url }}
           dist > review.md
       - uses: marocchino/sticky-pull-request-comment@v2
-        if: github.event.action != 'closed'
         with:
           header: docs-review
           path: review.md
+
+  cleanup:
+    name: Remove this PR's preview from GitHub Pages
+    # Runs when the PR closes, merged or not. A fork's PR has no preview to remove: its token is
+    # read-only, so it never published one.
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.action == 'closed' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    concurrency:
+      group: gh-pages
+      cancel-in-progress: false
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: gh-pages
+          path: pages
+      # Removes every tracked and untracked file of the folder, the .nojekyll ones included,
+      # then commits the deletion. Does nothing when the PR never got a preview.
+      - name: Remove pr-preview/pr-<number>/
+        working-directory: pages
+        env:
+          PREVIEW_DIR: pr-preview/pr-${{ github.event.number }}
+        run: |
+          if [ ! -e "$PREVIEW_DIR" ] && [ -z "$(git ls-files -- "$PREVIEW_DIR")" ]; then
+            echo "No preview at $PREVIEW_DIR to remove"
+            exit 0
+          fi
+          git rm -r -q --ignore-unmatch -- "$PREVIEW_DIR"
+          rm -rf -- "$PREVIEW_DIR"
+          if git diff --cached --quiet; then
+            echo "Nothing to commit for $PREVIEW_DIR"
+            exit 0
+          fi
+          git -c user.name="github-actions[bot]" \
+            -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+            commit -m "Remove preview for PR #${{ github.event.number }}"
+          git push origin gh-pages
