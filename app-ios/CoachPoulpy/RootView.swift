@@ -9,6 +9,10 @@ struct RootView: View {
     let account: AccountModel
     @StateObject private var settings: Observed<SettingsModel, SettingsUiState>
     @StateObject private var accountState: Observed<AccountModel, AccountState>
+    @StateObject private var confirmedElsewhere: Observed<AccountModel, Bool>
+    @Environment(\.scenePhase) private var scenePhase
+    /// Listens for the email link opened on another device, while the app is in front and the email waits.
+    @State private var watchingConfirmation: Cancellable?
     /// A sign-in, sign-up or email-link screen shown over the tabs.
     @State private var accountFlow: AccountFlowStart?
     @State private var tab = AppTab.home
@@ -23,6 +27,7 @@ struct RootView: View {
         self.account = account
         _settings = StateObject(wrappedValue: graph.observedSettings())
         _accountState = StateObject(wrappedValue: account.observedState())
+        _confirmedElsewhere = StateObject(wrappedValue: account.observedConfirmedElsewhere())
     }
 
     var body: some View {
@@ -81,6 +86,25 @@ struct RootView: View {
             AccountFlowView(account: account, start: start.step) { accountFlow = nil }
         }
         .modifier(ImportPresenter(graph: graph, incoming: $incoming))
+        // The email confirmed on another device while the app is open: Email confirmed, over Settings.
+        .onAppear(perform: updateConfirmationWatch)
+        .onChange(of: scenePhase) { _ in updateConfirmationWatch() }
+        .onReceive(accountState.$value) { _ in updateConfirmationWatch() }
+        .onReceive(confirmedElsewhere.$value) { confirmed in
+            guard confirmed else { return }
+            account.confirmedShown()
+            openFromLink("confirmed")
+        }
+    }
+
+    private func updateConfirmationWatch() {
+        let waiting = accountState.value is AccountStatePending && scenePhase == .active
+        if waiting, watchingConfirmation == nil {
+            watchingConfirmation = account.watchConfirmation()
+        } else if !waiting, let watching = watchingConfirmation {
+            watching.cancel()
+            watchingConfirmation = nil
+        }
     }
 
     /// Universal Links need the Associated Domains entitlement and app.coach-poulpy.com's apple-app-site-association (#24).

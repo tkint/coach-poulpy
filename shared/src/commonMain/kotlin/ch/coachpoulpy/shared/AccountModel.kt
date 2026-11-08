@@ -117,6 +117,13 @@ class AccountModel(
     /** The first upload, while Email confirmed or Welcome back shows it; null otherwise. */
     val upload: StateFlow<UploadProgress?> = _upload.asStateFlow()
 
+    private val _confirmedElsewhere = MutableStateFlow(false)
+    /**
+     * True once the link opened on another device, such as a computer, signed this phone in: the app
+     * shows Email confirmed with the upload over whatever is on screen, then calls [confirmedShown].
+     */
+    val confirmedElsewhere: StateFlow<Boolean> = _confirmedElsewhere.asStateFlow()
+
     private var syncing: Job? = null
     private var watching: Job? = null
     private val checking = Mutex()
@@ -132,6 +139,12 @@ class AccountModel(
 
     fun watch(onChange: (AccountState) -> Unit): Cancellable = state.watchIn(scope, onChange)
     fun watchUpload(onChange: (UploadProgress?) -> Unit): Cancellable = upload.watchIn(scope, onChange)
+    fun watchConfirmedElsewhere(onChange: (Boolean) -> Unit): Cancellable = confirmedElsewhere.watchIn(scope, onChange)
+
+    /** Email confirmed is on screen. */
+    fun confirmedShown() {
+        _confirmedElsewhere.value = false
+    }
 
     /** The email to fill in the forms with: the one waiting for confirmation, or the last one used. */
     val knownEmail: String? get() = pending()?.email ?: memory.getString(EMAIL)
@@ -188,7 +201,7 @@ class AccountModel(
         if (!client.confirmEmail(token)) return@offlineAs ConfirmResult.LINK_EXPIRED
         if (pending() == null) return@offlineAs ConfirmResult.CONFIRMED_SIGN_IN
         // The check on Check your email may have signed in a moment before.
-        if (checkConfirmed() || _state.value is AccountState.SignedIn) ConfirmResult.CONFIRMED else ConfirmResult.CONFIRMED_SIGN_IN
+        if (checkConfirmed(elsewhere = false) || _state.value is AccountState.SignedIn) ConfirmResult.CONFIRMED else ConfirmResult.CONFIRMED_SIGN_IN
     }
 
     /**
@@ -197,7 +210,9 @@ class AccountModel(
      * offline. Asking costs no sign-in try, so the address is never throttled by it; a phone that
      * signed up before the key existed tries the password instead.
      */
-    suspend fun checkConfirmed(): Boolean = checking.withLock {
+    suspend fun checkConfirmed(): Boolean = checkConfirmed(elsewhere = true)
+
+    private suspend fun checkConfirmed(elsewhere: Boolean): Boolean = checking.withLock {
         offlineAs(false) {
             val waiting = pending() ?: return@offlineAs false
             if (waiting.key != null && !client.isConfirmed(waiting.key)) return@offlineAs false
@@ -205,6 +220,7 @@ class AccountModel(
                 SignInAnswer.SignedIn -> {
                     forgetPending()
                     signedIn(waiting.email)
+                    if (elsewhere) _confirmedElsewhere.value = true
                     true
                 }
                 // Confirmed, but the password changed since: the person signs in themselves.
@@ -218,10 +234,11 @@ class AccountModel(
     }
 
     /**
-     * While Check your email is on screen: listens for the server to say the link was opened, on any
-     * device, and then signs in, turning the state [AccountState.SignedIn]. A dropped stream is
+     * While the app is in front and the email waits: listens for the server to say the link was
+     * opened, on any device, and then signs in, turning the state [AccountState.SignedIn] and
+     * [confirmedElsewhere] true. A dropped stream is
      * opened again after [reconnectAfter], with a check first for what it missed. Cancel it when
-     * the screen goes. A sign-up from before the key existed is only checked once, since trying the
+     * the app goes to the background. A sign-up from before the key existed is only checked once, since trying the
      * password again and again would lock the address.
      */
     fun watchConfirmation(): Cancellable {

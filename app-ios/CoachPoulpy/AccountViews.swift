@@ -29,6 +29,12 @@ extension AccountModel {
         Observed(self, current: state.value as! AccountState, watch: watch, close: { _ in })
     }
 
+    func observedConfirmedElsewhere() -> Observed<AccountModel, Bool> {
+        Observed(self, current: (confirmedElsewhere.value as? KotlinBoolean)?.boolValue ?? false, watch: { onChange in
+            self.watchConfirmedElsewhere { onChange($0.boolValue) }
+        }, close: { _ in })
+    }
+
     func observedUpload() -> Observed<AccountModel, UploadProgress?> {
         Observed(self, current: upload.value as? UploadProgress, watch: watchUpload, close: { _ in })
     }
@@ -480,7 +486,6 @@ private struct CheckEmailScreen: View {
     @State private var sentAgain: Bool
     @State private var offline = false
     @State private var changingAddress = false
-    @State private var watching: Cancellable?
     @StateObject private var state: Observed<AccountModel, AccountState>
 
     init(account: AccountModel, resent: Bool, onStep: @escaping (String) -> Void, onClose: @escaping () -> Void) {
@@ -515,16 +520,10 @@ private struct CheckEmailScreen: View {
                 onStep("sign-up")
             }
         }
-        // The link may be opened on a computer: listen for it while this screen is shown.
-        .onAppear { watching = account.watchConfirmation() }
-        .onDisappear { watching?.cancel() }
+        // Opening the link elsewhere shows Email confirmed from RootView.
         .onReceive(state.$value) { value in
-            if value is AccountStateSignedIn {
-                onStep("confirmed")
-            } else if value is AccountStateGuest, !changingAddress {
-                // Confirmed, but the password changed meanwhile: sign in with the new one.
-                onStep("sign-in")
-            }
+            // Confirmed, but the password changed meanwhile: sign in with the new one.
+            if value is AccountStateGuest, !changingAddress { onStep("sign-in") }
         }
     }
 }
@@ -615,7 +614,8 @@ private struct UploadScreen: View {
             Poulpy(pose: pose, line: line)
             Intro(title: L(title), body: bodyKey.map { Text($0) })
             VStack(alignment: .leading, spacing: 10) {
-                Text("account.uploading").font(.poulpy(.headline).weight(.heavy))
+                // Nothing to send, or all of it sent: say so rather than "Sending" over a full bar.
+                Text(LocalizedStringKey(progress?.done ?? true ? "account.uploaded" : "account.uploading")).font(.poulpy(.headline).weight(.heavy))
                 ProgressView(value: progress.map { $0.total == 0 ? 1 : Double($0.sent) / Double($0.total) } ?? 1)
                     .tint(PoulpyColor.primary)
                 if let progress {
@@ -627,7 +627,7 @@ private struct UploadScreen: View {
             .padding(16)
             .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 16))
             .overlay(RoundedRectangle(cornerRadius: 16).stroke(PoulpyColor.outline, lineWidth: 1))
-            FieldNote("account.uploadOffline")
+            if progress?.done == false { FieldNote("account.uploadOffline") }
         }
     }
 }

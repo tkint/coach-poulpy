@@ -166,6 +166,8 @@ class AccountModelTest {
         linkOpened(true)
 
         assertEquals(ConfirmResult.CONFIRMED, account.confirmEmail("token"))
+        // Opened on this phone: its own screen moves on, nothing else needs showing.
+        assertEquals(false, account.confirmedElsewhere.value)
 
         account.becomes { it is AccountState.SignedIn && it.upToDate }
         assertNull(secrets.getSecret(AccountModel.PENDING))
@@ -217,6 +219,10 @@ class AccountModelTest {
         val watching = account.watchConfirmation()
         account.becomes { it is AccountState.SignedIn }
         watching.cancel()
+        // The app shows Email confirmed over whatever is on screen, once.
+        assertTrue(account.confirmedElsewhere.value)
+        account.confirmedShown()
+        assertEquals(false, account.confirmedElsewhere.value)
         assertEquals(3, streams)
         assertEquals(1, calls.count { it == "POST /oauth/token" })
     }

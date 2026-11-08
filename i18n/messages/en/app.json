@@ -618,6 +618,7 @@
     "confirmedPoulpy": "Lifting your training into the cloud. Eight tentacles, no waiting.",
     "uploading": "Sending your training…",
     "uploadProgress": "{done, number} of {total, number} sent",
+    "uploaded": "All sent: your training is in your account.",
     "uploadOffline": "It carries on when you’re back online.",
     "continue": "Continue",
     "welcomeBackTitle": "Welcome back",
