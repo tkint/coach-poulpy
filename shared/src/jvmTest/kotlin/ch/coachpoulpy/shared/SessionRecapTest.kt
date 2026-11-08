@@ -26,9 +26,12 @@ import ch.coachpoulpy.data.local.DriverFactory
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 import kotlin.test.assertNull
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.Duration
 import kotlin.time.Instant
 
 /** Opening a finished session lists what was done, part by part, from its events (`session-recap-*` mockups). */
@@ -47,7 +50,7 @@ class SessionRecapTest {
      * Runs [workout] to the end as one session: each phase is done, except those at [skipped], which are skipped.
      * [extra] is logged at the end, before the session finishes.
      */
-    private fun run(id: String, workout: Workout, skipped: Set<Int> = emptySet(), extra: List<SessionEvent> = emptyList()): SessionRecap {
+    private fun run(id: String, workout: Workout, skipped: Set<Int> = emptySet(), extra: List<SessionEvent> = emptyList(), phaseLength: Duration = 1.minutes): SessionRecap {
         val phases = graph.compiler.compile(workout).phases
         graph.store.startSession(
             SessionRecord(SessionId(id), SessionSource.GUIDED, start, workout = WorkoutRef(workout.id, workout.version)),
@@ -58,10 +61,10 @@ class SessionRecapTest {
         phases.indices.forEach { index ->
             // A reading goes in the log while its phase runs, so just before that phase ends.
             extra.filterIsInstance<SessionEvent.Sample>().filter { (it.at - start).inWholeMinutes.toInt() == index }.forEach { graph.store.appendEvent(id, it) }
-            val at = start + (index + 1).minutes
+            val at = start + phaseLength * (index + 1)
             graph.store.appendEvent(id, if (index in skipped) SessionEvent.PhaseSkipped(at, index) else SessionEvent.PhaseCompleted(at, index))
         }
-        val end = start + (phases.size).minutes
+        val end = start + phaseLength * phases.size
         graph.store.appendEvent(id, SessionEvent.Finished(end))
         graph.store.finishSession(id, end)
         return assertNotNull(graph.sessionRecap(id, "en"))
@@ -212,6 +215,14 @@ class SessionRecapTest {
         assertEquals("0.1\u00a0km · 9.0\u00a0km/h · 150 bpm", block.rows[1].detail)
         assertEquals(SessionKind.TREADMILL, recap.kind)
         assertEquals("Time", recap.tiles.first().label)
+    }
+
+    @Test
+    fun aPhaseTappedThroughStillShowsItsTime() {
+        // Every phase ends 400 ms after the last: the times round to the second and never vanish.
+        val recap = run("quick", sets(), phaseLength = 400.milliseconds)
+        assertTrue(recap.parts.flatMap { it.rows }.all { it.time.isNotEmpty() })
+        assertTrue(recap.parts.all { it.time.isNotEmpty() })
     }
 
     @Test
