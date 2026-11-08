@@ -55,6 +55,10 @@ class AppGraph(driverFactory: DriverFactory) {
     fun sessionShareCard(sessionId: String, units: UnitSystem, languageCode: String): ShareCard? =
         SessionShare(store, compiler, languageCode).card(sessionId, units)
 
+    /** What opening a finished session shows: its figures and the exercises it went through; null when the session is gone. */
+    fun sessionRecap(sessionId: String, languageCode: String): SessionRecap? =
+        SessionRecaps(store, compiler, catalog, languageCode, ::units).recap(sessionId)
+
     /** The .FIT file of a finished session, to import into Garmin Connect or upload to Strava; null when it never started. */
     fun sessionFitFile(sessionId: String): SessionFitFile? =
         SessionFitExport(store, compiler, catalog).file(sessionId, TimeZone.currentSystemDefault())

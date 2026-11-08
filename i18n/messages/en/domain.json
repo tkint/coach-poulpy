@@ -219,6 +219,27 @@
     "quote": "“Worth it. Probably.”",
     "championQuote": "“Eight tentacles. No regrets.”"
   },
+  "recap": {
+    "tileDuration": "Duration",
+    "tileSets": "Sets done",
+    "tileRounds": "Rounds",
+    "tileSkipped": "Skipped",
+    "tileTime": "Time",
+    "tileDistance": "Distance",
+    "tileSpeed": "Speed",
+    "tileHeartRate": "Avg heart rate",
+    "tileMaxHeartRate": "Max heart rate",
+    "tileEnergy": "Energy",
+    "tileSteps": "Steps (estimated)",
+    "listExercises": "Exercises",
+    "listSteps": "Steps",
+    "setsDone": "{done, number} of {planned, plural, one {# set} other {# sets}}",
+    "skippedSets": "{count, plural, one {# set skipped} other {# sets skipped}}",
+    "skippedRounds": "{count, plural, one {# round skipped} other {# rounds skipped}}",
+    "skippedStep": "Skipped",
+    "bpm": "{bpm, number} bpm",
+    "kcal": "{kcal, number} kcal"
+  },
   "player": {
     "unitReps": "{count, plural, one {rep} other {reps}}",
     "unitAtLoad": "{unit} at {load}",

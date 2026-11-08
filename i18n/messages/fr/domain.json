@@ -219,6 +219,27 @@
     "quote": "« Ça valait le coup. Probablement. »",
     "championQuote": "« Huit tentacules. Zéro regret. »"
   },
+  "recap": {
+    "tileDuration": "Durée",
+    "tileSets": "Séries faites",
+    "tileRounds": "Tours",
+    "tileSkipped": "Passées",
+    "tileTime": "Durée",
+    "tileDistance": "Distance",
+    "tileSpeed": "Vitesse",
+    "tileHeartRate": "FC moyenne",
+    "tileMaxHeartRate": "FC max",
+    "tileEnergy": "Énergie",
+    "tileSteps": "Pas (estimés)",
+    "listExercises": "Exercices",
+    "listSteps": "Étapes",
+    "setsDone": "{done, number} sur {planned, plural, one {# série} many {# séries} other {# séries}}",
+    "skippedSets": "{count, plural, one {# série passée} many {# séries passées} other {# séries passées}}",
+    "skippedRounds": "{count, plural, one {# tour passé} many {# tours passés} other {# tours passés}}",
+    "skippedStep": "Passée",
+    "bpm": "{bpm, number} bpm",
+    "kcal": "{kcal, number} kcal"
+  },
   "player": {
     "unitReps": "{count, plural, one {répétition} many {répétitions} other {répétitions}}",
     "unitAtLoad": "{unit} à {load}",

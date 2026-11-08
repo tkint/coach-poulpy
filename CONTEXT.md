@@ -111,6 +111,10 @@ In code, the header of a session (its id, source, start and end, workout and not
 One thing that happened during a session (a phase started, a set logged, a pause, a sample), stored in order and never changed.
 _Avoid_: Log entry
 
+**Session recap**:
+What opening a finished session shows: its figures, then each part of the workout with the exercises actually done in it (sets, reps or time, load, what was skipped). It is built from the session's events and never edited. In code, `SessionRecap`.
+_Avoid_: Session detail, session summary (that is the figures alone)
+
 **Timeline**:
 The flat run of work, rest and transition phases a workout compiles to before a session runs it. A free recording's timeline is open-ended: it grows one manual phase each time the user ends a step, and the pause between two steps is their rest.
 _Avoid_: Playlist, sequence

@@ -402,67 +402,19 @@ struct SessionDetailView: View {
     @State private var deleting = false
     @State private var sharing = false
     @State private var saving: FitDocument?
+    @State private var recap: SessionRecap?
     @Environment(\.unitSystem) private var units
     @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 14) {
-                HStack(spacing: 14) {
-                    Image("PoulpyPoseExhausted")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 96, height: 86)
-                        .accessibilityHidden(true)
-                    VStack(alignment: .leading, spacing: 2) {
-                        if let type = session.formatLabel {
-                            Text(type.uppercased()).font(PoulpyFont.label).kerning(1)
-                        }
-                        Text(dateTime(session.startedAtMillis)).font(PoulpyFont.headline)
-                    }
-                    Spacer(minLength: 0)
-                }
-                .foregroundStyle(PoulpyColor.onPrimaryContainer)
-                .padding(EdgeInsets(top: 16, leading: 18, bottom: 16, trailing: 18))
-                .background(PoulpyColor.primaryContainer, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
-
-                VStack(spacing: 0) {
-                    line("treadmill.summaryDuration", clock(session.activeSeconds))
-                    if session.kind == .workout, let done = session.setsDone {
-                        line("history.setsDone", session.setsPlanned.map { "\(done.intValue) / \($0.intValue)" } ?? "\(done.intValue)")
-                    }
-                    if session.kind == .workout, let skipped = session.setsSkipped, skipped.intValue > 0 {
-                        line("history.setsSkipped", "\(skipped.intValue)")
-                    }
-                    if let distance = session.distanceMeters {
-                        line("metric.distance", Units.shared.distance(meters: distance.doubleValue, system: units, decimals: 2).text)
-                    }
-                    if let speed = session.averageSpeedKmh {
-                        line("treadmill.summaryAverageSpeed", Units.shared.speed(kmh: speed.doubleValue, system: units).text)
-                    }
-                    if let hr = session.averageHeartRateBpm {
-                        line("treadmill.summaryAverageHr", "\(hr.intValue) bpm")
-                    }
-                    if let hr = session.maxHeartRateBpm {
-                        line("treadmill.summaryMaxHr", "\(hr.intValue) bpm")
-                    }
-                    if let kcal = session.energyKcal {
-                        line("metric.energy", "\(kcal.intValue) kcal")
-                    }
-                    if let steps = session.estimatedSteps {
-                        line("metric.steps", "≈ \(steps.intValue)")
-                    }
-                }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 4)
-                .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
-                .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(PoulpyColor.outline))
+        Group {
+            if let recap {
+                SessionRecapView(recap: recap, dateLine: [dateTime(recap.startedAtMillis), recap.formatLabel].compactMap { $0 }.joined(separator: " · "))
+            } else {
+                PoulpyColor.background
             }
-            .padding(.horizontal, PoulpySpace.lg)
-            .padding(.vertical, 12)
         }
-        .background(PoulpyColor.background)
-        .navigationTitle(session.title)
+        .onAppear { recap = graph.sessionRecap(sessionId: session.id, languageCode: Language.code) }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             Button {
@@ -542,15 +494,6 @@ struct SessionDetailView: View {
         .padding(.vertical, 10)
         .frame(minHeight: PoulpySize.row)
         .contentShape(Rectangle())
-    }
-
-    private func line(_ label: String, _ value: String) -> some View {
-        HStack {
-            Text(LocalizedStringKey(label)).font(.poulpy(.body).weight(.semibold)).foregroundStyle(PoulpyColor.onSurfaceVariant)
-            Spacer()
-            Text(value).font(.poulpy(.body).weight(.heavy)).monospacedDigit()
-        }
-        .padding(.vertical, 12)
     }
 }
 
