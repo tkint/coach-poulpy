@@ -3,6 +3,16 @@ package ch.coachpoulpy.android.ui
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
@@ -93,6 +103,31 @@ internal fun WorkoutBodyMap(
     Row(modifier.semantics(mergeDescendants = true) { contentDescription = description }, horizontalArrangement = Arrangement.spacedBy(PoulpySpace.sm)) {
         HeatMapFigure(figure, BodyView.FRONT, heat, hurting, figureWidth)
         HeatMapFigure(figure, BodyView.BACK, heat, hurting, figureWidth)
+    }
+}
+
+/** Where the figures start below the status bar: the legend and the gap under it. */
+private val MAP_FIGURES_TOP = PoulpySpace.lg + 16.dp + PoulpySpace.lg
+
+/**
+ * The map behind a [DetailSheet]: a legend, then the front and back figures, as tall as the [room] above the sheet allows.
+ * Collapsed, it fills the room: as wide as two figures side by side fit the screen. Shared by the workout page and the session recap.
+ */
+@Composable
+internal fun HeatMapPanel(
+    room: Dp,
+    figure: BodyFigure,
+    heat: Map<String, Int>,
+    hurting: Set<String>,
+    description: String,
+) {
+    val statusBar = with(LocalDensity.current) { WindowInsets.statusBars.getTop(this).toDp() }
+    val maxFigure = (LocalConfiguration.current.screenWidthDp.dp - PoulpySpace.lg * 2 - PoulpySpace.sm) / 2
+    val figureWidth = ((room - statusBar - MAP_FIGURES_TOP - PoulpySpace.md) / (BodyMapBox.HEIGHT / BodyMapBox.WIDTH)).coerceIn(56.dp, maxFigure)
+    Column(Modifier.fillMaxWidth().statusBarsPadding().padding(top = PoulpySpace.lg), horizontalAlignment = Alignment.CenterHorizontally) {
+        HeatLegend(showPain = hurting.isNotEmpty())
+        Spacer(Modifier.height(PoulpySpace.lg))
+        WorkoutBodyMap(figure, heat, hurting, description, figureWidth)
     }
 }
 

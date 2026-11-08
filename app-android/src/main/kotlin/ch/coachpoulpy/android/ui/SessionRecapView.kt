@@ -5,10 +5,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -29,8 +27,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -44,8 +42,6 @@ import androidx.compose.ui.graphics.ClipOp
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -56,7 +52,6 @@ import ch.coachpoulpy.android.R
 import ch.coachpoulpy.core.model.BodyFigure
 import ch.coachpoulpy.core.model.MovementPattern
 import ch.coachpoulpy.core.model.PartKind
-import ch.coachpoulpy.shared.BodyMapBox
 import ch.coachpoulpy.shared.RecapPart
 import ch.coachpoulpy.shared.RecapRow
 import ch.coachpoulpy.shared.RecapTile
@@ -85,19 +80,10 @@ internal fun SessionRecapSheet(recap: SessionRecap, dateLine: String, figure: Bo
         showBackgroundLabel = stringResource(R.string.workout_showMap),
         showDetailsLabel = stringResource(R.string.workout_showExercises),
         background = { room ->
-            val statusBar = with(LocalDensity.current) { WindowInsets.statusBars.getTop(this).toDp() }
-            // Collapsed, the map fills the room: as wide as two figures side by side fit the screen.
-            val maxFigure = (LocalConfiguration.current.screenWidthDp.dp - PoulpySpace.lg * 2 - PoulpySpace.sm) / 2
-            val figureWidth = ((room - statusBar - RECAP_MAP_TOP - RECAP_LEGEND_ROOM) / (BodyMapBox.HEIGHT / BodyMapBox.WIDTH)).coerceIn(56.dp, maxFigure)
-            Column(Modifier.fillMaxWidth().statusBarsPadding().padding(top = RECAP_MAP_TOP), horizontalAlignment = Alignment.CenterHorizontally) {
-                WorkoutBodyMap(
-                    figure, recap.muscles.heat, emptySet(),
-                    description = stringResource(R.string.workout_mapLabel, recap.muscles.loads.joinToString(", ") { it.label }),
-                    figureWidth = figureWidth,
-                )
-                Spacer(Modifier.height(PoulpySpace.lg))
-                HeatLegend(showPain = false)
-            }
+            HeatMapPanel(
+                room, figure, recap.muscles.heat, emptySet(),
+                description = stringResource(R.string.workout_mapLabel, recap.muscles.loads.joinToString(", ") { it.label }),
+            )
         },
         floating = {
             Row(Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = PoulpySpace.lg, vertical = PoulpySpace.sm), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -118,10 +104,6 @@ internal fun SessionRecapSheet(recap: SessionRecap, dateLine: String, figure: Bo
         RecapDetails(recap, dateLine)
     }
 }
-
-/** The map starts this far under the status bar, and the legend and the gap around it take this much room under it. */
-private val RECAP_MAP_TOP = PoulpySpace.lg + 48.dp
-private val RECAP_LEGEND_ROOM = PoulpySpace.lg + 16.dp + PoulpySpace.md
 
 @Composable
 private fun ColumnScope.RecapDetails(recap: SessionRecap, dateLine: String) {

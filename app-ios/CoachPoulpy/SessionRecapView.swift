@@ -32,9 +32,11 @@ struct SessionRecapSheetView: View {
             showBackgroundLabel: "workout.showMap",
             showDetailsLabel: "workout.showExercises",
             background: { room, safeTop in
-                bodyMap(room: room - safeTop - 48 - PoulpySpace.lg - 16 - PoulpySpace.md)
-                    .frame(maxWidth: .infinity)
-                    .padding(.top, safeTop + 48 + PoulpySpace.lg)
+                HeatMapPanel(
+                    figure: figure, heat: recap.muscles.heat, hurting: [],
+                    description: L("workout.mapLabel %@", recap.muscles.loads.map(\.label).joined(separator: ", ")),
+                    room: room, safeTop: safeTop
+                )
             },
             floating: {
                 HStack {
@@ -60,23 +62,6 @@ struct SessionRecapSheetView: View {
                     .padding(.bottom, PoulpySpace.lg)
             }
         )
-    }
-
-    /// The front and back figures, as tall as the room above the sheet allows, then the legend.
-    private func bodyMap(room: CGFloat) -> some View {
-        // Collapsed, the map fills the room: as wide as two figures side by side fit the screen.
-        let maxFigure = (UIScreen.main.bounds.width - PoulpySpace.lg * 2 - PoulpySpace.sm) / 2
-        let width = min(max(room / CGFloat(BodyMapBox.shared.HEIGHT / BodyMapBox.shared.WIDTH), 56), maxFigure)
-        let muscles = recap.muscles.loads.map(\.label).joined(separator: ", ")
-        return VStack(spacing: PoulpySpace.lg) {
-            HStack(spacing: PoulpySpace.sm) {
-                HeatMapFigure(figure: figure, view: .front, heat: recap.muscles.heat, hurting: [], width: width)
-                HeatMapFigure(figure: figure, view: .back, heat: recap.muscles.heat, hurting: [], width: width)
-            }
-            HeatLegend(showPain: false)
-        }
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(L("workout.mapLabel %@", muscles))
     }
 }
 

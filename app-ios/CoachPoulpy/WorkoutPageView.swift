@@ -72,9 +72,12 @@ struct WorkoutPageView: View {
                     showBackgroundLabel: "workout.showMap",
                     showDetailsLabel: "workout.showExercises",
                     background: { room, safeTop in
-                        bodyMap(state, room: room - safeTop - 48 - PoulpySpace.md)
-                            .frame(maxWidth: .infinity)
-                            .padding(.top, safeTop + PoulpySpace.lg)
+                        let mapText = L("workout.mapLabel %@", state.muscles.map(\.label).joined(separator: ", "))
+                        HeatMapPanel(
+                            figure: figure, heat: state.heat, hurting: Set(state.painAreas),
+                            description: state.painNote.isEmpty ? mapText : "\(mapText). \(state.painNote)",
+                            room: room, safeTop: safeTop
+                        )
                     },
                     floating: { floatingButtons(state) },
                     actions: { actions(state) },
@@ -107,24 +110,6 @@ struct WorkoutPageView: View {
             case .copy: BuilderView(graph: graph, workoutId: nil, copyOf: workoutId)
             }
         }
-    }
-
-    /// The legend, then the front and back figures, as tall as the room above the sheet allows.
-    private func bodyMap(_ state: WorkoutPageState, room: CGFloat) -> some View {
-        // Collapsed, the map fills the room: as wide as two figures side by side fit the screen.
-        let maxFigure = (UIScreen.main.bounds.width - PoulpySpace.lg * 2 - PoulpySpace.sm) / 2
-        let width = min(max(room / CGFloat(BodyMapBox.shared.HEIGHT / BodyMapBox.shared.WIDTH), 56), maxFigure)
-        let muscles = state.muscles.map(\.label).joined(separator: ", ")
-        let mapText = L("workout.mapLabel %@", muscles)
-        return VStack(spacing: PoulpySpace.lg) {
-            HeatLegend(showPain: !state.painAreas.isEmpty)
-            HStack(spacing: PoulpySpace.sm) {
-                HeatMapFigure(figure: figure, view: .front, heat: state.heat, hurting: Set(state.painAreas), width: width)
-                HeatMapFigure(figure: figure, view: .back, heat: state.heat, hurting: Set(state.painAreas), width: width)
-            }
-        }
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(state.painNote.isEmpty ? mapText : "\(mapText). \(state.painNote)")
     }
 
     /// A round filled button over the map: back, and the menu of share, copy and delete.
