@@ -66,10 +66,10 @@ fun ListFilters(
             onQuery = onQuery,
             placeholder = placeholder,
             label = label,
-            modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 12.dp),
+            modifier = Modifier.padding(start = PoulpySpace.lg, end = PoulpySpace.lg, top = 8.dp, bottom = 12.dp),
         )
         LazyRow(
-            contentPadding = PaddingValues(horizontal = 20.dp),
+            contentPadding = PaddingValues(horizontal = PoulpySpace.lg),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             content = chips,
         )
@@ -108,21 +108,21 @@ fun PoulpyCard(
         modifier
             .fillMaxWidth()
             .background(colors.primaryContainer, RoundedCornerShape(PoulpyRadius.lg))
-            .padding(horizontal = 20.dp, vertical = 24.dp),
+            .padding(horizontal = PoulpySpace.lg, vertical = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Image(painterResource(R.drawable.poulpy_mood_happy), contentDescription = null, modifier = Modifier.size(poulpySize))
         Text(title, style = MaterialTheme.typography.titleLarge, color = colors.onPrimaryContainer, textAlign = TextAlign.Center)
         Text(body, style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant, textAlign = TextAlign.Center)
-        Button(onClick = onClick, modifier = Modifier.padding(top = 8.dp).height(48.dp)) {
+        Button(onClick = onClick, modifier = Modifier.padding(top = 8.dp).height(PoulpySize.button)) {
             if (buttonIcon != null) Icon(buttonIcon, contentDescription = null, modifier = Modifier.padding(end = 8.dp).size(20.dp))
             Text(button, fontWeight = FontWeight.ExtraBold)
         }
     }
 }
 
-/** The 48 high pill search with a 1.5 px outline, `primary` once something is typed, and a clear button. */
+/** The 44 high pill search with a 1.5 px outline, `primary` once something is typed, and a clear button. */
 @Composable
 fun PillSearchField(query: String, onQuery: (String) -> Unit, placeholder: String, label: String, modifier: Modifier = Modifier) {
     val colors = MaterialTheme.colorScheme
@@ -130,7 +130,7 @@ fun PillSearchField(query: String, onQuery: (String) -> Unit, placeholder: Strin
     Row(
         modifier
             .fillMaxWidth()
-            .height(48.dp)
+            .height(PoulpySize.searchField)
             .background(colors.surface, pill)
             .border(1.5.dp, if (query.isEmpty()) colors.outline else colors.primary, pill)
             .padding(start = 18.dp, end = 6.dp),
@@ -177,7 +177,7 @@ fun PoulpyChip(selected: Boolean, onClick: () -> Unit, label: String, modifier: 
         color = if (selected) colors.primary else colors.surface,
         contentColor = if (selected) colors.onPrimary else colors.onSurface,
         border = if (selected) null else BorderStroke(1.5.dp, colors.outline),
-        modifier = modifier.height(36.dp),
+        modifier = modifier.height(PoulpySize.chip),
     ) {
         Box(Modifier.padding(horizontal = 16.dp), contentAlignment = Alignment.Center) {
             Text(label, style = MaterialTheme.typography.bodyMedium, fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.Bold)

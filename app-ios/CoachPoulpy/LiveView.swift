@@ -56,7 +56,7 @@ struct LiveView: View {
                         }
                     }
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, PoulpySpace.lg)
                 .padding(.vertical, PoulpySpace.md)
             }
             // The numbers and the steps scroll; the finish question and the recorder stay whole at the bottom.
@@ -73,7 +73,7 @@ struct LiveView: View {
                             recorder
                         }
                     }
-                    .padding(.horizontal, 20)
+                    .padding(.horizontal, PoulpySpace.lg)
                     .padding(.vertical, 8)
                     .background(PoulpyColor.background)
                 }
@@ -181,7 +181,7 @@ struct LiveView: View {
             Text("live.emptyTitle").font(PoulpyFont.headline).multilineTextAlignment(.center)
             Text("live.emptyBody").multilineTextAlignment(.center)
             Button(action: onManageDevices) {
-                Text("live.manageDevices").font(.poulpy(.headline)).padding(.horizontal, 20).frame(height: 52)
+                Text("live.manageDevices").font(.poulpy(.headline)).padding(.horizontal, PoulpySpace.lg).frame(height: PoulpySize.buttonLarge)
             }
             .buttonStyle(.borderedProminent)
             .buttonBorderShape(.capsule)
@@ -203,7 +203,7 @@ struct LiveView: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
-        .background(PoulpyColor.grumpyContainer, in: RoundedRectangle(cornerRadius: 14))
+        .background(PoulpyColor.grumpyContainer, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
     }
 
     /// Speed and pace large, the rest two by two. Six small tiles at most, so the screen never scrolls.
@@ -258,7 +258,7 @@ struct LiveView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 10)
         .padding(.vertical, 8)
-        .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 14))
+        .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
         .accessibilityElement(children: .combine)
     }
 
@@ -274,8 +274,8 @@ struct LiveView: View {
         .padding(.horizontal, 14)
         .padding(.vertical, 16)
         .frame(maxWidth: .infinity)
-        .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 20))
-        .overlay(RoundedRectangle(cornerRadius: 20).stroke(PoulpyColor.outline))
+        .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
+        .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(PoulpyColor.outline))
     }
 
     private var recorder: some View {
@@ -291,8 +291,8 @@ struct LiveView: View {
         .padding(.horizontal, 14)
         .padding(.vertical, 12)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 20))
-        .overlay(RoundedRectangle(cornerRadius: 20).stroke(PoulpyColor.outline))
+        .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
+        .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(PoulpyColor.outline))
     }
 
     private var choicePicker: some View {
@@ -318,9 +318,9 @@ struct LiveView: View {
                 }
                 .padding(.horizontal, 14)
                 .padding(.vertical, 8)
-                .frame(minHeight: 56)
-                .overlay(RoundedRectangle(cornerRadius: 16).stroke(PoulpyColor.outline, lineWidth: 1.5))
-                .contentShape(RoundedRectangle(cornerRadius: 16))
+                .frame(minHeight: PoulpySize.textField)
+                .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(PoulpyColor.outline, lineWidth: 1.5))
+                .contentShape(RoundedRectangle(cornerRadius: PoulpyRadius.lg))
             }
             .buttonStyle(.plain)
             .accessibilityHint(Text("live.change"))
@@ -330,7 +330,7 @@ struct LiveView: View {
             HStack(spacing: 8) {
                 Button { model.startRecording(key: state.selected) } label: {
                     Text(LocalizedStringKey(state.hasTreadmill && state.followTreadmill ? "live.waitTreadmill" : "treadmill.start"))
-                        .font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: 52)
+                        .font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: PoulpySize.buttonLarge)
                 }
                 .buttonStyle(.borderedProminent)
                 .buttonBorderShape(.capsule)
@@ -389,19 +389,19 @@ struct LiveView: View {
                 HStack(spacing: 8) {
                     Button { model.resumeRecording() } label: {
                         Label("treadmill.resume", systemImage: "play.fill")
-                            .font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: 40)
+                            .font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: PoulpySize.button)
                     }
                     .buttonStyle(.bordered)
                     .buttonBorderShape(.capsule)
                     Button { model.endStep() } label: {
-                        Text("live.endStep").font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: 40)
+                        Text("live.endStep").font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: PoulpySize.button)
                     }
                     .buttonStyle(.bordered)
                     .buttonBorderShape(.capsule)
                     .disabled(recording.restSeconds != nil)
                 }
                 Button { model.stopRecording() } label: {
-                    Text("treadmill.stop").font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: 40)
+                    Text("treadmill.stop").font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: PoulpySize.button)
                 }
                 .buttonStyle(.borderedProminent)
                 .buttonBorderShape(.capsule)
@@ -409,13 +409,13 @@ struct LiveView: View {
                 HStack(spacing: 8) {
                     Button { model.pauseRecording() } label: {
                         Label("treadmill.pause", systemImage: "pause.fill")
-                            .font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: 40)
+                            .font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: PoulpySize.button)
                     }
                     .buttonStyle(.bordered)
                     .buttonBorderShape(.capsule)
                     if !recording.freeRun {
                         Button { model.skipPhase() } label: {
-                            Text("treadmill.skip").font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: 40)
+                            Text("treadmill.skip").font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: PoulpySize.button)
                         }
                         .buttonStyle(.bordered)
                         .buttonBorderShape(.capsule)
@@ -448,8 +448,8 @@ struct LiveView: View {
         .padding(.horizontal, 14)
         .padding(.vertical, 12)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 20))
-        .overlay(RoundedRectangle(cornerRadius: 20).stroke(PoulpyColor.outline))
+        .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
+        .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(PoulpyColor.outline))
     }
 
     private func stepLine(_ title: String, _ detail: String, muted: Bool = false, current: Bool = false) -> some View {
@@ -531,12 +531,12 @@ struct LiveView: View {
             .accessibilityElement(children: .combine)
             HStack(spacing: 8) {
                 Button { model.cancelWaiting() } label: {
-                    Text("action.cancel").font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: 40)
+                    Text("action.cancel").font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: PoulpySize.button)
                 }
                 .buttonStyle(.bordered)
                 .buttonBorderShape(.capsule)
                 Button { model.startNow() } label: {
-                    Text("live.startNow").font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: 40)
+                    Text("live.startNow").font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: PoulpySize.button)
                 }
                 .buttonStyle(.bordered)
                 .buttonBorderShape(.capsule)
@@ -566,12 +566,12 @@ struct LiveView: View {
             }
             HStack(spacing: 8) {
                 Button { model.keepGoing() } label: {
-                    Text("live.keepGoing").font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: 40)
+                    Text("live.keepGoing").font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: PoulpySize.button)
                 }
                 .buttonStyle(.bordered)
                 .buttonBorderShape(.capsule)
                 Button { model.stopRecording() } label: {
-                    Text("treadmill.stop").font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: 40)
+                    Text("treadmill.stop").font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: PoulpySize.button)
                 }
                 .buttonStyle(.borderedProminent)
                 .buttonBorderShape(.capsule)
@@ -580,7 +580,7 @@ struct LiveView: View {
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
         .foregroundStyle(PoulpyColor.onPrimaryContainer)
-        .background(PoulpyColor.primaryContainer, in: RoundedRectangle(cornerRadius: 20))
+        .background(PoulpyColor.primaryContainer, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
     }
 }
 
@@ -703,7 +703,7 @@ private struct ChoiceSheet: View {
                 group("live.groupRunning", state.running)
                 group("live.groupWorkouts", state.workouts)
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, PoulpySpace.lg)
             .padding(.top, 24)
             .padding(.bottom, 28)
         }

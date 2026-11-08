@@ -90,7 +90,7 @@ fun HomeScreen(
 
     LazyColumn(
         modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = PoulpySpace.lg, bottom = PoulpySpace.xl),
+        contentPadding = PaddingValues(start = PoulpySpace.lg, end = PoulpySpace.lg, top = PoulpySpace.lg, bottom = PoulpySpace.xl),
         verticalArrangement = Arrangement.spacedBy(PoulpySpace.sm),
     ) {
         item(key = "title") {
@@ -163,7 +163,7 @@ private fun PlannedCard(item: TodayItem, onOpen: () -> Unit, onGo: () -> Unit, o
     OutlinedCard(
         colors = CardDefaults.outlinedCardColors(containerColor = colors.surface),
         border = BorderStroke(1.5.dp, PoulpyPalette.Lagoon300),
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(PoulpyRadius.lg),
         modifier = Modifier.fillMaxWidth(),
     ) {
         Column(Modifier.padding(PoulpySpace.sm), verticalArrangement = Arrangement.spacedBy(PoulpySpace.sm)) {
@@ -189,7 +189,7 @@ private fun PlannedCard(item: TodayItem, onOpen: () -> Unit, onGo: () -> Unit, o
                     OutlinedButton(
                         onClick = { discarding = true },
                         border = BorderStroke(1.dp, colors.error),
-                        modifier = Modifier.weight(1f).height(48.dp),
+                        modifier = Modifier.weight(1f).height(PoulpySize.button),
                     ) {
                         Icon(Icons.Filled.Delete, contentDescription = null, tint = colors.error)
                         Text(
@@ -200,11 +200,11 @@ private fun PlannedCard(item: TodayItem, onOpen: () -> Unit, onGo: () -> Unit, o
                         )
                     }
                 } else {
-                    OutlinedButton(onClick = onOpen, enabled = item.workoutId != null, modifier = Modifier.weight(1f).height(48.dp)) {
+                    OutlinedButton(onClick = onOpen, enabled = item.workoutId != null, modifier = Modifier.weight(1f).height(PoulpySize.button)) {
                         Text(stringResource(R.string.home_seeWorkout), fontWeight = FontWeight.ExtraBold)
                     }
                 }
-                Button(onClick = onGo, modifier = Modifier.weight(1.4f).height(48.dp)) {
+                Button(onClick = onGo, modifier = Modifier.weight(1.4f).height(PoulpySize.button)) {
                     Icon(Icons.Filled.PlayArrow, contentDescription = null)
                     // "Open", not "Resume": the session comes back paused.
                     Text(
@@ -240,7 +240,7 @@ private fun DoneCard(item: TodayItem, onClick: () -> Unit) {
         onClick = onClick,
         colors = CardDefaults.outlinedCardColors(containerColor = colors.surface),
         border = BorderStroke(1.dp, colors.outline),
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(PoulpyRadius.lg),
         modifier = Modifier.fillMaxWidth(),
     ) {
         Row(
@@ -306,7 +306,7 @@ private fun RestCard(state: HomeState, onOpenLibrary: () -> Unit) {
             .drawBehind {
                 drawRoundRect(
                     dash,
-                    cornerRadius = CornerRadius(20.dp.toPx()),
+                    cornerRadius = CornerRadius(PoulpyRadius.lg.toPx()),
                     style = Stroke(width = 1.5.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(6.dp.toPx(), 4.dp.toPx()))),
                 )
             }
@@ -321,7 +321,7 @@ private fun RestCard(state: HomeState, onOpenLibrary: () -> Unit) {
             stringResource(if (state.hasWorkouts) R.string.home_restBody else R.string.home_firstBody),
             style = MaterialTheme.typography.bodyMedium,
         )
-        Button(onClick = onOpenLibrary, modifier = Modifier.padding(top = PoulpySpace.xs).height(48.dp)) {
+        Button(onClick = onOpenLibrary, modifier = Modifier.padding(top = PoulpySpace.xs).height(PoulpySize.button)) {
             Icon(Icons.AutoMirrored.Filled.LibraryBooks, contentDescription = null)
             Text(stringResource(R.string.home_openLibrary), fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 8.dp))
         }

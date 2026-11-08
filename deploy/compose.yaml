@@ -65,6 +65,33 @@ services:
       retries: 5
     logging: *logging
 
+  # Ships the containers' logs to Grafana Cloud. Off unless .env has COMPOSE_PROFILES=logs, which
+  # the Deploy workflow writes when the Loki settings are set (docs/deploying-the-server.md).
+  alloy:
+    profiles: [logs]
+    image: grafana/alloy:v1.10.0
+    restart: unless-stopped
+    command:
+      - run
+      - /etc/alloy/config.alloy
+      - --storage.path=/var/lib/alloy/data
+      - --disable-reporting
+    environment:
+      APP_NAME: ${APP_NAME:-coach-poulpy}
+      DEPLOY_ENVIRONMENT: ${DEPLOY_ENVIRONMENT:-production}
+      LOKI_URL: ${LOKI_URL:-}
+      LOKI_USER: ${LOKI_USER:-}
+      LOKI_PASSWORD: ${LOKI_PASSWORD:-}
+    volumes:
+      - ./alloy/config.alloy:/etc/alloy/config.alloy:ro
+      # Read-only access to Docker, to find the containers and read their logs. It is root-equivalent
+      # on the machine, which is why Alloy has no published port and no network but its own.
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - alloy-data:/var/lib/alloy/data
+    mem_limit: 256m
+    networks: [internal]
+    logging: *logging
+
 networks:
   internal:
   edge:
@@ -72,3 +99,4 @@ networks:
 
 volumes:
   postgres-data:
+  alloy-data:

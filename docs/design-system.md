@@ -60,7 +60,7 @@ Baloo 2 for display and titles, Nunito for everything else. Platforms map each r
 
 - Spacing steps: 4, 8, 12, 16, 24, 32, 48 (`xs` to `xxxl`). Pick a step; never a value between them.
 - Radius: 8 for chips and small fields, 10 for cards and rows, 14 for sheets, pill for buttons. Small cards stay close to square so their text reads first.
-- Controls stay compact: a standard button is 44 high, a large one 52, an icon button 40 (its touch area stays 44), a small button 34. The side gutter of a screen is 16, and rows are 56 high with a 32 to 40 avatar.
+- Controls stay compact: a standard button is 44 high, a large one 52, an icon button 40 (its touch area stays 44), a small button 34. The side gutter of a screen is 16, and rows are 56 high with a 32 to 40 avatar. In the apps these come from one place, `PoulpySize` (generated from `design/tokens.json`, next to `PoulpySpace` and `PoulpyRadius`); a screen never writes a literal height, gutter or corner radius.
 - Motion: the flip (700 ms with overshoot) is the one signature move, used only when Poulpy changes side. Mood shades fade in 300 ms. Everything else is 150 to 250 ms and plain. With reduced motion on, the loader slows to one turn in 10 s.
 
 ## Components

@@ -108,7 +108,7 @@ internal fun AppIconSheet(selected: AppIcon, onPick: (AppIcon) -> Unit, onDismis
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         containerColor = MaterialTheme.colorScheme.surface,
     ) {
-        Column(Modifier.padding(start = 20.dp, end = 20.dp, bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(Modifier.padding(start = PoulpySpace.lg, end = PoulpySpace.lg, bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Column(Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(stringResource(R.string.settings_appIcon), style = MaterialTheme.typography.titleLarge)
                 Text(stringResource(R.string.appIcon_description), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -118,7 +118,7 @@ internal fun AppIconSheet(selected: AppIcon, onPick: (AppIcon) -> Unit, onDismis
                         Row(
                             Modifier
                                 .fillMaxWidth()
-                                .heightIn(min = 60.dp)
+                                .heightIn(min = PoulpySize.row)
                                 .selectable(selected = icon == selected, role = Role.RadioButton, onClick = { onPick(icon); onDismiss() })
                                 .padding(horizontal = 16.dp, vertical = 6.dp),
                             verticalAlignment = Alignment.CenterVertically,
@@ -134,7 +134,7 @@ internal fun AppIconSheet(selected: AppIcon, onPick: (AppIcon) -> Unit, onDismis
             }
             OutlinedButton(
                 onClick = onDismiss,
-                modifier = Modifier.fillMaxWidth().height(56.dp),
+                modifier = Modifier.fillMaxWidth().height(PoulpySize.buttonLarge),
                 border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
             ) { Text(stringResource(R.string.action_cancel), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onSurface) }
         }

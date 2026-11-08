@@ -18,8 +18,8 @@ struct FieldBox<Content: View>: View {
         content()
             .padding(.horizontal, 16)
             .frame(maxWidth: .infinity, minHeight: height, alignment: .leading)
-            .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 16))
-            .overlay(RoundedRectangle(cornerRadius: 16).stroke(error ? PoulpyColor.error : focused ? PoulpyColor.primary : PoulpyColor.outline, lineWidth: 1.5))
+            .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
+            .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(error ? PoulpyColor.error : focused ? PoulpyColor.primary : PoulpyColor.outline, lineWidth: 1.5))
     }
 }
 
@@ -271,7 +271,7 @@ struct SheetActions: View {
             .buttonStyle(.plain)
             .disabled(!canSave)
         }
-        .padding(.horizontal, 20)
+        .padding(.horizontal, PoulpySpace.lg)
         .padding(.vertical, 12)
         .background(PoulpyColor.surface)
     }

@@ -140,7 +140,7 @@ fun LiveScreen(
     }
 
     Column(
-        modifier.fillMaxSize().padding(start = 20.dp, end = 20.dp, top = PoulpySpace.lg, bottom = PoulpySpace.md),
+        modifier.fillMaxSize().padding(start = PoulpySpace.lg, end = PoulpySpace.lg, top = PoulpySpace.lg, bottom = PoulpySpace.md),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -202,7 +202,7 @@ private fun NothingConnected(onManageDevices: () -> Unit, modifier: Modifier) {
             Image(painterResource(R.drawable.poulpy_pose_standing_tall), contentDescription = null, modifier = Modifier.size(140.dp))
             Text(stringResource(R.string.live_emptyTitle), style = MaterialTheme.typography.headlineSmall, textAlign = TextAlign.Center)
             Text(stringResource(R.string.live_emptyBody), textAlign = TextAlign.Center)
-            Button(onClick = onManageDevices, modifier = Modifier.padding(top = 8.dp).height(52.dp)) {
+            Button(onClick = onManageDevices, modifier = Modifier.padding(top = 8.dp).height(PoulpySize.buttonLarge)) {
                 Text(stringResource(R.string.live_manageDevices))
             }
         }
@@ -212,7 +212,7 @@ private fun NothingConnected(onManageDevices: () -> Unit, modifier: Modifier) {
 @Composable
 private fun Connecting(names: List<String>) {
     Surface(
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(PoulpyRadius.lg),
         color = MaterialTheme.colorScheme.surface,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
     ) {
@@ -235,7 +235,7 @@ private fun Connecting(names: List<String>) {
 private fun BeltBanner(belt: BeltStatus) {
     val extras = PoulpyTheme.extraColors
     Row(
-        Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(extras.grumpyContainer).padding(horizontal = 12.dp, vertical = 8.dp),
+        Modifier.fillMaxWidth().clip(RoundedCornerShape(PoulpyRadius.lg)).background(extras.grumpyContainer).padding(horizontal = 12.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(Icons.Filled.Pause, contentDescription = null, tint = extras.grumpy, modifier = Modifier.size(18.dp))
@@ -286,7 +286,7 @@ private fun BigTile(tile: LiveTile, modifier: Modifier) {
 
 @Composable
 private fun SmallTile(tile: LiveTile, modifier: Modifier) {
-    Surface(modifier, shape = RoundedCornerShape(14.dp), color = MaterialTheme.colorScheme.surface) {
+    Surface(modifier, shape = RoundedCornerShape(PoulpyRadius.lg), color = MaterialTheme.colorScheme.surface) {
         Column(Modifier.padding(horizontal = 10.dp, vertical = 8.dp)) {
             Text(
                 listOfNotNull(stringResource(tile.metric.label), tile.source).joinToString(" · "),
@@ -307,7 +307,7 @@ private fun SmallTile(tile: LiveTile, modifier: Modifier) {
 @Composable
 private fun Recorder(state: LiveUiState, model: LiveModel) {
     Surface(
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(PoulpyRadius.lg),
         color = MaterialTheme.colorScheme.surface,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
     ) {
@@ -348,7 +348,7 @@ private fun ChoicePicker(state: LiveUiState, model: LiveModel) {
     Row(
         Modifier
             .fillMaxWidth()
-            .heightIn(min = 56.dp)
+            .heightIn(min = PoulpySize.textField)
             .clip(RoundedCornerShape(PoulpyRadius.md))
             .border(1.5.dp, colors.outline, RoundedCornerShape(PoulpyRadius.md))
             .clickable(onClickLabel = stringResource(R.string.live_change)) { picking = true }
@@ -366,7 +366,7 @@ private fun ChoicePicker(state: LiveUiState, model: LiveModel) {
     }
     if (state.hasTreadmill) FollowMode(state.followTreadmill)
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-        Button(onClick = start, modifier = Modifier.weight(1f).height(52.dp)) {
+        Button(onClick = start, modifier = Modifier.weight(1f).height(PoulpySize.buttonLarge)) {
             Text(stringResource(if (state.hasTreadmill && state.followTreadmill) R.string.live_waitTreadmill else R.string.treadmill_start))
         }
         if (state.hasTreadmill) FollowToggle(state.followTreadmill, model::setFollowTreadmill)
@@ -385,7 +385,7 @@ private fun ChoiceSheet(state: LiveUiState, onPick: (String) -> Unit, onDismiss:
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         containerColor = MaterialTheme.colorScheme.surface,
     ) {
-        Column(Modifier.verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 20.dp, bottom = 28.dp).selectableGroup()) {
+        Column(Modifier.verticalScroll(rememberScrollState()).padding(start = PoulpySpace.lg, end = PoulpySpace.lg, bottom = 28.dp).selectableGroup()) {
             Text(stringResource(R.string.live_whatDoing), style = MaterialTheme.typography.titleLarge, modifier = Modifier.semantics { heading() })
             listOf(
                 R.string.live_groupRecent to state.recent,
@@ -469,7 +469,7 @@ private fun Recording(recording: RecordingUi, units: UnitSystem, model: LiveMode
     // Recording: only Pause (and Skip in a workout). Paused: Resume, End step or Finish.
     if (recording.paused) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedButton(onClick = model::resumeRecording, modifier = Modifier.weight(1f).height(52.dp)) {
+            OutlinedButton(onClick = model::resumeRecording, modifier = Modifier.weight(1f).height(PoulpySize.buttonLarge)) {
                 Icon(Icons.Filled.PlayArrow, contentDescription = null)
                 Spacer(Modifier.size(6.dp))
                 Text(stringResource(R.string.treadmill_resume))
@@ -477,19 +477,19 @@ private fun Recording(recording: RecordingUi, units: UnitSystem, model: LiveMode
             OutlinedButton(
                 onClick = model::endStep,
                 enabled = recording.restSeconds == null,
-                modifier = Modifier.weight(1f).height(52.dp),
+                modifier = Modifier.weight(1f).height(PoulpySize.buttonLarge),
             ) { Text(stringResource(R.string.live_endStep)) }
         }
-        Button(onClick = model::stopRecording, modifier = Modifier.fillMaxWidth().height(52.dp)) { Text(stringResource(R.string.treadmill_stop)) }
+        Button(onClick = model::stopRecording, modifier = Modifier.fillMaxWidth().height(PoulpySize.buttonLarge)) { Text(stringResource(R.string.treadmill_stop)) }
     } else {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedButton(onClick = model::pauseRecording, modifier = Modifier.weight(1f).height(52.dp)) {
+            OutlinedButton(onClick = model::pauseRecording, modifier = Modifier.weight(1f).height(PoulpySize.buttonLarge)) {
                 Icon(Icons.Filled.Pause, contentDescription = null)
                 Spacer(Modifier.size(6.dp))
                 Text(stringResource(R.string.treadmill_pause))
             }
             if (!recording.freeRun) {
-                OutlinedButton(onClick = model::skipPhase, modifier = Modifier.weight(1f).height(52.dp)) { Text(stringResource(R.string.treadmill_skip)) }
+                OutlinedButton(onClick = model::skipPhase, modifier = Modifier.weight(1f).height(PoulpySize.buttonLarge)) { Text(stringResource(R.string.treadmill_skip)) }
             }
         }
     }
@@ -607,8 +607,8 @@ private fun Waiting(choice: LiveChoice, model: LiveModel) {
         }
     }
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        OutlinedButton(onClick = model::cancelWaiting, modifier = Modifier.weight(1f).height(52.dp)) { Text(stringResource(R.string.action_cancel)) }
-        OutlinedButton(onClick = model::startNow, modifier = Modifier.weight(1f).height(52.dp)) { Text(stringResource(R.string.live_startNow)) }
+        OutlinedButton(onClick = model::cancelWaiting, modifier = Modifier.weight(1f).height(PoulpySize.buttonLarge)) { Text(stringResource(R.string.action_cancel)) }
+        OutlinedButton(onClick = model::startNow, modifier = Modifier.weight(1f).height(PoulpySize.buttonLarge)) { Text(stringResource(R.string.live_startNow)) }
     }
 }
 
@@ -616,7 +616,7 @@ private fun Waiting(choice: LiveChoice, model: LiveModel) {
 @Composable
 internal fun FinishCard(prompt: FinishPromptUi, model: LiveModel) {
     val colors = MaterialTheme.colorScheme
-    Surface(shape = RoundedCornerShape(20.dp), color = colors.primaryContainer, contentColor = colors.onPrimaryContainer) {
+    Surface(shape = RoundedCornerShape(PoulpyRadius.lg), color = colors.primaryContainer, contentColor = colors.onPrimaryContainer) {
         Column(Modifier.fillMaxWidth().padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Row(verticalAlignment = Alignment.Top) {
                 Icon(Icons.Filled.Schedule, contentDescription = null, tint = colors.primary, modifier = Modifier.size(26.dp))
@@ -653,8 +653,8 @@ internal fun FinishCard(prompt: FinishPromptUi, model: LiveModel) {
                 }
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(onClick = model::keepGoing, modifier = Modifier.weight(1f).height(48.dp)) { Text(stringResource(R.string.live_keepGoing)) }
-                Button(onClick = model::stopRecording, modifier = Modifier.weight(1f).height(48.dp)) { Text(stringResource(R.string.treadmill_stop)) }
+                OutlinedButton(onClick = model::keepGoing, modifier = Modifier.weight(1f).height(PoulpySize.button)) { Text(stringResource(R.string.live_keepGoing)) }
+                Button(onClick = model::stopRecording, modifier = Modifier.weight(1f).height(PoulpySize.button)) { Text(stringResource(R.string.treadmill_stop)) }
             }
         }
     }

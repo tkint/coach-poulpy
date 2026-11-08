@@ -1,0 +1,43 @@
+// Ships the logs of this app's containers (server, postgres) to Grafana Cloud Loki.
+// Only started when the Deploy workflow has the Loki settings (docs/deploying-the-server.md).
+
+discovery.docker "app" {
+  host = "unix:///var/run/docker.sock"
+
+  // Only this Compose project: a preview running beside production ships its own logs.
+  filter {
+    name   = "label"
+    values = ["com.docker.compose.project=" + sys.env("APP_NAME")]
+  }
+}
+
+loki.source.docker "app" {
+  host       = "unix:///var/run/docker.sock"
+  targets    = discovery.docker.app.targets
+  labels     = {
+    app         = sys.env("APP_NAME"),
+    environment = sys.env("DEPLOY_ENVIRONMENT"),
+  }
+  relabel_rules = discovery.relabel.app.rules
+  forward_to    = [loki.write.grafana.receiver]
+}
+
+discovery.relabel "app" {
+  targets = []
+
+  rule {
+    source_labels = ["__meta_docker_container_label_com_docker_compose_service"]
+    target_label  = "service"
+  }
+}
+
+loki.write "grafana" {
+  endpoint {
+    url = sys.env("LOKI_URL")
+
+    basic_auth {
+      username = sys.env("LOKI_USER")
+      password = sys.env("LOKI_PASSWORD")
+    }
+  }
+}

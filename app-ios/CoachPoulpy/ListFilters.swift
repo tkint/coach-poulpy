@@ -13,12 +13,12 @@ struct ListFilters<Chips: View, Action: View>: View {
     var body: some View {
         VStack(spacing: 0) {
             PillSearchField(query: $query, placeholder: placeholder, label: label)
-                .padding(.horizontal, 20)
+                .padding(.horizontal, PoulpySpace.lg)
                 .padding(.top, 8)
                 .padding(.bottom, 12)
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) { chips() }
-                    .padding(.horizontal, 20)
+                    .padding(.horizontal, PoulpySpace.lg)
             }
             HStack {
                 Text(countLabel)
@@ -66,7 +66,7 @@ struct PoulpyCard: View {
                 }
                 .font(.poulpy(.subheadline).weight(.heavy))
                 .padding(.horizontal, 22)
-                .frame(height: 48)
+                .frame(height: PoulpySize.button)
                 .foregroundStyle(PoulpyColor.onPrimary)
                 .background(PoulpyColor.primary, in: Capsule())
             }
@@ -75,13 +75,13 @@ struct PoulpyCard: View {
         }
         .multilineTextAlignment(.center)
         .frame(maxWidth: .infinity)
-        .padding(.horizontal, 20)
+        .padding(.horizontal, PoulpySpace.lg)
         .padding(.vertical, 24)
-        .background(PoulpyColor.primaryContainer, in: RoundedRectangle(cornerRadius: 24))
+        .background(PoulpyColor.primaryContainer, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
     }
 }
 
-/// The 48 high pill search with a 1.5 px outline, `primary` once something is typed, and a clear button.
+/// The 44 high pill search with a 1.5 px outline, `primary` once something is typed, and a clear button.
 struct PillSearchField: View {
     @Binding var query: String
     let placeholder: LocalizedStringKey
@@ -113,7 +113,7 @@ struct PillSearchField: View {
         }
         .padding(.leading, 18)
         .padding(.trailing, 6)
-        .frame(height: 48)
+        .frame(height: PoulpySize.searchField)
         .background(PoulpyColor.surface, in: Capsule())
         .overlay(Capsule().stroke(query.isEmpty ? PoulpyColor.outline : PoulpyColor.primary, lineWidth: 1.5))
     }
@@ -130,7 +130,7 @@ struct PoulpyChip: View {
             title
                 .font(.poulpy(.subheadline).weight(selected ? .heavy : .bold))
                 .padding(.horizontal, 16)
-                .frame(height: 36)
+                .frame(height: PoulpySize.chip)
                 .foregroundStyle(selected ? PoulpyColor.onPrimary : PoulpyColor.onSurface)
                 .background(selected ? PoulpyColor.primary : PoulpyColor.surface, in: Capsule())
                 .overlay(Capsule().stroke(selected ? Color.clear : PoulpyColor.outline, lineWidth: 1.5))

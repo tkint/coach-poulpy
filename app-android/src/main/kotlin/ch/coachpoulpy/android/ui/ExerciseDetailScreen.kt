@@ -91,7 +91,7 @@ fun ExerciseDetailScreen(
         Column(Modifier.fillMaxSize()) {
             TopBar(detail, onBack, onVariations = { choosing = true })
             Column(
-                Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 16.dp),
+                Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(start = PoulpySpace.lg, end = PoulpySpace.lg, top = 8.dp, bottom = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 ExerciseHeading(detail)
@@ -99,8 +99,8 @@ fun ExerciseDetailScreen(
                 ExerciseTabContent(graph, language, detail, tab)
             }
             HorizontalDivider(color = colors.surfaceVariant)
-            Box(Modifier.navigationBarsPadding().padding(start = 20.dp, end = 20.dp, top = 12.dp, bottom = 16.dp)) {
-                Button(onClick = { onAddToWorkout(detail.slug) }, modifier = Modifier.fillMaxWidth().height(56.dp)) {
+            Box(Modifier.navigationBarsPadding().padding(start = PoulpySpace.lg, end = PoulpySpace.lg, top = 12.dp, bottom = 16.dp)) {
+                Button(onClick = { onAddToWorkout(detail.slug) }, modifier = Modifier.fillMaxWidth().height(PoulpySize.buttonLarge)) {
                     Icon(Icons.Filled.Add, contentDescription = null)
                     Text(stringResource(R.string.exercise_add), fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 8.dp))
                 }
@@ -196,7 +196,7 @@ internal fun VariationButton(detail: ExerciseDetail, onClick: () -> Unit) {
         shape = RoundedCornerShape(PoulpyRadius.pill),
         color = colors.surfaceVariant,
         contentColor = colors.onPrimaryContainer,
-        modifier = Modifier.height(44.dp).semantics {
+        modifier = Modifier.height(PoulpySize.button).semantics {
             contentDescription = label
             role = Role.Button
         },
@@ -261,7 +261,7 @@ private fun VariationsSheet(variations: List<VariationRow>, onPick: (String) -> 
         containerColor = colors.surface,
     ) {
         Column(
-            Modifier.verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 20.dp, bottom = 28.dp),
+            Modifier.verticalScroll(rememberScrollState()).padding(start = PoulpySpace.lg, end = PoulpySpace.lg, bottom = 28.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -284,7 +284,7 @@ internal fun VariationRungs(variations: List<VariationRow>, onPick: (String) -> 
                 shape = RoundedCornerShape(PoulpyRadius.md),
                 color = if (variation.current) colors.primaryContainer else colors.surface,
                 border = if (variation.current) BorderStroke(1.5.dp, colors.primary) else BorderStroke(1.dp, colors.outline),
-                modifier = Modifier.fillMaxWidth().heightIn(min = 60.dp).semantics { selected = variation.current },
+                modifier = Modifier.fillMaxWidth().heightIn(min = PoulpySize.row).semantics { selected = variation.current },
             ) {
                 Row(
                     Modifier.padding(horizontal = 12.dp, vertical = 8.dp),

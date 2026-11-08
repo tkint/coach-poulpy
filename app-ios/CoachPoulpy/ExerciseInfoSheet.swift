@@ -68,7 +68,7 @@ struct ExerciseInfoSheet: View {
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 20)
+                    .padding(.horizontal, PoulpySpace.lg)
                     .padding(.top, 20)
                     .padding(.bottom, 16)
                 }
@@ -85,11 +85,11 @@ struct ExerciseInfoSheet: View {
                         .font(.poulpy(.callout).weight(.heavy))
                         .foregroundStyle(PoulpyColor.onPrimary)
                         .frame(maxWidth: .infinity)
-                        .frame(height: 56)
+                        .frame(height: PoulpySize.buttonLarge)
                         .background(PoulpyColor.primary, in: Capsule())
                 }
                 .buttonStyle(.plain)
-                .padding(.horizontal, 20)
+                .padding(.horizontal, PoulpySpace.lg)
                 .padding(.top, 12)
                 .padding(.bottom, 8)
                 }
@@ -169,7 +169,7 @@ struct ExerciseInfoSheet: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 14)
         .padding(.vertical, 12)
-        .background(PoulpyColor.surfaceVariant, in: RoundedRectangle(cornerRadius: 16))
+        .background(PoulpyColor.surfaceVariant, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
     }
 }
 

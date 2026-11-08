@@ -45,7 +45,7 @@ struct LibraryView: View {
         NavigationStack {
             VStack(spacing: 0) {
                 sectionSwitch
-                    .padding(.horizontal, 20)
+                    .padding(.horizontal, PoulpySpace.lg)
                     .padding(.top, PoulpySpace.sm)
                 switch section {
                 case .workouts: workouts
@@ -128,7 +128,7 @@ struct LibraryView: View {
                     systemImage: "plus",
                     poulpySize: 120
                 ) { cover = .builder }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, PoulpySpace.lg)
                 .padding(.top, 16)
             }
         } else {
@@ -171,7 +171,7 @@ struct LibraryView: View {
                         .padding(.top, 8)
                     }
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, PoulpySpace.lg)
                 .padding(.bottom, 20)
             }
             .sheet(isPresented: Binding(get: { planning != nil }, set: { if !$0 { planning = nil } })) {
@@ -237,9 +237,9 @@ struct LibraryView: View {
             .accessibilityLabel(Text("action.start") + Text(" ") + Text(row.name))
         }
         .padding(EdgeInsets(top: 10, leading: 12, bottom: 10, trailing: 8))
-        .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 16))
-        .overlay(RoundedRectangle(cornerRadius: 16).stroke(PoulpyColor.outline))
-        .contentShape(.contextMenuPreview, RoundedRectangle(cornerRadius: 16))
+        .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
+        .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(PoulpyColor.outline))
+        .contentShape(.contextMenuPreview, RoundedRectangle(cornerRadius: PoulpyRadius.lg))
         .contextMenu {
             Button { planning = row.id } label: { Label("library.planDay", systemImage: "calendar.badge.plus") }
             if row.editable {

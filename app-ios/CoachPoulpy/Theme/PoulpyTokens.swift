@@ -110,6 +110,21 @@ enum PoulpyRadius {
     static let pill: CGFloat = 999
 }
 
+/// Control sizes from docs/design-system.md. Never write a literal height in a screen.
+enum PoulpySize {
+    static let button: CGFloat = 44
+    static let buttonLarge: CGFloat = 52
+    static let buttonSmall: CGFloat = 34
+    static let iconButton: CGFloat = 40
+    static let touch: CGFloat = 44
+    static let chip: CGFloat = 32
+    static let searchField: CGFloat = 44
+    static let textField: CGFloat = 46
+    static let row: CGFloat = 56
+    static let avatarSmall: CGFloat = 32
+    static let avatar: CGFloat = 40
+}
+
 enum PoulpyMotion {
     static let flipDuration: Double = 0.7
     static let flipAnimation = Animation.timingCurve(0.5, -0.35, 0.35, 1.4, duration: 0.7)

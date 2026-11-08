@@ -141,7 +141,7 @@ struct PainSheet: View {
                 durationRow(choice.0, choice.1, choice.2)
             }
         }
-        .overlay(RoundedRectangle(cornerRadius: 14).stroke(PoulpyColor.outline, lineWidth: 1))
+        .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(PoulpyColor.outline, lineWidth: 1))
     }
 
     private func durationRow(_ value: PainDuration, _ title: LocalizedStringKey, _ sub: LocalizedStringKey?) -> some View {
@@ -154,7 +154,7 @@ struct PainSheet: View {
                 Spacer()
                 if length == value { Image(systemName: "checkmark").foregroundStyle(PoulpyColor.primary) }
             }
-            .frame(minHeight: 52)
+            .frame(minHeight: PoulpySize.row)
             .padding(.horizontal, 16)
             .contentShape(Rectangle())
         }
@@ -227,7 +227,7 @@ struct BodyFigureSheet: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 12)
-            .overlay(RoundedRectangle(cornerRadius: 20).stroke(on ? PoulpyColor.primary : PoulpyColor.outline, lineWidth: on ? 2.5 : 1.5))
+            .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(on ? PoulpyColor.primary : PoulpyColor.outline, lineWidth: on ? 2.5 : 1.5))
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(on ? .isSelected : [])

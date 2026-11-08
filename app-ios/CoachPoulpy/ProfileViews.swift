@@ -211,7 +211,7 @@ struct ProfileView: View {
                 SelectField(label: "profile.pain", value: painText(state)) { sheet = .pain }
                 FieldNote("profile.painNote")
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, PoulpySpace.lg)
             .padding(.vertical, 16)
         }
         .scrollDismissesKeyboard(.interactively)
@@ -406,7 +406,7 @@ struct BodyView: View {
                         systemImage: "plus",
                         poulpySize: 120
                     ) { logging = true }
-                    .padding(.horizontal, 20)
+                    .padding(.horizontal, PoulpySpace.lg)
                     .padding(.top, 16)
                 }
             } else {
@@ -490,7 +490,7 @@ struct BodyView: View {
                         .font(.poulpy(.subheadline).weight(.heavy))
                         .foregroundStyle(PoulpyColor.onPrimary)
                         .padding(.horizontal, 18)
-                        .frame(height: 40)
+                        .frame(height: PoulpySize.buttonSmall)
                         .background(PoulpyColor.primary, in: Capsule())
                 }
             }
