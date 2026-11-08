@@ -10,12 +10,12 @@ import { t } from '../i18n'
 const emit = defineEmits<{ signedIn: [] }>()
 const email = ref('')
 const password = ref('')
-const failed = ref<Exclude<SignInAnswer, 'admin'> | 'sending'>()
+const failed = ref<Exclude<SignInAnswer, 'signedIn'> | 'sending'>()
 
 async function submit() {
   failed.value = 'sending'
-  const answer = await signIn(email.value.trim(), password.value)
-  if (answer === 'admin') emit('signedIn')
+  const answer = await signIn(email.value.trim(), password.value, 'admin')
+  if (answer === 'signedIn') emit('signedIn')
   else failed.value = answer
 }
 </script>

@@ -50,6 +50,22 @@
     "theServer": "The server",
     "actionPromote": "Made admin",
     "auditEmpty": "Nothing yet. Admin changes show up here.",
-    "auditError": "The audit log can’t be loaded. Try again."
+    "auditError": "The audit log can’t be loaded. Try again.",
+    "appLink": "Coach Poulpy app"
+  },
+  "app": {
+    "signInTitle": "Sign in",
+    "signInIntro": "Your account, on the web.",
+    "errorSignIn": "Wrong email or password.",
+    "profileTitle": "Profile",
+    "profileIntro": "Your account on Coach Poulpy.",
+    "emailConfirmed": "Email confirmed",
+    "passwordTitle": "Password",
+    "passwordBody": "We email you a link to choose a new password. Every device you are signed in on is signed out when you use it.",
+    "sendResetLink": "Email me a reset link",
+    "resetLinkSent": "If the address belongs to an account, a link is on its way.",
+    "dataTitle": "Your data",
+    "dataBody": "Your workouts, sessions and body log live on your phone and follow your account. To change them, open the app.",
+    "adminLink": "Admin"
   }
 }

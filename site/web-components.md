@@ -135,16 +135,17 @@ Primary, tonal, outline and grumpy: `CpButton`.
 | --- | --- |
 | `<CpAvatar>` | `div.cp-avatar.cp-avatar-placeholder` around `div.rounded-full.w-8.bg-secondary.text-secondary-content` and a `span` |
 | `<CpAvatar tone="primary" size="md">` | the same with `w-10 bg-primary text-primary-content` |
+| `<CpAvatar tone="primary" size="lg">` | the same with `w-16 text-2xl` |
 
 ## Card
 
-`CpCard`: a raised panel with a title. `CpPoulpyCard` is for empty states.
+`CpCard`: a raised panel, with a title when it has one. `CpPoulpyCard` is for empty states.
 
 <WebComponentSamples part="card" />
 
 | Vue | Classes |
 | --- | --- |
-| `<CpCard>` | `section.cp-card.bg-base-100.shadow-sm` around `div.cp-card-body.gap-4.p-4.md:p-6` and `h2.cp-card-title` |
+| `<CpCard>` | `section.cp-card.bg-base-100.shadow-sm` around `div.cp-card-body.gap-4.p-4.md:p-6` and, with a `title`, `h2.cp-card-title` |
 
 ## Table
 
@@ -185,7 +186,7 @@ Primary, tonal, outline and grumpy: `CpButton`.
 | Vue | Classes |
 | --- | --- |
 | `<CpDrawer>` | `cp-drawer lg:cp-drawer-open` with `input.cp-drawer-toggle`, `div.cp-drawer-content` (a `cp-navbar` and the page) and `div.cp-drawer-side` with `label.cp-drawer-overlay` |
-| `<CpDrawerItem label>` | `li` and a `button` with `cp-is-drawer-close:cp-tooltip cp-is-drawer-close:cp-tooltip-right` and `data-tip`; `cp-menu-active` when current |
+| `<CpDrawerItem label>` | `li` and a `button` (an `a` when it has `href`, a link to another page) with `cp-is-drawer-close:cp-tooltip cp-is-drawer-close:cp-tooltip-right` and `data-tip`; `cp-menu-active` when current |
 | In the sidebar | `cp-is-drawer-close:hidden` hides a label when folded, `cp-is-drawer-close:cp-tooltip cp-is-drawer-close:cp-tooltip-right` with `data-tip` names the icon. The variants carry the `cp-` prefix. |
 
 ## Type

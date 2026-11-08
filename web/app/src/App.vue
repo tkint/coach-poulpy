@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { CpPoulpy } from '@coach-poulpy/ui'
 import AdminPage from './pages/AdminPage.vue'
+import AppPage from './pages/AppPage.vue'
 import ConfirmEmailPage from './pages/ConfirmEmailPage.vue'
 import ResetPasswordPage from './pages/ResetPasswordPage.vue'
 import { locale } from './i18n'
 
+// The web app is everything else: its sign-in first, then the profile.
 // The account email links, /confirm-email#<token> and /reset-password#<token>, open here when
 // they don't open the app. The token stays in the fragment, which never reaches a server log, and
 // is taken off the address so a reload or the history doesn't keep it.
@@ -18,11 +19,7 @@ document.documentElement.lang = locale
   <AdminPage v-if="page === '/admin' || page.startsWith('/admin/')" />
   <ConfirmEmailPage v-else-if="page === '/confirm-email'" :token="token" />
   <ResetPasswordPage v-else-if="page === '/reset-password'" :token="token" />
-  <main v-else class="mx-auto my-16 max-w-xl px-4">
-    <CpPoulpy drawing="mood_happy" :size="96" />
-    <h1 class="cp-type-display">Coach <span class="text-primary">poulpy</span></h1>
-    <p>The website arrives with accounts.</p>
-  </main>
+  <AppPage v-else />
 </template>
 
 <style>

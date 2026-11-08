@@ -60,6 +60,7 @@ const formats = [
       <div v-else-if="part === 'avatar'" class="row">
         <CpAvatar initials="A" />
         <CpAvatar initials="A" tone="primary" size="md" />
+        <CpAvatar initials="A" tone="primary" size="lg" />
       </div>
       <CpCard v-else-if="part === 'card'" title="Latest changes">Everything an admin changed, newest first.</CpCard>
       <CpCard v-else-if="part === 'table'" title="Latest changes">
