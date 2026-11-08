@@ -30,11 +30,6 @@ private enum Cover: Identifiable {
     var id: Self { self }
 }
 
-/// The three places the details sheet rests, lowest first.
-private enum Stop: Int {
-    case peek, half, full
-}
-
 /// An exercise whose details sheet is open.
 private struct DetailTarget: Identifiable {
     let slug: String
@@ -52,9 +47,6 @@ struct WorkoutPageView: View {
     @State private var deleting = false
     /// The exercise whose details are open; nil when none.
     @State private var detailing: DetailTarget?
-    /// Where the details sheet rests: `peek` shows its top over a full-height map, `half` is the default, `full` covers the map.
-    @State private var stop = Stop.half
-    @GestureState private var dragged: CGFloat = 0
     private let figure: BodyFigure
     @Environment(\.dismiss) private var dismiss
 
@@ -70,36 +62,26 @@ struct WorkoutPageView: View {
         }())
     }
 
-    /// The body map takes this share of the screen at the sheet's default stop.
-    private static let mapShare: CGFloat = 0.46
-    /// The height of the sheet at its lowest stop: the handle, the workout name and the action bar.
-    private static let peekHeight: CGFloat = 196
 
     var body: some View {
         let state = page.value
-        GeometryReader { geo in
-            let halfTop = geo.size.height * Self.mapShare
-            let peekTop = geo.size.height - Self.peekHeight - geo.safeAreaInsets.bottom
-            let base = stop == .peek ? peekTop : (stop == .half ? halfTop : 0)
-            let top = min(max(base + dragged, 0), peekTop)
-            let full = min(max(1 - top / halfTop, 0), 1)
-            ZStack(alignment: .topLeading) {
-                PoulpyColor.background.ignoresSafeArea()
-                if state.found {
-                    bodyMap(state, room: top - geo.safeAreaInsets.top - 48 - PoulpySpace.md)
-                        .frame(maxWidth: .infinity)
-                        .padding(.top, geo.safeAreaInsets.top + PoulpySpace.lg)
-                    sheet(state, height: geo.size.height - top, topInset: geo.safeAreaInsets.top * full, corner: PoulpyRadius.lg * (1 - full), stops: [peekTop, halfTop, 0])
-                        .offset(y: top)
-                    floatingButtons(state)
-                        .padding(.top, geo.safeAreaInsets.top + 8)
-                        .padding(.horizontal, PoulpySpace.lg)
-                }
+        ZStack {
+            PoulpyColor.background.ignoresSafeArea()
+            if state.found {
+                DetailSheet(
+                    showBackgroundLabel: "workout.showMap",
+                    showDetailsLabel: "workout.showExercises",
+                    background: { room, safeTop in
+                        bodyMap(state, room: room - safeTop - 48 - PoulpySpace.md)
+                            .frame(maxWidth: .infinity)
+                            .padding(.top, safeTop + PoulpySpace.lg)
+                    },
+                    floating: { floatingButtons(state) },
+                    actions: { actions(state) },
+                    content: { details(state) }
+                )
             }
-            .frame(width: geo.size.width, height: geo.size.height, alignment: .topLeading)
-            .animation(.spring(response: 0.35, dampingFraction: 0.85), value: stop)
         }
-        .ignoresSafeArea()
         .navigationBarBackButtonHidden(true)
         .toolbar(.hidden, for: .navigationBar)
         .onChange(of: state.loaded && !state.found) { gone in
@@ -141,44 +123,6 @@ struct WorkoutPageView: View {
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(state.painNote.isEmpty ? mapText : "\(mapText). \(state.painNote)")
-    }
-
-    /// The details sheet: a handle you drag or tap, the details, and Edit and Start under them.
-    private func sheet(_ state: WorkoutPageState, height: CGFloat, topInset: CGFloat, corner: CGFloat, stops: [CGFloat]) -> some View {
-        let drag = DragGesture()
-            .updating($dragged) { value, current, _ in current = value.translation.height }
-            .onEnded { value in
-                // Rest at the stop nearest to where the sheet was heading, momentum included.
-                let heading = stops[stop.rawValue] + value.predictedEndTranslation.height
-                let nearest = stops.indices.min { abs(stops[$0] - heading) < abs(stops[$1] - heading) } ?? Stop.half.rawValue
-                stop = Stop(rawValue: nearest) ?? .half
-            }
-        return VStack(spacing: 0) {
-            Button { stop = stop == .full ? .half : .full } label: {
-                Capsule().fill(PoulpyColor.outline).frame(width: 40, height: 5)
-                    .frame(maxWidth: .infinity, minHeight: 44)
-                    .padding(.top, topInset)
-                    .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel(stop == .full ? "workout.showMap" : "workout.showExercises")
-            .gesture(drag)
-            ScrollView {
-                details(state)
-                    .padding(.horizontal, PoulpySpace.lg)
-            }
-            // Below full screen, dragging anywhere on the sheet moves it; at full screen it scrolls.
-            .scrollDisabled(stop != .full)
-            .simultaneousGesture(drag, including: stop == .full ? .none : .all)
-            actions(state)
-        }
-        .frame(height: max(height, 0), alignment: .top)
-        .background(
-            PoulpyColor.surface
-                .clipShape(UnevenRoundedRectangle(topLeadingRadius: corner, topTrailingRadius: corner))
-                .ignoresSafeArea(edges: .bottom)
-        )
-        .clipped()
     }
 
     /// A round filled button over the map: back, and the menu of share, copy and delete.

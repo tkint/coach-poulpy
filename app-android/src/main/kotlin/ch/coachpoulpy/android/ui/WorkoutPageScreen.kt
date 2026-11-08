@@ -2,18 +2,13 @@ package ch.coachpoulpy.android.ui
 
 import android.content.Context
 import android.content.Intent
-import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.draggable
-import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -21,21 +16,17 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -71,15 +62,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
@@ -109,18 +97,6 @@ import ch.coachpoulpy.shared.WorkoutStepRow
 import java.time.Instant
 import java.time.ZoneId
 import java.util.Locale
-import kotlin.math.abs
-import kotlin.math.roundToInt
-import kotlinx.coroutines.launch
-
-/** The body map takes this share of the screen at the sheet's default stop. */
-private const val MAP_SHARE = 0.46f
-
-private const val STOP_HALF = 1
-private const val STOP_FULL = 2
-
-/** The height of the sheet at its lowest stop: the handle, the workout name and the action bar. */
-private val SHEET_PEEK = 196.dp
 
 /**
  * One saved workout: the muscles it works on a body map, and over it a sheet you drag up for its exercises, how it
@@ -148,129 +124,73 @@ fun WorkoutPageScreen(
     var picking by remember { mutableStateOf(false) }
     // The exercise whose details are open; null when none.
     var detailing by rememberSaveable { mutableStateOf<String?>(null) }
-    // The sheet rests at one of three stops: PEEK shows its top over a full-height map, HALF is the default, FULL covers the map.
-    var stop by rememberSaveable { mutableStateOf(STOP_HALF) }
 
     // Deleted here or elsewhere: nothing left to show.
     LaunchedEffect(state.loaded, state.found) { if (state.loaded && !state.found) onBack() }
 
     if (state.found) {
-        BoxWithConstraints(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-            val density = LocalDensity.current
-            val total = with(density) { maxHeight.toPx() }
-            val halfTop = total * MAP_SHARE
-            val peekTop = total - with(density) { (SHEET_PEEK + WindowInsets.navigationBars.getBottom(density).toDp()).toPx() }
-            val stops = listOf(peekTop, halfTop, 0f)
-            val top = remember { Animatable(halfTop) }
-            val scope = rememberCoroutineScope()
-            LaunchedEffect(stop, total) { top.animateTo(stops[stop]) }
-            val drag = rememberDraggableState { delta -> scope.launch { top.snapTo((top.value + delta).coerceIn(0f, peekTop)) } }
-            val expanded = stop == STOP_FULL
-            val dragging = Modifier.draggable(
-                state = drag,
-                orientation = Orientation.Vertical,
-                onDragStopped = { velocity ->
-                    // Rest at the stop nearest to where the sheet was heading.
-                    val heading = top.value + velocity * 0.15f
-                    stop = stops.indices.minBy { abs(stops[it] - heading) }
-                    scope.launch { top.animateTo(stops[stop]) }
-                },
-            )
-
-            // The map: a legend, then the front and back figures, as tall as the room above the sheet allows.
-            val statusBar = with(density) { WindowInsets.statusBars.getTop(density).toDp() }
-            val mapRoom = with(density) { top.value.toDp() } - statusBar - MAP_FIGURES_TOP - PoulpySpace.md
-            val figureWidth = (mapRoom / (BodyMapBox.HEIGHT / BodyMapBox.WIDTH)).coerceIn(56.dp, 150.dp)
-            val mapText = stringResource(R.string.workout_mapLabel, state.muscles.joinToString(", ") { it.label })
-            Column(Modifier.fillMaxWidth().statusBarsPadding().padding(top = PoulpySpace.lg), horizontalAlignment = Alignment.CenterHorizontally) {
-                HeatLegend(showPain = state.painAreas.isNotEmpty())
-                Spacer(Modifier.height(PoulpySpace.lg))
-                WorkoutBodyMap(
-                    figure, state.heat, state.painAreas.toSet(),
-                    description = if (state.painNote.isEmpty()) mapText else "$mapText. ${state.painNote}",
-                    figureWidth = figureWidth,
-                )
-            }
-
-            val full = (1f - top.value / halfTop).coerceIn(0f, 1f)
-            val corner = PoulpyRadius.lg * (1f - full)
-            Surface(
-                color = MaterialTheme.colorScheme.surface,
-                shape = RoundedCornerShape(topStart = corner, topEnd = corner),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-                modifier = Modifier.layout { measurable, constraints ->
-                    val height = (total - top.value).roundToInt().coerceAtLeast(0)
-                    val placeable = measurable.measure(constraints.copy(minHeight = height, maxHeight = height))
-                    layout(placeable.width, constraints.maxHeight) { placeable.place(0, top.value.roundToInt()) }
-                },
-            ) {
-                Column(Modifier.fillMaxSize()) {
-                    // Drag the handle, or tap it, to swap the map for the exercises.
-                    val handleLabel = stringResource(if (expanded) R.string.workout_showMap else R.string.workout_showExercises)
-                    Box(
-                        Modifier
-                            .fillMaxWidth()
-                            .then(dragging)
-                            .clickable(onClickLabel = handleLabel) { stop = if (expanded) STOP_HALF else STOP_FULL }
-                            .padding(top = statusBar * full)
-                            .height(PoulpySize.touch),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Box(Modifier.size(width = 40.dp, height = 5.dp).clip(RoundedCornerShape(PoulpyRadius.pill)).background(MaterialTheme.colorScheme.outline))
-                    }
-                    Column(
-                        Modifier
-                            .weight(1f)
-                            .clipToBounds()
-                            .then(if (expanded) Modifier else dragging)
-                            .then(if (expanded) Modifier.verticalScroll(rememberScrollState()) else Modifier)
-                            .padding(horizontal = PoulpySpace.lg),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                    ) {
-                        WorkoutDetails(state, onPlan = { picking = true }, onOpen = { detailing = it })
-                    }
-                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                    Row(Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = PoulpySpace.lg, vertical = 12.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        if (state.editable) {
-                            OutlinedButton(onClick = onEdit, modifier = Modifier.weight(1f).height(PoulpySize.buttonLarge)) {
-                                Icon(Icons.Filled.Edit, contentDescription = null)
-                                Text(stringResource(R.string.action_edit), fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 6.dp))
-                            }
-                        }
-                        Button(onClick = onStart, modifier = Modifier.weight(1.6f).height(PoulpySize.buttonLarge)) {
-                            Icon(Icons.Filled.PlayArrow, contentDescription = null)
-                            Text(stringResource(R.string.workout_start), fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 6.dp))
-                        }
-                    }
+        DetailSheet(
+            showBackgroundLabel = stringResource(R.string.workout_showMap),
+            showDetailsLabel = stringResource(R.string.workout_showExercises),
+            background = { room ->
+                // The map: a legend, then the front and back figures, as tall as the room above the sheet allows.
+                val statusBar = with(LocalDensity.current) { WindowInsets.statusBars.getTop(this).toDp() }
+                val figureWidth = ((room - statusBar - MAP_FIGURES_TOP - PoulpySpace.md) / (BodyMapBox.HEIGHT / BodyMapBox.WIDTH)).coerceIn(56.dp, 150.dp)
+                val mapText = stringResource(R.string.workout_mapLabel, state.muscles.joinToString(", ") { it.label })
+                Column(Modifier.fillMaxWidth().statusBarsPadding().padding(top = PoulpySpace.lg), horizontalAlignment = Alignment.CenterHorizontally) {
+                    HeatLegend(showPain = state.painAreas.isNotEmpty())
+                    Spacer(Modifier.height(PoulpySpace.lg))
+                    WorkoutBodyMap(
+                        figure, state.heat, state.painAreas.toSet(),
+                        description = if (state.painNote.isEmpty()) mapText else "$mapText. ${state.painNote}",
+                        figureWidth = figureWidth,
+                    )
                 }
-            }
-
-            Row(Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = PoulpySpace.lg, vertical = PoulpySpace.sm), horizontalArrangement = Arrangement.SpaceBetween) {
-                FloatingButton(onClick = onBack) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
-                }
-                Box {
-                    FloatingButton(onClick = { menu = true }) {
-                        Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.action_more))
+            },
+            floating = {
+                Row(Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = PoulpySpace.lg, vertical = PoulpySpace.sm), horizontalArrangement = Arrangement.SpaceBetween) {
+                    FloatingButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
                     }
-                    DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.action_share)) },
-                            leadingIcon = { Icon(Icons.Filled.Share, contentDescription = null) },
-                            onClick = { menu = false; shareWorkout(context, model.exportFile(), shareTitle) },
-                        )
-                        if (state.editable) {
+                    Box {
+                        FloatingButton(onClick = { menu = true }) {
+                            Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.action_more))
+                        }
+                        DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
                             DropdownMenuItem(
-                                text = { Text(stringResource(R.string.action_copy)) },
-                                leadingIcon = { Icon(Icons.Filled.ContentCopy, contentDescription = null) },
-                                onClick = { menu = false; onCopy() },
+                                text = { Text(stringResource(R.string.action_share)) },
+                                leadingIcon = { Icon(Icons.Filled.Share, contentDescription = null) },
+                                onClick = { menu = false; shareWorkout(context, model.exportFile(), shareTitle) },
                             )
+                            if (state.editable) {
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.action_copy)) },
+                                    leadingIcon = { Icon(Icons.Filled.ContentCopy, contentDescription = null) },
+                                    onClick = { menu = false; onCopy() },
+                                )
+                            }
+                            HorizontalDivider()
+                            DeleteMenuItem(onClick = { menu = false; deleting = true })
                         }
-                        HorizontalDivider()
-                        DeleteMenuItem(onClick = { menu = false; deleting = true })
                     }
                 }
-            }
+            },
+            actions = {
+                Row(Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = PoulpySpace.lg, vertical = 12.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    if (state.editable) {
+                        OutlinedButton(onClick = onEdit, modifier = Modifier.weight(1f).height(PoulpySize.buttonLarge)) {
+                            Icon(Icons.Filled.Edit, contentDescription = null)
+                            Text(stringResource(R.string.action_edit), fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 6.dp))
+                        }
+                    }
+                    Button(onClick = onStart, modifier = Modifier.weight(1.6f).height(PoulpySize.buttonLarge)) {
+                        Icon(Icons.Filled.PlayArrow, contentDescription = null)
+                        Text(stringResource(R.string.workout_start), fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 6.dp))
+                    }
+                }
+            },
+        ) {
+            WorkoutDetails(state, onPlan = { picking = true }, onOpen = { detailing = it })
         }
     }
 
