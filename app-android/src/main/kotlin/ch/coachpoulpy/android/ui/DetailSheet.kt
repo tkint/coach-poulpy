@@ -66,7 +66,7 @@ private val PULL_DEAD_ZONE = 56.dp
 private const val FLING_SECONDS = 0.04f
 
 /**
- * A sheet over a full-height background (the workout page's body map), resting at three stops: peek shows its top, half
+ * A sheet over a full-height background (the body map of the workout page and the session recap), resting at three stops: peek shows its top, half
  * ([halfShare] of the screen left to the background) is the default, full covers the background and scrolls.
  * The handle drags or taps between stops; below full, dragging anywhere on the sheet moves it; at full, scrolling down
  * past the top of the content drags the sheet back down. [background] gets the room above the sheet, never less than
@@ -78,7 +78,7 @@ internal fun DetailSheet(
     showDetailsLabel: String,
     background: @Composable BoxScope.(room: Dp) -> Unit,
     floating: @Composable BoxScope.() -> Unit,
-    actions: @Composable () -> Unit,
+    actions: (@Composable () -> Unit)? = null,
     modifier: Modifier = Modifier,
     halfShare: Float = 0.46f,
     content: @Composable ColumnScope.() -> Unit,
@@ -182,8 +182,10 @@ internal fun DetailSheet(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     content = content,
                 )
-                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                actions()
+                if (actions != null) {
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                    actions()
+                }
             }
         }
         floating()

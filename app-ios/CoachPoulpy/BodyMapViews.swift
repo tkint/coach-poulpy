@@ -135,6 +135,34 @@ struct HeatMapFigure: View {
 }
 
 /// "Less ▢ ▢ ▢ More", the three heats; with `showPain` also the outlined "Hurts" swatch.
+/// The map behind a `DetailSheet`: a legend, then the front and back figures, as tall as the `room` above the sheet allows.
+/// Collapsed, it fills the room: as wide as two figures side by side fit the screen. Shared by the workout page and the session recap.
+struct HeatMapPanel: View {
+    let figure: BodyFigure
+    let heat: [String: KotlinInt]
+    let hurting: Set<String>
+    let description: String
+    let room: CGFloat
+    let safeTop: CGFloat
+
+    var body: some View {
+        let available = room - safeTop - 48 - PoulpySpace.md
+        let maxFigure = (UIScreen.main.bounds.width - PoulpySpace.lg * 2 - PoulpySpace.sm) / 2
+        let width = min(max(available / CGFloat(BodyMapBox.shared.HEIGHT / BodyMapBox.shared.WIDTH), 56), maxFigure)
+        VStack(spacing: PoulpySpace.lg) {
+            HeatLegend(showPain: !hurting.isEmpty)
+            HStack(spacing: PoulpySpace.sm) {
+                HeatMapFigure(figure: figure, view: .front, heat: heat, hurting: hurting, width: width)
+                HeatMapFigure(figure: figure, view: .back, heat: heat, hurting: hurting, width: width)
+            }
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(description)
+        .frame(maxWidth: .infinity)
+        .padding(.top, safeTop + PoulpySpace.lg)
+    }
+}
+
 struct HeatLegend: View {
     let showPain: Bool
 
