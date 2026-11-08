@@ -661,5 +661,11 @@
     "deleteBody": "This deletes everything stored in your account, right away and for good. Every phone signed in goes back to a guest and keeps its own copy. Backups age out within 30 days.",
     "deletePassword": "Enter your password to confirm",
     "errorDeletePassword": "That password isn’t right. Nothing was deleted."
+  },
+  "crash": {
+    "title": "Coach Poulpy closed on an error",
+    "body": "Sending the report helps fix it. It only says what went wrong, and you can read it before you send it.",
+    "send": "Send the report",
+    "notNow": "Not now"
   }
 }

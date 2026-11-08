@@ -20,6 +20,7 @@ class CoachPoulpyApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        CrashCatcher.install(this)
         graph = AppGraph(DriverFactory(this))
         account = graph.account(
             baseUrl = BuildConfig.API_URL,

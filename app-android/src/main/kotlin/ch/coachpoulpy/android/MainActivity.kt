@@ -18,6 +18,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ch.coachpoulpy.android.ui.AppPreferences
 import ch.coachpoulpy.android.ui.CoachPoulpyRoot
 import ch.coachpoulpy.android.ui.CoachPoulpyTheme
+import ch.coachpoulpy.android.ui.CrashDialog
 import ch.coachpoulpy.android.ui.LocalUnitSystem
 import ch.coachpoulpy.shared.LanguageChoice
 import ch.coachpoulpy.shared.ThemeChoice
@@ -34,6 +35,9 @@ class MainActivity : ComponentActivity() {
 
     /** The account screen an email link opens, such as "confirm:<token>", until it shows. */
     private val accountLink = mutableStateOf<String?>(null)
+
+    /** The report of a crash the app hasn't offered to send yet. */
+    private val crash = mutableStateOf<String?>(null)
 
     // The language picked in Settings wins over the phone's. "System" leaves the phone's,
     // including the per-app language Android 13 offers in its own settings.
@@ -53,7 +57,10 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         openLive.value = intent.getBooleanExtra(OPEN_LIVE, false)
         // Only on a fresh start: a rotation or language change recreates the activity with the same intent.
-        if (savedInstanceState == null) readIntent(intent)
+        if (savedInstanceState == null) {
+            readIntent(intent)
+            crash.value = CrashCatcher.lastCrash(this)
+        }
         val graph = (application as CoachPoulpyApp).graph
         val settings = graph.settings(AppPreferences(this))
         startLanguage = settings.state.value.language
@@ -77,6 +84,12 @@ class MainActivity : ComponentActivity() {
                         accountLink = accountLink.value,
                         onAccountLinkOpened = { accountLink.value = null },
                     )
+                    crash.value?.let { report ->
+                        CrashDialog(report) {
+                            CrashCatcher.forget(this@MainActivity)
+                            crash.value = null
+                        }
+                    }
                 }
             }
         }
