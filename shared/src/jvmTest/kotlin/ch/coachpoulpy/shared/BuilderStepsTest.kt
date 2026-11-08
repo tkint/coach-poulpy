@@ -376,7 +376,7 @@ class BuilderStepsTest {
         // Units are not saved with the workout (#72), so the page shows the distance in km.
         assertEquals(listOf("0.4 km · 5:00 /km", "1 min 30"), repeat.rows.map { it.prescription })
         assertEquals("5:45 /km · until the end", state.parts[2].steps.single().row?.prescription)
-        assertEquals("1 step · until the end", state.parts[2].summary)
+        assertEquals("1 step" to "until the end", state.parts[2].summary to state.parts[2].time)
         page.close()
     }
 
