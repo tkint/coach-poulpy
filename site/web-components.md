@@ -170,7 +170,7 @@ Primary, tonal, outline and grumpy: `CpButton`.
 
 ## Drawer
 
-`CpDrawer`: the admin's page frame. A full-height sidebar from a large screen up, folded to icons by the button in the top bar; on a smaller screen it slides over the page. It fills the browser window, so it has no live sample here: see it in the [Admin mockup](/mockups/web/drafts/admin).
+`CpDrawer`: the admin's page frame. A full-height sidebar from a large screen up, folded to icons by the button in the top bar; on a smaller screen it slides over the page. It fills the browser window, so it has no live sample here: see it in the [Admin mockup](/mockups/web/agreed/admin).
 
 | Vue | Classes |
 | --- | --- |
