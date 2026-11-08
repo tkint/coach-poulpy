@@ -77,10 +77,10 @@ class WorkoutPartsTest {
 
         assertEquals(listOf("Warm-up", "Work 1", "Work 2", "Cool down"), state.parts.map { it.name })
         assertEquals(listOf(PartKind.WARM_UP, PartKind.WORK, PartKind.WORK, PartKind.COOL_DOWN), state.parts.map { it.kind })
-        assertEquals("1 step · 5 min", state.parts[0].summary)
-        assertEquals("2 rounds · about 2 min", state.parts[1].summary)
-        assertEquals("1 exercise · 1 min", state.parts[2].summary)
-        assertEquals("1 step · 1 min", state.parts[3].summary)
+        assertEquals("1 step" to "5 min", state.parts[0].summary to state.parts[0].time)
+        assertEquals("2 rounds" to "about 2 min", state.parts[1].summary to state.parts[1].time)
+        assertEquals("1 exercise" to "1 min", state.parts[2].summary to state.parts[2].time)
+        assertEquals("1 step" to "1 min", state.parts[3].summary to state.parts[3].time)
         assertEquals("Circuit", state.formatLabel)
 
         // No Warm-up or Cool down tag on the rows: the header says it. Rests keep Recover.

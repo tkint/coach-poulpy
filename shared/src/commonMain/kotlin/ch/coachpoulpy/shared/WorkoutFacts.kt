@@ -53,7 +53,11 @@ internal class WorkoutFacts(private val compiler: TimelineCompiler, private val 
      * workout ([endsWorkout]) with a step done until the button press says "until the end", and
      * an empty part only its count.
      */
-    fun partSummary(part: Part, endsWorkout: Boolean): String {
+    fun partSummary(part: Part, endsWorkout: Boolean): String =
+        partLine(part, endsWorkout).let { (count, length) -> if (length.isEmpty()) count else "$count · $length" }
+
+    /** [partSummary] in its two halves: "4 exercises" and "about 25 min" (empty for an empty part). The workout page puts the second on the block's border. */
+    fun partLine(part: Part, endsWorkout: Boolean): Pair<String, String> {
         val alone = Workout(WorkoutId(""), 1, "", WorkoutFormat.SETS, listOf(part))
         val exercises = exerciseSteps(alone)
         val repeat = part.steps.singleOrNull() as? Step.Group
@@ -65,9 +69,9 @@ internal class WorkoutFacts(private val compiler: TimelineCompiler, private val 
         val last = part.steps.lastOrNull() as? Step.ExerciseStep
         val open = endsWorkout && last?.prescription?.sets?.lastOrNull()?.target == Target.Open
         return when {
-            exercises.isEmpty() -> count
-            open -> "$count · ${labels.until(last = true).lowercase()}"
-            else -> "$count · ${length(alone)}"
+            exercises.isEmpty() -> count to ""
+            open -> count to labels.until(last = true).lowercase()
+            else -> count to length(alone)
         }
     }
 

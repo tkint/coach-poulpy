@@ -90,7 +90,7 @@ struct WorkoutPageView: View {
             if gone { dismiss() }
         }
         .sheet(item: $detailing) { detail in
-            ExerciseInfoSheet(graph: graph, slug: detail.slug, adding: false, closeLabel: "action.close", onAction: { _ in detailing = nil })
+            ExerciseInfoSheet(graph: graph, slug: detail.slug, adding: false, closeLabel: nil, onAction: { _ in detailing = nil })
         }
         .sheet(isPresented: $picking) {
             PlanSheet(name: state.name, planned: state.plans) { days in page.model.setDays(days: days) }
@@ -168,25 +168,18 @@ struct WorkoutPageView: View {
             stats(state)
             sectionLabel("workout.exercises")
             ForEach(state.parts, id: \.key) { part in
-                partHeader(part)
-                ForEach(part.steps, id: \.key) { step in
-                    if let row = step.row {
-                        structureRow(row)
-                    } else if let group = step.repeatGroup {
-                        VStack(alignment: .leading, spacing: 6) {
-                            HStack(spacing: 8) {
-                                Image(systemName: "repeat").font(.system(size: 16, weight: .bold)).foregroundStyle(PoulpyColor.primary)
-                                Text("\(NSLocalizedString("builder.repeat", comment: "")) · \(group.timesLabel)")
-                                    .font(.poulpy(.headline))
-                                    .foregroundStyle(PoulpyColor.onPrimaryContainer)
-                            }
-                            .padding(EdgeInsets(top: 2, leading: 4, bottom: 2, trailing: 4))
-                            ForEach(group.rows, id: \.key) { row in
-                                structureRow(row)
+                PartBlockView(kind: part.kind, name: part.name, summary: part.summary, time: part.time) {
+                    ForEach(Array(part.steps.enumerated()), id: \.element.key) { index, step in
+                        if index > 0 { Divider().overlay(PoulpyColor.outline) }
+                        if let row = step.row {
+                            exerciseRow(row)
+                        } else if let group = step.repeatGroup {
+                            repeatHeader(group.timesLabel)
+                            ForEach(group.rows, id: \.key) { child in
+                                Divider().overlay(PoulpyColor.outline)
+                                exerciseRow(child)
                             }
                         }
-                        .padding(10)
-                        .background(PoulpyColor.primaryContainer, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
                     }
                 }
             }
@@ -306,45 +299,30 @@ struct WorkoutPageView: View {
         .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(PoulpyColor.outline))
     }
 
-    /// "Warm-up", "2 steps · about 6 min" beside the part's icon, as the builder heads a part.
-    private func partHeader(_ part: WorkoutPagePart) -> some View {
+    /// "Repeat · 3 times", heading the rows that go round together.
+    private func repeatHeader(_ timesLabel: String) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: "repeat").font(.system(size: 14, weight: .bold)).accessibilityHidden(true)
+            Text("\(NSLocalizedString("builder.repeat", comment: "")) · \(timesLabel)").font(.poulpy(.subheadline).weight(.heavy))
+        }
+        .foregroundStyle(PoulpyColor.primary)
+        .padding(.vertical, 6)
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    /// An exercise (or a rest) in a part's block, as in the session recap: its movement badge (a timer for a rest), Recover
+    /// tag, name and prescription. An exercise has an info button where the recap has a time, which opens its details sheet.
+    private func exerciseRow(_ step: WorkoutStepRow) -> some View {
         HStack(spacing: 10) {
-            PartBadge(kind: part.kind)
-            VStack(alignment: .leading, spacing: 0) {
-                Text(part.name).font(.poulpy(.title3).weight(.heavy)).foregroundStyle(PoulpyColor.onSurface)
-                Text(part.summary).font(.poulpy(.footnote)).monospacedDigit().foregroundStyle(PoulpyColor.onSurfaceVariant)
-            }
-        }
-        .padding(.leading, 2)
-        .padding(.top, 8)
-    }
-
-    /// An exercise opens its details sheet; a rest shows a timer and opens nothing.
-    @ViewBuilder
-    private func structureRow(_ row: WorkoutStepRow) -> some View {
-        if row.isRest {
-            stepRow(row)
-        } else {
-            Button {
-                detailing = DetailTarget(slug: row.slug)
-            } label: {
-                stepRow(row)
-            }
-            .buttonStyle(.plain)
-        }
-    }
-
-    private func stepRow(_ step: WorkoutStepRow) -> some View {
-        HStack(spacing: 12) {
             if step.isRest {
-                Image(systemName: "timer").font(.system(size: 16, weight: .bold)).foregroundStyle(PoulpyColor.onSurfaceVariant)
-                    .frame(width: 40, height: 40)
+                Image(systemName: "timer").font(.system(size: 14, weight: .bold)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+                    .frame(width: 32, height: 32)
                     .background(PoulpyColor.surfaceVariant, in: Circle())
                     .accessibilityHidden(true)
             } else {
-                PatternBadge(pattern: step.pattern, size: 40)
+                PatternBadge(pattern: step.pattern, size: 32)
             }
-            VStack(alignment: .leading, spacing: 1) {
+            VStack(alignment: .leading, spacing: 0) {
                 if let role = step.roleLabel {
                     Text(role)
                         .textCase(.uppercase)
@@ -352,18 +330,27 @@ struct WorkoutPageView: View {
                         .kerning(0.9)
                         .foregroundStyle(PoulpyColor.primary)
                 }
-                Text(step.name).font(.poulpy(.headline)).foregroundStyle(PoulpyColor.onSurface)
-                Text(step.prescription).font(.poulpy(.subheadline)).monospacedDigit().foregroundStyle(PoulpyColor.onSurfaceVariant)
+                Text(step.name).font(.poulpy(.subheadline).weight(.heavy)).foregroundStyle(PoulpyColor.onSurface)
+                Text(step.prescription).font(.poulpy(.footnote)).monospacedDigit().foregroundStyle(PoulpyColor.onSurfaceVariant)
             }
             Spacer(minLength: 0)
             if !step.isRest {
-                Image(systemName: "chevron.right").foregroundStyle(PoulpyColor.onSurfaceVariant)
+                Button {
+                    detailing = DetailTarget(slug: step.slug)
+                } label: {
+                    Image(systemName: "info.circle")
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundStyle(PoulpyColor.onSurfaceVariant)
+                        .frame(width: 44, height: 44)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(Text(L("exercise.details %@", step.name)))
+                // The button reaches past the row's padding instead of making the row taller.
+                .padding(.vertical, -6)
+                .padding(.trailing, -10)
             }
         }
-        .padding(EdgeInsets(top: 8, leading: 12, bottom: 8, trailing: 12))
-        .frame(minHeight: 56)
-        .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
-        .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(PoulpyColor.outline))
+        .padding(.vertical, 6)
     }
 
     private func actions(_ state: WorkoutPageState) -> some View {

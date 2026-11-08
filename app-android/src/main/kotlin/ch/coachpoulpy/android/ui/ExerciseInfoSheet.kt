@@ -47,8 +47,9 @@ import ch.coachpoulpy.shared.AppGraph
 /**
  * What the builder shows of an exercise: its muscles and equipment, the body map with the muscles it works lit on
  * the person's figure, the steps, and one button ([onAction]). From the picker the button is "Add to the workout"
- * ([adding]), which goes on to the add sheet; from a step's sheet it is "Back to the step"; from the workout page it is "Close" ([closeLabel]). Opened in full so the
- * figure and the steps are in view.
+ * ([adding]), which goes on to the add sheet; from a step's sheet it is "Back to the step" ([closeLabel]). From the workout page
+ * ([closeLabel] null) there is no button: the sheet opens partly over a scrim, closes with the cross at its top, and
+ * drags up for the rest (`workout-page-exercise-details` mockups). The others open in full so the figure and the steps are in view.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,7 +60,7 @@ fun ExerciseInfoSheet(
     onAction: (String) -> Unit,
     onDismiss: () -> Unit,
     adding: Boolean = true,
-    @StringRes closeLabel: Int = R.string.exercise_backToStep,
+    @StringRes closeLabel: Int? = R.string.exercise_backToStep,
 ) {
     // From the picker the sheet can move along the exercise's variations; [current] is the one shown and added.
     var current by rememberSaveable(slug) { mutableStateOf(slug) }
@@ -69,7 +70,7 @@ fun ExerciseInfoSheet(
     val colors = MaterialTheme.colorScheme
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = adding || closeLabel != null),
         containerColor = colors.surface,
     ) {
         // Fills the sheet, so the steps scroll inside a fixed height and the sheet itself never moves with them.
@@ -130,7 +131,7 @@ fun ExerciseInfoSheet(
                     }
                 }
             }
-            if (!(adding && listing)) {
+            if (!(adding && listing) && (adding || closeLabel != null)) {
                 HorizontalDivider(Modifier.padding(top = 12.dp), color = colors.surfaceVariant)
                 Box(Modifier.navigationBarsPadding().padding(start = PoulpySpace.lg, end = PoulpySpace.lg, top = 12.dp, bottom = 16.dp)) {
                     Button(onClick = { onAction(detail.slug) }, modifier = Modifier.fillMaxWidth().height(PoulpySize.buttonLarge)) {
@@ -138,7 +139,7 @@ fun ExerciseInfoSheet(
                             Icon(Icons.Filled.Add, contentDescription = null)
                         }
                         Text(
-                            stringResource(if (adding) R.string.exercise_addHere else closeLabel),
+                            stringResource(if (adding || closeLabel == null) R.string.exercise_addHere else closeLabel),
                             fontWeight = FontWeight.ExtraBold,
                             modifier = Modifier.padding(start = if (adding) 8.dp else 0.dp),
                         )

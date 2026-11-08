@@ -3,12 +3,13 @@ import Shared
 
 /// What the builder shows of an exercise: its muscles and equipment, the body map with the muscles it works lit on the
 /// person's figure, the steps, and one button. From the picker it is "Add to the workout" ([adding]), which goes on to
-/// the add sheet; from a step's sheet it is "Back to the step"; from the workout page it is "Close" ([closeLabel]).
+/// the add sheet; from a step's sheet it is "Back to the step" ([closeLabel]). From the workout page ([closeLabel] nil) there is no
+/// button: the sheet opens partly over a scrim, closes with the cross at its top, and drags up for the rest.
 struct ExerciseInfoSheet: View {
     let graph: AppGraph
     let slug: String
     var adding = true
-    var closeLabel: LocalizedStringKey = "exercise.backToStep"
+    var closeLabel: LocalizedStringKey? = "exercise.backToStep"
     let onAction: (String) -> Void
     @Environment(\.dismiss) private var dismiss
     // From the picker the sheet can move along the exercise's variations; [current] is the one shown and added.
@@ -72,13 +73,13 @@ struct ExerciseInfoSheet: View {
                     .padding(.top, 20)
                     .padding(.bottom, 16)
                 }
-                if !(adding && listing) {
+                if !(adding && listing), adding || closeLabel != nil {
                 Divider()
                 Button { onAction(detail.slug) } label: {
                     Group {
                         if adding {
                             Label("exercise.addHere", systemImage: "plus")
-                        } else {
+                        } else if let closeLabel {
                             Text(closeLabel)
                         }
                     }
@@ -95,7 +96,7 @@ struct ExerciseInfoSheet: View {
                 }
             }
             .background(PoulpyColor.surface)
-            .presentationDetents([.large])
+            .presentationDetents(adding || closeLabel != nil ? [.large] : [.medium, .large])
         }
     }
 

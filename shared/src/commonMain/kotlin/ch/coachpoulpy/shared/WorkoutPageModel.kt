@@ -46,14 +46,16 @@ data class WorkoutRepeatBlock(val key: String, val timesLabel: String, val rows:
 /** One step at the top of a part: an exercise or rest ([row]), or a repeat ([repeatGroup]). */
 data class WorkoutPageStep(val key: String, val row: WorkoutStepRow?, val repeatGroup: WorkoutRepeatBlock?)
 
-/** A part of the workout under its header: "Warm-up", "2 steps · about 6 min", then its steps. */
+/** A part of the workout as a block (`workout-page-*` mockups): "Warm-up" and "2 steps" on its border, "about 6 min" opposite, then its steps. */
 data class WorkoutPagePart(
     val key: String,
     val kind: PartKind,
     /** "Warm-up", "Work", or "Work 2" when there are several work parts. */
     val name: String,
-    /** "4 rounds · about 14 min" or "4 exercises · about 25 min" for work, "2 steps · about 6 min" otherwise ([WorkoutFacts.partSummary]). */
+    /** "4 rounds" or "4 exercises" for work, "2 steps" otherwise ([WorkoutFacts.partLine]). */
     val summary: String,
+    /** "about 14 min", or "until the end" for a part that ends the workout on a button press; empty for an empty part. */
+    val time: String,
     val steps: List<WorkoutPageStep>,
 )
 
@@ -216,11 +218,13 @@ class WorkoutPageModel internal constructor(
         }
         return workout.parts.map { part ->
             if (part.kind == PartKind.WORK) workParts++
+            val (count, length) = facts.partLine(part, endsWorkout = part == workout.parts.last())
             WorkoutPagePart(
                 key = part.id.value,
                 kind = part.kind,
                 name = labels.part(part.kind, workParts.takeIf { severalWorkParts && part.kind == PartKind.WORK }),
-                summary = facts.partSummary(part, endsWorkout = part == workout.parts.last()),
+                summary = count,
+                time = length,
                 steps = part.steps.map { step ->
                     if (step is Step.Group) {
                         WorkoutPageStep(step.id.value, null, WorkoutRepeatBlock(step.id.value, labels.times(step.rounds), step.children.mapNotNull(::leaf)))
