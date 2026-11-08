@@ -59,6 +59,12 @@ private const val STOP_FULL = 2
 /** The height of the sheet at its lowest stop: the handle, a title and the action bar. */
 private val SHEET_PEEK = 196.dp
 
+/** How far a pull down from the top of the content goes before the sheet starts to follow it. */
+private val PULL_DEAD_ZONE = 56.dp
+
+/** How much of a fling's speed counts when picking where the sheet rests: little, so only a wide drag changes the stop. */
+private const val FLING_SECONDS = 0.04f
+
 /**
  * A sheet over a full-height background (the workout page's body map), resting at three stops: peek shows its top, half
  * ([halfShare] of the screen left to the background) is the default, full covers the background and scrolls.
@@ -97,9 +103,9 @@ internal fun DetailSheet(
             return moved
         }
 
-        /** Rests at the stop nearest to where the sheet was heading. */
+        /** Rests at the stop nearest to where the sheet was heading; the same halfway rule in both directions. */
         fun settle(velocity: Float) {
-            val heading = top.value + velocity * 0.15f
+            val heading = top.value + velocity * FLING_SECONDS
             stop = stops.indices.minBy { abs(stops[it] - heading) }
             scope.launch { top.animateTo(stops[stop]) }
         }
@@ -109,15 +115,28 @@ internal fun DetailSheet(
 
         // At full height the content scrolls; a pull down once it is at the top lowers the sheet, and a pull up
         // raises it again before the content scrolls.
-        val connection = remember(scroll) {
+        val deadZone = with(density) { PULL_DEAD_ZONE.toPx() }
+        val connection = remember(scroll, deadZone) {
             object : NestedScrollConnection {
-                override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset =
-                    if (available.y < 0f && top.value > 0f) Offset(0f, moveBy(available.y)) else Offset.Zero
+                // How far the content has been pulled down past its top in this gesture.
+                private var pulled = 0f
 
-                override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset =
-                    if (available.y > 0f) Offset(0f, moveBy(available.y)) else Offset.Zero
+                override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                    if (available.y >= 0f) return Offset.Zero
+                    pulled = (pulled + available.y).coerceAtLeast(0f)
+                    return if (top.value > 0f) Offset(0f, moveBy(available.y)) else Offset.Zero
+                }
+
+                override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
+                    if (available.y <= 0f) return Offset.Zero
+                    pulled += available.y
+                    // The sheet only follows once the pull is past the dead zone.
+                    val excess = (pulled - deadZone).coerceAtLeast(0f)
+                    return Offset(0f, moveBy(minOf(available.y, excess)))
+                }
 
                 override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
+                    pulled = 0f
                     if (top.value > 0f && stop == STOP_FULL) settle(available.y)
                     return Velocity.Zero
                 }
@@ -156,7 +175,9 @@ internal fun DetailSheet(
                     Modifier
                         .weight(1f)
                         .clipToBounds()
-                        .then(if (expanded) Modifier.nestedScroll(connection).verticalScroll(scroll) else dragging)
+                        // Always measured at its natural height, so its items never squash while the sheet moves.
+                        .then(if (expanded) Modifier.nestedScroll(connection) else dragging)
+                        .verticalScroll(scroll, enabled = expanded)
                         .padding(horizontal = PoulpySpace.lg),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     content = content,

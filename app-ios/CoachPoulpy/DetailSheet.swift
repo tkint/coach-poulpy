@@ -27,6 +27,10 @@ struct DetailSheet<Background: View, Floating: View, Actions: View, Content: Vie
 
     /// The height of the sheet at its lowest stop: the handle, a title and the action bar.
     private static var peekHeight: CGFloat { 196 }
+    /// How far a pull down from the top of the content goes before the sheet starts to follow it.
+    private static var pullDeadZone: CGFloat { 56 }
+    /// How much of a fling's speed counts when picking where the sheet rests: little, so only a wide drag changes the stop.
+    private static var flingShare: CGFloat { 0.25 }
 
     @State private var stop = SheetStop.half
     @GestureState private var dragged: CGFloat = 0
@@ -60,7 +64,7 @@ struct DetailSheet<Background: View, Floating: View, Actions: View, Content: Vie
 
     /// Rests at the stop nearest to where the sheet was heading, momentum included.
     private func settle(from current: CGFloat, predicted: CGFloat, stops: [CGFloat]) {
-        let heading = current + predicted
+        let heading = current + predicted * Self.flingShare
         let nearest = stops.indices.min { abs(stops[$0] - heading) < abs(stops[$1] - heading) } ?? SheetStop.half.rawValue
         stop = SheetStop(rawValue: nearest) ?? .half
     }
@@ -75,10 +79,10 @@ struct DetailSheet<Background: View, Floating: View, Actions: View, Content: Vie
         let pull = DragGesture(minimumDistance: 8)
             .onChanged { value in
                 if pullStartedAtTop == nil { pullStartedAtTop = contentOffset <= 1 }
-                pulled = pullStartedAtTop == true ? max(value.translation.height, 0) : 0
+                pulled = pullStartedAtTop == true ? max(value.translation.height - Self.pullDeadZone, 0) : 0
             }
             .onEnded { value in
-                if pullStartedAtTop == true && value.translation.height > 0 {
+                if pullStartedAtTop == true && pulled > 0 {
                     settle(from: stops[stop.rawValue] + pulled, predicted: value.predictedEndTranslation.height - value.translation.height, stops: stops)
                 }
                 pulled = 0
