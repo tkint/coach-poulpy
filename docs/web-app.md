@@ -6,7 +6,7 @@ The web app is the signed-in website for members, at `app.coach-poulpy.com` ([AD
 
 - **The same stack as the admin**: Vue and DaisyUI from `web/ui` ([ADR 0023](./adr/0023-the-websites-share-one-vue-and-daisyui-design-system.md)). A missing component is added there, never styled in the app.
 - **The same sign-in as the admin**: cookies from `POST /api/v1/web/session` ([the API](./the-api.md)). The page never sees a token. Unlike the admin, any confirmed account may sign in.
-- **A sidebar**, the admin's `CpDrawer` shell. It lists only the screens that exist; each feature adds its own entry.
+- **A sidebar**, the admin's `CpDrawer` shell. It lists only the screens that exist; each feature adds its own entry. An **Admin** entry, a plain link to `/admin`, appears only when `GET /api/v1/me` says the role is `admin`; a member never sees it, and the admin area still checks the role itself ([the admin area](./admin.md)).
 
 ## The screens
 
