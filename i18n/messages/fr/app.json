@@ -69,7 +69,7 @@
     "less": "Moins",
     "more": "Plus",
     "hurts": "Douleur",
-    "mapLabel": "Muscles sollicités : {muscles}",
+    "mapLabel": "Muscles sollicités : {muscles}",
     "plannedSessions": "{count, plural, one {# séance prévue} many {# séances prévues} other {# séances prévues}}",
     "nextOn": "Prochaine le {date}",
     "nextToday": "Prochaine aujourd’hui",
