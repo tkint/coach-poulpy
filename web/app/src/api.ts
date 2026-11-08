@@ -1,13 +1,13 @@
 // The account endpoints the email links need (docs/the-api.md). The server allows this site's
 // origin (ADR 0021); during `npm run dev`, Vite proxies /api to the local server.
-const base = import.meta.env.VITE_API_URL ?? (import.meta.env.DEV ? '/api' : 'https://api.coach-poulpy.com')
+export const apiBase = import.meta.env.VITE_API_URL ?? (import.meta.env.DEV ? '/api' : 'https://api.coach-poulpy.com')
 
 /** Done, the link is used or expired, the password is refused, or the server can't be reached. */
 export type LinkAnswer = 'done' | 'expired' | 'invalid-password' | 'offline'
 
 async function post(path: string, body: object): Promise<LinkAnswer> {
   try {
-    const response = await fetch(`${base}/api/v1${path}`, {
+    const response = await fetch(`${apiBase}/api/v1${path}`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(body),
