@@ -13,5 +13,5 @@ const classes = {
 </script>
 
 <template>
-  <span class="cp-badge" :class="classes[tone]" data-component="badge"><slot /></span>
+  <span class="cp-badge whitespace-nowrap" :class="classes[tone]" data-component="badge"><slot /></span>
 </template>
