@@ -11,7 +11,7 @@ private struct ScrollOffsetKey: PreferenceKey {
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = nextValue() }
 }
 
-/// A sheet over a full-height background (the workout page's body map), resting at three stops: peek shows its top,
+/// A sheet over a full-height background (the body map of the workout page and the session recap), resting at three stops: peek shows its top,
 /// half (`halfShare` of the screen left to the background) is the default, full covers the background and scrolls.
 /// The handle drags or taps between stops; below full, dragging anywhere on the sheet moves it; at full, pulling
 /// down from the top of the content drags the sheet back down. `background` gets the room above the sheet, never less
@@ -122,5 +122,22 @@ struct DetailSheet<Background: View, Floating: View, Actions: View, Content: Vie
                 .ignoresSafeArea(edges: .bottom)
         )
         .clipped()
+    }
+}
+
+extension DetailSheet where Actions == EmptyView {
+    /// A sheet with no action bar under its content.
+    init(
+        showBackgroundLabel: LocalizedStringKey,
+        showDetailsLabel: LocalizedStringKey,
+        halfShare: CGFloat = 0.46,
+        background: @escaping (_ room: CGFloat, _ safeTop: CGFloat) -> Background,
+        floating: @escaping () -> Floating,
+        content: @escaping () -> Content
+    ) {
+        self.init(
+            showBackgroundLabel: showBackgroundLabel, showDetailsLabel: showDetailsLabel, halfShare: halfShare,
+            background: background, floating: floating, actions: { EmptyView() }, content: content
+        )
     }
 }

@@ -51,6 +51,11 @@ data class WorkoutMuscles(
                 }
             }
             workout.parts.filter { it.kind == PartKind.WORK }.forEach { open(it.steps, 1) }
+            return of(sets, labels)
+        }
+
+        /** The loads and the lit areas for [sets], the sets each muscle group got. */
+        internal fun of(sets: Map<MuscleGroup, Int>, labels: Labels): WorkoutMuscles {
             if (sets.isEmpty()) return NONE
 
             val busiest = sets.values.max()

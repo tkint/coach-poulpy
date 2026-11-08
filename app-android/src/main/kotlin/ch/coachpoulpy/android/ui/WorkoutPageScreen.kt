@@ -15,14 +15,12 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
@@ -59,8 +57,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -68,9 +66,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -86,7 +82,6 @@ import ch.coachpoulpy.core.model.BodyFigure
 import ch.coachpoulpy.core.model.MovementPattern
 import ch.coachpoulpy.core.model.PartKind
 import ch.coachpoulpy.shared.AppGraph
-import ch.coachpoulpy.shared.BodyMapBox
 import ch.coachpoulpy.shared.DeletePrompt
 import ch.coachpoulpy.shared.MuscleLoad
 import ch.coachpoulpy.shared.PoulpyDrawing
@@ -134,21 +129,11 @@ fun WorkoutPageScreen(
             showBackgroundLabel = stringResource(R.string.workout_showMap),
             showDetailsLabel = stringResource(R.string.workout_showExercises),
             background = { room ->
-                // The map: a legend, then the front and back figures, as tall as the room above the sheet allows.
-                val statusBar = with(LocalDensity.current) { WindowInsets.statusBars.getTop(this).toDp() }
-                // Collapsed, the map fills the room: as wide as two figures side by side fit the screen.
-                val maxFigure = (LocalConfiguration.current.screenWidthDp.dp - PoulpySpace.lg * 2 - PoulpySpace.sm) / 2
-                val figureWidth = ((room - statusBar - MAP_FIGURES_TOP - PoulpySpace.md) / (BodyMapBox.HEIGHT / BodyMapBox.WIDTH)).coerceIn(56.dp, maxFigure)
                 val mapText = stringResource(R.string.workout_mapLabel, state.muscles.joinToString(", ") { it.label })
-                Column(Modifier.fillMaxWidth().statusBarsPadding().padding(top = PoulpySpace.lg), horizontalAlignment = Alignment.CenterHorizontally) {
-                    HeatLegend(showPain = state.painAreas.isNotEmpty())
-                    Spacer(Modifier.height(PoulpySpace.lg))
-                    WorkoutBodyMap(
-                        figure, state.heat, state.painAreas.toSet(),
-                        description = if (state.painNote.isEmpty()) mapText else "$mapText. ${state.painNote}",
-                        figureWidth = figureWidth,
-                    )
-                }
+                HeatMapPanel(
+                    room, figure, state.heat, state.painAreas.toSet(),
+                    description = if (state.painNote.isEmpty()) mapText else "$mapText. ${state.painNote}",
+                )
             },
             floating = {
                 Row(Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = PoulpySpace.lg, vertical = PoulpySpace.sm), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -222,12 +207,9 @@ fun WorkoutPageScreen(
     }
 }
 
-/** Where the figures start below the status bar: the legend and the gap under it. */
-private val MAP_FIGURES_TOP = PoulpySpace.lg + 16.dp + PoulpySpace.lg
-
 /** A round filled button over the map, with a thin outline so it stays visible on any heat. */
 @Composable
-private fun FloatingButton(onClick: () -> Unit, content: @Composable () -> Unit) {
+internal fun FloatingButton(onClick: () -> Unit, content: @Composable () -> Unit) {
     Surface(
         shape = CircleShape,
         color = MaterialTheme.colorScheme.surface,

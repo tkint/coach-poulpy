@@ -113,6 +113,19 @@ class SessionRecapTest {
     }
 
     @Test
+    fun theMusclesWorkedFollowTheSetsDoneNotThePlan() {
+        // Phases: 0 jack, 1-3 push-up, 4-6 press, 7-8 plank, 9 pose. Skip the press's third set and both plank sets.
+        val recap = run("muscles-1", sets(), skipped = setOf(6, 7, 8))
+
+        val loads = recap.muscles.loads.associate { it.label to it.sets }
+        // The warm-up and cool down add nothing, and the skipped plank sets leave Core out.
+        assertEquals(false, "Core" in loads)
+        assertEquals(3, loads["Chest"])
+        assertEquals(recap.muscles.loads.maxOf { it.heat }, recap.muscles.heat["deltoid-left"])
+        assertEquals(null, recap.muscles.heat["abs-left"])
+    }
+
+    @Test
     fun aCircuitCountsRoundsAndWordsSkipsAsRounds() {
         val workout = save(
             Workout(
