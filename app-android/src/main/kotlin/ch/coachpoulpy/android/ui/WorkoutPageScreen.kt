@@ -27,7 +27,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Bedtime
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.CalendarMonth
@@ -42,6 +41,7 @@ import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.WbSunny
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
@@ -87,7 +87,6 @@ import ch.coachpoulpy.shared.MuscleLoad
 import ch.coachpoulpy.shared.PoulpyDrawing
 import ch.coachpoulpy.shared.WorkoutFile
 import ch.coachpoulpy.shared.WorkoutFileExport
-import ch.coachpoulpy.shared.WorkoutPagePart
 import ch.coachpoulpy.shared.WorkoutPageState
 import ch.coachpoulpy.shared.WorkoutStepRow
 import java.time.Instant
@@ -202,7 +201,7 @@ fun WorkoutPageScreen(
             onAction = { detailing = null },
             onDismiss = { detailing = null },
             adding = false,
-            closeLabel = R.string.action_close,
+            closeLabel = null,
         )
     }
 }
@@ -247,22 +246,21 @@ private fun ColumnScope.WorkoutDetails(state: WorkoutPageState, onPlan: () -> Un
     Stats(state)
     SectionLabel(stringResource(R.string.workout_exercises))
     state.parts.forEach { part ->
-        PartHeader(part)
-        part.steps.forEach { step ->
-            val row = step.row
-            val group = step.repeatGroup
-            if (row != null) {
-                StructureRow(row, onOpen)
-            } else if (group != null) {
-                Column(
-                    Modifier.fillMaxWidth().clip(RoundedCornerShape(PoulpyRadius.md)).background(colors.primaryContainer).padding(10.dp),
-                    verticalArrangement = Arrangement.spacedBy(6.dp),
-                ) {
-                    Row(Modifier.padding(start = 4.dp, top = 2.dp, bottom = 2.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Icon(Icons.Filled.Repeat, contentDescription = null, tint = colors.primary, modifier = Modifier.size(20.dp))
-                        Text("${stringResource(R.string.builder_repeat)} · ${group.timesLabel}", style = MaterialTheme.typography.titleMedium, color = colors.onPrimaryContainer)
+        PartBlock(part.kind, part.name, part.summary, part.time) {
+            var first = true
+            part.steps.forEach { step ->
+                if (!first) HorizontalDivider(color = colors.outline)
+                first = false
+                val row = step.row
+                val group = step.repeatGroup
+                if (row != null) {
+                    ExerciseRow(row, onOpen)
+                } else if (group != null) {
+                    RepeatHeader(group.timesLabel)
+                    group.rows.forEach { child ->
+                        HorizontalDivider(color = colors.outline)
+                        ExerciseRow(child, onOpen)
                     }
-                    group.rows.forEach { child -> StructureRow(child, onOpen) }
                 }
             }
         }
@@ -333,19 +331,6 @@ private fun heatColor(extras: PoulpyExtraColors, heat: Int) = when (heat) {
     else -> extras.heat3
 }
 
-/** "Warm-up", "2 steps · about 6 min" beside the part's icon, as the builder heads a part. */
-@Composable
-private fun PartHeader(part: WorkoutPagePart) {
-    val colors = MaterialTheme.colorScheme
-    Row(Modifier.padding(start = 2.dp, top = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        PartBadge(part.kind)
-        Column {
-            Text(part.name, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.ExtraBold)
-            Text(part.summary, style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
-        }
-    }
-}
-
 /** A part's icon in its round badge, filled for work, as on the workout page and in the builder. */
 @Composable
 internal fun PartBadge(kind: PartKind) {
@@ -364,36 +349,47 @@ internal val PartKind.icon: ImageVector
         PartKind.COOL_DOWN -> Icons.Filled.Bedtime
     }
 
-/** A step of the workout page: its movement badge (a timer for a rest), Recover tag, name and prescription; an exercise opens its page. */
+/** "Repeat · 3 times", heading the rows that go round together. */
 @Composable
-private fun StructureRow(row: WorkoutStepRow, onOpen: (String) -> Unit) {
+private fun RepeatHeader(timesLabel: String) {
+    val colors = MaterialTheme.colorScheme
+    Row(Modifier.padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Icon(Icons.Filled.Repeat, contentDescription = null, tint = colors.primary, modifier = Modifier.size(18.dp))
+        Text("${stringResource(R.string.builder_repeat)} · $timesLabel", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.ExtraBold, color = colors.primary)
+    }
+}
+
+/**
+ * An exercise (or a rest) in a part's block, as in the session recap: its movement badge (a timer for a rest), Recover
+ * tag, name and prescription. An exercise has an info button where the recap has a time, which opens its details sheet.
+ */
+@Composable
+private fun ExerciseRow(row: WorkoutStepRow, onOpen: (String) -> Unit) {
     val colors = MaterialTheme.colorScheme
     Row(
-        Modifier
-            .fillMaxWidth()
-            .heightIn(min = PoulpySize.row)
-            .clip(RoundedCornerShape(PoulpyRadius.md))
-            .background(colors.surface)
-            .then(if (row.isRest) Modifier else Modifier.clickable { onOpen(row.slug) })
-            .padding(horizontal = 12.dp, vertical = 8.dp),
+        Modifier.fillMaxWidth().padding(vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         if (row.isRest) {
-            Box(Modifier.size(PoulpySize.avatar).clip(CircleShape).background(colors.surfaceVariant), contentAlignment = Alignment.Center) {
-                Icon(Icons.Filled.Timer, contentDescription = null, tint = colors.onSurfaceVariant, modifier = Modifier.size(20.dp))
+            Box(Modifier.size(PoulpySize.avatarSmall).clip(CircleShape).background(colors.surfaceVariant), contentAlignment = Alignment.Center) {
+                Icon(Icons.Filled.Timer, contentDescription = null, tint = colors.onSurfaceVariant, modifier = Modifier.size(18.dp))
             }
         } else {
-            PatternBadge(row.pattern ?: MovementPattern.CORE, size = PoulpySize.avatar)
+            PatternBadge(row.pattern ?: MovementPattern.CORE, size = PoulpySize.avatarSmall)
         }
         Column(Modifier.weight(1f)) {
             row.roleLabel?.let {
                 Text(it.uppercase(Locale.getDefault()), style = MaterialTheme.typography.labelSmall, color = colors.primary)
             }
-            Text(row.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold)
-            Text(row.prescription, style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
+            Text(row.name, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.ExtraBold)
+            Text(row.prescription, style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
         }
-        if (!row.isRest) Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = colors.onSurfaceVariant)
+        if (!row.isRest) {
+            IconButton(onClick = { onOpen(row.slug) }, modifier = Modifier.size(PoulpySize.avatarSmall)) {
+                Icon(Icons.Outlined.Info, contentDescription = stringResource(R.string.exercise_details, row.name), tint = colors.onSurfaceVariant)
+            }
+        }
     }
 }
 
