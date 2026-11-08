@@ -290,16 +290,19 @@ private struct SyncState: View {
 // MARK: - Screens over the tabs
 
 /// The screens that open over the tabs, by step: "sign-up", "sign-in" and "forgot", each with ":<email>" for the
-/// address typed on the form before, "sign-in:reset-done", "forgot-sent:<email>", "check-email", "check-email:resent", "welcome", "confirmed", "confirm:<token>" and
-/// "reset:<token>" (the email links), "link-expired".
+/// address typed on the form before, "sign-in:reset-done", "forgot-sent:<email>", "check-email", "check-email:resent", "welcome", "confirm:<token>" and
+/// "reset:<token>" (the email links), "link-expired". "confirmed" goes to `onConfirmed`.
 struct AccountFlowView: View {
     let account: AccountModel
     let onClose: () -> Void
+    /// The address was confirmed: the caller closes this flow and shows [EmailConfirmedSheet].
+    let onConfirmed: () -> Void
     @State private var step: String
 
-    init(account: AccountModel, start: String, onClose: @escaping () -> Void) {
+    init(account: AccountModel, start: String, onClose: @escaping () -> Void, onConfirmed: @escaping () -> Void) {
         self.account = account
         self.onClose = onClose
+        self.onConfirmed = onConfirmed
         _step = State(initialValue: start)
     }
 
@@ -307,7 +310,9 @@ struct AccountFlowView: View {
         let parts = step.split(separator: ":", maxSplits: 1).map(String.init)
         let name = parts.first ?? ""
         let arg = parts.count > 1 ? parts[1] : ""
-        let go: (String) -> Void = { step = $0 }
+        let go: (String) -> Void = { next in
+            if next == "confirmed" { onConfirmed() } else { step = next }
+        }
         Group {
             switch name {
             case "sign-up": SignUpScreen(account: account, typedEmail: arg, onStep: go, onClose: onClose)
@@ -318,8 +323,6 @@ struct AccountFlowView: View {
             case "check-email": CheckEmailScreen(account: account, resent: arg == "resent", onStep: go, onClose: onClose)
             case "welcome":
                 UploadScreen(account: account, pose: "PoulpyPoseStandingTall", line: nil, title: "account.welcomeBackTitle", body: "account.mergeBody", onClose: onClose)
-            case "confirmed":
-                UploadScreen(account: account, pose: "PoulpyPoseChampion", line: "account.confirmedPoulpy", title: "account.confirmedTitle", body: nil, onClose: onClose)
             case "confirm": ConfirmScreen(account: account, token: arg, onStep: go, onClose: onClose)
             case "reset": ResetScreen(account: account, token: arg, onStep: go, onClose: onClose)
             default:
@@ -590,9 +593,9 @@ private struct ForgotSentScreen: View {
     }
 }
 
-/// Welcome back and Email confirmed: the first upload, which carries on in the background.
+/// Welcome back: the first upload, which carries on in the background.
 private struct UploadScreen: View {
-    @StateObject private var upload: Observed<AccountModel, UploadProgress?>
+    let account: AccountModel
     let pose: String
     let line: LocalizedStringKey?
     let title: String
@@ -600,7 +603,7 @@ private struct UploadScreen: View {
     let onClose: () -> Void
 
     init(account: AccountModel, pose: String, line: LocalizedStringKey?, title: String, body: LocalizedStringKey?, onClose: @escaping () -> Void) {
-        _upload = StateObject(wrappedValue: account.observedUpload())
+        self.account = account
         self.pose = pose
         self.line = line
         self.title = title
@@ -609,26 +612,59 @@ private struct UploadScreen: View {
     }
 
     var body: some View {
-        let progress = upload.value
         AccountFrame(onClose: nil, action: "account.continue", onAction: onClose) {
             Poulpy(pose: pose, line: line)
             Intro(title: L(title), body: bodyKey.map { Text($0) })
-            VStack(alignment: .leading, spacing: 10) {
-                // Nothing to send, or all of it sent: say so rather than "Sending" over a full bar.
-                Text(LocalizedStringKey(progress?.done ?? true ? "account.uploaded" : "account.uploading")).font(.poulpy(.headline).weight(.heavy))
-                ProgressView(value: progress.map { $0.total == 0 ? 1 : Double($0.sent) / Double($0.total) } ?? 1)
-                    .tint(PoulpyColor.primary)
-                if let progress {
-                    Text(L("account.uploadProgress %lld %lld", progress.sent, progress.total))
-                        .font(.poulpy(.footnote))
-                        .foregroundStyle(PoulpyColor.onSurfaceVariant)
-                }
-            }
-            .padding(16)
-            .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 16))
-            .overlay(RoundedRectangle(cornerRadius: 16).stroke(PoulpyColor.outline, lineWidth: 1))
-            if progress?.done == false { FieldNote("account.uploadOffline") }
+            UploadProgressCard(account: account)
         }
+    }
+}
+
+/// Email confirmed, in a sheet over whatever is on screen: the link was opened, here or on another device, and the
+/// first upload carries on in the background.
+struct EmailConfirmedSheet: View {
+    let account: AccountModel
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                Poulpy(pose: "PoulpyPoseChampion", line: "account.confirmedPoulpy")
+                Intro(title: L("account.confirmedTitle"), body: nil)
+                UploadProgressCard(account: account)
+                PrimaryButton(title: "account.continue") { dismiss() }.padding(.top, 4)
+            }
+            .padding(20)
+        }
+        .presentationDetents([.medium, .large])
+    }
+}
+
+/// How far the first upload got, and a note while it waits for a connection.
+private struct UploadProgressCard: View {
+    @StateObject private var upload: Observed<AccountModel, UploadProgress?>
+
+    init(account: AccountModel) {
+        _upload = StateObject(wrappedValue: account.observedUpload())
+    }
+
+    var body: some View {
+        let progress = upload.value
+        VStack(alignment: .leading, spacing: 10) {
+            // Nothing to send, or all of it sent: say so rather than "Sending" over a full bar.
+            Text(LocalizedStringKey(progress?.done ?? true ? "account.uploaded" : "account.uploading")).font(.poulpy(.headline).weight(.heavy))
+            ProgressView(value: progress.map { $0.total == 0 ? 1 : Double($0.sent) / Double($0.total) } ?? 1)
+                .tint(PoulpyColor.primary)
+            if let progress {
+                Text(L("account.uploadProgress %lld %lld", progress.sent, progress.total))
+                    .font(.poulpy(.footnote))
+                    .foregroundStyle(PoulpyColor.onSurfaceVariant)
+            }
+        }
+        .padding(16)
+        .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 16))
+        .overlay(RoundedRectangle(cornerRadius: 16).stroke(PoulpyColor.outline, lineWidth: 1))
+        if progress?.done == false { FieldNote("account.uploadOffline") }
     }
 }
 

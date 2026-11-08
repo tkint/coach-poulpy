@@ -97,14 +97,15 @@ fun CoachPoulpyRoot(
         }
     }
 
-    // The email confirmed on another device while the app is open: Email confirmed, over Settings.
+    // Email confirmed, in a sheet over whatever is on screen: the link opened on this phone, or on another device
+    // while the app is open.
+    var emailConfirmed by rememberSaveable { mutableStateOf(false) }
     WatchEmailConfirmation {
-        tab = Tab.SETTINGS
-        settingsPage = SettingsPage.HUB
-        devicesFrom = null
-        back = null
-        route = "account:confirmed"
+        // Check your email is done with once the address is confirmed.
+        if (route?.startsWith("account:") == true) close()
+        emailConfirmed = true
     }
+    if (emailConfirmed) EmailConfirmedSheet(onDismiss = { emailConfirmed = false })
 
     LaunchedEffect(openLive) {
         if (openLive) {
@@ -247,7 +248,18 @@ fun CoachPoulpyRoot(
                     )
                 }
                 "session" -> SessionDetailScreen(graph, language, sessionId = arg, onBack = close)
-                "account" -> AccountFlow(arg, onStep = { route = "account:$it" }, onClose = close)
+                "account" -> AccountFlow(
+                    arg,
+                    onStep = {
+                        if (it == "confirmed") {
+                            close()
+                            emailConfirmed = true
+                        } else {
+                            route = "account:$it"
+                        }
+                    },
+                    onClose = close,
+                )
                 "device" -> DeviceScreen(graph, key = arg, onBack = close, onSources = { route = "device-sources" })
                 else -> LaunchedEffect(current) { close() }
             }

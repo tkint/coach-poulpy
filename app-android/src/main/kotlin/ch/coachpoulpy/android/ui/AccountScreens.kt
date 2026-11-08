@@ -335,7 +335,8 @@ private fun SyncState(on: Boolean, title: String, detail: String?) {
  * The screens that open over the tabs, named by [step] so they survive rotation: "sign-up", "sign-in" and
  * "forgot", each with ":<email>" for the address typed on the form before, "sign-in:reset-done",
  * "forgot-sent:<email>", "check-email", "check-email:resent", "welcome",
- * "confirmed", "confirm:<token>" and "reset:<token>" (the email links), "link-expired".
+ * "confirm:<token>" and "reset:<token>" (the email links), "link-expired". "confirmed" goes to the caller, which shows
+ * [EmailConfirmedSheet] over the tabs.
  */
 @Composable
 fun AccountFlow(step: String, onStep: (String) -> Unit, onClose: () -> Unit) {
@@ -348,7 +349,6 @@ fun AccountFlow(step: String, onStep: (String) -> Unit, onClose: () -> Unit) {
         "forgot-sent" -> ForgotSentScreen(account, arg, onStep)
         "check-email" -> CheckEmailScreen(account, resent = arg == "resent", onStep, onClose)
         "welcome" -> UploadScreen(account, R.drawable.poulpy_pose_standing_tall, poulpyLine = null, R.string.account_welcomeBackTitle, R.string.account_mergeBody, onClose)
-        "confirmed" -> UploadScreen(account, R.drawable.poulpy_pose_champion, R.string.account_confirmedPoulpy, R.string.account_confirmedTitle, body = null, onClose)
         "confirm" -> ConfirmScreen(account, arg, onStep, onClose)
         "reset" -> ResetScreen(account, arg, onStep, onClose)
         "link-expired" -> MessageScreen(
@@ -559,37 +559,63 @@ private fun ForgotSentScreen(account: AccountModel, email: String, onStep: (Stri
     }
 }
 
-/** Welcome back and Email confirmed: the first upload, which carries on in the background. */
+/** Welcome back: the first upload, which carries on in the background. */
 @Composable
 private fun UploadScreen(account: AccountModel, @DrawableRes pose: Int, poulpyLine: Int?, title: Int, body: Int?, onClose: () -> Unit) {
-    val upload by account.upload.collectAsStateWithLifecycle()
     AccountFrame(onClose = null, R.string.account_continue, busy = false, onAction = onClose) {
         Poulpy(pose, poulpyLine)
         Intro(stringResource(title), body?.let { AnnotatedString(stringResource(it)) })
-        OutlinedSurface {
-            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                // Nothing to send, or all of it sent: say so rather than "Sending" over a full bar.
-                val done = upload?.done ?: true
-                Text(stringResource(if (done) R.string.account_uploaded else R.string.account_uploading), fontWeight = FontWeight.ExtraBold)
-                val progress = upload?.let { if (it.total == 0L) 1f else it.sent.toFloat() / it.total } ?: 1f
-                LinearProgressIndicator(
-                    progress = { progress },
-                    modifier = Modifier.fillMaxWidth().height(10.dp).clip(RoundedCornerShape(PoulpyRadius.pill)),
-                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                    drawStopIndicator = {},
-                    gapSize = 0.dp,
-                )
-                upload?.let {
-                    Text(
-                        stringResource(R.string.account_uploadProgress, it.sent.toInt(), it.total.toInt()),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
+        UploadProgress(account)
+    }
+}
+
+/**
+ * Email confirmed, in a sheet over whatever is on screen: the link was opened, here or on another device, and the
+ * first upload carries on in the background.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun EmailConfirmedSheet(onDismiss: () -> Unit) {
+    val account = rememberAccount()
+    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), containerColor = MaterialTheme.colorScheme.surface) {
+        Column(Modifier.padding(start = 20.dp, end = 20.dp, bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Poulpy(R.drawable.poulpy_pose_champion, R.string.account_confirmedPoulpy)
+            Text(stringResource(R.string.account_confirmedTitle), style = MaterialTheme.typography.headlineMedium, fontSize = 30.sp, lineHeight = 34.sp)
+            UploadProgress(account)
+            Button(onClick = onDismiss, modifier = Modifier.fillMaxWidth().height(56.dp)) {
+                Text(stringResource(R.string.account_continue), fontWeight = FontWeight.ExtraBold)
             }
         }
-        if (upload?.done == false) Note(stringResource(R.string.account_uploadOffline))
     }
+}
+
+/** How far the first upload got, and a note while it waits for a connection. */
+@Composable
+private fun UploadProgress(account: AccountModel) {
+    val upload by account.upload.collectAsStateWithLifecycle()
+    OutlinedSurface {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            // Nothing to send, or all of it sent: say so rather than "Sending" over a full bar.
+            val done = upload?.done ?: true
+            Text(stringResource(if (done) R.string.account_uploaded else R.string.account_uploading), fontWeight = FontWeight.ExtraBold)
+            val progress = upload?.let { if (it.total == 0L) 1f else it.sent.toFloat() / it.total } ?: 1f
+            LinearProgressIndicator(
+                progress = { progress },
+                modifier = Modifier.fillMaxWidth().height(10.dp).clip(RoundedCornerShape(PoulpyRadius.pill)),
+                trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                drawStopIndicator = {},
+                gapSize = 0.dp,
+            )
+            upload?.let {
+                Text(
+                    stringResource(R.string.account_uploadProgress, it.sent.toInt(), it.total.toInt()),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+    }
+    if (upload?.done == false) Note(stringResource(R.string.account_uploadOffline))
 }
 
 /** The confirmation link, opened on this phone: confirms, signs in and moves on to what follows. */
