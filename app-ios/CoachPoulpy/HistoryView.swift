@@ -403,19 +403,42 @@ struct SessionDetailView: View {
     @State private var sharing = false
     @State private var saving: FitDocument?
     @State private var recap: SessionRecap?
+    private let figure: BodyFigure
     @Environment(\.unitSystem) private var units
     @Environment(\.colorScheme) private var colorScheme
 
+    init(graph: AppGraph, session: SessionRow, onDelete: @escaping () -> Void) {
+        self.graph = graph
+        self.session = session
+        self.onDelete = onDelete
+        figure = (graph.profile(memory: UserDefaultsStore()).ui.value as! ProfileUi).bodyFigure ?? .shoulders
+    }
+
+    /// Whether the session has muscles worked to draw on a body map.
+    private var mapped: Bool { !(recap?.muscles.heat.isEmpty ?? true) }
+
+    private func dateLine(_ recap: SessionRecap) -> String {
+        [dateTime(recap.startedAtMillis), recap.formatLabel].compactMap { $0 }.joined(separator: " · ")
+    }
+
     var body: some View {
         Group {
-            if let recap {
-                SessionRecapView(recap: recap, dateLine: [dateTime(recap.startedAtMillis), recap.formatLabel].compactMap { $0 }.joined(separator: " · "))
+            if let recap, mapped {
+                SessionRecapSheetView(
+                    recap: recap, dateLine: dateLine(recap), figure: figure,
+                    onBack: { dismiss() }, onShare: { sharing = true }, onDelete: { deleting = true }
+                )
+            } else if let recap {
+                SessionRecapView(recap: recap, dateLine: dateLine(recap))
             } else {
                 PoulpyColor.background
             }
         }
         .onAppear { recap = graph.sessionRecap(sessionId: session.id, languageCode: Language.code) }
         .navigationBarTitleDisplayMode(.inline)
+        // The body map goes under the bar: the sheet carries its own back, share and delete buttons.
+        .navigationBarBackButtonHidden(mapped)
+        .toolbar(mapped ? .hidden : .automatic, for: .navigationBar)
         .toolbar {
             Button {
                 sharing = true

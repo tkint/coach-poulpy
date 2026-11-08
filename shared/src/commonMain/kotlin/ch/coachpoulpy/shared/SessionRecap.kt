@@ -7,6 +7,7 @@ import ch.coachpoulpy.core.engine.TimelineCompiler
 import ch.coachpoulpy.core.engine.covering
 import ch.coachpoulpy.core.model.Load
 import ch.coachpoulpy.core.model.MovementPattern
+import ch.coachpoulpy.core.model.MuscleGroup
 import ch.coachpoulpy.core.model.PartKind
 import ch.coachpoulpy.core.model.Step
 import ch.coachpoulpy.core.model.Target
@@ -52,6 +53,11 @@ data class SessionRecap(
     /** "Exercises", or "Steps" for a walk or a run. */
     val listTitle: String,
     val parts: List<RecapPart>,
+    /**
+     * The muscles worked by the sets done, for the body map over the details (`session-recap-sets`); [WorkoutMuscles.NONE]
+     * when there is no map to draw: a walk or a run, or a workout that is gone.
+     */
+    val muscles: WorkoutMuscles = WorkoutMuscles.NONE,
 )
 
 /** Builds the recap of a finished session from what the phone kept: its events, its workout and its plan. */
@@ -89,7 +95,20 @@ internal class SessionRecaps(
             tiles = tiles(row, format, phases, done, skipped),
             listTitle = if (walksOnly) DomainText.recapListSteps(languageCode) else DomainText.recapListExercises(languageCode),
             parts = parts,
+            muscles = workout?.let { musclesWorked(it, phases, done) } ?: WorkoutMuscles.NONE,
         )
+    }
+
+    /** The sets done in the work parts, by muscle group; walks and runs and exercises the catalog lost add nothing. */
+    private fun musclesWorked(workout: Workout, phases: List<Phase>, done: Set<Int>): WorkoutMuscles {
+        val sets = linkedMapOf<MuscleGroup, Int>()
+        workout.parts.filter { it.kind == PartKind.WORK }.flatMap { part -> part.steps.flatMap { it.exerciseSteps() } }
+            .filterNot { it.exercise.isWalkOrRun(catalog) }
+            .forEach { step ->
+                val count = phases.indices.count { (phases[it] as? Phase.Work)?.step == step.id && it in done }
+                if (count > 0) catalog[step.exercise]?.muscleGroups.orEmpty().forEach { sets[it] = (sets[it] ?: 0) + count }
+            }
+        return WorkoutMuscles.of(sets, labels)
     }
 
     private fun tiles(row: SessionRow, format: WorkoutFormat?, phases: List<Phase>, done: Set<Int>, skipped: Set<Int>) = buildList {

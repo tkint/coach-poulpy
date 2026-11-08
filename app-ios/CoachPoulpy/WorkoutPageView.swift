@@ -454,7 +454,7 @@ func partIcon(_ kind: PartKind) -> String {
 }
 
 /// The round, outlined look of the buttons floating over the map.
-private struct FloatingButtonLook: ViewModifier {
+struct FloatingButtonLook: ViewModifier {
     func body(content: Content) -> some View {
         content
             .foregroundStyle(PoulpyColor.onSurface)

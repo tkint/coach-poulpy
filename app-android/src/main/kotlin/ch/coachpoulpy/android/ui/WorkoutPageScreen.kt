@@ -227,7 +227,7 @@ private val MAP_FIGURES_TOP = PoulpySpace.lg + 16.dp + PoulpySpace.lg
 
 /** A round filled button over the map, with a thin outline so it stays visible on any heat. */
 @Composable
-private fun FloatingButton(onClick: () -> Unit, content: @Composable () -> Unit) {
+internal fun FloatingButton(onClick: () -> Unit, content: @Composable () -> Unit) {
     Surface(
         shape = CircleShape,
         color = MaterialTheme.colorScheme.surface,

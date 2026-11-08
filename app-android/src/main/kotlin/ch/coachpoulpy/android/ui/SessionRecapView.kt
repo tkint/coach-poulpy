@@ -4,6 +4,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,6 +20,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -35,13 +44,19 @@ import androidx.compose.ui.graphics.ClipOp
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import ch.coachpoulpy.android.R
+import ch.coachpoulpy.core.model.BodyFigure
 import ch.coachpoulpy.core.model.MovementPattern
 import ch.coachpoulpy.core.model.PartKind
+import ch.coachpoulpy.shared.BodyMapBox
 import ch.coachpoulpy.shared.RecapPart
 import ch.coachpoulpy.shared.RecapRow
 import ch.coachpoulpy.shared.RecapTile
@@ -51,7 +66,7 @@ import java.util.Locale
 /**
  * What opening a finished session shows (`session-recap-*` mockups): its name and date, the figures, then each part
  * with the exercises done in it. Everything is decided in the shared [SessionRecap]; this only draws it.
- * The body map half of the opening view is not drawn yet.
+ * A session with muscles worked puts this in a sheet over the body map ([SessionRecapSheet]); without, it is the page.
  */
 @Composable
 internal fun SessionRecapContent(recap: SessionRecap, dateLine: String, modifier: Modifier = Modifier) {
@@ -59,25 +74,75 @@ internal fun SessionRecapContent(recap: SessionRecap, dateLine: String, modifier
         modifier = modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = PoulpySpace.lg, vertical = PoulpySpace.md),
         verticalArrangement = Arrangement.spacedBy(PoulpySpace.sm),
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(recap.title, style = MaterialTheme.typography.headlineMedium, modifier = Modifier.semantics { heading() })
-            Text(dateLine, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-        recap.tiles.chunked(3).forEach { line ->
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(PoulpySpace.sm)) {
-                line.forEach { Tile(it, Modifier.weight(1f)) }
-                repeat(3 - line.size) { Spacer(Modifier.weight(1f)) }
+        RecapDetails(recap, dateLine)
+    }
+}
+
+/** The muscles worked on a body map, and over it the sheet you drag up for the session's figures and exercises. */
+@Composable
+internal fun SessionRecapSheet(recap: SessionRecap, dateLine: String, figure: BodyFigure, onBack: () -> Unit, onShare: () -> Unit, onDelete: () -> Unit) {
+    DetailSheet(
+        showBackgroundLabel = stringResource(R.string.workout_showMap),
+        showDetailsLabel = stringResource(R.string.workout_showExercises),
+        background = { room ->
+            val statusBar = with(LocalDensity.current) { WindowInsets.statusBars.getTop(this).toDp() }
+            // Collapsed, the map fills the room: as wide as two figures side by side fit the screen.
+            val maxFigure = (LocalConfiguration.current.screenWidthDp.dp - PoulpySpace.lg * 2 - PoulpySpace.sm) / 2
+            val figureWidth = ((room - statusBar - RECAP_MAP_TOP - RECAP_LEGEND_ROOM) / (BodyMapBox.HEIGHT / BodyMapBox.WIDTH)).coerceIn(56.dp, maxFigure)
+            Column(Modifier.fillMaxWidth().statusBarsPadding().padding(top = RECAP_MAP_TOP), horizontalAlignment = Alignment.CenterHorizontally) {
+                WorkoutBodyMap(
+                    figure, recap.muscles.heat, emptySet(),
+                    description = stringResource(R.string.workout_mapLabel, recap.muscles.loads.joinToString(", ") { it.label }),
+                    figureWidth = figureWidth,
+                )
+                Spacer(Modifier.height(PoulpySpace.lg))
+                HeatLegend(showPain = false)
             }
+        },
+        floating = {
+            Row(Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = PoulpySpace.lg, vertical = PoulpySpace.sm), horizontalArrangement = Arrangement.SpaceBetween) {
+                FloatingButton(onClick = onBack) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(PoulpySpace.sm)) {
+                    FloatingButton(onClick = onShare) {
+                        Icon(Icons.Filled.Share, contentDescription = stringResource(R.string.shareSession_title))
+                    }
+                    FloatingButton(onClick = onDelete) {
+                        Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.action_delete))
+                    }
+                }
+            }
+        },
+    ) {
+        RecapDetails(recap, dateLine)
+    }
+}
+
+/** The map starts this far under the status bar, and the legend and the gap around it take this much room under it. */
+private val RECAP_MAP_TOP = PoulpySpace.lg + 48.dp
+private val RECAP_LEGEND_ROOM = PoulpySpace.lg + 16.dp + PoulpySpace.md
+
+@Composable
+private fun ColumnScope.RecapDetails(recap: SessionRecap, dateLine: String) {
+    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Text(recap.title, style = MaterialTheme.typography.headlineMedium, modifier = Modifier.semantics { heading() })
+        Text(dateLine, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+    recap.tiles.chunked(3).forEach { line ->
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(PoulpySpace.sm)) {
+            line.forEach { Tile(it, Modifier.weight(1f)) }
+            repeat(3 - line.size) { Spacer(Modifier.weight(1f)) }
         }
-        if (recap.parts.isNotEmpty()) {
-            Text(
-                recap.listTitle.uppercase(Locale.getDefault()),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(start = PoulpySpace.xs, top = PoulpySpace.sm),
-            )
-            recap.parts.forEach { PartBlock(it) }
-        }
+    }
+    if (recap.parts.isNotEmpty()) {
+        Text(
+            recap.listTitle.uppercase(Locale.getDefault()),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(start = PoulpySpace.xs, top = PoulpySpace.sm),
+        )
+        recap.parts.forEach { PartBlock(it) }
     }
 }
 

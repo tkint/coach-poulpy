@@ -94,6 +94,7 @@ import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ch.coachpoulpy.android.R
+import ch.coachpoulpy.core.model.BodyFigure
 import ch.coachpoulpy.shared.AppGraph
 import ch.coachpoulpy.shared.CalendarDay
 import ch.coachpoulpy.shared.CalendarMonth
@@ -581,31 +582,32 @@ fun SessionDetailScreen(graph: AppGraph, language: String, sessionId: String, on
     }
     val colors = MaterialTheme.colorScheme
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {},
-                navigationIcon = { BackButton(onBack) },
-                actions = {
-                    if (session != null) {
-                        IconButton(onClick = { sharing = true }) {
-                            Icon(Icons.Filled.Share, contentDescription = stringResource(R.string.shareSession_title))
+    val recap = remember(graph, language, sessionId, session != null) { if (session == null) null else graph.sessionRecap(sessionId, language) }
+    val dateLine = recap?.let { listOfNotNull(dateTime(it.startedAtMillis), it.formatLabel).joinToString(" · ") }.orEmpty()
+    if (recap != null && recap.muscles.heat.isNotEmpty()) {
+        val figure = remember(graph, context) { graph.profile(AppPreferences(context)).profile.value.bodyFigure ?: BodyFigure.SHOULDERS }
+        SessionRecapSheet(recap, dateLine, figure, onBack = onBack, onShare = { sharing = true }, onDelete = { deleting = true })
+    } else {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = {},
+                    navigationIcon = { BackButton(onBack) },
+                    actions = {
+                        if (session != null) {
+                            IconButton(onClick = { sharing = true }) {
+                                Icon(Icons.Filled.Share, contentDescription = stringResource(R.string.shareSession_title))
+                            }
+                            IconButton(onClick = { deleting = true }) {
+                                Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.action_delete))
+                            }
                         }
-                        IconButton(onClick = { deleting = true }) {
-                            Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.action_delete))
-                        }
-                    }
-                },
-            )
-        },
-    ) { padding ->
-        if (session == null) return@Scaffold
-        val recap = remember(graph, language, sessionId) { graph.sessionRecap(sessionId, language) } ?: return@Scaffold
-        SessionRecapContent(
-            recap = recap,
-            dateLine = listOfNotNull(dateTime(recap.startedAtMillis), recap.formatLabel).joinToString(" · "),
-            modifier = Modifier.padding(padding),
-        )
+                    },
+                )
+            },
+        ) { padding ->
+            if (recap != null) SessionRecapContent(recap, dateLine, Modifier.padding(padding))
+        }
     }
 
     if (sharing && session != null) {

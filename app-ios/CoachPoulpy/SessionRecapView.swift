@@ -3,38 +3,111 @@ import Shared
 
 /// What opening a finished session shows (`session-recap-*` mockups): its name and date, the figures, then each part
 /// with the exercises done in it. Everything is decided in the shared `SessionRecap`; this only draws it.
-/// The body map half of the opening view is not drawn yet.
+/// A session with muscles worked puts this in a sheet over the body map (`SessionRecapSheetView`); without, it is the page.
 struct SessionRecapView: View {
     let recap: SessionRecap
     let dateLine: String
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: PoulpySpace.sm) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(recap.title).font(PoulpyFont.title).accessibilityAddTraits(.isHeader)
-                    Text(dateLine).font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
-                }
-                ForEach(Array(tileLines.enumerated()), id: \.offset) { _, line in
-                    HStack(spacing: PoulpySpace.sm) {
-                        ForEach(line, id: \.label) { tile in tileView(tile) }
-                        ForEach(0..<(3 - line.count), id: \.self) { _ in Color.clear.frame(maxWidth: .infinity) }
-                    }
-                }
-                if !recap.parts.isEmpty {
-                    Text(recap.listTitle.uppercased())
-                        .font(PoulpyFont.label)
-                        .kerning(1)
-                        .foregroundStyle(PoulpyColor.onSurfaceVariant)
-                        .padding(.leading, PoulpySpace.xs)
-                        .padding(.top, PoulpySpace.sm)
-                    ForEach(recap.parts, id: \.key) { part in PartBlockView(part: part) }
-                }
-            }
-            .padding(.horizontal, PoulpySpace.lg)
-            .padding(.vertical, PoulpySpace.md)
+            RecapDetails(recap: recap, dateLine: dateLine)
+                .padding(.horizontal, PoulpySpace.lg)
+                .padding(.vertical, PoulpySpace.md)
         }
         .background(PoulpyColor.background)
+    }
+}
+
+/// The muscles worked on a body map, and over it the sheet you drag up for the session's figures and exercises.
+struct SessionRecapSheetView: View {
+    let recap: SessionRecap
+    let dateLine: String
+    let figure: BodyFigure
+    let onBack: () -> Void
+    let onShare: () -> Void
+    let onDelete: () -> Void
+
+    var body: some View {
+        DetailSheet(
+            showBackgroundLabel: "workout.showMap",
+            showDetailsLabel: "workout.showExercises",
+            background: { room, safeTop in
+                bodyMap(room: room - safeTop - 48 - PoulpySpace.lg - 16 - PoulpySpace.md)
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, safeTop + 48 + PoulpySpace.lg)
+            },
+            floating: {
+                HStack {
+                    Button(action: onBack) {
+                        Image(systemName: "chevron.left").font(.system(size: 17, weight: .bold)).modifier(FloatingButtonLook())
+                    }
+                    .accessibilityLabel("action.back")
+                    Spacer()
+                    HStack(spacing: PoulpySpace.sm) {
+                        Button(action: onShare) {
+                            Image(systemName: "square.and.arrow.up").font(.system(size: 17, weight: .bold)).modifier(FloatingButtonLook())
+                        }
+                        .accessibilityLabel("shareSession.title")
+                        Button(action: onDelete) {
+                            Image(systemName: "trash").font(.system(size: 17, weight: .bold)).modifier(FloatingButtonLook())
+                        }
+                        .accessibilityLabel("action.delete")
+                    }
+                }
+            },
+            content: {
+                RecapDetails(recap: recap, dateLine: dateLine)
+                    .padding(.bottom, PoulpySpace.lg)
+            }
+        )
+    }
+
+    /// The front and back figures, as tall as the room above the sheet allows, then the legend.
+    private func bodyMap(room: CGFloat) -> some View {
+        // Collapsed, the map fills the room: as wide as two figures side by side fit the screen.
+        let maxFigure = (UIScreen.main.bounds.width - PoulpySpace.lg * 2 - PoulpySpace.sm) / 2
+        let width = min(max(room / CGFloat(BodyMapBox.shared.HEIGHT / BodyMapBox.shared.WIDTH), 56), maxFigure)
+        let muscles = recap.muscles.loads.map(\.label).joined(separator: ", ")
+        return VStack(spacing: PoulpySpace.lg) {
+            HStack(spacing: PoulpySpace.sm) {
+                HeatMapFigure(figure: figure, view: .front, heat: recap.muscles.heat, hurting: [], width: width)
+                HeatMapFigure(figure: figure, view: .back, heat: recap.muscles.heat, hurting: [], width: width)
+            }
+            HeatLegend(showPain: false)
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(L("workout.mapLabel %@", muscles))
+    }
+}
+
+/// The name and date, the figures, then each part with the exercises done in it.
+private struct RecapDetails: View {
+    let recap: SessionRecap
+    let dateLine: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: PoulpySpace.sm) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(recap.title).font(PoulpyFont.title).accessibilityAddTraits(.isHeader)
+                Text(dateLine).font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+            }
+            ForEach(Array(tileLines.enumerated()), id: \.offset) { _, line in
+                HStack(spacing: PoulpySpace.sm) {
+                    ForEach(line, id: \.label) { tile in tileView(tile) }
+                    ForEach(0..<(3 - line.count), id: \.self) { _ in Color.clear.frame(maxWidth: .infinity) }
+                }
+            }
+            if !recap.parts.isEmpty {
+                Text(recap.listTitle.uppercased())
+                    .font(PoulpyFont.label)
+                    .kerning(1)
+                    .foregroundStyle(PoulpyColor.onSurfaceVariant)
+                    .padding(.leading, PoulpySpace.xs)
+                    .padding(.top, PoulpySpace.sm)
+                ForEach(recap.parts, id: \.key) { part in PartBlockView(part: part) }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var tileLines: [[RecapTile]] {
