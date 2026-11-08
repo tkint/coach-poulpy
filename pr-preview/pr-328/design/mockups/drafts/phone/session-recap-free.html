@@ -18,10 +18,17 @@
 .recap-head { display: flex; flex-direction: column; gap: 2px; }
 .recap-part { display: flex; flex-direction: column; gap: var(--cp-space-sm); }
 .recap-exercise { border-radius: var(--cp-radius-md); background: var(--cp-background); border: 1px solid var(--cp-outline); padding: 10px var(--cp-space-md) var(--cp-space-md); display: flex; flex-direction: column; gap: 10px; }
-.recap-exercise header { display: flex; align-items: baseline; gap: 10px; }
+.recap-exercise header { display: flex; align-items: center; gap: 10px; }
 .recap-exercise header strong { flex: 1; min-width: 0; font-weight: 800; font-size: 16px; line-height: 22px; }
-.recap-exercise header span { font-size: 13.5px; font-weight: 700; color: var(--cp-on-surface-variant); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.recap-exercise header .row-icon { width: 36px; height: 36px; align-self: center; }
+.recap-exercise header > span:last-child { font-size: 13.5px; font-weight: 700; color: var(--cp-on-surface-variant); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .recap-exercise .note { font-size: 14px; line-height: 19px; color: var(--cp-on-surface-variant); font-variant-numeric: tabular-nums; margin-top: -6px; }
+.recap-row { min-height: 64px; }
+.recap-row .row-icon { flex: none; }
+.recap-row .row-count { flex: none; display: flex; flex-direction: column; align-items: flex-end; text-align: right; font-variant-numeric: tabular-nums; }
+.recap-row .row-count strong { font-weight: 800; font-size: 16px; line-height: 22px; }
+.recap-row .row-count span { font-size: 13.5px; line-height: 18px; color: var(--cp-on-surface-variant); font-weight: 700; }
+.recap-row .row-count .skip { display: inline-flex; align-items: center; gap: var(--cp-space-xs); }
 .set-chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .set-chip { height: 30px; padding: 0 var(--cp-space-md) 0 var(--cp-space-xs); border-radius: var(--cp-radius-pill); background: var(--cp-primary-container); color: var(--cp-on-primary-container); font-size: 13.5px; font-weight: 800; font-variant-numeric: tabular-nums; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
 .set-chip b { width: 22px; height: 22px; border-radius: var(--cp-radius-pill); background: var(--cp-surface); color: var(--cp-on-surface); font-size: 12px; display: flex; align-items: center; justify-content: center; }
@@ -39,7 +46,7 @@
 </style>
 </head>
 <body>
-<main class="phone" style="--frame-height: 860px">
+<main class="phone" style="--frame-height: 700px">
   
   <section class="detail-sheet detail-sheet--full" id="session-details" data-component="detail-sheet" aria-label="Session details" style="top: 0px;">
     <div class="sheet-drag"><button type="button" class="sheet-handle" data-component="sheet-handle" aria-label="Drag down to see the muscles"></button></div>
@@ -51,16 +58,19 @@
       <div class="stat-tiles" id="session-facts"><div class="stat-tile" data-component="stat-tile"><span class="label">Duration</span><strong>21:05</strong></div><div class="stat-tile" data-component="stat-tile"><span class="label">Sets</span><strong>5</strong></div><div class="stat-tile" data-component="stat-tile"><span class="label">Distance</span><strong>0.3 km</strong></div></div>
       <span class="label section-label">Exercises</span><section class="recap-part" data-component="recap-part" aria-label="In the order done">
         <div class="part-header" data-component="part-header"><span class="part-icon part-icon--work" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg></span><div><h2>In the order done</h2><p>3 exercises</p></div></div>
-        <ol class="steps"><li><li class="recap-exercise" data-component="recap-exercise">
-            <header><strong>Goblet squat</strong><span>3 sets</span></header>
-            <ol class="set-chips" aria-label="Sets of Goblet squat"><li class="set-chip" data-component="set-chip"><b>1</b>12 reps · 16 kg</li><li class="set-chip" data-component="set-chip"><b>2</b>12 reps · 16 kg</li><li class="set-chip" data-component="set-chip"><b>3</b>10 reps · 16 kg</li></ol>
-          </li></li><li><li class="recap-exercise" data-component="recap-exercise">
-            <header><strong>Dumbbell curl</strong><span>2 sets</span></header>
-            <ol class="set-chips" aria-label="Sets of Dumbbell curl"><li class="set-chip" data-component="set-chip"><b>1</b>10 reps · 8 kg</li><li class="set-chip" data-component="set-chip"><b>2</b>8 reps · 8 kg</li></ol>
-          </li></li><li><li class="recap-exercise" data-component="recap-exercise">
-            <header><strong>Walk</strong><span>4:10</span></header>
-            <dl class="run-facts"><div><dt>Distance</dt><dd>0.3 km</dd></div><div><dt>Average speed</dt><dd>4.3 km/h</dd></div></dl>
-          </li></li></ol>
+        <ol class="steps"><li><div class="list-row recap-row" data-component="exercise-row">
+            <span class="row-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7v10M3 9v6M18 7v10M21 9v6M6 12h12"/></svg></span>
+            <span class="row-text"><strong>Goblet squat</strong></span>
+            <span class="row-count"><strong>3 sets</strong><span>16 kg</span></span>
+          </div></li><li><div class="list-row recap-row" data-component="exercise-row">
+            <span class="row-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7v10M3 9v6M18 7v10M21 9v6M6 12h12"/></svg></span>
+            <span class="row-text"><strong>Dumbbell curl</strong></span>
+            <span class="row-count"><strong>2 sets</strong><span>8 kg</span></span>
+          </div></li><li><div class="list-row recap-row" data-component="exercise-row">
+            <span class="row-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="14" cy="4.5" r="2"/><path d="M12 8l-3 4 3 2 1 5M12 8l4 3 3-1M9 12l-3 2"/></svg></span>
+            <span class="row-text"><strong>Walk</strong></span>
+            <span class="row-count"><strong>4:10</strong><span>0.3 km</span></span>
+          </div></li></ol>
       </section>
     </div>
   </section>
