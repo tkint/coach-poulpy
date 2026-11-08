@@ -246,8 +246,9 @@ class AccountModel(
             while (_state.value is AccountState.Pending && !checkConfirmed()) {
                 val key = pending()?.key ?: break
                 val heard = try {
-                    // Off the main thread: Android forbids network there, and closing a stream
-                    // mid-read writes to its socket.
+                    // Off the main thread: Android forbids network there. Android uses Ktor's OkHttp
+                    // engine, whose stream can be closed mid-read from another thread; the system's
+                    // HttpURLConnection one crashed the app doing that.
                     withContext(Dispatchers.Default) { client.awaitConfirmation(key) }
                 } catch (e: CancellationException) {
                     throw e
