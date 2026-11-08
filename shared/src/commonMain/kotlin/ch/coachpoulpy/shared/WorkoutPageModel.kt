@@ -77,8 +77,10 @@ data class WorkoutPageState(
     val name: String = "",
     val format: WorkoutFormat = WorkoutFormat.SETS,
     val formatLabel: String = "",
-    /** "5 exercises · about 40 min · dumbbells, mat". */
+    /** "5 exercises · about 40 min". */
     val details: String = "",
+    /** The equipment the exercises need or can use, once each, as badges: "Dumbbell", "Mat". */
+    val equipment: List<String> = emptyList(),
     /** The workout's parts in order, each with its steps and repeats. */
     val parts: List<WorkoutPagePart> = emptyList(),
     val timesDone: Int = 0,
@@ -90,6 +92,14 @@ data class WorkoutPageState(
     /** Only workouts made with the builder can be edited or copied. */
     val editable: Boolean = false,
     val deletePrompt: DeletePrompt = DeletePrompt("", ""),
+    /** The muscles the work parts train, busiest first, for the list under the exercises. */
+    val muscles: List<MuscleLoad> = emptyList(),
+    /** Heat 1 to 3 of each area key of the body map to light; areas not listed stay plain. */
+    val heat: Map<String, Int> = emptyMap(),
+    /** The worked areas that hurt, as body map keys; drawn with the pain outline. Empty without active pain or rehab. */
+    val painAreas: List<String> = emptyList(),
+    /** Poulpy's note on the blue side about those areas; empty when none hurt. */
+    val painNote: String = "",
 )
 
 /** What deleting a workout asks: "Delete Upper body?", then what goes and what stays. */
@@ -126,6 +136,8 @@ class WorkoutPageModel internal constructor(
     private val zone: TimeZone = TimeZone.currentSystemDefault(),
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main),
     units: () -> UnitSystem = { UnitSystem.METRIC },
+    /** The body map areas that hurt now, read each time the page is built; empty without active pain or rehab. */
+    private val painAreas: () -> List<String> = { emptyList() },
 ) {
     private val labels = Labels(languageCode, units)
     private val facts = WorkoutFacts(compiler, catalog, labels)
@@ -159,7 +171,9 @@ class WorkoutPageModel internal constructor(
         val equipment = exerciseSteps(workout).mapNotNull { catalog[it.exercise] }
             .flatMap { it.equipment.flatten() }
             .distinct()
-            .map { labels.equipment(it).lowercase() }
+            .map { labels.equipment(it) }
+        val muscles = WorkoutMuscles.of(workout, catalog, labels)
+        val hurting = BodyMap.valid(painAreas()).filter { it in muscles.heat }
         return WorkoutPageState(
             loaded = true,
             found = true,
@@ -167,8 +181,8 @@ class WorkoutPageModel internal constructor(
             name = workout.name,
             format = workout.format,
             formatLabel = labels.format(workout.format),
-            details = (listOf(labels.exercises(exerciseSteps(workout).size), labels.aboutMinutes(facts.minutes(workout))) +
-                listOfNotNull(equipment.takeIf { it.isNotEmpty() }?.joinToString(", "))).joinToString(" · "),
+            details = listOf(labels.exercises(exerciseSteps(workout).size), labels.aboutMinutes(facts.minutes(workout))).joinToString(" · "),
+            equipment = equipment,
             parts = parts(workout),
             timesDone = done.size,
             lastDoneMillis = done.maxOfOrNull { it.record.startedAt }?.toEpochMilliseconds(),
@@ -176,6 +190,10 @@ class WorkoutPageModel internal constructor(
             plans = upcoming,
             deletePrompt = labels.deletePrompt(workout.name, upcoming.size, done.size),
             editable = WorkoutDraft.from(workout, catalog) != null,
+            muscles = muscles.loads,
+            heat = muscles.heat,
+            painAreas = hurting,
+            painNote = if (hurting.isEmpty()) "" else labels.workoutPain(hurting),
         )
     }
 
@@ -217,7 +235,7 @@ class WorkoutPageModel internal constructor(
     private fun stepRow(step: Step.ExerciseStep, last: Boolean = false): WorkoutStepRow {
         val exercise = catalog[step.exercise]
         val entry = DraftEntry.from(step, exercise)
-        val prescription = entry?.let { labels.prescription(it, last) } ?: "${step.prescription.sets.size} ×"
+        val prescription = entry?.let { labels.prescription(it, last, withRest = false) } ?: "${step.prescription.sets.size} ×"
         return WorkoutStepRow(
             key = step.id.value,
             slug = step.exercise.value,

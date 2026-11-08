@@ -80,6 +80,88 @@ struct BodyMapFigure: View {
     }
 }
 
+/// The fill of a muscle at `level` 1 to 3: a little, some, most. Nothing for level 0, a plain outline.
+func heatFill(_ level: Int) -> Color? {
+    switch level {
+    case 1: return PoulpyColor.heat1
+    case 2: return PoulpyColor.heat2
+    case 3: return PoulpyColor.heat3
+    default: return nil
+    }
+}
+
+/// The edge of a muscle at `level`, one step darker than its fill.
+private func heatEdge(_ level: Int) -> Color? {
+    switch level {
+    case 1: return PoulpyColor.heat2
+    case 2, 3: return PoulpyColor.heat3
+    default: return nil
+    }
+}
+
+/// One side of the body with the muscles worked lit from light to dark (`heat`, 1 to 3 per area key). Areas in `hurting`
+/// keep their heat and get the purple pain outline, with a halo so it reads on any fill. Only a picture.
+struct HeatMapFigure: View {
+    let figure: BodyFigure
+    let view: Shared.BodyView
+    let heat: [String: KotlinInt]
+    let hurting: Set<String>
+    var width: CGFloat = 100
+
+    var body: some View {
+        let regions = BodyMapShapes.shared.regions(figure: figure, view: view)
+        let height = width * CGFloat(BodyMapBox.shared.HEIGHT / BodyMapBox.shared.WIDTH)
+        let unit = width / 120
+        ZStack {
+            ForEach(Array(regions.enumerated()), id: \.offset) { _, region in
+                let level = region.key.flatMap { heat[$0] }.map { Int($0.intValue) } ?? 0
+                let shape = BodyShape(source: region.path)
+                shape
+                    .fill(region.skin ? Color.clear : (heatFill(level) ?? Color.clear))
+                    .overlay(shape.stroke(heatEdge(level) ?? PoulpyColor.outline, lineWidth: 1.2 * unit))
+            }
+            ForEach(Array(regions.enumerated()), id: \.offset) { _, region in
+                if let key = region.key, hurting.contains(key) {
+                    let shape = BodyShape(source: region.path)
+                    shape.stroke(PoulpyColor.background, style: StrokeStyle(lineWidth: 5 * unit, lineJoin: .round))
+                    shape.stroke(PoulpyColor.pain, style: StrokeStyle(lineWidth: 3 * unit, lineJoin: .round))
+                }
+            }
+        }
+        .frame(width: width, height: height)
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
+}
+
+/// "Less ▢ ▢ ▢ More", the three heats; with `showPain` also the outlined "Hurts" swatch.
+struct HeatLegend: View {
+    let showPain: Bool
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Text("workout.less")
+            ForEach(1...3, id: \.self) { swatch(fill: heatFill($0) ?? .clear, edge: heatEdge($0) ?? PoulpyColor.outline, line: 1.2) }
+            Text("workout.more")
+            if showPain {
+                swatch(fill: .clear, edge: PoulpyColor.pain, line: 2)
+                Text("workout.hurts")
+            }
+        }
+        .font(.poulpy(.caption).weight(.heavy))
+        .foregroundStyle(PoulpyColor.onSurfaceVariant)
+        .accessibilityHidden(true)
+    }
+
+    private func swatch(fill: Color, edge: Color, line: CGFloat) -> some View {
+        RoundedRectangle(cornerRadius: 3)
+            .fill(fill)
+            .overlay(RoundedRectangle(cornerRadius: 3).stroke(edge, lineWidth: line))
+            .frame(width: 12, height: 12)
+            .padding(1)
+    }
+}
+
 /// Pain or rehab: where it hurts on the front and back figures, then for how long.
 struct PainSheet: View {
     let figure: BodyFigure

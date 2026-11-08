@@ -192,7 +192,9 @@
     "nappingTitle": "Poulpy is napping",
     "nappingLine": "Your tentacles are still lit. Wake me up with a session.",
     "painTitle": "Taking it easy",
-    "painLine": "I’m patched up with you. No catching up, just rest."
+    "painLine": "I’m patched up with you. No catching up, just rest.",
+    "workoutPainOne": "Your {area} still hurts. Go gently, I'll keep an eye on it with you.",
+    "workoutPainMany": "Your {areas} still hurt. Go gently, I'll keep an eye on them with you."
   },
   "workoutFile": {
     "unreadable": "This file can’t be read. It may be damaged.",

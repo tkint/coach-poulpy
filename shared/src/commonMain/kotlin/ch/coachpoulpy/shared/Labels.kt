@@ -269,7 +269,7 @@ internal class Labels(private val languageCode: String, private val units: () ->
      * "40 s hold" for one set, or "5.0 km · 6:00 /km"
      * and "5:30 /km · until button press" for a walk or a run; [last] says "until the end" instead.
      */
-    fun prescription(entry: DraftEntry, last: Boolean = false): String {
+    fun prescription(entry: DraftEntry, last: Boolean = false, withRest: Boolean = true): String {
         if (entry.walkOrRun) {
             val pace = entry.speedKmh?.let { TargetInput.paceLabel(it, entry.paceUnit) }
             if (entry.open) return listOfNotNull(pace, until(last).lowercase()).joinToString(" · ")
@@ -290,7 +290,7 @@ internal class Labels(private val languageCode: String, private val units: () ->
             if (several) "${entry.sets} × $amount" else amount,
             perSide.takeIf { entry.perSide },
             entry.loadKg?.let(::weight),
-            entry.restBetweenSets.takeIf { several && it > 0 }?.let { betweenSets(longDuration(it)) },
+            entry.restBetweenSets.takeIf { withRest && several && it > 0 }?.let { betweenSets(longDuration(it)) },
         ).joinToString(" · ")
     }
 
@@ -324,4 +324,15 @@ internal class Labels(private val languageCode: String, private val units: () ->
     fun roleName(role: StepRole) = role(role) ?: DomainText.roleExercise(languageCode)
 
     fun times(count: Int) = DomainText.countTimes(languageCode, count)
+
+    /** "6 sets". */
+    fun sets(count: Int) = DomainText.countSets(languageCode, count)
+
+    /** Poulpy's line when the workout works muscles that hurt: "Your left shoulder still hurts. Go gently…". */
+    fun workoutPain(areas: List<String>) =
+        if (areas.size == 1) {
+            DomainText.poulpyWorkoutPainOne(languageCode, BodyMap.label(areas.single(), languageCode).lowercase())
+        } else {
+            DomainText.poulpyWorkoutPainMany(languageCode, areas.joinToString(", ") { BodyMap.label(it, languageCode).lowercase() })
+        }
 }

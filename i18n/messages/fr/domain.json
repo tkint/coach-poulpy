@@ -192,7 +192,9 @@
     "nappingTitle": "Poulpy fait la sieste",
     "nappingLine": "Tes tentacules sont toujours allumés. Réveille-moi avec une séance.",
     "painTitle": "On y va doucement",
-    "painLine": "Je suis rafistolé avec toi. Pas de rattrapage, juste du repos."
+    "painLine": "Je suis rafistolé avec toi. Pas de rattrapage, juste du repos.",
+    "workoutPainOne": "Ça fait encore mal : {area}. Vas-y doucement, je garde un œil dessus avec toi.",
+    "workoutPainMany": "Ça fait encore mal : {areas}. Vas-y doucement, je garde un œil dessus avec toi."
   },
   "workoutFile": {
     "unreadable": "Ce fichier est illisible. Il est peut-être abîmé.",
