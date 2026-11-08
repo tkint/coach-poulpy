@@ -97,6 +97,15 @@ fun CoachPoulpyRoot(
         }
     }
 
+    // The email confirmed on another device while the app is open: Email confirmed, over Settings.
+    WatchEmailConfirmation {
+        tab = Tab.SETTINGS
+        settingsPage = SettingsPage.HUB
+        devicesFrom = null
+        back = null
+        route = "account:confirmed"
+    }
+
     LaunchedEffect(openLive) {
         if (openLive) {
             route = null

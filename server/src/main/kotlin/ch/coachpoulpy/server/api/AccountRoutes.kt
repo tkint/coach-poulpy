@@ -13,6 +13,7 @@ import org.http4k.core.Response
 import org.http4k.core.Status.Companion.ACCEPTED
 import org.http4k.core.Status.Companion.BAD_REQUEST
 import org.http4k.core.Status.Companion.NO_CONTENT
+import org.http4k.core.Status.Companion.OK
 import org.http4k.core.with
 import org.http4k.format.KotlinxSerialization.auto
 
@@ -24,10 +25,21 @@ data class SignUpRequest(
     val language: String = "en",
     /** The person agreed to their health data being stored (docs/accounts.md). */
     val healthDataConsent: Boolean,
+    /**
+     * A random key of 32 to 128 characters the phone keeps, to ask later whether the link mailed
+     * now was opened (`confirmation-status`). Optional.
+     */
+    val pendingKey: String? = null,
 )
 
 @Serializable
 data class ConfirmRequest(val token: String)
+
+@Serializable
+data class ConfirmationStatusRequest(val key: String)
+
+@Serializable
+data class ConfirmationStatus(val confirmed: Boolean)
 
 /** Why a request was refused: a short code the app turns into its own words. */
 @Serializable
@@ -36,6 +48,11 @@ data class Problem(val error: String)
 private val signUpBody = Body.auto<SignUpRequest>().toLens()
 private val confirmBody = Body.auto<ConfirmRequest>().toLens()
 private val problemBody = Body.auto<Problem>().toLens()
+private val statusRequestBody = Body.auto<ConfirmationStatusRequest>().toLens()
+private val statusBody = Body.auto<ConfirmationStatus>().toLens()
+
+/** Long enough to be unguessable, short enough to bound what is hashed. */
+internal val PENDING_KEY_LENGTH = 32..128
 
 private val accountsTag = Tag("accounts")
 
@@ -51,13 +68,22 @@ fun signUpRoute(accounts: Accounts): ContractRoute = "$API_PREFIX/accounts" meta
     operationId = "signUp"
     tags += accountsTag
     security = Public
-    receiving(signUpBody to SignUpRequest("guest@example.com", "correct horse battery", "fr", healthDataConsent = true), definitionId = "SignUp")
+    receiving(
+        signUpBody to SignUpRequest("guest@example.com", "correct horse battery", "fr", healthDataConsent = true, pendingKey = EXAMPLE_KEY),
+        definitionId = "SignUp",
+    )
     returning(ACCEPTED to "The confirmation email is on its way, if this address can get one")
-    returning(BAD_REQUEST, problemBody to Problem("invalid-email"), "invalid-email, invalid-password or consent-required", definitionId = "Problem")
+    returning(
+        BAD_REQUEST,
+        problemBody to Problem("invalid-email"),
+        "invalid-email, invalid-password, consent-required or invalid-key",
+        definitionId = "Problem",
+    )
 } bindContract POST to { request ->
     val body = signUpBody(request)
-    val signUp = SignUp(body.email, body.password, body.language, body.healthDataConsent)
-    when (val problem = SignUpRules.problem(signUp)) {
+    val signUp = SignUp(body.email, body.password, body.language, body.healthDataConsent, body.pendingKey)
+    val problem = SignUpRules.problem(signUp) ?: "invalid-key".takeIf { body.pendingKey != null && body.pendingKey.length !in PENDING_KEY_LENGTH }
+    when (problem) {
         null -> {
             accounts.signUp(signUp)
             Response(ACCEPTED)
@@ -84,3 +110,26 @@ fun confirmEmailRoute(accounts: Accounts): ContractRoute = "$API_PREFIX/accounts
         Response(BAD_REQUEST).with(problemBody of Problem("invalid-token"))
     }
 }
+
+/**
+ * Whether the link mailed at a sign-up was opened, asked with that sign-up's pending key: the phone
+ * asks every few seconds while it shows "Check your email" (#319), so it moves on by itself when the
+ * link is opened on another device.
+ */
+fun confirmationStatusRoute(accounts: Accounts): ContractRoute = "$API_PREFIX/accounts/confirmation-status" meta {
+    summary = "Ask whether a sign-up's link was opened"
+    description = "Takes the pendingKey sent at sign-up. Answers confirmed true once the link mailed in that sign-up " +
+        "was opened, for ${Accounts.WATCH_LIFETIME.toDays()} days. An unknown or expired key answers false, as does one " +
+        "sent for an address that was already confirmed, so a key never tells who has an account."
+    operationId = "confirmationStatus"
+    tags += accountsTag
+    security = Public
+    receiving(statusRequestBody to ConfirmationStatusRequest(EXAMPLE_KEY), definitionId = "ConfirmationStatusRequest")
+    returning(OK, statusBody to ConfirmationStatus(confirmed = true), "Whether the link was opened", definitionId = "ConfirmationStatus")
+} bindContract POST to { request ->
+    val key = statusRequestBody(request).key
+    val confirmed = key.length in PENDING_KEY_LENGTH && accounts.isConfirmed(key)
+    Response(OK).with(statusBody of ConfirmationStatus(confirmed))
+}
+
+private const val EXAMPLE_KEY = "a-random-key-of-at-least-32-characters"

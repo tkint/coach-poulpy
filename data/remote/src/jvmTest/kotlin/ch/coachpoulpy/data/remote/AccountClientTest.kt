@@ -83,6 +83,34 @@ class AccountClientTest {
     }
 
     @Test
+    fun thePendingKeyGoesWithTheSignUpAndAsksAfterTheLink() = runTest {
+        answer = { _, _ -> respond("", HttpStatusCode.Accepted) }
+        client.signUp("ana@example.com", "secret-pass", "fr", true, pendingKey = "k1")
+        assertTrue(requests.single().endsWith(""","pendingKey":"k1"}"""), requests.single())
+
+        answer = { _, body -> json("""{"confirmed":${"k1" in body}}""") }
+        assertTrue(client.isConfirmed("k1"))
+        assertEquals(false, client.isConfirmed("k2"))
+        assertEquals("""POST /api/v1/accounts/confirmation-status {"key":"k1"}""", requests[1])
+    }
+
+    @Test
+    fun theEventStreamSaysWhenTheLinkIsOpened() = runTest {
+        answer = { request, _ ->
+            assertEquals("k1", request.headers["Pending-Key"])
+            respond(":\n\nevent:confirmed\ndata:{}\n\n", HttpStatusCode.OK, headersOf(HttpHeaders.ContentType, "text/event-stream"))
+        }
+        assertTrue(client.awaitConfirmation("k1"))
+
+        // A stream the server ends with only pings: not yet.
+        answer = { _, _ -> respond(":\n\n:\n\n", HttpStatusCode.OK, headersOf(HttpHeaders.ContentType, "text/event-stream")) }
+        assertEquals(false, client.awaitConfirmation("k1"))
+
+        answer = { _, _ -> respond("", HttpStatusCode.BadRequest) }
+        assertFailsWith<UnexpectedAnswer> { client.awaitConfirmation("short") }
+    }
+
+    @Test
     fun anExpiredAccessTokenIsRefreshedFirst() = runTest {
         store.tokens = Tokens("cp_at_1", "cp_rt_1", now + 10.minutes)
         now += 10.minutes

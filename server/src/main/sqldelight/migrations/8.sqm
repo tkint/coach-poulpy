@@ -1,0 +1,13 @@
+-- A phone waiting on "Check your email" asks whether the link was opened, with a random key it
+-- sent at sign-up (#319). Only the key's SHA-256 is kept. A key is tied to the one link mailed in
+-- that sign-up, and only opening that link marks it confirmed, so someone who signs up with an
+-- address they don't own never learns when its owner confirms an earlier link.
+CREATE TABLE confirmation_watch (
+    token_hash BYTEA PRIMARY KEY,
+    key_hash BYTEA NOT NULL,
+    account_id UUID NOT NULL REFERENCES account (id) ON DELETE CASCADE,
+    confirmed BOOLEAN NOT NULL DEFAULT FALSE,
+    expires_at TIMESTAMPTZ NOT NULL
+);
+
+CREATE INDEX confirmation_watch_key ON confirmation_watch (key_hash);

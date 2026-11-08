@@ -41,6 +41,7 @@ fun apiRoutes(
     catalogRoute(catalog),
     signUpRoute(accounts),
     confirmEmailRoute(accounts),
+    confirmationStatusRoute(accounts),
     passwordResetRoute(passwordResets),
     newPasswordRoute(passwordResets),
     meRoute(database),

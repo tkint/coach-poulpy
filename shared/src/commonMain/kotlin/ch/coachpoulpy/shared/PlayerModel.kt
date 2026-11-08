@@ -100,7 +100,10 @@ class PlayerModel internal constructor(
     events: List<SessionEvent>,
     private val clock: Clock = Clock.System,
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main),
+    /** Called once by [close]: the app knows the session is off screen. */
+    private val onClose: () -> Unit = {},
 ) {
+    private var closed = false
     private val face = PlayerFace(workout, catalog, languageCode, units)
     private val session = Session(timeline, events)
     private val mutableState = MutableStateFlow(render())
@@ -192,7 +195,13 @@ class PlayerModel internal constructor(
     /** Moves timed phases on. The ticker calls it; tests call it with a fake clock. */
     fun tick() = act { session.tick(clock.now()) }
 
-    fun close() = scope.cancel()
+    fun close() {
+        scope.cancel()
+        if (!closed) {
+            closed = true
+            onClose()
+        }
+    }
 
     private fun current() = session.state(clock.now())
 

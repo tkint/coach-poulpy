@@ -10,6 +10,7 @@ import ch.coachpoulpy.server.mail.ConsoleMailer
 import ch.coachpoulpy.server.mail.MailSettings
 import ch.coachpoulpy.server.mail.SmtpMailer
 import ch.coachpoulpy.server.api.api
+import ch.coachpoulpy.server.api.confirmationEvents
 import ch.coachpoulpy.server.auth.authenticate
 import ch.coachpoulpy.server.db.Database
 import ch.coachpoulpy.server.db.DatabaseSettings
@@ -17,6 +18,7 @@ import ch.coachpoulpy.server.sync.Sync
 import org.http4k.core.HttpHandler
 import org.http4k.core.Method.GET
 import org.http4k.core.Method.POST
+import org.http4k.core.PolyHandler
 import org.http4k.core.Response
 import org.http4k.core.Status.Companion.OK
 import org.http4k.core.Status.Companion.SERVICE_UNAVAILABLE
@@ -27,7 +29,7 @@ import org.http4k.filter.OriginPolicy
 import org.http4k.filter.ServerFilters
 import org.http4k.routing.bind
 import org.http4k.routing.routes
-import org.http4k.server.SunHttp
+import org.http4k.server.Jetty
 import org.http4k.server.asServer
 
 /**
@@ -94,6 +96,8 @@ fun main() {
     val passwordResets = PasswordResets(database, mailer, websiteUrl(System::getenv), signIns, passwords)
     val accountDeletion = AccountDeletion(database, passwords)
     val origin = websiteOrigin(websiteUrl(System::getenv))
-    app(version, Catalog.bundled, database, accounts, signIns, passwordResets, accountDeletion, websiteOrigin = origin).asServer(SunHttp(port)).start()
+    val http = app(version, Catalog.bundled, database, accounts, signIns, passwordResets, accountDeletion, websiteOrigin = origin)
+    // Jetty, for the server-sent events SunHttp can't hold open (#319).
+    PolyHandler(http, sse = confirmationEvents(accounts)).asServer(Jetty(port)).start()
     println("Coach Poulpy server $version listening on http://localhost:$port")
 }

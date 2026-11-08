@@ -12,15 +12,20 @@ import io.ktor.client.request.bearerAuth
 import io.ktor.client.request.delete
 import io.ktor.client.request.forms.submitForm
 import io.ktor.client.request.get
+import io.ktor.client.request.header
+import io.ktor.client.request.prepareGet
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
+import io.ktor.client.statement.bodyAsChannel
 import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.http.parameters
 import io.ktor.serialization.kotlinx.json.json
+import io.ktor.utils.io.readUTF8Line
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.seconds
@@ -96,10 +101,17 @@ class AccountClient(
     /** Whether this phone holds a sign-in. */
     val signedIn: Boolean get() = tokens.read() != null
 
-    suspend fun signUp(email: String, password: String, language: String, healthDataConsent: Boolean): SignUpAnswer {
+    /** [pendingKey] lets the phone ask later, with [isConfirmed], whether the link mailed now was opened. */
+    suspend fun signUp(
+        email: String,
+        password: String,
+        language: String,
+        healthDataConsent: Boolean,
+        pendingKey: String? = null,
+    ): SignUpAnswer {
         val response = http.post("$base/api/v1/accounts") {
             contentType(ContentType.Application.Json)
-            setBody(SignUpRequest(email, password, language, healthDataConsent))
+            setBody(SignUpRequest(email, password, language, healthDataConsent, pendingKey))
         }
         return when (response.status) {
             HttpStatusCode.Accepted -> SignUpAnswer.ACCEPTED
@@ -158,6 +170,43 @@ class AccountClient(
             else -> throw UnexpectedAnswer(response.status.value)
         }
     }
+
+    /** Whether the link mailed in the sign-up that sent [pendingKey] was opened, on any device. */
+    suspend fun isConfirmed(pendingKey: String): Boolean {
+        val response = http.post("$base/api/v1/accounts/confirmation-status") {
+            contentType(ContentType.Application.Json)
+            setBody(KeyRequest(pendingKey))
+        }
+        if (response.status != HttpStatusCode.OK) throw UnexpectedAnswer(response.status.value)
+        return response.body<ConfirmationStatus>().confirmed
+    }
+
+    /**
+     * Listens on the server-sent event stream for the sign-up that sent [pendingKey]: true as soon
+     * as its link is opened, on any device; false when the server ends the stream first, which it
+     * does every few minutes. Read by hand rather than with Ktor's SSE plugin, which not every
+     * engine the apps use supports.
+     */
+    suspend fun awaitConfirmation(pendingKey: String): Boolean =
+        http.prepareGet("$base/api/v1/accounts/confirmation-events") {
+            header("Pending-Key", pendingKey)
+            header(HttpHeaders.Accept, "text/event-stream")
+        }.execute { response ->
+            if (response.status != HttpStatusCode.OK) throw UnexpectedAnswer(response.status.value)
+            val stream = response.bodyAsChannel()
+            var event = ""
+            var line = stream.readUTF8Line()
+            while (line != null) {
+                if (line.isEmpty()) {
+                    if (event == "confirmed") return@execute true
+                    event = ""
+                } else if (line.startsWith("event:")) {
+                    event = line.removePrefix("event:").trim()
+                }
+                line = stream.readUTF8Line()
+            }
+            false
+        }
 
     /** Sets a new password with the token from the reset link; every phone of the account is signed out. */
     suspend fun setNewPassword(token: String, password: String): NewPasswordAnswer {
@@ -283,7 +332,19 @@ class AccountClient(
 }
 
 @Serializable
-private data class SignUpRequest(val email: String, val password: String, val language: String, val healthDataConsent: Boolean)
+private data class SignUpRequest(
+    val email: String,
+    val password: String,
+    val language: String,
+    val healthDataConsent: Boolean,
+    val pendingKey: String? = null,
+)
+
+@Serializable
+private data class KeyRequest(val key: String)
+
+@Serializable
+private data class ConfirmationStatus(val confirmed: Boolean)
 
 @Serializable
 private data class EmailRequest(val email: String)

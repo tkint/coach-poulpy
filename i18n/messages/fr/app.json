@@ -618,6 +618,7 @@
     "confirmedPoulpy": "Je hisse ton entraînement dans le cloud. Huit tentacules, zéro attente.",
     "uploading": "Envoi de votre entraînement…",
     "uploadProgress": "{done, number} sur {total, number} envoyés",
+    "uploaded": "Tout est envoyé : votre entraînement est sur votre compte.",
     "uploadOffline": "L’envoi reprend dès que vous êtes de nouveau en ligne.",
     "continue": "Continuer",
     "welcomeBackTitle": "Bon retour",

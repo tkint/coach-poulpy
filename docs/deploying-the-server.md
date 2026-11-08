@@ -22,6 +22,8 @@ flowchart LR
 
 Only Caddy publishes ports. The server reaches Postgres at `postgres:5432` with the `POSTGRES_PASSWORD` from `.env`, and starts once Postgres is healthy. The server joins the external `edge` network using a unique alias and the private `internal` network; Postgres joins only `internal`. The app and edge are separate Compose projects, so stopping the app leaves Caddy running. The shared network is for trusted applications: containers on it can reach each other's app ports.
 
+The server runs on Jetty, which holds the phones' server-sent event streams open (Caddy passes them through as they come). It runs as **one container**: who is listening for a confirmed email lives in its memory, so a second replica would need those events shared first.
+
 ## What you need
 
 - Linux with Python 3, Docker Engine and Docker Compose.

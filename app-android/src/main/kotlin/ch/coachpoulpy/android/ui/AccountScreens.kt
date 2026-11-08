@@ -74,6 +74,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ch.coachpoulpy.android.CoachPoulpyApp
 import ch.coachpoulpy.android.R
@@ -101,6 +102,30 @@ import kotlinx.coroutines.launch
 internal fun rememberAccount(): AccountModel {
     val context = LocalContext.current
     return remember { (context.applicationContext as CoachPoulpyApp).account }
+}
+
+/**
+ * While the app is in front and the email waits, listens for the link to be opened anywhere, such
+ * as on a computer, and calls [onConfirmed] once the phone is signed in, to show Email confirmed
+ * with the upload over whatever is on screen.
+ */
+@Composable
+internal fun WatchEmailConfirmation(onConfirmed: () -> Unit) {
+    val account = rememberAccount()
+    val state by account.state.collectAsStateWithLifecycle()
+    val confirmed by account.confirmedElsewhere.collectAsStateWithLifecycle()
+    if (state is AccountState.Pending) {
+        LifecycleResumeEffect(account) {
+            val watching = account.watchConfirmation()
+            onPauseOrDispose { watching.cancel() }
+        }
+    }
+    LaunchedEffect(confirmed) {
+        if (confirmed) {
+            account.confirmedShown()
+            onConfirmed()
+        }
+    }
 }
 
 /** Settings' Account section: one row that says where the phone stands and opens the next step. */
@@ -462,6 +487,13 @@ private fun CheckEmailScreen(account: AccountModel, resent: Boolean, onStep: (St
     val email = (state as? AccountState.Pending)?.email ?: account.knownEmail.orEmpty()
     var sentAgain by rememberSaveable { mutableStateOf(resent) }
     var offline by remember { mutableStateOf(false) }
+    var changingAddress by remember { mutableStateOf(false) }
+
+    // Opening the link elsewhere shows Email confirmed from the app level (WatchEmailConfirmation).
+    LaunchedEffect(state) {
+        // Confirmed, but the password changed meanwhile: sign in with the new one.
+        if (state == AccountState.Guest && !changingAddress) onStep("sign-in")
+    }
 
     AccountFrame(onClose, R.string.account_ok, busy = false, onAction = onClose) {
         Poulpy(R.drawable.poulpy_pose_standing_tall, R.string.account_checkEmailPoulpy)
@@ -476,6 +508,7 @@ private fun CheckEmailScreen(account: AccountModel, resent: Boolean, onStep: (St
             }
         }
         HelpLine(R.string.account_wrongAddress, R.string.account_changeAddress) {
+            changingAddress = true
             account.changeAddress()
             onStep("sign-up")
         }
@@ -535,7 +568,9 @@ private fun UploadScreen(account: AccountModel, @DrawableRes pose: Int, poulpyLi
         Intro(stringResource(title), body?.let { AnnotatedString(stringResource(it)) })
         OutlinedSurface {
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Text(stringResource(R.string.account_uploading), fontWeight = FontWeight.ExtraBold)
+                // Nothing to send, or all of it sent: say so rather than "Sending" over a full bar.
+                val done = upload?.done ?: true
+                Text(stringResource(if (done) R.string.account_uploaded else R.string.account_uploading), fontWeight = FontWeight.ExtraBold)
                 val progress = upload?.let { if (it.total == 0L) 1f else it.sent.toFloat() / it.total } ?: 1f
                 LinearProgressIndicator(
                     progress = { progress },
@@ -553,7 +588,7 @@ private fun UploadScreen(account: AccountModel, @DrawableRes pose: Int, poulpyLi
                 }
             }
         }
-        Note(stringResource(R.string.account_uploadOffline))
+        if (upload?.done == false) Note(stringResource(R.string.account_uploadOffline))
     }
 }
 

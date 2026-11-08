@@ -20,7 +20,9 @@ import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.runTest
 
 class PlayerModelTest {
     private val graph = AppGraph(DriverFactory())
@@ -52,6 +54,17 @@ class PlayerModelTest {
             sessionId = "run-1", events = graph.store.events("run-1"),
             clock = clock, scope = CoroutineScope(StandardTestDispatcher()),
         )
+    }
+
+    @Test
+    fun anOpenSessionHoldsBackWhatWouldCoverIt() = runTest {
+        val id = workout()
+        assertEquals(false, graph.training.first())
+        val player = graph.player(id.value, "en")!!
+        assertEquals(true, graph.training.first())
+        player.close()
+        player.close()
+        assertEquals(false, graph.training.first())
     }
 
     @Test
