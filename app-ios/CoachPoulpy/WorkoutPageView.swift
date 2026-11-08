@@ -111,7 +111,9 @@ struct WorkoutPageView: View {
 
     /// The legend, then the front and back figures, as tall as the room above the sheet allows.
     private func bodyMap(_ state: WorkoutPageState, room: CGFloat) -> some View {
-        let width = min(max(room / CGFloat(BodyMapBox.shared.HEIGHT / BodyMapBox.shared.WIDTH), 56), 150)
+        // Collapsed, the map fills the room: as wide as two figures side by side fit the screen.
+        let maxFigure = (UIScreen.main.bounds.width - PoulpySpace.lg * 2 - PoulpySpace.sm) / 2
+        let width = min(max(room / CGFloat(BodyMapBox.shared.HEIGHT / BodyMapBox.shared.WIDTH), 56), maxFigure)
         let muscles = state.muscles.map(\.label).joined(separator: ", ")
         let mapText = L("workout.mapLabel %@", muscles)
         return VStack(spacing: PoulpySpace.lg) {

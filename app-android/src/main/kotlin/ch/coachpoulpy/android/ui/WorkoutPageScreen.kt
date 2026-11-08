@@ -68,6 +68,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
@@ -135,7 +136,9 @@ fun WorkoutPageScreen(
             background = { room ->
                 // The map: a legend, then the front and back figures, as tall as the room above the sheet allows.
                 val statusBar = with(LocalDensity.current) { WindowInsets.statusBars.getTop(this).toDp() }
-                val figureWidth = ((room - statusBar - MAP_FIGURES_TOP - PoulpySpace.md) / (BodyMapBox.HEIGHT / BodyMapBox.WIDTH)).coerceIn(56.dp, 150.dp)
+                // Collapsed, the map fills the room: as wide as two figures side by side fit the screen.
+                val maxFigure = (LocalConfiguration.current.screenWidthDp.dp - PoulpySpace.lg * 2 - PoulpySpace.sm) / 2
+                val figureWidth = ((room - statusBar - MAP_FIGURES_TOP - PoulpySpace.md) / (BodyMapBox.HEIGHT / BodyMapBox.WIDTH)).coerceIn(56.dp, maxFigure)
                 val mapText = stringResource(R.string.workout_mapLabel, state.muscles.joinToString(", ") { it.label })
                 Column(Modifier.fillMaxWidth().statusBarsPadding().padding(top = PoulpySpace.lg), horizontalAlignment = Alignment.CenterHorizontally) {
                     HeatLegend(showPain = state.painAreas.isNotEmpty())
