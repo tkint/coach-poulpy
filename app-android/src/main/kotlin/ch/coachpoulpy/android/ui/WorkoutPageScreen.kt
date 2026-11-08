@@ -151,14 +151,14 @@ fun WorkoutPageScreen(
                 Surface(color = MaterialTheme.colorScheme.surface) {
                     Column {
                         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                        Row(Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = 20.dp, vertical = 12.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Row(Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = PoulpySpace.lg, vertical = 12.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                             if (state.editable) {
-                                OutlinedButton(onClick = onEdit, modifier = Modifier.weight(1f).height(52.dp)) {
+                                OutlinedButton(onClick = onEdit, modifier = Modifier.weight(1f).height(PoulpySize.buttonLarge)) {
                                     Icon(Icons.Filled.Edit, contentDescription = null)
                                     Text(stringResource(R.string.action_edit), fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 6.dp))
                                 }
                             }
-                            Button(onClick = onStart, modifier = Modifier.weight(1.6f).height(52.dp)) {
+                            Button(onClick = onStart, modifier = Modifier.weight(1.6f).height(PoulpySize.buttonLarge)) {
                                 Icon(Icons.Filled.PlayArrow, contentDescription = null)
                                 Text(stringResource(R.string.workout_start), fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 6.dp))
                             }
@@ -170,7 +170,7 @@ fun WorkoutPageScreen(
     ) { padding ->
         if (!state.found) return@Scaffold
         Column(
-            Modifier.padding(padding).fillMaxSize().verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 20.dp, top = 12.dp, bottom = 16.dp),
+            Modifier.padding(padding).fillMaxSize().verticalScroll(rememberScrollState()).padding(start = PoulpySpace.lg, end = PoulpySpace.lg, top = 12.dp, bottom = 16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -402,7 +402,7 @@ private fun Stats(state: WorkoutPageState) {
 private fun StatBox(label: String, value: String, modifier: Modifier) {
     Column(
         modifier
-            .clip(RoundedCornerShape(14.dp))
+            .clip(RoundedCornerShape(PoulpyRadius.lg))
             .background(MaterialTheme.colorScheme.surface)
             .padding(horizontal = 10.dp, vertical = 8.dp),
     ) {

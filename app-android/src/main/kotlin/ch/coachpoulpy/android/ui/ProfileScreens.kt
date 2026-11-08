@@ -124,7 +124,7 @@ internal fun SubPage(
             action?.invoke()
         }
         Column(
-            Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 20.dp, top = PoulpySpace.lg, bottom = PoulpySpace.lg),
+            Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(start = PoulpySpace.lg, end = PoulpySpace.lg, top = PoulpySpace.lg, bottom = PoulpySpace.lg),
             verticalArrangement = Arrangement.spacedBy(10.dp),
             content = content,
         )
@@ -184,10 +184,10 @@ internal fun SettingsHub(graph: AppGraph, language: String, onPage: (SettingsPag
         Text(
             stringResource(R.string.tab_settings),
             style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(start = 20.dp, end = 12.dp, top = PoulpySpace.lg),
+            modifier = Modifier.padding(start = PoulpySpace.lg, end = 12.dp, top = PoulpySpace.lg),
         )
         Column(
-            Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 20.dp, top = PoulpySpace.md, bottom = PoulpySpace.lg),
+            Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(start = PoulpySpace.lg, end = PoulpySpace.lg, top = PoulpySpace.md, bottom = PoulpySpace.lg),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Surface(
@@ -282,7 +282,7 @@ private fun SettingsRow(icon: ImageVector, title: String, subtitle: String?, onC
 @Composable
 private fun SettingsRow(leading: @Composable () -> Unit, title: String, subtitle: String?, onClick: (() -> Unit)?) {
     val row = @Composable {
-        Row(Modifier.fillMaxWidth().heightIn(min = 60.dp).padding(horizontal = 14.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.fillMaxWidth().heightIn(min = PoulpySize.row).padding(horizontal = 14.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.padding(end = 12.dp)) { leading() }
             Column(Modifier.weight(1f)) {
                 Text(title, fontWeight = FontWeight.ExtraBold)
@@ -552,7 +552,7 @@ internal fun BodyScreen(graph: AppGraph, metric: BodyMetric, language: String, o
         subtitle = state.latest?.let { stringResource(R.string.body_lastLogged, mediumDate(it.day.toJava())) } ?: stringResource(R.string.body_nothingLogged),
         onBack = onBack,
         modifier = modifier,
-        action = { Button(onClick = { logging = true }, modifier = Modifier.height(40.dp)) { Text(stringResource(R.string.body_log), fontWeight = FontWeight.ExtraBold) } },
+        action = { Button(onClick = { logging = true }, modifier = Modifier.height(PoulpySize.buttonSmall)) { Text(stringResource(R.string.body_log), fontWeight = FontWeight.ExtraBold) } },
     ) {
         if (state.history.isEmpty()) {
             PoulpyCard(
@@ -770,7 +770,7 @@ private fun LogSheet(metric: BodyMetric, system: UnitSystem, language: String, s
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         containerColor = MaterialTheme.colorScheme.surface,
     ) {
-        Column(Modifier.padding(start = 20.dp, end = 20.dp, bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(Modifier.padding(start = PoulpySpace.lg, end = PoulpySpace.lg, bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(stringResource(if (isWeight) R.string.body_logWeight else R.string.body_logHeight), style = MaterialTheme.typography.titleLarge)
                 Text(
@@ -803,10 +803,10 @@ private fun LogSheet(metric: BodyMetric, system: UnitSystem, language: String, s
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedButton(
                     onClick = onDismiss,
-                    modifier = Modifier.weight(1f).height(56.dp),
+                    modifier = Modifier.weight(1f).height(PoulpySize.buttonLarge),
                     border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
                 ) { Text(stringResource(R.string.action_cancel), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onSurface) }
-                Button(onClick = { typed?.let { onSave(it, day); onDismiss() } }, enabled = typed != null, modifier = Modifier.weight(1.6f).height(56.dp)) {
+                Button(onClick = { typed?.let { onSave(it, day); onDismiss() } }, enabled = typed != null, modifier = Modifier.weight(1.6f).height(PoulpySize.buttonLarge)) {
                     Text(stringResource(R.string.action_save), fontWeight = FontWeight.ExtraBold)
                 }
             }

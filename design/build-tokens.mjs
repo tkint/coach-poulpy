@@ -110,6 +110,10 @@ function kotlin() {
   out.push('object PoulpyRadius {')
   for (const [name, v] of Object.entries(tokens.radius)) out.push(`    val ${name} = ${v}.dp`)
   out.push('}', '')
+  out.push('/** Control sizes from docs/design-system.md. Never write a literal height in a screen. */')
+  out.push('object PoulpySize {')
+  for (const [name, v] of Object.entries(tokens.size)) out.push(`    val ${name} = ${v}.dp`)
+  out.push('}', '')
   const r = tokens.radius
   out.push(`internal val PoulpyShapes = Shapes(small = RoundedCornerShape(${r.sm}.dp), medium = RoundedCornerShape(${r.md}.dp), large = RoundedCornerShape(${r.lg}.dp))`, '')
   out.push('object PoulpyMotion {')
@@ -160,6 +164,10 @@ function swift() {
   out.push('}', '')
   out.push('enum PoulpyRadius {')
   for (const [name, v] of Object.entries(tokens.radius)) out.push(`    static let ${name}: CGFloat = ${v}`)
+  out.push('}', '')
+  out.push('/// Control sizes from docs/design-system.md. Never write a literal height in a screen.')
+  out.push('enum PoulpySize {')
+  for (const [name, v] of Object.entries(tokens.size)) out.push(`    static let ${name}: CGFloat = ${v}`)
   out.push('}', '')
   out.push('enum PoulpyMotion {')
   for (const [name, m] of Object.entries(tokens.motion)) {

@@ -257,7 +257,7 @@ internal fun SheetFrame(
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         containerColor = MaterialTheme.colorScheme.surface,
     ) {
-        Column(Modifier.padding(start = 20.dp, end = 20.dp, bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(Modifier.padding(start = PoulpySpace.lg, end = PoulpySpace.lg, bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             // The content scrolls, so a tall sheet (the body figure) never hides the buttons below it.
             Column(Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(title, style = MaterialTheme.typography.titleLarge)
@@ -268,10 +268,10 @@ internal fun SheetFrame(
             Row(Modifier.padding(top = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedButton(
                     onClick = onDismiss,
-                    modifier = Modifier.weight(1f).height(56.dp),
+                    modifier = Modifier.weight(1f).height(PoulpySize.buttonLarge),
                     border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
                 ) { Text(stringResource(R.string.action_cancel), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onSurface) }
-                Button(onClick = { onSave(); onDismiss() }, modifier = Modifier.weight(1.6f).height(56.dp)) {
+                Button(onClick = { onSave(); onDismiss() }, modifier = Modifier.weight(1.6f).height(PoulpySize.buttonLarge)) {
                     Text(stringResource(R.string.action_save), fontWeight = FontWeight.ExtraBold)
                 }
             }
@@ -302,7 +302,7 @@ internal fun <T : Any> OptionSheet(
                 Row(
                     Modifier
                         .fillMaxWidth()
-                        .heightIn(min = 52.dp)
+                        .heightIn(min = PoulpySize.row)
                         .selectable(selected = value == choice, role = Role.RadioButton, onClick = { choice = value })
                         .padding(horizontal = 16.dp),
                     verticalAlignment = Alignment.CenterVertically,
@@ -336,7 +336,7 @@ internal fun <T : Any> MultiOptionSheet(
                 Row(
                     Modifier
                         .fillMaxWidth()
-                        .heightIn(min = 52.dp)
+                        .heightIn(min = PoulpySize.row)
                         .selectable(selected = on, role = Role.Checkbox, onClick = { chosen = if (on) chosen - value else chosen + value })
                         .padding(horizontal = 16.dp),
                     verticalAlignment = Alignment.CenterVertically,

@@ -97,12 +97,12 @@ struct WorkoutPageView: View {
                                     }
                                 }
                                 .padding(10)
-                                .background(PoulpyColor.primaryContainer, in: RoundedRectangle(cornerRadius: 16))
+                                .background(PoulpyColor.primaryContainer, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
                             }
                         }
                     }
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, PoulpySpace.lg)
                 .padding(.top, 12)
                 .padding(.bottom, PoulpySpace.lg)
             }
@@ -199,7 +199,7 @@ struct WorkoutPageView: View {
             }
             .foregroundStyle(PoulpyColor.onPrimaryContainer)
             .padding(EdgeInsets(top: 6, leading: 14, bottom: 10, trailing: 6))
-            .background(PoulpyColor.primaryContainer, in: RoundedRectangle(cornerRadius: 16))
+            .background(PoulpyColor.primaryContainer, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
         } else {
             Button {
                 picking = true
@@ -209,7 +209,7 @@ struct WorkoutPageView: View {
                     .frame(maxWidth: .infinity, minHeight: 48)
                     .foregroundStyle(PoulpyColor.primary)
                     .overlay(
-                        RoundedRectangle(cornerRadius: 16)
+                        RoundedRectangle(cornerRadius: PoulpyRadius.lg)
                             .stroke(PoulpyPalette.lagoon300, style: StrokeStyle(lineWidth: 2, dash: [6, 4]))
                     )
             }
@@ -232,8 +232,8 @@ struct WorkoutPageView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(EdgeInsets(top: 8, leading: 10, bottom: 8, trailing: 10))
-        .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 14))
-        .overlay(RoundedRectangle(cornerRadius: 14).stroke(PoulpyColor.outline))
+        .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
+        .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(PoulpyColor.outline))
     }
 
     /// "Warm-up", "2 steps · about 6 min" beside the part's icon, as the builder heads a part.
@@ -302,7 +302,7 @@ struct WorkoutPageView: View {
             }
         }
         .padding(EdgeInsets(top: 10, leading: 12, bottom: 10, trailing: 12))
-        .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 16))
+        .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
     }
 
     private func actions(_ state: WorkoutPageState) -> some View {
@@ -331,7 +331,7 @@ struct WorkoutPageView: View {
             .buttonStyle(.plain)
             .layoutPriority(1)
         }
-        .padding(.horizontal, 20)
+        .padding(.horizontal, PoulpySpace.lg)
         .padding(.vertical, 12)
         .background(PoulpyColor.surface.ignoresSafeArea())
         .overlay(alignment: .top) { Divider() }

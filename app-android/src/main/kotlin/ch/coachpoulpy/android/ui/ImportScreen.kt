@@ -63,17 +63,17 @@ fun ImportScreen(graph: AppGraph, language: String, fileText: String, onAdded: (
             )
         },
         bottomBar = {
-            Column(Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = 20.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = PoulpySpace.lg, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 if (state.ready) {
                     Button(
                         onClick = { model.add()?.let(onAdded) },
-                        modifier = Modifier.fillMaxWidth().height(64.dp),
+                        modifier = Modifier.fillMaxWidth().height(PoulpySize.buttonLarge),
                     ) { Text(stringResource(R.string.import_add), fontWeight = FontWeight.ExtraBold) }
                     TextButton(onClick = onClose, modifier = Modifier.fillMaxWidth()) {
                         Text(stringResource(R.string.action_cancel), fontWeight = FontWeight.ExtraBold)
                     }
                 } else {
-                    OutlinedButton(onClick = onClose, modifier = Modifier.fillMaxWidth().height(52.dp)) {
+                    OutlinedButton(onClick = onClose, modifier = Modifier.fillMaxWidth().height(PoulpySize.buttonLarge)) {
                         Text(stringResource(R.string.action_close), fontWeight = FontWeight.ExtraBold)
                     }
                 }
@@ -81,7 +81,7 @@ fun ImportScreen(graph: AppGraph, language: String, fileText: String, onAdded: (
         },
     ) { padding ->
         Column(
-            Modifier.padding(padding).fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp, vertical = 12.dp),
+            Modifier.padding(padding).fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = PoulpySpace.lg, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             if (state.ready) {

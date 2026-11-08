@@ -130,8 +130,8 @@ struct AccountPage: View {
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(16)
-                    .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 16))
-                    .overlay(RoundedRectangle(cornerRadius: 16).stroke(PoulpyColor.outline, lineWidth: 1))
+                    .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
+                    .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(PoulpyColor.outline, lineWidth: 1))
                 }
                 if let pending = state as? AccountStatePending {
                     VStack(alignment: .leading, spacing: 8) {
@@ -149,7 +149,7 @@ struct AccountPage: View {
                     }
                     .foregroundStyle(PoulpyColor.onPrimaryContainer)
                     .padding(EdgeInsets(top: 12, leading: 14, bottom: 12, trailing: 14))
-                    .background(PoulpyColor.primaryContainer, in: RoundedRectangle(cornerRadius: 16))
+                    .background(PoulpyColor.primaryContainer, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
                     SyncState(on: false, title: L("account.stateNotSyncing"), detail: L("account.stateNotSyncingHint"))
                 }
                 if let signedIn = state as? AccountStateSignedIn {
@@ -161,8 +161,8 @@ struct AccountPage: View {
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(16)
-                    .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 16))
-                    .overlay(RoundedRectangle(cornerRadius: 16).stroke(PoulpyColor.outline, lineWidth: 1))
+                    .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
+                    .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(PoulpyColor.outline, lineWidth: 1))
                     // CLEANUP: Export my data (account-details mockup) waits for an export of the whole phone.
                     VStack(spacing: 4) {
                         Button { dialog = signedIn.upToDate ? .signOut : .unsent } label: {
@@ -180,7 +180,7 @@ struct AccountPage: View {
                     .padding(.top, 8)
                 }
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, PoulpySpace.lg)
             .padding(.vertical, 12)
         }
         .background(PoulpyColor.background)
@@ -662,8 +662,8 @@ private struct UploadProgressCard: View {
             }
         }
         .padding(16)
-        .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 16))
-        .overlay(RoundedRectangle(cornerRadius: 16).stroke(PoulpyColor.outline, lineWidth: 1))
+        .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
+        .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(PoulpyColor.outline, lineWidth: 1))
         if progress?.done == false { FieldNote("account.uploadOffline") }
     }
 }
@@ -754,18 +754,18 @@ private struct AccountFrame<Content: View>: View {
                 Spacer()
             }
             .frame(minHeight: 44)
-            .padding(.horizontal, 20)
+            .padding(.horizontal, PoulpySpace.lg)
             .padding(.vertical, 4)
             ScrollView {
                 VStack(alignment: .leading, spacing: 16, content: content)
-                    .padding(.horizontal, 20)
+                    .padding(.horizontal, PoulpySpace.lg)
                     .padding(.vertical, 8)
             }
         }
         .background(PoulpyColor.background)
         .safeAreaInset(edge: .bottom) {
             PrimaryButton(title: action, enabled: !busy, action: onAction)
-                .padding(.horizontal, 20)
+                .padding(.horizontal, PoulpySpace.lg)
                 .padding(.vertical, 12)
                 .background(PoulpyColor.surface)
         }
@@ -834,8 +834,8 @@ private struct ErrorCard: View {
         .foregroundStyle(PoulpyColor.error)
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(EdgeInsets(top: 12, leading: 14, bottom: 12, trailing: 14))
-        .background(PoulpyColor.surfaceVariant, in: RoundedRectangle(cornerRadius: 16))
-        .overlay(RoundedRectangle(cornerRadius: 16).stroke(PoulpyColor.error, lineWidth: 1.5))
+        .background(PoulpyColor.surfaceVariant, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
+        .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(PoulpyColor.error, lineWidth: 1.5))
     }
 }
 
@@ -851,7 +851,7 @@ private struct InfoCard: View {
         .foregroundStyle(PoulpyColor.onPrimaryContainer)
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(EdgeInsets(top: 12, leading: 14, bottom: 12, trailing: 14))
-        .background(PoulpyColor.primaryContainer, in: RoundedRectangle(cornerRadius: 16))
+        .background(PoulpyColor.primaryContainer, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
     }
 }
 

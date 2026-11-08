@@ -125,7 +125,7 @@ struct ExerciseList<Row: View>: View {
                         }
                     }
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, PoulpySpace.lg)
                 .padding(.bottom, 20)
             }
         }
@@ -204,7 +204,7 @@ private struct FilterChipButton: View {
             }
             .padding(.horizontal, 12)
             .frame(minWidth: 48)
-            .frame(height: 36)
+            .frame(height: PoulpySize.chip)
             .foregroundStyle(on ? PoulpyColor.primaryContainer : PoulpyColor.onSurface)
             .background(on ? PoulpyColor.onPrimaryContainer : PoulpyColor.surface, in: Capsule())
             .overlay(Capsule().stroke(on ? Color.clear : PoulpyColor.outline, lineWidth: 1.5))
@@ -272,7 +272,7 @@ private struct FilterOptionSheet<Value: Hashable>: View {
                 }
                 FilterSheetActions(count: fitting(pending), clear: { apply([]) }, show: { apply(pending) })
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, PoulpySpace.lg)
             .padding(.top, 24)
             .padding(.bottom, 28)
         }
@@ -317,7 +317,7 @@ private struct ZonesSheet: View {
                 }
                 FilterSheetActions(count: fitting(pending), clear: { apply([]) }, show: { apply(pending) })
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, PoulpySpace.lg)
             .padding(.top, 24)
             .padding(.bottom, 28)
         }
@@ -349,7 +349,7 @@ private struct FilterSheetActions: View {
                 Text("exercises.filterClear")
                     .font(.poulpy(.callout).weight(.heavy))
                     .frame(maxWidth: .infinity)
-                    .frame(height: 56)
+                    .frame(height: PoulpySize.buttonLarge)
                     .overlay(Capsule().stroke(PoulpyColor.outline, lineWidth: 2))
             }
             Button(action: show) {
@@ -357,7 +357,7 @@ private struct FilterSheetActions: View {
                     .font(.poulpy(.callout).weight(.heavy))
                     .foregroundStyle(PoulpyColor.onPrimary)
                     .frame(maxWidth: .infinity)
-                    .frame(height: 56)
+                    .frame(height: PoulpySize.buttonLarge)
                     .background(PoulpyColor.primary, in: Capsule())
             }
         }
@@ -395,10 +395,10 @@ struct ExerciseRowView: View {
             }
         }
         .padding(EdgeInsets(top: 10, leading: 12, bottom: 10, trailing: 12))
-        .frame(minHeight: 64)
-        .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 16))
-        .overlay(RoundedRectangle(cornerRadius: 16).stroke(PoulpyColor.outline))
-        .contentShape(RoundedRectangle(cornerRadius: 16))
+        .frame(minHeight: PoulpySize.row)
+        .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
+        .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(PoulpyColor.outline))
+        .contentShape(RoundedRectangle(cornerRadius: PoulpyRadius.lg))
     }
 }
 
@@ -422,7 +422,7 @@ struct PickerRowView: View {
                     Spacer(minLength: 0)
                 }
                 .padding(EdgeInsets(top: 10, leading: 12, bottom: 10, trailing: 0))
-                .frame(minHeight: 64)
+                .frame(minHeight: PoulpySize.row)
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
@@ -440,8 +440,8 @@ struct PickerRowView: View {
             .buttonStyle(.plain)
             .accessibilityLabel(String(localized: "exercise.addNamed \(row.name)"))
         }
-        .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 16))
-        .overlay(RoundedRectangle(cornerRadius: 16).stroke(PoulpyColor.outline))
+        .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
+        .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(PoulpyColor.outline))
     }
 }
 
@@ -504,7 +504,7 @@ struct ExerciseDetailView: View {
                     ExerciseTabContent(graph: graph, detail: detail, tab: tab)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, 20)
+                .padding(.horizontal, PoulpySpace.lg)
                 .padding(.top, 8)
                 .padding(.bottom, 16)
             }
@@ -516,11 +516,11 @@ struct ExerciseDetailView: View {
                     .font(.poulpy(.callout).weight(.heavy))
                     .foregroundStyle(PoulpyColor.onPrimary)
                     .frame(maxWidth: .infinity)
-                    .frame(height: 56)
+                    .frame(height: PoulpySize.buttonLarge)
                     .background(PoulpyColor.primary, in: Capsule())
             }
             .buttonStyle(.plain)
-            .padding(.horizontal, 20)
+            .padding(.horizontal, PoulpySpace.lg)
             .padding(.top, 12)
             .padding(.bottom, 8)
         }
@@ -583,7 +583,7 @@ private struct VariationsSheet: View {
                 }
                 VariationRungs(variations: variations, pick: pick, onCurrent: { dismiss() })
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, PoulpySpace.lg)
             .padding(.top, 24)
             .padding(.bottom, 28)
         }
@@ -644,13 +644,13 @@ struct VariationRungs: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
-        .frame(minHeight: 60)
-        .background(variation.current ? PoulpyColor.primaryContainer : PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 16))
+        .frame(minHeight: PoulpySize.row)
+        .background(variation.current ? PoulpyColor.primaryContainer : PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
         .overlay(
-            RoundedRectangle(cornerRadius: 16)
+            RoundedRectangle(cornerRadius: PoulpyRadius.lg)
                 .stroke(variation.current ? PoulpyColor.primary : PoulpyColor.outline, lineWidth: variation.current ? 1.5 : 1)
         )
-        .contentShape(RoundedRectangle(cornerRadius: 16))
+        .contentShape(RoundedRectangle(cornerRadius: PoulpyRadius.lg))
     }
 }
 
@@ -727,7 +727,7 @@ struct VariationButtonLabel: View {
         .foregroundStyle(PoulpyColor.onPrimaryContainer)
         .padding(.leading, 14)
         .padding(.trailing, 12)
-        .frame(height: 44)
+        .frame(height: PoulpySize.button)
         .background(PoulpyColor.surfaceVariant, in: Capsule())
     }
 }

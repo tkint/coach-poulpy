@@ -75,7 +75,7 @@ fun ExerciseInfoSheet(
         // Fills the sheet, so the steps scroll inside a fixed height and the sheet itself never moves with them.
         Column(Modifier.fillMaxWidth().fillMaxHeight()) {
             Column(
-                Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 20.dp),
+                Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = PoulpySpace.lg),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 if (adding && listing) {
@@ -132,8 +132,8 @@ fun ExerciseInfoSheet(
             }
             if (!(adding && listing)) {
                 HorizontalDivider(Modifier.padding(top = 12.dp), color = colors.surfaceVariant)
-                Box(Modifier.navigationBarsPadding().padding(start = 20.dp, end = 20.dp, top = 12.dp, bottom = 16.dp)) {
-                    Button(onClick = { onAction(detail.slug) }, modifier = Modifier.fillMaxWidth().height(56.dp)) {
+                Box(Modifier.navigationBarsPadding().padding(start = PoulpySpace.lg, end = PoulpySpace.lg, top = 12.dp, bottom = 16.dp)) {
+                    Button(onClick = { onAction(detail.slug) }, modifier = Modifier.fillMaxWidth().height(PoulpySize.buttonLarge)) {
                         if (adding) {
                             Icon(Icons.Filled.Add, contentDescription = null)
                         }

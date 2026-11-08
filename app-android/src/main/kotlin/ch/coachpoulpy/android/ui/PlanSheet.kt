@@ -66,7 +66,7 @@ fun PlanSheet(name: String, planned: List<PlannedDay>, onSave: (List<PlanDate>) 
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         containerColor = colors.surface,
     ) {
-        Column(Modifier.padding(start = 20.dp, end = 20.dp, bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(Modifier.padding(start = PoulpySpace.lg, end = PoulpySpace.lg, bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(stringResource(R.string.plan_title, name), style = MaterialTheme.typography.titleLarge)
                 Text(stringResource(R.string.plan_hint), style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
@@ -116,7 +116,7 @@ fun PlanSheet(name: String, planned: List<PlannedDay>, onSave: (List<PlanDate>) 
             }
             Button(
                 onClick = { onSave(ticked.filter { !it.isBefore(today) }.map { PlanDate(it.year, it.monthValue, it.dayOfMonth) }) },
-                modifier = Modifier.fillMaxWidth().height(52.dp),
+                modifier = Modifier.fillMaxWidth().height(PoulpySize.buttonLarge),
             ) {
                 val count = ticked.count { !it.isBefore(today) }
                 Text(

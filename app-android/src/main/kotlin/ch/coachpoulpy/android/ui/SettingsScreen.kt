@@ -108,7 +108,7 @@ internal fun ColumnScope.Devices(graph: AppGraph, onOpen: (DeviceRoute) -> Unit)
                 Image(painterResource(R.drawable.poulpy_pose_standing_tall), contentDescription = null, modifier = Modifier.size(140.dp))
                 Text(stringResource(R.string.devices_emptyTitle), style = MaterialTheme.typography.headlineSmall, textAlign = TextAlign.Center)
                 Text(stringResource(R.string.devices_emptyBody), textAlign = TextAlign.Center)
-                Button(onClick = { onOpen(DeviceRoute.Add) }, modifier = Modifier.padding(top = 8.dp).height(56.dp)) {
+                Button(onClick = { onOpen(DeviceRoute.Add) }, modifier = Modifier.padding(top = 8.dp).height(PoulpySize.buttonLarge)) {
                     Icon(Icons.Filled.Add, contentDescription = null)
                     Spacer(Modifier.size(8.dp))
                     Text(stringResource(R.string.devices_addFirst))
@@ -209,7 +209,7 @@ sealed interface DeviceRoute {
 private fun PageScaffold(title: String, onBack: () -> Unit, content: @Composable ColumnScope.() -> Unit) {
     Scaffold(topBar = { TopAppBar(title = { Text(title) }, navigationIcon = { BackButton(onBack) }) }) { padding ->
         Column(
-            Modifier.padding(padding).fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp, vertical = 12.dp),
+            Modifier.padding(padding).fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = PoulpySpace.lg, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
             content = content,
         )
@@ -321,15 +321,15 @@ fun DeviceScreen(graph: AppGraph, key: String, onBack: () -> Unit, onSources: ()
         BluetoothProblems(bluetooth)
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             if (device.status == ConnectionStatus.IDLE || device.status == ConnectionStatus.FAILED) {
-                Button(onClick = { bluetooth.whenReady { model.connect(device.key) } }, modifier = Modifier.weight(1f).height(48.dp)) {
+                Button(onClick = { bluetooth.whenReady { model.connect(device.key) } }, modifier = Modifier.weight(1f).height(PoulpySize.button)) {
                     Text(stringResource(R.string.devices_connect))
                 }
             } else {
-                OutlinedButton(onClick = { model.disconnect(device.key) }, modifier = Modifier.weight(1f).height(48.dp)) {
+                OutlinedButton(onClick = { model.disconnect(device.key) }, modifier = Modifier.weight(1f).height(PoulpySize.button)) {
                     Text(stringResource(R.string.devices_disconnect))
                 }
             }
-            TextButton(onClick = { confirmForget = true }, modifier = Modifier.weight(1f).height(48.dp)) {
+            TextButton(onClick = { confirmForget = true }, modifier = Modifier.weight(1f).height(PoulpySize.button)) {
                 Text(stringResource(R.string.devices_forget), color = PoulpyTheme.extraColors.grumpy)
             }
         }
