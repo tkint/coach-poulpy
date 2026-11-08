@@ -25,7 +25,11 @@ import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
@@ -48,11 +52,15 @@ class AccountModelTest {
         answers[call]?.invoke(this) ?: respond("", HttpStatusCode.NotFound)
     }
 
-    private fun model() = AccountModel(
+    private fun model(training: Flow<Boolean> = flowOf(false)) = AccountModel(
         store, memory, secrets, AccountClient("https://api.example.com", SecretTokenStore(secrets), engine),
         "Ana's iPhone", { "en" }, CoroutineScope(SupervisorJob() + Dispatchers.Default),
         reconnectAfter = 20.milliseconds,
+        training = training,
     )
+
+    private suspend fun AccountModel.confirmedElsewhereBecomes(shown: Boolean) =
+        withContext(Dispatchers.Default) { withTimeout(5.seconds) { confirmedElsewhere.first { it == shown } } }
 
     /** Whether the server says the link was opened, as confirmation-status answers. */
     private fun linkOpened(opened: Boolean) {
@@ -218,13 +226,31 @@ class AccountModelTest {
 
         val watching = account.watchConfirmation()
         // The app shows Email confirmed over whatever is on screen, once, after signing in.
-        withContext(Dispatchers.Default) { withTimeout(5.seconds) { account.confirmedElsewhere.first { it } } }
+        account.confirmedElsewhereBecomes(true)
         watching.cancel()
         assertIs<AccountState.SignedIn>(account.state.value)
         account.confirmedShown()
-        assertEquals(false, account.confirmedElsewhere.value)
+        account.confirmedElsewhereBecomes(false)
         assertEquals(3, streams)
         assertEquals(1, calls.count { it == "POST /oauth/token" })
+    }
+
+    @Test
+    fun emailConfirmedWaitsUntilTheWorkoutEnds() = runTest {
+        answers["POST /api/v1/accounts"] = { respond("", HttpStatusCode.Accepted) }
+        serverAccepts()
+        linkOpened(true)
+        val training = MutableStateFlow(true)
+        val account = model(training)
+        account.signUp("ana@example.com", "secret-pass", healthDataConsent = true)
+
+        val watching = account.watchConfirmation()
+        account.becomes { it is AccountState.SignedIn }
+        watching.cancel()
+        delay(100)
+        assertEquals(false, account.confirmedElsewhere.value)
+        training.value = false
+        account.confirmedElsewhereBecomes(true)
     }
 
     @Test

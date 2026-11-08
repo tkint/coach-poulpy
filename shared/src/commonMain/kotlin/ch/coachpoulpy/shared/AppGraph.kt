@@ -12,6 +12,15 @@ import ch.coachpoulpy.data.local.LocalStore
 import ch.coachpoulpy.data.remote.AccountClient
 import ch.coachpoulpy.device.ftms.KableCentral
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.datetime.TimeZone
@@ -79,7 +88,20 @@ class AppGraph(driverFactory: DriverFactory) {
 
     fun live(memory: KeyValueStore, languageCode: String): LiveModel =
         liveModel ?: LiveModel(devices(memory), settings(memory).state, store, compiler, memory, catalog = { catalog }, languageCode = languageCode)
-            .also { liveModel = it }
+            .also {
+                liveModel = it
+                liveCreated.value = it
+            }
+
+    private val liveCreated = MutableStateFlow<LiveModel?>(null)
+    private val playersOpen = MutableStateFlow(0)
+
+    /** True while a guided session is open or Live records, so that nothing pops up over the workout. */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    internal val training: Flow<Boolean> = combine(
+        playersOpen,
+        liveCreated.flatMapLatest { live -> live?.state?.map { it.recording != null } ?: flowOf(false) },
+    ) { players, recording -> players > 0 || recording }.distinctUntilChanged()
 
     // Not "newWorkout": Swift reserves the "new" prefix, and Kotlin would rename it.
     fun createWorkout(languageCode: String) =
@@ -122,6 +144,7 @@ class AppGraph(driverFactory: DriverFactory) {
             store, memory, secrets, AccountClient(baseUrl, SecretTokenStore(secrets)), deviceName,
             { LanguageChoice.entries.firstOrNull { it.name == memory.getString(SettingsModel.LANGUAGE) }?.code ?: languageCode },
             CoroutineScope(SupervisorJob() + Dispatchers.Main),
+            training = training,
         ).also { accountModel = it }
 
     /** The units chosen in Settings, once the app has opened them; metric until then. */
@@ -171,5 +194,6 @@ class AppGraph(driverFactory: DriverFactory) {
         units = ::units,
         sessionId = sessionId,
         events = store.events(sessionId),
-    )
+        onClose = { playersOpen.update { it - 1 } },
+    ).also { playersOpen.update { it + 1 } }
 }

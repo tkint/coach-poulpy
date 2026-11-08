@@ -16,11 +16,15 @@ import kotlin.uuid.Uuid
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -104,6 +108,8 @@ class AccountModel(
     private val scope: CoroutineScope,
     /** How long [watchConfirmation] waits before opening a dropped stream again. */
     private val reconnectAfter: Duration = 3.seconds,
+    /** True while a guided session plays or Live records: Email confirmed waits until it ends. */
+    training: Flow<Boolean> = flowOf(false),
 ) {
     val sync = SyncClient(
         store, memory, RemoteSyncServer(client), deviceName, languageCode, scope,
@@ -121,8 +127,11 @@ class AccountModel(
     /**
      * True once the link opened on another device, such as a computer, signed this phone in: the app
      * shows Email confirmed with the upload over whatever is on screen, then calls [confirmedShown].
+     * Held back while a session plays or Live records, so nothing covers the workout.
      */
-    val confirmedElsewhere: StateFlow<Boolean> = _confirmedElsewhere.asStateFlow()
+    val confirmedElsewhere: StateFlow<Boolean> =
+        combine(_confirmedElsewhere, training) { confirmed, busy -> confirmed && !busy }
+            .stateIn(scope, SharingStarted.Eagerly, false)
 
     private var syncing: Job? = null
     private var watching: Job? = null
