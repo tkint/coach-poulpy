@@ -104,9 +104,9 @@ enum PoulpySpace {
 }
 
 enum PoulpyRadius {
-    static let sm: CGFloat = 10
-    static let md: CGFloat = 16
-    static let lg: CGFloat = 24
+    static let sm: CGFloat = 8
+    static let md: CGFloat = 10
+    static let lg: CGFloat = 14
     static let pill: CGFloat = 999
 }
 
