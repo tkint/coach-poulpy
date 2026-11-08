@@ -72,11 +72,9 @@ struct WorkoutPageView: View {
                     showBackgroundLabel: "workout.showMap",
                     showDetailsLabel: "workout.showExercises",
                     background: { room, safeTop in
-                        let mapText = L("workout.mapLabel %@", state.muscles.map(\.label).joined(separator: ", "))
                         HeatMapPanel(
                             figure: figure, heat: state.heat, hurting: Set(state.painAreas),
-                            description: state.painNote.isEmpty ? mapText : "\(mapText). \(state.painNote)",
-                            room: room, safeTop: safeTop
+                            description: mapDescription(state), room: room, safeTop: safeTop
                         )
                     },
                     floating: { floatingButtons(state) },
@@ -110,6 +108,12 @@ struct WorkoutPageView: View {
             case .copy: BuilderView(graph: graph, workoutId: nil, copyOf: workoutId)
             }
         }
+    }
+
+    /// What VoiceOver reads for the map: the muscles worked, and the pain note when there is one.
+    private func mapDescription(_ state: WorkoutPageState) -> String {
+        let mapText = L("workout.mapLabel %@", state.muscles.map(\.label).joined(separator: ", "))
+        return state.painNote.isEmpty ? mapText : "\(mapText). \(state.painNote)"
     }
 
     /// A round filled button over the map: back, and the menu of share, copy and delete.
