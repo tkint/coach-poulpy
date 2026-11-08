@@ -74,6 +74,14 @@
 .recap-row .row-text strong { font-size: 15px; line-height: 20px; }
 .recap-row .row-text > span { font-size: 13px; line-height: 17px; }
 .section-label { margin: 0 var(--cp-space-xs); }
+
+/* Part blocks: an outlined rectangle, its avatar and title sitting on the top border. */
+.recap-part { position: relative; margin-top: var(--cp-space-md); background: transparent; border: 1px solid var(--cp-outline); padding: var(--cp-space-md) 10px 0; }
+.recap-part .part-header { position: absolute; top: -13px; left: 8px; max-width: calc(100% - 16px); padding: 0 6px; gap: 6px; background: var(--cp-surface); align-items: center; }
+.recap-part .part-header > div { display: flex; align-items: baseline; gap: var(--cp-space-sm); min-width: 0; }
+.recap-part .part-header h2 { color: var(--cp-primary); font-size: 15px; line-height: 20px; white-space: nowrap; }
+.recap-part .part-header p { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.recap-part .steps > li:first-child .recap-row.list-row { border-top: 0; }
 </style>
 </head>
 <body>
