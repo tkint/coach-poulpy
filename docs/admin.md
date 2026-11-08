@@ -11,7 +11,7 @@ The admin area is where the maintainer looks after the catalog, the accounts and
 
 ## The screens
 
-The admin lives at `/admin` on the website ([mockups](./../design/mockups/agreed/web/admin-shell.html)). With no admin session it shows the sign-in; the page asks `GET /api/v1/me`, and a member who signs in is signed out again at once with the same "wrong email or password" message, so the screen never says who is an admin. Once signed in it shows the `CpDrawer` shell and the audit log. The sidebar lists only the screens that exist; each admin feature adds its own entry.
+The admin lives at `/admin` on the website ([mockups](./../design/mockups/agreed/web/admin-shell.html)). With no admin session it shows the sign-in; the page asks `GET /api/v1/me`, and a member who signs in is signed out again at once with the same "wrong email or password" message, so the screen never says who is an admin. Once signed in it shows the `CpDrawer` shell and the audit log. The sidebar lists only the screens that exist; each admin feature adds its own entry. A **Coach Poulpy app** link at the bottom of the sidebar goes back to [the web app](./web-app.md).
 
 ## Making the first admin
 

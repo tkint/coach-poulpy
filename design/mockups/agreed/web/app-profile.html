@@ -15,7 +15,7 @@
 <script src="../../shared/mockup-theme.js"></script>
 </head>
 <body class="bg-base-200 text-base-content min-h-screen">
-<!-- The Admin entry is drawn as an admin sees it; a member's sidebar has only Profile. -->
+<!-- The Admin link sits at the bottom of the sidebar, just above the person, and is drawn as an admin sees it; a member's sidebar has only Profile. -->
 <!-- The page fills the browser window (mockup:viewport), so the docs site shows it in a window of
      that height and the page scrolls inside it. DaisyUI's responsive drawer: a full-height sidebar from a large screen up, which the button in
      the top bar folds to icons only; on a smaller screen it slides over the page. The page opens it
@@ -67,9 +67,11 @@
       </div>
       <ul class="cp-menu w-full grow gap-1 px-2">
         <li><button class="cp-menu-active cp-is-drawer-close:cp-tooltip cp-is-drawer-close:cp-tooltip-right" data-tip="Profile" aria-current="page"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg><span class="cp-is-drawer-close:hidden">Profile</span></button></li>
-        <li><a href="../../agreed/web/admin-shell.html" class="cp-is-drawer-close:cp-tooltip cp-is-drawer-close:cp-tooltip-right" data-tip="Admin" data-component="admin-link"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg><span class="cp-is-drawer-close:hidden">Admin</span></a></li>
       </ul>
       <div class="flex w-full flex-col gap-2 p-2">
+        <ul class="cp-menu w-full p-0">
+        <li><a href="admin-shell.html" class="cp-is-drawer-close:cp-tooltip cp-is-drawer-close:cp-tooltip-right" data-tip="Admin" data-component="admin-link"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg><span class="cp-is-drawer-close:hidden">Admin</span></a></li>
+        </ul>
         <div class="flex items-center gap-3 px-2">
           <div class="cp-avatar cp-avatar-placeholder"><div class="bg-primary text-primary-content w-10 rounded-full"><span>A</span></div></div>
           <div class="flex min-w-0 flex-1 flex-col text-sm cp-is-drawer-close:hidden">

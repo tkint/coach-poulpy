@@ -6,8 +6,8 @@ import { apiBase } from './api'
 export type Me = { accountId: string; email: string; role: string }
 export type AuditEntry = { actorEmail: string | null; action: string; target: string; at: string }
 
-/** Signed in as an admin, wrong credentials or not an admin, too many tries, or the server can't be reached. */
-export type SignInAnswer = 'admin' | 'refused' | 'throttled' | 'offline'
+/** Signed in, wrong credentials (or not the role asked for), too many tries, or the server can't be reached. */
+export type SignInAnswer = 'signedIn' | 'refused' | 'throttled' | 'offline'
 
 async function call(method: string, path: string, body?: object): Promise<Response> {
   return fetch(`${apiBase}/api/v1${path}`, {
@@ -31,14 +31,15 @@ export async function currentAccount(): Promise<Me | undefined> {
   return response.ok ? ((await response.json()) as Me) : undefined
 }
 
-export async function signIn(email: string, password: string): Promise<SignInAnswer> {
+/** Signs in; with `only`, an account of another role is signed out again at once and `refused`, so a screen never says who has that role. */
+export async function signIn(email: string, password: string, only?: string): Promise<SignInAnswer> {
   try {
     const response = await call('POST', '/web/session', { email, password })
     if (response.status === 429) return 'throttled'
     if (!response.ok) return response.status === 400 ? 'refused' : 'offline'
     const me = await currentAccount()
-    if (me?.role === 'admin') return 'admin'
-    // A member has no business here: end the session this sign-in just made.
+    if (me && (!only || me.role === only)) return 'signedIn'
+    // This account has no business here: end the session this sign-in just made.
     await signOut()
     return 'refused'
   } catch {

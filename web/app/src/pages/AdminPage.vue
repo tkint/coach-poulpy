@@ -1,7 +1,9 @@
 <script setup lang="ts">
 // /admin: the sign-in until the cookies sign an admin in, then the admin shell
-// (design/mockups/agreed/web/admin-shell.html) with the audit log, the only screen so far.
+// (design/mockups/agreed/web/admin-shell.html) with the audit log, the only screen so far. A link at
+// the bottom of the sidebar goes back to the web app.
 import { onMounted, ref } from 'vue'
+import { ArrowLeft } from 'lucide-vue-next'
 import { CpAvatar, CpBadge, CpCard, CpDrawer, CpDrawerItem, CpErrorNote, CpNavMenu, CpStat, CpStats, CpTable, poulpyDrawings } from '@coach-poulpy/ui'
 import AdminSignInPage from './AdminSignInPage.vue'
 import { auditLog, currentAccount, signOut, type AuditEntry, type Me } from '../session'
@@ -102,6 +104,9 @@ const what = (action: string) => (action in actions ? t(actions[action]) : actio
         </CpDrawerItem>
       </CpNavMenu></div>
       <div class="flex w-full flex-col gap-2 p-2">
+        <CpNavMenu>
+          <CpDrawerItem :label="t('admin.appLink')" href="/"><template #icon><ArrowLeft class="size-5 shrink-0" aria-hidden="true" /></template></CpDrawerItem>
+        </CpNavMenu>
         <CpBadge class="cp-is-drawer-close:hidden">{{ t('admin.adminBadge') }}</CpBadge>
         <div class="flex items-center gap-3 px-2">
           <CpAvatar :initials="initial(me.email)" tone="primary" size="md" />

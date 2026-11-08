@@ -25,3 +25,4 @@ async function post(path: string, body: object): Promise<LinkAnswer> {
 
 export const confirmEmail = (token: string) => post('/accounts/confirm', { token })
 export const setNewPassword = (token: string, password: string) => post('/password-resets/confirm', { token, password })
+export const requestPasswordReset = (email: string) => post('/password-resets', { email })
