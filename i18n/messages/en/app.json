@@ -666,6 +666,8 @@
   "crash": {
     "title": "Coach Poulpy closed on an error",
     "body": "Sending the report helps fix it. It only says what went wrong, and you can read it before you send it.",
+    "titleRunning": "Something went wrong",
+    "bodyRunning": "Coach Poulpy hit an error but is still open. Sending the report helps fix it. It only says what went wrong, and you can read it before you send it.",
     "send": "Send the report",
     "notNow": "Not now"
   }
