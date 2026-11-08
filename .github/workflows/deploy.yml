@@ -153,6 +153,10 @@ jobs:
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
           MAIL_FROM: ${{ vars.MAIL_FROM || secrets.MAIL_FROM }}
           WEBSITE_URL: ${{ vars.WEBSITE_URL }}
+          # Logs shipped to Grafana Cloud Loki (docs/deploying-the-server.md): all three, or none.
+          LOKI_URL: ${{ vars.LOKI_URL }}
+          LOKI_USER: ${{ vars.LOKI_USER }}
+          LOKI_PASSWORD: ${{ secrets.LOKI_PASSWORD }}
         run: |
           if [ "$PART" = website ]; then
             required="WEB_DOMAIN:WEB_DOMAIN"
@@ -173,7 +177,17 @@ jobs:
           elif [ "$PART" = server ] && [ -z "$MAIL_FROM" ]; then
             echo "::error::Missing MAIL_FROM in the $ENVIRONMENT environment, needed with SMTP_HOST."; exit 1
           fi
-          for name in SMTP_HOST SMTP_PORT SMTP_USER SMTP_PASSWORD MAIL_FROM WEBSITE_URL; do
+          LOGS=false
+          if [ "$PART" = server ]; then
+            if [ -n "$LOKI_URL$LOKI_USER$LOKI_PASSWORD" ] && { [ -z "$LOKI_URL" ] || [ -z "$LOKI_USER" ] || [ -z "$LOKI_PASSWORD" ]; }; then
+              echo "::error::LOKI_URL, LOKI_USER and LOKI_PASSWORD go together in the $ENVIRONMENT environment: set all three or none."; exit 1
+            elif [ -n "$LOKI_URL" ]; then
+              LOGS=true
+            else
+              echo "::warning::No LOKI_URL in the $ENVIRONMENT environment: logs stay on the machine."
+            fi
+          fi
+          for name in SMTP_HOST SMTP_PORT SMTP_USER SMTP_PASSWORD MAIL_FROM WEBSITE_URL LOKI_URL LOKI_USER LOKI_PASSWORD; do
             # Written in single quotes below, so Compose reads a $ in a password as itself.
             case "$(printenv "$name")" in *\'*|*$'\n'*) echo "::error::$name may not hold a quote or a line break."; exit 1;; esac
           done
@@ -188,6 +202,11 @@ jobs:
                 "$APP_NAME" "$DOMAIN" "$VERSION" "$POSTGRES_PASSWORD"
               printf "SMTP_HOST='%s'\nSMTP_PORT='%s'\nSMTP_USER='%s'\nSMTP_PASSWORD='%s'\nMAIL_FROM='%s'\nWEBSITE_URL='%s'\n" \
                 "$SMTP_HOST" "$SMTP_PORT" "$SMTP_USER" "$SMTP_PASSWORD" "$MAIL_FROM" "$WEBSITE_URL"
+              # The alloy service (log shipping) only starts under this profile.
+              printf "DEPLOY_ENVIRONMENT=%s\nCOMPOSE_PROFILES=%s\n" "$ENVIRONMENT" "$($LOGS && echo logs)"
+              if $LOGS; then
+                printf "LOKI_URL='%s'\nLOKI_USER='%s'\nLOKI_PASSWORD='%s'\n" "$LOKI_URL" "$LOKI_USER" "$LOKI_PASSWORD"
+              fi
             } > "$RUNNER_TEMP/.env"
           fi
           printf '%s\n' "$SSH_KEY" > "$RUNNER_TEMP/key"
@@ -203,7 +222,7 @@ jobs:
               remote "mkdir -p ~/$APP_NAME-web && tar -xzf - -C ~/$APP_NAME-web"
             remote "python3 ~/caddy/deploy.py ~/$APP_NAME-web compose.yaml coach-poulpy-web.caddy"
           else
-            tar -C deploy -czf - compose.yaml coach-poulpy.caddy -C "$RUNNER_TEMP" .env |
+            tar -C deploy -czf - compose.yaml coach-poulpy.caddy alloy -C "$RUNNER_TEMP" .env |
               remote "mkdir -p ~/$APP_NAME && tar -xzf - -C ~/$APP_NAME"
             remote "python3 ~/caddy/deploy.py ~/$APP_NAME compose.yaml coach-poulpy.caddy"
           fi

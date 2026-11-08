@@ -57,6 +57,19 @@ If another Caddy already holds ports 80/443, remove that container once before t
 
 The account emails link to `/confirm-email#<token>` and `/reset-password#<token>` there; when a link opens in a browser, those pages confirm the email or set the new password through the API, which accepts browser calls from the origin of `WEBSITE_URL` only. The image carries `/.well-known/assetlinks.json`, built from the Android signing key, so Android opens those links in the app; a build without the key (a deploy with no `ANDROID_KEYSTORE_*` secrets) leaves it out and the links open in the browser. The iPhone's `apple-app-site-association` waits on an Apple Developer account ([#24](https://github.com/tkint/coach-poulpy/issues/24)).
 
+## Logs
+
+Containers log to Docker's `json-file` driver, capped at 3 files of 10 MB each, so on the machine `docker compose logs server` only reaches back a short while. To read them from anywhere, with longer retention and search, the deploy can ship them to the free tier of [Grafana Cloud](https://grafana.com/products/cloud/) (Loki). Pick an EU region when creating the stack, for the same GDPR reason as the host.
+
+1. Create a free Grafana Cloud stack in an EU region.
+2. In the stack's **Loki** details, copy the push URL (`https://logs-prod-XXX.grafana.net/loki/api/v1/push`) and the user ID.
+3. Under **Administration > Access policies**, create a policy with the `logs:write` scope only and generate a token from it.
+4. Add `LOKI_URL`, `LOKI_USER` (variables) and `LOKI_PASSWORD` (secret, the token) to the `production` environment ([Releasing](./releasing.md#deploy-the-server)), then deploy again.
+
+With all three set, the Deploy workflow writes `COMPOSE_PROFILES=logs` to `.env` and an `alloy` container (Grafana Alloy, [`deploy/alloy/config.alloy`](https://github.com/tkint/coach-poulpy/tree/main/deploy/alloy)) starts beside the server. It reads the logs of this Compose project's containers through the read-only Docker socket and pushes them to Loki, labelled `app`, `environment` and `service` (`server` or `postgres`). In Grafana, **Explore** with the Loki data source and `{app="coach-poulpy", service="server"}` shows the server. Setting only some of the three stops the deploy; setting none leaves the logs on the machine. Alloy needs about 256 MB more memory. If you remove the settings after enabling them, stop Alloy once with `docker compose --profile logs stop alloy`.
+
+Logs leave the machine, so they must not hold personal data. The server prints no secrets, and the emails it printed when `SMTP_HOST` was unset are being removed ([#340](https://github.com/tkint/coach-poulpy/issues/340)); until then, set `SMTP_HOST` before enabling log shipping. Check the free tier's limits (monthly volume and retention) on Grafana's pricing page, as they change.
+
 ## Backups
 
 Postgres has nothing to back up until accounts arrive. After that, dump it nightly and before deploying a release with new migrations, since an older server refuses a migrated database, and store the dumps off-machine in the EU or Switzerland:
