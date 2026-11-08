@@ -94,9 +94,12 @@ const what = (action: string) => (action in actions ? t(actions[action]) : actio
       </template>
     </main>
     <template #sidebar>
-      <div class="flex h-16 w-full items-center gap-2 px-4">
+      <div class="flex min-h-16 w-full items-center gap-2 px-4 py-2">
         <img :src="poulpyDrawings.mood_happy" alt="" width="32" height="32" class="shrink-0" />
-        <span class="cp-type-headline cp-is-drawer-close:hidden">Coach <span class="text-primary">poulpy</span></span>
+        <div class="flex flex-col items-start cp-is-drawer-close:hidden">
+          <span class="cp-type-headline">Coach <span class="text-primary">poulpy</span></span>
+          <CpBadge>{{ t('admin.adminBadge') }}</CpBadge>
+        </div>
       </div>
       <div class="w-full grow px-2"><CpNavMenu>
         <CpDrawerItem :label="t('admin.auditTitle')" active>
@@ -107,7 +110,6 @@ const what = (action: string) => (action in actions ? t(actions[action]) : actio
         <CpNavMenu>
           <CpDrawerItem :label="t('admin.appLink')" href="/"><template #icon><ArrowLeft class="size-5 shrink-0" aria-hidden="true" /></template></CpDrawerItem>
         </CpNavMenu>
-        <CpBadge class="cp-is-drawer-close:hidden">{{ t('admin.adminBadge') }}</CpBadge>
         <div class="flex items-center gap-3 px-2">
           <CpAvatar :initials="initial(me.email)" tone="primary" size="md" />
           <span class="truncate text-sm cp-is-drawer-close:hidden">{{ me.email }}</span>
