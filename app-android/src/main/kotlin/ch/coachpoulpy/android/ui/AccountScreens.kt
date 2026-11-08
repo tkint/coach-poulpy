@@ -1,4 +1,4 @@
-@file:OptIn(kotlin.time.ExperimentalTime::class)
+@file:OptIn(kotlin.time.ExperimentalTime::class, androidx.compose.ui.ExperimentalComposeUiApi::class)
 
 package ch.coachpoulpy.android.ui
 
@@ -59,6 +59,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.autofill.ContentType
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -109,7 +110,7 @@ internal fun AccountRow(onPage: () -> Unit, onFlow: (String) -> Unit, row: @Comp
     val account = rememberAccount()
     val state by account.state.collectAsStateWithLifecycle()
     when (val current = state) {
-        AccountState.Guest -> row(stringResource(R.string.account_guestRow), stringResource(R.string.account_guestRowHint)) { onFlow("sign-up") }
+        AccountState.Guest -> row(stringResource(R.string.account_guestRow), stringResource(R.string.account_guestRowHint)) { onFlow("sign-in") }
         is AccountState.Pending -> row(stringResource(R.string.account_rowPending), stringResource(R.string.account_rowPendingHint, current.email), onPage)
         is AccountState.SignedIn -> row(current.email, syncSummary(current), onPage)
     }
@@ -307,8 +308,9 @@ private fun SyncState(on: Boolean, title: String, detail: String?) {
 }
 
 /**
- * The screens that open over the tabs, named by [step] so they survive rotation: "sign-up", "sign-in",
- * "sign-in:reset-done", "forgot", "forgot-sent:<email>", "check-email", "check-email:resent", "welcome",
+ * The screens that open over the tabs, named by [step] so they survive rotation: "sign-up", "sign-in" and
+ * "forgot", each with ":<email>" for the address typed on the form before, "sign-in:reset-done",
+ * "forgot-sent:<email>", "check-email", "check-email:resent", "welcome",
  * "confirmed", "confirm:<token>" and "reset:<token>" (the email links), "link-expired".
  */
 @Composable
@@ -316,9 +318,9 @@ fun AccountFlow(step: String, onStep: (String) -> Unit, onClose: () -> Unit) {
     val account = rememberAccount()
     val (name, arg) = step.split(':', limit = 2).let { it[0] to it.getOrElse(1) { "" } }
     when (name) {
-        "sign-up" -> SignUpScreen(account, onStep, onClose)
-        "sign-in" -> SignInScreen(account, resetDone = arg == "reset-done", onStep, onClose)
-        "forgot" -> ForgotScreen(account, onStep)
+        "sign-up" -> SignUpScreen(account, arg, onStep, onClose)
+        "sign-in" -> SignInScreen(account, resetDone = arg == "reset-done", typedEmail = arg.takeIf { '@' in it }.orEmpty(), onStep, onClose)
+        "forgot" -> ForgotScreen(account, typedEmail = arg, onStep)
         "forgot-sent" -> ForgotSentScreen(account, arg, onStep)
         "check-email" -> CheckEmailScreen(account, resent = arg == "resent", onStep, onClose)
         "welcome" -> UploadScreen(account, R.drawable.poulpy_pose_standing_tall, poulpyLine = null, R.string.account_welcomeBackTitle, R.string.account_mergeBody, onClose)
@@ -333,10 +335,13 @@ fun AccountFlow(step: String, onStep: (String) -> Unit, onClose: () -> Unit) {
     }
 }
 
+/** [step] with the address typed on this form, so the next form starts with it. */
+private fun withEmail(step: String, email: String): String = email.trim().let { if (it.isEmpty()) step else "$step:$it" }
+
 @Composable
-private fun SignUpScreen(account: AccountModel, onStep: (String) -> Unit, onClose: () -> Unit) {
+private fun SignUpScreen(account: AccountModel, typedEmail: String, onStep: (String) -> Unit, onClose: () -> Unit) {
     val scope = rememberCoroutineScope()
-    var email by rememberSaveable { mutableStateOf(account.knownEmail.orEmpty()) }
+    var email by rememberSaveable { mutableStateOf(typedEmail.ifEmpty { account.knownEmail.orEmpty() }) }
     var password by remember { mutableStateOf("") }
     var consent by rememberSaveable { mutableStateOf(false) }
     var problems by remember { mutableStateOf(SignUpProblems()) }
@@ -362,12 +367,14 @@ private fun SignUpScreen(account: AccountModel, onStep: (String) -> Unit, onClos
             stringResource(R.string.account_email), email, { email = it; problems = problems.copy(email = false) },
             error = if (problems.email) stringResource(R.string.account_errorEmail) else null,
             keyboardType = KeyboardType.Email,
+            contentType = ContentType.NewUsername + ContentType.EmailAddress,
         )
         PoulpyTextField(
             stringResource(R.string.account_password), password, { password = it; problems = problems.copy(password = false) },
             note = stringResource(R.string.account_passwordHint),
             error = if (problems.password) stringResource(R.string.account_errorPasswordShort) else null,
             password = true,
+            contentType = ContentType.NewPassword,
         )
         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Row(verticalAlignment = Alignment.Top) {
@@ -379,7 +386,7 @@ private fun SignUpScreen(account: AccountModel, onStep: (String) -> Unit, onClos
             }
             if (problems.consent) FieldError(stringResource(R.string.account_errorConsent))
         }
-        AltLine(R.string.account_haveAccount, R.string.account_signIn) { onStep("sign-in") }
+        AltLine(R.string.account_haveAccount, R.string.account_signIn) { onStep(withEmail("sign-in", email)) }
     }
     if (why) ConsentSheet(onDismiss = { why = false })
 }
@@ -414,9 +421,9 @@ private fun ConsentSheet(onDismiss: () -> Unit) {
 }
 
 @Composable
-private fun SignInScreen(account: AccountModel, resetDone: Boolean, onStep: (String) -> Unit, onClose: () -> Unit) {
+private fun SignInScreen(account: AccountModel, resetDone: Boolean, typedEmail: String, onStep: (String) -> Unit, onClose: () -> Unit) {
     val scope = rememberCoroutineScope()
-    var email by rememberSaveable { mutableStateOf(account.knownEmail.orEmpty()) }
+    var email by rememberSaveable { mutableStateOf(typedEmail.ifEmpty { account.knownEmail.orEmpty() }) }
     var password by remember { mutableStateOf("") }
     var problem by remember { mutableStateOf<SignInResult?>(null) }
     var busy by remember { mutableStateOf(false) }
@@ -439,10 +446,13 @@ private fun SignInScreen(account: AccountModel, resetDone: Boolean, onStep: (Str
             SignInResult.Offline -> ErrorCard(stringResource(R.string.account_errorOffline))
             else -> if (resetDone) InfoCard(stringResource(R.string.account_passwordChanged))
         }
-        PoulpyTextField(stringResource(R.string.account_email), email, { email = it }, keyboardType = KeyboardType.Email)
-        PoulpyTextField(stringResource(R.string.account_password), password, { password = it }, password = true)
-        Link(R.string.account_forgot) { onStep("forgot") }
-        AltLine(R.string.account_noAccount, R.string.account_createOne) { onStep("sign-up") }
+        PoulpyTextField(
+            stringResource(R.string.account_email), email, { email = it },
+            keyboardType = KeyboardType.Email, contentType = ContentType.Username + ContentType.EmailAddress,
+        )
+        PoulpyTextField(stringResource(R.string.account_password), password, { password = it }, password = true, contentType = ContentType.Password)
+        Link(R.string.account_forgot) { onStep(withEmail("forgot", email)) }
+        AltLine(R.string.account_noAccount, R.string.account_createOne) { onStep(withEmail("sign-up", email)) }
     }
 }
 
@@ -490,13 +500,13 @@ private fun CheckEmailScreen(account: AccountModel, resent: Boolean, onStep: (St
 }
 
 @Composable
-private fun ForgotScreen(account: AccountModel, onStep: (String) -> Unit) {
+private fun ForgotScreen(account: AccountModel, typedEmail: String, onStep: (String) -> Unit) {
     val scope = rememberCoroutineScope()
-    var email by rememberSaveable { mutableStateOf(account.knownEmail.orEmpty()) }
+    var email by rememberSaveable { mutableStateOf(typedEmail.ifEmpty { account.knownEmail.orEmpty() }) }
     var offline by remember { mutableStateOf(false) }
     var busy by remember { mutableStateOf(false) }
 
-    AccountFrame({ onStep("sign-in") }, R.string.account_sendLink, busy || email.isBlank(), onAction = {
+    AccountFrame({ onStep(withEmail("sign-in", email)) }, R.string.account_sendLink, busy || email.isBlank(), onAction = {
         busy = true
         scope.launch {
             if (account.requestPasswordReset(email)) onStep("forgot-sent:${email.trim()}") else offline = true
@@ -505,7 +515,10 @@ private fun ForgotScreen(account: AccountModel, onStep: (String) -> Unit) {
     }) {
         Intro(R.string.account_forgotTitle, R.string.account_forgotIntro)
         if (offline) ErrorCard(stringResource(R.string.account_errorOffline))
-        PoulpyTextField(stringResource(R.string.account_email), email, { email = it }, keyboardType = KeyboardType.Email)
+        PoulpyTextField(
+            stringResource(R.string.account_email), email, { email = it },
+            keyboardType = KeyboardType.Email, contentType = ContentType.Username + ContentType.EmailAddress,
+        )
     }
 }
 
@@ -609,6 +622,7 @@ private fun ResetScreen(account: AccountModel, token: String, onStep: (String) -
             note = stringResource(R.string.account_passwordHint),
             error = if (problem == NewPasswordResult.TOO_SHORT) stringResource(R.string.account_errorPasswordShort) else null,
             password = true,
+            contentType = ContentType.NewPassword,
         )
     }
 }

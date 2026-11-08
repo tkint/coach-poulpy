@@ -87,7 +87,9 @@ fun main() {
     val version = appVersion()
     // Migrations run before the server listens; a failed one throws and stops it here.
     val database = Database.connect(DatabaseSettings.from(System::getenv)).apply { migrate() }
-    val mailer = MailSettings.from(System::getenv)?.let(::SmtpMailer) ?: ConsoleMailer
+    val mailSettings = MailSettings.from(System::getenv)
+    val mailer = mailSettings?.let(::SmtpMailer) ?: ConsoleMailer
+    println(mailSettings?.let { "Mail goes through ${it.host}:${it.port} from ${it.from}" } ?: "Mail is printed here: SMTP_HOST is unset")
     val passwords = Passwords()
     val accounts = Accounts(database, mailer, websiteUrl = websiteUrl(System::getenv), passwords = passwords)
     val signIns = SignIns(database, passwords)

@@ -7,6 +7,7 @@ import ch.coachpoulpy.server.auth.Secrets.newToken
 import ch.coachpoulpy.server.db.Database
 import ch.coachpoulpy.server.mail.Email
 import ch.coachpoulpy.server.mail.Mailer
+import ch.coachpoulpy.server.mail.masked
 import java.time.Clock
 import java.time.Duration
 import java.time.OffsetDateTime
@@ -70,7 +71,7 @@ class Accounts(
                     database.queries.confirmationWatchQueries.insert(hashOf(token), hashOf(key), it.id, now.plus(WATCH_LIFETIME))
                 }
             }
-        } ?: return
+        } ?: return println("Sign-up for ${masked(address)}, already confirmed: no email sent")
         val link = "${websiteUrl.trimEnd('/')}/confirm-email#$token"
         val email = Email(
             to = recipient.email,

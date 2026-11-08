@@ -76,6 +76,8 @@ struct PoulpyTextField: View {
     var error: String? = nil
     var keyboard: UIKeyboardType = .default
     var secure = false
+    /// What the field is, so the password manager can fill it.
+    var contentType: UITextContentType? = nil
     @FocusState private var focused: Bool
     @State private var shown = false
 
@@ -92,6 +94,7 @@ struct PoulpyTextField: View {
                     }
                     .font(.poulpy(.headline))
                     .keyboardType(secure ? .default : keyboard)
+                    .textContentType(contentType)
                     .textInputAutocapitalization(secure || keyboard != .default ? .never : .sentences)
                     .autocorrectionDisabled(secure || keyboard != .default)
                     .focused($focused)
