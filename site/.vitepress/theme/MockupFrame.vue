@@ -50,7 +50,9 @@ const pageHeight = ref(800)
 const width = computed(() => (isWeb.value ? viewport.value : 438))
 // A page that fills the window (`mockup:viewport`) gets a window of that height and scrolls inside it, since
 // sizing the frame to a page that is as tall as the frame would make it grow forever.
-const height = computed(() => (isWeb.value ? props.mockup.viewport || pageHeight.value : props.mockup.height + 48))
+// The page the frame shows now can differ from the mockup's own (a link inside it), so it is read from the page.
+const pageViewport = ref(0)
+const height = computed(() => (isWeb.value ? props.mockup.viewport || pageViewport.value || pageHeight.value : props.mockup.height + 48))
 const scale = computed(() => Math.min(1, boxWidth.value / width.value))
 
 const frame = ref<HTMLIFrameElement>()
@@ -68,6 +70,8 @@ function onLoad() {
   pageObserver?.disconnect()
   const body = frame.value?.contentDocument?.body
   if (!body) return
+  pageViewport.value = Number(frame.value?.contentDocument?.querySelector('meta[name="mockup:viewport"]')?.getAttribute('content') || 0)
+  if (pageViewport.value) return
   measure()
   pageObserver = new ResizeObserver(measure)
   // The body follows the frame's width even when a centred column inside it keeps its size.
