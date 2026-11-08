@@ -85,7 +85,7 @@ private struct PartBlockView: View {
                 timeLabel(part.time)
                     .padding(.horizontal, 6)
                     .background(GeometryReader { proxy in Color.clear.preference(key: TimeWidthKey.self, value: proxy.size.width) })
-                    .offset(x: -gap, y: -11)
+                    .offset(x: -gap, y: -9)
             }
         }
         .onPreferenceChange(HeaderWidthKey.self) { headerWidth = $0 }
@@ -94,7 +94,7 @@ private struct PartBlockView: View {
     }
 
     private func timeLabel(_ time: String) -> some View {
-        Text(time).font(.poulpy(.callout).weight(.heavy)).monospacedDigit().foregroundStyle(PoulpyColor.onSurfaceVariant).lineLimit(1)
+        Text(time).font(.poulpy(.caption).weight(.heavy)).monospacedDigit().foregroundStyle(PoulpyColor.onSurfaceVariant).lineLimit(1)
     }
 
     private func partHeader(_ kind: PartKind) -> some View {

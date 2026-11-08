@@ -156,13 +156,13 @@ private fun PartBlock(part: RecapPart) {
         if (part.time.isNotEmpty()) {
             Text(
                 part.time,
-                style = MaterialTheme.typography.labelLarge,
+                style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.ExtraBold,
                 color = colors.onSurfaceVariant,
                 maxLines = 1,
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .offset(x = -PoulpySpace.sm, y = (-11).dp)
+                    .offset(x = -PoulpySpace.sm, y = (-9).dp)
                     .onSizeChanged { timeWidth = it.width }
                     .padding(horizontal = 6.dp),
             )
@@ -185,7 +185,7 @@ private fun RecapRowView(row: RecapRow) {
             }
         }
         if (row.time.isNotEmpty()) {
-            Text(row.time, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
+            Text(row.time, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
         }
     }
 }
