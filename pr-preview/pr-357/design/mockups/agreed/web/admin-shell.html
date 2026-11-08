@@ -100,9 +100,12 @@
   <div class="cp-drawer-side cp-is-drawer-close:overflow-visible" data-component="admin-nav">
     <label for="admin-drawer" aria-label="Close the navigation" class="cp-drawer-overlay"></label>
     <div class="flex min-h-full flex-col items-start border-r border-base-300 bg-base-100 cp-is-drawer-close:w-16 cp-is-drawer-open:w-64">
-      <div class="flex h-16 w-full items-center gap-2 px-4">
+      <div class="flex min-h-16 w-full items-center gap-2 px-4 py-2">
         <img src="../../../poulpy/mood_happy.svg" alt="" width="32" height="32" class="shrink-0">
-        <span class="cp-type-headline cp-is-drawer-close:hidden">Coach <span class="text-primary">poulpy</span></span>
+        <div class="flex flex-col items-start cp-is-drawer-close:hidden">
+          <span class="cp-type-headline">Coach <span class="text-primary">poulpy</span></span>
+          <span class="cp-badge cp-badge-primary cp-badge-soft cp-badge-sm w-fit gap-1 whitespace-nowrap"><svg xmlns="http://www.w3.org/2000/svg" class="size-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>Admin</span>
+        </div>
       </div>
       <ul class="cp-menu w-full grow gap-1 px-2">
         <li><button class="cp-menu-active cp-is-drawer-close:cp-tooltip cp-is-drawer-close:cp-tooltip-right" data-tip="Audit log" aria-current="page"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg><span class="cp-is-drawer-close:hidden">Audit log</span></button></li>
@@ -115,7 +118,6 @@
         <ul class="cp-menu w-full p-0">
           <li><a href="app-profile.html" class="cp-is-drawer-close:cp-tooltip cp-is-drawer-close:cp-tooltip-right" data-tip="Coach Poulpy app" data-component="app-link"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg><span class="cp-is-drawer-close:hidden">Coach Poulpy app</span></a></li>
         </ul>
-        <span class="cp-badge cp-badge-primary cp-badge-soft cp-badge-sm w-fit gap-1 whitespace-nowrap cp-is-drawer-close:hidden"><svg xmlns="http://www.w3.org/2000/svg" class="size-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>Admin</span>
         <div class="flex items-center gap-3 px-2">
           <div class="cp-avatar cp-avatar-placeholder"><div class="bg-primary text-primary-content w-10 rounded-full"><span>A</span></div></div>
           <div class="flex min-w-0 flex-1 flex-col text-sm cp-is-drawer-close:hidden">
