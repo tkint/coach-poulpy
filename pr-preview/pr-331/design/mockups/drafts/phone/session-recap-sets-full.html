@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Session recap · sets, list open</title>
+<meta name="mockup:screen" content="session-recap-sets-full">
+<meta name="mockup:section" content="Session recap">
+<meta name="mockup:issue" content="223">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../../../web/ui/src/tokens.css">
+<link rel="stylesheet" href="../../shared/mockup.css">
+<script src="../../shared/mockup-theme.js"></script>
+<style>.workout-map { position: absolute; left: 0; right: 0; top: 0; display: flex; flex-direction: column; align-items: center; padding-top: var(--figure-top); gap: var(--cp-space-lg); }.workout-map .body-map { gap: var(--cp-space-sm); }.workout-map .body-view svg { width: var(--figure-width); height: var(--figure-height); }.workout-map .body-part, .heat-legend .body-part { fill: transparent; stroke: var(--cp-outline); }.body-part[data-heat="1"], .heat-legend .body-part[data-heat="1"] { fill: var(--cp-heat1); stroke: var(--cp-heat2); }.body-part[data-heat="2"], .heat-legend .body-part[data-heat="2"] { fill: var(--cp-heat2); stroke: var(--cp-heat3); }.body-part[data-heat="3"], .heat-legend .body-part[data-heat="3"] { fill: var(--cp-heat3); stroke: var(--cp-heat3); }.pain-halo { fill: none; stroke: var(--cp-background); stroke-width: 5; stroke-linejoin: round; }.pain-outline { fill: none; stroke: var(--cp-pain); stroke-width: 3; stroke-linejoin: round; }.pain-note { border-radius: var(--cp-radius-md); background: var(--cp-primary-container); color: var(--cp-on-primary-container); padding: 10px 14px 10px 10px; display: flex; align-items: center; gap: 10px; font-size: 15px; line-height: 20px; font-weight: 700; }.pain-note img { width: 44px; height: 44px; }.heat-legend { position: absolute; left: 50%; top: 60px; transform: translateX(-50%); }.heat-legend { display: flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 800; color: var(--cp-on-surface-variant); }.heat-legend svg { width: 14px; height: 14px; }.heat-legend rect { stroke-width: 1.2; }.muscle-summary { max-width: 300px; text-align: center; font-size: 15px; line-height: 21px; font-weight: 700; color: var(--cp-on-surface-variant); }.muscle-summary strong { color: var(--cp-on-background); font-weight: 800; }.workout-badges { position: absolute; right: var(--cp-space-lg); bottom: 26px; display: flex; gap: 6px; }.badge { height: 30px; padding: 0 var(--cp-space-md) 0 10px; border-radius: var(--cp-radius-pill); background: var(--cp-surface); border: 1px solid var(--cp-outline); color: var(--cp-on-surface); font-size: 13.5px; font-weight: 800; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }.badge--format { background: var(--cp-primary-container); border-color: var(--cp-primary-container); color: var(--cp-on-primary-container); }.floating { position: absolute; top: var(--cp-space-xxxl); z-index: 2; border: 1px solid var(--cp-outline); }.floating--start { left: var(--cp-space-lg); }.floating--end { right: var(--cp-space-lg); }.detail-sheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 1; border-radius: var(--cp-radius-lg) var(--cp-radius-lg) 0 0; background: var(--cp-surface); color: var(--cp-on-surface); box-shadow: 0 -1px 0 var(--cp-outline); display: flex; flex-direction: column; overflow: hidden; }.detail-sheet--full { border-radius: 0; box-shadow: none; }.sheet-drag { flex: none; display: flex; justify-content: center; padding: 10px 0 var(--cp-space-xs); }.sheet-content { flex: 1; min-height: 0; overflow: hidden; padding: var(--cp-space-xs) 20px var(--cp-space-lg); display: flex; flex-direction: column; gap: var(--cp-space-md); }.detail-sheet--full .sheet-drag { padding-top: 68px; }.detail-sheet--full .sheet-content { padding-top: 28px; }.detail-sheet .action-bar { padding-bottom: 34px; }.plan-summary { border-radius: var(--cp-radius-md); background: var(--cp-primary-container); color: var(--cp-on-primary-container); padding: 10px 10px 10px 14px; display: flex; align-items: center; gap: 10px; }.plan-summary div { flex: 1; min-width: 0; display: flex; flex-direction: column; }.plan-summary strong { font-size: 15px; line-height: 20px; font-weight: 800; }.plan-summary span { font-size: 14px; line-height: 19px; font-weight: 700; font-variant-numeric: tabular-nums; }.plan-summary a { min-height: 40px; padding: 0 14px; border-radius: var(--cp-radius-pill); background: var(--cp-surface); color: var(--cp-on-surface); font-size: 14px; font-weight: 800; display: flex; align-items: center; white-space: nowrap; }.section-label { margin: var(--cp-space-xs) var(--cp-space-xs) 0; }.muscle-rows { display: flex; flex-direction: column; gap: 10px; padding: 0 var(--cp-space-xs); }.muscle-rows li { display: grid; grid-template-columns: 92px 1fr 52px; align-items: center; gap: 10px; font-size: 15px; font-weight: 800; }.muscle-rows .bar { height: 10px; border-radius: var(--cp-radius-pill); background: var(--cp-surface-variant); overflow: hidden; }.muscle-rows .bar span { display: block; height: 100%; border-radius: var(--cp-radius-pill); background: var(--cp-heat3); }.muscle-rows .bar span[data-heat="1"] { background: var(--cp-heat1); }.muscle-rows .bar span[data-heat="2"] { background: var(--cp-heat2); }.muscle-rows em { font-style: normal; text-align: right; color: var(--cp-on-surface-variant); font-variant-numeric: tabular-nums; }.workout-map{--figure-width:132px;--figure-height:295px;--figure-top:64px}
+.workout-map{--figure-width:100px;--figure-height:223px;--figure-top:92px}
+.muscle-summary{display:none}
+.recap-head p { font-size: 14px; line-height: 19px; color: var(--cp-on-surface-variant); }
+.recap-poulpy img { width: 170px; height: 153px; }
+.floating-group { position: absolute; top: var(--cp-space-xxxl); right: var(--cp-space-lg); z-index: 2; display: flex; gap: var(--cp-space-sm); }
+.floating-group .icon-button { border: 1px solid var(--cp-outline); }
+.recap-head { display: flex; flex-direction: column; gap: 2px; }
+.recap-part { display: flex; flex-direction: column; gap: var(--cp-space-sm); }
+.recap-exercise { border-radius: var(--cp-radius-md); background: var(--cp-background); border: 1px solid var(--cp-outline); padding: 10px var(--cp-space-md) var(--cp-space-md); display: flex; flex-direction: column; gap: 10px; }
+.recap-exercise header { display: flex; align-items: center; gap: 10px; }
+.recap-exercise header strong { flex: 1; min-width: 0; font-weight: 800; font-size: 16px; line-height: 22px; }
+.recap-exercise header .row-icon { width: 36px; height: 36px; align-self: center; }
+.recap-exercise header > span:last-child { font-size: 13.5px; font-weight: 700; color: var(--cp-on-surface-variant); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.recap-exercise .note { font-size: 14px; line-height: 19px; color: var(--cp-on-surface-variant); font-variant-numeric: tabular-nums; margin-top: -6px; }
+.recap-row { min-height: 64px; }
+.recap-row .row-icon { flex: none; }
+.recap-row .row-count { flex: none; display: flex; flex-direction: column; align-items: flex-end; text-align: right; font-variant-numeric: tabular-nums; }
+.recap-row .row-count strong { font-weight: 800; font-size: 16px; line-height: 22px; }
+.recap-row .row-count span { font-size: 13.5px; line-height: 18px; color: var(--cp-on-surface-variant); font-weight: 700; }
+.recap-row .row-count .skip { display: inline-flex; align-items: center; gap: var(--cp-space-xs); }
+.set-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.set-chip { height: 30px; padding: 0 var(--cp-space-md) 0 var(--cp-space-xs); border-radius: var(--cp-radius-pill); background: var(--cp-primary-container); color: var(--cp-on-primary-container); font-size: 13.5px; font-weight: 800; font-variant-numeric: tabular-nums; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.set-chip b { width: 22px; height: 22px; border-radius: var(--cp-radius-pill); background: var(--cp-surface); color: var(--cp-on-surface); font-size: 12px; display: flex; align-items: center; justify-content: center; }
+.set-chip small { font-size: 12.5px; font-weight: 700; opacity: 0.8; }
+.set-chip--skipped { background: transparent; border: 1.5px dashed var(--cp-outline); color: var(--cp-on-surface-variant); font-weight: 700; padding-right: 10px; }
+.set-chip--skipped b { background: var(--cp-surface-variant); color: var(--cp-on-surface-variant); }
+.set-chip--skipped svg { flex: none; }
+.run-facts { display: grid; grid-template-columns: 1fr; gap: var(--cp-space-xs); font-size: 14px; line-height: 19px; font-variant-numeric: tabular-nums; }
+.run-facts div { display: flex; justify-content: space-between; gap: var(--cp-space-sm); }
+.run-facts dt { color: var(--cp-on-surface-variant); font-weight: 600; }
+.run-facts dd { margin: 0; font-weight: 800; }
+.recap-poulpy { position: absolute; left: 0; right: 0; top: 0; height: 400px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--cp-space-lg); padding-top: var(--cp-space-xxxl); }
+.recap-poulpy img { width: 210px; height: 189px; }
+.recap-poulpy p { max-width: 280px; text-align: center; font-size: 15px; line-height: 21px; font-weight: 700; color: var(--cp-on-surface-variant); }
+
+/* Readability pass: discreet part blocks, smaller rows, buttons and radii, tighter padding. */
+.phone { --recap-radius: 8px; }
+.detail-sheet { border-radius: var(--cp-space-md) var(--cp-space-md) 0 0; }
+.detail-sheet--full { border-radius: 0; }
+.sheet-content { padding-left: var(--cp-space-lg); padding-right: var(--cp-space-lg); gap: var(--cp-space-sm); }
+.detail-sheet--full .sheet-drag { padding-top: 56px; }
+.detail-sheet--full .sheet-content { padding-top: var(--cp-space-xl); }
+.recap-head h1 { font: var(--cp-type-headline); }
+.stat-tile { border-radius: var(--recap-radius); padding: 6px 10px; }
+.stat-tile strong { font-size: 17px; line-height: 22px; }
+.floating, .floating-group .icon-button { width: 38px; height: 38px; }
+.floating svg, .floating-group svg { width: 18px; height: 18px; }
+.floating-group { gap: 6px; }
+.recap-part { background: var(--cp-background); border-radius: var(--recap-radius); padding: 2px 10px 0; gap: 0; }
+.recap-part .part-header { padding: 6px 0; gap: var(--cp-space-sm); }
+.recap-part .part-icon { width: 24px; height: 24px; }
+.recap-part .part-icon svg { width: 14px; height: 14px; }
+.recap-part .part-header h2 { font-size: 15px; line-height: 20px; }
+.recap-part .part-header p { font-size: 12.5px; line-height: 16px; }
+.recap-part .steps { gap: 0; }
+.recap-row.list-row { background: transparent; border: 0; border-top: 1px solid var(--cp-outline); border-radius: 0; padding: 6px 0; min-height: 0; gap: 10px; }
+.recap-row .row-icon { width: 32px; height: 32px; }
+.recap-row .row-icon svg { width: 18px; height: 18px; }
+.recap-row .row-text strong { font-size: 15px; line-height: 20px; }
+.recap-row .row-text > span { font-size: 13px; line-height: 17px; }
+.section-label { margin: 0 var(--cp-space-xs); }
+</style>
+</head>
+<body>
+<main class="phone">
+  
+  <section class="detail-sheet detail-sheet--full" id="session-details" data-component="detail-sheet" aria-label="Session details" style="top: 0px;">
+    <div class="sheet-drag"><button type="button" class="sheet-handle" data-component="sheet-handle" aria-label="Drag down to see the muscles"></button></div>
+    <div class="sheet-content">
+      <div id="session-summary" class="recap-head">
+        <h1 class="headline" style="font: var(--cp-type-headline);">Upper body</h1>
+        <p>Sat 24 Oct 2026, 18:05 · Strength</p>
+      </div>
+      <div class="stat-tiles" id="session-facts"><div class="stat-tile" data-component="stat-tile"><span class="label">Duration</span><strong>31:40</strong></div><div class="stat-tile" data-component="stat-tile"><span class="label">Sets done</span><strong>10 / 11</strong></div><div class="stat-tile" data-component="stat-tile"><span class="label">Skipped</span><strong>1</strong></div></div>
+      <span class="label section-label">Exercises</span><section class="recap-part" data-component="recap-part" aria-label="Warm-up">
+        <div class="part-header" data-component="part-header"><span class="part-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></span><div><h2>Warm-up</h2><p>2 exercises · 2:00</p></div></div>
+        <ol class="steps"><li><div class="list-row recap-row" data-component="exercise-row">
+            <span class="row-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a2 2 0 1 1 0 4 2 2 0 0 1 0-4zM8 10h8M12 8v5M12 13l-5 1 1 6M12 13l5 1-1 6"/></svg></span>
+            <span class="row-text"><strong>Jumping jack</strong><span>30 s</span></span>
+          </div></li><li><div class="list-row recap-row" data-component="exercise-row">
+            <span class="row-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a2 2 0 1 1 0 4 2 2 0 0 1 0-4zM8 10h8M12 8v5M12 13l-5 1 1 6M12 13l5 1-1 6"/></svg></span>
+            <span class="row-text"><strong>Arm circles</strong><span>30 s</span></span>
+          </div></li></ol>
+      </section><section class="recap-part" data-component="recap-part" aria-label="Work 1">
+        <div class="part-header" data-component="part-header"><span class="part-icon part-icon--work" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg></span><div><h2>Work 1</h2><p>4 exercises · 10 of 11 sets</p></div></div>
+        <ol class="steps"><li><div class="list-row recap-row" data-component="exercise-row">
+            <span class="row-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a2 2 0 1 1 0 4 2 2 0 0 1 0-4zM8 10h8M12 8v5M12 13l-5 1 1 6M12 13l5 1-1 6"/></svg></span>
+            <span class="row-text"><strong>Push-up</strong><span>3 × 12</span></span>
+          </div></li><li><div class="list-row recap-row" data-component="exercise-row">
+            <span class="row-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7v10M3 9v6M18 7v10M21 9v6M6 12h12"/></svg></span>
+            <span class="row-text"><strong>One-arm dumbbell row</strong><span>3 × 10 · 14 kg</span></span>
+          </div></li><li><div class="list-row recap-row" data-component="exercise-row">
+            <span class="row-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7v10M3 9v6M18 7v10M21 9v6M6 12h12"/></svg></span>
+            <span class="row-text"><strong>Dumbbell overhead press</strong><span>2 × 8 · 10 kg · 1 set skipped</span></span>
+          </div></li><li><div class="list-row recap-row" data-component="exercise-row">
+            <span class="row-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a2 2 0 1 1 0 4 2 2 0 0 1 0-4zM8 10h8M12 8v5M12 13l-5 1 1 6M12 13l5 1-1 6"/></svg></span>
+            <span class="row-text"><strong>Plank</strong><span>2 × 40 s</span></span>
+          </div></li></ol>
+      </section><section class="recap-part" data-component="recap-part" aria-label="Cool down">
+        <div class="part-header" data-component="part-header"><span class="part-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M5 7l14 10M19 7L5 17"/></svg></span><div><h2>Cool down</h2><p>1 exercise · 1:30</p></div></div>
+        <ol class="steps"><li><div class="list-row recap-row" data-component="exercise-row">
+            <span class="row-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a2 2 0 1 1 0 4 2 2 0 0 1 0-4zM8 10h8M12 8v5M12 13l-5 1 1 6M12 13l5 1-1 6"/></svg></span>
+            <span class="row-text"><strong>Child’s pose</strong><span>90 s</span></span>
+          </div></li></ol>
+      </section>
+    </div>
+  </section>
+  <a class="icon-button icon-button--filled floating floating--start" data-component="icon-button" href="../../agreed/phone/history-calendar.html" aria-label="Back"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4"><path d="M15 5l-7 7 7 7"/></svg></a>
+  <div class="floating-group">
+    <a class="icon-button icon-button--filled" data-component="icon-button" href="../../agreed/phone/history-session-share.html" aria-label="Share this session"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 10.5l6.8-4M8.6 13.5l6.8 4"/></svg></a>
+    <a class="icon-button icon-button--filled" data-component="icon-button" href="../../agreed/phone/history-session-delete.html" aria-label="Delete this session"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg></a>
+  </div>
+</main>
+</body>
+</html>
