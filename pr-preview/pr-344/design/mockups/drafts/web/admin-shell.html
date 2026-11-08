@@ -14,10 +14,11 @@
 <script src="../../shared/mockup-theme.js"></script>
 </head>
 <body class="bg-base-200 text-base-content min-h-screen">
-<!-- No viewport-height box here: the docs site sizes this frame to its content, and a child as
-     tall as the viewport would make it grow forever. -->
+<!-- No viewport-height box here: the docs site sizes this frame to the bottom of the page, and a
+     box as tall as the viewport would make it grow forever. The navigation and the page share the
+     page colour, so the strip the frame adds under them looks like part of both. -->
 <div class="flex flex-col md:flex-row">
-  <aside class="flex flex-col gap-6 bg-base-100 p-4 md:w-64 md:shrink-0 md:p-6" data-component="admin-nav">
+  <aside class="flex flex-col gap-6 p-4 md:w-64 md:shrink-0 md:p-6" data-component="admin-nav">
     <div class="flex items-center gap-2">
       <img src="../../../poulpy/mood_happy.svg" alt="" width="40" height="40">
       <div class="flex flex-col leading-tight">
@@ -41,7 +42,7 @@
       <button class="cp-btn cp-btn-ghost cp-btn-sm cp-btn-circle" aria-label="Sign out"><svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg></button>
     </div>
   </aside>
-  <main class="flex max-w-5xl flex-1 flex-col gap-6 p-4 md:p-8" id="audit">
+  <main class="flex min-w-0 flex-1 flex-col gap-6 p-4 md:p-8" id="audit">
     <div class="flex flex-col gap-1">
       <h1 class="cp-type-display">Audit log</h1>
       <p class="text-base-content/70">Everything an admin changed, newest first. Only admins see this.</p>
@@ -80,7 +81,7 @@
                 <span>Ana</span>
               </div>
             </td>
-            <td><span class="cp-badge cp-badge-soft cp-badge-primary">Published catalog</span></td>
+            <td><span class="cp-badge cp-badge-soft cp-badge-primary whitespace-nowrap">Published catalog</span></td>
             <td class="font-mono text-sm">version 12</td>
           </tr>
           <tr>
@@ -91,7 +92,7 @@
                 <span>Ana</span>
               </div>
             </td>
-            <td><span class="cp-badge cp-badge-outline">Disabled account</span></td>
+            <td><span class="cp-badge cp-badge-outline whitespace-nowrap">Disabled account</span></td>
             <td class="font-mono text-sm">0190d4d2-…-0042</td>
           </tr>
           <tr>
@@ -99,10 +100,10 @@
             <td>
               <div class="flex items-center gap-3">
                 <div class="cp-avatar cp-avatar-placeholder"><div class="bg-secondary text-secondary-content w-8 rounded-full"><span class="text-xs">S</span></div></div>
-                <span>The server</span>
+                <span class="whitespace-nowrap">The server</span>
               </div>
             </td>
-            <td><span class="cp-badge cp-badge-soft cp-badge-neutral">Made admin</span></td>
+            <td><span class="cp-badge cp-badge-soft cp-badge-neutral whitespace-nowrap">Made admin</span></td>
             <td class="font-mono text-sm">0190d4d2-…-0001</td>
           </tr>
             </tbody>
