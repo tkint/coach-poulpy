@@ -172,7 +172,7 @@ fun ExerciseList(
             },
         )
         LazyColumn(
-            contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 20.dp),
+            contentPadding = PaddingValues(start = PoulpySpace.lg, end = PoulpySpace.lg, bottom = 20.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.fillMaxSize(),
         ) {
@@ -287,7 +287,7 @@ private fun FilterChipButton(icon: ImageVector, count: Int, name: String, ticked
         color = if (on) colors.onPrimaryContainer else colors.surface,
         contentColor = if (on) colors.primaryContainer else colors.onSurface,
         border = if (on) null else BorderStroke(1.5.dp, colors.outline),
-        modifier = Modifier.height(36.dp).semantics { contentDescription = label },
+        modifier = Modifier.height(PoulpySize.chip).semantics { contentDescription = label },
     ) {
         Row(
             Modifier.padding(horizontal = 12.dp),
@@ -334,7 +334,7 @@ private fun <T> OptionSheet(
         containerColor = MaterialTheme.colorScheme.surface,
     ) {
         Column(
-            Modifier.verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 20.dp, bottom = 28.dp),
+            Modifier.verticalScroll(rememberScrollState()).padding(start = PoulpySpace.lg, end = PoulpySpace.lg, bottom = 28.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             SheetHeading(title, hint)
@@ -381,7 +381,7 @@ private fun ZonesSheet(
         containerColor = MaterialTheme.colorScheme.surface,
     ) {
         Column(
-            Modifier.verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 20.dp, bottom = 28.dp),
+            Modifier.verticalScroll(rememberScrollState()).padding(start = PoulpySpace.lg, end = PoulpySpace.lg, bottom = 28.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             SheetHeading(stringResource(R.string.exercises_zones), stringResource(R.string.exercises_zonesHint))
@@ -413,11 +413,11 @@ private fun SheetActions(count: Int, onClear: () -> Unit, onShow: () -> Unit) {
         OutlinedButton(
             onClick = onClear,
             border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
-            modifier = Modifier.weight(1f).height(56.dp),
+            modifier = Modifier.weight(1f).height(PoulpySize.buttonLarge),
         ) {
             Text(stringResource(R.string.exercises_filterClear), fontWeight = FontWeight.ExtraBold)
         }
-        Button(onClick = onShow, modifier = Modifier.weight(1.6f).height(56.dp)) {
+        Button(onClick = onShow, modifier = Modifier.weight(1.6f).height(PoulpySize.buttonLarge)) {
             Text(pluralStringResource(R.plurals.exercises_filterShow, count, count), fontWeight = FontWeight.ExtraBold)
         }
     }
@@ -434,7 +434,7 @@ private fun ExerciseCard(row: ExerciseRow, adding: Boolean, onClick: () -> Unit)
         modifier = Modifier.fillMaxWidth(),
     ) {
         Row(
-            Modifier.heightIn(min = 64.dp).padding(horizontal = 12.dp, vertical = 10.dp),
+            Modifier.heightIn(min = PoulpySize.row).padding(horizontal = 12.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
@@ -464,7 +464,7 @@ private fun PickerCard(row: ExerciseRow, onOpen: () -> Unit, onAdd: () -> Unit) 
         shape = RoundedCornerShape(PoulpyRadius.md),
         modifier = Modifier.fillMaxWidth(),
     ) {
-        Row(Modifier.heightIn(min = 64.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.heightIn(min = PoulpySize.row), verticalAlignment = Alignment.CenterVertically) {
             Row(
                 Modifier
                     .weight(1f)

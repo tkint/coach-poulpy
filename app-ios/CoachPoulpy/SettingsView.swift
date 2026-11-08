@@ -92,7 +92,7 @@ private struct DevicesList: View {
                                 .font(.poulpy(.headline))
                                 .foregroundStyle(PoulpyColor.onPrimary)
                                 .padding(.horizontal, 24)
-                                .frame(height: 56)
+                                .frame(height: PoulpySize.buttonLarge)
                                 .background(PoulpyColor.primary, in: Capsule())
                         }
                         .buttonStyle(.plain)
@@ -385,7 +385,7 @@ private struct DataSourcesView: View {
                     }
                 }
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, PoulpySpace.lg)
             .padding(.vertical, 16)
         }
         .background(PoulpyColor.background)

@@ -214,7 +214,7 @@ internal fun PainSheet(
             label = { Text(BodyMap.label(BodyMap.OTHER, language), fontWeight = FontWeight.ExtraBold) },
         )
         Text(stringResource(R.string.profile_painFor), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Column(Modifier.selectableGroup().border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(14.dp))) {
+        Column(Modifier.selectableGroup().border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(PoulpyRadius.lg))) {
             listOf(
                 Triple(PainDuration.HOURS_72, R.string.profile_painDuration72, R.string.profile_painDuration72Sub),
                 Triple(PainDuration.ONE_WEEK, R.string.profile_painDurationWeek, null),
@@ -225,7 +225,7 @@ internal fun PainSheet(
                 Row(
                     Modifier
                         .fillMaxWidth()
-                        .heightIn(min = 52.dp)
+                        .heightIn(min = PoulpySize.row)
                         .selectable(selected = value == length, role = Role.RadioButton, onClick = { length = value })
                         .padding(horizontal = 16.dp, vertical = 6.dp),
                     verticalAlignment = Alignment.CenterVertically,
@@ -264,7 +264,7 @@ internal fun BodyFigureSheet(
                 Column(
                     Modifier
                         .weight(1f)
-                        .border(if (on) 2.5.dp else 1.5.dp, if (on) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline, RoundedCornerShape(20.dp))
+                        .border(if (on) 2.5.dp else 1.5.dp, if (on) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline, RoundedCornerShape(PoulpyRadius.lg))
                         .selectable(selected = on, role = Role.RadioButton, onClick = { choice = value })
                         .padding(vertical = 12.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,

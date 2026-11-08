@@ -63,7 +63,7 @@ struct AppIconSheet: View {
                                     Spacer()
                                     if icon == selected { Image(systemName: "checkmark").foregroundStyle(PoulpyColor.primary) }
                                 }
-                                .frame(minHeight: 56)
+                                .frame(minHeight: PoulpySize.row)
                                 .contentShape(Rectangle())
                             }
                             .buttonStyle(.plain)

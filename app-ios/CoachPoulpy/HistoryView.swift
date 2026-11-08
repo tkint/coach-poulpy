@@ -37,7 +37,7 @@ struct HistoryView: View {
         NavigationStack {
             VStack(spacing: 0) {
                 viewSwitch
-                    .padding(.horizontal, 20)
+                    .padding(.horizontal, PoulpySpace.lg)
                     .padding(.top, PoulpySpace.sm)
                 if state.loaded {
                     switch tab {
@@ -116,7 +116,7 @@ struct HistoryView: View {
                             }
                         }
                     }
-                    .padding(.horizontal, 20)
+                    .padding(.horizontal, PoulpySpace.lg)
                     .padding(.vertical, 12)
                 }
                 .onChange(of: selected) { day in
@@ -178,9 +178,9 @@ struct HistoryView: View {
             }
         }
         .padding(EdgeInsets(top: 10, leading: 12, bottom: 12, trailing: 12))
-        .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 20))
-        .overlay(RoundedRectangle(cornerRadius: 20).stroke(PoulpyColor.outline))
-        .padding(.horizontal, 20)
+        .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
+        .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(PoulpyColor.outline))
+        .padding(.horizontal, PoulpySpace.lg)
         .padding(.top, 14)
         .gesture(
             DragGesture(minimumDistance: 30).onEnded { drag in
@@ -241,7 +241,7 @@ struct HistoryView: View {
             .padding(.horizontal, 14)
             .padding(.vertical, 12)
             .overlay(
-                RoundedRectangle(cornerRadius: 16)
+                RoundedRectangle(cornerRadius: PoulpyRadius.lg)
                     .stroke(PoulpyColor.onSurfaceVariant.opacity(0.5), style: StrokeStyle(lineWidth: 1.5, dash: [6, 4]))
             )
     }
@@ -264,8 +264,8 @@ struct HistoryView: View {
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 12)
-        .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 16))
-        .overlay(RoundedRectangle(cornerRadius: 16).stroke(highlighted ? PoulpyColor.primary : PoulpyColor.outline, lineWidth: highlighted ? 2 : 1))
+        .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
+        .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(highlighted ? PoulpyColor.primary : PoulpyColor.outline, lineWidth: highlighted ? 2 : 1))
     }
 
     /// The numbers that matter most for the row: duration, then distance for the treadmill or sets for a workout.
@@ -311,8 +311,8 @@ struct HistoryView: View {
                 }
             }
             .padding(EdgeInsets(top: 14, leading: 16, bottom: 14, trailing: 16))
-            .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 16))
-            .overlay(RoundedRectangle(cornerRadius: 16).stroke(PoulpyColor.outline))
+            .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
+            .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(PoulpyColor.outline))
             HStack(alignment: .top, spacing: 12) {
                 tile("history.total", value: "\(state.totalSessions)", caption: L("history.sessionsUnit %lld", Int64(state.totalSessions)))
                 tile(
@@ -323,7 +323,7 @@ struct HistoryView: View {
                 tile("history.fullOctopus", value: "×\(state.fullOctopuses)", caption: L("history.tentaclesLit %lld", Int64(state.tentaclesLit)))
             }
         }
-        .padding(.horizontal, 20)
+        .padding(.horizontal, PoulpySpace.lg)
         .padding(.vertical, 14)
     }
 
@@ -342,8 +342,8 @@ struct HistoryView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(EdgeInsets(top: 14, leading: 16, bottom: 14, trailing: 16))
-        .background(highlighted ? PoulpyColor.primaryContainer : PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 16))
-        .overlay(RoundedRectangle(cornerRadius: 16).stroke(highlighted ? Color.clear : PoulpyColor.outline))
+        .background(highlighted ? PoulpyColor.primaryContainer : PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
+        .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(highlighted ? Color.clear : PoulpyColor.outline))
     }
 
     /// One bar per week, the current one last in the stronger colour, the value above each bar.
@@ -389,8 +389,8 @@ struct HistoryView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(EdgeInsets(top: 12, leading: 14, bottom: 12, trailing: 14))
-        .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 16))
-        .overlay(RoundedRectangle(cornerRadius: 16).stroke(PoulpyColor.outline))
+        .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
+        .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(PoulpyColor.outline))
     }
 }
 
@@ -424,7 +424,7 @@ struct SessionDetailView: View {
                 }
                 .foregroundStyle(PoulpyColor.onPrimaryContainer)
                 .padding(EdgeInsets(top: 16, leading: 18, bottom: 16, trailing: 18))
-                .background(PoulpyColor.primaryContainer, in: RoundedRectangle(cornerRadius: 24))
+                .background(PoulpyColor.primaryContainer, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
 
                 VStack(spacing: 0) {
                     line("treadmill.summaryDuration", clock(session.activeSeconds))
@@ -455,10 +455,10 @@ struct SessionDetailView: View {
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 4)
-                .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 16))
-                .overlay(RoundedRectangle(cornerRadius: 16).stroke(PoulpyColor.outline))
+                .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
+                .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(PoulpyColor.outline))
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, PoulpySpace.lg)
             .padding(.vertical, 12)
         }
         .background(PoulpyColor.background)
@@ -522,7 +522,7 @@ struct SessionDetailView: View {
                     .buttonStyle(.plain)
                 }
             }
-            .background(PoulpyColor.surfaceVariant, in: RoundedRectangle(cornerRadius: 16))
+            .background(PoulpyColor.surfaceVariant, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
         }
         .padding(20)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -540,7 +540,7 @@ struct SessionDetailView: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
-        .frame(minHeight: 52)
+        .frame(minHeight: PoulpySize.row)
         .contentShape(Rectangle())
     }
 

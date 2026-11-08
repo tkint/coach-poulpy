@@ -231,7 +231,7 @@ internal fun AccountPage(onBack: () -> Unit, onFlow: (String) -> Unit, modifier:
                 Column(Modifier.fillMaxWidth().padding(top = 8.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     OutlinedButton(
                         onClick = { dialog = if (current.upToDate) LeaveDialog.SIGN_OUT else LeaveDialog.UNSENT },
-                        modifier = Modifier.fillMaxWidth().height(52.dp),
+                        modifier = Modifier.fillMaxWidth().height(PoulpySize.buttonLarge),
                         border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
                     ) { Text(stringResource(R.string.account_signOut), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onSurface) }
                     TextButton(onClick = { deleting = true }) {
@@ -286,7 +286,7 @@ private fun DeleteSheet(account: AccountModel, onDismiss: () -> Unit) {
     var problem by remember { mutableStateOf<DeleteResult?>(null) }
     var busy by remember { mutableStateOf(false) }
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), containerColor = MaterialTheme.colorScheme.surface) {
-        Column(Modifier.padding(start = 20.dp, end = 20.dp, bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(Modifier.padding(start = PoulpySpace.lg, end = PoulpySpace.lg, bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text(stringResource(R.string.account_deleteTitle), style = MaterialTheme.typography.titleLarge)
             Text(stringResource(R.string.account_deleteBody), color = MaterialTheme.colorScheme.onSurfaceVariant)
             when (problem) {
@@ -298,7 +298,7 @@ private fun DeleteSheet(account: AccountModel, onDismiss: () -> Unit) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedButton(
                     onClick = onDismiss,
-                    modifier = Modifier.weight(1f).height(56.dp),
+                    modifier = Modifier.weight(1f).height(PoulpySize.buttonLarge),
                     border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
                 ) { Text(stringResource(R.string.action_cancel), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onSurface) }
                 Button(
@@ -311,7 +311,7 @@ private fun DeleteSheet(account: AccountModel, onDismiss: () -> Unit) {
                         }
                     },
                     enabled = password.isNotEmpty() && !busy,
-                    modifier = Modifier.weight(1.6f).height(56.dp),
+                    modifier = Modifier.weight(1.6f).height(PoulpySize.buttonLarge),
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error, contentColor = MaterialTheme.colorScheme.onError),
                 ) { Text(stringResource(R.string.account_deleteAccount), fontWeight = FontWeight.ExtraBold) }
             }
@@ -420,7 +420,7 @@ private fun SignUpScreen(account: AccountModel, typedEmail: String, onStep: (Str
 @Composable
 private fun ConsentSheet(onDismiss: () -> Unit) {
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), containerColor = MaterialTheme.colorScheme.surface) {
-        Column(Modifier.padding(start = 20.dp, end = 20.dp, bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Column(Modifier.padding(start = PoulpySpace.lg, end = PoulpySpace.lg, bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text(stringResource(R.string.account_consentSheetTitle), style = MaterialTheme.typography.titleLarge)
             Text(stringResource(R.string.account_consentSheetIntro), color = MaterialTheme.colorScheme.onSurfaceVariant)
             listOf(R.string.account_consentItemTraining, R.string.account_consentItemBody, R.string.account_consentItemPrefs).forEach {
@@ -437,7 +437,7 @@ private fun ConsentSheet(onDismiss: () -> Unit) {
                 fontWeight = FontWeight.ExtraBold,
                 modifier = Modifier.padding(horizontal = 4.dp),
             )
-            Button(onClick = onDismiss, modifier = Modifier.fillMaxWidth().padding(top = 4.dp).height(56.dp)) {
+            Button(onClick = onDismiss, modifier = Modifier.fillMaxWidth().padding(top = 4.dp).height(PoulpySize.buttonLarge)) {
                 Text(stringResource(R.string.account_gotIt), fontWeight = FontWeight.ExtraBold)
             }
         }
@@ -578,11 +578,11 @@ private fun UploadScreen(account: AccountModel, @DrawableRes pose: Int, poulpyLi
 fun EmailConfirmedSheet(onDismiss: () -> Unit) {
     val account = rememberAccount()
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), containerColor = MaterialTheme.colorScheme.surface) {
-        Column(Modifier.padding(start = 20.dp, end = 20.dp, bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        Column(Modifier.padding(start = PoulpySpace.lg, end = PoulpySpace.lg, bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Poulpy(R.drawable.poulpy_pose_champion, R.string.account_confirmedPoulpy)
             Text(stringResource(R.string.account_confirmedTitle), style = MaterialTheme.typography.headlineMedium, fontSize = 30.sp, lineHeight = 34.sp)
             UploadProgress(account)
-            Button(onClick = onDismiss, modifier = Modifier.fillMaxWidth().height(56.dp)) {
+            Button(onClick = onDismiss, modifier = Modifier.fillMaxWidth().height(PoulpySize.buttonLarge)) {
                 Text(stringResource(R.string.account_continue), fontWeight = FontWeight.ExtraBold)
             }
         }
@@ -697,15 +697,15 @@ private fun AccountFrame(onClose: (() -> Unit)?, action: Int, busy: Boolean, onA
             )
         },
         bottomBar = {
-            Box(Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = 20.dp, vertical = 12.dp)) {
-                Button(onClick = onAction, enabled = !busy, modifier = Modifier.fillMaxWidth().height(56.dp)) {
+            Box(Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = PoulpySpace.lg, vertical = 12.dp)) {
+                Button(onClick = onAction, enabled = !busy, modifier = Modifier.fillMaxWidth().height(PoulpySize.buttonLarge)) {
                     Text(stringResource(action), fontWeight = FontWeight.ExtraBold)
                 }
             }
         },
     ) { padding ->
         Column(
-            Modifier.padding(padding).fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp, vertical = 8.dp),
+            Modifier.padding(padding).fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = PoulpySpace.lg, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
             content = content,
         )

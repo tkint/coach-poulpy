@@ -74,7 +74,7 @@ struct HomeView: View {
                         }
                     }
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, PoulpySpace.lg)
                 .padding(.bottom, PoulpySpace.xl)
             }
             .background(PoulpyColor.background)
@@ -181,8 +181,8 @@ struct HomeView: View {
             }
         }
         .padding(PoulpySpace.sm)
-        .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 20))
-        .overlay(RoundedRectangle(cornerRadius: 20).stroke(PoulpyPalette.lagoon300, lineWidth: 1.5))
+        .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
+        .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(PoulpyPalette.lagoon300, lineWidth: 1.5))
     }
 
     /// A session finished today, opening its page as in the history.
@@ -206,8 +206,8 @@ struct HomeView: View {
         }
         .padding(PoulpySpace.sm)
         .frame(minHeight: 60)
-        .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 20))
-        .overlay(RoundedRectangle(cornerRadius: 20).stroke(PoulpyColor.outline))
+        .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
+        .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(PoulpyColor.outline))
     }
 
     private func nextCard(_ next: NextSession) -> some View {
@@ -247,8 +247,8 @@ struct HomeView: View {
             Button(action: onOpenLibrary) {
                 Label("home.openLibrary", systemImage: "books.vertical")
                     .font(.poulpy(.body).weight(.heavy))
-                    .padding(.horizontal, 20)
-                    .frame(minHeight: 48)
+                    .padding(.horizontal, PoulpySpace.lg)
+                    .frame(minHeight: PoulpySize.button)
                     .foregroundStyle(PoulpyColor.onPrimary)
                     .background(PoulpyColor.primary, in: Capsule())
             }
@@ -259,7 +259,7 @@ struct HomeView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(PoulpySpace.md)
         .overlay(
-            RoundedRectangle(cornerRadius: 20)
+            RoundedRectangle(cornerRadius: PoulpyRadius.lg)
                 .stroke(PoulpyColor.onSurfaceVariant.opacity(0.5), style: StrokeStyle(lineWidth: 1.5, dash: [6, 4]))
         )
         .padding(.top, PoulpySpace.xs)

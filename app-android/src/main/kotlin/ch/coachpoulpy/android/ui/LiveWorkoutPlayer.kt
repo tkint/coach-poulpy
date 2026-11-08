@@ -161,7 +161,7 @@ internal fun ColumnScope.StartStep(
         )
     }
     Spacer(Modifier.height(PoulpySpace.lg))
-    Button(onClick = onStart, modifier = Modifier.fillMaxWidth().height(64.dp)) {
+    Button(onClick = onStart, modifier = Modifier.fillMaxWidth().height(PoulpySize.buttonLarge)) {
         Text(startLabel, fontSize = 19.sp, fontWeight = FontWeight.ExtraBold)
     }
     // Done cuts the step short without the feel of skipping it.
@@ -170,7 +170,7 @@ internal fun ColumnScope.StartStep(
             OutlinedButton(
                 onClick = action,
                 border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
-                modifier = Modifier.weight(1f).height(56.dp),
+                modifier = Modifier.weight(1f).height(PoulpySize.buttonLarge),
             ) { Text(stringResource(label), fontSize = 17.sp, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onSurface) }
         }
     }

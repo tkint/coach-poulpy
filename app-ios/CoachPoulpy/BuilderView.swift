@@ -57,7 +57,7 @@ struct BuilderView: View {
                         .buttonStyle(.plain)
                     }
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, PoulpySpace.lg)
                 .padding(.top, 8)
                 .padding(.bottom, PoulpySpace.xl)
             }
@@ -265,9 +265,9 @@ struct BuilderView: View {
         }
         .padding(EdgeInsets(top: 4, leading: 6, bottom: 10, trailing: 8))
         // The agreed `.builder-repeat` look: primary container mixed 55% with the background, plus a 1.5pt border.
-        .background(PoulpyColor.background, in: RoundedRectangle(cornerRadius: 16))
-        .background(PoulpyColor.primaryContainer.opacity(0.55), in: RoundedRectangle(cornerRadius: 16))
-        .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(PoulpyColor.primaryContainer, lineWidth: 1.5))
+        .background(PoulpyColor.background, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
+        .background(PoulpyColor.primaryContainer.opacity(0.55), in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
+        .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).strokeBorder(PoulpyColor.primaryContainer, lineWidth: 1.5))
     }
 
     private func timesButton(_ symbol: String, _ description: LocalizedStringKey, _ action: @escaping () -> Void) -> some View {
@@ -304,7 +304,7 @@ struct BuilderView: View {
             .foregroundStyle(PoulpyColor.primary)
             .frame(maxWidth: .infinity, minHeight: height)
             .overlay(RoundedRectangle(cornerRadius: height < 56 ? 12 : 16).stroke(PoulpyPalette.lagoon300, style: StrokeStyle(lineWidth: 2, dash: [8, 6])))
-            .contentShape(RoundedRectangle(cornerRadius: 16))
+            .contentShape(RoundedRectangle(cornerRadius: PoulpyRadius.lg))
     }
 
     /// Moves a step or a repeat one place up (-1) or down (1) among its siblings, sliding it there.
@@ -402,8 +402,8 @@ private struct FormatSheet: View {
             .foregroundStyle(PoulpyColor.onSurface)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(14)
-            .background(selected ? PoulpyColor.primaryContainer : PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 16))
-            .overlay(RoundedRectangle(cornerRadius: 16).stroke(selected ? PoulpyColor.primary : PoulpyColor.outline, lineWidth: selected ? 2 : 1))
+            .background(selected ? PoulpyColor.primaryContainer : PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
+            .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(selected ? PoulpyColor.primary : PoulpyColor.outline, lineWidth: selected ? 2 : 1))
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(selected ? .isSelected : [])
@@ -429,8 +429,8 @@ private struct PartSheet: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     .padding(12)
-                    .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 16))
-                    .overlay(RoundedRectangle(cornerRadius: 16).stroke(PoulpyColor.outline, lineWidth: 1))
+                    .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
+                    .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(PoulpyColor.outline, lineWidth: 1))
                     .opacity(option.enabled ? 1 : 0.5)
                 }
                 .buttonStyle(.plain)
@@ -643,8 +643,8 @@ private struct EntryCard: View {
             }
         }
         .padding(EdgeInsets(top: open ? 10 : 6, leading: open ? 12 : 6, bottom: open ? 14 : 6, trailing: 8))
-        .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 16))
-        .overlay(RoundedRectangle(cornerRadius: 16).stroke(PoulpyColor.outline, lineWidth: 1))
+        .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
+        .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(PoulpyColor.outline, lineWidth: 1))
     }
 
     /// The small tag above a step's name: "RECOVER".
@@ -697,9 +697,9 @@ private struct EntryCard: View {
             .padding(.leading, 12)
             .padding(.trailing, 10)
             .frame(maxWidth: .infinity, minHeight: 52)
-            .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 12))
-            .overlay(RoundedRectangle(cornerRadius: 12).stroke(PoulpyColor.outline, lineWidth: 1.5))
-            .contentShape(RoundedRectangle(cornerRadius: 12))
+            .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.md))
+            .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.md).stroke(PoulpyColor.outline, lineWidth: 1.5))
+            .contentShape(RoundedRectangle(cornerRadius: PoulpyRadius.md))
         }
         .buttonStyle(.plain)
     }
@@ -711,7 +711,7 @@ private struct EntryCard: View {
         }
         .padding(6)
         .frame(maxWidth: .infinity)
-        .background(PoulpyColor.background, in: RoundedRectangle(cornerRadius: 12))
+        .background(PoulpyColor.background, in: RoundedRectangle(cornerRadius: PoulpyRadius.md))
     }
 
     /// A value between − and +; with [onValue], tapping the value opens a sheet to type it.
@@ -938,8 +938,8 @@ private struct ValueSheet: View {
                     .multilineTextAlignment(.center)
                     .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 22, relativeTo: .title3))
                     .frame(height: 56)
-                    .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: 16))
-                    .overlay(RoundedRectangle(cornerRadius: 16).stroke(PoulpyColor.primary, lineWidth: 1.5))
+                    .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
+                    .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(PoulpyColor.primary, lineWidth: 1.5))
                     .accessibilityLabel(Text(field.title))
                     .onChange(of: text) { _ in invalid = false }
                 if field != .duration {

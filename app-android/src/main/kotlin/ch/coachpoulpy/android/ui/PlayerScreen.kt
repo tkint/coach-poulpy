@@ -145,7 +145,7 @@ private fun ColumnScope.Ready(state: PlayerState, onStart: () -> Unit, onClose: 
         Text(state.title, style = PoulpyTextStyles.Title, textAlign = TextAlign.Center)
         state.targetDetail?.let { Text(it, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurfaceVariant) }
     }
-    Button(onClick = onStart, modifier = Modifier.fillMaxWidth().height(64.dp)) {
+    Button(onClick = onStart, modifier = Modifier.fillMaxWidth().height(PoulpySize.buttonLarge)) {
         Icon(Icons.Filled.PlayArrow, contentDescription = null, modifier = Modifier.size(24.dp))
         Text(stringResource(R.string.player_start), modifier = Modifier.padding(start = PoulpySpace.sm), fontSize = 19.sp, fontWeight = FontWeight.ExtraBold)
     }
@@ -314,14 +314,14 @@ internal fun ColumnScope.WorkStep(state: PlayerState, paused: Boolean, onSkip: (
             colors = ButtonDefaults.outlinedButtonColors(disabledContentColor = MaterialTheme.colorScheme.onSurface),
             border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
             contentPadding = PaddingValues(horizontal = 22.dp),
-            modifier = Modifier.then(if (!showDone) Modifier.weight(1f) else Modifier).height(64.dp),
+            modifier = Modifier.then(if (!showDone) Modifier.weight(1f) else Modifier).height(PoulpySize.buttonLarge),
         ) { Text(stringResource(R.string.player_skip), fontSize = 19.sp, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onSurface) }
         if (showDone) {
             Button(
                 onClick = onDone,
                 enabled = !paused,
                 colors = ButtonDefaults.buttonColors(disabledContainerColor = MaterialTheme.colorScheme.primary, disabledContentColor = MaterialTheme.colorScheme.onPrimary),
-                modifier = Modifier.weight(1f).height(64.dp),
+                modifier = Modifier.weight(1f).height(PoulpySize.buttonLarge),
             ) {
                 Icon(Icons.Filled.Check, contentDescription = null, modifier = Modifier.size(24.dp))
                 Text(stringResource(R.string.player_done), fontSize = 19.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = PoulpySpace.sm))
@@ -382,7 +382,7 @@ internal fun ColumnScope.RestStep(state: PlayerState, paused: Boolean, onSkip: (
             disabledContainerColor = MaterialTheme.colorScheme.primaryContainer,
             disabledContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
         ),
-        modifier = Modifier.fillMaxWidth().alpha(if (paused) PAUSED_DIM else 1f).height(64.dp),
+        modifier = Modifier.fillMaxWidth().alpha(if (paused) PAUSED_DIM else 1f).height(PoulpySize.buttonLarge),
     ) {
         Icon(Icons.Filled.SkipNext, contentDescription = null, modifier = Modifier.size(22.dp))
         Text(stringResource(R.string.player_skipRest), fontSize = 19.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = PoulpySpace.sm))
@@ -457,11 +457,11 @@ private fun ColumnScope.Finished(state: PlayerState, finished: FinishedScreen?, 
             TentacleLitCard(finished.poulpy)
         }
     }
-    OutlinedButton(onClick = onShare, modifier = Modifier.fillMaxWidth().height(56.dp)) {
+    OutlinedButton(onClick = onShare, modifier = Modifier.fillMaxWidth().height(PoulpySize.buttonLarge)) {
         Icon(Icons.Filled.Share, contentDescription = null, modifier = Modifier.padding(end = 8.dp))
         Text(stringResource(R.string.shareImage_button))
     }
-    Button(onClick = onClose, modifier = Modifier.fillMaxWidth().height(56.dp).padding(top = 8.dp)) { Text(stringResource(R.string.player_close)) }
+    Button(onClick = onClose, modifier = Modifier.fillMaxWidth().height(PoulpySize.buttonLarge).padding(top = 8.dp)) { Text(stringResource(R.string.player_close)) }
 }
 
 @Composable

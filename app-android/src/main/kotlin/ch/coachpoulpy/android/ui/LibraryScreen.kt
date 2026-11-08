@@ -83,7 +83,7 @@ fun LibraryScreen(
 ) {
     Column(modifier.fillMaxSize()) {
         Column(
-            Modifier.padding(start = 20.dp, end = 20.dp, top = PoulpySpace.lg),
+            Modifier.padding(start = PoulpySpace.lg, end = PoulpySpace.lg, top = PoulpySpace.lg),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(stringResource(R.string.tab_library), style = MaterialTheme.typography.headlineMedium)
@@ -167,7 +167,7 @@ private fun Workouts(
             onClick = onNew,
             buttonIcon = Icons.Filled.Add,
             poulpySize = 120.dp,
-            modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 16.dp),
+            modifier = Modifier.padding(start = PoulpySpace.lg, end = PoulpySpace.lg, top = 16.dp),
         )
         return
     }
@@ -204,7 +204,7 @@ private fun Workouts(
                 },
             )
             LazyColumn(
-                contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 96.dp),
+                contentPadding = PaddingValues(start = PoulpySpace.lg, end = PoulpySpace.lg, bottom = 96.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.fillMaxSize(),
             ) {

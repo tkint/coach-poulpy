@@ -43,7 +43,7 @@ struct ImportView: View {
                 .accessibilityLabel(Text("action.close"))
                 Spacer()
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, PoulpySpace.lg)
             .padding(.vertical, 12)
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
@@ -67,7 +67,7 @@ struct ImportView: View {
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(16)
-                        .background(PoulpyColor.surfaceVariant, in: RoundedRectangle(cornerRadius: 16))
+                        .background(PoulpyColor.surfaceVariant, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
                         Text("import.note").font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
                     } else {
                         Text("import.errorTitle").font(PoulpyFont.title)
@@ -79,11 +79,11 @@ struct ImportView: View {
                         .foregroundStyle(PoulpyColor.error)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(16)
-                        .background(PoulpyColor.surfaceVariant, in: RoundedRectangle(cornerRadius: 16))
+                        .background(PoulpyColor.surfaceVariant, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
                         Text("import.nothingAdded").font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
                     }
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, PoulpySpace.lg)
             }
         }
         .background(PoulpyColor.background)
@@ -112,7 +112,7 @@ struct ImportView: View {
                     .buttonStyle(.plain)
                 }
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, PoulpySpace.lg)
             .padding(.vertical, 12)
             .background(PoulpyColor.surface)
         }

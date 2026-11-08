@@ -187,7 +187,7 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
                         onClick = { if (model.save() != null) onClose() },
                         enabled = state.canSave,
                         contentPadding = PaddingValues(horizontal = 18.dp),
-                        modifier = Modifier.padding(end = 12.dp).height(40.dp),
+                        modifier = Modifier.padding(end = 12.dp).height(PoulpySize.buttonSmall),
                     ) {
                         Text(stringResource(R.string.action_save), fontWeight = FontWeight.ExtraBold)
                     }
@@ -199,7 +199,7 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
         LazyColumn(
             state = list,
             modifier = Modifier.padding(padding).fillMaxSize().navigationBarsPadding(),
-            contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 24.dp),
+            contentPadding = PaddingValues(start = PoulpySpace.lg, end = PoulpySpace.lg, top = 8.dp, bottom = 24.dp),
         ) {
             item {
                 PoulpyTextField(stringResource(R.string.builder_name), state.name, model::rename, Modifier.padding(bottom = 14.dp).fillMaxWidth())
@@ -299,7 +299,7 @@ private fun FormatSheet(options: List<WorkoutFormatOption>, onChoose: (WorkoutFo
     var chosen by rememberSaveable { mutableStateOf(WorkoutFormat.CIRCUIT) }
     ModalBottomSheet(onDismissRequest = onClose, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), containerColor = colors.surface) {
         Column(
-            Modifier.padding(horizontal = 20.dp).padding(bottom = 24.dp).navigationBarsPadding(),
+            Modifier.padding(horizontal = PoulpySpace.lg).padding(bottom = 24.dp).navigationBarsPadding(),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             SheetTitle(stringResource(R.string.builder_formatTitle), stringResource(R.string.builder_formatSubtitle))
@@ -329,7 +329,7 @@ private fun FormatSheet(options: List<WorkoutFormatOption>, onChoose: (WorkoutFo
                     }
                 }
             }
-            Button(onClick = { onChoose(chosen) }, modifier = Modifier.fillMaxWidth().height(52.dp)) {
+            Button(onClick = { onChoose(chosen) }, modifier = Modifier.fillMaxWidth().height(PoulpySize.buttonLarge)) {
                 Text(stringResource(R.string.builder_continue), fontWeight = FontWeight.ExtraBold)
             }
         }
@@ -416,7 +416,7 @@ private fun PartSheet(options: List<BuilderPartOption>, onPick: (PartKind) -> Un
     val colors = MaterialTheme.colorScheme
     ModalBottomSheet(onDismissRequest = onDone, containerColor = colors.surface) {
         Column(
-            Modifier.padding(horizontal = 20.dp).padding(bottom = 24.dp).navigationBarsPadding(),
+            Modifier.padding(horizontal = PoulpySpace.lg).padding(bottom = 24.dp).navigationBarsPadding(),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             SheetTitle(stringResource(R.string.builder_addPart), stringResource(R.string.builder_addPartSubtitle))
@@ -578,7 +578,7 @@ private fun StepSheet(model: BuilderModel, row: BuilderRow, format: WorkoutForma
     // Opens fully, so every field shows without dragging the sheet up.
     ModalBottomSheet(onDismissRequest = onDone, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), containerColor = colors.surface) {
         Column(
-            Modifier.padding(horizontal = 20.dp).padding(bottom = 24.dp).navigationBarsPadding(),
+            Modifier.padding(horizontal = PoulpySpace.lg).padding(bottom = 24.dp).navigationBarsPadding(),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -635,7 +635,7 @@ private fun StepSheet(model: BuilderModel, row: BuilderRow, format: WorkoutForma
                     }
                 }
             }
-            Button(onClick = onDone, modifier = Modifier.fillMaxWidth().height(52.dp)) {
+            Button(onClick = onDone, modifier = Modifier.fillMaxWidth().height(PoulpySize.buttonLarge)) {
                 Text(stringResource(R.string.action_done), fontWeight = FontWeight.ExtraBold)
             }
         }
@@ -734,10 +734,10 @@ private fun PoulpySelect(label: String, value: String, options: List<Pair<String
     Box(modifier) {
         Surface(
             onClick = { expanded = true },
-            shape = RoundedCornerShape(12.dp),
+            shape = RoundedCornerShape(PoulpyRadius.md),
             color = colors.surface,
             border = BorderStroke(1.5.dp, colors.outline),
-            modifier = Modifier.fillMaxWidth().height(52.dp).semantics { contentDescription = "$label, $value" },
+            modifier = Modifier.fillMaxWidth().height(PoulpySize.buttonLarge).semantics { contentDescription = "$label, $value" },
         ) {
             Row(Modifier.padding(start = 12.dp, end = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
@@ -758,7 +758,7 @@ private fun PoulpySelect(label: String, value: String, options: List<Pair<String
 @Composable
 private fun SettingCell(label: String, modifier: Modifier, content: @Composable () -> Unit) {
     Column(
-        modifier.background(MaterialTheme.colorScheme.background, RoundedCornerShape(12.dp)).padding(6.dp),
+        modifier.background(MaterialTheme.colorScheme.background, RoundedCornerShape(PoulpyRadius.md)).padding(6.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
@@ -787,7 +787,7 @@ private fun StepperCell(label: String, value: String, onLess: () -> Unit, onMore
                 autoSize = TextAutoSize.StepBased(minFontSize = 13.sp, maxFontSize = 22.sp),
                 modifier = Modifier
                     .weight(1f)
-                    .then(if (onValue != null) Modifier.clip(RoundedCornerShape(8.dp)).clickable(onClickLabel = editLabel, onClick = onValue) else Modifier)
+                    .then(if (onValue != null) Modifier.clip(RoundedCornerShape(PoulpyRadius.sm)).clickable(onClickLabel = editLabel, onClick = onValue) else Modifier)
                     .padding(horizontal = 2.dp, vertical = 10.dp),
             )
             RoundStep("+", stringResource(R.string.builder_moreNamed, label), onMore)
@@ -952,7 +952,7 @@ private fun ValueSheet(model: BuilderModel, key: String, target: WalkRunTarget, 
     val colors = MaterialTheme.colorScheme
     ModalBottomSheet(onDismissRequest = onDone, containerColor = colors.surface) {
         Column(
-            Modifier.padding(horizontal = 20.dp).padding(bottom = 24.dp).navigationBarsPadding(),
+            Modifier.padding(horizontal = PoulpySpace.lg).padding(bottom = 24.dp).navigationBarsPadding(),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             Text(title, style = MaterialTheme.typography.titleLarge)
@@ -961,7 +961,7 @@ private fun ValueSheet(model: BuilderModel, key: String, target: WalkRunTarget, 
                     text,
                     { text = it; invalid = false },
                     label = title,
-                    modifier = Modifier.weight(1f).height(56.dp),
+                    modifier = Modifier.weight(1f).height(PoulpySize.buttonLarge),
                     keyboard = KeyboardOptions(keyboardType = if (decimal) KeyboardType.Decimal else KeyboardType.Text),
                     center = true,
                 )
@@ -999,7 +999,7 @@ private fun ValueSheet(model: BuilderModel, key: String, target: WalkRunTarget, 
                     PoulpyChip(selected = text == pick.text, onClick = { if (apply(pick.text)) onDone() }, label = pick.label)
                 }
             }
-            Button(onClick = { if (apply(text)) onDone() else invalid = true }, modifier = Modifier.fillMaxWidth().height(52.dp)) {
+            Button(onClick = { if (apply(text)) onDone() else invalid = true }, modifier = Modifier.fillMaxWidth().height(PoulpySize.buttonLarge)) {
                 Text(stringResource(R.string.action_done), fontWeight = FontWeight.ExtraBold)
             }
         }
@@ -1018,11 +1018,11 @@ private fun DashedTile(label: String, icon: ImageVector, onClick: () -> Unit, mo
             .drawBehind {
                 drawRoundRect(
                     color = dash,
-                    cornerRadius = CornerRadius(if (height < 56) 12.dp.toPx() else 16.dp.toPx()),
+                    cornerRadius = CornerRadius(if (height < 56) PoulpyRadius.md.toPx() else PoulpyRadius.lg.toPx()),
                     style = Stroke(width = 2.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(8.dp.toPx(), 6.dp.toPx()))),
                 )
             }
-            .clip(RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(PoulpyRadius.lg))
             .clickable(onClick = onClick),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),

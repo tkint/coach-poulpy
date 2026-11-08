@@ -125,7 +125,7 @@ fun HistoryScreen(graph: AppGraph, language: String, onOpen: (String) -> Unit, m
 
     Column(modifier.fillMaxSize()) {
         Column(
-            Modifier.padding(start = 20.dp, end = 20.dp, top = PoulpySpace.lg),
+            Modifier.padding(start = PoulpySpace.lg, end = PoulpySpace.lg, top = PoulpySpace.lg),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             Text(stringResource(R.string.tab_history), style = MaterialTheme.typography.headlineMedium)
@@ -200,7 +200,7 @@ private fun CalendarView(model: HistoryModel, state: HistoryState, onOpen: (Stri
         MonthCard(month, selected, onSelect = { selected = it }, onMonth = changeMonth)
         LazyColumn(
             state = list,
-            contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 12.dp, bottom = 16.dp),
+            contentPadding = PaddingValues(start = PoulpySpace.lg, end = PoulpySpace.lg, top = 12.dp, bottom = 16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.weight(1f),
         ) {
@@ -239,9 +239,9 @@ private fun MonthCard(month: CalendarMonth, selected: Int, onSelect: (Int) -> Un
     val cells: List<CalendarDay?> = List(month.leadingBlanks) { null } + month.days
     OutlinedCard(
         colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surface),
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(PoulpyRadius.lg),
         modifier = Modifier
-            .padding(start = 20.dp, end = 20.dp, top = 14.dp)
+            .padding(start = PoulpySpace.lg, end = PoulpySpace.lg, top = 14.dp)
             .fillMaxWidth()
             .pointerInput(month.year, month.month) {
                 detectHorizontalDragGestures(
@@ -364,7 +364,7 @@ private fun RestingRow() {
             .drawBehind {
                 drawRoundRect(
                     color,
-                    cornerRadius = CornerRadius(16.dp.toPx()),
+                    cornerRadius = CornerRadius(PoulpyRadius.lg.toPx()),
                     style = Stroke(width = 1.5.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(6.dp.toPx(), 4.dp.toPx()))),
                 )
             }
@@ -404,7 +404,7 @@ private fun SessionCard(session: SessionRow, highlighted: Boolean, onClick: () -
 @Composable
 private fun StatsView(state: HistoryState) {
     Column(
-        Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 20.dp, top = 14.dp, bottom = 16.dp),
+        Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(start = PoulpySpace.lg, end = PoulpySpace.lg, top = 14.dp, bottom = 16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -601,7 +601,7 @@ fun SessionDetailScreen(graph: AppGraph, language: String, sessionId: String, on
     ) { padding ->
         if (session == null) return@Scaffold
         Column(
-            modifier = Modifier.padding(padding).fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp, vertical = 12.dp),
+            modifier = Modifier.padding(padding).fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = PoulpySpace.lg, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             Card(
@@ -682,7 +682,7 @@ private fun ShareSheet(onFit: () -> Unit, onImage: () -> Unit, onDismiss: () -> 
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         containerColor = MaterialTheme.colorScheme.surface,
     ) {
-        Column(Modifier.padding(start = 20.dp, end = 20.dp, bottom = 28.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(Modifier.padding(start = PoulpySpace.lg, end = PoulpySpace.lg, bottom = 28.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Column {
                 Text(stringResource(R.string.shareSession_title), style = MaterialTheme.typography.titleLarge, modifier = Modifier.semantics { heading() })
                 Text(stringResource(R.string.shareSession_why), color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -699,7 +699,7 @@ private fun ShareSheet(onFit: () -> Unit, onImage: () -> Unit, onDismiss: () -> 
 @Composable
 private fun ShareFormat(icon: ImageVector, @StringRes title: Int, @StringRes note: Int, onClick: () -> Unit) {
     Row(
-        Modifier.fillMaxWidth().heightIn(min = 52.dp).clickable(onClick = onClick).padding(horizontal = 16.dp, vertical = 10.dp),
+        Modifier.fillMaxWidth().heightIn(min = PoulpySize.row).clickable(onClick = onClick).padding(horizontal = 16.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(14.dp),
     ) {

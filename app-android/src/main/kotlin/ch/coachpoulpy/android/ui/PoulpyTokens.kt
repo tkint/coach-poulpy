@@ -150,6 +150,21 @@ object PoulpyRadius {
     val pill = 999.dp
 }
 
+/** Control sizes from docs/design-system.md. Never write a literal height in a screen. */
+object PoulpySize {
+    val button = 44.dp
+    val buttonLarge = 52.dp
+    val buttonSmall = 34.dp
+    val iconButton = 40.dp
+    val touch = 44.dp
+    val chip = 32.dp
+    val searchField = 44.dp
+    val textField = 46.dp
+    val row = 56.dp
+    val avatarSmall = 32.dp
+    val avatar = 40.dp
+}
+
 internal val PoulpyShapes = Shapes(small = RoundedCornerShape(8.dp), medium = RoundedCornerShape(10.dp), large = RoundedCornerShape(14.dp))
 
 object PoulpyMotion {
