@@ -102,6 +102,72 @@ Primary, tonal, outline and grumpy: `CpButton`.
 | --- | --- |
 | `<CpSheet>` | `dialog.cp-modal.cp-modal-bottom.sm:cp-modal-middle.cp-sheet` and `.cp-modal-box` |
 
+## Badge
+
+`CpBadge`: what kind of change, what state. Primary, neutral, outline, or error (crimson, with an icon beside it); never ember or `warning`.
+
+<WebComponentSamples part="badge" />
+
+| Vue | Classes |
+| --- | --- |
+| `<CpBadge>` | `cp-badge cp-badge-primary cp-badge-soft` |
+| `<CpBadge tone="neutral">` | `cp-badge cp-badge-neutral cp-badge-soft` |
+| `<CpBadge tone="outline">` | `cp-badge cp-badge-outline` |
+| `<CpBadge tone="error">` | `cp-badge cp-badge-error cp-badge-soft` |
+
+## Avatar
+
+`CpAvatar`: initials in a circle, until there are profile pictures.
+
+<WebComponentSamples part="avatar" />
+
+| Vue | Classes |
+| --- | --- |
+| `<CpAvatar>` | `div.cp-avatar.cp-avatar-placeholder` around `div.rounded-full.w-8.bg-secondary.text-secondary-content` and a `span` |
+| `<CpAvatar tone="primary" size="md">` | the same with `w-10 bg-primary text-primary-content` |
+
+## Card
+
+`CpCard`: a raised panel with a title. `CpPoulpyCard` is for empty states.
+
+<WebComponentSamples part="card" />
+
+| Vue | Classes |
+| --- | --- |
+| `<CpCard>` | `section.cp-card.bg-base-100.shadow-sm` around `div.cp-card-body.gap-4.p-4.md:p-6` and `h2.cp-card-title` |
+
+## Table
+
+`CpTable`: scrolls sideways on a phone. Put it in a `CpCard`.
+
+<WebComponentSamples part="table" />
+
+| Vue | Classes |
+| --- | --- |
+| `<CpTable>` | `div.overflow-x-auto` around `table.cp-table` |
+
+## Stats
+
+`CpStats` and `CpStat`: a row of figures, stacked on a phone.
+
+<WebComponentSamples part="stats" />
+
+| Vue | Classes |
+| --- | --- |
+| `<CpStats>` | `cp-stats cp-stats-vertical md:cp-stats-horizontal bg-base-100 shadow-sm` |
+| `<CpStat>` | `cp-stat` with `cp-stat-title`, `cp-stat-value` (`text-primary` with `accent`) and `cp-stat-desc` |
+
+## Navigation menu
+
+`CpNavMenu` and `CpNavItem`: the admin's side navigation. Put a Lucide icon before each label.
+
+<WebComponentSamples part="nav-menu" />
+
+| Vue | Classes |
+| --- | --- |
+| `<CpNavMenu>` | `ul.cp-menu.cp-menu-md.w-full.gap-1.p-0` |
+| `<CpNavItem active>` | `li` and `a.cp-menu-active` with `aria-current="page"` |
+
 ## Type
 
 Plain classes, no component: `cp-type-display`, `cp-type-title`, `cp-type-headline`, `cp-type-label`.

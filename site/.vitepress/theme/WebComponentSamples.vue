@@ -6,7 +6,15 @@ import { useSampleTheme } from './useSampleTheme'
 import '../../../web/ui/src/tokens.css'
 import '../../../web/ui/poulpy-ui-embed.css'
 import {
+  CpAvatar,
+  CpBadge,
+  CpCard,
+  CpNavItem,
+  CpNavMenu,
   CpPasswordField,
+  CpStat,
+  CpStats,
+  CpTable,
   CpButton,
   CpChip,
   CpErrorNote,
@@ -17,7 +25,7 @@ import {
   CpStepper,
 } from '../../../web/ui/src/index'
 
-defineProps<{ part: 'button' | 'chip' | 'search-field' | 'stepper' | 'select-field' | 'password-field' | 'poulpy-card' | 'error' | 'sheet' }>()
+defineProps<{ part: 'badge' | 'avatar' | 'card' | 'table' | 'stats' | 'nav-menu' | 'button' | 'chip' | 'search-field' | 'stepper' | 'select-field' | 'password-field' | 'poulpy-card' | 'error' | 'sheet' }>()
 const { mode } = useSampleTheme()
 const chips = ref({ legs: true, core: false })
 const query = ref('squat')
@@ -41,6 +49,35 @@ const formats = [
         <CpButton variant="outline">Cancel</CpButton>
         <CpButton variant="grumpy">Catch up</CpButton>
       </div>
+      <div v-else-if="part === 'badge'" class="row">
+        <CpBadge>Published catalog</CpBadge>
+        <CpBadge tone="neutral">Made admin</CpBadge>
+        <CpBadge tone="outline">Disabled account</CpBadge>
+        <CpBadge tone="error">Send failed</CpBadge>
+      </div>
+      <div v-else-if="part === 'avatar'" class="row">
+        <CpAvatar initials="A" />
+        <CpAvatar initials="A" tone="primary" size="md" />
+      </div>
+      <CpCard v-else-if="part === 'card'" title="Latest changes">Everything an admin changed, newest first.</CpCard>
+      <CpCard v-else-if="part === 'table'" title="Latest changes">
+        <CpTable>
+          <thead><tr><th>When</th><th>What</th></tr></thead>
+          <tbody>
+            <tr><td>8 Nov, 14:20</td><td><CpBadge>Published catalog</CpBadge></td></tr>
+            <tr><td>8 Nov, 14:02</td><td><CpBadge tone="outline">Disabled account</CpBadge></td></tr>
+          </tbody>
+        </CpTable>
+      </CpCard>
+      <CpStats v-else-if="part === 'stats'">
+        <CpStat title="Changes this week" value="12" description="Since Monday" accent />
+        <CpStat title="Admins" value="1" description="Ana" />
+      </CpStats>
+      <CpNavMenu v-else-if="part === 'nav-menu'">
+        <CpNavItem active>Audit log</CpNavItem>
+        <CpNavItem>Accounts</CpNavItem>
+        <CpNavItem>Catalog</CpNavItem>
+      </CpNavMenu>
       <div v-else-if="part === 'chip'" class="row">
         <CpChip v-model="chips.legs">Legs</CpChip>
         <CpChip v-model="chips.core">Core</CpChip>
