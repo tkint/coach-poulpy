@@ -38,6 +38,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.autofill.ContentType
+import androidx.compose.ui.semantics.contentType
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -87,8 +91,10 @@ private fun FieldBox(focused: Boolean, height: Dp, modifier: Modifier = Modifier
 
 /**
  * A labelled free-text field, with an optional note under it, or an [error] in crimson with an icon in
- * its place. A [password] field hides what is typed, with a button to show it.
+ * its place. A [password] field hides what is typed, with a button to show it. A [contentType] tells
+ * the autofill service (a password manager) what the field is.
  */
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 internal fun PoulpyTextField(
     label: String,
@@ -99,6 +105,7 @@ internal fun PoulpyTextField(
     error: String? = null,
     keyboardType: KeyboardType = KeyboardType.Text,
     password: Boolean = false,
+    contentType: ContentType? = null,
 ) {
     var focused by remember { mutableStateOf(false) }
     var shown by remember { mutableStateOf(false) }
@@ -118,7 +125,8 @@ internal fun PoulpyTextField(
                         autoCorrectEnabled = !password && keyboardType == KeyboardType.Text,
                     ),
                     visualTransformation = if (password && !shown) PasswordVisualTransformation() else VisualTransformation.None,
-                    modifier = Modifier.weight(1f).onFocusChanged { focused = it.isFocused },
+                    modifier = Modifier.weight(1f).onFocusChanged { focused = it.isFocused }
+                        .then(if (contentType != null) Modifier.semantics { this.contentType = contentType } else Modifier),
                 )
                 if (password) {
                     IconButton(onClick = { shown = !shown }) {
