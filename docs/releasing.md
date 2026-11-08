@@ -35,7 +35,7 @@ The first push creates the package as private. Either make it public once (the p
 
 ## Deploy the server
 
-A release never reaches the machine on its own. Open **Actions > Deploy > Run workflow**, pick what to deploy (`server`, or `website` for the web app), the `production` environment, enter `latest` or a version such as `0.2.0`, and run it. The server and the website are separate runs, each replacing only its own container and Caddy route. It writes the app's `.env` from that GitHub environment, uploads it with the deploy files from the selected workflow ref and deploys that server image behind the shared Caddy. The machine needs Python 3 and Docker Compose.
+A release never reaches the machine on its own. Open **Actions > Deploy > Run workflow**, pick what to deploy (`server`, `website` for the web app, or `all` for both, the server first), the `production` environment, enter `latest` or a version such as `0.2.0`, and run it. With `all` the two run one after the other in the same workflow run, and a failed server deploy stops before the website; each replaces only its own container and Caddy route. It writes the app's `.env` from that GitHub environment, uploads it with the deploy files from the selected workflow ref and deploys that server image behind the shared Caddy. The machine needs Python 3 and Docker Compose.
 
 Set it up once:
 
