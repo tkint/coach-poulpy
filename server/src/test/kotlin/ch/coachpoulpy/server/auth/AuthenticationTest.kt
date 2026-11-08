@@ -10,7 +10,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class AuthenticationTest {
-    private val ana = Caller.Signed(AccountId("0190d4d2-0000-7000-8000-000000000001"), Client("app"), setOf(Scope.Sync))
+    private val ana = Caller.Signed(AccountId.parse("0190d4d2-0000-7000-8000-000000000001"), Client("app"), setOf(Scope.Sync))
 
     private val app = authenticate(
         mapOf(

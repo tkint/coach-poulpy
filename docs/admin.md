@@ -14,7 +14,9 @@ No endpoint makes an admin. Set `ADMIN_EMAIL` in the `production` environment ([
 
 ## The audit log
 
-Every admin write adds a row to `admin_audit`: who (empty when the server itself did it, as at start-up), what, the target (an account id, an exercise slug) and when. Rows stay when the admin's own account is deleted. `GET /api/v1/admin/audit` returns the last 100, and the first screen of the admin shows them. Each admin feature calls `AdminAudit.record` for its writes.
+An admin action is an `AdminAction` event (who, what, the target), sent through http4k's `Events` like any other event. One sink stores it in the `admin_audit` table (who is empty when the server itself did it, as at start-up; rows stay when the admin's own account is deleted), and another prints it to the server log, which the log shipping picks up. `GET /api/v1/admin/audit` returns the last 100 rows, and the first screen of the admin shows them. Each admin feature emits an `AdminAction` for its writes; tests check it with `RecordingEvents`.
+
+Sensitive values are values4k types that print masked: `EmailAddress` prints as `a***@example.com`, so an address that reaches a log or an event by accident stays hidden, and the real one is read with `.value` only where it is needed. An event never carries a password or an unmasked address.
 
 ## What comes next
 

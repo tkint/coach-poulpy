@@ -10,7 +10,11 @@ import ch.coachpoulpy.server.mail.ConsoleMailer
 import ch.coachpoulpy.server.mail.MailSettings
 import ch.coachpoulpy.server.mail.SmtpMailer
 import ch.coachpoulpy.server.admin.AdminAudit
+import ch.coachpoulpy.server.admin.EmailAddress
+import dev.forkhandles.values.parseOrNull
 import ch.coachpoulpy.server.admin.promoteFirstAdmin
+import org.http4k.events.StdOutEvents
+import org.http4k.events.and
 import ch.coachpoulpy.server.api.api
 import ch.coachpoulpy.server.api.confirmationEvents
 import ch.coachpoulpy.server.auth.authenticate
@@ -100,8 +104,11 @@ fun main() {
     val accountDeletion = AccountDeletion(database, passwords)
     val origin = websiteOrigin(websiteUrl(System::getenv))
     val audit = AdminAudit(database)
-    System.getenv("ADMIN_EMAIL")?.takeIf { it.isNotBlank() }?.let { email ->
-        if (promoteFirstAdmin(database, audit, email)) println("$email is now an admin")
+    // Admin actions go to the database and, with their masked values, to the log.
+    val events = audit.events.and(StdOutEvents)
+    System.getenv("ADMIN_EMAIL")?.takeIf { it.isNotBlank() }?.let { setting ->
+        val email = requireNotNull(EmailAddress.parseOrNull(setting.trim())) { "ADMIN_EMAIL is not an email address" }
+        if (promoteFirstAdmin(database, events, email)) println("$email is now an admin")
     }
     val http = app(version, Catalog.bundled, database, accounts, signIns, passwordResets, accountDeletion, audit = audit, websiteOrigin = origin)
     // Jetty, for the server-sent events SunHttp can't hold open (#319).

@@ -1,5 +1,8 @@
 package ch.coachpoulpy.server.auth
 
+import dev.forkhandles.values.UUIDValueFactory
+import dev.forkhandles.values.Value
+import java.util.UUID
 import org.http4k.core.Request
 import org.http4k.lens.RequestKey
 
@@ -23,8 +26,11 @@ sealed interface Caller {
     ) : Caller
 }
 
+/** An account's id, a UUID that can only be made through [AccountId.of] or [AccountId.parse] (values4k). */
 @JvmInline
-value class AccountId(val value: String)
+value class AccountId private constructor(override val value: UUID) : Value<UUID> {
+    companion object : UUIDValueFactory<AccountId>(::AccountId)
+}
 
 /** The account's role, which is not a scope anyone can ask for (ADR 0020). */
 enum class Role(val value: String) {
