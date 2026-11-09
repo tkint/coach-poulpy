@@ -18,21 +18,25 @@ import {
   CpButton,
   CpChip,
   CpErrorNote,
+  CpPagination,
   CpPoulpyCard,
   CpSearchField,
   CpSelectField,
   CpSheet,
+  CpSidePanel,
   CpStepper,
   CpTextField,
 } from '../../../web/ui/src/index'
 
-defineProps<{ part: 'badge' | 'avatar' | 'card' | 'table' | 'stats' | 'nav-menu' | 'button' | 'chip' | 'search-field' | 'stepper' | 'select-field' | 'text-field' | 'password-field' | 'poulpy-card' | 'error' | 'sheet' }>()
+defineProps<{ part: 'badge' | 'avatar' | 'card' | 'table' | 'stats' | 'nav-menu' | 'button' | 'chip' | 'search-field' | 'stepper' | 'select-field' | 'text-field' | 'password-field' | 'poulpy-card' | 'error' | 'sheet' | 'pagination' | 'side-panel' }>()
 const { mode } = useSampleTheme()
 const chips = ref({ legs: true, core: false })
 const query = ref('squat')
 const rest = ref(90)
 const format = ref('circuit')
 const sheet = ref(false)
+const page = ref(2)
+const panel = ref(true)
 const password = ref('correct horse')
 const email = ref('ana@example.com')
 const formats = [
@@ -115,6 +119,14 @@ const formats = [
           </template>
         </CpSheet>
       </template>
+      <CpPagination v-else-if="part === 'pagination'" v-model:page="page" :pages="5" previous-label="Previous page" next-label="Next page" nav-label="Pages" />
+      <template v-else-if="part === 'side-panel'">
+        <div class="row"><CpButton variant="outline" size="md" @click="panel = !panel">{{ panel ? 'Hide' : 'Show' }} the details</CpButton></div>
+        <CpSidePanel v-if="panel" class="side-panel-sample" title="lea@example.com" close-label="Close the details" @close="panel = false">
+          <template #subtitle><CpBadge>Active</CpBadge></template>
+          <p>Member since 9 Nov 2026.</p>
+        </CpSidePanel>
+      </template>
     </div>
   </div>
 </template>
@@ -158,5 +170,13 @@ const formats = [
 }
 .panel :deep(button) {
   line-height: 1.2;
+}
+.side-panel-sample {
+  /* The page version covers the screen on a phone; here it stays in its sample. */
+  position: static;
+  inset: auto;
+  width: auto;
+  border: 1px solid var(--cp-outline);
+  border-radius: 16px;
 }
 </style>

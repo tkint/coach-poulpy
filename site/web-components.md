@@ -157,6 +157,28 @@ Primary, tonal, outline and grumpy: `CpButton`.
 | --- | --- |
 | `<CpTable>` | `div.overflow-x-auto` around `table.cp-table` |
 
+Sortable columns put a `cp-btn cp-btn-ghost cp-btn-sm` in the header cell, with the arrow of the order beside the label, and `aria-sort` on the `th`. A table of records the person opens has a button in the first cell and a `cp-hover` row.
+
+## Pagination
+
+`CpPagination`: previous, the page numbers and next, joined in one row. Put the count of what is shown beside it.
+
+<WebComponentSamples part="pagination" />
+
+| Vue | Classes |
+| --- | --- |
+| `<CpPagination>` | `nav` around `div.cp-join` of `cp-join-item cp-btn cp-btn-sm` buttons, `cp-btn-active` and `aria-current="page"` on the current page |
+
+## Side panel
+
+`CpSidePanel`: the details of the row picked in a list, in a column on the right of a wide page and over the whole page on a phone. Put it next to the list inside a `flex` row.
+
+<WebComponentSamples part="side-panel" />
+
+| Vue | Classes |
+| --- | --- |
+| `<CpSidePanel>` | `aside.fixed.inset-0.bg-base-100` that becomes `lg:static lg:w-96 lg:border-s`, with an `h2.cp-type-headline` and a `cp-btn cp-btn-circle cp-btn-ghost cp-btn-sm` close button |
+
 ## Stats
 
 `CpStats` and `CpStat`: a row of figures, stacked on a phone.
