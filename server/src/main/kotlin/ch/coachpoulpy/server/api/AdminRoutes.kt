@@ -29,8 +29,8 @@ import org.http4k.core.Status.Companion.OK
 import org.http4k.core.with
 import org.http4k.format.KotlinxSerialization.auto
 import org.http4k.lens.Path
-import org.http4k.lens.int
 import org.http4k.lens.Query
+import org.http4k.lens.int
 import org.http4k.lens.uuid
 
 @Serializable
