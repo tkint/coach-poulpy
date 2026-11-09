@@ -10,6 +10,7 @@ import ch.coachpoulpy.server.auth.requiresAdmin
 import kotlinx.serialization.Serializable
 import org.http4k.contract.ContractRoute
 import org.http4k.contract.Tag
+import org.http4k.contract.div
 import org.http4k.contract.meta
 import org.http4k.core.Body
 import org.http4k.core.Method.DELETE
@@ -126,7 +127,7 @@ private fun disableAccountRoute(accounts: AdminAccounts): ContractRoute = "$API_
     returning(NOT_FOUND to "Unknown account")
     returning(CONFLICT to "Your own account")
     returning(FORBIDDEN to "Not an admin, or not signed in through the website")
-} bindContract POST to { id, _ ->
+} bindContract POST to { id ->
     { request: Request -> accounts.disable(request.admin().accountId, id).toResponse() }
 }
 
@@ -139,7 +140,7 @@ private fun enableAccountRoute(accounts: AdminAccounts): ContractRoute = "$API_P
     returning(NO_CONTENT to "The account is enabled")
     returning(NOT_FOUND to "Unknown account")
     returning(FORBIDDEN to "Not an admin, or not signed in through the website")
-} bindContract POST to { id, _ ->
+} bindContract POST to { id ->
     { request: Request -> accounts.enable(request.admin().accountId, id).toResponse() }
 }
 
