@@ -33,7 +33,7 @@ Primary, tonal, outline and grumpy: `CpButton`.
 
 ## Search field
 
-`CpSearchField`.
+`CpSearchField`: a search is never a sign-in, so the input sets `autocomplete="off"` and the ignore attributes of Proton Pass, 1Password and LastPass, and a password manager does not offer to fill it, even when people search for an email address.
 
 <WebComponentSamples part="search-field" />
 
@@ -79,7 +79,7 @@ Primary, tonal, outline and grumpy: `CpButton`.
 
 | Vue | Classes |
 | --- | --- |
-| `<CpPasswordField>` | `div.cp-fieldset` around a `label.cp-type-label`, `label.cp-input` (`cp-input-error` in error) holding the `input` and a `cp-btn cp-btn-circle cp-btn-ghost cp-btn-sm`, and `span.cp-label` for the hint |
+| `<CpPasswordField>` | `div.cp-fieldset` around a `label.cp-type-label`, `label.cp-input` (`cp-input-error` in error) holding the `input` and a `cp-btn cp-btn-circle cp-btn-ghost cp-btn-sm`, and `p.cp-label.whitespace-normal` for the hint |
 
 ## Poulpy card
 
