@@ -15,11 +15,6 @@ const id = useId()
     <label class="cp-type-label" :for="id">{{ label }}</label>
     <label class="cp-input w-full" :class="{ 'cp-input-error': invalid }">
       <input :id="id" v-model="value" :type="type" class="grow" :autocomplete="autocomplete" :aria-invalid="invalid ? 'true' : undefined"
-        :data-1p-ignore="autocomplete === 'off' ? '' : undefined"
-        :data-lpignore="autocomplete === 'off' ? 'true' : undefined"
-        :data-bwignore="autocomplete === 'off' ? '' : undefined"
-        :data-protonpass-ignore="autocomplete === 'off' ? 'true' : undefined"
-        :data-form-type="autocomplete === 'off' ? 'other' : undefined"
       />
     </label>
   </div>
