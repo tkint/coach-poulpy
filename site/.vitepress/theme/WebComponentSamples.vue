@@ -68,6 +68,7 @@ const formats = [
         <CpBadge>Published catalog</CpBadge>
         <CpBadge tone="neutral">Made admin</CpBadge>
         <CpBadge tone="outline">Disabled account</CpBadge>
+        <CpBadge tone="success">Active</CpBadge>
         <CpBadge tone="error">Send failed</CpBadge>
       </div>
       <div v-else-if="part === 'avatar'" class="row">
@@ -136,7 +137,7 @@ const formats = [
       <CpPagination v-else-if="part === 'pagination'" v-model:page="page" :pages="5" previous-label="Previous page" next-label="Next page" nav-label="Pages" />
       <template v-else-if="part === 'side-panel'">
         <div class="row"><CpButton variant="outline" size="md" @click="panel = !panel">{{ panel ? 'Hide' : 'Show' }} the details</CpButton></div>
-        <CpSidePanel v-if="panel" class="side-panel-sample" title="lea@example.com" close-label="Close the details" @close="panel = false">
+        <CpSidePanel v-if="panel" :class="`cp-theme-${mode}`" data-theme="poulpy" title="lea@example.com" close-label="Close the details" @close="panel = false">
           <template #subtitle><CpBadge>Active</CpBadge></template>
           <p>Member since 9 Nov 2026.</p>
         </CpSidePanel>
@@ -184,13 +185,5 @@ const formats = [
 }
 .panel :deep(button) {
   line-height: 1.2;
-}
-.side-panel-sample {
-  /* The page version covers the screen on a phone; here it stays in its sample. */
-  position: static;
-  inset: auto;
-  width: auto;
-  border: 1px solid var(--cp-outline);
-  border-radius: 16px;
 }
 </style>

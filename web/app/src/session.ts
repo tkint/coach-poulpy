@@ -62,17 +62,39 @@ export async function auditLog(): Promise<AuditEntry[] | undefined> {
   }
 }
 
-/** What `findAccount` found: the account, none with that address, or a failure. */
-export type FoundAccount = { account: AdminAccount } | 'none' | 'failed'
+/** What the admin asks of the accounts table: filters (empty means all), one sort, and a page from 1. */
+export type AccountsQuery = {
+  q: string
+  role: string
+  confirmed: string
+  signIn: string
+  sort: 'email' | 'role' | 'confirmed' | 'signIn' | 'created'
+  order: 'asc' | 'desc'
+  page: number
+  size: number
+}
 
-/** The account with this email, for the admin (#336). */
-export async function findAccount(email: string): Promise<FoundAccount> {
+export type AccountsPage = { accounts: AdminAccount[]; total: number }
+
+/** One page of accounts for the admin (#336), or nothing when it can't be loaded. */
+export async function listAccounts(query: AccountsQuery): Promise<AccountsPage | undefined> {
+  const params = new URLSearchParams()
+  for (const [name, value] of Object.entries(query)) if (value !== '') params.set(name, String(value))
   try {
-    const response = await authorized(`/admin/accounts?email=${encodeURIComponent(email.trim())}`)
-    if (response.status === 404) return 'none'
-    return response.ok ? { account: (await response.json()) as AdminAccount } : 'failed'
+    const response = await authorized(`/admin/accounts?${params}`)
+    return response.ok ? ((await response.json()) as AccountsPage) : undefined
   } catch {
-    return 'failed'
+    return undefined
+  }
+}
+
+/** One account, for a link that opens it; nothing when it doesn't exist or can't be loaded. */
+export async function getAccount(id: string): Promise<AdminAccount | undefined> {
+  try {
+    const response = await authorized(`/admin/accounts/${encodeURIComponent(id)}`)
+    return response.ok ? ((await response.json()) as AdminAccount) : undefined
+  } catch {
+    return undefined
   }
 }
 

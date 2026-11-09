@@ -71,7 +71,7 @@ Primary, tonal, outline, grumpy and danger (crimson, for a deletion that can't b
 
 | Vue | Classes |
 | --- | --- |
-| `<CpTextField>` | `div.cp-fieldset` around a `label.cp-type-label` and `label.cp-input` (`cp-input-error` in error) holding the `input`; `type="search"` for searches, with `autocomplete="off"` |
+| `<CpTextField>` | `div.cp-fieldset` around a `label.cp-type-label` and `label.cp-input` (`cp-input-error` in error) holding the `input`; `type="search"` (with `autocomplete="off"`) is for searches and adds a search icon in the `label.cp-input`, at the height of the other fields |
 
 ## Password field
 
@@ -116,7 +116,7 @@ Primary, tonal, outline, grumpy and danger (crimson, for a deletion that can't b
 
 ## Badge
 
-`CpBadge`: what kind of change, what state. Primary, neutral, outline, or error (crimson, with an icon beside it); never ember or `warning`.
+`CpBadge`: what kind of change, what state. Primary, neutral, outline, success (a state that is fine), or error (crimson, with an icon beside it); never ember or `warning`.
 
 <WebComponentSamples part="badge" />
 
@@ -125,6 +125,7 @@ Primary, tonal, outline, grumpy and danger (crimson, for a deletion that can't b
 | `<CpBadge>` | `cp-badge cp-badge-primary cp-badge-soft` |
 | `<CpBadge tone="neutral">` | `cp-badge cp-badge-neutral cp-badge-soft` |
 | `<CpBadge tone="outline">` | `cp-badge cp-badge-outline` |
+| `<CpBadge tone="success">` | `cp-badge cp-badge-success cp-badge-soft` |
 | `<CpBadge tone="error">` | `cp-badge cp-badge-error cp-badge-soft` |
 
 ## Avatar
@@ -163,7 +164,7 @@ Sortable columns put a `cp-btn cp-btn-ghost cp-btn-sm` in the header cell, with 
 
 ## Pagination
 
-`CpPagination`: previous, the page numbers and next, joined in one row. Put the count of what is shown beside it.
+`CpPagination`: previous, the page numbers and next, joined in one row; a long list keeps the first and last pages and those around the current one, with a gap between. Put the count of what is shown beside it.
 
 <WebComponentSamples part="pagination" />
 
@@ -173,13 +174,13 @@ Sortable columns put a `cp-btn cp-btn-ghost cp-btn-sm` in the header cell, with 
 
 ## Side panel
 
-`CpSidePanel`: the details of the row picked in a list, in a column on the right of a wide page and over the whole page on a phone. Put it next to the list inside a `flex` row.
+`CpSidePanel`: the details of the row picked in a list, floating over the page from the right (the whole width on a phone) with a dim backdrop, so the list never moves. A click outside, the close button and Escape close it. Render it with `v-if` while a row is picked.
 
 <WebComponentSamples part="side-panel" />
 
 | Vue | Classes |
 | --- | --- |
-| `<CpSidePanel>` | `aside.fixed.inset-0.bg-base-100` that becomes `lg:static lg:w-96 lg:border-s`, with an `h2.cp-type-headline` and a `cp-btn cp-btn-circle cp-btn-ghost cp-btn-sm` close button |
+| `<CpSidePanel>` | `dialog.cp-modal.cp-modal-end` around a `div.cp-modal-box` (`w-full sm:w-96`) with an `h2.cp-type-headline` and a `cp-btn cp-btn-circle cp-btn-ghost cp-btn-sm` close button, and a `form.cp-modal-backdrop` |
 
 ## Stats
 

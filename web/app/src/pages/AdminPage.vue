@@ -2,18 +2,20 @@
 // /admin: the sign-in until the cookies sign an admin in, then the admin shell
 // (design/mockups/agreed/web/admin-shell.html) with the audit log and the accounts. A link at
 // the bottom of the sidebar goes back to the web app.
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { ArrowLeft } from 'lucide-vue-next'
 import { CpAvatar, CpBadge, CpCard, CpDrawer, CpDrawerItem, CpErrorNote, CpNavMenu, CpStat, CpStats, CpTable, poulpyDrawings } from '@coach-poulpy/ui'
 import AdminAccountsView from './AdminAccountsView.vue'
 import AdminSignInPage from './AdminSignInPage.vue'
 import { auditLog, currentAccount, signOut, type AuditEntry, type Me } from '../session'
+import { navigate, path } from '../route'
 import { locale, t } from '../i18n'
 
 const me = ref<Me>()
 const checked = ref(false)
 const open = ref(false)
-const view = ref<'audit' | 'accounts'>('audit')
+// The screen is the address: /admin is the audit log, /admin/accounts the accounts table.
+const view = computed<'audit' | 'accounts'>(() => (path.value === '/admin/accounts' ? 'accounts' : 'audit'))
 const entries = ref<AuditEntry[]>()
 const loadFailed = ref(false)
 
@@ -110,10 +112,10 @@ const what = (action: string) => (action in actions ? t(actions[action]) : actio
         </div>
       </div>
       <div class="w-full grow px-2"><CpNavMenu>
-        <CpDrawerItem :label="t('admin.auditTitle')" :active="view === 'audit'" @click="view = 'audit'; load()">
+        <CpDrawerItem :label="t('admin.auditTitle')" href="/admin" :active="view === 'audit'" @click.prevent="navigate('/admin'); load()">
           <template #icon><svg class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /><path d="M12 7v5l4 2" /></svg></template>
         </CpDrawerItem>
-        <CpDrawerItem :label="t('admin.navAccounts')" :active="view === 'accounts'" @click="view = 'accounts'">
+        <CpDrawerItem :label="t('admin.navAccounts')" href="/admin/accounts" :active="view === 'accounts'" @click.prevent="navigate('/admin/accounts')">
           <template #icon><svg class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg></template>
         </CpDrawerItem>
       </CpNavMenu></div>

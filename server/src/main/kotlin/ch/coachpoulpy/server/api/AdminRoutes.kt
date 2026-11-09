@@ -1,6 +1,8 @@
 package ch.coachpoulpy.server.api
 
 import ch.coachpoulpy.server.admin.AccountAction
+import ch.coachpoulpy.server.admin.AccountQuery
+import ch.coachpoulpy.server.admin.AccountSort
 import ch.coachpoulpy.server.admin.AccountView
 import ch.coachpoulpy.server.admin.AdminAccounts
 import ch.coachpoulpy.server.admin.AdminAudit
@@ -28,6 +30,7 @@ import org.http4k.core.with
 import org.http4k.format.KotlinxSerialization.auto
 import org.http4k.lens.Path
 import org.http4k.lens.Query
+import org.http4k.lens.int
 import org.http4k.lens.uuid
 
 @Serializable
@@ -42,7 +45,8 @@ private val adminTag = Tag("admin")
 /** The admin area's routes (#335). Each admin write is recorded in the audit log. */
 fun adminRoutes(audit: AdminAudit, accounts: AdminAccounts): List<ContractRoute> = listOf(
     auditRoute(audit),
-    findAccountRoute(accounts),
+    listAccountsRoute(accounts),
+    getAccountRoute(accounts),
     disableAccountRoute(accounts),
     enableAccountRoute(accounts),
     deleteAccountRoute(accounts),
@@ -77,12 +81,15 @@ data class AdminAccountResponse(
 )
 
 @Serializable
+data class AdminAccountPageResponse(val accounts: List<AdminAccountResponse>, val total: Int)
+
+@Serializable
 data class DeleteAccountConfirmation(val confirmEmail: String)
 
 private val accountBody = Body.auto<AdminAccountResponse>().toLens()
+private val accountPageBody = Body.auto<AdminAccountPageResponse>().toLens()
 private val confirmationBody = Body.auto<DeleteAccountConfirmation>().toLens()
 private val adminProblemBody = Body.auto<Problem>().toLens()
-private val emailQuery = Query.required("email", "The address, whatever its case")
 private val accountId = Path.uuid().of("id", "The account's id")
 
 private fun AccountView.toResponse() =
@@ -100,20 +107,84 @@ private fun AccountAction.toResponse(): Response = when (this) {
     AccountAction.ConfirmationMismatch -> Response(BAD_REQUEST).with(adminProblemBody of Problem("confirmation-mismatch"))
 }
 
-private fun findAccountRoute(accounts: AdminAccounts): ContractRoute = "$API_PREFIX/admin/accounts" meta {
-    summary = "Find an account by its email"
-    description = "The account's state: email, whether it is confirmed, role, creation date and whether it is disabled. " +
-        "Never a workout or health data. 404 when no account has this address."
-    operationId = "findAdminAccount"
+private val searchQuery = Query.optional("q", "Part of the address, whatever its case")
+private val roleQuery = Query.optional("role", "member or admin")
+private val confirmedQuery = Query.optional("confirmed", "yes or no: whether the email is confirmed")
+private val signInQuery = Query.optional("signIn", "active or disabled")
+private val sortQuery = Query.optional("sort", "email, role, confirmed, signIn or created (default created)")
+private val orderQuery = Query.optional("order", "asc or desc (default desc)")
+private val pageQuery = Query.int().defaulted("page", 1, "The page, from 1")
+private val sizeQuery = Query.int().defaulted("size", AccountQuery.DEFAULT_PAGE_SIZE, "Accounts per page, up to ${AccountQuery.MAX_PAGE_SIZE}")
+
+private val sorts = mapOf(
+    "email" to AccountSort.Email,
+    "role" to AccountSort.Role,
+    "confirmed" to AccountSort.EmailStatus,
+    "signIn" to AccountSort.SignIn,
+    "created" to AccountSort.Created,
+)
+
+/** The table's question from the query string, or null when a value isn't one of the allowed words. */
+private fun Request.accountQuery(): AccountQuery? {
+    val role = roleQuery(this)
+    val confirmed = confirmedQuery(this)
+    val signIn = signInQuery(this)
+    val sort = sortQuery(this)
+    val order = orderQuery(this)
+    if (role !in listOf(null, "member", "admin") || confirmed !in listOf(null, "yes", "no") ||
+        signIn !in listOf(null, "active", "disabled") || sort != null && sort !in sorts || order !in listOf(null, "asc", "desc")
+    ) return null
+    return AccountQuery(
+        emailContains = searchQuery(this),
+        role = role,
+        confirmed = confirmed?.let { it == "yes" },
+        disabled = signIn?.let { it == "disabled" },
+        sort = sort?.let(sorts::getValue) ?: AccountSort.Created,
+        ascending = order == "asc",
+        page = pageQuery(this),
+        size = sizeQuery(this),
+    )
+}
+
+private fun listAccountsRoute(accounts: AdminAccounts): ContractRoute = "$API_PREFIX/admin/accounts" meta {
+    summary = "List the accounts"
+    description = "One page of accounts, filtered and sorted, with how many match in all: email, whether it is confirmed, role, " +
+        "creation date and whether it is disabled. Never a workout or health data. A value that isn't an allowed word is a 400."
+    operationId = "listAdminAccounts"
     tags += adminTag
-    queries += emailQuery
+    queries += searchQuery
+    queries += roleQuery
+    queries += confirmedQuery
+    queries += signInQuery
+    queries += sortQuery
+    queries += orderQuery
+    queries += pageQuery
+    queries += sizeQuery
     security = requiresAdmin()
-    returning(OK, accountBody to exampleAccount, "The account", definitionId = "AdminAccount")
-    returning(NOT_FOUND, adminProblemBody to Problem("unknown-account"), "No account with this address", definitionId = "Problem")
+    returning(OK, accountPageBody to AdminAccountPageResponse(listOf(exampleAccount), 1), "A page of accounts", definitionId = "AdminAccountPage")
+    returning(BAD_REQUEST, adminProblemBody to Problem("bad-query"), "A filter or sort value isn't allowed", definitionId = "Problem")
     returning(FORBIDDEN to "Not an admin, or not signed in through the website")
 } bindContract GET to { request ->
-    accounts.find(emailQuery(request))?.let { Response(OK).with(accountBody of it.toResponse()) }
-        ?: Response(NOT_FOUND).with(adminProblemBody of Problem("unknown-account"))
+    request.accountQuery()?.let { query ->
+        val page = accounts.list(query)
+        Response(OK).with(accountPageBody of AdminAccountPageResponse(page.accounts.map { it.toResponse() }, page.total))
+    } ?: Response(BAD_REQUEST).with(adminProblemBody of Problem("bad-query"))
+}
+
+private fun getAccountRoute(accounts: AdminAccounts): ContractRoute = "$API_PREFIX/admin/accounts" / accountId meta {
+    summary = "One account"
+    description = "The account's state, as the list shows it, so a link to one account opens it even when it is not on the page. 404 when the id is unknown."
+    operationId = "getAdminAccount"
+    tags += adminTag
+    security = requiresAdmin()
+    returning(OK, accountBody to exampleAccount, "The account", definitionId = "AdminAccount")
+    returning(NOT_FOUND, adminProblemBody to Problem("unknown-account"), "No account with this id", definitionId = "Problem")
+    returning(FORBIDDEN to "Not an admin, or not signed in through the website")
+} bindContract GET to { id ->
+    { _: Request ->
+        accounts.get(id)?.let { Response(OK).with(accountBody of it.toResponse()) }
+            ?: Response(NOT_FOUND).with(adminProblemBody of Problem("unknown-account"))
+    }
 }
 
 private fun disableAccountRoute(accounts: AdminAccounts): ContractRoute = "$API_PREFIX/admin/accounts" / accountId / "disable" meta {
