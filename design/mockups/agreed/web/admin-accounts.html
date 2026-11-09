@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Admin · accounts · found</title>
+<title>Admin · accounts · list</title>
 <meta name="mockup:screen" content="admin-accounts">
 <meta name="mockup:section" content="Admin">
 <meta name="mockup:issue" content="336">
@@ -22,40 +22,78 @@
       <label for="admin-drawer" aria-label="Toggle the navigation" class="cp-btn cp-btn-square cp-btn-ghost"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/></svg></label>
       <div class="px-2 font-bold">Accounts</div>
     </nav>
-    <main class="flex flex-col gap-6 p-4 md:p-8" id="accounts">
-      <div class="flex flex-col gap-1">
-        <h1 class="cp-type-display">Accounts</h1>
-        <p class="text-base-content/70">Find an account by its email. You see its state, never its workouts or health data.</p>
-      </div>
-      <form class="flex flex-col gap-1 sm:flex-row sm:items-end" id="account-search" role="search">
-        <div class="cp-fieldset grow" data-component="email-field">
-          <label class="cp-type-label" for="account-email">Email</label>
-          <label class="cp-input w-full">
-            <input id="account-email" type="search" class="grow" value="léa@example.com" autocomplete="off" placeholder="name@example.com">
-          </label>
+    <main class="flex min-h-full" id="accounts">
+      <div class="flex min-w-0 grow flex-col gap-6 p-4 md:p-8">
+        <div class="flex flex-col gap-1">
+          <h1 class="cp-type-display">Accounts</h1>
+          <p class="text-base-content/70">Every account, with its state and never its workouts or health data. Open one to disable or delete it.</p>
         </div>
-        <button type="submit" class="cp-btn cp-btn-primary gap-2"><svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>Find</button>
+      <form class="cp-card bg-base-100 shadow-sm" id="filters" role="search" aria-label="Filter the accounts">
+        <div class="cp-card-body grid gap-4 p-4 sm:grid-cols-2 lg:grid-cols-4 md:p-6">
+          <div class="cp-fieldset sm:col-span-2 lg:col-span-1" data-component="email-field">
+            <label class="cp-type-label" for="filter-email">Email contains</label>
+            <label class="cp-input w-full"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input id="filter-email" type="search" class="grow" value="" autocomplete="off"></label>
+          </div>
+          <label class="cp-fieldset" data-component="select-field"><span class="cp-type-label">Role</span><select id="filter-role" class="cp-select w-full"><option value="" selected>All</option><option value="member">Member</option><option value="admin">Admin</option></select></label>
+          <label class="cp-fieldset" data-component="select-field"><span class="cp-type-label">Email</span><select id="filter-confirmed" class="cp-select w-full"><option value="" selected>All</option><option value="yes">Confirmed</option><option value="no">Not confirmed</option></select></label>
+          <label class="cp-fieldset" data-component="select-field"><span class="cp-type-label">Sign-in</span><select id="filter-signin" class="cp-select w-full"><option value="" selected>All</option><option value="active">Active</option><option value="disabled">Disabled</option></select></label>
+        </div>
       </form>
-      <div class="cp-card bg-base-100 shadow-sm" id="account">
+      <div class="cp-card bg-base-100 shadow-sm" id="accounts-table">
         <div class="cp-card-body gap-4 p-4 md:p-6">
-          <div class="flex flex-wrap items-center gap-3">
-            <div class="cp-avatar cp-avatar-placeholder"><div class="bg-secondary text-secondary-content w-12 rounded-full"><span>L</span></div></div>
-            <h2 class="cp-card-title min-w-0 break-all">léa@example.com</h2>
-            <span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Active</span>
+          <div class="overflow-x-auto">
+            <table class="cp-table">
+              <thead><tr><th aria-sort="none"><button type="button" class="cp-btn cp-btn-ghost cp-btn-sm -ms-3 gap-1 whitespace-nowrap">Email<svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg></button></th><th aria-sort="none"><button type="button" class="cp-btn cp-btn-ghost cp-btn-sm -ms-3 gap-1 whitespace-nowrap">Role<svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg></button></th><th aria-sort="none"><button type="button" class="cp-btn cp-btn-ghost cp-btn-sm -ms-3 gap-1 whitespace-nowrap">Email status<svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg></button></th><th aria-sort="none"><button type="button" class="cp-btn cp-btn-ghost cp-btn-sm -ms-3 gap-1 whitespace-nowrap">Sign-in<svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg></button></th><th aria-sort="descending"><button type="button" class="cp-btn cp-btn-ghost cp-btn-sm -ms-3 gap-1 whitespace-nowrap">Created<svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button></th></tr></thead>
+              <tbody>
+                <tr class="cp-hover">
+                  <td><div class="flex items-center gap-3"><div class="cp-avatar cp-avatar-placeholder"><div class="bg-secondary text-secondary-content w-8 rounded-full"><span class="text-xs">L</span></div></div><a href="admin-accounts-details.html" class="cp-link cp-link-hover whitespace-nowrap text-start font-semibold">lea@example.com</a></div></td>
+                  <td><span class="cp-badge cp-badge-neutral cp-badge-soft whitespace-nowrap">Member</span></td><td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Confirmed</span></td><td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Active</span></td><td class="whitespace-nowrap">9 Nov 2026</td>
+                </tr>
+                <tr class="cp-hover">
+                  <td><div class="flex items-center gap-3"><div class="cp-avatar cp-avatar-placeholder"><div class="bg-secondary text-secondary-content w-8 rounded-full"><span class="text-xs">T</span></div></div><a href="admin-accounts-details.html" class="cp-link cp-link-hover whitespace-nowrap text-start font-semibold">tom@example.com</a></div></td>
+                  <td><span class="cp-badge cp-badge-neutral cp-badge-soft whitespace-nowrap">Member</span></td><td><span class="cp-badge cp-badge-outline whitespace-nowrap">Not confirmed</span></td><td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Active</span></td><td class="whitespace-nowrap">8 Nov 2026</td>
+                </tr>
+                <tr class="cp-hover">
+                  <td><div class="flex items-center gap-3"><div class="cp-avatar cp-avatar-placeholder"><div class="bg-secondary text-secondary-content w-8 rounded-full"><span class="text-xs">A</span></div></div><a href="admin-accounts-details.html" class="cp-link cp-link-hover whitespace-nowrap text-start font-semibold">ana@example.com</a></div></td>
+                  <td><span class="cp-badge cp-badge-primary cp-badge-soft whitespace-nowrap">Admin</span></td><td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Confirmed</span></td><td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Active</span></td><td class="whitespace-nowrap">2 Nov 2026</td>
+                </tr>
+                <tr class="cp-hover">
+                  <td><div class="flex items-center gap-3"><div class="cp-avatar cp-avatar-placeholder"><div class="bg-secondary text-secondary-content w-8 rounded-full"><span class="text-xs">S</span></div></div><a href="admin-accounts-details.html" class="cp-link cp-link-hover whitespace-nowrap text-start font-semibold">sam@example.com</a></div></td>
+                  <td><span class="cp-badge cp-badge-neutral cp-badge-soft whitespace-nowrap">Member</span></td><td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Confirmed</span></td><td><span class="cp-badge cp-badge-outline whitespace-nowrap">Disabled</span></td><td class="whitespace-nowrap">28 Oct 2026</td>
+                </tr>
+                <tr class="cp-hover">
+                  <td><div class="flex items-center gap-3"><div class="cp-avatar cp-avatar-placeholder"><div class="bg-secondary text-secondary-content w-8 rounded-full"><span class="text-xs">N</span></div></div><a href="admin-accounts-details.html" class="cp-link cp-link-hover whitespace-nowrap text-start font-semibold">noa@example.com</a></div></td>
+                  <td><span class="cp-badge cp-badge-neutral cp-badge-soft whitespace-nowrap">Member</span></td><td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Confirmed</span></td><td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Active</span></td><td class="whitespace-nowrap">21 Oct 2026</td>
+                </tr>
+                <tr class="cp-hover">
+                  <td><div class="flex items-center gap-3"><div class="cp-avatar cp-avatar-placeholder"><div class="bg-secondary text-secondary-content w-8 rounded-full"><span class="text-xs">I</span></div></div><a href="admin-accounts-details.html" class="cp-link cp-link-hover whitespace-nowrap text-start font-semibold">ines@example.com</a></div></td>
+                  <td><span class="cp-badge cp-badge-neutral cp-badge-soft whitespace-nowrap">Member</span></td><td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Confirmed</span></td><td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Active</span></td><td class="whitespace-nowrap">14 Oct 2026</td>
+                </tr>
+                <tr class="cp-hover">
+                  <td><div class="flex items-center gap-3"><div class="cp-avatar cp-avatar-placeholder"><div class="bg-secondary text-secondary-content w-8 rounded-full"><span class="text-xs">H</span></div></div><a href="admin-accounts-details.html" class="cp-link cp-link-hover whitespace-nowrap text-start font-semibold">hugo@example.com</a></div></td>
+                  <td><span class="cp-badge cp-badge-neutral cp-badge-soft whitespace-nowrap">Member</span></td><td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Confirmed</span></td><td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Active</span></td><td class="whitespace-nowrap">9 Oct 2026</td>
+                </tr>
+                <tr class="cp-hover">
+                  <td><div class="flex items-center gap-3"><div class="cp-avatar cp-avatar-placeholder"><div class="bg-secondary text-secondary-content w-8 rounded-full"><span class="text-xs">Z</span></div></div><a href="admin-accounts-details.html" class="cp-link cp-link-hover whitespace-nowrap text-start font-semibold">zoe@example.com</a></div></td>
+                  <td><span class="cp-badge cp-badge-neutral cp-badge-soft whitespace-nowrap">Member</span></td><td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Confirmed</span></td><td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Active</span></td><td class="whitespace-nowrap">2 Oct 2026</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
-          <dl class="grid gap-x-8 gap-y-3 sm:grid-cols-2">
-            <div><dt class="cp-type-label">Email</dt><dd>Confirmed</dd></div>
-            <div><dt class="cp-type-label">Role</dt><dd>Member</dd></div>
-            <div><dt class="cp-type-label">Created</dt><dd>2 Oct 2026</dd></div>
-            <div><dt class="cp-type-label">Sign-in</dt><dd>Allowed</dd></div>
-          </dl>
-          <p class="text-sm text-base-content/70">Disabling signs this account out everywhere and blocks sign-in until you enable it again. Nothing is deleted.</p>
-          <div class="cp-card-actions flex-wrap justify-end">
-            <button class="cp-btn cp-btn-outline gap-2"><svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></svg>Disable account</button>
-            <button class="cp-btn cp-btn-error gap-2"><svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Delete account</button>
+          <div class="flex flex-col items-center justify-between gap-3 sm:flex-row" data-component="pagination">
+            <p class="text-sm text-base-content/70">Showing 1 to 8 of 21 accounts</p>
+            <nav aria-label="Pages"><div class="cp-join">
+              <button class="cp-join-item cp-btn cp-btn-sm" disabled aria-label="Previous page"><svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
+              <button class="cp-join-item cp-btn cp-btn-sm cp-btn-active" aria-current="page">1</button>
+              <button class="cp-join-item cp-btn cp-btn-sm">2</button>
+              <button class="cp-join-item cp-btn cp-btn-sm">3</button>
+              <button class="cp-join-item cp-btn cp-btn-sm" aria-label="Next page"><svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
+            </div></nav>
           </div>
         </div>
       </div>
+      </div>
+
     </main>
   </div>
   <div class="cp-drawer-side cp-is-drawer-close:overflow-visible" data-component="admin-nav">
