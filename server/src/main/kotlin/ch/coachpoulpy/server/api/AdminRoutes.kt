@@ -46,6 +46,7 @@ private val adminTag = Tag("admin")
 fun adminRoutes(audit: AdminAudit, accounts: AdminAccounts): List<ContractRoute> = listOf(
     auditRoute(audit),
     listAccountsRoute(accounts),
+    getAccountRoute(accounts),
     disableAccountRoute(accounts),
     enableAccountRoute(accounts),
     deleteAccountRoute(accounts),
@@ -85,6 +86,7 @@ data class AdminAccountPageResponse(val accounts: List<AdminAccountResponse>, va
 @Serializable
 data class DeleteAccountConfirmation(val confirmEmail: String)
 
+private val accountBody = Body.auto<AdminAccountResponse>().toLens()
 private val accountPageBody = Body.auto<AdminAccountPageResponse>().toLens()
 private val confirmationBody = Body.auto<DeleteAccountConfirmation>().toLens()
 private val adminProblemBody = Body.auto<Problem>().toLens()
@@ -167,6 +169,22 @@ private fun listAccountsRoute(accounts: AdminAccounts): ContractRoute = "$API_PR
         val page = accounts.list(query)
         Response(OK).with(accountPageBody of AdminAccountPageResponse(page.accounts.map { it.toResponse() }, page.total))
     } ?: Response(BAD_REQUEST).with(adminProblemBody of Problem("bad-query"))
+}
+
+private fun getAccountRoute(accounts: AdminAccounts): ContractRoute = "$API_PREFIX/admin/accounts" / accountId meta {
+    summary = "One account"
+    description = "The account's state, as the list shows it, so a link to one account opens it even when it is not on the page. 404 when the id is unknown."
+    operationId = "getAdminAccount"
+    tags += adminTag
+    security = requiresAdmin()
+    returning(OK, accountBody to exampleAccount, "The account", definitionId = "AdminAccount")
+    returning(NOT_FOUND, adminProblemBody to Problem("unknown-account"), "No account with this id", definitionId = "Problem")
+    returning(FORBIDDEN to "Not an admin, or not signed in through the website")
+} bindContract GET to { id ->
+    { _: Request ->
+        accounts.get(id)?.let { Response(OK).with(accountBody of it.toResponse()) }
+            ?: Response(NOT_FOUND).with(adminProblemBody of Problem("unknown-account"))
+    }
 }
 
 private fun disableAccountRoute(accounts: AdminAccounts): ContractRoute = "$API_PREFIX/admin/accounts" / accountId / "disable" meta {

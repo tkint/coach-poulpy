@@ -88,6 +88,16 @@ export async function listAccounts(query: AccountsQuery): Promise<AccountsPage |
   }
 }
 
+/** One account, for a link that opens it; nothing when it doesn't exist or can't be loaded. */
+export async function getAccount(id: string): Promise<AdminAccount | undefined> {
+  try {
+    const response = await authorized(`/admin/accounts/${encodeURIComponent(id)}`)
+    return response.ok ? ((await response.json()) as AdminAccount) : undefined
+  } catch {
+    return undefined
+  }
+}
+
 /** Disables or enables an account; true when the server did it. */
 export async function setAccountDisabled(id: string, disabled: boolean): Promise<boolean> {
   try {

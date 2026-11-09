@@ -39,6 +39,10 @@ DELETE FROM account WHERE id = ? RETURNING email;
 adminList:
 SELECT id, email, role, confirmed_at, created_at, disabled_at FROM account;
 
+-- One account as the admin sees it; no row when the id is unknown.
+adminViewById:
+SELECT id, email, role, confirmed_at, created_at, disabled_at FROM account WHERE id = :id;
+
 -- No row when the account is unknown or already disabled.
 disable:
 UPDATE account SET disabled_at = :disabledAt WHERE id = :id AND disabled_at IS NULL RETURNING id;

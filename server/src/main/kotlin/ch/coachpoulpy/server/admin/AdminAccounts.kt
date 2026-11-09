@@ -80,6 +80,11 @@ class AdminAccounts(
 ) {
     private val queries get() = database.queries.accountQueries
 
+    /** The account with [id], or null. */
+    fun get(id: UUID): AccountView? = queries.adminViewById(id).executeAsOneOrNull()?.let {
+        AccountView(it.id, it.email, it.role, it.confirmed_at != null, it.created_at, it.disabled_at)
+    }
+
     /** The page of accounts [query] asks for. */
     fun list(query: AccountQuery): AccountPage = pageOf(
         queries.adminList().executeAsList().map {

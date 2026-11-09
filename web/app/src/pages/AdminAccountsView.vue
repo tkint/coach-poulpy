@@ -1,8 +1,9 @@
 <script setup lang="ts">
 // The accounts screen of the admin (design/mockups/agreed/web/admin-accounts*.html): a paged table of every
-// account, sorted and filtered on the server, with the account picked in a panel floating on the right where it is
-// disabled, enabled or deleted after typing its email again (#336). It never shows a workout or health data.
-import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
+// account, sorted and filtered on the server, with the account picked in a panel floating on the right where it
+// is disabled, enabled or deleted after typing its email again (#336). It never shows a workout or health data.
+// The table's state lives in the URL (route.ts): /admin/accounts?q=lea&role=admin&sort=email&order=asc&page=2&account=<id>.
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import {
   CpAvatar,
   CpBadge,
@@ -17,15 +18,39 @@ import {
   CpTable,
   CpTextField,
 } from '@coach-poulpy/ui'
-import { deleteAccount, listAccounts, setAccountDisabled, type AccountsQuery, type AdminAccount } from '../session'
+import { deleteAccount, getAccount, listAccounts, setAccountDisabled, type AccountsQuery, type AdminAccount } from '../session'
+import { navigate, search, withParams } from '../route'
 import { locale, t } from '../i18n'
 
 const props = defineProps<{ ownAccountId: string }>()
 
 const PAGE_SIZE = 8
+const BASE = '/admin/accounts'
 type Sort = AccountsQuery['sort']
+const SORTS: Sort[] = ['email', 'role', 'confirmed', 'signIn', 'created']
+/** What each URL parameter is when it is absent; a default isn't written to the address. */
+const DEFAULTS = { q: '', role: '', confirmed: '', signIn: '', sort: 'created', order: 'desc', page: '1', account: '' }
+type Param = keyof typeof DEFAULTS
 
-const query = reactive<AccountsQuery>({ q: '', role: '', confirmed: '', signIn: '', sort: 'created', order: 'desc', page: 1, size: PAGE_SIZE })
+const param = (name: Param) => search.value.get(name) ?? DEFAULTS[name]
+const query = computed<AccountsQuery>(() => ({
+  q: param('q'),
+  role: param('role'),
+  confirmed: param('confirmed'),
+  signIn: param('signIn'),
+  sort: SORTS.find((sort) => sort === param('sort')) ?? 'created',
+  order: param('order') === 'asc' ? 'asc' : 'desc',
+  page: Math.max(1, Number.parseInt(param('page'), 10) || 1),
+  size: PAGE_SIZE,
+}))
+const accountId = computed(() => param('account'))
+
+/** Moves to the table with [patch] applied to the address; `replace` for typing, which shouldn't fill the history. */
+function go(patch: Partial<Record<Param, string>>, mode: 'push' | 'replace' = 'push') {
+  const current = Object.fromEntries(Object.keys(DEFAULTS).map((name) => [name, search.value.get(name) ?? ''])) as Record<Param, string>
+  navigate(withParams(BASE, { ...current, ...patch }, DEFAULTS), mode)
+}
+
 const accounts = ref<AdminAccount[]>([])
 const total = ref(0)
 const state = ref<'loading' | 'ready' | 'failed'>('loading')
@@ -39,8 +64,8 @@ const moment = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short',
 const pages = computed(() => Math.max(1, Math.ceil(total.value / PAGE_SIZE)))
 const showing = computed(() =>
   t('admin.showing', {
-    from: String((query.page - 1) * PAGE_SIZE + 1),
-    to: String(Math.min(query.page * PAGE_SIZE, total.value)),
+    from: String((query.value.page - 1) * PAGE_SIZE + 1),
+    to: String(Math.min(query.value.page * PAGE_SIZE, total.value)),
     total: String(total.value),
   }),
 )
@@ -70,56 +95,75 @@ const signInOptions = computed(() => [
   { value: 'disabled', text: t('admin.accountDisabled') },
 ])
 
-const ariaSort = (sort: Sort) => (query.sort !== sort ? 'none' : query.order === 'asc' ? 'ascending' : 'descending')
+/** A select bound to a filter in the address; changing it goes back to the first page. */
+const filter = (name: 'role' | 'confirmed' | 'signIn') => computed({ get: () => param(name), set: (value: string) => go({ [name]: value, page: '' }) })
+const role = filter('role')
+const emailStatus = filter('confirmed')
+const signIn = filter('signIn')
+const page = computed({ get: () => query.value.page, set: (value: number) => go({ page: String(value) }) })
+
+// The email filter is typed in a draft and reaches the address after a pause, replacing the entry.
+const draft = ref(param('q'))
+let pause: ReturnType<typeof setTimeout> | undefined
+watch(draft, (text) => {
+  clearTimeout(pause)
+  pause = setTimeout(() => {
+    if (text !== param('q')) go({ q: text, page: '' }, 'replace')
+  }, 300)
+})
+watch(
+  () => param('q'),
+  (text) => {
+    if (text !== draft.value) draft.value = text
+  },
+)
+onBeforeUnmount(() => clearTimeout(pause))
+
+const ariaSort = (sort: Sort) => (query.value.sort !== sort ? 'none' : query.value.order === 'asc' ? 'ascending' : 'descending')
 
 /** A new column sorts ascending first; the same column flips its direction. */
 function sortBy(sort: Sort) {
-  query.order = query.sort === sort && query.order === 'asc' ? 'desc' : 'asc'
-  query.sort = sort
-  query.page = 1
+  go({ sort, order: query.value.sort === sort && query.value.order === 'asc' ? 'desc' : 'asc', page: '' })
 }
+
+const href = (id: string) => withParams(BASE, { ...Object.fromEntries(Object.keys(DEFAULTS).map((name) => [name, search.value.get(name) ?? ''])), account: id }, DEFAULTS)
 
 let latest = 0
 async function load() {
   const asked = ++latest
-  const page = await listAccounts(query)
+  const found = await listAccounts(query.value)
   if (asked !== latest) return // a newer question was asked meanwhile
-  if (!page) {
+  if (!found) {
     state.value = 'failed'
     return
   }
-  // The last page of a list that shrank (a deletion, a filter) is gone: go back to the new last one.
-  if (page.accounts.length === 0 && page.total > 0 && query.page > 1) {
-    query.page = Math.ceil(page.total / PAGE_SIZE)
+  // The last page of a list that shrank (a deletion, a filter) is gone: go to the new last one.
+  if (found.accounts.length === 0 && found.total > 0 && query.value.page > 1) {
+    go({ page: String(Math.ceil(found.total / PAGE_SIZE)) }, 'replace')
     return
   }
-  accounts.value = page.accounts
-  total.value = page.total
+  accounts.value = found.accounts
+  total.value = found.total
   state.value = 'ready'
-  if (selected.value) selected.value = page.accounts.find((a) => a.id === selected.value?.id) ?? selected.value
+  await syncSelected()
 }
 
-// Typing in the email filter waits for a pause; every other change loads at once, from the first page.
-let pause: ReturnType<typeof setTimeout> | undefined
-watch(
-  () => [query.role, query.confirmed, query.signIn],
-  () => {
-    query.page = 1
-  },
-)
-watch(
-  () => query.q,
-  () => {
-    clearTimeout(pause)
-    pause = setTimeout(() => {
-      query.page = 1
-      void load()
-    }, 300)
-  },
-)
-watch(() => [query.role, query.confirmed, query.signIn, query.sort, query.order, query.page], load)
-onMounted(load)
-onBeforeUnmount(() => clearTimeout(pause))
+/** The open account is the one the address names: on the page, or fetched when a link opens one that isn't. */
+async function syncSelected() {
+  const id = accountId.value
+  if (!id) {
+    selected.value = undefined
+    return
+  }
+  const found = accounts.value.find((account) => account.id === id) ?? (await getAccount(id))
+  if (id !== accountId.value) return
+  if (found) selected.value = found
+  else go({ account: '' }, 'replace') // an id that is no account: leave it out of the address
+}
+
+// Everything but the open account asks the server again.
+watch(() => JSON.stringify(query.value), load, { immediate: true })
+watch(accountId, syncSelected)
 
 async function toggle() {
   const account = selected.value
@@ -145,6 +189,7 @@ async function remove() {
   deleting.value = false
   if (done) {
     selected.value = undefined
+    go({ account: '' }, 'replace')
     await load()
   } else {
     state.value = 'failed'
@@ -161,10 +206,10 @@ async function remove() {
       </div>
       <form class="cp-card bg-base-100 shadow-sm" role="search" :aria-label="t('admin.filtersLabel')" @submit.prevent>
         <div class="cp-card-body grid gap-4 p-4 sm:grid-cols-2 lg:grid-cols-4 md:p-6">
-          <CpTextField v-model="query.q" class="sm:col-span-2 lg:col-span-1" type="search" :label="t('admin.filterEmail')" autocomplete="off" />
-          <CpSelectField v-model="query.role" :label="t('admin.fieldRole')" :options="roleOptions" />
-          <CpSelectField v-model="query.confirmed" :label="t('admin.fieldEmail')" :options="confirmedOptions" />
-          <CpSelectField v-model="query.signIn" :label="t('admin.fieldSignIn')" :options="signInOptions" />
+          <CpTextField v-model="draft" class="sm:col-span-2 lg:col-span-1" type="search" :label="t('admin.filterEmail')" autocomplete="off" />
+          <CpSelectField v-model="role" :label="t('admin.fieldRole')" :options="roleOptions" />
+          <CpSelectField v-model="emailStatus" :label="t('admin.fieldEmail')" :options="confirmedOptions" />
+          <CpSelectField v-model="signIn" :label="t('admin.fieldSignIn')" :options="signInOptions" />
         </div>
       </form>
       <CpErrorNote v-if="state === 'failed'">{{ t('admin.accountsError') }}</CpErrorNote>
@@ -191,7 +236,7 @@ async function remove() {
                 <td>
                   <div class="flex items-center gap-3">
                     <CpAvatar :initials="account.email.charAt(0).toUpperCase()" />
-                    <button type="button" class="cp-link cp-link-hover whitespace-nowrap text-start font-semibold" @click="selected = account">{{ account.email }}</button>
+                    <a :href="href(account.id)" class="cp-link cp-link-hover whitespace-nowrap text-start font-semibold" @click.prevent="go({ account: account.id })">{{ account.email }}</a>
                   </div>
                 </td>
                 <td><CpBadge :tone="account.role === 'admin' ? 'primary' : 'neutral'" >{{ account.role === 'admin' ? t('admin.roleAdmin') : t('admin.roleMember') }}</CpBadge></td>
@@ -203,11 +248,11 @@ async function remove() {
         </CpTable>
         <div class="flex flex-col items-center justify-between gap-3 sm:flex-row">
           <p class="text-sm text-base-content/70">{{ showing }}</p>
-          <CpPagination v-model:page="query.page" :pages="pages" :nav-label="t('admin.pages')" :previous-label="t('admin.previousPage')" :next-label="t('admin.nextPage')" />
+          <CpPagination v-model:page="page" :pages="pages" :nav-label="t('admin.pages')" :previous-label="t('admin.previousPage')" :next-label="t('admin.nextPage')" />
         </div>
       </CpCard>
     </div>
-    <CpSidePanel v-if="selected" :title="selected.email" :close-label="t('admin.detailsClose')" @close="selected = undefined">
+    <CpSidePanel v-if="selected" :title="selected.email" :close-label="t('admin.detailsClose')" @close="go({ account: '' })">
       <template #avatar><CpAvatar :initials="selected.email.charAt(0).toUpperCase()" size="md" /></template>
       <template #subtitle>
         <CpBadge :tone="selected.disabledAt ? 'outline' : 'success'" class="w-fit">{{ selected.disabledAt ? t('admin.accountDisabled') : t('admin.accountActive') }}</CpBadge>

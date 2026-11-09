@@ -90,6 +90,16 @@ class AdminAccountsTest {
     }
 
     @Test
+    fun oneAccountIsOpenedByItsId() {
+        account("lea@example.com")
+        val response = call(Request(GET, "/api/v1/admin/accounts/${idOf("lea@example.com")}"))
+        assertEquals(OK, response.status)
+        assertEquals("lea@example.com", body(response).getValue("email").jsonPrimitive.content)
+        assertEquals(NOT_FOUND, call(Request(GET, "/api/v1/admin/accounts/00000000-0000-7000-8000-000000000000")).status)
+        assertEquals(FORBIDDEN, call(Request(GET, "/api/v1/admin/accounts/${idOf("lea@example.com")}"), signIn("lea@example.com", Client.Website).tokens.accessToken).status)
+    }
+
+    @Test
     fun aSearchWithNoMatchIsAnEmptyPage() {
         val response = find("nobody@example.com")
         assertEquals(OK, response.status)
