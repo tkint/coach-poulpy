@@ -1,6 +1,7 @@
 package ch.coachpoulpy.server.api
 
 import ch.coachpoulpy.catalog.Catalog
+import ch.coachpoulpy.server.admin.AdminAccounts
 import ch.coachpoulpy.server.admin.AdminAudit
 import ch.coachpoulpy.server.accounts.AccountDeletion
 import ch.coachpoulpy.server.accounts.Accounts
@@ -18,6 +19,7 @@ import org.http4k.contract.openapi.v3.OpenApi3
 import org.http4k.contract.openapi.v3.OpenApi3ApiRenderer
 import org.http4k.contract.security.NoSecurity
 import org.http4k.contract.security.Security
+import org.http4k.events.Events
 import org.http4k.format.KotlinxSerialization
 import org.http4k.routing.RoutingHttpHandler
 
@@ -43,6 +45,7 @@ fun apiRoutes(
     database: Database,
     audit: AdminAudit = AdminAudit(database),
     cookies: WebCookies = WebCookies(websiteOrigin(websiteUrl { null })),
+    events: Events = audit.events,
 ): List<ContractRoute> = listOf(
     catalogRoute(catalog),
     signUpRoute(accounts),
@@ -56,7 +59,7 @@ fun apiRoutes(
     pullRoute(sync),
     tokenRoute(signIns),
     revokeRoute(signIns),
-) + webSessionRoutes(signIns, cookies) + adminRoutes(audit)
+) + webSessionRoutes(signIns, cookies) + adminRoutes(audit, AdminAccounts(database, signIns, accountDeletion, events))
 
 /** The API, described in OpenAPI at `/api/v1/openapi.json`, OAuth routes included. */
 fun api(
@@ -70,6 +73,7 @@ fun api(
     database: Database,
     audit: AdminAudit = AdminAudit(database),
     cookies: WebCookies = WebCookies(websiteOrigin(websiteUrl { null })),
+    events: Events = audit.events,
 ): RoutingHttpHandler = contract {
     // The description is built as JSON nodes: kotlinx.serialization has no serializer for
     // http4k's own description classes, which the auto-marshalling renderer would need.
@@ -79,5 +83,5 @@ fun api(
         apiRenderer = OpenApi3ApiRenderer(KotlinxSerialization),
     )
     descriptionPath = "$API_PREFIX/openapi.json"
-    routes += apiRoutes(catalog, accounts, signIns, passwordResets, accountDeletion, sync, database, audit, cookies)
+    routes += apiRoutes(catalog, accounts, signIns, passwordResets, accountDeletion, sync, database, audit, cookies, events)
 }

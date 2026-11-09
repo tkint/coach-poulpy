@@ -4,6 +4,7 @@
 import { apiBase } from './api'
 
 export type Me = { accountId: string; email: string; role: string }
+export type AdminAccount = { id: string; email: string; role: string; confirmed: boolean; createdAt: string; disabledAt: string | null }
 export type AuditEntry = { actorEmail: string | null; action: string; target: string; at: string }
 
 /** Signed in, wrong credentials (or not the role asked for), too many tries, or the server can't be reached. */
@@ -18,11 +19,11 @@ async function call(method: string, path: string, body?: object): Promise<Respon
   })
 }
 
-async function authorized(path: string): Promise<Response> {
-  const first = await call('GET', path)
+async function authorized(path: string, method = 'GET', body?: object): Promise<Response> {
+  const first = await call(method, path, body)
   if (first.status !== 401) return first
   const refreshed = await call('POST', '/web/session/refresh')
-  return refreshed.ok ? call('GET', path) : first
+  return refreshed.ok ? call(method, path, body) : first
 }
 
 /** Who the cookies sign in, or nobody. */
@@ -58,5 +59,37 @@ export async function auditLog(): Promise<AuditEntry[] | undefined> {
     return response.ok ? ((await response.json()) as { entries: AuditEntry[] }).entries : undefined
   } catch {
     return undefined
+  }
+}
+
+/** What `findAccount` found: the account, none with that address, or a failure. */
+export type FoundAccount = { account: AdminAccount } | 'none' | 'failed'
+
+/** The account with this email, for the admin (#336). */
+export async function findAccount(email: string): Promise<FoundAccount> {
+  try {
+    const response = await authorized(`/admin/accounts?email=${encodeURIComponent(email.trim())}`)
+    if (response.status === 404) return 'none'
+    return response.ok ? { account: (await response.json()) as AdminAccount } : 'failed'
+  } catch {
+    return 'failed'
+  }
+}
+
+/** Disables or enables an account; true when the server did it. */
+export async function setAccountDisabled(id: string, disabled: boolean): Promise<boolean> {
+  try {
+    return (await authorized(`/admin/accounts/${id}/${disabled ? 'disable' : 'enable'}`, 'POST')).ok
+  } catch {
+    return false
+  }
+}
+
+/** Deletes an account, once its email is typed again; true when the server did it. */
+export async function deleteAccount(id: string, confirmEmail: string): Promise<boolean> {
+  try {
+    return (await authorized(`/admin/accounts/${id}`, 'DELETE', { confirmEmail })).ok
+  } catch {
+    return false
   }
 }

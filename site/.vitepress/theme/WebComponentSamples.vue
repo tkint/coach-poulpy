@@ -50,6 +50,8 @@ const formats = [
         <CpButton variant="tonal">Edit</CpButton>
         <CpButton variant="outline">Cancel</CpButton>
         <CpButton variant="grumpy">Catch up</CpButton>
+        <CpButton variant="danger">Delete</CpButton>
+        <CpButton variant="outline" size="md">Disable</CpButton>
       </div>
       <div v-else-if="part === 'badge'" class="row">
         <CpBadge>Published catalog</CpBadge>
