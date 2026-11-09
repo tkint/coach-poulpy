@@ -13,7 +13,7 @@ passwordHash:
 SELECT password_hash FROM account WHERE lower(email) = lower(:email);
 
 forSignIn:
-SELECT id, password_hash, confirmed_at FROM account WHERE lower(email) = lower(:email);
+SELECT id, password_hash, confirmed_at, disabled_at FROM account WHERE lower(email) = lower(:email);
 
 byId:
 SELECT id, email, role FROM account WHERE id = ?;
@@ -33,3 +33,15 @@ SELECT password_hash FROM account WHERE id = ?;
 -- Every row of the account goes with it: its tokens, sign-ins and links cascade.
 delete:
 DELETE FROM account WHERE id = ? RETURNING email;
+
+-- What the admin sees of an account (#336): its state, never its data.
+adminView:
+SELECT id, email, role, confirmed_at, created_at, disabled_at FROM account WHERE lower(email) = lower(:email);
+
+-- No row when the account is unknown or already disabled.
+disable:
+UPDATE account SET disabled_at = :disabledAt WHERE id = :id AND disabled_at IS NULL RETURNING id;
+
+-- No row when the account is unknown or not disabled.
+enable:
+UPDATE account SET disabled_at = NULL WHERE id = :id AND disabled_at IS NOT NULL RETURNING id;

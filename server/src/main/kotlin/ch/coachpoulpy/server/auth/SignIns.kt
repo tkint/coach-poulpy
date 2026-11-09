@@ -16,7 +16,7 @@ data class Tokens(val accessToken: String, val refreshToken: String, val expires
 sealed interface SignInResult {
     data class Signed(val tokens: Tokens) : SignInResult
 
-    /** Wrong address or password, or an email not confirmed yet: one answer for all three. */
+    /** Wrong address or password, an email not confirmed yet or a disabled account: one answer for all four. */
     data object Refused : SignInResult
 
     /** Too many failures for this address lately. */
@@ -47,7 +47,7 @@ class SignIns(
         }
         val account = database.queries.accountQueries.forSignIn(address).executeAsOneOrNull()
         val passwordMatches = passwords.verify(password, account?.password_hash ?: decoy)
-        if (account == null || !passwordMatches || account.confirmed_at == null) {
+        if (account == null || !passwordMatches || account.confirmed_at == null || account.disabled_at != null) {
             queries.recordFailure(address, now)
             return SignInResult.Refused
         }

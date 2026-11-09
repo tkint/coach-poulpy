@@ -11,7 +11,17 @@ The admin area is where the maintainer looks after the catalog, the accounts and
 
 ## The screens
 
-The admin lives at `/admin` on the website ([mockups](./../design/mockups/agreed/web/admin-shell.html)). With no admin session it shows the sign-in; the page asks `GET /api/v1/me`, and a member who signs in is signed out again at once with the same "wrong email or password" message, so the screen never says who is an admin. Once signed in it shows the `CpDrawer` shell and the audit log. The sidebar lists only the screens that exist; each admin feature adds its own entry. A **Coach Poulpy app** link at the bottom of the sidebar goes back to [the web app](./web-app.md).
+The admin lives at `/admin` on the website ([mockups](./../design/mockups/agreed/web/admin-shell.html)). With no admin session it shows the sign-in; the page asks `GET /api/v1/me`, and a member who signs in is signed out again at once with the same "wrong email or password" message, so the screen never says who is an admin. Once signed in it shows the `CpDrawer` shell, with the audit log and the accounts. The sidebar lists only the screens that exist; each admin feature adds its own entry. A **Coach Poulpy app** link at the bottom of the sidebar goes back to [the web app](./web-app.md).
+
+## Accounts
+
+The **Accounts** screen finds an account by its email ([mockups](./../design/mockups/agreed/web/admin-accounts.html)) and shows its state: email (confirmed or not), role, creation date and whether it is disabled. It shows no workout or health data. Three actions, each written to the audit log with the account's id as the target (never its address):
+
+- **Disable** blocks sign-in and signs every device of the account out, access and refresh tokens included. It is reversible: **Enable** lets the account sign in again. A disabled account is refused at sign-in with the same "wrong email or password" answer as any other refusal.
+- **Delete** removes the account and every row of it through the same code as the user's own deletion, once the admin has typed the account's email again.
+- An admin can't disable or delete their own account (`409 own-account`).
+
+The routes are `GET /api/v1/admin/accounts?email=`, `POST /api/v1/admin/accounts/{id}/disable`, `POST /api/v1/admin/accounts/{id}/enable` and `DELETE /api/v1/admin/accounts/{id}` with `{"confirmEmail": …}`, all described in the OpenAPI document and all for an admin signed in through the website.
 
 ## Making the first admin
 
@@ -25,4 +35,4 @@ Sensitive values are values4k types that print masked: `EmailAddress` prints as 
 
 ## What comes next
 
-Accounts ([#336](https://github.com/tkint/coach-poulpy/issues/336), drawn in [drafts](./../design/mockups/drafts/web/admin-accounts.html) awaiting review), the mail from-address ([#339](https://github.com/tkint/coach-poulpy/issues/339)), the status view ([#340](https://github.com/tkint/coach-poulpy/issues/340), drawn in [drafts](./../design/mockups/drafts/web/admin-status.html) awaiting review), and the catalog ([#337](https://github.com/tkint/coach-poulpy/issues/337), [#338](https://github.com/tkint/coach-poulpy/issues/338)).
+The mail from-address ([#339](https://github.com/tkint/coach-poulpy/issues/339)), the status view ([#340](https://github.com/tkint/coach-poulpy/issues/340), drawn in [drafts](./../design/mockups/drafts/web/admin-status.html) awaiting review), and the catalog ([#337](https://github.com/tkint/coach-poulpy/issues/337), [#338](https://github.com/tkint/coach-poulpy/issues/338)).
