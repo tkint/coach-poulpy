@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // The accounts screen of the admin (design/mockups/agreed/web/admin-accounts*.html): a paged table of every
-// account, sorted and filtered on the server, with the account picked in a panel on the right where it is
+// account, sorted and filtered on the server, with the account picked in a panel floating on the right where it is
 // disabled, enabled or deleted after typing its email again (#336). It never shows a workout or health data.
 import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import {
