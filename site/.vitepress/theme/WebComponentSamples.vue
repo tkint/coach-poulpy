@@ -8,6 +8,7 @@ import '../../../web/ui/poulpy-ui-embed.css'
 import {
   CpAvatar,
   CpBadge,
+  CpBodyMap,
   CpBreadcrumbs,
   CpCard,
   CpNavItem,
@@ -29,8 +30,13 @@ import {
   CpTextField,
 } from '../../../web/ui/src/index'
 
-defineProps<{ part: 'badge' | 'breadcrumbs' | 'avatar' | 'card' | 'table' | 'stats' | 'nav-menu' | 'button' | 'chip' | 'search-field' | 'stepper' | 'select-field' | 'text-field' | 'password-field' | 'poulpy-card' | 'error' | 'sheet' | 'pagination' | 'side-panel' }>()
+defineProps<{ part: 'badge' | 'body-map' | 'breadcrumbs' | 'avatar' | 'card' | 'table' | 'stats' | 'nav-menu' | 'button' | 'chip' | 'search-field' | 'stepper' | 'select-field' | 'text-field' | 'password-field' | 'poulpy-card' | 'error' | 'sheet' | 'pagination' | 'side-panel' }>()
 const { mode } = useSampleTheme()
+// A stand-in figure: the real ones are the generated body map shapes.
+const sampleFigures = [
+  { caption: 'Front', paths: [{ d: 'M60 40 a14 14 0 1 0 0.01 0z', outline: true }, { d: 'M36 60 h48 v70 h-48z', heat: 3 as const }, { d: 'M42 130 h14 v90 h-14z M64 130 h14 v90 h-14z', heat: 1 as const }] },
+  { caption: 'Back', paths: [{ d: 'M60 40 a14 14 0 1 0 0.01 0z', outline: true }, { d: 'M36 60 h48 v70 h-48z', heat: 2 as const }, { d: 'M42 130 h14 v90 h-14z M64 130 h14 v90 h-14z' }] },
+]
 const chips = ref({ legs: true, core: false })
 const query = ref('squat')
 const rest = ref(90)
@@ -84,6 +90,7 @@ const formats = [
         <li><a href="#">Workouts</a></li>
         <li>Upper body</li>
       </CpBreadcrumbs>
+      <CpBodyMap v-else-if="part === 'body-map'" :figures="sampleFigures" description="Muscles worked: chest most, then legs a little" less="Less" more="More" />
       <CpStats v-else-if="part === 'stats'">
         <CpStat title="Changes this week" value="12" description="Since Monday" accent />
         <CpStat title="Admins" value="1" description="Ana" />
