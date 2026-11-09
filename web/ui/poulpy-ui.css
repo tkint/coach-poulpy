@@ -8,6 +8,7 @@
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
       "Courier New", monospace;
     --spacing: 0.25rem;
+    --container-sm: 24rem;
     --container-md: 28rem;
     --container-5xl: 64rem;
     --text-xs: 0.75rem;
@@ -2172,6 +2173,9 @@
   .grid {
     display: grid;
   }
+  .inline-flex {
+    display: inline-flex;
+  }
   .table {
     display: table;
   }
@@ -2207,9 +2211,17 @@
     width: calc(var(--spacing) * 3);
     height: calc(var(--spacing) * 3);
   }
+  .size-4 {
+    width: calc(var(--spacing) * 4);
+    height: calc(var(--spacing) * 4);
+  }
   .size-5 {
     width: calc(var(--spacing) * 5);
     height: calc(var(--spacing) * 5);
+  }
+  .size-9 {
+    width: calc(var(--spacing) * 9);
+    height: calc(var(--spacing) * 9);
   }
   .h-16 {
     height: calc(var(--spacing) * 16);
@@ -2258,6 +2270,26 @@
   }
   .grow {
     flex-grow: 1;
+  }
+  @layer daisyui.l1.l2.l3 {
+    .cp-link {
+      cursor: pointer;
+      text-decoration-line: underline;
+    }
+    .cp-link:focus {
+      --tw-outline-style: none;
+      outline-style: none;
+    }
+    @media (forced-colors: active) {
+      .cp-link:focus {
+        outline: 2px solid transparent;
+        outline-offset: 2px;
+      }
+    }
+    .cp-link:focus-visible {
+      outline: 2px solid currentColor;
+      outline-offset: 2px;
+    }
   }
   @layer daisyui.l1.l2 {
     .cp-stats-vertical {
@@ -2477,6 +2509,9 @@
     --tw-font-weight: var(--font-weight-bold);
     font-weight: var(--font-weight-bold);
   }
+  .break-all {
+    word-break: break-all;
+  }
   .whitespace-nowrap {
     white-space: nowrap;
   }
@@ -2512,6 +2547,16 @@
   }
   .text-secondary-content {
     color: var(--color-secondary-content);
+  }
+  @layer daisyui.l1.l2 {
+    .cp-link-hover {
+      text-decoration-line: none;
+    }
+    @media (hover: hover) {
+      .cp-link-hover:hover {
+        text-decoration-line: underline;
+      }
+    }
   }
   .shadow-sm {
     --tw-shadow: 0 1px 3px 0 var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 1px 2px -1px var(--tw-shadow-color, rgb(0 0 0 / 0.1));
@@ -2576,6 +2621,10 @@
       --cp-badge-color: var(--color-primary);
       --cp-badge-fg: var(--color-primary-content);
     }
+    .cp-badge-success {
+      --cp-badge-color: var(--color-success);
+      --cp-badge-fg: var(--color-success-content);
+    }
   }
   @layer daisyui.l1.l2.l3 {
     .cp-aura:has( > .cp-card,  > .cp-alert) {
@@ -2617,6 +2666,9 @@
     .md\:w-80 {
       width: calc(var(--spacing) * 80);
     }
+    .md\:max-w-sm {
+      max-width: var(--container-sm);
+    }
     @layer daisyui.l1.l2 {
       .md\:cp-stats-horizontal {
         grid-auto-flow: column;
@@ -2636,6 +2688,12 @@
     }
     .md\:grid-cols-2 {
       grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .md\:flex-row {
+      flex-direction: row;
+    }
+    .md\:items-center {
+      align-items: center;
     }
     .md\:gap-16 {
       gap: calc(var(--spacing) * 16);
