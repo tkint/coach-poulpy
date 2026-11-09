@@ -3095,11 +3095,26 @@
     .lg\:static {
       position: static;
     }
+    .lg\:sticky {
+      position: sticky;
+    }
     .lg\:inset-auto {
       inset: auto;
     }
+    .lg\:top-8 {
+      top: calc(var(--spacing) * 8);
+    }
     .lg\:col-span-1 {
       grid-column: span 1 / span 1;
+    }
+    .lg\:col-start-2 {
+      grid-column-start: 2;
+    }
+    .lg\:row-span-2 {
+      grid-row: span 2 / span 2;
+    }
+    .lg\:row-start-1 {
+      grid-row-start: 1;
     }
     .lg\:w-96 {
       width: calc(var(--spacing) * 96);
@@ -3109,6 +3124,12 @@
     }
     .lg\:grid-cols-4 {
       grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    .lg\:grid-cols-\[minmax\(0\,1fr\)_auto\] {
+      grid-template-columns: minmax(0,1fr) auto;
+    }
+    .lg\:self-start {
+      align-self: flex-start;
     }
     .lg\:border-s {
       border-inline-start-style: var(--tw-border-style);
@@ -3350,6 +3371,57 @@
   }
   .cp-search-field input::-webkit-search-cancel-button {
     display: none;
+  }
+  .cp-body-map {
+    display: flex;
+    justify-content: center;
+    gap: var(--cp-space-lg);
+  }
+  .cp-body-view {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--cp-space-sm);
+    font-weight: 800;
+    color: var(--cp-on-surface-variant);
+  }
+  .cp-body-figure {
+    width: 110px;
+    height: 245px;
+    overflow: visible;
+  }
+  .cp-body-part {
+    fill: transparent;
+    stroke: var(--cp-outline);
+    stroke-width: 1.2;
+  }
+  .cp-body-part[data-heat='1'] {
+    fill: var(--cp-heat1);
+    stroke: var(--cp-heat2);
+  }
+  .cp-body-part[data-heat='2'] {
+    fill: var(--cp-heat2);
+    stroke: var(--cp-heat3);
+  }
+  .cp-body-part[data-heat='3'] {
+    fill: var(--cp-heat3);
+    stroke: var(--cp-heat3);
+  }
+  .cp-body-outline {
+    fill: none;
+    stroke: var(--cp-outline);
+    stroke-width: 1.2;
+  }
+  .cp-heat-legend {
+    display: flex;
+    align-items: center;
+    gap: var(--cp-space-sm);
+    font-weight: 800;
+    color: var(--cp-on-surface-variant);
+  }
+  .cp-heat-legend svg {
+    width: 14px;
+    height: 14px;
   }
   .cp-stepper {
     display: inline-flex;
