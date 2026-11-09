@@ -13,6 +13,7 @@
     --text-sm--line-height: calc(1.25 / 0.875);
     --text-2xl: 1.5rem;
     --text-2xl--line-height: calc(2 / 1.5);
+    --font-weight-semibold: 600;
     --font-weight-bold: 700;
   }
 .cp-modal {
@@ -1504,6 +1505,35 @@ fieldset:disabled .cp-select::placeholder, fieldset:disabled .cp-select  ::place
       overflow-x: auto;
       border-radius: var(--radius-box);
     }
+.fixed {
+    position: fixed;
+  }
+.inset-0 {
+    inset: 0px;
+  }
+.cp-btn-active {
+      --cp-btn-bg: var(--cp-btn-color, var(--color-base-200));
+    }
+@supports (color: color-mix(in lab, red, red)) {
+      .cp-btn-active {
+        --cp-btn-bg: color-mix(in oklab, var(--cp-btn-color, var(--color-base-200)), #000 5%);
+      }
+    }
+.cp-btn-active {
+      color: var(--cp-btn-fg, var(--color-base-content));
+      --cp-btn-border: var(--cp-btn-color, var(--color-base-200));
+    }
+@supports (color: color-mix(in lab, red, red)) {
+      .cp-btn-active {
+        --cp-btn-border: color-mix(in oklab, var(--cp-btn-color, var(--color-base-200)), #000 7%);
+      }
+    }
+.cp-btn-active {
+      --cp-btn-border-style: solid;
+      --cp-btn-inset: 0 0 0 0 oklch(0% 0 0/0);
+      --cp-btn-shadow: 0 0 0 0 oklch(0% 0 0/0);
+      isolation: isolate;
+    }
 .cp-modal-backdrop {
       grid-column-start: 1;
       grid-row-start: 1;
@@ -1516,6 +1546,53 @@ fieldset:disabled .cp-select::placeholder, fieldset:disabled .cp-select  ::place
 .cp-modal-backdrop button {
       cursor: pointer;
     }
+.cp-join {
+    display: inline-flex;
+    align-items: stretch;
+    --cp-join-ss: 0;
+    --cp-join-se: 0;
+    --cp-join-es: 0;
+    --cp-join-ee: 0;
+    --cp-join-ml: 0;
+    --cp-join-mt: 0;
+    --cp-join-v: 0;
+    --cp-join-h: 1;
+  }
+@scope (:is(.cp-join)) {
+     > :where(:focus, :has(:focus)) {
+      z-index: 2;
+    }
+    @media (hover: hover) {
+       > :where(.cp-btn:hover, :has(.cp-btn:hover)) {
+        z-index: 1;
+      }
+    }
+    :where(:scope > :first-child) {
+      --cp-join-ss: var(--radius-field);
+      --cp-join-se: calc(var(--radius-field) * var(--cp-join-v));
+      --cp-join-es: calc(var(--radius-field) * var(--cp-join-h));
+      --cp-join-ee: 0;
+    }
+    :where(:scope > :last-child) {
+      --cp-join-ss: 0;
+      --cp-join-se: calc(var(--radius-field) * var(--cp-join-h));
+      --cp-join-es: calc(var(--radius-field) * var(--cp-join-v));
+      --cp-join-ee: var(--radius-field);
+    }
+    :where(:scope > :only-child) {
+      --cp-join-ss: var(--radius-field);
+      --cp-join-se: var(--radius-field);
+      --cp-join-es: var(--radius-field);
+      --cp-join-ee: var(--radius-field);
+    }
+    :where(:scope > :not(:first-child)) {
+      --cp-join-ml: calc(var(--border, 1px) * -1 * var(--cp-join-h));
+      --cp-join-mt: calc(var(--border, 1px) * -1 * var(--cp-join-v));
+    }
+  }
+.z-30 {
+    z-index: 30;
+  }
 .cp-modal-box {
       grid-column-start: 1;
       grid-row-start: 1;
@@ -1970,6 +2047,32 @@ fieldset:disabled .cp-select::placeholder, fieldset:disabled .cp-select  ::place
         border-inline-start: var(--border) solid color-mix(in oklab, currentColor 10%, #0000);
       }
     }
+.cp-join-item {
+       > * {
+        --cp-join-ss: initial;
+        --cp-join-se: initial;
+        --cp-join-es: initial;
+        --cp-join-ee: initial;
+      }
+    border-style: solid;
+    border-width: var(--border, 1px);
+    border-start-start-radius: var(--cp-join-ss);
+    border-start-end-radius: var(--cp-join-se);
+    border-end-start-radius: var(--cp-join-es);
+    border-end-end-radius: var(--cp-join-ee);
+    &:not(:disabled, [disabled], .cp-btn-disabled) {
+      margin-inline-start: var(--cp-join-ml, 0);
+      margin-block-start: var(--cp-join-mt, 0);
+    }
+    &:is(:disabled, [disabled], .cp-btn-disabled) {
+      border-width: var(--border, 1px);
+      border-inline-end-width: calc(var(--border, 1px) * var(--cp-join-v));
+      border-block-end-width: calc(var(--border, 1px) * var(--cp-join-h));
+    }
+  }
+.-ms-3 {
+    margin-inline-start: calc(var(--spacing) * -3);
+  }
 .cp-modal-action {
       margin-top: calc(0.25rem * 6);
       display: flex;
@@ -2252,6 +2355,9 @@ fieldset:disabled .cp-select::placeholder, fieldset:disabled .cp-select  ::place
 .items-start {
     align-items: flex-start;
   }
+.justify-between {
+    justify-content: space-between;
+  }
 .justify-end {
     justify-content: flex-end;
   }
@@ -2289,6 +2395,9 @@ fieldset:disabled .cp-select::placeholder, fieldset:disabled .cp-select  ::place
   }
 .overflow-x-auto {
     overflow-x: auto;
+  }
+.overflow-y-auto {
+    overflow-y: auto;
   }
 .cp-menu-md :where(li:not(.cp-menu-title) > :not(ul, menu, details, .cp-menu-title)) {
       border-radius: var(--radius-field);
@@ -2422,6 +2531,9 @@ fieldset:disabled .cp-select::placeholder, fieldset:disabled .cp-select  ::place
 .text-center {
     text-align: center;
   }
+.text-start {
+    text-align: start;
+  }
 .font-mono {
     font-family: var(--font-mono);
   }
@@ -2444,6 +2556,10 @@ fieldset:disabled .cp-select::placeholder, fieldset:disabled .cp-select  ::place
 .font-bold {
     --tw-font-weight: var(--font-weight-bold);
     font-weight: var(--font-weight-bold);
+  }
+.font-semibold {
+    --tw-font-weight: var(--font-weight-semibold);
+    font-weight: var(--font-weight-semibold);
   }
 .break-all {
     word-break: break-all;
@@ -2580,6 +2696,9 @@ fieldset:disabled .cp-select::placeholder, fieldset:disabled .cp-select  ::place
       --cp-aura-radius: var(--radius-field);
     }
 @media (width >= 40rem) {
+    .sm\:col-span-2 {
+      grid-column: span 2 / span 2;
+    }
       .sm\:cp-modal-middle {
         place-items: center;
       }
@@ -2691,6 +2810,31 @@ fieldset:disabled .cp-select::placeholder, fieldset:disabled .cp-select  ::place
       [dir="rtl"] :is(.lg\:cp-drawer-open > .cp-drawer-toggle ~ .cp-drawer-side > :not(.cp-drawer-overlay)) {
         translate: 0%;
       }
+    .lg\:static {
+      position: static;
+    }
+    .lg\:inset-auto {
+      inset: auto;
+    }
+    .lg\:col-span-1 {
+      grid-column: span 1 / span 1;
+    }
+    .lg\:w-96 {
+      width: calc(var(--spacing) * 96);
+    }
+    .lg\:shrink-0 {
+      flex-shrink: 0;
+    }
+    .lg\:grid-cols-4 {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    .lg\:border-s {
+      border-inline-start-style: var(--tw-border-style);
+      border-inline-start-width: 1px;
+    }
+    .lg\:border-base-300 {
+      border-color: var(--color-base-300);
+    }
   }
 .cp-is-drawer-close\:cp-tooltip:where(.cp-drawer-toggle:not(:checked) ~ .cp-drawer-side, .cp-drawer-toggle:not(:checked) ~ .cp-drawer-side *) {
       position: relative;
