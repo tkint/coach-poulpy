@@ -127,7 +127,7 @@ private fun disableAccountRoute(accounts: AdminAccounts): ContractRoute = "$API_
     returning(NOT_FOUND to "Unknown account")
     returning(CONFLICT to "Your own account")
     returning(FORBIDDEN to "Not an admin, or not signed in through the website")
-} bindContract POST to { id ->
+} bindContract POST to { id, _ ->
     { request: Request -> accounts.disable(request.admin().accountId, id).toResponse() }
 }
 
@@ -140,7 +140,7 @@ private fun enableAccountRoute(accounts: AdminAccounts): ContractRoute = "$API_P
     returning(NO_CONTENT to "The account is enabled")
     returning(NOT_FOUND to "Unknown account")
     returning(FORBIDDEN to "Not an admin, or not signed in through the website")
-} bindContract POST to { id ->
+} bindContract POST to { id, _ ->
     { request: Request -> accounts.enable(request.admin().accountId, id).toResponse() }
 }
 
