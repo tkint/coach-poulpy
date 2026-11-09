@@ -2464,6 +2464,9 @@
   .grid {
     display: grid;
   }
+  .hidden {
+    display: none;
+  }
   .table {
     display: table;
   }
@@ -3107,14 +3110,11 @@
     .lg\:col-span-1 {
       grid-column: span 1 / span 1;
     }
-    .lg\:col-start-2 {
-      grid-column-start: 2;
+    .lg\:flex {
+      display: flex;
     }
-    .lg\:row-span-2 {
-      grid-row: span 2 / span 2;
-    }
-    .lg\:row-start-1 {
-      grid-row-start: 1;
+    .lg\:hidden {
+      display: none;
     }
     .lg\:w-96 {
       width: calc(var(--spacing) * 96);
@@ -3125,11 +3125,8 @@
     .lg\:grid-cols-4 {
       grid-template-columns: repeat(4, minmax(0, 1fr));
     }
-    .lg\:grid-cols-\[minmax\(0\,1fr\)_auto\] {
-      grid-template-columns: minmax(0,1fr) auto;
-    }
-    .lg\:self-start {
-      align-self: flex-start;
+    .lg\:grid-cols-\[22rem_minmax\(0\,1fr\)\] {
+      grid-template-columns: 22rem minmax(0,1fr);
     }
     .lg\:border-s {
       border-inline-start-style: var(--tw-border-style);
