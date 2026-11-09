@@ -2753,6 +2753,12 @@ fieldset:disabled .cp-select::placeholder, fieldset:disabled .cp-select  ::place
     font-weight: 700;
     white-space: nowrap;
   }
+.cp-fieldset {
+    grid-template-columns: minmax(0, 1fr);
+  }
+.cp-input > input {
+    min-width: 0;
+  }
 .cp-search-field {
     --cp-size: 48px;
     --cp-input-color: var(--cp-outline);

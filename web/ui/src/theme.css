@@ -98,6 +98,16 @@
   }
 
   /* Search field: 48 high, pill, primary while it holds text, with a round clear button. */
+  /* A field never pushes past its container: a text input has a width of its own (about 20
+     characters) and the fieldset's grid track grows to hold it, so on a phone the field ran out of
+     its card on the right. Both may shrink. */
+  .cp-fieldset {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .cp-input > input {
+    min-width: 0;
+  }
+
   .cp-search-field {
     --cp-size: 48px;
     --cp-input-color: var(--cp-outline);
