@@ -81,7 +81,7 @@ Primary, tonal, outline, grumpy and danger (crimson, for a deletion that can't b
 
 | Vue | Classes |
 | --- | --- |
-| `<CpPasswordField>` | `div.cp-fieldset` around a `label.cp-type-label`, `label.cp-input` (`cp-input-error` in error) holding the `input` and a `cp-btn cp-btn-circle cp-btn-ghost cp-btn-sm`, and `span.cp-label` for the hint |
+| `<CpPasswordField>` | `div.cp-fieldset` around a `label.cp-type-label`, `label.cp-input` (`cp-input-error` in error) holding the `input` and a `cp-btn cp-btn-circle cp-btn-ghost cp-btn-sm`, and `p.cp-label.whitespace-normal` for the hint |
 
 ## Poulpy card
 

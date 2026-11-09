@@ -35,4 +35,4 @@ Sensitive values are values4k types that print masked: `EmailAddress` prints as 
 
 ## What comes next
 
-The mail from-address ([#339](https://github.com/tkint/coach-poulpy/issues/339)), the status view ([#340](https://github.com/tkint/coach-poulpy/issues/340), drawn in [drafts](./../design/mockups/drafts/web/admin-status.html) awaiting review), and the catalog ([#337](https://github.com/tkint/coach-poulpy/issues/337), [#338](https://github.com/tkint/coach-poulpy/issues/338)).
+The mail from-address ([#339](https://github.com/tkint/coach-poulpy/issues/339), drawn in [drafts](./../design/mockups/drafts/web/admin-settings-mail.html) awaiting review), the status view ([#340](https://github.com/tkint/coach-poulpy/issues/340), drawn in [drafts](./../design/mockups/drafts/web/admin-status.html) awaiting review), and the catalog ([#337](https://github.com/tkint/coach-poulpy/issues/337), [#338](https://github.com/tkint/coach-poulpy/issues/338)).
