@@ -19,11 +19,56 @@ data class AccountView(
     val disabledAt: OffsetDateTime?,
 )
 
+/** The columns the admin's accounts table sorts on. */
+enum class AccountSort { Email, Role, EmailStatus, SignIn, Created }
+
+/** What the admin asked of the accounts table: filters, one sort and a page. A null filter lets everything through. */
+data class AccountQuery(
+    val emailContains: String? = null,
+    val role: String? = null,
+    val confirmed: Boolean? = null,
+    val disabled: Boolean? = null,
+    val sort: AccountSort = AccountSort.Created,
+    val ascending: Boolean = false,
+    val page: Int = 1,
+    val size: Int = DEFAULT_PAGE_SIZE,
+) {
+    companion object {
+        const val DEFAULT_PAGE_SIZE = 8
+        const val MAX_PAGE_SIZE = 100
+    }
+}
+
+/** One page of accounts, and how many accounts match the filters in all. */
+data class AccountPage(val accounts: List<AccountView>, val total: Int)
+
+/** Filters, sorts and cuts [all] as [query] says; ties on the sort keep the email order. */
+fun pageOf(all: List<AccountView>, query: AccountQuery): AccountPage {
+    val needle = query.emailContains?.trim()?.lowercase().orEmpty()
+    val matching = all.filter {
+        it.email.lowercase().contains(needle) &&
+            (query.role == null || it.role == query.role) &&
+            (query.confirmed == null || it.confirmed == query.confirmed) &&
+            (query.disabled == null || (it.disabledAt != null) == query.disabled)
+    }
+    val key: Comparator<AccountView> = when (query.sort) {
+        AccountSort.Email -> compareBy { it.email.lowercase() }
+        AccountSort.Role -> compareBy { it.role }
+        AccountSort.EmailStatus -> compareBy { it.confirmed }
+        AccountSort.SignIn -> compareBy { it.disabledAt != null }
+        AccountSort.Created -> compareBy { it.createdAt }
+    }
+    val byEmail = compareBy<AccountView> { it.email.lowercase() }
+    val sorted = matching.sortedWith((if (query.ascending) key else key.reversed()).then(byEmail))
+    val size = query.size.coerceIn(1, AccountQuery.MAX_PAGE_SIZE)
+    return AccountPage(sorted.drop((query.page.coerceAtLeast(1) - 1) * size).take(size), matching.size)
+}
+
 /** What an admin did to an account, or why it was refused. */
 enum class AccountAction { Done, Unknown, OwnAccount, ConfirmationMismatch }
 
 /**
- * Finding, disabling and deleting accounts for the admin (#336). Each change emits an
+ * Listing, disabling and deleting accounts for the admin (#336). Each change emits an
  * [AdminAction] whose target is the account's id, never its address.
  */
 class AdminAccounts(
@@ -35,10 +80,13 @@ class AdminAccounts(
 ) {
     private val queries get() = database.queries.accountQueries
 
-    /** The account with [email], whatever its case, or null. */
-    fun find(email: String): AccountView? = queries.adminView(email.trim()).executeAsOneOrNull()?.let {
-        AccountView(it.id, it.email, it.role, it.confirmed_at != null, it.created_at, it.disabled_at)
-    }
+    /** The page of accounts [query] asks for. */
+    fun list(query: AccountQuery): AccountPage = pageOf(
+        queries.adminList().executeAsList().map {
+            AccountView(it.id, it.email, it.role, it.confirmed_at != null, it.created_at, it.disabled_at)
+        },
+        query,
+    )
 
     /** Blocks sign-in and signs every device of the account out; [AccountAction.Done] also for an account already disabled. */
     fun disable(actor: AccountId, id: UUID): AccountAction {

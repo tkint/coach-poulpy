@@ -71,7 +71,7 @@ Primary, tonal, outline, grumpy and danger (crimson, for a deletion that can't b
 
 | Vue | Classes |
 | --- | --- |
-| `<CpTextField>` | `div.cp-fieldset` around a `label.cp-type-label` and `label.cp-input` (`cp-input-error` in error) holding the `input`; `type="search"` for searches, with `autocomplete="off"` |
+| `<CpTextField>` | `div.cp-fieldset` around a `label.cp-type-label` and `label.cp-input` (`cp-input-error` in error) holding the `input`; `type="search"` (with `autocomplete="off"`) is for searches and gets the search icon in a `label.cp-input.cp-search-field` |
 
 ## Password field
 
@@ -116,7 +116,7 @@ Primary, tonal, outline, grumpy and danger (crimson, for a deletion that can't b
 
 ## Badge
 
-`CpBadge`: what kind of change, what state. Primary, neutral, outline, or error (crimson, with an icon beside it); never ember or `warning`.
+`CpBadge`: what kind of change, what state. Primary, neutral, outline, success (a state that is fine), or error (crimson, with an icon beside it); never ember or `warning`.
 
 <WebComponentSamples part="badge" />
 
@@ -125,6 +125,7 @@ Primary, tonal, outline, grumpy and danger (crimson, for a deletion that can't b
 | `<CpBadge>` | `cp-badge cp-badge-primary cp-badge-soft` |
 | `<CpBadge tone="neutral">` | `cp-badge cp-badge-neutral cp-badge-soft` |
 | `<CpBadge tone="outline">` | `cp-badge cp-badge-outline` |
+| `<CpBadge tone="success">` | `cp-badge cp-badge-success cp-badge-soft` |
 | `<CpBadge tone="error">` | `cp-badge cp-badge-error cp-badge-soft` |
 
 ## Avatar
@@ -163,7 +164,7 @@ Sortable columns put a `cp-btn cp-btn-ghost cp-btn-sm` in the header cell, with 
 
 ## Pagination
 
-`CpPagination`: previous, the page numbers and next, joined in one row. Put the count of what is shown beside it.
+`CpPagination`: previous, the page numbers and next, joined in one row; a long list keeps the first and last pages and those around the current one, with a gap between. Put the count of what is shown beside it.
 
 <WebComponentSamples part="pagination" />
 

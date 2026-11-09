@@ -15,13 +15,13 @@ The admin lives at `/admin` on the website ([mockups](./../design/mockups/agreed
 
 ## Accounts
 
-The **Accounts** screen finds an account by its email ([mockups](./../design/mockups/agreed/web/admin-accounts.html)) and shows its state: email (confirmed or not), role, creation date and whether it is disabled. It shows no workout or health data. Three actions, each written to the audit log with the account's id as the target (never its address):
+The **Accounts** screen is a paged table of every account ([mockups](./../design/mockups/agreed/web/admin-accounts.html), [details](./../design/mockups/agreed/web/admin-accounts-details.html), [filtered](./../design/mockups/agreed/web/admin-accounts-filtered.html), [no match](./../design/mockups/agreed/web/admin-accounts-none.html), [delete](./../design/mockups/agreed/web/admin-accounts-delete.html)). Each row shows the email, role, whether the email is confirmed, whether sign-in is blocked and the creation date. Every column sorts (a click flips the direction); the email filter matches part of the address and the role, email status and sign-in filters narrow the list. Eight accounts show per page, with `CpPagination` and the count below. Picking a row opens its details in the `CpSidePanel` on the right (over the whole page on a phone). Nothing here shows a workout or health data. The panel holds three actions, each written to the audit log with the account's id as the target (never its address):
 
 - **Disable** blocks sign-in and signs every device of the account out, access and refresh tokens included. It is reversible: **Enable** lets the account sign in again. A disabled account is refused at sign-in with the same "wrong email or password" answer as any other refusal.
 - **Delete** removes the account and every row of it through the same code as the user's own deletion, once the admin has typed the account's email again.
 - An admin can't disable or delete their own account (`409 own-account`).
 
-The routes are `GET /api/v1/admin/accounts?email=`, `POST /api/v1/admin/accounts/{id}/disable`, `POST /api/v1/admin/accounts/{id}/enable` and `DELETE /api/v1/admin/accounts/{id}` with `{"confirmEmail": …}`, all described in the OpenAPI document and all for an admin signed in through the website.
+Filtering, sorting and paging happen on the server (`AdminAccounts.list`, which reads every account row and cuts the page in memory, enough for a back office; move it into SQL if accounts reach the hundreds of thousands). The routes are `GET /api/v1/admin/accounts` with `q`, `role`, `confirmed` (`yes`/`no`), `signIn` (`active`/`disabled`), `sort` (`email`, `role`, `confirmed`, `signIn`, `created`), `order`, `page` and `size`, answering `{accounts, total}` (a word that isn't allowed is a `400 bad-query`), `POST /api/v1/admin/accounts/{id}/disable`, `POST /api/v1/admin/accounts/{id}/enable` and `DELETE /api/v1/admin/accounts/{id}` with `{"confirmEmail": …}`, all described in the OpenAPI document and all for an admin signed in through the website.
 
 ## Making the first admin
 

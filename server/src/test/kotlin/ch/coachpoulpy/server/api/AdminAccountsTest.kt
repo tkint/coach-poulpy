@@ -8,6 +8,8 @@ import ch.coachpoulpy.server.auth.Client
 import ch.coachpoulpy.server.auth.SignInResult
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonNull
+import kotlinx.serialization.json.int
+import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import org.http4k.core.Method.DELETE
@@ -52,7 +54,19 @@ class AdminAccountsTest {
     private fun call(request: Request, token: String? = adminToken): Response =
         test.http(if (token == null) request else request.header("Authorization", "Bearer $token"))
 
-    private fun find(email: String, token: String? = adminToken) = call(Request(GET, "/api/v1/admin/accounts").query("email", email), token)
+    private fun list(vararg params: Pair<String, String>, token: String? = adminToken): Response =
+        call(params.fold(Request(GET, "/api/v1/admin/accounts")) { request, (name, value) -> request.query(name, value) }, token)
+
+    private fun find(email: String, token: String? = adminToken) = list("q" to email, token = token)
+
+    private fun body(response: Response) = Json.parseToJsonElement(response.bodyString()).jsonObject
+
+    private fun emails(response: Response) = body(response).getValue("accounts").jsonArray.map { it.jsonObject.getValue("email").jsonPrimitive.content }
+
+    private fun total(response: Response) = body(response).getValue("total").jsonPrimitive.int
+
+    /** The account with exactly [email], as the list shows it. */
+    private fun shown(email: String) = body(find(email)).getValue("accounts").jsonArray.single().jsonObject
 
     private fun disable(email: String) = call(Request(POST, "/api/v1/admin/accounts/${idOf(email)}/disable"))
 
@@ -62,11 +76,12 @@ class AdminAccountsTest {
         call(Request(DELETE, "/api/v1/admin/accounts/${idOf(email)}").header("content-type", "application/json").body("""{"confirmEmail":"$confirm"}"""))
 
     @Test
-    fun findingAnAccountShowsItsStateAndNothingElse() {
+    fun theListShowsEachAccountsStateAndNothingElse() {
         account("lea@example.com")
-        val response = find("LEA@example.com")
+        val response = find("LEA@example")
         assertEquals(OK, response.status)
-        val body = Json.parseToJsonElement(response.bodyString()).jsonObject
+        assertEquals(1, total(response))
+        val body = shown("lea@example.com")
         assertEquals(setOf("id", "email", "role", "confirmed", "createdAt", "disabledAt"), body.keys)
         assertEquals("lea@example.com", body.getValue("email").jsonPrimitive.content)
         assertEquals("member", body.getValue("role").jsonPrimitive.content)
@@ -75,8 +90,51 @@ class AdminAccountsTest {
     }
 
     @Test
-    fun anUnknownAddressIs404() {
-        assertEquals(NOT_FOUND, find("nobody@example.com").status)
+    fun aSearchWithNoMatchIsAnEmptyPage() {
+        val response = find("nobody@example.com")
+        assertEquals(OK, response.status)
+        assertEquals(0, total(response))
+        assertEquals(emptyList(), emails(response))
+    }
+
+    @Test
+    fun filtersNarrowTheListAndTheTotalFollows() {
+        account("lea@example.com")
+        account("tom@example.com")
+        disable("tom@example.com")
+        assertEquals(listOf("ana@example.com"), emails(list("role" to "admin")))
+        assertEquals(listOf("tom@example.com"), emails(list("signIn" to "disabled")))
+        assertEquals(setOf("ana@example.com", "lea@example.com"), emails(list("signIn" to "active")).toSet())
+        assertEquals(3, total(list("confirmed" to "yes")))
+        assertEquals(0, total(list("confirmed" to "no")))
+        assertEquals(listOf("lea@example.com"), emails(list("q" to "EA@", "signIn" to "active", "role" to "member")))
+    }
+
+    @Test
+    fun theListSortsOnAColumnInEitherDirection() {
+        account("zoe@example.com")
+        account("lea@example.com")
+        assertEquals(listOf("ana@example.com", "lea@example.com", "zoe@example.com"), emails(list("sort" to "email", "order" to "asc")))
+        assertEquals(listOf("zoe@example.com", "lea@example.com", "ana@example.com"), emails(list("sort" to "email", "order" to "desc")))
+        assertEquals("ana@example.com", emails(list("sort" to "role", "order" to "asc")).first())
+    }
+
+    @Test
+    fun theListIsPaged() {
+        listOf("a", "b", "c", "d", "e").forEach { account("$it@example.com") }
+        val first = list("sort" to "email", "order" to "asc", "size" to "4", "page" to "1")
+        val second = list("sort" to "email", "order" to "asc", "size" to "4", "page" to "2")
+        assertEquals(6, total(first))
+        assertEquals(listOf("a@example.com", "ana@example.com", "b@example.com", "c@example.com"), emails(first))
+        assertEquals(listOf("d@example.com", "e@example.com"), emails(second))
+        assertEquals(emptyList(), emails(list("size" to "4", "page" to "3")))
+    }
+
+    @Test
+    fun anUnknownFilterOrSortWordIs400() {
+        assertEquals(BAD_REQUEST, list("role" to "boss").status)
+        assertEquals(BAD_REQUEST, list("sort" to "password").status)
+        assertEquals(BAD_REQUEST, list("order" to "sideways").status)
     }
 
     @Test
@@ -96,8 +154,7 @@ class AdminAccountsTest {
         assertEquals(SignInResult.Refused, test.signIns.signIn("lea@example.com", "correct horse", "A device"))
         assertNull(test.signIns.refresh(before.tokens.refreshToken))
         assertEquals(UNAUTHORIZED, call(Request(GET, "/api/v1/me"), before.tokens.accessToken).status)
-        val shown = Json.parseToJsonElement(find("lea@example.com").bodyString()).jsonObject.getValue("disabledAt")
-        assertNotNull(shown.takeIf { it != JsonNull })
+        assertNotNull(shown("lea@example.com").getValue("disabledAt").takeIf { it != JsonNull })
     }
 
     @Test
@@ -106,7 +163,7 @@ class AdminAccountsTest {
         disable("lea@example.com")
         assertEquals(NO_CONTENT, enable("lea@example.com").status)
         assertTrue(test.signIns.signIn("lea@example.com", "correct horse", "A device") is SignInResult.Signed)
-        assertEquals(JsonNull, Json.parseToJsonElement(find("lea@example.com").bodyString()).jsonObject.getValue("disabledAt"))
+        assertEquals(JsonNull, shown("lea@example.com").getValue("disabledAt"))
     }
 
     @Test
@@ -127,7 +184,7 @@ class AdminAccountsTest {
     fun deletingNeedsTheEmailTypedAgain() {
         account("lea@example.com")
         assertEquals(BAD_REQUEST, delete("lea@example.com", "lea@exam").status)
-        assertEquals(OK, find("lea@example.com").status)
+        assertEquals(1, total(find("lea@example.com")))
     }
 
     @Test
@@ -137,7 +194,7 @@ class AdminAccountsTest {
         val signedIn = signIn("lea@example.com")
         assertEquals(NO_CONTENT, delete("lea@example.com", " Lea@Example.com ").status)
 
-        assertEquals(NOT_FOUND, find("lea@example.com").status)
+        assertEquals(0, total(find("lea@example.com")))
         assertNull(test.database.queries.accountQueries.byId(id).executeAsOneOrNull())
         assertNull(test.database.queries.signInQueries.liveCaller(ch.coachpoulpy.server.auth.Secrets.hashOf(signedIn.tokens.accessToken), java.time.OffsetDateTime.now(test.clock)).executeAsOneOrNull())
         assertFalse(test.signIns.signIn("lea@example.com", "correct horse", "A device") is SignInResult.Signed)

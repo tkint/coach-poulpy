@@ -1,13 +1,14 @@
 <script setup lang="ts">
 // A short label on a row: what kind of change, what state. Primary for the main kind, neutral for
-// system or quiet ones, outline for a state that stays plain, error for what went wrong (crimson,
-// with an icon beside it). Never ember, and not DaisyUI's warning.
-withDefaults(defineProps<{ tone?: 'primary' | 'neutral' | 'outline' | 'error' }>(), { tone: 'primary' })
+// system or quiet ones, outline for a state that stays plain, success for a state that is fine, error
+// for what went wrong (crimson, with an icon beside it). Never ember, and not DaisyUI's warning.
+withDefaults(defineProps<{ tone?: 'primary' | 'neutral' | 'outline' | 'success' | 'error' }>(), { tone: 'primary' })
 
 const classes = {
   primary: 'cp-badge-primary cp-badge-soft',
   neutral: 'cp-badge-neutral cp-badge-soft',
   outline: 'cp-badge-outline',
+  success: 'cp-badge-success cp-badge-soft',
   error: 'cp-badge-error cp-badge-soft',
 }
 </script>

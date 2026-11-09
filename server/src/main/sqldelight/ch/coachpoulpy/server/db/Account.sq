@@ -34,9 +34,10 @@ SELECT password_hash FROM account WHERE id = ?;
 delete:
 DELETE FROM account WHERE id = ? RETURNING email;
 
--- What the admin sees of an account (#336): its state, never its data.
-adminView:
-SELECT id, email, role, confirmed_at, created_at, disabled_at FROM account WHERE lower(email) = lower(:email);
+-- What the admin sees of every account (#336): its state, never its data. Filtering, sorting and
+-- paging happen in AdminAccounts, which is plenty for a back office; move them here if accounts reach the hundreds of thousands.
+adminList:
+SELECT id, email, role, confirmed_at, created_at, disabled_at FROM account;
 
 -- No row when the account is unknown or already disabled.
 disable:

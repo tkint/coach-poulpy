@@ -62,6 +62,7 @@ const formats = [
         <CpBadge>Published catalog</CpBadge>
         <CpBadge tone="neutral">Made admin</CpBadge>
         <CpBadge tone="outline">Disabled account</CpBadge>
+        <CpBadge tone="success">Active</CpBadge>
         <CpBadge tone="error">Send failed</CpBadge>
       </div>
       <div v-else-if="part === 'avatar'" class="row">

@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Admin · accounts · delete</title>
-<meta name="mockup:screen" content="admin-accounts-list-delete">
+<title>Admin · accounts · details</title>
+<meta name="mockup:screen" content="admin-accounts-details">
 <meta name="mockup:section" content="Admin">
 <meta name="mockup:issue" content="336">
 <meta name="mockup:viewport" content="800">
@@ -95,7 +95,7 @@
       </div>
     <aside class="fixed inset-0 z-30 flex flex-col gap-4 overflow-y-auto bg-base-100 p-4 md:p-6 lg:static lg:inset-auto lg:w-96 lg:shrink-0 lg:border-s lg:border-base-300" aria-labelledby="side-panel-title" data-component="side-panel">
       <div class="flex items-start gap-3">
-        <div class="cp-avatar cp-avatar-placeholder"><div class="bg-secondary text-secondary-content w-12 rounded-full"><span>L</span></div></div>
+        <div class="cp-avatar cp-avatar-placeholder"><div class="bg-secondary text-secondary-content w-10 rounded-full"><span>L</span></div></div>
         <div class="flex min-w-0 grow flex-col gap-1"><h2 class="cp-type-headline break-all" id="side-panel-title">lea@example.com</h2><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Active</span></div>
         <button type="button" class="cp-btn cp-btn-circle cp-btn-ghost cp-btn-sm" aria-label="Close the details"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
       </div>
@@ -112,21 +112,6 @@
       </div>
     </aside>
     </main>
-    <dialog class="cp-modal cp-modal-open cp-modal-bottom sm:cp-modal-middle cp-sheet" data-component="sheet" id="delete-account" aria-labelledby="delete-title">
-      <div class="cp-modal-box">
-        <h2 class="cp-type-headline" id="delete-title">Delete this account?</h2>
-        <p class="py-2">This removes <strong class="break-all">lea@example.com</strong> and everything saved for it, for good. It is the same deletion the user can ask for in the app. It cannot be undone.</p>
-        <div class="cp-fieldset" data-component="confirm-field">
-          <label class="cp-type-label" for="confirm-email">Type the email to confirm</label>
-          <label class="cp-input w-full"><input id="confirm-email" type="text" class="grow" value="lea@exam" autocomplete="off"></label>
-        </div>
-        <div class="cp-modal-action">
-          <button class="cp-btn cp-btn-ghost">Cancel</button>
-          <button class="cp-btn cp-btn-error gap-2" disabled><svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Delete for good</button>
-        </div>
-      </div>
-      <form method="dialog" class="cp-modal-backdrop"><button>Close</button></form>
-    </dialog>
   </div>
   <div class="cp-drawer-side cp-is-drawer-close:overflow-visible" data-component="admin-nav">
     <label for="admin-drawer" aria-label="Close the navigation" class="cp-drawer-overlay"></label>
@@ -147,7 +132,7 @@
       </ul>
       <div class="flex w-full flex-col gap-2 p-2">
         <ul class="cp-menu w-full p-0">
-          <li><a href="../../agreed/web/app-profile.html" class="cp-is-drawer-close:cp-tooltip cp-is-drawer-close:cp-tooltip-right" data-tip="Coach Poulpy app" data-component="app-link"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg><span class="cp-is-drawer-close:hidden">Coach Poulpy app</span></a></li>
+          <li><a href="app-profile.html" class="cp-is-drawer-close:cp-tooltip cp-is-drawer-close:cp-tooltip-right" data-tip="Coach Poulpy app" data-component="app-link"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg><span class="cp-is-drawer-close:hidden">Coach Poulpy app</span></a></li>
         </ul>
         <div class="flex items-center gap-3 px-2">
           <div class="cp-avatar cp-avatar-placeholder"><div class="bg-primary text-primary-content w-10 rounded-full"><span>A</span></div></div>

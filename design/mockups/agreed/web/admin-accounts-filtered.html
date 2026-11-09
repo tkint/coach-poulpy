@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Admin · accounts · no match</title>
-<meta name="mockup:screen" content="admin-accounts-list-none">
+<title>Admin · accounts · filtered</title>
+<meta name="mockup:screen" content="admin-accounts-filtered">
 <meta name="mockup:section" content="Admin">
 <meta name="mockup:issue" content="336">
 <meta name="mockup:viewport" content="800">
@@ -32,18 +32,34 @@
         <div class="cp-card-body grid gap-4 p-4 sm:grid-cols-2 lg:grid-cols-4 md:p-6">
           <div class="cp-fieldset sm:col-span-2 lg:col-span-1" data-component="email-field">
             <label class="cp-type-label" for="filter-email">Email contains</label>
-            <label class="cp-input cp-search-field w-full"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input id="filter-email" type="search" class="grow" value="nobody" placeholder=" " autocomplete="off"></label>
+            <label class="cp-input cp-search-field w-full"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input id="filter-email" type="search" class="grow" value="" placeholder=" " autocomplete="off"></label>
           </div>
           <label class="cp-fieldset" data-component="select-field"><span class="cp-type-label">Role</span><select id="filter-role" class="cp-select w-full"><option value="" selected>All</option><option value="member">Member</option><option value="admin">Admin</option></select></label>
           <label class="cp-fieldset" data-component="select-field"><span class="cp-type-label">Email</span><select id="filter-confirmed" class="cp-select w-full"><option value="" selected>All</option><option value="yes">Confirmed</option><option value="no">Not confirmed</option></select></label>
-          <label class="cp-fieldset" data-component="select-field"><span class="cp-type-label">Sign-in</span><select id="filter-signin" class="cp-select w-full"><option value="" selected>All</option><option value="active">Active</option><option value="disabled">Disabled</option></select></label>
+          <label class="cp-fieldset" data-component="select-field"><span class="cp-type-label">Sign-in</span><select id="filter-signin" class="cp-select w-full"><option value="">All</option><option value="active">Active</option><option value="disabled" selected>Disabled</option></select></label>
         </div>
       </form>
-      <div class="cp-card bg-base-100 shadow-sm" id="no-account">
-        <div class="cp-card-body items-center gap-3 p-6 text-center">
-          <img src="../../../poulpy/mood_happy.svg" alt="" width="96" height="87">
-          <h2 class="cp-card-title">No account matches</h2>
-          <p class="text-base-content/70">Change or clear the filters to see more accounts.</p>
+      <div class="cp-card bg-base-100 shadow-sm" id="accounts-table">
+        <div class="cp-card-body gap-4 p-4 md:p-6">
+          <div class="overflow-x-auto">
+            <table class="cp-table">
+              <thead><tr><th aria-sort="ascending"><button type="button" class="cp-btn cp-btn-ghost cp-btn-sm -ms-3 gap-1 whitespace-nowrap">Email<svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m18 15-6-6-6 6"/></svg></button></th><th aria-sort="none"><button type="button" class="cp-btn cp-btn-ghost cp-btn-sm -ms-3 gap-1 whitespace-nowrap">Role<svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg></button></th><th aria-sort="none"><button type="button" class="cp-btn cp-btn-ghost cp-btn-sm -ms-3 gap-1 whitespace-nowrap">Email status<svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg></button></th><th aria-sort="none"><button type="button" class="cp-btn cp-btn-ghost cp-btn-sm -ms-3 gap-1 whitespace-nowrap">Sign-in<svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg></button></th><th aria-sort="none"><button type="button" class="cp-btn cp-btn-ghost cp-btn-sm -ms-3 gap-1 whitespace-nowrap">Created<svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg></button></th></tr></thead>
+              <tbody>
+                <tr class="cp-hover">
+                  <td><div class="flex items-center gap-3"><div class="cp-avatar cp-avatar-placeholder"><div class="bg-secondary text-secondary-content w-8 rounded-full"><span class="text-xs">S</span></div></div><button type="button" class="cp-link cp-link-hover whitespace-nowrap text-start font-semibold">sam@example.com</button></div></td>
+                  <td><span class="cp-badge cp-badge-neutral cp-badge-soft whitespace-nowrap">Member</span></td><td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Confirmed</span></td><td><span class="cp-badge cp-badge-outline whitespace-nowrap">Disabled</span></td><td class="whitespace-nowrap">28 Oct 2026</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="flex flex-col items-center justify-between gap-3 sm:flex-row" data-component="pagination">
+            <p class="text-sm text-base-content/70">Showing 1 to 1 of 1 account</p>
+            <nav aria-label="Pages"><div class="cp-join">
+              <button class="cp-join-item cp-btn cp-btn-sm" disabled aria-label="Previous page"><svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
+              <button class="cp-join-item cp-btn cp-btn-sm cp-btn-active" aria-current="page">1</button>
+              <button class="cp-join-item cp-btn cp-btn-sm" disabled aria-label="Next page"><svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
+            </div></nav>
+          </div>
         </div>
       </div>
       </div>
@@ -69,7 +85,7 @@
       </ul>
       <div class="flex w-full flex-col gap-2 p-2">
         <ul class="cp-menu w-full p-0">
-          <li><a href="../../agreed/web/app-profile.html" class="cp-is-drawer-close:cp-tooltip cp-is-drawer-close:cp-tooltip-right" data-tip="Coach Poulpy app" data-component="app-link"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg><span class="cp-is-drawer-close:hidden">Coach Poulpy app</span></a></li>
+          <li><a href="app-profile.html" class="cp-is-drawer-close:cp-tooltip cp-is-drawer-close:cp-tooltip-right" data-tip="Coach Poulpy app" data-component="app-link"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg><span class="cp-is-drawer-close:hidden">Coach Poulpy app</span></a></li>
         </ul>
         <div class="flex items-center gap-3 px-2">
           <div class="cp-avatar cp-avatar-placeholder"><div class="bg-primary text-primary-content w-10 rounded-full"><span>A</span></div></div>

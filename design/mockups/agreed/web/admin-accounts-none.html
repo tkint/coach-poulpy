@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Admin · accounts · not found</title>
+<title>Admin · accounts · no match</title>
 <meta name="mockup:screen" content="admin-accounts-none">
 <meta name="mockup:section" content="Admin">
 <meta name="mockup:issue" content="336">
@@ -22,27 +22,32 @@
       <label for="admin-drawer" aria-label="Toggle the navigation" class="cp-btn cp-btn-square cp-btn-ghost"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/></svg></label>
       <div class="px-2 font-bold">Accounts</div>
     </nav>
-    <main class="flex flex-col gap-6 p-4 md:p-8" id="accounts">
-      <div class="flex flex-col gap-1">
-        <h1 class="cp-type-display">Accounts</h1>
-        <p class="text-base-content/70">Find an account by its email. You see its state, never its workouts or health data.</p>
-      </div>
-      <form class="flex flex-col gap-1 sm:flex-row sm:items-end" id="account-search" role="search">
-        <div class="cp-fieldset grow" data-component="email-field">
-          <label class="cp-type-label" for="account-email">Email</label>
-          <label class="cp-input w-full">
-            <input id="account-email" type="search" class="grow" value="nobody@example.com" autocomplete="off" placeholder="name@example.com">
-          </label>
+    <main class="flex min-h-full" id="accounts">
+      <div class="flex min-w-0 grow flex-col gap-6 p-4 md:p-8">
+        <div class="flex flex-col gap-1">
+          <h1 class="cp-type-display">Accounts</h1>
+          <p class="text-base-content/70">Every account, with its state and never its workouts or health data. Open one to disable or delete it.</p>
         </div>
-        <button type="submit" class="cp-btn cp-btn-primary gap-2"><svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>Find</button>
+      <form class="cp-card bg-base-100 shadow-sm" id="filters" role="search" aria-label="Filter the accounts">
+        <div class="cp-card-body grid gap-4 p-4 sm:grid-cols-2 lg:grid-cols-4 md:p-6">
+          <div class="cp-fieldset sm:col-span-2 lg:col-span-1" data-component="email-field">
+            <label class="cp-type-label" for="filter-email">Email contains</label>
+            <label class="cp-input cp-search-field w-full"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input id="filter-email" type="search" class="grow" value="nobody" placeholder=" " autocomplete="off"></label>
+          </div>
+          <label class="cp-fieldset" data-component="select-field"><span class="cp-type-label">Role</span><select id="filter-role" class="cp-select w-full"><option value="" selected>All</option><option value="member">Member</option><option value="admin">Admin</option></select></label>
+          <label class="cp-fieldset" data-component="select-field"><span class="cp-type-label">Email</span><select id="filter-confirmed" class="cp-select w-full"><option value="" selected>All</option><option value="yes">Confirmed</option><option value="no">Not confirmed</option></select></label>
+          <label class="cp-fieldset" data-component="select-field"><span class="cp-type-label">Sign-in</span><select id="filter-signin" class="cp-select w-full"><option value="" selected>All</option><option value="active">Active</option><option value="disabled">Disabled</option></select></label>
+        </div>
       </form>
       <div class="cp-card bg-base-100 shadow-sm" id="no-account">
         <div class="cp-card-body items-center gap-3 p-6 text-center">
           <img src="../../../poulpy/mood_happy.svg" alt="" width="96" height="87">
-          <h2 class="cp-card-title">No account with this email</h2>
-          <p class="text-base-content/70">Check the spelling.</p>
+          <h2 class="cp-card-title">No account matches</h2>
+          <p class="text-base-content/70">Change or clear the filters to see more accounts.</p>
         </div>
       </div>
+      </div>
+
     </main>
   </div>
   <div class="cp-drawer-side cp-is-drawer-close:overflow-visible" data-component="admin-nav">
