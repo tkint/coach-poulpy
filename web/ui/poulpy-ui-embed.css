@@ -2179,6 +2179,9 @@ fieldset:disabled .cp-select::placeholder, fieldset:disabled .cp-select  ::place
     --tw-font-weight: var(--font-weight-bold);
     font-weight: var(--font-weight-bold);
   }
+.break-all {
+    word-break: break-all;
+  }
 .whitespace-nowrap {
     white-space: nowrap;
   }
@@ -2186,6 +2189,11 @@ fieldset:disabled .cp-select::placeholder, fieldset:disabled .cp-select  ::place
       color: var(--color-error-content);
       --cp-alert-border-color: var(--color-error);
       --cp-alert-color: var(--color-error);
+    }
+.cp-alert-success {
+      color: var(--color-success-content);
+      --cp-alert-border-color: var(--color-success);
+      --cp-alert-color: var(--color-success);
     }
 .text-base-content {
     color: var(--color-base-content);
@@ -2274,6 +2282,10 @@ fieldset:disabled .cp-select::placeholder, fieldset:disabled .cp-select  ::place
 .cp-badge-primary {
       --cp-badge-color: var(--color-primary);
       --cp-badge-fg: var(--color-primary-content);
+    }
+.cp-badge-success {
+      --cp-badge-color: var(--color-success);
+      --cp-badge-fg: var(--color-success-content);
     }
 .cp-aura:has( > .cp-card,  > .cp-alert) {
       --cp-aura-radius: var(--radius-box);

@@ -2429,6 +2429,9 @@
     --tw-font-weight: var(--font-weight-bold);
     font-weight: var(--font-weight-bold);
   }
+  .break-all {
+    word-break: break-all;
+  }
   .whitespace-nowrap {
     white-space: nowrap;
   }
@@ -2437,6 +2440,11 @@
       color: var(--color-error-content);
       --cp-alert-border-color: var(--color-error);
       --cp-alert-color: var(--color-error);
+    }
+    .cp-alert-success {
+      color: var(--color-success-content);
+      --cp-alert-border-color: var(--color-success);
+      --cp-alert-color: var(--color-success);
     }
   }
   .text-base-content {
@@ -2529,6 +2537,10 @@
     .cp-badge-primary {
       --cp-badge-color: var(--color-primary);
       --cp-badge-fg: var(--color-primary-content);
+    }
+    .cp-badge-success {
+      --cp-badge-color: var(--color-success);
+      --cp-badge-fg: var(--color-success-content);
     }
   }
   @layer daisyui.l1.l2.l3 {
