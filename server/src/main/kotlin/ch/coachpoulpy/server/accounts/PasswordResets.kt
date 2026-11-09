@@ -95,11 +95,16 @@ class AccountDeletion(
         val id = caller.accountId.value
         val stored = database.queries.accountQueries.passwordHashById(id).executeAsOneOrNull() ?: return AccountProblem.WrongPassword
         if (!passwords.verify(password, stored)) return AccountProblem.WrongPassword
+        erase(id)
+        return null
+    }
+
+    /** Removes the account [id] and every row of it. The user's own deletion and an admin's both end here. */
+    fun erase(id: UUID) {
         database.queries.transaction {
             val email = database.queries.accountQueries.delete(id).executeAsOneOrNull()
             email?.let { database.queries.signInQueries.deleteFailures(it) }
         }
-        return null
     }
 
     companion object {

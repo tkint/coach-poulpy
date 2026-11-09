@@ -8,6 +8,7 @@ import '../../../web/ui/poulpy-ui-embed.css'
 import {
   CpAvatar,
   CpBadge,
+  CpBreadcrumbs,
   CpCard,
   CpNavItem,
   CpNavMenu,
@@ -28,7 +29,7 @@ import {
   CpTextField,
 } from '../../../web/ui/src/index'
 
-defineProps<{ part: 'badge' | 'avatar' | 'card' | 'table' | 'stats' | 'nav-menu' | 'button' | 'chip' | 'search-field' | 'stepper' | 'select-field' | 'text-field' | 'password-field' | 'poulpy-card' | 'error' | 'sheet' | 'pagination' | 'side-panel' }>()
+defineProps<{ part: 'badge' | 'breadcrumbs' | 'avatar' | 'card' | 'table' | 'stats' | 'nav-menu' | 'button' | 'chip' | 'search-field' | 'stepper' | 'select-field' | 'text-field' | 'password-field' | 'poulpy-card' | 'error' | 'sheet' | 'pagination' | 'side-panel' }>()
 const { mode } = useSampleTheme()
 const chips = ref({ legs: true, core: false })
 const query = ref('squat')
@@ -54,6 +55,8 @@ const formats = [
         <CpButton variant="tonal">Edit</CpButton>
         <CpButton variant="outline">Cancel</CpButton>
         <CpButton variant="grumpy">Catch up</CpButton>
+        <CpButton variant="danger">Delete</CpButton>
+        <CpButton variant="outline" size="md">Disable</CpButton>
       </div>
       <div v-else-if="part === 'badge'" class="row">
         <CpBadge>Published catalog</CpBadge>
@@ -76,6 +79,10 @@ const formats = [
           </tbody>
         </CpTable>
       </CpCard>
+      <CpBreadcrumbs v-else-if="part === 'breadcrumbs'" label="You are here">
+        <li><a href="#">Workouts</a></li>
+        <li>Upper body</li>
+      </CpBreadcrumbs>
       <CpStats v-else-if="part === 'stats'">
         <CpStat title="Changes this week" value="12" description="Since Monday" accent />
         <CpStat title="Admins" value="1" description="Ana" />

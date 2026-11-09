@@ -10,7 +10,7 @@ The landing site, the web app, the web mockups and this site draw with one packa
 
 ## Button
 
-Primary, tonal, outline and grumpy: `CpButton`.
+Primary, tonal, outline, grumpy and danger (crimson, for a deletion that can't be undone): `CpButton`. The large size is the default; `size="md"` drops `cp-btn-xl` for the actions of a card.
 
 <WebComponentSamples part="button" />
 
@@ -20,6 +20,8 @@ Primary, tonal, outline and grumpy: `CpButton`.
 | `<CpButton variant="tonal">` | `cp-btn cp-btn-xl cp-btn-secondary` |
 | `<CpButton variant="outline">` | `cp-btn cp-btn-xl cp-btn-outline` |
 | `<CpButton variant="grumpy">` | `cp-btn cp-btn-xl cp-btn-accent` |
+| `<CpButton variant="danger">` | `cp-btn cp-btn-xl cp-btn-error` |
+| `<CpButton size="md">` | the same without `cp-btn-xl` |
 
 ## Chip
 
@@ -33,7 +35,7 @@ Primary, tonal, outline and grumpy: `CpButton`.
 
 ## Search field
 
-`CpSearchField`.
+`CpSearchField`: a pill with a search icon. The input is `type="search"` with `autocomplete="off"`, so a password manager does not take a search for an email address as a sign-in.
 
 <WebComponentSamples part="search-field" />
 
@@ -69,7 +71,7 @@ Primary, tonal, outline and grumpy: `CpButton`.
 
 | Vue | Classes |
 | --- | --- |
-| `<CpTextField>` | `div.cp-fieldset` around a `label.cp-type-label` and `label.cp-input` (`cp-input-error` in error) holding the `input` |
+| `<CpTextField>` | `div.cp-fieldset` around a `label.cp-type-label` and `label.cp-input` (`cp-input-error` in error) holding the `input`; `type="search"` for searches, with `autocomplete="off"` |
 
 ## Password field
 
@@ -79,7 +81,7 @@ Primary, tonal, outline and grumpy: `CpButton`.
 
 | Vue | Classes |
 | --- | --- |
-| `<CpPasswordField>` | `div.cp-fieldset` around a `label.cp-type-label`, `label.cp-input` (`cp-input-error` in error) holding the `input` and a `cp-btn cp-btn-circle cp-btn-ghost cp-btn-sm`, and `span.cp-label` for the hint |
+| `<CpPasswordField>` | `div.cp-fieldset` around a `label.cp-type-label`, `label.cp-input` (`cp-input-error` in error) holding the `input` and a `cp-btn cp-btn-circle cp-btn-ghost cp-btn-sm`, and `p.cp-label.whitespace-normal` for the hint |
 
 ## Poulpy card
 
@@ -189,6 +191,16 @@ Sortable columns put a `cp-btn cp-btn-ghost cp-btn-sm` in the header cell, with 
 | --- | --- |
 | `<CpStats>` | `cp-stats cp-stats-vertical md:cp-stats-horizontal bg-base-100 shadow-sm` |
 | `<CpStat>` | `cp-stat` with `cp-stat-title`, `cp-stat-value` (`text-primary` with `accent`) and `cp-stat-desc` |
+
+## Breadcrumbs
+
+`CpBreadcrumbs`: where a page sits, as links to the pages above it and the page itself last. Use it on a page that opens from a list, in place of a one-off back link.
+
+<WebComponentSamples part="breadcrumbs" />
+
+| Vue | Classes |
+| --- | --- |
+| `<CpBreadcrumbs label>` | `nav.cp-breadcrumbs` around `ul`, with an `li` per step (`a` for the pages above, plain text for the current one) |
 
 ## Navigation menu
 
