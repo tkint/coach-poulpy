@@ -327,6 +327,26 @@
 [dir="rtl"] :is(.cp-drawer-open > .cp-drawer-toggle ~ .cp-drawer-side > :not(.cp-drawer-overlay)) {
       translate: 0%;
     }
+.cp-modal.cp-modal-open {
+      pointer-events: auto;
+      visibility: visible;
+      opacity: 100%;
+      transition: visibility 0s allow-discrete, background-color 0.3s ease-out, opacity 0.1s ease-out;
+      background-color: oklch(0% 0 0/ 0.4);
+    }
+.cp-modal.cp-modal-open  > .cp-modal-box {
+      translate: 0 0;
+      scale: 1;
+      opacity: 1;
+    }
+:root:has(.cp-modal.cp-modal-open) {
+      --cp-page-scroll-lock:  ;
+    }
+@starting-style {
+      .cp-modal.cp-modal-open {
+        opacity: 0%;
+      }
+    }
 .cp-menu {
       display: flex;
       width: fit-content;
@@ -1898,6 +1918,10 @@ fieldset:disabled .cp-select::placeholder, fieldset:disabled .cp-select  ::place
     width: calc(var(--spacing) * 3);
     height: calc(var(--spacing) * 3);
   }
+.size-4 {
+    width: calc(var(--spacing) * 4);
+    height: calc(var(--spacing) * 4);
+  }
 .size-5 {
     width: calc(var(--spacing) * 5);
     height: calc(var(--spacing) * 5);
@@ -1919,6 +1943,9 @@ fieldset:disabled .cp-select::placeholder, fieldset:disabled .cp-select  ::place
   }
 .w-10 {
     width: calc(var(--spacing) * 10);
+  }
+.w-12 {
+    width: calc(var(--spacing) * 12);
   }
 .w-16 {
     width: calc(var(--spacing) * 16);
@@ -1966,11 +1993,17 @@ fieldset:disabled .cp-select::placeholder, fieldset:disabled .cp-select  ::place
 .flex-col {
     flex-direction: column;
   }
+.flex-wrap {
+    flex-wrap: wrap;
+  }
 .items-center {
     align-items: center;
   }
 .items-start {
     align-items: flex-start;
+  }
+.justify-end {
+    justify-content: flex-end;
   }
 .gap-1 {
     gap: var(--spacing);
@@ -1989,6 +2022,12 @@ fieldset:disabled .cp-select::placeholder, fieldset:disabled .cp-select  ::place
   }
 .gap-8 {
     gap: calc(var(--spacing) * 8);
+  }
+.gap-x-8 {
+    column-gap: calc(var(--spacing) * 8);
+  }
+.gap-y-3 {
+    row-gap: calc(var(--spacing) * 3);
   }
 .justify-self-center {
     justify-self: center;
@@ -2108,6 +2147,9 @@ fieldset:disabled .cp-select::placeholder, fieldset:disabled .cp-select  ::place
 .p-4 {
     padding: calc(var(--spacing) * 4);
   }
+.p-6 {
+    padding: calc(var(--spacing) * 6);
+  }
 .px-2 {
     padding-inline: calc(var(--spacing) * 2);
   }
@@ -2122,6 +2164,9 @@ fieldset:disabled .cp-select::placeholder, fieldset:disabled .cp-select  ::place
   }
 .pt-6 {
     padding-top: calc(var(--spacing) * 6);
+  }
+.text-center {
+    text-align: center;
   }
 .font-mono {
     font-family: var(--font-mono);
@@ -2145,6 +2190,9 @@ fieldset:disabled .cp-select::placeholder, fieldset:disabled .cp-select  ::place
 .font-bold {
     --tw-font-weight: var(--font-weight-bold);
     font-weight: var(--font-weight-bold);
+  }
+.break-all {
+    word-break: break-all;
   }
 .whitespace-nowrap {
     white-space: nowrap;
@@ -2186,6 +2234,11 @@ fieldset:disabled .cp-select::placeholder, fieldset:disabled .cp-select  ::place
 .cp-btn-accent {
       --cp-btn-color: var(--color-accent);
       --cp-btn-fg: var(--color-accent-content);
+      --cp-btn-soft-bg: initial;
+    }
+.cp-btn-error {
+      --cp-btn-color: var(--color-error);
+      --cp-btn-fg: var(--color-error-content);
       --cp-btn-soft-bg: initial;
     }
 .cp-btn-primary {
@@ -2234,6 +2287,10 @@ fieldset:disabled .cp-select::placeholder, fieldset:disabled .cp-select  ::place
       --cp-badge-color: var(--color-primary);
       --cp-badge-fg: var(--color-primary-content);
     }
+.cp-badge-success {
+      --cp-badge-color: var(--color-success);
+      --cp-badge-fg: var(--color-success-content);
+    }
 .cp-aura:has( > .cp-card,  > .cp-alert) {
       --cp-aura-radius: var(--radius-box);
     }
@@ -2265,6 +2322,15 @@ fieldset:disabled .cp-select::placeholder, fieldset:disabled .cp-select  ::place
         --cp-modal-bl: var(--radius-box);
         --cp-modal-br: var(--radius-box);
       }
+    .sm\:grid-cols-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .sm\:flex-row {
+      flex-direction: row;
+    }
+    .sm\:items-end {
+      align-items: flex-end;
+    }
   }
 @media (width >= 48rem) {
     .md\:w-80 {
