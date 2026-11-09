@@ -35,7 +35,7 @@ Primary, tonal, outline, grumpy and danger (crimson, for a deletion that can't b
 
 ## Search field
 
-`CpSearchField`.
+`CpSearchField`: a pill with a search icon. The input is `type="search"` with `autocomplete="off"`, so a password manager does not take a search for an email address as a sign-in.
 
 <WebComponentSamples part="search-field" />
 
@@ -169,6 +169,16 @@ Primary, tonal, outline, grumpy and danger (crimson, for a deletion that can't b
 | --- | --- |
 | `<CpStats>` | `cp-stats cp-stats-vertical md:cp-stats-horizontal bg-base-100 shadow-sm` |
 | `<CpStat>` | `cp-stat` with `cp-stat-title`, `cp-stat-value` (`text-primary` with `accent`) and `cp-stat-desc` |
+
+## Breadcrumbs
+
+`CpBreadcrumbs`: where a page sits, as links to the pages above it and the page itself last. Use it on a page that opens from a list, in place of a one-off back link.
+
+<WebComponentSamples part="breadcrumbs" />
+
+| Vue | Classes |
+| --- | --- |
+| `<CpBreadcrumbs label>` | `nav.cp-breadcrumbs` around `ul`, with an `li` per step (`a` for the pages above, plain text for the current one) |
 
 ## Navigation menu
 
