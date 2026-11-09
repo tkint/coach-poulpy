@@ -66,7 +66,7 @@ async function remove() {
       <p class="text-base-content/70">{{ t('admin.accountsIntro') }}</p>
     </div>
     <form class="flex flex-col gap-1 sm:flex-row sm:items-end" role="search" @submit.prevent="find">
-      <CpTextField v-model="email" class="grow" type="email" :label="t('admin.fieldEmail')" autocomplete="off" />
+      <CpTextField v-model="email" class="grow" type="search" :label="t('admin.fieldEmail')" autocomplete="off" />
       <CpButton type="submit" size="md" :disabled="busy">{{ t('admin.accountsFind') }}</CpButton>
     </form>
     <CpErrorNote v-if="state === 'failed'">{{ t('admin.accountsError') }}</CpErrorNote>

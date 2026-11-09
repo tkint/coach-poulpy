@@ -71,7 +71,7 @@ Primary, tonal, outline, grumpy and danger (crimson, for a deletion that can't b
 
 | Vue | Classes |
 | --- | --- |
-| `<CpTextField>` | `div.cp-fieldset` around a `label.cp-type-label` and `label.cp-input` (`cp-input-error` in error) holding the `input` |
+| `<CpTextField>` | `div.cp-fieldset` around a `label.cp-type-label` and `label.cp-input` (`cp-input-error` in error) holding the `input`; `type="search"` for searches, and `autocomplete="off"` also sets the password-manager ignore attributes |
 
 ## Password field
 
