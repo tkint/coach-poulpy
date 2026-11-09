@@ -33,7 +33,7 @@ Primary, tonal, outline and grumpy: `CpButton`.
 
 ## Search field
 
-`CpSearchField`: a search is never a sign-in, so the input sets `autocomplete="off"` and the ignore attributes of Proton Pass, 1Password and LastPass, and a password manager does not offer to fill it, even when people search for an email address.
+`CpSearchField`: a pill with a search icon. The input is `type="search"` with `autocomplete="off"`, so a password manager does not take a search for an email address as a sign-in.
 
 <WebComponentSamples part="search-field" />
 
