@@ -2295,6 +2295,9 @@ fieldset:disabled .cp-select::placeholder, fieldset:disabled .cp-select  ::place
 .break-all {
     word-break: break-all;
   }
+.whitespace-normal {
+    white-space: normal;
+  }
 .whitespace-nowrap {
     white-space: nowrap;
   }
@@ -2752,12 +2755,6 @@ fieldset:disabled .cp-select::placeholder, fieldset:disabled .cp-select  ::place
     --cp-btn-p: var(--cp-space-lg);
     font-weight: 700;
     white-space: nowrap;
-  }
-.cp-fieldset {
-    grid-template-columns: minmax(0, 1fr);
-  }
-.cp-input > input {
-    min-width: 0;
   }
 .cp-search-field {
     --cp-size: 48px;
