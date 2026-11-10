@@ -66,9 +66,31 @@ fun missingLanguages(exercise: Exercise, required: List<String> = ServerCatalog.
 }
 
 /**
+ * One exercise as a row of the draft or of a version: its place in the catalog, and its variation
+ * group and rank in it (easiest first), null when it has no group.
+ */
+private data class CatalogRow(val exercise: Exercise, val position: Int, val group: Int?, val rank: Int?)
+
+/** [catalog] as rows: its order, and each exercise's variation group by the group's index. */
+private fun rowsOf(catalog: Catalog): List<CatalogRow> {
+    val groupOf = catalog.variationGroups.flatMapIndexed { group, slugs -> slugs.mapIndexed { rank, slug -> slug to (group to rank) } }.toMap()
+    return catalog.exercises.mapIndexed { position, exercise ->
+        val (group, rank) = groupOf[exercise.slug] ?: (null to null)
+        CatalogRow(exercise, position, group, rank)
+    }
+}
+
+/** The catalog document of [version] made of [rows]: the exercises in order and the variation groups they name. */
+private fun catalogOf(version: Int, rows: List<CatalogRow>): Catalog {
+    val groups = rows.filter { it.group != null }.groupBy { it.group!! }.toSortedMap().values
+        .map { group -> group.sortedBy { it.rank }.map { it.exercise.slug } }
+    return Catalog(version, rows.sortedBy { it.position }.map { it.exercise }, groups)
+}
+
+/**
  * The exercise catalog on the server (#337, ADR 0026): a working draft the admin edits, and numbered
- * published versions, each the whole catalog in the format phones store and the app bundles
- * (ADR 0008, ADR 0015). The public catalog route serves the latest version.
+ * published versions, both stored as one row per exercise. The server assembles a version into the
+ * document phones store and the app bundles (ADR 0008, ADR 0015); the public catalog route serves the latest.
  *
  * [bundled] is the catalog this server was built with: it fills the database the first time ([seed]),
  * and a published version always numbers past it, so a phone with a newer app still takes the next one.
@@ -80,6 +102,10 @@ class ServerCatalog(
 ) {
     private val queries get() = database.queries.catalogQueries
 
+    /** The latest version's document, kept once assembled: a version never changes, and every phone launch asks for it. */
+    @Volatile
+    private var served: Pair<Int, String>? = null
+
     /**
      * Fills an empty catalog from [bundled]: its version becomes the first published one and its
      * exercises the draft. Does nothing once a version exists. Returns whether it seeded.
@@ -87,10 +113,9 @@ class ServerCatalog(
     fun seed(): Boolean = database.queries.transactionWithResult {
         if (queries.latestVersion().executeAsOne().latest != null) return@transactionWithResult false
         val now = OffsetDateTime.now(clock)
-        queries.insertVersion(bundled.version, bundled.toJson(), now)
-        bundled.exercises.forEachIndexed { position, exercise ->
-            queries.insertDraft(exercise.slug.value, position, encode(exercise), now)
-        }
+        val rows = rowsOf(bundled)
+        insertVersion(bundled.version, rows)
+        rows.forEach { queries.insertDraft(it.exercise.slug.value, it.position, encode(it.exercise), it.group, it.rank, now) }
         true
     }
 
@@ -100,11 +125,12 @@ class ServerCatalog(
     /** The latest published version as the public route serves it: the bundled JSON format. Null before [seed]. */
     fun latestDocument(): Pair<Int, String>? {
         val version = latestVersion() ?: return null
-        return version to queries.document(version).executeAsOne()
+        served?.takeIf { it.first == version }?.let { return it }
+        return (version to catalogAt(version).toJson()).also { served = it }
     }
 
     /** The latest published version, or null before [seed]. */
-    fun published(): Catalog? = latestDocument()?.let { Catalog.fromJson(it.second) }
+    fun published(): Catalog? = latestVersion()?.let(::catalogAt)
 
     /** The draft, in the catalog's order, retired exercises included. */
     fun draft(): List<DraftExercise> {
@@ -120,9 +146,10 @@ class ServerCatalog(
         invalidity(exercise)?.let { return DraftResult.Invalid(it) }
         val added = exercise.copy(retired = false)
         return database.queries.transactionWithResult {
-            val draft = draftExercises()
-            if (draft.any { it.slug == added.slug }) return@transactionWithResult DraftResult.SlugTaken
-            queries.insertDraft(added.slug.value, draft.size, encode(added), OffsetDateTime.now(clock))
+            val draft = draftRows()
+            if (draft.any { it.exercise.slug == added.slug }) return@transactionWithResult DraftResult.SlugTaken
+            val position = (draft.maxOfOrNull { it.position } ?: -1) + 1
+            queries.insertDraft(added.slug.value, position, encode(added), null, null, OffsetDateTime.now(clock))
             DraftResult.Saved(view(added, published()))
         }
     }
@@ -169,20 +196,33 @@ class ServerCatalog(
     }
 
     /**
-     * Publishes the draft as the next version, with the latest version's variation groups. Refused while
-     * nothing changed, or while some exercise lacks a text in one of the shipped [LANGUAGES].
+     * Publishes the draft as the next version: a copy of its rows, variation groups included. Refused
+     * while nothing changed, or while some exercise lacks a text in one of the shipped [LANGUAGES].
      */
     fun publish(): PublishResult = database.queries.transactionWithResult {
         val changes = changes()
         if (changes.missing.isNotEmpty()) return@transactionWithResult PublishResult.MissingTranslations(changes.missing)
         if (changes.isEmpty) return@transactionWithResult PublishResult.NothingChanged
-        val groups = published()?.variationGroups.orEmpty()
-        val catalog = Catalog(changes.nextVersion, draftExercises(), groups)
-        queries.insertVersion(catalog.version, catalog.toJson(), OffsetDateTime.now(clock))
-        PublishResult.Published(catalog.version)
+        val rows = draftRows()
+        catalogOf(changes.nextVersion, rows) // checks the catalog's rules before anything is written
+        insertVersion(changes.nextVersion, rows)
+        PublishResult.Published(changes.nextVersion)
     }
 
-    private fun draftExercises(): List<Exercise> = queries.draft().executeAsList().map { decode(it.content!!) }
+    private fun insertVersion(version: Int, rows: List<CatalogRow>) {
+        queries.insertVersion(version, OffsetDateTime.now(clock))
+        rows.forEach { queries.insertVersionExercise(version, it.exercise.slug.value, it.position, encode(it.exercise), it.group, it.rank) }
+    }
+
+    private fun catalogAt(version: Int): Catalog = catalogOf(
+        version,
+        queries.versionExercises(version).executeAsList().map { CatalogRow(decode(it.content!!), it.position, it.variation_group, it.variation_rank) },
+    )
+
+    private fun draftRows(): List<CatalogRow> =
+        queries.draft().executeAsList().map { CatalogRow(decode(it.content!!), it.position, it.variation_group, it.variation_rank) }
+
+    private fun draftExercises(): List<Exercise> = draftRows().map { it.exercise }
 
     private fun view(exercise: Exercise, published: Catalog?): DraftExercise {
         val before = published?.get(exercise.slug)

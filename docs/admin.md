@@ -48,7 +48,7 @@ The public side is the web app's `/status` page ([mockups](./../design/mockups/a
 
 ## Catalog
 
-The server holds the exercise catalog as a **catalog draft** the admin edits and numbered **published versions** that phones download ([ADR 0026](./adr/0026-the-server-holds-the-catalog-as-a-draft-and-published-versions.md), [#337](https://github.com/tkint/coach-poulpy/issues/337)). The screens are [#338](https://github.com/tkint/coach-poulpy/issues/338); the routes come first.
+The server holds the exercise catalog as a **catalog draft** the admin edits and numbered **published versions** that phones download, both stored as one row per exercise (tables `catalog_draft_exercise` and `catalog_version_exercise`; [ADR 0026](./adr/0026-the-server-holds-the-catalog-as-a-draft-and-published-versions.md), [#337](https://github.com/tkint/coach-poulpy/issues/337)). The screens are [#338](https://github.com/tkint/coach-poulpy/issues/338); the routes come first.
 
 - **The first start seeds it** from the catalog the server was built with: that version becomes the first published one and its exercises the draft. Later starts leave it alone.
 - **An exercise in the draft is the catalog's JSON**, every text a map from language to string (`{"en": "Goblet squat", "fr": "Squat gobelet"}`). Saving needs the English name; the other shipped languages can wait.

@@ -108,6 +108,8 @@ class AdminCatalogTest {
         assertEquals(bundled.exercises, test.serverCatalog.draft().map { it.exercise })
         assertTrue(test.serverCatalog.draft().all { it.published && it.change == null })
         assertFalse(test.serverCatalog.seed(), "a second start leaves the catalog alone")
+        val rows = test.database.queries.catalogQueries.versionExercises(bundled.version).executeAsList()
+        assertEquals(bundled.exercises.map { it.slug.value }, rows.map { it.slug }, "one row per exercise, in the catalog's order")
         val response = publicCatalog()
         assertEquals(OK, response.status)
         assertEquals(Json.parseToJsonElement(bundled.toJson()), Json.parseToJsonElement(response.bodyString()))

@@ -1,18 +1,33 @@
 -- The exercise catalog on the server (#337, ADR 0026): the admin edits a draft and publishes
--- numbered versions. A published version is the whole catalog document phones store, in the bundled
--- JSON format (ADR 0008, ADR 0015), and never changes once written. The server fills both tables
--- from the bundled catalog the first time it starts.
+-- numbered versions. Both keep one row per exercise, retired ones included, holding the shared
+-- Exercise JSON (ADR 0007); the server assembles a version into the document phones store, in the
+-- bundled JSON format (ADR 0008, ADR 0015). The server fills the tables from the bundled catalog the
+-- first time it starts.
+
+-- A published version. Its exercises never change once written.
 CREATE TABLE catalog_version (
     version INTEGER PRIMARY KEY,
-    document JSONB NOT NULL,
     published_at TIMESTAMPTZ NOT NULL
 );
 
--- The working draft: one row per exercise, retired ones included, as the shared Exercise JSON
--- (ADR 0007). Rows are never deleted, since slugs never go away; `position` keeps the catalog's order.
+-- The exercises of a version. `position` keeps the catalog's order; an exercise in a variation group
+-- has the group's number and its `variation_rank`, easiest first.
+CREATE TABLE catalog_version_exercise (
+    version INTEGER NOT NULL REFERENCES catalog_version (version),
+    slug TEXT NOT NULL,
+    position INTEGER NOT NULL,
+    content JSONB NOT NULL,
+    variation_group INTEGER,
+    variation_rank INTEGER,
+    PRIMARY KEY (version, slug)
+);
+
+-- The working draft, in the same shape. Rows are never deleted, since slugs never go away.
 CREATE TABLE catalog_draft_exercise (
     slug TEXT PRIMARY KEY,
     position INTEGER NOT NULL,
     content JSONB NOT NULL,
+    variation_group INTEGER,
+    variation_rank INTEGER,
     updated_at TIMESTAMPTZ NOT NULL
 );

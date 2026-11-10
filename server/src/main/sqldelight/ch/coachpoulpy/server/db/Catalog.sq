@@ -1,18 +1,26 @@
 latestVersion:
 SELECT max(version) AS latest FROM catalog_version;
 
-document:
-SELECT CAST(document AS TEXT) FROM catalog_version WHERE version = :version;
-
 insertVersion:
-INSERT INTO catalog_version (version, document, published_at) VALUES (:version, CAST(:document AS JSONB), :publishedAt);
+INSERT INTO catalog_version (version, published_at) VALUES (:version, :publishedAt);
+
+-- In the catalog's order.
+versionExercises:
+SELECT slug, position, CAST(content AS TEXT) AS content, variation_group, variation_rank
+FROM catalog_version_exercise WHERE version = :version ORDER BY position, slug;
+
+insertVersionExercise:
+INSERT INTO catalog_version_exercise (version, slug, position, content, variation_group, variation_rank)
+VALUES (:version, :slug, :position, CAST(:content AS JSONB), :variationGroup, :variationRank);
 
 -- In the catalog's order.
 draft:
-SELECT slug, position, CAST(content AS TEXT) AS content FROM catalog_draft_exercise ORDER BY position, slug;
+SELECT slug, position, CAST(content AS TEXT) AS content, variation_group, variation_rank
+FROM catalog_draft_exercise ORDER BY position, slug;
 
 insertDraft:
-INSERT INTO catalog_draft_exercise (slug, position, content, updated_at) VALUES (:slug, :position, CAST(:content AS JSONB), :updatedAt);
+INSERT INTO catalog_draft_exercise (slug, position, content, variation_group, variation_rank, updated_at)
+VALUES (:slug, :position, CAST(:content AS JSONB), :variationGroup, :variationRank, :updatedAt);
 
 -- Renames the slug too, which the admin may do only until the exercise is first published.
 updateDraft:
