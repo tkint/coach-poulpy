@@ -4,6 +4,7 @@
 // is disabled, enabled or deleted after typing its email again (#336). It never shows a workout or health data.
 // The table's state lives in the URL (route.ts): /admin/accounts?q=lea&role=admin&sort=email&order=asc&page=2&account=<id>.
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import { ChevronDown, ChevronUp, ChevronsUpDown } from '@lucide/vue'
 import {
   CpAvatar,
   CpBadge,
@@ -221,12 +222,9 @@ async function remove() {
                 <th v-for="column in columns" :key="column.sort" :aria-sort="ariaSort(column.sort)">
                   <button type="button" class="cp-btn cp-btn-ghost cp-btn-sm -ms-3 gap-1 whitespace-nowrap" @click="sortBy(column.sort)">
                     {{ t(column.label) }}
-                    <svg class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                      <path v-if="query.sort !== column.sort" d="m7 15 5 5 5-5" />
-                      <path v-if="query.sort !== column.sort" d="m7 9 5-5 5 5" />
-                      <path v-else-if="query.order === 'asc'" d="m18 15-6-6-6 6" />
-                      <path v-else d="m6 9 6 6 6-6" />
-                    </svg>
+                    <ChevronsUpDown v-if="query.sort !== column.sort" class="size-4 shrink-0" aria-hidden="true" />
+                    <ChevronUp v-else-if="query.order === 'asc'" class="size-4 shrink-0" aria-hidden="true" />
+                    <ChevronDown v-else class="size-4 shrink-0" aria-hidden="true" />
                   </button>
                 </th>
               </tr>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 // One mobile component drawn with the tokens' own values, in the theme the page's switch chose.
+import { CircleExclamationPoint } from '@lucide/vue'
 import tokens from '../../../design/tokens.json'
 import { useSampleTheme } from './useSampleTheme'
 
@@ -42,7 +43,7 @@ const vars = (mode: 'light' | 'dark') =>
         </div>
       </div>
       <div v-else-if="part === 'alert'" class="error" role="note">
-        <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9" /><path d="M12 7v6M12 16.5v.5" /></svg>
+        <CircleExclamationPoint :size="20" aria-hidden="true" />
         The treadmill stopped answering. Recording resumes when it's back.
       </div>
     </div>

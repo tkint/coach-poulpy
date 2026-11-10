@@ -6,6 +6,7 @@
 //   - link only files that exist, and load no script or stylesheet from outside the repo (brand fonts are the one exception)
 //   - on the web, draw with the websites' shared classes: link web/ui/poulpy-ui.css, not mockup.css,
 //     and never DaisyUI's warning colour, since ember is not a warning (ADR 0023)
+//   - draw every icon (an SVG in a 24 box) as the Lucide icon its data-lucide names, from design/icons (ADR 0024)
 import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs'
 import { dirname, join, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -22,6 +23,15 @@ const radius = tokenPx('radius')
 // Body and label sizes are set on buttons and inputs all over a mockup, so only the display, title,
 // headline and timer sizes must come from their token.
 const fontSizes = new Set([...tokens.matchAll(/--cp-type-(display|title|headline|timer):\s*\d+\s+([\d.]+)px/g)].map((m) => m[2]))
+
+// An icon's drawing: its elements and their shapes, whatever the order or spacing.
+const drawingOf = (svg) =>
+  [...svg.matchAll(/<(path|circle|rect|line|polyline|polygon|ellipse)\b([^>]*?)\/?>/g)]
+    .map(([, tag, attrs]) => tag + [...attrs.matchAll(/\b(d|cx|cy|r|rx|ry|x|y|width|height|x1|x2|y1|y2|points)="([^"]*)"/g)]
+      .map(([, k, v]) => ` ${k}=${v.trim().replace(/\s+/g, ' ')}`).sort().join(''))
+    .sort().join(';')
+const lucide = new Map(readdirSync(join(root, 'design/icons')).filter((f) => f.endsWith('.svg'))
+  .map((f) => [f.slice(0, -4), drawingOf(readFileSync(join(root, 'design/icons', f), 'utf8'))]))
 
 const fontHosts = ['fonts.googleapis.com', 'fonts.gstatic.com']
 const problems = []
@@ -62,6 +72,14 @@ for (const file of walk(mockups).filter((f) => f.endsWith('.html'))) {
     if (!/href="[^"]*web\/ui\/poulpy-ui\.css"/.test(html)) fail(file, 'a web mockup links web/ui/poulpy-ui.css (ADR 0023)')
     if (/href="[^"]*shared\/mockup\.css"/.test(html)) fail(file, 'a web mockup draws with web/ui/poulpy-ui.css, not shared/mockup.css (ADR 0023)')
     if (/class="[^"]*\b[a-z]+-warning\b/.test(html)) fail(file, 'no warning classes: ember is not a warning, a problem is an error (ADR 0023)')
+  }
+
+  for (const [, attrs, inner] of html.matchAll(/<svg\b([^>]*)>([\s\S]*?)<\/svg>/g)) {
+    if (!/viewBox="0 0 24 24"/.test(attrs)) continue
+    const name = /data-lucide="([^"]+)"/.exec(attrs)?.[1]
+    if (!name) fail(file, 'an icon names its Lucide icon in data-lucide (ADR 0024)')
+    else if (!lucide.has(name)) fail(file, `icon ${name} is not in design/icons: copy it there from the lucide-static package`)
+    else if (lucide.get(name) !== drawingOf(inner)) fail(file, `icon ${name} is not drawn as Lucide draws it: copy it from design/icons/${name}.svg`)
   }
 
   for (const m of html.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)) checkStyle(file, m[1], '<style>')

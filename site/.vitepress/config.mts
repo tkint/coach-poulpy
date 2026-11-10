@@ -114,8 +114,9 @@ export default withMermaid(
       if (pageData.params?.title) pageData.title = pageData.params.title
     },
     // The web design system (web/ui, ADR 0023) is imported from its source; dedupe keeps its
-    // components on the site's own copy of Vue.
-    vite: { server: { fs: { allow: [repoRoot] } }, resolve: { dedupe: ['vue'] } },
+    // components on the site's own copy of Vue and of the Lucide icons (ADR 0024), since web/ui's
+    // own packages are not installed when the site is built.
+    vite: { server: { fs: { allow: [repoRoot] } }, resolve: { dedupe: ['vue', '@lucide/vue'] } },
     themeConfig: {
       logo: '/poulpy.svg',
       nav: [

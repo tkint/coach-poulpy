@@ -19,11 +19,12 @@
     "vue": "^3.5.44"
   },
   "dependencies": {
+    "@lucide/vue": "1.71.0",
     "daisyui": "5.7.50"
   },
   "devDependencies": {
     "@tailwindcss/cli": "4.3.5",
-    "tailwindcss": "4.3.5",
-    "postcss": "8.5.32"
+    "postcss": "8.5.32",
+    "tailwindcss": "4.3.5"
   }
 }

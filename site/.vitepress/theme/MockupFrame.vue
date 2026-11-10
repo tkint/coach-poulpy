@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Moon, RotateCcw, Sun } from '@lucide/vue'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { withBase } from 'vitepress'
 import type { Mockup } from '../mockups.mts'
@@ -126,12 +127,12 @@ onBeforeUnmount(() => {
         <span class="mockup-width">{{ viewport }} px</span>
       </div>
       <button type="button" @click="run++">
-        <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+        <RotateCcw :size="16" aria-hidden="true" />
         Reset
       </button>
       <button type="button" :aria-pressed="isDark" @click="toggleTheme">
-        <svg v-if="isDark" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>
-        <svg v-else width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        <Moon v-if="isDark" :size="16" aria-hidden="true" />
+        <Sun v-else :size="16" aria-hidden="true" />
         {{ isDark ? 'Dark' : 'Light' }}
       </button>
       <a :href="src()" target="_blank" rel="noopener">Open on its own</a>

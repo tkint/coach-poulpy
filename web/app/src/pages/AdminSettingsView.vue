@@ -3,6 +3,7 @@
 // the from-address of the emails, saved without a deploy, and a test email to the admin's own address with the
 // saved settings (#339). The mail server itself (host, port, user, password) stays in the server's environment.
 // Nothing here is a view to bookmark beyond the path: the test's result is the answer to a click.
+import { Send } from '@lucide/vue'
 import { computed, onMounted, ref, watch } from 'vue'
 import { CpButton, CpCard, CpDivider, CpErrorNote, CpSuccessNote, CpTextField } from '@coach-poulpy/ui'
 import { getSettings, saveMailFrom, sendTestEmail, type TestEmailAnswer } from '../session'
@@ -89,7 +90,7 @@ async function sendTest() {
         </div>
         <div>
           <CpButton variant="outline" size="md" :disabled="testing" @click="sendTest">
-            <svg class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4Z" /><path d="M22 2 11 13" /></svg>
+            <Send class="size-5 shrink-0" aria-hidden="true" />
             {{ t('admin.testEmailSend') }}
           </CpButton>
         </div>
