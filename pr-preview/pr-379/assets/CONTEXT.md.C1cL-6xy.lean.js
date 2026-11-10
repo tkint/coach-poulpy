@@ -1,1 +1,0 @@
-import{_ as t,o,c as s,a3 as a}from"./chunks/framework.B4L2-OcQ.js";const m=JSON.parse('{"title":"Coach Poulpy","description":"","frontmatter":{},"headers":[],"relativePath":"CONTEXT.md","filePath":"CONTEXT.md"}'),n={name:"CONTEXT.md"};function r(i,e,d,h,p,l){return o(),s("div",null,[...e[0]||(e[0]=[a("",70)])])}const u=t(n,[["render",r]]);export{m as __pageData,u as default};
