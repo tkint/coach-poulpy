@@ -78,23 +78,23 @@ struct ExerciseList<Row: View>: View {
         VStack(spacing: 0) {
             ListFilters(query: $query, placeholder: "exercises.search", label: "exercises.searchLabel", countLabel: listing.countLabel) {
                 FilterChipButton(
-                    icon: "dumbbell", count: ticked?.count ?? 0, name: Text("exercises.equipment"),
+                    icon: .dumbbell, count: ticked?.count ?? 0, name: Text("exercises.equipment"),
                     tickedName: Text("exercises.equipmentTicked \(ticked?.count ?? 0)")
                 ) { sheet = .equipment }
                 FilterChipButton(
-                    icon: "scope", count: focus.count, name: Text("exercises.focus"),
+                    icon: .target, count: focus.count, name: Text("exercises.focus"),
                     tickedName: Text("exercises.focusTicked \(focus.count)")
                 ) { sheet = .focus }
                 FilterChipButton(
-                    icon: "figure.mind.and.body", count: positions.count, name: Text("exercises.position"),
+                    icon: .armchair, count: positions.count, name: Text("exercises.position"),
                     tickedName: Text("exercises.positionTicked \(positions.count)")
                 ) { sheet = .position }
                 FilterChipButton(
-                    icon: "figure.arms.open", count: zoneCount, name: Text("exercises.zones"),
+                    icon: .personStanding, count: zoneCount, name: Text("exercises.zones"),
                     tickedName: Text("exercises.zonesTicked \(zoneCount)")
                 ) { sheet = .zones }
                 FilterChipButton(
-                    icon: "tag", count: tags.count, name: Text("exercises.tags"),
+                    icon: .tag, count: tags.count, name: Text("exercises.tags"),
                     tickedName: Text("exercises.tagsTicked \(tags.count)")
                 ) { sheet = .tags }
             } action: {
@@ -180,7 +180,7 @@ struct ExerciseList<Row: View>: View {
 
 /// The icon-only filter chip; filled, with how many are ticked, while its filter is on.
 private struct FilterChipButton: View {
-    let icon: String
+    let icon: Lucide
     let count: Int
     let name: Text
     let tickedName: Text
@@ -190,8 +190,7 @@ private struct FilterChipButton: View {
         let on = count > 0
         Button(action: action) {
             HStack(spacing: 4) {
-                Image(systemName: icon)
-                    .font(.system(size: 15, weight: .semibold))
+                LucideIcon(icon, size: 18)
                 if on {
                     Text(verbatim: "\(count)")
                         .font(PoulpyFont.label)
@@ -252,8 +251,7 @@ private struct FilterOptionSheet<Value: Hashable>: View {
                             if on { pending.remove(option.value) } else { pending.insert(option.value) }
                         } label: {
                             HStack(spacing: 14) {
-                                Image(systemName: on ? "checkmark.square.fill" : "square")
-                                    .font(.system(size: 22))
+                                LucideIcon(on ? .squareCheck : .square, size: 26)
                                     .foregroundStyle(on ? PoulpyColor.primary : PoulpyColor.onSurfaceVariant)
                                 Text(option.label).font(.poulpy(.callout).weight(.bold))
                                 Spacer()
@@ -381,15 +379,13 @@ struct ExerciseRowView: View {
             }
             Spacer(minLength: 0)
             if adding {
-                Image(systemName: "plus")
-                    .font(.system(size: 16, weight: .bold))
+                LucideIcon(.plus, size: 20)
                     .foregroundStyle(PoulpyColor.onPrimary)
                     .frame(width: 36, height: 36)
                     .background(PoulpyColor.primary, in: Circle())
                     .accessibilityHidden(true)
             } else {
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 15, weight: .bold))
+                LucideIcon(.chevronRight, size: 18)
                     .foregroundStyle(PoulpyColor.onSurfaceVariant)
                     .accessibilityHidden(true)
             }
@@ -429,8 +425,7 @@ struct PickerRowView: View {
             .accessibilityHint(String(localized: "exercise.details \(row.name)"))
             // A 56 pt touch target around the 36 pt plus.
             Button(action: onAdd) {
-                Image(systemName: "plus")
-                    .font(.system(size: 16, weight: .bold))
+                LucideIcon(.plus, size: 20)
                     .foregroundStyle(PoulpyColor.onPrimary)
                     .frame(width: 36, height: 36)
                     .background(PoulpyColor.primary, in: Circle())
@@ -512,7 +507,7 @@ struct ExerciseDetailView: View {
             Button {
                 adding = true
             } label: {
-                Label("exercise.add", systemImage: "plus")
+                Label("exercise.add", lucide: .plus)
                     .font(.poulpy(.callout).weight(.heavy))
                     .foregroundStyle(PoulpyColor.onPrimary)
                     .frame(maxWidth: .infinity)
@@ -543,8 +538,7 @@ struct ExerciseDetailView: View {
             Button {
                 dismiss()
             } label: {
-                Image(systemName: "chevron.left")
-                    .font(.system(size: 18, weight: .bold))
+                LucideIcon(.chevronLeft, size: 22)
                     .foregroundStyle(PoulpyColor.onSurface)
                     .frame(width: 44, height: 44)
                     .background(PoulpyColor.surface, in: Circle())
@@ -636,8 +630,7 @@ struct VariationRungs: View {
             }
             Spacer(minLength: 0)
             if variation.current {
-                Image(systemName: "checkmark")
-                    .font(.system(size: 18, weight: .bold))
+                LucideIcon(.check, size: 22)
                     .foregroundStyle(PoulpyColor.primary)
                     .accessibilityHidden(true)
             }
@@ -719,9 +712,9 @@ struct VariationButtonLabel: View {
 
     var body: some View {
         HStack(spacing: 8) {
-            Image(systemName: "chart.bar.fill").font(.system(size: 14, weight: .bold))
+            LucideIcon(.signal, size: 16)
             Text("exercise.variationPosition \(detail.variationPosition)")
-            Image(systemName: "chevron.down").font(.system(size: 12, weight: .bold))
+            LucideIcon(.chevronDown, size: 14)
         }
         .font(.poulpy(.subheadline).weight(.heavy))
         .foregroundStyle(PoulpyColor.onPrimaryContainer)

@@ -16,7 +16,7 @@ enum PlayerSteps {
                     capsLabel(Text("player.step \(Int(state.phaseNumber)) \(Int(state.phaseCount))") + Text(" · \(state.sessionClock)"))
                     progressTrack(Double(state.phaseNumber) / Double(max(state.phaseCount, 1)))
                 }
-                iconButton("xmark", "player.stop", action: onEnd)
+                iconButton(.x, "player.stop", action: onEnd)
             }
             if paused { pausedCard }
         }
@@ -28,8 +28,7 @@ enum PlayerSteps {
     /// Pause and Resume: the one big round button of the bar, with a soft blue halo while paused (`player-paused`). Never ember or crimson.
     static func pauseButton(paused: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            Image(systemName: paused ? "play.fill" : "pause.fill")
-                .font(.system(size: paused ? 28 : 26, weight: .bold))
+            LucideIcon(paused ? .play : .pause, size: paused ? 34 : 32)
                 .foregroundStyle(PoulpyColor.onPrimary)
                 .frame(width: 56, height: 56)
                 .background(PoulpyColor.primary, in: Circle())
@@ -44,7 +43,7 @@ enum PlayerSteps {
     /// "Paused", under the bar, in the blue container: the state is told by more than the icon.
     static var pausedCard: some View {
         HStack(spacing: PoulpySpace.md) {
-            Image(systemName: "pause.fill").font(.system(size: 20, weight: .bold)).accessibilityHidden(true)
+            LucideIcon(.pause, size: 24).accessibilityHidden(true)
             Text("player.paused").font(.poulpy(.headline))
             Spacer(minLength: 0)
         }
@@ -166,7 +165,7 @@ enum PlayerSteps {
                 Button {
                     onDone()
                 } label: {
-                    Label("player.done", systemImage: "checkmark")
+                    Label("player.done", lucide: .check)
                         .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 19, relativeTo: .body))
                         .foregroundStyle(PoulpyColor.onPrimary)
                         .frame(maxWidth: .infinity, minHeight: 64)
@@ -231,7 +230,7 @@ enum PlayerSteps {
         Button {
             onSkip()
         } label: {
-            Label("player.skipRest", systemImage: "forward.end.fill")
+            Label("player.skipRest", lucide: .skipForward)
                 .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 19, relativeTo: .body))
                 .foregroundStyle(PoulpyColor.onPrimaryContainer)
                 .frame(maxWidth: .infinity, minHeight: 64)
@@ -264,7 +263,7 @@ enum PlayerSteps {
     static func partLine(_ state: PlayerState) -> some View {
         if let part = state.partLabel {
             HStack(spacing: 6) {
-                if let kind = state.partKind { Image(systemName: partIcon(kind)).font(.system(size: 13, weight: .bold)) }
+                if let kind = state.partKind { LucideIcon(partIcon(kind), size: 16) }
                 capsLabel(Text(part), color: PoulpyColor.primary)
             }
             .foregroundStyle(PoulpyColor.primary)
@@ -277,10 +276,9 @@ enum PlayerSteps {
     }
 
     /// The round button on a surface at the top of the player (`icon-button--filled`).
-    static func iconButton(_ systemName: String, _ label: LocalizedStringKey, action: @escaping () -> Void) -> some View {
+    static func iconButton(_ icon: Lucide, _ label: LocalizedStringKey, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            Image(systemName: systemName)
-                .font(.system(size: 18, weight: .bold))
+            LucideIcon(icon, size: 22)
                 .foregroundStyle(PoulpyColor.onBackground)
                 .frame(width: 44, height: 44)
                 .background(PoulpyColor.surface, in: Circle())

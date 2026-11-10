@@ -3,12 +3,6 @@ package ch.coachpoulpy.android.ui
 import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.LibraryBooks
-import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Speed
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -29,11 +23,11 @@ import ch.coachpoulpy.android.R
 import ch.coachpoulpy.shared.AppGraph
 
 private enum class Tab(@StringRes val label: Int, val icon: ImageVector) {
-    HOME(R.string.tab_home, Icons.Filled.Home),
-    LIBRARY(R.string.tab_library, Icons.AutoMirrored.Filled.LibraryBooks),
-    LIVE(R.string.tab_live, Icons.Filled.Speed),
-    HISTORY(R.string.tab_history, Icons.Filled.History),
-    SETTINGS(R.string.tab_settings, Icons.Filled.Settings),
+    HOME(R.string.tab_home, Lucide.House),
+    LIBRARY(R.string.tab_library, Lucide.LibraryBig),
+    LIVE(R.string.tab_live, Lucide.Activity),
+    HISTORY(R.string.tab_history, Lucide.RotateCcwClock),
+    SETTINGS(R.string.tab_settings, Lucide.Settings),
 }
 
 /**

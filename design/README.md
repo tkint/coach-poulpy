@@ -64,3 +64,20 @@ The app icon is the brand book's: the happy blue Poulpy on Foam (`neutral.50`), 
 The alternate icons use the portrait or pose of the same name, scaled until its longest side fills 170 of the 200 square (on Android, until its farthest point sits on the 66 dp circle), so a pose with props or confetti draws Poulpy smaller. Their ids are those of `AppIcon` in the shared code and never change. Android switches between launcher aliases in the manifest; iOS lists the sets in `ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES` in `app-ios/project.yml`.
 
 The rules for using Poulpy are in [`docs/brand.md`](../docs/brand.md); the full brand book is in `site/.vitepress/theme/brand-book/` and on the docs site, and the decisions behind it are in [`docs/brand-decisions.md`](../docs/brand-decisions.md).
+
+## Icons
+
+Every icon is from [Lucide](https://lucide.dev) ([ADR 0024](../docs/adr/0024-lucide-is-the-icon-set.md)). `icons/` holds a copy of each Lucide icon the product uses, unchanged from the `lucide-static` package at the version `web/ui` pins for `@lucide/vue`, with Lucide's licence (`icons/LICENSE`). `build-icons.mjs` writes them for the apps:
+
+```sh
+node design/build-icons.mjs --add calendar-plus   # copy a Lucide icon in, then write
+node design/build-icons.mjs                       # write the apps' icons again
+```
+
+| Generated file | Used by |
+| --- | --- |
+| `app-android/.../ui/Lucide.kt` | Compose `ImageVector`s, one per icon (`Icon(Lucide.CalendarPlus, …)`) |
+| `app-ios/CoachPoulpy/Lucide.swift` | The `Lucide` enum (`.calendarPlus`), the `LucideIcon` view and `Label(_:lucide:)` |
+| `app-ios/CoachPoulpy/Assets.xcassets/Lucide/*.imageset` | iOS template vector images (`LucideCalendarPlus`) |
+
+The websites take the same icons from `@lucide/vue`, and the mockups inline the SVG with `data-lucide="<name>"`; `check-mockups.mjs` fails when a mockup icon is not the Lucide icon it names. CI runs `build-icons.mjs --check`, which also fails when an image set is left over from an icon no longer in `icons/`. To move to a newer Lucide, raise `@lucide/vue` in `web/ui` and the docs site, then copy each icon again with `--add`.

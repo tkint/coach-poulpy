@@ -67,7 +67,7 @@ struct LibraryView: View {
                     Button {
                         cover = .builder
                     } label: {
-                        Label("library.newWorkout", systemImage: "plus")
+                        Label("library.newWorkout", lucide: .plus)
                     }
                 }
             }
@@ -125,7 +125,7 @@ struct LibraryView: View {
                     title: Text("library.emptyTitle"),
                     message: Text("library.emptyBody"),
                     button: Text("library.buildFirst"),
-                    systemImage: "plus",
+                    icon: .plus,
                     poulpySize: 120
                 ) { cover = .builder }
                 .padding(.horizontal, PoulpySpace.lg)
@@ -149,7 +149,7 @@ struct LibraryView: View {
                 } label: {
                     HStack(spacing: 4) {
                         Text(sortTitle(sort))
-                        Image(systemName: "chevron.down").font(.system(size: 12, weight: .bold))
+                        LucideIcon(.chevronDown, size: 14)
                     }
                     .font(.poulpy(.subheadline).weight(.heavy))
                 }
@@ -209,8 +209,7 @@ struct LibraryView: View {
                 WorkoutPageView(graph: graph, workoutId: row.id)
             } label: {
                 HStack(spacing: 12) {
-                    Image(systemName: formatIcon(row.format))
-                        .font(.system(size: 18, weight: .semibold))
+                    LucideIcon(formatIcon(row.format), size: 22)
                         .foregroundStyle(PoulpyColor.onPrimaryContainer)
                         .frame(width: 44, height: 44)
                         .background(PoulpyColor.primaryContainer, in: Circle())
@@ -228,7 +227,7 @@ struct LibraryView: View {
             Button {
                 cover = .player(workoutId: row.id)
             } label: {
-                Image(systemName: "play.fill")
+                LucideIcon(.play)
                     .foregroundStyle(PoulpyColor.onPrimaryContainer)
                     .frame(width: 44, height: 44)
                     .background(PoulpyColor.primaryContainer, in: Circle())
@@ -241,12 +240,12 @@ struct LibraryView: View {
         .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(PoulpyColor.outline))
         .contentShape(.contextMenuPreview, RoundedRectangle(cornerRadius: PoulpyRadius.lg))
         .contextMenu {
-            Button { planning = row.id } label: { Label("library.planDay", systemImage: "calendar.badge.plus") }
+            Button { planning = row.id } label: { Label("library.planDay", lucide: .calendarPlus) }
             if row.editable {
-                Button { cover = .copy(workoutId: row.id) } label: { Label("action.copy", systemImage: "doc.on.doc") }
+                Button { cover = .copy(workoutId: row.id) } label: { Label("action.copy", lucide: .copy) }
             }
             Divider()
-            Button(role: .destructive) { deleting = row.id } label: { Label("action.delete", systemImage: "trash") }
+            Button(role: .destructive) { deleting = row.id } label: { Label("action.delete", lucide: .trash) }
         }
     }
 

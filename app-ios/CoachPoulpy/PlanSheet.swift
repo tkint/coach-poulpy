@@ -46,7 +46,7 @@ struct PlanSheet: View {
                 Button {
                     month = calendar.date(byAdding: .month, value: -1, to: month) ?? month
                 } label: {
-                    Image(systemName: "chevron.left").frame(width: 44, height: 44)
+                    LucideIcon(.chevronLeft).frame(width: 44, height: 44)
                 }
                 .disabled(month <= (calendar.dateInterval(of: .month, for: Date())?.start ?? Date()))
                 .accessibilityLabel(Text("plan.previousMonth"))
@@ -57,7 +57,7 @@ struct PlanSheet: View {
                 Button {
                     month = calendar.date(byAdding: .month, value: 1, to: month) ?? month
                 } label: {
-                    Image(systemName: "chevron.right").frame(width: 44, height: 44)
+                    LucideIcon(.chevronRight).frame(width: 44, height: 44)
                 }
                 .accessibilityLabel(Text("plan.nextMonth"))
             }

@@ -41,17 +41,17 @@ struct SessionRecapSheetView: View {
             floating: {
                 HStack {
                     Button(action: onBack) {
-                        Image(systemName: "chevron.left").font(.system(size: 17, weight: .bold)).modifier(FloatingButtonLook())
+                        LucideIcon(.chevronLeft, size: 20).modifier(FloatingButtonLook())
                     }
                     .accessibilityLabel("action.back")
                     Spacer()
                     HStack(spacing: PoulpySpace.sm) {
                         Button(action: onShare) {
-                            Image(systemName: "square.and.arrow.up").font(.system(size: 17, weight: .bold)).modifier(FloatingButtonLook())
+                            LucideIcon(.share2, size: 20).modifier(FloatingButtonLook())
                         }
                         .accessibilityLabel("shareSession.title")
                         Button(action: onDelete) {
-                            Image(systemName: "trash").font(.system(size: 17, weight: .bold)).modifier(FloatingButtonLook())
+                            LucideIcon(.trash, size: 20).modifier(FloatingButtonLook())
                         }
                         .accessibilityLabel("action.delete")
                     }

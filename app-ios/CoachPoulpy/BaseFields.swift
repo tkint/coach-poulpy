@@ -59,7 +59,7 @@ struct FieldError: View {
 
     var body: some View {
         HStack(alignment: .top, spacing: 6) {
-            Image(systemName: "exclamationmark.circle").font(.system(size: 15, weight: .semibold))
+            LucideIcon(.circleExclamationPoint, size: 18)
             Text(text).font(.poulpy(.footnote).weight(.bold))
         }
         .foregroundStyle(PoulpyColor.error)
@@ -101,7 +101,7 @@ struct PoulpyTextField: View {
                     .accessibilityLabel(Text(label))
                     if secure {
                         Button { shown.toggle() } label: {
-                            Image(systemName: shown ? "eye.slash" : "eye").foregroundStyle(PoulpyColor.onSurfaceVariant)
+                            LucideIcon(shown ? .eyeOff : .eye).foregroundStyle(PoulpyColor.onSurfaceVariant)
                         }
                         .buttonStyle(.plain)
                         .accessibilityLabel(Text(LocalizedStringKey(shown ? "account.hidePassword" : "account.showPassword")))
@@ -232,7 +232,7 @@ struct SelectField: View {
                         Text(value).font(.poulpy(.headline)).foregroundStyle(PoulpyColor.onSurface).lineLimit(1)
                     }
                     Spacer()
-                    Image(systemName: "chevron.right").font(.footnote).foregroundStyle(PoulpyColor.onSurfaceVariant)
+                    LucideIcon(.chevronRight, size: 16).foregroundStyle(PoulpyColor.onSurfaceVariant)
                 }
             }
         }
@@ -334,7 +334,7 @@ struct OptionSheet<T: Hashable, Extra: View>: View {
                                 Text(options[index].1).font(.poulpy(.body)).foregroundStyle(PoulpyColor.onSurface)
                                 Spacer()
                                 if choice == options[index].0 {
-                                    Image(systemName: "checkmark").foregroundStyle(PoulpyColor.primary)
+                                    LucideIcon(.check).foregroundStyle(PoulpyColor.primary)
                                 }
                             }
                             .frame(minHeight: 44)
@@ -391,7 +391,7 @@ struct MultiOptionSheet<T: Hashable>: View {
                         HStack {
                             Text(options[index].1).font(.poulpy(.body)).foregroundStyle(PoulpyColor.onSurface)
                             Spacer()
-                            Image(systemName: on ? "checkmark.square.fill" : "square")
+                            LucideIcon(on ? .squareCheck : .square)
                                 .foregroundStyle(on ? PoulpyColor.primary : PoulpyColor.onSurfaceVariant)
                         }
                         .frame(minHeight: 44)

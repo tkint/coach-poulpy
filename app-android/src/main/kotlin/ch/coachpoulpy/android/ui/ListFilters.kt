@@ -19,9 +19,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -137,7 +134,7 @@ fun PillSearchField(query: String, onQuery: (String) -> Unit, placeholder: Strin
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        Icon(Icons.Filled.Search, contentDescription = null, tint = colors.onSurfaceVariant, modifier = Modifier.size(20.dp))
+        Icon(Lucide.Search, contentDescription = null, tint = colors.onSurfaceVariant, modifier = Modifier.size(20.dp))
         Box(Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
             if (query.isEmpty()) {
                 Text(placeholder, style = MaterialTheme.typography.bodyLarge, color = colors.onSurfaceVariant, maxLines = 1)
@@ -155,7 +152,7 @@ fun PillSearchField(query: String, onQuery: (String) -> Unit, placeholder: Strin
             IconButton(onClick = { onQuery("") }, modifier = Modifier.size(44.dp)) {
                 Box(Modifier.size(36.dp).background(colors.surfaceVariant, CircleShape), contentAlignment = Alignment.Center) {
                     Icon(
-                        Icons.Filled.Close,
+                        Lucide.X,
                         contentDescription = stringResource(R.string.exercises_clearSearch),
                         tint = colors.onSurfaceVariant,
                         modifier = Modifier.size(16.dp),

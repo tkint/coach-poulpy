@@ -61,7 +61,7 @@ struct AppIconSheet: View {
                                     Image(icon.drawing).resizable().scaledToFit().frame(width: 48, height: 48).accessibilityHidden(true)
                                     Text(icon.label).font(.poulpy(.body).weight(.bold)).foregroundStyle(PoulpyColor.onSurface)
                                     Spacer()
-                                    if icon == selected { Image(systemName: "checkmark").foregroundStyle(PoulpyColor.primary) }
+                                    if icon == selected { LucideIcon(.check).foregroundStyle(PoulpyColor.primary) }
                                 }
                                 .frame(minHeight: PoulpySize.row)
                                 .contentShape(Rectangle())

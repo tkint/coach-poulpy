@@ -19,12 +19,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.SignalCellularAlt
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -101,7 +95,7 @@ fun ExerciseDetailScreen(
             HorizontalDivider(color = colors.surfaceVariant)
             Box(Modifier.navigationBarsPadding().padding(start = PoulpySpace.lg, end = PoulpySpace.lg, top = 12.dp, bottom = 16.dp)) {
                 Button(onClick = { onAddToWorkout(detail.slug) }, modifier = Modifier.fillMaxWidth().height(PoulpySize.buttonLarge)) {
-                    Icon(Icons.Filled.Add, contentDescription = null)
+                    Icon(Lucide.Plus, contentDescription = null)
                     Text(stringResource(R.string.exercise_add), fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 8.dp))
                 }
             }
@@ -131,7 +125,7 @@ private fun TopBar(detail: ExerciseDetail, onBack: () -> Unit, onVariations: () 
         ) {
             Surface(shape = CircleShape, color = colors.surface, modifier = Modifier.size(44.dp)) {
                 IconButton(onClick = onBack) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
+                    Icon(Lucide.ChevronLeft, contentDescription = stringResource(R.string.action_back))
                 }
             }
             if (detail.variations.isNotEmpty()) {
@@ -206,13 +200,13 @@ internal fun VariationButton(detail: ExerciseDetail, onClick: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            Icon(Icons.Filled.SignalCellularAlt, contentDescription = null, modifier = Modifier.size(18.dp))
+            Icon(Lucide.Signal, contentDescription = null, modifier = Modifier.size(18.dp))
             Text(
                 stringResource(R.string.exercise_variationPosition, detail.variationPosition),
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.ExtraBold,
             )
-            Icon(Icons.Filled.KeyboardArrowDown, contentDescription = null, modifier = Modifier.size(18.dp))
+            Icon(Lucide.ChevronDown, contentDescription = null, modifier = Modifier.size(18.dp))
         }
     }
 }
@@ -300,7 +294,7 @@ internal fun VariationRungs(variations: List<VariationRow>, onPick: (String) -> 
                             color = colors.onSurfaceVariant,
                         )
                     }
-                    if (variation.current) Icon(Icons.Filled.Check, contentDescription = null, tint = colors.primary)
+                    if (variation.current) Icon(Lucide.Check, contentDescription = null, tint = colors.primary)
                 }
             }
         }
@@ -326,6 +320,6 @@ private fun Ladder(rung: Int, count: Int) {
 @Composable
 fun BackButton(onBack: () -> Unit) {
     IconButton(onClick = onBack) {
-        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
+        Icon(Lucide.ChevronLeft, contentDescription = stringResource(R.string.action_back))
     }
 }

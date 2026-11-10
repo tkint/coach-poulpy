@@ -115,11 +115,40 @@ The landing site, the web app, the web mockups and the docs site share one packa
 - The roles above keep their meaning: `cp-btn-primary` is `primary`, `cp-btn-secondary` is the tonal `primaryContainer`, `cp-btn-accent` is `grumpy` and only for the catch-up action. Never use DaisyUI's `warning` classes: ember is not a warning, and a problem is an `error`.
 - A web mockup that fills the browser window, such as one with a `CpDrawer` sidebar, adds `<meta name="mockup:viewport" content="800">`: the docs site then shows it in a window of that height and the page scrolls inside it, since a frame sized to a page as tall as the frame would grow forever. `design/mockups/shared/mockup-drawer.js` opens such a drawer on a large screen. Web mockups link `web/ui/src/tokens.css` then `web/ui/poulpy-ui.css`. After using a class no component or web mockup used before, run `npm run build -w ui` in `web/` and commit `poulpy-ui.css`; CI checks it.
 - Phone and tablet mockups keep `design/mockups/shared/mockup.css`: they draw the native screens.
-- Icons on the websites and in web mockups come from Lucide, as in the [Icons](#icons) section ([ADR 0024](adr/0024-lucide-is-the-icon-set.md)).
+- Icons on the websites and in every mockup come from Lucide, as in the [Icons](#icons) section ([ADR 0024](adr/0024-lucide-is-the-icon-set.md)).
 
 ## Icons
 
-Every icon is from [Lucide](https://lucide.dev), on every platform ([ADR 0024](adr/0024-lucide-is-the-icon-set.md)). Use its name for the action, never a home-made drawing of one Lucide already has. Icons take their colour from the roles above, and an error keeps its icon. The existing icons are being moved to Lucide in a follow-up issue; the Android and iOS Lucide packages are chosen there.
+Every icon is from [Lucide](https://lucide.dev), on every platform ([ADR 0024](adr/0024-lucide-is-the-icon-set.md)). Use its name for the action, never a home-made drawing of one Lucide already has. Icons take their colour from the roles above, and an error keeps its icon. Lucide's drawing stays as it is: a 24 box and a 2 wide round stroke, never filled; only the size changes (24 by default, 20 in chips and small buttons, 16 to 18 beside a line of text).
+
+| Where | How |
+| --- | --- |
+| Vue (web app, `web/ui`, docs site) | `@lucide/vue`: `<ChevronLeft class="size-5" aria-hidden="true" />` |
+| Mockups | The Lucide SVG inline, with `data-lucide="chevron-left"`; `design/check-mockups.mjs` checks it |
+| Android | `Icon(Lucide.ChevronLeft, contentDescription = …)` |
+| iOS | `LucideIcon(.chevronLeft, size: 20)`, or `Label("action.back", lucide: .chevronLeft)` |
+
+The Android and iOS icons, and the reference copies the mockups are checked against, are generated from `design/icons/`: run `node design/build-icons.mjs --add <name>` for an icon not used yet.
+
+One icon per meaning, the same on every platform:
+
+| Meaning | Lucide icon |
+| --- | --- |
+| Back, previous; next, open a row | `chevron-left`; `chevron-right` |
+| Close, clear | `x` |
+| More actions | `ellipsis-vertical` |
+| Add; duplicate, copy | `plus`; `copy` |
+| Edit; delete | `pencil`; `trash` |
+| Share; export a file | `share-2`; `download` |
+| Plan a day | `calendar-plus` |
+| Error | `circle-exclamation-point` |
+| Tabs: Home, Library, Live, History, Settings | `house`, `library-big`, `activity`, `rotate-ccw-clock`, `settings` |
+| Warm-up, work, cool down | `sun`, `zap`, `moon` |
+| Circuit, sets | `repeat`, `list` |
+| Treadmill (no Lucide treadmill), foot pod, heart rate band | `gauge`, `footprints`, `heart-pulse` |
+| Filters: equipment, focus, position, zones, tags | `dumbbell`, `target`, `armchair`, `person-standing`, `tag` |
+
+The movement-pattern badge stands in for exercise pictures, and Lucide draws few people, so its icons are the nearest Lucide match rather than an exact one: squat `person-standing`, hinge `hand-grab`, lunge `footprints`, push `dumbbell`, pull `biceps-flexed`, carry `luggage`, core `shield`, rotation `rotate-cw`, locomotion `sport-shoe`, mobility `accessibility`, stretch `stretch-horizontal`.
 
 ## Accessibility
 
