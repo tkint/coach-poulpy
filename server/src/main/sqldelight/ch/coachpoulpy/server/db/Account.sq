@@ -54,3 +54,11 @@ UPDATE account SET disabled_at = :disabledAt WHERE id = :id AND disabled_at IS N
 -- No row when the account is unknown or not disabled.
 enable:
 UPDATE account SET disabled_at = NULL WHERE id = :id AND disabled_at IS NOT NULL RETURNING id;
+
+-- The accounts whose email isn't confirmed yet (#340), newest first, one row per confirmation link
+-- still stored (none once they all were used). AdminStatus keeps the latest link of each account.
+pendingRegistrations:
+SELECT account.id, account.email, account.created_at, confirmation_token.expires_at
+FROM account LEFT JOIN confirmation_token ON confirmation_token.account_id = account.id
+WHERE account.confirmed_at IS NULL
+ORDER BY account.created_at DESC, account.id;

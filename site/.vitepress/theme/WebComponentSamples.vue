@@ -80,6 +80,17 @@ const formats = [
         <CpAvatar initials="A" tone="primary" size="lg" />
       </div>
       <CpCard v-else-if="part === 'card'" title="Latest changes">Everything an admin changed, newest first.</CpCard>
+      <template v-else-if="part === 'card-badge'">
+        <CpCard title="Mail">
+          <template #badge><CpBadge tone="success">Configured</CpBadge></template>
+          The server sends emails through its mail server.
+        </CpCard>
+        <CpCard title="Mail">
+          <template #badge><CpBadge tone="error">Not configured</CpBadge></template>
+          <CpErrorNote>No mail server is set on the server, so no email can be sent.</CpErrorNote>
+        </CpCard>
+        <CpCard title="Pending registrations" description="Accounts that have not confirmed their email yet." />
+      </template>
       <CpCard v-else-if="part === 'table'" title="Latest changes">
         <CpTable>
           <thead><tr><th>When</th><th>What</th></tr></thead>

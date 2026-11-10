@@ -4,9 +4,9 @@ import ch.coachpoulpy.catalog.Catalog
 import ch.coachpoulpy.server.admin.AdminAccounts
 import ch.coachpoulpy.server.admin.AdminAudit
 import ch.coachpoulpy.server.admin.AdminSettings
+import ch.coachpoulpy.server.admin.AdminStatus
 import ch.coachpoulpy.server.admin.ServerSettings
-import ch.coachpoulpy.server.mail.ConsoleMailer
-import ch.coachpoulpy.server.mail.Mailer
+import ch.coachpoulpy.server.mail.NoMailServer
 import ch.coachpoulpy.server.mail.SettingsMailer
 import ch.coachpoulpy.server.accounts.AccountDeletion
 import ch.coachpoulpy.server.accounts.Accounts
@@ -52,8 +52,10 @@ fun apiRoutes(
     cookies: WebCookies = WebCookies(websiteOrigin(websiteUrl { null })),
     events: Events = audit.events,
     settings: ServerSettings = ServerSettings(database),
-    mailer: Mailer = SettingsMailer(ConsoleMailer, settings::mailFrom),
+    mailer: SettingsMailer = SettingsMailer(NoMailServer, settings::mailFrom),
+    databaseAnswers: () -> Boolean = database::answers,
 ): List<ContractRoute> = listOf(
+    publicStatusRoute(databaseAnswers),
     catalogRoute(catalog),
     signUpRoute(accounts),
     confirmEmailRoute(accounts),
@@ -70,6 +72,7 @@ fun apiRoutes(
     audit,
     AdminAccounts(database, signIns, accountDeletion, events),
     AdminSettings(database, settings, mailer, events),
+    AdminStatus(database, mailer),
 )
 
 /** The API, described in OpenAPI at `/api/v1/openapi.json`, OAuth routes included. */
@@ -86,7 +89,8 @@ fun api(
     cookies: WebCookies = WebCookies(websiteOrigin(websiteUrl { null })),
     events: Events = audit.events,
     settings: ServerSettings = ServerSettings(database),
-    mailer: Mailer = SettingsMailer(ConsoleMailer, settings::mailFrom),
+    mailer: SettingsMailer = SettingsMailer(NoMailServer, settings::mailFrom),
+    databaseAnswers: () -> Boolean = database::answers,
 ): RoutingHttpHandler = contract {
     // The description is built as JSON nodes: kotlinx.serialization has no serializer for
     // http4k's own description classes, which the auto-marshalling renderer would need.
@@ -96,5 +100,5 @@ fun api(
         apiRenderer = OpenApi3ApiRenderer(KotlinxSerialization),
     )
     descriptionPath = "$API_PREFIX/openapi.json"
-    routes += apiRoutes(catalog, accounts, signIns, passwordResets, accountDeletion, sync, database, audit, cookies, events, settings, mailer)
+    routes += apiRoutes(catalog, accounts, signIns, passwordResets, accountDeletion, sync, database, audit, cookies, events, settings, mailer, databaseAnswers)
 }

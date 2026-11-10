@@ -90,6 +90,8 @@ class AdminSettingsTest {
 
     @Test
     fun savingIsWrittenToTheAuditLogWithAMaskedAddress() {
+        // A minute after the promotion, so the audit log's newest-first order doesn't hang on two ids made in the same millisecond.
+        test.clock.now = test.clock.now.plusSeconds(60)
         saveFrom("Poulpy <team@poulpy.example>")
         val action = events.filterIsInstance<AdminAction>().single()
         assertEquals("admin.settings.mail-from", action.action)

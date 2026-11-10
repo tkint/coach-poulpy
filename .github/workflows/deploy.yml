@@ -180,7 +180,7 @@ jobs:
             echo "::error::APP_NAME may only have lowercase letters, digits and dashes."; exit 1
           fi
           if [ "$PART" = server ] && [ -z "$SMTP_HOST" ]; then
-            echo "::warning::No SMTP_HOST variable or secret in the $ENVIRONMENT environment or the repository: the server will print emails to its log instead of sending them."
+            echo "::warning::No SMTP_HOST variable or secret in the $ENVIRONMENT environment or the repository: the server will send no email, confirmation links included, and the admin's status will say mail isn't configured."
           elif [ "$PART" = server ] && [ -z "$MAIL_FROM" ]; then
             echo "::error::Missing MAIL_FROM in the $ENVIRONMENT environment, needed with SMTP_HOST."; exit 1
           fi
