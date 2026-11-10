@@ -6,10 +6,10 @@ import java.time.Clock
 import java.time.Instant
 
 /**
- * How the last email the server tried to send went: when, to whom (masked), and what the mail
- * server said when it refused it, or null when it took it.
+ * How the last email the server tried to send went: when, which kind, to whom (masked), and what
+ * the mail server said when it refused it, or null when it took it.
  */
-data class SendResult(val at: Instant, val to: EmailAddress?, val error: String?) {
+data class SendResult(val at: Instant, val kind: EmailKind, val to: EmailAddress?, val error: String?) {
     val sent: Boolean get() = error == null
 }
 
@@ -24,6 +24,9 @@ class SettingsMailer(
     private val from: () -> String?,
     private val clock: Clock = Clock.systemUTC(),
 ) : Mailer {
+    /** Whether the server has a mail server at all; false while `SMTP_HOST` is unset ([NoMailServer]). */
+    val configured: Boolean get() = transport !== NoMailServer
+
     @Volatile
     var last: SendResult? = null
         private set
@@ -33,10 +36,10 @@ class SettingsMailer(
         try {
             transport.send(email.copy(from = email.from ?: from()))
         } catch (e: Exception) {
-            last = SendResult(clock.instant(), to, smtpError(e))
+            last = SendResult(clock.instant(), email.kind, to, smtpError(e))
             throw e
         }
-        last = SendResult(clock.instant(), to, null)
+        last = SendResult(clock.instant(), email.kind, to, null)
     }
 }
 

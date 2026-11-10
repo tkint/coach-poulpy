@@ -9,8 +9,15 @@ import jakarta.mail.internet.InternetAddress
 import jakarta.mail.internet.MimeMessage
 import java.util.Properties
 
+/** Why the server writes: the status view says which kind of email the last send was (#340). */
+enum class EmailKind(val code: String) {
+    Confirmation("confirmation"),
+    PasswordReset("password-reset"),
+    Test("test"),
+}
+
 /** A plain-text email; [from] is filled in by [SettingsMailer] from the saved setting or `MAIL_FROM`. */
-data class Email(val to: String, val subject: String, val text: String, val from: String? = null)
+data class Email(val to: String, val subject: String, val text: String, val kind: EmailKind, val from: String? = null)
 
 /** Sends an email, or throws when it can't. */
 fun interface Mailer {
@@ -19,7 +26,8 @@ fun interface Mailer {
 
 /**
  * The SMTP server mail goes through (docs/accounts.md), from `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`,
- * `SMTP_PASSWORD` and `MAIL_FROM`; null when `SMTP_HOST` is unset, as on a laptop.
+ * `SMTP_PASSWORD` and `MAIL_FROM`; null when `SMTP_HOST` is unset, as on a laptop, and then
+ * [NoMailServer] refuses every email.
  */
 data class MailSettings(val host: String, val port: Int, val user: String, val password: String, val from: String) {
     override fun toString() = "MailSettings(host=$host, port=$port, user=$user, from=$from)"
@@ -78,9 +86,16 @@ class SmtpMailer(private val settings: MailSettings) : Mailer {
 fun masked(address: String): String =
     address.substringBefore('@').take(1) + "…@" + address.substringAfter('@', "")
 
-/** Prints each email instead of sending it, for a server with no SMTP settings, such as on a laptop. */
-object ConsoleMailer : Mailer {
+/** Thrown for every email while the server has no mail server: `SMTP_HOST` is unset. */
+class MailServerMissing : IllegalStateException("No mail server is set: SMTP_HOST is unset, so no email is sent")
+
+/**
+ * The mailer of a server with no SMTP settings, such as on a laptop: every email fails with
+ * [MailServerMissing], and the admin's status view says mail isn't configured (#340). It never
+ * prints the email, whose confirmation or reset link would end up in the logs.
+ */
+object NoMailServer : Mailer {
     override fun send(email: Email) {
-        println("Email to ${email.to}, not sent because SMTP_HOST is unset\nSubject: ${email.subject}\n\n${email.text}\n")
+        throw MailServerMissing()
     }
 }

@@ -110,7 +110,32 @@
     "testEmailSent": "Test email sent to {email}.",
     "testEmailFailed": "The test email was not sent. The mail server said: {error}",
     "mailServerNote": "The mail server (host, port, user and password) is set on the server and is not editable here.",
-    "actionMailFrom": "Changed the from-address"
+    "actionMailFrom": "Changed the from-address",
+    "navStatus": "Status",
+    "statusTitle": "Status",
+    "statusIntro": "What the server can do right now. Only admins see this.",
+    "statusError": "The status can’t be loaded. Try again.",
+    "mailTitle": "Mail",
+    "mailConfigured": "Configured",
+    "mailNotConfigured": "Not configured",
+    "mailConfiguredBody": "The server sends emails through its mail server.",
+    "mailMissing": "No mail server is set on the server, so no email can be sent. Sign-up cannot send its confirmation link.",
+    "mailMissingNote": "The mail server is set with environment variables on the server, not here.",
+    "lastSendNone": "No email sent since the server started.",
+    "lastSendSent": "Last send: {status}, {when} ({kind}).",
+    "lastSendStatusSent": "sent",
+    "lastSendFailed": "The last send failed on {when}: {error}",
+    "kindConfirmation": "a confirmation email",
+    "kindPasswordReset": "a password reset email",
+    "kindTest": "a test email",
+    "pendingTitle": "Pending registrations",
+    "pendingIntro": "Accounts that have not confirmed their email yet. No email is sent from here.",
+    "pendingNone": "No account is waiting for its confirmation.",
+    "pendingError": "The pending registrations can’t be loaded. Try again.",
+    "colEmail": "Email",
+    "colSignedUp": "Signed up",
+    "colLinkExpires": "Link expires",
+    "linkNone": "No link left"
   },
   "app": {
     "signInTitle": "Sign in",
@@ -126,5 +151,13 @@
     "dataTitle": "Your data",
     "dataBody": "Your workouts, sessions and body log live on your phone and follow your account. To change them, open the app.",
     "adminLink": "Admin"
+  },
+  "status": {
+    "title": "Status",
+    "checking": "Checking…",
+    "up": "Coach Poulpy is up.",
+    "upBody": "Everything works as expected.",
+    "down": "Coach Poulpy is down.",
+    "downBody": "We are on it. Try again in a few minutes."
   }
 }

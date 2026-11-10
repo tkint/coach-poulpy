@@ -1,4 +1,4 @@
-// The account endpoints the email links need (docs/the-api.md). The server allows this site's
+// The account endpoints the email links need, and the public status (docs/the-api.md). The server allows this site's
 // origin (ADR 0021); during `npm run dev`, Vite proxies /api to the local server.
 export const apiBase = import.meta.env.VITE_API_URL ?? (import.meta.env.DEV ? '/api' : 'https://api.coach-poulpy.com')
 
@@ -26,3 +26,13 @@ async function post(path: string, body: object): Promise<LinkAnswer> {
 export const confirmEmail = (token: string) => post('/accounts/confirm', { token })
 export const setNewPassword = (token: string, password: string) => post('/password-resets/confirm', { token, password })
 export const requestPasswordReset = (email: string) => post('/password-resets', { email })
+
+/** Whether Coach Poulpy is up, for the public status page: down when the server says so or can't be reached. */
+export async function serverStatus(): Promise<'up' | 'down'> {
+  try {
+    const response = await fetch(`${apiBase}/api/v1/status`)
+    return response.ok && ((await response.json()) as { status: string }).status === 'up' ? 'up' : 'down'
+  } catch {
+    return 'down'
+  }
+}

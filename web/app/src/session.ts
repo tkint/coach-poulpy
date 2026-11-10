@@ -157,3 +157,32 @@ export async function sendTestEmail(): Promise<TestEmailAnswer> {
     return undefined
   }
 }
+
+/** The last email the server tried to send since it started: when, which kind, and the mail server's error if it refused it. */
+export type LastSend = { at: string; kind: 'confirmation' | 'password-reset' | 'test'; sent: boolean; error: string | null }
+
+/** What the server can do right now (#340): for now, whether a mail server is configured and how the last send went. */
+export type AdminStatus = { mail: { configured: boolean; lastSend: LastSend | null } }
+
+/** An account whose email isn't confirmed yet. */
+export type PendingRegistration = { email: string; signedUpAt: string; linkExpiresAt: string | null }
+
+/** The server's status for the admin, or nothing when it can't be loaded. */
+export async function getStatus(): Promise<AdminStatus | undefined> {
+  try {
+    const response = await authorized('/admin/status')
+    return response.ok ? ((await response.json()) as AdminStatus) : undefined
+  } catch {
+    return undefined
+  }
+}
+
+/** The accounts not confirmed yet, newest first, or nothing when they can't be loaded. */
+export async function pendingRegistrations(): Promise<PendingRegistration[] | undefined> {
+  try {
+    const response = await authorized('/admin/pending-registrations')
+    return response.ok ? ((await response.json()) as { registrations: PendingRegistration[] }).registrations : undefined
+  } catch {
+    return undefined
+  }
+}

@@ -51,7 +51,8 @@ Library versions live in `gradle/libs.versions.toml`. Package and app id: `ch.co
 # iOS: generate the Xcode project, then open it and press Run
 cd app-ios && xcodegen && open CoachPoulpy.xcodeproj
 
-# Server on http://localhost:8080, with its local Postgres
+# Server on http://localhost:8080, with its local Postgres. With no SMTP_HOST it sends no email:
+# confirm a local account in Postgres (docs/the-api.md, "Trying it locally")
 docker compose -f tools/compose.yaml up -d
 ./gradlew :server:run
 

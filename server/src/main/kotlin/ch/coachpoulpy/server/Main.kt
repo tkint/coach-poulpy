@@ -7,12 +7,11 @@ import ch.coachpoulpy.server.accounts.PasswordResets
 import ch.coachpoulpy.server.accounts.Passwords
 import ch.coachpoulpy.server.auth.SignIns
 import ch.coachpoulpy.server.auth.WebCookies
-import ch.coachpoulpy.server.mail.ConsoleMailer
+import ch.coachpoulpy.server.mail.NoMailServer
 import ch.coachpoulpy.server.mail.MailSettings
 import ch.coachpoulpy.server.mail.SmtpMailer
 import ch.coachpoulpy.server.admin.AdminAudit
 import ch.coachpoulpy.server.admin.ServerSettings
-import ch.coachpoulpy.server.mail.Mailer
 import ch.coachpoulpy.server.mail.SettingsMailer
 import ch.coachpoulpy.server.admin.EmailAddress
 import dev.forkhandles.values.parseOrNull
@@ -90,12 +89,12 @@ fun app(
     websiteOrigin: String = websiteOrigin(websiteUrl { null }),
     events: Events = audit.events,
     settings: ServerSettings = ServerSettings(database),
-    mailer: Mailer = SettingsMailer(ConsoleMailer, settings::mailFrom),
+    mailer: SettingsMailer = SettingsMailer(NoMailServer, settings::mailFrom),
 ): HttpHandler = WebCookies(websiteOrigin).let { cookies -> websiteCors(websiteOrigin).then(routes(
     "/health" bind GET to {
         if (databaseAnswers()) Response(OK).body("ok $version") else Response(SERVICE_UNAVAILABLE).body("database unavailable")
     },
-    authenticate(mapOf(SignIns.ACCESS_PREFIX to signIns.authenticator), cookies).then(api(version, catalog, accounts, signIns, passwordResets, accountDeletion, sync, database, audit, cookies, events, settings, mailer)),
+    authenticate(mapOf(SignIns.ACCESS_PREFIX to signIns.authenticator), cookies).then(api(version, catalog, accounts, signIns, passwordResets, accountDeletion, sync, database, audit, cookies, events, settings, mailer, databaseAnswers)),
 )) }
 
 fun main() {
@@ -106,8 +105,9 @@ fun main() {
     val mailSettings = MailSettings.from(System::getenv)
     // The admin can change the from-address (#339); MAIL_FROM is the default until they do.
     val settings = ServerSettings(database, defaultMailFrom = System.getenv("MAIL_FROM")?.takeIf { it.isNotBlank() })
-    val mailer = SettingsMailer(mailSettings?.let(::SmtpMailer) ?: ConsoleMailer, settings::mailFrom)
-    println(mailSettings?.let { "Mail goes through ${it.host}:${it.port} from ${settings.mailFrom()}" } ?: "Mail is printed here: SMTP_HOST is unset")
+    // With no SMTP_HOST, no email leaves and none is printed (#340): the admin's status says mail isn't configured.
+    val mailer = SettingsMailer(mailSettings?.let(::SmtpMailer) ?: NoMailServer, settings::mailFrom)
+    println(mailSettings?.let { "Mail goes through ${it.host}:${it.port} from ${settings.mailFrom()}" } ?: "No mail server: SMTP_HOST is unset, so no email is sent")
     val passwords = Passwords()
     val accounts = Accounts(database, mailer, websiteUrl = websiteUrl(System::getenv), passwords = passwords)
     val signIns = SignIns(database, passwords)

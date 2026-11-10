@@ -4,6 +4,7 @@ import ch.coachpoulpy.server.ServerText
 import ch.coachpoulpy.server.auth.AccountId
 import ch.coachpoulpy.server.db.Database
 import ch.coachpoulpy.server.mail.Email
+import ch.coachpoulpy.server.mail.EmailKind
 import ch.coachpoulpy.server.mail.Mailer
 import ch.coachpoulpy.server.mail.smtpError
 import dev.forkhandles.values.parseOrNull
@@ -89,6 +90,7 @@ class AdminSettings(
             to = account.email,
             subject = ServerText.emailTestSubject(account.language),
             text = ServerText.emailTestBody(account.language),
+            kind = EmailKind.Test,
         )
         return try {
             mailer.send(email)

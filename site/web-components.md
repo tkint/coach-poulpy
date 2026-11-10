@@ -128,7 +128,7 @@ Primary, tonal, outline, grumpy and danger (crimson, for a deletion that can't b
 
 ## Badge
 
-`CpBadge`: what kind of change, what state. Primary, neutral, outline, success (a state that is fine), or error (crimson, with an icon beside it); never ember or `warning`.
+`CpBadge`: what kind of change, what state. Primary, neutral, outline, success (a state that is fine), or error (crimson, with its alert icon drawn in, so it never relies on colour alone); never ember or `warning`.
 
 <WebComponentSamples part="badge" />
 
@@ -138,7 +138,7 @@ Primary, tonal, outline, grumpy and danger (crimson, for a deletion that can't b
 | `<CpBadge tone="neutral">` | `cp-badge cp-badge-neutral cp-badge-soft` |
 | `<CpBadge tone="outline">` | `cp-badge cp-badge-outline` |
 | `<CpBadge tone="success">` | `cp-badge cp-badge-success cp-badge-soft` |
-| `<CpBadge tone="error">` | `cp-badge cp-badge-error cp-badge-soft` |
+| `<CpBadge tone="error">` | `cp-badge cp-badge-error cp-badge-soft gap-1` with the alert icon (`svg.size-3`) before the words |
 
 ## Avatar
 
@@ -154,13 +154,16 @@ Primary, tonal, outline, grumpy and danger (crimson, for a deletion that can't b
 
 ## Card
 
-`CpCard`: a raised panel, with a title when it has one. `CpPoulpyCard` is for empty states.
+`CpCard`: a raised panel, with a title when it has one. A `badge` slot puts the state of what the card is about beside the title (mail: configured), and a `description` says under it what the card holds. `CpPoulpyCard` is for empty states.
 
 <WebComponentSamples part="card" />
+
+<WebComponentSamples part="card-badge" />
 
 | Vue | Classes |
 | --- | --- |
 | `<CpCard>` | `section.cp-card.bg-base-100.shadow-sm` around `div.cp-card-body.gap-4.p-4.md:p-6` and, with a `title`, `h2.cp-card-title` |
+| `<CpCard title description>` with `#badge` | the title in `div.flex.flex-col.gap-1`: `div.flex.flex-wrap.items-center.gap-3` holding the `h2.cp-card-title` and the badge, then `p.text-sm.text-base-content/70` |
 
 ## Divider
 

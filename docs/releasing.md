@@ -57,7 +57,7 @@ Set it up once:
    | `DEPLOY_PORT` | variable | Optional, `22` by default |
    | `DOMAIN` | variable | The API hostname, without scheme, port or path |
    | `POSTGRES_PASSWORD` | secret | For example `openssl rand -hex 24`; used when the Postgres volume is created |
-   | `SMTP_HOST` | variable | The EU mail provider's SMTP server. Optional until one is chosen: without it the server prints emails to its log instead of sending them |
+   | `SMTP_HOST` | variable | The EU mail provider's SMTP server. Optional until one is chosen: without it the server sends no email (no confirmation link either) and the admin's [Status](./admin.md#status) says mail isn't configured |
    | `SMTP_PORT` | variable | Optional, `587` (STARTTLS) by default; `465` for implicit TLS |
    | `SMTP_USER` | variable | The SMTP login |
    | `SMTP_PASSWORD` | secret | The SMTP password |
