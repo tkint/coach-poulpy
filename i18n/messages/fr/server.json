@@ -7,6 +7,10 @@
     "reset": {
       "subject": "Réinitialisez votre mot de passe Coach Poulpy",
       "body": "Bonjour,\n\nOuvrez ce lien pour choisir un nouveau mot de passe :\n\n{link}\n\nLe lien ne sert qu’une fois, pendant 1 heure. Choisir un nouveau mot de passe vous déconnecte sur tous vos appareils.\n\nSi vous n’avez rien demandé, ignorez cet e-mail : votre mot de passe ne change pas."
+    },
+    "test": {
+      "subject": "E-mail de test Coach Poulpy",
+      "body": "Bonjour,\n\nVoici l’e-mail de test envoyé depuis l’admin de Coach Poulpy. S’il vous est parvenu, les e-mails partent bien avec les réglages enregistrés.\n\nIl n’y a rien à faire."
     }
   }
 }

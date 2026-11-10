@@ -227,6 +227,10 @@ _Avoid_: Principal, user
 One right a token grants, named `resource:action` (`sessions:read`).
 _Avoid_: Permission, role (a role, like admin, belongs to the account)
 
+**Server setting**:
+A value an admin changes in the admin without a deploy, such as the from-address of the emails; it wins over its default from the environment. Secrets, like the SMTP password, are never one ([The admin area](docs/admin.md#settings)).
+_Avoid_: Config, preference (a preference belongs to a person)
+
 **Personal access token**:
 A token a person makes in Settings for their own scripts or the MCP server: named, scoped, with an expiry, revocable.
 _Avoid_: API key

@@ -1,11 +1,12 @@
 <script setup lang="ts">
 // /admin: the sign-in until the cookies sign an admin in, then the admin shell
-// (design/mockups/agreed/web/admin-shell.html) with the audit log and the accounts. A link at
+// (design/mockups/agreed/web/admin-shell.html) with the audit log, the accounts and the settings. A link at
 // the bottom of the sidebar goes back to the web app.
 import { computed, onMounted, ref } from 'vue'
 import { ArrowLeft } from 'lucide-vue-next'
 import { CpAvatar, CpBadge, CpCard, CpDrawer, CpDrawerItem, CpErrorNote, CpNavMenu, CpStat, CpStats, CpTable, poulpyDrawings } from '@coach-poulpy/ui'
 import AdminAccountsView from './AdminAccountsView.vue'
+import AdminSettingsView from './AdminSettingsView.vue'
 import AdminSignInPage from './AdminSignInPage.vue'
 import { auditLog, currentAccount, signOut, type AuditEntry, type Me } from '../session'
 import { navigate, path } from '../route'
@@ -14,8 +15,10 @@ import { locale, t } from '../i18n'
 const me = ref<Me>()
 const checked = ref(false)
 const open = ref(false)
-// The screen is the address: /admin is the audit log, /admin/accounts the accounts table.
-const view = computed<'audit' | 'accounts'>(() => (path.value === '/admin/accounts' ? 'accounts' : 'audit'))
+// The screen is the address: /admin is the audit log, /admin/accounts the accounts table, /admin/settings the settings.
+const screens = { '/admin/accounts': 'accounts', '/admin/settings': 'settings' } as const
+const view = computed<'audit' | 'accounts' | 'settings'>(() => screens[path.value as keyof typeof screens] ?? 'audit')
+const titles = { audit: 'admin.auditTitle', accounts: 'admin.accountsTitle', settings: 'admin.settingsTitle' }
 const entries = ref<AuditEntry[]>()
 const loadFailed = ref(false)
 
@@ -55,6 +58,7 @@ const actions: Record<string, string> = {
   'admin.account.disable': 'admin.actionDisable',
   'admin.account.enable': 'admin.actionEnable',
   'admin.account.delete': 'admin.actionDelete',
+  'admin.settings.mail-from': 'admin.actionMailFrom',
 }
 const what = (action: string) => (action in actions ? t(actions[action]) : action)
 </script>
@@ -66,8 +70,9 @@ const what = (action: string) => (action in actions ? t(actions[action]) : actio
     <template #toggle-icon>
       <svg class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2" /><path d="M9 3v18" /></svg>
     </template>
-    <template #title>{{ view === 'audit' ? t('admin.auditTitle') : t('admin.accountsTitle') }}</template>
+    <template #title>{{ t(titles[view]) }}</template>
     <AdminAccountsView v-if="view === 'accounts'" :own-account-id="me.accountId" />
+    <AdminSettingsView v-else-if="view === 'settings'" :email="me.email" />
     <main v-else class="flex flex-col gap-6 p-4 md:p-8">
       <div class="flex flex-col gap-1">
         <h1 class="cp-type-display">{{ t('admin.auditTitle') }}</h1>
@@ -117,6 +122,9 @@ const what = (action: string) => (action in actions ? t(actions[action]) : actio
         </CpDrawerItem>
         <CpDrawerItem :label="t('admin.navAccounts')" href="/admin/accounts" :active="view === 'accounts'" @click.prevent="navigate('/admin/accounts')">
           <template #icon><svg class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg></template>
+        </CpDrawerItem>
+        <CpDrawerItem :label="t('admin.navSettings')" href="/admin/settings" :active="view === 'settings'" @click.prevent="navigate('/admin/settings')">
+          <template #icon><svg class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="21" x2="14" y1="4" y2="4" /><line x1="10" x2="3" y1="4" y2="4" /><line x1="21" x2="12" y1="12" y2="12" /><line x1="8" x2="3" y1="12" y2="12" /><line x1="21" x2="16" y1="20" y2="20" /><line x1="12" x2="3" y1="20" y2="20" /><line x1="14" x2="14" y1="2" y2="6" /><line x1="8" x2="8" y1="10" y2="14" /><line x1="16" x2="16" y1="18" y2="22" /></svg></template>
         </CpDrawerItem>
       </CpNavMenu></div>
       <div class="flex w-full flex-col gap-2 p-2">

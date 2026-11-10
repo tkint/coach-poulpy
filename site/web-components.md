@@ -65,13 +65,15 @@ Primary, tonal, outline, grumpy and danger (crimson, for a deletion that can't b
 
 ## Text field
 
-`CpTextField`, a one-line field such as an email. In error, it turns crimson and a `CpErrorNote` under the form says why.
+`CpTextField`, a one-line field such as an email, with a `hint` under it when it needs one. In error, it turns crimson and a `CpErrorNote` under the form says why; a field checked on its own, such as an address that isn't one, passes `error` instead, which takes the hint's place in crimson.
 
 <WebComponentSamples part="text-field" />
 
 | Vue | Classes |
 | --- | --- |
 | `<CpTextField>` | `div.cp-fieldset` around a `label.cp-type-label` and `label.cp-input` (`cp-input-error` in error) holding the `input`; `type="search"` (with `autocomplete="off"`) is for searches and adds a search icon in the `label.cp-input`, at the height of the other fields |
+| `<CpTextField hint>` | adds `p.cp-label.whitespace-normal` under the field, named by the input's `aria-describedby` |
+| `<CpTextField error>` | `cp-input-error`, `aria-invalid`, and `p.cp-label.whitespace-normal.text-error` with `role="alert"` in the hint's place |
 
 ## Password field
 
@@ -103,6 +105,16 @@ Primary, tonal, outline, grumpy and danger (crimson, for a deletion that can't b
 | Vue | Classes |
 | --- | --- |
 | `<CpErrorNote>` | `cp-alert cp-alert-error cp-error-note` with an icon, `role="alert"` |
+
+## Success
+
+`CpSuccessNote`: something went through, such as a test email sent. Green with a check and words; a status, not an alert.
+
+<WebComponentSamples part="success" />
+
+| Vue | Classes |
+| --- | --- |
+| `<CpSuccessNote>` | `cp-alert cp-alert-success` with a check icon, `role="status"` |
 
 ## Sheet
 
@@ -149,6 +161,16 @@ Primary, tonal, outline, grumpy and danger (crimson, for a deletion that can't b
 | Vue | Classes |
 | --- | --- |
 | `<CpCard>` | `section.cp-card.bg-base-100.shadow-sm` around `div.cp-card-body.gap-4.p-4.md:p-6` and, with a `title`, `h2.cp-card-title` |
+
+## Divider
+
+`CpDivider`: a line between two parts of a card, such as a form and an action of its own. It adds no space; the card's gap does.
+
+<WebComponentSamples part="divider" />
+
+| Vue | Classes |
+| --- | --- |
+| `<CpDivider>` | `div.cp-divider.my-0` with `role="separator"` |
 
 ## Table
 

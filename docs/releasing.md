@@ -61,7 +61,7 @@ Set it up once:
    | `SMTP_PORT` | variable | Optional, `587` (STARTTLS) by default; `465` for implicit TLS |
    | `SMTP_USER` | variable | The SMTP login |
    | `SMTP_PASSWORD` | secret | The SMTP password |
-   | `MAIL_FROM` | variable | The sender, for example `Coach Poulpy <hello@coach-poulpy.com>`; needed with `SMTP_HOST` |
+   | `MAIL_FROM` | variable | The sender, for example `Coach Poulpy <hello@coach-poulpy.com>`; needed with `SMTP_HOST`. A from-address saved in the admin replaces it ([Settings](./admin.md#settings)) |
    | `WEBSITE_URL` | variable | Optional, `https://app.coach-poulpy.com` by default: where the links in emails point |
    | `ADMIN_EMAIL` | variable | Optional: the confirmed account with this address becomes an admin when the server starts ([the admin area](./admin.md)) |
    | `LOKI_URL` | variable | Optional: the push URL of a Grafana Cloud Loki, `https://logs-prod-XXX.grafana.net/loki/api/v1/push`. With it, the deploy starts a container that ships the logs there ([Logs](./deploying-the-server.md#logs)) |
