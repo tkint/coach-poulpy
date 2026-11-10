@@ -78,7 +78,7 @@ for (const file of walk(mockups).filter((f) => f.endsWith('.html'))) {
     if (!/viewBox="0 0 24 24"/.test(attrs)) continue
     const name = /data-lucide="([^"]+)"/.exec(attrs)?.[1]
     if (!name) fail(file, 'an icon names its Lucide icon in data-lucide (ADR 0024)')
-    else if (!lucide.has(name)) fail(file, `icon ${name} is not in design/icons: copy it there from the lucide-static package`)
+    else if (!lucide.has(name)) fail(file, `icon ${name} is not in design/icons: add it with node design/build-icons.mjs --add ${name}`)
     else if (lucide.get(name) !== drawingOf(inner)) fail(file, `icon ${name} is not drawn as Lucide draws it: copy it from design/icons/${name}.svg`)
   }
 

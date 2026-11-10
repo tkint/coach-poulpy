@@ -27,24 +27,6 @@ import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.TextAutoSize
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.DriveFileMove
-import androidx.compose.material.icons.automirrored.filled.Logout
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.automirrored.filled.DirectionsWalk
-import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.ErrorOutline
-import androidx.compose.material.icons.filled.FitnessCenter
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Repeat
-import androidx.compose.material.icons.filled.Timer
-import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -179,7 +161,7 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
                 title = { Text(stringResource(if (model.isEditing) R.string.builder_editTitle else R.string.builder_newTitle), style = MaterialTheme.typography.titleLarge) },
                 navigationIcon = {
                     IconButton(onClick = onClose) {
-                        Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.action_close))
+                        Icon(Lucide.X, contentDescription = stringResource(R.string.action_close))
                     }
                 },
                 actions = {
@@ -269,7 +251,7 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
                 }
             }
             item {
-                DashedTile(stringResource(R.string.builder_addPart), Icons.Filled.Add, onClick = { addingPart = true })
+                DashedTile(stringResource(R.string.builder_addPart), Lucide.Plus, onClick = { addingPart = true })
             }
         }
     }
@@ -359,7 +341,7 @@ private fun FormatLine(format: WorkoutFormat, label: String) {
             Icon(format.icon, contentDescription = null, tint = colors.onPrimaryContainer, modifier = Modifier.size(18.dp))
             Text(label, fontWeight = FontWeight.ExtraBold, color = colors.onPrimaryContainer)
         }
-        Icon(Icons.Filled.Lock, contentDescription = null, tint = colors.onSurfaceVariant, modifier = Modifier.size(16.dp))
+        Icon(Lucide.Lock, contentDescription = null, tint = colors.onSurfaceVariant, modifier = Modifier.size(16.dp))
         Text(stringResource(R.string.builder_formatLocked), style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
     }
 }
@@ -378,20 +360,20 @@ private fun BuilderPartHeader(model: BuilderModel, part: BuilderPart) {
         if (part.canMoveUp || part.canMoveDown || part.canDelete) {
             Box {
                 IconButton(onClick = { expanded = true }) {
-                    Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.builder_moreActions, part.name), tint = colors.onSurfaceVariant)
+                    Icon(Lucide.EllipsisVertical, contentDescription = stringResource(R.string.builder_moreActions, part.name), tint = colors.onSurfaceVariant)
                 }
                 DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                     if (part.canMoveUp) {
                         DropdownMenuItem(
                             text = { Text(stringResource(R.string.builder_moveUp)) },
-                            leadingIcon = { Icon(Icons.Filled.KeyboardArrowUp, contentDescription = null) },
+                            leadingIcon = { Icon(Lucide.ChevronUp, contentDescription = null) },
                             onClick = { expanded = false; model.movePartUp(part.key) },
                         )
                     }
                     if (part.canMoveDown) {
                         DropdownMenuItem(
                             text = { Text(stringResource(R.string.builder_moveDown)) },
-                            leadingIcon = { Icon(Icons.Filled.KeyboardArrowDown, contentDescription = null) },
+                            leadingIcon = { Icon(Lucide.ChevronDown, contentDescription = null) },
                             onClick = { expanded = false; model.movePartDown(part.key) },
                         )
                     }
@@ -399,7 +381,7 @@ private fun BuilderPartHeader(model: BuilderModel, part: BuilderPart) {
                         if (part.canMoveUp || part.canMoveDown) HorizontalDivider()
                         DropdownMenuItem(
                             text = { Text(stringResource(R.string.builder_delete), color = colors.error) },
-                            leadingIcon = { Icon(Icons.Filled.Delete, contentDescription = null, tint = colors.error) },
+                            leadingIcon = { Icon(Lucide.Trash, contentDescription = null, tint = colors.error) },
                             onClick = { expanded = false; model.removePart(part.key) },
                         )
                     }
@@ -459,7 +441,7 @@ private fun RepeatHeader(model: BuilderModel, repeat: BuilderRepeat, partKey: St
             onMoveUp = { moves.moved(repeat.key); model.moveUp(repeat.key) },
             onMoveDown = { moves.moved(repeat.key); model.moveDown(repeat.key) },
         )
-        Icon(Icons.Filled.Repeat, contentDescription = null, tint = colors.primary)
+        Icon(Lucide.Repeat, contentDescription = null, tint = colors.primary)
         Text(stringResource(R.string.builder_repeat), style = PoulpyTextStyles.Headline.copy(fontSize = 19.sp, lineHeight = 23.sp), color = colors.onPrimaryContainer, modifier = Modifier.weight(1f))
         Row(
             Modifier.background(colors.surface, CircleShape).padding(4.dp),
@@ -588,7 +570,7 @@ private fun StepSheet(model: BuilderModel, row: BuilderRow, format: WorkoutForma
                 }
                 if (!row.isRest) {
                     FilledTonalButton(onClick = onDetails, contentPadding = PaddingValues(horizontal = 14.dp)) {
-                        Icon(Icons.Outlined.Info, contentDescription = null, modifier = Modifier.size(20.dp))
+                        Icon(Lucide.Info, contentDescription = null, modifier = Modifier.size(20.dp))
                         Text(stringResource(R.string.builder_details), fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 6.dp))
                     }
                 }
@@ -680,46 +662,46 @@ private fun ActionsMenu(
             }
         }
         IconButton(onClick = { expanded = true }) {
-            Icon(Icons.Filled.MoreVert, contentDescription = description, tint = colors.onSurfaceVariant)
+            Icon(Lucide.EllipsisVertical, contentDescription = description, tint = colors.onSurfaceVariant)
         }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             onEdit?.let { edit ->
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.builder_edit)) },
-                    leadingIcon = { Icon(Icons.Filled.Edit, contentDescription = null) },
+                    leadingIcon = { Icon(Lucide.Pencil, contentDescription = null) },
                     onClick = { expanded = false; edit() },
                 )
             }
             DropdownMenuItem(
                 text = { Text(stringResource(R.string.builder_duplicate)) },
-                leadingIcon = { Icon(Icons.Filled.ContentCopy, contentDescription = null) },
+                leadingIcon = { Icon(Lucide.Copy, contentDescription = null) },
                 onClick = { expanded = false; onDuplicate() },
             )
             onMoveIn?.let { move ->
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.builder_moveIntoRepeat)) },
-                    leadingIcon = { Icon(Icons.Filled.Repeat, contentDescription = null) },
+                    leadingIcon = { Icon(Lucide.Repeat, contentDescription = null) },
                     onClick = { expanded = false; move() },
                 )
             }
             onMoveOut?.let { move ->
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.builder_moveOutOfRepeat)) },
-                    leadingIcon = { Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null) },
+                    leadingIcon = { Icon(Lucide.LogOut, contentDescription = null) },
                     onClick = { expanded = false; move() },
                 )
             }
             if (otherParts.isNotEmpty()) {
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.builder_moveToPart)) },
-                    leadingIcon = { Icon(Icons.AutoMirrored.Filled.DriveFileMove, contentDescription = null) },
+                    leadingIcon = { Icon(Lucide.FolderInput, contentDescription = null) },
                     onClick = { expanded = false; choosingPart = true },
                 )
             }
             HorizontalDivider()
             DropdownMenuItem(
                 text = { Text(stringResource(R.string.builder_delete), color = colors.error) },
-                leadingIcon = { Icon(Icons.Filled.Delete, contentDescription = null, tint = colors.error) },
+                leadingIcon = { Icon(Lucide.Trash, contentDescription = null, tint = colors.error) },
                 onClick = { expanded = false; onRemove() },
             )
         }
@@ -744,7 +726,7 @@ private fun PoulpySelect(label: String, value: String, options: List<Pair<String
                     Text(label.uppercase(), style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold), color = colors.onSurfaceVariant, maxLines = 1)
                     Text(value, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
-                Icon(Icons.Filled.KeyboardArrowDown, contentDescription = null, tint = colors.onSurfaceVariant)
+                Icon(Lucide.ChevronDown, contentDescription = null, tint = colors.onSurfaceVariant)
             }
         }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
@@ -975,7 +957,7 @@ private fun ValueSheet(model: BuilderModel, key: String, target: WalkRunTarget, 
             }
             if (invalid) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Icon(Icons.Filled.ErrorOutline, contentDescription = null, tint = colors.error, modifier = Modifier.size(18.dp))
+                    Icon(Lucide.CircleExclamationPoint, contentDescription = null, tint = colors.error, modifier = Modifier.size(18.dp))
                     Text(stringResource(R.string.builder_valueInvalid), color = colors.error, style = MaterialTheme.typography.bodySmall)
                 }
             }
@@ -1040,11 +1022,11 @@ private fun DashedTile(label: String, icon: ImageVector, onClick: () -> Unit, mo
 private fun AddStepButton(label: String, onExercise: (StepRole) -> Unit, onRest: () -> Unit, modifier: Modifier = Modifier, height: Int = 56, onRepeat: (() -> Unit)? = null) {
     var expanded by remember { mutableStateOf(false) }
     Box(modifier) {
-        DashedTile(label, Icons.Filled.Add, onClick = { expanded = true }, height = height)
+        DashedTile(label, Lucide.Plus, onClick = { expanded = true }, height = height)
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             listOf(
-                Triple(StepRole.WORK, R.string.builder_addExercise, Icons.Filled.FitnessCenter),
-                Triple(StepRole.RECOVER, R.string.builder_addRecover, Icons.AutoMirrored.Filled.DirectionsWalk),
+                Triple(StepRole.WORK, R.string.builder_addExercise, Lucide.Dumbbell),
+                Triple(StepRole.RECOVER, R.string.builder_addRecover, Lucide.Footprints),
             ).forEach { (role, text, icon) ->
                 DropdownMenuItem(
                     text = { Text(stringResource(text)) },
@@ -1054,13 +1036,13 @@ private fun AddStepButton(label: String, onExercise: (StepRole) -> Unit, onRest:
             }
             DropdownMenuItem(
                 text = { Text(stringResource(R.string.builder_addRest)) },
-                leadingIcon = { Icon(Icons.Filled.Timer, contentDescription = null) },
+                leadingIcon = { Icon(Lucide.Timer, contentDescription = null) },
                 onClick = { expanded = false; onRest() },
             )
             onRepeat?.let { repeat ->
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.builder_addRepeat)) },
-                    leadingIcon = { Icon(Icons.Filled.Repeat, contentDescription = null) },
+                    leadingIcon = { Icon(Lucide.Repeat, contentDescription = null) },
                     onClick = { expanded = false; repeat() },
                 )
             }

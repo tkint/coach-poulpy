@@ -22,14 +22,6 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Accessibility
-import androidx.compose.material.icons.filled.FitnessCenter
-import androidx.compose.material.icons.filled.GpsFixed
-import androidx.compose.material.icons.filled.SelfImprovement
-import androidx.compose.material.icons.filled.Sell
 import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
@@ -133,32 +125,32 @@ fun ExerciseList(
             chips = {
                 item {
                     FilterChipButton(
-                        Icons.Filled.FitnessCenter, ticked?.size ?: 0, stringResource(R.string.exercises_equipment),
+                        Lucide.Dumbbell, ticked?.size ?: 0, stringResource(R.string.exercises_equipment),
                         pluralStringResource(R.plurals.exercises_equipmentTicked, ticked?.size ?: 0, ticked?.size ?: 0),
                     ) { sheet = FilterSheet.EQUIPMENT }
                 }
                 item {
                     FilterChipButton(
-                        Icons.Filled.GpsFixed, focus.size, stringResource(R.string.exercises_focus),
+                        Lucide.Target, focus.size, stringResource(R.string.exercises_focus),
                         pluralStringResource(R.plurals.exercises_focusTicked, focus.size, focus.size),
                     ) { sheet = FilterSheet.FOCUS }
                 }
                 item {
                     FilterChipButton(
-                        Icons.Filled.SelfImprovement, positions.size, stringResource(R.string.exercises_position),
+                        Lucide.Armchair, positions.size, stringResource(R.string.exercises_position),
                         pluralStringResource(R.plurals.exercises_positionTicked, positions.size, positions.size),
                     ) { sheet = FilterSheet.POSITION }
                 }
                 item {
                     val zones = Zones.zones(picked).size
                     FilterChipButton(
-                        Icons.Filled.Accessibility, zones, stringResource(R.string.exercises_zones),
+                        Lucide.PersonStanding, zones, stringResource(R.string.exercises_zones),
                         pluralStringResource(R.plurals.exercises_zonesTicked, zones, zones),
                     ) { sheet = FilterSheet.ZONES }
                 }
                 item {
                     FilterChipButton(
-                        Icons.Filled.Sell, tags.size, stringResource(R.string.exercises_tags),
+                        Lucide.Tag, tags.size, stringResource(R.string.exercises_tags),
                         pluralStringResource(R.plurals.exercises_tagsTicked, tags.size, tags.size),
                     ) { sheet = FilterSheet.TAGS }
                 }
@@ -445,10 +437,10 @@ private fun ExerciseCard(row: ExerciseRow, adding: Boolean, onClick: () -> Unit)
             }
             if (adding) {
                 Box(Modifier.size(36.dp).background(colors.primary, CircleShape), contentAlignment = Alignment.Center) {
-                    Icon(Icons.Filled.Add, contentDescription = null, tint = colors.onPrimary, modifier = Modifier.size(20.dp))
+                    Icon(Lucide.Plus, contentDescription = null, tint = colors.onPrimary, modifier = Modifier.size(20.dp))
                 }
             } else {
-                Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = colors.onSurfaceVariant)
+                Icon(Lucide.ChevronRight, contentDescription = null, tint = colors.onSurfaceVariant)
             }
         }
     }
@@ -487,7 +479,7 @@ private fun PickerCard(row: ExerciseRow, onOpen: () -> Unit, onAdd: () -> Unit) 
                 contentAlignment = Alignment.Center,
             ) {
                 Box(Modifier.size(36.dp).background(colors.primary, CircleShape), contentAlignment = Alignment.Center) {
-                    Icon(Icons.Filled.Add, contentDescription = null, tint = colors.onPrimary, modifier = Modifier.size(20.dp))
+                    Icon(Lucide.Plus, contentDescription = null, tint = colors.onPrimary, modifier = Modifier.size(20.dp))
                 }
             }
         }

@@ -13,9 +13,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -57,7 +54,7 @@ fun ImportScreen(graph: AppGraph, language: String, fileText: String, onAdded: (
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = colors.background, scrolledContainerColor = colors.background),
                 navigationIcon = {
                     IconButton(onClick = onClose) {
-                        Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.action_close))
+                        Icon(Lucide.X, contentDescription = stringResource(R.string.action_close))
                     }
                 },
             )
@@ -113,7 +110,7 @@ fun ImportScreen(graph: AppGraph, language: String, fileText: String, onAdded: (
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     // Crimson with an icon, never ember.
-                    Icon(Icons.Filled.ErrorOutline, contentDescription = null, tint = colors.error, modifier = Modifier.size(24.dp))
+                    Icon(Lucide.CircleExclamationPoint, contentDescription = null, tint = colors.error, modifier = Modifier.size(24.dp))
                     Text(state.errorMessage, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, color = colors.error)
                 }
                 Text(stringResource(R.string.import_nothingAdded), style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)

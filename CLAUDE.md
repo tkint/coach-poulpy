@@ -21,6 +21,7 @@ node design/build-tokens.mjs --check    # theme files match design/tokens.json
 node design/build-poulpy.mjs --check    # Poulpy drawings match their generator
 node design/build-body-map.mjs --check  # body map figures match their generator
 node design/build-body-map-shapes.mjs --check  # body map shapes for the apps match design/body-map.json
+node design/build-icons.mjs --check     # the apps' Lucide icons match design/icons
 (cd web && npm ci && npm run build)    # the web design system's CSS is current, and the web app builds
 ```
 
@@ -30,6 +31,7 @@ Android and iOS only build in CI (`.github/workflows/ci.yml`); a PR is done when
 
 - Logic goes in shared Kotlin with a test; Compose and SwiftUI code stays thin and mirrors the other platform.
 - Theme files, Poulpy drawings and body map figures are generated: edit `design/tokens.json`, `design/build-poulpy.mjs` or `design/build-body-map.mjs` and regenerate. The apps' body map shapes follow `design/body-map.json`: run `design/build-body-map-shapes.mjs` after it changes.
+- Every icon is a Lucide icon by its Lucide name (ADR 0024): `@lucide/vue` on the web, the inline SVG with `data-lucide` in mockups, `Lucide.*` on Android and `LucideIcon`/`Label(_:lucide:)` on iOS. An icon the apps don't have yet is added with `node design/build-icons.mjs --add <name>`.
 - The websites, web mockups and docs samples share `web/ui` (Vue, DaisyUI, the Poulpy theme; ADR 0023): add a missing component there, never one-off styles in an app, and run `npm run build -w ui` in `web/` after changing its classes. A DaisyUI component a screen needs that `web/ui` lacks is added to `web/ui` in the same PR as a `Cp` component, with a sample and a section on `site/web-components.md`; a mockup only uses the `cp-` classes of those components.
 - Mockups are plain HTML in `design/mockups/` (ADR 0016), styled only with `var(--cp-*)` from the token CSS, `shared/mockup.css` and `design/poulpy/*.svg`. A new screen or redesign starts in `drafts/`; nothing is built until a PR moves it to `agreed/`. The claude.ai canvas is scratch only.
 - Every user-facing string is added to `i18n/messages/en` and `i18n/messages/fr` (`app.json` for screens, `domain.json` for shared words, `catalog.json` for exercise text). Android, iOS and `DomainText` are generated from them at build time; never write a native string file. See `i18n/README.md`.

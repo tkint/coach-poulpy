@@ -26,6 +26,7 @@ Read [the design system](../design-system.md) and [ADR 0016](../adr/0016-mockups
 - Android and iOS mirror each other. When they disagree, the agreed mockup wins; when the mockup is wrong, fix it in a PR rather than diverging in code.
 - Words never break: text is laid out for the longest language. A tab label has about 12 characters of room; shrink or shorten it before letting a word wrap.
 - The warm-up is headed by the builder's sun icon in every mockup and screen.
+- Icons are Lucide, by their Lucide name, the same meaning with the same icon on every platform (the table in [the design system](../design-system.md#icons)). A mockup copies the SVG from `design/icons/<name>.svg` with `data-lucide="<name>"`; an icon not there yet is added with `node design/build-icons.mjs --add <name>`, which also gives it to both apps.
 - The English screen copy follows `docs/brand.md`; every string is also added in French (see Translator below).
 - Theme files are generated from `design/tokens.json`: edit the tokens, then run `node design/build-tokens.mjs`.
 

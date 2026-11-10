@@ -120,7 +120,7 @@ struct WorkoutPageView: View {
     private func floatingButtons(_ state: WorkoutPageState) -> some View {
         HStack {
             Button { dismiss() } label: {
-                Image(systemName: "chevron.left").font(.system(size: 17, weight: .bold)).modifier(FloatingButtonLook())
+                LucideIcon(.chevronLeft, size: 20).modifier(FloatingButtonLook())
             }
             .accessibilityLabel("action.back")
             Spacer()
@@ -129,15 +129,15 @@ struct WorkoutPageView: View {
                     item: WorkoutFileItem(make: { page.model.exportFile() }),
                     preview: SharePreview(state.name)
                 ) {
-                    Label("action.share", systemImage: "square.and.arrow.up")
+                    Label("action.share", lucide: .share2)
                 }
                 if state.editable {
-                    Button { cover = .copy } label: { Label("action.copy", systemImage: "doc.on.doc") }
+                    Button { cover = .copy } label: { Label("action.copy", lucide: .copy) }
                 }
                 Divider()
-                Button(role: .destructive) { deleting = true } label: { Label("action.delete", systemImage: "trash") }
+                Button(role: .destructive) { deleting = true } label: { Label("action.delete", lucide: .trash) }
             } label: {
-                Image(systemName: "ellipsis").font(.system(size: 17, weight: .bold)).modifier(FloatingButtonLook())
+                LucideIcon(.ellipsisVertical, size: 20).modifier(FloatingButtonLook())
             }
             .accessibilityLabel("action.more")
         }
@@ -152,8 +152,8 @@ struct WorkoutPageView: View {
                 Text(state.details).font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
             }
             FlowLayout(spacing: 6) {
-                badge(state.formatLabel, icon: "bolt.fill", primary: true)
-                ForEach(equipment, id: \.self) { badge($0, icon: "dumbbell.fill", primary: false) }
+                badge(state.formatLabel, icon: .zap, primary: true)
+                ForEach(equipment, id: \.self) { badge($0, icon: .dumbbell, primary: false) }
             }
             if !state.painNote.isEmpty {
                 HStack(spacing: 10) {
@@ -205,9 +205,9 @@ struct WorkoutPageView: View {
     }
 
     /// The format (filled with the primary container) or one piece of equipment (outlined), as a small pill.
-    private func badge(_ text: String, icon: String, primary: Bool) -> some View {
+    private func badge(_ text: String, icon: Lucide, primary: Bool) -> some View {
         HStack(spacing: 6) {
-            Image(systemName: icon).font(.system(size: 13, weight: .bold)).accessibilityHidden(true)
+            LucideIcon(icon, size: 16).accessibilityHidden(true)
             Text(text).font(.poulpy(.subheadline).weight(.heavy)).lineLimit(1)
         }
         .foregroundStyle(primary ? PoulpyColor.onPrimaryContainer : PoulpyColor.onSurface)
@@ -243,7 +243,7 @@ struct WorkoutPageView: View {
     private func planRow(_ state: WorkoutPageState) -> some View {
         if let next = state.plans.first {
             HStack(spacing: 10) {
-                Image(systemName: "calendar").font(.system(size: 18, weight: .semibold)).accessibilityHidden(true)
+                LucideIcon(.calendar, size: 22).accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 0) {
                     Text(String.localizedStringWithFormat(NSLocalizedString("workout.plannedSessions %lld", comment: ""), Int64(state.plans.count)))
                         .font(.poulpy(.subheadline).weight(.heavy))
@@ -267,7 +267,7 @@ struct WorkoutPageView: View {
             Button {
                 picking = true
             } label: {
-                Label("workout.plan", systemImage: "calendar.badge.plus")
+                Label("workout.plan", lucide: .calendarPlus)
                     .font(.poulpy(.body).weight(.heavy))
                     .frame(maxWidth: .infinity, minHeight: 48)
                     .foregroundStyle(PoulpyColor.primary)
@@ -302,7 +302,7 @@ struct WorkoutPageView: View {
     /// "Repeat · 3 times", heading the rows that go round together.
     private func repeatHeader(_ timesLabel: String) -> some View {
         HStack(spacing: 8) {
-            Image(systemName: "repeat").font(.system(size: 14, weight: .bold)).accessibilityHidden(true)
+            LucideIcon(.repeat, size: 16).accessibilityHidden(true)
             Text("\(NSLocalizedString("builder.repeat", comment: "")) · \(timesLabel)").font(.poulpy(.subheadline).weight(.heavy))
         }
         .foregroundStyle(PoulpyColor.primary)
@@ -315,7 +315,7 @@ struct WorkoutPageView: View {
     private func exerciseRow(_ step: WorkoutStepRow) -> some View {
         HStack(spacing: 10) {
             if step.isRest {
-                Image(systemName: "timer").font(.system(size: 14, weight: .bold)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+                LucideIcon(.timer, size: 16).foregroundStyle(PoulpyColor.onSurfaceVariant)
                     .frame(width: 32, height: 32)
                     .background(PoulpyColor.surfaceVariant, in: Circle())
                     .accessibilityHidden(true)
@@ -338,8 +338,7 @@ struct WorkoutPageView: View {
                 Button {
                     detailing = DetailTarget(slug: step.slug)
                 } label: {
-                    Image(systemName: "info.circle")
-                        .font(.system(size: 20, weight: .semibold))
+                    LucideIcon(.info, size: 24)
                         .foregroundStyle(PoulpyColor.onSurfaceVariant)
                         .frame(width: 44, height: 44)
                 }
@@ -359,7 +358,7 @@ struct WorkoutPageView: View {
                 Button {
                     cover = .builder
                 } label: {
-                    Label("action.edit", systemImage: "pencil")
+                    Label("action.edit", lucide: .pencil)
                         .font(.poulpy(.body).weight(.heavy))
                         .frame(maxWidth: .infinity, minHeight: 52)
                         .foregroundStyle(PoulpyColor.onSurface)
@@ -370,7 +369,7 @@ struct WorkoutPageView: View {
             Button {
                 cover = .player
             } label: {
-                Label("workout.start", systemImage: "play.fill")
+                Label("workout.start", lucide: .play)
                     .font(.poulpy(.body).weight(.heavy))
                     .frame(maxWidth: .infinity, minHeight: 52)
                     .foregroundStyle(PoulpyColor.onPrimary)
@@ -407,8 +406,7 @@ struct PartBadge: View {
 
     var body: some View {
         let work = kind == .work
-        Image(systemName: partIcon(kind))
-            .font(.system(size: 16, weight: .bold))
+        LucideIcon(partIcon(kind), size: 20)
             .foregroundStyle(work ? PoulpyColor.onPrimary : PoulpyColor.onPrimaryContainer)
             .frame(width: 36, height: 36)
             .background(work ? PoulpyColor.primary : PoulpyColor.primaryContainer, in: Circle())
@@ -417,15 +415,15 @@ struct PartBadge: View {
 }
 
 /// The icon of a format: a loop for a circuit, a list for sets.
-func formatIcon(_ format: WorkoutFormat) -> String {
-    format == .circuit ? "repeat" : "list.bullet"
+func formatIcon(_ format: WorkoutFormat) -> Lucide {
+    format == .circuit ? .repeat : .list
 }
 
-func partIcon(_ kind: PartKind) -> String {
+func partIcon(_ kind: PartKind) -> Lucide {
     switch kind {
-    case .warmUp: return "sun.max"
-    case .coolDown: return "moon"
-    default: return "bolt.fill"
+    case .warmUp: return .sun
+    case .coolDown: return .moon
+    default: return .zap
     }
 }
 

@@ -40,7 +40,7 @@ struct PoulpyCard: View {
     let title: Text
     let message: Text
     let button: Text
-    var systemImage: String? = nil
+    var icon: Lucide? = nil
     var poulpySize: CGFloat = 96
     let action: () -> Void
 
@@ -59,8 +59,8 @@ struct PoulpyCard: View {
                 .foregroundStyle(PoulpyColor.onSurfaceVariant)
             Button(action: action) {
                 HStack(spacing: 8) {
-                    if let systemImage {
-                        Image(systemName: systemImage).font(.system(size: 15, weight: .bold))
+                    if let icon {
+                        LucideIcon(icon, size: 18)
                     }
                     button
                 }
@@ -89,7 +89,7 @@ struct PillSearchField: View {
 
     var body: some View {
         HStack(spacing: 10) {
-            Image(systemName: "magnifyingglass")
+            LucideIcon(.search)
                 .foregroundStyle(PoulpyColor.onSurfaceVariant)
                 .accessibilityHidden(true)
             TextField(placeholder, text: $query)
@@ -101,8 +101,7 @@ struct PillSearchField: View {
                 Button {
                     query = ""
                 } label: {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 13, weight: .bold))
+                    LucideIcon(.x, size: 16)
                         .foregroundStyle(PoulpyColor.onSurfaceVariant)
                         .frame(width: 36, height: 36)
                         .background(PoulpyColor.surfaceVariant, in: Circle())

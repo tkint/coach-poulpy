@@ -40,25 +40,25 @@ struct RootView: View {
                 librarySection = .workouts
                 tab = .library
             }, onOpenLive: { tab = .live })
-                .tabItem { Label("tab.home", systemImage: "house") }
+                .tabItem { Label("tab.home", lucide: .house) }
                 .tag(AppTab.home)
             LibraryView(graph: graph, section: $librarySection)
-                .tabItem { Label("tab.library", systemImage: "books.vertical") }
+                .tabItem { Label("tab.library", lucide: .libraryBig) }
                 .tag(AppTab.library)
             LiveView(graph: graph, onManageDevices: {
                 settingsPath = NavigationPath([SettingsPage.devices])
                 devicesFrom = .live
                 tab = .settings
             })
-                .tabItem { Label("tab.live", systemImage: "waveform.path.ecg") }
+                .tabItem { Label("tab.live", lucide: .activity) }
                 .tag(AppTab.live)
             HistoryView(graph: graph)
-                .tabItem { Label("tab.history", systemImage: "clock.arrow.circlepath") }
+                .tabItem { Label("tab.history", lucide: .rotateCcwClock) }
                 .tag(AppTab.history)
             SettingsView(graph: graph, settings: settings, account: accountState, path: $settingsPath) { step in
                 accountFlow = AccountFlowStart(step: step)
             }
-                .tabItem { Label("tab.settings", systemImage: "gearshape") }
+                .tabItem { Label("tab.settings", lucide: .settings) }
                 .tag(AppTab.settings)
         }
         .onChange(of: settingsPath.count) { depth in

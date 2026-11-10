@@ -4,18 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.DirectionsRun
-import androidx.compose.material.icons.automirrored.filled.DirectionsWalk
-import androidx.compose.material.icons.filled.Accessibility
-import androidx.compose.material.icons.filled.AccessibilityNew
-import androidx.compose.material.icons.filled.FitnessCenter
-import androidx.compose.material.icons.filled.Luggage
-import androidx.compose.material.icons.filled.Rowing
-import androidx.compose.material.icons.filled.SelfImprovement
-import androidx.compose.material.icons.filled.SportsGymnastics
-import androidx.compose.material.icons.filled.SportsMartialArts
-import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -31,17 +19,17 @@ import ch.coachpoulpy.core.model.MovementPattern
  * one illustration per movement pattern.
  */
 fun MovementPattern.icon(): ImageVector = when (this) {
-    MovementPattern.SQUAT -> Icons.Filled.AccessibilityNew
-    MovementPattern.HINGE -> Icons.Filled.Accessibility
-    MovementPattern.LUNGE -> Icons.AutoMirrored.Filled.DirectionsWalk
-    MovementPattern.PUSH -> Icons.Filled.FitnessCenter
-    MovementPattern.PULL -> Icons.Filled.Rowing
-    MovementPattern.CARRY -> Icons.Filled.Luggage
-    MovementPattern.CORE -> Icons.Filled.SportsGymnastics
-    MovementPattern.ROTATION -> Icons.Filled.Sync
-    MovementPattern.LOCOMOTION -> Icons.AutoMirrored.Filled.DirectionsRun
-    MovementPattern.MOBILITY -> Icons.Filled.SelfImprovement
-    MovementPattern.STRETCH -> Icons.Filled.SportsMartialArts
+    MovementPattern.SQUAT -> Lucide.PersonStanding
+    MovementPattern.HINGE -> Lucide.HandGrab
+    MovementPattern.LUNGE -> Lucide.Footprints
+    MovementPattern.PUSH -> Lucide.Dumbbell
+    MovementPattern.PULL -> Lucide.BicepsFlexed
+    MovementPattern.CARRY -> Lucide.Luggage
+    MovementPattern.CORE -> Lucide.Shield
+    MovementPattern.ROTATION -> Lucide.RotateCw
+    MovementPattern.LOCOMOTION -> Lucide.SportShoe
+    MovementPattern.MOBILITY -> Lucide.Accessibility
+    MovementPattern.STRETCH -> Lucide.StretchHorizontal
 }
 
 @Composable

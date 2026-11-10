@@ -7,28 +7,27 @@ struct PatternBadge: View {
     var size: CGFloat = 40
 
     var body: some View {
-        Image(systemName: symbol)
-            .font(.system(size: size * 0.5))
+        LucideIcon(symbol, size: size * 0.6)
             .foregroundStyle(PoulpyColor.onPrimaryContainer)
             .frame(width: size, height: size)
             .background(PoulpyColor.primaryContainer, in: Circle())
     }
 
-    private var symbol: String {
-        guard let pattern else { return "figure.mixed.cardio" }
+    private var symbol: Lucide {
+        guard let pattern else { return .dumbbell }
         switch pattern {
-        case .squat: return "figure.strengthtraining.functional"
-        case .hinge: return "figure.strengthtraining.traditional"
-        case .lunge: return "figure.step.training"
-        case .push: return "dumbbell.fill"
-        case .pull: return "figure.rower"
-        case .carry: return "bag.fill"
-        case .core: return "figure.core.training"
-        case .rotation: return "arrow.triangle.2.circlepath"
-        case .locomotion: return "figure.run"
-        case .mobility: return "figure.mind.and.body"
-        case .stretch: return "figure.flexibility"
-        default: return "figure.mixed.cardio"
+        case .squat: return .personStanding
+        case .hinge: return .handGrab
+        case .lunge: return .footprints
+        case .push: return .dumbbell
+        case .pull: return .bicepsFlexed
+        case .carry: return .luggage
+        case .core: return .shield
+        case .rotation: return .rotateCw
+        case .locomotion: return .sportShoe
+        case .mobility: return .accessibility
+        case .stretch: return .stretchHorizontal
+        default: return .dumbbell
         }
     }
 }

@@ -24,12 +24,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.ErrorOutline
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -200,7 +194,7 @@ internal fun AccountPage(onBack: () -> Unit, onFlow: (String) -> Unit, modifier:
                 Surface(Modifier.fillMaxWidth(), shape = RoundedCornerShape(PoulpyRadius.md), color = MaterialTheme.colorScheme.primaryContainer) {
                     Column(Modifier.padding(horizontal = 14.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Icon(Icons.Filled.Info, contentDescription = null)
+                            Icon(Lucide.Info, contentDescription = null)
                             Text(stringResource(R.string.account_pendingTitle), style = MaterialTheme.typography.titleMedium)
                         }
                         Text(stringResource(R.string.account_pendingBody, current.email), fontWeight = FontWeight.SemiBold)
@@ -262,7 +256,7 @@ internal fun AccountPage(onBack: () -> Unit, onFlow: (String) -> Unit, modifier:
         )
         LeaveDialog.UNSENT -> AlertDialog(
             onDismissRequest = { dialog = null },
-            icon = { Icon(Icons.Filled.ErrorOutline, contentDescription = null, tint = MaterialTheme.colorScheme.error) },
+            icon = { Icon(Lucide.CircleExclamationPoint, contentDescription = null, tint = MaterialTheme.colorScheme.error) },
             title = { Text(stringResource(R.string.account_unsentTitle), textAlign = TextAlign.Center) },
             text = { Text(stringResource(R.string.account_unsentBody), textAlign = TextAlign.Center) },
             confirmButton = { Button(onClick = { dialog = null }) { Text(stringResource(R.string.account_waitForUpload), fontWeight = FontWeight.ExtraBold) } },
@@ -425,7 +419,7 @@ private fun ConsentSheet(onDismiss: () -> Unit) {
             Text(stringResource(R.string.account_consentSheetIntro), color = MaterialTheme.colorScheme.onSurfaceVariant)
             listOf(R.string.account_consentItemTraining, R.string.account_consentItemBody, R.string.account_consentItemPrefs).forEach {
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Filled.Check, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                    Icon(Lucide.Check, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                     Text(stringResource(it), fontWeight = FontWeight.Bold)
                 }
             }
@@ -691,7 +685,7 @@ private fun AccountFrame(onClose: (() -> Unit)?, action: Int, busy: Boolean, onA
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = colors.background, scrolledContainerColor = colors.background),
                 navigationIcon = {
                     onClose?.let { close ->
-                        IconButton(onClick = close) { Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.action_close)) }
+                        IconButton(onClick = close) { Icon(Lucide.X, contentDescription = stringResource(R.string.action_close)) }
                     }
                 },
             )
@@ -754,7 +748,7 @@ private fun ErrorCard(text: String) {
         border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.error),
     ) {
         Row(Modifier.padding(horizontal = 14.dp, vertical = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Icon(Icons.Filled.ErrorOutline, contentDescription = null, tint = MaterialTheme.colorScheme.error)
+            Icon(Lucide.CircleExclamationPoint, contentDescription = null, tint = MaterialTheme.colorScheme.error)
             Text(text, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.error)
         }
     }
@@ -764,7 +758,7 @@ private fun ErrorCard(text: String) {
 private fun InfoCard(text: String) {
     Surface(Modifier.fillMaxWidth(), shape = RoundedCornerShape(PoulpyRadius.md), color = MaterialTheme.colorScheme.primaryContainer) {
         Row(Modifier.padding(horizontal = 14.dp, vertical = 12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Icon(Icons.Filled.Info, contentDescription = null)
+            Icon(Lucide.Info, contentDescription = null)
             Text(text, fontWeight = FontWeight.SemiBold)
         }
     }
@@ -773,7 +767,7 @@ private fun InfoCard(text: String) {
 @Composable
 private fun DoneLine(text: String) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
-        Icon(Icons.Filled.CheckCircle, contentDescription = null, tint = PoulpyTheme.extraColors.success, modifier = Modifier.size(18.dp))
+        Icon(Lucide.CircleCheck, contentDescription = null, tint = PoulpyTheme.extraColors.success, modifier = Modifier.size(18.dp))
         Text(text, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.ExtraBold, color = PoulpyTheme.extraColors.success, modifier = Modifier.padding(start = 6.dp))
     }
 }

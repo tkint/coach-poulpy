@@ -20,13 +20,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.DirectionsRun
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Bluetooth
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -109,7 +102,7 @@ internal fun ColumnScope.Devices(graph: AppGraph, onOpen: (DeviceRoute) -> Unit)
                 Text(stringResource(R.string.devices_emptyTitle), style = MaterialTheme.typography.headlineSmall, textAlign = TextAlign.Center)
                 Text(stringResource(R.string.devices_emptyBody), textAlign = TextAlign.Center)
                 Button(onClick = { onOpen(DeviceRoute.Add) }, modifier = Modifier.padding(top = 8.dp).height(PoulpySize.buttonLarge)) {
-                    Icon(Icons.Filled.Add, contentDescription = null)
+                    Icon(Lucide.Plus, contentDescription = null)
                     Spacer(Modifier.size(8.dp))
                     Text(stringResource(R.string.devices_addFirst))
                 }
@@ -125,13 +118,13 @@ internal fun ColumnScope.Devices(graph: AppGraph, onOpen: (DeviceRoute) -> Unit)
     if (state.sources.isNotEmpty()) {
         OutlinedSurface(onClick = { onOpen(DeviceRoute.Sources) }) {
             Row(Modifier.padding(horizontal = 14.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Filled.Tune, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                Icon(Lucide.SlidersHorizontal, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                 Spacer(Modifier.size(12.dp))
                 Column(Modifier.weight(1f)) {
                     Text(stringResource(R.string.devices_sources), fontWeight = FontWeight.ExtraBold)
                     Text(stringResource(R.string.devices_sourcesRowHint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
-                Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                Icon(Lucide.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }
@@ -155,7 +148,7 @@ private fun KnownRow(device: KnownDeviceUi, onClick: () -> Unit, onConnect: () -
             if (device.status == ConnectionStatus.IDLE || device.status == ConnectionStatus.FAILED) {
                 FilledTonalButton(onClick = onConnect) { Text(stringResource(R.string.devices_connect)) }
             } else {
-                Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                Icon(Lucide.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }
@@ -451,7 +444,8 @@ private val DeviceKind?.label: Int
 
 private val DeviceKind?.icon: ImageVector
     get() = when (this) {
-        DeviceKind.TREADMILL, DeviceKind.FOOT_POD -> Icons.AutoMirrored.Filled.DirectionsRun
-        DeviceKind.HEART_RATE -> Icons.Filled.Favorite
-        null -> Icons.Filled.Bluetooth
+        DeviceKind.TREADMILL -> Lucide.Gauge
+        DeviceKind.FOOT_POD -> Lucide.Footprints
+        DeviceKind.HEART_RATE -> Lucide.HeartPulse
+        null -> Lucide.Bluetooth
     }

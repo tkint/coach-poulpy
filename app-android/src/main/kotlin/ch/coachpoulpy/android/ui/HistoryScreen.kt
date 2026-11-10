@@ -33,17 +33,6 @@ import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.DirectionsRun
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.BarChart
-import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.FitnessCenter
-import androidx.compose.material.icons.filled.Image
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -148,8 +137,8 @@ private fun ViewSwitch(selected: HistoryView, onSelect: (HistoryView) -> Unit) {
         Modifier.fillMaxWidth().clip(pill).background(MaterialTheme.colorScheme.surfaceVariant).padding(4.dp).selectableGroup(),
     ) {
         listOf(
-            Triple(HistoryView.CALENDAR, R.string.history_viewCalendar, Icons.Filled.CalendarMonth),
-            Triple(HistoryView.STATS, R.string.history_viewStats, Icons.Filled.BarChart),
+            Triple(HistoryView.CALENDAR, R.string.history_viewCalendar, Lucide.Calendar),
+            Triple(HistoryView.STATS, R.string.history_viewStats, Lucide.ChartNoAxesColumn),
         ).forEach { (item, label, icon) ->
             val on = item == selected
             val color = if (on) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
@@ -256,7 +245,7 @@ private fun MonthCard(month: CalendarMonth, selected: Int, onSelect: (Int) -> Un
         Column(Modifier.padding(start = 12.dp, end = 12.dp, top = 10.dp, bottom = 12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = { onMonth(-1) }, enabled = month.canGoBack) {
-                    Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = stringResource(R.string.history_previousMonth))
+                    Icon(Lucide.ChevronLeft, contentDescription = stringResource(R.string.history_previousMonth))
                 }
                 Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(monthTitle(month.monthStartMillis), style = MaterialTheme.typography.titleLarge)
@@ -267,7 +256,7 @@ private fun MonthCard(month: CalendarMonth, selected: Int, onSelect: (Int) -> Un
                     )
                 }
                 IconButton(onClick = { onMonth(1) }, enabled = month.canGoForward) {
-                    Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = stringResource(R.string.history_nextMonth))
+                    Icon(Lucide.ChevronRight, contentDescription = stringResource(R.string.history_nextMonth))
                 }
             }
             Row(Modifier.fillMaxWidth().padding(vertical = 4.dp).clearAndSetSemantics { }) {
@@ -596,10 +585,10 @@ fun SessionDetailScreen(graph: AppGraph, language: String, sessionId: String, on
                     actions = {
                         if (session != null) {
                             IconButton(onClick = { sharing = true }) {
-                                Icon(Icons.Filled.Share, contentDescription = stringResource(R.string.shareSession_title))
+                                Icon(Lucide.Share2, contentDescription = stringResource(R.string.shareSession_title))
                             }
                             IconButton(onClick = { deleting = true }) {
-                                Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.action_delete))
+                                Icon(Lucide.Trash, contentDescription = stringResource(R.string.action_delete))
                             }
                         }
                     },
@@ -648,9 +637,9 @@ private fun ShareSheet(onFit: () -> Unit, onImage: () -> Unit, onDismiss: () -> 
                 Text(stringResource(R.string.shareSession_why), color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             Column(Modifier.clip(RoundedCornerShape(PoulpyRadius.md)).background(MaterialTheme.colorScheme.surfaceVariant)) {
-                ShareFormat(Icons.Filled.Download, R.string.shareSession_fit, R.string.shareSession_fitNote, onFit)
+                ShareFormat(Lucide.Download, R.string.shareSession_fit, R.string.shareSession_fitNote, onFit)
                 HorizontalDivider(color = MaterialTheme.colorScheme.outline)
-                ShareFormat(Icons.Filled.Image, R.string.shareSession_image, R.string.shareSession_imageNote, onImage)
+                ShareFormat(Lucide.Image, R.string.shareSession_image, R.string.shareSession_imageNote, onImage)
             }
         }
     }
@@ -674,7 +663,7 @@ private fun ShareFormat(icon: ImageVector, @StringRes title: Int, @StringRes not
 private const val SWIPE_PX = 120f
 
 private val SessionRow.icon
-    get() = if (kind == SessionKind.TREADMILL) Icons.AutoMirrored.Filled.DirectionsRun else Icons.Filled.FitnessCenter
+    get() = if (kind == SessionKind.TREADMILL) Lucide.Gauge else Lucide.Dumbbell
 
 /** The numbers that matter most for the row: duration, then distance for the treadmill or sets for a workout. */
 @Composable

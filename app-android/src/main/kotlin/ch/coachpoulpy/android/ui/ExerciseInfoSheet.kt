@@ -15,10 +15,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -82,14 +78,14 @@ fun ExerciseInfoSheet(
                 if (adding && listing) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         IconButton(onClick = { listing = false }) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
+                            Icon(Lucide.ChevronLeft, contentDescription = stringResource(R.string.action_back))
                         }
                         Column(Modifier.weight(1f)) {
                             Text(stringResource(R.string.exercise_variations), style = MaterialTheme.typography.titleLarge, modifier = Modifier.semantics { heading() })
                             Text(stringResource(R.string.exercise_variationsHint), style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
                         }
                         IconButton(onClick = onDismiss) {
-                            Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.action_close))
+                            Icon(Lucide.X, contentDescription = stringResource(R.string.action_close))
                         }
                     }
                     VariationRungs(detail.variations, onPick = { current = it; listing = false }, onCurrent = { listing = false })
@@ -97,7 +93,7 @@ fun ExerciseInfoSheet(
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                         if (detail.variations.isNotEmpty()) VariationButton(detail) { listing = true } else Box {}
                         IconButton(onClick = onDismiss) {
-                            Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.action_close))
+                            Icon(Lucide.X, contentDescription = stringResource(R.string.action_close))
                         }
                     }
                     ExerciseHeading(detail)
@@ -110,7 +106,7 @@ fun ExerciseInfoSheet(
                             Text(detail.name, style = MaterialTheme.typography.headlineMedium, modifier = Modifier.semantics { heading() })
                         }
                         IconButton(onClick = onDismiss) {
-                            Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.action_close))
+                            Icon(Lucide.X, contentDescription = stringResource(R.string.action_close))
                         }
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -136,7 +132,7 @@ fun ExerciseInfoSheet(
                 Box(Modifier.navigationBarsPadding().padding(start = PoulpySpace.lg, end = PoulpySpace.lg, top = 12.dp, bottom = 16.dp)) {
                     Button(onClick = { onAction(detail.slug) }, modifier = Modifier.fillMaxWidth().height(PoulpySize.buttonLarge)) {
                         if (adding) {
-                            Icon(Icons.Filled.Add, contentDescription = null)
+                            Icon(Lucide.Plus, contentDescription = null)
                         }
                         Text(
                             stringResource(if (adding || closeLabel == null) R.string.exercise_addHere else closeLabel),

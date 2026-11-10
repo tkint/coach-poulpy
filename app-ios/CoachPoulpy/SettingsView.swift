@@ -55,7 +55,7 @@ struct SettingsView: View {
                             .toolbar {
                                 ToolbarItem(placement: .navigationBarTrailing) {
                                     NavigationLink(value: DeviceRoute.add) {
-                                        Image(systemName: "plus")
+                                        LucideIcon(.plus)
                                     }
                                     .accessibilityLabel(Text("devices.add"))
                                 }
@@ -88,7 +88,7 @@ private struct DevicesList: View {
                         Text("devices.emptyTitle").font(PoulpyFont.headline).multilineTextAlignment(.center)
                         Text("devices.emptyBody").multilineTextAlignment(.center)
                         NavigationLink(value: DeviceRoute.add) {
-                            Label("devices.addFirst", systemImage: "plus")
+                            Label("devices.addFirst", lucide: .plus)
                                 .font(.poulpy(.headline))
                                 .foregroundStyle(PoulpyColor.onPrimary)
                                 .padding(.horizontal, 24)
@@ -123,7 +123,7 @@ private struct DevicesList: View {
                                     Text("devices.sourcesRowHint").font(.poulpy(.footnote)).foregroundStyle(PoulpyColor.onSurfaceVariant)
                                 }
                             } icon: {
-                                Image(systemName: "slider.horizontal.3").foregroundStyle(PoulpyColor.primary)
+                                LucideIcon(.slidersHorizontal).foregroundStyle(PoulpyColor.primary)
                             }
                         }
                     }
@@ -188,7 +188,7 @@ private struct DeviceAvatar: View {
     var size: CGFloat = 44
 
     var body: some View {
-        Image(systemName: kindIcon(kind))
+        LucideIcon(kindIcon(kind))
             .foregroundStyle(on ? PoulpyColor.onPrimaryContainer : PoulpyColor.onSurfaceVariant)
             .frame(width: size, height: size)
             .background(on ? PoulpyColor.primaryContainer : PoulpyColor.surfaceVariant, in: Circle())
@@ -436,9 +436,10 @@ private func kindLabel(_ kind: DeviceKind?) -> String {
     return L("kind.unknown")
 }
 
-private func kindIcon(_ kind: DeviceKind?) -> String {
-    guard let kind else { return "dot.radiowaves.left.and.right" }
-    return kind == DeviceKind.heartRate ? "heart.fill" : "figure.run"
+private func kindIcon(_ kind: DeviceKind?) -> Lucide {
+    guard let kind else { return .bluetooth }
+    if kind == DeviceKind.heartRate { return .heartPulse }
+    return kind == DeviceKind.footPod ? .footprints : .gauge
 }
 
 /// A localized string with printf-style arguments, as in Localizable.strings.

@@ -262,7 +262,7 @@ struct PainSheet: View {
                     if let sub { Text(sub).font(.poulpy(.footnote)).foregroundStyle(PoulpyColor.onSurfaceVariant) }
                 }
                 Spacer()
-                if length == value { Image(systemName: "checkmark").foregroundStyle(PoulpyColor.primary) }
+                if length == value { LucideIcon(.check).foregroundStyle(PoulpyColor.primary) }
             }
             .frame(minHeight: PoulpySize.row)
             .padding(.horizontal, 16)

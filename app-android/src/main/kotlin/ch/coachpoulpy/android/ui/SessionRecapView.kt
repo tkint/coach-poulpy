@@ -14,10 +14,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -70,14 +66,14 @@ internal fun SessionRecapSheet(recap: SessionRecap, dateLine: String, figure: Bo
         floating = {
             Row(Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = PoulpySpace.lg, vertical = PoulpySpace.sm), horizontalArrangement = Arrangement.SpaceBetween) {
                 FloatingButton(onClick = onBack) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
+                    Icon(Lucide.ChevronLeft, contentDescription = stringResource(R.string.action_back))
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(PoulpySpace.sm)) {
                     FloatingButton(onClick = onShare) {
-                        Icon(Icons.Filled.Share, contentDescription = stringResource(R.string.shareSession_title))
+                        Icon(Lucide.Share2, contentDescription = stringResource(R.string.shareSession_title))
                     }
                     FloatingButton(onClick = onDelete) {
-                        Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.action_delete))
+                        Icon(Lucide.Trash, contentDescription = stringResource(R.string.action_delete))
                     }
                 }
             }

@@ -14,9 +14,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -123,7 +120,7 @@ private fun Chevron(label: String, enabled: Boolean, up: Boolean, onClick: () ->
         contentAlignment = Alignment.Center,
     ) {
         Icon(
-            if (up) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+            if (up) Lucide.ChevronUp else Lucide.ChevronDown,
             contentDescription = null,
             tint = if (enabled) colors.primary else colors.outline,
             modifier = Modifier.size(24.dp),

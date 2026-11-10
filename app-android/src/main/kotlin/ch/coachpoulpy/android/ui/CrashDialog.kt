@@ -1,8 +1,6 @@
 package ch.coachpoulpy.android.ui
 
 import android.content.Intent
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
@@ -26,7 +24,7 @@ fun CrashDialog(report: String, closed: Boolean, onDismiss: () -> Unit) {
     val chooserTitle = stringResource(R.string.crash_send)
     AlertDialog(
         onDismissRequest = onDismiss,
-        icon = { Icon(Icons.Filled.ErrorOutline, contentDescription = null, tint = MaterialTheme.colorScheme.error) },
+        icon = { Icon(Lucide.CircleExclamationPoint, contentDescription = null, tint = MaterialTheme.colorScheme.error) },
         title = { Text(stringResource(if (closed) R.string.crash_title else R.string.crash_titleRunning), textAlign = TextAlign.Center) },
         text = { Text(stringResource(if (closed) R.string.crash_body else R.string.crash_bodyRunning), textAlign = TextAlign.Center) },
         confirmButton = {

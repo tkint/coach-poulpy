@@ -56,7 +56,7 @@ struct HomeView: View {
                             Button(action: onOpenLibrary) {
                                 HStack(spacing: 4) {
                                     Text("home.somethingElse")
-                                    Image(systemName: "chevron.right").font(.system(size: 13, weight: .bold))
+                                    LucideIcon(.chevronRight, size: 16)
                                 }
                                 .font(.poulpy(.subheadline).weight(.heavy))
                                 .frame(minHeight: 44)
@@ -125,8 +125,7 @@ struct HomeView: View {
         let inProgress = item.status == .inProgress
         return VStack(alignment: .leading, spacing: PoulpySpace.sm) {
             HStack(spacing: PoulpySpace.sm) {
-                Image(systemName: "dumbbell")
-                    .font(.system(size: 18, weight: .semibold))
+                LucideIcon(.dumbbell, size: 22)
                     .foregroundStyle(PoulpyColor.onPrimaryContainer)
                     .frame(width: 44, height: 44)
                     .background(PoulpyColor.primaryContainer, in: Circle())
@@ -148,7 +147,7 @@ struct HomeView: View {
                 if inProgress {
                     // Destructive, so crimson with an icon, never ember.
                     Button { discarding = true } label: {
-                        Label("home.discard", systemImage: "trash")
+                        Label("home.discard", lucide: .trash)
                             .font(.poulpy(.body).weight(.heavy))
                             .frame(maxWidth: .infinity, minHeight: 48)
                             .foregroundStyle(PoulpyColor.error)
@@ -170,7 +169,7 @@ struct HomeView: View {
                     if inProgress && item.live { onOpenLive() } else { cover = .player(workoutId: inProgress ? nil : item.workoutId) }
                 } label: {
                     // "Open", not "Resume": the session comes back paused.
-                    Label(LocalizedStringKey(inProgress ? "home.openSession" : "action.start"), systemImage: "play.fill")
+                    Label(LocalizedStringKey(inProgress ? "home.openSession" : "action.start"), lucide: .play)
                         .font(.poulpy(.body).weight(.heavy))
                         .frame(maxWidth: .infinity, minHeight: 48)
                         .foregroundStyle(PoulpyColor.onPrimary)
@@ -188,8 +187,7 @@ struct HomeView: View {
     /// A session finished today, opening its page as in the history.
     private func doneCard(_ session: SessionRow) -> some View {
         HStack(spacing: PoulpySpace.sm) {
-            Image(systemName: "checkmark")
-                .font(.system(size: 18, weight: .heavy))
+            LucideIcon(.check, size: 22)
                 .foregroundStyle(PoulpyColor.surface)
                 .frame(width: 44, height: 44)
                 .background(PoulpyColor.success, in: Circle())
@@ -202,7 +200,7 @@ struct HomeView: View {
                     .foregroundStyle(PoulpyColor.onSurfaceVariant)
             }
             Spacer(minLength: 0)
-            Image(systemName: "chevron.right").foregroundStyle(PoulpyColor.onSurfaceVariant)
+            LucideIcon(.chevronRight).foregroundStyle(PoulpyColor.onSurfaceVariant)
         }
         .padding(PoulpySpace.sm)
         .frame(minHeight: 60)
@@ -232,7 +230,7 @@ struct HomeView: View {
                 Text(when).font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
             }
             Spacer(minLength: 0)
-            Image(systemName: "chevron.right").foregroundStyle(PoulpyColor.onSurfaceVariant)
+            LucideIcon(.chevronRight).foregroundStyle(PoulpyColor.onSurfaceVariant)
         }
         .padding(PoulpySpace.sm)
         .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
@@ -245,7 +243,7 @@ struct HomeView: View {
             Text(LocalizedStringKey(firstTime ? "home.firstTitle" : "home.restTitle")).font(PoulpyFont.headline)
             Text(LocalizedStringKey(firstTime ? "home.firstBody" : "home.restBody")).font(.poulpy(.subheadline))
             Button(action: onOpenLibrary) {
-                Label("home.openLibrary", systemImage: "books.vertical")
+                Label("home.openLibrary", lucide: .libraryBig)
                     .font(.poulpy(.body).weight(.heavy))
                     .padding(.horizontal, PoulpySpace.lg)
                     .frame(minHeight: PoulpySize.button)
