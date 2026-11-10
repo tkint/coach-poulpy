@@ -9,8 +9,8 @@ import jakarta.mail.internet.InternetAddress
 import jakarta.mail.internet.MimeMessage
 import java.util.Properties
 
-/** A plain-text email. */
-data class Email(val to: String, val subject: String, val text: String)
+/** A plain-text email; [from] is filled in by [SettingsMailer] from the saved setting or `MAIL_FROM`. */
+data class Email(val to: String, val subject: String, val text: String, val from: String? = null)
 
 /** Sends an email, or throws when it can't. */
 fun interface Mailer {
@@ -63,7 +63,7 @@ class SmtpMailer(private val settings: MailSettings) : Mailer {
 
     override fun send(email: Email) {
         val message = MimeMessage(session).apply {
-            setFrom(InternetAddress(settings.from))
+            setFrom(InternetAddress(email.from ?: settings.from))
             setRecipient(Message.RecipientType.TO, InternetAddress(email.to))
             setSubject(email.subject, "UTF-8")
             setText(email.text, "UTF-8")

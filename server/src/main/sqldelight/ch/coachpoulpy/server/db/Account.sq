@@ -18,6 +18,10 @@ SELECT id, password_hash, confirmed_at, disabled_at FROM account WHERE lower(ema
 byId:
 SELECT id, email, role FROM account WHERE id = ?;
 
+-- Where and in which language to write to the account, such as the admin's test email.
+contactById:
+SELECT email, language FROM account WHERE id = ?;
+
 -- Makes the confirmed account with this address an admin. No row when there is none: an address
 -- nobody confirmed can't be promoted by signing up with it first.
 promote:

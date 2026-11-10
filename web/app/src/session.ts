@@ -115,3 +115,45 @@ export async function deleteAccount(id: string, confirmEmail: string): Promise<b
     return false
   }
 }
+
+/** The server settings the admin changes without a deploy (#339): the from-address in use, saved here or MAIL_FROM. */
+export type AdminSettings = { mailFrom: string | null; mailFromSaved: boolean }
+
+/** The settings, or nothing when they can't be loaded. */
+export async function getSettings(): Promise<AdminSettings | undefined> {
+  try {
+    const response = await authorized('/admin/settings')
+    return response.ok ? ((await response.json()) as AdminSettings) : undefined
+  } catch {
+    return undefined
+  }
+}
+
+/** Saved, refused because it isn't an email address, or not reached. */
+export type SaveAnswer = 'saved' | 'invalid' | 'failed'
+
+/** Saves the from-address of the next emails. */
+export async function saveMailFrom(mailFrom: string): Promise<SaveAnswer> {
+  try {
+    const response = await authorized('/admin/settings/mail-from', 'POST', { mailFrom })
+    if (response.ok) return 'saved'
+    return response.status === 400 ? 'invalid' : 'failed'
+  } catch {
+    return 'failed'
+  }
+}
+
+/** What the test email did: sent, refused with what the mail server said, or the server wasn't reached. */
+export type TestEmailAnswer = { sent: true } | { sent: false; error: string } | undefined
+
+/** Sends a test email to the signed-in admin with the saved settings. */
+export async function sendTestEmail(): Promise<TestEmailAnswer> {
+  try {
+    const response = await authorized('/admin/settings/test-email', 'POST')
+    if (!response.ok) return undefined
+    const body = (await response.json()) as { sent: boolean; error: string | null }
+    return body.sent ? { sent: true } : { sent: false, error: body.error ?? '' }
+  } catch {
+    return undefined
+  }
+}

@@ -1,0 +1,8 @@
+-- The server settings an admin changes without a deploy (#339), one row per setting. Only
+-- non-secret values live here; the SMTP host, port, user and password stay in the environment.
+-- A setting with no row keeps its default from the environment (MAIL_FROM for `mail.from`).
+CREATE TABLE settings (
+    name TEXT PRIMARY KEY,
+    value TEXT NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL
+);

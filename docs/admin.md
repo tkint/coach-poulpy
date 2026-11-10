@@ -11,7 +11,7 @@ The admin area is where the maintainer looks after the catalog, the accounts and
 
 ## The screens
 
-The admin lives at `/admin` on the website ([mockups](./../design/mockups/agreed/web/admin-shell.html)). With no admin session it shows the sign-in; the page asks `GET /api/v1/me`, and a member who signs in is signed out again at once with the same "wrong email or password" message, so the screen never says who is an admin. Once signed in it shows the `CpDrawer` shell, with the audit log and the accounts. The sidebar lists only the screens that exist; each admin feature adds its own entry. A **Coach Poulpy app** link at the bottom of the sidebar goes back to [the web app](./web-app.md).
+The admin lives at `/admin` on the website ([mockups](./../design/mockups/agreed/web/admin-shell.html)). With no admin session it shows the sign-in; the page asks `GET /api/v1/me`, and a member who signs in is signed out again at once with the same "wrong email or password" message, so the screen never says who is an admin. Once signed in it shows the `CpDrawer` shell, with the audit log, the accounts and the settings. The sidebar lists only the screens that exist; each admin feature adds its own entry. A **Coach Poulpy app** link at the bottom of the sidebar goes back to [the web app](./web-app.md).
 
 ## Accounts
 
@@ -22,6 +22,18 @@ The **Accounts** screen is a paged table of every account ([mockups](./../design
 - An admin can't disable or delete their own account (`409 own-account`).
 
 Filtering, sorting and paging happen on the server (`AdminAccounts.list`, which reads every account row and cuts the page in memory, enough for a back office; move it into SQL if accounts reach the hundreds of thousands). The routes are `GET /api/v1/admin/accounts/{id}` for one account (a link opens an account that isn't on the page), `GET /api/v1/admin/accounts` with `q`, `role`, `confirmed` (`yes`/`no`), `signIn` (`active`/`disabled`), `sort` (`email`, `role`, `confirmed`, `signIn`, `created`), `order`, `page` and `size`, answering `{accounts, total}` (a word that isn't allowed is a `400 bad-query`), `POST /api/v1/admin/accounts/{id}/disable`, `POST /api/v1/admin/accounts/{id}/enable` and `DELETE /api/v1/admin/accounts/{id}` with `{"confirmEmail": …}`, all described in the OpenAPI document and all for an admin signed in through the website.
+
+## Settings
+
+The **Settings** screen at `/admin/settings` changes the server without a deploy ([mockups](./../design/mockups/agreed/web/admin-settings-mail.html), [invalid address](./../design/mockups/agreed/web/admin-settings-mail-invalid.html), [test sent](./../design/mockups/agreed/web/admin-settings-mail-test-ok.html), [test failed](./../design/mockups/agreed/web/admin-settings-mail-test-failed.html)). Its one setting so far is the **from-address** of the emails.
+
+- **Only non-secret settings live in the database**, one row per setting in the `settings` table (`ServerSettings`). The SMTP host, port, user and password stay in the environment ([Deploying the server](./deploying-the-server.md)) and are not shown or editable here.
+- **`MAIL_FROM` is the default until a from-address is saved.** A saved one applies to the next email, with no restart: every email goes through `SettingsMailer`, which reads the setting when it sends. An address alone (`hello@example.com`) or with a name (`Coach Poulpy <hello@example.com>`) is accepted; anything else is refused (`400 invalid-address`) and nothing is saved.
+- **Saving writes `admin.settings.mail-from` to the audit log**, with the masked address (`h***@example.com`) as the target.
+- **Send test email** sends a message to the signed-in admin's own address with the saved settings and shows whether the mail server took it or, in crimson with an icon, what it answered (`535 Authentication failed`).
+- **The last send is remembered.** `SettingsMailer.last` keeps when the last email (a test or any other) went, to whom (masked) and the mail server's error if any, for the status view ([#340](https://github.com/tkint/coach-poulpy/issues/340)). It lives in memory, so a restart forgets it.
+
+The routes are `GET /api/v1/admin/settings` (`{mailFrom, mailFromSaved}`), `POST /api/v1/admin/settings/mail-from` with `{"mailFrom": …}` and `POST /api/v1/admin/settings/test-email` (`{sent, error}`), for an admin signed in through the website. The screen keeps no state of its own beyond its path.
 
 ## Making the first admin
 
@@ -35,4 +47,4 @@ Sensitive values are values4k types that print masked: `EmailAddress` prints as 
 
 ## What comes next
 
-The mail from-address ([#339](https://github.com/tkint/coach-poulpy/issues/339), [agreed mockup](./../design/mockups/agreed/web/admin-settings-mail.html)), the status view ([#340](https://github.com/tkint/coach-poulpy/issues/340), [agreed mockups](./../design/mockups/agreed/web/admin-status.html)), and the catalog ([#337](https://github.com/tkint/coach-poulpy/issues/337), [#338](https://github.com/tkint/coach-poulpy/issues/338)).
+The status view ([#340](https://github.com/tkint/coach-poulpy/issues/340), [agreed mockups](./../design/mockups/agreed/web/admin-status.html)) and the catalog ([#337](https://github.com/tkint/coach-poulpy/issues/337), [#338](https://github.com/tkint/coach-poulpy/issues/338)).
