@@ -14,6 +14,14 @@ _Avoid_: Move, drill
 The curated, versioned set of exercises shipped with the app and updated without an account.
 _Avoid_: Exercise database, library (the library is the user's)
 
+**Published version**:
+One numbered, finished catalog that phones download and store whole, in the same format as the one the app bundles. It never changes once published; the server serves the latest ([ADR 0026](docs/adr/0026-the-server-holds-the-catalog-as-a-draft-and-published-versions.md)).
+_Avoid_: Release (a release is an app build), catalog update
+
+**Catalog draft**:
+The catalog the admin is editing on the server, which no phone sees until it is published as the next version; the admin shows what it adds, edits and retires since the latest published version. Called the draft where only the catalog is meant; it is not a mockup draft or an unsaved workout.
+_Avoid_: Staging, work in progress
+
 **Retired exercise**:
 A catalog exercise no longer offered, kept so the workouts that use it still open.
 _Avoid_: Deleted exercise

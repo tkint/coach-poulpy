@@ -8,6 +8,7 @@ import ch.coachpoulpy.server.accounts.Passwords
 import ch.coachpoulpy.server.admin.AdminAudit
 import ch.coachpoulpy.server.admin.ServerSettings
 import ch.coachpoulpy.server.auth.SignIns
+import ch.coachpoulpy.server.catalog.ServerCatalog
 import ch.coachpoulpy.server.db.Database
 import ch.coachpoulpy.server.mail.Email
 import ch.coachpoulpy.server.mail.Mailer
@@ -62,6 +63,8 @@ class TestServer {
     val passwords = Passwords(memoryKib = 64, iterations = 1)
     val accounts = Accounts(database, outgoing, "https://app.example.com", passwords, clock)
     val catalog: Catalog = Catalog.bundled
+    /** The catalog in the database, seeded from [catalog] as the server's first start does. */
+    val serverCatalog = ServerCatalog(database, catalog, clock).apply { seed() }
     val signIns = SignIns(database, passwords, clock)
     val passwordResets = PasswordResets(database, outgoing, "https://app.example.com", signIns, passwords, clock)
     val accountDeletion = AccountDeletion(database, passwords)

@@ -46,6 +46,26 @@ The routes are `GET /api/v1/admin/status` (`{mail: {configured, lastSend: {at, k
 
 The public side is the web app's `/status` page ([mockups](./../design/mockups/agreed/web/app-status.html), [down](./../design/mockups/agreed/web/app-status-down.html)), which anyone can open. It asks `GET /api/v1/status` and shows only whether Coach Poulpy is up or down, down too when the server can't be reached; it never says how the server is configured, and a test holds it to that.
 
+## Catalog
+
+The server holds the exercise catalog as a **catalog draft** the admin edits and numbered **published versions** that phones download ([ADR 0026](./adr/0026-the-server-holds-the-catalog-as-a-draft-and-published-versions.md), [#337](https://github.com/tkint/coach-poulpy/issues/337)). The screens are [#338](https://github.com/tkint/coach-poulpy/issues/338); the routes come first.
+
+- **The first start seeds it** from the catalog the server was built with: that version becomes the first published one and its exercises the draft. Later starts leave it alone.
+- **An exercise in the draft is the catalog's JSON**, every text a map from language to string (`{"en": "Goblet squat", "fr": "Squat gobelet"}`). Saving needs the English name; the other shipped languages can wait.
+- **A slug is editable only until the exercise is first published**; after that a rename is refused (`409 slug-published`), since workouts point at it ([ADR 0008](./adr/0008-curated-catalog-with-stable-slugs.md)). Exercises are retired, never deleted; an edit keeps an exercise retired.
+- **Publishing** makes the draft the next version, numbered past both the latest published one and the bundled one, with the latest version's variation groups. It is refused while a name, instruction or variation note lacks English or French (`409 missing-translations`, listing the exercises and languages), or when nothing changed (`409 no-changes`). `GET /api/v1/catalog` serves the new version at once.
+- **Every write goes to the audit log**: `admin.catalog.create`, `admin.catalog.edit` (a rename reads `old -> new`) and `admin.catalog.retire` with the slug as the target, `admin.catalog.publish` with the version number.
+
+The routes, for an admin signed in through the website, are:
+
+- `GET /api/v1/admin/catalog/exercises` with `q` (part of the slug, a name in any language or an alias) and `retired` (`yes`/`no`), answering `{exercises: [{exercise, published, change}], total}` in the catalog's order. `published` says whether a version holds the exercise, so whether its slug is still editable; `change` is `added`, `edited`, `retired` or null against the latest version.
+- `GET /api/v1/admin/catalog/exercises/{slug}`, one exercise in the same shape.
+- `POST /api/v1/admin/catalog/exercises` with an exercise (`201`, `400 invalid-exercise` with a `reason`, `409 slug-taken`).
+- `PUT /api/v1/admin/catalog/exercises/{slug}` with the whole exercise; a different slug in the body renames it (`404 unknown-exercise`, `409 slug-published`, `409 slug-taken`).
+- `POST /api/v1/admin/catalog/exercises/{slug}/retire`.
+- `GET /api/v1/admin/catalog/changes`: what publishing would do, `{version, nextVersion, added, edited, retired, missing}`, each change a `{slug, name}` and each missing entry `{slug, name, languages}`.
+- `POST /api/v1/admin/catalog/publish`: `{version}`, or the 409s above.
+
 ## Making the first admin
 
 No endpoint makes an admin. Set `ADMIN_EMAIL` in the `production` environment ([Releasing](./releasing.md#deploy-the-server)) and deploy: when the server starts, the confirmed account with that address becomes an admin. An address with no confirmed account does nothing, so signing up first with someone else's address cannot take the role. The promotion is written to the audit log.
@@ -58,4 +78,4 @@ Sensitive values are values4k types that print masked: `EmailAddress` prints as 
 
 ## What comes next
 
-The catalog ([#337](https://github.com/tkint/coach-poulpy/issues/337), [#338](https://github.com/tkint/coach-poulpy/issues/338)). The status will take more checks, such as the database and the catalog version, and log viewing is its own issue.
+The catalog's screens ([#338](https://github.com/tkint/coach-poulpy/issues/338)), editing variation groups, and a tool that copies a published version back into the repository's catalog files so the next build bundles it ([ADR 0026](./adr/0026-the-server-holds-the-catalog-as-a-draft-and-published-versions.md)). The status will take more checks, such as the database and the catalog version, and log viewing is its own issue.
