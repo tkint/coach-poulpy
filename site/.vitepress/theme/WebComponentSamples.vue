@@ -11,6 +11,8 @@ import {
   CpBodyMap,
   CpBreadcrumbs,
   CpCard,
+  CpDivider,
+  CpSuccessNote,
   CpNavItem,
   CpNavMenu,
   CpPasswordField,
@@ -46,6 +48,7 @@ const page = ref(2)
 const panel = ref(true)
 const password = ref('correct horse')
 const email = ref('ana@example.com')
+const sender = ref('hello@coachpoulpy.example')
 const formats = [
   { value: 'sets', text: 'Sets' },
   { value: 'circuit', text: 'Circuit' },
@@ -77,6 +80,17 @@ const formats = [
         <CpAvatar initials="A" tone="primary" size="lg" />
       </div>
       <CpCard v-else-if="part === 'card'" title="Latest changes">Everything an admin changed, newest first.</CpCard>
+      <template v-else-if="part === 'card-badge'">
+        <CpCard title="Mail">
+          <template #badge><CpBadge tone="success">Configured</CpBadge></template>
+          The server sends emails through its mail server.
+        </CpCard>
+        <CpCard title="Mail">
+          <template #badge><CpBadge tone="error">Not configured</CpBadge></template>
+          <CpErrorNote>No mail server is set on the server, so no email can be sent.</CpErrorNote>
+        </CpCard>
+        <CpCard title="Pending registrations" description="Accounts that have not confirmed their email yet." />
+      </template>
       <CpCard v-else-if="part === 'table'" title="Latest changes">
         <CpTable>
           <thead><tr><th>When</th><th>What</th></tr></thead>
@@ -113,6 +127,8 @@ const formats = [
       </div>
       <div v-else-if="part === 'text-field'" class="row">
         <CpTextField v-model="email" label="Email" type="email" autocomplete="username" />
+        <CpTextField v-model="sender" label="From address" type="email" autocomplete="off" hint="The address emails come from." />
+        <CpTextField model-value="hello@" label="From address" type="email" autocomplete="off" error="This is not an email address. Use the form name@example.com." />
       </div>
       <div v-else-if="part === 'password-field'" class="row">
         <CpPasswordField v-model="password" label="New password" hint="8 characters or more." show-label="Show password" hide-label="Hide password" autocomplete="new-password" />
@@ -122,6 +138,12 @@ const formats = [
         <template #actions><CpButton>New workout</CpButton></template>
       </CpPoulpyCard>
       <CpErrorNote v-else-if="part === 'error'">We couldn't save your workout. Check your connection and try again.</CpErrorNote>
+      <CpSuccessNote v-else-if="part === 'success'">Test email sent to ana@example.com.</CpSuccessNote>
+      <CpCard v-else-if="part === 'divider'" title="Email sender">
+        The address emails come from.
+        <CpDivider />
+        Send a test email with the saved settings.
+      </CpCard>
       <template v-else-if="part === 'sheet'">
         <div class="row">
           <CpButton variant="outline" @click="sheet = true">Open a sheet</CpButton>

@@ -27,6 +27,7 @@ flowchart LR
 | Route | Who | What it does |
 | --- | --- | --- |
 | `GET /health` | Anyone | `ok` and the version, or 503 while the database doesn't answer; the Docker health check. Outside `/api/v1`, so it never changes with the API's version. |
+| `GET /api/v1/status` | Anyone | `{"status": "up"}`, or 503 `{"status": "down"}` while the database doesn't answer: what the web app's `/status` page shows ([#340](https://github.com/tkint/coach-poulpy/issues/340)). Nothing else, never the version or how the server is configured; the admin's [status](./admin.md#status) has the details. |
 | `GET /api/v1/openapi.json` | Anyone | The OpenAPI description of every route below, the OAuth ones included. |
 | `GET /api/v1/catalog` | Anyone | The exercise catalog the server was built with, the same JSON the app bundles. With `?newerThan=<version>` it answers 204 when the phone already has that version or a newer one, so phones download it only when it changed ([#27](https://github.com/tkint/coach-poulpy/issues/27)). |
 | `POST /api/v1/accounts` | Anyone | Signs up ([#25](https://github.com/tkint/coach-poulpy/issues/25)): `email`, `password` (8 to 256 characters), `language` such as `fr` for the account's emails, and `healthDataConsent`, which must be `true`. Creates an account whose email isn't confirmed and mails it a link valid 24 hours. Answers 202 whether or not the address already has an account, so addresses can't be probed; a 400 carries `{"error": "invalid-email"}`, `invalid-password` or `consent-required`. |
@@ -56,12 +57,13 @@ curl -i http://localhost:8080/api/v1/accounts -H 'Content-Type: application/json
   -d '{"email":"guest@example.com","password":"correct horse","language":"fr","healthDataConsent":true}'
 ```
 
-Confirm the email with the token at the end of the printed link (`POST /api/v1/accounts/confirm`), then sign in:
+With no `SMTP_HOST`, as on a laptop, no email is sent and none is printed: the confirmation link never leaves the server. Confirm the account in the local Postgres instead, then sign in:
 
 ```sh
+docker compose -f tools/compose.yaml exec postgres psql -U coachpoulpy   -c "UPDATE account SET confirmed_at = now() WHERE email = 'guest@example.com'"
 curl -s http://localhost:8080/oauth/token -d grant_type=password \
   -d username=guest@example.com -d 'password=correct horse' -d device_name=curl
 curl -i http://localhost:8080/api/v1/me -H 'Authorization: Bearer cp_at_…'
 ```
 
-With no `SMTP_HOST` set, the server prints each email to its output instead of sending it, link included.
+To use the admin locally, confirm your own account that way and start the server with `ADMIN_EMAIL` set to it ([Making the first admin](./admin.md#making-the-first-admin)). Its [Status](./admin.md#status) screen then lists the pending registrations, the accounts still waiting for a confirmation, so you can see who signed up and confirm them the same way. There is no mail catcher. To try real emails, set `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD` and `MAIL_FROM` to a mail provider's.

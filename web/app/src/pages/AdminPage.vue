@@ -1,11 +1,13 @@
 <script setup lang="ts">
 // /admin: the sign-in until the cookies sign an admin in, then the admin shell
-// (design/mockups/agreed/web/admin-shell.html) with the audit log and the accounts. A link at
+// (design/mockups/agreed/web/admin-shell.html) with the audit log, the accounts, the settings and the status. A link at
 // the bottom of the sidebar goes back to the web app.
 import { computed, onMounted, ref } from 'vue'
-import { ArrowLeft, LogOut, PanelLeft, RotateCcwClock, Users } from '@lucide/vue'
+import { Activity, ArrowLeft, LogOut, PanelLeft, RotateCcwClock, SlidersHorizontal, Users } from '@lucide/vue'
 import { CpAvatar, CpBadge, CpCard, CpDrawer, CpDrawerItem, CpErrorNote, CpNavMenu, CpStat, CpStats, CpTable, poulpyDrawings } from '@coach-poulpy/ui'
 import AdminAccountsView from './AdminAccountsView.vue'
+import AdminSettingsView from './AdminSettingsView.vue'
+import AdminStatusView from './AdminStatusView.vue'
 import AdminSignInPage from './AdminSignInPage.vue'
 import { auditLog, currentAccount, signOut, type AuditEntry, type Me } from '../session'
 import { navigate, path } from '../route'
@@ -14,8 +16,11 @@ import { locale, t } from '../i18n'
 const me = ref<Me>()
 const checked = ref(false)
 const open = ref(false)
-// The screen is the address: /admin is the audit log, /admin/accounts the accounts table.
-const view = computed<'audit' | 'accounts'>(() => (path.value === '/admin/accounts' ? 'accounts' : 'audit'))
+// The screen is the address: /admin is the audit log, /admin/accounts the accounts table, /admin/settings the settings,
+// /admin/status the status.
+const screens = { '/admin/accounts': 'accounts', '/admin/settings': 'settings', '/admin/status': 'status' } as const
+const view = computed<'audit' | 'accounts' | 'settings' | 'status'>(() => screens[path.value as keyof typeof screens] ?? 'audit')
+const titles = { audit: 'admin.auditTitle', accounts: 'admin.accountsTitle', settings: 'admin.settingsTitle', status: 'admin.statusTitle' }
 const entries = ref<AuditEntry[]>()
 const loadFailed = ref(false)
 
@@ -55,6 +60,7 @@ const actions: Record<string, string> = {
   'admin.account.disable': 'admin.actionDisable',
   'admin.account.enable': 'admin.actionEnable',
   'admin.account.delete': 'admin.actionDelete',
+  'admin.settings.mail-from': 'admin.actionMailFrom',
 }
 const what = (action: string) => (action in actions ? t(actions[action]) : action)
 </script>
@@ -66,8 +72,10 @@ const what = (action: string) => (action in actions ? t(actions[action]) : actio
     <template #toggle-icon>
       <PanelLeft class="size-5 shrink-0" aria-hidden="true" />
     </template>
-    <template #title>{{ view === 'audit' ? t('admin.auditTitle') : t('admin.accountsTitle') }}</template>
+    <template #title>{{ t(titles[view]) }}</template>
     <AdminAccountsView v-if="view === 'accounts'" :own-account-id="me.accountId" />
+    <AdminSettingsView v-else-if="view === 'settings'" :email="me.email" />
+    <AdminStatusView v-else-if="view === 'status'" />
     <main v-else class="flex flex-col gap-6 p-4 md:p-8">
       <div class="flex flex-col gap-1">
         <h1 class="cp-type-display">{{ t('admin.auditTitle') }}</h1>
@@ -117,6 +125,12 @@ const what = (action: string) => (action in actions ? t(actions[action]) : actio
         </CpDrawerItem>
         <CpDrawerItem :label="t('admin.navAccounts')" href="/admin/accounts" :active="view === 'accounts'" @click.prevent="navigate('/admin/accounts')">
           <template #icon><Users class="size-5 shrink-0" aria-hidden="true" /></template>
+        </CpDrawerItem>
+        <CpDrawerItem :label="t('admin.navSettings')" href="/admin/settings" :active="view === 'settings'" @click.prevent="navigate('/admin/settings')">
+          <template #icon><SlidersHorizontal class="size-5 shrink-0" aria-hidden="true" /></template>
+        </CpDrawerItem>
+        <CpDrawerItem :label="t('admin.navStatus')" href="/admin/status" :active="view === 'status'" @click.prevent="navigate('/admin/status')">
+          <template #icon><Activity class="size-5 shrink-0" aria-hidden="true" /></template>
         </CpDrawerItem>
       </CpNavMenu></div>
       <div class="flex w-full flex-col gap-2 p-2">

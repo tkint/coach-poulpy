@@ -57,11 +57,11 @@ Set it up once:
    | `DEPLOY_PORT` | variable | Optional, `22` by default |
    | `DOMAIN` | variable | The API hostname, without scheme, port or path |
    | `POSTGRES_PASSWORD` | secret | For example `openssl rand -hex 24`; used when the Postgres volume is created |
-   | `SMTP_HOST` | variable | The EU mail provider's SMTP server. Optional until one is chosen: without it the server prints emails to its log instead of sending them |
+   | `SMTP_HOST` | variable | The EU mail provider's SMTP server. Optional until one is chosen: without it the server sends no email (no confirmation link either) and the admin's [Status](./admin.md#status) says mail isn't configured |
    | `SMTP_PORT` | variable | Optional, `587` (STARTTLS) by default; `465` for implicit TLS |
    | `SMTP_USER` | variable | The SMTP login |
    | `SMTP_PASSWORD` | secret | The SMTP password |
-   | `MAIL_FROM` | variable | The sender, for example `Coach Poulpy <hello@coach-poulpy.com>`; needed with `SMTP_HOST` |
+   | `MAIL_FROM` | variable | The sender, for example `Coach Poulpy <hello@coach-poulpy.com>`; needed with `SMTP_HOST`. A from-address saved in the admin replaces it ([Settings](./admin.md#settings)) |
    | `WEBSITE_URL` | variable | Optional, `https://app.coach-poulpy.com` by default: where the links in emails point |
    | `ADMIN_EMAIL` | variable | Optional: the confirmed account with this address becomes an admin when the server starts ([the admin area](./admin.md)) |
    | `LOKI_URL` | variable | Optional: the push URL of a Grafana Cloud Loki, `https://logs-prod-XXX.grafana.net/loki/api/v1/push`. With it, the deploy starts a container that ships the logs there ([Logs](./deploying-the-server.md#logs)) |

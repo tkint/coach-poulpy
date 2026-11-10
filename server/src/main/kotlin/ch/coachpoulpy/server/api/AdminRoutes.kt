@@ -6,6 +6,8 @@ import ch.coachpoulpy.server.admin.AccountSort
 import ch.coachpoulpy.server.admin.AccountView
 import ch.coachpoulpy.server.admin.AdminAccounts
 import ch.coachpoulpy.server.admin.AdminAudit
+import ch.coachpoulpy.server.admin.AdminSettings
+import ch.coachpoulpy.server.admin.AdminStatus
 import ch.coachpoulpy.server.auth.Caller
 import ch.coachpoulpy.server.auth.caller
 import ch.coachpoulpy.server.auth.requiresAdmin
@@ -43,13 +45,18 @@ private val auditBody = Body.auto<AuditResponse>().toLens()
 private val adminTag = Tag("admin")
 
 /** The admin area's routes (#335). Each admin write is recorded in the audit log. */
-fun adminRoutes(audit: AdminAudit, accounts: AdminAccounts): List<ContractRoute> = listOf(
+fun adminRoutes(audit: AdminAudit, accounts: AdminAccounts, settings: AdminSettings, status: AdminStatus): List<ContractRoute> = listOf(
     auditRoute(audit),
     listAccountsRoute(accounts),
     getAccountRoute(accounts),
     disableAccountRoute(accounts),
     enableAccountRoute(accounts),
     deleteAccountRoute(accounts),
+    settingsRoute(settings),
+    saveMailFromRoute(settings),
+    testEmailRoute(settings),
+    statusRoute(status),
+    pendingRegistrationsRoute(status),
 )
 
 private fun auditRoute(audit: AdminAudit): ContractRoute = "$API_PREFIX/admin/audit" meta {
@@ -230,4 +237,144 @@ private fun deleteAccountRoute(accounts: AdminAccounts): ContractRoute = "$API_P
     returning(FORBIDDEN to "Not an admin, or not signed in through the website")
 } bindContract DELETE to { id ->
     { request: Request -> accounts.delete(request.admin().accountId, id, confirmationBody(request).confirmEmail).toResponse() }
+}
+
+@Serializable
+data class AdminSettingsResponse(
+    /** The from-address emails leave from now, or null when none is set (no MAIL_FROM, as on a laptop). */
+    val mailFrom: String?,
+    /** Whether [mailFrom] was saved in the admin; false while it is MAIL_FROM. */
+    val mailFromSaved: Boolean,
+)
+
+@Serializable
+data class MailFromChange(val mailFrom: String)
+
+@Serializable
+data class TestEmailResponse(
+    val sent: Boolean,
+    /** What the mail server said when it refused the email, or null when it took it. */
+    val error: String?,
+)
+
+private val settingsBody = Body.auto<AdminSettingsResponse>().toLens()
+private val mailFromBody = Body.auto<MailFromChange>().toLens()
+private val testEmailBody = Body.auto<TestEmailResponse>().toLens()
+
+private fun settingsRoute(settings: AdminSettings): ContractRoute = "$API_PREFIX/admin/settings" meta {
+    summary = "The server settings"
+    description = "The settings an admin changes without a deploy: the from-address of the emails, the saved one or else MAIL_FROM. " +
+        "The SMTP host, port, user and password stay in the environment and are not shown."
+    operationId = "getAdminSettings"
+    tags += adminTag
+    security = requiresAdmin()
+    returning(OK, settingsBody to AdminSettingsResponse("Coach Poulpy <hello@example.com>", true), "The settings", definitionId = "AdminSettings")
+    returning(FORBIDDEN to "Not an admin, or not signed in through the website")
+} bindContract GET to { _ ->
+    val mail = settings.mail()
+    Response(OK).with(settingsBody of AdminSettingsResponse(mail.mailFrom, mail.saved))
+}
+
+private fun saveMailFromRoute(settings: AdminSettings): ContractRoute = "$API_PREFIX/admin/settings/mail-from" meta {
+    summary = "Change the from-address"
+    description = "Saves the address the next emails come from, such as Coach Poulpy <hello@example.com>, in place of MAIL_FROM. " +
+        "Something that isn't one email address is a 400 invalid-address. Written to the audit log."
+    operationId = "saveAdminMailFrom"
+    tags += adminTag
+    security = requiresAdmin()
+    receiving(mailFromBody to MailFromChange("Coach Poulpy <hello@example.com>"), definitionId = "MailFromChange")
+    returning(NO_CONTENT to "Saved: the next email uses it")
+    returning(BAD_REQUEST, adminProblemBody to Problem("invalid-address"), "Not an email address", definitionId = "Problem")
+    returning(FORBIDDEN to "Not an admin, or not signed in through the website")
+} bindContract POST to { request ->
+    if (settings.saveMailFrom(request.admin().accountId, mailFromBody(request).mailFrom)) {
+        Response(NO_CONTENT)
+    } else {
+        Response(BAD_REQUEST).with(adminProblemBody of Problem("invalid-address"))
+    }
+}
+
+private fun testEmailRoute(settings: AdminSettings): ContractRoute = "$API_PREFIX/admin/settings/test-email" meta {
+    summary = "Send a test email"
+    description = "Sends an email to the signed-in admin's own address with the saved settings, and says whether the mail server took it " +
+        "or what it answered when it refused it."
+    operationId = "sendAdminTestEmail"
+    tags += adminTag
+    security = requiresAdmin()
+    returning(OK, testEmailBody to TestEmailResponse(false, "535 Authentication failed"), "What the mail server answered", definitionId = "TestEmail")
+    returning(FORBIDDEN to "Not an admin, or not signed in through the website")
+} bindContract POST to { request ->
+    val result = settings.sendTestEmail(request.admin().accountId)
+    Response(OK).with(testEmailBody of TestEmailResponse(result.error == null, result.error))
+}
+
+@Serializable
+data class LastSendResponse(
+    val at: String,
+    /** `confirmation`, `password-reset` or `test`. */
+    val kind: String,
+    val sent: Boolean,
+    /** What the mail server said when it refused the email, or null when it took it. */
+    val error: String?,
+)
+
+@Serializable
+data class MailStatusResponse(
+    /** False while the server has no mail server (SMTP_HOST unset): no email can be sent. */
+    val configured: Boolean,
+    /** The last email the server tried to send since it started, or null. */
+    val lastSend: LastSendResponse?,
+)
+
+@Serializable
+data class AdminStatusResponse(val mail: MailStatusResponse)
+
+@Serializable
+data class PendingRegistrationResponse(val email: String, val signedUpAt: String, val linkExpiresAt: String?)
+
+@Serializable
+data class PendingRegistrationsResponse(val registrations: List<PendingRegistrationResponse>)
+
+private val statusBody = Body.auto<AdminStatusResponse>().toLens()
+private val pendingBody = Body.auto<PendingRegistrationsResponse>().toLens()
+
+private fun statusRoute(status: AdminStatus): ContractRoute = "$API_PREFIX/admin/status" meta {
+    summary = "What the server can do right now"
+    description = "Whether a mail server is configured, and how the last email since the server started went: when, which kind, " +
+        "and the mail server's error if it refused it. The SMTP settings themselves are never shown."
+    operationId = "getAdminStatus"
+    tags += adminTag
+    security = requiresAdmin()
+    returning(
+        OK,
+        statusBody to AdminStatusResponse(MailStatusResponse(true, LastSendResponse("2026-11-09T07:41:00Z", "confirmation", true, null))),
+        "The status",
+        definitionId = "AdminStatus",
+    )
+    returning(FORBIDDEN to "Not an admin, or not signed in through the website")
+} bindContract GET to { _ ->
+    val mail = status.mail()
+    val last = mail.last?.let { LastSendResponse(it.at.toString(), it.kind.code, it.sent, it.error) }
+    Response(OK).with(statusBody of AdminStatusResponse(MailStatusResponse(mail.configured, last)))
+}
+
+private fun pendingRegistrationsRoute(status: AdminStatus): ContractRoute = "$API_PREFIX/admin/pending-registrations" meta {
+    summary = "The accounts not confirmed yet"
+    description = "The ${AdminStatus.PENDING_LIMIT} newest accounts whose email isn't confirmed, newest first: the address, when it signed up, " +
+        "and when its latest confirmation link expires (null when none is left). Sends no email."
+    operationId = "getAdminPendingRegistrations"
+    tags += adminTag
+    security = requiresAdmin()
+    returning(
+        OK,
+        pendingBody to PendingRegistrationsResponse(listOf(PendingRegistrationResponse("lea@example.com", "2026-11-09T07:41:00Z", "2026-11-10T07:41:00Z"))),
+        "The pending registrations",
+        definitionId = "PendingRegistrations",
+    )
+    returning(FORBIDDEN to "Not an admin, or not signed in through the website")
+} bindContract GET to { _ ->
+    val registrations = status.pendingRegistrations().map {
+        PendingRegistrationResponse(it.email, it.signedUpAt.toInstant().toString(), it.linkExpiresAt?.toInstant()?.toString())
+    }
+    Response(OK).with(pendingBody of PendingRegistrationsResponse(registrations))
 }

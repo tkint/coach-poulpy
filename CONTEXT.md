@@ -207,6 +207,10 @@ _Avoid_: User, profile (the profile is what the person tells the app about thems
 An account's address once its owner has tapped the link sent to it; nothing leaves the phone before ([Accounts](docs/accounts.md)).
 _Avoid_: Verified account, activated account
 
+**Pending registration**:
+An account whose email isn't confirmed yet; the admin's status lists them, and they leave the list once the link is opened ([The admin area](docs/admin.md#status)).
+_Avoid_: Unverified user, inactive account
+
 **Sign-in**:
 One phone or browser signed in to an account, named by its device, with its own tokens; revoking a token or reusing a refresh token ends it alone.
 _Avoid_: Session (a session is a workout done), login
@@ -226,6 +230,10 @@ _Avoid_: Principal, user
 **Scope**:
 One right a token grants, named `resource:action` (`sessions:read`).
 _Avoid_: Permission, role (a role, like admin, belongs to the account)
+
+**Server setting**:
+A value an admin changes in the admin without a deploy, such as the from-address of the emails; it wins over its default from the environment. Secrets, like the SMTP password, are never one ([The admin area](docs/admin.md#settings)).
+_Avoid_: Config, preference (a preference belongs to a person)
 
 **Personal access token**:
 A token a person makes in Settings for their own scripts or the MCP server: named, scoped, with an expiry, revocable.

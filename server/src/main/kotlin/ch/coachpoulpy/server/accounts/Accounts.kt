@@ -6,6 +6,7 @@ import ch.coachpoulpy.server.auth.Secrets.hashOf
 import ch.coachpoulpy.server.auth.Secrets.newToken
 import ch.coachpoulpy.server.db.Database
 import ch.coachpoulpy.server.mail.Email
+import ch.coachpoulpy.server.mail.EmailKind
 import ch.coachpoulpy.server.mail.Mailer
 import ch.coachpoulpy.server.mail.masked
 import java.time.Clock
@@ -77,6 +78,7 @@ class Accounts(
             to = recipient.email,
             subject = ServerText.emailConfirmSubject(recipient.language),
             text = ServerText.emailConfirmBody(recipient.language, link),
+            kind = EmailKind.Confirmation,
         )
         // The answer stays the same: signing up again sends a new link.
         runCatching { mailer.send(email) }.onFailure { System.err.println("Could not send the confirmation email: $it") }

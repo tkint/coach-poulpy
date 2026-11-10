@@ -7,6 +7,10 @@
     "reset": {
       "subject": "Reset your Coach Poulpy password",
       "body": "Hello,\n\nOpen this link to choose a new password:\n\n{link}\n\nThe link works once, for 1 hour. Choosing a new password signs you out on every device.\n\nIf you didn’t ask for this, ignore this email: your password stays as it is."
+    },
+    "test": {
+      "subject": "Coach Poulpy test email",
+      "body": "Hello,\n\nThis is the test email sent from the Coach Poulpy admin. If it reached you, emails go out with the saved settings.\n\nThere is nothing to do."
     }
   }
 }

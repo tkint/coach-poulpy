@@ -7,10 +7,12 @@ import ch.coachpoulpy.server.accounts.PasswordResets
 import ch.coachpoulpy.server.accounts.Passwords
 import ch.coachpoulpy.server.auth.SignIns
 import ch.coachpoulpy.server.auth.WebCookies
-import ch.coachpoulpy.server.mail.ConsoleMailer
+import ch.coachpoulpy.server.mail.NoMailServer
 import ch.coachpoulpy.server.mail.MailSettings
 import ch.coachpoulpy.server.mail.SmtpMailer
 import ch.coachpoulpy.server.admin.AdminAudit
+import ch.coachpoulpy.server.admin.ServerSettings
+import ch.coachpoulpy.server.mail.SettingsMailer
 import ch.coachpoulpy.server.admin.EmailAddress
 import dev.forkhandles.values.parseOrNull
 import ch.coachpoulpy.server.admin.promoteFirstAdmin
@@ -86,11 +88,13 @@ fun app(
     databaseAnswers: () -> Boolean = database::answers,
     websiteOrigin: String = websiteOrigin(websiteUrl { null }),
     events: Events = audit.events,
+    settings: ServerSettings = ServerSettings(database),
+    mailer: SettingsMailer = SettingsMailer(NoMailServer, settings::mailFrom),
 ): HttpHandler = WebCookies(websiteOrigin).let { cookies -> websiteCors(websiteOrigin).then(routes(
     "/health" bind GET to {
         if (databaseAnswers()) Response(OK).body("ok $version") else Response(SERVICE_UNAVAILABLE).body("database unavailable")
     },
-    authenticate(mapOf(SignIns.ACCESS_PREFIX to signIns.authenticator), cookies).then(api(version, catalog, accounts, signIns, passwordResets, accountDeletion, sync, database, audit, cookies, events)),
+    authenticate(mapOf(SignIns.ACCESS_PREFIX to signIns.authenticator), cookies).then(api(version, catalog, accounts, signIns, passwordResets, accountDeletion, sync, database, audit, cookies, events, settings, mailer, databaseAnswers)),
 )) }
 
 fun main() {
@@ -99,8 +103,11 @@ fun main() {
     // Migrations run before the server listens; a failed one throws and stops it here.
     val database = Database.connect(DatabaseSettings.from(System::getenv)).apply { migrate() }
     val mailSettings = MailSettings.from(System::getenv)
-    val mailer = mailSettings?.let(::SmtpMailer) ?: ConsoleMailer
-    println(mailSettings?.let { "Mail goes through ${it.host}:${it.port} from ${it.from}" } ?: "Mail is printed here: SMTP_HOST is unset")
+    // The admin can change the from-address (#339); MAIL_FROM is the default until they do.
+    val settings = ServerSettings(database, defaultMailFrom = System.getenv("MAIL_FROM")?.takeIf { it.isNotBlank() })
+    // With no SMTP_HOST, no email leaves and none is printed (#340): the admin's status says mail isn't configured.
+    val mailer = SettingsMailer(mailSettings?.let(::SmtpMailer) ?: NoMailServer, settings::mailFrom)
+    println(mailSettings?.let { "Mail goes through ${it.host}:${it.port} from ${settings.mailFrom()}" } ?: "No mail server: SMTP_HOST is unset, so no email is sent")
     val passwords = Passwords()
     val accounts = Accounts(database, mailer, websiteUrl = websiteUrl(System::getenv), passwords = passwords)
     val signIns = SignIns(database, passwords)
@@ -114,7 +121,7 @@ fun main() {
         val email = requireNotNull(EmailAddress.parseOrNull(setting.trim())) { "ADMIN_EMAIL is not an email address" }
         if (promoteFirstAdmin(database, events, email)) println("$email is now an admin")
     }
-    val http = app(version, Catalog.bundled, database, accounts, signIns, passwordResets, accountDeletion, audit = audit, websiteOrigin = origin, events = events)
+    val http = app(version, Catalog.bundled, database, accounts, signIns, passwordResets, accountDeletion, audit = audit, websiteOrigin = origin, events = events, settings = settings, mailer = mailer)
     // Jetty, for the server-sent events SunHttp can't hold open (#319).
     PolyHandler(http, sse = confirmationEvents(accounts)).asServer(Jetty(port)).start()
     println("Coach Poulpy server $version listening on http://localhost:$port")

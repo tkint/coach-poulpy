@@ -8,6 +8,7 @@ import ch.coachpoulpy.server.auth.Secrets.newToken
 import ch.coachpoulpy.server.auth.SignIns
 import ch.coachpoulpy.server.db.Database
 import ch.coachpoulpy.server.mail.Email
+import ch.coachpoulpy.server.mail.EmailKind
 import ch.coachpoulpy.server.mail.Mailer
 import java.time.Clock
 import java.time.Duration
@@ -56,6 +57,7 @@ class PasswordResets(
             to = account.email,
             subject = ServerText.emailResetSubject(account.language),
             text = ServerText.emailResetBody(account.language, link),
+            kind = EmailKind.PasswordReset,
         )
         runCatching { mailer.send(message) }.onFailure { System.err.println("Could not send the password reset email: $it") }
     }
