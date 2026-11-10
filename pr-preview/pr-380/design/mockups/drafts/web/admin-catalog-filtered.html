@@ -15,7 +15,7 @@
 <script src="../../shared/mockup-theme.js"></script>
 </head>
 <body class="bg-base-200 text-base-content min-h-screen">
-<!-- Status set to Retired: /admin/catalog?retired=yes. A retired exercise stays in the catalog so the workouts that use it still open. -->
+<!-- Status set to Retired: /admin/catalog?retired=yes. A retired exercise stays in the catalog so the workouts that use it still open, and can be offered again. -->
 <div class="cp-drawer lg:cp-drawer-open">
   <input id="admin-drawer" type="checkbox" class="cp-drawer-toggle" aria-label="Toggle the navigation">
   <div class="cp-drawer-content flex flex-col">
@@ -35,7 +35,7 @@
         <div class="cp-card-body p-4 md:p-6"><div class="flex flex-wrap items-center justify-between gap-4">
           <div class="flex flex-col gap-1">
             <h2 class="cp-card-title">Draft</h2>
-            <p class="text-sm text-base-content/70">Since version 11: 1 new, 2 edited, 1 retiring. Phones see none of it until you publish.</p>
+            <p class="text-sm text-base-content/70">Since version 11: 1 new, 2 edited, 1 retiring, 1 offered again. Phones see none of it until you publish.</p>
           </div>
           <a href="admin-catalog-publish.html" class="cp-btn cp-btn-secondary">Review changes</a>
         </div></div>
@@ -53,10 +53,10 @@
         <div class="cp-card-body gap-4 p-4 md:p-6">
           <div class="overflow-x-auto">
             <table class="cp-table">
-              <thead><tr><th>Exercise</th><th>Pattern</th><th>Languages</th><th>In the draft</th><th>Status</th></tr></thead>
+              <thead><tr><th aria-sort="none"><button type="button" class="cp-btn cp-btn-ghost cp-btn-sm -ms-3 gap-1 whitespace-nowrap">Exercise<svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg></button></th><th aria-sort="none"><button type="button" class="cp-btn cp-btn-ghost cp-btn-sm -ms-3 gap-1 whitespace-nowrap">Pattern<svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg></button></th><th aria-sort="none"><button type="button" class="cp-btn cp-btn-ghost cp-btn-sm -ms-3 gap-1 whitespace-nowrap">Languages<svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg></button></th><th aria-sort="none"><button type="button" class="cp-btn cp-btn-ghost cp-btn-sm -ms-3 gap-1 whitespace-nowrap">In the draft<svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg></button></th><th aria-sort="none"><button type="button" class="cp-btn cp-btn-ghost cp-btn-sm -ms-3 gap-1 whitespace-nowrap">Status<svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg></button></th></tr></thead>
               <tbody>
                 <tr class="cp-hover">
-                  <td><div class="flex flex-col"><a href="admin-catalog-exercise-retire.html" class="cp-link cp-link-hover text-start font-semibold">Wall sit</a><span class="text-sm text-base-content/70">Chaise contre le mur · wall-sit</span></div></td>
+                  <td><div class="flex flex-col"><a href="admin-catalog-exercise-retired.html" class="cp-link cp-link-hover text-start font-semibold">Wall sit</a><span class="text-sm text-base-content/70">Chaise contre le mur · wall-sit</span></div></td>
                   <td class="whitespace-nowrap">Squat</td>
                   <td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Complete</span></td>
                   <td><span class="cp-badge cp-badge-outline whitespace-nowrap">Retiring</span></td>
@@ -65,7 +65,14 @@
               </tbody>
             </table>
           </div>
-          <p class="text-sm text-base-content/70">1 of 60 exercises</p>
+          <div class="flex flex-col items-center justify-between gap-3 sm:flex-row" data-component="pagination">
+            <p class="text-sm text-base-content/70">Showing 1 to 1 of 1 exercises</p>
+            <nav aria-label="Pages"><div class="cp-join">
+              <button class="cp-join-item cp-btn cp-btn-sm" disabled aria-label="Previous page"><svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
+              <button class="cp-join-item cp-btn cp-btn-sm cp-btn-active" aria-current="page">1</button>
+              <button class="cp-join-item cp-btn cp-btn-sm" disabled aria-label="Next page"><svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
+            </div></nav>
+          </div>
         </div>
       </section>
     </main>
