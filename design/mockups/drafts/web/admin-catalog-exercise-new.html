@@ -15,7 +15,7 @@
 <script src="../../shared/mockup-theme.js"></script>
 </head>
 <body class="bg-base-200 text-base-content min-h-screen">
-<!-- A new exercise: /admin/catalog/new. The slug is editable until the exercise is first published. French is still empty: saving works, publishing will not. -->
+<!-- A new exercise: /admin/catalog/new. The slug is editable until the exercise is first published. French is still empty, so the French tab carries the crimson marker: saving works, publishing will not. -->
 <div class="cp-drawer lg:cp-drawer-open">
   <input id="admin-drawer" type="checkbox" class="cp-drawer-toggle" aria-label="Toggle the navigation">
   <div class="cp-drawer-content flex flex-col">
@@ -34,78 +34,52 @@
       <form class="flex flex-col gap-6" id="exercise-form">
       <section class="cp-card bg-base-100 shadow-sm" id="text">
         <div class="cp-card-body gap-4 p-4 md:p-6">
-          <div class="flex flex-col gap-1">
-            <h2 class="cp-card-title">Names and instructions</h2>
-            <p class="text-sm text-base-content/70">English is needed to save. Publishing needs French too, for every text.</p>
+          <div class="flex flex-wrap items-center justify-between gap-4">
+            <div class="flex flex-col gap-1">
+              <h2 class="cp-card-title">Names and instructions</h2>
+              <p class="text-sm text-base-content/70">English is needed to save. Publishing needs French too, for every text.</p>
+            </div>
+          <div class="cp-join" role="tablist" aria-label="Language" data-component="tabs">
+            <a href="admin-catalog-exercise-new.html" role="tab" aria-selected="true" class="cp-join-item cp-btn cp-btn-sm cp-btn-active">English</a>
+            <a href="admin-catalog-exercise-new-french.html" role="tab" aria-selected="false" class="cp-join-item cp-btn cp-btn-sm gap-2">French<span class="cp-badge cp-badge-error cp-badge-soft cp-badge-sm gap-1"><svg xmlns="http://www.w3.org/2000/svg" class="size-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.5v.5"/></svg>Missing</span></a>
           </div>
-          <div class="grid gap-4 md:grid-cols-2">
-            <div class="cp-fieldset" data-component="text-field">
-              <label class="cp-type-label" for="name-en">Name in English</label>
-              <label class="cp-input w-full"><input id="name-en" type="text" class="grow" value="Pike push-up" autocomplete="off"></label>
-              
-            </div>
-            <div class="cp-fieldset" data-component="text-field">
-              <label class="cp-type-label" for="name-fr">Name in French</label>
-              <label class="cp-input w-full"><input id="name-fr" type="text" class="grow" value="" placeholder="Needed before publishing" autocomplete="off"></label>
-              
-            </div>
           </div>
-          <div class="cp-divider my-0" role="separator"></div>
-          <h3 class="cp-type-label">Instructions</h3>
-          <ol class="flex flex-col gap-4">
-            <li class="flex flex-col gap-2" data-component="instruction">
-              <div class="flex items-center justify-between gap-2"><span class="cp-type-label">Step 1</span><button type="button" class="cp-btn cp-btn-circle cp-btn-ghost cp-btn-sm" aria-label="Remove step 1"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div>
-              <div class="grid gap-4 md:grid-cols-2">
-                <div class="cp-fieldset" data-component="text-field">
-              <label class="cp-type-label" for="step-0-en">English</label>
-              <label class="cp-input w-full"><input id="step-0-en" type="text" class="grow" value="Start in a push-up with your hips high, like an upside-down V." autocomplete="off"></label>
+          <div role="tabpanel" aria-label="English" class="flex flex-col gap-4">
+            <div class="cp-fieldset" data-component="text-field">
+              <label class="cp-type-label" for="name">Name in English</label>
+              <label class="cp-input w-full"><input id="name" type="text" class="grow" value="Pike push-up" autocomplete="off"></label>
               
             </div>
-                <div class="cp-fieldset" data-component="text-field">
-              <label class="cp-type-label" for="step-0-fr">French</label>
-              <label class="cp-input w-full"><input id="step-0-fr" type="text" class="grow" value="" placeholder="Needed before publishing" autocomplete="off"></label>
+            <h3 class="cp-type-label">Instructions in English</h3>
+            <ol class="flex flex-col gap-3">
+            <li class="flex items-center gap-2" data-component="instruction">
+              <div class="grow"><div class="cp-fieldset" data-component="text-field">
+              <label class="cp-type-label" for="step-0">Step 1</label>
+              <label class="cp-input w-full"><input id="step-0" type="text" class="grow" value="Start in a push-up with your hips high, like an upside-down V." autocomplete="off"></label>
               
-            </div>
-              </div>
+            </div></div><button type="button" class="cp-btn cp-btn-circle cp-btn-ghost cp-btn-sm" aria-label="Remove step 1"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
             </li>
-            <li class="flex flex-col gap-2" data-component="instruction">
-              <div class="flex items-center justify-between gap-2"><span class="cp-type-label">Step 2</span><button type="button" class="cp-btn cp-btn-circle cp-btn-ghost cp-btn-sm" aria-label="Remove step 2"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div>
-              <div class="grid gap-4 md:grid-cols-2">
-                <div class="cp-fieldset" data-component="text-field">
-              <label class="cp-type-label" for="step-1-en">English</label>
-              <label class="cp-input w-full"><input id="step-1-en" type="text" class="grow" value="Bend your elbows to bring your head toward the floor, then push back." autocomplete="off"></label>
+            <li class="flex items-center gap-2" data-component="instruction">
+              <div class="grow"><div class="cp-fieldset" data-component="text-field">
+              <label class="cp-type-label" for="step-1">Step 2</label>
+              <label class="cp-input w-full"><input id="step-1" type="text" class="grow" value="Bend your elbows to bring your head toward the floor, then push back." autocomplete="off"></label>
               
-            </div>
-                <div class="cp-fieldset" data-component="text-field">
-              <label class="cp-type-label" for="step-1-fr">French</label>
-              <label class="cp-input w-full"><input id="step-1-fr" type="text" class="grow" value="" placeholder="Needed before publishing" autocomplete="off"></label>
-              
-            </div>
-              </div>
+            </div></div><button type="button" class="cp-btn cp-btn-circle cp-btn-ghost cp-btn-sm" aria-label="Remove step 2"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
             </li>
-          </ol>
-          <div><button type="button" class="cp-btn cp-btn-outline cp-btn-sm gap-2"><svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg>Add a step</button></div>
-          <div class="cp-divider my-0" role="separator"></div>
-          <div class="grid gap-4 md:grid-cols-2">
-            <div class="cp-fieldset" data-component="text-field">
-              <label class="cp-type-label" for="note-en">Variation note in English</label>
-              <label class="cp-input w-full"><input id="note-en" type="text" class="grow" value="" aria-describedby="note-en-hint" autocomplete="off"></label>
-              <p class="cp-label whitespace-normal" id="note-en-hint">How it differs from the other variations; shown only in the variations sheet.</p>
+            </ol>
+            <div><button type="button" class="cp-btn cp-btn-outline cp-btn-sm gap-2"><svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg>Add a step</button></div>
+            <p class="text-sm text-base-content/70">Adding or removing a step does it in both languages.</p>
+            <div class="grid gap-4 md:grid-cols-2">
+              <div class="cp-fieldset" data-component="text-field">
+              <label class="cp-type-label" for="note">Variation note in English</label>
+              <label class="cp-input w-full"><input id="note" type="text" class="grow" value="" aria-describedby="note-hint" autocomplete="off"></label>
+              <p class="cp-label whitespace-normal" id="note-hint">How it differs from the other variations; shown only in the variations sheet.</p>
             </div>
-            <div class="cp-fieldset" data-component="text-field">
-              <label class="cp-type-label" for="note-fr">Variation note in French</label>
-              <label class="cp-input w-full"><input id="note-fr" type="text" class="grow" value="" autocomplete="off"></label>
-              
+              <div class="cp-fieldset" data-component="text-field">
+              <label class="cp-type-label" for="aliases">Search aliases in English</label>
+              <label class="cp-input w-full"><input id="aliases" type="text" class="grow" value="" aria-describedby="aliases-hint" autocomplete="off"></label>
+              <p class="cp-label whitespace-normal" id="aliases-hint">Other names people search with, separated by commas. Never shown.</p>
             </div>
-            <div class="cp-fieldset" data-component="text-field">
-              <label class="cp-type-label" for="aliases-en">Search aliases in English</label>
-              <label class="cp-input w-full"><input id="aliases-en" type="text" class="grow" value="" aria-describedby="aliases-en-hint" autocomplete="off"></label>
-              <p class="cp-label whitespace-normal" id="aliases-en-hint">Other names people search with, separated by commas. Never shown.</p>
-            </div>
-            <div class="cp-fieldset" data-component="text-field">
-              <label class="cp-type-label" for="aliases-fr">Search aliases in French</label>
-              <label class="cp-input w-full"><input id="aliases-fr" type="text" class="grow" value="" autocomplete="off"></label>
-              
             </div>
           </div>
         </div>
@@ -147,25 +121,13 @@
             <p class="text-sm text-base-content/70">Each need is met by any one of its items. No need means bodyweight.</p>
           </div>
           <p class="text-sm text-base-content/70">No equipment needed: bodyweight.</p>
-          <div><button type="button" class="cp-btn cp-btn-outline cp-btn-sm gap-2"><svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg>Add a need</button></div>
+          <div><button type="button" class="cp-btn cp-btn-outline cp-btn-sm gap-2"><svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg>Add need</button></div>
           <div class="cp-divider my-0" role="separator"></div>
-          <div class="flex flex-col gap-2" role="group" aria-label="Helps but not needed">
-              <span class="cp-type-label">Helps but not needed</span>
-              <div class="flex flex-wrap gap-2"><button type="button" class="cp-btn cp-chip cp-btn-primary" aria-pressed="true">Mat</button><button type="button" class="cp-btn cp-chip cp-btn-outline" aria-pressed="false">Dumbbells</button><button type="button" class="cp-btn cp-chip cp-btn-outline" aria-pressed="false">Kettlebell</button><button type="button" class="cp-btn cp-chip cp-btn-outline" aria-pressed="false">Barbell</button><button type="button" class="cp-btn cp-chip cp-btn-outline" aria-pressed="false">Resistance band</button><button type="button" class="cp-btn cp-chip cp-btn-outline" aria-pressed="false">Bench or step</button><button type="button" class="cp-btn cp-chip cp-btn-outline" aria-pressed="false">Pull-up bar</button><button type="button" class="cp-btn cp-chip cp-btn-outline" aria-pressed="false">Treadmill</button><button type="button" class="cp-btn cp-chip cp-btn-outline" aria-pressed="false">Machine</button></div>
+          <div class="cp-fieldset" data-component="multi-select">
+              <div class="flex items-center justify-between gap-2"><label class="cp-type-label" for="optional">Helps but not needed</label></div>
+              <label class="cp-input w-full gap-1"><span class="cp-badge cp-badge-neutral cp-badge-soft gap-1 whitespace-nowrap">Mat<button type="button" class="cp-btn cp-btn-circle cp-btn-ghost cp-btn-xs" aria-label="Remove Mat"><svg xmlns="http://www.w3.org/2000/svg" class="size-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></span><input id="optional" type="text" class="grow" value="" placeholder="" autocomplete="off" role="combobox" aria-expanded="false"><svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></label>
+              <p class="cp-label whitespace-normal">Such as a mat; shown, never required.</p>
             </div>
-        </div>
-      </section>
-      <section class="cp-card bg-base-100 shadow-sm" id="pictures">
-        <div class="cp-card-body gap-4 p-4 md:p-6">
-          <div class="flex flex-col gap-1">
-            <h2 class="cp-card-title">Pictures</h2>
-            <p class="text-sm text-base-content/70">Shown on the exercise in the apps, in this order.</p>
-          </div>
-          <div class="flex flex-col items-center gap-3 bg-base-200 p-6 text-center" data-component="file-input">
-            <svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 5h6"/><path d="M19 2v6"/><path d="M21 11.5V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7.5"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/><circle cx="9" cy="9" r="2"/></svg>
-            <p class="text-base-content/70">No picture yet.</p>
-            <button type="button" class="cp-btn cp-btn-outline cp-btn-sm gap-2"><svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg>Add a picture</button>
-          </div>
         </div>
       </section>
       <div class="flex flex-wrap justify-end gap-2">
