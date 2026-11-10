@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Admin · status · mail not configured</title>
-<meta name="mockup:screen" content="admin-status-mail-missing">
+<title>Admin · status · mail configured</title>
+<meta name="mockup:screen" content="admin-status">
 <meta name="mockup:section" content="Admin">
 <meta name="mockup:issue" content="340">
 <meta name="mockup:viewport" content="800">
@@ -31,9 +31,9 @@
         <div class="cp-card-body gap-4 p-4 md:p-6">
           <div class="flex flex-wrap items-center gap-3">
             <h2 class="cp-card-title">Mail</h2>
-            <span class="cp-badge cp-badge-soft cp-badge-error gap-1 whitespace-nowrap"><svg xmlns="http://www.w3.org/2000/svg" class="size-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.5v.5"/></svg>Not configured</span>
+            <span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Configured</span>
           </div>
-          <div class="cp-alert cp-alert-error cp-error-note" role="alert"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.5v.5"/></svg><span>No mail server is set on the server, so no email can be sent. Sign-up cannot send its confirmation link.</span></div><p class="text-sm text-base-content/70">The mail server is set with environment variables on the server, not here.</p>
+          <p class="text-base-content/70">The server sends emails through its mail server.</p><p class="text-sm">Last send: <strong>sent</strong>, 9 Nov, 08:41 (a confirmation email).</p>
         </div>
       </div>
       <div class="cp-card bg-base-100 shadow-sm" id="pending">
@@ -73,7 +73,7 @@
       </ul>
       <div class="flex w-full flex-col gap-2 p-2">
         <ul class="cp-menu w-full p-0">
-          <li><a href="../../agreed/web/app-profile.html" class="cp-is-drawer-close:cp-tooltip cp-is-drawer-close:cp-tooltip-right" data-tip="Coach Poulpy app" data-component="app-link"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg><span class="cp-is-drawer-close:hidden">Coach Poulpy app</span></a></li>
+          <li><a href="app-profile.html" class="cp-is-drawer-close:cp-tooltip cp-is-drawer-close:cp-tooltip-right" data-tip="Coach Poulpy app" data-component="app-link"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg><span class="cp-is-drawer-close:hidden">Coach Poulpy app</span></a></li>
         </ul>
         <div class="flex items-center gap-3 px-2">
           <div class="cp-avatar cp-avatar-placeholder"><div class="bg-primary text-primary-content w-10 rounded-full"><span>A</span></div></div>
