@@ -4,16 +4,19 @@ import ch.coachpoulpy.core.model.Exercise
 import ch.coachpoulpy.core.model.ExerciseSlug
 import ch.coachpoulpy.server.admin.AdminCatalog
 import ch.coachpoulpy.server.admin.ExerciseQuery
+import ch.coachpoulpy.server.admin.ExerciseSort
 import ch.coachpoulpy.server.auth.Caller
 import ch.coachpoulpy.server.auth.caller
 import ch.coachpoulpy.server.auth.requiresAdmin
 import ch.coachpoulpy.server.catalog.DraftExercise
 import ch.coachpoulpy.server.catalog.DraftResult
+import ch.coachpoulpy.server.catalog.EditedExercise
 import ch.coachpoulpy.server.catalog.MissingText
 import ch.coachpoulpy.server.catalog.PublishResult
 import ch.coachpoulpy.server.catalog.ServerCatalog
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonElement
 import org.http4k.contract.ContractRoute
 import org.http4k.contract.Tag
 import org.http4k.contract.div
@@ -35,8 +38,9 @@ import org.http4k.core.with
 import org.http4k.lens.Header
 import org.http4k.lens.Path
 import org.http4k.lens.Query
+import org.http4k.lens.int
 
-/** One exercise of the draft: the shared Exercise JSON, whether a version holds it, and what changed since (added, edited, retired or null). */
+/** One exercise of the draft: the shared Exercise JSON, whether a version holds it, and what changed since (added, edited, retired, offered or null). */
 @Serializable
 data class DraftExerciseResponse(val exercise: Exercise, val published: Boolean, val change: String?)
 
@@ -45,6 +49,13 @@ data class DraftExercisesResponse(val exercises: List<DraftExerciseResponse>, va
 
 @Serializable
 data class ChangedExerciseResponse(val slug: String, val name: Map<String, String>)
+
+/** One changed field of an edited exercise: its path in the exercise JSON, such as `name.fr`, and its value in the latest version and in the draft (null when absent). */
+@Serializable
+data class FieldChangeResponse(val field: String, val before: JsonElement?, val after: JsonElement?)
+
+@Serializable
+data class EditedExerciseResponse(val slug: String, val name: Map<String, String>, val fields: List<FieldChangeResponse>)
 
 @Serializable
 data class MissingTextResponse(val slug: String, val name: Map<String, String>, val languages: List<String>)
@@ -56,8 +67,11 @@ data class CatalogChangesResponse(
     /** The number publishing now would give. */
     val nextVersion: Int,
     val added: List<ChangedExerciseResponse>,
-    val edited: List<ChangedExerciseResponse>,
+    /** Each with the fields that changed, before (the latest version) and after (the draft). */
+    val edited: List<EditedExerciseResponse>,
     val retired: List<ChangedExerciseResponse>,
+    /** Retired in the latest version, offered again in the draft. */
+    val offered: List<ChangedExerciseResponse>,
     /** The exercises whose text lacks a shipped language; publishing is refused while there is one. */
     val missing: List<MissingTextResponse>,
 )
@@ -75,6 +89,35 @@ private val catalogAdminTag = Tag("admin")
 private val slugPath = Path.map(::ExerciseSlug, ExerciseSlug::value).of("slug", "The exercise's slug")
 private val textQuery = Query.optional("q", "Part of the slug, of a name in any language or of an alias, whatever its case")
 private val retiredQuery = Query.optional("retired", "yes or no: only the retired exercises, or only the offered ones")
+private val sortQuery = Query.optional("sort", "catalog, name, pattern, languages, change or status (default catalog, the catalog's order)")
+private val orderQuery = Query.optional("order", "asc or desc (default asc)")
+private val pageQuery = Query.int().defaulted("page", 1, "The page, from 1")
+private val sizeQuery = Query.int().defaulted("size", ExerciseQuery.DEFAULT_PAGE_SIZE, "Exercises per page, up to ${ExerciseQuery.MAX_PAGE_SIZE}")
+
+private val sorts = mapOf(
+    "catalog" to ExerciseSort.Catalog,
+    "name" to ExerciseSort.Name,
+    "pattern" to ExerciseSort.Pattern,
+    "languages" to ExerciseSort.Languages,
+    "change" to ExerciseSort.Change,
+    "status" to ExerciseSort.Status,
+)
+
+/** The table's question from the query string, or null when a value isn't one of the allowed words. */
+private fun Request.exerciseQuery(): ExerciseQuery? {
+    val retired = retiredQuery(this)
+    val sort = sortQuery(this)
+    val order = orderQuery(this)
+    if (retired !in listOf(null, "yes", "no") || sort != null && sort !in sorts || order !in listOf(null, "asc", "desc")) return null
+    return ExerciseQuery(
+        text = textQuery(this),
+        retired = retired?.let { it == "yes" },
+        sort = sort?.let(sorts::getValue) ?: ExerciseSort.Catalog,
+        ascending = order != "desc",
+        page = pageQuery(this),
+        size = sizeQuery(this),
+    )
+}
 
 private const val EXERCISES = "$API_PREFIX/admin/catalog/exercises"
 
@@ -85,6 +128,7 @@ fun adminCatalogRoutes(catalog: AdminCatalog): List<ContractRoute> = listOf(
     createRoute(catalog),
     editRoute(catalog),
     retireRoute(catalog),
+    offerRoute(catalog),
     changesRoute(catalog),
     publishRoute(catalog),
 )
@@ -99,6 +143,9 @@ private fun Request.admin(): Caller.Signed = caller as Caller.Signed
 private fun DraftExercise.toResponse() = DraftExerciseResponse(exercise, published, change?.code)
 
 private fun Exercise.changed() = ChangedExerciseResponse(slug.value, name.byLanguage)
+
+private fun EditedExercise.toResponse() =
+    EditedExerciseResponse(exercise.slug.value, exercise.name.byLanguage, fields.map { FieldChangeResponse(it.field, it.before, it.after) })
 
 /**
  * The exercise in the body, or why it isn't one: bad JSON, a missing or unknown field, or a text
@@ -123,26 +170,27 @@ private fun DraftResult.toResponse(saved: Status): Response = when (this) {
 
 private fun listRoute(catalog: AdminCatalog): ContractRoute = EXERCISES meta {
     summary = "List the draft's exercises"
-    description = "Every exercise of the catalog's draft in the catalog's order, retired ones included unless filtered, each with " +
-        "whether a published version holds it and what changed since the latest one: added, edited, retired or null. " +
-        "A retired value other than yes or no is a 400."
+    description = "One page of the catalog draft's exercises, filtered and sorted (the catalog's order by default), with how many match " +
+        "in all. Each says whether a published version holds it and what changed since the latest one: added, edited, retired, " +
+        "offered or null. A value that isn't an allowed word is a 400."
     operationId = "listAdminCatalogExercises"
     tags += catalogAdminTag
     queries += textQuery
     queries += retiredQuery
+    queries += sortQuery
+    queries += orderQuery
+    queries += pageQuery
+    queries += sizeQuery
     security = requiresAdmin()
     produces += APPLICATION_JSON
-    returning(OK to "The exercises, as {exercises: [{exercise, published, change}], total}")
-    returning(BAD_REQUEST to "The retired filter isn't yes or no")
+    returning(OK to "A page of exercises, as {exercises: [{exercise, published, change}], total}")
+    returning(BAD_REQUEST to "A filter or sort value isn't allowed")
     returning(FORBIDDEN to "Not an admin, or not signed in through the website")
 } bindContract GET to { request ->
-    val retired = retiredQuery(request)
-    if (retired !in listOf(null, "yes", "no")) {
-        problem(BAD_REQUEST, "bad-query")
-    } else {
-        val exercises = catalog.list(ExerciseQuery(textQuery(request), retired?.let { it == "yes" }))
-        json(OK, DraftExercisesResponse.serializer(), DraftExercisesResponse(exercises.map { it.toResponse() }, exercises.size))
-    }
+    request.exerciseQuery()?.let { query ->
+        val page = catalog.list(query)
+        json(OK, DraftExercisesResponse.serializer(), DraftExercisesResponse(page.exercises.map { it.toResponse() }, page.total))
+    } ?: problem(BAD_REQUEST, "bad-query")
 }
 
 private fun getRoute(catalog: AdminCatalog): ContractRoute = EXERCISES / slugPath meta {
@@ -221,17 +269,33 @@ private fun retireRoute(catalog: AdminCatalog): ContractRoute = EXERCISES / slug
     { request: Request -> catalog.retire(request.admin().accountId, slug).toResponse(OK) }
 }
 
+private fun offerRoute(catalog: AdminCatalog): ContractRoute = EXERCISES / slugPath / "offer" meta {
+    summary = "Offer a retired exercise again"
+    description = "Undoes a retire in the draft: the next version lists the exercise for browsing and building again. " +
+        "Does nothing to an exercise that is offered. Written to the audit log."
+    operationId = "offerAdminCatalogExercise"
+    tags += catalogAdminTag
+    security = requiresAdmin()
+    produces += APPLICATION_JSON
+    returning(OK to "The exercise, as {exercise, published, change}")
+    returning(NOT_FOUND to "No exercise with this slug")
+    returning(FORBIDDEN to "Not an admin, or not signed in through the website")
+} bindContract POST to { slug, _ ->
+    { request: Request -> catalog.offer(request.admin().accountId, slug).toResponse(OK) }
+}
+
 private fun MissingText.toResponse() = MissingTextResponse(exercise.slug.value, exercise.name.byLanguage, languages)
 
 private fun changesRoute(catalog: AdminCatalog): ContractRoute = "$API_PREFIX/admin/catalog/changes" meta {
     summary = "What publishing would change"
-    description = "The draft against the latest published version: the exercises added, edited and retired since, the number the next " +
+    description = "The draft against the latest published version: the exercises added, edited (each with its changed fields, " +
+        "before and after), retired and offered again since, the number the next " +
         "version would take, and the exercises whose text still lacks a shipped language (${ServerCatalog.LANGUAGES.joinToString()})."
     operationId = "getAdminCatalogChanges"
     tags += catalogAdminTag
     security = requiresAdmin()
     produces += APPLICATION_JSON
-    returning(OK to "The changes, as {version, nextVersion, added, edited, retired, missing}")
+    returning(OK to "The changes, as {version, nextVersion, added, edited, retired, offered, missing}")
     returning(FORBIDDEN to "Not an admin, or not signed in through the website")
 } bindContract GET to { _ ->
     val changes = catalog.changes()
@@ -242,8 +306,9 @@ private fun changesRoute(catalog: AdminCatalog): ContractRoute = "$API_PREFIX/ad
             changes.version,
             changes.nextVersion,
             changes.added.map { it.changed() },
-            changes.edited.map { it.changed() },
+            changes.edited.map { it.toResponse() },
             changes.retired.map { it.changed() },
+            changes.offered.map { it.changed() },
             changes.missing.map { it.toResponse() },
         ),
     )

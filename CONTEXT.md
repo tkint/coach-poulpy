@@ -19,11 +19,11 @@ One numbered, finished catalog that phones download and store whole, in the same
 _Avoid_: Release (a release is an app build), catalog update
 
 **Catalog draft**:
-The catalog the admin is editing on the server, which no phone sees until it is published as the next version; the admin shows what it adds, edits and retires since the latest published version. Called the draft where only the catalog is meant; it is not a mockup draft or an unsaved workout.
+The catalog the admin is editing on the server, which no phone sees until it is published as the next version; the admin shows what it adds, edits, retires and offers again since the latest published version; only those exercises get a new revision when it is published. Called the draft where only the catalog is meant; it is not a mockup draft or an unsaved workout.
 _Avoid_: Staging, work in progress
 
 **Retired exercise**:
-A catalog exercise no longer offered, kept so the workouts that use it still open.
+A catalog exercise no longer offered, kept so the workouts that use it still open. The admin can offer it again in a later version.
 _Avoid_: Deleted exercise
 
 **Variation**:
