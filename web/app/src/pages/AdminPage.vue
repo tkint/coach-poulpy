@@ -3,7 +3,7 @@
 // (design/mockups/agreed/web/admin-shell.html) with the audit log and the accounts. A link at
 // the bottom of the sidebar goes back to the web app.
 import { computed, onMounted, ref } from 'vue'
-import { ArrowLeft } from 'lucide-vue-next'
+import { ArrowLeft, LogOut, PanelLeft, RotateCcwClock, Users } from '@lucide/vue'
 import { CpAvatar, CpBadge, CpCard, CpDrawer, CpDrawerItem, CpErrorNote, CpNavMenu, CpStat, CpStats, CpTable, poulpyDrawings } from '@coach-poulpy/ui'
 import AdminAccountsView from './AdminAccountsView.vue'
 import AdminSignInPage from './AdminSignInPage.vue'
@@ -64,7 +64,7 @@ const what = (action: string) => (action in actions ? t(actions[action]) : actio
   <AdminSignInPage v-else-if="!me" @signed-in="async () => enter(await currentAccount())" />
   <CpDrawer v-else v-model:open="open" :toggle-label="t('admin.toggleNavigation')" :close-label="t('admin.closeNavigation')" class="bg-base-200 text-base-content">
     <template #toggle-icon>
-      <svg class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2" /><path d="M9 3v18" /></svg>
+      <PanelLeft class="size-5 shrink-0" aria-hidden="true" />
     </template>
     <template #title>{{ view === 'audit' ? t('admin.auditTitle') : t('admin.accountsTitle') }}</template>
     <AdminAccountsView v-if="view === 'accounts'" :own-account-id="me.accountId" />
@@ -113,10 +113,10 @@ const what = (action: string) => (action in actions ? t(actions[action]) : actio
       </div>
       <div class="w-full grow px-2"><CpNavMenu>
         <CpDrawerItem :label="t('admin.auditTitle')" href="/admin" :active="view === 'audit'" @click.prevent="navigate('/admin'); load()">
-          <template #icon><svg class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /><path d="M12 7v5l4 2" /></svg></template>
+          <template #icon><RotateCcwClock class="size-5 shrink-0" aria-hidden="true" /></template>
         </CpDrawerItem>
         <CpDrawerItem :label="t('admin.navAccounts')" href="/admin/accounts" :active="view === 'accounts'" @click.prevent="navigate('/admin/accounts')">
-          <template #icon><svg class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg></template>
+          <template #icon><Users class="size-5 shrink-0" aria-hidden="true" /></template>
         </CpDrawerItem>
       </CpNavMenu></div>
       <div class="flex w-full flex-col gap-2 p-2">
@@ -129,7 +129,7 @@ const what = (action: string) => (action in actions ? t(actions[action]) : actio
         </div>
         <CpNavMenu>
           <CpDrawerItem :label="t('admin.signOut')" @click="leave">
-            <template #icon><svg class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" x2="9" y1="12" y2="12" /></svg></template>
+            <template #icon><LogOut class="size-5 shrink-0" aria-hidden="true" /></template>
           </CpDrawerItem>
         </CpNavMenu>
       </div>

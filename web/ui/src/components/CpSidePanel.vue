@@ -3,6 +3,7 @@
 // width on a phone) with a dim backdrop, so the list under it never moves. A native <dialog> like
 // CpSheet: Escape and a click outside close it, and the page behind can't be reached meanwhile.
 // Render it with `v-if` while a row is picked; it emits `close` once it has closed itself.
+import { X } from '@lucide/vue'
 import { onMounted, ref } from 'vue'
 
 defineProps<{ title: string; closeLabel: string }>()
@@ -21,7 +22,7 @@ onMounted(() => dialog.value?.showModal())
           <slot name="subtitle" />
         </div>
         <button type="button" class="cp-btn cp-btn-circle cp-btn-ghost cp-btn-sm" :aria-label="closeLabel" @click="dialog?.close()">
-          <svg class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+          <X class="size-5 shrink-0" aria-hidden="true" />
         </button>
       </div>
       <slot />
