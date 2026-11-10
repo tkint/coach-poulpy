@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin · catalog · exercise</title>
+<meta name="mockup:screen" content="admin-catalog-exercise">
+<meta name="mockup:section" content="Admin">
+<meta name="mockup:issue" content="338">
+<meta name="mockup:viewport" content="800">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../../../web/ui/src/tokens.css">
+<link rel="stylesheet" href="../../../../web/ui/poulpy-ui.css">
+<script src="../../shared/mockup-theme.js"></script>
+</head>
+<body class="bg-base-200 text-base-content min-h-screen">
+<!-- A published exercise in the draft: /admin/catalog/goblet-squat. Its slug is locked. The French name was just edited, so it reads Edited until the next version. Fields follow the catalog JSON: name, instructions, variation note and aliases per language; slug, movement pattern, muscles, equipment needs and optional equipment, measurement, each side, focus, positions, jumps, images; variations are read-only. -->
+<div class="cp-drawer lg:cp-drawer-open">
+  <input id="admin-drawer" type="checkbox" class="cp-drawer-toggle" aria-label="Toggle the navigation">
+  <div class="cp-drawer-content flex flex-col">
+    <nav class="cp-navbar w-full bg-base-100 px-2 shadow-sm md:px-4">
+      <label for="admin-drawer" aria-label="Toggle the navigation" class="cp-btn cp-btn-square cp-btn-ghost"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/></svg></label>
+      <div class="px-2 font-bold">Catalog</div>
+    </nav>
+    <main class="flex min-w-0 flex-col gap-6 p-4 md:p-8" id="catalog">
+      <nav class="cp-breadcrumbs text-sm" aria-label="You are here" data-component="breadcrumbs">
+        <ul><li><a href="admin-catalog.html">Catalog</a></li><li>Goblet squat</li></ul>
+      </nav>
+      <div class="flex flex-col gap-2">
+        <h1 class="cp-type-display">Goblet squat</h1>
+        <p class="flex flex-wrap items-center gap-2"><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Offered</span><span class="cp-badge cp-badge-neutral cp-badge-soft whitespace-nowrap">Edited</span><span class="text-sm text-base-content/70">Published since version 4</span></p>
+      </div>
+      <form class="flex flex-col gap-6" id="exercise-form">
+      <section class="cp-card bg-base-100 shadow-sm" id="text">
+        <div class="cp-card-body gap-4 p-4 md:p-6">
+          <div class="flex flex-col gap-1">
+            <h2 class="cp-card-title">Names and instructions</h2>
+            <p class="text-sm text-base-content/70">English is needed to save. Publishing needs French too, for every text.</p>
+          </div>
+          <div class="grid gap-4 md:grid-cols-2">
+            <div class="cp-fieldset" data-component="text-field">
+              <label class="cp-type-label" for="name-en">Name in English</label>
+              <label class="cp-input w-full"><input id="name-en" type="text" class="grow" value="Goblet squat" autocomplete="off"></label>
+              
+            </div>
+            <div class="cp-fieldset" data-component="text-field">
+              <label class="cp-type-label" for="name-fr">Name in French</label>
+              <label class="cp-input w-full"><input id="name-fr" type="text" class="grow" value="Squat goblet" autocomplete="off"></label>
+              
+            </div>
+          </div>
+          <div class="cp-divider my-0" role="separator"></div>
+          <h3 class="cp-type-label">Instructions</h3>
+          <ol class="flex flex-col gap-4">
+            <li class="flex flex-col gap-2" data-component="instruction">
+              <div class="flex items-center justify-between gap-2"><span class="cp-type-label">Step 1</span><button type="button" class="cp-btn cp-btn-circle cp-btn-ghost cp-btn-sm" aria-label="Remove step 1"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div>
+              <div class="grid gap-4 md:grid-cols-2">
+                <div class="cp-fieldset" data-component="text-field">
+              <label class="cp-type-label" for="step-0-en">English</label>
+              <label class="cp-input w-full"><input id="step-0-en" type="text" class="grow" value="Hold the weight against your chest, elbows down." autocomplete="off"></label>
+              
+            </div>
+                <div class="cp-fieldset" data-component="text-field">
+              <label class="cp-type-label" for="step-0-fr">French</label>
+              <label class="cp-input w-full"><input id="step-0-fr" type="text" class="grow" value="Tenez la charge contre la poitrine, coudes vers le bas." autocomplete="off"></label>
+              
+            </div>
+              </div>
+            </li>
+            <li class="flex flex-col gap-2" data-component="instruction">
+              <div class="flex items-center justify-between gap-2"><span class="cp-type-label">Step 2</span><button type="button" class="cp-btn cp-btn-circle cp-btn-ghost cp-btn-sm" aria-label="Remove step 2"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div>
+              <div class="grid gap-4 md:grid-cols-2">
+                <div class="cp-fieldset" data-component="text-field">
+              <label class="cp-type-label" for="step-1-en">English</label>
+              <label class="cp-input w-full"><input id="step-1-en" type="text" class="grow" value="Sit down between your heels, chest up, then stand." autocomplete="off"></label>
+              
+            </div>
+                <div class="cp-fieldset" data-component="text-field">
+              <label class="cp-type-label" for="step-1-fr">French</label>
+              <label class="cp-input w-full"><input id="step-1-fr" type="text" class="grow" value="Descendez entre vos talons, buste droit, puis remontez." autocomplete="off"></label>
+              
+            </div>
+              </div>
+            </li>
+          </ol>
+          <div><button type="button" class="cp-btn cp-btn-outline cp-btn-sm gap-2"><svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg>Add a step</button></div>
+          <div class="cp-divider my-0" role="separator"></div>
+          <div class="grid gap-4 md:grid-cols-2">
+            <div class="cp-fieldset" data-component="text-field">
+              <label class="cp-type-label" for="note-en">Variation note in English</label>
+              <label class="cp-input w-full"><input id="note-en" type="text" class="grow" value="A weight held against your chest" aria-describedby="note-en-hint" autocomplete="off"></label>
+              <p class="cp-label whitespace-normal" id="note-en-hint">How it differs from the other variations; shown only in the variations sheet.</p>
+            </div>
+            <div class="cp-fieldset" data-component="text-field">
+              <label class="cp-type-label" for="note-fr">Variation note in French</label>
+              <label class="cp-input w-full"><input id="note-fr" type="text" class="grow" value="Une charge tenue contre la poitrine" autocomplete="off"></label>
+              
+            </div>
+            <div class="cp-fieldset" data-component="text-field">
+              <label class="cp-type-label" for="aliases-en">Search aliases in English</label>
+              <label class="cp-input w-full"><input id="aliases-en" type="text" class="grow" value="" aria-describedby="aliases-en-hint" autocomplete="off"></label>
+              <p class="cp-label whitespace-normal" id="aliases-en-hint">Other names people search with, separated by commas. Never shown.</p>
+            </div>
+            <div class="cp-fieldset" data-component="text-field">
+              <label class="cp-type-label" for="aliases-fr">Search aliases in French</label>
+              <label class="cp-input w-full"><input id="aliases-fr" type="text" class="grow" value="" autocomplete="off"></label>
+              
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="cp-card bg-base-100 shadow-sm" id="movement">
+        <div class="cp-card-body gap-4 p-4 md:p-6">
+          <h2 class="cp-card-title">How it is done</h2>
+          <div class="grid gap-4 sm:grid-cols-2">
+            <div class="cp-fieldset" data-component="text-field">
+              <label class="cp-type-label" for="slug">Slug</label>
+              <label class="cp-input w-full"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><input id="slug" type="text" class="grow" value="goblet-squat" disabled aria-describedby="slug-hint" autocomplete="off"></label>
+              <p class="cp-label whitespace-normal" id="slug-hint">Published in version 11, so it never changes: workouts point at it.</p>
+            </div>
+            <label class="cp-fieldset" data-component="select-field"><span class="cp-type-label">Movement pattern</span><select id="pattern" class="cp-select w-full"><option selected>Squat</option><option>Hinge</option><option>Lunge</option><option>Push</option><option>Pull</option><option>Carry</option><option>Core</option><option>Rotation</option><option>Cardio</option><option>Mobility</option><option>Stretch</option></select></label>
+            <label class="cp-fieldset" data-component="select-field"><span class="cp-type-label">Measured in</span><select id="measurement" class="cp-select w-full"><option selected>Reps</option><option>Timed</option><option>Hold</option><option>Distance</option></select></label>
+          </div>
+          <div class="flex flex-col gap-2" role="group" aria-label="Muscles worked">
+              <span class="cp-type-label">Muscles worked</span>
+              <div class="flex flex-wrap gap-2"><button type="button" class="cp-btn cp-chip cp-btn-outline" aria-pressed="false">Chest</button><button type="button" class="cp-btn cp-chip cp-btn-outline" aria-pressed="false">Back</button><button type="button" class="cp-btn cp-chip cp-btn-outline" aria-pressed="false">Shoulders</button><button type="button" class="cp-btn cp-chip cp-btn-outline" aria-pressed="false">Biceps</button><button type="button" class="cp-btn cp-chip cp-btn-outline" aria-pressed="false">Triceps</button><button type="button" class="cp-btn cp-chip cp-btn-outline" aria-pressed="false">Forearms</button><button type="button" class="cp-btn cp-chip cp-btn-primary" aria-pressed="true">Core</button><button type="button" class="cp-btn cp-chip cp-btn-primary" aria-pressed="true">Glutes</button><button type="button" class="cp-btn cp-chip cp-btn-primary" aria-pressed="true">Quadriceps</button><button type="button" class="cp-btn cp-chip cp-btn-outline" aria-pressed="false">Hamstrings</button><button type="button" class="cp-btn cp-chip cp-btn-outline" aria-pressed="false">Calves</button><button type="button" class="cp-btn cp-chip cp-btn-outline" aria-pressed="false">Hips</button><button type="button" class="cp-btn cp-chip cp-btn-outline" aria-pressed="false">Neck</button><button type="button" class="cp-btn cp-chip cp-btn-outline" aria-pressed="false">Full body</button></div>
+            </div>
+          <div class="flex flex-col gap-2" role="group" aria-label="Focus">
+              <span class="cp-type-label">Focus</span>
+              <div class="flex flex-wrap gap-2"><button type="button" class="cp-btn cp-chip cp-btn-primary" aria-pressed="true">Strength</button><button type="button" class="cp-btn cp-chip cp-btn-outline" aria-pressed="false">Cardio</button><button type="button" class="cp-btn cp-chip cp-btn-outline" aria-pressed="false">Mobility</button><button type="button" class="cp-btn cp-chip cp-btn-outline" aria-pressed="false">Stretching</button><button type="button" class="cp-btn cp-chip cp-btn-outline" aria-pressed="false">Warm-up</button><button type="button" class="cp-btn cp-chip cp-btn-outline" aria-pressed="false">Cool down</button></div>
+            </div>
+          <div class="flex flex-col gap-2" role="group" aria-label="Position">
+              <span class="cp-type-label">Position</span>
+              <div class="flex flex-wrap gap-2"><button type="button" class="cp-btn cp-chip cp-btn-primary" aria-pressed="true">Standing</button><button type="button" class="cp-btn cp-chip cp-btn-outline" aria-pressed="false">Seated</button><button type="button" class="cp-btn cp-chip cp-btn-outline" aria-pressed="false">On the floor</button></div>
+            </div>
+          <div class="flex flex-col gap-2" role="group" aria-label="Also">
+              <span class="cp-type-label">Also</span>
+              <div class="flex flex-wrap gap-2"><button type="button" class="cp-btn cp-chip cp-btn-outline" aria-pressed="false">Each side</button><button type="button" class="cp-btn cp-chip cp-btn-outline" aria-pressed="false">Jumps</button></div>
+            </div>
+        </div>
+      </section>
+      <section class="cp-card bg-base-100 shadow-sm" id="equipment">
+        <div class="cp-card-body gap-4 p-4 md:p-6">
+          <div class="flex flex-col gap-1">
+            <h2 class="cp-card-title">Equipment</h2>
+            <p class="text-sm text-base-content/70">Each need is met by any one of its items. No need means bodyweight.</p>
+          </div>
+          <div class="flex flex-col gap-2" role="group" aria-label="Need 1">
+              <div class="flex items-center justify-between gap-2"><span class="text-sm">Need 1: one of these at hand</span><button type="button" class="cp-btn cp-btn-circle cp-btn-ghost cp-btn-sm" aria-label="Remove need 1"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div>
+              <div class="flex flex-wrap gap-2"><button type="button" class="cp-btn cp-chip cp-btn-primary" aria-pressed="true">Dumbbells</button><button type="button" class="cp-btn cp-chip cp-btn-primary" aria-pressed="true">Kettlebell</button><button type="button" class="cp-btn cp-chip cp-btn-outline" aria-pressed="false">Barbell</button><button type="button" class="cp-btn cp-chip cp-btn-outline" aria-pressed="false">Resistance band</button><button type="button" class="cp-btn cp-chip cp-btn-outline" aria-pressed="false">Bench or step</button><button type="button" class="cp-btn cp-chip cp-btn-outline" aria-pressed="false">Pull-up bar</button><button type="button" class="cp-btn cp-chip cp-btn-outline" aria-pressed="false">Treadmill</button><button type="button" class="cp-btn cp-chip cp-btn-outline" aria-pressed="false">Machine</button></div>
+            </div>
+          <div><button type="button" class="cp-btn cp-btn-outline cp-btn-sm gap-2"><svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg>Add a need</button></div>
+          <div class="cp-divider my-0" role="separator"></div>
+          <div class="flex flex-col gap-2" role="group" aria-label="Helps but not needed">
+              <span class="cp-type-label">Helps but not needed</span>
+              <div class="flex flex-wrap gap-2"><button type="button" class="cp-btn cp-chip cp-btn-outline" aria-pressed="false">Mat</button><button type="button" class="cp-btn cp-chip cp-btn-outline" aria-pressed="false">Dumbbells</button><button type="button" class="cp-btn cp-chip cp-btn-outline" aria-pressed="false">Kettlebell</button><button type="button" class="cp-btn cp-chip cp-btn-outline" aria-pressed="false">Barbell</button><button type="button" class="cp-btn cp-chip cp-btn-outline" aria-pressed="false">Resistance band</button><button type="button" class="cp-btn cp-chip cp-btn-outline" aria-pressed="false">Bench or step</button><button type="button" class="cp-btn cp-chip cp-btn-outline" aria-pressed="false">Pull-up bar</button><button type="button" class="cp-btn cp-chip cp-btn-outline" aria-pressed="false">Treadmill</button><button type="button" class="cp-btn cp-chip cp-btn-outline" aria-pressed="false">Machine</button></div>
+            </div>
+        </div>
+      </section>
+      <section class="cp-card bg-base-100 shadow-sm" id="pictures">
+        <div class="cp-card-body gap-4 p-4 md:p-6">
+          <div class="flex flex-col gap-1">
+            <h2 class="cp-card-title">Pictures</h2>
+            <p class="text-sm text-base-content/70">Shown on the exercise in the apps, in this order.</p>
+          </div>
+          <div class="flex flex-col items-center gap-3 bg-base-200 p-6 text-center" data-component="file-input">
+            <svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 5h6"/><path d="M19 2v6"/><path d="M21 11.5V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7.5"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/><circle cx="9" cy="9" r="2"/></svg>
+            <p class="text-base-content/70">No picture yet.</p>
+            <button type="button" class="cp-btn cp-btn-outline cp-btn-sm gap-2"><svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg>Add a picture</button>
+          </div>
+        </div>
+      </section>
+      <section class="cp-card bg-base-100 shadow-sm" id="variations">
+        <div class="cp-card-body gap-4 p-4 md:p-6">
+          <div class="flex flex-col gap-1">
+            <h2 class="cp-card-title">Variations</h2>
+            <p class="text-sm text-base-content/70">Easiest to hardest. Changing the groups isn't in the admin yet.</p>
+          </div>
+          <ol class="flex flex-wrap items-center gap-2"><li><a href="admin-catalog-exercise.html" class="cp-link">Sit to stand</a></li><li aria-hidden="true">›</li><li><a href="admin-catalog-exercise.html" class="cp-link">Bodyweight squat</a></li><li aria-hidden="true">›</li><li class="font-semibold" aria-current="true">Goblet squat</li></ol>
+        </div>
+      </section>
+      <div class="flex flex-wrap justify-end gap-2">
+        <a href="admin-catalog.html" class="cp-btn cp-btn-ghost">Cancel</a>
+        <button type="submit" class="cp-btn cp-btn-primary">Save to the draft</button>
+      </div>
+      </form>
+      <section class="cp-card bg-base-100 shadow-sm" id="retire">
+        <div class="cp-card-body p-4 md:p-6"><div class="flex flex-wrap items-center justify-between gap-4">
+          <div class="flex flex-col gap-1">
+            <h2 class="cp-card-title">Retire</h2>
+            <p class="text-sm text-base-content/70">Hides it from the exercise list and the builder in the next version. Workouts that use it still open; nothing is deleted.</p>
+          </div>
+          <a href="admin-catalog-exercise-retire.html" class="cp-btn cp-btn-outline gap-2"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="5" x="2" y="3" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/></svg>Retire</a>
+        </div></div>
+      </section>
+    </main>
+  </div>
+  <div class="cp-drawer-side cp-is-drawer-close:overflow-visible" data-component="admin-nav">
+    <label for="admin-drawer" aria-label="Close the navigation" class="cp-drawer-overlay"></label>
+    <div class="flex min-h-full flex-col items-start border-r border-base-300 bg-base-100 cp-is-drawer-close:w-16 cp-is-drawer-open:w-64">
+      <div class="flex min-h-16 w-full items-center gap-2 px-4 py-2">
+        <img src="../../../poulpy/mood_happy.svg" alt="" width="32" height="32" class="shrink-0">
+        <div class="flex flex-col items-start cp-is-drawer-close:hidden">
+          <span class="cp-type-headline">Coach <span class="text-primary">poulpy</span></span>
+          <span class="cp-badge cp-badge-primary cp-badge-soft cp-badge-sm w-fit gap-1 whitespace-nowrap"><svg xmlns="http://www.w3.org/2000/svg" class="size-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>Admin</span>
+        </div>
+      </div>
+      <ul class="cp-menu w-full grow gap-1 px-2">
+        <li><a href="../../agreed/web/admin-shell.html" class="cp-is-drawer-close:cp-tooltip cp-is-drawer-close:cp-tooltip-right" data-tip="Audit log"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg><span class="cp-is-drawer-close:hidden">Audit log</span></a></li>
+        <li><a href="../../agreed/web/admin-accounts.html" class="cp-is-drawer-close:cp-tooltip cp-is-drawer-close:cp-tooltip-right" data-tip="Accounts"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span class="cp-is-drawer-close:hidden">Accounts</span></a></li>
+        <li><a href="admin-catalog.html" class="cp-menu-active cp-is-drawer-close:cp-tooltip cp-is-drawer-close:cp-tooltip-right" data-tip="Catalog" aria-current="page"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg><span class="cp-is-drawer-close:hidden">Catalog</span></a></li>
+        <li><a href="../../agreed/web/admin-settings-mail.html" class="cp-is-drawer-close:cp-tooltip cp-is-drawer-close:cp-tooltip-right" data-tip="Settings"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="21" x2="14" y1="4" y2="4"/><line x1="10" x2="3" y1="4" y2="4"/><line x1="21" x2="12" y1="12" y2="12"/><line x1="8" x2="3" y1="12" y2="12"/><line x1="21" x2="16" y1="20" y2="20"/><line x1="12" x2="3" y1="20" y2="20"/><line x1="14" x2="14" y1="2" y2="6"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="16" x2="16" y1="18" y2="22"/></svg><span class="cp-is-drawer-close:hidden">Settings</span></a></li>
+        <li><a href="../../agreed/web/admin-status.html" class="cp-is-drawer-close:cp-tooltip cp-is-drawer-close:cp-tooltip-right" data-tip="Status"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/></svg><span class="cp-is-drawer-close:hidden">Status</span></a></li>
+      </ul>
+      <div class="flex w-full flex-col gap-2 p-2">
+        <ul class="cp-menu w-full p-0">
+          <li><a href="../../agreed/web/app-profile.html" class="cp-is-drawer-close:cp-tooltip cp-is-drawer-close:cp-tooltip-right" data-tip="Coach Poulpy app" data-component="app-link"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg><span class="cp-is-drawer-close:hidden">Coach Poulpy app</span></a></li>
+        </ul>
+        <div class="flex items-center gap-3 px-2">
+          <div class="cp-avatar cp-avatar-placeholder"><div class="bg-primary text-primary-content w-10 rounded-full"><span>A</span></div></div>
+          <div class="flex min-w-0 flex-1 flex-col text-sm cp-is-drawer-close:hidden">
+            <span class="font-bold">Ana</span>
+            <span class="truncate text-base-content/70">ana@example.com</span>
+          </div>
+        </div>
+        <ul class="cp-menu w-full p-0">
+          <li><button class="cp-is-drawer-close:cp-tooltip cp-is-drawer-close:cp-tooltip-right" data-tip="Sign out"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg><span class="cp-is-drawer-close:hidden">Sign out</span></button></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="../../shared/mockup-drawer.js"></script>
+</body>
+</html>
