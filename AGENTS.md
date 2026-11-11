@@ -73,8 +73,14 @@ When working on catalog code or documentation, follow #400 and avoid extending t
 
 ## Git and pull requests
 
-- Use the branch naming convention in `CLAUDE.md`.
-- Keep one coherent goal per PR and link it with `Closes #<number>` when applicable.
+- **Never work directly on `main`.** Do not commit to, push to, or otherwise update the `main` branch directly.
+- **Use a dedicated feature branch for every change**, created from the current `main` unless the task explicitly depends on another base branch. Follow the branch naming convention in `CLAUDE.md`.
+- **Commit autonomously on feature branches when a coherent unit of work is ready.** Do not wait for explicit commit authorization.
+- **Minimize commits.** Prefer one well-organized commit per task or coherent change. Avoid incremental, checkpoint, cosmetic or fixup commits; split only when changes are genuinely independent or the user asks for separate commits.
+- Push feature branches as needed to share work or open a pull request, but never push to `main`.
+- Never force-push or rewrite shared branch history unless explicitly authorized. Do not discard user changes.
+- When the work is ready for integration, use a pull request targeting `main`; never bypass the pull-request workflow.
 - Do not merge or close issues/PRs unless the user explicitly requests it.
+- Keep one coherent goal per PR and link it with `Closes #<number>` when applicable.
 - Put review context and known limitations in the PR description.
 - A task is not complete merely because edits were made: relevant local checks and required CI must be verified.
