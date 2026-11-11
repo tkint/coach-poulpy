@@ -75,6 +75,16 @@ Primary, tonal, outline, grumpy and danger (crimson, for a deletion that can't b
 | `<CpTextField hint>` | adds `p.cp-label.whitespace-normal` under the field, named by the input's `aria-describedby` |
 | `<CpTextField error>` | `cp-input-error`, `aria-invalid`, and `p.cp-label.whitespace-normal.text-error` with `role="alert"` in the hint's place |
 
+## Textarea
+
+`CpTextarea`: a multiline field that grows to fit its content. It resizes after typing, when its model changes, and when its width changes and text wraps onto different lines.
+
+<WebComponentSamples part="textarea" />
+
+| Vue | Classes |
+| --- | --- |
+| `<CpTextarea v-model label rows hint>` | `div.cp-fieldset` around `label.cp-type-label`, `textarea.cp-textarea.w-full`, and an optional `p.cp-label.whitespace-normal` helper |
+
 ## Password field
 
 `CpPasswordField`, with a button that shows the password. In error, it turns crimson and a `CpErrorNote` under the form says why.
