@@ -106,7 +106,7 @@ Both phones then show both workouts, and nothing on the server is rewritten.
 
 ## Leaving
 
-- **Deleting the account happens at once**, after the password: every row is deleted, every phone is signed out and goes back to a guest with its own copy, and the nightly dumps age out within 30 days.
+- **Deleting the account happens at once**, after the password: every row is deleted, every phone is signed out and goes back to a guest with its own copy, and the nightly dumps age out within 30 days. A wrong password leaves the account untouched.
 - **Export** gives all the account's data as JSON, and sessions as FIT files.
 
 ## Screens
