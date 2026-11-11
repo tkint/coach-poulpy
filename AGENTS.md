@@ -11,6 +11,38 @@ This file is the entry point for Codex and other agents that follow `AGENTS.md`.
 5. Read the relevant area guidance in [`docs/agents/areas.md`](docs/agents/areas.md). The other guides in `docs/agents/` cover code-graph exploration, domain context, issue refinement, issue tracking and triage labels.
 6. Follow [`CONTRIBUTING.md`](CONTRIBUTING.md) for the issue-to-PR workflow.
 
+## Mandatory specialist skills
+
+Before implementing or reviewing code, inspect the skills available to the current agent. Load and follow the applicable specialist skills below; these are required workflow dependencies, not optional references. Do not claim to have used a skill unless its `SKILL.md` was actually loaded.
+
+| Work area | Required specialist skills |
+| --- | --- |
+| Any behavior change or feature implementation | Matt Pocock's `tdd` |
+| Any bug diagnosis or bug fix | Matt Pocock's `diagnosing-bugs` |
+| Module boundaries, abstractions or architectural changes | Matt Pocock's `codebase-design` |
+| Final review of every code PR | Matt Pocock's `code-review` |
+| Any Vue application or component work | `vue-best-practices`; also `vue-router-best-practices`, `vue-pinia-best-practices`, `vue-testing-best-practices` or `vue-debug-guides` when the task touches those areas |
+| Any DaisyUI/Tailwind component, theme or styling work | daisyUI's `daisyui` |
+| Any http4k server, route, filter, contract or test work | http4k's `http4k-development` |
+
+Install missing skills into the current repository before starting implementation. Use the Skills CLI and install for the current agent (or all agents used by the team):
+
+```sh
+npx skills@latest add saadeghi/daisyui --skill daisyui
+npx skills@latest add vuejs-ai/skills --skill vue-best-practices
+npx skills@latest add vuejs-ai/skills --skill vue-router-best-practices
+npx skills@latest add vuejs-ai/skills --skill vue-pinia-best-practices
+npx skills@latest add vuejs-ai/skills --skill vue-testing-best-practices
+npx skills@latest add vuejs-ai/skills --skill vue-debug-guides
+npx skills@latest add https://github.com/http4k/agent-skills/tree/master/plugins/http4k/skills/http4k-development
+npx skills@latest add mattpocock/skills --skill tdd
+npx skills@latest add mattpocock/skills --skill diagnosing-bugs
+npx skills@latest add mattpocock/skills --skill codebase-design
+npx skills@latest add mattpocock/skills --skill code-review
+```
+
+The Vue skills repository is explicitly an early community experiment; use its guidance as specialist advice, but verify it against the installed Vue version and this repository's architecture. The local project rules, actual source, tests and ADRs remain authoritative when generic skill advice conflicts. If a required skill cannot be installed or loaded, stop and report the missing skill instead of silently substituting model knowledge.
+
 ## Engineering workflow
 
 - **Inspect before editing.** Read the issue and its comments, inspect the current implementation, nearby tests, callers, generated sources and relevant history. Use CodeGraph when available; still read the source files you intend to change.
