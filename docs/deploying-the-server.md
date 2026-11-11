@@ -22,12 +22,19 @@ flowchart TD
     end
     edge["External edge network"]
     internal["Private internal network"]
+    caddyData[("caddy-data volume<br/>TLS certificates")]
+    caddyConfig[("caddy-config volume<br/>autosaved routes")]
+    postgresData[("postgres-data volume<br/>database files")]
+    alloyData[("alloy-data volume<br/>log positions")]
     loki["Grafana Cloud Loki"]
+    smtp["SMTP provider"]
 
     internet -->|HTTP / HTTPS| caddy
     caddy -->|api.coach-poulpy.com via edge| server
     caddy -->|app.coach-poulpy.com via edge| web
     caddy -. attaches to .-> edge
+    caddy -. persists .-> caddyData
+    caddy -. persists .-> caddyConfig
     server -. attaches to .-> edge
     web -. attaches to .-> edge
     server -. attaches to .-> internal
