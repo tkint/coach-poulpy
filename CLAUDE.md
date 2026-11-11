@@ -48,10 +48,10 @@ Skills live in `.agents/skills/` and are shared by Codex and Claude Code. Claude
 
 Before starting work, inspect the available skills and read the relevant `SKILL.md` files. Treat applicable skills as required working procedures, not optional reference material. In particular:
 
-- Web UI, components, styling and accessibility: `daisyui` and the relevant `vue-*` skills.
+- Web UI, components, styling and accessibility: always read `daisyui` and `vue-best-practices`; also read the relevant `vue-router-*`, `vue-pinia-*`, `vue-testing-*`, `vue-jsx-*` or other Vue skills for the files being changed.
 - Kotlin and HTTP services: `http4k-development`.
-- TypeScript and JavaScript API design: `setup-matt-pocock-skills` (follow its own instructions for the installed Matt Pocock skill set).
-- Any implementation: use `implement` and `tdd` where applicable; use `diagnosing-bugs` for bug fixes and `code-review` before completing a change.
+- Matt Pocock's engineering workflow: use `setup-matt-pocock-skills` when its repository setup guidance is needed, then select the applicable skills from that set (`implement`, `tdd`, `code-review`, `domain-modeling`, `codebase-design`, `diagnosing-bugs`, `to-spec`, `to-tickets`, `grill-me`, etc.).
+- Any implementation: use `implement` and `tdd` where applicable; use `diagnosing-bugs` for bug fixes and `code-review` before completing a change. Do not treat these as a substitute for the technology-specific skills above.
 - Product, architecture, requirements and documentation work: select the corresponding domain, design, research, specification or writing skill.
 
 Read the full skill instructions and any referenced files needed for the task. Do not assume a skill name alone is sufficient context.
