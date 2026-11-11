@@ -33,7 +33,7 @@
       </div>
       <section class="cp-card bg-base-100 shadow-sm" id="exercises">
         <div class="cp-card-body gap-4 p-4 md:p-6">
-          <div class="flex flex-wrap items-center gap-3" data-component="catalog-toolbar">
+          <div class="flex flex-wrap items-center gap-4" data-component="catalog-toolbar">
             <label class="cp-input w-64 max-w-full" data-component="search-field">
               <svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="search"><path d="m21 21-4.34-4.34" /><circle cx="11" cy="11" r="8" /></svg>
               <input id="filter-q" type="search" class="grow" placeholder="Search exercises" aria-label="Search exercises by name, slug or alias" value="" autocomplete="off">
@@ -56,7 +56,7 @@
                 <template data-state="no-selection">
                   <label class="cp-btn cp-btn-ghost cp-btn-square cp-btn-sm" aria-label="Select all exercises on this page"><input type="checkbox" class="cp-checkbox" aria-label="Select all exercises on this page"></label>
                 </template>
-                <details class="relative inline-block" open data-component="selection-actions" data-selection-count="3">
+                <details class="relative inline-block" data-component="selection-actions" data-selection-count="3">
                   <summary class="cp-btn cp-btn-ghost cp-btn-square cp-btn-sm relative list-none" aria-label="Actions for 3 selected exercises">
                     <svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="ellipsis-vertical"><circle cx="12" cy="12" r="1" /><circle cx="12" cy="5" r="1" /><circle cx="12" cy="19" r="1" /></svg>
                     <span class="cp-badge cp-badge-primary cp-badge-sm absolute -right-2 -top-2 z-10">3</span>
@@ -235,7 +235,7 @@
         </div>
       </section>
     </main>
-    <dialog class="cp-modal cp-modal-open cp-modal-end cp-sheet" data-component="filter-sheet" id="catalog-filters" aria-labelledby="catalog-filters-title">
+    <dialog class="cp-modal cp-modal-end cp-sheet" data-component="filter-sheet" id="catalog-filters" aria-labelledby="catalog-filters-title">
       <div class="cp-modal-box flex flex-col gap-4 p-4 md:p-6">
         <div class="flex items-center justify-between gap-3">
           <div class="flex flex-col gap-1">
