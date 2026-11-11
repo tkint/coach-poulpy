@@ -6,7 +6,7 @@
 <title>Admin · catalog · retire</title>
 <meta name="mockup:screen" content="admin-catalog-exercise-retire">
 <meta name="mockup:section" content="Admin">
-<meta name="mockup:issue" content="338">
+<meta name="mockup:issue" content="386">
 <meta name="mockup:viewport" content="800">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
@@ -15,7 +15,7 @@
 <script src="../../shared/mockup-theme.js"></script>
 </head>
 <body class="bg-base-200 text-base-content min-h-screen">
-<!-- Retire asks first. It is not a deletion, so the button stays a neutral outline, and it can be undone with Offer again. -->
+<!-- Preparing retirement is a draft lifecycle action, not deletion. The exercise remains active until the retirement is published and can be cancelled beforehand. -->
 <div class="cp-drawer lg:cp-drawer-open">
   <input id="admin-drawer" type="checkbox" class="cp-drawer-toggle" aria-label="Toggle the navigation">
   <div class="cp-drawer-content flex flex-col">
@@ -61,7 +61,7 @@
               <label class="cp-type-label" for="slug">Slug</label>
               <label class="cp-input w-full"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="lock"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
   <path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg><input id="slug" type="text" class="grow" value="wall-sit" disabled autocomplete="off"></label>
-              <p class="cp-label whitespace-normal">Published since version 1: it never changes, workouts point at it. Not translated.</p>
+              <p class="cp-label whitespace-normal">Published exercise: workouts keep their reference to it. Not translated.</p>
             </div>
           </div>
           <div class="cp-divider my-0" role="separator"></div>
@@ -118,11 +118,11 @@
             <div class="cp-card-body p-4 md:p-6"><div class="flex flex-wrap items-center justify-between gap-4">
               <div class="flex flex-col gap-1">
                 <h2 class="cp-card-title">Retire</h2>
-                <p class="text-sm text-base-content/70">Hides it from the exercise list and the builder in the next version. Workouts that use it still open; nothing is deleted, and you can offer it again.</p>
+                <p class="text-sm text-base-content/70">Hides it from the exercise list and the builder after publication. Workouts that use it still open; nothing is deleted, and you can offer it again.</p>
               </div>
-              <a href="admin-catalog-exercise-retire.html" class="cp-btn cp-btn-outline gap-2"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="archive"><rect width="20" height="5" x="2" y="3" rx="1" />
+              <a href="#retire-exercise" class="cp-btn cp-btn-outline gap-2" aria-haspopup="dialog"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="archive"><rect width="20" height="5" x="2" y="3" rx="1" />
   <path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8" />
-  <path d="M10 12h4" /></svg>Retire</a>
+  <path d="M10 12h4" /></svg>Prepare retirement</a>
             </div></div>
           </section>
         </div>
@@ -187,11 +187,11 @@
     </main>
     <dialog class="cp-modal cp-modal-open cp-modal-bottom sm:cp-modal-middle cp-sheet" data-component="sheet" id="retire-exercise" aria-labelledby="retire-title">
       <div class="cp-modal-box">
-        <h2 class="cp-type-headline" id="retire-title">Retire Wall sit?</h2>
-        <p class="py-2">It leaves the exercise list and the builder once you publish the next version. Workouts that already use it still open and keep their history. You can offer it again later.</p>
+        <h2 class="cp-type-headline" id="retire-title">Prepare retirement for Wall sit?</h2>
+        <p class="py-2">Wall sit stays active in the published catalog until you publish this change. Existing workouts keep working and retain their history. You can cancel this pending action before publication or offer the exercise again after retirement.</p>
         <div class="cp-modal-action">
           <a href="admin-catalog-exercise.html" class="cp-btn cp-btn-ghost">Cancel</a>
-          <a href="admin-catalog-exercise-retired.html" class="cp-btn cp-btn-outline gap-2"><svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="archive"><rect width="20" height="5" x="2" y="3" rx="1" />
+          <a href="admin-catalog.html" class="cp-btn cp-btn-outline gap-2"><svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="archive"><rect width="20" height="5" x="2" y="3" rx="1" />
   <path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8" />
   <path d="M10 12h4" /></svg>Retire</a>
         </div>
