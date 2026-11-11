@@ -58,9 +58,9 @@
               <label class="cp-type-label" for="filter-q">Name, slug or alias</label>
               <label class="cp-input w-full"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="search"><path d="m21 21-4.34-4.34" /><circle cx="11" cy="11" r="8" /></svg><input id="filter-q" type="search" class="grow" value="" autocomplete="off"></label>
             </div>
-            <label class="cp-fieldset"><span class="cp-type-label">Muscles</span><select class="cp-select w-full" multiple size="3"><option>Quadriceps</option><option>Glutes</option><option>Hamstrings</option><option>Chest</option><option>Back</option></select></label>
-            <label class="cp-fieldset"><span class="cp-type-label">Positions</span><select class="cp-select w-full"><option>Any position</option><option>Standing</option><option>Kneeling</option><option>Seated</option><option>Lying</option></select></label>
-            <label class="cp-fieldset"><span class="cp-type-label">Equipment</span><select class="cp-select w-full"><option>Any equipment</option><option>Bodyweight</option><option>Dumbbell</option><option>Barbell</option><option>Kettlebell</option><option>Resistance band</option></select></label>
+            <div class="cp-fieldset" data-component="multi-select"><label class="cp-type-label" for="filter-muscles">Muscles</label><label class="cp-input w-full"><input id="filter-muscles" class="grow" placeholder="Search and select muscles" role="combobox" aria-expanded="false"></label></div>
+            <div class="cp-fieldset" data-component="multi-select"><label class="cp-type-label" for="filter-positions">Positions</label><label class="cp-input w-full"><input id="filter-positions" class="grow" placeholder="Search and select positions" role="combobox" aria-expanded="false"></label></div>
+            <div class="cp-fieldset" data-component="multi-select"><label class="cp-type-label" for="filter-equipment">Equipment</label><label class="cp-input w-full"><input id="filter-equipment" class="grow" placeholder="Search and select equipment" role="combobox" aria-expanded="false"></label></div>
             <label class="cp-fieldset"><span class="cp-type-label">Movement pattern</span><select class="cp-select w-full"><option>All patterns</option><option>Squat</option><option>Hinge</option><option>Lunge</option><option>Push</option><option>Pull</option><option>Carry</option><option>Core</option><option>Rotation</option></select></label>
             <label class="cp-fieldset"><span class="cp-type-label">Translation status</span><select class="cp-select w-full"><option>All</option><option>Complete</option><option>Incomplete</option></select></label>
             <label class="cp-fieldset"><span class="cp-type-label">Content status</span><select class="cp-select w-full"><option>All</option><option>Draft</option><option>Modified</option><option>Published</option><option>Pending publication</option></select></label>
@@ -75,7 +75,7 @@
       <section class="cp-card bg-base-100 shadow-sm" id="exercises">
         <div class="cp-card-body gap-4 p-4 md:p-6">
           <div class="flex flex-wrap items-center justify-between gap-3 rounded-box border border-primary/30 bg-primary/5 p-3" role="region" aria-label="Bulk actions">
-            <div class="flex flex-col gap-1"><strong>3 exercises selected</strong><span class="text-sm text-base-content/70">2 have pending content changes · 3 are eligible for retirement</span></div>
+            <div class="flex flex-col gap-1"><strong>3 exercises selected</strong><a href="admin-catalog.html?select=all-matching" class="cp-link cp-link-hover text-sm">Select all 248 matching results</a><span class="text-sm text-base-content/70">2 have pending content changes · 3 are eligible for retirement</span></div>
             <div class="flex flex-wrap gap-2"><a href="admin-catalog-publish.html" class="cp-btn cp-btn-primary cp-btn-sm">Publish changes (2)</a><a href="admin-catalog-retire-selected.html" class="cp-btn cp-btn-outline cp-btn-sm">Prepare retirement (3)</a><a href="admin-catalog.html" class="cp-btn cp-btn-ghost cp-btn-sm">Clear selection</a></div>
           </div>
 
