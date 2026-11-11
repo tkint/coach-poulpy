@@ -33,3 +33,6 @@ keystore.properties
 # Deploy secrets and machine-specific overrides (docs/deploying-the-server.md)
 .env
 deploy/compose.override.yaml
+
+# Generated Tailwind/DaisyUI output (built by the web and docs jobs)
+web/ui/poulpy-ui*.css
