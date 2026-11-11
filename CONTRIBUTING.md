@@ -1,8 +1,8 @@
 # Contributing
 
-Coach Poulpy is built mostly by talking to Claude, using [Matt Pocock's engineering skills](https://github.com/mattpocock/skills). This page says which skill to reach for, in what order, and what each one leaves behind in the repo or on GitHub.
+This page is the path from an idea to a merged pull request: which skill to use, in what order, and what it leaves behind.
 
-Everything below works the same in a Claude Code terminal (type `/triage`, `/to-spec`...) and in a Claude project thread (write "triage #12" or "run to-spec on this"). Skills marked _auto_ are picked up by Claude without being named.
+The repository's engineering rules, area-specific guidance and required checks live in [CLAUDE.md](CLAUDE.md) and [the agent guides](docs/agents/). This page focuses on the workflow and GitHub conventions.
 
 ## The flow
 
@@ -28,7 +28,7 @@ flowchart TD
     ci -- no --> implement
 ```
 
-Rounded boxes are where work starts; each step leaves something behind, listed in the table below.
+Rounded boxes are where work starts. The table below says what each skill leaves behind.
 
 ## Which skill when
 
@@ -46,18 +46,11 @@ Rounded boxes are where work starts; each step leaves something behind, listed i
 
 `/tdd`, `/grilling`, `/domain-modeling`, `/code-review` and `/writing-for-agents` are _auto_: the skills above call them, and Claude reaches for them when a task fits.
 
-## Habits that keep it working
+## Working habits
 
 - **One goal per thread or session.** Grill, spec and tickets in one unbroken conversation; then each ticket starts fresh, because the ticket carries everything it needs.
 - **Don't triage what `/to-tickets` made.** Those issues are born `ready-for-agent`.
-- **Read the area's rules.** [`docs/agents/areas.md`](docs/agents/areas.md) has what the Architect, Designer, Poulpy and Translator used to carry in their heads, per area. A spec or ticket reads the sections it touches; one review per PR covers the rest.
-- **Words come from `CONTEXT.md`.** If an issue or a test needs a word the glossary lacks, add it there first.
-- **A decision that would surprise the next reader gets an ADR** in `docs/adr/`, in the same PR that makes it.
-- **Every PR says `Closes #n`**, so merging closes the issue.
-- **Branch names say what the work is**: `<type>/<issue-number>-<short-description>`, in English, like `feat/21-training-plans` or `fix/34-rest-timer-sound`. Leave out the number when there is no issue (`docs/brand-decisions`). Types are `feat`, `fix`, `docs`, `chore` and `design`. No random suffixes, session ids or tool prefixes such as `claude/`.
-- **The docs site is the source of truth, so a PR is reviewed there.** On every PR, the Docs site workflow publishes a preview and posts a "Review in the docs" comment, both without an agent. It links each spec, mockup, decision or guideline the PR adds or changes, down to the sections and glossary entries it touches, and the agreed mockups drawn for the issue the PR closes. Agents don't write a review comment of their own; anything the reviewer must know, such as a known difference from a mockup, goes in the PR description.
-- **Every guideline is on the docs site.** A new rule, glossary or ADR is published in the same PR that adds it: add its file to `site/published.mjs` and a sidebar entry in `site/.vitepress/config.mts`. CI fails on a Markdown file the site doesn't publish or a page no link reaches.
-- **CI is not a phone.** Anything about Bluetooth, sound, haptics, background running or installs carries the `device-test` label and is checked on a real phone before merge.
+- **Use the repository guidance.** Start with [CLAUDE.md](CLAUDE.md); it links to the glossary, architecture, decisions and area-specific rules.
 
 ## Labels
 
@@ -71,19 +64,9 @@ Every issue has one type, one state and at least one area, and sits in its phase
 | Check | `device-test` |
 | Wayfinder | `wayfinder:map`, `wayfinder:research`, `wayfinder:prototype`, `wayfinder:grilling`, `wayfinder:task` |
 
-How agents read the tracker and the domain docs is in [`docs/agents/`](docs/agents/).
+## Checks before a PR
 
-## Running and checking the code
-
-See the [README](README.md) for building each app. Before opening a PR, at least run:
-
-```sh
-./gradlew jvmTest jsTest :server:test :tools:i18n:test
-node design/build-tokens.mjs --check
-node design/build-poulpy.mjs --check
-```
-
-When a change touches Markdown, CI also lints it, checks its links and checks the site publishes it. To run the same checks first (lychee is a separate install, see [its README](https://github.com/lycheeverse/lychee#installation)):
+Follow the required checks in [CLAUDE.md](CLAUDE.md). CI also lints Markdown, checks its links and verifies that every published page is reachable from the docs site's sidebar. To run the documentation checks locally (lychee is a separate install; see [its README](https://github.com/lycheeverse/lychee#installation)):
 
 ```sh
 npx markdownlint-cli2

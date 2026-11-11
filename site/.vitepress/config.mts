@@ -120,11 +120,11 @@ export default withMermaid(
     themeConfig: {
       logo: '/poulpy.svg',
       nav: [
-        { text: 'Brand', link: '/docs/brand' },
-        { text: 'Design system', link: '/docs/design-system' },
+        { text: 'Start here', link: '/CONTRIBUTING' },
         { text: 'Architecture', link: '/docs/architecture' },
+        { text: 'Design system', link: '/docs/design-system' },
+        { text: 'Brand', link: '/docs/brand' },
         { text: 'Translations', link: '/translations' },
-        { text: 'Contributing', link: '/CONTRIBUTING' },
       ],
       // Each section shows only its own menu: a page gets the menu of the longest key its path starts
       // with, so every page of a section is listed under one of its keys. Each menu is one group
