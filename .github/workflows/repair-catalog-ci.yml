@@ -1,0 +1,110 @@
+name: Repair catalog mockup CI
+
+on:
+  push:
+    branches:
+      - design/338-admin-catalog
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: design/338-admin-catalog
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Install web tooling and add the missing Lucide source icons
+        run: |
+          npm ci --prefix web
+          node design/build-icons.mjs --add cloud-upload log-in grip-vertical link archive archive-restore
+          node design/build-icons.mjs
+      - name: Name and normalize the catalog mockup icons
+        run: |
+          node --input-type=module <<'NODE'
+          import { readdirSync, readFileSync, writeFileSync } from 'node:fs'
+          import { join } from 'node:path'
+
+          const root = 'design/mockups/drafts/web'
+          const iconRoot = 'design/icons'
+          const byHash = {
+            d4768995: 'panel-left',
+            bc7845b4: 'plus',
+            '4167f3c0': 'cloud-upload',
+            b941faa3: 'circle-exclamation-point',
+            bed55589: 'refresh-cw',
+            '6d9b62b0': 'shield-check',
+            '480b1a2a': 'rotate-ccw-clock',
+            cb8a81da: 'users',
+            '58ab2896': 'book-open',
+            '67da8e0f': 'sliders-horizontal',
+            '81ae48ad': 'activity',
+            '1358c86c': 'arrow-left',
+            '798982a8': 'log-in',
+            '8909c729': 'lock',
+            a04ddf59: 'grip-vertical',
+            '05ed4748': 'x',
+            '0d1b91a6': 'link',
+            e226796f: 'archive',
+            '13b77df4': 'chevron-down',
+            '1d2c3267': 'archive-restore',
+            '7c1e4c46': 'search',
+            '34506a3b': 'chevrons-up-down',
+            '6e584bda': 'chevron-left',
+            '0296bc9d': 'chevron-right',
+            '9fca3216': 'pencil',
+            '95ebfae7': 'check',
+          }
+
+          const hash = (value) => {
+            let result = 2166136261
+            for (let i = 0; i < value.length; i++) {
+              result ^= value.charCodeAt(i)
+              result = Math.imul(result, 16777619)
+            }
+            return (result >>> 0).toString(16).padStart(8, '0')
+          }
+          const drawingOf = (svg) =>
+            [...svg.matchAll(/<(path|circle|rect|line|polyline|polygon|ellipse)\\b([^>]*?)\\/?>/g)]
+              .map(([, tag, attrs]) => tag + [...attrs.matchAll(/\\b(d|cx|cy|r|rx|ry|x|y|width|height|x1|x2|y1|y2|points)="([^"]*)"/g)]
+                .map(([, key, value]) => ` ${key}=${value.trim().replace(/\\s+/g, ' ')}`).sort().join(''))
+              .sort().join(';')
+
+          const names = readdirSync(root).filter((name) => name.endsWith('.html'))
+          let icons = 0
+          for (const file of names) {
+            const path = join(root, file)
+            const html = readFileSync(path, 'utf8')
+            const updated = html.replace(/<svg\\b([^>]*)>([\\s\\S]*?)<\\/svg>/g, (match, attrs, inner) => {
+              if (!/viewBox="0 0 24 24"/.test(attrs)) return match
+              const name = byHash[hash(drawingOf(inner))]
+              if (!name) throw new Error(`No Lucide mapping for SVG in ${path}: ${inner.slice(0, 180)}`)
+              const source = readFileSync(join(iconRoot, `${name}.svg`), 'utf8')
+              const official = source.match(/<svg\\b[^>]*>([\\s\\S]*?)<\\/svg>/)?.[1]?.trim()
+              if (!official) throw new Error(`No SVG drawing for ${name}`)
+              const nextAttrs = attrs.replace(/\\sdata-lucide="[^"]*"/, '') + ` data-lucide="${name}"`
+              icons++
+              return `<svg${nextAttrs}>${official}</svg>`
+            })
+            if (updated !== html) writeFileSync(path, updated)
+          }
+          console.log(`Named and normalized ${icons} Lucide icons across ${names.length} mockups.`)
+          NODE
+      - name: Regenerate the committed web UI styles
+        run: npm run build -w ui --prefix web
+      - name: Commit generated sources and remove this temporary workflow
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          rm .github/workflows/repair-catalog-ci.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "fix: use named Lucide icons in catalog mockups"
+          git push origin HEAD:design/338-admin-catalog
