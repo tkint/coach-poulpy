@@ -17,11 +17,11 @@
 <body class="bg-base-200 text-base-content min-h-screen">
 <!-- Bulk retirement review: preparing the action creates pending lifecycle changes only. It does not change the currently published catalog. -->
 <div class="min-h-screen">
-  <nav class="cp-navbar w-full bg-base-100 px-4 shadow-sm">
+  <nav class="cp-navbar w-full bg-base-100 px-4 shadow-sm" data-component="admin-navbar">
     <a href="admin-catalog.html" class="cp-btn cp-btn-ghost">Catalog</a>
     <span class="font-bold">Prepare retirement</span>
   </nav>
-  <main class="mx-auto flex max-w-4xl flex-col gap-6 p-4 md:p-8">
+  <main class="mx-auto flex max-w-4xl flex-col gap-6 p-4 md:p-8" data-component="bulk-retirement-review">
     <nav class="cp-breadcrumbs text-sm" aria-label="You are here"><ul><li><a href="admin-catalog.html">Catalog</a></li><li>Prepare retirement</li></ul></nav>
     <header class="flex flex-col gap-1">
       <h1 class="cp-type-display">Prepare retirement for 3 exercises</h1>
@@ -31,7 +31,7 @@
       <div class="cp-card-body gap-4 p-4 md:p-6">
         <div class="flex flex-wrap items-center justify-between gap-2">
           <h2 class="cp-card-title">Selected exercises</h2>
-          <span class="cp-badge cp-badge-warning cp-badge-soft">3 pending retirement actions</span>
+          <span class="cp-badge cp-badge-error cp-badge-soft">3 pending retirement actions</span>
         </div>
         <div class="overflow-x-auto rounded-box border border-base-300 bg-base-100">
           <table class="cp-table bg-base-100">
