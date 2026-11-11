@@ -1,4 +1,5 @@
-// Markdown lint for every guideline in the repo, run by the Docs site workflow.
+// Markdown lint for project-authored guidelines. Imported specialist skills are third-party
+// source: keep them intact rather than rewriting their formatting to satisfy this repo's rules.
 {
   "config": {
     "default": true,
@@ -9,5 +10,14 @@
     "MD041": false
   },
   "globs": ["**/*.md"],
-  "ignores": ["**/node_modules/**", "site/CONTEXT.md", "site/CONTRIBUTING.md", "site/CLAUDE.md", "site/docs/**", "site/design/**", "site/i18n/**"]
+  "ignores": [
+    "**/node_modules/**",
+    "site/CONTEXT.md",
+    "site/CONTRIBUTING.md",
+    "site/CLAUDE.md",
+    "site/docs/**",
+    "site/design/**",
+    "site/i18n/**",
+    ".agents/skills/{chief-of-staff,claude-handoff,code-review,codebase-design,create-adaptable-composable,daisyui,diagnosing-bugs,domain-modeling,grill-me,grill-with-docs,grilling,handoff,http4k-development,implement-spec,implement,improve-codebase-architecture,loop-me,pr,prototype,research,retro,setup-matt-pocock-skills,tdd,teach,to-questionnaire,to-spec,to-tickets,triage,vue-best-practices,vue-debug-guides,vue-jsx-best-practices,vue-options-api-best-practices,vue-pinia-best-practices,vue-router-best-practices,vue-testing-best-practices,wait-what,wayfinder,wizard,writing-for-agents}/**"
+  ]
 }
