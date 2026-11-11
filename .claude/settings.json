@@ -1,0 +1,8 @@
+{
+  "enabledPlugins": {
+    "vue-skills-bundle@vue-skills": true,
+    "http4k@http4k-marketplace": true,
+    "daisyui@daisyui": true,
+    "frontend-design@claude-plugins-official": true
+  }
+}
