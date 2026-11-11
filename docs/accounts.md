@@ -9,6 +9,7 @@ What a guest gets by signing up, and what the server and the phones do with an *
 - **The link can be opened anywhere**, on the phone or on a computer. While the app is in front and the email waits, the phone listens on a server-sent event stream, and the server tells it the moment the link is opened; the phone then signs in with the password it kept and shows Email confirmed in a sheet, over whichever tab is open. While a guided session plays or Live records, Email confirmed waits until it ends, so nothing covers the workout ([#319](https://github.com/tkint/coach-poulpy/issues/319)). A dropped stream is opened again 3 seconds later, after a check for what it missed, and the app checks once on each open too. The phone proves it is the one that signed up with a random key sent at sign-up, rather than by trying the password, which would count towards the 5 refused sign-ins that lock an address. The key follows only the link mailed with it, so it never tells who owns an address.
 - **Health data consent is asked at sign-up**, with a link to what is stored and why.
 - **Forgotten password**: the person asks for a reset link by email and chooses a new password; every phone is signed out.
+- **Sign-in never reveals whether an email has an account**: an unknown address and a wrong password receive the same refusal. A pending registration can resend its link or restart with another address; the old address remains unconfirmed, no data leaves the phone, and the response never reveals whether that address was already registered. Expired or used confirmation links have a separate recovery screen.
 - **Mail goes out over plain SMTP** to an EU provider set in the server's settings, so the provider can change without a code change.
 
 ## The phone and the account
@@ -110,17 +111,7 @@ Both phones then show both workouts, and nothing on the server is rewritten.
 
 ## Screens
 
-Drafted in [#272](https://github.com/tkint/coach-poulpy/issues/272); they sit under Mockups, Drafts, Accounts on the site and are built once the owner has agreed them ([ADR 0016](./adr/0016-mockups-are-plain-html-in-the-repo.md)).
-
-- **Settings** gets an **Account** section at the top. A guest sees one row, "Sign in or create an account". With an unconfirmed email it reads "Confirm your email"; signed in it shows the address and the sync state. (`account-settings-guest`, `-pending`, `-synced`)
-- **Sign in is the default.** The Account row in Settings opens Sign in: email, password, "Forgot your password?", and a note that what is on the phone joins the account. One quiet line under it, "No account yet? Create one", switches to **Create your account**, which asks for the email, a password (8 characters or more, with a show toggle) and the health data consent, whose link opens "What is stored", and says "Already have an account? Sign in" to switch back. Errors sit under their field in `error` with an icon; a wrong email or password gives one message that doesn't say which. (`account-sign-in`, `-error`, `-reset-done`, `account-sign-up`, `-error`, `-offline`, `-consent-sheet`)
-- **Check your email** has a single **OK** that returns to the app, which keeps working as a guest. Under it, two quiet lines: "Didn't get the email? Send it again" (signs up again with the same address) and "Wrong address? Try again with another email" (reopens the form with the address filled in; nothing has left the phone, and the earlier address stays unconfirmed and is never used). The text never says whether the address already had an account: the server answers the same either way. An expired or used link has its own page. (`account-check-email`, `-resent`, `account-link-expired`)
-- **Email confirmed** and **Welcome back** (signing in on a phone that has guest data) show the upload as a progress card. Email confirmed is a sheet over whatever is on screen, Welcome back a full screen; nothing is replaced, both edits are kept. (`account-confirmed`, `account-sign-in-merge`)
-- **Forgot your password?** sends a link; it opens "Choose a new password", every phone is signed out, and the next stop is Sign in with a "Password changed" note. (`account-forgot-password`, `-sent`, `account-reset-password`)
-- **The account page** shows the address, the sync state, what follows the account, Export my data, Sign out and Delete account; before the email is confirmed it shows the same two quiet lines instead. (`account-details`, `-pending`)
-- **Sign out** says the phone goes back to an empty guest. When changes aren't uploaded yet, a second dialog says they will never reach the account and offers "Wait for the upload" or "Sign out anyway". (`account-sign-out`, `-unsent`)
-- **Delete account** is a sheet that says what goes, asks for the password and deletes at once; a wrong password says nothing was deleted. (`account-delete`, `-error`)
-
+The agreed account screens and their states are in the [Mockups gallery](https://tkint.github.io/coach-poulpy/mockups/) under Mobile → Agreed → Accounts. The mockups own layout, copy and visual states; the behavior and security rules are defined above.
 ## Not yet
 
 Apple and Google sign-in, the website's sign-in, sharing and coaching, and personal access tokens ([#228](https://github.com/tkint/coach-poulpy/issues/228)).
