@@ -107,7 +107,7 @@ The fields every form is built from. Reference mockups: `profile-edit`, the thre
 Mockups are plain HTML in `design/mockups/` ([ADR 0016](adr/0016-mockups-are-plain-html-in-the-repo.md)). They are split by stage (`drafts/` and `agreed/`) and platform (`phone/`, `tablet/`, `web/`).
 
 - Build from an agreed mockup. If a screen has none, agree one through a PR before building it.
-- The [Mockups gallery](/mockups/) shows each app view and its available states in light and dark themes.
+- The [Mockups gallery](https://tkint.github.io/coach-poulpy/mockups/) shows each app view and its available states in light and dark themes.
 - CI checks mockup links, local assets, design tokens and required metadata with `node design/check-mockups.mjs`.
 
 The mockup is the design reference; this page defines the shared rules and components used to build it.
