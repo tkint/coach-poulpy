@@ -11,11 +11,11 @@ The admin area is where the maintainer looks after the catalog, the accounts and
 
 ## The screens
 
-The admin lives at `/admin` on the website ([mockups](./../design/mockups/agreed/web/admin-shell.html)). With no admin session it shows the sign-in; the page asks `GET /api/v1/me`, and a member who signs in is signed out again at once with the same "wrong email or password" message, so the screen never says who is an admin. Once signed in it shows the `CpDrawer` shell, with the audit log, the accounts, the settings and the status. The sidebar lists only the screens that exist; each admin feature adds its own entry. A **Coach Poulpy app** link at the bottom of the sidebar goes back to [the web app](./web-app.md).
+The admin lives at `/admin` ([agreed shell mockup](./../design/mockups/agreed/web/admin-shell.html)). A member who signs in is immediately signed out with the same "wrong email or password" message as any other refusal, so the sign-in flow does not disclose the account's role. The admin shell links to the audit log, accounts, settings and status; its **Coach Poulpy app** link returns to [the web app](./web-app.md).
 
 ## Accounts
 
-The **Accounts** screen is a paged table of every account ([mockups](./../design/mockups/agreed/web/admin-accounts.html), [details](./../design/mockups/agreed/web/admin-accounts-details.html), [filtered](./../design/mockups/agreed/web/admin-accounts-filtered.html), [no match](./../design/mockups/agreed/web/admin-accounts-none.html), [delete](./../design/mockups/agreed/web/admin-accounts-delete.html)). Each row shows the email, role, whether the email is confirmed, whether sign-in is blocked and the creation date. Every column sorts (a click flips the direction); the email filter matches part of the address and the role, email status and sign-in filters narrow the list. Eight accounts show per page, with `CpPagination` and the count below. Picking a row opens its details in the `CpSidePanel`, floating over the page from the right with a dim backdrop (the table never moves; a click outside or Escape closes it). The state is in the address (`/admin/accounts?q=…&role=…&sort=…&order=…&page=…&account=<id>`), so a view can be bookmarked and the back button steps through it ([Navigation lives in the URL](./web-app.md#navigation-lives-in-the-url)); the audit log is `/admin`. Nothing here shows a workout or health data. The panel holds three actions, each written to the audit log with the account's id as the target (never its address):
+The **Accounts** screen lists accounts with their email, role, confirmation and sign-in status, and creation date. It supports filtering, sorting, paging and opening an account by id, including when it is not on the current page. The view is encoded in the address (`/admin/accounts?q=…&role=…&sort=…&order=…&page=…&account=<id>`), so it can be bookmarked and browser history restores previous views ([navigation](./web-app.md#navigation-lives-in-the-url)). It never exposes workouts or health data. Each account action is written to the audit log with the account id as the target, never its address:
 
 - **Disable** blocks sign-in and signs every device of the account out, access and refresh tokens included. It is reversible: **Enable** lets the account sign in again. A disabled account is refused at sign-in with the same "wrong email or password" answer as any other refusal.
 - **Delete** removes the account and every row of it through the same code as the user's own deletion, once the admin has typed the account's email again.
@@ -25,26 +25,26 @@ Filtering, sorting and paging happen on the server (`AdminAccounts.list`, which 
 
 ## Settings
 
-The **Settings** screen at `/admin/settings` changes the server without a deploy ([mockups](./../design/mockups/agreed/web/admin-settings-mail.html), [invalid address](./../design/mockups/agreed/web/admin-settings-mail-invalid.html), [test sent](./../design/mockups/agreed/web/admin-settings-mail-test-ok.html), [test failed](./../design/mockups/agreed/web/admin-settings-mail-test-failed.html)). Its one setting so far is the **from-address** of the emails.
+The **Settings** screen at `/admin/settings` changes the email from-address without a deploy.
 
 - **Only non-secret settings live in the database**, one row per setting in the `settings` table (`ServerSettings`). The SMTP host, port, user and password stay in the environment ([Deploying the server](./deploying-the-server.md)) and are not shown or editable here.
 - **`MAIL_FROM` is the default until a from-address is saved.** A saved one applies to the next email, with no restart: every email goes through `SettingsMailer`, which reads the setting when it sends. An address alone (`hello@example.com`) or with a name (`Coach Poulpy <hello@example.com>`) is accepted; anything else is refused (`400 invalid-address`) and nothing is saved.
 - **Saving writes `admin.settings.mail-from` to the audit log**, with the masked address (`h***@example.com`) as the target.
-- **Send test email** sends a message to the signed-in admin's own address with the saved settings and shows whether the mail server took it or, in crimson with an icon, what it answered (`535 Authentication failed`).
+- **Send test email** sends a message to the signed-in admin's own address with the saved settings and reports whether the mail server accepted it or returned an error.
 - **The last send is remembered.** `SettingsMailer.last` keeps when the last email (a test or any other) went, which kind it was, to whom (masked) and the mail server's error if any, for the [Status](#status) screen. It lives in memory, so a restart forgets it.
 
 The routes are `GET /api/v1/admin/settings` (`{mailFrom, mailFromSaved}`), `POST /api/v1/admin/settings/mail-from` with `{"mailFrom": …}` and `POST /api/v1/admin/settings/test-email` (`{sent, error}`), for an admin signed in through the website. The screen keeps no state of its own beyond its path.
 
 ## Status
 
-The **Status** screen at `/admin/status` says what the server can do right now ([mockups](./../design/mockups/agreed/web/admin-status.html), [mail not configured](./../design/mockups/agreed/web/admin-status-mail-missing.html), [last send failed](./../design/mockups/agreed/web/admin-status-mail-failed.html), [#340](https://github.com/tkint/coach-poulpy/issues/340)). It only reads: nothing on it changes the server or sends an email. It starts with mail and can take other checks later, each its own card.
+The **Status** screen at `/admin/status` reports server health and mail configuration ([#340](https://github.com/tkint/coach-poulpy/issues/340)). It is read-only: it cannot change settings or send email. Further checks can be added independently.
 
-- **Mail** says whether a mail server is configured, which is whether `SMTP_HOST` is set. Without it the server has no fallback: every email fails with `No mail server is set: SMTP_HOST is unset`, nothing of it is printed to the log, and the card shows **Not configured** with the reason, in crimson with an icon. With it, the card says how the last email since the start went: sent, when and which kind (confirmation, password reset or test), or the mail server's error in crimson. The SMTP host, user and password are never shown.
+- **Mail** is configured when `SMTP_HOST` is set. Without it, email sending fails with `No mail server is set: SMTP_HOST is unset`; the error is not printed to the log. Otherwise the status reports the last email attempt since server start, its kind (confirmation, password reset or test), time and outcome. The SMTP host, user and password are never shown.
 - **Pending registrations** lists the accounts whose email isn't confirmed yet, newest first (the last 100): the address, when it signed up and when its latest confirmation link expires. Signing up again sends a new link, so the date moves. No email is sent from here and there is no action on a row; on a laptop with no mail server, this is where a developer sees who signed up, and confirms them in Postgres ([Trying it locally](./the-api.md#trying-it-locally)).
 
 The routes are `GET /api/v1/admin/status` (`{mail: {configured, lastSend: {at, kind, sent, error} | null}}`) and `GET /api/v1/admin/pending-registrations` (`{registrations: [{email, signedUpAt, linkExpiresAt}]}`), for an admin signed in through the website.
 
-The public side is the web app's `/status` page ([mockups](./../design/mockups/agreed/web/app-status.html), [down](./../design/mockups/agreed/web/app-status-down.html)), which anyone can open. It asks `GET /api/v1/status` and shows only whether Coach Poulpy is up or down, down too when the server can't be reached; it never says how the server is configured, and a test holds it to that.
+The public side is the web app's `/status` page, which anyone can open. It asks `GET /api/v1/status` and shows only whether Coach Poulpy is up or down, down too when the server can't be reached; it never says how the server is configured, and a test holds it to that.
 
 ## Catalog
 
