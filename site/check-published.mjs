@@ -13,7 +13,8 @@ const tracked = execFileSync('git', ['ls-files', '--', '*.md', ':!:site/**'], { 
   .filter(Boolean)
 for (const file of tracked) {
   const isShared = shared.some((path) => file === path || file.startsWith(`${path}/`))
-  if (!isShared && !(file in unpublished)) {
+  const isUnpublished = Object.keys(unpublished).some((path) => file === path || file.startsWith(`${path}/`))
+  if (!isShared && !isUnpublished) {
     problems.push(`${file} isn't published: add it to \`shared\` in site/published.mjs, or to \`unpublished\` with the reason.`)
   }
 }
