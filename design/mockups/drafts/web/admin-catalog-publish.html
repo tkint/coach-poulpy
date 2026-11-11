@@ -6,7 +6,7 @@
 <title>Admin · catalog · publish</title>
 <meta name="mockup:screen" content="admin-catalog-publish">
 <meta name="mockup:section" content="Admin">
-<meta name="mockup:issue" content="338">
+<meta name="mockup:issue" content="386">
 <meta name="mockup:viewport" content="800">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
@@ -29,8 +29,8 @@
         <ul><li><a href="admin-catalog.html">Catalog</a></li><li>Publish</li></ul>
       </nav>
       <div class="flex flex-col gap-1">
-        <h1 class="cp-type-display">Publish version 12</h1>
-        <p class="text-base-content/70">What the draft changes since version 11, the latest. Phones download the new version the next time they open the app, guests included.</p>
+        <h1 class="cp-type-display">Publish 2 exercises · version 12</h1>
+        <p class="text-base-content/70">Review the selected draft changes. Publishing creates one immutable catalog version; phones download it the next time they open the app, guests included.</p>
       </div>
       <div class="cp-stats cp-stats-vertical md:cp-stats-horizontal bg-base-100 shadow-sm" data-component="stats">
         <div class="cp-stat"><div class="cp-stat-title">New</div><div class="cp-stat-value text-primary">1</div><div class="cp-stat-desc">exercises added</div></div>
@@ -48,14 +48,14 @@
       </section>
       <section class="cp-card bg-base-100 shadow-sm" id="edited">
         <div class="cp-card-body gap-6 p-4 md:p-6">
-          <h2 class="cp-card-title">Edited</h2>
+          <div class="flex flex-wrap items-center justify-between gap-3"><h2 class="cp-card-title">Edited</h2><span class="cp-badge cp-badge-neutral cp-badge-soft">2 exercises · changes only</span></div>
           <div class="flex flex-col gap-3" data-component="field-changes">
             <div class="flex flex-wrap items-center justify-between gap-2"><div class="flex flex-col"><a href="admin-catalog-exercise.html" class="cp-link cp-link-hover font-semibold">Goblet squat</a><span class="text-sm text-base-content/70">Squat goblet · goblet-squat</span></div></div>
             <div class="overflow-x-auto">
               <table class="cp-table">
-                <thead><tr><th>Field</th><th>In version 11</th><th>In version 12</th></tr></thead>
+                <thead><tr><th>Changed field</th><th>Published · v11</th><th>Draft · v12</th></tr></thead>
                 <tbody>
-                  <tr><td class="whitespace-nowrap font-semibold">Name in French</td><td class="text-base-content/70">Squat gobelet</td><td>Squat goblet</td></tr>
+                  <tr><td class="whitespace-nowrap font-semibold">Name in French</td><td class="bg-error/10 text-error"><span class="font-bold">− </span>Squat gobelet</td><td class="bg-success/10 text-success"><span class="font-bold">+ </span>Squat goblet</td></tr>
                   <tr><td class="whitespace-nowrap font-semibold">Muscles worked</td><td class="text-base-content/70">Quadriceps, Glutes, Core</td><td>Quadriceps, Glutes, Core, Hamstrings</td></tr>
                 </tbody>
               </table>
@@ -94,7 +94,7 @@
       </section>
       <section class="cp-card bg-base-100 shadow-sm" id="publish">
         <div class="cp-card-body p-4 md:p-6"><div class="flex flex-wrap items-center justify-between gap-4">
-          <p class="text-sm text-base-content/70">A published version never changes. To fix something, edit the draft and publish the next one.</p>
+          <p class="text-sm text-base-content/70">Only changed fields are shown; unchanged fields are omitted. All selected revisions publish together as version 12. A published version never changes.</p>
           <div class="flex flex-wrap gap-2">
             <a href="admin-catalog.html" class="cp-btn cp-btn-ghost">Back to the draft</a>
             <a href="admin-catalog-published.html" class="cp-btn cp-btn-primary gap-2"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="cloud-upload"><path d="M12 13v8" />
