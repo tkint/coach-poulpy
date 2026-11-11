@@ -41,8 +41,9 @@ let stale = 0
 for (const [out, { input, post }] of Object.entries(outputs)) {
   const css = banner + post(execFileSync(bin, ['--input', join(here, input)], { cwd: here, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }))
   if (check && out === 'poulpy-ui.css') {
+    const encoded = Buffer.from(css).toString('base64')
     console.log('POULPY_UI_CSS_BEGIN')
-    console.log(Buffer.from(css).toString('base64'))
+    for (let offset = 0; offset < encoded.length; offset += 8000) console.log(encoded.slice(offset, offset + 8000))
     console.log('POULPY_UI_CSS_END')
   }
   const path = join(here, out)
