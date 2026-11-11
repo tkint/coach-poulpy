@@ -37,7 +37,7 @@ The unit system chosen in Settings decides how weight (kg or lb), height (cm or 
 
 ## Pain or rehab
 
-A person can say where it hurts and choose how long the pain window lasts: 72 hours by default, 1 week, 2 weeks or until they clear it. During that window Poulpy stays on the blue side in the Patched up pose, entries never count as missed, and workouts are never filtered. The body map and its accessibility requirements are defined in the [design system](./design-system.md#components); the two body figures are chosen independently of sex assigned at birth and are never used for estimates. See [Character rules](./brand.md#character-rules) and [brand decision 8](./brand-decisions.md#8-no-hearts-a-grace-period-instead).
+A person can say where it hurts and choose how long the pain window lasts: 72 hours by default, 1 week, 2 weeks or until they clear it. During that window Poulpy stays on the blue side in the Patched up pose, entries never count as missed, and workouts are never filtered. The body map and its accessibility requirements are defined in the [design system](./design-system.md#components); the two body figures are chosen independently of sex assigned at birth and are never used for estimates. See [Character rules](./brand.md#character-rules).
 
 ## Still open
 
