@@ -30,54 +30,46 @@
           <h1 class="cp-type-display">Catalog</h1>
           <p class="text-base-content/70">The exercises every phone gets. Edit the draft here, then publish it as the next version.</p>
         </div>
-        <div class="flex flex-wrap gap-2"><a href="admin-catalog-exercise-new.html" class="cp-btn cp-btn-outline gap-2"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="plus"><path d="M5 12h14" />
-  <path d="M12 5v14" /></svg>New exercise</a><a href="admin-catalog-publish.html" class="cp-btn cp-btn-primary gap-2"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="cloud-upload"><path d="M12 13v8" />
-  <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
-  <path d="m8 17 4-4 4 4" /></svg>Publish version 12</a></div>
-      </div>
-      <section class="cp-card bg-base-100 shadow-sm" id="draft">
-        <div class="cp-card-body p-4 md:p-6"><div class="flex flex-wrap items-center justify-between gap-4">
-          <div class="flex flex-col gap-1">
-            <h2 class="cp-card-title">Draft</h2>
-            <p class="text-sm text-base-content/70">Since version 11: 1 new, 2 edited, 1 retiring, 1 offered again. Phones see none of it until you publish.</p>
-          </div>
-          <a href="admin-catalog-publish.html" class="cp-btn cp-btn-secondary">Review changes</a>
-        </div></div>
-      </section>
-      <div class="flex flex-wrap items-center justify-between gap-3" data-component="catalog-toolbar">
-        <a href="#catalog-filters" class="cp-btn cp-btn-outline cp-btn-sm gap-2" aria-haspopup="dialog">
-          <svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="sliders-horizontal"><path d="M10 5H3" /><path d="M12 19H3" /><path d="M14 3v4" /><path d="M16 17v4" /><path d="M21 12h-9" /><path d="M21 19h-5" /><path d="M21 5h-7" /><path d="M8 10v4" /><path d="M8 12H3" /></svg>
-          Filters <span class="cp-badge cp-badge-neutral cp-badge-sm">2</span>
-        </a>
-        <div class="flex flex-wrap items-center gap-2">
-          <label class="cp-input w-64 max-w-full" data-component="search-field">
-            <svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="search"><path d="m21 21-4.34-4.34" /><circle cx="11" cy="11" r="8" /></svg>
-            <input id="filter-q" type="search" class="grow" placeholder="Search exercises" aria-label="Search exercises by name, slug or alias" value="" autocomplete="off">
-          </label>
-          <!-- When no rows are selected, this action control is a page-select checkbox. With a selection, it becomes the overflow menu with a selected-count badge. -->
-          <template data-state="no-selection">
-            <label class="cp-btn cp-btn-outline cp-btn-square" aria-label="Select all exercises on this page"><input type="checkbox" class="cp-checkbox" aria-label="Select all exercises on this page"></label>
-          </template>
-          <details class="relative" open data-component="selection-actions" data-selection-count="3">
-            <summary class="cp-btn cp-btn-outline cp-btn-square list-none gap-1" aria-label="Actions for 3 selected exercises">
-              <svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="ellipsis-vertical"><circle cx="12" cy="12" r="1" /><circle cx="12" cy="5" r="1" /><circle cx="12" cy="19" r="1" /></svg>
-              <span class="cp-badge cp-badge-primary cp-badge-sm">3</span>
-            </summary>
-            <ul class="cp-menu absolute right-0 z-10 mt-2 w-52 cp-card border border-base-300 bg-base-100 p-2 shadow-lg">
-              <li><a href="admin-catalog-publish.html">Publish <span class="cp-badge cp-badge-sm">2</span></a></li>
-              <li><a href="admin-catalog-retire-selected.html">Retire <span class="cp-badge cp-badge-sm">3</span></a></li>
-              <li class="my-1 border-t border-base-300" aria-hidden="true"></li>
-              <li><a href="admin-catalog.html?select=all-matching">Select all</a></li>
-              <li><a href="admin-catalog.html">Clear selection</a></li>
-            </ul>
-          </details>
-        </div>
       </div>
       <section class="cp-card bg-base-100 shadow-sm" id="exercises">
         <div class="cp-card-body gap-4 p-4 md:p-6">
+          <div class="flex flex-wrap items-center gap-3" data-component="catalog-toolbar">
+            <label class="cp-input w-64 max-w-full" data-component="search-field">
+              <svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="search"><path d="m21 21-4.34-4.34" /><circle cx="11" cy="11" r="8" /></svg>
+              <input id="filter-q" type="search" class="grow" placeholder="Search exercises" aria-label="Search exercises by name, slug or alias" value="" autocomplete="off">
+            </label>
+            <div class="ml-auto flex flex-wrap items-center justify-end gap-2">
+              <a href="#catalog-filters" class="cp-btn cp-btn-outline cp-btn-sm gap-2" aria-haspopup="dialog">
+                <svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="sliders-horizontal"><path d="M10 5H3" /><path d="M12 19H3" /><path d="M14 3v4" /><path d="M16 17v4" /><path d="M21 12h-9" /><path d="M21 19h-5" /><path d="M21 5h-7" /><path d="M8 10v4" /><path d="M8 12H3" /></svg>
+                Filters <span class="cp-badge cp-badge-neutral cp-badge-sm">2</span>
+              </a>
+              <a href="admin-catalog-exercise-new.html" class="cp-btn cp-btn-primary cp-btn-sm gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="plus"><path d="M5 12h14" /><path d="M12 5v14" /></svg>
+                New exercise
+              </a>
+            </div>
+          </div>
           <div class="overflow-x-auto cp-card border border-base-300 bg-base-100">
             <table class="cp-table bg-base-100">
-              <thead><tr><th class="w-12" aria-label="Selection"></th><th aria-sort="none"><button type="button" class="cp-btn cp-btn-ghost cp-btn-sm -ms-3 gap-1 whitespace-nowrap">Exercise<svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="chevrons-up-down"><path d="m7 15 5 5 5-5" />
+              <thead><tr><th class="w-12 text-center" aria-label="Selection">
+                <!-- With no selection, this is the page-select checkbox. With a selection, it becomes the overflow menu. -->
+                <template data-state="no-selection">
+                  <label class="cp-btn cp-btn-ghost cp-btn-square cp-btn-sm" aria-label="Select all exercises on this page"><input type="checkbox" class="cp-checkbox" aria-label="Select all exercises on this page"></label>
+                </template>
+                <details class="relative inline-block" open data-component="selection-actions" data-selection-count="3">
+                  <summary class="cp-btn cp-btn-ghost cp-btn-square cp-btn-sm relative list-none" aria-label="Actions for 3 selected exercises">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="ellipsis-vertical"><circle cx="12" cy="12" r="1" /><circle cx="12" cy="5" r="1" /><circle cx="12" cy="19" r="1" /></svg>
+                    <span class="cp-badge cp-badge-primary cp-badge-sm absolute -right-2 -top-2 z-10">3</span>
+                  </summary>
+                  <ul class="cp-menu absolute left-0 z-20 mt-2 w-52 cp-card border border-base-300 bg-base-100 p-2 text-start shadow-lg">
+                    <li><a href="admin-catalog-publish.html">Publish <span class="cp-badge cp-badge-sm">2</span></a></li>
+                    <li><a href="admin-catalog-retire-selected.html">Retire <span class="cp-badge cp-badge-sm">3</span></a></li>
+                    <li class="my-1 border-t border-base-300" aria-hidden="true"></li>
+                    <li><a href="admin-catalog.html?select=all-matching">Select all</a></li>
+                    <li><a href="admin-catalog.html">Clear selection</a></li>
+                  </ul>
+                </details>
+              </th><th aria-sort="none"><button type="button" class="cp-btn cp-btn-ghost cp-btn-sm -ms-3 gap-1 whitespace-nowrap">Exercise<svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="chevrons-up-down"><path d="m7 15 5 5 5-5" />
   <path d="m7 9 5-5 5 5" /></svg></button></th><th aria-sort="none"><button type="button" class="cp-btn cp-btn-ghost cp-btn-sm -ms-3 gap-1 whitespace-nowrap">Pattern<svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="chevrons-up-down"><path d="m7 15 5 5 5-5" />
   <path d="m7 9 5-5 5 5" /></svg></button></th><th aria-sort="none"><button type="button" class="cp-btn cp-btn-ghost cp-btn-sm -ms-3 gap-1 whitespace-nowrap">Languages<svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="chevrons-up-down"><path d="m7 15 5 5 5-5" />
   <path d="m7 9 5-5 5 5" /></svg></button></th><th aria-sort="none"><button type="button" class="cp-btn cp-btn-ghost cp-btn-sm -ms-3 gap-1 whitespace-nowrap">Content<svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="chevrons-up-down"><path d="m7 15 5 5 5-5" />
