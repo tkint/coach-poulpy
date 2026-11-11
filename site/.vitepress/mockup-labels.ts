@@ -17,6 +17,7 @@ export const groupOf = (m: { device: keyof typeof devices; section: string; scre
 
   const screen = m.screen
   if (screen === 'admin-shell' || screen.startsWith('admin-audit')) return 'Admin · Audit'
+  if (screen.startsWith('admin-sign-in')) return 'Admin · Sign in'
   if (screen.startsWith('admin-accounts')) return 'Admin · Accounts'
   if (screen.startsWith('admin-settings')) return 'Admin · Settings'
   if (screen.startsWith('admin-status')) return 'Admin · Status'
