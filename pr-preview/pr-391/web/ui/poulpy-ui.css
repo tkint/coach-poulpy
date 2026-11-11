@@ -1606,6 +1606,156 @@
       width: 100%;
       object-fit: cover;
     }
+    .cp-checkbox {
+      border: var(--border) solid var(--cp-input-color, var(--color-base-content));
+    }
+    @supports (color: color-mix(in lab, red, red)) {
+      .cp-checkbox {
+        border: var(--border) solid var(--cp-input-color, color-mix(in oklab, var(--color-base-content) 20%, #0000));
+      }
+    }
+    .cp-checkbox {
+      position: relative;
+      display: inline-block;
+      flex-shrink: 0;
+      cursor: pointer;
+      appearance: none;
+      border-radius: var(--radius-selector);
+      padding: 0.25rem;
+      vertical-align: middle;
+      color: var(--color-base-content);
+      box-shadow: 0 1px oklch(0% 0 0 / calc(var(--depth) * 0.1)) inset, 0 0 #0000 inset, 0 0 #0000;
+      transition: background-color 0.2s, box-shadow 0.2s;
+      --cp-size: calc(var(--size-selector, 0.25rem) * 6);
+      width: var(--cp-size);
+      height: var(--cp-size);
+      background-size: auto, calc(var(--noise) * 100%);
+      background-image: none, var(--cp-fx-noise);
+    }
+    .cp-checkbox:before {
+      --tw-content: "";
+      content: var(--tw-content);
+      display: block;
+      width: 100%;
+      height: 100%;
+      rotate: 45deg;
+      background-color: currentcolor;
+      opacity: 0%;
+      transition: clip-path 0.3s, opacity 0.1s, rotate 0.3s, translate 0.3s;
+      transition-delay: 0.1s;
+      clip-path: polygon(20% 100%, 20% 80%, 50% 80%, 50% 80%, 70% 80%, 70% 100%);
+      box-shadow: 0px 3px 0 0px oklch(100% 0 0 / calc(var(--depth) * 0.1)) inset;
+      font-size: 1rem;
+      line-height: 0.75;
+    }
+    .cp-checkbox:focus-visible {
+      outline: 2px solid var(--cp-input-color, currentColor);
+      outline-offset: 2px;
+    }
+    .cp-checkbox:checked {
+      background-color: var(--cp-input-color, #0000);
+      box-shadow: 0 0 #0000 inset, 0 8px 0 -4px oklch(100% 0 0 / calc(var(--depth) * 0.1)) inset, 0 1px oklch(0% 0 0 / calc(var(--depth) * 0.1));
+    }
+    .cp-checkbox:checked:before {
+      clip-path: polygon(20% 100%, 20% 80%, 50% 80%, 50% 0%, 70% 0%, 70% 100%);
+      translate: 3.5% -7%;
+      opacity: 100%;
+    }
+    @media (forced-colors: active) {
+      .cp-checkbox:checked:before {
+        rotate: 0deg;
+        background-color: transparent;
+        --tw-content: "✔︎";
+        clip-path: none;
+      }
+    }
+    @media print {
+      .cp-checkbox:checked:before {
+        rotate: 0deg;
+        background-color: transparent;
+        --tw-content: "✔︎";
+        clip-path: none;
+      }
+    }
+    .cp-checkbox[aria-checked="true"] {
+      background-color: var(--cp-input-color, #0000);
+      box-shadow: 0 0 #0000 inset, 0 8px 0 -4px oklch(100% 0 0 / calc(var(--depth) * 0.1)) inset, 0 1px oklch(0% 0 0 / calc(var(--depth) * 0.1));
+    }
+    .cp-checkbox[aria-checked="true"]:before {
+      clip-path: polygon(20% 100%, 20% 80%, 50% 80%, 50% 0%, 70% 0%, 70% 100%);
+      translate: 3.5% -7%;
+      opacity: 100%;
+    }
+    @media (forced-colors: active) {
+      .cp-checkbox[aria-checked="true"]:before {
+        rotate: 0deg;
+        background-color: transparent;
+        --tw-content: "✔︎";
+        clip-path: none;
+      }
+    }
+    @media print {
+      .cp-checkbox[aria-checked="true"]:before {
+        rotate: 0deg;
+        background-color: transparent;
+        --tw-content: "✔︎";
+        clip-path: none;
+      }
+    }
+    .cp-checkbox:indeterminate {
+      background-color: var( --cp-input-color, var(--color-base-content) );
+    }
+    @supports (color: color-mix(in lab, red, red)) {
+      .cp-checkbox:indeterminate {
+        background-color: var( --cp-input-color, color-mix(in oklab, var(--color-base-content) 20%, #0000) );
+      }
+    }
+    .cp-checkbox:indeterminate:before {
+      rotate: 0deg;
+      opacity: 100%;
+      translate: 0 -40%;
+      clip-path: polygon(20% 100%, 20% 80%, 50% 80%, 50% 80%, 80% 80%, 80% 100%);
+    }
+    @media (forced-colors: active) {
+      .cp-checkbox:indeterminate:before {
+        rotate: 0deg;
+        background-color: transparent;
+        --tw-content: "−";
+        clip-path: none;
+        translate: 0;
+      }
+    }
+    .cp-checkbox[aria-checked="mixed"] {
+      background-color: var( --cp-input-color, var(--color-base-content) );
+    }
+    @supports (color: color-mix(in lab, red, red)) {
+      .cp-checkbox[aria-checked="mixed"] {
+        background-color: var( --cp-input-color, color-mix(in oklab, var(--color-base-content) 20%, #0000) );
+      }
+    }
+    .cp-checkbox[aria-checked="mixed"]:before {
+      rotate: 0deg;
+      opacity: 100%;
+      translate: 0 -40%;
+      clip-path: polygon(20% 100%, 20% 80%, 50% 80%, 50% 80%, 80% 80%, 80% 100%);
+    }
+    @media (forced-colors: active) {
+      .cp-checkbox[aria-checked="mixed"]:before {
+        rotate: 0deg;
+        background-color: transparent;
+        --tw-content: "−";
+        clip-path: none;
+        translate: 0;
+      }
+    }
+  }
+  @layer daisyui.l1.l2 {
+    .cp-checkbox:disabled {
+      cursor: not-allowed;
+      opacity: 20%;
+    }
+  }
+  @layer daisyui.l1.l2.l3 {
     .cp-navbar {
       display: flex;
       width: 100%;
@@ -2829,6 +2979,10 @@
   .rounded-full {
     border-radius: calc(infinity * 1px);
   }
+  .border {
+    border-style: var(--tw-border-style);
+    border-width: 1px;
+  }
   .border-r {
     border-right-style: var(--tw-border-style);
     border-right-width: 1px;
@@ -3120,6 +3274,9 @@
     }
     .cp-aura:has( > .cp-card,  > .cp-alert) {
       --cp-aura-radius: var(--radius-box);
+    }
+    .cp-aura:has( > .cp-checkbox,  > .cp-toggle,  > .cp-badge) {
+      --cp-aura-radius: var(--radius-selector);
     }
     .cp-aura:has( > .cp-btn,  > .cp-input,  > .cp-select) {
       --cp-aura-radius: var(--radius-field);
