@@ -53,7 +53,7 @@
       </nav>
       <form class="cp-card bg-base-100 shadow-sm" id="filters" role="search" aria-label="Filter the exercises">
         <div class="cp-card-body gap-4 p-4 md:p-6">
-          <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div class="grid gap-4 sm:grid-cols-2 sm:grid-cols-2">
             <div class="cp-fieldset" data-component="search-field">
               <label class="cp-type-label" for="filter-q">Name, slug or alias</label>
               <label class="cp-input w-full"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="search"><path d="m21 21-4.34-4.34" /><circle cx="11" cy="11" r="8" /></svg><input id="filter-q" type="search" class="grow" value="" autocomplete="off"></label>
@@ -66,7 +66,7 @@
             <label class="cp-fieldset"><span class="cp-type-label">Content status</span><select class="cp-select w-full"><option>All</option><option>Draft</option><option>Modified</option><option>Published</option><option>Pending publication</option></select></label>
             <label class="cp-fieldset"><span class="cp-type-label">Lifecycle status</span><select class="cp-select w-full"><option>All</option><option>Active</option><option>Retirement pending</option><option>Retired</option></select></label>
           </div>
-          <div class="flex flex-wrap items-center justify-between gap-3 border-t border-base-300 pt-3">
+          <div class="flex flex-wrap items-center justify-between gap-3 border border-base-300 py-2">
             <div class="flex flex-wrap items-center gap-2 text-sm text-base-content/70"><span class="cp-badge cp-badge-neutral cp-badge-soft">Pattern: Squat</span><span class="cp-badge cp-badge-neutral cp-badge-soft">Translation: Incomplete</span><a href="admin-catalog.html" class="cp-link cp-link-hover">Clear all</a></div>
             <div class="flex items-center gap-2"><span class="text-sm text-base-content/70">248 exercises</span><button type="submit" class="cp-btn cp-btn-primary cp-btn-sm">Apply filters</button></div>
           </div>
@@ -74,12 +74,12 @@
       </form>
       <section class="cp-card bg-base-100 shadow-sm" id="exercises">
         <div class="cp-card-body gap-4 p-4 md:p-6">
-          <div class="flex flex-wrap items-center justify-between gap-3 rounded-box border border-primary/30 bg-primary/5 p-3" role="region" aria-label="Bulk actions">
+          <div class="flex flex-wrap items-center justify-between gap-3 cp-card border border-base-300 bg-base-200 p-4" role="region" aria-label="Bulk actions">
             <div class="flex flex-col gap-1"><strong>3 exercises selected</strong><a href="admin-catalog.html?select=all-matching" class="cp-link cp-link-hover text-sm">Select all 248 matching results</a><span class="text-sm text-base-content/70">2 have pending content changes · 3 are eligible for retirement</span></div>
             <div class="flex flex-wrap gap-2"><a href="admin-catalog-publish.html" class="cp-btn cp-btn-primary cp-btn-sm">Publish changes (2)</a><a href="admin-catalog-retire-selected.html" class="cp-btn cp-btn-outline cp-btn-sm">Prepare retirement (3)</a><a href="admin-catalog.html" class="cp-btn cp-btn-ghost cp-btn-sm">Clear selection</a></div>
           </div>
 
-          <div class="overflow-x-auto rounded-box border border-base-300 bg-base-100">
+          <div class="overflow-x-auto cp-card border border-base-300 bg-base-100">
             <table class="cp-table bg-base-100">
               <thead><tr><th class="w-12"><label class="cp-label"><input type="checkbox" class="cp-checkbox" aria-label="Select all 20 exercises on this page"></label></th><th aria-sort="none"><button type="button" class="cp-btn cp-btn-ghost cp-btn-sm -ms-3 gap-1 whitespace-nowrap">Exercise<svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="chevrons-up-down"><path d="m7 15 5 5 5-5" />
   <path d="m7 9 5-5 5 5" /></svg></button></th><th aria-sort="none"><button type="button" class="cp-btn cp-btn-ghost cp-btn-sm -ms-3 gap-1 whitespace-nowrap">Pattern<svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="chevrons-up-down"><path d="m7 15 5 5 5-5" />
