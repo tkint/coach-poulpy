@@ -112,6 +112,7 @@ Both phones then show both workouts, and nothing on the server is rewritten.
 ## Screens
 
 The agreed account screens and their states are in the [Mockups gallery](https://tkint.github.io/coach-poulpy/mockups/) under Mobile → Agreed → Accounts. The mockups own layout, copy and visual states; the behavior and security rules are defined above.
+
 ## Not yet
 
 Apple and Google sign-in, the website's sign-in, sharing and coaching, and personal access tokens ([#228](https://github.com/tkint/coach-poulpy/issues/228)).
