@@ -3,7 +3,7 @@
 </script>
 
 <template>
-  <div class="overflow-x-auto rounded-box border border-base-300 bg-base-100" data-component="table">
+  <div class="overflow-x-auto" data-component="table">
     <table class="cp-table"><slot /></table>
   </div>
 </template>
