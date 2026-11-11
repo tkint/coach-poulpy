@@ -40,6 +40,12 @@ const check = process.argv.includes('--check')
 let stale = 0
 for (const [out, { input, post }] of Object.entries(outputs)) {
   const css = banner + post(execFileSync(bin, ['--input', join(here, input)], { cwd: here, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }))
+  if (check) {
+    const label = out === 'poulpy-ui.css' ? 'POULPY_UI_CSS' : 'POULPY_UI_EMBED_CSS'
+    console.log(`${label}_BEGIN`)
+    console.log(Buffer.from(css).toString('base64'))
+    console.log(`${label}_END`)
+  }
   const path = join(here, out)
   const current = existsSync(path) ? readFileSync(path, 'utf8') : null
   if (current === css) continue
