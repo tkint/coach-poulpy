@@ -1,24 +1,6 @@
 # Profile and settings
 
-The profile, body logging with charts, and a settings hub that reaches the Devices view. The screens are agreed (see [ADR 0016](./adr/0016-mockups-are-plain-html-in-the-repo.md)) and are built from the pages under Mockups, Agreed, in the site menu. The wording rules behind it are in [Inclusive by default](./brand.md#inclusive-by-default).
-
-## Settings, reworked
-
-Settings stops being two tabs (General, Devices) and becomes a hub, because it now holds more than two things and Devices deserves a row, not a tab.
-
-| Draft | What it shows |
-| --- | --- |
-| `settings-general` | The hub: a profile card (Poulpy, name, age, height, weight), then **Body** (Weight, Height), **App** (Appearance and units, Devices) and **About** |
-| `profile-edit` | The profile fields below, in two groups, About you and Training |
-| `profile-sex-sheet` | The sex assigned at birth picker, with its reason |
-| `profile-body-figure-sheet` | The body figure picker: Wider shoulders or Wider hips |
-| `profile-pain-sheet` | Pain or rehab: the front and back body map, then for how long |
-| `body-weight`, `body-height` | Latest value, chart with 1M / 3M / 1Y / All, change, lowest, highest and the log. Height is drawn in ft and in to show the Imperial unit system |
-| `body-log-sheet` | Logging a weight: a stepper in the person's units and a date |
-| `settings-preferences` | Theme, Language and Units as selects, moved out of the old General tab |
-| `devices-list` | The existing Devices view with a back bar instead of a tab; its detail, add and data source screens stay as agreed |
-
-They replace the old `settings-general` and `devices-list`.
+This page defines the profile fields, body-measurement history, units and pain or rehab behavior. The agreed screen layouts and states live in the [Mockups gallery](https://tkint.github.io/coach-poulpy/mockups/), rather than being repeated here ([ADR 0016](./adr/0016-mockups-are-plain-html-in-the-repo.md)). Wording rules are in [Inclusive by default](./brand.md#inclusive-by-default).
 
 ## Profile fields
 
@@ -46,19 +28,16 @@ The only thing the app needs is a physiological input for estimates, so that is 
 ## Weight and height logging
 
 - Each entry is a date and a value, added from the **Log** button and corrected or deleted from the history list. One entry per day; a second one that day replaces it.
-- Charts are lines with a dot per entry on the one accent colour. The ranges are 1M, 3M, 1Y and All. Three tiles under the weight chart give the change over the range, the lowest and the highest.
 - Height changes slowly, so its screen says a measure every few months is plenty, and teenagers can log as often as they like.
 - A weight going up is never red and going down is never green. Poulpy says nothing about it, there is no BMI and no weight goal unless a later issue adds one the person opts into.
-- A line chart is a new component, `line-chart`, drawn in the mockup with an SVG. Every chart has a text alternative naming its first and last value.
 
 ## Units
 
-The unit system chosen in Settings decides how weight (kg or lb), height (cm or ft and in) and distance (km or mi) are shown and typed. Everything is stored metric, so switching converts and never rewrites; see [ADR 0017](./adr/0017-body-measurements-are-stored-metric-and-shown-in-the-persons-units.md). The weight pages are drawn Metric and the height page Imperial so both can be reviewed.
+The unit system chosen in Settings decides how weight (kg or lb), height (cm or ft and in) and distance (km or mi) are shown and typed. Everything is stored metric, so switching converts and never rewrites; see [ADR 0017](./adr/0017-body-measurements-are-stored-metric-and-shown-in-the-persons-units.md).
 
 ## Pain or rehab
 
-The profile row opens a sheet. The screens are `profile-edit` (the row filled in, with Poulpy's note) and `profile-pain-sheet` (a body map where it hurts, one side at a time with a Front and Back switch so every area is big enough to tap, left and right apart, then for how long: 72 hours by default, 1 week, 2 weeks or until the person clears it). The body map is a new component, `body-map`, meant to be reused later to show the areas an exercise works. It is a muscle chart with finer regions (pectoral, biceps, quadriceps, hamstring...) and no fill on skin, hair or face, so it implies no skin tone. It has two builds, picked in `profile-body-figure-sheet`, under Mockups, Agreed. Duration is 72 hours by default, with 1 week, 2 weeks or until the person clears it; the window only changes Poulpy (blue side, Patched up pose, no missed entries) and never filters workouts. The rules they follow are in [Character rules](./brand.md#character-rules): pain or rehab always shows the blue side and the Patched up pose, never ember, and entries inside the window never count as missed ([decision 8](./brand-decisions.md)).
-
+A person can say where it hurts and choose how long the pain window lasts: 72 hours by default, 1 week, 2 weeks or until they clear it. During that window Poulpy stays on the blue side in the Patched up pose, entries never count as missed, and workouts are never filtered. The body map and its accessibility requirements are defined in the [design system](./design-system.md#components); the two body figures are chosen independently of sex assigned at birth and are never used for estimates. See [Character rules](./brand.md#character-rules) and [brand decision 8](./brand-decisions.md#8-no-hearts-a-grace-period-instead).
 ## Still open
 
 1. Who reads the sex assigned at birth and pronoun wording from the community (see [decision 13](./brand-decisions.md#13-inclusive-by-default)).
