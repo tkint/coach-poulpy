@@ -35,7 +35,7 @@ Android and iOS only build in CI (`.github/workflows/ci.yml`); a PR is done when
 - The websites, web mockups and docs samples share `web/ui` (Vue, DaisyUI, the Poulpy theme; ADR 0023): add a missing component there, never one-off styles in an app, and run `npm run build -w ui` in `web/` after changing its classes. A DaisyUI component a screen needs that `web/ui` lacks is added to `web/ui` in the same PR as a `Cp` component, with a sample and a section on `site/web-components.md`; a mockup only uses the `cp-` classes of those components.
 - Mockups are plain HTML in `design/mockups/` (ADR 0016), styled only with `var(--cp-*)` from the token CSS, `shared/mockup.css` and `design/poulpy/*.svg`. A new screen or redesign starts in `drafts/`; nothing is built until a PR moves it to `agreed/`. The claude.ai canvas is scratch only.
 - Every user-facing string is added to `i18n/messages/en` and `i18n/messages/fr` (`app.json` for screens, `domain.json` for shared words, `catalog.json` for exercise text). Android, iOS and `DomainText` are generated from them at build time; never write a native string file. See `i18n/README.md`.
-- Catalog slugs never change; set `"retired": true` instead of deleting, and raise `version`.
+- Catalog slugs never change; set `"retired": true` instead of deleting.
 - Poulpy is never guilt: pain or rehab always shows the blue side, and errors are crimson with an icon, never ember.
 - A schema change is a new SQLDelight migration; existing phones keep their data.
 - The docs site is the source of truth. The Docs site workflow comments each PR's preview and the docs pages, sections and mockups to review (`site/review-links.mjs`); never post a review comment of your own. Put anything the reviewer must know in the PR description, and say `Closes #n` so the mockups drawn for that issue are linked.
@@ -43,6 +43,18 @@ Android and iOS only build in CI (`.github/workflows/ci.yml`); a PR is done when
 - Branches are named `<type>/<issue-number>-<short-description>` in English (`feat/21-training-plans`, or `docs/brand-decisions` with no issue); types `feat`, `fix`, `docs`, `chore`, `design`. Never a random suffix, session id or `claude/` prefix, even if a tool suggests one.
 
 ## Agent skills
+
+Skills live in `.agents/skills/` and are shared by Codex and Claude Code. Claude's `.claude/skills/<name>` entries are relative symlinks to the canonical skill directories; do not duplicate or edit a second copy.
+
+Before starting work, inspect the available skills and read the relevant `SKILL.md` files. Treat applicable skills as required working procedures, not optional reference material. In particular:
+
+- Web UI, components, styling and accessibility: `daisyui` and the relevant `vue-*` skills.
+- Kotlin and HTTP services: `http4k-development`.
+- TypeScript and JavaScript API design: `setup-matt-pocock-skills` (follow its own instructions for the installed Matt Pocock skill set).
+- Any implementation: use `implement` and `tdd` where applicable; use `diagnosing-bugs` for bug fixes and `code-review` before completing a change.
+- Product, architecture, requirements and documentation work: select the corresponding domain, design, research, specification or writing skill.
+
+Read the full skill instructions and any referenced files needed for the task. Do not assume a skill name alone is sufficient context.
 
 ### Issue tracker
 
