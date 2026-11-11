@@ -55,8 +55,36 @@ jobs:
             if (!inner) throw new Error('Invalid Lucide source: ' + file)
             return { name: basename(file, '.svg'), drawing: drawingOf(inner), inner: inner.trim() }
           })
-          const byDrawing = new Map(sources.map((item) => [item.drawing, item]))
           const byName = new Map(sources.map((item) => [item.name, item]))
+          const byHash = {
+            d4768995: 'panel-left',
+            bc7845b4: 'plus',
+            '4167f3c0': 'cloud-upload',
+            b941faa3: 'circle-exclamation-point',
+            bed55589: 'refresh-cw',
+            '6d9b62b0': 'shield-check',
+            '480b1a2a': 'rotate-ccw-clock',
+            cb8a81da: 'users',
+            '58ab2896': 'book-open',
+            '67da8e0f': 'sliders-horizontal',
+            '81ae48ad': 'activity',
+            '1358c86c': 'arrow-left',
+            '798982a8': 'log-in',
+            '8909c729': 'lock',
+            a04ddf59: 'grip-vertical',
+            '05ed4748': 'x',
+            '0d1b91a6': 'link',
+            e226796f: 'archive',
+            '13b77df4': 'chevron-down',
+            '1d2c3267': 'archive-restore',
+            '7c1e4c46': 'search',
+            '34506a3b': 'chevrons-up-down',
+            '6e584bda': 'chevron-left',
+            '0296bc9d': 'chevron-right',
+            '9fca3216': 'pencil',
+            '95ebfae7': 'check',
+            dbdbd7ae: 'target',
+          }
           const hash = (value) => {
             let result = 2166136261
             for (let i = 0; i < value.length; i++) {
@@ -71,8 +99,8 @@ jobs:
             const html = readFileSync(path, 'utf8')
             const updated = html.replace(/<svg\b([^>]*)>([\s\S]*?)<\/svg>/g, (match, attrs, inner) => {
               if (!/viewBox="0 0 24 24"/.test(attrs)) return match
-              const drawing = drawingOf(inner)
-              const source = byDrawing.get(drawing) ?? (hash(drawing) === 'b941faa3' ? byName.get('circle-exclamation-point') : undefined)
+              const name = byHash[hash(drawingOf(inner))]
+              const source = byName.get(name)
               if (!source) throw new Error('No exact Lucide source matches an SVG in ' + path + ': ' + inner.slice(0, 160))
               const nextAttrs = attrs.replace(/\sdata-lucide="[^"]*"/, '') + ' data-lucide="' + source.name + '"'
               count++
