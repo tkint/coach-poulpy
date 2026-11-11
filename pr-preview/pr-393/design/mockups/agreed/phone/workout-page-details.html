@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Workout page · details full screen</title>
+<meta name="mockup:screen" content="workout-page-details">
+<meta name="mockup:section" content="Workout page">
+<meta name="mockup:issue" content="244">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../../../web/ui/src/tokens.css">
+<link rel="stylesheet" href="../../shared/mockup.css">
+<script src="../../shared/mockup-theme.js"></script>
+<style>.workout-map { position: absolute; left: 0; right: 0; top: 0; display: flex; flex-direction: column; align-items: center; padding-top: var(--figure-top); gap: var(--cp-space-lg); }.workout-map .body-map { gap: var(--cp-space-sm); }.workout-map .body-view svg { width: var(--figure-width); height: var(--figure-height); }.workout-map .body-part, .heat-legend .body-part { fill: transparent; stroke: var(--cp-outline); }.body-part[data-heat="1"], .heat-legend .body-part[data-heat="1"] { fill: var(--cp-heat1); stroke: var(--cp-heat2); }.body-part[data-heat="2"], .heat-legend .body-part[data-heat="2"] { fill: var(--cp-heat2); stroke: var(--cp-heat3); }.body-part[data-heat="3"], .heat-legend .body-part[data-heat="3"] { fill: var(--cp-heat3); stroke: var(--cp-heat3); }.pain-halo { fill: none; stroke: var(--cp-background); stroke-width: 5; stroke-linejoin: round; }.pain-outline { fill: none; stroke: var(--cp-pain); stroke-width: 3; stroke-linejoin: round; }.pain-note { border-radius: var(--cp-radius-md); background: var(--cp-primary-container); color: var(--cp-on-primary-container); padding: 10px var(--cp-space-md) 10px 10px; display: flex; align-items: center; gap: 10px; font-size: 15px; line-height: 20px; font-weight: 700; }.pain-note img { width: 44px; height: 44px; }.heat-legend { position: absolute; left: 50%; top: 60px; transform: translateX(-50%); }.heat-legend { display: flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 800; color: var(--cp-on-surface-variant); }.heat-legend svg { width: 14px; height: 14px; }.heat-legend rect { stroke-width: 1.2; }.muscle-summary { max-width: 300px; text-align: center; font-size: 15px; line-height: 21px; font-weight: 700; color: var(--cp-on-surface-variant); }.muscle-summary strong { color: var(--cp-on-background); font-weight: 800; }.workout-badges { position: absolute; right: var(--cp-space-lg); bottom: 26px; display: flex; gap: 6px; }.badge { height: 30px; padding: 0 var(--cp-space-md) 0 10px; border-radius: var(--cp-radius-pill); background: var(--cp-surface); border: 1px solid var(--cp-outline); color: var(--cp-on-surface); font-size: 13.5px; font-weight: 800; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }.badge--format { background: var(--cp-primary-container); border-color: var(--cp-primary-container); color: var(--cp-on-primary-container); }.floating { position: absolute; top: var(--cp-space-xxxl); z-index: 2; border: 1px solid var(--cp-outline); }.floating--start { left: var(--cp-space-lg); }.floating--end { right: var(--cp-space-lg); }.detail-sheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 1; border-radius: var(--cp-radius-lg) var(--cp-radius-lg) 0 0; background: var(--cp-surface); color: var(--cp-on-surface); box-shadow: 0 -1px 0 var(--cp-outline); display: flex; flex-direction: column; overflow: hidden; }.detail-sheet--full { border-radius: 0; box-shadow: none; }.sheet-drag { flex: none; display: flex; justify-content: center; padding: 10px 0 var(--cp-space-xs); }.sheet-content { flex: 1; min-height: 0; overflow: hidden; padding: var(--cp-space-xs) var(--cp-space-lg) var(--cp-space-lg); display: flex; flex-direction: column; gap: var(--cp-space-md); }.detail-sheet--full .sheet-drag { padding-top: 68px; }.detail-sheet--full .sheet-content { padding-top: 28px; }.detail-sheet .action-bar { padding-bottom: 34px; }.plan-summary { border-radius: var(--cp-radius-md); background: var(--cp-primary-container); color: var(--cp-on-primary-container); padding: 10px 10px 10px var(--cp-space-md); display: flex; align-items: center; gap: 10px; }.plan-summary div { flex: 1; min-width: 0; display: flex; flex-direction: column; }.plan-summary strong { font-size: 15px; line-height: 20px; font-weight: 800; }.plan-summary span { font-size: 14px; line-height: 19px; font-weight: 700; font-variant-numeric: tabular-nums; }.plan-summary a { min-height: 40px; padding: 0 var(--cp-space-md); border-radius: var(--cp-radius-pill); background: var(--cp-surface); color: var(--cp-on-surface); font-size: 14px; font-weight: 800; display: flex; align-items: center; white-space: nowrap; }.section-label { margin: var(--cp-space-xs) var(--cp-space-xs) 0; }.muscle-rows { display: flex; flex-direction: column; gap: 10px; padding: 0 var(--cp-space-xs); }.muscle-rows li { display: grid; grid-template-columns: 92px 1fr 52px; align-items: center; gap: 10px; font-size: 15px; font-weight: 800; }.muscle-rows .bar { height: 10px; border-radius: var(--cp-radius-pill); background: var(--cp-surface-variant); overflow: hidden; }.muscle-rows .bar span { display: block; height: 100%; border-radius: var(--cp-radius-pill); background: var(--cp-heat3); }.muscle-rows .bar span[data-heat="1"] { background: var(--cp-heat1); }.muscle-rows .bar span[data-heat="2"] { background: var(--cp-heat2); }.muscle-rows em { font-style: normal; text-align: right; color: var(--cp-on-surface-variant); font-variant-numeric: tabular-nums; }.workout-map{--figure-width:100px;--figure-height:223px;--figure-top:92px}.muscle-summary{display:none}
+.recap-head { display: flex; flex-direction: column; gap: 2px; }
+.recap-head p { font-size: 14px; line-height: 19px; color: var(--cp-on-surface-variant); }
+.workout-row { min-height: 56px; padding-right: var(--cp-space-md); }
+.detail-sheet .workout-badges { position: static; flex-wrap: wrap; }
+
+/* Blocks and exercises as in the session recap; the info button replaces the time. */
+.recap-part { display: flex; flex-direction: column; }
+.recap-row { min-height: 0; }
+.recap-row .row-icon { flex: none; width: 32px; height: 32px; }
+.recap-row .row-icon svg { width: 18px; height: 18px; }
+.recap-row .row-text strong { font-size: 15px; line-height: 20px; }
+.recap-row .row-text > span { font-size: 13px; line-height: 17px; }
+.recap-row.list-row { background: transparent; border: 0; border-top: 1px solid var(--cp-outline); border-radius: 0; padding: 6px 0; gap: 10px; }
+.recap-part .steps { gap: 0; }
+.recap-part .steps > li:first-child .recap-row.list-row { border-top: 0; }
+.recap-part .part-icon { width: 24px; height: 24px; }
+.recap-part .part-icon svg { width: 14px; height: 14px; }
+.recap-part .part-header h2 { color: var(--cp-primary); font-size: 15px; line-height: 20px; white-space: nowrap; }
+.recap-part .part-header p { font-size: 12.5px; line-height: 16px; white-space: nowrap; }
+fieldset.recap-part { position: relative; min-inline-size: 0; margin: var(--cp-space-md) 0 0; padding: 0 10px; border: 1px solid var(--cp-outline); border-radius: var(--cp-radius-sm); background: transparent; }
+fieldset.recap-part .part-header { display: block; max-width: 100%; margin-left: 2px; padding: 0 6px; background: transparent; }
+fieldset.recap-part .part-header > .part-title { display: flex; align-items: center; gap: 6px; padding: 0; }
+fieldset.recap-part .part-title > div { display: flex; align-items: baseline; gap: var(--cp-space-sm); min-width: 0; }
+.part-time { position: absolute; top: -22px; right: 8px; padding: 0 6px; background: var(--cp-surface); font-size: 12.5px; line-height: 16px; font-weight: 800; color: var(--cp-on-surface-variant); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.info-button { flex: none; width: 44px; height: 44px; margin: -6px -10px -6px 0; border-radius: var(--cp-radius-pill); display: flex; align-items: center; justify-content: center; color: var(--cp-on-surface-variant); }
+.section-label { margin: 0 var(--cp-space-xs); }
+</style>
+</head>
+<body>
+<main class="phone">
+  <section class="detail-sheet detail-sheet--full" id="workout-details" data-component="detail-sheet" aria-label="Workout details" style="top: 0px;">
+    <div class="sheet-drag"><button type="button" class="sheet-handle" data-component="sheet-handle" aria-label="Drag down for the body map"></button></div>
+    <div class="sheet-content">
+        <div id="workout-summary" class="recap-head">
+          <h1 class="headline" style="font: var(--cp-type-headline);">Upper body</h1>
+          <p class="workout-details">7 exercises · about 32 min</p>
+        </div>
+        <section id="planned-days" class="plan-summary" data-component="plan-summary" aria-label="Planned days">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="calendar"><path d="M8 2v3"/><path d="M16 2v3"/><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/></svg>
+          <div><strong>3 sessions planned</strong><span>Next on Fri 30 Oct</span></div>
+          <a href="../../agreed/phone/workout-plan.html">Change days</a>
+        </section>
+        <div class="stat-tiles">
+          <div class="stat-tile" data-component="stat-tile"><span class="label">Done</span><strong>3 times</strong></div>
+          <div class="stat-tile" data-component="stat-tile"><span class="label">Last time</span><strong>Wed 21</strong></div>
+          <div class="stat-tile" data-component="stat-tile"><span class="label">Usually</span><strong>31 min</strong></div>
+        </div>
+        <span class="label section-label">Exercises</span>
+        <fieldset class="recap-part" data-component="recap-part" aria-label="Warm-up">
+          <legend class="part-header" data-component="part-header"><div class="part-title"><span class="part-icon " aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="sun"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg></span><div><h2>Warm-up</h2><p>2 exercises</p></div></div></legend><span class="part-time">2 min</span>
+          <ol class="steps"><li><div class="list-row recap-row" data-component="exercise-row">
+            <span class="row-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="person-standing"><circle cx="12" cy="5" r="1"/><path d="m9 20 3-6 3 6"/><path d="m6 8 6 2 6-2"/><path d="M12 10v4"/></svg></span>
+            <span class="row-text"><strong>Jumping jack</strong><span>30 s</span></span>
+            <a class="info-button" data-component="info-button" href="#" aria-haspopup="dialog" aria-label="Details of Jumping jack"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="info"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></a>
+          </div></li><li><div class="list-row recap-row" data-component="exercise-row">
+            <span class="row-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="person-standing"><circle cx="12" cy="5" r="1"/><path d="m9 20 3-6 3 6"/><path d="m6 8 6 2 6-2"/><path d="M12 10v4"/></svg></span>
+            <span class="row-text"><strong>Arm circles</strong><span>30 s</span></span>
+            <a class="info-button" data-component="info-button" href="#" aria-haspopup="dialog" aria-label="Details of Arm circles"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="info"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></a>
+          </div></li></ol>
+        </fieldset><fieldset class="recap-part" data-component="recap-part" aria-label="Work">
+          <legend class="part-header" data-component="part-header"><div class="part-title"><span class="part-icon part-icon--work" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="zap"><path d="M15.914 4a1.5 1.5 0 00-2.474-1.561l-9 9A1.5 1.5 0 005.5 14h4.002a.5.5 0 01.471.666L8.086 20a1.5 1.5 0 002.475 1.56l9-9A1.5 1.5 0 0018.5 10h-3.997a.5.5 0 01-.472-.667z"/></svg></span><div><h2>Work</h2><p>4 exercises</p></div></div></legend><span class="part-time">28 min</span>
+          <ol class="steps"><li><div class="list-row recap-row" data-component="exercise-row">
+            <span class="row-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="person-standing"><circle cx="12" cy="5" r="1"/><path d="m9 20 3-6 3 6"/><path d="m6 8 6 2 6-2"/><path d="M12 10v4"/></svg></span>
+            <span class="row-text"><strong>Push-up</strong><span>3 × 12</span></span>
+            <a class="info-button" data-component="info-button" href="workout-page-exercise-details.html" aria-haspopup="dialog" aria-label="Details of Push-up"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="info"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></a>
+          </div></li><li><div class="list-row recap-row" data-component="exercise-row">
+            <span class="row-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="dumbbell"><path d="M17.596 12.768a2 2 0 1 0 2.829-2.829l-1.768-1.767a2 2 0 0 0 2.828-2.829l-2.828-2.828a2 2 0 0 0-2.829 2.828l-1.767-1.768a2 2 0 1 0-2.829 2.829z"/><path d="m2.5 21.5 1.4-1.4"/><path d="m20.1 3.9 1.4-1.4"/><path d="M5.343 21.485a2 2 0 1 0 2.829-2.828l1.767 1.768a2 2 0 1 0 2.829-2.829l-6.364-6.364a2 2 0 1 0-2.829 2.829l1.768 1.767a2 2 0 0 0-2.828 2.829z"/><path d="m9.6 14.4 4.8-4.8"/></svg></span>
+            <span class="row-text"><strong>One-arm dumbbell row</strong><span>3 × 10 each side · 14 kg</span></span>
+            <a class="info-button" data-component="info-button" href="#" aria-haspopup="dialog" aria-label="Details of One-arm dumbbell row"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="info"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></a>
+          </div></li><li><div class="list-row recap-row" data-component="exercise-row">
+            <span class="row-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="dumbbell"><path d="M17.596 12.768a2 2 0 1 0 2.829-2.829l-1.768-1.767a2 2 0 0 0 2.828-2.829l-2.828-2.828a2 2 0 0 0-2.829 2.828l-1.767-1.768a2 2 0 1 0-2.829 2.829z"/><path d="m2.5 21.5 1.4-1.4"/><path d="m20.1 3.9 1.4-1.4"/><path d="M5.343 21.485a2 2 0 1 0 2.829-2.828l1.767 1.768a2 2 0 1 0 2.829-2.829l-6.364-6.364a2 2 0 1 0-2.829 2.829l1.768 1.767a2 2 0 0 0-2.828 2.829z"/><path d="m9.6 14.4 4.8-4.8"/></svg></span>
+            <span class="row-text"><strong>Dumbbell overhead press</strong><span>3 × 8 · 10 kg</span></span>
+            <a class="info-button" data-component="info-button" href="#" aria-haspopup="dialog" aria-label="Details of Dumbbell overhead press"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="info"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></a>
+          </div></li><li><div class="list-row recap-row" data-component="exercise-row">
+            <span class="row-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="person-standing"><circle cx="12" cy="5" r="1"/><path d="m9 20 3-6 3 6"/><path d="m6 8 6 2 6-2"/><path d="M12 10v4"/></svg></span>
+            <span class="row-text"><strong>Plank</strong><span>2 × 40 s hold</span></span>
+            <a class="info-button" data-component="info-button" href="#" aria-haspopup="dialog" aria-label="Details of Plank"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="info"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></a>
+          </div></li></ol>
+        </fieldset><fieldset class="recap-part" data-component="recap-part" aria-label="Cool down">
+          <legend class="part-header" data-component="part-header"><div class="part-title"><span class="part-icon " aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="moon"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/></svg></span><div><h2>Cool down</h2><p>1 exercise</p></div></div></legend><span class="part-time">2 min</span>
+          <ol class="steps"><li><div class="list-row recap-row" data-component="exercise-row">
+            <span class="row-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="person-standing"><circle cx="12" cy="5" r="1"/><path d="m9 20 3-6 3 6"/><path d="m6 8 6 2 6-2"/><path d="M12 10v4"/></svg></span>
+            <span class="row-text"><strong>Child’s pose</strong><span>90 s</span></span>
+            <a class="info-button" data-component="info-button" href="#" aria-haspopup="dialog" aria-label="Details of Child’s pose"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="info"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></a>
+          </div></li></ol>
+        </fieldset>
+        <span class="label section-label">Muscles worked</span>
+        <ul class="muscle-rows" id="muscles-worked" data-component="muscle-rows">
+          <li><span>Shoulders</span><span class="bar"><span data-heat="3" style="width: 100%;"></span></span><em>6 sets</em></li>
+          <li><span>Triceps</span><span class="bar"><span data-heat="3" style="width: 100%;"></span></span><em>6 sets</em></li>
+          <li><span>Chest</span><span class="bar"><span data-heat="2" style="width: 50%;"></span></span><em>3 sets</em></li>
+          <li><span>Back</span><span class="bar"><span data-heat="2" style="width: 50%;"></span></span><em>3 sets</em></li>
+          <li><span>Biceps</span><span class="bar"><span data-heat="2" style="width: 50%;"></span></span><em>3 sets</em></li>
+          <li><span>Core</span><span class="bar"><span data-heat="1" style="width: 33%;"></span></span><em>2 sets</em></li>
+        </ul>
+    </div>
+      <div class="action-bar">
+        <a class="secondary-button" data-component="secondary-button" href="../../agreed/phone/builder-sets-superset.html" style="flex: 1; font-size: 16px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="pencil"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>Edit</a>
+        <a class="primary-button" data-component="primary-button" href="#" style="flex: 1.6;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="play"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg>Start now</a>
+      </div>
+  </section>
+  <a class="icon-button icon-button--filled floating floating--start" data-component="icon-button" href="../../agreed/phone/library-workouts.html" aria-label="Back to the library"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="chevron-left"><path d="m15 18-6-6 6-6"/></svg></a>
+  <a class="icon-button icon-button--filled floating floating--end" data-component="icon-button" href="../../agreed/phone/workout-menu.html" aria-label="More options" aria-haspopup="menu"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="ellipsis-vertical"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg></a>
+</main>
+</body>
+</html>
