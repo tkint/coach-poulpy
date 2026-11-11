@@ -1287,6 +1287,19 @@
       place-self: stretch;
       background-color: oklch(0% 0 0 / 40%);
     }
+  }
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border-width: 0;
+  }
+  @layer daisyui.l1.l2.l3 {
     .cp-select {
       position: relative;
       display: inline-flex;
@@ -1718,8 +1731,134 @@
       overflow-x: auto;
       border-radius: var(--radius-box);
     }
+    .cp-textarea {
+      min-height: calc(0.25rem * 20);
+      flex-shrink: 1;
+      appearance: none;
+      border-radius: var(--radius-field);
+      background-color: var(--color-base-100);
+      padding-inline: calc(0.25rem * 3);
+      padding-block: calc(0.25rem * 2);
+      vertical-align: middle;
+      --cp-input-color: var(--color-base-content);
+    }
+    @supports (color: color-mix(in lab, red, red)) {
+      .cp-textarea {
+        --cp-input-color: color-mix(in oklab, var(--color-base-content) 20%, #0000);
+      }
+    }
+    .cp-textarea {
+      width: clamp(3rem, 20rem, 100%);
+      font-size: max(var(--cp-font-size, 0rem), var(--cp-font-size-min, 0.875rem));
+      touch-action: manipulation;
+      border: var(--border) solid var(--cp-input-color, #0000);
+      box-shadow: 0 1px var(--cp-input-color) inset, 0 -1px oklch(100% 0 0 / calc(var(--depth) * 0.1)) inset;
+    }
+    @supports (color: color-mix(in lab, red, red)) {
+      .cp-textarea {
+        box-shadow: 0 1px color-mix(in oklab, var(--cp-input-color) calc(var(--depth) * 10%), #0000) inset, 0 -1px oklch(100% 0 0 / calc(var(--depth) * 0.1)) inset;
+      }
+    }
+    .cp-textarea textarea {
+      appearance: none;
+      background-color: transparent;
+      border: none;
+    }
+    .cp-textarea textarea::placeholder {
+      color: var(--color-base-content);
+      opacity: 50%;
+    }
+    .cp-textarea textarea:focus, .cp-textarea textarea:focus-within {
+      --tw-outline-style: none;
+      outline-style: none;
+      @media (forced-colors: active) {
+        outline: 2px solid transparent;
+        outline-offset: 2px;
+      }
+    }
+    .cp-textarea:focus {
+      --cp-input-color: var(--color-base-content);
+      box-shadow: 0 1px var(--cp-input-color);
+    }
+    @supports (color: color-mix(in lab, red, red)) {
+      .cp-textarea:focus {
+        box-shadow: 0 1px color-mix(in oklab, var(--cp-input-color) calc(var(--depth) * 10%), #0000);
+      }
+    }
+    .cp-textarea:focus {
+      outline: 2px solid var(--cp-input-color);
+      outline-offset: 2px;
+      isolation: isolate;
+    }
+    @media (pointer: coarse) {
+      @supports (-webkit-touch-callout: none) {
+        .cp-textarea:focus {
+          --cp-font-size: 1rem;
+        }
+      }
+    }
+    .cp-textarea:focus-within {
+      --cp-input-color: var(--color-base-content);
+      box-shadow: 0 1px var(--cp-input-color);
+    }
+    @supports (color: color-mix(in lab, red, red)) {
+      .cp-textarea:focus-within {
+        box-shadow: 0 1px color-mix(in oklab, var(--cp-input-color) calc(var(--depth) * 10%), #0000);
+      }
+    }
+    .cp-textarea:focus-within {
+      outline: 2px solid var(--cp-input-color);
+      outline-offset: 2px;
+      isolation: isolate;
+    }
+    @media (pointer: coarse) {
+      @supports (-webkit-touch-callout: none) {
+        .cp-textarea:focus-within {
+          --cp-font-size: 1rem;
+        }
+      }
+    }
   }
   @layer daisyui.l1.l2 {
+    .cp-textarea:has( > textarea[disabled]) {
+      cursor: not-allowed;
+      border-color: var(--color-base-200);
+      background-color: var(--color-base-200);
+      color: var(--color-base-content);
+    }
+    @supports (color: color-mix(in lab, red, red)) {
+      .cp-textarea:has( > textarea[disabled]) {
+        color: color-mix(in oklab, var(--color-base-content) 40%, transparent);
+      }
+    }
+    .cp-textarea:has( > textarea[disabled]) {
+      box-shadow: none;
+    }
+    .cp-textarea:has( > textarea[disabled])::placeholder, .cp-textarea:has( > textarea[disabled])  ::placeholder {
+      color: var(--color-base-content);
+      opacity: 20%;
+    }
+    .cp-textarea:is(:disabled, [disabled]) {
+      cursor: not-allowed;
+      border-color: var(--color-base-200);
+      background-color: var(--color-base-200);
+      color: var(--color-base-content);
+    }
+    @supports (color: color-mix(in lab, red, red)) {
+      .cp-textarea:is(:disabled, [disabled]) {
+        color: color-mix(in oklab, var(--color-base-content) 40%, transparent);
+      }
+    }
+    .cp-textarea:is(:disabled, [disabled]) {
+      box-shadow: none;
+    }
+    .cp-textarea:is(:disabled, [disabled])::placeholder, .cp-textarea:is(:disabled, [disabled])  ::placeholder {
+      color: var(--color-base-content);
+      opacity: 20%;
+    }
+    .cp-textarea:has( > textarea[disabled]) > textarea[disabled] {
+      cursor: not-allowed;
+    }
     .cp-btn-active {
       --cp-btn-bg: var(--cp-btn-color, var(--color-base-200));
     }
@@ -2545,6 +2684,9 @@
   .w-10 {
     width: calc(var(--spacing) * 10);
   }
+  .w-12 {
+    width: calc(var(--spacing) * 12);
+  }
   .w-16 {
     width: calc(var(--spacing) * 16);
   }
@@ -2594,6 +2736,9 @@
       outline: 2px solid currentColor;
       outline-offset: 2px;
     }
+  }
+  .resize-none {
+    resize: none;
   }
   @layer daisyui.l1.l2 {
     .cp-stats-vertical {
@@ -2653,6 +2798,9 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+  .overflow-hidden {
+    overflow: hidden;
   }
   .overflow-x-auto {
     overflow-x: auto;
@@ -2794,8 +2942,14 @@
   .pt-6 {
     padding-top: calc(var(--spacing) * 6);
   }
+  .pb-4 {
+    padding-bottom: calc(var(--spacing) * 4);
+  }
   .text-center {
     text-align: center;
+  }
+  .text-right {
+    text-align: right;
   }
   .text-start {
     text-align: start;
@@ -3052,6 +3206,9 @@
     }
     .md\:py-24 {
       padding-block: calc(var(--spacing) * 24);
+    }
+    .md\:pb-8 {
+      padding-bottom: calc(var(--spacing) * 8);
     }
   }
   @media (width >= 64rem) {
@@ -3350,6 +3507,26 @@
   }
   .cp-search-field input::-webkit-search-cancel-button {
     display: none;
+  }
+  .cp-textarea {
+    display: block;
+    width: 100%;
+    min-height: 4.5rem;
+    padding: var(--cp-space-md);
+    border: 1.5px solid var(--cp-outline);
+    border-radius: var(--cp-radius-md);
+    background: var(--cp-surface-variant);
+    color: var(--cp-on-surface);
+    font: inherit;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    resize: none;
+    overflow-y: hidden;
+  }
+  .cp-textarea:focus-visible {
+    outline: 2px solid var(--cp-primary);
+    outline-offset: 2px;
   }
   .cp-body-map {
     display: flex;
