@@ -12,8 +12,7 @@
     "./poulpy-ui-embed.css": "./poulpy-ui-embed.css"
   },
   "scripts": {
-    "build": "node build-css.mjs",
-    "check": "node build-css.mjs --check"
+    "build": "node build-css.mjs"
   },
   "peerDependencies": {
     "vue": "^3.5.44"
