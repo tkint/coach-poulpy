@@ -114,16 +114,17 @@ export default withMermaid(
       if (pageData.params?.title) pageData.title = pageData.params.title
     },
     // The web design system (web/ui, ADR 0023) is imported from its source; dedupe keeps its
-    // components on the site's own copy of Vue.
-    vite: { server: { fs: { allow: [repoRoot] } }, resolve: { dedupe: ['vue'] } },
+    // components on the site's own copy of Vue and of the Lucide icons (ADR 0024), since web/ui's
+    // own packages are not installed when the site is built.
+    vite: { server: { fs: { allow: [repoRoot] } }, resolve: { dedupe: ['vue', '@lucide/vue'] } },
     themeConfig: {
       logo: '/poulpy.svg',
       nav: [
-        { text: 'Brand', link: '/docs/brand' },
-        { text: 'Design system', link: '/docs/design-system' },
+        { text: 'Start here', link: '/CONTRIBUTING' },
         { text: 'Architecture', link: '/docs/architecture' },
+        { text: 'Design system', link: '/docs/design-system' },
+        { text: 'Brand', link: '/docs/brand' },
         { text: 'Translations', link: '/translations' },
-        { text: 'Contributing', link: '/CONTRIBUTING' },
       ],
       // Each section shows only its own menu: a page gets the menu of the longest key its path starts
       // with, so every page of a section is listed under one of its keys. Each menu is one group
@@ -193,14 +194,8 @@ export default withMermaid(
             [
               { text: 'Issues, skills and PRs', link: '/CONTRIBUTING' },
               { text: 'House rules', link: '/CLAUDE' },
-              { text: 'Rules by area', link: '/docs/agents/areas' },
               { text: 'Releasing a beta', link: '/docs/releasing' },
               { text: 'Deploying the server', link: '/docs/deploying-the-server' },
-              { text: 'Issue tracker', link: '/docs/agents/issue-tracker' },
-              { text: 'Refining an issue', link: '/docs/agents/refining-issues' },
-              { text: 'Triage labels', link: '/docs/agents/triage-labels' },
-              { text: 'Domain docs', link: '/docs/agents/domain' },
-              { text: 'Code graph', link: '/docs/agents/code-graph' },
             ],
           ],
         ].flatMap(([title, prefixes, items]) => {

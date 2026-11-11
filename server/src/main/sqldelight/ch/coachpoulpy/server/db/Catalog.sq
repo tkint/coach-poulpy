@@ -1,0 +1,45 @@
+latestVersion:
+SELECT max(version) AS latest FROM catalog_version;
+
+insertVersion:
+INSERT INTO catalog_version (version, published_at) VALUES (:version, :publishedAt);
+
+-- What version :version holds: for each slug, its latest revision published up to it, in the catalog's order.
+versionExercises:
+SELECT r.slug, r.position, CAST(r.content AS TEXT) AS content, r.variation_group, r.variation_rank
+FROM catalog_exercise_revision r
+WHERE r.published_in = (
+    SELECT max(p.published_in) FROM catalog_exercise_revision p WHERE p.slug = r.slug AND p.published_in <= :version
+)
+ORDER BY r.position, r.slug;
+
+-- The draft revisions: the exercises edited, added, retired or offered again since the latest version.
+draftRevisions:
+SELECT slug, position, CAST(content AS TEXT) AS content, variation_group, variation_rank
+FROM catalog_exercise_revision WHERE published_in IS NULL ORDER BY position, slug;
+
+latestRevision:
+SELECT max(revision) AS latest FROM catalog_exercise_revision WHERE slug = :slug;
+
+insertRevision:
+INSERT INTO catalog_exercise_revision (slug, revision, position, content, variation_group, variation_rank, published_in, created_at)
+VALUES (:slug, :revision, :position, CAST(:content AS JSONB), :variationGroup, :variationRank, :publishedIn, :createdAt);
+
+-- Changes a draft revision, its slug too, which the admin may do only until the exercise is first published.
+updateDraftRevision:
+UPDATE catalog_exercise_revision SET slug = :newSlug, content = CAST(:content AS JSONB), created_at = :createdAt
+WHERE slug = :slug AND published_in IS NULL;
+
+-- A draft revision that came back to what the latest version holds.
+deleteDraftRevision:
+DELETE FROM catalog_exercise_revision WHERE slug = :slug AND published_in IS NULL;
+
+publishDraftRevisions:
+UPDATE catalog_exercise_revision SET published_in = :version WHERE published_in IS NULL;
+
+-- For tests and the docs: how many revisions are stored, and what a slug has.
+revisionCount:
+SELECT count(*) FROM catalog_exercise_revision;
+
+revisionsOf:
+SELECT revision, published_in FROM catalog_exercise_revision WHERE slug = :slug ORDER BY revision;

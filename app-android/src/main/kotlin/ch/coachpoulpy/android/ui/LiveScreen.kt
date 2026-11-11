@@ -29,14 +29,6 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Pause
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Schedule
-import androidx.compose.material.icons.filled.Sync
-import androidx.compose.material.icons.filled.SyncDisabled
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -238,7 +230,7 @@ private fun BeltBanner(belt: BeltStatus) {
         Modifier.fillMaxWidth().clip(RoundedCornerShape(PoulpyRadius.lg)).background(extras.grumpyContainer).padding(horizontal = 12.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Icon(Icons.Filled.Pause, contentDescription = null, tint = extras.grumpy, modifier = Modifier.size(18.dp))
+        Icon(Lucide.Pause, contentDescription = null, tint = extras.grumpy, modifier = Modifier.size(18.dp))
         Spacer(Modifier.size(10.dp))
         Text(
             stringResource(if (belt == BeltStatus.PAUSED) R.string.treadmill_beltPaused else R.string.treadmill_beltStopped),
@@ -362,7 +354,7 @@ private fun ChoicePicker(state: LiveUiState, model: LiveModel) {
                 Text(note, style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
             }
         }
-        Icon(Icons.Filled.ExpandMore, contentDescription = null, tint = colors.onSurfaceVariant)
+        Icon(Lucide.ChevronDown, contentDescription = null, tint = colors.onSurfaceVariant)
     }
     if (state.hasTreadmill) FollowMode(state.followTreadmill)
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -470,7 +462,7 @@ private fun Recording(recording: RecordingUi, units: UnitSystem, model: LiveMode
     if (recording.paused) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedButton(onClick = model::resumeRecording, modifier = Modifier.weight(1f).height(PoulpySize.buttonLarge)) {
-                Icon(Icons.Filled.PlayArrow, contentDescription = null)
+                Icon(Lucide.Play, contentDescription = null)
                 Spacer(Modifier.size(6.dp))
                 Text(stringResource(R.string.treadmill_resume))
             }
@@ -484,7 +476,7 @@ private fun Recording(recording: RecordingUi, units: UnitSystem, model: LiveMode
     } else {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedButton(onClick = model::pauseRecording, modifier = Modifier.weight(1f).height(PoulpySize.buttonLarge)) {
-                Icon(Icons.Filled.Pause, contentDescription = null)
+                Icon(Lucide.Pause, contentDescription = null)
                 Spacer(Modifier.size(6.dp))
                 Text(stringResource(R.string.treadmill_pause))
             }
@@ -557,7 +549,7 @@ private fun FollowMode(on: Boolean) {
             modifier = Modifier.weight(1f),
         )
         IconButton(onClick = { info = true }, modifier = Modifier.size(40.dp)) {
-            Icon(Icons.Filled.Info, contentDescription = stringResource(R.string.live_modeInfoLabel), tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp))
+            Icon(Lucide.Info, contentDescription = stringResource(R.string.live_modeInfoLabel), tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp))
         }
     }
     if (info) {
@@ -586,7 +578,7 @@ private fun FollowToggle(on: Boolean, onChange: (Boolean) -> Unit) {
             .toggleable(value = on, role = Role.Switch, onValueChange = onChange),
     ) {
         Box(contentAlignment = Alignment.Center) {
-            Icon(if (on) Icons.Filled.Sync else Icons.Filled.SyncDisabled, contentDescription = stringResource(R.string.live_followTreadmill))
+            Icon(if (on) Lucide.RefreshCw else Lucide.RefreshCwOff, contentDescription = stringResource(R.string.live_followTreadmill))
         }
     }
 }
@@ -619,7 +611,7 @@ internal fun FinishCard(prompt: FinishPromptUi, model: LiveModel) {
     Surface(shape = RoundedCornerShape(PoulpyRadius.lg), color = colors.primaryContainer, contentColor = colors.onPrimaryContainer) {
         Column(Modifier.fillMaxWidth().padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Row(verticalAlignment = Alignment.Top) {
-                Icon(Icons.Filled.Schedule, contentDescription = null, tint = colors.primary, modifier = Modifier.size(26.dp))
+                Icon(Lucide.Clock, contentDescription = null, tint = colors.primary, modifier = Modifier.size(26.dp))
                 Spacer(Modifier.size(12.dp))
                 Column(Modifier.semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite }) {
                     val lost = prompt.reason == FinishReason.TREADMILL_LOST

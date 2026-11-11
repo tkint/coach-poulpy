@@ -104,7 +104,13 @@ The fields every form is built from. Reference mockups: `profile-edit`, the thre
 
 ## Screens
 
-Mockups are plain HTML pages in `design/mockups/` ([ADR 0016](adr/0016-mockups-are-plain-html-in-the-repo.md)): drafts in `drafts/`, validated screens in `agreed/`, each split into `phone/`, `tablet/` and `web/`. The docs site shows them on the [Mockups](https://tkint.github.io/coach-poulpy/mockups/) pages, one page per screen, in light or dark. Build a screen from its agreed mockup, and get a mockup agreed, through a PR that moves it out of `drafts/`, before building a screen that has none. The player draws the same screens on both phones (`player-ready`, `player-set`, `player-circuit-round`, `player-repeat-in-sets`, `player-warm-up`, `player-rest`, `player-recover`): pause and end on the bar over the step count, Poulpy straining on an exercise and glancing aside inside the rest ring, a rep target as one big number with its unit under it, a line saying what comes next, and −15 s and +15 s under the ring to lengthen or shorten that one rest. The screen sits on the `background` role, not `surface`, so the cards on it stand out. The finished screen names the workout and its date, then shows three stats picked from what the exercises logged: Time always, then sets and weight lifted for sets and weights, distance and pace for runs and walks, and never heart rate; a stat with nothing logged, such as the weight of a bodyweight session, is left out (`player-finished` and `player-finished-run` on the Mockups pages). CI runs `node design/check-mockups.mjs` on every mockup: no literal colours, no px value where a spacing, radius or headline token has that size, no missing link, no script or style from outside the repo (the brand fonts apart), and the title, screen and section meta tags in place.
+Mockups are plain HTML in `design/mockups/` ([ADR 0016](adr/0016-mockups-are-plain-html-in-the-repo.md)). They are split by stage (`drafts/` and `agreed/`) and platform (`phone/`, `tablet/`, `web/`).
+
+- Build from an agreed mockup. If a screen has none, agree one through a PR before building it.
+- The [Mockups gallery](https://tkint.github.io/coach-poulpy/mockups/) shows each app view and its available states in light and dark themes.
+- CI checks mockup links, local assets, design tokens and required metadata with `node design/check-mockups.mjs`.
+
+The mockup is the design reference; this page defines the shared rules and components used to build it.
 
 ## Websites
 
@@ -113,13 +119,42 @@ The landing site, the web app, the web mockups and the docs site share one packa
 - Use the shared components (`CpButton`, `CpChip`...) in Vue, and their classes in a web mockup; never restyle a DaisyUI class in an app. A missing shape goes in `web/ui`, with its sample and its section on the Web components page in the same PR.
 - Every DaisyUI class carries the `cp-` prefix (`cp-btn cp-btn-primary`). Our own classes (`cp-chip`, `cp-stepper`, `cp-type-label`...) never reuse a DaisyUI name, so the two cannot clash.
 - The roles above keep their meaning: `cp-btn-primary` is `primary`, `cp-btn-secondary` is the tonal `primaryContainer`, `cp-btn-accent` is `grumpy` and only for the catch-up action. Never use DaisyUI's `warning` classes: ember is not a warning, and a problem is an `error`.
-- A web mockup that fills the browser window, such as one with a `CpDrawer` sidebar, adds `<meta name="mockup:viewport" content="800">`: the docs site then shows it in a window of that height and the page scrolls inside it, since a frame sized to a page as tall as the frame would grow forever. `design/mockups/shared/mockup-drawer.js` opens such a drawer on a large screen. Web mockups link `web/ui/src/tokens.css` then `web/ui/poulpy-ui.css`. After using a class no component or web mockup used before, run `npm run build -w ui` in `web/` and commit `poulpy-ui.css`; CI checks it.
+- A web mockup that fills the browser window, such as one with a `CpDrawer` sidebar, adds `<meta name="mockup:viewport" content="800">`: the docs site then shows it in a window of that height and the page scrolls inside it, since a frame sized to a page as tall as the frame would grow forever. `design/mockups/shared/mockup-drawer.js` opens such a drawer on a large screen. Web mockups link `web/ui/src/tokens.css` then `web/ui/poulpy-ui.css`. The generated CSS is ignored by Git: the web and docs-site builds generate it from `web/ui/src/`, and the docs build copies it alongside the mockups into the published site.
 - Phone and tablet mockups keep `design/mockups/shared/mockup.css`: they draw the native screens.
-- Icons on the websites and in web mockups come from Lucide, as in the [Icons](#icons) section ([ADR 0024](adr/0024-lucide-is-the-icon-set.md)).
+- Icons on the websites and in every mockup come from Lucide, as in the [Icons](#icons) section ([ADR 0024](adr/0024-lucide-is-the-icon-set.md)).
 
 ## Icons
 
-Every icon is from [Lucide](https://lucide.dev), on every platform ([ADR 0024](adr/0024-lucide-is-the-icon-set.md)). Use its name for the action, never a home-made drawing of one Lucide already has. Icons take their colour from the roles above, and an error keeps its icon. The existing icons are being moved to Lucide in a follow-up issue; the Android and iOS Lucide packages are chosen there.
+Every icon is from [Lucide](https://lucide.dev), on every platform ([ADR 0024](adr/0024-lucide-is-the-icon-set.md)). Use its name for the action, never a home-made drawing of one Lucide already has. Icons take their colour from the roles above, and an error keeps its icon. Lucide's drawing stays as it is: a 24 box and a 2 wide round stroke, never filled; only the size changes (24 by default, 20 in chips and small buttons, 16 to 18 beside a line of text).
+
+| Where | How |
+| --- | --- |
+| Vue (web app, `web/ui`, docs site) | `@lucide/vue`: `<ChevronLeft class="size-5" aria-hidden="true" />` |
+| Mockups | The Lucide SVG inline, with `data-lucide="chevron-left"`; `design/check-mockups.mjs` checks it |
+| Android | `Icon(Lucide.ChevronLeft, contentDescription = …)` |
+| iOS | `LucideIcon(.chevronLeft, size: 20)`, or `Label("action.back", lucide: .chevronLeft)` |
+
+The Android and iOS icons, and the reference copies the mockups are checked against, are generated from `design/icons/`: run `node design/build-icons.mjs --add <name>` for an icon not used yet.
+
+One icon per meaning, the same on every platform:
+
+| Meaning | Lucide icon |
+| --- | --- |
+| Back, previous; next, open a row | `chevron-left`; `chevron-right` |
+| Close, clear | `x` |
+| More actions | `ellipsis-vertical` |
+| Add; duplicate, copy | `plus`; `copy` |
+| Edit; delete | `pencil`; `trash` |
+| Share; export a file | `share-2`; `download` |
+| Plan a day | `calendar-plus` |
+| Error | `circle-exclamation-point` |
+| Tabs: Home, Library, Live, History, Settings | `house`, `library-big`, `activity`, `rotate-ccw-clock`, `settings` |
+| Warm-up, work, cool down | `sun`, `zap`, `moon` |
+| Circuit, sets | `repeat`, `list` |
+| Treadmill (no Lucide treadmill), foot pod, heart rate band | `gauge`, `footprints`, `heart-pulse` |
+| Filters: equipment, focus, position, zones, tags | `dumbbell`, `target`, `armchair`, `person-standing`, `tag` |
+
+The movement-pattern badge stands in for exercise pictures, and Lucide draws few people, so its icons are the nearest Lucide match rather than an exact one: squat `person-standing`, hinge `hand-grab`, lunge `footprints`, push `dumbbell`, pull `biceps-flexed`, carry `luggage`, core `shield`, rotation `rotate-cw`, locomotion `sport-shoe`, mobility `accessibility`, stretch `stretch-horizontal`.
 
 ## Accessibility
 

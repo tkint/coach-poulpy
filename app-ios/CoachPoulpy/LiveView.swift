@@ -195,7 +195,7 @@ struct LiveView: View {
 
     private var beltBanner: some View {
         HStack(spacing: 10) {
-            Image(systemName: "pause.fill").foregroundStyle(PoulpyColor.grumpy)
+            LucideIcon(.pause).foregroundStyle(PoulpyColor.grumpy)
             Text(LocalizedStringKey(state.belt == .paused ? "treadmill.beltPaused" : "treadmill.beltStopped"))
                 .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 16, relativeTo: .body))
                 .foregroundStyle(PoulpyColor.onGrumpyContainer)
@@ -314,7 +314,7 @@ struct LiveView: View {
                         }
                     }
                     Spacer()
-                    Image(systemName: "chevron.down").font(.system(size: 14, weight: .bold)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+                    LucideIcon(.chevronDown, size: 16).foregroundStyle(PoulpyColor.onSurfaceVariant)
                 }
                 .padding(.horizontal, 14)
                 .padding(.vertical, 8)
@@ -388,7 +388,7 @@ struct LiveView: View {
             if recording.paused {
                 HStack(spacing: 8) {
                     Button { model.resumeRecording() } label: {
-                        Label("treadmill.resume", systemImage: "play.fill")
+                        Label("treadmill.resume", lucide: .play)
                             .font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: PoulpySize.button)
                     }
                     .buttonStyle(.bordered)
@@ -408,7 +408,7 @@ struct LiveView: View {
             } else {
                 HStack(spacing: 8) {
                     Button { model.pauseRecording() } label: {
-                        Label("treadmill.pause", systemImage: "pause.fill")
+                        Label("treadmill.pause", lucide: .pause)
                             .font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: PoulpySize.button)
                     }
                     .buttonStyle(.bordered)
@@ -483,7 +483,7 @@ struct LiveView: View {
                 .foregroundStyle(PoulpyColor.onSurfaceVariant)
             Spacer(minLength: 0)
             Button { modeInfo = true } label: {
-                Image(systemName: "info.circle").font(.system(size: 17)).frame(width: 40, height: 40)
+                LucideIcon(.info, size: 20).frame(width: 40, height: 40)
             }
             .buttonStyle(.plain)
             .foregroundStyle(PoulpyColor.onSurfaceVariant)
@@ -501,8 +501,7 @@ struct LiveView: View {
         let on = state.followTreadmill
         // Filled when on, outlined and crossed out when off, so the state reads at a glance.
         return Button { model.setFollowTreadmill(on: !on) } label: {
-            Image(systemName: "arrow.triangle.2.circlepath")
-                .font(.system(size: 20, weight: .bold))
+            LucideIcon(.refreshCw, size: 24)
                 .foregroundStyle(on ? PoulpyColor.onPrimary : PoulpyColor.onSurfaceVariant)
                 .overlay {
                     if !on {
@@ -550,7 +549,7 @@ struct LiveView: View {
         let closed = prompt.reason == .appClosed
         return VStack(alignment: .leading, spacing: 10) {
             HStack(alignment: .top, spacing: 12) {
-                Image(systemName: "clock").font(.system(size: 22, weight: .semibold)).foregroundStyle(PoulpyColor.primary)
+                LucideIcon(.clock, size: 26).foregroundStyle(PoulpyColor.primary)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(LocalizedStringKey(lost ? "live.finishLostTitle" : closed ? "live.finishClosedTitle" : "live.finishStillTitle"))
                         .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 19, relativeTo: .title3))
@@ -731,8 +730,7 @@ private struct ChoiceSheet: View {
                             }
                         }
                         Spacer()
-                        Image(systemName: on ? "largecircle.fill.circle" : "circle")
-                            .font(.system(size: 22))
+                        LucideIcon(on ? .circleDot : .circle, size: 26)
                             .foregroundStyle(on ? PoulpyColor.primary : PoulpyColor.outline)
                             .accessibilityHidden(true)
                     }

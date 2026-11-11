@@ -43,8 +43,7 @@ struct PartBlockView<Content: View>: View {
     private var header: some View {
         let work = kind == .work
         return HStack(spacing: 6) {
-            Image(systemName: partIcon(kind))
-                .font(.system(size: 11, weight: .bold))
+            LucideIcon(partIcon(kind), size: 14)
                 .foregroundStyle(work ? PoulpyColor.onPrimary : PoulpyColor.onPrimaryContainer)
                 .frame(width: 24, height: 24)
                 .background(work ? PoulpyColor.primary : PoulpyColor.primaryContainer, in: Circle())

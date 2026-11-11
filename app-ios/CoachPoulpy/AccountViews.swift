@@ -69,7 +69,7 @@ struct AccountSection: View {
                     HStack {
                         row(Text("account.guestRow"), L("account.guestRowHint"))
                         Spacer()
-                        Image(systemName: "chevron.right").font(.system(size: 13, weight: .semibold)).foregroundStyle(PoulpyColor.onSurfaceVariant.opacity(0.6))
+                        LucideIcon(.chevronRight, size: 16).foregroundStyle(PoulpyColor.onSurfaceVariant.opacity(0.6))
                     }
                 }
                 .foregroundStyle(PoulpyColor.onSurface)
@@ -79,7 +79,7 @@ struct AccountSection: View {
 
     private func row(_ title: Text, _ subtitle: String) -> some View {
         HStack(spacing: 12) {
-            Image(systemName: "person.crop.circle").font(.system(size: 20)).foregroundStyle(PoulpyColor.primary).frame(width: 26)
+            LucideIcon(.userRound, size: 24).foregroundStyle(PoulpyColor.primary).frame(width: 26)
             VStack(alignment: .leading, spacing: 0) {
                 title.font(.poulpy(.headline))
                 Text(subtitle).font(.poulpy(.footnote)).foregroundStyle(PoulpyColor.onSurfaceVariant)
@@ -135,7 +135,7 @@ struct AccountPage: View {
                 }
                 if let pending = state as? AccountStatePending {
                     VStack(alignment: .leading, spacing: 8) {
-                        Label("account.pendingTitle", systemImage: "info.circle").font(.poulpy(.title3))
+                        Label("account.pendingTitle", lucide: .info).font(.poulpy(.title3))
                         Text(L("account.pendingBody %@", pending.email)).font(.poulpy(.callout).weight(.semibold))
                         HelpLine(question: "account.noEmail", link: "account.sendAgain") {
                             Task { @MainActor in
@@ -374,8 +374,7 @@ private struct SignUpScreen: View {
             VStack(alignment: .leading, spacing: 6) {
                 HStack(alignment: .top, spacing: 10) {
                     Button { consent.toggle() } label: {
-                        Image(systemName: consent ? "checkmark.square.fill" : "square")
-                            .font(.system(size: 24))
+                        LucideIcon(consent ? .squareCheck : .square, size: 28)
                             .foregroundStyle(consent ? PoulpyColor.primary : PoulpyColor.onSurfaceVariant)
                     }
                     .buttonStyle(.plain)
@@ -419,7 +418,7 @@ private struct ConsentSheet: View {
                 Text("account.consentSheetIntro").font(.poulpy(.callout)).foregroundStyle(PoulpyColor.onSurfaceVariant)
                 ForEach(["account.consentItemTraining", "account.consentItemBody", "account.consentItemPrefs"], id: \.self) { key in
                     Label { Text(LocalizedStringKey(key)).font(.poulpy(.callout).weight(.bold)) } icon: {
-                        Image(systemName: "checkmark").foregroundStyle(PoulpyColor.primary)
+                        LucideIcon(.check).foregroundStyle(PoulpyColor.primary)
                     }
                 }
                 FieldNote("account.consentStays")
@@ -748,7 +747,7 @@ private struct AccountFrame<Content: View>: View {
         VStack(alignment: .leading, spacing: 0) {
             HStack {
                 if let onClose {
-                    Button(action: onClose) { Image(systemName: "xmark").font(.system(size: 18, weight: .semibold)) }
+                    Button(action: onClose) { LucideIcon(.x, size: 22) }
                         .accessibilityLabel(Text("action.close"))
                 }
                 Spacer()
@@ -828,7 +827,7 @@ private struct ErrorCard: View {
 
     var body: some View {
         HStack(alignment: .top, spacing: 8) {
-            Image(systemName: "exclamationmark.circle").font(.system(size: 18, weight: .semibold))
+            LucideIcon(.circleExclamationPoint, size: 22)
             Text(text).font(.poulpy(.callout).weight(.bold))
         }
         .foregroundStyle(PoulpyColor.error)
@@ -845,7 +844,7 @@ private struct InfoCard: View {
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
-            Image(systemName: "info.circle")
+            LucideIcon(.info)
             Text(text).font(.poulpy(.callout).weight(.semibold))
         }
         .foregroundStyle(PoulpyColor.onPrimaryContainer)
@@ -860,7 +859,7 @@ private struct DoneLine: View {
     init(_ text: String) { self.text = text }
 
     var body: some View {
-        Label(text, systemImage: "checkmark.circle.fill")
+        Label(text, lucide: .circleCheck)
             .font(.poulpy(.subheadline).weight(.heavy))
             .foregroundStyle(PoulpyColor.success)
             .frame(maxWidth: .infinity)

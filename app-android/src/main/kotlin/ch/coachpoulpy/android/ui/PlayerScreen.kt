@@ -24,13 +24,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Pause
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -131,7 +124,7 @@ fun PlayerScreen(graph: AppGraph, language: String, workoutId: String?, onClose:
 @Composable
 private fun ColumnScope.Ready(state: PlayerState, onStart: () -> Unit, onClose: () -> Unit) {
     Row(Modifier.fillMaxWidth()) {
-        PlayerIconButton(Icons.Filled.Close, stringResource(R.string.action_back), onClick = onClose)
+        PlayerIconButton(Lucide.X, stringResource(R.string.action_back), onClick = onClose)
     }
     Column(Modifier.weight(1f).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
         PlayerLabel("${state.workoutName} · ${state.exerciseCountLabel}")
@@ -146,7 +139,7 @@ private fun ColumnScope.Ready(state: PlayerState, onStart: () -> Unit, onClose: 
         state.targetDetail?.let { Text(it, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurfaceVariant) }
     }
     Button(onClick = onStart, modifier = Modifier.fillMaxWidth().height(PoulpySize.buttonLarge)) {
-        Icon(Icons.Filled.PlayArrow, contentDescription = null, modifier = Modifier.size(24.dp))
+        Icon(Lucide.Play, contentDescription = null, modifier = Modifier.size(24.dp))
         Text(stringResource(R.string.player_start), modifier = Modifier.padding(start = PoulpySpace.sm), fontSize = 19.sp, fontWeight = FontWeight.ExtraBold)
     }
 }
@@ -191,7 +184,7 @@ internal fun PlayerBar(state: PlayerState, paused: Boolean, onToggle: () -> Unit
                     )
                 }
             }
-            PlayerIconButton(Icons.Filled.Close, stringResource(R.string.player_stop), onClick = onEnd)
+            PlayerIconButton(Lucide.X, stringResource(R.string.player_stop), onClick = onEnd)
         }
         if (paused) PausedCard()
     }
@@ -213,7 +206,7 @@ private fun PauseButton(paused: Boolean, onClick: () -> Unit, enabled: Boolean) 
         colors = IconButtonDefaults.filledIconButtonColors(containerColor = colors.primary, contentColor = colors.onPrimary),
     ) {
         Icon(
-            if (paused) Icons.Filled.PlayArrow else Icons.Filled.Pause,
+            if (paused) Lucide.Play else Lucide.Pause,
             contentDescription = stringResource(if (paused) R.string.player_resume else R.string.player_pause),
             modifier = Modifier.size(if (paused) 28.dp else 26.dp),
         )
@@ -232,7 +225,7 @@ private fun PausedCard() {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(PoulpySpace.md),
     ) {
-        Icon(Icons.Filled.Pause, contentDescription = null, tint = colors.onPrimaryContainer, modifier = Modifier.size(24.dp))
+        Icon(Lucide.Pause, contentDescription = null, tint = colors.onPrimaryContainer, modifier = Modifier.size(24.dp))
         Text(stringResource(R.string.player_paused), style = PoulpyTextStyles.Headline, color = colors.onPrimaryContainer)
     }
 }
@@ -323,7 +316,7 @@ internal fun ColumnScope.WorkStep(state: PlayerState, paused: Boolean, onSkip: (
                 colors = ButtonDefaults.buttonColors(disabledContainerColor = MaterialTheme.colorScheme.primary, disabledContentColor = MaterialTheme.colorScheme.onPrimary),
                 modifier = Modifier.weight(1f).height(PoulpySize.buttonLarge),
             ) {
-                Icon(Icons.Filled.Check, contentDescription = null, modifier = Modifier.size(24.dp))
+                Icon(Lucide.Check, contentDescription = null, modifier = Modifier.size(24.dp))
                 Text(stringResource(R.string.player_done), fontSize = 19.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = PoulpySpace.sm))
             }
         }
@@ -384,7 +377,7 @@ internal fun ColumnScope.RestStep(state: PlayerState, paused: Boolean, onSkip: (
         ),
         modifier = Modifier.fillMaxWidth().alpha(if (paused) PAUSED_DIM else 1f).height(PoulpySize.buttonLarge),
     ) {
-        Icon(Icons.Filled.SkipNext, contentDescription = null, modifier = Modifier.size(22.dp))
+        Icon(Lucide.SkipForward, contentDescription = null, modifier = Modifier.size(22.dp))
         Text(stringResource(R.string.player_skipRest), fontSize = 19.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = PoulpySpace.sm))
     }
 }
@@ -458,7 +451,7 @@ private fun ColumnScope.Finished(state: PlayerState, finished: FinishedScreen?, 
         }
     }
     OutlinedButton(onClick = onShare, modifier = Modifier.fillMaxWidth().height(PoulpySize.buttonLarge)) {
-        Icon(Icons.Filled.Share, contentDescription = null, modifier = Modifier.padding(end = 8.dp))
+        Icon(Lucide.Share2, contentDescription = null, modifier = Modifier.padding(end = 8.dp))
         Text(stringResource(R.string.shareImage_button))
     }
     Button(onClick = onClose, modifier = Modifier.fillMaxWidth().height(PoulpySize.buttonLarge).padding(top = 8.dp)) { Text(stringResource(R.string.player_close)) }

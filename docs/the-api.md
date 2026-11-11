@@ -7,20 +7,73 @@ The server is an API only, at `https://api.coach-poulpy.com/api/v1` ([ADR 0021](
 Every request under `/api/v1` passes one filter that finds its **caller** ([ADR 0020](./adr/0020-every-credential-resolves-to-one-caller.md)):
 
 ```mermaid
-flowchart LR
-    request(["Request"]) --> header{"Authorization<br/>header?"}
-    header -- "none" --> anonymous["Anonymous caller"]
-    header -- "Bearer cp_…" --> authenticator["Authenticator<br/>for that prefix"]
-    authenticator -- "accepts" --> signed["Signed caller<br/>account · client · scopes"]
-    authenticator -- "refuses, or no such prefix" --> denied(["401"])
-    header -- "anything else" --> denied
-    anonymous --> route["Route: public,<br/>or checks its scopes"]
-    signed --> route
+flowchart TD
+    request(["Incoming API request"])
+    header{"Credential supplied?"}
+    anonymous["Anonymous caller"]
+    authenticator["Select authenticator<br/>from token prefix"]
+    signed["Signed caller<br/>account · client · scopes"]
+    denied(["401 Unauthorized"])
+    route{"Route access policy"}
+    public["Public route"]
+    scope{"Required scope present?"}
+    forbidden(["403 Forbidden"])
+    response["Run route with caller identity"]
+
+    request --> header
+    header -->|No bearer token or session cookie| anonymous --> route
+    header -->|Bearer cp_at_… or website session cookie| authenticator
+    header -->|Malformed / unsupported| denied
+    authenticator -->|Valid| signed --> route
+    authenticator -->|Invalid / expired| denied
+    route -->|Public| public --> response
+    route -->|Requires scopes| scope
+    scope -->|Yes| response
+    scope -->|No| forbidden
 ```
 
 - **A bad credential is never treated as no credential.** An unknown prefix, an expired token or a `Basic` header is a 401, even on a public route.
 - **Each kind of token has its own authenticator,** picked by its prefix: `cp_at_` for access tokens, later `cp_pat_` for personal access tokens ([#228](https://github.com/tkint/coach-poulpy/issues/228)). Today only `cp_at_` is registered; a refresh token (`cp_rt_`) is never accepted as an access token.
 - **Every route says who may call it.** In the code, each route sets its `security` to `Public` or to `requires(...)` with the scopes it needs; a server test fails when a route sets neither. With no token, `requires` answers 401; with a token missing a scope, 403 with `WWW-Authenticate: Bearer error="insufficient_scope"`. The phone app gets every scope.
+
+## Browser session (admin website)
+
+The browser session uses the same email/password check as the phone, but the server sets secure cookies instead of returning tokens to JavaScript. The current browser sign-in is used by the admin area; a general member sign-up/sign-in experience on the web is not implemented.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Admin
+    participant Browser as Browser
+    participant API as Account API
+    participant DB as Postgres
+
+    Admin->>Browser: Enter email and password
+    Browser->>API: POST /api/v1/web/session (Origin + credentials)
+    API->>API: Check allowed website Origin
+    API->>DB: Verify password and confirmed email
+    alt Valid credentials
+        API-->>Browser: 204 + Secure, HttpOnly, SameSite=Strict cookies
+        Browser->>API: GET /api/v1/me (cookies sent automatically)
+        API-->>Browser: Account identity and role
+        Browser->>Browser: Admin UI checks role
+        opt Not an admin
+            Browser->>API: DELETE /api/v1/web/session
+            API-->>Browser: 204 + clear cookies
+        end
+        opt Access cookie expires or API returns 401
+            Browser->>API: POST /api/v1/web/session/refresh (refresh cookie)
+            API-->>Browser: 204 + rotated cookie pair
+            Browser->>API: Retry original request
+        end
+    else Wrong credentials or unconfirmed email
+        API-->>Browser: 400 refusal
+    else Too many failed attempts
+        API-->>Browser: 429 + Retry-After
+    end
+```
+
+The cookies are never readable by page scripts. The website sends them with `credentials: 'include'`; the server checks the website origin on session writes and uses SameSite cookies as an additional CSRF defence.
 
 ## Routes
 
@@ -29,7 +82,7 @@ flowchart LR
 | `GET /health` | Anyone | `ok` and the version, or 503 while the database doesn't answer; the Docker health check. Outside `/api/v1`, so it never changes with the API's version. |
 | `GET /api/v1/status` | Anyone | `{"status": "up"}`, or 503 `{"status": "down"}` while the database doesn't answer: what the web app's `/status` page shows ([#340](https://github.com/tkint/coach-poulpy/issues/340)). Nothing else, never the version or how the server is configured; the admin's [status](./admin.md#status) has the details. |
 | `GET /api/v1/openapi.json` | Anyone | The OpenAPI description of every route below, the OAuth ones included. |
-| `GET /api/v1/catalog` | Anyone | The exercise catalog the server was built with, the same JSON the app bundles. With `?newerThan=<version>` it answers 204 when the phone already has that version or a newer one, so phones download it only when it changed ([#27](https://github.com/tkint/coach-poulpy/issues/27)). |
+| `GET /api/v1/catalog` | Anyone | The latest published catalog version, in the same JSON the app bundles; the first start publishes the bundled one ([ADR 0026](./adr/0026-the-server-holds-the-catalog-as-a-draft-and-published-versions.md)). With `?newerThan=<version>` it answers 204 when the phone already has that version or a newer one, so phones download it only when it changed ([#27](https://github.com/tkint/coach-poulpy/issues/27)). |
 | `POST /api/v1/accounts` | Anyone | Signs up ([#25](https://github.com/tkint/coach-poulpy/issues/25)): `email`, `password` (8 to 256 characters), `language` such as `fr` for the account's emails, and `healthDataConsent`, which must be `true`. Creates an account whose email isn't confirmed and mails it a link valid 24 hours. Answers 202 whether or not the address already has an account, so addresses can't be probed; a 400 carries `{"error": "invalid-email"}`, `invalid-password` or `consent-required`. |
 | `POST /api/v1/accounts/confirm` | Anyone | Takes `{"token": …}` from the link, which reads `<website>/confirm-email#<token>`, and confirms the email: 204, or 400 `invalid-token` for a token unknown, used or expired. A token works once. |
 | `POST /api/v1/accounts/confirmation-status` | Anyone | Takes `{"key": …}`, the optional `pendingKey` (32 to 128 characters) the phone sent with its sign-up, and answers `{"confirmed": true}` once the link mailed in that sign-up was opened, for 30 days. An unknown or expired key answers `false`, as does one sent for an address already confirmed, so it never tells who has an account. A sign-up with a key of the wrong length gets 400 `invalid-key`. |

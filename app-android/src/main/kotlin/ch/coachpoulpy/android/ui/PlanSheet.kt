@@ -10,9 +10,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -73,7 +70,7 @@ fun PlanSheet(name: String, planned: List<PlannedDay>, onSave: (List<PlanDate>) 
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = { month = month.minusMonths(1) }, enabled = month > YearMonth.from(today)) {
-                    Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = stringResource(R.string.plan_previousMonth))
+                    Icon(Lucide.ChevronLeft, contentDescription = stringResource(R.string.plan_previousMonth))
                 }
                 Text(
                     month.atDay(1).format(DateTimeFormatter.ofPattern("LLLL yyyy", locale)).replaceFirstChar { it.titlecase(locale) },
@@ -83,7 +80,7 @@ fun PlanSheet(name: String, planned: List<PlannedDay>, onSave: (List<PlanDate>) 
                     textAlign = TextAlign.Center,
                 )
                 IconButton(onClick = { month = month.plusMonths(1) }) {
-                    Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = stringResource(R.string.plan_nextMonth))
+                    Icon(Lucide.ChevronRight, contentDescription = stringResource(R.string.plan_nextMonth))
                 }
             }
             Row(Modifier.fillMaxWidth()) {

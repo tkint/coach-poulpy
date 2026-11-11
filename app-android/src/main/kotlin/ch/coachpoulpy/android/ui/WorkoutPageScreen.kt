@@ -25,23 +25,6 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Bedtime
-import androidx.compose.material.icons.filled.Bolt
-import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.EditCalendar
-import androidx.compose.material.icons.filled.FitnessCenter
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Repeat
-import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.Timer
-import androidx.compose.material.icons.filled.WbSunny
-import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
@@ -137,22 +120,22 @@ fun WorkoutPageScreen(
             floating = {
                 Row(Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = PoulpySpace.lg, vertical = PoulpySpace.sm), horizontalArrangement = Arrangement.SpaceBetween) {
                     FloatingButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
+                        Icon(Lucide.ChevronLeft, contentDescription = stringResource(R.string.action_back))
                     }
                     Box {
                         FloatingButton(onClick = { menu = true }) {
-                            Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.action_more))
+                            Icon(Lucide.EllipsisVertical, contentDescription = stringResource(R.string.action_more))
                         }
                         DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.action_share)) },
-                                leadingIcon = { Icon(Icons.Filled.Share, contentDescription = null) },
+                                leadingIcon = { Icon(Lucide.Share2, contentDescription = null) },
                                 onClick = { menu = false; shareWorkout(context, model.exportFile(), shareTitle) },
                             )
                             if (state.editable) {
                                 DropdownMenuItem(
                                     text = { Text(stringResource(R.string.action_copy)) },
-                                    leadingIcon = { Icon(Icons.Filled.ContentCopy, contentDescription = null) },
+                                    leadingIcon = { Icon(Lucide.Copy, contentDescription = null) },
                                     onClick = { menu = false; onCopy() },
                                 )
                             }
@@ -166,12 +149,12 @@ fun WorkoutPageScreen(
                 Row(Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = PoulpySpace.lg, vertical = 12.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     if (state.editable) {
                         OutlinedButton(onClick = onEdit, modifier = Modifier.weight(1f).height(PoulpySize.buttonLarge)) {
-                            Icon(Icons.Filled.Edit, contentDescription = null)
+                            Icon(Lucide.Pencil, contentDescription = null)
                             Text(stringResource(R.string.action_edit), fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 6.dp))
                         }
                     }
                     Button(onClick = onStart, modifier = Modifier.weight(1.6f).height(PoulpySize.buttonLarge)) {
-                        Icon(Icons.Filled.PlayArrow, contentDescription = null)
+                        Icon(Lucide.Play, contentDescription = null)
                         Text(stringResource(R.string.workout_start), fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 6.dp))
                     }
                 }
@@ -229,8 +212,8 @@ private fun ColumnScope.WorkoutDetails(state: WorkoutPageState, onPlan: () -> Un
         Text(state.details, style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
     }
     FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Badge(state.formatLabel, Icons.Filled.Bolt, primary = true)
-        state.equipment.forEach { Badge(it, Icons.Filled.FitnessCenter, primary = false) }
+        Badge(state.formatLabel, Lucide.Zap, primary = true)
+        state.equipment.forEach { Badge(it, Lucide.Dumbbell, primary = false) }
     }
     if (state.painNote.isNotEmpty()) {
         Row(
@@ -344,9 +327,9 @@ internal fun PartBadge(kind: PartKind) {
 /** The icon of a part, as the builder adds it: the sun for a warm-up, a bolt for work, the moon for a cool down. */
 internal val PartKind.icon: ImageVector
     get() = when (this) {
-        PartKind.WARM_UP -> Icons.Filled.WbSunny
-        PartKind.WORK -> Icons.Filled.Bolt
-        PartKind.COOL_DOWN -> Icons.Filled.Bedtime
+        PartKind.WARM_UP -> Lucide.Sun
+        PartKind.WORK -> Lucide.Zap
+        PartKind.COOL_DOWN -> Lucide.Moon
     }
 
 /** "Repeat · 3 times", heading the rows that go round together. */
@@ -354,7 +337,7 @@ internal val PartKind.icon: ImageVector
 private fun RepeatHeader(timesLabel: String) {
     val colors = MaterialTheme.colorScheme
     Row(Modifier.padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        Icon(Icons.Filled.Repeat, contentDescription = null, tint = colors.primary, modifier = Modifier.size(18.dp))
+        Icon(Lucide.Repeat, contentDescription = null, tint = colors.primary, modifier = Modifier.size(18.dp))
         Text("${stringResource(R.string.builder_repeat)} · $timesLabel", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.ExtraBold, color = colors.primary)
     }
 }
@@ -373,7 +356,7 @@ private fun ExerciseRow(row: WorkoutStepRow, onOpen: (String) -> Unit) {
     ) {
         if (row.isRest) {
             Box(Modifier.size(PoulpySize.avatarSmall).clip(CircleShape).background(colors.surfaceVariant), contentAlignment = Alignment.Center) {
-                Icon(Icons.Filled.Timer, contentDescription = null, tint = colors.onSurfaceVariant, modifier = Modifier.size(18.dp))
+                Icon(Lucide.Timer, contentDescription = null, tint = colors.onSurfaceVariant, modifier = Modifier.size(18.dp))
             }
         } else {
             PatternBadge(row.pattern ?: MovementPattern.CORE, size = PoulpySize.avatarSmall)
@@ -387,7 +370,7 @@ private fun ExerciseRow(row: WorkoutStepRow, onOpen: (String) -> Unit) {
         }
         if (!row.isRest) {
             IconButton(onClick = { onOpen(row.slug) }, modifier = Modifier.size(PoulpySize.avatarSmall)) {
-                Icon(Icons.Outlined.Info, contentDescription = stringResource(R.string.exercise_details, row.name), tint = colors.onSurfaceVariant)
+                Icon(Lucide.Info, contentDescription = stringResource(R.string.exercise_details, row.name), tint = colors.onSurfaceVariant)
             }
         }
     }
@@ -399,7 +382,7 @@ internal fun DeleteMenuItem(onClick: () -> Unit) {
     val error = MaterialTheme.colorScheme.error
     DropdownMenuItem(
         text = { Text(stringResource(R.string.action_delete), color = error) },
-        leadingIcon = { Icon(Icons.Filled.Delete, contentDescription = null, tint = error) },
+        leadingIcon = { Icon(Lucide.Trash, contentDescription = null, tint = error) },
         onClick = onClick,
     )
 }
@@ -410,7 +393,7 @@ internal fun DeleteWorkoutDialog(prompt: DeletePrompt, onDelete: () -> Unit, onD
     val error = MaterialTheme.colorScheme.error
     AlertDialog(
         onDismissRequest = onDismiss,
-        icon = { Icon(Icons.Filled.Delete, contentDescription = null, tint = error) },
+        icon = { Icon(Lucide.Trash, contentDescription = null, tint = error) },
         title = { Text(prompt.title) },
         text = { Text(prompt.message) },
         confirmButton = { TextButton(onClick = onDelete) { Text(stringResource(R.string.action_delete), color = error, fontWeight = FontWeight.ExtraBold) } },
@@ -431,7 +414,7 @@ private fun PlanRow(state: WorkoutPageState, onPick: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            Icon(Icons.Filled.CalendarMonth, contentDescription = null, tint = colors.onPrimaryContainer)
+            Icon(Lucide.Calendar, contentDescription = null, tint = colors.onPrimaryContainer)
             Column(Modifier.weight(1f)) {
                 Text(
                     pluralStringResource(R.plurals.workout_plannedSessions, state.plans.size, state.plans.size),
@@ -466,7 +449,7 @@ private fun PlanRow(state: WorkoutPageState, onPick: () -> Unit) {
             shape = RoundedCornerShape(PoulpyRadius.md),
             modifier = Modifier.fillMaxWidth().height(PoulpySize.button),
         ) {
-            Icon(Icons.Filled.EditCalendar, contentDescription = null)
+            Icon(Lucide.CalendarPlus, contentDescription = null)
             Text(stringResource(R.string.workout_plan), fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 8.dp))
         }
     }

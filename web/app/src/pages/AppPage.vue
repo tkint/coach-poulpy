@@ -3,7 +3,7 @@
 // someone in, then the sidebar shell with the profile, the only screen so far. Admins get a link to
 // /admin at the bottom of the sidebar, just above themselves.
 import { onMounted, ref } from 'vue'
-import { PanelLeft, LogOut, ShieldCheck, User, Check } from 'lucide-vue-next'
+import { Check, LogOut, PanelLeft, ShieldCheck, UserRound } from '@lucide/vue'
 import { CpAvatar, CpBadge, CpButton, CpCard, CpDrawer, CpDrawerItem, CpErrorNote, CpNavMenu, poulpyDrawings } from '@coach-poulpy/ui'
 import AppSignInPage from './AppSignInPage.vue'
 import { requestPasswordReset } from '../api'
@@ -74,7 +74,7 @@ async function sendResetLink() {
       </div>
       <div class="w-full grow px-2">
         <CpNavMenu>
-          <CpDrawerItem :label="t('app.profileTitle')" active><template #icon><User class="size-5 shrink-0" aria-hidden="true" /></template></CpDrawerItem>
+          <CpDrawerItem :label="t('app.profileTitle')" active><template #icon><UserRound class="size-5 shrink-0" aria-hidden="true" /></template></CpDrawerItem>
         </CpNavMenu>
       </div>
       <div class="flex w-full flex-col gap-2 p-2">

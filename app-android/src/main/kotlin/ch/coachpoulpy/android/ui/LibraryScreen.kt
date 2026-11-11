@@ -20,14 +20,6 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.List
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.EditCalendar
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -165,7 +157,7 @@ private fun Workouts(
             body = stringResource(R.string.library_emptyBody),
             button = stringResource(R.string.library_buildFirst),
             onClick = onNew,
-            buttonIcon = Icons.Filled.Add,
+            buttonIcon = Lucide.Plus,
             poulpySize = 120.dp,
             modifier = Modifier.padding(start = PoulpySpace.lg, end = PoulpySpace.lg, top = 16.dp),
         )
@@ -193,7 +185,7 @@ private fun Workouts(
                     Box {
                         TextButton(onClick = { sorting = true }) {
                             Text(stringResource(sort.label), fontWeight = FontWeight.ExtraBold)
-                            Icon(Icons.Filled.ArrowDropDown, contentDescription = null)
+                            Icon(Lucide.ChevronDown, contentDescription = null)
                         }
                         DropdownMenu(expanded = sorting, onDismissRequest = { sorting = false }) {
                             LibrarySort.entries.forEach { option ->
@@ -233,7 +225,7 @@ private fun Workouts(
         }
         ExtendedFloatingActionButton(
             onClick = onNew,
-            icon = { Icon(Icons.Filled.Add, contentDescription = null) },
+            icon = { Icon(Lucide.Plus, contentDescription = null) },
             text = { Text(stringResource(R.string.library_newWorkout)) },
             modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
         )
@@ -297,20 +289,20 @@ private fun WorkoutCard(row: LibraryRow, onOpen: () -> Unit, onStart: () -> Unit
                     Note(row)
                 }
                 FilledTonalIconButton(onClick = onStart, modifier = Modifier.size(44.dp)) {
-                    Icon(Icons.Filled.PlayArrow, contentDescription = stringResource(R.string.action_start) + " " + row.name)
+                    Icon(Lucide.Play, contentDescription = stringResource(R.string.action_start) + " " + row.name)
                 }
             }
         }
         DropdownMenu(expanded = menu, onDismissRequest = { menu = false }, offset = DpOffset(12.dp, 4.dp)) {
             DropdownMenuItem(
                 text = { Text(stringResource(R.string.library_planDay)) },
-                leadingIcon = { Icon(Icons.Filled.EditCalendar, contentDescription = null) },
+                leadingIcon = { Icon(Lucide.CalendarPlus, contentDescription = null) },
                 onClick = { menu = false; onPlan() },
             )
             if (row.editable) {
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.action_copy)) },
-                    leadingIcon = { Icon(Icons.Filled.ContentCopy, contentDescription = null) },
+                    leadingIcon = { Icon(Lucide.Copy, contentDescription = null) },
                     onClick = { menu = false; onCopy() },
                 )
             }
@@ -363,6 +355,6 @@ private val LibrarySort.label: Int
 
 internal val WorkoutFormat.icon: ImageVector
     get() = when (this) {
-        WorkoutFormat.CIRCUIT -> Icons.Filled.Repeat
-        WorkoutFormat.SETS -> Icons.AutoMirrored.Filled.List
+        WorkoutFormat.CIRCUIT -> Lucide.Repeat
+        WorkoutFormat.SETS -> Lucide.List
     }

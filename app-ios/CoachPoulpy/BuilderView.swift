@@ -52,7 +52,7 @@ struct BuilderView: View {
                             partBlock(part)
                         }
                         Button { addingPart = true } label: {
-                            dashedTile(Text("builder.addPart"), systemImage: "plus", height: 56)
+                            dashedTile(Text("builder.addPart"), icon: .plus, height: 56)
                         }
                         .buttonStyle(.plain)
                     }
@@ -77,7 +77,7 @@ struct BuilderView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button { dismiss() } label: {
-                        Image(systemName: "xmark").font(.system(size: 17, weight: .bold))
+                        LucideIcon(.x, size: 20)
                     }
                     .foregroundStyle(PoulpyColor.onSurface)
                     .accessibilityLabel(Text("action.close"))
@@ -150,13 +150,13 @@ struct BuilderView: View {
     private func formatLine(_ format: WorkoutFormat) -> some View {
         HStack(spacing: 10) {
             fieldLabel("builder.format")
-            Label(state.formatLabel, systemImage: formatIcon(format))
+            Label(state.formatLabel, lucide: formatIcon(format))
                 .font(.poulpy(.subheadline).weight(.heavy))
                 .foregroundStyle(PoulpyColor.onPrimaryContainer)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 6)
                 .background(PoulpyColor.primaryContainer, in: Capsule())
-            Image(systemName: "lock.fill").font(.system(size: 13, weight: .bold)).foregroundStyle(PoulpyColor.onSurfaceVariant).accessibilityHidden(true)
+            LucideIcon(.lock, size: 16).foregroundStyle(PoulpyColor.onSurfaceVariant).accessibilityHidden(true)
             Text("builder.formatLocked").font(.poulpy(.caption)).foregroundStyle(PoulpyColor.onSurfaceVariant)
         }
     }
@@ -189,17 +189,17 @@ struct BuilderView: View {
             if part.canMoveUp || part.canMoveDown || part.canDelete {
                 Menu {
                     if part.canMoveUp {
-                        Button { model.movePartUp(key: part.key) } label: { Label("builder.moveUp", systemImage: "arrow.up") }
+                        Button { model.movePartUp(key: part.key) } label: { Label("builder.moveUp", lucide: .arrowUp) }
                     }
                     if part.canMoveDown {
-                        Button { model.movePartDown(key: part.key) } label: { Label("builder.moveDown", systemImage: "arrow.down") }
+                        Button { model.movePartDown(key: part.key) } label: { Label("builder.moveDown", lucide: .arrowDown) }
                     }
                     if part.canDelete {
                         Divider()
-                        Button(role: .destructive) { model.removePart(key: part.key) } label: { Label("builder.delete", systemImage: "trash") }
+                        Button(role: .destructive) { model.removePart(key: part.key) } label: { Label("builder.delete", lucide: .trash) }
                     }
                 } label: {
-                    Image(systemName: "ellipsis").font(.system(size: 17, weight: .bold)).frame(width: 44, height: 44)
+                    LucideIcon(.ellipsisVertical, size: 20).frame(width: 44, height: 44)
                 }
                 .foregroundStyle(PoulpyColor.onSurfaceVariant)
                 .accessibilityLabel(Text(L("builder.moreActions %@", part.name)))
@@ -227,29 +227,29 @@ struct BuilderView: View {
                     canMoveDown: group.canMoveDown,
                     onMove: { move(group.key, by: $0) }
                 )
-                Image(systemName: "repeat").font(.system(size: 17, weight: .bold)).foregroundStyle(PoulpyColor.primary)
+                LucideIcon(.repeat, size: 20).foregroundStyle(PoulpyColor.primary)
                 Text("builder.repeat")
                     .font(.custom(PoulpyFontFace.baloo2Bold, size: 19, relativeTo: .headline))
                     .foregroundStyle(PoulpyColor.onPrimaryContainer)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 HStack(spacing: 4) {
-                    timesButton("minus", "builder.repeatFewer") { model.setRepeatTimes(key: group.key, times: group.times - 1) }
+                    timesButton(.minus, "builder.repeatFewer") { model.setRepeatTimes(key: group.key, times: group.times - 1) }
                     Text(group.timesLabel)
                         .font(.poulpy(.subheadline).weight(.heavy))
                         .monospacedDigit()
                         .foregroundStyle(PoulpyColor.onPrimaryContainer)
                         .frame(minWidth: 58)
-                    timesButton("plus", "builder.repeatMore") { model.setRepeatTimes(key: group.key, times: group.times + 1) }
+                    timesButton(.plus, "builder.repeatMore") { model.setRepeatTimes(key: group.key, times: group.times + 1) }
                 }
                 .padding(4)
                 .background(PoulpyColor.surface.opacity(0.6), in: Capsule())
                 Menu {
-                    Button { model.duplicate(key: group.key) } label: { Label("builder.duplicate", systemImage: "plus.square.on.square") }
+                    Button { model.duplicate(key: group.key) } label: { Label("builder.duplicate", lucide: .copy) }
                     moveToPartMenu(group.key, from: partKey, parts: state.parts, model: model)
                     Divider()
-                    Button(role: .destructive) { model.remove(key: group.key) } label: { Label("builder.delete", systemImage: "trash") }
+                    Button(role: .destructive) { model.remove(key: group.key) } label: { Label("builder.delete", lucide: .trash) }
                 } label: {
-                    Image(systemName: "ellipsis").font(.system(size: 17, weight: .bold)).frame(width: 44, height: 44)
+                    LucideIcon(.ellipsisVertical, size: 20).frame(width: 44, height: 44)
                 }
                 .foregroundStyle(PoulpyColor.onSurfaceVariant)
                 .accessibilityLabel(Text("builder.repeatActions"))
@@ -270,10 +270,9 @@ struct BuilderView: View {
         .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).strokeBorder(PoulpyColor.primaryContainer, lineWidth: 1.5))
     }
 
-    private func timesButton(_ symbol: String, _ description: LocalizedStringKey, _ action: @escaping () -> Void) -> some View {
+    private func timesButton(_ symbol: Lucide, _ description: LocalizedStringKey, _ action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            Image(systemName: symbol)
-                .font(.system(size: 15, weight: .heavy))
+            LucideIcon(symbol, size: 18)
                 .foregroundStyle(PoulpyColor.primary)
                 .frame(width: 36, height: 36)
                 .background(PoulpyColor.surface, in: Circle())
@@ -286,20 +285,20 @@ struct BuilderView: View {
     /// list; a rest, or a repeat at the end of a part (none inside a repeat), is added right away.
     private func addStepButton(_ label: Text, height: CGFloat, part: String, repeatKey: String?) -> some View {
         Menu {
-            Button { picking = PickTarget(partKey: part, repeatKey: repeatKey, role: .work) } label: { Label("builder.addExercise", systemImage: "dumbbell") }
-            Button { picking = PickTarget(partKey: part, repeatKey: repeatKey, role: .recover) } label: { Label("builder.addRecover", systemImage: "figure.walk") }
-            Button { model.addRest(partKey: part, repeatKey: repeatKey) } label: { Label("builder.addRest", systemImage: "timer") }
+            Button { picking = PickTarget(partKey: part, repeatKey: repeatKey, role: .work) } label: { Label("builder.addExercise", lucide: .dumbbell) }
+            Button { picking = PickTarget(partKey: part, repeatKey: repeatKey, role: .recover) } label: { Label("builder.addRecover", lucide: .footprints) }
+            Button { model.addRest(partKey: part, repeatKey: repeatKey) } label: { Label("builder.addRest", lucide: .timer) }
             if repeatKey == nil {
-                Button { model.addRepeat(partKey: part) } label: { Label("builder.addRepeat", systemImage: "repeat") }
+                Button { model.addRepeat(partKey: part) } label: { Label("builder.addRepeat", lucide: .repeat) }
             }
         } label: {
-            dashedTile(label, systemImage: "plus", height: height)
+            dashedTile(label, icon: .plus, height: height)
         }
         .buttonStyle(.plain)
     }
 
-    private func dashedTile(_ label: Text, systemImage: String, height: CGFloat) -> some View {
-        Label { label } icon: { Image(systemName: systemImage) }
+    private func dashedTile(_ label: Text, icon: Lucide, height: CGFloat) -> some View {
+        Label { label } icon: { LucideIcon(icon) }
             .font(.poulpy(height < 56 ? .subheadline : .body).weight(.heavy))
             .foregroundStyle(PoulpyColor.primary)
             .frame(maxWidth: .infinity, minHeight: height)
@@ -346,7 +345,7 @@ private func moveToPartMenu(_ key: String, from partKey: String, parts: [Builder
                 Button(part.name) { model.moveToPart(key: key, partKey: part.key) }
             }
         } label: {
-            Label("builder.moveToPart", systemImage: "arrow.right.doc.on.clipboard")
+            Label("builder.moveToPart", lucide: .folderInput)
         }
     }
 }
@@ -385,8 +384,7 @@ private struct FormatSheet: View {
         return Button { chosen = option.format } label: {
             VStack(alignment: .leading, spacing: 6) {
                 HStack(spacing: 10) {
-                    Image(systemName: formatIcon(option.format))
-                        .font(.system(size: 16, weight: .bold))
+                    LucideIcon(formatIcon(option.format), size: 20)
                         .foregroundStyle(selected ? PoulpyColor.onPrimary : PoulpyColor.onPrimaryContainer)
                         .frame(width: 36, height: 36)
                         .background(selected ? PoulpyColor.primary : PoulpyColor.primaryContainer, in: Circle())
@@ -505,15 +503,14 @@ private struct MoveChevrons: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            chevron("chevron.up", upLabel, enabled: canMoveUp) { onMove(-1) }
-            chevron("chevron.down", downLabel, enabled: canMoveDown) { onMove(1) }
+            chevron(.chevronUp, upLabel, enabled: canMoveUp) { onMove(-1) }
+            chevron(.chevronDown, downLabel, enabled: canMoveDown) { onMove(1) }
         }
     }
 
-    private func chevron(_ symbol: String, _ label: Text, enabled: Bool, action: @escaping () -> Void) -> some View {
+    private func chevron(_ symbol: Lucide, _ label: Text, enabled: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            Image(systemName: symbol)
-                .font(.system(size: 16, weight: .heavy))
+            LucideIcon(symbol, size: 20)
                 .foregroundStyle(enabled ? PoulpyColor.primary : PoulpyColor.outline)
                 .frame(width: 44, height: 32)
                 .contentShape(Rectangle())
@@ -592,7 +589,7 @@ private struct EntryCard: View {
                 }
                 if open, !row.isRest, let onDetails {
                     Button(action: onDetails) {
-                        Label("builder.details", systemImage: "info.circle")
+                        Label("builder.details", lucide: .info)
                             .font(.poulpy(.subheadline).weight(.heavy))
                             .foregroundStyle(PoulpyColor.onSurface)
                             .padding(.horizontal, 14)
@@ -663,19 +660,19 @@ private struct EntryCard: View {
     /// Edit, duplicate, the moves into or out of a repeat when they apply, the move to another part, and delete.
     private var stepMenu: some View {
         Menu {
-            Button(action: onOpen) { Label("builder.edit", systemImage: "pencil") }
-            Button { model.duplicate(key: row.key) } label: { Label("builder.duplicate", systemImage: "plus.square.on.square") }
+            Button(action: onOpen) { Label("builder.edit", lucide: .pencil) }
+            Button { model.duplicate(key: row.key) } label: { Label("builder.duplicate", lucide: .copy) }
             if row.canMoveIntoRepeat {
-                Button { model.moveIntoRepeatAbove(key: row.key) } label: { Label("builder.moveIntoRepeat", systemImage: "repeat") }
+                Button { model.moveIntoRepeatAbove(key: row.key) } label: { Label("builder.moveIntoRepeat", lucide: .repeat) }
             }
             if row.repeatKey != nil {
-                Button { model.moveOutOfRepeat(key: row.key) } label: { Label("builder.moveOutOfRepeat", systemImage: "rectangle.portrait.and.arrow.right") }
+                Button { model.moveOutOfRepeat(key: row.key) } label: { Label("builder.moveOutOfRepeat", lucide: .logOut) }
             }
             moveToPartMenu(row.key, from: row.partKey, parts: parts, model: model)
             Divider()
-            Button(role: .destructive) { model.remove(key: row.key) } label: { Label("builder.delete", systemImage: "trash") }
+            Button(role: .destructive) { model.remove(key: row.key) } label: { Label("builder.delete", lucide: .trash) }
         } label: {
-            Image(systemName: "ellipsis").font(.system(size: 17, weight: .bold)).frame(width: 44, height: 44)
+            LucideIcon(.ellipsisVertical, size: 20).frame(width: 44, height: 44)
         }
         .foregroundStyle(PoulpyColor.onSurfaceVariant)
         .accessibilityLabel(Text(L("builder.moreActions %@", row.name)))
@@ -692,7 +689,7 @@ private struct EntryCard: View {
                     Text(value).font(.poulpy(.body).weight(.bold)).lineLimit(1).foregroundStyle(PoulpyColor.onSurface)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                Image(systemName: "chevron.down").font(.system(size: 14, weight: .bold)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+                LucideIcon(.chevronDown, size: 16).foregroundStyle(PoulpyColor.onSurfaceVariant)
             }
             .padding(.leading, 12)
             .padding(.trailing, 10)
@@ -724,7 +721,7 @@ private struct EntryCard: View {
     ) -> some View {
         cell(label) {
             HStack(spacing: 2) {
-                roundStep("minus", "builder.less", less)
+                roundStep(.minus, "builder.less", less)
                 if let onValue {
                     Button(action: onValue) { stepperValue(value, tappable: true) }
                         .buttonStyle(.plain)
@@ -732,7 +729,7 @@ private struct EntryCard: View {
                 } else {
                     stepperValue(value, tappable: false)
                 }
-                roundStep("plus", "builder.more", more)
+                roundStep(.plus, "builder.more", more)
             }
         }
     }
@@ -796,10 +793,9 @@ private struct EntryCard: View {
         }
     }
 
-    private func roundStep(_ symbol: String, _ description: LocalizedStringKey, _ action: @escaping () -> Void) -> some View {
+    private func roundStep(_ symbol: Lucide, _ description: LocalizedStringKey, _ action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            Image(systemName: symbol)
-                .font(.system(size: 18, weight: .heavy))
+            LucideIcon(symbol, size: 22)
                 .foregroundStyle(PoulpyColor.primary)
                 .frame(width: 44, height: 44)
                 .background(PoulpyColor.surface, in: Circle())
@@ -949,7 +945,7 @@ private struct ValueSheet: View {
                 }
             }
             if invalid {
-                Label("builder.valueInvalid", systemImage: "exclamationmark.circle")
+                Label("builder.valueInvalid", lucide: .circleExclamationPoint)
                     .font(.poulpy(.caption))
                     .foregroundStyle(PoulpyColor.error)
             }

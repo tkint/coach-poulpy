@@ -56,19 +56,19 @@ struct HistoryView: View {
 
     private var viewSwitch: some View {
         HStack(spacing: 0) {
-            switchButton(.calendar, "history.viewCalendar", systemImage: "calendar")
-            switchButton(.stats, "history.viewStats", systemImage: "chart.bar")
+            switchButton(.calendar, "history.viewCalendar", icon: .calendar)
+            switchButton(.stats, "history.viewStats", icon: .chartNoAxesColumn)
         }
         .padding(4)
         .background(PoulpyColor.surfaceVariant, in: Capsule())
     }
 
-    private func switchButton(_ item: HistoryTab, _ title: LocalizedStringKey, systemImage: String) -> some View {
+    private func switchButton(_ item: HistoryTab, _ title: LocalizedStringKey, icon: Lucide) -> some View {
         let on = tab == item
         return Button {
             tab = item
         } label: {
-            Label(title, systemImage: systemImage)
+            Label(title, lucide: icon)
                 .font(.poulpy(.subheadline).weight(.heavy))
                 .frame(maxWidth: .infinity)
                 .frame(height: 36)
@@ -140,7 +140,7 @@ struct HistoryView: View {
         VStack(spacing: 4) {
             HStack {
                 Button { changeMonth(by: -1, state) } label: {
-                    Image(systemName: "chevron.left").font(.system(size: 18, weight: .bold)).frame(width: 44, height: 44)
+                    LucideIcon(.chevronLeft, size: 22).frame(width: 44, height: 44)
                 }
                 .disabled(!month.canGoBack)
                 .accessibilityLabel(Text("history.previousMonth"))
@@ -153,7 +153,7 @@ struct HistoryView: View {
                 }
                 Spacer()
                 Button { changeMonth(by: 1, state) } label: {
-                    Image(systemName: "chevron.right").font(.system(size: 18, weight: .bold)).frame(width: 44, height: 44)
+                    LucideIcon(.chevronRight, size: 22).frame(width: 44, height: 44)
                 }
                 .disabled(!month.canGoForward)
                 .accessibilityLabel(Text("history.nextMonth"))
@@ -248,8 +248,7 @@ struct HistoryView: View {
 
     private func sessionCard(_ session: SessionRow, highlighted: Bool) -> some View {
         HStack(spacing: 12) {
-            Image(systemName: session.kind == .treadmill ? "figure.run" : "dumbbell")
-                .font(.system(size: 18, weight: .semibold))
+            LucideIcon(session.kind == .treadmill ? .gauge : .dumbbell, size: 22)
                 .foregroundStyle(PoulpyColor.onPrimaryContainer)
                 .frame(width: 44, height: 44)
                 .background(PoulpyColor.primaryContainer, in: Circle())
@@ -443,12 +442,12 @@ struct SessionDetailView: View {
             Button {
                 sharing = true
             } label: {
-                Label("shareSession.title", systemImage: "square.and.arrow.up")
+                Label("shareSession.title", lucide: .share2)
             }
             Button(role: .destructive) {
                 deleting = true
             } label: {
-                Label("action.delete", systemImage: "trash")
+                Label("action.delete", lucide: .trash)
             }
         }
         .sheet(isPresented: $sharing) {
@@ -486,13 +485,13 @@ struct SessionDetailView: View {
                     sharing = false
                     saving = graph.sessionFitFile(sessionId: session.id).map { FitDocument($0) }
                 } label: {
-                    shareFormat("shareSession.fit", "shareSession.fitNote", systemImage: "square.and.arrow.down")
+                    shareFormat("shareSession.fit", "shareSession.fitNote", icon: .download)
                 }
                 .buttonStyle(.plain)
                 Divider().overlay(PoulpyColor.outline)
                 if let card = graph.sessionShareCard(sessionId: session.id, units: units, languageCode: Language.code) {
                     ShareLink(item: ShareCardItem(card: card, scheme: colorScheme), preview: SharePreview(session.title)) {
-                        shareFormat("shareSession.image", "shareSession.imageNote", systemImage: "photo")
+                        shareFormat("shareSession.image", "shareSession.imageNote", icon: .image)
                     }
                     .buttonStyle(.plain)
                 }
@@ -504,9 +503,9 @@ struct SessionDetailView: View {
         .presentationDetents([.height(260)])
     }
 
-    private func shareFormat(_ title: LocalizedStringKey, _ note: LocalizedStringKey, systemImage: String) -> some View {
+    private func shareFormat(_ title: LocalizedStringKey, _ note: LocalizedStringKey, icon: Lucide) -> some View {
         HStack(spacing: 14) {
-            Image(systemName: systemImage).frame(width: 24)
+            LucideIcon(icon).frame(width: 24)
             VStack(alignment: .leading, spacing: 2) {
                 Text(title).font(.poulpy(.body).weight(.bold)).foregroundStyle(PoulpyColor.onSurface)
                 Text(note).font(.poulpy(.footnote)).foregroundStyle(PoulpyColor.onSurfaceVariant)

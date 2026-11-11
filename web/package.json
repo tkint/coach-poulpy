@@ -2,9 +2,12 @@
   "name": "coach-poulpy-web",
   "private": true,
   "type": "module",
-  "workspaces": ["ui", "app"],
+  "workspaces": [
+    "ui",
+    "app"
+  ],
   "scripts": {
-    "build": "npm run check -w ui && npm run build -w app",
+    "build": "npm run build -w ui && npm run build -w app",
     "dev": "npm run dev -w app"
   }
 }

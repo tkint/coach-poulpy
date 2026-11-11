@@ -151,8 +151,10 @@ jobs:
         run: node ../design/build-body-map.mjs --check
       - name: Check the generated body map shapes match design/body-map.json
         run: node ../design/build-body-map-shapes.mjs --check
-      - name: Check the HTML mockups use only the design tokens and link only files in the repo
-        run: node ../design/check-mockups.mjs
+      - name: Check the apps' Lucide icons match design/icons
+        run: node ../design/build-icons.mjs --check
       - run: npm ci
-      - name: Check the web design system's CSS is current (ADR 0023), then build the web app
+      - name: Build the web design system CSS and web app
         run: npm run build
+      - name: Check the HTML mockups use only the design tokens, link only files in the repo and draw Lucide icons
+        run: node ../design/check-mockups.mjs

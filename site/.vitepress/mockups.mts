@@ -6,7 +6,7 @@ import { devices, groupOf, platformOf, platforms, slug, stages } from './mockup-
 export { devices, platforms, stages }
 
 // Lists the mockups from the tags each file carries in its <head> (ADR 0016): no index to keep in step.
-// Shared by the sidebar, the gallery pages and the one page per mockup.
+// Shared by the sidebar, the gallery pages and the one page per app view.
 
 export interface Mockup {
   stage: 'agreed' | 'drafts'
@@ -21,12 +21,12 @@ export interface Mockup {
   viewport: number
   /** The file, from the repo root and from the site's public folder. */
   path: string
-  /** The heading it is listed under: its section, apart for tablets. */
+  /** The app view the mockup belongs to. */
   group: string
   sectionSlug: string
-  /** The page of its section, which shows every state of it. */
+  /** The page for this app view, showing its available states. */
   sectionPath: string
-  /** The mockup itself: its place on the page of its section. */
+  /** The mockup itself: its place on the app-view page. */
   link: string
 }
 

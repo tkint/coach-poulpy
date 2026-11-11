@@ -17,13 +17,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.automirrored.filled.LibraryBooks
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.FitnessCenter
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
@@ -133,7 +126,7 @@ fun HomeScreen(
             item(key = "library") {
                 TextButton(onClick = onOpenLibrary) {
                     Text(stringResource(R.string.home_somethingElse), fontWeight = FontWeight.ExtraBold)
-                    Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null)
+                    Icon(Lucide.ChevronRight, contentDescription = null)
                 }
             }
         }
@@ -169,7 +162,7 @@ private fun PlannedCard(item: TodayItem, onOpen: () -> Unit, onGo: () -> Unit, o
         Column(Modifier.padding(PoulpySpace.sm), verticalArrangement = Arrangement.spacedBy(PoulpySpace.sm)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(PoulpySpace.sm)) {
                 Box(Modifier.size(44.dp).clip(CircleShape).background(colors.primaryContainer), contentAlignment = Alignment.Center) {
-                    Icon(Icons.Filled.FitnessCenter, contentDescription = null, tint = colors.onPrimaryContainer)
+                    Icon(Lucide.Dumbbell, contentDescription = null, tint = colors.onPrimaryContainer)
                 }
                 Column(Modifier.weight(1f)) {
                     Text(item.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold)
@@ -191,7 +184,7 @@ private fun PlannedCard(item: TodayItem, onOpen: () -> Unit, onGo: () -> Unit, o
                         border = BorderStroke(1.dp, colors.error),
                         modifier = Modifier.weight(1f).height(PoulpySize.button),
                     ) {
-                        Icon(Icons.Filled.Delete, contentDescription = null, tint = colors.error)
+                        Icon(Lucide.Trash, contentDescription = null, tint = colors.error)
                         Text(
                             stringResource(R.string.home_discard),
                             color = colors.error,
@@ -205,7 +198,7 @@ private fun PlannedCard(item: TodayItem, onOpen: () -> Unit, onGo: () -> Unit, o
                     }
                 }
                 Button(onClick = onGo, modifier = Modifier.weight(1.4f).height(PoulpySize.button)) {
-                    Icon(Icons.Filled.PlayArrow, contentDescription = null)
+                    Icon(Lucide.Play, contentDescription = null)
                     // "Open", not "Resume": the session comes back paused.
                     Text(
                         stringResource(if (inProgress) R.string.home_openSession else R.string.action_start),
@@ -249,13 +242,13 @@ private fun DoneCard(item: TodayItem, onClick: () -> Unit) {
             horizontalArrangement = Arrangement.spacedBy(PoulpySpace.sm),
         ) {
             Box(Modifier.size(44.dp).clip(CircleShape).background(PoulpyTheme.extraColors.success), contentAlignment = Alignment.Center) {
-                Icon(Icons.Filled.Check, contentDescription = stringResource(R.string.workout_done), tint = colors.surface)
+                Icon(Lucide.Check, contentDescription = stringResource(R.string.workout_done), tint = colors.surface)
             }
             Column(Modifier.weight(1f)) {
                 Text(session.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold)
                 Text("${time(session.startedAtMillis)} · ${clock(session.activeSeconds)}", style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
             }
-            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = colors.onSurfaceVariant)
+            Icon(Lucide.ChevronRight, contentDescription = null, tint = colors.onSurfaceVariant)
         }
     }
 }
@@ -290,7 +283,7 @@ private fun NextCard(next: NextSession, onClick: () -> Unit) {
                 Text(next.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold)
                 Text(whenText, style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
             }
-            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = colors.onSurfaceVariant)
+            Icon(Lucide.ChevronRight, contentDescription = null, tint = colors.onSurfaceVariant)
         }
     }
 }
@@ -322,7 +315,7 @@ private fun RestCard(state: HomeState, onOpenLibrary: () -> Unit) {
             style = MaterialTheme.typography.bodyMedium,
         )
         Button(onClick = onOpenLibrary, modifier = Modifier.padding(top = PoulpySpace.xs).height(PoulpySize.button)) {
-            Icon(Icons.AutoMirrored.Filled.LibraryBooks, contentDescription = null)
+            Icon(Lucide.LibraryBig, contentDescription = null)
             Text(stringResource(R.string.home_openLibrary), fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 8.dp))
         }
     }

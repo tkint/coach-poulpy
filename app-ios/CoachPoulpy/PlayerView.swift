@@ -75,7 +75,7 @@ struct PlayerView: View {
     @ViewBuilder
     private func ready(_ model: PlayerModel, _ state: PlayerState) -> some View {
         HStack {
-            PlayerSteps.iconButton("xmark", "action.back") { dismiss() }
+            PlayerSteps.iconButton(.x, "action.back") { dismiss() }
             Spacer()
         }
         Spacer()
@@ -92,7 +92,7 @@ struct PlayerView: View {
         Button {
             model.start()
         } label: {
-            Label("player.start", systemImage: "play.fill")
+            Label("player.start", lucide: .play)
                 .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 19, relativeTo: .body))
                 .foregroundStyle(PoulpyColor.onPrimary)
                 .frame(maxWidth: .infinity, minHeight: 64)
@@ -187,7 +187,7 @@ struct PlayerView: View {
         }
         if let card = model.shareCard(units: units) {
             ShareLink(item: ShareCardItem(card: card, scheme: colorScheme), preview: SharePreview(card.title)) {
-                Label("shareImage.button", systemImage: "square.and.arrow.up").frame(maxWidth: .infinity, minHeight: 44)
+                Label("shareImage.button", lucide: .share2).frame(maxWidth: .infinity, minHeight: 44)
             }
             .buttonStyle(.bordered)
         }

@@ -20,16 +20,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Bluetooth
-import androidx.compose.material.icons.filled.Contrast
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Height
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.MonitorWeight
 import androidx.compose.material3.Button
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -203,24 +193,24 @@ internal fun SettingsHub(graph: AppGraph, language: String, onPage: (SettingsPag
                         if (summary.isNotEmpty()) Text(summary, style = MaterialTheme.typography.bodyMedium)
                         Text(stringResource(R.string.settings_editProfile), style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.ExtraBold)
                     }
-                    Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null)
+                    Icon(Lucide.ChevronRight, contentDescription = null)
                 }
             }
             SectionLabel(R.string.account_sectionLabel)
             SettingsList {
                 AccountRow(onPage = { onPage(SettingsPage.ACCOUNT) }, onFlow = onAccount) { title, subtitle, onClick ->
-                    SettingsRow(Icons.Filled.AccountCircle, title, subtitle, onClick)
+                    SettingsRow(Lucide.UserRound, title, subtitle, onClick)
                 }
             }
             SectionLabel(R.string.settings_body)
             SettingsList {
                 SettingsRow(
-                    Icons.Filled.Height, stringResource(R.string.body_height),
+                    Lucide.MoveVertical, stringResource(R.string.body_height),
                     height.latest?.let { BodyDisplay.height(it.value, units.units, language) } ?: stringResource(R.string.body_nothingLogged),
                 ) { onPage(SettingsPage.HEIGHT) }
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 SettingsRow(
-                    Icons.Filled.MonitorWeight, stringResource(R.string.body_weight),
+                    Lucide.Weight, stringResource(R.string.body_weight),
                     weight.latest?.let { BodyDisplay.weight(it.value, units.units, language) } ?: stringResource(R.string.body_nothingLogged),
                 ) { onPage(SettingsPage.WEIGHT) }
             }
@@ -233,9 +223,9 @@ internal fun SettingsHub(graph: AppGraph, language: String, onPage: (SettingsPag
                     LanguageChoice.FRENCH -> "Français"
                 }
                 val system = stringResource(if (units.units == UnitSystem.METRIC) R.string.units_metric else R.string.units_imperial)
-                SettingsRow(Icons.Filled.Contrast, stringResource(R.string.settings_appearanceUnits), "$theme · $languageName · $system") { onPage(SettingsPage.PREFERENCES) }
+                SettingsRow(Lucide.Contrast, stringResource(R.string.settings_appearanceUnits), "$theme · $languageName · $system") { onPage(SettingsPage.PREFERENCES) }
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                SettingsRow(Icons.Filled.Bluetooth, stringResource(R.string.settings_devices), null) { onPage(SettingsPage.DEVICES) }
+                SettingsRow(Lucide.Gauge, stringResource(R.string.settings_devices), null) { onPage(SettingsPage.DEVICES) }
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 var appIcon by remember { mutableStateOf(AppIconSwitch.current(context)) }
                 var pickingIcon by remember { mutableStateOf(false) }
@@ -255,7 +245,7 @@ internal fun SettingsHub(graph: AppGraph, language: String, onPage: (SettingsPag
             }
             SectionLabel(R.string.settings_about)
             SettingsList {
-                SettingsRow(Icons.Filled.Info, stringResource(R.string.settings_aboutApp), stringResource(R.string.settings_aboutLine, BuildConfig.VERSION_NAME), onClick = null)
+                SettingsRow(Lucide.Info, stringResource(R.string.settings_aboutApp), stringResource(R.string.settings_aboutLine, BuildConfig.VERSION_NAME), onClick = null)
             }
         }
     }
@@ -288,7 +278,7 @@ private fun SettingsRow(leading: @Composable () -> Unit, title: String, subtitle
                 Text(title, fontWeight = FontWeight.ExtraBold)
                 subtitle?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
             }
-            if (onClick != null) Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            if (onClick != null) Icon(Lucide.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
     if (onClick != null) Surface(onClick = onClick, color = MaterialTheme.colorScheme.surface, content = row) else row()
@@ -560,7 +550,7 @@ internal fun BodyScreen(graph: AppGraph, metric: BodyMetric, language: String, o
                 body = stringResource(if (isWeight) R.string.body_emptyWeightBody else R.string.body_emptyHeightBody),
                 button = stringResource(if (isWeight) R.string.body_logWeight else R.string.body_logHeight),
                 onClick = { logging = true },
-                buttonIcon = Icons.Filled.Add,
+                buttonIcon = Lucide.Plus,
             )
             return@SubPage
         }
@@ -625,7 +615,7 @@ internal fun BodyScreen(graph: AppGraph, metric: BodyMetric, language: String, o
                         Text(show(entry.value), fontWeight = FontWeight.ExtraBold, modifier = Modifier.weight(1f))
                         Text(mediumDate(entry.day.toJava()), color = colors.onSurfaceVariant)
                         IconButton(onClick = { model.delete(entry.day) }) {
-                            Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.body_deleteEntry, mediumDate(entry.day.toJava())))
+                            Icon(Lucide.Trash, contentDescription = stringResource(R.string.body_deleteEntry, mediumDate(entry.day.toJava())))
                         }
                     }
                 }
@@ -825,7 +815,7 @@ internal fun DevicesPage(graph: AppGraph, onBack: () -> Unit, onOpen: (DeviceRou
         modifier = modifier,
         action = {
             FilledTonalIconButton(onClick = { onOpen(DeviceRoute.Add) }, modifier = Modifier.size(48.dp)) {
-                Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.devices_add))
+                Icon(Lucide.Plus, contentDescription = stringResource(R.string.devices_add))
             }
         },
     ) { Devices(graph, onOpen) }

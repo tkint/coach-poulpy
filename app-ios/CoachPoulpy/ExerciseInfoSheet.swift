@@ -40,8 +40,7 @@ struct ExerciseInfoSheet: View {
                             }
                             Spacer(minLength: 0)
                             Button { dismiss() } label: {
-                                Image(systemName: "xmark")
-                                    .font(.system(size: 16, weight: .bold))
+                                LucideIcon(.x, size: 20)
                                     .foregroundStyle(PoulpyColor.onSurface)
                                     .frame(width: 44, height: 44)
                             }
@@ -78,7 +77,7 @@ struct ExerciseInfoSheet: View {
                 Button { onAction(detail.slug) } label: {
                     Group {
                         if adding {
-                            Label("exercise.addHere", systemImage: "plus")
+                            Label("exercise.addHere", lucide: .plus)
                         } else if let closeLabel {
                             Text(closeLabel)
                         }
@@ -128,8 +127,7 @@ struct ExerciseInfoSheet: View {
     private func variationsList(_ detail: ExerciseDetail) -> some View {
         HStack(alignment: .center) {
             Button { listing = false } label: {
-                Image(systemName: "chevron.left")
-                    .font(.system(size: 18, weight: .bold))
+                LucideIcon(.chevronLeft, size: 22)
                     .foregroundStyle(PoulpyColor.onSurface)
                     .frame(width: 44, height: 44)
             }
@@ -150,8 +148,7 @@ struct ExerciseInfoSheet: View {
 
     private var closeButton: some View {
         Button { dismiss() } label: {
-            Image(systemName: "xmark")
-                .font(.system(size: 16, weight: .bold))
+            LucideIcon(.x, size: 20)
                 .foregroundStyle(PoulpyColor.onSurface)
                 .frame(width: 44, height: 44)
         }

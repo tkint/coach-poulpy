@@ -17,11 +17,6 @@ import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.ErrorOutline
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -131,7 +126,7 @@ internal fun PoulpyTextField(
                 if (password) {
                     IconButton(onClick = { shown = !shown }) {
                         Icon(
-                            if (shown) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
+                            if (shown) Lucide.EyeOff else Lucide.Eye,
                             contentDescription = stringResource(if (shown) R.string.account_hidePassword else R.string.account_showPassword),
                             tint = colors.onSurfaceVariant,
                         )
@@ -150,7 +145,7 @@ internal fun PoulpyTextField(
 @Composable
 internal fun FieldError(text: String) {
     Row(Modifier.padding(horizontal = 4.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-        Icon(Icons.Filled.ErrorOutline, contentDescription = null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(18.dp))
+        Icon(Lucide.CircleExclamationPoint, contentDescription = null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(18.dp))
         Text(text, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.error)
     }
 }
@@ -236,7 +231,7 @@ internal fun SelectField(label: String, value: String, onClick: () -> Unit) {
                 Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Text(value, fontWeight = FontWeight.ExtraBold)
             }
-            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            Icon(Lucide.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }

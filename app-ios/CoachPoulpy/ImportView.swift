@@ -38,7 +38,7 @@ struct ImportView: View {
         VStack(alignment: .leading, spacing: 0) {
             HStack {
                 Button(action: onClose) {
-                    Image(systemName: "xmark").font(.system(size: 18, weight: .semibold))
+                    LucideIcon(.x, size: 22)
                 }
                 .accessibilityLabel(Text("action.close"))
                 Spacer()
@@ -73,7 +73,7 @@ struct ImportView: View {
                         Text("import.errorTitle").font(PoulpyFont.title)
                         // Crimson with an icon, never ember.
                         HStack(alignment: .top, spacing: 12) {
-                            Image(systemName: "exclamationmark.circle").font(.system(size: 22, weight: .semibold))
+                            LucideIcon(.circleExclamationPoint, size: 26)
                             Text(state.errorMessage).font(.poulpy(.callout).weight(.bold))
                         }
                         .foregroundStyle(PoulpyColor.error)
@@ -143,7 +143,7 @@ struct ImportPresenter: ViewModifier {
                     WorkoutPageView(graph: graph, workoutId: workout.id)
                         .toolbar {
                             ToolbarItem(placement: .navigationBarLeading) {
-                                Button { added = nil } label: { Image(systemName: "xmark") }
+                                Button { added = nil } label: { LucideIcon(.x) }
                                     .accessibilityLabel(Text("action.close"))
                             }
                         }

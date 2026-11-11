@@ -49,17 +49,17 @@ struct SettingsHub: View {
             AccountSection(account: account, onFlow: onAccount)
             Section("settings.body") {
                 NavigationLink(value: SettingsPage.height) {
-                    row("arrow.up.and.down", "body.height", height.value.latest.map { bodyText(.height, $0.value, units) } ?? L("body.nothingLogged"))
+                    row(.moveVertical, "body.height", height.value.latest.map { bodyText(.height, $0.value, units) } ?? L("body.nothingLogged"))
                 }
                 NavigationLink(value: SettingsPage.weight) {
-                    row("scalemass", "body.weight", weight.value.latest.map { bodyText(.weight, $0.value, units) } ?? L("body.nothingLogged"))
+                    row(.weight, "body.weight", weight.value.latest.map { bodyText(.weight, $0.value, units) } ?? L("body.nothingLogged"))
                 }
             }
             Section("settings.app") {
                 NavigationLink(value: SettingsPage.preferences) {
-                    row("circle.lefthalf.filled", "settings.appearanceUnits", "\(themeName(settings.value.theme)) · \(languageName(settings.value.language)) · \(unitsName(units))")
+                    row(.contrast, "settings.appearanceUnits", "\(themeName(settings.value.theme)) · \(languageName(settings.value.language)) · \(unitsName(units))")
                 }
-                NavigationLink(value: SettingsPage.devices) { row("antenna.radiowaves.left.and.right", "settings.devices", nil) }
+                NavigationLink(value: SettingsPage.devices) { row(.gauge, "settings.devices", nil) }
                 Button { pickingIcon = true } label: {
                     HStack(spacing: 12) {
                         Image(appIcon.drawing).resizable().scaledToFit().frame(width: 44, height: 44).accessibilityHidden(true)
@@ -68,13 +68,13 @@ struct SettingsHub: View {
                             Text(appIcon.label).font(.poulpy(.footnote)).foregroundStyle(PoulpyColor.onSurfaceVariant)
                         }
                         Spacer()
-                        Image(systemName: "chevron.right").font(.system(size: 13, weight: .semibold)).foregroundStyle(PoulpyColor.onSurfaceVariant.opacity(0.6))
+                        LucideIcon(.chevronRight, size: 16).foregroundStyle(PoulpyColor.onSurfaceVariant.opacity(0.6))
                     }
                     .frame(minHeight: 44)
                 }
             }
             Section("settings.about") {
-                row("info.circle", "settings.aboutApp", L("settings.aboutLine %@", Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "—"))
+                row(.info, "settings.aboutApp", L("settings.aboutLine %@", Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "—"))
             }
         }
         .sheet(isPresented: $pickingIcon) {
@@ -86,9 +86,9 @@ struct SettingsHub: View {
     }
 
     /// A leading icon, a bold title with a line under it.
-    private func row(_ symbol: String, _ title: LocalizedStringKey, _ subtitle: String?) -> some View {
+    private func row(_ symbol: Lucide, _ title: LocalizedStringKey, _ subtitle: String?) -> some View {
         HStack(spacing: 12) {
-            Image(systemName: symbol).font(.system(size: 20)).foregroundStyle(PoulpyColor.primary).frame(width: 26)
+            LucideIcon(symbol, size: 24).foregroundStyle(PoulpyColor.primary).frame(width: 26)
             VStack(alignment: .leading, spacing: 0) {
                 Text(title).font(.poulpy(.headline))
                 if let subtitle { Text(subtitle).font(.poulpy(.footnote)).foregroundStyle(PoulpyColor.onSurfaceVariant) }
@@ -403,7 +403,7 @@ struct BodyView: View {
                         title: Text(LocalizedStringKey(isWeight ? "body.emptyWeightTitle" : "body.emptyHeightTitle")),
                         message: Text(LocalizedStringKey(isWeight ? "body.emptyWeightBody" : "body.emptyHeightBody")),
                         button: Text(LocalizedStringKey(isWeight ? "body.logWeight" : "body.logHeight")),
-                        systemImage: "plus",
+                        icon: .plus,
                         poulpySize: 120
                     ) { logging = true }
                     .padding(.horizontal, PoulpySpace.lg)
@@ -471,7 +471,7 @@ struct BodyView: View {
                             Button(role: .destructive) {
                                 log.model.deleteOn(date: point.date)
                             } label: {
-                                Label("action.delete", systemImage: "trash")
+                                Label("action.delete", lucide: .trash)
                             }
                         }
                         .accessibilityAction(named: Text(L("body.deleteEntry %@", shown(point.date)))) { log.model.deleteOn(date: point.date) }

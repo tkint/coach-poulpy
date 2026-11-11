@@ -4,22 +4,132 @@ What a guest gets by signing up, and what the server and the phones do with an *
 
 ## Signing up and signing in
 
-- **Email and password only, for now.** Sign in with Apple and Google come later, each as one new authenticator; no route changes. Passwords are hashed with Argon2id.
-- **The email is confirmed before any data leaves the phone.** Signing up sends a link; until it is tapped, the phone keeps working as a guest and uploads nothing. A typo in the address can never tie health data to someone else's mailbox.
-- **The link can be opened anywhere**, on the phone or on a computer. While the app is in front and the email waits, the phone listens on a server-sent event stream, and the server tells it the moment the link is opened; the phone then signs in with the password it kept and shows Email confirmed in a sheet, over whichever tab is open. While a guided session plays or Live records, Email confirmed waits until it ends, so nothing covers the workout ([#319](https://github.com/tkint/coach-poulpy/issues/319)). A dropped stream is opened again 3 seconds later, after a check for what it missed, and the app checks once on each open too. The phone proves it is the one that signed up with a random key sent at sign-up, rather than by trying the password, which would count towards the 5 refused sign-ins that lock an address. The key follows only the link mailed with it, so it never tells who owns an address.
-- **Health data consent is asked at sign-up**, with a link to what is stored and why.
-- **Forgotten password**: the person asks for a reset link by email and chooses a new password; every phone is signed out.
-- **Mail goes out over plain SMTP** to an EU provider set in the server's settings, so the provider can change without a code change.
+- **Mobile sign-up uses email and password.** Sign in with Apple and Google are not implemented. Passwords are hashed with Argon2id.
+- **The email is confirmed before any data leaves the phone.** Until the link is opened, the phone remains a guest and uploads nothing. Health-data consent is required at sign-up.
+- **The confirmation link can open in the app or a browser.** The app keeps a random pending key and listens for the matching confirmation event. If the link opens in a browser, the event lets the waiting app sign in without repeatedly trying the password. It checks once on app open and after reconnecting too. The pending key identifies only that sign-up attempt; it does not reveal whether an address has an account.
+- **A confirmed phone signs in with the password it kept temporarily.** It stores access and refresh tokens in the platform's secure store, then begins sync. The confirmation sheet waits until a guided session or Live recording ends before appearing ([#319](https://github.com/tkint/coach-poulpy/issues/319)).
+- **Forgotten password**: the person requests a reset link by email and chooses a new password. The server revokes every device's sign-in.
+- **Sign-in never reveals whether an email has an account**: an unknown address and a wrong password receive the same refusal. A pending registration can resend its link or restart with another address; the old address remains unconfirmed, no data leaves the phone, and the response never reveals whether that address was already registered. Expired or used confirmation links have a separate recovery screen.
+- **Mail goes out over SMTP** to the provider configured on the server.
+
+### Mobile sign-up and email confirmation
+
+The app creates the pending account and keeps the password and a random pending key in its secure store. The email link can be opened on the phone or another device. The browser confirms the email but does not create a browser session; the waiting phone signs itself in when it hears the matching event.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Person
+    participant App as Mobile app
+    participant API as Account API
+    participant DB as Postgres
+    participant Mail as SMTP provider
+    participant Browser as Browser / email link
+
+    Person->>App: Submit email, password and health-data consent
+    App->>App: Generate pending key; keep pending credentials securely
+    App->>API: POST /api/v1/accounts (pendingKey)
+    API->>DB: Create unconfirmed account and confirmation watch
+    API->>Mail: Send /confirm-email#token link
+    API-->>App: 202 Accepted (same for existing addresses)
+    App->>API: POST /api/v1/accounts/confirmation-status
+    API-->>App: confirmed = false
+    App->>API: GET /api/v1/accounts/confirmation-events (Pending-Key header)
+    Person->>Browser: Open confirmation email link
+    Browser->>API: POST /api/v1/accounts/confirm (token)
+    API->>DB: Consume one-time token; mark email confirmed
+    API-->>Browser: 204 No Content
+    API-->>App: confirmed event on matching SSE stream
+    App->>API: POST /api/v1/accounts/confirmation-status (after event / reconnect)
+    API-->>App: confirmed = true
+    App->>API: POST /oauth/token (password grant)
+    API->>DB: Verify confirmed account and password
+    API-->>App: Access + refresh tokens
+    App->>App: Store tokens in Keychain / Android Keystore
+    App->>API: GET /api/v1/sync/pull, then POST /api/v1/sync/push
+    API-->>App: Account data and accepted guest data
+```
+
+If the link opens inside the app, the app calls the same confirmation endpoint directly and then signs in. The pending key is a confirmation-watch capability, not an access token. If the address is already confirmed, the API still answers sign-up with 202 but sends no new confirmation email.
+
+### Mobile sign-in and token refresh
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Person
+    participant App as Mobile app
+    participant API as OAuth / account API
+    participant DB as Postgres
+
+    Person->>App: Enter email and password
+    App->>API: POST /oauth/token (grant_type=password, device_name)
+    API->>DB: Verify password and confirmed email
+    alt Credentials valid and email confirmed
+        API-->>App: 200 access token (15 min) + refresh token
+        App->>App: Store tokens in Keychain / Android Keystore
+        opt Phone contains guest data
+            App->>API: GET /sync/pull
+            API-->>App: Account changes
+            App->>API: POST /sync/push (local outbox)
+            API-->>App: 200; guest data joins account
+        end
+        opt Access token expires soon or request gets 401
+            App->>API: POST /oauth/token (grant_type=refresh_token)
+            API->>DB: Consume current refresh token
+            API-->>App: New access + refresh token pair
+            App->>App: Replace stored token pair
+        end
+    else Wrong password, unknown account or unconfirmed email
+        API-->>App: 400 invalid_grant (same refusal)
+    else Five failed attempts in 15 minutes
+        API-->>App: 429 with Retry-After
+    end
+```
+
+Each refresh token works once. A refused or reused refresh token signs the phone out; the app becomes a guest but keeps its local data.
+
+### Password reset (mobile request, browser or app link)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Person
+    participant App as Mobile app
+    participant API as Account API
+    participant DB as Postgres
+    participant Mail as SMTP provider
+    participant Link as Browser or app link handler
+
+    Person->>App: Request password reset for email
+    App->>API: POST /api/v1/password-resets
+    API->>DB: Find confirmed account; enforce 3 links/hour
+    API->>Mail: Send /reset-password#token (only if eligible)
+    API-->>App: 202 Accepted for every address
+    Person->>Link: Open reset link and enter new password
+    Link->>API: POST /api/v1/password-resets/confirm (token, password)
+    API->>DB: Consume one-hour token; update password; revoke all device tokens
+    API-->>Link: 204 No Content
+    Note over App,API: All existing sessions are revoked; each client signs out when refresh is refused
+```
+
+The browser reset page and the mobile app use the same one-time token endpoint. A reset token expires after one hour; successful reset revokes every device and invalidates the account's other reset links. The API always answers 202 to the request, including unknown addresses, and sends at most three links per account per hour.
 
 ## The phone and the account
 
 ```mermaid
-flowchart LR
-    guest(["Guest"]) -- "sign up" --> pending["Account, email not confirmed<br/>phone still a guest"]
-    pending -- "tap the link" --> synced["Signed in<br/>phone uploads, then syncs"]
-    guest -- "sign in to an existing account" --> merged["Signed in<br/>guest data merged into the account"]
-    synced -- "sign out" --> cleared(["Empty guest"])
-    merged -- "sign out" --> cleared
+flowchart TD
+    guest(["Guest on phone"])
+    pending["Account created<br/>email not confirmed<br/>phone remains a guest"]
+    signedUp["Email confirmed<br/>phone signs in and syncs"]
+    merged["Existing account<br/>guest data joins account"]
+    cleared(["Signed out<br/>empty guest"])
+
+    guest -->|sign up| pending
+    pending -->|open confirmation link| signedUp
+    guest -->|sign in to existing account| merged
+    signedUp -->|sign out| cleared
+    merged -->|sign out| cleared
 ```
 
 - **The first upload keeps every id** ([ADR 0005](./adr/0005-ids-are-uuidv7-made-on-the-device.md)).
@@ -105,21 +215,12 @@ Both phones then show both workouts, and nothing on the server is rewritten.
 
 ## Leaving
 
-- **Deleting the account happens at once**, after the password: every row is deleted, every phone is signed out and goes back to a guest with its own copy, and the nightly dumps age out within 30 days.
+- **Deleting the account happens at once**, after the password: every row is deleted, every phone is signed out and goes back to a guest with its own copy, and the nightly dumps age out within 30 days. A wrong password leaves the account untouched.
 - **Export** gives all the account's data as JSON, and sessions as FIT files.
 
 ## Screens
 
-Drafted in [#272](https://github.com/tkint/coach-poulpy/issues/272); they sit under Mockups, Drafts, Accounts on the site and are built once the owner has agreed them ([ADR 0016](./adr/0016-mockups-are-plain-html-in-the-repo.md)).
-
-- **Settings** gets an **Account** section at the top. A guest sees one row, "Sign in or create an account". With an unconfirmed email it reads "Confirm your email"; signed in it shows the address and the sync state. (`account-settings-guest`, `-pending`, `-synced`)
-- **Sign in is the default.** The Account row in Settings opens Sign in: email, password, "Forgot your password?", and a note that what is on the phone joins the account. One quiet line under it, "No account yet? Create one", switches to **Create your account**, which asks for the email, a password (8 characters or more, with a show toggle) and the health data consent, whose link opens "What is stored", and says "Already have an account? Sign in" to switch back. Errors sit under their field in `error` with an icon; a wrong email or password gives one message that doesn't say which. (`account-sign-in`, `-error`, `-reset-done`, `account-sign-up`, `-error`, `-offline`, `-consent-sheet`)
-- **Check your email** has a single **OK** that returns to the app, which keeps working as a guest. Under it, two quiet lines: "Didn't get the email? Send it again" (signs up again with the same address) and "Wrong address? Try again with another email" (reopens the form with the address filled in; nothing has left the phone, and the earlier address stays unconfirmed and is never used). The text never says whether the address already had an account: the server answers the same either way. An expired or used link has its own page. (`account-check-email`, `-resent`, `account-link-expired`)
-- **Email confirmed** and **Welcome back** (signing in on a phone that has guest data) show the upload as a progress card. Email confirmed is a sheet over whatever is on screen, Welcome back a full screen; nothing is replaced, both edits are kept. (`account-confirmed`, `account-sign-in-merge`)
-- **Forgot your password?** sends a link; it opens "Choose a new password", every phone is signed out, and the next stop is Sign in with a "Password changed" note. (`account-forgot-password`, `-sent`, `account-reset-password`)
-- **The account page** shows the address, the sync state, what follows the account, Export my data, Sign out and Delete account; before the email is confirmed it shows the same two quiet lines instead. (`account-details`, `-pending`)
-- **Sign out** says the phone goes back to an empty guest. When changes aren't uploaded yet, a second dialog says they will never reach the account and offers "Wait for the upload" or "Sign out anyway". (`account-sign-out`, `-unsent`)
-- **Delete account** is a sheet that says what goes, asks for the password and deletes at once; a wrong password says nothing was deleted. (`account-delete`, `-error`)
+The agreed account screens and their states are in the [Mockups gallery](https://tkint.github.io/coach-poulpy/mockups/) under Mobile → Agreed → Accounts. The mockups own layout, copy and visual states; the behavior and security rules are defined above.
 
 ## Not yet
 

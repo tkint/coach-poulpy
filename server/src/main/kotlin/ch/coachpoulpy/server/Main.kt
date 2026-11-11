@@ -11,6 +11,7 @@ import ch.coachpoulpy.server.mail.NoMailServer
 import ch.coachpoulpy.server.mail.MailSettings
 import ch.coachpoulpy.server.mail.SmtpMailer
 import ch.coachpoulpy.server.admin.AdminAudit
+import ch.coachpoulpy.server.catalog.ServerCatalog
 import ch.coachpoulpy.server.admin.ServerSettings
 import ch.coachpoulpy.server.mail.SettingsMailer
 import ch.coachpoulpy.server.admin.EmailAddress
@@ -29,6 +30,7 @@ import org.http4k.core.HttpHandler
 import org.http4k.core.Method.DELETE
 import org.http4k.core.Method.GET
 import org.http4k.core.Method.POST
+import org.http4k.core.Method.PUT
 import org.http4k.core.PolyHandler
 import org.http4k.core.Response
 import org.http4k.core.Status.Companion.OK
@@ -64,7 +66,7 @@ fun websiteOrigin(websiteUrl: String): String = java.net.URI(websiteUrl).let { u
  * reset-password pages post JSON, and its admin signs in with cookies, which is why credentials are allowed.
  */
 fun websiteCors(origin: String) = ServerFilters.Cors(
-    CorsPolicy(OriginPolicy.Only(origin), headers = listOf("content-type"), methods = listOf(GET, POST, DELETE), credentials = true),
+    CorsPolicy(OriginPolicy.Only(origin), headers = listOf("content-type"), methods = listOf(GET, POST, PUT, DELETE), credentials = true),
 )
 
 /**
@@ -121,6 +123,8 @@ fun main() {
         val email = requireNotNull(EmailAddress.parseOrNull(setting.trim())) { "ADMIN_EMAIL is not an email address" }
         if (promoteFirstAdmin(database, events, email)) println("$email is now an admin")
     }
+    // The first start fills the catalog from the bundled one (#337, ADR 0026); from then on the admin publishes it.
+    if (ServerCatalog(database, Catalog.bundled).seed()) println("The catalog starts at the bundled version ${Catalog.bundled.version}")
     val http = app(version, Catalog.bundled, database, accounts, signIns, passwordResets, accountDeletion, audit = audit, websiteOrigin = origin, events = events, settings = settings, mailer = mailer)
     // Jetty, for the server-sent events SunHttp can't hold open (#319).
     PolyHandler(http, sse = confirmationEvents(accounts)).asServer(Jetty(port)).start()

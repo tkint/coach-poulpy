@@ -30,9 +30,10 @@ import {
   CpSidePanel,
   CpStepper,
   CpTextField,
+  CpTextarea,
 } from '../../../web/ui/src/index'
 
-defineProps<{ part: 'badge' | 'body-map' | 'breadcrumbs' | 'avatar' | 'card' | 'table' | 'stats' | 'nav-menu' | 'button' | 'chip' | 'search-field' | 'stepper' | 'select-field' | 'text-field' | 'password-field' | 'poulpy-card' | 'error' | 'sheet' | 'pagination' | 'side-panel' }>()
+defineProps<{ part: 'badge' | 'body-map' | 'breadcrumbs' | 'avatar' | 'card' | 'table' | 'stats' | 'nav-menu' | 'button' | 'chip' | 'search-field' | 'stepper' | 'select-field' | 'text-field' | 'textarea' | 'password-field' | 'poulpy-card' | 'error' | 'sheet' | 'pagination' | 'side-panel' }>()
 const { mode } = useSampleTheme()
 // A stand-in figure: the real ones are the generated body map shapes.
 const sampleFigures = [
@@ -49,6 +50,7 @@ const panel = ref(true)
 const password = ref('correct horse')
 const email = ref('ana@example.com')
 const sender = ref('hello@coachpoulpy.example')
+const stepText = ref('Keep your chest lifted and lower under control.\nPause briefly, then return to standing.')
 const formats = [
   { value: 'sets', text: 'Sets' },
   { value: 'circuit', text: 'Circuit' },
@@ -129,6 +131,9 @@ const formats = [
         <CpTextField v-model="email" label="Email" type="email" autocomplete="username" />
         <CpTextField v-model="sender" label="From address" type="email" autocomplete="off" hint="The address emails come from." />
         <CpTextField model-value="hello@" label="From address" type="email" autocomplete="off" error="This is not an email address. Use the form name@example.com." />
+      </div>
+      <div v-else-if="part === 'textarea'" class="row">
+        <CpTextarea v-model="stepText" label="Step 1" hint="One instruction per step. The field grows as you write." :rows="2" />
       </div>
       <div v-else-if="part === 'password-field'" class="row">
         <CpPasswordField v-model="password" label="New password" hint="8 characters or more." show-label="Show password" hide-label="Hide password" autocomplete="new-password" />

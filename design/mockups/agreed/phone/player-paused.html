@@ -16,18 +16,18 @@
 <body>
 <main class="phone player player--paused">
   <div class="session-progress" id="session-progress">
-    <button class="pause-button pause-button--paused" data-component="pause-button" id="pause-button" type="button" aria-label="Resume"><svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.6-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg></button>
+    <button class="pause-button pause-button--paused" data-component="pause-button" id="pause-button" type="button" aria-label="Resume"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="play"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg></button>
     <div>
       <span class="label numbers">Step 4 of 18 · 09:12</span>
       <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="18" aria-valuenow="4" aria-label="Session progress"><div style="width: 22%;"></div></div>
     </div>
-    <a class="icon-button icon-button--filled" href="#" aria-label="End session"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></a>
+    <a class="icon-button icon-button--filled" href="#" aria-label="End session"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></a>
   </div>
-  <div class="paused-card" id="paused" data-component="paused-card" role="status"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1.5"/><rect x="14" y="5" width="4" height="14" rx="1.5"/></svg><strong>Paused</strong></div>
+  <div class="paused-card" id="paused" data-component="paused-card" role="status"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="pause"><rect x="14" y="3" width="5" height="18" rx="1"/><rect x="5" y="3" width="5" height="18" rx="1"/></svg><strong>Paused</strong></div>
 
   <div class="player-step" id="current-step">
     <img src="../../../poulpy/pose_straining.svg" alt="Poulpy straining">
-    <span class="part-line" id="part-line" data-component="part-line"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg>Work</span>
+    <span class="part-line" id="part-line" data-component="part-line"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="zap"><path d="M15.914 4a1.5 1.5 0 00-2.474-1.561l-9 9A1.5 1.5 0 005.5 14h4.002a.5.5 0 01.471.666L8.086 20a1.5 1.5 0 002.475 1.56l9-9A1.5 1.5 0 0018.5 10h-3.997a.5.5 0 01-.472-.667z"/></svg>Work</span>
     <h1 class="title">Bench press</h1>
     <span class="set-count numbers" id="set-count">Set 2 of 3</span>
     <div class="set-dots" aria-hidden="true"><span class="done"></span><span class="current"></span><span></span></div>
@@ -39,7 +39,7 @@
 
   <div class="player-actions">
     <button class="secondary-button secondary-button--large" data-component="secondary-button" type="button" disabled>Skip</button>
-    <a class="primary-button primary-button--large" data-component="primary-button" aria-disabled="true"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>Done</a>
+    <a class="primary-button primary-button--large" data-component="primary-button" aria-disabled="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="check"><path d="M20 6 9 17l-5-5"/></svg>Done</a>
   </div>
 </main>
 </body>

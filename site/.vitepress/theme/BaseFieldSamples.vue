@@ -1,6 +1,7 @@
 <script setup lang="ts">
 // One base field drawn with the tokens' own values, in the theme the page's switch chose. Each has its own
 // heading on the mobile components page, so the "Base fields" table in the design system links to it.
+import { ChevronRight } from '@lucide/vue'
 import tokens from '../../../design/tokens.json'
 import { useSampleTheme } from './useSampleTheme'
 
@@ -26,8 +27,8 @@ const points = '8,62 60,56 112,58 164,44 216,40 268,30'
       </section>
 
       <section v-if="part === 'select-field'" class="sample">
-        <button type="button" class="box select"><span><span class="label">Experience</span><strong>Getting going</strong></span><span aria-hidden="true">›</span></button>
-        <button type="button" class="box select"><span><span class="label">Sex</span><strong class="muted">Not set</strong></span><span aria-hidden="true">›</span></button>
+        <button type="button" class="box select"><span><span class="label">Experience</span><strong>Getting going</strong></span><ChevronRight :size="20" aria-hidden="true" /></button>
+        <button type="button" class="box select"><span><span class="label">Sex</span><strong class="muted">Not set</strong></span><ChevronRight :size="20" aria-hidden="true" /></button>
       </section>
 
       <section v-if="part === 'option-sheet'" class="sample">

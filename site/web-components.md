@@ -75,6 +75,16 @@ Primary, tonal, outline, grumpy and danger (crimson, for a deletion that can't b
 | `<CpTextField hint>` | adds `p.cp-label.whitespace-normal` under the field, named by the input's `aria-describedby` |
 | `<CpTextField error>` | `cp-input-error`, `aria-invalid`, and `p.cp-label.whitespace-normal.text-error` with `role="alert"` in the hint's place |
 
+## Textarea
+
+`CpTextarea`: a multiline field that grows to fit its content. It resizes after typing, when its model changes, and when its width changes and text wraps onto different lines. Its appearance comes from the shared DaisyUI theme and is included in both generated UI stylesheets.
+
+<WebComponentSamples part="textarea" />
+
+| Vue | Classes |
+| --- | --- |
+| `<CpTextarea v-model label rows hint>` | `div.cp-fieldset` around `label.cp-type-label`, `textarea.cp-textarea.w-full`, and an optional `p.cp-label.whitespace-normal` helper |
+
 ## Password field
 
 `CpPasswordField`, with a button that shows the password. In error, it turns crimson and a `CpErrorNote` under the form says why.
@@ -251,7 +261,7 @@ Sortable columns put a `cp-btn cp-btn-ghost cp-btn-sm` in the header cell, with 
 
 ## Drawer
 
-`CpDrawer`: the admin's page frame. A full-height sidebar from a large screen up, folded to icons by the button in the top bar; on a smaller screen it slides over the page. It fills the browser window, so it has no live sample here: see it in the [Admin mockup](/mockups/web/agreed/admin).
+`CpDrawer`: the admin's page frame. A full-height sidebar from a large screen up, folded to icons by the button in the top bar; on a smaller screen it slides over the page. It fills the browser window, so it has no live sample here: see it in the [Admin · Audit mockup](/mockups/web/agreed/admin-audit).
 
 | Vue | Classes |
 | --- | --- |
