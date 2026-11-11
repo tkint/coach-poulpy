@@ -44,6 +44,8 @@ Android and iOS only build in CI (`.github/workflows/ci.yml`); a PR is done when
 
 ## Agent skills
 
+Specialist skills are mandatory when their area is touched. Check the current agent's available skills before implementation; load the relevant `SKILL.md` and follow it. Do not claim a skill was used unless its instructions were actually loaded. See `AGENTS.md` for the required skill-to-task mapping and installation commands.
+
 ### Issue tracker
 
 Issues live in GitHub Issues on `tkint/coach-poulpy`. See `docs/agents/issue-tracker.md`.
