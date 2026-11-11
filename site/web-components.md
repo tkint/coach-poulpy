@@ -77,7 +77,7 @@ Primary, tonal, outline, grumpy and danger (crimson, for a deletion that can't b
 
 ## Textarea
 
-`CpTextarea`: a multiline field that grows to fit its content. It resizes after typing, when its model changes, and when its width changes and text wraps onto different lines.
+`CpTextarea`: a multiline field that grows to fit its content. It resizes after typing, when its model changes, and when its width changes and text wraps onto different lines. Its appearance comes from the shared DaisyUI theme and is included in both generated UI stylesheets.
 
 <WebComponentSamples part="textarea" />
 
