@@ -119,31 +119,15 @@ Android and iOS both depend on `shared`; iOS consumes its `Shared` framework.
 
 ## Text and translations
 
-Every word a person reads is in `i18n/messages/<locale>/<namespace>.json` ([ADR 0014](./adr/0014-text-lives-in-one-json-file-per-language-and-namespace.md)). At build time `tools/i18n`, run by the `coachpoulpy.i18n` Gradle plugin, writes the Android `strings.xml`, the iOS `.strings` and `.stringsdict`, the shared `DomainText` object (one typed function per `domain` message, so a wrong id or argument fails the build) and the catalog with its text merged back in ([ADR 0015](./adr/0015-catalog-text-lives-in-translation-files.md)). None of it is committed, and the build fails when a shipped language lacks a message. How to add a string is in [the translation files' README](../i18n/README.md).
+User-facing text lives in `i18n/messages/<locale>/<namespace>.json`; native string resources and catalog text are generated at build time. See the [translation files' README](../i18n/README.md) and [ADRs 0014](./adr/0014-text-lives-in-one-json-file-per-language-and-namespace.md) and [0015](./adr/0015-catalog-text-lives-in-translation-files.md).
 
 ## Storage and sync
 
-The phone database is the source of truth and the server is a replica ([ADR 0001](./adr/0001-local-first-phone-is-the-source-of-truth.md)); sync and the website are later work.
+The phone database is the source of truth; the server is its replica ([ADR 0001](./adr/0001-local-first-phone-is-the-source-of-truth.md)). The sync protocol and conflict handling are described in [Accounts](./accounts.md#sync) and [ADR 0006](./adr/0006-sync-keeps-both-edits.md).
 
-```mermaid
-flowchart LR
-    phone["Phone<br/>guest · SQLite source of truth"] -. "sign-up: upload local database" .-> server["Server replica · later, not in v1"]
-    phone -. "push changes with base versions" .-> server
-    server -. "pull changes since cursor" .-> phone
-    web["Website · later, not in v1<br/>online-first"] -. "same push and pull calls" .-> server
-    web -.-> buffer["IndexedDB<br/>buffers running Session events"]
-    phone --> records["Session events<br/>append-only"]
-    records -. "sync as union; no conflicts" .-> server
-    edits["Workout and Plan edits"] -. "on conflict, keep both versions" .-> server
-    fields["Small fields"] -. "latest write wins" .-> server
-```
-
-Sync follows [ADR 0006](./adr/0006-sync-keeps-both-edits.md).
-
-- Ids are UUIDv7 made on the device ([ADR 0005](./adr/0005-ids-are-uuidv7-made-on-the-device.md)).
-- Workouts and Plans keep both edits; small fields take the latest write ([ADR 0006](./adr/0006-sync-keeps-both-edits.md)).
-- The catalog ships with the app and updates without an account ([ADR 0008](./adr/0008-curated-catalog-with-stable-slugs.md)); the server holds it as a draft the admin publishes as numbered versions ([ADR 0026](./adr/0026-the-server-holds-the-catalog-as-a-draft-and-published-versions.md)).
-- The server's Postgres schema is its own numbered SQLDelight migrations, applied on start ([ADR 0022](./adr/0022-the-servers-schema-is-sqldelight-migrations-on-postgres.md)).
+- Device-generated ids are UUIDv7 ([ADR 0005](./adr/0005-ids-are-uuidv7-made-on-the-device.md)).
+- The catalog is curated, separate from personal-data sync, and updated without an account ([ADR 0008](./adr/0008-curated-catalog-with-stable-slugs.md), [ADR 0026](./adr/0026-the-server-holds-the-catalog-as-a-draft-and-published-versions.md)).
+- The server's Postgres schema uses SQLDelight migrations, applied on start ([ADR 0022](./adr/0022-the-servers-schema-is-sqldelight-migrations-on-postgres.md)).
 
 ## Devices
 
@@ -162,14 +146,8 @@ On Android a Live recording runs in a connected-device foreground service, from 
 
 ## Accounts and security
 
-- A guest's data never leaves the phone; the operating system's file encryption protects it.
-- Sign-up pushes the whole local database as a first sync, keeping ids.
-- Email and password hashed with Argon2id, plus Sign in with Apple and Google, whose ID tokens the server verifies.
-- Every credential resolves to one caller (account, client, scopes) through one http4k filter ([the API](./the-api.md)); routes check scopes, every query is scoped by owner, and coach access is checked against an active coach link on each request ([ADR 0020](./adr/0020-every-credential-resolves-to-one-caller.md)).
-- Tokens are opaque and stored hashed: 15-minute access tokens and rotating refresh tokens, in Keychain or Android Keystore on phones and an HttpOnly, SameSite cookie on the website. `GET /api/v1/me` tells a client who it is. Personal access tokens, then OAuth 2.1 for third-party apps and the MCP server, come with [#228](https://github.com/tkint/coach-poulpy/issues/228).
-- The landing site, the web app and the API each have their own hostname and container: `coach-poulpy.com`, `app.coach-poulpy.com`, `api.coach-poulpy.com` ([ADR 0021](./adr/0021-the-landing-site-the-app-and-the-api-have-their-own-hostname.md)).
-- Health data is sensitive under the GDPR: consent at sign-up, export as JSON and FIT, full deletion, hosting in the EU; token reads of health data are logged.
+Guests keep their data on the phone. After email confirmation, an account can sync that data between phones and use the website. The sign-in, sync and account lifecycle are specified in [Accounts](./accounts.md); request authentication and routes are in [The API](./the-api.md). Admin access has its own [security rules](./admin.md#who-can-open-it) ([ADR 0020](./adr/0020-every-credential-resolves-to-one-caller.md)).
 
 ## Deployment
 
-The first release needs no server. Android phones install the signed APK from CI; iPhones need Xcode (7-day installs with a free account) or TestFlight with a paid Apple Developer membership. The server builds into one JVM program in a Docker image, published with each release and run on one server with Docker ([ADR 0019](./adr/0019-the-server-runs-with-docker-compose-on-one-server.md)). [Deploying the server](./deploying-the-server.md) runs it there behind a Caddy that other apps can share.
+The server is one JVM program in a Docker image, run with Docker Compose behind Caddy ([ADR 0019](./adr/0019-the-server-runs-with-docker-compose-on-one-server.md)). See [Releasing](./releasing.md) for app releases and [Deploying the server](./deploying-the-server.md) for hosting.
