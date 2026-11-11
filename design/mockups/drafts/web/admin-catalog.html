@@ -55,6 +55,9 @@
             <input id="filter-q" type="search" class="grow" placeholder="Search exercises" aria-label="Search exercises by name, slug or alias" value="" autocomplete="off">
           </label>
           <!-- When no rows are selected, this action control is a page-select checkbox. With a selection, it becomes the overflow menu with a selected-count badge. -->
+          <template data-state="no-selection">
+            <label class="cp-btn cp-btn-outline cp-btn-square" aria-label="Select all exercises on this page"><input type="checkbox" class="cp-checkbox" aria-label="Select all exercises on this page"></label>
+          </template>
           <details class="relative" open data-component="selection-actions" data-selection-count="3">
             <summary class="cp-btn cp-btn-outline cp-btn-square list-none gap-1" aria-label="Actions for 3 selected exercises">
               <svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="ellipsis"><circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /><circle cx="5" cy="12" r="1" /></svg>
@@ -74,7 +77,7 @@
         <div class="cp-card-body gap-4 p-4 md:p-6">
           <div class="overflow-x-auto cp-card border border-base-300 bg-base-100">
             <table class="cp-table bg-base-100">
-              <thead><tr><th class="w-12"><label class="cp-label"><input type="checkbox" class="cp-checkbox" aria-label="Select all 20 exercises on this page"></label></th><th aria-sort="none"><button type="button" class="cp-btn cp-btn-ghost cp-btn-sm -ms-3 gap-1 whitespace-nowrap">Exercise<svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="chevrons-up-down"><path d="m7 15 5 5 5-5" />
+              <thead><tr><th class="w-12" aria-label="Selection"></th><th aria-sort="none"><button type="button" class="cp-btn cp-btn-ghost cp-btn-sm -ms-3 gap-1 whitespace-nowrap">Exercise<svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="chevrons-up-down"><path d="m7 15 5 5 5-5" />
   <path d="m7 9 5-5 5 5" /></svg></button></th><th aria-sort="none"><button type="button" class="cp-btn cp-btn-ghost cp-btn-sm -ms-3 gap-1 whitespace-nowrap">Pattern<svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="chevrons-up-down"><path d="m7 15 5 5 5-5" />
   <path d="m7 9 5-5 5 5" /></svg></button></th><th aria-sort="none"><button type="button" class="cp-btn cp-btn-ghost cp-btn-sm -ms-3 gap-1 whitespace-nowrap">Languages<svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="chevrons-up-down"><path d="m7 15 5 5 5-5" />
   <path d="m7 9 5-5 5 5" /></svg></button></th><th aria-sort="none"><button type="button" class="cp-btn cp-btn-ghost cp-btn-sm -ms-3 gap-1 whitespace-nowrap">Content<svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="chevrons-up-down"><path d="m7 15 5 5 5-5" />
