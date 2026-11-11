@@ -3,6 +3,8 @@ package ch.coachpoulpy.server.api
 import ch.coachpoulpy.catalog.Catalog
 import ch.coachpoulpy.server.admin.AdminAccounts
 import ch.coachpoulpy.server.admin.AdminAudit
+import ch.coachpoulpy.server.admin.AdminCatalog
+import ch.coachpoulpy.server.catalog.ServerCatalog
 import ch.coachpoulpy.server.admin.AdminSettings
 import ch.coachpoulpy.server.admin.AdminStatus
 import ch.coachpoulpy.server.admin.ServerSettings
@@ -39,7 +41,10 @@ const val API_PREFIX = "/api/v1"
  */
 val Public: Security = NoSecurity
 
-/** Every route: those under [API_PREFIX], and OAuth's under `/oauth`. */
+/**
+ * Every route: those under [API_PREFIX], and OAuth's under `/oauth`. [catalog] is the bundled one, which seeded the
+ * server's catalog on its first start (ADR 0026); the routes serve what the database holds.
+ */
 fun apiRoutes(
     catalog: Catalog,
     accounts: Accounts,
@@ -56,7 +61,7 @@ fun apiRoutes(
     databaseAnswers: () -> Boolean = database::answers,
 ): List<ContractRoute> = listOf(
     publicStatusRoute(databaseAnswers),
-    catalogRoute(catalog),
+    catalogRoute(ServerCatalog(database, catalog)),
     signUpRoute(accounts),
     confirmEmailRoute(accounts),
     confirmationStatusRoute(accounts),
@@ -73,6 +78,8 @@ fun apiRoutes(
     AdminAccounts(database, signIns, accountDeletion, events),
     AdminSettings(database, settings, mailer, events),
     AdminStatus(database, mailer),
+) + adminCatalogRoutes(
+    AdminCatalog(ServerCatalog(database, catalog), events),
 )
 
 /** The API, described in OpenAPI at `/api/v1/openapi.json`, OAuth routes included. */

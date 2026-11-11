@@ -1,0 +1,31 @@
+-- The exercise catalog on the server (#337, ADR 0026): the admin edits a draft and publishes
+-- numbered versions. Each exercise is stored on its own, as revisions of the shared Exercise JSON
+-- (ADR 0007); a publish writes only the exercises that changed. The server assembles a version into the
+-- document phones store, in the bundled JSON format (ADR 0008, ADR 0015). It fills the tables from the
+-- bundled catalog the first time it starts.
+
+-- A published version. What it holds never changes once written.
+CREATE TABLE catalog_version (
+    version INTEGER PRIMARY KEY,
+    published_at TIMESTAMPTZ NOT NULL
+);
+
+-- One revision of one exercise. `published_in` is the version that published it, or null for the
+-- exercise's draft revision (at most one per slug). Version N holds, for each slug, the revision with the
+-- highest `published_in` up to N. `position` keeps the catalog's order; an exercise in a variation group
+-- has the group's number and its `variation_rank`, easiest first. Published revisions are never changed.
+CREATE TABLE catalog_exercise_revision (
+    slug TEXT NOT NULL,
+    revision INTEGER NOT NULL,
+    position INTEGER NOT NULL,
+    content JSONB NOT NULL,
+    variation_group INTEGER,
+    variation_rank INTEGER,
+    published_in INTEGER REFERENCES catalog_version (version),
+    created_at TIMESTAMPTZ NOT NULL,
+    PRIMARY KEY (slug, revision)
+);
+
+CREATE UNIQUE INDEX catalog_exercise_revision_draft ON catalog_exercise_revision (slug) WHERE published_in IS NULL;
+
+CREATE INDEX catalog_exercise_revision_published ON catalog_exercise_revision (published_in);
