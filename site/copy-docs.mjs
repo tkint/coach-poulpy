@@ -1,7 +1,17 @@
 // Copies the repo's shared Markdown into the site before each build, at the same paths as in
 // the repo, so relative links work the same on GitHub and on the site. The copies are ignored.
 import { cpSync, rmSync } from 'node:fs'
+import { execFileSync } from 'node:child_process'
+import { dirname, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { shared } from './published.mjs'
+
+// Generate the ignored Tailwind/DaisyUI styles before copying the plain-HTML mockups and before
+// VitePress imports the embed stylesheet. The docs build installs web/ dependencies first.
+execFileSync('npm', ['run', 'build', '-w', 'ui'], {
+  cwd: resolve(dirname(fileURLToPath(import.meta.url)), '../web'),
+  stdio: 'inherit',
+})
 
 for (const path of shared) {
   rmSync(path, { recursive: true, force: true })

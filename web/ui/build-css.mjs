@@ -1,10 +1,9 @@
-// Builds poulpy-ui.css and poulpy-ui-embed.css from src/prebuilt.css and src/embed.css (ADR 0023).
-//   node build-css.mjs          writes them
-//   node build-css.mjs --check  fails when a committed file no longer matches (CI)
-// They are committed so plain-HTML web mockups can link them with no build, as tokens.css is.
+// Builds ignored poulpy-ui.css and poulpy-ui-embed.css from src/prebuilt.css and src/embed.css (ADR 0023).
+// The web app and docs-site build generate them; plain-HTML mockups use the prebuilt file copied
+// into the docs site's public tree.
 // Run it after changing theme.css, a component's classes, or the classes a web mockup uses.
 import { execFileSync } from 'node:child_process'
-import { existsSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import postcss from 'postcss'
@@ -36,22 +35,9 @@ const outputs = {
   'poulpy-ui.css': { input: 'src/prebuilt.css', post: unprefixKeyframes },
   'poulpy-ui-embed.css': { input: 'src/embed.css', post: (css) => unlayer(unprefixKeyframes(css)) },
 }
-const check = process.argv.includes('--check')
-let stale = 0
 for (const [out, { input, post }] of Object.entries(outputs)) {
   const css = banner + post(execFileSync(bin, ['--input', join(here, input)], { cwd: here, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }))
   const path = join(here, out)
-  const current = existsSync(path) ? readFileSync(path, 'utf8') : null
-  if (current === css) continue
-  if (check) {
-    console.error(`Out of date: web/ui/${out}`)
-    stale++
-  } else {
-    writeFileSync(path, css)
-    console.log(`Wrote web/ui/${out}`)
-  }
-}
-if (stale) {
-  console.error('Run `npm run build -w ui` in web/ and commit the result.')
-  process.exit(1)
+  writeFileSync(path, css)
+  console.log(`Wrote web/ui/${out}`)
 }
