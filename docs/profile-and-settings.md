@@ -30,6 +30,7 @@ The only thing the app needs is a physiological input for estimates, so that is 
 - Each entry is a date and a value, added from the **Log** button and corrected or deleted from the history list. One entry per day; a second one that day replaces it.
 - Height changes slowly, so its screen says a measure every few months is plenty, and teenagers can log as often as they like.
 - A weight going up is never red and going down is never green. Poulpy says nothing about it, there is no BMI and no weight goal unless a later issue adds one the person opts into.
+- Every chart has a text alternative naming its first and last value.
 
 ## Units
 
