@@ -32,19 +32,21 @@ sequenceDiagram
     API->>DB: Create unconfirmed account and confirmation watch
     API->>Mail: Send /confirm-email#token link
     API-->>App: 202 Accepted (same for existing addresses)
-    App->>API: GET /confirmation-events (Pending-Key header)
+    App->>API: POST /api/v1/accounts/confirmation-status
+    API-->>App: confirmed = false
+    App->>API: GET /api/v1/accounts/confirmation-events (Pending-Key header)
     Person->>Browser: Open confirmation email link
     Browser->>API: POST /api/v1/accounts/confirm (token)
     API->>DB: Consume one-time token; mark email confirmed
     API-->>Browser: 204 No Content
     API-->>App: confirmed event on matching SSE stream
-    App->>API: POST /api/v1/accounts/confirmation-status (on reconnect / app open)
+    App->>API: POST /api/v1/accounts/confirmation-status (after event / reconnect)
     API-->>App: confirmed = true
     App->>API: POST /oauth/token (password grant)
     API->>DB: Verify confirmed account and password
     API-->>App: Access + refresh tokens
     App->>App: Store tokens in Keychain / Android Keystore
-    App->>API: GET sync/pull, then POST sync/push
+    App->>API: GET /api/v1/sync/pull, then POST /api/v1/sync/push
     API-->>App: Account data and accepted guest data
 ```
 
@@ -108,7 +110,7 @@ sequenceDiagram
     Link->>API: POST /api/v1/password-resets/confirm (token, password)
     API->>DB: Consume one-hour token; update password; revoke all device tokens
     API-->>Link: 204 No Content
-    Note over App,DB: Other devices are signed out when their next refresh is refused
+    Note over App,API: All existing sessions are revoked; each client signs out when refresh is refused
 ```
 
 The browser reset page and the mobile app use the same one-time token endpoint. A reset token expires after one hour; successful reset revokes every device and invalidates the account's other reset links. The API always answers 202 to the request, including unknown addresses, and sends at most three links per account per hour.

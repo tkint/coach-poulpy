@@ -21,8 +21,8 @@ flowchart TD
     response["Run route with caller identity"]
 
     request --> header
-    header -->|No credential| anonymous --> route
-    header -->|Bearer cp_…| authenticator
+    header -->|No bearer token or session cookie| anonymous --> route
+    header -->|Bearer cp_at_… or website session cookie| authenticator
     header -->|Malformed / unsupported| denied
     authenticator -->|Valid| signed --> route
     authenticator -->|Invalid / expired| denied

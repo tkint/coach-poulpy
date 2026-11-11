@@ -9,23 +9,30 @@ The setup follows [ADR 0019](./adr/0019-the-server-runs-with-docker-compose-on-o
 ```mermaid
 flowchart TD
     internet(("Internet"))
-    caddy["Caddy container<br/>shared HTTPS · ports 80 / 443"]
-    subgraph edgeproj["External edge network"]
-        caddy
-        server["Server container<br/>http4k · port 8080"]
-        web["Web container<br/>Vue static app · port 8080"]
+    subgraph edgeproject["Shared Caddy Compose project"]
+        caddy["Caddy container<br/>publishes ports 80 / 443"]
     end
-    subgraph appproj["Coach Poulpy Compose project"]
-        server
+    subgraph serverproject["Coach Poulpy Compose project"]
+        server["API server container<br/>http4k · port 8080"]
         postgres[("Postgres container<br/>postgres:5432")]
         alloy["Grafana Alloy container<br/>optional log shipping"]
     end
+    subgraph webproject["Web app Compose project"]
+        web["Static web container<br/>Vue · port 8080"]
+    end
+    edge["External edge network"]
+    internal["Private internal network"]
     loki["Grafana Cloud Loki"]
 
     internet -->|HTTP / HTTPS| caddy
-    caddy -->|api.coach-poulpy.com| server
-    caddy -->|app.coach-poulpy.com| web
-    server -->|internal network| postgres
+    caddy -->|api.coach-poulpy.com via edge| server
+    caddy -->|app.coach-poulpy.com via edge| web
+    caddy -. attaches to .-> edge
+    server -. attaches to .-> edge
+    web -. attaches to .-> edge
+    server -->|Postgres protocol| internal
+    postgres -. attaches to .-> internal
+    alloy -. attaches to .-> internal
     alloy -. reads Docker logs .-> server
     alloy -. reads Docker logs .-> postgres
     alloy -. pushes logs when enabled .-> loki
