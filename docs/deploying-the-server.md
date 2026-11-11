@@ -7,20 +7,46 @@ The setup follows [ADR 0019](./adr/0019-the-server-runs-with-docker-compose-on-o
 ## The containers
 
 ```mermaid
-flowchart LR
-    internet(("Internet")) -- "80 and 443" --> caddy
-    subgraph edgeproj["edge project"]
-        caddy["caddy · shared HTTPS"]
+flowchart TD
+    internet(("Internet"))
+    subgraph edgeproject["Shared Caddy Compose project"]
+        caddy["Caddy container<br/>publishes ports 80 / 443"]
     end
-    subgraph appproj["coach-poulpy project"]
-        server["server · coach-poulpy-server:8080"]
-        postgres[("postgres · postgres-data")]
+    subgraph serverproject["Coach Poulpy Compose project"]
+        server["API server container<br/>http4k · port 8080"]
+        postgres[("Postgres container<br/>postgres:5432")]
+        alloy["Grafana Alloy container<br/>optional log shipping"]
     end
-    caddy -- "edge network" --> server
-    server -- "internal network" --> postgres
+    subgraph webproject["Web app Compose project"]
+        web["Static web container<br/>Vue · port 8080"]
+    end
+    edge["External edge network"]
+    internal["Private internal network"]
+    caddyData[("caddy-data volume<br/>TLS certificates")]
+    caddyConfig[("caddy-config volume<br/>autosaved routes")]
+    postgresData[("postgres-data volume<br/>database files")]
+    alloyData[("alloy-data volume<br/>log positions")]
+    loki["Grafana Cloud Loki"]
+    smtp["SMTP provider"]
+
+    internet -->|HTTP / HTTPS| caddy
+    caddy -->|api.coach-poulpy.com via edge| server
+    caddy -->|app.coach-poulpy.com via edge| web
+    caddy -. attaches to .-> edge
+    caddy -. persists .-> caddyData
+    caddy -. persists .-> caddyConfig
+    server -. attaches to .-> edge
+    web -. attaches to .-> edge
+    server -. attaches to .-> internal
+    postgres -. attaches to .-> internal
+    server -->|Postgres protocol| postgres
+    alloy -. attaches to .-> internal
+    alloy -. reads Docker logs .-> server
+    alloy -. reads Docker logs .-> postgres
+    alloy -. pushes logs when enabled .-> loki
 ```
 
-Only Caddy publishes ports. The server reaches Postgres at `postgres:5432` with the `POSTGRES_PASSWORD` from `.env`, and starts once Postgres is healthy. The server joins the external `edge` network using a unique alias and the private `internal` network; Postgres joins only `internal`. The app and edge are separate Compose projects, so stopping the app leaves Caddy running. The shared network is for trusted applications: containers on it can reach each other's app ports.
+Only Caddy publishes host ports. The API server and static web container expose port 8080 on the external `edge` network, where Caddy routes each hostname to its container. The server also joins the private `internal` network and reaches Postgres at `postgres:5432`; Postgres joins only `internal` and is not reachable from Caddy or the internet. Caddy runs in its own Compose project, so stopping the app projects leaves shared HTTPS running. The optional Alloy container joins `internal`, reads Docker logs through a read-only Docker socket and pushes them to Grafana Cloud Loki when log shipping is enabled.
 
 The server runs on Jetty, which holds the phones' server-sent event streams open (Caddy passes them through as they come). It runs as **one container**: who is listening for a confirmed email lives in its memory, so a second replica would need those events shared first.
 
@@ -40,7 +66,7 @@ Everything is deployed from GitHub; you don't log in to the machine for it. Set 
 The workflow writes `~/coach-poulpy/.env` from those settings (replaced on every run, so change settings in GitHub, not on the machine), uploads `compose.yaml` and the site file to `~/coach-poulpy`, and the shared Caddy to `~/caddy`. On the machine, `~/caddy/deploy.py` then:
 
 - creates the external `edge` network and starts Caddy if needed,
-- pulls and starts the server and Postgres,
+- pulls and starts the server and Postgres (and Alloy when log shipping is enabled),
 - adds the site to Caddy through its admin API, or replaces it if already there.
 
 Caddy keeps the configuration it receives through the API in its `caddy-config` volume and resumes it after a restart; `bootstrap.json` is only used before the first site is added. Other sites on the same Caddy are left alone, and deployments wait for each other. To change the hostname, update `DOMAIN` in GitHub and deploy again. Any branch can be deployed by hand to a `preview` environment, beside production or in its place ([Deploy a pull request](./releasing.md#deploy-a-pull-request)). HTTPS errors are usually caused by DNS or blocked ports; inspect `cd ~/caddy && docker compose logs caddy`.

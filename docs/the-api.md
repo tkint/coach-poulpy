@@ -7,20 +7,73 @@ The server is an API only, at `https://api.coach-poulpy.com/api/v1` ([ADR 0021](
 Every request under `/api/v1` passes one filter that finds its **caller** ([ADR 0020](./adr/0020-every-credential-resolves-to-one-caller.md)):
 
 ```mermaid
-flowchart LR
-    request(["Request"]) --> header{"Authorization<br/>header?"}
-    header -- "none" --> anonymous["Anonymous caller"]
-    header -- "Bearer cp_…" --> authenticator["Authenticator<br/>for that prefix"]
-    authenticator -- "accepts" --> signed["Signed caller<br/>account · client · scopes"]
-    authenticator -- "refuses, or no such prefix" --> denied(["401"])
-    header -- "anything else" --> denied
-    anonymous --> route["Route: public,<br/>or checks its scopes"]
-    signed --> route
+flowchart TD
+    request(["Incoming API request"])
+    header{"Credential supplied?"}
+    anonymous["Anonymous caller"]
+    authenticator["Select authenticator<br/>from token prefix"]
+    signed["Signed caller<br/>account · client · scopes"]
+    denied(["401 Unauthorized"])
+    route{"Route access policy"}
+    public["Public route"]
+    scope{"Required scope present?"}
+    forbidden(["403 Forbidden"])
+    response["Run route with caller identity"]
+
+    request --> header
+    header -->|No bearer token or session cookie| anonymous --> route
+    header -->|Bearer cp_at_… or website session cookie| authenticator
+    header -->|Malformed / unsupported| denied
+    authenticator -->|Valid| signed --> route
+    authenticator -->|Invalid / expired| denied
+    route -->|Public| public --> response
+    route -->|Requires scopes| scope
+    scope -->|Yes| response
+    scope -->|No| forbidden
 ```
 
 - **A bad credential is never treated as no credential.** An unknown prefix, an expired token or a `Basic` header is a 401, even on a public route.
 - **Each kind of token has its own authenticator,** picked by its prefix: `cp_at_` for access tokens, later `cp_pat_` for personal access tokens ([#228](https://github.com/tkint/coach-poulpy/issues/228)). Today only `cp_at_` is registered; a refresh token (`cp_rt_`) is never accepted as an access token.
 - **Every route says who may call it.** In the code, each route sets its `security` to `Public` or to `requires(...)` with the scopes it needs; a server test fails when a route sets neither. With no token, `requires` answers 401; with a token missing a scope, 403 with `WWW-Authenticate: Bearer error="insufficient_scope"`. The phone app gets every scope.
+
+## Browser session (admin website)
+
+The browser session uses the same email/password check as the phone, but the server sets secure cookies instead of returning tokens to JavaScript. The current browser sign-in is used by the admin area; a general member sign-up/sign-in experience on the web is not implemented.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Admin
+    participant Browser as Browser
+    participant API as Account API
+    participant DB as Postgres
+
+    Admin->>Browser: Enter email and password
+    Browser->>API: POST /api/v1/web/session (Origin + credentials)
+    API->>API: Check allowed website Origin
+    API->>DB: Verify password and confirmed email
+    alt Valid credentials
+        API-->>Browser: 204 + Secure, HttpOnly, SameSite=Strict cookies
+        Browser->>API: GET /api/v1/me (cookies sent automatically)
+        API-->>Browser: Account identity and role
+        Browser->>Browser: Admin UI checks role
+        opt Not an admin
+            Browser->>API: DELETE /api/v1/web/session
+            API-->>Browser: 204 + clear cookies
+        end
+        opt Access cookie expires or API returns 401
+            Browser->>API: POST /api/v1/web/session/refresh (refresh cookie)
+            API-->>Browser: 204 + rotated cookie pair
+            Browser->>API: Retry original request
+        end
+    else Wrong credentials or unconfirmed email
+        API-->>Browser: 400 refusal
+    else Too many failed attempts
+        API-->>Browser: 429 + Retry-After
+    end
+```
+
+The cookies are never readable by page scripts. The website sends them with `credentials: 'include'`; the server checks the website origin on session writes and uses SameSite cookies as an additional CSRF defence.
 
 ## Routes
 
