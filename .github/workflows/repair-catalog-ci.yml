@@ -1,0 +1,89 @@
+name: Repair catalog mockup CI
+
+on:
+  push:
+    branches:
+      - design/338-admin-catalog
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: design/338-admin-catalog
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Install web tooling and add any missing Lucide icons
+        run: |
+          npm ci --prefix web
+          node --input-type=module <<'NODE'
+          import { existsSync } from 'node:fs'
+          import { spawnSync } from 'node:child_process'
+          const names = ['cloud-upload', 'log-in', 'grip-vertical', 'link', 'archive', 'archive-restore']
+          const missing = names.filter((name) => !existsSync('design/icons/' + name + '.svg'))
+          if (missing.length) {
+            const result = spawnSync(process.execPath, ['design/build-icons.mjs', '--add', ...missing], { stdio: 'inherit' })
+            if (result.status !== 0) process.exit(result.status ?? 1)
+          }
+          const result = spawnSync(process.execPath, ['design/build-icons.mjs'], { stdio: 'inherit' })
+          if (result.status !== 0) process.exit(result.status ?? 1)
+          NODE
+      - name: Name each mockup icon from its exact Lucide drawing
+        run: |
+          node --input-type=module <<'NODE'
+          import { readdirSync, readFileSync, writeFileSync } from 'node:fs'
+          import { basename, join } from 'node:path'
+
+          const root = 'design/mockups/drafts/web'
+          const iconRoot = 'design/icons'
+          const drawingOf = (svg) =>
+            [...svg.matchAll(/<(path|circle|rect|line|polyline|polygon|ellipse)\\b([^>]*?)\\/?>/g)]
+              .map(([, tag, attrs]) => tag + [...attrs.matchAll(/\\b(d|cx|cy|r|rx|ry|x|y|width|height|x1|x2|y1|y2|points)="([^"]*)"/g)]
+                .map(([, key, value]) => ' ' + key + '=' + value.trim().replace(/\\s+/g, ' ')).sort().join(''))
+              .sort().join(';')
+
+          const sources = readdirSync(iconRoot).filter((file) => file.endsWith('.svg')).map((file) => {
+            const content = readFileSync(join(iconRoot, file), 'utf8')
+            const inner = content.match(/<svg\\b[^>]*>([\\s\\S]*?)<\\/svg>/)?.[1]
+            if (!inner) throw new Error('Invalid Lucide source: ' + file)
+            return { name: basename(file, '.svg'), drawing: drawingOf(inner), inner: inner.trim() }
+          })
+          const byDrawing = new Map(sources.map((item) => [item.drawing, item]))
+          let count = 0
+          for (const file of readdirSync(root).filter((name) => name.endsWith('.html'))) {
+            const path = join(root, file)
+            const html = readFileSync(path, 'utf8')
+            const updated = html.replace(/<svg\\b([^>]*)>([\\s\\S]*?)<\\/svg>/g, (match, attrs, inner) => {
+              if (!/viewBox="0 0 24 24"/.test(attrs)) return match
+              const source = byDrawing.get(drawingOf(inner))
+              if (!source) throw new Error('No exact Lucide source matches an SVG in ' + path + ': ' + inner.slice(0, 160))
+              const nextAttrs = attrs.replace(/\\sdata-lucide="[^"]*"/, '') + ' data-lucide="' + source.name + '"'
+              count++
+              return '<svg' + nextAttrs + '>' + source.inner + '</svg>'
+            })
+            if (updated !== html) writeFileSync(path, updated)
+          }
+          console.log('Named and normalized ' + count + ' inline Lucide icons.')
+          NODE
+      - name: Rebuild the UI styles and run design checks
+        run: |
+          npm run build -w ui --prefix web
+          node design/check-mockups.mjs
+          node design/build-icons.mjs --check
+          node design/build-tokens.mjs --check
+          npm run check -w ui --prefix web
+      - name: Remove this temporary workflow and commit the repair
+        run: |
+          rm .github/workflows/repair-catalog-ci.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "fix: validate catalog mockup Lucide icons and rebuild UI styles"
+          git push origin HEAD:design/338-admin-catalog
