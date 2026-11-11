@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Admin · catalog · prepare bulk retirement</title>
+<title>Admin · catalog · retire selected</title>
 <meta name="mockup:screen" content="admin-catalog-retire-selected">
 <meta name="mockup:section" content="Admin">
 <meta name="mockup:issue" content="386">
@@ -15,46 +15,335 @@
 <script src="../../shared/mockup-theme.js"></script>
 </head>
 <body class="bg-base-200 text-base-content min-h-screen">
-<!-- Bulk retirement review: preparing the action creates pending lifecycle changes only. It does not change the currently published catalog. -->
-<div class="min-h-screen">
-  <nav class="cp-navbar w-full bg-base-100 px-4 shadow-sm" data-component="admin-navbar">
-    <a href="admin-catalog.html" class="cp-btn cp-btn-ghost">Catalog</a>
-    <span class="font-bold">Prepare retirement</span>
-  </nav>
-  <main class="mx-auto flex max-w-5xl flex-col gap-6 p-4 md:p-8" data-component="bulk-retirement-review">
-    <nav class="cp-breadcrumbs text-sm" aria-label="You are here"><ul><li><a href="admin-catalog.html">Catalog</a></li><li>Prepare retirement</li></ul></nav>
-    <header class="flex flex-col gap-1">
-      <h1 class="cp-type-display">Prepare retirement for 3 exercises</h1>
-      <p class="text-base-content/70">Review the selected exercises. They remain active in the published catalog until a publication includes these retirement actions.</p>
-    </header>
-    <section class="cp-card bg-base-100 shadow-sm">
-      <div class="cp-card-body gap-4 p-4 md:p-6">
-        <div class="flex flex-wrap items-center justify-between gap-2">
-          <h2 class="cp-card-title">Selected exercises</h2>
-          <span class="cp-badge cp-badge-error cp-badge-soft">3 pending retirement actions</span>
+<!-- Exercise editorial workspace (#386). The address holds the table: /admin/catalog?q=…&retired=yes|no&sort=name|pattern|languages|change|status&order=asc|desc&page=2, with no sort meaning the catalog's order. 20 exercises a page, as the server pages them (#337). A click on a column header sorts by it and flips the order on a second click. "In the draft" is what changed since the latest publication: New, Edited, Retiring, Offered again. -->
+<div class="cp-drawer lg:cp-drawer-open">
+  <input id="admin-drawer" type="checkbox" class="cp-drawer-toggle" aria-label="Toggle the navigation">
+  <div class="cp-drawer-content flex flex-col">
+    <nav class="cp-navbar w-full bg-base-100 px-2 shadow-sm md:px-4">
+      <label for="admin-drawer" aria-label="Toggle the navigation" class="cp-btn cp-btn-square cp-btn-ghost"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="panel-left"><rect width="18" height="18" x="3" y="3" rx="2" />
+  <path d="M9 3v18" /></svg></label>
+      <div class="px-2 font-bold">Catalog</div>
+    </nav>
+    <main class="flex min-w-0 flex-col gap-6 p-4 md:p-8" id="catalog">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <div class="flex flex-col gap-1">
+          <h1 class="cp-type-display">Catalog</h1>
+          <p class="text-base-content/70">The exercises every phone gets. Edit the catalog, then publish the changes.</p>
         </div>
-        <div class="overflow-x-auto cp-card border border-base-300 bg-base-100">
-          <table class="cp-table bg-base-100">
-            <thead><tr><th>Exercise</th><th>Published state</th><th>Pending content</th><th>Action</th></tr></thead>
-            <tbody>
-              <tr><td><a href="admin-catalog-exercise.html" class="cp-link cp-link-hover font-semibold">Goblet squat</a><div class="text-sm text-base-content/70">goblet-squat</div></td><td><span class="cp-badge cp-badge-success cp-badge-soft">Active</span></td><td><span class="cp-badge cp-badge-neutral cp-badge-soft">Modified</span></td><td><button type="button" class="cp-btn cp-btn-ghost cp-btn-sm">Remove</button></td></tr>
-              <tr><td><a href="admin-catalog-exercise.html" class="cp-link cp-link-hover font-semibold">Glute bridge</a><div class="text-sm text-base-content/70">glute-bridge</div></td><td><span class="cp-badge cp-badge-success cp-badge-soft">Active</span></td><td><span class="text-base-content/70">None</span></td><td><button type="button" class="cp-btn cp-btn-ghost cp-btn-sm">Remove</button></td></tr>
-              <tr><td><a href="admin-catalog-exercise.html" class="cp-link cp-link-hover font-semibold">Romanian deadlift</a><div class="text-sm text-base-content/70">romanian-deadlift</div></td><td><span class="cp-badge cp-badge-success cp-badge-soft">Active</span></td><td><span class="cp-badge cp-badge-neutral cp-badge-soft">Modified</span></td><td><button type="button" class="cp-btn cp-btn-ghost cp-btn-sm">Remove</button></td></tr>
-            </tbody>
-          </table>
-        </div>
-        <p class="text-sm text-base-content/70">Only active, published exercises are eligible. Draft-only, already retired or otherwise ineligible selections are excluded with an explanation before this review.</p>
       </div>
-    </section>
-    <section class="cp-alert cp-alert items-start">
-      <svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="info"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-      <div><strong>Nothing is retired yet.</strong><p>Preparing retirement records pending lifecycle actions. All three exercises remain available until you publish a catalog version containing them. You can cancel each pending action before publication. Existing workouts keep their history.</p></div>
-    </section>
-    <div class="flex flex-wrap justify-end gap-2">
-      <a href="admin-catalog.html" class="cp-btn cp-btn-ghost">Cancel</a>
-      <a href="admin-catalog.html?changes=pending" class="cp-btn cp-btn-outline">Prepare retirement for 3</a>
+      <section class="cp-card bg-base-100 shadow-sm" id="exercises">
+        <div class="cp-card-body gap-4 p-4 md:p-6">
+          <div class="flex flex-wrap items-center justify-between gap-4" data-component="catalog-toolbar">
+            <label class="cp-input w-64 max-w-full" data-component="search-field">
+              <svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="search"><path d="m21 21-4.34-4.34" /><circle cx="11" cy="11" r="8" /></svg>
+              <input id="filter-q" type="search" class="grow" placeholder="Search exercises" aria-label="Search exercises by name, slug or alias" value="" autocomplete="off">
+            </label>
+            <div class="ml-auto flex flex-wrap items-center justify-end gap-2">
+              <a href="#catalog-filters" class="cp-btn cp-btn-outline gap-2" aria-haspopup="dialog">
+                <svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="sliders-horizontal"><path d="M10 5H3" /><path d="M12 19H3" /><path d="M14 3v4" /><path d="M16 17v4" /><path d="M21 12h-9" /><path d="M21 19h-5" /><path d="M21 5h-7" /><path d="M8 10v4" /><path d="M8 12H3" /></svg>
+                Filters <span class="cp-badge cp-badge-neutral cp-badge-sm">2</span>
+              </a>
+              <a href="admin-catalog-exercise-new.html" class="cp-btn cp-btn-primary cp-btn-sm gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="plus"><path d="M5 12h14" /><path d="M12 5v14" /></svg>
+                New exercise
+              </a>
+            </div>
+          </div>
+          <div class="overflow-x-auto cp-card border border-base-300 bg-base-100">
+            <table class="cp-table bg-base-100">
+              <thead><tr><th class="w-12 text-center" aria-label="Selection">
+                <!-- With no selection, this is the page-select checkbox. With a selection, it becomes the overflow menu. -->
+                <template data-state="no-selection">
+                  <label class="cp-btn cp-btn-ghost cp-btn-square cp-btn-sm" aria-label="Select all exercises on this page"><input type="checkbox" class="cp-checkbox" aria-label="Select all exercises on this page"></label>
+                </template>
+                <details class="relative inline-block" data-component="selection-actions" data-selection-count="3">
+                  <summary class="cp-btn cp-btn-ghost cp-btn-square cp-btn-sm relative list-none" aria-label="Actions for 3 selected exercises">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="ellipsis-vertical"><circle cx="12" cy="12" r="1" /><circle cx="12" cy="5" r="1" /><circle cx="12" cy="19" r="1" /></svg>
+                    <span class="cp-badge cp-badge-primary cp-badge-sm absolute -right-2 -top-2 z-10">3</span>
+                  </summary>
+                  <ul class="cp-menu absolute left-0 z-20 mt-2 w-52 cp-card border border-base-300 bg-base-100 p-2 text-start shadow-lg">
+                    <li><a href="admin-catalog-publish.html">Publish <span class="cp-badge cp-badge-sm">2</span></a></li>
+                    <li><a href="admin-catalog-retire-selected.html">Retire <span class="cp-badge cp-badge-sm">3</span></a></li>
+                    <li class="my-1 border-t border-base-300" aria-hidden="true"></li>
+                    <li><a href="admin-catalog.html?select=all-matching">Select all</a></li>
+                    <li><a href="admin-catalog.html">Clear selection</a></li>
+                  </ul>
+                </details>
+              </th><th aria-sort="none"><button type="button" class="cp-btn cp-btn-ghost cp-btn-sm -ms-3 gap-1 whitespace-nowrap">Exercise<svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="chevrons-up-down"><path d="m7 15 5 5 5-5" />
+  <path d="m7 9 5-5 5 5" /></svg></button></th><th aria-sort="none"><button type="button" class="cp-btn cp-btn-ghost cp-btn-sm -ms-3 gap-1 whitespace-nowrap">Pattern<svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="chevrons-up-down"><path d="m7 15 5 5 5-5" />
+  <path d="m7 9 5-5 5 5" /></svg></button></th><th aria-sort="none"><button type="button" class="cp-btn cp-btn-ghost cp-btn-sm -ms-3 gap-1 whitespace-nowrap">Languages<svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="chevrons-up-down"><path d="m7 15 5 5 5-5" />
+  <path d="m7 9 5-5 5 5" /></svg></button></th><th aria-sort="none"><button type="button" class="cp-btn cp-btn-ghost cp-btn-sm -ms-3 gap-1 whitespace-nowrap">Content<svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="chevrons-up-down"><path d="m7 15 5 5 5-5" />
+  <path d="m7 9 5-5 5 5" /></svg></button></th><th aria-sort="none"><button type="button" class="cp-btn cp-btn-ghost cp-btn-sm -ms-3 gap-1 whitespace-nowrap">Lifecycle<svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="chevrons-up-down"><path d="m7 15 5 5 5-5" />
+  <path d="m7 9 5-5 5 5" /></svg></button></th></tr></thead>
+              <tbody>
+                <tr class="cp-hover"><td><input type="checkbox" class="cp-checkbox" aria-label="Select exercise"></td>
+                  <td><div class="flex flex-col"><a href="admin-catalog-exercise-new.html" class="cp-link cp-link-hover text-start font-semibold">Pike push-up</a><span class="text-sm text-base-content/70">No French name · pike-push-up</span></div></td>
+                  <td class="whitespace-nowrap">Push</td>
+                  <td><span class="cp-badge cp-badge-error cp-badge-soft gap-1 whitespace-nowrap"><svg xmlns="http://www.w3.org/2000/svg" class="size-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="circle-exclamation-point"><circle cx="12" cy="12" r="10" />
+  <line x1="12" x2="12" y1="8" y2="12" />
+  <line x1="12" x2="12.01" y1="16" y2="16" /></svg>French missing</span></td>
+                  <td><span class="cp-badge cp-badge-primary cp-badge-soft whitespace-nowrap">New</span></td>
+                  <td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Offered</span></td>
+                </tr>
+                <tr class="cp-hover"><td><input type="checkbox" class="cp-checkbox" aria-label="Select Goblet squat" checked></td>
+                  <td><div class="flex flex-col"><a href="admin-catalog-exercise.html" class="cp-link cp-link-hover text-start font-semibold">Goblet squat</a><span class="text-sm text-base-content/70">Squat gobelet · goblet-squat</span></div></td>
+                  <td class="whitespace-nowrap">Squat</td>
+                  <td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Complete</span></td>
+                  <td><span class="cp-badge cp-badge-neutral cp-badge-soft whitespace-nowrap">Edited</span></td>
+                  <td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Offered</span></td>
+                </tr>
+                <tr class="cp-hover"><td><input type="checkbox" class="cp-checkbox" aria-label="Select exercise"></td>
+                  <td><div class="flex flex-col"><a href="admin-catalog-exercise.html" class="cp-link cp-link-hover text-start font-semibold">Bodyweight squat</a><span class="text-sm text-base-content/70">Squat au poids du corps · bodyweight-squat</span></div></td>
+                  <td class="whitespace-nowrap">Squat</td>
+                  <td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Complete</span></td>
+                  <td><span class="text-base-content/70">None</span></td>
+                  <td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Offered</span></td>
+                </tr>
+                <tr class="cp-hover"><td><input type="checkbox" class="cp-checkbox" aria-label="Select exercise"></td>
+                  <td><div class="flex flex-col"><a href="admin-catalog-exercise.html" class="cp-link cp-link-hover text-start font-semibold">Sit to stand</a><span class="text-sm text-base-content/70">Assis-debout sur chaise · chair-squat</span></div></td>
+                  <td class="whitespace-nowrap">Squat</td>
+                  <td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Complete</span></td>
+                  <td><span class="text-base-content/70">None</span></td>
+                  <td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Offered</span></td>
+                </tr>
+                <tr class="cp-hover"><td><input type="checkbox" class="cp-checkbox" aria-label="Select exercise"></td>
+                  <td><div class="flex flex-col"><a href="admin-catalog-exercise-retire.html" class="cp-link cp-link-hover text-start font-semibold">Wall sit</a><span class="text-sm text-base-content/70">Chaise contre le mur · wall-sit</span></div></td>
+                  <td class="whitespace-nowrap">Squat</td>
+                  <td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Complete</span></td>
+                  <td><span class="cp-badge cp-badge-outline whitespace-nowrap">Retiring</span></td>
+                  <td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Offered</span></td>
+                </tr>
+                <tr class="cp-hover"><td><input type="checkbox" class="cp-checkbox" aria-label="Select Glute bridge" checked></td>
+                  <td><div class="flex flex-col"><a href="admin-catalog-exercise.html" class="cp-link cp-link-hover text-start font-semibold">Glute bridge</a><span class="text-sm text-base-content/70">Pont fessier · glute-bridge</span></div></td>
+                  <td class="whitespace-nowrap">Hinge</td>
+                  <td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Complete</span></td>
+                  <td><span class="text-base-content/70">None</span></td>
+                  <td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Offered</span></td>
+                </tr>
+                <tr class="cp-hover"><td><input type="checkbox" class="cp-checkbox" aria-label="Select Romanian deadlift" checked></td>
+                  <td><div class="flex flex-col"><a href="admin-catalog-exercise.html" class="cp-link cp-link-hover text-start font-semibold">Romanian deadlift</a><span class="text-sm text-base-content/70">Soulevé de terre roumain · romanian-deadlift</span></div></td>
+                  <td class="whitespace-nowrap">Hinge</td>
+                  <td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Complete</span></td>
+                  <td><span class="cp-badge cp-badge-neutral cp-badge-soft whitespace-nowrap">Edited</span></td>
+                  <td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Offered</span></td>
+                </tr>
+                <tr class="cp-hover"><td><input type="checkbox" class="cp-checkbox" aria-label="Select exercise"></td>
+                  <td><div class="flex flex-col"><a href="admin-catalog-exercise.html" class="cp-link cp-link-hover text-start font-semibold">Kettlebell swing</a><span class="text-sm text-base-content/70">Swing kettlebell · kettlebell-swing</span></div></td>
+                  <td class="whitespace-nowrap">Hinge</td>
+                  <td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Complete</span></td>
+                  <td><span class="cp-badge cp-badge-success cp-badge-soft whitespace-nowrap">Offered again</span></td>
+                  <td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Offered</span></td>
+                </tr>
+                <tr class="cp-hover"><td><input type="checkbox" class="cp-checkbox" aria-label="Select exercise"></td>
+                  <td><div class="flex flex-col"><a href="admin-catalog-exercise.html" class="cp-link cp-link-hover text-start font-semibold">Good morning</a><span class="text-sm text-base-content/70">Good morning · good-morning</span></div></td>
+                  <td class="whitespace-nowrap">Hinge</td>
+                  <td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Complete</span></td>
+                  <td><span class="text-base-content/70">None</span></td>
+                  <td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Offered</span></td>
+                </tr>
+                <tr class="cp-hover"><td><input type="checkbox" class="cp-checkbox" aria-label="Select exercise"></td>
+                  <td><div class="flex flex-col"><a href="admin-catalog-exercise.html" class="cp-link cp-link-hover text-start font-semibold">Reverse lunge</a><span class="text-sm text-base-content/70">Fente arrière · reverse-lunge</span></div></td>
+                  <td class="whitespace-nowrap">Lunge</td>
+                  <td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Complete</span></td>
+                  <td><span class="text-base-content/70">None</span></td>
+                  <td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Offered</span></td>
+                </tr>
+                <tr class="cp-hover"><td><input type="checkbox" class="cp-checkbox" aria-label="Select exercise"></td>
+                  <td><div class="flex flex-col"><a href="admin-catalog-exercise.html" class="cp-link cp-link-hover text-start font-semibold">Walking lunge</a><span class="text-sm text-base-content/70">Fentes marchées · walking-lunge</span></div></td>
+                  <td class="whitespace-nowrap">Lunge</td>
+                  <td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Complete</span></td>
+                  <td><span class="text-base-content/70">None</span></td>
+                  <td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Offered</span></td>
+                </tr>
+                <tr class="cp-hover"><td><input type="checkbox" class="cp-checkbox" aria-label="Select exercise"></td>
+                  <td><div class="flex flex-col"><a href="admin-catalog-exercise.html" class="cp-link cp-link-hover text-start font-semibold">Step-up</a><span class="text-sm text-base-content/70">Montée sur banc · step-up</span></div></td>
+                  <td class="whitespace-nowrap">Lunge</td>
+                  <td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Complete</span></td>
+                  <td><span class="text-base-content/70">None</span></td>
+                  <td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Offered</span></td>
+                </tr>
+                <tr class="cp-hover"><td><input type="checkbox" class="cp-checkbox" aria-label="Select exercise"></td>
+                  <td><div class="flex flex-col"><a href="admin-catalog-exercise.html" class="cp-link cp-link-hover text-start font-semibold">Push-up</a><span class="text-sm text-base-content/70">Pompe · push-up</span></div></td>
+                  <td class="whitespace-nowrap">Push</td>
+                  <td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Complete</span></td>
+                  <td><span class="text-base-content/70">None</span></td>
+                  <td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Offered</span></td>
+                </tr>
+                <tr class="cp-hover"><td><input type="checkbox" class="cp-checkbox" aria-label="Select exercise"></td>
+                  <td><div class="flex flex-col"><a href="admin-catalog-exercise.html" class="cp-link cp-link-hover text-start font-semibold">Knee push-up</a><span class="text-sm text-base-content/70">Pompe sur les genoux · knee-push-up</span></div></td>
+                  <td class="whitespace-nowrap">Push</td>
+                  <td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Complete</span></td>
+                  <td><span class="text-base-content/70">None</span></td>
+                  <td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Offered</span></td>
+                </tr>
+                <tr class="cp-hover"><td><input type="checkbox" class="cp-checkbox" aria-label="Select exercise"></td>
+                  <td><div class="flex flex-col"><a href="admin-catalog-exercise.html" class="cp-link cp-link-hover text-start font-semibold">Incline push-up</a><span class="text-sm text-base-content/70">Pompe inclinée · incline-push-up</span></div></td>
+                  <td class="whitespace-nowrap">Push</td>
+                  <td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Complete</span></td>
+                  <td><span class="text-base-content/70">None</span></td>
+                  <td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Offered</span></td>
+                </tr>
+                <tr class="cp-hover"><td><input type="checkbox" class="cp-checkbox" aria-label="Select exercise"></td>
+                  <td><div class="flex flex-col"><a href="admin-catalog-exercise.html" class="cp-link cp-link-hover text-start font-semibold">Diamond push-up</a><span class="text-sm text-base-content/70">Pompe diamant · diamond-push-up</span></div></td>
+                  <td class="whitespace-nowrap">Push</td>
+                  <td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Complete</span></td>
+                  <td><span class="text-base-content/70">None</span></td>
+                  <td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Offered</span></td>
+                </tr>
+                <tr class="cp-hover"><td><input type="checkbox" class="cp-checkbox" aria-label="Select exercise"></td>
+                  <td><div class="flex flex-col"><a href="admin-catalog-exercise.html" class="cp-link cp-link-hover text-start font-semibold">One-arm push-up</a><span class="text-sm text-base-content/70">Pompe sur un bras · one-arm-push-up</span></div></td>
+                  <td class="whitespace-nowrap">Push</td>
+                  <td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Complete</span></td>
+                  <td><span class="text-base-content/70">None</span></td>
+                  <td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Offered</span></td>
+                </tr>
+                <tr class="cp-hover"><td><input type="checkbox" class="cp-checkbox" aria-label="Select exercise"></td>
+                  <td><div class="flex flex-col"><a href="admin-catalog-exercise.html" class="cp-link cp-link-hover text-start font-semibold">Dumbbell bench press</a><span class="text-sm text-base-content/70">Développé couché haltères · dumbbell-bench-press</span></div></td>
+                  <td class="whitespace-nowrap">Push</td>
+                  <td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Complete</span></td>
+                  <td><span class="text-base-content/70">None</span></td>
+                  <td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Offered</span></td>
+                </tr>
+                <tr class="cp-hover"><td><input type="checkbox" class="cp-checkbox" aria-label="Select exercise"></td>
+                  <td><div class="flex flex-col"><a href="admin-catalog-exercise.html" class="cp-link cp-link-hover text-start font-semibold">Dumbbell overhead press</a><span class="text-sm text-base-content/70">Développé militaire haltères · overhead-press</span></div></td>
+                  <td class="whitespace-nowrap">Push</td>
+                  <td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Complete</span></td>
+                  <td><span class="text-base-content/70">None</span></td>
+                  <td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Offered</span></td>
+                </tr>
+                <tr class="cp-hover"><td><input type="checkbox" class="cp-checkbox" aria-label="Select exercise"></td>
+                  <td><div class="flex flex-col"><a href="admin-catalog-exercise.html" class="cp-link cp-link-hover text-start font-semibold">Bench dip</a><span class="text-sm text-base-content/70">Dips sur banc · bench-dip</span></div></td>
+                  <td class="whitespace-nowrap">Push</td>
+                  <td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Complete</span></td>
+                  <td><span class="text-base-content/70">None</span></td>
+                  <td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Offered</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="flex flex-col items-center justify-between gap-3 sm:flex-row" data-component="pagination">
+            <p class="text-sm text-base-content/70">Showing 1 to 20 of 61 exercises</p>
+            <nav aria-label="Pages"><div class="cp-join">
+              <button class="cp-join-item cp-btn cp-btn-sm" disabled aria-label="Previous page"><svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="chevron-left"><path d="m15 18-6-6 6-6" /></svg></button>
+              <button class="cp-join-item cp-btn cp-btn-sm cp-btn-active" aria-current="page">1</button>
+              <button class="cp-join-item cp-btn cp-btn-sm">2</button>
+              <button class="cp-join-item cp-btn cp-btn-sm">3</button>
+              <button class="cp-join-item cp-btn cp-btn-sm">4</button>
+              <button class="cp-join-item cp-btn cp-btn-sm" aria-label="Next page"><svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="chevron-right"><path d="m9 18 6-6-6-6" /></svg></button>
+            </div></nav>
+          </div>
+        </div>
+      </section>
+    </main>
+    <dialog class="cp-modal cp-modal-end cp-sheet" data-component="filter-sheet" id="catalog-filters" aria-labelledby="catalog-filters-title">
+      <div class="cp-modal-box flex flex-col gap-4 p-4 md:p-6">
+        <div class="flex items-center justify-between gap-3">
+          <div class="flex flex-col gap-1">
+            <h2 class="cp-type-headline" id="catalog-filters-title">Filters</h2>
+            <p class="text-sm text-base-content/70">Narrow the exercise catalog.</p>
+          </div>
+          <form method="dialog"><button class="cp-btn cp-btn-ghost cp-btn-square" aria-label="Close filters"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="x"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg></button></form>
+        </div>
+        <form class="flex min-h-0 flex-1 flex-col gap-4" role="search" aria-label="Filter the exercises">
+          <div class="flex flex-col gap-3">
+            <label class="cp-fieldset"><span class="cp-type-label">Show</span><select class="cp-select w-full"><option>All exercises</option><option>Pending changes</option><option>Drafts</option><option>Published</option><option>Incomplete translations</option></select></label>
+            <label class="cp-fieldset"><span class="cp-type-label">Movement pattern</span><select class="cp-select w-full"><option>All patterns</option><option>Squat</option><option>Hinge</option><option>Lunge</option><option>Push</option><option>Pull</option><option>Carry</option><option>Core</option><option>Rotation</option></select></label>
+            <label class="cp-fieldset"><span class="cp-type-label">Translation status</span><select class="cp-select w-full"><option>All</option><option>Complete</option><option>Incomplete</option></select></label>
+            <label class="cp-fieldset"><span class="cp-type-label">Content status</span><select class="cp-select w-full"><option>All</option><option>Draft</option><option>Modified</option><option>Published</option><option>Pending publication</option></select></label>
+            <label class="cp-fieldset"><span class="cp-type-label">Lifecycle status</span><select class="cp-select w-full"><option>All</option><option>Active</option><option>Retirement pending</option><option>Retired</option></select></label>
+            <div class="cp-fieldset" data-component="multi-select"><label class="cp-type-label" for="filter-muscles">Muscles</label><label class="cp-input w-full"><input id="filter-muscles" class="grow" placeholder="Search and select muscles" role="combobox" aria-expanded="false"></label></div>
+            <div class="cp-fieldset" data-component="multi-select"><label class="cp-type-label" for="filter-positions">Positions</label><label class="cp-input w-full"><input id="filter-positions" class="grow" placeholder="Search and select positions" role="combobox" aria-expanded="false"></label></div>
+            <div class="cp-fieldset" data-component="multi-select"><label class="cp-type-label" for="filter-equipment">Equipment</label><label class="cp-input w-full"><input id="filter-equipment" class="grow" placeholder="Search and select equipment" role="combobox" aria-expanded="false"></label></div>
+          </div>
+          <div class="mt-auto flex flex-col gap-3 border-t border-base-300 pt-4">
+            <div class="flex flex-wrap items-center gap-2 text-sm text-base-content/70"><span class="cp-badge cp-badge-neutral cp-badge-soft">Pattern: Squat</span><span class="cp-badge cp-badge-neutral cp-badge-soft">Translation: Incomplete</span></div>
+            <div class="flex items-center justify-between gap-2"><a href="admin-catalog.html" class="cp-link cp-link-hover">Clear filters</a><button type="submit" class="cp-btn cp-btn-primary">Apply filters</button></div>
+          </div>
+        </form>
+      </div>
+      <form method="dialog" class="cp-modal-backdrop"><button>Close filters</button></form>
+    </dialog>
+  </div>
+  <div class="cp-drawer-side cp-is-drawer-close:overflow-visible" data-component="admin-nav">
+    <label for="admin-drawer" aria-label="Close the navigation" class="cp-drawer-overlay"></label>
+    <div class="flex min-h-full flex-col items-start border-r border-base-300 bg-base-100 cp-is-drawer-close:w-16 cp-is-drawer-open:w-64">
+      <div class="flex min-h-16 w-full items-center gap-2 px-4 py-2">
+        <img src="../../../poulpy/mood_happy.svg" alt="" width="32" height="32" class="shrink-0">
+        <div class="flex flex-col items-start cp-is-drawer-close:hidden">
+          <span class="cp-type-headline">Coach <span class="text-primary">poulpy</span></span>
+          <span class="cp-badge cp-badge-primary cp-badge-soft cp-badge-sm w-fit gap-1 whitespace-nowrap"><svg xmlns="http://www.w3.org/2000/svg" class="size-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="shield-check"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" />
+  <path d="m9 12 2 2 4-4" /></svg>Admin</span>
+        </div>
+      </div>
+      <ul class="cp-menu w-full grow gap-1 px-2">
+        <li><a href="../../agreed/web/admin-shell.html" class="cp-is-drawer-close:cp-tooltip cp-is-drawer-close:cp-tooltip-right" data-tip="Audit log"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="rotate-ccw-clock"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+  <path d="M3 3v5h5" />
+  <path d="M12 7v5l4 2" /></svg><span class="cp-is-drawer-close:hidden">Audit log</span></a></li>
+        <li><a href="../../agreed/web/admin-accounts.html" class="cp-is-drawer-close:cp-tooltip cp-is-drawer-close:cp-tooltip-right" data-tip="Accounts"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="users"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+  <path d="M16 3.128a4 4 0 0 1 0 7.744" />
+  <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+  <circle cx="9" cy="7" r="4" /></svg><span class="cp-is-drawer-close:hidden">Accounts</span></a></li>
+        <li><a href="admin-catalog.html" class="cp-menu-active cp-is-drawer-close:cp-tooltip cp-is-drawer-close:cp-tooltip-right" data-tip="Catalog" aria-current="page"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="book-open"><path d="M12 5v16" />
+  <path d="M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z" /></svg><span class="cp-is-drawer-close:hidden">Catalog</span></a></li>
+        <li><a href="../../agreed/web/admin-settings-mail.html" class="cp-is-drawer-close:cp-tooltip cp-is-drawer-close:cp-tooltip-right" data-tip="Settings"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="sliders-horizontal"><path d="M10 5H3" />
+  <path d="M12 19H3" />
+  <path d="M14 3v4" />
+  <path d="M16 17v4" />
+  <path d="M21 12h-9" />
+  <path d="M21 19h-5" />
+  <path d="M21 5h-7" />
+  <path d="M8 10v4" />
+  <path d="M8 12H3" /></svg><span class="cp-is-drawer-close:hidden">Settings</span></a></li>
+        <li><a href="../../agreed/web/admin-status.html" class="cp-is-drawer-close:cp-tooltip cp-is-drawer-close:cp-tooltip-right" data-tip="Status"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="activity"><path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2" /></svg><span class="cp-is-drawer-close:hidden">Status</span></a></li>
+      </ul>
+      <div class="flex w-full flex-col gap-2 p-2">
+        <ul class="cp-menu w-full p-0">
+          <li><a href="../../agreed/web/app-profile.html" class="cp-is-drawer-close:cp-tooltip cp-is-drawer-close:cp-tooltip-right" data-tip="Coach Poulpy app" data-component="app-link"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="arrow-left"><path d="m12 19-7-7 7-7" />
+  <path d="M19 12H5" /></svg><span class="cp-is-drawer-close:hidden">Coach Poulpy app</span></a></li>
+        </ul>
+        <div class="flex items-center gap-3 px-2">
+          <div class="cp-avatar cp-avatar-placeholder"><div class="bg-primary text-primary-content w-10 rounded-full"><span>A</span></div></div>
+          <div class="flex min-w-0 flex-1 flex-col text-sm cp-is-drawer-close:hidden">
+            <span class="font-bold">Ana</span>
+            <span class="truncate text-base-content/70">ana@example.com</span>
+          </div>
+        </div>
+        <ul class="cp-menu w-full p-0">
+          <li><button class="cp-is-drawer-close:cp-tooltip cp-is-drawer-close:cp-tooltip-right" data-tip="Sign out"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="log-in"><path d="m10 17 5-5-5-5" />
+  <path d="M15 12H3" />
+  <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" /></svg><span class="cp-is-drawer-close:hidden">Sign out</span></button></li>
+        </ul>
+      </div>
     </div>
-  </main>
+  </div>
 </div>
+  <dialog class="cp-modal cp-modal-open cp-modal-bottom sm:cp-modal-middle" open aria-labelledby="bulk-retire-title" data-component="bulk-retirement-dialog">
+    <div class="cp-modal-box flex max-h-[90vh] w-11/12 max-w-2xl flex-col gap-4 overflow-y-auto">
+      <div class="flex items-start justify-between gap-4">
+        <div class="flex flex-col gap-1">
+          <h2 class="cp-type-headline" id="bulk-retire-title">Retire 3 selected exercises?</h2>
+          <p class="text-sm text-base-content/70">These exercises stay available until you publish the changes. Existing workouts keep working and retain their history.</p>
+        </div>
+        <form method="dialog"><button class="cp-btn cp-btn-ghost cp-btn-square cp-btn-sm" aria-label="Close retirement review">×</button></form>
+      </div>
+      <div class="overflow-x-auto rounded-box border border-base-300">
+        <table class="cp-table bg-base-100">
+          <thead><tr><th>Exercise</th><th>Current state</th><th>Pending content</th></tr></thead>
+          <tbody>
+            <tr><td class="font-semibold">Goblet squat</td><td><span class="cp-badge cp-badge-success cp-badge-soft">Offered</span></td><td>Edited</td></tr>
+            <tr><td class="font-semibold">Glute bridge</td><td><span class="cp-badge cp-badge-success cp-badge-soft">Offered</span></td><td>Unchanged</td></tr>
+            <tr><td class="font-semibold">Romanian deadlift</td><td><span class="cp-badge cp-badge-success cp-badge-soft">Offered</span></td><td>Edited</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="text-sm text-base-content/70">Retirement removes an exercise from the catalog and exercise builder after publication. It does not delete exercise data or workout history. You can offer it again later.</p>
+      <div class="flex flex-wrap justify-end gap-2 border-t border-base-300 pt-4">
+        <form method="dialog"><button class="cp-btn cp-btn-ghost">Cancel</button></form>
+        <button type="button" class="cp-btn cp-btn-outline">Retire 3 exercises</button>
+      </div>
+    </div>
+    <form method="dialog" class="cp-modal-backdrop"><button>Close retirement review</button></form>
+  </dialog>
+<script src="../../shared/mockup-drawer.js"></script>
 </body>
 </html>
