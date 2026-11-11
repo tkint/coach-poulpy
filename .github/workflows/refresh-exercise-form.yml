@@ -73,7 +73,7 @@ jobs:
             return (result >>> 0).toString(16).padStart(8, '0')
           }
           let count = 0
-          for (const file of readdirSync(root).filter((name) => name.endsWith('.html'))) {
+          for (const file of readdirSync(root).filter((name) => name.startsWith('admin-catalog') && name.endsWith('.html'))) {
             const path = join(root, file)
             const html = readFileSync(path, 'utf8')
             const updated = html.replace(/<svg\b([^>]*)>([\s\S]*?)<\/svg>/g, (match, attrs, inner) => {
