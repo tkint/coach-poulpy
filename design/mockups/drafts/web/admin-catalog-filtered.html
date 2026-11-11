@@ -15,7 +15,7 @@
 <script src="../../shared/mockup-theme.js"></script>
 </head>
 <body class="bg-base-200 text-base-content min-h-screen">
-<!-- Status set to Retired: /admin/catalog?retired=yes. A retired exercise stays in the catalog so the workouts that use it still open, and can be offered again. -->
+<!-- Retired exercises view (#338). The address holds the table: /admin/catalog?q=…&retired=yes|no&sort=name|pattern|languages|change|status&order=asc|desc&page=2, with no sort meaning the catalog's order. 20 exercises a page, as the server pages them (#337). A click on a column header sorts by it and flips the order on a second click. "In the draft" is what changed since the latest published version: New, Edited, Retiring, Offered again. -->
 <div class="cp-drawer lg:cp-drawer-open">
   <input id="admin-drawer" type="checkbox" class="cp-drawer-toggle" aria-label="Toggle the navigation">
   <div class="cp-drawer-content flex flex-col">
@@ -28,64 +28,99 @@
       <div class="flex flex-wrap items-center justify-between gap-4">
         <div class="flex flex-col gap-1">
           <h1 class="cp-type-display">Catalog</h1>
-          <p class="text-base-content/70">The exercises every phone gets. Edit the draft here, then publish it as the next version.</p>
+          <p class="text-base-content/70">Retired exercises remain available to existing workouts and can be offered again.</p>
         </div>
-        <div class="flex flex-wrap gap-2"><a href="admin-catalog-exercise-new.html" class="cp-btn cp-btn-outline gap-2"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="plus"><path d="M5 12h14" />
-  <path d="M12 5v14" /></svg>New exercise</a><a href="admin-catalog-publish.html" class="cp-btn cp-btn-primary gap-2"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="cloud-upload"><path d="M12 13v8" />
-  <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
-  <path d="m8 17 4-4 4 4" /></svg>Publish version 12</a></div>
       </div>
-      <section class="cp-card bg-base-100 shadow-sm" id="draft">
-        <div class="cp-card-body p-4 md:p-6"><div class="flex flex-wrap items-center justify-between gap-4">
-          <div class="flex flex-col gap-1">
-            <h2 class="cp-card-title">Draft</h2>
-            <p class="text-sm text-base-content/70">Since version 11: 1 new, 2 edited, 1 retiring, 1 offered again. Phones see none of it until you publish.</p>
-          </div>
-          <a href="admin-catalog-publish.html" class="cp-btn cp-btn-secondary">Review changes</a>
-        </div></div>
-      </section>
-      <form class="cp-card bg-base-100 shadow-sm" id="filters" role="search" aria-label="Filter the exercises">
-        <div class="cp-card-body grid gap-4 p-4 sm:grid-cols-2 md:p-6">
-          <div class="cp-fieldset" data-component="search-field">
-            <label class="cp-type-label" for="filter-q">Name, slug or alias</label>
-            <label class="cp-input w-full"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="search"><path d="m21 21-4.34-4.34" />
-  <circle cx="11" cy="11" r="8" /></svg><input id="filter-q" type="search" class="grow" value="" autocomplete="off"></label>
-          </div>
-          <label class="cp-fieldset" data-component="select-field"><span class="cp-type-label">Status</span><select id="filter-retired" class="cp-select w-full"><option value="">All</option><option value="no">Offered</option><option value="yes" selected>Retired</option></select></label>
-        </div>
-      </form>
       <section class="cp-card bg-base-100 shadow-sm" id="exercises">
         <div class="cp-card-body gap-4 p-4 md:p-6">
-          <div class="overflow-x-auto">
-            <table class="cp-table">
-              <thead><tr><th aria-sort="none"><button type="button" class="cp-btn cp-btn-ghost cp-btn-sm -ms-3 gap-1 whitespace-nowrap">Exercise<svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="chevrons-up-down"><path d="m7 15 5 5 5-5" />
+          <div class="flex flex-wrap items-center justify-between gap-4" data-component="catalog-toolbar">
+            <label class="cp-input w-64 max-w-full" data-component="search-field">
+              <svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="search"><path d="m21 21-4.34-4.34" /><circle cx="11" cy="11" r="8" /></svg>
+              <input id="filter-q" type="search" class="grow" placeholder="Search retired exercises" aria-label="Search exercises by name, slug or alias" value="" autocomplete="off">
+            </label>
+            <div class="ml-auto flex flex-wrap items-center justify-end gap-2">
+              <a href="#catalog-filters" class="cp-btn cp-btn-outline gap-2" aria-haspopup="dialog">
+                <svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="sliders-horizontal"><path d="M10 5H3" /><path d="M12 19H3" /><path d="M14 3v4" /><path d="M16 17v4" /><path d="M21 12h-9" /><path d="M21 19h-5" /><path d="M21 5h-7" /><path d="M8 10v4" /><path d="M8 12H3" /></svg>
+                Filters <span class="cp-badge cp-badge-neutral cp-badge-sm">1</span>
+              </a>
+              <a href="admin-catalog-exercise-new.html" class="cp-btn cp-btn-primary cp-btn-sm gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="plus"><path d="M5 12h14" /><path d="M12 5v14" /></svg>
+                New exercise
+              </a>
+            </div>
+          </div>
+          <div class="overflow-x-auto cp-card border border-base-300 bg-base-100">
+            <table class="cp-table bg-base-100">
+              <thead><tr><th class="w-12 text-center" aria-label="Selection">
+                <!-- With no selection, this is the page-select checkbox. With a selection, it becomes the overflow menu. -->
+                <template data-state="no-selection">
+                  <label class="cp-btn cp-btn-ghost cp-btn-square cp-btn-sm" aria-label="Select all exercises on this page"><input type="checkbox" class="cp-checkbox" aria-label="Select all exercises on this page"></label>
+                </template>
+                <details class="relative inline-block" data-component="selection-actions" data-selection-count="1">
+                  <summary class="cp-btn cp-btn-ghost cp-btn-square cp-btn-sm relative list-none" aria-label="Actions for 1 selected exercise">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="ellipsis-vertical"><circle cx="12" cy="12" r="1" /><circle cx="12" cy="5" r="1" /><circle cx="12" cy="19" r="1" /></svg>
+                    <span class="cp-badge cp-badge-primary cp-badge-sm absolute -right-2 -top-2 z-10">1</span>
+                  </summary>
+                  <ul class="cp-menu absolute left-0 z-20 mt-2 w-52 cp-card border border-base-300 bg-base-100 p-2 text-start shadow-lg">
+                    <li><a href="admin-catalog-publish.html">Publish <span class="cp-badge cp-badge-sm">2</span></a></li>
+                    <li><a href="admin-catalog-retire-selected.html">Retire <span class="cp-badge cp-badge-sm">3</span></a></li>
+                    <li class="my-1 border-t border-base-300" aria-hidden="true"></li>
+                    <li><a href="admin-catalog.html?select=all-matching">Select all</a></li>
+                    <li><a href="admin-catalog.html">Clear selection</a></li>
+                  </ul>
+                </details>
+              </th><th aria-sort="none"><button type="button" class="cp-btn cp-btn-ghost cp-btn-sm -ms-3 gap-1 whitespace-nowrap">Exercise<svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="chevrons-up-down"><path d="m7 15 5 5 5-5" />
   <path d="m7 9 5-5 5 5" /></svg></button></th><th aria-sort="none"><button type="button" class="cp-btn cp-btn-ghost cp-btn-sm -ms-3 gap-1 whitespace-nowrap">Pattern<svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="chevrons-up-down"><path d="m7 15 5 5 5-5" />
   <path d="m7 9 5-5 5 5" /></svg></button></th><th aria-sort="none"><button type="button" class="cp-btn cp-btn-ghost cp-btn-sm -ms-3 gap-1 whitespace-nowrap">Languages<svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="chevrons-up-down"><path d="m7 15 5 5 5-5" />
-  <path d="m7 9 5-5 5 5" /></svg></button></th><th aria-sort="none"><button type="button" class="cp-btn cp-btn-ghost cp-btn-sm -ms-3 gap-1 whitespace-nowrap">In the draft<svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="chevrons-up-down"><path d="m7 15 5 5 5-5" />
-  <path d="m7 9 5-5 5 5" /></svg></button></th><th aria-sort="none"><button type="button" class="cp-btn cp-btn-ghost cp-btn-sm -ms-3 gap-1 whitespace-nowrap">Status<svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="chevrons-up-down"><path d="m7 15 5 5 5-5" />
+  <path d="m7 9 5-5 5 5" /></svg></button></th><th aria-sort="none"><button type="button" class="cp-btn cp-btn-ghost cp-btn-sm -ms-3 gap-1 whitespace-nowrap">Content<svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="chevrons-up-down"><path d="m7 15 5 5 5-5" />
+  <path d="m7 9 5-5 5 5" /></svg></button></th><th aria-sort="none"><button type="button" class="cp-btn cp-btn-ghost cp-btn-sm -ms-3 gap-1 whitespace-nowrap">Lifecycle<svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="chevrons-up-down"><path d="m7 15 5 5 5-5" />
   <path d="m7 9 5-5 5 5" /></svg></button></th></tr></thead>
               <tbody>
-                <tr class="cp-hover">
-                  <td><div class="flex flex-col"><a href="admin-catalog-exercise-retire.html" class="cp-link cp-link-hover text-start font-semibold">Wall sit</a><span class="text-sm text-base-content/70">Chaise contre le mur · wall-sit</span></div></td>
-                  <td class="whitespace-nowrap">Squat</td>
-                  <td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Complete</span></td>
-                  <td><span class="cp-badge cp-badge-outline whitespace-nowrap">Retiring</span></td>
-                  <td><span class="cp-badge cp-badge-outline whitespace-nowrap">Retired</span></td>
-                </tr>
-              </tbody>
-            </table>
+                <tr class="cp-hover"><td><input type="checkbox" class="cp-checkbox" aria-label="Select Wall sit"></td><td><div class="flex flex-col"><a href="admin-catalog-exercise-retire.html" class="cp-link cp-link-hover text-start font-semibold">Wall sit</a><span class="text-sm text-base-content/70">Chaise contre le mur · wall-sit</span></div></td><td class="whitespace-nowrap">Squat</td><td><span class="cp-badge cp-badge-soft cp-badge-success whitespace-nowrap">Complete</span></td><td><span class="text-base-content/70">None</span></td><td><span class="cp-badge cp-badge-neutral cp-badge-soft whitespace-nowrap">Retired</span></td></tr>
+              </tbody>           </table>
           </div>
           <div class="flex flex-col items-center justify-between gap-3 sm:flex-row" data-component="pagination">
-            <p class="text-sm text-base-content/70">Showing 1 to 1 of 1 exercises</p>
+            <p class="text-sm text-base-content/70">Showing 1 to 20 of 61 exercises</p>
             <nav aria-label="Pages"><div class="cp-join">
               <button class="cp-join-item cp-btn cp-btn-sm" disabled aria-label="Previous page"><svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="chevron-left"><path d="m15 18-6-6 6-6" /></svg></button>
               <button class="cp-join-item cp-btn cp-btn-sm cp-btn-active" aria-current="page">1</button>
-              <button class="cp-join-item cp-btn cp-btn-sm" disabled aria-label="Next page"><svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="chevron-right"><path d="m9 18 6-6-6-6" /></svg></button>
+              <button class="cp-join-item cp-btn cp-btn-sm">2</button>
+              <button class="cp-join-item cp-btn cp-btn-sm">3</button>
+              <button class="cp-join-item cp-btn cp-btn-sm">4</button>
+              <button class="cp-join-item cp-btn cp-btn-sm" aria-label="Next page"><svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="chevron-right"><path d="m9 18 6-6-6-6" /></svg></button>
             </div></nav>
           </div>
         </div>
       </section>
     </main>
+    <dialog class="cp-modal cp-modal-end cp-sheet" data-component="filter-sheet" id="catalog-filters" aria-labelledby="catalog-filters-title">
+      <div class="cp-modal-box flex flex-col gap-4 p-4 md:p-6">
+        <div class="flex items-center justify-between gap-3">
+          <div class="flex flex-col gap-1">
+            <h2 class="cp-type-headline" id="catalog-filters-title">Filters</h2>
+            <p class="text-sm text-base-content/70">Narrow the exercise catalog.</p>
+          </div>
+          <form method="dialog"><button class="cp-btn cp-btn-ghost cp-btn-square" aria-label="Close filters"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="x"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg></button></form>
+        </div>
+        <form class="flex min-h-0 flex-1 flex-col gap-4" role="search" aria-label="Filter the exercises">
+          <div class="flex flex-col gap-3">
+            <label class="cp-fieldset"><span class="cp-type-label">Show</span><select class="cp-select w-full"><option>All exercises</option><option>Pending changes</option><option>Drafts</option><option>Published</option><option>Incomplete translations</option></select></label>
+            <label class="cp-fieldset"><span class="cp-type-label">Movement pattern</span><select class="cp-select w-full"><option>All patterns</option><option>Squat</option><option>Hinge</option><option>Lunge</option><option>Push</option><option>Pull</option><option>Carry</option><option>Core</option><option>Rotation</option></select></label>
+            <label class="cp-fieldset"><span class="cp-type-label">Translation status</span><select class="cp-select w-full"><option>All</option><option>Complete</option><option>Incomplete</option></select></label>
+            <label class="cp-fieldset"><span class="cp-type-label">Content status</span><select class="cp-select w-full"><option>All</option><option>Draft</option><option>Modified</option><option>Published</option><option>Pending publication</option></select></label>
+            <label class="cp-fieldset"><span class="cp-type-label">Lifecycle status</span><select class="cp-select w-full"><option>All</option><option>Active</option><option>Retirement pending</option><option>Retired</option></select></label>
+            <div class="cp-fieldset" data-component="multi-select"><label class="cp-type-label" for="filter-muscles">Muscles</label><label class="cp-input w-full"><input id="filter-muscles" class="grow" placeholder="Search and select muscles" role="combobox" aria-expanded="false"></label></div>
+            <div class="cp-fieldset" data-component="multi-select"><label class="cp-type-label" for="filter-positions">Positions</label><label class="cp-input w-full"><input id="filter-positions" class="grow" placeholder="Search and select positions" role="combobox" aria-expanded="false"></label></div>
+            <div class="cp-fieldset" data-component="multi-select"><label class="cp-type-label" for="filter-equipment">Equipment</label><label class="cp-input w-full"><input id="filter-equipment" class="grow" placeholder="Search and select equipment" role="combobox" aria-expanded="false"></label></div>
+          </div>
+          <div class="mt-auto flex flex-col gap-3 border-t border-base-300 pt-4">
+            <div class="flex flex-wrap items-center gap-2 text-sm text-base-content/70"><span class="cp-badge cp-badge-neutral cp-badge-soft">Pattern: Squat</span><span class="cp-badge cp-badge-neutral cp-badge-soft">Translation: Incomplete</span></div>
+            <div class="flex items-center justify-between gap-2"><a href="admin-catalog.html" class="cp-link cp-link-hover">Clear filters</a><button type="submit" class="cp-btn cp-btn-primary">Apply filters</button></div>
+          </div>
+        </form>
+      </div>
+      <form method="dialog" class="cp-modal-backdrop"><button>Close filters</button></form>
+    </dialog>
   </div>
   <div class="cp-drawer-side cp-is-drawer-close:overflow-visible" data-component="admin-nav">
     <label for="admin-drawer" aria-label="Close the navigation" class="cp-drawer-overlay"></label>
@@ -106,7 +141,7 @@
   <path d="M16 3.128a4 4 0 0 1 0 7.744" />
   <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
   <circle cx="9" cy="7" r="4" /></svg><span class="cp-is-drawer-close:hidden">Accounts</span></a></li>
-        <li><a href="admin-catalog.html" class="cp-menu-active cp-is-drawer-close:cp-tooltip cp-is-drawer-close:cp-tooltip-right" data-tip="Catalog" aria-current="page"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="book-open"><path d="M12 5v16" />
+        <li><a href="admin-catalog-filtered.html" class="cp-menu-active cp-is-drawer-close:cp-tooltip cp-is-drawer-close:cp-tooltip-right" data-tip="Catalog" aria-current="page"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="book-open"><path d="M12 5v16" />
   <path d="M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z" /></svg><span class="cp-is-drawer-close:hidden">Catalog</span></a></li>
         <li><a href="../../agreed/web/admin-settings-mail.html" class="cp-is-drawer-close:cp-tooltip cp-is-drawer-close:cp-tooltip-right" data-tip="Settings"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="sliders-horizontal"><path d="M10 5H3" />
   <path d="M12 19H3" />
