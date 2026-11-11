@@ -31,9 +31,13 @@ This file is the entry point for Codex and other agents that follow `AGENTS.md`.
 - **Kotlin Multiplatform:** keep domain/workout logic in shared Kotlin with tests; platform UI and hardware integration remain thin and follow the documented architecture.
 - **Translations:** user-facing strings belong in the source message files for every supported language. Do not edit generated translations or native string resources directly.
 
-## Explicit decision: catalog versioning
+## Explicit decision: per-exercise revisioning, not catalog versioning
 
-The maintainer has rejected catalog versioning as an unnecessary concept. Do not introduce, increment, or design new behavior around a catalog version. Existing source code and documentation may still contain legacy version-related fields or descriptions; inspect actual behavior and do not claim the legacy implementation has been removed. Do not rewrite historical ADRs as part of unrelated work. Raise the inconsistency when it is relevant to the task.
+The maintainer has rejected catalog-level versioning. The intended model is immutable revision history per exercise: a publication changes the revision of the exercise being published, not a global catalog snapshot or counter.
+
+Issue [#400](https://github.com/tkint/coach-poulpy/issues/400) is the dedicated removal and migration task. It covers the active implementation, API/client update contract, database migration, CI, documentation and historical ADR annotations. Until that work is implemented, legacy catalog-version fields and behavior still exist; never describe them as already removed or design new features around them.
+
+When working on catalog code or documentation, follow #400 and avoid extending the legacy model. Historical ADRs should be marked superseded as part of that dedicated change, not silently rewritten during unrelated work.
 
 ## Git and pull requests
 
