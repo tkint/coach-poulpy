@@ -40,6 +40,7 @@ const check = process.argv.includes('--check')
 let stale = 0
 for (const [out, { input, post }] of Object.entries(outputs)) {
   const css = banner + post(execFileSync(bin, ['--input', join(here, input)], { cwd: here, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }))
+  console.log(`GENERATED_CSS_BEGIN:${out}\n${Buffer.from(css).toString('base64')}\nGENERATED_CSS_END:${out}`)
   const path = join(here, out)
   const current = existsSync(path) ? readFileSync(path, 'utf8') : null
   if (current === css) continue
