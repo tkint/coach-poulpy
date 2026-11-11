@@ -30,10 +30,10 @@ const pages = (dir) =>
 // A link like /docs/brand#moods is the page docs/brand.html; a folder is its index.
 const toPage = (href, from) => {
   // The address a built page is served at, so a relative link resolves the way a browser does.
-  const served = new URL(base + from.replace(/(^|\\/)index\\.html$/, '$1').replace(/\\.html$/, ''), 'https://site')
+  const served = new URL(base + from.replace(/(^|\/)index\.html$/, '$1').replace(/\.html$/, ''), 'https://site')
   const url = new URL(href, served)
   if (url.origin !== served.origin || !url.pathname.startsWith(base)) return null
-  const path = decodeURI(url.pathname).slice(base.length).replace(/\\/$/, '/index')
+  const path = decodeURI(url.pathname).slice(base.length).replace(/\/$/, '/index')
   const page = path === '' ? 'index.html' : path.endsWith('.html') ? path : `${path}.html`
   return existsSync(join(dist, page)) ? page : null
 }
