@@ -30,8 +30,9 @@ flowchart TD
     caddy -. attaches to .-> edge
     server -. attaches to .-> edge
     web -. attaches to .-> edge
-    server -->|Postgres protocol| internal
+    server -. attaches to .-> internal
     postgres -. attaches to .-> internal
+    server -->|Postgres protocol| postgres
     alloy -. attaches to .-> internal
     alloy -. reads Docker logs .-> server
     alloy -. reads Docker logs .-> postgres

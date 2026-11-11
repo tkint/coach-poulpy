@@ -90,7 +90,7 @@ The shared engine runs on each platform ([ADR 0002](./adr/0002-one-kotlin-multip
 
 ## Modules
 
-Solid arrows are module dependencies in the current Gradle build; arrows labelled "planned" are not built in v1.
+Solid arrows are module dependencies in the current Gradle build; dashed arrows show build-time text generation.
 
 ```mermaid
 flowchart TD
