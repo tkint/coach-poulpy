@@ -21,11 +21,11 @@ The admin's accounts table is the reference: `/admin/accounts?q=lea&role=admin&s
 
 ## The screens
 
-They are agreed (see Mockups, Agreed, Web app on the site).
+The agreed layouts and states are documented in the Web app mockups on the docs site.
 
-- **Sign in** is the landing route. A person who is already signed in goes straight to the profile. A wrong email or password gets one message that doesn't say which. (`app-sign-in`, `app-sign-in-error`)
-- **Status**, at `/status`, says whether Coach Poulpy is up or down and nothing else, for anyone, signed in or not; the admin has the details ([Status](./admin.md#status)). (`app-status`, `app-status-down`)
-- **Profile** shows the address and that the email is confirmed, a button that emails a password reset link, and a note that workouts and the body log live on the phone. It shows only what the server holds for the web: the profile fields stay on the phone, and `sync` is a scope of the apps ([Accounts](./accounts.md#sync)). (`app-profile`)
+- **Sign in** is the landing route. An already signed-in person goes straight to the profile. Invalid credentials produce one generic refusal, without revealing which field was wrong.
+- **Status**, at `/status`, is public and reports only whether Coach Poulpy is up or down; it does not expose server configuration ([admin status](./admin.md#status)).
+- **Profile** shows the account email and confirmation state, offers a password-reset email, and explains that workouts, body measurements and profile fields remain on the phone. The website exposes only server-held account data; `sync` is a scope of the apps ([Accounts](./accounts.md#sync)).
 
 ## Not yet
 
