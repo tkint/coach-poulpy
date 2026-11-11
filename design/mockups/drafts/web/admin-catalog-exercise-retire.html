@@ -6,7 +6,7 @@
 <title>Admin · catalog · retire</title>
 <meta name="mockup:screen" content="admin-catalog-exercise-retire">
 <meta name="mockup:section" content="Admin">
-<meta name="mockup:issue" content="338">
+<meta name="mockup:issue" content="386">
 <meta name="mockup:viewport" content="800">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
@@ -15,7 +15,7 @@
 <script src="../../shared/mockup-theme.js"></script>
 </head>
 <body class="bg-base-200 text-base-content min-h-screen">
-<!-- Retire asks first. It is not a deletion, so the button stays a neutral outline, and it can be undone with Offer again. -->
+<!-- Preparing retirement is a draft lifecycle action, not deletion. The exercise remains active until the retirement is published and can be cancelled beforehand. -->
 <div class="cp-drawer lg:cp-drawer-open">
   <input id="admin-drawer" type="checkbox" class="cp-drawer-toggle" aria-label="Toggle the navigation">
   <div class="cp-drawer-content flex flex-col">
@@ -122,7 +122,7 @@
               </div>
               <a href="admin-catalog-exercise-retire.html" class="cp-btn cp-btn-outline gap-2"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="archive"><rect width="20" height="5" x="2" y="3" rx="1" />
   <path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8" />
-  <path d="M10 12h4" /></svg>Retire</a>
+  <path d="M10 12h4" /></svg>Prepare retirement</a>
             </div></div>
           </section>
         </div>
@@ -187,8 +187,8 @@
     </main>
     <dialog class="cp-modal cp-modal-open cp-modal-bottom sm:cp-modal-middle cp-sheet" data-component="sheet" id="retire-exercise" aria-labelledby="retire-title">
       <div class="cp-modal-box">
-        <h2 class="cp-type-headline" id="retire-title">Retire Wall sit?</h2>
-        <p class="py-2">It leaves the exercise list and the builder once you publish the next version. Workouts that already use it still open and keep their history. You can offer it again later.</p>
+        <h2 class="cp-type-headline" id="retire-title">Prepare retirement for Wall sit?</h2>
+        <p class="py-2">Wall sit stays active in the published catalog until a publication includes this retirement. Existing workouts keep working and retain their history. You can cancel this pending action before publication or offer the exercise again after retirement.</p>
         <div class="cp-modal-action">
           <a href="admin-catalog-exercise.html" class="cp-btn cp-btn-ghost">Cancel</a>
           <a href="admin-catalog-exercise-retired.html" class="cp-btn cp-btn-outline gap-2"><svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="archive"><rect width="20" height="5" x="2" y="3" rx="1" />
