@@ -232,31 +232,6 @@
 </div>
 <script src="../../shared/mockup-drawer.js"></script>
 
-<script data-mockup-autoresize>
-(() => {
-  const fields = document.querySelectorAll('textarea[data-autoresize]');
-  const resize = (field) => {
-    field.style.height = 'auto';
-    field.style.height = field.scrollHeight + 'px';
-  };
-  fields.forEach((field) => {
-    resize(field);
-    field.addEventListener('input', () => resize(field));
-    if (typeof ResizeObserver !== 'undefined') {
-      let width = field.getBoundingClientRect().width;
-      const observer = new ResizeObserver(() => {
-        const nextWidth = field.getBoundingClientRect().width;
-        if (nextWidth !== width) {
-          width = nextWidth;
-          resize(field);
-        }
-      });
-      observer.observe(field);
-    } else {
-      window.addEventListener('resize', () => resize(field));
-    }
-  });
-})();
-</script>
+<script src="../../shared/admin-exercise.js"></script>
 </body>
 </html>
