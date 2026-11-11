@@ -12,6 +12,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../../../../web/ui/src/tokens.css">
 <link rel="stylesheet" href="../../../../web/ui/poulpy-ui.css">
+<link rel="stylesheet" href="../../shared/admin-exercise.css">
 <script src="../../shared/mockup-theme.js"></script>
 </head>
 <body class="bg-base-200 text-base-content min-h-screen">
@@ -19,11 +20,11 @@
 <div class="cp-drawer lg:cp-drawer-open">
   <input id="admin-drawer" type="checkbox" class="cp-drawer-toggle" aria-label="Toggle the navigation">
   <div class="cp-drawer-content flex flex-col">
-    <nav class="cp-navbar w-full bg-base-100 px-2 shadow-sm md:px-4">
+    <nav class="cp-navbar bg-base-100 px-2 shadow-sm md:px-4" data-component="admin-navbar">
       <label for="admin-drawer" aria-label="Toggle the navigation" class="cp-btn cp-btn-square cp-btn-ghost"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/></svg></label>
       <div class="px-2 font-bold">Catalog</div>
     </nav>
-    <main class="flex min-w-0 flex-col gap-6 p-4 md:p-8" id="catalog">
+    <main class="flex min-w-0 flex-col gap-6 px-4 pb-4 md:px-8 md:pb-8" data-component="admin-content" id="catalog">
       <div class="flex flex-col gap-4 bg-base-200 py-2" data-component="form-header">
         <nav class="cp-breadcrumbs text-sm" aria-label="You are here" data-component="breadcrumbs">
           <ul><li><a href="admin-catalog.html">Catalog</a></li><li>New exercise</li></ul>
@@ -72,7 +73,7 @@
               <span class="cp-badge cp-badge-primary cp-badge-soft shrink-0">1</span>
               <div class="min-w-0 grow"><div class="cp-fieldset" data-component="translatable-field">
               <label class="cp-type-label" for="step-0">Step 1</label>
-              <label class="cp-input w-full"><textarea id="step-0" class="cp-textarea w-full" rows="3" autocomplete="off">Start in a push-up with your hips high, like an upside-down V.</textarea></label>
+              <textarea id="step-0" class="cp-textarea w-full" rows="2" data-autoresize autocomplete="off">Start in a push-up with your hips high, like an upside-down V.</textarea>
               
             </div></div>
               <div class="flex shrink-0 flex-col"><button type="button" class="cp-btn cp-btn-circle cp-btn-ghost cp-btn-sm" aria-label="Move step 1" disabled><svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg></button><button type="button" class="cp-btn cp-btn-circle cp-btn-ghost cp-btn-sm" aria-label="Remove step 1"><svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div>
@@ -82,7 +83,7 @@
               <span class="cp-badge cp-badge-primary cp-badge-soft shrink-0">2</span>
               <div class="min-w-0 grow"><div class="cp-fieldset" data-component="translatable-field">
               <label class="cp-type-label" for="step-1">Step 2</label>
-              <label class="cp-input w-full"><textarea id="step-1" class="cp-textarea w-full" rows="3" autocomplete="off">Bend your elbows to bring your head toward the floor, then push back.</textarea></label>
+              <textarea id="step-1" class="cp-textarea w-full resize-none overflow-hidden" rows="2" data-autoresize autocomplete="off">Bend your elbows to bring your head toward the floor, then push back.</textarea>
               
             </div></div>
               <div class="flex shrink-0 flex-col"><button type="button" class="cp-btn cp-btn-circle cp-btn-ghost cp-btn-sm" aria-label="Move step 2" disabled><svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg></button><button type="button" class="cp-btn cp-btn-circle cp-btn-ghost cp-btn-sm" aria-label="Remove step 2"><svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div>
@@ -99,14 +100,16 @@
           </div>
           <h3 class="cp-type-label">Required</h3>
           <div class="cp-fieldset" data-component="multi-select">
-              <label class="cp-type-label" for="need-0">Any of these</label>
-              <label class="cp-input w-full gap-1"><input id="need-0" type="text" class="grow" value="" placeholder="Select equipment" autocomplete="off" role="combobox" aria-expanded="false"><svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></label>
+              
+              <label class="cp-input w-full gap-1"><input id="need-0" type="text" class="grow" aria-label="Required equipment" aria-describedby="need-0-hint" value="" placeholder="Select equipment" autocomplete="off" role="combobox" aria-expanded="false"><svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></label>
+              <p id="need-0-hint" class="cp-label whitespace-normal">Any of these</p>
             </div>
           
           <h3 class="cp-type-label">Optional</h3>
           <div class="cp-fieldset" data-component="multi-select">
-              <div class="flex items-center justify-between gap-2"><label class="cp-type-label" for="optional">Helps but not needed</label></div>
-              <label class="cp-input w-full gap-1"><span class="cp-badge cp-badge-neutral cp-badge-soft gap-1 whitespace-nowrap">Mat<button type="button" class="cp-btn cp-btn-circle cp-btn-ghost cp-btn-xs" aria-label="Remove Mat"><svg xmlns="http://www.w3.org/2000/svg" class="size-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></span><input id="optional" type="text" class="grow" value="" placeholder="" autocomplete="off" role="combobox" aria-expanded="false"><svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></label>
+              
+              <label class="cp-input w-full gap-1"><span class="cp-badge cp-badge-neutral cp-badge-soft gap-1 whitespace-nowrap">Mat<button type="button" class="cp-btn cp-btn-circle cp-btn-ghost cp-btn-xs" aria-label="Remove Mat"><svg xmlns="http://www.w3.org/2000/svg" class="size-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></span><input id="optional" type="text" class="grow" aria-label="Optional equipment" aria-describedby="optional-hint" value="" placeholder="" autocomplete="off" role="combobox" aria-expanded="false"><svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></label>
+              <p id="optional-hint" class="cp-label whitespace-normal">Helps but not needed</p>
             </div></div>
               <div class="flex min-w-0 flex-col gap-4"><div class="flex flex-wrap items-center justify-between gap-2">
             <div class="flex flex-col gap-1"><h2 class="cp-card-title">Classification</h2></div>
@@ -204,5 +207,32 @@
   </div>
 </div>
 <script src="../../shared/mockup-drawer.js"></script>
+
+<script data-mockup-autoresize>
+(() => {
+  const fields = document.querySelectorAll('textarea[data-autoresize]');
+  const resize = (field) => {
+    field.style.height = 'auto';
+    field.style.height = field.scrollHeight + 'px';
+  };
+  fields.forEach((field) => {
+    resize(field);
+    field.addEventListener('input', () => resize(field));
+    if (typeof ResizeObserver !== 'undefined') {
+      let width = field.getBoundingClientRect().width;
+      const observer = new ResizeObserver(() => {
+        const nextWidth = field.getBoundingClientRect().width;
+        if (nextWidth !== width) {
+          width = nextWidth;
+          resize(field);
+        }
+      });
+      observer.observe(field);
+    } else {
+      window.addEventListener('resize', () => resize(field));
+    }
+  });
+})();
+</script>
 </body>
 </html>
