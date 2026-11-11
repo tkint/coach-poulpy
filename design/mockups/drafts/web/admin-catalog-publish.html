@@ -326,37 +326,75 @@
         </div>
         <form method="dialog"><button class="cp-btn cp-btn-ghost cp-btn-square cp-btn-sm" aria-label="Close publication review"><svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="x"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg></button></form>
       </div>
-      <div class="cp-stats cp-stats-vertical bg-base-200 md:cp-stats-horizontal" data-component="publication-summary">
-        <div class="cp-stat"><div class="cp-stat-title">New</div><div class="cp-stat-value text-primary">1</div><div class="cp-stat-desc">exercise added</div></div>
-        <div class="cp-stat"><div class="cp-stat-title">Edited</div><div class="cp-stat-value">2</div><div class="cp-stat-desc">exercises changed</div></div>
-        <div class="cp-stat"><div class="cp-stat-title">Retiring</div><div class="cp-stat-value">1</div><div class="cp-stat-desc">hidden from the catalog</div></div>
-        <div class="cp-stat"><div class="cp-stat-title">Offered again</div><div class="cp-stat-value">1</div><div class="cp-stat-desc">back in the catalog</div></div>
-      </div>
-      <section class="flex flex-col gap-3" aria-labelledby="publish-new">
-        <div class="flex items-center justify-between gap-2"><h3 class="cp-type-title" id="publish-new">New</h3><span class="cp-badge cp-badge-primary cp-badge-soft">1</span></div>
-        <div class="rounded-box border border-base-300 p-3"><div class="font-semibold">Pike push-up</div><div class="text-sm text-base-content/70">Pompe en V · pike-push-up</div></div>
-      </section>
-      <section class="flex flex-col gap-3" aria-labelledby="publish-edited">
-        <div class="flex items-center justify-between gap-2"><h3 class="cp-type-title" id="publish-edited">Edited</h3><span class="cp-badge cp-badge-neutral cp-badge-soft">2</span></div>
-        <div class="overflow-x-auto rounded-box border border-base-300">
-          <table class="cp-table bg-base-100">
-            <thead><tr><th>Exercise</th><th>Changed fields</th></tr></thead>
-            <tbody>
-              <tr><td class="font-semibold">Goblet squat</td><td><div class="font-medium">French name</div><div class="text-sm text-base-content/70"><span class="line-through">Squat avec haltère</span> <span aria-hidden="true">→</span> Squat gobelet</div><div class="mt-2 font-medium">Muscles worked</div><div class="text-sm text-base-content/70"><span class="line-through">Quadriceps</span> <span aria-hidden="true">→</span> Quadriceps, glutes</div></td></tr>
-              <tr><td class="font-semibold">Romanian deadlift</td><td><div class="font-medium">Step 3 · English</div><div class="text-sm text-base-content/70"><span class="line-through">Keep your back straight.</span> <span aria-hidden="true">→</span> Keep your spine neutral and push your hips back.</div><div class="mt-2 font-medium">Required equipment</div><div class="text-sm text-base-content/70"><span class="line-through">Barbell</span> <span aria-hidden="true">→</span> Barbell, weight plates</div><div class="mt-2 font-medium">French search aliases</div><div class="text-sm text-base-content/70"><span class="line-through">soulevé roumain</span> <span aria-hidden="true">→</span> soulevé roumain, SDT roumain</div></td></tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-      <div class="grid gap-3 sm:grid-cols-2">
-        <section class="flex flex-col gap-2" aria-labelledby="publish-retiring">
-          <div class="flex items-center justify-between gap-2"><h3 class="cp-type-title" id="publish-retiring">Retiring</h3><span class="cp-badge cp-badge-neutral cp-badge-soft">1</span></div>
-          <div class="rounded-box border border-base-300 p-3"><div class="font-semibold">Wall sit</div><div class="text-sm text-base-content/70">Chaise contre le mur · wall-sit</div></div>
-        </section>
-        <section class="flex flex-col gap-2" aria-labelledby="publish-offered">
-          <div class="flex items-center justify-between gap-2"><h3 class="cp-type-title" id="publish-offered">Offered again</h3><span class="cp-badge cp-badge-neutral cp-badge-soft">1</span></div>
-          <div class="rounded-box border border-base-300 p-3"><div class="font-semibold">Kettlebell swing</div><div class="text-sm text-base-content/70">Swing kettlebell · kettlebell-swing</div></div>
-        </section>
+      <div class="overflow-x-auto rounded-box border border-base-300">
+        <table class="cp-table bg-base-100">
+          <thead>
+            <tr><th>Exercise</th><th>Status</th><th>Change</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><div class="font-semibold">Pike push-up</div><div class="text-sm text-base-content/70">pike-push-up</div></td>
+              <td><span class="cp-badge cp-badge-error cp-badge-soft whitespace-nowrap">Missing translations · French</span></td>
+              <td><span class="cp-badge cp-badge-primary cp-badge-soft">Creation</span></td>
+            </tr>
+            <tr>
+              <td><div class="font-semibold">Goblet squat</div><div class="text-sm text-base-content/70">goblet-squat</div></td>
+              <td><span class="cp-badge cp-badge-success cp-badge-soft">Complete</span></td>
+              <td><span class="cp-badge cp-badge-neutral cp-badge-soft">Edition</span></td>
+            </tr>
+            <tr class="bg-base-200/50">
+              <td colspan="3" class="!py-2">
+                <div class="flex flex-col gap-2 border-s-2 border-base-300 ps-3">
+                  <div class="grid grid-cols-[minmax(7rem,auto)_1fr] gap-x-3 gap-y-1 text-sm">
+                    <span class="font-semibold text-base-content/70">French name</span>
+                    <div class="grid grid-cols-[1fr_auto_1fr] items-start gap-2">
+                      <span class="rounded bg-error/10 px-2 py-1 text-error line-through">Squat avec haltère</span><span class="text-base-content/50">→</span><span class="rounded bg-success/10 px-2 py-1 text-success">Squat gobelet</span>
+                    </div>
+                    <span class="font-semibold text-base-content/70">Muscles worked</span>
+                    <div class="grid grid-cols-[1fr_auto_1fr] items-start gap-2">
+                      <span class="rounded bg-error/10 px-2 py-1 text-error line-through">Quadriceps</span><span class="text-base-content/50">→</span><span class="rounded bg-success/10 px-2 py-1 text-success">Quadriceps, glutes</span>
+                    </div>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><div class="font-semibold">Romanian deadlift</div><div class="text-sm text-base-content/70">romanian-deadlift</div></td>
+              <td><span class="cp-badge cp-badge-success cp-badge-soft">Complete</span></td>
+              <td><span class="cp-badge cp-badge-neutral cp-badge-soft">Edition</span></td>
+            </tr>
+            <tr class="bg-base-200/50">
+              <td colspan="3" class="!py-2">
+                <div class="flex flex-col gap-2 border-s-2 border-base-300 ps-3">
+                  <div class="grid grid-cols-[minmax(7rem,auto)_1fr] gap-x-3 gap-y-1 text-sm">
+                    <span class="font-semibold text-base-content/70">Step 3 · English</span>
+                    <div class="grid grid-cols-[1fr_auto_1fr] items-start gap-2">
+                      <span class="rounded bg-error/10 px-2 py-1 text-error line-through">Keep your back straight.</span><span class="text-base-content/50">→</span><span class="rounded bg-success/10 px-2 py-1 text-success">Keep your spine neutral and push your hips back.</span>
+                    </div>
+                    <span class="font-semibold text-base-content/70">Required equipment</span>
+                    <div class="grid grid-cols-[1fr_auto_1fr] items-start gap-2">
+                      <span class="rounded bg-error/10 px-2 py-1 text-error line-through">Barbell</span><span class="text-base-content/50">→</span><span class="rounded bg-success/10 px-2 py-1 text-success">Barbell, weight plates</span>
+                    </div>
+                    <span class="font-semibold text-base-content/70">French search aliases</span>
+                    <div class="grid grid-cols-[1fr_auto_1fr] items-start gap-2">
+                      <span class="rounded bg-error/10 px-2 py-1 text-error line-through">soulevé roumain</span><span class="text-base-content/50">→</span><span class="rounded bg-success/10 px-2 py-1 text-success">soulevé roumain, SDT roumain</span>
+                    </div>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><div class="font-semibold">Wall sit</div><div class="text-sm text-base-content/70">wall-sit</div></td>
+              <td><span class="cp-badge cp-badge-success cp-badge-soft">Complete</span></td>
+              <td><span class="cp-badge cp-badge-neutral cp-badge-soft">Retirement</span></td>
+            </tr>
+            <tr>
+              <td><div class="font-semibold">Kettlebell swing</div><div class="text-sm text-base-content/70">kettlebell-swing</div></td>
+              <td><span class="cp-badge cp-badge-success cp-badge-soft">Complete</span></td>
+              <td><span class="cp-badge cp-badge-success cp-badge-soft">Offered again</span></td>
+            </tr>
+          </tbody>
+        </table>
       </div>
       <p class="text-sm text-base-content/70">Only changed fields are listed. Publishing makes these changes available to everyone on their next app open.</p>
       <div class="flex flex-wrap justify-end gap-2 border-t border-base-300 pt-4">
