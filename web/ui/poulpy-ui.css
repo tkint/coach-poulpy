@@ -1888,8 +1888,14 @@
   .relative {
     position: relative;
   }
-  .right-0 {
-    right: 0px;
+  .-top-2 {
+    top: calc(var(--spacing) * -2);
+  }
+  .-right-2 {
+    right: calc(var(--spacing) * -2);
+  }
+  .left-0 {
+    left: 0px;
   }
   @layer daisyui.l1.l2.l3 {
     .cp-textarea {
@@ -2104,6 +2110,9 @@
   }
   .z-10 {
     z-index: 10;
+  }
+  .z-20 {
+    z-index: 20;
   }
   @layer daisyui.l1.l2.l3 {
     .cp-modal-box {
@@ -2618,6 +2627,9 @@
   .mt-auto {
     margin-top: auto;
   }
+  .ml-auto {
+    margin-left: auto;
+  }
   @layer daisyui.l1.l2.l3 {
     .cp-badge {
       display: inline-flex;
@@ -2771,6 +2783,9 @@
   }
   .hidden {
     display: none;
+  }
+  .inline-block {
+    display: inline-block;
   }
   .table {
     display: table;
