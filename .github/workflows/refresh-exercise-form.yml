@@ -23,6 +23,8 @@ jobs:
           cache-dependency-path: web/package-lock.json
       - name: Bring in the repaired catalog base
         run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git fetch origin design/338-admin-catalog
           git merge --no-edit -X ours origin/design/338-admin-catalog
       - name: Install web tooling and regenerate prebuilt styles
@@ -45,7 +47,7 @@ jobs:
 
           const sources = readdirSync(iconRoot).filter((file) => file.endsWith('.svg')).map((file) => {
             const content = readFileSync(join(iconRoot, file), 'utf8')
-            const inner = content.match(/<svg\b[^>]*>([\s\\S]*?)<\/svg>/)?.[1]
+            const inner = content.match(/<svg\b[^>]*>([\s\S]*?)<\/svg>/)?.[1]
             if (!inner) throw new Error('Invalid Lucide source: ' + file)
             return { name: basename(file, '.svg'), drawing: drawingOf(inner), inner: inner.trim() }
           })
@@ -54,7 +56,7 @@ jobs:
           for (const file of readdirSync(root).filter((name) => name.endsWith('.html'))) {
             const path = join(root, file)
             const html = readFileSync(path, 'utf8')
-            const updated = html.replace(/<svg\b([^>]*)>([\s\\S]*?)<\/svg>/g, (match, attrs, inner) => {
+            const updated = html.replace(/<svg\b([^>]*)>([\s\S]*?)<\/svg>/g, (match, attrs, inner) => {
               if (!/viewBox="0 0 24 24"/.test(attrs)) return match
               const source = byDrawing.get(drawingOf(inner))
               if (!source) throw new Error('No exact Lucide source matches an SVG in ' + path + ': ' + inner.slice(0, 160))
