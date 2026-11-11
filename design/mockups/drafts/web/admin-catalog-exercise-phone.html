@@ -137,24 +137,18 @@
           <section class="cp-card bg-base-100 shadow-sm" id="variations" data-component="variation-group">
             <div class="cp-card-body gap-3 p-4 md:p-6">
               <div class="flex flex-col gap-1"><h2 class="cp-card-title">Variations</h2><p class="text-sm text-base-content/70">Exercises in this group, ordered from easiest to hardest. The shared order is reflected on every exercise in the group.</p></div>
-              <div class="overflow-x-auto"><table class="w-full  text-sm">
-                <thead><tr class="border-b border-base-300"><th scope="col" class="px-2 py-2 font-semibold">Exercise</th></tr></thead>
-                <tbody><tr class="border-b border-base-300">
-                  <td class="px-2 py-2"><div class="flex w-full items-center gap-2"><a href="admin-catalog-exercise.html?slug=sit-to-stand" class="cp-link cp-link-hover font-semibold">Sit to stand</a></div></td>
-                </tr>
-                <tr class="border-b border-base-300">
-                  <td class="px-2 py-2"><div class="flex w-full items-center gap-2"><a href="admin-catalog-exercise.html?slug=bodyweight-squat" class="cp-link cp-link-hover font-semibold">Bodyweight squat</a></div></td>
-                </tr>
-                <tr class="border-b border-base-300 bg-base-200">
-                  <td class="px-2 py-2"><div class="flex w-full items-center gap-2"><a href="admin-catalog-exercise.html?slug=goblet-squat" class="cp-link cp-link-hover font-semibold">Goblet squat</a><span class="cp-badge cp-badge-primary cp-badge-soft cp-badge-sm ml-auto" title="Focus" aria-label="Focus"><svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="target"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span></div></td>
-                </tr></tbody>
+              <div class="overflow-x-auto"><table class="cp-table w-full text-sm">
+                <thead><tr><th scope="col" class="w-10 px-2 py-2"><span class="sr-only">Reorder</span></th><th scope="col" class="px-2 py-2 font-semibold">Exercise</th><th scope="col" class="w-12 px-2 py-2 text-right"><span class="sr-only">Focus</span></th></tr></thead>
+                <tbody><tr><td class="w-10 px-2 py-2"><button type="button" class="cp-btn cp-btn-circle cp-btn-ghost cp-btn-sm" aria-label="Reorder Sit to stand" title="Drag to reorder"><svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="grip-vertical"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg></button></td><td class="px-2 py-2"><div class="flex min-w-0 items-center gap-2"><a href="admin-catalog-exercise.html?slug=sit-to-stand" class="cp-link cp-link-hover font-semibold">Sit to stand</a></div></td><td class="w-12 px-2 py-2"></td></tr>
+                <tr><td class="w-10 px-2 py-2"><button type="button" class="cp-btn cp-btn-circle cp-btn-ghost cp-btn-sm" aria-label="Reorder Bodyweight squat" title="Drag to reorder"><svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="grip-vertical"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg></button></td><td class="px-2 py-2"><div class="flex min-w-0 items-center gap-2"><a href="admin-catalog-exercise.html?slug=bodyweight-squat" class="cp-link cp-link-hover font-semibold">Bodyweight squat</a></div></td><td class="w-12 px-2 py-2"></td></tr>
+                <tr class="bg-base-200"><td class="w-10 px-2 py-2"><button type="button" class="cp-btn cp-btn-circle cp-btn-ghost cp-btn-sm" aria-label="Reorder Goblet squat" title="Drag to reorder"><svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="grip-vertical"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg></button></td><td class="px-2 py-2"><div class="flex min-w-0 items-center gap-2"><a href="admin-catalog-exercise.html?slug=goblet-squat" class="cp-link cp-link-hover font-semibold">Goblet squat</a></div></td><td class="w-12 px-2 py-2 text-right"><span class="cp-badge cp-badge-primary cp-badge-soft cp-badge-sm" title="Focus" aria-label="Focus"><svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="target"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span></td></tr></tbody>
               </table></div>
               <div><button type="button" class="cp-btn cp-btn-outline cp-btn-sm">Add exercise</button></div>
-            </div>
-<div class="cp-fieldset" data-component="translatable-field">
+              <div class="cp-fieldset" data-component="translatable-field">
               <label class="cp-type-label" for="variation-note">How it differs</label>
               <label class="cp-input w-full"><input id="variation-note" type="text" class="grow" value="Une charge tenue contre la poitrine" autocomplete="off"></label>
               <p class="cp-label whitespace-normal">English original: A weight held against your chest</p>
+            </div>
             </div>
           </section>
           <section class="cp-card bg-base-100 shadow-sm" id="side">
