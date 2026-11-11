@@ -47,7 +47,12 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: site/package-lock.json
+          cache-dependency-path: |
+            site/package-lock.json
+            web/package-lock.json
+      - name: Install web design system dependencies
+        working-directory: web
+        run: npm ci
       - run: npm ci
       - run: npm run build
       - name: Check every guideline is published and reachable
