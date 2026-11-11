@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin · catalog · prepare bulk retirement</title>
+<meta name="mockup:screen" content="admin-catalog-retire-selected">
+<meta name="mockup:section" content="Admin">
+<meta name="mockup:issue" content="386">
+<meta name="mockup:viewport" content="800">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../../../web/ui/src/tokens.css">
+<link rel="stylesheet" href="../../../../web/ui/poulpy-ui.css">
+<script src="../../shared/mockup-theme.js"></script>
+</head>
+<body class="bg-base-200 text-base-content min-h-screen">
+<!-- Bulk retirement review: preparing the action creates pending lifecycle changes only. It does not change the currently published catalog. -->
+<div class="min-h-screen">
+  <nav class="cp-navbar w-full bg-base-100 px-4 shadow-sm">
+    <a href="admin-catalog.html" class="cp-btn cp-btn-ghost">Catalog</a>
+    <span class="font-bold">Prepare retirement</span>
+  </nav>
+  <main class="mx-auto flex max-w-4xl flex-col gap-6 p-4 md:p-8">
+    <nav class="cp-breadcrumbs text-sm" aria-label="You are here"><ul><li><a href="admin-catalog.html">Catalog</a></li><li>Prepare retirement</li></ul></nav>
+    <header class="flex flex-col gap-1">
+      <h1 class="cp-type-display">Prepare retirement for 3 exercises</h1>
+      <p class="text-base-content/70">Review the selected exercises. They remain active in the published catalog until a publication includes these retirement actions.</p>
+    </header>
+    <section class="cp-card bg-base-100 shadow-sm">
+      <div class="cp-card-body gap-4 p-4 md:p-6">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <h2 class="cp-card-title">Selected exercises</h2>
+          <span class="cp-badge cp-badge-warning cp-badge-soft">3 pending retirement actions</span>
+        </div>
+        <div class="overflow-x-auto rounded-box border border-base-300 bg-base-100">
+          <table class="cp-table bg-base-100">
+            <thead><tr><th>Exercise</th><th>Published state</th><th>Pending content</th><th>Action</th></tr></thead>
+            <tbody>
+              <tr><td><a href="admin-catalog-exercise.html" class="cp-link cp-link-hover font-semibold">Goblet squat</a><div class="text-sm text-base-content/70">goblet-squat</div></td><td><span class="cp-badge cp-badge-success cp-badge-soft">Active</span></td><td><span class="cp-badge cp-badge-neutral cp-badge-soft">Modified</span></td><td><button type="button" class="cp-btn cp-btn-ghost cp-btn-sm">Remove</button></td></tr>
+              <tr><td><a href="admin-catalog-exercise.html" class="cp-link cp-link-hover font-semibold">Glute bridge</a><div class="text-sm text-base-content/70">glute-bridge</div></td><td><span class="cp-badge cp-badge-success cp-badge-soft">Active</span></td><td><span class="text-base-content/70">None</span></td><td><button type="button" class="cp-btn cp-btn-ghost cp-btn-sm">Remove</button></td></tr>
+              <tr><td><a href="admin-catalog-exercise.html" class="cp-link cp-link-hover font-semibold">Romanian deadlift</a><div class="text-sm text-base-content/70">romanian-deadlift</div></td><td><span class="cp-badge cp-badge-success cp-badge-soft">Active</span></td><td><span class="cp-badge cp-badge-neutral cp-badge-soft">Modified</span></td><td><button type="button" class="cp-btn cp-btn-ghost cp-btn-sm">Remove</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="text-sm text-base-content/70">Only active, published exercises are eligible. Draft-only, already retired or otherwise ineligible selections are excluded with an explanation before this review.</p>
+      </div>
+    </section>
+    <section class="cp-alert cp-alert-info items-start">
+      <svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="info"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+      <div><strong>Nothing is retired yet.</strong><p>Preparing retirement records pending lifecycle actions. All three exercises remain available until you publish a catalog version containing them. You can cancel each pending action before publication. Existing workouts keep their history.</p></div>
+    </section>
+    <div class="flex flex-wrap justify-end gap-2">
+      <a href="admin-catalog.html" class="cp-btn cp-btn-ghost">Cancel</a>
+      <a href="admin-catalog.html?changes=pending" class="cp-btn cp-btn-outline">Prepare retirement for 3</a>
+    </div>
+  </main>
+</div>
+</body>
+</html>
