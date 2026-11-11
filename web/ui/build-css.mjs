@@ -40,10 +40,6 @@ const check = process.argv.includes('--check')
 let stale = 0
 for (const [out, { input, post }] of Object.entries(outputs)) {
   const css = banner + post(execFileSync(bin, ['--input', join(here, input)], { cwd: here, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }))
-  const encoded = Buffer.from(css).toString('base64')
-  for (let offset = 0; offset < encoded.length; offset += 16000) {
-    console.log(`GENERATED_CSS_CHUNK:${out}:${offset / 16000}:${encoded.slice(offset, offset + 16000)}`)
-  }
   const path = join(here, out)
   const current = existsSync(path) ? readFileSync(path, 'utf8') : null
   if (current === css) continue
