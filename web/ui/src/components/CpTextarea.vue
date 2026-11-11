@@ -72,25 +72,3 @@ onBeforeUnmount(() => observer?.disconnect())
   </div>
 </template>
 
-<style scoped>
-textarea.cp-textarea {
-  display: block;
-  width: 100%;
-  min-height: 4.5rem;
-  padding: var(--cp-space-md);
-  border: 1.5px solid var(--cp-outline);
-  border-radius: var(--cp-radius-md);
-  background: var(--cp-surface-variant);
-  color: var(--cp-on-surface);
-  font: inherit;
-  line-height: 1.5;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-  resize: none;
-  overflow-y: hidden;
-}
-textarea.cp-textarea:focus-visible {
-  outline: 2px solid var(--cp-primary);
-  outline-offset: 2px;
-}
-</style>
