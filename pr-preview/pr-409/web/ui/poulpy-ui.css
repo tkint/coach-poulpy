@@ -1890,6 +1890,9 @@
   .absolute {
     position: absolute;
   }
+  .fixed {
+    position: fixed;
+  }
   .relative {
     position: relative;
   }
@@ -2618,6 +2621,9 @@
   .-ms-3 {
     margin-inline-start: calc(var(--spacing) * -3);
   }
+  .ms-auto {
+    margin-inline-start: auto;
+  }
   @layer daisyui.l1.l2.l3 {
     .cp-modal-action {
       margin-top: calc(0.25rem * 6);
@@ -2628,12 +2634,6 @@
   }
   .mt-2 {
     margin-top: calc(var(--spacing) * 2);
-  }
-  .mt-auto {
-    margin-top: auto;
-  }
-  .ml-auto {
-    margin-left: auto;
   }
   @layer daisyui.l1.l2.l3 {
     .cp-badge {
@@ -2870,9 +2870,6 @@
   .max-h-\[90vh\] {
     max-height: 90vh;
   }
-  .min-h-0 {
-    min-height: 0px;
-  }
   .min-h-16 {
     min-height: calc(var(--spacing) * 16);
   }
@@ -2903,8 +2900,14 @@
   .w-52 {
     width: calc(var(--spacing) * 52);
   }
+  .w-56 {
+    width: calc(var(--spacing) * 56);
+  }
   .w-64 {
     width: calc(var(--spacing) * 64);
+  }
+  .w-auto {
+    width: auto;
   }
   .w-fit {
     width: fit-content;
@@ -3206,9 +3209,6 @@
   .p-0 {
     padding: 0px;
   }
-  .p-1 {
-    padding: var(--spacing);
-  }
   .p-2 {
     padding: calc(var(--spacing) * 2);
   }
@@ -3366,6 +3366,24 @@
     filter: var(--tw-blur, ) var(--tw-brightness, ) var(--tw-contrast, ) var(--tw-grayscale, ) var(--tw-hue-rotate, ) var(--tw-invert, ) var(--tw-saturate, ) var(--tw-sepia, ) var(--tw-drop-shadow, );
   }
   @layer daisyui.l1.l2 {
+    .cp-input-sm {
+      --cp-in-size-mul: 8;
+      --cp-font-size-min: 0.75rem;
+      --cp-spin-my: -2;
+    }
+    .cp-floating-label:has(.cp-input-sm) {
+      --cp-top-mul: 4;
+      --cp-font-size: 0.75rem;
+    }
+    .cp-select-sm {
+      --cp-sl-size-mul: 8;
+      --cp-font-size-min: 0.75rem;
+      --cp-option-px: 2.5;
+    }
+    .cp-floating-label:has(.cp-select-sm) {
+      --cp-top-mul: 4;
+      --cp-font-size: 0.75rem;
+    }
     .cp-btn-accent {
       --cp-btn-color: var(--color-accent);
       --cp-btn-fg: var(--color-accent-content);
@@ -3823,11 +3841,19 @@
     font-weight: 700;
     white-space: nowrap;
   }
+  .cp-chip-compact {
+    --cp-size: 32px;
+  }
   .cp-search-field {
     --cp-size: 48px;
     --cp-input-color: var(--cp-outline);
     width: 100%;
     gap: var(--cp-space-sm);
+  }
+  .cp-search-field-compact {
+    --cp-size: 32px;
+    width: 14rem;
+    max-width: 100%;
   }
   .cp-search-field:has(input:not(:placeholder-shown)) {
     --cp-input-color: var(--cp-primary);
