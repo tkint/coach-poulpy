@@ -25,23 +25,23 @@ Primary, tonal, outline, grumpy and danger (crimson, for a deletion that can't b
 
 ## Chip
 
-`CpChip`, a toggle with `aria-pressed`.
+`CpChip`, a toggle with `aria-pressed`. With `compact` it is as high as the small controls of a filter bar.
 
 <WebComponentSamples part="chip" />
 
 | Vue | Classes |
 | --- | --- |
-| `<CpChip v-model>` | `cp-btn cp-chip cp-btn-primary` when on, `cp-btn cp-chip cp-btn-outline` when off, with `aria-pressed` |
+| `<CpChip v-model>` | `cp-btn cp-chip cp-btn-primary` when on, `cp-btn cp-chip cp-btn-outline` when off, with `aria-pressed`; `cp-chip-compact` with `compact` |
 
 ## Search field
 
-`CpSearchField`: a pill with a search icon. The input is `type="search"` with `autocomplete="off"`, so a password manager does not take a search for an email address as a sign-in.
+`CpSearchField`: a pill with a search icon. With `compact` it is one control of a filter bar: as high as a small button and 14rem wide instead of filling its row. The input is `type="search"` with `autocomplete="off"`, so a password manager does not take a search for an email address as a sign-in.
 
 <WebComponentSamples part="search-field" />
 
 | Vue | Classes |
 | --- | --- |
-| `<CpSearchField>` | `label.cp-input.cp-search-field` around the icon and an `input type="search"` |
+| `<CpSearchField>` | `label.cp-input.cp-search-field` around the icon and an `input type="search"`; `cp-search-field-compact` with `compact` |
 
 ## Stepper
 
@@ -55,23 +55,23 @@ Primary, tonal, outline, grumpy and danger (crimson, for a deletion that can't b
 
 ## Select field
 
-`CpSelectField`.
+`CpSelectField`. With `compact` it is one control of a filter bar: its label is hidden (still read aloud, and its first option usually says it too) and it is only as wide as its longest option.
 
 <WebComponentSamples part="select-field" />
 
 | Vue | Classes |
 | --- | --- |
-| `<CpSelectField>` | `label.cp-fieldset`, a `span.cp-type-label` and `select.cp-select` |
+| `<CpSelectField>` | `label.cp-fieldset`, a `span.cp-type-label` and `select.cp-select`; `cp-select-sm w-auto` and a `sr-only` label with `compact` |
 
 ## Multi-select field
 
-`CpMultiSelectField`: any number of values from a long list. The search box narrows the list, each match is a checkbox, and what is picked stays on show as chips that take their value back off.
+`CpMultiSelectField`: any number of values from a long list. It is a button that opens its panel only while it is used: a search box narrows the list and each match is a checkbox. The button says how many are picked; Escape or a click elsewhere closes the panel.
 
 <WebComponentSamples part="multi-select-field" />
 
 | Vue | Classes |
 | --- | --- |
-| `<CpMultiSelectField>` | `div.cp-fieldset`, a `label.cp-type-label`, chips `cp-badge cp-badge-neutral cp-badge-soft`, `input.cp-input` and a list of `cp-checkbox cp-checkbox-sm` |
+| `<CpMultiSelectField>` | `details` with a `summary.cp-btn.cp-btn-sm.cp-btn-outline` and a `cp-card` panel of `input.cp-input.cp-input-sm` and a list of `cp-checkbox cp-checkbox-sm` |
 
 ## Checkbox
 
@@ -148,13 +148,13 @@ Primary, tonal, outline, grumpy and danger (crimson, for a deletion that can't b
 
 ## Sheet
 
-`CpSheet`: a bottom sheet on a phone, a dialog on a wider screen. With `side` it is a panel against the end edge at every width, for a long form such as a table's filters.
+`CpSheet`: a bottom sheet on a phone, a dialog on a wider screen.
 
 <WebComponentSamples part="sheet" />
 
 | Vue | Classes |
 | --- | --- |
-| `<CpSheet>` | `dialog.cp-modal.cp-modal-bottom.sm:cp-modal-middle.cp-sheet` and `.cp-modal-box`; `cp-modal-end` instead of the first two with `side` |
+| `<CpSheet>` | `dialog.cp-modal.cp-modal-bottom.sm:cp-modal-middle.cp-sheet` and `.cp-modal-box` |
 
 ## Badge
 

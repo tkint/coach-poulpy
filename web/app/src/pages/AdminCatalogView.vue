@@ -5,8 +5,8 @@
 // three separate columns and filters. The table's state lives in the URL (route.ts):
 // /admin/catalog?q=squat&pattern=squat&muscles=glutes,quadriceps&translation=incomplete&sort=name&order=desc&page=2.
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
-import { ChevronDown, ChevronUp, ChevronsUpDown, EllipsisVertical, SlidersHorizontal } from '@lucide/vue'
-import { CpBadge, CpButton, CpCard, CpCheckbox, CpErrorNote, CpMultiSelectField, CpPagination, CpPoulpyCard, CpSearchField, CpSelectField, CpSheet, CpTable } from '@coach-poulpy/ui'
+import { ChevronDown, ChevronUp, ChevronsUpDown, EllipsisVertical } from '@lucide/vue'
+import { CpBadge, CpCard, CpCheckbox, CpChip, CpErrorNote, CpMultiSelectField, CpPagination, CpPoulpyCard, CpSearchField, CpSelectField, CpTable } from '@coach-poulpy/ui'
 import { listCatalogExercises, type CatalogExercise, type CatalogQuery, type CatalogSort } from '../session'
 import { domainLabel, domainOptions } from '../catalogText'
 import { navigate, search, withParams } from '../route'
@@ -48,7 +48,6 @@ function go(patch: Partial<Record<Param, string>>, mode: 'push' | 'replace' = 'p
 const exercises = ref<CatalogExercise[]>([])
 const total = ref(0)
 const state = ref<'loading' | 'ready' | 'failed'>('loading')
-const filtering = ref(false)
 const picked = ref(new Set<string>())
 const menu = ref<HTMLDetailsElement>()
 
@@ -106,46 +105,21 @@ const muscles = multiple('muscles')
 const positions = multiple('positions')
 const equipment = multiple('equipment')
 
-/** The quick views of "Show" are shortcuts for the content and translation filters; any other mix reads as all. */
-const SHOWS: Record<string, Partial<Record<Param, string>>> = {
-  all: { content: '', translation: '' },
-  pending: { content: 'pending', translation: '' },
-  draft: { content: 'draft', translation: '' },
-  published: { content: 'published', translation: '' },
-  incomplete: { content: '', translation: 'incomplete' },
-}
-const show = computed({
-  get: () => Object.keys(SHOWS).find((name) => Object.entries(SHOWS[name]).every(([key, value]) => param(key as Param) === value)) ?? 'all',
-  set: (name: string) => go({ ...SHOWS[name], page: '' }),
-})
+/** "Pending changes" is the quick view of the content filter that finds new drafts and unpublished edits. */
+const pending = computed({ get: () => param('content') === 'pending', set: (on: boolean) => go({ content: on ? 'pending' : '', page: '' }) })
 
-const options = (keys: Record<string, string>) => [{ value: '', text: t('admin.filterAll') }, ...Object.entries(keys).map(([value, label]) => ({ value, text: t(label) }))]
-const showOptions = computed(() =>
-  Object.entries({ all: 'showAll', pending: 'showPending', draft: 'showDrafts', published: 'showPublished', incomplete: 'showIncomplete' }).map(([value, label]) => ({ value, text: t(`admin.${label}`) })),
-)
-const patternOptions = computed(() => [{ value: '', text: t('admin.patternAll') }, ...domainOptions('pattern')])
-const translationOptions = computed(() => options({ complete: 'admin.translationComplete', incomplete: 'admin.translationIncomplete' }))
-const contentOptions = computed(() => options({ draft: 'admin.contentDraft', modified: 'admin.contentModified', published: 'admin.contentPublished', pending: 'admin.contentPending' }))
-const lifecycleOptions = computed(() => options({ active: 'admin.catalogLifeActive', retiring: 'admin.catalogLifeRetiring', retired: 'admin.catalogLifeRetired' }))
+/** The first option, with no value, names the filter, as the select shows no other label. */
+const options = (all: string, keys: Record<string, string>) => [{ value: '', text: t(all) }, ...Object.entries(keys).map(([value, label]) => ({ value, text: t(label) }))]
+const patternOptions = computed(() => [{ value: '', text: t('admin.filterPattern') }, ...domainOptions('pattern')])
+const translationOptions = computed(() => options('admin.filterTranslation', { complete: 'admin.translationComplete', incomplete: 'admin.translationIncomplete' }))
+const contentOptions = computed(() => options('admin.filterContent', { draft: 'admin.contentDraft', modified: 'admin.contentModified', published: 'admin.contentPublished', pending: 'admin.contentPending' }))
+const lifecycleOptions = computed(() => options('admin.filterLifecycle', { active: 'admin.catalogLifeActive', retiring: 'admin.catalogLifeRetiring', retired: 'admin.catalogLifeRetired' }))
 const muscleOptions = computed(() => domainOptions('muscle'))
 const positionOptions = computed(() => domainOptions('position'))
 const equipmentOptions = computed(() => domainOptions('equipment'))
 
-const textOf = (values: { value: string; text: string }[], value: string) => values.find((option) => option.value === value)?.text ?? value
-/** The active filters as chips (the search isn't one: it has its own field). */
-const chips = computed(() => {
-  const found: string[] = []
-  const add = (label: string, value: string) => found.push(t(label, { value }))
-  if (pattern.value) add('admin.chipPattern', textOf(patternOptions.value, pattern.value))
-  if (muscles.value.length) add('admin.chipMuscles', muscles.value.map((value) => textOf(muscleOptions.value, value)).join(', '))
-  if (positions.value.length) add('admin.chipPositions', positions.value.map((value) => textOf(positionOptions.value, value)).join(', '))
-  if (equipment.value.length) add('admin.chipEquipment', equipment.value.map((value) => textOf(equipmentOptions.value, value)).join(', '))
-  if (translation.value) add('admin.chipTranslation', textOf(translationOptions.value, translation.value))
-  if (content.value) add('admin.chipContent', textOf(contentOptions.value, content.value))
-  if (lifecycle.value) add('admin.chipLifecycle', textOf(lifecycleOptions.value, lifecycle.value))
-  return found
-})
-const activeFilters = computed(() => chips.value.length)
+/** Some filter besides the search is on. */
+const filtered = computed(() => FILTERS.some((name) => name !== 'q' && param(name) !== ''))
 const clearFilters = () => go({ pattern: '', muscles: '', positions: '', equipment: '', translation: '', content: '', lifecycle: '', page: '' })
 
 // Row labels. The title is the English name, the other line the French one and the slug.
@@ -237,17 +211,17 @@ watch(
       <p class="text-base-content/70">{{ t('admin.catalogIntro') }}</p>
     </div>
     <CpCard>
-      <div class="flex flex-wrap items-center justify-between gap-4">
-        <CpSearchField v-model="draft" class="w-64 max-w-full" :label="t('admin.catalogSearchLabel')" :clear-label="t('admin.catalogSearchClear')" :placeholder="t('admin.catalogSearch')" />
-        <CpButton variant="outline" size="md" class="ms-auto gap-2" :aria-label="activeFilters ? `${t('admin.catalogFilters')}, ${t('admin.catalogFiltersActive', { count: String(activeFilters) })}` : undefined" @click="filtering = true">
-          <SlidersHorizontal class="size-4 shrink-0" aria-hidden="true" />
-          {{ t('admin.catalogFilters') }}
-          <CpBadge v-if="activeFilters" tone="neutral">{{ activeFilters }}</CpBadge>
-        </CpButton>
-      </div>
-      <div v-if="chips.length" class="flex flex-wrap items-center gap-2">
-        <CpBadge v-for="chip in chips" :key="chip" tone="neutral">{{ chip }}</CpBadge>
-        <button type="button" class="cp-link cp-link-hover text-sm" @click="clearFilters">{{ t('admin.filtersClear') }}</button>
+      <div class="flex flex-wrap items-center gap-2" role="search" :aria-label="t('admin.catalogFiltersLabel')">
+        <CpSearchField v-model="draft" compact :label="t('admin.catalogSearchLabel')" :clear-label="t('admin.catalogSearchClear')" :placeholder="t('admin.catalogSearch')" />
+        <CpChip v-model="pending" compact>{{ t('admin.catalogPending') }}</CpChip>
+        <CpSelectField v-model="pattern" compact :label="t('admin.filterPattern')" :options="patternOptions" />
+        <CpSelectField v-model="translation" compact :label="t('admin.filterTranslation')" :options="translationOptions" />
+        <CpSelectField v-model="content" compact :label="t('admin.filterContent')" :options="contentOptions" />
+        <CpSelectField v-model="lifecycle" compact :label="t('admin.filterLifecycle')" :options="lifecycleOptions" />
+        <CpMultiSelectField v-model="muscles" :label="t('admin.filterMuscles')" :placeholder="t('admin.filterMusclesPlaceholder')" :options="muscleOptions" :none-label="t('admin.filterNoMatch')" />
+        <CpMultiSelectField v-model="positions" :label="t('admin.filterPositions')" :placeholder="t('admin.filterPositionsPlaceholder')" :options="positionOptions" :none-label="t('admin.filterNoMatch')" />
+        <CpMultiSelectField v-model="equipment" :label="t('admin.filterEquipment')" :placeholder="t('admin.filterEquipmentPlaceholder')" :options="equipmentOptions" :none-label="t('admin.filterNoMatch')" />
+        <button v-if="filtered" type="button" class="cp-link cp-link-hover text-sm" @click="clearFilters">{{ t('admin.filtersClear') }}</button>
       </div>
       <CpErrorNote v-if="state === 'failed'">{{ t('admin.catalogError') }}</CpErrorNote>
       <CpPoulpyCard v-else-if="state === 'ready' && total === 0" :title="t('admin.catalogNone')">{{ t('admin.catalogNoneHint') }}</CpPoulpyCard>
@@ -310,22 +284,5 @@ watch(
         </div>
       </template>
     </CpCard>
-    <CpSheet v-model:open="filtering" side :title="t('admin.filtersTitle')" :close-label="t('admin.filtersClose')">
-      <form class="flex flex-col gap-4" role="search" :aria-label="t('admin.catalogFiltersLabel')" @submit.prevent>
-        <p class="text-sm text-base-content/70">{{ t('admin.filtersIntro') }}</p>
-        <CpSelectField v-model="show" :label="t('admin.filterShow')" :options="showOptions" />
-        <CpSelectField v-model="pattern" :label="t('admin.filterPattern')" :options="patternOptions" />
-        <CpSelectField v-model="translation" :label="t('admin.filterTranslation')" :options="translationOptions" />
-        <CpSelectField v-model="content" :label="t('admin.filterContent')" :options="contentOptions" />
-        <CpSelectField v-model="lifecycle" :label="t('admin.filterLifecycle')" :options="lifecycleOptions" />
-        <CpMultiSelectField v-model="muscles" :label="t('admin.filterMuscles')" :placeholder="t('admin.filterMusclesPlaceholder')" :options="muscleOptions" :remove-label="(name) => t('admin.filterRemove', { name })" :none-label="t('admin.filterNoMatch')" />
-        <CpMultiSelectField v-model="positions" :label="t('admin.filterPositions')" :placeholder="t('admin.filterPositionsPlaceholder')" :options="positionOptions" :remove-label="(name) => t('admin.filterRemove', { name })" :none-label="t('admin.filterNoMatch')" />
-        <CpMultiSelectField v-model="equipment" :label="t('admin.filterEquipment')" :placeholder="t('admin.filterEquipmentPlaceholder')" :options="equipmentOptions" :remove-label="(name) => t('admin.filterRemove', { name })" :none-label="t('admin.filterNoMatch')" />
-      </form>
-      <template #actions>
-        <button type="button" class="cp-link cp-link-hover me-auto" @click="clearFilters">{{ t('admin.filtersClear') }}</button>
-        <CpButton size="md" @click="filtering = false">{{ t('admin.filtersDone') }}</CpButton>
-      </template>
-    </CpSheet>
   </main>
 </template>

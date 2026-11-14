@@ -97,12 +97,23 @@
     white-space: nowrap;
   }
 
+  /* A chip in a filter bar of small controls. */
+  .cp-chip-compact {
+    --cp-size: 32px;
+  }
+
   /* Search field: 48 high, pill, primary while it holds text, with a round clear button. */
   .cp-search-field {
     --cp-size: 48px;
     --cp-input-color: var(--cp-outline);
     width: 100%;
     gap: var(--cp-space-sm);
+  }
+  /* One control of a filter bar, as high as a small button and no wider than a short query needs. */
+  .cp-search-field-compact {
+    --cp-size: 32px;
+    width: 14rem;
+    max-width: 100%;
   }
   .cp-search-field:has(input:not(:placeholder-shown)) {
     --cp-input-color: var(--cp-primary);

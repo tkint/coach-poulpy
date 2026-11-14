@@ -135,7 +135,7 @@ const formats = [
         <CpStepper v-model="rest" label="Rest" :value-text="`${rest} s`" less-label="Less rest" more-label="More rest" :step="15" />
       </div>
       <div v-else-if="part === 'multi-select-field'" class="row">
-        <CpMultiSelectField v-model="muscles" label="Muscles" placeholder="Search muscles" :options="muscleOptions" :remove-label="(text) => `Remove ${text}`" none-label="No muscle matches" />
+        <CpMultiSelectField v-model="muscles" label="Muscles" placeholder="Search muscles" :options="muscleOptions" none-label="No muscle matches" />
       </div>
       <div v-else-if="part === 'checkbox'" class="row">
         <CpCheckbox v-model="ticked" label="Select Goblet squat" />
