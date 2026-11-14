@@ -1,1 +1,0 @@
-import{t as e}from"./iframe-BSXg-Hva.js";e();
