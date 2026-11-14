@@ -106,6 +106,8 @@ All the dropdowns (select, multi-select, menu) share the closing rule of `web/ui
 | `<CpTextField>` | `div.cp-fieldset` around a `label.cp-type-label` and `label.cp-input` (`cp-input-error` in error) holding the `input`; `type="search"` (with `autocomplete="off"`) is for searches and adds a search icon in the `label.cp-input`, at the height of the other fields |
 | `<CpTextField hint>` | adds `p.cp-label.whitespace-normal` under the field, named by the input's `aria-describedby` |
 | `<CpTextField error>` | `cp-input-error`, `aria-invalid`, and `p.cp-label.whitespace-normal.text-error` with `role="alert"` in the hint's place |
+| `<CpTextField disabled>` | a field that can't be changed, such as a slug locked once its exercise is published |
+| `<CpTextField>` with `#status` | a slot under the hint for a badge, such as a field's translation status |
 
 ## Textarea
 
@@ -115,7 +117,7 @@ All the dropdowns (select, multi-select, menu) share the closing rule of `web/ui
 
 | Vue | Classes |
 | --- | --- |
-| `<CpTextarea v-model label rows hint>` | `div.cp-fieldset` around `label.cp-type-label`, `textarea.cp-textarea.w-full`, and an optional `p.cp-label.whitespace-normal` helper |
+| `<CpTextarea v-model label rows hint>` | `div.cp-fieldset` around `label.cp-type-label`, `textarea.cp-textarea.w-full`, and an optional `p.cp-label.whitespace-normal` helper; a `#status` slot under the helper takes a badge |
 
 ## Password field
 
