@@ -4,10 +4,9 @@
 // The address is /workouts/<id>. The words come from the API, the same as the phone's.
 import { computed, ref, watch } from 'vue'
 import { List, Moon, Repeat, Sun, Zap } from '@lucide/vue'
-import { CpBadge, CpBodyMap, CpBreadcrumbs, CpButton, CpCard, CpErrorNote, CpPoulpyCard, CpSheet, CpStat, CpStats } from '@coach-poulpy/ui'
+import { CpBadge, CpBreadcrumbs, CpCard, CpErrorNote, CpPoulpyCard, CpSheet } from '@coach-poulpy/ui'
+import WorkoutOverview from './WorkoutOverview.vue'
 import { getWorkout, type PartText, type StepText, type Workout } from '../workouts'
-import { bodyMapFigures } from '../bodyMap'
-import { formatDay } from '../dates'
 import { navigate, search } from '../route'
 import { t } from '../i18n'
 
@@ -33,14 +32,10 @@ watch(() => props.id, load, { immediate: true })
 
 const overview = computed({
   get: () => search.value.get('overview') === '1',
-  set: (open: boolean) => navigate(open ? `/workouts/${encodeURIComponent(props.id)}?overview=1` : `/workouts/${encodeURIComponent(props.id)}`, open ? 'push' : 'replace'),
+  set: (open: boolean) => navigate(open ? `${here.value}?overview=1` : here.value, open ? 'push' : 'replace'),
 })
-const figures = computed(() => bodyMapFigures(workout.value?.text.heat ?? {}, { front: t('app.bodyFront'), back: t('app.bodyBack') }))
-const musclesAlt = computed(() => t('app.musclesAlt', { list: (workout.value?.text.muscles ?? []).map((muscle) => muscle.label).join(', ') }))
 const partIcons = { WARM_UP: Sun, WORK: Zap, COOL_DOWN: Moon }
 const formatIcon = computed(() => (workout.value?.workout.format === 'CIRCUIT' ? Repeat : List))
-const lastTime = computed(() => (workout.value?.history.lastDoneAt ? formatDay(workout.value.history.lastDoneAt) : t('app.statNever')))
-const never = computed(() => t('app.statNever'))
 
 type Line = { key: string; repeat?: string; row?: StepText; number?: number }
 
@@ -57,19 +52,20 @@ const numbered = computed(() => {
   }))
 })
 const line = (row: { prescription: string; roleLabel: string | null }) => [row.prescription, row.roleLabel].filter(Boolean).join(' · ')
-const list = '/workouts'
+const workoutsPath = '/workouts'
+const here = computed(() => `${workoutsPath}/${encodeURIComponent(props.id)}`)
 </script>
 
 <template>
   <main class="flex flex-col gap-6 p-4 md:p-8">
     <CpPoulpyCard v-if="state === 'missing'" :title="t('app.workoutMissing')">
       {{ t('app.workoutMissingHint') }}
-      <template #actions><a :href="list" class="cp-btn cp-btn-primary" @click.prevent="navigate(list)">{{ t('app.backToWorkouts') }}</a></template>
+      <template #actions><a :href="workoutsPath" class="cp-btn cp-btn-primary" @click.prevent="navigate(workoutsPath)">{{ t('app.backToWorkouts') }}</a></template>
     </CpPoulpyCard>
     <CpErrorNote v-else-if="state === 'failed'">{{ t('app.workoutsError') }}</CpErrorNote>
     <template v-else-if="state === 'ready' && workout">
       <CpBreadcrumbs :label="t('app.hereLabel')">
-        <li><a :href="list" @click.prevent="navigate(list)">{{ t('app.workoutsTitle') }}</a></li>
+        <li><a :href="workoutsPath" @click.prevent="navigate(workoutsPath)">{{ t('app.workoutsTitle') }}</a></li>
         <li>{{ workout.workout.name }}</li>
       </CpBreadcrumbs>
       <div class="flex flex-col gap-2">
@@ -79,17 +75,10 @@ const list = '/workouts'
           <span>{{ [workout.text.details, workout.text.equipment.join(', ')].filter(Boolean).join(' · ') }}</span>
         </p>
       </div>
-      <a :href="`/workouts/${encodeURIComponent(id)}?overview=1`" class="cp-btn cp-btn-outline lg:hidden" aria-haspopup="dialog" @click.prevent="overview = true">{{ t('app.overviewButton') }}</a>
+      <a :href="`${here}?overview=1`" class="cp-btn cp-btn-outline lg:hidden" aria-haspopup="dialog" @click.prevent="overview = true">{{ t('app.overviewButton') }}</a>
       <div class="grid items-start gap-6 lg:grid-cols-[22rem_minmax(0,1fr)]">
-        <div class="hidden flex-col gap-6 lg:sticky lg:top-8 lg:flex" :aria-label="t('app.overviewLabel')">
-          <CpStats vertical class="w-full">
-            <CpStat :title="t('app.statDone')" :value="workout.text.timesDone || never" />
-            <CpStat :title="t('app.statLast')" :value="lastTime" />
-            <CpStat :title="t('app.statUsual')" :value="workout.text.usual || never" />
-          </CpStats>
-          <CpCard :title="t('app.musclesTitle')">
-            <CpBodyMap :figures="figures" :description="musclesAlt" :less="t('app.heatLess')" :more="t('app.heatMore')" />
-          </CpCard>
+        <div class="hidden flex-col gap-6 lg:sticky lg:top-8 lg:flex" role="region" :aria-label="t('app.overviewLabel')">
+          <WorkoutOverview :workout="workout" card />
         </div>
         <div class="flex flex-col gap-6">
           <CpCard v-for="{ part, lines } in numbered" :key="part.key">
@@ -121,14 +110,7 @@ const list = '/workouts'
         <p class="text-base-content/70">{{ t('app.changeOnPhoneBody') }}</p>
       </CpCard>
       <CpSheet v-model:open="overview" :title="t('app.overviewButton')" :close-label="t('app.overviewClose')">
-        <div class="flex flex-col gap-4 py-2">
-          <CpStats vertical class="w-full">
-            <CpStat :title="t('app.statDone')" :value="workout.text.timesDone || never" />
-            <CpStat :title="t('app.statLast')" :value="lastTime" />
-            <CpStat :title="t('app.statUsual')" :value="workout.text.usual || never" />
-          </CpStats>
-          <CpBodyMap :figures="figures" :description="musclesAlt" :less="t('app.heatLess')" :more="t('app.heatMore')" />
-        </div>
+        <div class="flex flex-col gap-4 py-2"><WorkoutOverview :workout="workout" /></div>
       </CpSheet>
     </template>
   </main>
