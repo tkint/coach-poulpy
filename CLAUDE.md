@@ -10,6 +10,7 @@ A training platform: Android and iOS apps first, guest-only and offline, with a 
 - `docs/design-system.md` and `docs/brand.md`: before any screen, colour, copy or Poulpy change.
 - `CONTRIBUTING.md`: the issue-to-PR flow and labels.
 - `docs/agents/refining-issues.md`: how to turn a Quick idea into an agent-ready issue ("refine #N").
+- `docs/agents/storybook-mcp.md`: before building or changing a web component or screen, start the component workshop (`cd web && npm run storybook`) so the `storybook` MCP server in `.mcp.json` answers: find the existing story and component first, reuse it, and run the story tests after.
 - `docs/agents/code-graph.md`: the code graph (`codegraph_explore` MCP tool, or `codegraph explore` in Bash). Use it first to find code and see what depends on it.
 - `docs/agents/areas.md`: the rules per area (model and schema, screens and mockups, Poulpy, translations, housekeeping). Read the sections for the areas you touch; there are no role threads to consult.
 
