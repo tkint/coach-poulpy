@@ -104,24 +104,23 @@ The fields every form is built from. Reference mockups: `profile-edit`, the thre
 
 ## Screens
 
-Mockups are plain HTML in `design/mockups/` ([ADR 0016](adr/0016-mockups-are-plain-html-in-the-repo.md)). They are split by stage (`drafts/` and `agreed/`) and platform (`phone/`, `tablet/`, `web/`).
+The web screens are stories in the [component workshop](https://tkint.github.io/coach-poulpy/storybook/?path=/docs/design-system-introduction--docs), under Web > Screens, composed from the `Cp*` components ([ADR 0029](adr/0029-mockups-are-stories-in-the-component-workshop.md)). The phone and tablet screens are still plain HTML in `design/mockups/` ([ADR 0016](adr/0016-mockups-are-plain-html-in-the-repo.md)), split by stage (`drafts/` and `agreed/`) and platform (`phone/`, `tablet/`), until they move to the workshop too.
 
 - Build from an agreed mockup. If a screen has none, agree one through a PR before building it.
-- The [Mockups gallery](https://tkint.github.io/coach-poulpy/mockups/) shows each app view and its available states in light and dark themes.
+- The [Mockups gallery](https://tkint.github.io/coach-poulpy/mockups/) shows each phone and tablet view and its available states in light and dark themes; the workshop shows the web screens, each state as a story.
 - CI checks mockup links, local assets, design tokens and required metadata with `node design/check-mockups.mjs`.
 
 The mockup is the design reference; this page defines the shared rules and components used to build it.
 
 ## Websites
 
-The landing site, the web app, the web mockups and the docs site share one package, `web/ui`: DaisyUI with the Poulpy theme and a few Vue components ([ADR 0023](adr/0023-the-websites-share-one-vue-and-daisyui-design-system.md)). Each component, in every state, with the classes it renders and its interaction and accessibility checks, is in the [component workshop](https://tkint.github.io/coach-poulpy/storybook/) ([ADR 0028](adr/0028-storybook-is-the-component-workshop-of-the-design-system.md)).
+The landing site, the web app, the web screens of the workshop and the docs site share one package, `web/ui`: DaisyUI with the Poulpy theme and a few Vue components ([ADR 0023](adr/0023-the-websites-share-one-vue-and-daisyui-design-system.md)). Each component, in every state, with the classes it renders and its interaction and accessibility checks, is in the [component workshop](https://tkint.github.io/coach-poulpy/storybook/) ([ADR 0028](adr/0028-storybook-is-the-component-workshop-of-the-design-system.md)).
 
-- Use the shared components (`CpButton`, `CpChip`...) in Vue, and their classes in a web mockup; never restyle a DaisyUI class in an app. A missing shape goes in `web/ui`, with its stories and the classes it renders in its docs, in the same PR.
+- Use the shared components (`CpButton`, `CpChip`...) in Vue, and never restyle a DaisyUI class in an app. A missing shape goes in `web/ui`, with its stories and the classes it renders in its docs, in the same PR.
 - Every DaisyUI class carries the `cp-` prefix (`cp-btn cp-btn-primary`). Our own classes (`cp-chip`, `cp-stepper`, `cp-type-label`...) never reuse a DaisyUI name, so the two cannot clash.
 - The roles above keep their meaning: `cp-btn-primary` is `primary`, `cp-btn-secondary` is the tonal `primaryContainer`, `cp-btn-accent` is `grumpy` and only for the catch-up action. Never use DaisyUI's `warning` classes: ember is not a warning, and a problem is an `error`.
-- A web mockup that fills the browser window, such as one with a `CpDrawer` sidebar, adds `<meta name="mockup:viewport" content="800">`: the docs site then shows it in a window of that height and the page scrolls inside it, since a frame sized to a page as tall as the frame would grow forever. `design/mockups/shared/mockup-drawer.js` opens such a drawer on a large screen. Web mockups link `web/ui/src/tokens.css` then `web/ui/poulpy-ui.css`. The generated CSS is ignored by Git: the web and docs-site builds generate it from `web/ui/src/`, and the docs build copies it alongside the mockups into the published site.
 - Phone and tablet mockups keep `design/mockups/shared/mockup.css`: they draw the native screens.
-- Icons on the websites and in every mockup come from Lucide, as in the [Icons](#icons) section ([ADR 0024](adr/0024-lucide-is-the-icon-set.md)).
+- Icons on the websites and in every screen come from Lucide, as in the [Icons](#icons) section ([ADR 0024](adr/0024-lucide-is-the-icon-set.md)).
 
 ## Icons
 

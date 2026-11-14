@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// The workouts of the account (design/mockups/agreed/web/app-workouts.html): a searchable, paged table of the workouts the
+// The workouts of the account (the story Web/Screens/App/Workouts): a searchable, paged table of the workouts the
 // phone synced, read-only. Its state lives in the URL (route.ts): /workouts?q=squat&format=sets&page=2. The words come from the API.
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { List, Repeat } from '@lucide/vue'

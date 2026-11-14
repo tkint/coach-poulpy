@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// One workout (design/mockups/agreed/web/app-workout.html): its stats and the muscles it works in a column on the right, its parts with
+// One workout (the stories Web/Screens/App/Workout): its stats and the muscles it works in a column on the right, its parts with
 // their steps on the right, read-only. On a phone the stats and muscles open in a sheet, kept in the URL as ?overview=1.
 // The address is /workouts/<id>. The words come from the API, the same as the phone's.
 import { computed, ref, watch } from 'vue'
