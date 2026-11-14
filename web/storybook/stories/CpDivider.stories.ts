@@ -3,7 +3,7 @@ import { CpDivider } from '@coach-poulpy/ui'
 import doc from './CpDivider.md?raw'
 
 const meta = {
-  title: 'Display/Divider',
+  title: 'Web/Components/Display/Divider',
   parameters: { docs: { description: { component: doc } } },
   component: CpDivider,
   render: () => ({ components: { CpDivider }, template: '<div class="w-64"><p>Above</p><CpDivider /><p>Below</p></div>' }),

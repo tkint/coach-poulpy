@@ -10,7 +10,7 @@ const options = [
   { value: 'mobility', text: 'Mobility' },
 ]
 const meta = {
-  title: 'Fields/SelectField',
+  title: 'Web/Components/Fields/SelectField',
   component: CpSelectField,
   args: { label: 'Format', options },
   // CLEANUP: the button is named by its label alone, so the value it shows is not part of its accessible name (WCAG 2.5.3);

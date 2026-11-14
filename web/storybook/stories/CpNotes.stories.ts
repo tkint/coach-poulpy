@@ -4,7 +4,7 @@ import { CpErrorNote, CpSuccessNote } from '@coach-poulpy/ui'
 import doc from './CpNotes.md?raw'
 
 const meta = {
-  title: 'Display/Notes',
+  title: 'Web/Components/Display/Notes',
   parameters: { docs: { description: { component: doc } } },
   render: (args: { kind: 'error' | 'success' }) => ({
     components: { CpErrorNote, CpSuccessNote },

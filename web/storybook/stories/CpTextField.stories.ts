@@ -6,7 +6,7 @@ import { CpBadge, CpTextField } from '@coach-poulpy/ui'
 import doc from './CpTextField.md?raw'
 
 const meta = {
-  title: 'Fields/TextField',
+  title: 'Web/Components/Fields/TextField',
   parameters: { docs: { description: { component: doc } } },
   component: CpTextField,
   args: { label: 'Email', type: 'email' },

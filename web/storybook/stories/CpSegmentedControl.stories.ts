@@ -9,7 +9,7 @@ const options = [
   { value: 'fr', text: 'Français' },
 ]
 const meta = {
-  title: 'Fields/SegmentedControl',
+  title: 'Web/Components/Fields/SegmentedControl',
   component: CpSegmentedControl,
   parameters: { docs: { description: { component: doc } } },
   args: { label: 'Language', options },

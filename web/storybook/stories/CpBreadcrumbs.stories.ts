@@ -3,7 +3,7 @@ import { CpBreadcrumbs } from '@coach-poulpy/ui'
 import doc from './CpBreadcrumbs.md?raw'
 
 const meta = {
-  title: 'Navigation/Breadcrumbs',
+  title: 'Web/Components/Navigation/Breadcrumbs',
   parameters: { docs: { description: { component: doc } } },
   component: CpBreadcrumbs,
   args: { label: 'You are here' },

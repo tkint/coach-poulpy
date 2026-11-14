@@ -4,7 +4,7 @@ import { CpAvatar, CpSidePanel } from '@coach-poulpy/ui'
 import doc from './CpSidePanel.md?raw'
 
 const meta = {
-  title: 'Overlays/SidePanel',
+  title: 'Web/Components/Overlays/SidePanel',
   parameters: { docs: { description: { component: doc } } },
   component: CpSidePanel,
   args: { title: 'Alex Martin', closeLabel: 'Close' },

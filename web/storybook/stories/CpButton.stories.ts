@@ -4,7 +4,7 @@ import { CpButton } from '@coach-poulpy/ui'
 import doc from './CpButton.md?raw'
 
 const meta = {
-  title: 'Actions/Button',
+  title: 'Web/Components/Actions/Button',
   parameters: { docs: { description: { component: doc } } },
   component: CpButton,
   render: (args) => ({ components: { CpButton }, setup: () => ({ args }), template: '<CpButton v-bind="args">Start the session</CpButton>' }),

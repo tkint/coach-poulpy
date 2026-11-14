@@ -5,7 +5,7 @@ import { CpDrawer, CpDrawerItem } from '@coach-poulpy/ui'
 import doc from './CpDrawer.md?raw'
 
 const meta = {
-  title: 'Navigation/Drawer',
+  title: 'Web/Components/Navigation/Drawer',
   component: CpDrawer,
   args: { toggleLabel: 'Toggle the menu', closeLabel: 'Close the menu' },
   // CLEANUP: the toggle is a <label> with an aria-label, which ARIA does not allow on a label; give the checkbox the name and

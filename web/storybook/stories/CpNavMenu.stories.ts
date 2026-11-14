@@ -3,7 +3,7 @@ import { CpNavItem, CpNavMenu } from '@coach-poulpy/ui'
 import doc from './CpNavMenu.md?raw'
 
 const meta = {
-  title: 'Navigation/NavMenu',
+  title: 'Web/Components/Navigation/NavMenu',
   parameters: { docs: { description: { component: doc } } },
   component: CpNavMenu,
   render: () => ({

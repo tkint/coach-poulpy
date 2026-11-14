@@ -4,7 +4,7 @@ import { CpCheckbox } from '@coach-poulpy/ui'
 import doc from './CpCheckbox.md?raw'
 
 const meta = {
-  title: 'Fields/Checkbox',
+  title: 'Web/Components/Fields/Checkbox',
   parameters: { docs: { description: { component: doc } } },
   component: CpCheckbox,
   args: { label: 'Warm-up included' },
