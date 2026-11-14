@@ -1,50 +1,69 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, within } from 'storybook/test'
 import { ref } from 'vue'
-import { CpBodyMap } from '@coach-poulpy/ui'
+import { CpBodyMap, type BodyAreas } from '@coach-poulpy/ui'
 import doc from './CpBodyMap.md?raw'
 
-// A stand-in figure: the real ones are the generated body map shapes.
-const figures = [
-  { caption: 'Front', paths: [{ d: 'M60 40 a14 14 0 1 0 0.01 0z', outline: true }, { d: 'M36 60 h48 v70 h-48z', heat: 3 as const }, { d: 'M42 130 h14 v90 h-14z M64 130 h14 v90 h-14z', heat: 1 as const }] },
-  { caption: 'Back', paths: [{ d: 'M60 40 a14 14 0 1 0 0.01 0z', outline: true }, { d: 'M36 60 h48 v70 h-48z', heat: 2 as const }, { d: 'M42 130 h14 v90 h-14z M64 130 h14 v90 h-14z' }] },
-]
 const meta = {
   title: 'Core/Body map',
   parameters: { docs: { description: { component: doc } } },
   component: CpBodyMap,
-  args: { figures, description: 'Legs and chest worked most', less: 'Less', more: 'More' },
+  args: {
+    front: { pectoral: 'both', biceps: { side: 'left', heat: 2 }, abs: { side: 'both', heat: 1 } },
+    back: { deltoid: 'both', triceps: { side: 'both', heat: 2 } },
+    captions: { front: 'Front', back: 'Back' },
+    description: 'Chest and shoulders worked most',
+    legend: 'top',
+    less: 'Less',
+    more: 'More',
+  },
 } satisfies Meta<typeof CpBodyMap>
 export default meta
-export const Default: StoryObj<typeof meta> = {
+type Story = StoryObj<typeof meta>
+
+/** An area is lit by its name; a side string lights that side at the most, an object says how much. */
+export const Default: Story = {
   play: async ({ canvasElement }) => {
-    expect(within(canvasElement).getByRole('img')).toHaveAccessibleName('Legs and chest worked most')
+    expect(within(canvasElement).getByRole('img')).toHaveAccessibleName('Chest and shoulders worked most')
   },
 }
 
-/** The picture is a field: an area with a key and a label is a button that says its key when it is pressed. */
-export const Interactive: StoryObj<typeof meta> = {
-  args: { interactive: true, less: undefined, more: undefined },
+/** An injury takes the same object as the muscles worked and is drawn in the pain colour, its `heat` how much it hurts. */
+export const Injury: Story = {
+  args: { front: undefined, back: undefined, frontInjury: { deltoid: { side: 'right', heat: 3 }, biceps: 'right' }, backInjury: { deltoid: { side: 'right', heat: 3 }, 'lower-back': { side: 'both', heat: 1 } }, legend: 'hidden', description: 'Right shoulder hurts' },
+}
+
+/** The legend on the right, one side of the figure only. */
+export const LegendRight: Story = { args: { legend: 'right', layout: 'front' } }
+
+/** The other body figure. */
+export const Hips: Story = { args: { figure: 'hips' } }
+
+/** The picture is a field: an area `areaLabel` names is a button that says its area and side when it is pressed. */
+export const Interactive: Story = {
+  args: { interactive: true, front: undefined, back: undefined, legend: 'hidden' },
   render: (args) => ({
     components: { CpBodyMap },
     setup: () => {
-      const lit = ref<string[]>(['chest'])
-      const areas = [
-        { key: 'chest', label: 'Chest', d: 'M36 60 h48 v40 h-48z' },
-        { key: 'legs', label: 'Legs', d: 'M42 130 h14 v90 h-14z M64 130 h14 v90 h-14z' },
-      ]
-      const figures = () => [
-        { caption: 'Front', paths: [{ d: 'M60 40 a14 14 0 1 0 0.01 0z', outline: true }, ...areas.map((area) => ({ ...area, heat: lit.value.includes(area.key) ? (3 as const) : undefined }))] },
-      ]
-      const pick = (key: string) => (lit.value = lit.value.includes(key) ? lit.value.filter((one) => one !== key) : [...lit.value, key])
-      return { args, figures, pick }
+      const lit = ref<BodyAreas>({ biceps: 'left' })
+      const areaLabel = (area: string) => (area === 'biceps' ? 'Biceps' : area === 'quads' ? 'Quadriceps' : undefined)
+      const sides = (area: string) => (lit.value[area] === 'both' ? ['left', 'right'] : lit.value[area] ? [lit.value[area]] : [])
+      const pick = (area: string, side: 'left' | 'right') => {
+        const now = sides(area)
+        const next = now.includes(side) ? now.filter((one) => one !== side) : [...now, side]
+        const { [area]: _, ...rest } = lit.value
+        lit.value = next.length === 2 ? { ...rest, [area]: 'both' } : next.length ? { ...rest, [area]: next[0] as 'left' | 'right' } : rest
+      }
+      return { args, lit, areaLabel, pick }
     },
-    template: '<CpBodyMap v-bind="args" :figures="figures()" @pick="pick" />',
+    template: '<CpBodyMap v-bind="args" :front="lit" :area-label="areaLabel" @pick="pick" />',
   }),
   play: async ({ canvasElement }) => {
-    const legs = within(canvasElement).getByRole('button', { name: 'Legs' })
-    expect(legs).toHaveAttribute('aria-pressed', 'false')
-    await userEvent.click(legs)
-    expect(legs).toHaveAttribute('aria-pressed', 'true')
+    const biceps = within(canvasElement).getAllByRole('button', { name: 'Biceps' })
+    const pressed = () => biceps.filter((one) => one.getAttribute('aria-pressed') === 'true').length
+    expect(biceps).toHaveLength(2)
+    expect(pressed()).toBe(1)
+    await userEvent.click(biceps.find((one) => one.getAttribute('aria-pressed') === 'false')!)
+    expect(pressed()).toBe(2)
   },
 }

@@ -3,7 +3,7 @@
 export { default as CpAvatar } from './components/CpAvatar.vue'
 export { default as CpBadge } from './components/CpBadge.vue'
 export { default as CpBreadcrumbs } from './components/CpBreadcrumbs.vue'
-export { default as CpBodyMap, type BodyMapFigure, type BodyMapPath } from './components/CpBodyMap.vue'
+export { default as CpBodyMap, type BodyAreas, type BodyAreaValue, type BodyHeat, type BodySide } from './components/CpBodyMap.vue'
 export { default as CpButton } from './components/CpButton.vue'
 export { default as CpCard } from './components/CpCard.vue'
 export { default as CpCheckbox } from './components/CpCheckbox.vue'
