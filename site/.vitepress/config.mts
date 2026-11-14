@@ -190,9 +190,10 @@ export default withMermaid(
           ],
           [
             'Contributing',
-            ['/CONTRIBUTING', '/CLAUDE', '/docs/agents/', '/docs/releasing', '/docs/deploying-the-server'],
+            ['/CONTRIBUTING', '/CLAUDE', '/docs/agents/', '/docs/agents/skills', '/docs/releasing', '/docs/deploying-the-server'],
             [
               { text: 'Issues, skills and PRs', link: '/CONTRIBUTING' },
+              { text: 'Agent skills', link: '/docs/agents/skills' },
               { text: 'House rules', link: '/CLAUDE' },
               { text: 'Releasing a beta', link: '/docs/releasing' },
               { text: 'Deploying the server', link: '/docs/deploying-the-server' },
