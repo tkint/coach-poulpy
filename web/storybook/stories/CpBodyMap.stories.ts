@@ -39,6 +39,21 @@ export const LegendRight: Story = { args: { legend: 'right', layout: 'front' } }
 /** The other body figure. */
 export const Hips: Story = { args: { figure: 'hips' } }
 
+/** In a form, `v-model` holds the areas: picking a side toggles it, and both sides make `both`. */
+export const FormModel: Story = {
+  args: { front: undefined, back: undefined, legend: 'hidden', interactive: true },
+  render: (args) => ({
+    components: { CpBodyMap },
+    setup: () => ({ args, areas: ref<BodyAreas>({ biceps: 'left' }), areaLabel: (area: string) => (area === 'biceps' ? 'Biceps' : undefined) }),
+    template: '<CpBodyMap v-bind="args" v-model="areas" :area-label="areaLabel" /><p data-testid="areas">{{ JSON.stringify(areas) }}</p>',
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await userEvent.click(canvas.getAllByRole('button', { name: 'Biceps' }).find((one) => one.getAttribute('aria-pressed') === 'false')!)
+    expect(canvas.getByTestId('areas')).toHaveTextContent('{"biceps":"both"}')
+  },
+}
+
 /** The picture is a field: an area `areaLabel` names is a button that says its area and side when it is pressed. */
 export const Interactive: Story = {
   args: { interactive: true, front: undefined, back: undefined, legend: 'hidden' },

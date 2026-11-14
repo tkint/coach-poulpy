@@ -5,6 +5,7 @@
 | Prop | Takes | Says |
 | --- | --- | --- |
 | `front`, `back` | areas | what is lit on that side of the figure |
+| `v-model` | areas | for a form: what is lit on both figures; picking an area also updates it (left and right make `both`). `front` and `back` win over it; `pick` is still sent |
 | `front-injury`, `back-injury` | areas | what hurts on that side, in the pain colour |
 | `captions` | `{ front, back }` | the text under each figure |
 | `description` | text | the picture in words, for a screen reader |

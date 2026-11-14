@@ -17,6 +17,8 @@ export type BodyAreas = Record<string, BodyAreaValue>
 
 type Region = { key: string | null; d: string; skin: boolean }
 const props = defineProps<{
+  /** Areas lit on both figures, for a form: `v-model` also updates it when an area is picked, and `front` and `back` still win over it. */
+  modelValue?: BodyAreas
   front?: BodyAreas
   back?: BodyAreas
   frontInjury?: BodyAreas
@@ -35,7 +37,21 @@ const props = defineProps<{
   /** The name of an area as a button, or nothing for an area that cannot be picked. */
   areaLabel?: (area: string) => string | undefined
 }>()
-const emit = defineEmits<{ pick: [area: string, side: 'left' | 'right'] }>()
+const emit = defineEmits<{ pick: [area: string, side: 'left' | 'right']; 'update:modelValue': [areas: BodyAreas] }>()
+
+/** Picking says `pick`, and with a `v-model` it also hands over the areas with that side toggled (left and right make both). */
+function pick(area: string, side: 'left' | 'right') {
+  emit('pick', area, side)
+  if (!props.modelValue) return
+  const value = props.modelValue[area]
+  const given = typeof value === 'string' ? value : value?.side
+  const sides = given === 'both' ? ['left', 'right'] : given ? [given] : []
+  const next = sides.includes(side) ? sides.filter((one) => one !== side) : [...sides, side]
+  const { [area]: _, ...rest } = props.modelValue
+  const heat = typeof value === 'object' ? value.heat : undefined
+  const named = next.length === 2 ? 'both' : (next[0] as BodySide | undefined)
+  emit('update:modelValue', named ? { ...rest, [area]: heat ? { side: named, heat } : named } : rest)
+}
 
 const split = (key: string): { area: string; side?: 'left' | 'right' } => {
   const match = /^(.*)-(left|right)$/.exec(key)
@@ -62,7 +78,7 @@ const views = computed(() => {
       return { d: region.d, area, side, label, heat: heatOf(lit, area, side), pain: heatOf(hurt, area, side) }
     }),
   })
-  const shown = [view('front', props.front, props.frontInjury), view('back', props.back, props.backInjury)]
+  const shown = [view('front', props.front ?? props.modelValue, props.frontInjury), view('back', props.back ?? props.modelValue, props.backInjury)]
   return props.layout === 'front' || props.layout === 'back' ? shown.filter((one) => one.name === props.layout) : shown
 })
 const showLegend = computed(() => !!props.legend && props.legend !== 'hidden' && !!props.less && !!props.more)
@@ -89,9 +105,9 @@ const showLegend = computed(() => !!props.legend && props.legend !== 'hidden' &&
               tabindex="0"
               :aria-label="path.label"
               :aria-pressed="path.heat !== undefined || path.pain !== undefined"
-              @click="emit('pick', path.area!, path.side!)"
-              @keydown.enter.prevent="emit('pick', path.area!, path.side!)"
-              @keydown.space.prevent="emit('pick', path.area!, path.side!)"
+              @click="pick(path.area!, path.side!)"
+              @keydown.enter.prevent="pick(path.area!, path.side!)"
+              @keydown.space.prevent="pick(path.area!, path.side!)"
             />
             <path v-else class="cp-body-part" :data-heat="path.heat" :data-pain="path.pain" :d="path.d" />
           </template>
