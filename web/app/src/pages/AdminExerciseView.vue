@@ -278,7 +278,8 @@ watch(form, () => (saved.value = false), { deep: true })
             <CpButton type="submit" form="exercise-form" size="md" :disabled="saving">{{ isNew ? t('admin.exerciseAdd') : t('admin.exerciseSave') }}</CpButton>
           </div>
         </div>
-        <p v-if="translating" class="text-sm text-base-content/70">{{ inLanguage('admin.exerciseEditingLanguage') }}</p>
+        <!-- Always there, hidden while the original shows, so switching language never moves the page. -->
+        <p class="text-sm text-base-content/70" :class="{ invisible: !translating }" :aria-hidden="!translating">{{ t('admin.exerciseEditingLanguage', { language: languageName(translating ? language : shippedLanguages[1] ?? language) }) }}</p>
       </div>
       <CpSuccessNote v-if="saved">{{ t('admin.exerciseSaved') }}</CpSuccessNote>
       <CpErrorNote v-if="failure === 'failed'">{{ t('admin.exerciseSaveFailed') }}</CpErrorNote>
