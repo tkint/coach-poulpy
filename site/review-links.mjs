@@ -18,6 +18,24 @@ const groups = {
   design: 'Design system and brand',
 }
 
+// The page group of a web mockup (keep in step with groupOf in .vitepress/mockup-labels.ts): each web
+// app view has its own page, named from the file, and others keep the section in their metadata.
+const webGroups = [
+  [(screen) => screen === 'admin-shell' || screen.startsWith('admin-audit'), 'Admin · Audit'],
+  [(screen) => screen.startsWith('admin-sign-in'), 'Admin · Sign in'],
+  [(screen) => screen.startsWith('admin-accounts'), 'Admin · Accounts'],
+  [(screen) => screen.startsWith('admin-settings'), 'Admin · Settings'],
+  [(screen) => screen.startsWith('admin-status'), 'Admin · Status'],
+  [(screen) => screen.startsWith('admin-catalog-exercise'), 'Admin · Exercise'],
+  [(screen) => screen.startsWith('admin-catalog'), 'Admin · Catalog'],
+  [(screen) => screen.startsWith('app-sign-in'), 'Web app · Sign in'],
+  [(screen) => screen.startsWith('app-status'), 'Web app · Status'],
+  [(screen) => screen === 'app-profile', 'Web app · Profile'],
+  [(screen) => screen === 'app-workouts', 'Web app · Workouts'],
+  [(screen) => screen.startsWith('app-workout'), 'Web app · Workout'],
+]
+const webGroup = (screen, section) => webGroups.find(([matches]) => matches(screen))?.[1] ?? section
+
 // A mockup shows on the page of its section, with the other states of it (keep in step with
 // .vitepress/mockup-labels.ts). The file may be gone at the head, so its tag is read from the base then.
 function mockupPage(file, stage, device) {
@@ -29,7 +47,7 @@ function mockupPage(file, stage, device) {
     } catch {}
   }
   const section = html.match(/<meta name="mockup:section" content="([^"]*)"/)?.[1] ?? ''
-  const group = device === 'tablet' ? `Tablet · ${section}` : section
+  const group = device === 'tablet' ? `Tablet · ${section}` : device === 'web' ? webGroup(file.split('/').at(-1).replace(/\.html$/, ''), section) : section
   const slug = group.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
   return `mockups/${device === 'web' ? 'web' : 'mobile'}/${stage}/${slug}`
 }
