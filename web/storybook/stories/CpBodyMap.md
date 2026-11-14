@@ -7,12 +7,14 @@
 | `front`, `back` | areas | what is lit on that side of the figure |
 | `v-model` | areas | for a form: what is lit on both figures; picking an area also updates it (left and right make `both`). `front` and `back` win over it; `pick` is still sent |
 | `front-injury`, `back-injury` | areas | what hurts on that side, in the pain colour |
+| `v-model:injury`, `editing` | areas, `areas` (default) or `injury` | for a form: what hurts on both figures. With `interactive`, `editing` says which of `v-model` and `v-model:injury` a pick updates. `front-injury` and `back-injury` win over it |
 | `captions` | `{ front, back }` | the text under each figure |
 | `description` | text | the picture in words, for a screen reader |
 | `figure` | `shoulders` (default) or `hips` | the body figure |
 | `layout` | `both` (default), `front` or `back` | which figures are drawn |
 | `legend` | `hidden` (default), `top` or `right` | where the Less to More scale goes |
 | `less`, `more` | text | the words of the legend |
+| `interactive-mode` | `individual` (default) or `both` | with `interactive` and a `v-model`: a tap toggles the side tapped, or both sides of the area |
 | `interactive`, `area-label` | flag, `(area) => text` | an area `area-label` names is a button; `pick` says its `area` and `side` |
 
 ## Areas

@@ -54,6 +54,34 @@ export const FormModel: Story = {
   },
 }
 
+/** `interactive-mode="both"`: a tap on either side selects both sides of the area. */
+export const BothSides: Story = {
+  ...FormModel,
+  args: { ...FormModel.args, interactiveMode: 'both' },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await userEvent.click(canvas.getAllByRole('button', { name: 'Biceps' })[0])
+    expect(canvas.getByTestId('areas')).toHaveTextContent('{"biceps":"both"}')
+    await userEvent.click(canvas.getAllByRole('button', { name: 'Biceps' })[0])
+    expect(canvas.getByTestId('areas')).toHaveTextContent('{}')
+  },
+}
+
+/** `v-model:injury` with `editing="injury"`: a pick edits what hurts, and the muscles worked stay as they are. */
+export const InjuryModel: Story = {
+  args: { front: undefined, back: undefined, legend: 'hidden', interactive: true, editing: 'injury', description: 'Where it hurts' },
+  render: (args) => ({
+    components: { CpBodyMap },
+    setup: () => ({ args, hurt: ref<BodyAreas>({}), areaLabel: (area: string) => (area === 'deltoid' ? 'Shoulder' : undefined) }),
+    template: '<CpBodyMap v-bind="args" v-model:injury="hurt" :area-label="areaLabel" /><p data-testid="hurt">{{ JSON.stringify(hurt) }}</p>',
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await userEvent.click(canvas.getAllByRole('button', { name: 'Shoulder' })[0])
+    expect(canvas.getByTestId('hurt')).toHaveTextContent(/"deltoid":"(left|right)"/)
+  },
+}
+
 /** The picture is a field: an area `areaLabel` names is a button that says its area and side when it is pressed. */
 export const Interactive: Story = {
   args: { interactive: true, front: undefined, back: undefined, legend: 'hidden' },

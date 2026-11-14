@@ -19,6 +19,10 @@ type Region = { key: string | null; d: string; skin: boolean }
 const props = defineProps<{
   /** Areas lit on both figures, for a form: `v-model` also updates it when an area is picked, and `front` and `back` still win over it. */
   modelValue?: BodyAreas
+  /** Areas that hurt on both figures, for a form: `v-model:injury`. `front-injury` and `back-injury` win over it. */
+  injury?: BodyAreas
+  /** What a pick edits with `interactive`: the areas lit (the default) or the `injury`. */
+  editing?: 'areas' | 'injury'
   front?: BodyAreas
   back?: BodyAreas
   frontInjury?: BodyAreas
@@ -34,23 +38,34 @@ const props = defineProps<{
   /** Where the Less to More legend goes: `hidden` (the default), `top` or `right`; it says its words with `less` and `more`. */
   legend?: 'hidden' | 'top' | 'right'
   interactive?: boolean
+  /** What a tap selects with `interactive`: the `individual` side tapped (the default) or `both` sides of the area. */
+  interactiveMode?: 'individual' | 'both'
   /** The name of an area as a button, or nothing for an area that cannot be picked. */
   areaLabel?: (area: string) => string | undefined
 }>()
-const emit = defineEmits<{ pick: [area: string, side: 'left' | 'right']; 'update:modelValue': [areas: BodyAreas] }>()
+const emit = defineEmits<{ pick: [area: string, side: 'left' | 'right']; 'update:modelValue': [areas: BodyAreas]; 'update:injury': [areas: BodyAreas] }>()
 
-/** Picking says `pick`, and with a `v-model` it also hands over the areas with that side toggled (left and right make both). */
+/** The areas with [side] of [area] toggled (left and right make both), or both sides at once with `interactive-mode="both"`: an area on one side only then becomes both. A `heat` already on the area is kept. */
+function toggled(areas: BodyAreas, area: string, side: 'left' | 'right'): BodyAreas {
+  const value = areas[area]
+  const given = typeof value === 'string' ? value : value?.side
+  const { [area]: _, ...rest } = areas
+  const heat = typeof value === 'object' ? value.heat : undefined
+  const next: BodySide[] =
+    props.interactiveMode === 'both' ? (given === 'both' ? [] : ['both']) : (() => {
+      const sides: BodySide[] = given === 'both' ? ['left', 'right'] : given ? [given] : []
+      return sides.includes(side) ? sides.filter((one) => one !== side) : [...sides, side]
+    })()
+  const named = next.length === 2 ? 'both' : next[0]
+  return named ? { ...rest, [area]: heat ? { side: named, heat } : named } : rest
+}
+
+/** Picking says `pick`, and with a `v-model` (what is lit) or `v-model:injury`, whichever `editing` names, it also hands over the new areas. */
 function pick(area: string, side: 'left' | 'right') {
   emit('pick', area, side)
-  if (!props.modelValue) return
-  const value = props.modelValue[area]
-  const given = typeof value === 'string' ? value : value?.side
-  const sides = given === 'both' ? ['left', 'right'] : given ? [given] : []
-  const next = sides.includes(side) ? sides.filter((one) => one !== side) : [...sides, side]
-  const { [area]: _, ...rest } = props.modelValue
-  const heat = typeof value === 'object' ? value.heat : undefined
-  const named = next.length === 2 ? 'both' : (next[0] as BodySide | undefined)
-  emit('update:modelValue', named ? { ...rest, [area]: heat ? { side: named, heat } : named } : rest)
+  if (props.editing === 'injury') {
+    if (props.injury) emit('update:injury', toggled(props.injury, area, side))
+  } else if (props.modelValue) emit('update:modelValue', toggled(props.modelValue, area, side))
 }
 
 const split = (key: string): { area: string; side?: 'left' | 'right' } => {
@@ -78,7 +93,7 @@ const views = computed(() => {
       return { d: region.d, area, side, label, heat: heatOf(lit, area, side), pain: heatOf(hurt, area, side) }
     }),
   })
-  const shown = [view('front', props.front ?? props.modelValue, props.frontInjury), view('back', props.back ?? props.modelValue, props.backInjury)]
+  const shown = [view('front', props.front ?? props.modelValue, props.frontInjury ?? props.injury), view('back', props.back ?? props.modelValue, props.backInjury ?? props.injury)]
   return props.layout === 'front' || props.layout === 'back' ? shown.filter((one) => one.name === props.layout) : shown
 })
 const showLegend = computed(() => !!props.legend && props.legend !== 'hidden' && !!props.less && !!props.more)
