@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// The catalog screen of the admin (design/mockups/agreed/web/admin-catalog*.html, #387): the exercises of the
+// The catalog screen of the admin (the Web/Screens/Admin/Catalog stories in the component workshop, #387): the exercises of the
 // catalog draft in a paged table that is searched, filtered and sorted on the server, with rows picked for the
 // actions on several exercises. Content (what changed since the latest version), translations and lifecycle are
 // three separate columns and filters. The table's state lives in the URL (route.ts):
