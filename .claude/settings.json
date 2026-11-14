@@ -1,4 +1,11 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(git push:*)",
+      "mcp__github__create_pull_request",
+      "mcp__github__issue_write"
+    ]
+  },
   "enabledPlugins": {
     "vue-skills-bundle@vue-skills": true,
     "http4k@http4k-marketplace": true,
