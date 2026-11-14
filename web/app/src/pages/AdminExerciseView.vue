@@ -4,13 +4,14 @@
 // published exercise, which the apps download, stays as it is until a publication. A text is written in one language
 // at a time (`?lang=fr`), and under each translatable field a badge says whether every shipped language has it, so
 // the screen shows at once what a publication would refuse. Saving never needs every language; publishing does.
-import { computed, onMounted, reactive, ref, watch } from 'vue'
-import { CircleExclamationPoint, Plus, X } from '@lucide/vue'
-import { CpBadge, CpBreadcrumbs, CpButton, CpCard, CpChip, CpErrorNote, CpMultiSelectField, CpPoulpyCard, CpSelectField, CpSuccessNote, CpTextarea, CpTextField } from '@coach-poulpy/ui'
-import { changedFields, getCatalogExercise, saveCatalogExercise, type CatalogExercise, type ExerciseJson, type FieldChange } from '../session'
+import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
+import { GripVertical, Lock, Plus, X } from '@lucide/vue'
+import { CpBadge, CpBodyMap, CpBreadcrumbs, CpButton, CpCard, CpChip, CpChipSelectField, CpErrorNote, CpPoulpyCard, CpSegmentedControl, CpSelectField, CpSuccessNote, CpTextarea, CpTextField } from '@coach-poulpy/ui'
+import { getCatalogExercise, saveCatalogExercise, type CatalogExercise, type ExerciseJson } from '../session'
 import { domainLabel, domainOptions } from '../catalogText'
+import { groupOfArea, musclePickerFigures } from '../bodyMap'
 import { navigate, search, withParams } from '../route'
-import { shippedLanguages, t } from '../i18n'
+import { locale, shippedLanguages, t } from '../i18n'
 
 const props = defineProps<{ slug?: string }>()
 
@@ -18,7 +19,8 @@ type Texts = Record<string, string>
 type Form = {
   slug: string
   name: Texts
-  steps: Texts[]
+  /** Each step keeps its key while it moves, so the field and the focus follow it. */
+  steps: { key: number; text: Texts }[]
   note: Texts
   /** Per language, the aliases separated by commas. */
   aliases: Texts
@@ -40,13 +42,17 @@ const texts = (from?: Record<string, string>): Texts => ({ ...blank(), ...from }
 const lower = (codes?: string[]) => (codes ?? []).map((code) => code.toLowerCase())
 const upper = (codes: string[]) => codes.map((code) => code.toUpperCase())
 
+let stepKeys = 0
+const newStep = (from?: Record<string, string>) => ({ key: stepKeys++, text: texts(from) })
+
 const fromExercise = (exercise?: ExerciseJson): Form => ({
   slug: exercise?.slug ?? '',
   name: texts(exercise?.name),
-  steps: (exercise?.instructions ?? []).map(texts),
+  steps: (exercise?.instructions ?? []).map(newStep),
   note: texts(exercise?.variationNote),
   aliases: Object.fromEntries(shippedLanguages.map((language) => [language, (exercise?.aliases?.[language] ?? []).join(', ')])),
-  needs: (exercise?.equipment ?? []).map(lower),
+  // The screen always shows one need, empty when the exercise needs nothing.
+  needs: exercise?.equipment?.length ? exercise.equipment.map(lower) : [[]],
   optional: lower(exercise?.optionalEquipment),
   pattern: exercise?.movementPattern.toLowerCase() ?? 'squat',
   measurement: exercise?.measurement.toLowerCase() ?? 'reps',
@@ -81,7 +87,7 @@ function toExercise(form: Form, base?: ExerciseJson): ExerciseJson {
     focus: upper(form.focus),
     positions: upper(form.positions),
     jumps: form.jumps,
-    instructions: form.steps.map(written).filter((step) => Object.keys(step).length),
+    instructions: form.steps.map((step) => written(step.text)).filter((step) => Object.keys(step).length),
   }
   if (Object.keys(note).length) exercise.variationNote = note
   else delete exercise.variationNote
@@ -91,7 +97,6 @@ function toExercise(form: Form, base?: ExerciseJson): ExerciseJson {
 const state = ref<'loading' | 'ready' | 'missing' | 'failed'>('loading')
 const loaded = ref<CatalogExercise>()
 const form = reactive<Form>(fromExercise())
-const changes = ref<FieldChange[]>([])
 const saving = ref(false)
 const saved = ref(false)
 const failure = ref<'failed' | 'invalid' | 'slug-taken'>()
@@ -106,7 +111,11 @@ const language = computed(() => {
 })
 const base = computed(() => (props.slug ? `/admin/catalog/${encodeURIComponent(props.slug)}` : '/admin/catalog/new'))
 const showLanguage = (code: string) => navigate(withParams(base.value, { lang: code }, { lang: shippedLanguages[0] }), 'replace')
-const languageName = (code: string) => ({ en: 'English', fr: 'Français' } as Record<string, string>)[code] ?? code
+const names = new Intl.DisplayNames([locale], { type: 'language' })
+const languageName = (code: string) => names.of(code) ?? code
+const original = shippedLanguages[0]
+/** The language of the text on show is not the original one: each translatable field then shows the original below it. */
+const translating = computed(() => language.value !== original)
 
 function apply(found: CatalogExercise | undefined) {
   loaded.value = found
@@ -119,7 +128,6 @@ async function load() {
   slugTouched.value = !isNew.value
   if (props.slug === undefined) {
     apply(undefined)
-    changes.value = []
     state.value = 'ready'
     return
   }
@@ -132,7 +140,6 @@ async function load() {
   }
   apply(found)
   state.value = 'ready'
-  changes.value = (await changedFields(props.slug)) ?? []
 }
 onMounted(load)
 watch(() => props.slug, load)
@@ -155,53 +162,66 @@ watch(
 
 /** The shipped languages [from] has no text in. */
 const missingIn = (from: Texts) => shippedLanguages.filter((code) => !from[code]?.trim())
-/** The badge under a translatable field: every language has the text, or which ones lack it. An optional text left empty says nothing. */
-function status(from: Texts, optional = false): { tone: 'success' | 'error'; text: string } | undefined {
+type Status = { tone: 'success' | 'error' | 'neutral'; text: string }
+/**
+ * What the badges under a translatable field say while the original is shown: where each other language stands. The name says it
+ * for all of them at once; a text that is optional and empty everywhere (the variation note) says nothing, and aliases, which
+ * a language can do without, say when one isn't needed.
+ */
+function statuses(from: Texts, kind: 'name' | 'step' | 'note' | 'aliases'): Status[] {
+  const others = shippedLanguages.filter((code) => code !== original)
   const missing = missingIn(from)
-  if (optional && missing.length === shippedLanguages.length) return undefined
-  if (!missing.length) return { tone: 'success', text: t('admin.exerciseTranslated') }
-  return { tone: 'error', text: t('admin.catalogLanguagesMissing', { languages: missing.map(languageName).join(', ') }) }
+  if (kind === 'note' && missing.length === shippedLanguages.length) return []
+  if (kind === 'name' && !missing.length) return [{ tone: 'success', text: t('admin.exerciseTranslated') }]
+  return others.map((code) => {
+    const language = languageName(code)
+    if (from[code]?.trim()) return { tone: 'success', text: t('admin.translationDone', { language }) }
+    return kind === 'aliases' ? { tone: 'neutral', text: t('admin.translationNotNeeded', { language }) } : { tone: 'error', text: t('admin.translationMissing', { language }) }
+  })
 }
 /** The language switch marks a language some text still lacks. */
-const lacks = (code: string) => [form.name, ...form.steps, ...(Object.keys(written(form.note)).length ? [form.note] : [])].some((from) => !from[code]?.trim())
+const lacks = (code: string) => [form.name, ...form.steps.map((step) => step.text), ...(Object.keys(written(form.note)).length ? [form.note] : [])].some((from) => !from[code]?.trim())
+const languages = computed(() =>
+  shippedLanguages.map((code) => ({ value: code, text: code.toUpperCase(), flagged: lacks(code), flagLabel: t('admin.languageNeedsText', { language: languageName(code) }) })),
+)
+const shown = computed({ get: () => language.value, set: (code: string) => showLanguage(code) })
+/** What a field of the language on show asks for, and what it shows of the original under it. */
+const originalOf = (from: Texts) => t('admin.englishOriginal', { text: from[original]?.trim() || t('admin.englishNothing') })
+const inLanguage = (label: string) => t(label, { language: languageName(language.value) })
 
 const patternOptions = domainOptions('pattern')
 const measurementOptions = domainOptions('measurement')
 const positionOptions = domainOptions('position')
-const muscleOptions = domainOptions('muscle')
 const equipmentOptions = domainOptions('equipment')
 const focusOptions = domainOptions('focus')
-const group = (kind: 'position' | 'muscle' | 'equipment' | 'focus', codes: string[]) => codes.map((code) => domainLabel(kind, code)).join(', ')
 
-const addStep = () => form.steps.push(blank())
+const removeLabel = (text: string) => t('admin.chipRemove', { name: text })
+
+const addStep = () => form.steps.push(newStep())
 const removeStep = (at: number) => form.steps.splice(at, 1)
-const addNeed = () => form.needs.push([])
-const removeNeed = (at: number) => form.needs.splice(at, 1)
-
-const contentTone = computed(() => (loaded.value?.change === 'added' ? 'primary' : 'neutral'))
-/** What a changed field of the draft is called, such as `name.fr` or `instructions.1.en`. */
-function fieldLabel(field: string): string {
-  const [head, ...rest] = field.split('.')
-  const code = rest.at(-1) ?? ''
-  const where = languageName(code)
-  if (head === 'name') return t('admin.changeIn', { field: t('admin.fieldName'), language: where })
-  if (head === 'variationNote') return t('admin.changeIn', { field: t('admin.variationNote'), language: where })
-  if (head === 'aliases') return t('admin.changeIn', { field: t('admin.fieldAliases'), language: where })
-  if (head === 'instructions') return t('admin.changeStep', { n: String(Number(rest[0]) + 1), language: where })
-  const plain: Record<string, string> = {
-    muscleGroups: 'admin.exerciseMuscles',
-    equipment: 'admin.exerciseEquipment',
-    optionalEquipment: 'admin.equipmentOptional',
-    movementPattern: 'admin.filterPattern',
-    measurement: 'admin.fieldMeasurement',
-    positions: 'admin.filterPositions',
-    focus: 'admin.fieldFocus',
-    perSide: 'admin.attrEachSide',
-    jumps: 'admin.attrJumps',
-  }
-  return t(plain[head] ?? 'admin.changeFallback')
+// Steps move by dragging their handle or, from the keyboard, with the arrow keys on it.
+const dragged = ref<number>()
+function moveStep(from: number | undefined, to: number) {
+  if (from === undefined || to < 0 || to >= form.steps.length || from === to) return
+  const [step] = form.steps.splice(from, 1)
+  form.steps.splice(to, 0, step)
+  void nextTick(() => document.getElementById(`step-grip-${step.key}`)?.focus())
 }
-const changedLabels = computed(() => [...new Set(changes.value.map((one) => fieldLabel(one.field)))])
+
+// The muscles: tapping an area of the figure adds or removes its muscle group; full body is its own chip, since no area is it.
+const muscleLabel = (code: string) => domainLabel('muscle', code)
+const figures = computed(() => musclePickerFigures(form.muscles, { front: t('app.bodyFront'), back: t('app.bodyBack') }, muscleLabel))
+const musclesList = computed(() => form.muscles.map(muscleLabel).join(', '))
+const musclesSaid = computed(() => (form.muscles.length ? t('admin.musclesWorked', { list: musclesList.value }) : t('admin.musclesNone')))
+function pickArea(key: string) {
+  const group = groupOfArea(key)
+  if (!group || form.muscles.includes('full_body')) return
+  form.muscles = form.muscles.includes(group) ? form.muscles.filter((one) => one !== group) : [...form.muscles, group]
+}
+const fullBody = computed({
+  get: () => form.muscles.includes('full_body'),
+  set: (on: boolean) => (form.muscles = on ? ['full_body'] : []),
+})
 
 async function save() {
   saving.value = true
@@ -214,7 +234,6 @@ async function save() {
     apply(answer.saved)
     // A new exercise now has its own address.
     if (isNew.value) navigate(withParams(`/admin/catalog/${encodeURIComponent(answer.saved.exercise.slug)}`, { lang: language.value }, { lang: shippedLanguages[0] }), 'replace')
-    else changes.value = (await changedFields(answer.saved.exercise.slug)) ?? []
     return
   }
   reason.value = answer.reason ?? ''
@@ -234,112 +253,199 @@ watch(form, () => (saved.value = false), { deep: true })
     <CpErrorNote v-else-if="state === 'failed'">{{ t('admin.exerciseLoadFailed') }}</CpErrorNote>
     <p v-else-if="state === 'loading'" role="status">{{ t('admin.checking') }}</p>
     <template v-else>
-      <CpBreadcrumbs :label="t('admin.exerciseBreadcrumbs')">
-        <li><a href="/admin/catalog" @click.prevent="navigate('/admin/catalog')">{{ t('admin.catalogTitle') }}</a></li>
-        <li>{{ form.name[shippedLanguages[0]] || t('admin.exerciseNew') }}</li>
-      </CpBreadcrumbs>
-      <form class="flex flex-col gap-6" @submit.prevent="save">
-        <div class="flex flex-wrap items-start justify-between gap-4">
-          <div class="flex flex-col gap-2">
+      <div class="flex flex-col gap-4 bg-base-200 py-2" data-component="form-header">
+        <CpBreadcrumbs :label="t('admin.exerciseBreadcrumbs')">
+          <li><a href="/admin/catalog" @click.prevent="navigate('/admin/catalog')">{{ t('admin.catalogTitle') }}</a></li>
+          <li>{{ isNew ? t('admin.exerciseNew') : form.name[original] }}</li>
+        </CpBreadcrumbs>
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div class="flex flex-col gap-1">
             <h1 class="cp-type-display">{{ isNew ? t('admin.exerciseNew') : t('admin.exerciseEdit') }}</h1>
-            <div v-if="loaded" class="flex flex-wrap gap-2">
-              <CpBadge v-if="loaded.change === 'added'" :tone="contentTone">{{ t('admin.catalogContentNew') }}</CpBadge>
-              <CpBadge v-else-if="loaded.change === 'edited'" :tone="contentTone">{{ t('admin.catalogContentEdited') }}</CpBadge>
+            <p v-if="isNew" class="flex flex-wrap items-center gap-2">
+              <CpBadge>{{ t('admin.catalogContentNew') }}</CpBadge>
+              <span class="text-sm text-base-content/70">{{ t('admin.exerciseNotPublished') }}</span>
+            </p>
+            <p v-else-if="loaded" class="flex flex-wrap items-center gap-2">
+              <CpBadge :tone="loaded.exercise.retired ? 'neutral' : 'success'">{{ loaded.exercise.retired ? t(loaded.change === 'retired' ? 'admin.catalogLifeRetiring' : 'admin.catalogLifeRetired') : t('admin.exerciseOffered') }}</CpBadge>
+              <CpBadge v-if="loaded.change === 'added'">{{ t('admin.catalogContentNew') }}</CpBadge>
+              <CpBadge v-else-if="loaded.change === 'edited'" tone="neutral">{{ t('admin.catalogContentEdited') }}</CpBadge>
               <CpBadge v-else-if="loaded.change === 'offered'" tone="success">{{ t('admin.catalogContentOfferedAgain') }}</CpBadge>
-              <CpBadge :tone="loaded.exercise.retired ? 'neutral' : 'success'">{{ loaded.exercise.retired ? t(loaded.change === 'retired' ? 'admin.catalogLifeRetiring' : 'admin.catalogLifeRetired') : t('admin.catalogLifeActive') }}</CpBadge>
-            </div>
+            </p>
           </div>
           <div class="flex flex-wrap items-center gap-2">
-            <div class="flex gap-1" role="group" :aria-label="t('admin.exerciseLanguage')">
-              <CpChip v-for="code in shippedLanguages" :key="code" compact :model-value="code === language" @update:model-value="showLanguage(code)">
-                {{ code.toUpperCase() }}
-                <CircleExclamationPoint v-if="lacks(code)" class="size-3.5 shrink-0 text-error" aria-hidden="true" />
-              </CpChip>
-            </div>
-            <CpButton variant="outline" size="md" @click="navigate('/admin/catalog')">{{ t('admin.exerciseCancel') }}</CpButton>
-            <CpButton type="submit" size="md" :disabled="saving">{{ t('admin.exerciseSave') }}</CpButton>
+            <CpSegmentedControl v-model="shown" :label="t('admin.exerciseLanguage')" :options="languages" />
+            <CpButton variant="ghost" size="md" @click="navigate('/admin/catalog')">{{ t('admin.exerciseCancel') }}</CpButton>
+            <CpButton type="submit" form="exercise-form" size="md" :disabled="saving">{{ isNew ? t('admin.exerciseAdd') : t('admin.exerciseSave') }}</CpButton>
           </div>
         </div>
-        <CpSuccessNote v-if="saved">{{ t('admin.exerciseSaved') }}</CpSuccessNote>
-        <CpErrorNote v-if="failure === 'failed'">{{ t('admin.exerciseSaveFailed') }}</CpErrorNote>
-        <CpErrorNote v-if="failure === 'invalid'">{{ t('admin.exerciseInvalid', { reason }) }}</CpErrorNote>
-        <CpCard v-if="isNew || loaded" :title="loaded?.change === 'added' || isNew ? t('admin.stateNew') : changedLabels.length ? t('admin.stateDraft') : t('admin.statePublished')">
-          <template v-if="!isNew && loaded?.change !== 'added' && changedLabels.length">
-            <p class="text-sm text-base-content/70">{{ t('admin.stateDraftHint') }}</p>
-            <ul class="flex flex-wrap gap-2"><li v-for="label in changedLabels" :key="label"><CpBadge tone="neutral">{{ label }}</CpBadge></li></ul>
-          </template>
-        </CpCard>
-        <div class="grid items-start gap-6 lg:grid-cols-3">
-          <div class="flex flex-col gap-6 lg:col-span-2">
-            <CpCard :title="t('admin.exerciseInfo')">
-              <div class="grid gap-4 sm:grid-cols-2">
-                <CpTextField v-model="form.name[language]" :label="t('admin.fieldName')" autocomplete="off">
-                  <template #status><CpBadge v-if="status(form.name)" :tone="status(form.name)!.tone" class="w-fit">{{ status(form.name)!.text }}</CpBadge></template>
-                </CpTextField>
-                <CpTextField v-model="form.slug" :label="t('admin.fieldSlug')" autocomplete="off" :disabled="locked" :error="failure === 'slug-taken' ? t('admin.exerciseSlugTaken') : undefined" :hint="locked ? t('admin.slugLocked') : t('admin.slugHint')" @input="slugTouched = true" />
-              </div>
-            </CpCard>
-            <CpCard :title="t('admin.exerciseSteps')" :description="t('admin.stepsHint')">
-              <ol class="flex flex-col gap-4">
-                <li v-for="(step, at) in form.steps" :key="at" class="flex items-start gap-2">
-                  <div class="grow">
-                    <CpTextarea v-model="step[language]" :label="t('admin.stepN', { n: String(at + 1) })">
-                      <template #status><CpBadge v-if="status(step)" :tone="status(step)!.tone" class="w-fit">{{ status(step)!.text }}</CpBadge></template>
+        <p v-if="translating" class="text-sm text-base-content/70">{{ inLanguage('admin.exerciseEditingLanguage') }}</p>
+      </div>
+      <CpSuccessNote v-if="saved">{{ t('admin.exerciseSaved') }}</CpSuccessNote>
+      <CpErrorNote v-if="failure === 'failed'">{{ t('admin.exerciseSaveFailed') }}</CpErrorNote>
+      <CpErrorNote v-if="failure === 'invalid'">{{ t('admin.exerciseInvalid', { reason }) }}</CpErrorNote>
+      <CpErrorNote v-if="failure === 'slug-taken'">{{ t('admin.exerciseSlugTakenNote') }}</CpErrorNote>
+      <form id="exercise-form" class="grid items-start gap-6 lg:flex" @submit.prevent="save">
+        <div class="contents lg:flex lg:min-w-0 lg:flex-1 lg:flex-col lg:gap-6" data-component="main-column">
+          <CpCard :title="t('admin.exerciseInfo')" class="order-1 lg:order-none">
+            <div class="grid items-start gap-4 sm:grid-cols-2">
+              <CpTextField
+                v-model="form.name[language]"
+                :label="translating ? inLanguage('admin.fieldNameIn') : t('admin.fieldName')"
+                :placeholder="translating ? t('admin.neededBeforePublishing') : undefined"
+                :hint="translating ? originalOf(form.name) : undefined"
+                :invalid="translating && !form.name[language]?.trim()"
+                autocomplete="off"
+              >
+                <template v-if="!translating" #status>
+                  <p class="cp-label flex flex-wrap gap-1 whitespace-normal"><CpBadge v-for="one in statuses(form.name, 'name')" :key="one.text" :tone="one.tone" small>{{ one.text }}</CpBadge></p>
+                </template>
+              </CpTextField>
+              <CpTextField
+                v-model="form.slug"
+                :label="t('admin.fieldSlug')"
+                autocomplete="off"
+                :disabled="locked"
+                :error="failure === 'slug-taken' ? t('admin.exerciseSlugTaken') : undefined"
+                :hint="locked ? t('admin.slugLocked') : t('admin.slugHint')"
+                @input="slugTouched = true"
+              >
+                <template v-if="locked" #icon><Lock class="size-5 shrink-0" aria-hidden="true" /></template>
+              </CpTextField>
+            </div>
+            <div class="cp-divider my-0" role="separator"></div>
+            <div class="flex flex-col gap-1">
+              <h2 class="cp-card-title">{{ t('admin.exerciseSteps') }}</h2>
+              <p class="text-sm text-base-content/70">{{ t('admin.stepsHint') }}</p>
+            </div>
+            <ol class="flex flex-col gap-3">
+              <template v-for="(step, at) in form.steps" :key="step.key">
+                <div v-if="at" class="cp-divider my-0" role="separator"></div>
+                <li class="flex items-start gap-3" data-component="step" @dragover.prevent @drop.prevent="moveStep(dragged, at)">
+                  <span class="cp-badge cp-badge-primary cp-badge-soft shrink-0">{{ at + 1 }}</span>
+                  <div class="min-w-0 grow">
+                    <CpTextarea
+                      v-model="step.text[language]"
+                      :label="translating ? t('admin.stepIn', { n: String(at + 1), language: languageName(language) }) : t('admin.stepN', { n: String(at + 1) })"
+                      :placeholder="translating ? t('admin.neededBeforePublishing') : undefined"
+                      :hint="translating ? originalOf(step.text) : undefined"
+                    >
+                      <template v-if="!translating" #status>
+                        <p class="cp-label flex flex-wrap gap-1 whitespace-normal"><CpBadge v-for="one in statuses(step.text, 'step')" :key="one.text" :tone="one.tone" small>{{ one.text }}</CpBadge></p>
+                      </template>
                     </CpTextarea>
                   </div>
-                  <button type="button" class="cp-btn cp-btn-ghost cp-btn-square cp-btn-sm mt-6" :aria-label="t('admin.stepRemove', { n: String(at + 1) })" @click="removeStep(at)"><X class="size-4" aria-hidden="true" /></button>
+                  <div class="flex shrink-0 flex-col">
+                    <button
+                      :id="`step-grip-${step.key}`"
+                      type="button"
+                      class="cp-btn cp-btn-circle cp-btn-ghost cp-btn-sm cursor-grab"
+                      :aria-label="t('admin.stepMove', { n: String(at + 1) })"
+                      :disabled="form.steps.length < 2"
+                      draggable="true"
+                      @dragstart="dragged = at"
+                      @dragend="dragged = undefined"
+                      @keydown.up.prevent="moveStep(at, at - 1)"
+                      @keydown.down.prevent="moveStep(at, at + 1)"
+                    >
+                      <GripVertical class="size-4 shrink-0" aria-hidden="true" />
+                    </button>
+                    <button type="button" class="cp-btn cp-btn-circle cp-btn-ghost cp-btn-sm" :aria-label="t('admin.stepRemove', { n: String(at + 1) })" @click="removeStep(at)">
+                      <X class="size-4 shrink-0" aria-hidden="true" />
+                    </button>
+                  </div>
                 </li>
-              </ol>
-              <div><CpButton variant="outline" size="md" class="gap-2" @click="addStep"><Plus class="size-4" aria-hidden="true" />{{ t('admin.stepAdd') }}</CpButton></div>
-              <CpTextField v-model="form.note[language]" :label="t('admin.variationNote')" autocomplete="off">
-                <template #status><CpBadge v-if="status(form.note, true)" :tone="status(form.note, true)!.tone" class="w-fit">{{ status(form.note, true)!.text }}</CpBadge></template>
-              </CpTextField>
-            </CpCard>
-            <CpCard :title="t('admin.exerciseEquipment')">
-              <p v-if="!form.needs.length" class="text-sm text-base-content/70">{{ t('admin.equipmentNone') }}</p>
-              <div v-for="(need, at) in form.needs" :key="at" class="flex items-start gap-2">
-                <div class="flex grow flex-col gap-2">
-                  <CpMultiSelectField v-model="form.needs[at]" :label="t('admin.equipmentNeed')" :placeholder="t('admin.filterEquipmentPlaceholder')" :options="equipmentOptions" :none-label="t('admin.filterNoMatch')" />
-                  <p class="text-sm text-base-content/70">{{ group('equipment', need) || t('admin.equipmentNeedHint') }}</p>
+              </template>
+            </ol>
+            <div><CpButton variant="outline" size="md" class="cp-btn-sm gap-2" @click="addStep"><Plus class="size-4 shrink-0" aria-hidden="true" />{{ t('admin.stepAdd') }}</CpButton></div>
+          </CpCard>
+          <CpCard class="order-5 lg:order-none">
+            <div class="grid gap-6 md:grid-cols-2">
+              <div class="flex min-w-0 flex-col gap-4">
+                <h2 class="cp-card-title">{{ t('admin.exerciseEquipment') }}</h2>
+                <h3 class="cp-type-label">{{ t('admin.equipmentRequired') }}</h3>
+                <CpChipSelectField
+                  v-for="(_, at) in form.needs"
+                  :key="at"
+                  v-model="form.needs[at]"
+                  :aria-label="t('admin.equipmentRequiredAria')"
+                  :hint="t('admin.equipmentRequiredHint')"
+                  :placeholder="t('admin.equipmentPlaceholder')"
+                  :options="equipmentOptions"
+                  :none-label="t('admin.filterNoMatch')"
+                  :remove-label="removeLabel"
+                />
+                <h3 class="cp-type-label">{{ t('admin.equipmentOptional') }}</h3>
+                <CpChipSelectField
+                  v-model="form.optional"
+                  :aria-label="t('admin.equipmentOptionalAria')"
+                  :hint="t('admin.equipmentOptionalHint')"
+                  :placeholder="t('admin.equipmentPlaceholder')"
+                  :options="equipmentOptions"
+                  :none-label="t('admin.filterNoMatch')"
+                  :remove-label="removeLabel"
+                />
+              </div>
+              <div class="flex min-w-0 flex-col gap-4">
+                <h2 class="cp-card-title">{{ t('admin.exerciseClassification') }}</h2>
+                <div class="grid gap-3 sm:grid-cols-2">
+                  <CpSelectField v-model="form.pattern" :label="t('admin.filterPattern')" :options="patternOptions" />
+                  <CpSelectField v-model="form.measurement" :label="t('admin.fieldMeasurement')" :options="measurementOptions" />
                 </div>
-                <button type="button" class="cp-btn cp-btn-ghost cp-btn-square cp-btn-sm" :aria-label="t('admin.equipmentRemove', { n: String(at + 1) })" @click="removeNeed(at)"><X class="size-4" aria-hidden="true" /></button>
+                <CpChipSelectField
+                  v-model="form.positions"
+                  :label="t('admin.fieldPosition')"
+                  :options="positionOptions"
+                  :none-label="t('admin.filterNoMatch')"
+                  :remove-label="removeLabel"
+                />
               </div>
-              <div><CpButton variant="outline" size="md" class="gap-2" @click="addNeed"><Plus class="size-4" aria-hidden="true" />{{ t('admin.equipmentAdd') }}</CpButton></div>
-              <div class="flex flex-col gap-2">
-                <CpMultiSelectField v-model="form.optional" :label="t('admin.equipmentOptional')" :placeholder="t('admin.filterEquipmentPlaceholder')" :options="equipmentOptions" :none-label="t('admin.filterNoMatch')" />
-                <p class="text-sm text-base-content/70">{{ group('equipment', form.optional) || t('admin.equipmentOptionalHint') }}</p>
-              </div>
-            </CpCard>
-          </div>
-          <div class="flex flex-col gap-6">
-            <CpCard :title="t('admin.exerciseClassification')">
-              <CpSelectField v-model="form.pattern" :label="t('admin.filterPattern')" :options="patternOptions" />
-              <CpSelectField v-model="form.measurement" :label="t('admin.fieldMeasurement')" :options="measurementOptions" />
-              <div class="flex flex-col gap-2">
-                <CpMultiSelectField v-model="form.positions" :label="t('admin.filterPositions')" :placeholder="t('admin.filterPositionsPlaceholder')" :options="positionOptions" :none-label="t('admin.filterNoMatch')" />
-                <p v-if="form.positions.length" class="text-sm text-base-content/70">{{ group('position', form.positions) }}</p>
-              </div>
-            </CpCard>
-            <CpCard :title="t('admin.exerciseMuscles')">
-              <div class="flex flex-col gap-2">
-                <CpMultiSelectField v-model="form.muscles" :label="t('admin.filterMuscles')" :placeholder="t('admin.filterMusclesPlaceholder')" :options="muscleOptions" :none-label="t('admin.filterNoMatch')" />
-                <p v-if="form.muscles.length" class="text-sm text-base-content/70">{{ group('muscle', form.muscles) }}</p>
-              </div>
-            </CpCard>
-            <CpCard :title="t('admin.exerciseAdditional')">
-              <div class="flex flex-col gap-2">
-                <CpMultiSelectField v-model="form.focus" :label="t('admin.fieldFocus')" :placeholder="t('admin.filterFocusPlaceholder')" :options="focusOptions" :none-label="t('admin.filterNoMatch')" />
-                <p v-if="form.focus.length" class="text-sm text-base-content/70">{{ group('focus', form.focus) }}</p>
-              </div>
+            </div>
+          </CpCard>
+        </div>
+        <div class="contents lg:flex lg:w-full lg:max-w-md lg:flex-col lg:gap-6" data-component="side-column">
+          <CpCard :title="t('admin.exerciseVariations')" class="order-3 lg:order-none">
+            <CpTextField
+              v-model="form.note[language]"
+              :label="t('admin.variationNote')"
+              :hint="translating ? originalOf(form.note) : undefined"
+              autocomplete="off"
+            >
+              <template v-if="!translating" #status>
+                <p class="cp-label flex flex-wrap gap-1 whitespace-normal"><CpBadge v-for="one in statuses(form.note, 'note')" :key="one.text" :tone="one.tone" small>{{ one.text }}</CpBadge></p>
+              </template>
+            </CpTextField>
+          </CpCard>
+          <CpCard :title="t('admin.exerciseMuscles')" :description="t('admin.musclesHint')" class="order-4 lg:order-none">
+            <CpBodyMap :figures="figures" :description="musclesSaid" interactive @pick="pickArea" />
+            <div class="flex flex-wrap items-center justify-center gap-3">
+              <CpChip v-model="fullBody" compact>{{ muscleLabel('full_body') }}</CpChip>
+            </div>
+            <p class="text-sm text-base-content/70">{{ musclesSaid }}</p>
+            <h3 class="cp-card-title">{{ t('admin.exerciseAdditional') }}</h3>
+            <div class="flex flex-col gap-3 py-2">
+              <CpChipSelectField v-model="form.focus" :label="t('admin.fieldFocus')" :options="focusOptions" :none-label="t('admin.filterNoMatch')" :remove-label="removeLabel" />
               <div class="flex flex-wrap gap-2">
-                <CpChip v-model="form.perSide">{{ t('admin.attrEachSide') }}</CpChip>
-                <CpChip v-model="form.jumps">{{ t('admin.attrJumps') }}</CpChip>
+                <CpChip v-model="form.perSide" compact>{{ t('admin.attrEachSide') }}</CpChip>
+                <CpChip v-model="form.jumps" compact>{{ t('admin.attrJumps') }}</CpChip>
               </div>
-              <CpTextField v-model="form.aliases[language]" :label="t('admin.fieldAliases')" autocomplete="off" :hint="t('admin.aliasesHint')" />
-            </CpCard>
-          </div>
+              <CpTextField
+                v-model="form.aliases[language]"
+                :label="translating ? inLanguage('admin.fieldAliasesIn') : t('admin.fieldAliases')"
+                :hint="translating ? originalOf(form.aliases) : t('admin.aliasesHint')"
+                autocomplete="off"
+              >
+                <template v-if="!translating" #status>
+                  <p class="cp-label flex flex-wrap gap-1 whitespace-normal"><CpBadge v-for="one in statuses(form.aliases, 'aliases')" :key="one.text" :tone="one.tone" small>{{ one.text }}</CpBadge></p>
+                </template>
+              </CpTextField>
+            </div>
+          </CpCard>
         </div>
       </form>
+      <div class="flex flex-wrap justify-end gap-2 lg:hidden" data-component="form-actions">
+        <CpButton variant="ghost" size="md" @click="navigate('/admin/catalog')">{{ t('admin.exerciseCancel') }}</CpButton>
+        <CpButton type="submit" form="exercise-form" size="md" :disabled="saving">{{ isNew ? t('admin.exerciseAdd') : t('admin.exerciseSave') }}</CpButton>
+      </div>
     </template>
   </main>
 </template>

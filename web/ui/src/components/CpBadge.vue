@@ -3,7 +3,8 @@
 // system or quiet ones, outline for a state that stays plain, success for a state that is fine, error
 // for what went wrong (crimson, with its alert icon drawn in). Never ember, and not DaisyUI's warning.
 import { CircleExclamationPoint } from '@lucide/vue'
-withDefaults(defineProps<{ tone?: 'primary' | 'neutral' | 'outline' | 'success' | 'error' }>(), { tone: 'primary' })
+// `small` is the badge under a field, such as where its translation stands: smaller, and an error draws no icon.
+withDefaults(defineProps<{ tone?: 'primary' | 'neutral' | 'outline' | 'success' | 'error'; small?: boolean }>(), { tone: 'primary' })
 
 const classes = {
   primary: 'cp-badge-primary cp-badge-soft',
@@ -15,8 +16,8 @@ const classes = {
 </script>
 
 <template>
-  <span class="cp-badge whitespace-nowrap" :class="classes[tone]" data-component="badge">
-    <CircleExclamationPoint v-if="tone === 'error'" class="size-3 shrink-0" aria-hidden="true" />
+  <span class="cp-badge whitespace-nowrap" :class="[classes[tone], { 'cp-badge-sm': small }]" data-component="badge">
+    <CircleExclamationPoint v-if="tone === 'error' && !small" class="size-3 shrink-0" aria-hidden="true" />
     <slot />
   </span>
 </template>

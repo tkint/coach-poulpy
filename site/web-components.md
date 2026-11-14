@@ -10,7 +10,7 @@ The landing site, the web app, the web mockups and this site draw with one packa
 
 ## Button
 
-Primary, tonal, outline, grumpy and danger (crimson, for a deletion that can't be undone): `CpButton`. The large size is the default; `size="md"` drops `cp-btn-xl` for the actions of a card.
+Primary, tonal, outline, ghost (a quieter cancel beside a save), grumpy and danger (crimson, for a deletion that can't be undone): `CpButton`. The large size is the default; `size="md"` drops `cp-btn-xl` for the actions of a card.
 
 <WebComponentSamples part="button" />
 
@@ -19,6 +19,7 @@ Primary, tonal, outline, grumpy and danger (crimson, for a deletion that can't b
 | `<CpButton>` | `cp-btn cp-btn-xl cp-btn-primary` |
 | `<CpButton variant="tonal">` | `cp-btn cp-btn-xl cp-btn-secondary` |
 | `<CpButton variant="outline">` | `cp-btn cp-btn-xl cp-btn-outline` |
+| `<CpButton variant="ghost">` | `cp-btn cp-btn-xl cp-btn-ghost` |
 | `<CpButton variant="grumpy">` | `cp-btn cp-btn-xl cp-btn-accent` |
 | `<CpButton variant="danger">` | `cp-btn cp-btn-xl cp-btn-error` |
 | `<CpButton size="md">` | the same without `cp-btn-xl` |
@@ -73,6 +74,26 @@ Primary, tonal, outline, grumpy and danger (crimson, for a deletion that can't b
 | --- | --- |
 | `<CpMultiSelectField>` | `details` with a `summary.cp-btn.cp-btn-sm.cp-btn-outline` and a `cp-card` panel of `input.cp-input.cp-input-sm` and a list of `cp-checkbox cp-checkbox-sm` |
 
+## Chip select field
+
+`CpChipSelectField`: any number of values in a form. The picked ones sit in the field as removable badges; typing narrows the list its panel shows while it is used, and a picked value is checked there. Clicking a value again, its badge's cross or Backspace in an empty field takes it out; Enter picks the first match (so it never sends the form); Escape or a click elsewhere closes the panel. `aria-label` names a field whose label is written beside it, such as a heading above.
+
+<WebComponentSamples part="chip-select-field" />
+
+| Vue | Classes |
+| --- | --- |
+| `<CpChipSelectField>` | `div.cp-fieldset` around a `label.cp-type-label`, a `label.cp-input` holding `span.cp-badge.cp-badge-neutral.cp-badge-soft` badges (each with a `cp-btn cp-btn-circle cp-btn-ghost cp-btn-xs` cross), the `input[role=combobox]` and a chevron, a `cp-card` `ul[role=listbox]` of option `button`s (as the select field's) and an optional `p.cp-label` hint |
+
+## Segmented control
+
+`CpSegmentedControl`: a few values side by side, one of them on, such as the language an exercise's text is written in. An option can be flagged with a crimson alert icon, read aloud as its `flagLabel`, such as a language some text still lacks.
+
+<WebComponentSamples part="segmented-control" />
+
+| Vue | Classes |
+| --- | --- |
+| `<CpSegmentedControl>` | `div.cp-join[role=group]` of `button.cp-join-item.cp-btn.cp-btn-sm` (`cp-btn-active` for the picked one, `aria-current`), with the alert icon (`svg.size-4.text-error`) after a flagged option's text |
+
 ## Dropdown menu
 
 `CpDropdownMenu`: a button that opens a short menu of actions only while it is used. Choosing an entry, Escape or a click elsewhere closes it.
@@ -105,7 +126,9 @@ All the dropdowns (select, multi-select, menu) share the closing rule of `web/ui
 | --- | --- |
 | `<CpTextField>` | `div.cp-fieldset` around a `label.cp-type-label` and `label.cp-input` (`cp-input-error` in error) holding the `input`; `type="search"` (with `autocomplete="off"`) is for searches and adds a search icon in the `label.cp-input`, at the height of the other fields |
 | `<CpTextField hint>` | adds `p.cp-label.whitespace-normal` under the field, named by the input's `aria-describedby` |
-| `<CpTextField error>` | `cp-input-error`, `aria-invalid`, and `p.cp-label.whitespace-normal.text-error` with `role="alert"` in the hint's place |
+| `<CpTextField error>` | `cp-input-error`, `aria-invalid`, and `p.cp-label.flex.items-center.gap-1.whitespace-normal.text-error` with `role="alert"` and the alert icon (`svg.size-4`), in the hint's place |
+| `<CpTextField placeholder>` | a placeholder, such as "Needed before publishing" in a translation still to write |
+| `<CpTextField>` with `#icon` | an icon before the text inside `label.cp-input`, such as a lock on a slug that can't change |
 | `<CpTextField disabled>` | a field that can't be changed, such as a slug locked once its exercise is published |
 | `<CpTextField>` with `#status` | a slot under the hint for a badge, such as a field's translation status |
 
@@ -183,6 +206,7 @@ All the dropdowns (select, multi-select, menu) share the closing rule of `web/ui
 | `<CpBadge tone="outline">` | `cp-badge cp-badge-outline` |
 | `<CpBadge tone="success">` | `cp-badge cp-badge-success cp-badge-soft` |
 | `<CpBadge tone="error">` | `cp-badge cp-badge-error cp-badge-soft gap-1` with the alert icon (`svg.size-3`) before the words |
+| `<CpBadge small>` | adds `cp-badge-sm`, for the badge under a field that says where its translation stands; an error draws no icon |
 
 ## Avatar
 
@@ -270,7 +294,12 @@ Sortable columns put a `cp-btn cp-btn-ghost cp-btn-sm` in the header cell, with 
 
 | Vue | Classes |
 | --- | --- |
-| `<CpBodyMap>` | `div.cp-body-map` (`role="img"`) around a `figure.cp-body-view` per side, each with an `svg.cp-body-figure` of `path.cp-body-part` (`data-heat` 1 to 3) and `path.cp-body-outline`, then `p.cp-heat-legend` |
+| `<CpBodyMap>` | `div.cp-body-map` (`role="img"`) around a `figure.cp-body-view` per side, each with an `svg.cp-body-figure` of `path.cp-body-part` (`data-heat` 1 to 3) and `path.cp-body-outline`, then `p.cp-heat-legend` (left out when `less` and `more` are) |
+| `<CpBodyMap interactive>` | `role="group"`; an area with a `key` and a `label` is a `path.cp-body-part.cp-body-part-pick[role=button]` (`aria-pressed` says whether it is lit) and says its key with `pick`, so the picture is a field: the screen writes its own legend, or none |
+
+An interactive map, here lighting an area when it is tapped:
+
+<WebComponentSamples part="body-map-picker" />
 
 ## Breadcrumbs
 

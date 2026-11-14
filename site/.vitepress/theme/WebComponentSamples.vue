@@ -1,8 +1,8 @@
 <script setup lang="ts">
 // One of the websites' real components from web/ui (ADR 0023), in the theme the page's switch chose. The panel
 // pins it with a cp-theme-* class from tokens.css, and data-theme="poulpy" so DaisyUI reads the panel's colours. The embed build adds no page-wide rule, so the site keeps its look.
-import { ref } from 'vue'
-import { EllipsisVertical } from '@lucide/vue'
+import { computed, ref } from 'vue'
+import { EllipsisVertical, Lock } from '@lucide/vue'
 import { useSampleTheme } from './useSampleTheme'
 import '../../../web/ui/src/tokens.css'
 import '../../../web/ui/poulpy-ui-embed.css'
@@ -22,6 +22,7 @@ import {
   CpTable,
   CpButton,
   CpChip,
+  CpChipSelectField,
   CpCheckbox,
   CpErrorNote,
   CpDropdownMenu,
@@ -29,6 +30,7 @@ import {
   CpPagination,
   CpPoulpyCard,
   CpSearchField,
+  CpSegmentedControl,
   CpSelectField,
   CpSheet,
   CpSidePanel,
@@ -37,7 +39,7 @@ import {
   CpTextarea,
 } from '../../../web/ui/src/index'
 
-defineProps<{ part: 'badge' | 'body-map' | 'breadcrumbs' | 'avatar' | 'card' | 'table' | 'stats' | 'nav-menu' | 'button' | 'chip' | 'search-field' | 'stepper' | 'select-field' | 'dropdown-menu' | 'multi-select-field' | 'checkbox' | 'text-field' | 'textarea' | 'password-field' | 'poulpy-card' | 'error' | 'sheet' | 'pagination' | 'side-panel' }>()
+defineProps<{ part: 'badge' | 'body-map' | 'breadcrumbs' | 'avatar' | 'card' | 'table' | 'stats' | 'nav-menu' | 'button' | 'chip' | 'search-field' | 'stepper' | 'select-field' | 'dropdown-menu' | 'multi-select-field' | 'body-map-picker' | 'chip-select-field' | 'segmented-control' | 'checkbox' | 'text-field' | 'textarea' | 'password-field' | 'poulpy-card' | 'error' | 'sheet' | 'pagination' | 'side-panel' }>()
 const { mode } = useSampleTheme()
 // A stand-in figure: the real ones are the generated body map shapes.
 const sampleFigures = [
@@ -55,6 +57,26 @@ const muscleOptions = [
   { value: 'glutes', text: 'Glutes' },
   { value: 'calves', text: 'Calves' },
 ]
+const equipmentPicked = ref(['dumbbell', 'kettlebell'])
+const equipmentOptions = [
+  { value: 'dumbbell', text: 'Dumbbells' },
+  { value: 'kettlebell', text: 'Kettlebell' },
+  { value: 'band', text: 'Band' },
+  { value: 'mat', text: 'Mat' },
+]
+const language = ref('en')
+const languages = [
+  { value: 'en', text: 'EN' },
+  { value: 'fr', text: 'FR', flagged: true, flagLabel: 'Some text is missing in French' },
+]
+const pickedArea = ref(['quadriceps'])
+const pickableFigures = computed(() =>
+  sampleFigures.map((figure) => ({
+    ...figure,
+    paths: figure.paths.map((path, i) => (path.outline ? path : { ...path, key: `${figure.caption}${i}`, label: `Area ${i}`, heat: pickedArea.value.includes(`${figure.caption}${i}`) ? (3 as const) : undefined })),
+  })),
+)
+const togglePicked = (key: string) => (pickedArea.value = pickedArea.value.includes(key) ? pickedArea.value.filter((one) => one !== key) : [...pickedArea.value, key])
 const ticked = ref(true)
 const sheet = ref(false)
 const page = ref(2)
@@ -77,6 +99,7 @@ const formats = [
         <CpButton variant="primary">Start session</CpButton>
         <CpButton variant="tonal">Edit</CpButton>
         <CpButton variant="outline">Cancel</CpButton>
+        <CpButton variant="ghost" size="md">Cancel</CpButton>
         <CpButton variant="grumpy">Catch up</CpButton>
         <CpButton variant="danger">Delete</CpButton>
         <CpButton variant="outline" size="md">Disable</CpButton>
@@ -87,6 +110,8 @@ const formats = [
         <CpBadge tone="outline">Disabled account</CpBadge>
         <CpBadge tone="success">Active</CpBadge>
         <CpBadge tone="error">Send failed</CpBadge>
+        <CpBadge tone="success" small>French · translated</CpBadge>
+        <CpBadge tone="error" small>French · missing</CpBadge>
       </div>
       <div v-else-if="part === 'avatar'" class="row">
         <CpAvatar initials="A" />
@@ -119,6 +144,13 @@ const formats = [
         <li>Upper body</li>
       </CpBreadcrumbs>
       <CpBodyMap v-else-if="part === 'body-map'" :figures="sampleFigures" description="Muscles worked: chest most, then legs a little" less="Less" more="More" />
+      <CpBodyMap v-else-if="part === 'body-map-picker'" :figures="pickableFigures" description="Pick the muscles worked" interactive @pick="togglePicked" />
+      <div v-else-if="part === 'chip-select-field'" class="flex max-w-80 flex-col gap-4">
+        <CpChipSelectField v-model="equipmentPicked" label="Equipment" hint="Any of these" placeholder="Select equipment" :options="equipmentOptions" none-label="Nothing matches" :remove-label="(text) => `Remove ${text}`" />
+      </div>
+      <div v-else-if="part === 'segmented-control'" class="row">
+        <CpSegmentedControl v-model="language" label="Language of the text" :options="languages" />
+      </div>
       <CpStats v-else-if="part === 'stats'">
         <CpStat title="Changes this week" value="12" description="Since Monday" accent />
         <CpStat title="Admins" value="1" description="Ana" />
@@ -157,6 +189,8 @@ const formats = [
         <CpTextField v-model="email" label="Email" type="email" autocomplete="username" />
         <CpTextField v-model="sender" label="From address" type="email" autocomplete="off" hint="The address emails come from." />
         <CpTextField model-value="hello@" label="From address" type="email" autocomplete="off" error="This is not an email address. Use the form name@example.com." />
+        <CpTextField model-value="goblet-squat" label="Slug" autocomplete="off" disabled hint="Permanent identifier used by existing workouts."><template #icon><Lock class="size-5 shrink-0" aria-hidden="true" /></template></CpTextField>
+        <CpTextField model-value="" label="Name in French" autocomplete="off" placeholder="Needed before publishing" hint="English original: Goblet squat" />
       </div>
       <div v-else-if="part === 'textarea'" class="row">
         <CpTextarea v-model="stepText" label="Step 1" hint="One instruction per step. The field grows as you write." :rows="2" />
