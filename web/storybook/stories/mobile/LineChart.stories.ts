@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 
 const meta = {
   title: 'Mobile/Components/Line chart',
-  parameters: { docs: { description: { component: 'The line chart, drawn on the shared tokens with the isolated mobile stylesheet. Its shape and notes are in the design system tables. Light and dark follow the theme toolbar.' } } },
+  parameters: { docs: { canvas: { sourceState: 'none' }, description: { component: 'The line chart, drawn on the shared tokens with the isolated mobile stylesheet. Its shape and notes are in the design system tables. Light and dark follow the theme toolbar.' } } },
 } satisfies Meta
 export default meta
 type Story = StoryObj

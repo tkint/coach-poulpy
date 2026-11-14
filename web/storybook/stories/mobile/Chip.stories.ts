@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 
 const meta = {
   title: 'Mobile/Components/Chip',
-  parameters: { docs: { description: { component: 'Filters, with `aria-pressed`. On is `primary`, off is a 1.5 px `outline`.' } } },
+  parameters: { docs: { canvas: { sourceState: 'none' }, description: { component: 'Filters, with `aria-pressed`. On is `primary`, off is a 1.5 px `outline`.' } } },
 } satisfies Meta
 export default meta
 type Story = StoryObj

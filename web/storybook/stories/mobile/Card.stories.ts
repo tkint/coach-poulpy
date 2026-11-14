@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 
 const meta = {
   title: 'Mobile/Components/Card',
-  parameters: { docs: { description: { component: 'A row with a pattern badge: the exercise and workout lists are made of these.' } } },
+  parameters: { docs: { canvas: { sourceState: 'none' }, description: { component: 'A row with a pattern badge: the exercise and workout lists are made of these.' } } },
 } satisfies Meta
 export default meta
 type Story = StoryObj

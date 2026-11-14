@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 
 const meta = {
   title: 'Mobile/Components/Stepper',
-  parameters: { docs: { description: { component: 'Sets, reps, load and rest.' } } },
+  parameters: { docs: { canvas: { sourceState: 'none' }, description: { component: 'Sets, reps, load and rest.' } } },
 } satisfies Meta
 export default meta
 type Story = StoryObj

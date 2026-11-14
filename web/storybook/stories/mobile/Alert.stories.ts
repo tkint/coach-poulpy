@@ -3,7 +3,7 @@ import { CircleExclamationPoint } from '@lucide/vue'
 
 const meta = {
   title: 'Mobile/Components/Alert',
-  parameters: { docs: { description: { component: 'The error banner: `error` tint, an icon and text, never ember.' } } },
+  parameters: { docs: { canvas: { sourceState: 'none' }, description: { component: 'The error banner: `error` tint, an icon and text, never ember.' } } },
 } satisfies Meta
 export default meta
 type Story = StoryObj

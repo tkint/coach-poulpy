@@ -3,7 +3,7 @@ import { ChevronRight } from '@lucide/vue'
 
 const meta = {
   title: 'Mobile/Components/Select field',
-  parameters: { docs: { description: { component: 'The select field, drawn on the shared tokens with the isolated mobile stylesheet. Its shape and notes are in the design system tables. Light and dark follow the theme toolbar.' } } },
+  parameters: { docs: { canvas: { sourceState: 'none' }, description: { component: 'The select field, drawn on the shared tokens with the isolated mobile stylesheet. Its shape and notes are in the design system tables. Light and dark follow the theme toolbar.' } } },
 } satisfies Meta
 export default meta
 type Story = StoryObj

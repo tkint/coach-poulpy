@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 
 const meta = {
   title: 'Mobile/Components/Button',
-  parameters: { docs: { description: { component: 'The four button shapes. One primary button per screen; the grumpy button is only the catch-up action.' } } },
+  parameters: { docs: { canvas: { sourceState: 'none' }, description: { component: 'The four button shapes. One primary button per screen; the grumpy button is only the catch-up action.' } } },
 } satisfies Meta
 export default meta
 type Story = StoryObj
