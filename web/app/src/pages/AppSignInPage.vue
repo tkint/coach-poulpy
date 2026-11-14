@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// The web app's sign-in (design/mockups/agreed/web/app-sign-in.html): any account may sign in. The
+// The web app's sign-in (the stories Web/Screens/App/Sign in): any account may sign in. The
 // cookies the server sets are the session; this page only says whether it worked.
 import { ref } from 'vue'
 import { CpButton, CpErrorNote, CpPasswordField, CpTextField } from '@coach-poulpy/ui'

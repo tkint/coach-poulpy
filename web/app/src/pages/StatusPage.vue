@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// The public status, /status (design/mockups/agreed/web/app-status.html and app-status-down.html, #340): up or down,
+// The public status, /status (the stories Web/Screens/App/Status, #340): up or down,
 // nothing about how the server is configured. A server that can't be reached is down too.
 import { onMounted, ref } from 'vue'
 import { CpErrorNote, CpSuccessNote } from '@coach-poulpy/ui'
