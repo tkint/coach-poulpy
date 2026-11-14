@@ -55,13 +55,13 @@ Primary, tonal, outline, grumpy and danger (crimson, for a deletion that can't b
 
 ## Select field
 
-`CpSelectField`. With `compact` it is one control of a filter bar: its label is hidden (still read aloud, and its first option usually says it too) and it is only as wide as its longest option.
+`CpSelectField`: one value from a list. A button shows the current value and opens its panel only while it is used; the options look like the multi-select field's, without the checkboxes, and the chosen one is bold with a check. Choosing an option, Escape or a click elsewhere closes the panel. With `compact` it is one control of a filter bar: its label is hidden (still read aloud, and its first option usually says it too) and it is only as wide as its longest option.
 
 <WebComponentSamples part="select-field" />
 
 | Vue | Classes |
 | --- | --- |
-| `<CpSelectField>` | `label.cp-fieldset`, a `span.cp-type-label` and `select.cp-select`; `cp-select-sm w-auto` and a `sr-only` label with `compact` |
+| `<CpSelectField>` | `div.cp-fieldset`, a `span.cp-type-label` and a `details` with a `summary.cp-btn.cp-btn-outline` and a `cp-card` `ul[role=listbox]` of option `button`s (`flex w-full items-center gap-3 rounded-field px-2 py-1 hover:bg-base-200`); `cp-btn-sm w-auto` and a `sr-only` label with `compact` |
 
 ## Multi-select field
 
@@ -72,6 +72,18 @@ Primary, tonal, outline, grumpy and danger (crimson, for a deletion that can't b
 | Vue | Classes |
 | --- | --- |
 | `<CpMultiSelectField>` | `details` with a `summary.cp-btn.cp-btn-sm.cp-btn-outline` and a `cp-card` panel of `input.cp-input.cp-input-sm` and a list of `cp-checkbox cp-checkbox-sm` |
+
+## Dropdown menu
+
+`CpDropdownMenu`: a button that opens a short menu of actions only while it is used. Choosing an entry, Escape or a click elsewhere closes it.
+
+<WebComponentSamples part="dropdown-menu" />
+
+| Vue | Classes |
+| --- | --- |
+| `<CpDropdownMenu>` | `details` with a `summary.cp-btn.cp-btn-ghost.cp-btn-square.cp-btn-sm` and a `ul.cp-menu` panel |
+
+All the dropdowns (select, multi-select, menu) share the closing rule of `web/ui/src/dismissable.ts`, and their panels float over the page (`absolute`), so opening or closing one never moves anything.
 
 ## Checkbox
 

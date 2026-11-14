@@ -2,6 +2,7 @@
 // One of the websites' real components from web/ui (ADR 0023), in the theme the page's switch chose. The panel
 // pins it with a cp-theme-* class from tokens.css, and data-theme="poulpy" so DaisyUI reads the panel's colours. The embed build adds no page-wide rule, so the site keeps its look.
 import { ref } from 'vue'
+import { EllipsisVertical } from '@lucide/vue'
 import { useSampleTheme } from './useSampleTheme'
 import '../../../web/ui/src/tokens.css'
 import '../../../web/ui/poulpy-ui-embed.css'
@@ -23,6 +24,7 @@ import {
   CpChip,
   CpCheckbox,
   CpErrorNote,
+  CpDropdownMenu,
   CpMultiSelectField,
   CpPagination,
   CpPoulpyCard,
@@ -35,7 +37,7 @@ import {
   CpTextarea,
 } from '../../../web/ui/src/index'
 
-defineProps<{ part: 'badge' | 'body-map' | 'breadcrumbs' | 'avatar' | 'card' | 'table' | 'stats' | 'nav-menu' | 'button' | 'chip' | 'search-field' | 'stepper' | 'select-field' | 'multi-select-field' | 'checkbox' | 'text-field' | 'textarea' | 'password-field' | 'poulpy-card' | 'error' | 'sheet' | 'pagination' | 'side-panel' }>()
+defineProps<{ part: 'badge' | 'body-map' | 'breadcrumbs' | 'avatar' | 'card' | 'table' | 'stats' | 'nav-menu' | 'button' | 'chip' | 'search-field' | 'stepper' | 'select-field' | 'dropdown-menu' | 'multi-select-field' | 'checkbox' | 'text-field' | 'textarea' | 'password-field' | 'poulpy-card' | 'error' | 'sheet' | 'pagination' | 'side-panel' }>()
 const { mode } = useSampleTheme()
 // A stand-in figure: the real ones are the generated body map shapes.
 const sampleFigures = [
@@ -136,6 +138,13 @@ const formats = [
       </div>
       <div v-else-if="part === 'multi-select-field'" class="row">
         <CpMultiSelectField v-model="muscles" label="Muscles" placeholder="Search muscles" :options="muscleOptions" none-label="No muscle matches" />
+      </div>
+      <div v-else-if="part === 'dropdown-menu'" class="row">
+        <CpDropdownMenu label="Actions">
+          <template #trigger><EllipsisVertical class="size-4" aria-hidden="true" /></template>
+          <li><button type="button">Select all 24 matching</button></li>
+          <li><button type="button">Clear selection</button></li>
+        </CpDropdownMenu>
       </div>
       <div v-else-if="part === 'checkbox'" class="row">
         <CpCheckbox v-model="ticked" label="Select Goblet squat" />

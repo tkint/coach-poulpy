@@ -6,7 +6,7 @@
 // /admin/catalog?q=squat&pattern=squat&muscles=glutes,quadriceps&translation=incomplete&sort=name&order=desc&page=2.
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { ChevronDown, ChevronUp, ChevronsUpDown, EllipsisVertical } from '@lucide/vue'
-import { CpBadge, CpCard, CpCheckbox, CpChip, CpErrorNote, CpMultiSelectField, CpPagination, CpPoulpyCard, CpSearchField, CpSelectField, CpTable } from '@coach-poulpy/ui'
+import { CpBadge, CpCard, CpCheckbox, CpChip, CpDropdownMenu, CpErrorNote, CpMultiSelectField, CpPagination, CpPoulpyCard, CpSearchField, CpSelectField, CpTable } from '@coach-poulpy/ui'
 import { listCatalogExercises, type CatalogExercise, type CatalogQuery, type CatalogSort } from '../session'
 import { domainLabel, domainOptions } from '../catalogText'
 import { navigate, search, withParams } from '../route'
@@ -49,7 +49,6 @@ const exercises = ref<CatalogExercise[]>([])
 const total = ref(0)
 const state = ref<'loading' | 'ready' | 'failed'>('loading')
 const picked = ref(new Set<string>())
-const menu = ref<HTMLDetailsElement>()
 
 const pages = computed(() => Math.max(1, Math.ceil(total.value / PAGE_SIZE)))
 const showing = computed(() =>
@@ -162,7 +161,6 @@ const rowBox = (slug: string) =>
 const rowBoxes = computed(() => Object.fromEntries(onPage.value.map((slug) => [slug, rowBox(slug)])))
 const clearSelection = () => {
   picked.value = new Set()
-  if (menu.value) menu.value.open = false
 }
 
 /** Every slug the filters match, a page of the largest size at a time. */
@@ -174,7 +172,6 @@ async function selectAllMatching() {
     for (const row of result.exercises) found.add(row.exercise.slug)
   }
   picked.value = found
-  if (menu.value) menu.value.open = false
 }
 
 let latest = 0
@@ -229,17 +226,15 @@ watch(
           <thead>
             <tr>
               <th class="w-12 text-center">
-                <details v-if="selectedCount" ref="menu" class="relative inline-block">
-                  <summary class="cp-btn cp-btn-ghost cp-btn-square cp-btn-sm relative list-none" :aria-label="t('admin.catalogSelectionActions', { count: String(selectedCount) })">
+                <CpDropdownMenu v-if="selectedCount" :label="t('admin.catalogSelectionActions', { count: String(selectedCount) })">
+                  <template #trigger>
                     <EllipsisVertical class="size-4" aria-hidden="true" />
                     <span class="cp-badge cp-badge-primary cp-badge-sm absolute -right-2 -top-2 z-10">{{ selectedCount }}</span>
-                  </summary>
+                  </template>
                   <!-- CLEANUP: Publish and Retire join this menu with the batch publication and the retirement of #389 and #390. -->
-                  <ul class="cp-menu absolute left-0 z-20 mt-2 w-60 rounded-box border border-base-300 bg-base-100 p-2 text-start shadow-lg">
-                    <li v-if="selectedCount < total"><button type="button" @click="selectAllMatching">{{ t('admin.catalogSelectAllMatching', { count: String(total) }) }}</button></li>
-                    <li><button type="button" @click="clearSelection">{{ t('admin.catalogClearSelection') }}</button></li>
-                  </ul>
-                </details>
+                  <li v-if="selectedCount < total"><button type="button" @click="selectAllMatching">{{ t('admin.catalogSelectAllMatching', { count: String(total) }) }}</button></li>
+                  <li><button type="button" @click="clearSelection">{{ t('admin.catalogClearSelection') }}</button></li>
+                </CpDropdownMenu>
                 <CpCheckbox v-else v-model="pageBox" :label="t('admin.catalogSelectPage')" :indeterminate="someOnPage && !allOnPage" />
               </th>
               <th v-for="column in columns" :key="column.sort" :aria-sort="ariaSort(column.sort)">
