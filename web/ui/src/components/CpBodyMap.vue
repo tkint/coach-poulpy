@@ -96,7 +96,7 @@ const views = computed(() => {
 const showLegend = computed(() => !!props.legend && props.legend !== 'hidden' && !!props.less && !!props.more)
 </script>
 <template>
-  <div class="flex items-center gap-4" :class="legend === 'right' ? 'flex-row' : 'flex-col'" data-component="body-map">
+  <div class="flex items-center justify-center gap-4" :class="legend === 'right' ? 'flex-row' : 'flex-col'" data-component="body-map">
     <p v-if="showLegend && legend === 'top'" class="cp-heat-legend order-first" aria-hidden="true">
       {{ less }}
       <svg v-for="heat in [1, 2, 3]" :key="heat" viewBox="0 0 14 14"><rect class="cp-body-part" :data-heat="heat" x="1" y="1" width="12" height="12" rx="3" /></svg>
