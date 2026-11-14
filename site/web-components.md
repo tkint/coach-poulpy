@@ -25,23 +25,23 @@ Primary, tonal, outline, grumpy and danger (crimson, for a deletion that can't b
 
 ## Chip
 
-`CpChip`, a toggle with `aria-pressed`.
+`CpChip`, a toggle with `aria-pressed`. With `compact` it is as high as the small controls of a filter bar.
 
 <WebComponentSamples part="chip" />
 
 | Vue | Classes |
 | --- | --- |
-| `<CpChip v-model>` | `cp-btn cp-chip cp-btn-primary` when on, `cp-btn cp-chip cp-btn-outline` when off, with `aria-pressed` |
+| `<CpChip v-model>` | `cp-btn cp-chip cp-btn-primary` when on, `cp-btn cp-chip cp-btn-outline` when off, with `aria-pressed`; `cp-chip-compact` with `compact` |
 
 ## Search field
 
-`CpSearchField`: a pill with a search icon. The input is `type="search"` with `autocomplete="off"`, so a password manager does not take a search for an email address as a sign-in.
+`CpSearchField`: a pill with a search icon. With `compact` it is one control of a filter bar: as high as a small button and 14rem wide instead of filling its row. The input is `type="search"` with `autocomplete="off"`, so a password manager does not take a search for an email address as a sign-in.
 
 <WebComponentSamples part="search-field" />
 
 | Vue | Classes |
 | --- | --- |
-| `<CpSearchField>` | `label.cp-input.cp-search-field` around the icon and an `input type="search"` |
+| `<CpSearchField>` | `label.cp-input.cp-search-field` around the icon and an `input type="search"`; `cp-search-field-compact` with `compact` |
 
 ## Stepper
 
@@ -55,13 +55,45 @@ Primary, tonal, outline, grumpy and danger (crimson, for a deletion that can't b
 
 ## Select field
 
-`CpSelectField`.
+`CpSelectField`: one value from a list. A button shows the current value and opens its panel only while it is used; the options look like the multi-select field's, without the checkboxes, and the chosen one is bold with a check. Choosing an option, Escape or a click elsewhere closes the panel. With `compact` it is one control of a filter bar: its label is hidden (still read aloud, and its first option usually says it too) and it is only as wide as its longest option.
 
 <WebComponentSamples part="select-field" />
 
 | Vue | Classes |
 | --- | --- |
-| `<CpSelectField>` | `label.cp-fieldset`, a `span.cp-type-label` and `select.cp-select` |
+| `<CpSelectField>` | `div.cp-fieldset`, a `span.cp-type-label` and a `details` with a `summary.cp-btn.cp-btn-outline` and a `cp-card` `ul[role=listbox]` of option `button`s (`flex w-full items-center gap-3 rounded-field px-2 py-1 hover:bg-base-200`); `cp-btn-sm w-auto` and a `sr-only` label with `compact` |
+
+## Multi-select field
+
+`CpMultiSelectField`: any number of values from a long list. It is a button that opens its panel only while it is used: a search box narrows the list and each match is a checkbox. The button says how many are picked; Escape or a click elsewhere closes the panel.
+
+<WebComponentSamples part="multi-select-field" />
+
+| Vue | Classes |
+| --- | --- |
+| `<CpMultiSelectField>` | `details` with a `summary.cp-btn.cp-btn-sm.cp-btn-outline` and a `cp-card` panel of `input.cp-input.cp-input-sm` and a list of `cp-checkbox cp-checkbox-sm` |
+
+## Dropdown menu
+
+`CpDropdownMenu`: a button that opens a short menu of actions only while it is used. Choosing an entry, Escape or a click elsewhere closes it.
+
+<WebComponentSamples part="dropdown-menu" />
+
+| Vue | Classes |
+| --- | --- |
+| `<CpDropdownMenu>` | `details` with a `summary.cp-btn.cp-btn-ghost.cp-btn-square.cp-btn-sm` and a `ul.cp-menu` panel |
+
+All the dropdowns (select, multi-select, menu) share the closing rule of `web/ui/src/dismissable.ts`, and their panels float over the page (`absolute`), so opening or closing one never moves anything.
+
+## Checkbox
+
+`CpCheckbox`: a checkbox with no visible label, for a table row or a header that selects rows. Its label names what it selects.
+
+<WebComponentSamples part="checkbox" />
+
+| Vue | Classes |
+| --- | --- |
+| `<CpCheckbox>` | `label.cp-btn.cp-btn-ghost.cp-btn-square.cp-btn-sm` around `input.cp-checkbox` |
 
 ## Text field
 
@@ -187,15 +219,15 @@ Primary, tonal, outline, grumpy and danger (crimson, for a deletion that can't b
 
 ## Table
 
-`CpTable`: scrolls sideways on a phone. Put it in a `CpCard`.
+`CpTable`: scrolls sideways on a phone. It draws on an opaque, bordered surface (`bg-base-100`), so its rows read the same on a card, on the page and in a dark theme.
 
 <WebComponentSamples part="table" />
 
 | Vue | Classes |
 | --- | --- |
-| `<CpTable>` | `div.overflow-x-auto` around `table.cp-table` |
+| `<CpTable>` | `div.overflow-x-auto.rounded-box.border.border-base-300.bg-base-100` around `table.cp-table.bg-base-100` |
 
-Sortable columns put a `cp-btn cp-btn-ghost cp-btn-sm` in the header cell, with the arrow of the order beside the label, and `aria-sort` on the `th`. A table of records the person opens has a button in the first cell and a `cp-hover` row.
+Sortable columns put a `cp-btn cp-btn-ghost cp-btn-sm` in the header cell, with the arrow of the order beside the label, and `aria-sort` on the `th`. A table of records the person opens has a button in the first cell and a `cp-hover` row; a row picked or selected has `aria-selected="true"` and `bg-base-200`. A table whose rows are selected for a bulk action starts each row with a `CpCheckbox`.
 
 ## Pagination
 

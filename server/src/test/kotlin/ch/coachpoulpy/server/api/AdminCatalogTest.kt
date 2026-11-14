@@ -247,7 +247,7 @@ class AdminCatalogTest {
     }
 
     @Test
-    fun theListSearchesAndFiltersRetiredExercises() {
+    fun theListSearchesAndFiltersByLifecycle() {
         retire("wall-sit")
         fun list(vararg params: Pair<String, String>) =
             body(call(params.fold(Request(GET, "/api/v1/admin/catalog/exercises")) { request, (name, value) -> request.query(name, value) }))
@@ -255,10 +255,40 @@ class AdminCatalogTest {
             list(*params).getValue("exercises").jsonArray.map { it.jsonObject.getValue("exercise").jsonObject.getValue("slug").jsonPrimitive.content }
 
         assertEquals(bundled.exercises.size, list().getValue("total").jsonPrimitive.int)
-        assertEquals(listOf("wall-sit"), listed("retired" to "yes"))
-        assertFalse("wall-sit" in listed("retired" to "no"))
+        assertEquals(listOf("wall-sit"), listed("lifecycle" to "retiring"), "retired in the draft only: its retirement is pending")
+        assertTrue("wall-sit" !in listed("lifecycle" to "active"))
         assertEquals(listOf("goblet-squat"), listed("q" to "GOBELET"), "a French name matches")
-        assertEquals(BAD_REQUEST, call(Request(GET, "/api/v1/admin/catalog/exercises?retired=maybe")).status)
+        assertEquals(BAD_REQUEST, call(Request(GET, "/api/v1/admin/catalog/exercises?lifecycle=maybe")).status)
+        assertEquals(BAD_REQUEST, call(Request(GET, "/api/v1/admin/catalog/exercises?muscles=quadriceps,wings")).status)
+    }
+
+    @Test
+    fun theListFiltersByWhatTheExerciseIs() {
+        val squats = listed("pattern" to "squat").first
+        assertTrue("goblet-squat" in squats)
+        assertTrue(squats.all { bundled[ExerciseSlug(it)]!!.movementPattern == MovementPattern.SQUAT })
+        val worked = listed("muscles" to "quadriceps,calves").first
+        assertTrue(worked.all { slug -> bundled[ExerciseSlug(slug)]!!.muscleGroups.any { it == MuscleGroup.QUADRICEPS || it == MuscleGroup.CALVES } })
+        assertEquals(listed("muscles" to "quadriceps,calves").second, worked.size)
+        assertTrue(listed("pattern" to "squat", "muscles" to "chest").first.all { it in squats }, "filters narrow one another")
+    }
+
+    @Test
+    fun theListSeparatesContentTranslationAndLifecycle() {
+        create(pikePushUp(fr = false))
+        edit("goblet-squat", goblet.copy(name = LocalizedText(mapOf("en" to "Goblet squat", "fr" to "Squat gobelet !"))))
+        retire("wall-sit")
+
+        assertEquals(listOf("pike-push-up"), listed("content" to "draft").first)
+        assertEquals(listOf("goblet-squat"), listed("content" to "modified").first)
+        assertEquals(setOf("pike-push-up", "goblet-squat", "wall-sit"), listed("content" to "pending").first.toSet())
+        assertTrue("pike-push-up" !in listed("content" to "published").first)
+        assertTrue("wall-sit" in listed("content" to "published").first, "a retirement is a lifecycle change, not a content one")
+        assertEquals(listOf("pike-push-up"), listed("translation" to "incomplete").first)
+        assertEquals(listOf("fr"), body(get("pike-push-up")).getValue("missing").jsonArray.map { it.jsonPrimitive.content }, "each exercise names its missing languages")
+        assertTrue(body(get("wall-sit")).getValue("missing").jsonArray.isEmpty())
+        assertTrue("pike-push-up" !in listed("translation" to "complete").first)
+        assertEquals(listOf("pike-push-up"), listed("lifecycle" to "active", "translation" to "incomplete").first, "the dimensions combine")
     }
 
     private fun listed(vararg params: Pair<String, String>): Pair<List<String>, Int> {
@@ -274,12 +304,17 @@ class AdminCatalogTest {
         assertEquals(all.drop(8).take(8) to all.size, listed("size" to "8", "page" to "2"))
         val byName = bundled.exercises.sortedBy { it.name.byLanguage.getValue("en").lowercase() }.map { it.slug.value }
         assertEquals(byName.take(8), listed("sort" to "name", "size" to "8").first)
-        assertEquals(byName.reversed().take(8), listed("sort" to "name", "order" to "desc", "size" to "8").first)
+        assertEquals(byName.reversed().take(8), listed("sort" to "-name", "size" to "8").first)
+
+        val byPatternThenName = bundled.exercises.sortedWith(compareBy({ it.movementPattern.name }, { it.name.byLanguage.getValue("en").lowercase() })).map { it.slug.value }
+        assertEquals(byPatternThenName.take(8), listed("sort" to "pattern,name", "size" to "8").first, "a second column orders the ties of the first")
+        val byPatternDescThenName = bundled.exercises.sortedWith(compareBy<Exercise>({ it.movementPattern.name }).reversed().thenBy { it.name.byLanguage.getValue("en").lowercase() }).map { it.slug.value }
+        assertEquals(byPatternDescThenName.take(5), listed("sort" to "-pattern,name", "size" to "5").first, "each column has its own direction")
 
         create(pikePushUp(fr = false))
         assertEquals("pike-push-up", listed("sort" to "languages", "size" to "1").first.single(), "missing French comes first")
         assertEquals("pike-push-up", listed("sort" to "change", "size" to "1").first.single(), "changes come first")
-        listOf("sort" to "colour", "order" to "up", "retired" to "maybe").forEach { (name, value) ->
+        listOf("sort" to "colour", "sort" to "name,-name", "sort" to "name,,pattern", "lifecycle" to "maybe", "content" to "later", "translation" to "half").forEach { (name, value) ->
             assertEquals(BAD_REQUEST, call(Request(GET, "/api/v1/admin/catalog/exercises").query(name, value)).status, name)
         }
     }

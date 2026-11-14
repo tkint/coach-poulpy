@@ -186,3 +186,49 @@ export async function pendingRegistrations(): Promise<PendingRegistration[] | un
     return undefined
   }
 }
+
+
+/** One exercise of the catalog draft as the admin lists it: the catalog's JSON, whether a version holds it, what changed since and the shipped languages it lacks. */
+export type CatalogExercise = {
+  exercise: {
+    slug: string
+    name: Record<string, string>
+    movementPattern: string
+    muscleGroups: string[]
+    positions?: string[]
+    retired?: boolean
+  }
+  published: boolean
+  change: 'added' | 'edited' | 'retired' | 'offered' | null
+  missing: string[]
+}
+/** A column the catalog table sorts on. */
+export type CatalogSort = 'name' | 'pattern' | 'languages' | 'change' | 'status'
+/** The catalog table's question; an empty string asks for no filter. Lists are comma-separated lowercase words. */
+export type CatalogQuery = {
+  q: string
+  pattern: string
+  muscles: string
+  positions: string
+  equipment: string
+  translation: string
+  content: string
+  lifecycle: string
+  /** Comma-separated columns, the most important first, each with a leading - for descending: `-change,name`. Empty for the catalog's order. */
+  sort: string
+  page: number
+  size: number
+}
+export type CatalogPage = { exercises: CatalogExercise[]; total: number }
+
+/** One page of the catalog draft's exercises, or nothing when it can't be loaded. */
+export async function listCatalogExercises(query: CatalogQuery): Promise<CatalogPage | undefined> {
+  const params = new URLSearchParams()
+  for (const [name, value] of Object.entries(query)) if (value !== '') params.set(name, String(value))
+  try {
+    const response = await authorized(`/admin/catalog/exercises?${params}`)
+    return response.ok ? ((await response.json()) as CatalogPage) : undefined
+  } catch {
+    return undefined
+  }
+}
