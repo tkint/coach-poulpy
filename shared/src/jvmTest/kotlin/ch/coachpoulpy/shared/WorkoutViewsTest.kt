@@ -87,6 +87,8 @@ class WorkoutViewsTest {
     fun aRowSaysItsFormatAndLengthInTheLanguageAsked() {
         assertEquals("Sets · 1 exercise · about 1 min", views.list(listOf(upper), emptyMap(), "en").items.single().details)
         assertEquals("Séries", views.list(listOf(upper), emptyMap(), "fr").items.single().formatLabel)
+        assertEquals("1 exercise", views.list(listOf(upper), emptyMap(), "en").items.single().exercisesLabel)
+        assertEquals("about 1 min", views.list(listOf(upper), emptyMap(), "en").items.single().lengthLabel)
     }
 
     @Test
@@ -96,6 +98,8 @@ class WorkoutViewsTest {
         assertEquals("Sets", page.formatLabel)
         assertEquals(2, page.timesDone)
         assertEquals(34, page.usualMinutes)
+        assertEquals("34 min", page.usualLabel)
+        assertEquals("2 times", page.timesDoneLabel)
         assertEquals(1, page.parts.size)
         assertEquals("Work", page.parts.single().name)
         assertEquals("Push-up", page.parts.single().steps.single().row?.name)

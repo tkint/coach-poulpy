@@ -16,7 +16,11 @@ data class WorkoutSummary(
     /** "Sets · 5 exercises · about 40 min". */
     val details: String,
     val exerciseCount: Int,
+    /** "5 exercises". */
+    val exercisesLabel: String,
     val minutes: Int,
+    /** "about 40 min", or the exact length when every phase is timed. */
+    val lengthLabel: String,
     val timesDone: Int,
     val lastDoneMillis: Long?,
 )
@@ -69,7 +73,9 @@ class WorkoutViews(private val catalog: Catalog, private val compiler: TimelineC
                 formatLabel = labels.format(workout.format),
                 details = facts.details(workout),
                 exerciseCount = exerciseSteps(workout).size,
+                exercisesLabel = labels.exercises(exerciseSteps(workout).size),
                 minutes = facts.minutes(workout),
+                lengthLabel = facts.length(workout),
                 timesDone = past.startedAt.size,
                 lastDoneMillis = past.startedAt.maxOrNull()?.toEpochMilliseconds(),
             )

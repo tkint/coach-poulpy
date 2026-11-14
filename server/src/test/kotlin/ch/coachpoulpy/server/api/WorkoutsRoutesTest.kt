@@ -137,6 +137,7 @@ class WorkoutsRoutesTest {
         assertEquals("3 séances", body.getValue("text").jsonObject.getValue("count").jsonPrimitive.content)
         val row = body.items().first { it.getValue("id").jsonPrimitive.content == UPPER }
         assertEquals("Séries", row.getValue("text").jsonObject.getValue("format").jsonPrimitive.content)
+        assertEquals("1 exercice", row.getValue("text").jsonObject.getValue("exercises").jsonPrimitive.content)
     }
 
     @Test
@@ -206,6 +207,8 @@ class WorkoutsRoutesTest {
         library()
         val text = get("/workouts/$UPPER?include=text", language = "en").json().getValue("text").jsonObject
         assertEquals("Sets", text.getValue("format").jsonPrimitive.content)
+        assertEquals("2 times", text.getValue("timesDone").jsonPrimitive.content)
+        assertEquals("34 min", text.getValue("usual").jsonPrimitive.content)
         val part = text.getValue("parts").jsonArray.first().jsonObject
         assertEquals("Work", part.getValue("name").jsonPrimitive.content)
         assertTrue(text.getValue("muscles").jsonArray.isNotEmpty())

@@ -87,9 +87,13 @@ data class WorkoutPageState(
     /** The workout's parts in order, each with its steps and repeats. */
     val parts: List<WorkoutPagePart> = emptyList(),
     val timesDone: Int = 0,
+    /** "3 times"; empty before the first. */
+    val timesDoneLabel: String = "",
     val lastDoneMillis: Long? = null,
     /** The middle length of the sessions done, in minutes; null before the first. */
     val usualMinutes: Int? = null,
+    /** "31 min"; empty before the first. */
+    val usualLabel: String = "",
     /** Every upcoming planned day, soonest first; empty when the workout waits in the library. */
     val plans: List<PlannedDay> = emptyList(),
     /** Only workouts made with the builder can be edited or copied. */
@@ -211,8 +215,10 @@ internal class WorkoutPageBuilder(private val catalog: Catalog, private val labe
             equipment = equipment,
             parts = parts(workout),
             timesDone = history.startedAt.size,
+            timesDoneLabel = if (history.startedAt.isEmpty()) "" else labels.times(history.startedAt.size),
             lastDoneMillis = history.startedAt.maxOrNull()?.toEpochMilliseconds(),
             usualMinutes = minutes.getOrNull(minutes.size / 2)?.coerceAtLeast(1),
+            usualLabel = minutes.getOrNull(minutes.size / 2)?.coerceAtLeast(1)?.let { labels.duration(it * 60) }.orEmpty(),
             plans = plans,
             deletePrompt = labels.deletePrompt(workout.name, plans.size, history.startedAt.size),
             editable = WorkoutDraft.from(workout, catalog) != null,

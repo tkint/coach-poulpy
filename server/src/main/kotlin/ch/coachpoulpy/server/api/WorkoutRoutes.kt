@@ -40,7 +40,7 @@ data class WorkoutListText(val count: String)
 
 /** What `include=text` adds to a row: the words under the name. */
 @Serializable
-data class WorkoutRowText(val format: String, val details: String)
+data class WorkoutRowText(val format: String, val details: String, val exercises: String, val length: String)
 
 @Serializable
 data class WorkoutRow(
@@ -86,6 +86,10 @@ data class WorkoutPageText(
     val muscles: List<WorkoutMuscleText>,
     /** Heat 1 to 3 of each body map area key to light. */
     val heat: Map<String, Int>,
+    /** "3 times"; empty before the first session. */
+    val timesDone: String,
+    /** "31 min"; empty before the first session. */
+    val usual: String,
 )
 
 @Serializable
@@ -172,7 +176,7 @@ fun workoutsRoute(library: WorkoutLibrary): ContractRoute = "$API_PREFIX/workout
                 WorkoutRow(
                     it.id, it.name, it.format, it.exerciseCount, it.minutes, it.timesDone,
                     it.lastDoneMillis?.let(Instant::fromEpochMilliseconds),
-                    text = if (withText) WorkoutRowText(it.formatLabel, it.details) else null,
+                    text = if (withText) WorkoutRowText(it.formatLabel, it.details, it.exercisesLabel, it.lengthLabel) else null,
                 )
             },
             found.total, found.page, found.pageSize,
@@ -222,6 +226,8 @@ private fun ch.coachpoulpy.shared.WorkoutPageState.text() = WorkoutPageText(
     parts = parts.map { it.text() },
     muscles = muscles.map { WorkoutMuscleText(it.group.name, it.label, it.sets, it.setsLabel, it.heat, it.percent) },
     heat = heat,
+    timesDone = timesDoneLabel,
+    usual = usualLabel,
 )
 
 private fun WorkoutPagePart.text() = WorkoutPartText(key, kind.name, name, summary, time, steps.map { it.text() })
