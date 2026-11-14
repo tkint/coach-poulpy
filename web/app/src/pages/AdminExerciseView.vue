@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// The exercise screen of the admin (design/mockups/agreed/web/admin-catalog-exercise*.html, #388): one exercise of the
+// The exercise screen of the admin (the stories Web/Screens/Admin/Exercise, web/storybook/stories/web/AdminExercise.stories.ts, #388): one exercise of the
 // catalog draft, edited at /admin/catalog/<slug>, or added at /admin/catalog/new. Saving writes the draft only: the
 // published exercise, which the apps download, stays as it is until a publication. A text is written in one language
 // at a time (`?lang=fr`), and under each translatable field a badge says whether every shipped language has it, so
