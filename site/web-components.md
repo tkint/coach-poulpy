@@ -63,6 +63,26 @@ Primary, tonal, outline, grumpy and danger (crimson, for a deletion that can't b
 | --- | --- |
 | `<CpSelectField>` | `label.cp-fieldset`, a `span.cp-type-label` and `select.cp-select` |
 
+## Multi-select field
+
+`CpMultiSelectField`: any number of values from a long list. The search box narrows the list, each match is a checkbox, and what is picked stays on show as chips that take their value back off.
+
+<WebComponentSamples part="multi-select-field" />
+
+| Vue | Classes |
+| --- | --- |
+| `<CpMultiSelectField>` | `div.cp-fieldset`, a `label.cp-type-label`, chips `cp-badge cp-badge-neutral cp-badge-soft`, `input.cp-input` and a list of `cp-checkbox cp-checkbox-sm` |
+
+## Checkbox
+
+`CpCheckbox`: a checkbox with no visible label, for a table row or a header that selects rows. Its label names what it selects.
+
+<WebComponentSamples part="checkbox" />
+
+| Vue | Classes |
+| --- | --- |
+| `<CpCheckbox>` | `label.cp-btn.cp-btn-ghost.cp-btn-square.cp-btn-sm` around `input.cp-checkbox` |
+
 ## Text field
 
 `CpTextField`, a one-line field such as an email, with a `hint` under it when it needs one. In error, it turns crimson and a `CpErrorNote` under the form says why; a field checked on its own, such as an address that isn't one, passes `error` instead, which takes the hint's place in crimson.
@@ -128,13 +148,13 @@ Primary, tonal, outline, grumpy and danger (crimson, for a deletion that can't b
 
 ## Sheet
 
-`CpSheet`: a bottom sheet on a phone, a dialog on a wider screen.
+`CpSheet`: a bottom sheet on a phone, a dialog on a wider screen. With `side` it is a panel against the end edge at every width, for a long form such as a table's filters.
 
 <WebComponentSamples part="sheet" />
 
 | Vue | Classes |
 | --- | --- |
-| `<CpSheet>` | `dialog.cp-modal.cp-modal-bottom.sm:cp-modal-middle.cp-sheet` and `.cp-modal-box` |
+| `<CpSheet>` | `dialog.cp-modal.cp-modal-bottom.sm:cp-modal-middle.cp-sheet` and `.cp-modal-box`; `cp-modal-end` instead of the first two with `side` |
 
 ## Badge
 
@@ -187,15 +207,15 @@ Primary, tonal, outline, grumpy and danger (crimson, for a deletion that can't b
 
 ## Table
 
-`CpTable`: scrolls sideways on a phone. Put it in a `CpCard`.
+`CpTable`: scrolls sideways on a phone. It draws on an opaque, bordered surface (`bg-base-100`), so its rows read the same on a card, on the page and in a dark theme.
 
 <WebComponentSamples part="table" />
 
 | Vue | Classes |
 | --- | --- |
-| `<CpTable>` | `div.overflow-x-auto` around `table.cp-table` |
+| `<CpTable>` | `div.overflow-x-auto.rounded-box.border.border-base-300.bg-base-100` around `table.cp-table.bg-base-100` |
 
-Sortable columns put a `cp-btn cp-btn-ghost cp-btn-sm` in the header cell, with the arrow of the order beside the label, and `aria-sort` on the `th`. A table of records the person opens has a button in the first cell and a `cp-hover` row.
+Sortable columns put a `cp-btn cp-btn-ghost cp-btn-sm` in the header cell, with the arrow of the order beside the label, and `aria-sort` on the `th`. A table of records the person opens has a button in the first cell and a `cp-hover` row; a row picked or selected has `aria-selected="true"` and `bg-base-200`. A table whose rows are selected for a bulk action starts each row with a `CpCheckbox`.
 
 ## Pagination
 

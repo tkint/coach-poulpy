@@ -1,10 +1,16 @@
 package ch.coachpoulpy.server.api
 
+import ch.coachpoulpy.core.model.BodyPosition
+import ch.coachpoulpy.core.model.Equipment
 import ch.coachpoulpy.core.model.Exercise
 import ch.coachpoulpy.core.model.ExerciseSlug
+import ch.coachpoulpy.core.model.MovementPattern
+import ch.coachpoulpy.core.model.MuscleGroup
 import ch.coachpoulpy.server.admin.AdminCatalog
+import ch.coachpoulpy.server.admin.ContentState
 import ch.coachpoulpy.server.admin.ExerciseQuery
 import ch.coachpoulpy.server.admin.ExerciseSort
+import ch.coachpoulpy.server.admin.Lifecycle
 import ch.coachpoulpy.server.auth.Caller
 import ch.coachpoulpy.server.auth.caller
 import ch.coachpoulpy.server.auth.requiresAdmin
@@ -14,6 +20,7 @@ import ch.coachpoulpy.server.catalog.EditedExercise
 import ch.coachpoulpy.server.catalog.MissingText
 import ch.coachpoulpy.server.catalog.PublishResult
 import ch.coachpoulpy.server.catalog.ServerCatalog
+import ch.coachpoulpy.server.catalog.missingLanguages
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
@@ -40,9 +47,12 @@ import org.http4k.lens.Path
 import org.http4k.lens.Query
 import org.http4k.lens.int
 
-/** One exercise of the draft: the shared Exercise JSON, whether a version holds it, and what changed since (added, edited, retired, offered or null). */
+/**
+ * One exercise of the draft: the shared Exercise JSON, whether a version holds it, what changed since (added, edited,
+ * retired, offered or null) and the shipped languages some of its text lacks (empty when it is complete).
+ */
 @Serializable
-data class DraftExerciseResponse(val exercise: Exercise, val published: Boolean, val change: String?)
+data class DraftExerciseResponse(val exercise: Exercise, val published: Boolean, val change: String?, val missing: List<String>)
 
 @Serializable
 data class DraftExercisesResponse(val exercises: List<DraftExerciseResponse>, val total: Int)
@@ -88,7 +98,13 @@ data class InvalidExerciseResponse(val error: String, val reason: String)
 private val catalogAdminTag = Tag("admin")
 private val slugPath = Path.map(::ExerciseSlug, ExerciseSlug::value).of("slug", "The exercise's slug")
 private val textQuery = Query.optional("q", "Part of the slug, of a name in any language or of an alias, whatever its case")
-private val retiredQuery = Query.optional("retired", "yes or no: only the retired exercises, or only the offered ones")
+private val patternQuery = Query.optional("pattern", "A movement pattern, such as squat or hinge")
+private val musclesQuery = Query.optional("muscles", "Comma-separated muscle groups, such as quadriceps,glutes: exercises working any of them")
+private val positionsQuery = Query.optional("positions", "Comma-separated body positions (standing, seated, floor): exercises done in any of them")
+private val equipmentQuery = Query.optional("equipment", "Comma-separated equipment, such as dumbbell,pull_up_bar: exercises needing or optionally using any of it")
+private val translationQuery = Query.optional("translation", "complete: every shipped language is written; incomplete: a language is missing")
+private val contentQuery = Query.optional("content", "draft (never published), modified, published or pending (anything the next publication would change)")
+private val lifecycleQuery = Query.optional("lifecycle", "active, retiring (retirement pending publication) or retired")
 private val sortQuery = Query.optional("sort", "catalog, name, pattern, languages, change or status (default catalog, the catalog's order)")
 private val orderQuery = Query.optional("order", "asc or desc (default asc)")
 private val pageQuery = Query.int().defaulted("page", 1, "The page, from 1")
@@ -103,15 +119,43 @@ private val sorts = mapOf(
     "status" to ExerciseSort.Status,
 )
 
+/** The values of the enum named in [text], lowercase and comma-separated; null when a word names none. */
+private inline fun <reified E : Enum<E>> words(text: String?): Set<E>? {
+    if (text.isNullOrEmpty()) return emptySet()
+    val all = enumValues<E>().associateBy { it.name.lowercase() }
+    return text.split(',').map { all[it] ?: return null }.toSet()
+}
+
+private inline fun <reified E : Enum<E>> word(text: String?): Result<E?> {
+    if (text == null) return Result.success(null)
+    return enumValues<E>().firstOrNull { it.name.lowercase() == text }?.let { Result.success(it) } ?: Result.failure(IllegalArgumentException(text))
+}
+
 /** The table's question from the query string, or null when a value isn't one of the allowed words. */
 private fun Request.exerciseQuery(): ExerciseQuery? {
-    val retired = retiredQuery(this)
     val sort = sortQuery(this)
     val order = orderQuery(this)
-    if (retired !in listOf(null, "yes", "no") || sort != null && sort !in sorts || order !in listOf(null, "asc", "desc")) return null
+    val translation = translationQuery(this)
+    val lifecycle = lifecycleQuery(this)
+    if (sort != null && sort !in sorts || order !in listOf(null, "asc", "desc") || translation !in listOf(null, "complete", "incomplete")) return null
+    val pattern = word<MovementPattern>(patternQuery(this)).getOrElse { return null }
+    val content = word<ContentState>(contentQuery(this)).getOrElse { return null }
+    val lifecycleState = when (lifecycle) {
+        null -> null
+        "active" -> Lifecycle.Active
+        "retiring" -> Lifecycle.RetirementPending
+        "retired" -> Lifecycle.Retired
+        else -> return null
+    }
     return ExerciseQuery(
         text = textQuery(this),
-        retired = retired?.let { it == "yes" },
+        pattern = pattern,
+        muscles = words<MuscleGroup>(musclesQuery(this)) ?: return null,
+        positions = words<BodyPosition>(positionsQuery(this)) ?: return null,
+        equipment = words<Equipment>(equipmentQuery(this)) ?: return null,
+        translationComplete = translation?.let { it == "complete" },
+        content = content,
+        lifecycle = lifecycleState,
         sort = sort?.let(sorts::getValue) ?: ExerciseSort.Catalog,
         ascending = order != "desc",
         page = pageQuery(this),
@@ -140,7 +184,7 @@ private fun problem(status: Status, error: String) = json(status, Problem.serial
 
 private fun Request.admin(): Caller.Signed = caller as Caller.Signed
 
-private fun DraftExercise.toResponse() = DraftExerciseResponse(exercise, published, change?.code)
+private fun DraftExercise.toResponse() = DraftExerciseResponse(exercise, published, change?.code, missingLanguages(exercise))
 
 private fun Exercise.changed() = ChangedExerciseResponse(slug.value, name.byLanguage)
 
@@ -176,14 +220,20 @@ private fun listRoute(catalog: AdminCatalog): ContractRoute = EXERCISES meta {
     operationId = "listAdminCatalogExercises"
     tags += catalogAdminTag
     queries += textQuery
-    queries += retiredQuery
+    queries += patternQuery
+    queries += musclesQuery
+    queries += positionsQuery
+    queries += equipmentQuery
+    queries += translationQuery
+    queries += contentQuery
+    queries += lifecycleQuery
     queries += sortQuery
     queries += orderQuery
     queries += pageQuery
     queries += sizeQuery
     security = requiresAdmin()
     produces += APPLICATION_JSON
-    returning(OK to "A page of exercises, as {exercises: [{exercise, published, change}], total}")
+    returning(OK to "A page of exercises, as {exercises: [{exercise, published, change, missing}], total}")
     returning(BAD_REQUEST to "A filter or sort value isn't allowed")
     returning(FORBIDDEN to "Not an admin, or not signed in through the website")
 } bindContract GET to { request ->
@@ -200,7 +250,7 @@ private fun getRoute(catalog: AdminCatalog): ContractRoute = EXERCISES / slugPat
     tags += catalogAdminTag
     security = requiresAdmin()
     produces += APPLICATION_JSON
-    returning(OK to "The exercise, as {exercise, published, change}")
+    returning(OK to "The exercise, as {exercise, published, change, missing}")
     returning(NOT_FOUND to "No exercise with this slug")
     returning(FORBIDDEN to "Not an admin, or not signed in through the website")
 } bindContract GET to { slug ->
@@ -219,7 +269,7 @@ private fun createRoute(catalog: AdminCatalog): ContractRoute = EXERCISES meta {
     security = requiresAdmin()
     consumes += APPLICATION_JSON
     produces += APPLICATION_JSON
-    returning(CREATED to "The exercise, as {exercise, published, change}")
+    returning(CREATED to "The exercise, as {exercise, published, change, missing}")
     returning(BAD_REQUEST to "Not a valid exercise")
     returning(CONFLICT to "Another exercise has this slug")
     returning(FORBIDDEN to "Not an admin, or not signed in through the website")
@@ -240,7 +290,7 @@ private fun editRoute(catalog: AdminCatalog): ContractRoute = EXERCISES / slugPa
     security = requiresAdmin()
     consumes += APPLICATION_JSON
     produces += APPLICATION_JSON
-    returning(OK to "The exercise, as {exercise, published, change}")
+    returning(OK to "The exercise, as {exercise, published, change, missing}")
     returning(BAD_REQUEST to "Not a valid exercise")
     returning(NOT_FOUND to "No exercise with this slug")
     returning(CONFLICT to "The slug is published, or another exercise has the new one")
@@ -262,7 +312,7 @@ private fun retireRoute(catalog: AdminCatalog): ContractRoute = EXERCISES / slug
     tags += catalogAdminTag
     security = requiresAdmin()
     produces += APPLICATION_JSON
-    returning(OK to "The exercise, as {exercise, published, change}")
+    returning(OK to "The exercise, as {exercise, published, change, missing}")
     returning(NOT_FOUND to "No exercise with this slug")
     returning(FORBIDDEN to "Not an admin, or not signed in through the website")
 } bindContract POST to { slug, _ ->
@@ -277,7 +327,7 @@ private fun offerRoute(catalog: AdminCatalog): ContractRoute = EXERCISES / slugP
     tags += catalogAdminTag
     security = requiresAdmin()
     produces += APPLICATION_JSON
-    returning(OK to "The exercise, as {exercise, published, change}")
+    returning(OK to "The exercise, as {exercise, published, change, missing}")
     returning(NOT_FOUND to "No exercise with this slug")
     returning(FORBIDDEN to "Not an admin, or not signed in through the website")
 } bindContract POST to { slug, _ ->

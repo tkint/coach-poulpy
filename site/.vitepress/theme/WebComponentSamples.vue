@@ -21,7 +21,9 @@ import {
   CpTable,
   CpButton,
   CpChip,
+  CpCheckbox,
   CpErrorNote,
+  CpMultiSelectField,
   CpPagination,
   CpPoulpyCard,
   CpSearchField,
@@ -33,7 +35,7 @@ import {
   CpTextarea,
 } from '../../../web/ui/src/index'
 
-defineProps<{ part: 'badge' | 'body-map' | 'breadcrumbs' | 'avatar' | 'card' | 'table' | 'stats' | 'nav-menu' | 'button' | 'chip' | 'search-field' | 'stepper' | 'select-field' | 'text-field' | 'textarea' | 'password-field' | 'poulpy-card' | 'error' | 'sheet' | 'pagination' | 'side-panel' }>()
+defineProps<{ part: 'badge' | 'body-map' | 'breadcrumbs' | 'avatar' | 'card' | 'table' | 'stats' | 'nav-menu' | 'button' | 'chip' | 'search-field' | 'stepper' | 'select-field' | 'multi-select-field' | 'checkbox' | 'text-field' | 'textarea' | 'password-field' | 'poulpy-card' | 'error' | 'sheet' | 'pagination' | 'side-panel' }>()
 const { mode } = useSampleTheme()
 // A stand-in figure: the real ones are the generated body map shapes.
 const sampleFigures = [
@@ -44,6 +46,14 @@ const chips = ref({ legs: true, core: false })
 const query = ref('squat')
 const rest = ref(90)
 const format = ref('circuit')
+const muscles = ref(['quadriceps'])
+const muscleOptions = [
+  { value: 'quadriceps', text: 'Quadriceps' },
+  { value: 'hamstrings', text: 'Hamstrings' },
+  { value: 'glutes', text: 'Glutes' },
+  { value: 'calves', text: 'Calves' },
+]
+const ticked = ref(true)
 const sheet = ref(false)
 const page = ref(2)
 const panel = ref(false)
@@ -123,6 +133,13 @@ const formats = [
       <CpSearchField v-else-if="part === 'search-field'" v-model="query" label="Search exercises" clear-label="Clear the search" placeholder="Search exercises" />
       <div v-else-if="part === 'stepper'" class="row">
         <CpStepper v-model="rest" label="Rest" :value-text="`${rest} s`" less-label="Less rest" more-label="More rest" :step="15" />
+      </div>
+      <div v-else-if="part === 'multi-select-field'" class="row">
+        <CpMultiSelectField v-model="muscles" label="Muscles" placeholder="Search muscles" :options="muscleOptions" :remove-label="(text) => `Remove ${text}`" none-label="No muscle matches" />
+      </div>
+      <div v-else-if="part === 'checkbox'" class="row">
+        <CpCheckbox v-model="ticked" label="Select Goblet squat" />
+        <CpCheckbox label="Select Wall sit" />
       </div>
       <div v-else-if="part === 'select-field'" class="row">
         <CpSelectField v-model="format" label="Format" :options="formats" />

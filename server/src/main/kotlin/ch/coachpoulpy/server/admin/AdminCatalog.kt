@@ -1,10 +1,15 @@
 package ch.coachpoulpy.server.admin
 
+import ch.coachpoulpy.core.model.BodyPosition
+import ch.coachpoulpy.core.model.Equipment
 import ch.coachpoulpy.core.model.Exercise
 import ch.coachpoulpy.core.model.ExerciseSlug
 import ch.coachpoulpy.core.model.LocalizedText
+import ch.coachpoulpy.core.model.MovementPattern
+import ch.coachpoulpy.core.model.MuscleGroup
 import ch.coachpoulpy.server.auth.AccountId
 import ch.coachpoulpy.server.catalog.CatalogChanges
+import ch.coachpoulpy.server.catalog.DraftChange
 import ch.coachpoulpy.server.catalog.DraftExercise
 import ch.coachpoulpy.server.catalog.DraftResult
 import ch.coachpoulpy.server.catalog.PublishResult
@@ -15,11 +20,37 @@ import org.http4k.events.Events
 /** The columns the admin's exercise table sorts on; [Catalog] is the catalog's own order. */
 enum class ExerciseSort { Catalog, Name, Pattern, Languages, Change, Status }
 
-/** What the admin asked of the exercise table: filters, one sort and a page. A null filter lets everything through. */
+/** Where an exercise stands against the latest published version, apart from its lifecycle and its translations. */
+enum class ContentState {
+    /** Never published: a new exercise. */
+    Draft,
+
+    /** Published, with edits the next publication would carry. */
+    Modified,
+
+    /** The draft holds what the latest version holds, or only a lifecycle change. */
+    Published,
+
+    /** Anything the next publication would change: a new exercise, an edit, a retirement or an offer again. */
+    Pending,
+}
+
+/** Whether an exercise is offered, about to be retired by the next publication, or already retired in the latest version. */
+enum class Lifecycle { Active, RetirementPending, Retired }
+
+/** What the admin asked of the exercise table: filters, one sort and a page. A null or empty filter lets everything through. */
 data class ExerciseQuery(
     /** Part of the slug, of a name in any language or of an alias. */
     val text: String? = null,
-    val retired: Boolean? = null,
+    val pattern: MovementPattern? = null,
+    /** An exercise that works any of these muscle groups, any of these positions, or needs any of these pieces of equipment. */
+    val muscles: Set<MuscleGroup> = emptySet(),
+    val positions: Set<BodyPosition> = emptySet(),
+    val equipment: Set<Equipment> = emptySet(),
+    /** True: every shipped language is written; false: some language is missing. */
+    val translationComplete: Boolean? = null,
+    val content: ContentState? = null,
+    val lifecycle: Lifecycle? = null,
     val sort: ExerciseSort = ExerciseSort.Catalog,
     val ascending: Boolean = true,
     val page: Int = 1,
@@ -31,15 +62,36 @@ data class ExerciseQuery(
     }
 }
 
+/** The exercise's [ContentState] when it is [content]; [ContentState.Pending] holds whatever [DraftExercise.change] names. */
+private fun DraftExercise.inState(content: ContentState): Boolean = when (content) {
+    ContentState.Draft -> !published
+    ContentState.Modified -> change == DraftChange.Edited
+    ContentState.Published -> published && (change == null || change == DraftChange.Retired || change == DraftChange.Offered)
+    ContentState.Pending -> change != null
+}
+
+/** An exercise retired in the draft but not yet in the latest version is only about to be: its retirement is pending. */
+private fun DraftExercise.lifecycle(): Lifecycle = when {
+    !exercise.retired -> Lifecycle.Active
+    change == DraftChange.Retired -> Lifecycle.RetirementPending
+    else -> Lifecycle.Retired
+}
+
 /** One page of exercises, and how many match the filters in all. */
 data class ExercisePage(val exercises: List<DraftExercise>, val total: Int)
 
 /** Filters, sorts and cuts [all], given in the catalog's order, as [query] says; ties keep the catalog's order. */
 fun exercisePageOf(all: List<DraftExercise>, query: ExerciseQuery): ExercisePage {
     val needle = query.text?.trim()?.lowercase().orEmpty()
-    val matching = all.withIndex().filter { (_, it) ->
-        val exercise = it.exercise
-        (query.retired == null || exercise.retired == query.retired) &&
+    val matching = all.withIndex().filter { (_, draft) ->
+        val exercise = draft.exercise
+        (query.pattern == null || exercise.movementPattern == query.pattern) &&
+            (query.muscles.isEmpty() || exercise.muscleGroups.any { group -> group in query.muscles }) &&
+            (query.positions.isEmpty() || exercise.positions.any { position -> position in query.positions }) &&
+            (query.equipment.isEmpty() || exercise.allEquipment.any { piece -> piece in query.equipment }) &&
+            (query.translationComplete == null || missingLanguages(exercise).isEmpty() == query.translationComplete) &&
+            (query.content == null || draft.inState(query.content)) &&
+            (query.lifecycle == null || draft.lifecycle() == query.lifecycle) &&
             (needle.isEmpty() || (listOf(exercise.slug.value) + exercise.name.all + exercise.aliases.all).any { text -> text.lowercase().contains(needle) })
     }
     val key: Comparator<IndexedValue<DraftExercise>> = when (query.sort) {
@@ -49,7 +101,7 @@ fun exercisePageOf(all: List<DraftExercise>, query: ExerciseQuery): ExercisePage
         // Missing languages first when ascending, so what blocks publishing is found at once.
         ExerciseSort.Languages -> compareBy { -missingLanguages(it.value.exercise).size }
         ExerciseSort.Change -> compareBy { it.value.change?.ordinal ?: Int.MAX_VALUE }
-        ExerciseSort.Status -> compareBy { it.value.exercise.retired }
+        ExerciseSort.Status -> compareBy { it.value.lifecycle() }
     }
     val sorted = matching.sortedWith((if (query.ascending) key else key.reversed()).thenBy { it.index })
     val size = query.size.coerceIn(1, ExerciseQuery.MAX_PAGE_SIZE)

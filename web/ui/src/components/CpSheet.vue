@@ -1,9 +1,10 @@
 <script setup lang="ts">
-// A sheet: rises from the bottom on a phone-width page, a dialog in the middle on a wide one.
+// A sheet: rises from the bottom on a phone-width page, a dialog in the middle on a wide one. With `side` it
+// is a panel against the end edge at every width, for a long form such as a table's filters.
 // A native <dialog>, so focus, Escape and the backdrop behave as the browser expects.
 import { ref, watch, onMounted } from 'vue'
 
-defineProps<{ title: string; closeLabel: string }>()
+defineProps<{ title: string; closeLabel: string; side?: boolean }>()
 const open = defineModel<boolean>('open', { default: false })
 const dialog = ref<HTMLDialogElement>()
 
@@ -17,7 +18,7 @@ watch(open, sync)
 </script>
 
 <template>
-  <dialog ref="dialog" class="cp-modal cp-modal-bottom sm:cp-modal-middle cp-sheet" data-component="sheet" @close="open = false">
+  <dialog ref="dialog" class="cp-modal cp-sheet" :class="side ? 'cp-modal-end' : 'cp-modal-bottom sm:cp-modal-middle'" data-component="sheet" @close="open = false">
     <div class="cp-modal-box">
       <h2 class="cp-type-headline">{{ title }}</h2>
       <slot />
