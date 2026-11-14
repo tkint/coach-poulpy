@@ -34,6 +34,7 @@ i18n.kotlinText("server", "ch.coachpoulpy.server", "ServerText")
 dependencies {
     implementation(projects.core.model)
     implementation(projects.catalog)
+    implementation(projects.shared)
     implementation(platform(libs.http4k.bom))
     implementation(platform(libs.forkhandles.bom))
     implementation(libs.values4k)

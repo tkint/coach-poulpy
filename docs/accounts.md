@@ -138,7 +138,7 @@ flowchart TD
 
 ## Sync
 
-Phones sync through the account with two calls, push and pull ([ADR 0006](./adr/0006-sync-keeps-both-edits.md), [ADR 0025](./adr/0025-the-phone-forks-a-conflicting-workout-and-the-server-counts-changes.md)). Both need the `sync` scope, so only the apps can call them.
+Phones sync through the account with two calls, push and pull ([ADR 0006](./adr/0006-sync-keeps-both-edits.md), [ADR 0025](./adr/0025-the-phone-forks-a-conflicting-workout-and-the-server-counts-changes.md)). Both need the `sync` scope, which the apps and the signed-in website hold (the website only reads, through `GET /workouts`; it never pushes).
 
 ```mermaid
 sequenceDiagram

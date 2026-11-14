@@ -113,3 +113,24 @@ FROM body_measurement WHERE account_id = :accountId AND change_number > :after O
 settingsAfter:
 SELECT key, value, changed_at, change_number
 FROM setting WHERE account_id = :accountId AND change_number > :after ORDER BY change_number LIMIT :limit;
+
+-- The latest version of each workout the account has not deleted, for the website's library.
+latestWorkouts:
+SELECT CAST(v.content AS TEXT) AS content
+FROM workout_version v
+WHERE v.account_id = :accountId
+  AND v.version = (SELECT max(m.version) FROM workout_version m WHERE m.account_id = v.account_id AND m.workout_id = v.workout_id)
+  AND NOT EXISTS (SELECT 1 FROM workout_deletion d WHERE d.account_id = v.account_id AND d.workout_id = v.workout_id);
+
+latestWorkout:
+SELECT CAST(v.content AS TEXT) AS content
+FROM workout_version v
+WHERE v.account_id = :accountId AND v.workout_id = :workoutId
+  AND v.version = (SELECT max(m.version) FROM workout_version m WHERE m.account_id = v.account_id AND m.workout_id = v.workout_id)
+  AND NOT EXISTS (SELECT 1 FROM workout_deletion d WHERE d.account_id = v.account_id AND d.workout_id = v.workout_id);
+
+-- The sessions done of a workout (any of its versions) with the totals the phone saved; sessions without totals are left out.
+workoutSessions:
+SELECT workout_id, started_at, CAST(totals AS TEXT) AS totals
+FROM session
+WHERE account_id = :accountId AND workout_id IS NOT NULL AND deleted_at IS NULL AND totals IS NOT NULL;
