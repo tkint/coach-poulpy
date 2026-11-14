@@ -986,6 +986,9 @@
       }
     }
   }
+  .pointer-events-none {
+    pointer-events: none;
+  }
   .visible {
     visibility: visible;
   }
@@ -1612,8 +1615,17 @@
   .relative {
     position: relative;
   }
+  .end-3 {
+    inset-inline-end: calc(var(--spacing) * 3);
+  }
   .-top-2 {
     top: calc(var(--spacing) * -2);
+  }
+  .top-1\/2 {
+    top: calc(1 / 2 * 100%);
+  }
+  .top-full {
+    top: 100%;
   }
   .-right-2 {
     right: calc(var(--spacing) * -2);
@@ -2324,6 +2336,9 @@
       gap: calc(0.25rem * 2);
     }
   }
+  .mt-1 {
+    margin-top: var(--spacing);
+  }
   .mt-2 {
     margin-top: calc(var(--spacing) * 2);
   }
@@ -2556,6 +2571,9 @@
   .h-16 {
     height: calc(var(--spacing) * 16);
   }
+  .h-auto {
+    height: auto;
+  }
   .max-h-40 {
     max-height: calc(var(--spacing) * 40);
   }
@@ -2564,6 +2582,9 @@
   }
   .max-h-\[90vh\] {
     max-height: 90vh;
+  }
+  .min-h-10 {
+    min-height: calc(var(--spacing) * 10);
   }
   .min-h-16 {
     min-height: calc(var(--spacing) * 16);
@@ -2648,6 +2669,13 @@
   }
   .grow {
     flex-grow: 1;
+  }
+  .basis-16 {
+    flex-basis: calc(var(--spacing) * 16);
+  }
+  .-translate-y-1\/2 {
+    --tw-translate-y: calc(calc(1 / 2 * 100%) * -1);
+    translate: var(--tw-translate-x) var(--tw-translate-y);
   }
   @layer daisyui.l1.l2.l3 {
     .cp-link {
@@ -2945,6 +2973,9 @@
   }
   .ps-3 {
     padding-inline-start: calc(var(--spacing) * 3);
+  }
+  .pe-9 {
+    padding-inline-end: calc(var(--spacing) * 9);
   }
   .pt-4 {
     padding-top: calc(var(--spacing) * 4);
@@ -3618,6 +3649,17 @@
     fill: var(--cp-heat3);
     stroke: var(--cp-heat3);
   }
+  .cp-body-part-pick {
+    cursor: pointer;
+  }
+  .cp-body-part-pick:hover {
+    stroke: var(--cp-primary);
+    stroke-width: 2;
+  }
+  .cp-body-part-pick:focus-visible {
+    outline: 2px solid var(--cp-primary);
+    outline-offset: 1px;
+  }
   .cp-body-outline {
     fill: none;
     stroke: var(--cp-outline);
@@ -3865,6 +3907,21 @@
     --noise: 0;
   }
 }
+@property --tw-translate-x {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0;
+}
+@property --tw-translate-y {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0;
+}
+@property --tw-translate-z {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0;
+}
 @property --tw-border-style {
   syntax: "*";
   inherits: false;
@@ -4042,6 +4099,9 @@
 @layer properties {
   @supports ((-webkit-hyphens: none) and (not (margin-trim: block))) or ((-moz-orient: inline) and (not (color:rgb(from red r g b)))) {
     *, ::before, ::after, ::backdrop {
+      --tw-translate-x: 0;
+      --tw-translate-y: 0;
+      --tw-translate-z: 0;
       --tw-border-style: solid;
       --tw-gradient-position: initial;
       --tw-gradient-from: #0000;
