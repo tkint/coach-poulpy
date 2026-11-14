@@ -39,6 +39,7 @@ Read [the brand](../brand.md) and [the brand decisions](../brand-decisions.md).
 - Poulpy speaks in short first-person lines, warm and a little cheeky. He says *tu* in French while the app says *vous*.
 - A new reward, notification, pose or reaction rule is written into `docs/brand.md` (and `docs/brand-decisions.md` when it settles an open question) in the same PR. At most one notification a day.
 - Drawings are generated: edit `design/build-poulpy.mjs`, then run `node design/build-poulpy.mjs`.
+- The 3D model is generated too: edit `SHAPE`, `FACES` or `LOOK` in `design/poulpy-3d/model.mjs`, then run `node design/build-poulpy-3d.mjs`. Its rules are on the docs site's Poulpy in 3D page (`site/poulpy-3d.md`); change that page in the same PR as a rule.
 - The body map figures are generated too: edit `design/build-body-map.mjs` or the outlines in `design/body-map-source/` (keep its NOTICE.md), then run `node design/build-body-map.mjs`.
 
 ## Translator: text in every language

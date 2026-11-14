@@ -133,10 +133,11 @@ export default withMermaid(
         [
           [
             'Brand',
-            ['/docs/brand', '/drawings', '/brand-book'],
+            ['/docs/brand', '/drawings', '/poulpy-3d', '/brand-book'],
             [
               { text: 'Poulpy and his moods', link: '/docs/brand' },
               { text: 'Drawings', link: '/drawings' },
+              { text: 'Poulpy in 3D', link: '/poulpy-3d' },
               { text: 'Brand book', link: '/brand-book', collapsed: true, items: brandBookSections },
               { text: 'Brand decisions', link: '/docs/brand-decisions' },
             ],
