@@ -2,9 +2,11 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, within } from 'storybook/test'
 import { ref } from 'vue'
 import { CpSearchField } from '@coach-poulpy/ui'
+import doc from './CpSearchField.md?raw'
 
 const meta = {
   title: 'Fields/SearchField',
+  parameters: { docs: { description: { component: doc } } },
   component: CpSearchField,
   args: { label: 'Search exercises', clearLabel: 'Clear the search', placeholder: 'Search' },
   render: (args) => ({

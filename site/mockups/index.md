@@ -11,6 +11,6 @@ Mockups are split by platform, then by stage:
 - **[Mobile](/mockups/mobile/)**: the Android and iOS apps (phone and tablet screens), drawn with `design/mockups/shared/mockup.css`.
   - [Agreed](/mockups/mobile/agreed): screens the owner validated. The apps are built from these.
   - [Drafts](/mockups/mobile/drafts): screens being explored or redesigned. A draft becomes agreed through a pull request that moves it out of `drafts/`.
-- **[Web](/mockups/web/)**: the websites, drawn with the [web components](/web-components). Each view (for example, Admin · Catalog or Admin · Accounts) has its own page.
+- **[Web](/mockups/web/)**: the websites, drawn with the <WorkshopLink>web components</WorkshopLink>. Each view (for example, Admin · Catalog or Admin · Accounts) has its own page.
   - [Agreed](/mockups/web/agreed)
   - [Drafts](/mockups/web/drafts)

@@ -1,8 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { CpStat, CpStats } from '@coach-poulpy/ui'
+import doc from './CpStats.md?raw'
 
 const meta = {
   title: 'Display/Stats',
+  parameters: { docs: { description: { component: doc } } },
   component: CpStats,
   render: (args) => ({
     components: { CpStats, CpStat },

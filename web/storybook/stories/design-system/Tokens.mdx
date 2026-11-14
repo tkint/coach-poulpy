@@ -1,0 +1,109 @@
+import { Meta, ColorPalette, ColorItem } from '@storybook/addon-docs/blocks'
+import tokens from '../../../../design/tokens.json'
+
+<Meta title="Design system/Tokens" />
+
+# Tokens
+
+Every value below is read from [`design/tokens.json`](https://github.com/tkint/coach-poulpy/blob/main/design/tokens.json) when the workshop is built, the same file that generates the Android, iOS and web themes ([ADR 0012](https://tkint.github.io/coach-poulpy/docs/adr/0012-design-tokens-generated-from-one-file)). How to use them is on the [Rules](?path=/docs/design-system-rules--docs) page.
+
+export const roles = Object.keys(tokens.theme.light).filter((name) => !name.startsWith('on'))
+export const onRole = (role) => {
+  const name = 'on' + role[0].toUpperCase() + role.slice(1)
+  return name in tokens.theme.light ? name : null
+}
+export const family = (font) => (font === 'display' ? "'Baloo 2', sans-serif" : 'Nunito, sans-serif')
+
+## Colour roles
+
+Each role with its text colour, in light and dark.
+
+<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16 }}>
+  {['light', 'dark'].map((mode) => (
+    <div key={mode} style={{ background: tokens.theme[mode].background, border: `1px solid ${tokens.theme[mode].outline}`, borderRadius: 16, padding: 16 }}>
+      <strong style={{ color: tokens.theme[mode].onBackground, textTransform: 'capitalize' }}>{mode}</strong>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: 8, marginTop: 12 }}>
+        {roles.map((role) => (
+          <div key={role} style={{ background: tokens.theme[mode][role], color: onRole(role) ? tokens.theme[mode][onRole(role)] : tokens.theme[mode].onBackground, border: `1px solid ${tokens.theme[mode].outline}`, borderRadius: 12, padding: 10, minHeight: 64, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <span style={{ fontWeight: 800, fontSize: 13 }}>{role}</span>
+            <code style={{ background: 'none', color: 'inherit', fontSize: 12 }}>{tokens.theme[mode][role]}</code>
+          </div>
+        ))}
+      </div>
+    </div>
+  ))}
+</div>
+
+## Mood spectrum
+
+<ColorPalette>
+  {Object.entries(tokens.mood).map(([name, hex]) => (
+    <ColorItem key={name} title={name} subtitle={hex} colors={[hex]} />
+  ))}
+</ColorPalette>
+
+## Palette
+
+{Object.entries(tokens.color).map(([name, steps]) => (
+  <div key={name}>
+    <h3 style={{ textTransform: 'capitalize' }}>{name}</h3>
+    <ColorPalette>
+      {Object.entries(steps).map(([step, hex]) => (
+        <ColorItem key={step} title={step} subtitle={hex} colors={[hex]} />
+      ))}
+    </ColorPalette>
+  </div>
+))}
+
+## Type
+
+{Object.entries(tokens.type).map(([name, role]) => (
+  <div key={name} style={{ display: 'grid', gridTemplateColumns: '90px 1fr auto', alignItems: 'baseline', gap: 16, padding: '8px 0', borderBottom: '1px solid #8883', overflowX: 'auto' }}>
+    <span style={{ fontSize: 12.5, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', opacity: 0.7 }}>{name}</span>
+    <span style={{ fontFamily: family(role.font), fontSize: role.size, lineHeight: `${role.lineHeight}px`, fontWeight: role.weight, letterSpacing: role.tracking ? `${role.tracking}em` : undefined, textTransform: name === 'label' ? 'uppercase' : undefined, fontVariantNumeric: role.tabular ? 'tabular-nums' : undefined }}>
+      {name === 'timer' ? '01:27' : 'Leg day, Poulpy approves'}
+    </span>
+    <code>{role.size} / {role.lineHeight} · {role.weight}</code>
+  </div>
+))}
+
+## Space and radius
+
+{Object.entries(tokens.space).map(([name, px]) => (
+  <div key={name} style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '6px 0' }}>
+    <span style={{ minWidth: 60, fontSize: 12.5, fontWeight: 800, textTransform: 'uppercase', opacity: 0.7 }}>{name}</span>
+    <span style={{ height: 12, width: px * 3, borderRadius: 6, background: 'currentColor', opacity: 0.6 }} />
+    <code>{px}</code>
+  </div>
+))}
+
+<div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginTop: 16 }}>
+  {Object.entries(tokens.radius).map(([name, px]) => (
+    <div key={name} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, fontSize: 13 }}>
+      <span style={{ width: 80, height: 80, borderRadius: Math.min(px, 40), border: '2px solid currentColor', opacity: 0.6 }} />
+      <span>{name} · {px}</span>
+    </div>
+  ))}
+</div>
+
+## Size
+
+<table>
+  <thead><tr><th>Token</th><th>Size</th></tr></thead>
+  <tbody>
+    {Object.entries(tokens.size).map(([name, px]) => (
+      <tr key={name}><td>{name}</td><td>{px}</td></tr>
+    ))}
+  </tbody>
+</table>
+
+## Motion
+
+<table>
+  <thead><tr><th>Token</th><th>Duration</th><th>Easing</th></tr></thead>
+  <tbody>
+    {Object.entries(tokens.motion).map(([name, m]) => (
+      <tr key={name}><td>{name}</td><td>{m.duration} ms</td><td><code>{m.easing ? `cubic-bezier(${m.easing.join(', ')})` : 'standard'}</code></td></tr>
+    ))}
+  </tbody>
+</table>

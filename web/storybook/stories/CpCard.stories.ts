@@ -1,8 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { CpBadge, CpCard } from '@coach-poulpy/ui'
+import doc from './CpCard.md?raw'
 
 const meta = {
   title: 'Display/Card',
+  parameters: { docs: { description: { component: doc } } },
   component: CpCard,
   render: (args) => ({
     components: { CpCard, CpBadge },

@@ -2,9 +2,11 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, within } from 'storybook/test'
 import { ref } from 'vue'
 import { CpButton, CpSheet } from '@coach-poulpy/ui'
+import doc from './CpSheet.md?raw'
 
 const meta = {
   title: 'Overlays/Sheet',
+  parameters: { docs: { description: { component: doc } } },
   component: CpSheet,
   args: { title: 'Delete this workout?', closeLabel: 'Close' },
   render: (args, { argTypes }) => ({

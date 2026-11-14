@@ -17,6 +17,10 @@ const preview: Preview = {
       return { components: { story }, template: '<div class="bg-base-200 p-4"><story /></div>' }
     },
   ],
-  parameters: { layout: 'fullscreen', a11y: { test: 'error' } },
+  parameters: {
+    layout: 'fullscreen',
+    a11y: { test: 'error' },
+    options: { storySort: { order: ['Design system', ['Introduction', 'Rules', 'Tokens'], '*'] } },
+  },
 }
 export default preview

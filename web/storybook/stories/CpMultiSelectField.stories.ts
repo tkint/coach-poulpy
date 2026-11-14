@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, within } from 'storybook/test'
 import { ref } from 'vue'
 import { CpMultiSelectField } from '@coach-poulpy/ui'
+import doc from './CpMultiSelectField.md?raw'
 
 const options = [
   { value: 'quadriceps', text: 'Quadriceps' },
@@ -11,6 +12,7 @@ const options = [
 ]
 const meta = {
   title: 'Fields/MultiSelectField',
+  parameters: { docs: { description: { component: doc } } },
   component: CpMultiSelectField,
   args: { label: 'Muscles', placeholder: 'Any muscle', options, noneLabel: 'No muscle matches' },
   render: (args) => ({

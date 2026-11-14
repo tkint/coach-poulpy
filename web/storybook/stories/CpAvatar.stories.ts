@@ -1,8 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, within } from 'storybook/test'
 import { CpAvatar } from '@coach-poulpy/ui'
+import doc from './CpAvatar.md?raw'
 
-const meta = { title: 'Display/Avatar', component: CpAvatar, args: { initials: 'AM' } } satisfies Meta<typeof CpAvatar>
+const meta = { title: 'Display/Avatar', component: CpAvatar, args: { initials: 'AM' }, parameters: { docs: { description: { component: doc } } } } satisfies Meta<typeof CpAvatar>
 export default meta
 type Story = StoryObj<typeof meta>
 

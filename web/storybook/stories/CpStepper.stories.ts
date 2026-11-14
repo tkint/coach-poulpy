@@ -2,9 +2,11 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, within } from 'storybook/test'
 import { ref } from 'vue'
 import { CpStepper } from '@coach-poulpy/ui'
+import doc from './CpStepper.md?raw'
 
 const meta = {
   title: 'Fields/Stepper',
+  parameters: { docs: { description: { component: doc } } },
   component: CpStepper,
   args: { label: 'Rest', valueText: '90 s', lessLabel: 'Less rest', moreLabel: 'More rest', step: 15, min: 30, max: 120 },
   render: (args) => ({

@@ -55,6 +55,8 @@ while (queue.length > 0) {
 // Agent guidance remains published for direct links from CLAUDE.md, but is intentionally
 // omitted from the human-facing sidebar and therefore isn't part of the navigation graph.
 for (const page of pages(dist)) {
+  // The component workshop is a static site of its own (ADR 0028): its entry page must be linked, its other files are its own.
+  if (page.startsWith('storybook/') && page !== 'storybook/index.html') continue
   if (!reached.has(page) && !page.startsWith('docs/agents/')) {
     problems.push(`${page} is built but no link reaches it: add it to the sidebar in .vitepress/config.mts.`)
   }

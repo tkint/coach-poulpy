@@ -2,9 +2,11 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, within } from 'storybook/test'
 import { ref } from 'vue'
 import { CpPagination } from '@coach-poulpy/ui'
+import doc from './CpPagination.md?raw'
 
 const meta = {
   title: 'Navigation/Pagination',
+  parameters: { docs: { description: { component: doc } } },
   component: CpPagination,
   args: { pages: 12, previousLabel: 'Previous page', nextLabel: 'Next page', navLabel: 'Pages' },
   render: (args) => ({
