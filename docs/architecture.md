@@ -144,6 +144,7 @@ The phone database is the source of truth; the server is its replica ([ADR 0001]
 
 - Device-generated ids are UUIDv7 ([ADR 0005](./adr/0005-ids-are-uuidv7-made-on-the-device.md)).
 - The catalog is curated, separate from personal-data sync, and updated without an account ([ADR 0008](./adr/0008-curated-catalog-with-stable-slugs.md), [ADR 0026](./adr/0026-the-server-holds-the-catalog-as-a-draft-and-published-versions.md)).
+- The website reads the account's workouts from the API and gets their wording on request with `include=text`; the shared Kotlin builds it, so the website keeps no copy ([ADR 0027](./adr/0027-the-api-says-the-words-on-request.md)).
 - The server's Postgres schema uses SQLDelight migrations, applied on start ([ADR 0022](./adr/0022-the-servers-schema-is-sqldelight-migrations-on-postgres.md)).
 
 ## Devices

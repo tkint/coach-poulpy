@@ -19,6 +19,7 @@ import ch.coachpoulpy.server.websiteOrigin
 import ch.coachpoulpy.server.websiteUrl
 import ch.coachpoulpy.server.db.Database
 import ch.coachpoulpy.server.sync.Sync
+import ch.coachpoulpy.server.workouts.WorkoutLibrary
 import org.http4k.contract.ContractRoute
 import org.http4k.contract.contract
 import org.http4k.contract.openapi.ApiInfo
@@ -71,6 +72,8 @@ fun apiRoutes(
     deleteMeRoute(accountDeletion),
     pushRoute(sync),
     pullRoute(sync),
+    workoutsRoute(WorkoutLibrary(database, catalog)),
+    workoutRoute(WorkoutLibrary(database, catalog)),
     tokenRoute(signIns),
     revokeRoute(signIns),
 ) + webSessionRoutes(signIns, cookies) + adminRoutes(

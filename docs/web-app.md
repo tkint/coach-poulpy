@@ -25,7 +25,7 @@ The agreed layouts and states are documented in the Web app mockups on the docs 
 
 - **Sign in** is the landing route. An already signed-in person goes straight to the profile. Invalid credentials produce one generic refusal, without revealing which field was wrong.
 - **Status**, at `/status`, is public and reports only whether Coach Poulpy is up or down; it does not expose server configuration ([admin status](./admin.md#status)).
-- **Profile** shows the account email and confirmation state, offers a password-reset email, and explains that workouts, body measurements and profile fields remain on the phone. The website exposes only server-held account data; `sync` is a scope of the apps ([Accounts](./accounts.md#sync)).
+- **Profile** shows the account email and confirmation state, offers a password-reset email, and explains that workouts, body measurements and profile fields remain on the phone. The website reads what the phones synced through the API's read routes (workouts first, [ADR 0027](./adr/0027-the-api-says-the-words-on-request.md)) and never writes it: the phone stays the source of truth.
 
 ## Not yet
 

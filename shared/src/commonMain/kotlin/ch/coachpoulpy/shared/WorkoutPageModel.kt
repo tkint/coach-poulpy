@@ -13,6 +13,7 @@ import ch.coachpoulpy.data.local.LocalStore
 import ch.coachpoulpy.data.local.PlannedWorkout
 import ch.coachpoulpy.data.local.StoredSession
 import kotlin.time.Clock
+import kotlin.time.Instant
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -104,6 +105,9 @@ data class WorkoutPageState(
     val painNote: String = "",
 )
 
+/** The past sessions of a workout that really happened: when each started and its active minutes. */
+data class WorkoutHistory(val startedAt: List<Instant> = emptyList(), val activeMinutes: List<Int> = emptyList())
+
 /** What deleting a workout asks: "Delete Upper body?", then what goes and what stays. */
 data class DeletePrompt(val title: String, val message: String)
 
@@ -142,7 +146,7 @@ class WorkoutPageModel internal constructor(
     private val painAreas: () -> List<String> = { emptyList() },
 ) {
     private val labels = Labels(languageCode, units)
-    private val facts = WorkoutFacts(compiler, catalog, labels)
+    private val builder = WorkoutPageBuilder(catalog, labels, WorkoutFacts(compiler, catalog, labels))
 
     val state: StateFlow<WorkoutPageState> =
         combine(store.workouts(), store.plannedWorkouts(), store.finishedSessions(), ::build)
@@ -169,13 +173,33 @@ class WorkoutPageModel internal constructor(
         val done = sessions.filter { it.counts && it.record.workout?.workoutId == workoutId }
         val doneToday = done.any { it.record.startedAt.toLocalDateTime(zone).date == today }
         val upcoming = upcomingDays(plans, workoutId, today, doneToday, zone)
-        val minutes = done.mapNotNull { it.realTotals?.active?.inWholeMinutes?.toInt() }.sorted()
+        return builder.state(
+            workout,
+            history = WorkoutHistory(done.map { it.record.startedAt }, done.mapNotNull { it.realTotals?.active?.inWholeMinutes?.toInt() }),
+            plans = upcoming,
+            painAreas = painAreas(),
+        )
+    }
+}
+
+/**
+ * What a workout's page says, from the workout and its past sessions. The phone's page and the
+ * server's `GET /workouts/{id}` both build it here, so the words and the muscle heat are decided once.
+ */
+internal class WorkoutPageBuilder(private val catalog: Catalog, private val labels: Labels, private val facts: WorkoutFacts) {
+    fun state(
+        workout: Workout,
+        history: WorkoutHistory,
+        plans: List<PlannedDay> = emptyList(),
+        painAreas: List<String> = emptyList(),
+    ): WorkoutPageState {
+        val minutes = history.activeMinutes.sorted()
         val equipment = exerciseSteps(workout).mapNotNull { catalog[it.exercise] }
             .flatMap { it.equipment.flatten() }
             .distinct()
             .map { labels.equipment(it) }
         val muscles = WorkoutMuscles.of(workout, catalog, labels)
-        val hurting = BodyMap.valid(painAreas()).filter { it in muscles.heat }
+        val hurting = BodyMap.valid(painAreas).filter { it in muscles.heat }
         return WorkoutPageState(
             loaded = true,
             found = true,
@@ -186,11 +210,11 @@ class WorkoutPageModel internal constructor(
             details = listOf(labels.exercises(exerciseSteps(workout).size), labels.aboutMinutes(facts.minutes(workout))).joinToString(" · "),
             equipment = equipment,
             parts = parts(workout),
-            timesDone = done.size,
-            lastDoneMillis = done.maxOfOrNull { it.record.startedAt }?.toEpochMilliseconds(),
+            timesDone = history.startedAt.size,
+            lastDoneMillis = history.startedAt.maxOrNull()?.toEpochMilliseconds(),
             usualMinutes = minutes.getOrNull(minutes.size / 2)?.coerceAtLeast(1),
-            plans = upcoming,
-            deletePrompt = labels.deletePrompt(workout.name, upcoming.size, done.size),
+            plans = plans,
+            deletePrompt = labels.deletePrompt(workout.name, plans.size, history.startedAt.size),
             editable = WorkoutDraft.from(workout, catalog) != null,
             muscles = muscles.loads,
             heat = muscles.heat,
