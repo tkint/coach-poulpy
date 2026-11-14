@@ -15,3 +15,6 @@ export function t(id: string, args: Record<string, string> = {}): string {
   if (typeof found !== 'string') throw new Error(`No web message ${id}`)
   return found.replace(/\{(\w+)\}/g, (whole, name: string) => args[name] ?? whole)
 }
+
+/** The languages the website ships, which are the ones the catalog's text must be written in. */
+export const shippedLanguages = Object.keys(messages)
