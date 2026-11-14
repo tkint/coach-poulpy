@@ -1,9 +1,11 @@
 ---
-status: accepted, amended by 0026
+status: accepted, amended by 0026, catalog version superseded by 0030
 date: 2026-10-26
 ---
 
 # Catalog text lives in translation files
+
+> **Superseded in part by [ADR 0030](./0030-the-catalog-changes-by-exercise-revision-not-by-catalog-version.md):** the catalog `version` and the CI check that raises it are replaced by per-exercise revisions. Text in translation files, keyed by slug, still holds for the bundled catalog.
 
 Amends [ADR 0008](./0008-curated-catalog-with-stable-slugs.md).
 
