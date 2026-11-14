@@ -1,6 +1,7 @@
-import { defineComponent, h, onMounted, ref } from 'vue'
+import { createApp, defineComponent, h, onMounted, ref } from 'vue'
 import { poulpyDrawings } from '@coach-poulpy/ui'
 import { enableReorder } from './reorder'
+import { mobileComponents } from '../components'
 import styles from './screens.css?inline'
 
 // A phone or tablet screen of the apps (ADR 0029): its markup is plain HTML next to the story, drawn with
@@ -21,8 +22,14 @@ const Screen = defineComponent({
       const root = host.value!.attachShadow({ mode: 'open' })
       // A screen shown behind a sheet (?embedded) drops its device edge, as the sheet's own frame is the one on show.
       const embedded = new URLSearchParams(location.search).has('embedded') ? ' cp-screen--embedded' : ''
-      // The stylesheet comes first, so a screen's own <style> rules (later in the markup) win ties, as they did in the old pages.
-      root.innerHTML = `<style>${styles}</style><div class="cp-screen${embedded}">${markupOf(props.markup)}</div>`
+      // The markup is a Vue template, so a screen can use the mobile components. Its own <style> blocks are lifted out
+      // (a template drops them) and kept after the stylesheet, so they still win ties, as they did in the old pages.
+      const styleBlocks: string[] = []
+      const template = markupOf(props.markup).replace(/<style>([\s\S]*?)<\/style>/g, (_, css: string) => (styleBlocks.push(css), ''))
+      root.innerHTML = `<style>${[styles, ...styleBlocks].join('\n')}</style><div class="cp-screen${embedded}"></div>`
+      const app = createApp({ components: mobileComponents, template })
+      app.config.compilerOptions.whitespace = 'preserve'
+      app.mount(root.querySelector('.cp-screen') as HTMLElement)
       if (props.reorder) enableReorder(root.querySelector('.cp-screen') as HTMLElement)
     })
     return () => h('div', { ref: host, style: 'display: contents' })
