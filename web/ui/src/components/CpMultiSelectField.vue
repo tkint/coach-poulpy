@@ -2,8 +2,9 @@
 // Choosing any number of values from a long list. It is a button that opens a panel only while it is used: a
 // search box narrows the list and each match is a checkbox. The button says how many are picked. Escape or a
 // click elsewhere closes the panel.
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, ref } from 'vue'
 import { ChevronDown } from '@lucide/vue'
+import { useDismissable } from '../dismissable'
 
 const props = defineProps<{
   label: string
@@ -22,23 +23,7 @@ const shown = computed(() => {
 })
 const toggle = (value: string, on: boolean) => (picked.value = on ? [...picked.value, value] : picked.value.filter((one) => one !== value))
 
-const close = () => {
-  if (root.value) root.value.open = false
-}
-const outside = (event: Event) => {
-  if (root.value?.open && !root.value.contains(event.target as Node)) close()
-}
-const escape = (event: KeyboardEvent) => {
-  if (event.key === 'Escape') close()
-}
-onMounted(() => {
-  document.addEventListener('pointerdown', outside)
-  document.addEventListener('keydown', escape)
-})
-onBeforeUnmount(() => {
-  document.removeEventListener('pointerdown', outside)
-  document.removeEventListener('keydown', escape)
-})
+useDismissable(root)
 </script>
 
 <template>
