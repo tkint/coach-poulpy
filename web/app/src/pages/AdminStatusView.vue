@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// The status screen of the admin (design/mockups/agreed/web/admin-status*.html), at /admin/status (#340): whether
+// The status screen of the admin (the Web/Screens/Admin/Status stories in the component workshop), at /admin/status (#340): whether
 // the server has a mail server and how the last email went, then the accounts that haven't confirmed their email.
 // It only reads; the mail server is set in the server's environment and no email is sent from here.
 import { computed, onMounted, ref } from 'vue'
