@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Web app · sign in</title>
+<meta name="mockup:screen" content="app-sign-in">
+<meta name="mockup:section" content="Web app">
+<meta name="mockup:issue" content="355">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../../../web/ui/src/tokens.css">
+<link rel="stylesheet" href="../../../../web/ui/poulpy-ui.css">
+<script src="../../shared/mockup-theme.js"></script>
+</head>
+<body class="bg-base-100 text-base-content min-h-screen">
+<header class="mx-auto flex max-w-5xl items-center gap-2 px-4 pt-6 md:px-8" data-component="site-header">
+  <img src="../../../poulpy/mood_happy.svg" alt="" width="36" height="36">
+  <span class="cp-type-headline">Coach <span class="text-primary">poulpy</span></span>
+</header>
+<main class="mx-auto grid max-w-5xl items-center gap-8 px-4 py-10 md:grid-cols-2 md:gap-16 md:px-8 md:py-24" id="sign-in">
+  <img src="../../../poulpy/pose_standing_tall.svg" alt="" width="320" height="290" class="w-40 justify-self-center md:w-80">
+  <div class="flex max-w-md flex-col gap-6">
+    <div class="flex flex-col gap-2">
+      <h1 class="cp-type-display">Sign in</h1>
+      <p>Your account, on the web.</p>
+    </div>
+    <form class="flex flex-col gap-6" id="sign-in-form">
+      <div class="cp-fieldset" data-component="email-field">
+        <label class="cp-type-label" for="email">Email</label>
+        <label class="cp-input w-full">
+          <input id="email" type="email" class="grow" value="ana@example.com" autocomplete="username">
+        </label>
+      </div>
+      <div class="cp-fieldset" data-component="password-field" id="password-field">
+        <label class="cp-type-label" for="password">Password</label>
+        <label class="cp-input w-full">
+          <input id="password" type="password" class="grow" value="correct horse" autocomplete="current-password">
+          <button type="button" class="cp-btn cp-btn-circle cp-btn-ghost cp-btn-sm" aria-label="Show password" aria-pressed="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="eye"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg></button>
+        </label>
+      </div>
+      <a class="cp-btn cp-btn-xl cp-btn-primary w-full" data-component="button" href="app-profile.html">Sign in</a>
+    </form>
+  </div>
+</main>
+</body>
+</html>
