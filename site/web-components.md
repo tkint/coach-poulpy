@@ -92,7 +92,7 @@ Primary, tonal, outline, ghost (a quieter cancel beside a save), grumpy and dang
 
 | Vue | Classes |
 | --- | --- |
-| `<CpSegmentedControl>` | `div.cp-join[role=group]` of `button.cp-join-item.cp-btn.cp-btn-sm` (`cp-btn-active` for the picked one, `aria-current`), with the alert icon (`svg.size-4.text-error`) after a flagged option's text |
+| `<CpSegmentedControl>` | `div.cp-join[role=group]` of `button.cp-join-item.cp-btn` (`cp-btn-primary` for the picked one, `cp-btn-outline` for the others, `aria-current`), with the alert icon (`svg.size-4.text-error`) after a flagged option's text |
 
 ## Dropdown menu
 

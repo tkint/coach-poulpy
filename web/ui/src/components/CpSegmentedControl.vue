@@ -14,8 +14,8 @@ const value = defineModel<string>()
       v-for="option in options"
       :key="option.value"
       type="button"
-      class="cp-join-item cp-btn cp-btn-sm gap-1"
-      :class="{ 'cp-btn-active': option.value === value }"
+      class="cp-join-item cp-btn gap-1"
+      :class="option.value === value ? 'cp-btn-primary' : 'cp-btn-outline'"
       :aria-current="option.value === value ? 'true' : undefined"
       @click="value = option.value"
     >
