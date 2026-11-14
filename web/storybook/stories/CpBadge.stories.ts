@@ -18,3 +18,5 @@ export const Outline: Story = { args: { tone: 'outline' } }
 // CLEANUP: the success colour is 3.1:1 on the light badge background, below 4.5:1; fix the badge's tone, then drop this exemption.
 export const Success: Story = { parameters: { a11y: { test: 'todo' } }, args: { tone: 'success' } }
 export const Error: Story = { args: { tone: 'error' } }
+/** Under a field, saying where its translation stands. */
+export const Small: Story = { args: { tone: 'neutral', small: true } }

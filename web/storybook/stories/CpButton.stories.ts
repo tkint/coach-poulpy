@@ -15,6 +15,8 @@ type Story = StoryObj<typeof meta>
 export const Primary: Story = { args: { variant: 'primary', size: 'xl' } }
 export const Tonal: Story = { args: { variant: 'tonal', size: 'xl' } }
 export const Outline: Story = { args: { variant: 'outline', size: 'xl' } }
+/** A quieter cancel beside a save. */
+export const Ghost: Story = { args: { variant: 'ghost', size: 'xl' } }
 export const Grumpy: Story = { args: { variant: 'grumpy', size: 'xl' } }
 /** Crimson, for a deletion that cannot be undone. */
 export const Danger: Story = { args: { variant: 'danger', size: 'xl' } }

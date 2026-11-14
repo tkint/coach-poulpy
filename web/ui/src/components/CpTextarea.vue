@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { nextTick, onBeforeUnmount, onMounted, useId, watch, useTemplateRef } from 'vue'
 
-// A multiline field that grows with its content. The model stays the source of truth; resizing
+// A multiline field that grows with its content (the `status` slot, under the hint, takes a badge saying where a translated text stands). The model stays the source of truth; resizing
 // also runs after external model changes and when the available width changes and text re-wraps.
 const props = withDefaults(
   defineProps<{
@@ -69,6 +69,7 @@ onBeforeUnmount(() => observer?.disconnect())
       :aria-describedby="hint ? `${id}-hint` : undefined"
     />
     <p v-if="hint" :id="`${id}-hint`" class="cp-label whitespace-normal">{{ hint }}</p>
+    <slot name="status" />
   </div>
 </template>
 

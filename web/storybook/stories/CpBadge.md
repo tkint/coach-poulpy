@@ -7,3 +7,4 @@
 | `<CpBadge tone="outline">` | `cp-badge cp-badge-outline` |
 | `<CpBadge tone="success">` | `cp-badge cp-badge-success cp-badge-soft` |
 | `<CpBadge tone="error">` | `cp-badge cp-badge-error cp-badge-soft gap-1` with the alert icon (`svg.size-3`) before the words |
+| `<CpBadge small>` | adds `cp-badge-sm`, for the badge under a field that says where its translation stands; an error draws no icon |

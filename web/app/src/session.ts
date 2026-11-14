@@ -188,16 +188,30 @@ export async function pendingRegistrations(): Promise<PendingRegistration[] | un
 }
 
 
+/** An exercise as the catalog's JSON has it: texts are maps from language to string, enums are uppercase words. Fields the editor doesn't edit (pictures) travel as they came. */
+export type ExerciseJson = {
+  slug: string
+  name: Record<string, string>
+  aliases?: Record<string, string[]>
+  movementPattern: string
+  muscleGroups: string[]
+  /** Each need is the alternatives of which one must be at hand. */
+  equipment?: string[][]
+  optionalEquipment?: string[]
+  measurement: string
+  perSide?: boolean
+  focus?: string[]
+  positions?: string[]
+  jumps?: boolean
+  instructions?: Record<string, string>[]
+  variationNote?: Record<string, string>
+  retired?: boolean
+  [other: string]: unknown
+}
+
 /** One exercise of the catalog draft as the admin lists it: the catalog's JSON, whether a version holds it, what changed since and the shipped languages it lacks. */
 export type CatalogExercise = {
-  exercise: {
-    slug: string
-    name: Record<string, string>
-    movementPattern: string
-    muscleGroups: string[]
-    positions?: string[]
-    retired?: boolean
-  }
+  exercise: ExerciseJson
   published: boolean
   change: 'added' | 'edited' | 'retired' | 'offered' | null
   missing: string[]
@@ -228,6 +242,48 @@ export async function listCatalogExercises(query: CatalogQuery): Promise<Catalog
   try {
     const response = await authorized(`/admin/catalog/exercises?${params}`)
     return response.ok ? ((await response.json()) as CatalogPage) : undefined
+  } catch {
+    return undefined
+  }
+}
+
+/** One exercise of the draft, or nothing when it doesn't exist or can't be loaded. */
+export async function getCatalogExercise(slug: string): Promise<CatalogExercise | undefined> {
+  try {
+    const response = await authorized(`/admin/catalog/exercises/${encodeURIComponent(slug)}`)
+    return response.ok ? ((await response.json()) as CatalogExercise) : undefined
+  } catch {
+    return undefined
+  }
+}
+
+/** What saving an exercise answered: the saved exercise, a slug that is taken or published, the reason the server refused it, or that it couldn't be reached. */
+export type SaveExerciseAnswer = { saved: CatalogExercise } | { error: 'slug-taken' | 'slug-published' | 'unknown-exercise' | 'invalid-exercise' | 'failed'; reason?: string }
+
+/** Adds [exercise] to the draft, or with a [slug] replaces that exercise of it. */
+export async function saveCatalogExercise(slug: string | undefined, exercise: ExerciseJson): Promise<SaveExerciseAnswer> {
+  try {
+    const response = await authorized(slug ? `/admin/catalog/exercises/${encodeURIComponent(slug)}` : '/admin/catalog/exercises', slug ? 'PUT' : 'POST', exercise)
+    if (response.ok) return { saved: (await response.json()) as CatalogExercise }
+    const problem = (await response.json().catch(() => ({}))) as { error?: string; reason?: string }
+    const known = ['slug-taken', 'slug-published', 'unknown-exercise', 'invalid-exercise'] as const
+    const error = known.find((one) => one === problem.error)
+    return error ? { error, reason: problem.reason } : { error: 'failed' }
+  } catch {
+    return { error: 'failed' }
+  }
+}
+
+/** One changed field of an edited exercise: its path in the exercise JSON, such as `name.fr`, and its value in the latest version and in the draft (null when absent). */
+export type FieldChange = { field: string; before: unknown; after: unknown }
+
+/** The fields of one exercise that its draft changed since the latest version; empty when it has none, nothing when it can't be loaded. */
+export async function changedFields(slug: string): Promise<FieldChange[] | undefined> {
+  try {
+    const response = await authorized('/admin/catalog/changes')
+    if (!response.ok) return undefined
+    const changes = (await response.json()) as { edited: { slug: string; fields: FieldChange[] }[] }
+    return changes.edited.find((one) => one.slug === slug)?.fields ?? []
   } catch {
     return undefined
   }

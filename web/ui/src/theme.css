@@ -181,6 +181,18 @@
     fill: var(--cp-heat3);
     stroke: var(--cp-heat3);
   }
+  /* An area the person can tap (CpBodyMap with interactive): a pointer, and a ring when it has the keyboard focus. */
+  .cp-body-part-pick {
+    cursor: pointer;
+  }
+  .cp-body-part-pick:hover {
+    stroke: var(--cp-primary);
+    stroke-width: 2;
+  }
+  .cp-body-part-pick:focus-visible {
+    outline: 2px solid var(--cp-primary);
+    outline-offset: 1px;
+  }
   .cp-body-outline {
     fill: none;
     stroke: var(--cp-outline);

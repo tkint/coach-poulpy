@@ -6,7 +6,7 @@
 // /admin/catalog?q=squat&pattern=squat&muscles=glutes,quadriceps&translation=incomplete&sort=-change,name&page=2.
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { ChevronDown, ChevronUp, ChevronsUpDown, EllipsisVertical } from '@lucide/vue'
-import { CpBadge, CpCard, CpCheckbox, CpChip, CpDropdownMenu, CpErrorNote, CpMultiSelectField, CpPagination, CpPoulpyCard, CpSearchField, CpSelectField, CpTable } from '@coach-poulpy/ui'
+import { CpBadge, CpButton, CpCard, CpCheckbox, CpChip, CpDropdownMenu, CpErrorNote, CpMultiSelectField, CpPagination, CpPoulpyCard, CpSearchField, CpSelectField, CpTable } from '@coach-poulpy/ui'
 import { listCatalogExercises, type CatalogExercise, type CatalogQuery, type CatalogSort } from '../session'
 import { domainLabel, domainOptions } from '../catalogText'
 import { navigate, search, withParams } from '../route'
@@ -236,6 +236,7 @@ watch(
         <CpMultiSelectField v-model="positions" :label="t('admin.filterPositions')" :placeholder="t('admin.filterPositionsPlaceholder')" :options="positionOptions" :none-label="t('admin.filterNoMatch')" />
         <CpMultiSelectField v-model="equipment" :label="t('admin.filterEquipment')" :placeholder="t('admin.filterEquipmentPlaceholder')" :options="equipmentOptions" :none-label="t('admin.filterNoMatch')" />
         <button type="button" class="cp-link cp-link-hover text-sm" :class="{ invisible: !filtered }" :tabindex="filtered ? undefined : -1" :aria-hidden="!filtered" @click="clearFilters">{{ t('admin.filtersClear') }}</button>
+        <CpButton size="md" class="ms-auto" @click="navigate('/admin/catalog/new')">{{ t('admin.exerciseNew') }}</CpButton>
       </div>
       <CpErrorNote v-if="state === 'failed'">{{ t('admin.catalogError') }}</CpErrorNote>
       <CpPoulpyCard v-else-if="state === 'ready' && total === 0" :title="t('admin.catalogNone')">{{ t('admin.catalogNoneHint') }}</CpPoulpyCard>
@@ -271,8 +272,7 @@ watch(
               <td class="text-center"><CpCheckbox v-model="rowBoxes[row.exercise.slug].value" :label="t('admin.catalogSelectOne', { name: english(row) })" /></td>
               <td>
                 <div class="flex flex-col">
-                  <!-- CLEANUP: the name becomes a link to the exercise's editor with the editor of #388. -->
-                  <span class="text-start font-semibold">{{ english(row) }}</span>
+                  <a :href="`/admin/catalog/${row.exercise.slug}`" class="cp-link cp-link-hover text-start font-semibold" @click.prevent="navigate(`/admin/catalog/${row.exercise.slug}`)">{{ english(row) }}</a>
                   <span class="text-sm text-base-content/70">{{ french(row) }} · {{ row.exercise.slug }}</span>
                 </div>
               </td>

@@ -4,7 +4,7 @@ import en from '../../../i18n/messages/en/domain.json'
 import fr from '../../../i18n/messages/fr/domain.json'
 import { locale } from './i18n'
 
-type Group = 'muscle' | 'equipment' | 'pattern' | 'position'
+type Group = 'muscle' | 'equipment' | 'pattern' | 'position' | 'measurement' | 'focus'
 const domain: Record<string, Record<string, Record<string, string>>> = { en, fr } as never
 
 /** `quadriceps`, `pull_up_bar` or `QUADRICEPS` becomes the label of `muscle.quadriceps`, `equipment.pullUpBar`. */
