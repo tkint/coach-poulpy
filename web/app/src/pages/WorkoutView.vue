@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// One workout (design/mockups/agreed/web/app-workout.html): its stats and the muscles it works on the left, its parts with
+// One workout (design/mockups/agreed/web/app-workout.html): its stats and the muscles it works in a column on the right, its parts with
 // their steps on the right, read-only. On a phone the stats and muscles open in a sheet, kept in the URL as ?overview=1.
 // The address is /workouts/<id>. The words come from the API, the same as the phone's.
 import { computed, ref, watch } from 'vue'
@@ -76,10 +76,7 @@ const here = computed(() => `${workoutsPath}/${encodeURIComponent(props.id)}`)
         </p>
       </div>
       <a :href="`${here}?overview=1`" class="cp-btn cp-btn-outline lg:hidden" aria-haspopup="dialog" @click.prevent="overview = true">{{ t('app.overviewButton') }}</a>
-      <div class="grid items-start gap-6 lg:grid-cols-[22rem_minmax(0,1fr)]">
-        <div class="hidden flex-col gap-6 lg:sticky lg:top-8 lg:flex" role="region" :aria-label="t('app.overviewLabel')">
-          <WorkoutOverview :workout="workout" card />
-        </div>
+      <div class="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
         <div class="flex flex-col gap-6">
           <CpCard v-for="{ part, lines } in numbered" :key="part.key">
             <div class="flex items-center gap-3">
@@ -104,6 +101,9 @@ const here = computed(() => `${workoutsPath}/${encodeURIComponent(props.id)}`)
               </table>
             </div>
           </CpCard>
+        </div>
+        <div class="hidden flex-col gap-6 lg:sticky lg:top-8 lg:flex" role="region" :aria-label="t('app.overviewLabel')">
+          <WorkoutOverview :workout="workout" card />
         </div>
       </div>
       <CpCard :title="t('app.changeOnPhoneTitle')">

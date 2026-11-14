@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// A workout's stats and the muscles it works: the left column of the workout page on a wide screen, the sheet on a phone.
+// A workout's stats and the muscles it works: the right column of the workout page on a wide screen, the sheet on a phone.
 // The stats and the body map are two blocks of their own, side by side in the column, never grouped in one card.
 import { computed } from 'vue'
 import { CpBodyMap, CpCard, CpStat, CpStats } from '@coach-poulpy/ui'
