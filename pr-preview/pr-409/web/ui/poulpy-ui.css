@@ -19,6 +19,7 @@
     --text-sm--line-height: calc(1.25 / 0.875);
     --text-2xl: 1.5rem;
     --text-2xl--line-height: calc(2 / 1.5);
+    --font-weight-normal: 400;
     --font-weight-semibold: 600;
     --font-weight-bold: 700;
     --default-font-family: var(--font-sans);
@@ -1305,291 +1306,6 @@
     border-width: 0;
   }
   @layer daisyui.l1.l2.l3 {
-    .cp-select {
-      position: relative;
-      display: inline-flex;
-      flex-shrink: 1;
-      appearance: none;
-      align-items: center;
-      gap: calc(0.25rem * 1.5);
-      background-color: var(--color-base-100);
-      padding-inline-start: calc(0.25rem * 3);
-      padding-inline-end: calc(0.25rem * 7);
-      vertical-align: middle;
-      --cp-size: calc(var(--size-field, 0.25rem) * var(--cp-sl-size-mul, 10));
-      --cp-input-color: var(--color-base-content);
-    }
-    @supports (color: color-mix(in lab, red, red)) {
-      .cp-select {
-        --cp-input-color: color-mix(in oklab, var(--color-base-content) 20%, #0000);
-      }
-    }
-    .cp-select {
-      width: clamp(3rem, 20rem, 100%);
-      height: var(--cp-size);
-      font-size: max(var(--cp-font-size, 0rem), var(--cp-font-size-min, 0.875rem));
-      touch-action: manipulation;
-      border-start-start-radius: var(--cp-join-ss, var(--radius-field));
-      border-start-end-radius: var(--cp-join-se, var(--radius-field));
-      border-end-start-radius: var(--cp-join-es, var(--radius-field));
-      border-end-end-radius: var(--cp-join-ee, var(--radius-field));
-      background-image: linear-gradient(45deg, #0000 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, #0000 50%);
-      background-position: calc(100% - 20px) calc(1px + 50%), calc(100% - 16.1px) calc(1px + 50%);
-      background-size: 4px 4px, 4px 4px;
-      background-repeat: no-repeat;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      border: var(--border) solid var(--cp-input-color, #0000);
-      box-shadow: 0 1px var(--cp-input-color) inset, 0 -1px oklch(100% 0 0 / calc(var(--depth) * 0.1)) inset;
-    }
-    @supports (color: color-mix(in lab, red, red)) {
-      .cp-select {
-        box-shadow: 0 1px color-mix(in oklab, var(--cp-input-color) calc(var(--depth) * 10%), #0000) inset, 0 -1px oklch(100% 0 0 / calc(var(--depth) * 0.1)) inset;
-      }
-    }
-    [dir="rtl"] .cp-select {
-      background-position: calc(0% + 12px) calc(1px + 50%), calc(0% + 16px) calc(1px + 50%);
-    }
-    .cp-select[multiple] {
-      height: auto;
-      overflow: auto;
-      padding-block: calc(0.25rem * 3);
-      padding-inline-end: calc(0.25rem * 3);
-      background-image: none;
-    }
-    .cp-select select {
-      margin-inline-start: calc(0.25rem * -3);
-      margin-inline-end: calc(0.25rem * -7);
-      width: calc(100% + 2.75rem);
-      appearance: none;
-      padding-inline-start: calc(0.25rem * 3);
-      padding-inline-end: calc(0.25rem * 7);
-      height: calc(100% - calc(var(--border) * 2));
-      align-items: center;
-      background: inherit;
-      border-radius: inherit;
-      border-style: none;
-    }
-    .cp-select select::placeholder {
-      color: var(--color-base-content);
-      opacity: 50%;
-    }
-    .cp-select select:focus, .cp-select select:focus-within {
-      --tw-outline-style: none;
-      outline-style: none;
-      @media (forced-colors: active) {
-        outline: 2px solid transparent;
-        outline-offset: 2px;
-      }
-    }
-    .cp-select select:not(:last-child) {
-      margin-inline-end: calc(0.25rem * -5.5);
-      background-image: none;
-    }
-    .cp-select:focus {
-      --cp-input-color: var(--color-base-content);
-      box-shadow: 0 1px var(--cp-input-color);
-    }
-    @supports (color: color-mix(in lab, red, red)) {
-      .cp-select:focus {
-        box-shadow: 0 1px color-mix(in oklab, var(--cp-input-color) calc(var(--depth) * 10%), #0000);
-      }
-    }
-    .cp-select:focus {
-      outline: 2px solid var(--cp-input-color);
-      outline-offset: 2px;
-    }
-    .cp-select:focus-within {
-      --cp-input-color: var(--color-base-content);
-      box-shadow: 0 1px var(--cp-input-color);
-    }
-    @supports (color: color-mix(in lab, red, red)) {
-      .cp-select:focus-within {
-        box-shadow: 0 1px color-mix(in oklab, var(--cp-input-color) calc(var(--depth) * 10%), #0000);
-      }
-    }
-    .cp-select:focus-within {
-      outline: 2px solid var(--cp-input-color);
-      outline-offset: 2px;
-    }
-    .cp-select:open {
-      --cp-input-color: var(--color-base-content);
-      box-shadow: 0 1px var(--cp-input-color);
-    }
-    @supports (color: color-mix(in lab, red, red)) {
-      .cp-select:open {
-        box-shadow: 0 1px color-mix(in oklab, var(--cp-input-color) calc(var(--depth) * 10%), #0000);
-      }
-    }
-    .cp-select:open {
-      outline: 2px solid var(--cp-input-color);
-      outline-offset: 2px;
-      background-image: linear-gradient(135deg, #0000 50%, currentColor 50%), linear-gradient(45deg, currentColor 50%, #0000 50%);
-    }
-    @supports (appearance: base-select) {
-      :is(:is(.cp-select), .cp-select select) {
-        appearance: base-select;
-      }
-      :is(:is(.cp-select), .cp-select select)::picker(select) {
-        appearance: base-select;
-      }
-    }
-    :is(:is(.cp-select), .cp-select select)::picker(select) {
-      color: inherit;
-      max-height: min(24rem, 70dvh);
-      margin-inline: 0.5rem;
-      translate: -0.5rem 0;
-      border: var(--border) solid var(--color-base-200);
-      margin-block: calc(0.25rem * 2);
-      border-radius: var(--radius-box);
-      padding: calc(0.25rem * 2);
-      background-color: inherit;
-      box-shadow: 0 2px calc(var(--depth) * 3px) -2px oklch(0% 0 0/0.2);
-      box-shadow: 0 20px 25px -5px rgb(0 0 0 / calc(var(--depth) * 0.1)), 0 8px 10px -6px rgb(0 0 0 / calc(var(--depth) * 0.1));
-    }
-    :is(:is(.cp-select), .cp-select select)::picker-icon {
-      display: none;
-    }
-    :is(:is(.cp-select), .cp-select select) selectedcontent {
-      width: 100%;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-    :is(:is(.cp-select), .cp-select select) optgroup {
-      padding-top: 0.5em;
-    }
-    :is(:is(.cp-select), .cp-select select) optgroup option:nth-child(1) {
-      margin-top: 0.5em;
-    }
-    :is(:is(.cp-select), .cp-select select) optgroup {
-      padding-top: 0.5em;
-    }
-    :is(:is(.cp-select), .cp-select select) optgroup option:nth-child(1) {
-      margin-top: 0.5em;
-    }
-    :is(:is(.cp-select), .cp-select select) option {
-      border-radius: var(--radius-field);
-      padding-block: calc(0.25rem * 1.5);
-      padding-inline: calc(0.25rem * var(--cp-option-px, 3));
-      transition-property: color, background-color;
-      transition-duration: 0.2s;
-      transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
-      white-space: normal;
-    }
-    :is(:is(.cp-select), .cp-select select) option:not(:disabled):hover, :is(:is(.cp-select), .cp-select select) option:not(:disabled):focus-visible {
-      cursor: pointer;
-      background-color: var(--color-base-content);
-      @supports (color: color-mix(in lab, red, red)) {
-        background-color: color-mix(in oklab, var(--color-base-content) 10%, transparent);
-      }
-      --tw-outline-style: none;
-      outline-style: none;
-      @media (forced-colors: active) {
-        outline: 2px solid transparent;
-        outline-offset: 2px;
-      }
-    }
-    :is(:is(.cp-select), .cp-select select) option:not(:disabled):active {
-      background-color: var(--color-neutral);
-      color: var(--color-neutral-content);
-      box-shadow: 0 2px calc(var(--depth) * 3px) -2px var(--color-neutral);
-    }
-    :is(:is(.cp-select), .cp-select select) option {
-      border-radius: var(--radius-field);
-      padding-block: calc(0.25rem * 1.5);
-      padding-inline: calc(0.25rem * var(--cp-option-px, 3));
-      transition-property: color, background-color;
-      transition-duration: 0.2s;
-      transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
-      white-space: normal;
-    }
-    :is(:is(.cp-select), .cp-select select) option:not(:disabled):hover, :is(:is(.cp-select), .cp-select select) option:not(:disabled):focus-visible {
-      cursor: pointer;
-      background-color: var(--color-base-content);
-      @supports (color: color-mix(in lab, red, red)) {
-        background-color: color-mix(in oklab, var(--color-base-content) 10%, transparent);
-      }
-      --tw-outline-style: none;
-      outline-style: none;
-      @media (forced-colors: active) {
-        outline: 2px solid transparent;
-        outline-offset: 2px;
-      }
-    }
-    :is(:is(.cp-select), .cp-select select) option:not(:disabled):active {
-      background-color: var(--color-neutral);
-      color: var(--color-neutral-content);
-      box-shadow: 0 2px calc(var(--depth) * 3px) -2px var(--color-neutral);
-    }
-    [dir="rtl"] .cp-select::picker(select) {
-      translate: 0.5rem 0;
-    }
-    [dir="rtl"] .cp-select select::picker(select) {
-      translate: 0.5rem 0;
-    }
-  }
-  @layer daisyui.l1.l2 {
-    .cp-select:has( > select[disabled]) {
-      cursor: not-allowed;
-      border-color: var(--color-base-200);
-      background-color: var(--color-base-200);
-    }
-    .cp-select:has( > select[disabled]):is(select), .cp-select:has( > select[disabled])  :is(select) {
-      color: var(--color-base-content);
-      @supports (color: color-mix(in lab, red, red)) {
-        color: color-mix(in oklab, var(--color-base-content) 40%, transparent);
-      }
-    }
-    .cp-select:has( > select[disabled]) {
-      box-shadow: none;
-    }
-    .cp-select:has( > select[disabled])::placeholder, .cp-select:has( > select[disabled])  ::placeholder {
-      color: var(--color-base-content);
-      opacity: 20%;
-    }
-    .cp-select:is(:disabled, [disabled]) {
-      cursor: not-allowed;
-      border-color: var(--color-base-200);
-      background-color: var(--color-base-200);
-    }
-    .cp-select:is(:disabled, [disabled]):is(select), .cp-select:is(:disabled, [disabled])  :is(select) {
-      color: var(--color-base-content);
-      @supports (color: color-mix(in lab, red, red)) {
-        color: color-mix(in oklab, var(--color-base-content) 40%, transparent);
-      }
-    }
-    .cp-select:is(:disabled, [disabled]) {
-      box-shadow: none;
-    }
-    .cp-select:is(:disabled, [disabled])::placeholder, .cp-select:is(:disabled, [disabled])  ::placeholder {
-      color: var(--color-base-content);
-      opacity: 20%;
-    }
-    fieldset:disabled .cp-select {
-      cursor: not-allowed;
-      border-color: var(--color-base-200);
-      background-color: var(--color-base-200);
-    }
-    fieldset:disabled .cp-select:is(select), fieldset:disabled .cp-select  :is(select) {
-      color: var(--color-base-content);
-      @supports (color: color-mix(in lab, red, red)) {
-        color: color-mix(in oklab, var(--color-base-content) 40%, transparent);
-      }
-    }
-    fieldset:disabled .cp-select {
-      box-shadow: none;
-    }
-    fieldset:disabled .cp-select::placeholder, fieldset:disabled .cp-select  ::placeholder {
-      color: var(--color-base-content);
-      opacity: 20%;
-    }
-    .cp-select:has( > select[disabled]) > select[disabled] {
-      cursor: not-allowed;
-    }
-  }
-  @layer daisyui.l1.l2.l3 {
     .cp-avatar-group .cp-avatar {
       overflow: hidden;
       border-radius: calc(infinity * 1px);
@@ -2568,30 +2284,6 @@
         border-inline-start: var(--border) solid color-mix(in oklab, currentColor 10%, #0000);
       }
     }
-    .cp-label:is(.cp-input > *, .cp-select > *) {
-      display: flex;
-      height: calc(100% - 0.5rem);
-      align-items: center;
-      padding-inline: calc(0.25rem * 3);
-      white-space: nowrap;
-      font-size: inherit;
-    }
-    .cp-label:is(.cp-input > *, .cp-select > *):first-child {
-      margin-inline-start: calc(0.25rem * -3);
-      margin-inline-end: calc(0.25rem * 3);
-      border-inline-end: var(--border) solid currentColor;
-      @supports (color: color-mix(in lab, red, red)) {
-        border-inline-end: var(--border) solid color-mix(in oklab, currentColor 10%, #0000);
-      }
-    }
-    .cp-label:is(.cp-input > *, .cp-select > *):last-child {
-      margin-inline-start: calc(0.25rem * 3);
-      margin-inline-end: calc(0.25rem * -3);
-      border-inline-start: var(--border) solid currentColor;
-      @supports (color: color-mix(in lab, red, red)) {
-        border-inline-start: var(--border) solid color-mix(in oklab, currentColor 10%, #0000);
-      }
-    }
   }
   .cp-join-item {
     @layer daisyui.l1.l2.l3.l4 {
@@ -2867,6 +2559,9 @@
   .max-h-40 {
     max-height: calc(var(--spacing) * 40);
   }
+  .max-h-60 {
+    max-height: calc(var(--spacing) * 60);
+  }
   .max-h-\[90vh\] {
     max-height: 90vh;
   }
@@ -2903,6 +2598,9 @@
   .w-56 {
     width: calc(var(--spacing) * 56);
   }
+  .w-60 {
+    width: calc(var(--spacing) * 60);
+  }
   .w-64 {
     width: calc(var(--spacing) * 64);
   }
@@ -2915,6 +2613,9 @@
   .w-full {
     width: 100%;
   }
+  .w-max {
+    width: max-content;
+  }
   .max-w-2xl {
     max-width: var(--container-2xl);
   }
@@ -2924,6 +2625,9 @@
   .max-w-5xl {
     max-width: var(--container-5xl);
   }
+  .max-w-80 {
+    max-width: calc(var(--spacing) * 80);
+  }
   .max-w-full {
     max-width: 100%;
   }
@@ -2932,6 +2636,9 @@
   }
   .min-w-0 {
     min-width: 0px;
+  }
+  .min-w-full {
+    min-width: 100%;
   }
   .flex-1 {
     flex: 1;
@@ -3282,6 +2989,10 @@
     --tw-font-weight: var(--font-weight-bold);
     font-weight: var(--font-weight-bold);
   }
+  .font-normal {
+    --tw-font-weight: var(--font-weight-normal);
+    font-weight: var(--font-weight-normal);
+  }
   .font-semibold {
     --tw-font-weight: var(--font-weight-semibold);
     font-weight: var(--font-weight-semibold);
@@ -3372,15 +3083,6 @@
       --cp-spin-my: -2;
     }
     .cp-floating-label:has(.cp-input-sm) {
-      --cp-top-mul: 4;
-      --cp-font-size: 0.75rem;
-    }
-    .cp-select-sm {
-      --cp-sl-size-mul: 8;
-      --cp-font-size-min: 0.75rem;
-      --cp-option-px: 2.5;
-    }
-    .cp-floating-label:has(.cp-select-sm) {
       --cp-top-mul: 4;
       --cp-font-size: 0.75rem;
     }
