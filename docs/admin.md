@@ -11,7 +11,7 @@ The admin area is where the maintainer looks after the catalog, the accounts and
 
 ## The screens
 
-The admin lives at `/admin` ([agreed shell mockup](./../design/mockups/agreed/web/admin-shell.html)). A member who signs in is immediately signed out with the same "wrong email or password" message as any other refusal, so the sign-in flow does not disclose the account's role. The admin shell links to the audit log, accounts, settings and status; its **Coach Poulpy app** link returns to [the web app](./web-app.md).
+The admin lives at `/admin` ([agreed shell story](https://tkint.github.io/coach-poulpy/storybook/?path=/story/web-screens-admin-audit-log--default)). A member who signs in is immediately signed out with the same "wrong email or password" message as any other refusal, so the sign-in flow does not disclose the account's role. The admin shell links to the audit log, accounts, settings and status; its **Coach Poulpy app** link returns to [the web app](./web-app.md).
 
 ## Accounts
 

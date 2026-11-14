@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// The accounts screen of the admin (design/mockups/agreed/web/admin-accounts*.html): a paged table of every
+// The accounts screen of the admin (the Web/Screens/Admin/Accounts stories in the component workshop): a paged table of every
 // account, sorted and filtered on the server, with the account picked in a panel floating on the right where it
 // is disabled, enabled or deleted after typing its email again (#336). It never shows a workout or health data.
 // The table's state lives in the URL (route.ts): /admin/accounts?q=lea&role=admin&sort=email&order=asc&page=2&account=<id>.
