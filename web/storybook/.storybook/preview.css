@@ -9,3 +9,4 @@
 @import "@coach-poulpy/ui/theme.css";
 @source "../../ui/src/components";
 @source "../stories";
+@import "../stories/mobile/mobile.css";
