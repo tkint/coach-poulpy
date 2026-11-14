@@ -5,5 +5,5 @@ import { withBase } from 'vitepress'
 </script>
 
 <template>
-  <a :href="withBase('/storybook/index.html')" target="_self"><slot /></a>
+  <a :href="withBase('/storybook/index.html')" target="_blank" rel="noopener"><slot /></a>
 </template>

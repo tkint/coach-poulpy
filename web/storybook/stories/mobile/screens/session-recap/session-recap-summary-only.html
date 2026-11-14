@@ -1,0 +1,104 @@
+<style>.cp-screen .workout-map { position: absolute; left: 0; right: 0; top: 0; display: flex; flex-direction: column; align-items: center; padding-top: var(--figure-top); gap: var(--cp-space-lg); }.cp-screen .workout-map .body-map { gap: var(--cp-space-sm); }.cp-screen .workout-map .body-view svg { width: var(--figure-width); height: var(--figure-height); }.cp-screen .workout-map .body-part,
+.cp-screen .heat-legend .body-part { fill: transparent; stroke: var(--cp-outline); }.cp-screen .body-part[data-heat="1"],
+.cp-screen .heat-legend .body-part[data-heat="1"] { fill: var(--cp-heat1); stroke: var(--cp-heat2); }.cp-screen .body-part[data-heat="2"],
+.cp-screen .heat-legend .body-part[data-heat="2"] { fill: var(--cp-heat2); stroke: var(--cp-heat3); }.cp-screen .body-part[data-heat="3"],
+.cp-screen .heat-legend .body-part[data-heat="3"] { fill: var(--cp-heat3); stroke: var(--cp-heat3); }.cp-screen .pain-halo { fill: none; stroke: var(--cp-background); stroke-width: 5; stroke-linejoin: round; }.cp-screen .pain-outline { fill: none; stroke: var(--cp-pain); stroke-width: 3; stroke-linejoin: round; }.cp-screen .pain-note { border-radius: var(--cp-radius-md); background: var(--cp-primary-container); color: var(--cp-on-primary-container); padding: 10px var(--cp-space-md) 10px 10px; display: flex; align-items: center; gap: 10px; font-size: 15px; line-height: 20px; font-weight: 700; }.cp-screen .pain-note img { width: 44px; height: 44px; }.cp-screen .heat-legend { position: absolute; left: 50%; top: 60px; transform: translateX(-50%); }.cp-screen .heat-legend { display: flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 800; color: var(--cp-on-surface-variant); }.cp-screen .heat-legend svg { width: 14px; height: 14px; }.cp-screen .heat-legend rect { stroke-width: 1.2; }.cp-screen .muscle-summary { max-width: 300px; text-align: center; font-size: 15px; line-height: 21px; font-weight: 700; color: var(--cp-on-surface-variant); }.cp-screen .muscle-summary strong { color: var(--cp-on-background); font-weight: 800; }.cp-screen .workout-badges { position: absolute; right: var(--cp-space-lg); bottom: 26px; display: flex; gap: 6px; }.cp-screen .badge { height: 30px; padding: 0 var(--cp-space-md) 0 10px; border-radius: var(--cp-radius-pill); background: var(--cp-surface); border: 1px solid var(--cp-outline); color: var(--cp-on-surface); font-size: 13.5px; font-weight: 800; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }.cp-screen .badge--format { background: var(--cp-primary-container); border-color: var(--cp-primary-container); color: var(--cp-on-primary-container); }.cp-screen .floating { position: absolute; top: var(--cp-space-xxxl); z-index: 2; border: 1px solid var(--cp-outline); }.cp-screen .floating--start { left: var(--cp-space-lg); }.cp-screen .floating--end { right: var(--cp-space-lg); }.cp-screen .detail-sheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 1; border-radius: var(--cp-radius-lg) var(--cp-radius-lg) 0 0; background: var(--cp-surface); color: var(--cp-on-surface); box-shadow: 0 -1px 0 var(--cp-outline); display: flex; flex-direction: column; overflow: hidden; }.cp-screen .detail-sheet--full { border-radius: 0; box-shadow: none; }.cp-screen .sheet-drag { flex: none; display: flex; justify-content: center; padding: 10px 0 var(--cp-space-xs); }.cp-screen .sheet-content { flex: 1; min-height: 0; overflow: hidden; padding: var(--cp-space-xs) var(--cp-space-lg) var(--cp-space-lg); display: flex; flex-direction: column; gap: var(--cp-space-md); }.cp-screen .detail-sheet--full .sheet-drag { padding-top: 68px; }.cp-screen .detail-sheet--full .sheet-content { padding-top: 28px; }.cp-screen .detail-sheet .action-bar { padding-bottom: 34px; }.cp-screen .plan-summary { border-radius: var(--cp-radius-md); background: var(--cp-primary-container); color: var(--cp-on-primary-container); padding: 10px 10px 10px var(--cp-space-md); display: flex; align-items: center; gap: 10px; }.cp-screen .plan-summary div { flex: 1; min-width: 0; display: flex; flex-direction: column; }.cp-screen .plan-summary strong { font-size: 15px; line-height: 20px; font-weight: 800; }.cp-screen .plan-summary span { font-size: 14px; line-height: 19px; font-weight: 700; font-variant-numeric: tabular-nums; }.cp-screen .plan-summary a { min-height: 40px; padding: 0 var(--cp-space-md); border-radius: var(--cp-radius-pill); background: var(--cp-surface); color: var(--cp-on-surface); font-size: 14px; font-weight: 800; display: flex; align-items: center; white-space: nowrap; }.cp-screen .section-label { margin: var(--cp-space-xs) var(--cp-space-xs) 0; }.cp-screen .muscle-rows { display: flex; flex-direction: column; gap: 10px; padding: 0 var(--cp-space-xs); }.cp-screen .muscle-rows li { display: grid; grid-template-columns: 92px 1fr 52px; align-items: center; gap: 10px; font-size: 15px; font-weight: 800; }.cp-screen .muscle-rows .bar { height: 10px; border-radius: var(--cp-radius-pill); background: var(--cp-surface-variant); overflow: hidden; }.cp-screen .muscle-rows .bar span { display: block; height: 100%; border-radius: var(--cp-radius-pill); background: var(--cp-heat3); }.cp-screen .muscle-rows .bar span[data-heat="1"] { background: var(--cp-heat1); }.cp-screen .muscle-rows .bar span[data-heat="2"] { background: var(--cp-heat2); }.cp-screen .muscle-rows em { font-style: normal; text-align: right; color: var(--cp-on-surface-variant); font-variant-numeric: tabular-nums; }.cp-screen .workout-map{--figure-width:100px;--figure-height:223px;--figure-top:92px}.cp-screen .muscle-summary{display:none}
+.cp-screen .recap-head { display: flex; flex-direction: column; gap: 2px; }
+.cp-screen .recap-head p { font-size: 14px; line-height: 19px; color: var(--cp-on-surface-variant); }
+.cp-screen .workout-row { min-height: 56px; padding-right: var(--cp-space-md); }
+.cp-screen .detail-sheet .workout-badges { position: static; flex-wrap: wrap; }
+
+.cp-screen .workout-map{--figure-width:100px;--figure-height:223px;--figure-top:92px}
+.cp-screen .muscle-summary{display:none}
+.cp-screen .recap-head p { font-size: 14px; line-height: 19px; color: var(--cp-on-surface-variant); }
+.cp-screen .recap-poulpy img { width: 170px; height: 153px; }
+.cp-screen .floating-group { position: absolute; top: var(--cp-space-xxxl); right: var(--cp-space-lg); z-index: 2; display: flex; gap: var(--cp-space-sm); }
+.cp-screen .floating-group .icon-button { border: 1px solid var(--cp-outline); }
+.cp-screen .recap-head { display: flex; flex-direction: column; gap: 2px; }
+.cp-screen .recap-part { display: flex; flex-direction: column; gap: var(--cp-space-sm); }
+.cp-screen .recap-exercise { border-radius: var(--cp-radius-md); background: var(--cp-background); border: 1px solid var(--cp-outline); padding: 10px var(--cp-space-md) var(--cp-space-md); display: flex; flex-direction: column; gap: 10px; }
+.cp-screen .recap-exercise header { display: flex; align-items: center; gap: 10px; }
+.cp-screen .recap-exercise header strong { flex: 1; min-width: 0; font-weight: 800; font-size: 16px; line-height: 22px; }
+.cp-screen .recap-exercise header .row-icon { width: 36px; height: 36px; align-self: center; }
+.cp-screen .recap-exercise header > span:last-child { font-size: 13.5px; font-weight: 700; color: var(--cp-on-surface-variant); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.cp-screen .recap-exercise .note { font-size: 14px; line-height: 19px; color: var(--cp-on-surface-variant); font-variant-numeric: tabular-nums; margin-top: -6px; }
+.cp-screen .recap-row { min-height: 64px; }
+.cp-screen .recap-row .row-icon { flex: none; }
+.cp-screen .recap-row .row-count { flex: none; display: flex; flex-direction: column; align-items: flex-end; text-align: right; font-variant-numeric: tabular-nums; }
+.cp-screen .recap-row .row-count strong { font-weight: 800; font-size: 16px; line-height: 22px; }
+.cp-screen .recap-row .row-count span { font-size: 13.5px; line-height: 18px; color: var(--cp-on-surface-variant); font-weight: 700; }
+.cp-screen .recap-row .row-count .skip { display: inline-flex; align-items: center; gap: var(--cp-space-xs); }
+.cp-screen .set-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.cp-screen .set-chip { height: 30px; padding: 0 var(--cp-space-md) 0 var(--cp-space-xs); border-radius: var(--cp-radius-pill); background: var(--cp-primary-container); color: var(--cp-on-primary-container); font-size: 13.5px; font-weight: 800; font-variant-numeric: tabular-nums; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.cp-screen .set-chip b { width: 22px; height: 22px; border-radius: var(--cp-radius-pill); background: var(--cp-surface); color: var(--cp-on-surface); font-size: 12px; display: flex; align-items: center; justify-content: center; }
+.cp-screen .set-chip small { font-size: 12.5px; font-weight: 700; opacity: 0.8; }
+.cp-screen .set-chip--skipped { background: transparent; border: 1.5px dashed var(--cp-outline); color: var(--cp-on-surface-variant); font-weight: 700; padding-right: 10px; }
+.cp-screen .set-chip--skipped b { background: var(--cp-surface-variant); color: var(--cp-on-surface-variant); }
+.cp-screen .set-chip--skipped svg { flex: none; }
+.cp-screen .run-facts { display: grid; grid-template-columns: 1fr; gap: var(--cp-space-xs); font-size: 14px; line-height: 19px; font-variant-numeric: tabular-nums; }
+.cp-screen .run-facts div { display: flex; justify-content: space-between; gap: var(--cp-space-sm); }
+.cp-screen .run-facts dt { color: var(--cp-on-surface-variant); font-weight: 600; }
+.cp-screen .run-facts dd { margin: 0; font-weight: 800; }
+.cp-screen .recap-poulpy { position: absolute; left: 0; right: 0; top: 0; height: 400px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--cp-space-lg); padding-top: var(--cp-space-xxxl); }
+.cp-screen .recap-poulpy img { width: 210px; height: 189px; }
+.cp-screen .recap-poulpy p { max-width: 280px; text-align: center; font-size: 15px; line-height: 21px; font-weight: 700; color: var(--cp-on-surface-variant); }
+
+/* Readability pass: discreet part blocks, smaller rows, buttons and radii, tighter padding. */
+.cp-screen .phone { --recap-radius: var(--cp-radius-sm); }
+.cp-screen .detail-sheet { border-radius: var(--cp-radius-lg) var(--cp-radius-lg) 0 0; }
+.cp-screen .detail-sheet--full { border-radius: 0; }
+.cp-screen .sheet-content { padding-left: var(--cp-space-lg); padding-right: var(--cp-space-lg); gap: var(--cp-space-sm); }
+.cp-screen .detail-sheet--full .sheet-drag { padding-top: 56px; }
+.cp-screen .detail-sheet--full .sheet-content { padding-top: var(--cp-space-xl); }
+.cp-screen .recap-head h1 { font: var(--cp-type-headline); }
+.cp-screen .stat-tile { border-radius: var(--recap-radius); padding: 6px 10px; }
+.cp-screen .stat-tile strong { font-size: 17px; line-height: 22px; }
+.cp-screen .floating svg,
+.cp-screen .floating-group svg { width: 18px; height: 18px; }
+.cp-screen .floating-group { gap: 6px; }
+.cp-screen .recap-part { background: var(--cp-background); border-radius: var(--recap-radius); padding: 2px 10px 0; gap: 0; }
+.cp-screen .recap-part .part-header { padding: 6px 0; gap: var(--cp-space-sm); }
+.cp-screen .recap-part .part-icon { width: 24px; height: 24px; }
+.cp-screen .recap-part .part-icon svg { width: 14px; height: 14px; }
+.cp-screen .recap-part .part-header h2 { font-size: 15px; line-height: 20px; }
+.cp-screen .recap-part .part-header p { font-size: 12.5px; line-height: 16px; }
+.cp-screen .recap-part .steps { gap: 0; }
+.cp-screen .recap-row.list-row { background: transparent; border: 0; border-top: 1px solid var(--cp-outline); border-radius: 0; padding: 6px 0; min-height: 0; gap: 10px; }
+.cp-screen .recap-row .row-icon { width: 32px; height: 32px; }
+.cp-screen .recap-row .row-icon svg { width: 18px; height: 18px; }
+.cp-screen .recap-row .row-text strong { font-size: 15px; line-height: 20px; }
+.cp-screen .recap-row .row-text > span { font-size: 13px; line-height: 17px; }
+.cp-screen .section-label { margin: 0 var(--cp-space-xs); }
+
+/* Part blocks: an outlined rectangle, its avatar and title sitting on the top border. */
+.cp-screen .recap-part { position: relative; margin-top: var(--cp-space-md); background: transparent; border: 1px solid var(--cp-outline); padding: var(--cp-space-md) 10px 0; }
+.cp-screen .recap-part .part-header { position: absolute; top: -13px; left: 8px; max-width: calc(100% - 16px); padding: 0 6px; gap: 6px; background: var(--cp-surface); align-items: center; }
+.cp-screen .recap-part .part-header > div { display: flex; align-items: baseline; gap: var(--cp-space-sm); min-width: 0; }
+.cp-screen .recap-part .part-header h2 { color: var(--cp-primary); font-size: 15px; line-height: 20px; white-space: nowrap; }
+.cp-screen .recap-part .part-header p { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cp-screen .recap-part .steps > li:first-child .recap-row.list-row { border-top: 0; }
+/* Part titles are legends: the border breaks around them, so they need no background of their own. */
+.cp-screen fieldset.recap-part { min-inline-size: 0; margin: var(--cp-space-md) 0 0; padding: 0 10px; border: 1px solid var(--cp-outline); border-radius: var(--recap-radius); }
+.cp-screen fieldset.recap-part .part-header { position: static; display: block; max-width: 100%; margin-left: 2px; padding: 0 6px; background: transparent; }
+.cp-screen fieldset.recap-part .part-header > .part-title { display: flex; align-items: center; gap: 6px; padding: 0; }
+.cp-screen fieldset.recap-part .part-title > div { display: flex; align-items: baseline; gap: var(--cp-space-sm); min-width: 0; }
+</style>
+<main class="phone">
+  <section class="recap-poulpy" id="session-poulpy"><img src="../../../poulpy/mood_happy.svg" alt="Poulpy, happy"></section>
+  <section class="detail-sheet" id="session-details" data-component="detail-sheet" aria-label="Session details" style="top: 392px;">
+    <div class="sheet-drag"><button type="button" class="sheet-handle" data-component="sheet-handle" aria-label="Drag up for the exercises"></button></div>
+    <div class="sheet-content">
+      <div id="session-summary" class="recap-head">
+        <h1 class="headline" style="font: var(--cp-type-headline);">Easy walk</h1>
+        <p>Mon 19 Oct 2026, 08:45 · Walk</p>
+      </div>
+      <div class="stat-tiles" id="session-facts"><div class="stat-tile" data-component="stat-tile"><span class="label">Time</span><strong>12:10</strong></div><div class="stat-tile" data-component="stat-tile"><span class="label">Distance</span><strong>0.8 km</strong></div><div class="stat-tile" data-component="stat-tile"><span class="label">Speed</span><strong>3.9 km/h</strong></div></div>
+      
+    </div>
+  </section>
+  <a class="icon-button icon-button--filled floating floating--start" data-component="icon-button" href="#" aria-label="Back"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="chevron-left"><path d="m15 18-6-6 6-6"/></svg></a>
+  <div class="floating-group">
+    <a class="icon-button icon-button--filled" data-component="icon-button" href="#" aria-label="Share this session"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="share-2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/></svg></a>
+    <a class="icon-button icon-button--filled" data-component="icon-button" href="#" aria-label="Delete this session"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="trash"><path d="M10 11v6"/><path d="M14 11v6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></a>
+  </div>
+</main>

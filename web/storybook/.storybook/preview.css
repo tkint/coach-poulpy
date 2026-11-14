@@ -9,4 +9,7 @@
 @import "@coach-poulpy/ui/theme.css";
 @source "../../ui/src/components";
 @source "../stories";
+@source not "../stories/mobile/screens";
 @import "../stories/mobile/mobile.css";
+/* A screen shown behind a sheet is another story in an iframe, which fills it. */
+html[data-embedded], html[data-embedded] body, html[data-embedded] #storybook-root { height: 100%; margin: 0; padding: 0; }

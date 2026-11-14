@@ -24,6 +24,8 @@ features:
   - title: Design system
     details: Colour roles, type, spacing and every web component in each state, in the Storybook workshop.
     link: /storybook/index.html
+    target: _blank
+    rel: noopener
   - title: Architecture
     details: Local-first apps over one Kotlin Multiplatform core, and the decisions behind it.
     link: /docs/architecture

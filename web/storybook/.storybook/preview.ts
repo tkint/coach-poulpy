@@ -14,6 +14,8 @@ const preview: Preview = {
   decorators: [
     (story, context) => {
       document.documentElement.dataset.theme = context.globals.theme
+      // A screen shown behind a sheet is another screen's story, framed by the sheet's: it drops its device edge.
+      document.documentElement.toggleAttribute('data-embedded', new URLSearchParams(location.search).has('embedded'))
       // A popover opens past its component, and the docs page clips whatever leaves the story's box:
       // stories that declare `parameters.popover` keep room below for it.
       // A screen draws its own page, edge to edge.
