@@ -1,0 +1,29 @@
+{
+  "name": "@coach-poulpy/storybook",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "The component workshop for the websites' design system (ADR 0028): every web/ui component in each of its states, with interaction and accessibility checks.",
+  "scripts": {
+    "dev": "storybook dev -p 6006",
+    "build": "storybook build -o dist",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@coach-poulpy/ui": "*",
+    "vue": "^3.5.44"
+  },
+  "devDependencies": {
+    "@storybook/addon-a11y": "10.6.7",
+    "@storybook/addon-docs": "10.6.7",
+    "@storybook/addon-vitest": "10.6.7",
+    "@storybook/vue3-vite": "10.6.7",
+    "@tailwindcss/vite": "4.3.5",
+    "@vitejs/plugin-vue": "^6.0.10",
+    "@vitest/browser-playwright": "5.1.0",
+    "playwright": "1.65.1",
+    "storybook": "10.6.7",
+    "tailwindcss": "4.3.5",
+    "vitest": "5.1.0"
+  }
+}

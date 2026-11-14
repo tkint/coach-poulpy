@@ -4,10 +4,12 @@
   "type": "module",
   "workspaces": [
     "ui",
-    "app"
+    "app",
+    "storybook"
   ],
   "scripts": {
     "build": "npm run build -w ui && npm run build -w app",
-    "dev": "npm run dev -w app"
+    "dev": "npm run dev -w app",
+    "storybook": "npm run dev -w storybook"
   }
 }
