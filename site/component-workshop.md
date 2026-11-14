@@ -6,7 +6,7 @@ outline: [2, 2]
 
 Every component of [`web/ui`](web/ui/package.json) in each of its states, from [Storybook](https://storybook.js.org) ([ADR 0028](/docs/adr/0028-storybook-is-the-component-workshop-of-the-design-system)). Each state is a story, and each story runs as a test in CI: a panel that is open on load, a button that stays enabled when it should not, a missing label or a colour with too little contrast fails the build. The [Web components](/web-components) page holds the classes each component renders, for web mockups.
 
-[Open the whole workshop](/storybook/index.html){target="_self"}: the component list on the left, a **Docs** page per component that lists all its states one under the other, the light and dark switch in the toolbar and an accessibility panel under each story.
+<WorkshopLink>Open the whole workshop</WorkshopLink>: the component list on the left, a **Docs** page per component that lists all its states one under the other, the light and dark switch in the toolbar and an accessibility panel under each story.
 
 ## Select field
 
