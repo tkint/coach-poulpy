@@ -108,7 +108,7 @@ Suggested next step if the owner agrees: a spike that adds three MDX pages to `w
 
 ## Sources
 
-- Histoire npm record (versions and dates, peer ranges): <https://registry.npmjs.org/histoire,> <https://registry.npmjs.org/histoire/1.0.0-beta.1,> <https://registry.npmjs.org/@histoire/plugin-vue/1.0.0-beta.1,> <https://registry.npmjs.org/@histoire/plugin-a11y>
+- Histoire npm record (versions and dates, peer ranges): <https://registry.npmjs.org/histoire,> <https://registry.npmjs.org/histoire/1.0.0-beta.1,> <https://registry.npmjs.org/@histoire/plugin-vue/1.0.0-beta.1,> `https://registry.npmjs.org/@histoire/plugin-a11y` (a 404, so not published)
 - Histoire changelog: <https://raw.githubusercontent.com/histoire-dev/histoire/main/CHANGELOG.md>
 - Histoire releases: <https://github.com/histoire-dev/histoire/releases>
 - Histoire `main` package manifest and engines: <https://raw.githubusercontent.com/histoire-dev/histoire/main/package.json,> <https://raw.githubusercontent.com/histoire-dev/histoire/main/packages/histoire/package.json>
