@@ -4,7 +4,8 @@ import tailwindcss from '@tailwindcss/vite'
 
 const config: StorybookConfig = {
   framework: '@storybook/vue3-vite',
-  stories: ['../stories/**/*.stories.ts'],
+  stories: ['../stories/**/*.stories.ts', '../stories/**/*.mdx'],
+  staticDirs: [{ from: '../../../design/mockups', to: '/design/mockups' }],
   addons: ['@storybook/addon-a11y', '@storybook/addon-docs', '@storybook/addon-vitest'],
   // The Poulpy theme is built here, with the stories as a source, so a story may use a Tailwind utility.
   viteFinal: (viteConfig) => ({
