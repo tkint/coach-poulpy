@@ -1,12 +1,13 @@
 <script setup lang="ts">
-// The body map: the front and back figure, drawn from the apps' shapes (design/body-map.json). `front` and `back` say which
-// areas are lit, `front-injury` and `back-injury` which hurt; all four take the same object, an area by its name ('biceps',
-// 'lower-back'...) with its side ('left', 'right' or 'both', the person's own left and right) or `{ side, heat }`.
-// `heat` runs from 1 (a little) to 3 (most) and a bare side means 3; an injury is drawn in the pain colour, its `heat` how much it
-// hurts. `description` says in words what the picture shows, since the figure alone is not readable by a screen reader.
+// The body map: the front and back figure, drawn from the apps' shapes (design/body-map.json). `heat` says which areas are
+// lit and `injury` which hurt; both take the same object, an area by its name ('biceps', 'lower-back'...) with its side
+// ('left', 'right' or 'both', the person's own left and right) or `{ side, heat }`. An area is drawn on the figure that has it.
+// `heat` in the object runs from 1 (a little) to 3 (most) and a bare side means 3; an injury is drawn in the pain colour, its
+// `heat` how much it hurts. `description` says in words what the picture shows, since the figure alone is not readable by a screen reader.
 // `layout` shows the front, the back or both; `legend` puts the Less to More scale on top, on the right or hides it.
 // With `interactive`, an area `areaLabel` names is a button (`pick` says its area and side, `aria-pressed` says whether it is
-// lit), so the picture is a field: a screen that does this writes its own legend, or none, by leaving `less` and `more` out.
+// lit) and a pick updates `v-model:heat` or `v-model:injury` (`editing` says which); `interactive-mode` says whether a tap takes
+// the side tapped or both sides. A screen that does this writes its own legend, or none, with the legend `hidden`.
 import { computed } from 'vue'
 import shapes from '../../../../design/body-map.json'
 
@@ -17,16 +18,12 @@ export type BodyAreas = Record<string, BodyAreaValue>
 
 type Region = { key: string | null; d: string; skin: boolean }
 const props = defineProps<{
-  /** Areas lit on both figures, for a form: `v-model` also updates it when an area is picked, and `front` and `back` still win over it. */
-  modelValue?: BodyAreas
-  /** Areas that hurt on both figures, for a form: `v-model:injury`. `front-injury` and `back-injury` win over it. */
+  /** What is lit; `v-model:heat` in a form. */
+  heat?: BodyAreas
+  /** What hurts; `v-model:injury` in a form. */
   injury?: BodyAreas
-  /** What a pick edits with `interactive`: the areas lit (the default) or the `injury`. */
-  editing?: 'areas' | 'injury'
-  front?: BodyAreas
-  back?: BodyAreas
-  frontInjury?: BodyAreas
-  backInjury?: BodyAreas
+  /** What a pick edits with `interactive`: the `heat` (the default) or the `injury`. */
+  editing?: 'heat' | 'injury'
   /** Wider shoulders (the default) or Wider hips. */
   figure?: 'shoulders' | 'hips'
   captions: { front: string; back: string }
@@ -43,7 +40,7 @@ const props = defineProps<{
   /** The name of an area as a button, or nothing for an area that cannot be picked. */
   areaLabel?: (area: string) => string | undefined
 }>()
-const emit = defineEmits<{ pick: [area: string, side: 'left' | 'right']; 'update:modelValue': [areas: BodyAreas]; 'update:injury': [areas: BodyAreas] }>()
+const emit = defineEmits<{ pick: [area: string, side: 'left' | 'right']; 'update:heat': [areas: BodyAreas]; 'update:injury': [areas: BodyAreas] }>()
 
 /** The areas with [side] of [area] toggled (left and right make both), or both sides at once with `interactive-mode="both"`: an area on one side only then becomes both. A `heat` already on the area is kept. */
 function toggled(areas: BodyAreas, area: string, side: 'left' | 'right'): BodyAreas {
@@ -60,12 +57,12 @@ function toggled(areas: BodyAreas, area: string, side: 'left' | 'right'): BodyAr
   return named ? { ...rest, [area]: heat ? { side: named, heat } : named } : rest
 }
 
-/** Picking says `pick`, and with a `v-model` (what is lit) or `v-model:injury`, whichever `editing` names, it also hands over the new areas. */
+/** Picking says `pick`, and with `v-model:heat` or `v-model:injury`, whichever `editing` names, it also hands over the new areas. */
 function pick(area: string, side: 'left' | 'right') {
   emit('pick', area, side)
   if (props.editing === 'injury') {
     if (props.injury) emit('update:injury', toggled(props.injury, area, side))
-  } else if (props.modelValue) emit('update:modelValue', toggled(props.modelValue, area, side))
+  } else if (props.heat) emit('update:heat', toggled(props.heat, area, side))
 }
 
 const split = (key: string): { area: string; side?: 'left' | 'right' } => {
@@ -83,17 +80,17 @@ const heatOf = (areas: BodyAreas | undefined, area: string, side?: 'left' | 'rig
 
 const views = computed(() => {
   const regions = shapes[props.figure ?? 'shoulders'] as Record<'front' | 'back', Region[]>
-  const view = (name: 'front' | 'back', lit?: BodyAreas, hurt?: BodyAreas) => ({
+  const view = (name: 'front' | 'back') => ({
     name,
     caption: props.captions[name],
     paths: regions[name].map((region) => {
       if (region.skin || !region.key) return { d: region.d, outline: region.skin }
       const { area, side } = split(region.key)
       const label = props.interactive && side ? props.areaLabel?.(area) : undefined
-      return { d: region.d, area, side, label, heat: heatOf(lit, area, side), pain: heatOf(hurt, area, side) }
+      return { d: region.d, area, side, label, heat: heatOf(props.heat, area, side), pain: heatOf(props.injury, area, side) }
     }),
   })
-  const shown = [view('front', props.front ?? props.modelValue, props.frontInjury ?? props.injury), view('back', props.back ?? props.modelValue, props.backInjury ?? props.injury)]
+  const shown = [view('front'), view('back')]
   return props.layout === 'front' || props.layout === 'back' ? shown.filter((one) => one.name === props.layout) : shown
 })
 const showLegend = computed(() => !!props.legend && props.legend !== 'hidden' && !!props.less && !!props.more)

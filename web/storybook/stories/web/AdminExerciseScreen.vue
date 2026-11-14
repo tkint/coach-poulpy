@@ -220,7 +220,7 @@ const slugLocked = computed(() => !props.isNew)
             </CpTextField>
           </CpCard>
           <CpCard title="Muscles" description="Tap an area to add or remove its muscle group." class="order-4 lg:order-none">
-            <CpBodyMap :front="lit" :back="lit" :captions="captions" :description="musclesSaid" :area-label="areaLabel" interactive />
+            <CpBodyMap :heat="lit" :captions="captions" :description="musclesSaid" :area-label="areaLabel" interactive />
             <div class="flex flex-wrap items-center justify-center gap-3">
               <CpChip :model-value="form.muscles.includes('full_body')" compact>Full body</CpChip>
             </div>

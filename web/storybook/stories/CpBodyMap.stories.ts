@@ -9,8 +9,7 @@ const meta = {
   parameters: { docs: { description: { component: doc } } },
   component: CpBodyMap,
   args: {
-    front: { pectoral: 'both', biceps: { side: 'left', heat: 2 }, abs: { side: 'both', heat: 1 } },
-    back: { deltoid: 'both', triceps: { side: 'both', heat: 2 } },
+    heat: { pectoral: 'both', biceps: { side: 'left', heat: 2 }, abs: { side: 'both', heat: 1 }, deltoid: 'both', triceps: { side: 'both', heat: 2 } },
     captions: { front: 'Front', back: 'Back' },
     description: 'Chest and shoulders worked most',
     legend: 'top',
@@ -30,7 +29,7 @@ export const Default: Story = {
 
 /** An injury takes the same object as the muscles worked and is drawn in the pain colour, its `heat` how much it hurts. */
 export const Injury: Story = {
-  args: { front: undefined, back: undefined, frontInjury: { deltoid: { side: 'right', heat: 3 }, biceps: 'right' }, backInjury: { deltoid: { side: 'right', heat: 3 }, 'lower-back': { side: 'both', heat: 1 } }, legend: 'hidden', description: 'Right shoulder hurts' },
+  args: { heat: undefined, injury: { deltoid: { side: 'right', heat: 3 }, biceps: 'right', 'lower-back': { side: 'both', heat: 1 } }, legend: 'hidden', description: 'Right shoulder hurts' },
 }
 
 /** The legend on the right, one side of the figure only. */
@@ -39,13 +38,13 @@ export const LegendRight: Story = { args: { legend: 'right', layout: 'front' } }
 /** The other body figure. */
 export const Hips: Story = { args: { figure: 'hips' } }
 
-/** In a form, `v-model` holds the areas: picking a side toggles it, and both sides make `both`. */
+/** In a form, `v-model:heat` holds the areas: picking a side toggles it, and both sides make `both`. */
 export const FormModel: Story = {
-  args: { front: undefined, back: undefined, legend: 'hidden', interactive: true },
+  args: { heat: undefined, legend: 'hidden', interactive: true },
   render: (args) => ({
     components: { CpBodyMap },
     setup: () => ({ args, areas: ref<BodyAreas>({ biceps: 'left' }), areaLabel: (area: string) => (area === 'biceps' ? 'Biceps' : undefined) }),
-    template: '<CpBodyMap v-bind="args" v-model="areas" :area-label="areaLabel" /><p data-testid="areas">{{ JSON.stringify(areas) }}</p>',
+    template: '<CpBodyMap v-bind="args" v-model:heat="areas" :area-label="areaLabel" /><p data-testid="areas">{{ JSON.stringify(areas) }}</p>',
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
@@ -69,7 +68,7 @@ export const BothSides: Story = {
 
 /** `v-model:injury` with `editing="injury"`: a pick edits what hurts, and the muscles worked stay as they are. */
 export const InjuryModel: Story = {
-  args: { front: undefined, back: undefined, legend: 'hidden', interactive: true, editing: 'injury', description: 'Where it hurts' },
+  args: { heat: undefined, legend: 'hidden', interactive: true, editing: 'injury', description: 'Where it hurts' },
   render: (args) => ({
     components: { CpBodyMap },
     setup: () => ({ args, hurt: ref<BodyAreas>({}), areaLabel: (area: string) => (area === 'deltoid' ? 'Shoulder' : undefined) }),
@@ -84,7 +83,7 @@ export const InjuryModel: Story = {
 
 /** The picture is a field: an area `areaLabel` names is a button that says its area and side when it is pressed. */
 export const Interactive: Story = {
-  args: { interactive: true, front: undefined, back: undefined, legend: 'hidden' },
+  args: { interactive: true, heat: undefined, legend: 'hidden' },
   render: (args) => ({
     components: { CpBodyMap },
     setup: () => {
@@ -99,7 +98,7 @@ export const Interactive: Story = {
       }
       return { args, lit, areaLabel, pick }
     },
-    template: '<CpBodyMap v-bind="args" :front="lit" :area-label="areaLabel" @pick="pick" />',
+    template: '<CpBodyMap v-bind="args" :heat="lit" :area-label="areaLabel" @pick="pick" />',
   }),
   play: async ({ canvasElement }) => {
     const biceps = within(canvasElement).getAllByRole('button', { name: 'Biceps' })

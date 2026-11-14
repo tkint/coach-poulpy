@@ -4,22 +4,21 @@
 
 | Prop | Takes | Says |
 | --- | --- | --- |
-| `front`, `back` | areas | what is lit on that side of the figure |
-| `v-model` | areas | for a form: what is lit on both figures; picking an area also updates it (left and right make `both`). `front` and `back` win over it; `pick` is still sent |
-| `front-injury`, `back-injury` | areas | what hurts on that side, in the pain colour |
-| `v-model:injury`, `editing` | areas, `areas` (default) or `injury` | for a form: what hurts on both figures. With `interactive`, `editing` says which of `v-model` and `v-model:injury` a pick updates. `front-injury` and `back-injury` win over it |
+| `heat`, `v-model:heat` | areas | what is lit; `v-model:heat` in a form |
+| `injury`, `v-model:injury` | areas | what hurts, in the pain colour; `v-model:injury` in a form |
+| `editing` | `heat` (default) or `injury` | with `interactive`, which of the two a pick updates |
 | `captions` | `{ front, back }` | the text under each figure |
 | `description` | text | the picture in words, for a screen reader |
 | `figure` | `shoulders` (default) or `hips` | the body figure |
 | `layout` | `both` (default), `front` or `back` | which figures are drawn |
 | `legend` | `hidden` (default), `top` or `right` | where the Less to More scale goes |
 | `less`, `more` | text | the words of the legend |
-| `interactive-mode` | `individual` (default) or `both` | with `interactive` and a `v-model`: a tap toggles the side tapped, or both sides of the area |
+| `interactive-mode` | `individual` (default) or `both` | with `interactive` and `v-model:heat` or `v-model:injury`: a tap toggles the side tapped, or both sides of the area |
 | `interactive`, `area-label` | flag, `(area) => text` | an area `area-label` names is a button; `pick` says its `area` and `side` |
 
 ## Areas
 
-The four area props take the same object: an area by its name (`biceps`, `lower-back`, `quads`...), as the catalog and the API name it, and its value is a side or a side with a number.
+`heat` and `injury` take the same object: an area by its name (`biceps`, `lower-back`, `quads`...), as the catalog and the API name it, and its value is a side or a side with a number.
 
 ```ts
 { biceps: 'left', pectoral: 'both', deltoid: { side: 'right', heat: 2 } }
@@ -27,7 +26,7 @@ The four area props take the same object: an area by its name (`biceps`, `lower-
 
 - A side is `left`, `right` or `both`, the person's own left and right.
 - `heat` runs from 1 (a little) to 3 (most) and is `3` when left out. On an injury it says how much it hurts.
-- An area the figure does not have on that side is ignored, so `front` and `back` can be given the same object.
+- An area is drawn on the figure that has it, so there is one object for both the front and the back.
 - Where a muscle and an injury meet, the injury is drawn.
 
 | Vue | Classes |

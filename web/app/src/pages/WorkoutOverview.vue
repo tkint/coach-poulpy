@@ -24,7 +24,7 @@ const description = computed(() => t('app.musclesAlt', { list: props.workout.tex
     <CpStat :title="t('app.statUsual')" :value="workout.text.usual || never" />
   </CpStats>
   <CpCard v-if="card" :title="t('app.musclesTitle')">
-    <CpBodyMap :front="heat" :back="heat" :captions="captions" legend="top" :description="description" :less="t('app.heatLess')" :more="t('app.heatMore')" />
+    <CpBodyMap :heat="heat" :captions="captions" legend="top" :description="description" :less="t('app.heatLess')" :more="t('app.heatMore')" />
   </CpCard>
-  <CpBodyMap v-else :front="heat" :back="heat" :captions="captions" legend="top" :description="description" :less="t('app.heatLess')" :more="t('app.heatMore')" />
+  <CpBodyMap v-else :heat="heat" :captions="captions" legend="top" :description="description" :less="t('app.heatLess')" :more="t('app.heatMore')" />
 </template>

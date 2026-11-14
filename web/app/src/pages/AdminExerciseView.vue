@@ -422,7 +422,7 @@ watch(form, () => (saved.value = false), { deep: true })
             </CpTextField>
           </CpCard>
           <CpCard :title="t('admin.exerciseMuscles')" :description="t('admin.musclesHint')" class="order-4 lg:order-none">
-            <CpBodyMap :front="lit" :back="lit" :captions="captions" :description="musclesSaid" :area-label="areaLabel" interactive @pick="pickArea" />
+            <CpBodyMap :heat="lit" :captions="captions" :description="musclesSaid" :area-label="areaLabel" interactive @pick="pickArea" />
             <div class="flex flex-wrap items-center justify-center gap-3">
               <CpChip v-model="fullBody" compact>{{ muscleLabel('full_body') }}</CpChip>
             </div>
