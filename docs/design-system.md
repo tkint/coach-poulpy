@@ -114,7 +114,7 @@ The mockup is the design reference; this page defines the shared rules and compo
 
 ## Websites
 
-The landing site, the web app, the web mockups and the docs site share one package, `web/ui`: DaisyUI with the Poulpy theme and a few Vue components ([ADR 0023](adr/0023-the-websites-share-one-vue-and-daisyui-design-system.md)). The live samples and the class of each component are on the [Web components](https://tkint.github.io/coach-poulpy/web-components) page.
+The landing site, the web app, the web mockups and the docs site share one package, `web/ui`: DaisyUI with the Poulpy theme and a few Vue components ([ADR 0023](adr/0023-the-websites-share-one-vue-and-daisyui-design-system.md)). The live samples and the class of each component are on the [Web components](https://tkint.github.io/coach-poulpy/web-components) page, and each component in every state, with interaction and accessibility checks, in the [component workshop](https://tkint.github.io/coach-poulpy/component-workshop).
 
 - Use the shared components (`CpButton`, `CpChip`...) in Vue, and their classes in a web mockup; never restyle a DaisyUI class in an app. A missing shape goes in `web/ui`, with its sample and its section on the Web components page in the same PR.
 - Every DaisyUI class carries the `cp-` prefix (`cp-btn cp-btn-primary`). Our own classes (`cp-chip`, `cp-stepper`, `cp-type-label`...) never reuse a DaisyUI name, so the two cannot clash.

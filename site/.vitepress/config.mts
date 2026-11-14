@@ -144,7 +144,7 @@ export default withMermaid(
           ],
           [
             'Design system',
-            ['/docs/design-system', '/tokens', '/mobile-components', '/web-components', '/mockups/', '/docs/profile-and-settings', '/design/'],
+            ['/docs/design-system', '/tokens', '/mobile-components', '/web-components', '/component-workshop', '/mockups/', '/docs/profile-and-settings', '/design/'],
             [
               { text: 'How to use it', link: '/docs/design-system' },
               { text: 'Tokens', link: '/tokens' },
@@ -156,7 +156,7 @@ export default withMermaid(
               {
                 text: 'Web',
                 collapsed: false,
-                items: [{ text: 'Components', link: '/web-components', collapsed: true, items: headings('web-components') }, mockupSidebar('web')],
+                items: [{ text: 'Components', link: '/web-components', collapsed: true, items: headings('web-components') }, { text: 'Component workshop', link: '/component-workshop' }, mockupSidebar('web')],
               },
               { text: 'Profile and settings', link: '/docs/profile-and-settings' },
               { text: 'Generating tokens and fonts', link: '/design/README' },

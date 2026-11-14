@@ -7,6 +7,7 @@ import MockupList from './MockupList.vue'
 import MockupPage from './MockupPage.vue'
 import Poulpy3d from './Poulpy3d.vue'
 import PoulpyGallery from './PoulpyGallery.vue'
+import StoryFrame from './StoryFrame.vue'
 import SampleThemeSwitch from './SampleThemeSwitch.vue'
 import TokenSwatches from './TokenSwatches.vue'
 import WebComponentSamples from './WebComponentSamples.vue'
@@ -23,6 +24,7 @@ export default {
     app.component('MockupPage', MockupPage)
     app.component('Poulpy3d', Poulpy3d)
     app.component('PoulpyGallery', PoulpyGallery)
+    app.component('StoryFrame', StoryFrame)
     app.component('TokenSwatches', TokenSwatches)
     app.component('WebComponentSamples', WebComponentSamples)
   },

@@ -13,6 +13,13 @@ execFileSync('npm', ['run', 'build', '-w', 'ui'], {
   stdio: 'inherit',
 })
 
+// The component workshop (web/storybook, ADR 0028) is built as static files and published under /storybook/,
+// where the component workshop page embeds it. Its stories read the same CSS source as the apps.
+const web = resolve(dirname(fileURLToPath(import.meta.url)), '../web')
+execFileSync('npm', ['run', 'build', '-w', 'storybook'], { cwd: web, stdio: 'inherit' })
+rmSync('public/storybook', { recursive: true, force: true })
+cpSync(resolve(web, 'storybook/dist'), 'public/storybook', { recursive: true })
+
 for (const path of shared) {
   rmSync(path, { recursive: true, force: true })
   cpSync(`../${path}`, path, { recursive: true })
