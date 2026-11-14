@@ -140,7 +140,6 @@ const onPage = computed(() => exercises.value.map((row) => row.exercise.slug))
 const allOnPage = computed(() => onPage.value.length > 0 && onPage.value.every((slug) => picked.value.has(slug)))
 const someOnPage = computed(() => onPage.value.some((slug) => picked.value.has(slug)))
 const selectedCount = computed(() => picked.value.size)
-const selectedText = computed(() => (selectedCount.value === 1 ? t('admin.catalogSelectedOne') : t('admin.catalogSelectedMany', { count: String(selectedCount.value) })))
 const pageBox = computed({
   get: () => allOnPage.value,
   set: (on: boolean) => {
@@ -221,18 +220,17 @@ watch(
         <CpMultiSelectField v-model="muscles" :label="t('admin.filterMuscles')" :placeholder="t('admin.filterMusclesPlaceholder')" :options="muscleOptions" :none-label="t('admin.filterNoMatch')" />
         <CpMultiSelectField v-model="positions" :label="t('admin.filterPositions')" :placeholder="t('admin.filterPositionsPlaceholder')" :options="positionOptions" :none-label="t('admin.filterNoMatch')" />
         <CpMultiSelectField v-model="equipment" :label="t('admin.filterEquipment')" :placeholder="t('admin.filterEquipmentPlaceholder')" :options="equipmentOptions" :none-label="t('admin.filterNoMatch')" />
-        <button v-if="filtered" type="button" class="cp-link cp-link-hover text-sm" @click="clearFilters">{{ t('admin.filtersClear') }}</button>
+        <button type="button" class="cp-link cp-link-hover text-sm" :class="{ invisible: !filtered }" :tabindex="filtered ? undefined : -1" :aria-hidden="!filtered" @click="clearFilters">{{ t('admin.filtersClear') }}</button>
       </div>
       <CpErrorNote v-if="state === 'failed'">{{ t('admin.catalogError') }}</CpErrorNote>
       <CpPoulpyCard v-else-if="state === 'ready' && total === 0" :title="t('admin.catalogNone')">{{ t('admin.catalogNoneHint') }}</CpPoulpyCard>
       <template v-else-if="state === 'ready'">
-        <p v-if="selectedCount" class="text-sm text-base-content/70" role="status">{{ selectedText }}</p>
         <CpTable>
           <thead>
             <tr>
               <th class="w-12 text-center">
                 <details v-if="selectedCount" ref="menu" class="relative inline-block">
-                  <summary class="cp-btn cp-btn-ghost cp-btn-square cp-btn-sm relative list-none" :aria-label="t('admin.catalogSelectionActions')">
+                  <summary class="cp-btn cp-btn-ghost cp-btn-square cp-btn-sm relative list-none" :aria-label="t('admin.catalogSelectionActions', { count: String(selectedCount) })">
                     <EllipsisVertical class="size-4" aria-hidden="true" />
                     <span class="cp-badge cp-badge-primary cp-badge-sm absolute -right-2 -top-2 z-10">{{ selectedCount }}</span>
                   </summary>
