@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, within } from 'storybook/test'
 import { ref } from 'vue'
-import { CpPagination, setUiLocale } from '@coach-poulpy/ui'
+import { CpPagination } from '@coach-poulpy/ui'
 import doc from './CpPagination.md?raw'
 
 const meta = {
@@ -41,9 +41,8 @@ export const SaysItsOwnWords: Story = {
 }
 export const SaysItsOwnWordsInFrench: Story = {
   args: { previousLabel: undefined, nextLabel: undefined, navLabel: undefined },
-  loaders: [() => void setUiLocale('fr')],
+  globals: { locale: 'fr' },
   play: async ({ canvasElement }) => {
     expect(within(canvasElement).getByRole('button', { name: 'Page précédente' })).toBeDisabled()
-    setUiLocale('en')
   },
 }
