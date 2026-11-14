@@ -56,6 +56,8 @@ Before starting work, inspect the available skills and read the relevant `SKILL.
 
 Read the full skill instructions and any referenced files needed for the task. Do not assume a skill name alone is sufficient context.
 
+[`docs/agents/skills.md`](docs/agents/skills.md) maps every skill to when and how to use it, with examples. Update it in the same PR whenever a skill is added, renamed or removed.
+
 ### Issue tracker
 
 Issues live in GitHub Issues on `tkint/coach-poulpy`. See `docs/agents/issue-tracker.md`.
