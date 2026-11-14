@@ -510,28 +510,6 @@
       translate: 0%;
     }
   }
-  @layer daisyui.l1.l2 {
-    .cp-modal.cp-modal-open {
-      pointer-events: auto;
-      visibility: visible;
-      opacity: 100%;
-      transition: visibility 0s allow-discrete, background-color 0.3s ease-out, opacity 0.1s ease-out;
-      background-color: oklch(0% 0 0/ 0.4);
-    }
-    .cp-modal.cp-modal-open  > .cp-modal-box {
-      translate: 0 0;
-      scale: 1;
-      opacity: 1;
-    }
-    :root:has(.cp-modal.cp-modal-open) {
-      --cp-page-scroll-lock:  ;
-    }
-    @starting-style {
-      .cp-modal.cp-modal-open {
-        opacity: 0%;
-      }
-    }
-  }
   @layer daisyui.l1.l2.l3 {
     .cp-menu {
       display: flex;
@@ -2566,9 +2544,6 @@
   .min-h-10 {
     min-height: calc(var(--spacing) * 10);
   }
-  .min-h-16 {
-    min-height: calc(var(--spacing) * 16);
-  }
   .min-h-full {
     min-height: 100%;
   }
@@ -2580,9 +2555,6 @@
   }
   .w-10 {
     width: calc(var(--spacing) * 10);
-  }
-  .w-12 {
-    width: calc(var(--spacing) * 12);
   }
   .w-16 {
     width: calc(var(--spacing) * 16);
@@ -2598,9 +2570,6 @@
   }
   .w-auto {
     width: auto;
-  }
-  .w-fit {
-    width: fit-content;
   }
   .w-full {
     width: 100%;
@@ -2662,9 +2631,6 @@
   .cursor-pointer {
     cursor: pointer;
   }
-  .resize-none {
-    resize: none;
-  }
   .list-none {
     list-style-type: none;
   }
@@ -2698,12 +2664,6 @@
   .justify-between {
     justify-content: space-between;
   }
-  .justify-center {
-    justify-content: center;
-  }
-  .justify-end {
-    justify-content: flex-end;
-  }
   .gap-1 {
     gap: var(--spacing);
   }
@@ -2729,9 +2689,6 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-  }
-  .overflow-hidden {
-    overflow: hidden;
   }
   .overflow-x-auto {
     overflow-x: auto;
@@ -2879,9 +2836,6 @@
   .py-1 {
     padding-block: var(--spacing);
   }
-  .py-2 {
-    padding-block: calc(var(--spacing) * 2);
-  }
   .py-10 {
     padding-block: calc(var(--spacing) * 10);
   }
@@ -2890,12 +2844,6 @@
   }
   .pt-6 {
     padding-top: calc(var(--spacing) * 6);
-  }
-  .pb-4 {
-    padding-bottom: calc(var(--spacing) * 4);
-  }
-  .text-right {
-    text-align: right;
   }
   .text-start {
     text-align: start;
@@ -3114,9 +3062,6 @@
     .sm\:w-96 {
       width: calc(var(--spacing) * 96);
     }
-    .sm\:grid-cols-2 {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
   }
   @media (width >= 48rem) {
     .md\:w-80 {
@@ -3168,9 +3113,6 @@
     }
     .md\:py-24 {
       padding-block: calc(var(--spacing) * 24);
-    }
-    .md\:pb-8 {
-      padding-bottom: calc(var(--spacing) * 8);
     }
   }
   @media (width >= 64rem) {
