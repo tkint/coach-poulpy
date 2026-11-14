@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // /admin: the sign-in until the cookies sign an admin in, then the admin shell
-// (design/mockups/agreed/web/admin-shell.html) with the audit log, the accounts, the settings and the status. A link at
+// (the Web/Screens/Admin/Audit log story in the component workshop) with the audit log, the accounts, the settings and the status. A link at
 // the bottom of the sidebar goes back to the web app.
 import { computed, onMounted, ref } from 'vue'
 import { Activity, ArrowLeft, BookOpen, LogOut, PanelLeft, RotateCcwClock, SlidersHorizontal, Users } from '@lucide/vue'
