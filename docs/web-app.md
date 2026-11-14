@@ -23,10 +23,11 @@ The admin's accounts table is the reference: `/admin/accounts?q=lea&role=admin&s
 
 The agreed layouts and states are documented in the Web app mockups on the docs site.
 
-- **Sign in** is the landing route. An already signed-in person goes straight to the profile. Invalid credentials produce one generic refusal, without revealing which field was wrong.
+- **Sign in** is the landing route. An already signed-in person goes straight to the workouts. Invalid credentials produce one generic refusal, without revealing which field was wrong.
 - **Status**, at `/status`, is public and reports only whether Coach Poulpy is up or down; it does not expose server configuration ([admin status](./admin.md#status)).
-- **Profile** shows the account email and confirmation state, offers a password-reset email, and explains that workouts, body measurements and profile fields remain on the phone. The website reads what the phones synced through the API's read routes (workouts first, [ADR 0027](./adr/0027-the-api-says-the-words-on-request.md)) and never writes it: the phone stays the source of truth.
+- **Workouts**, at `/workouts`, is a searchable, paged table of the workouts the phones synced (`?q=squat&format=sets&page=2`). A row opens the **workout** at `/workouts/<id>`: its parts and steps beside a column on the right with its stats and the muscles it works (a body map); on a phone the stats and muscles open in a sheet (`?overview=1`). Both are read-only, with a note to change a workout on the phone. The website reads what the phones synced through the API's read routes and never writes it: the phone stays the source of truth. Every word of a workout comes from the API (`include=text`, [ADR 0027](./adr/0027-the-api-says-the-words-on-request.md)), so the website holds none of its own.
+- **Profile**, at `/profile`, shows the account email and confirmation state, offers a password-reset email, and explains that body measurements and profile fields remain on the phone.
 
 ## Not yet
 
-A "Forgot your password?" link on the sign-in page, the profile fields, workouts and sessions on the web.
+A "Forgot your password?" link on the sign-in page, the profile fields and sessions on the web.

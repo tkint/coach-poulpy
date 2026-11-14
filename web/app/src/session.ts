@@ -19,7 +19,7 @@ async function call(method: string, path: string, body?: object): Promise<Respon
   })
 }
 
-async function authorized(path: string, method = 'GET', body?: object): Promise<Response> {
+export async function authorized(path: string, method = 'GET', body?: object): Promise<Response> {
   const first = await call(method, path, body)
   if (first.status !== 401) return first
   const refreshed = await call('POST', '/web/session/refresh')

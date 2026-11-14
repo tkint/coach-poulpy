@@ -219,13 +219,13 @@ Sortable columns put a `cp-btn cp-btn-ghost cp-btn-sm` in the header cell, with 
 
 ## Stats
 
-`CpStats` and `CpStat`: a row of figures, stacked on a phone.
+`CpStats` and `CpStat`: a row of figures, stacked on a phone. `vertical` keeps them stacked, for a narrow column beside other content (the workout page).
 
 <WebComponentSamples part="stats" />
 
 | Vue | Classes |
 | --- | --- |
-| `<CpStats>` | `cp-stats cp-stats-vertical md:cp-stats-horizontal bg-base-100 shadow-sm` |
+| `<CpStats>` | `cp-stats cp-stats-vertical md:cp-stats-horizontal bg-base-100 shadow-sm` (`cp-stats cp-stats-vertical` with `vertical`) |
 | `<CpStat>` | `cp-stat` with `cp-stat-title`, `cp-stat-value` (`text-primary` with `accent`) and `cp-stat-desc` |
 
 ## Body map

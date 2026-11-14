@@ -23,6 +23,11 @@ export const groupOf = (m: { device: keyof typeof devices; section: string; scre
   if (screen.startsWith('admin-status')) return 'Admin · Status'
   if (screen.startsWith('admin-catalog-exercise')) return 'Admin · Exercise'
   if (screen.startsWith('admin-catalog')) return 'Admin · Catalog'
+  if (screen.startsWith('app-sign-in')) return 'Web app · Sign in'
+  if (screen.startsWith('app-status')) return 'Web app · Status'
+  if (screen === 'app-profile') return 'Web app · Profile'
+  if (screen === 'app-workouts') return 'Web app · Workouts'
+  if (screen.startsWith('app-workout')) return 'Web app · Workout'
 
   return m.section
 }
