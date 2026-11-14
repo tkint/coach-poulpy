@@ -1,4 +1,4 @@
-// Lists the docs pages a PR changes, with links into its preview, for the "Review in the docs"
+// Lists the docs pages and Storybook stories a PR changes, with links into its preview, for the "Review in the docs"
 // comment the Docs site workflow posts on each PR.
 // Usage: node review-links.mjs <base-sha> <head-sha> <preview-url> <built-site-dir>
 // with the PR's body in PR_BODY, to find the issues it closes and the mockups drawn for them.
@@ -16,6 +16,39 @@ const groups = {
   decisions: 'Decisions',
   guidelines: 'Specs and guidelines',
   design: 'Design system and brand',
+}
+
+// The component workshop is published under /storybook/ (ADR 0028). A changed story, its doc or
+// mockup helper, or the Vue component of the same name, links the stories it shows (ids as Storybook makes them).
+const workshop = 'web/storybook/stories/'
+const slug = (text) => text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+const storyIdOf = (name) => slug(name.replace(/([a-z0-9])([A-Z])/g, '$1 $2'))
+const storyFilesOf = (file) => {
+  if (file.endsWith('.stories.ts') || file.endsWith('.mdx')) return file.startsWith(workshop) ? [file] : []
+  const stem = file.replace(/^.*\//, '').replace(/\.[^.]+$/, '')
+  if (file.startsWith('web/ui/src/components/')) return git('ls-files', workshop).split('\n').filter((f) => f.endsWith(`/${stem}.stories.ts`))
+  if (!file.startsWith(workshop)) return []
+  // A doc or helper next to the stories that use it.
+  const dir = file.slice(0, file.lastIndexOf('/') + 1)
+  return git('ls-files', dir).split('\n').filter((f) => f.endsWith('.stories.ts') && f.slice(dir.length).indexOf('/') === -1 && new RegExp(`/${stem}(\\.\\w+)?'`).test(show(f)))
+}
+const show = (file) => {
+  try {
+    return git('show', `${head}:${file}`)
+  } catch {
+    return ''
+  }
+}
+// The workshop entry of a story file: its title, a link to its docs page and to each story.
+function workshopEntry(file) {
+  const source = show(file)
+  if (source === '') return null // removed in this PR
+  const title = source.match(/(?:title: |<Meta title=)['"]([^'"]+)['"]/)?.[1]
+  if (!title) return null
+  const id = title.split('/').map(slug).join('-')
+  const base = `${previewUrl}storybook/index.html?path=`
+  const stories = file.endsWith('.mdx') ? [] : [...source.matchAll(/^export const (\w+)/gm)].map((m) => m[1])
+  return { title, docs: `${base}/docs/${id}--docs`, stories: stories.map((name) => [name, `${base}/story/${id}--${storyIdOf(name)}`]) }
 }
 
 // A mockup shows on the page of its section, with the other states of it (keep in step with
@@ -121,9 +154,11 @@ function builtMockups() {
 const lines = execFileSync('git', ['diff', '--name-status', '-M', `${base}...${head}`], { encoding: 'utf8' }).split('\n').filter(Boolean)
 const found = new Map(Object.keys(groups).map((group) => [group, new Map()]))
 const removed = []
+const workshopFiles = new Set()
 for (const line of lines) {
   const [status, ...paths] = line.split('\t')
   const file = paths.at(-1)
+  if (status !== 'D') storyFilesOf(file).forEach((f) => workshopFiles.add(f))
   const target = pageOf(file)
   if (!target) continue
   if (status === 'D' || !existsSync(htmlOf(target.page))) {
@@ -149,6 +184,16 @@ for (const [group, pages] of found) {
     out.push(`- [${title}](${previewUrl}${page}) (${verb})`)
     if (sections.length > 0) out.push(`  - Sections: ${sections.map(([id, text]) => `[${text}](${previewUrl}${page}#${id})`).join(', ')}`)
     if (terms.length > 0) out.push(`  - Entries: ${terms.join(', ')}`)
+  }
+  out.push('')
+}
+const entries = [...workshopFiles].sort().map(workshopEntry).filter(Boolean)
+if (entries.length > 0) {
+  any = true
+  out.push('**Storybook**', '')
+  for (const { title, docs, stories } of entries) {
+    out.push(`- [${title}](${docs})`)
+    if (stories.length > 0) out.push(`  - Stories: ${stories.map(([name, link]) => `[${name}](${link})`).join(', ')}`)
   }
   out.push('')
 }

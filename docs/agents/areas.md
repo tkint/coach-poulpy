@@ -63,7 +63,7 @@ The Maintainer owns `// CLEANUP:` markers, CI (`.github/workflows/`), `gradle/li
 
 ## Reviews
 
-Each PR gets a single review, not one per area. The docs site workflow posts one comment with the preview link and the pages to review; nobody posts a docs-review comment of their own. Put what the reviewer must know in the PR description.
+Each PR gets a single review, not one per area. The docs site workflow posts one comment with the preview link and the pages and Storybook stories to review; nobody posts a docs-review comment of their own. Put what the reviewer must know in the PR description.
 
 ## Docs on the site
 
