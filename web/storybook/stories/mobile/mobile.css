@@ -45,7 +45,7 @@
 
   & .alert { display: flex; gap: 10px; align-items: center; border-radius: var(--cp-radius-md); padding: 12px 14px; font-size: 14px; font-weight: 700; color: var(--cp-error); border: 1.5px solid var(--cp-error); background: var(--cp-surface); }
 
-  & .box { height: 52px; border-radius: 10px; border: 1.5px solid var(--cp-outline); background: var(--cp-surface); padding: 0 var(--cp-space-md); display: flex; align-items: center; gap: var(--cp-space-sm); }
+  & .box { height: 52px; border-radius: var(--cp-radius-md); border: 1.5px solid var(--cp-outline); background: var(--cp-surface); padding: 0 var(--cp-space-md); display: flex; align-items: center; gap: var(--cp-space-sm); }
   & .box:focus-within { border-color: var(--cp-primary); }
   & .box input { flex: 1; min-width: 0; width: 100%; background: transparent; border: 0; outline: 0; font: inherit; font-size: 17px; font-weight: 800; color: var(--cp-on-surface); }
   & .select { width: 100%; justify-content: space-between; text-align: left; color: var(--cp-on-surface); }
@@ -55,7 +55,7 @@
   & .entry .box { flex: 1; }
   & .entry button { width: 48px; height: 48px; border-radius: var(--cp-radius-pill); background: var(--cp-surface-variant); color: var(--cp-primary); font-size: 24px; font-weight: 800; }
 
-  & .sheet { background: var(--cp-surface); border: 1px solid var(--cp-outline); border-radius: var(--cp-space-xl); padding: var(--cp-space-md); display: flex; flex-direction: column; gap: 10px; }
+  & .sheet { background: var(--cp-surface); border: 1px solid var(--cp-outline); border-radius: var(--cp-radius-lg); padding: var(--cp-space-md); display: flex; flex-direction: column; gap: 10px; }
   & .sheet-title { font-size: 18px; }
   & .option { display: flex; align-items: center; gap: var(--cp-space-md); min-height: 44px; font-weight: 700; }
   & .radio { width: 20px; height: 20px; border-radius: var(--cp-radius-pill); border: 2px solid var(--cp-outline); }
