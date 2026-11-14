@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Account · sign up</title>
+<meta name="mockup:screen" content="account-sign-up">
+<meta name="mockup:section" content="Accounts">
+<meta name="mockup:issue" content="272">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../../../web/ui/src/tokens.css">
+<link rel="stylesheet" href="../../shared/mockup.css">
+<script src="../../shared/mockup-theme.js"></script>
+</head>
+<body>
+<main class="phone">
+  <header class="top-bar" style="justify-content: flex-start;"><a class="icon-button" href="account-settings-guest.html" aria-label="Close"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></a></header>
+  <div class="form-body" style="padding-top: var(--cp-space-sm);">
+    <div class="intro"><h1 class="title" style="font-size: 30px; line-height: 34px;">Create your account</h1><p class="muted">Back up your training and pick it up on any phone. The app keeps working without a connection.</p></div>
+    
+    <div class="field" id="email-field"><label class="label" for="email">Email</label><input class="text-field" id="email" type="email" value="alex@example.com" autocomplete="email"></div>
+    <div class="field" id="password-field"><label class="label" for="password">Password</label><span class="password-field"><input class="text-field" id="password" type="password" value="correct horse battery" autocomplete="new-password" aria-describedby="password-hint"><button type="button" class="icon-button" aria-label="Show password" aria-pressed="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="eye"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg></button></span><span class="field-note" id="password-hint">8 characters or more.</span></div>
+    <div class="field" id="consent-field"><label class="check-row" data-component="check-row"><input type="checkbox" id="consent" checked><span>I agree that Coach Poulpy keeps my health data (sessions, measurements, pain) to sync it between my phones. <a class="link" href="account-sign-up-consent-sheet.html">What is stored and why</a></span></label></div>
+    <p class="alt-line" id="alt-line">Already have an account? <a class="link" href="account-sign-in.html">Sign in</a></p>
+  </div>
+  <div class="action-bar">
+    <a class="primary-button" data-component="primary-button" href="account-check-email.html" style="flex: 1;">Create account</a>
+  </div>
+</main>
+</body>
+</html>
