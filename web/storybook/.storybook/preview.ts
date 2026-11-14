@@ -16,6 +16,8 @@ const preview: Preview = {
       document.documentElement.dataset.theme = context.globals.theme
       // A popover opens past its component, and the docs page clips whatever leaves the story's box:
       // stories that declare `parameters.popover` keep room below for it.
+      // A screen draws its own page, edge to edge.
+      if (context.parameters.mockup) return { components: { story }, template: '<story />' }
       const room = context.parameters.popover ? ' style="padding-bottom: 18rem"' : ''
       return { components: { story }, template: `<div class="bg-base-200 p-4"${room}><story /></div>` }
     },

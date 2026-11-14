@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// The admin's sign-in (design/mockups/agreed/web/admin-sign-in.html). The cookies the server sets are
+// The admin's sign-in (the Web/Screens/Admin/Sign in stories in the component workshop). The cookies the server sets are
 // the session; this page only says whether it worked.
 import { ref } from 'vue'
 import { CpButton, CpErrorNote, CpPasswordField, CpTextField } from '@coach-poulpy/ui'
