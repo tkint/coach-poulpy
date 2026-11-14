@@ -1,4 +1,4 @@
-`CpBodyMap`: the full body map, the front and back figure drawn from the apps' shapes (`design/body-map.json`), with the areas worked lit and the areas that hurt in the pain colour, and an optional Less to More legend.
+`CpBodyMap`: the full web body map, the front and back figure drawn from the apps' shapes (`design/body-map.json`; the figures and area names are under Core / Body map), with the areas worked lit and the areas that hurt in the pain colour, and an optional Less to More legend.
 
 ## Props
 

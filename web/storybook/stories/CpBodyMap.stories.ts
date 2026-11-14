@@ -5,7 +5,7 @@ import { CpBodyMap, type BodyAreas } from '@coach-poulpy/ui'
 import doc from './CpBodyMap.md?raw'
 
 const meta = {
-  title: 'Core/Body map',
+  title: 'Web/Components/Display/Body map',
   parameters: { docs: { description: { component: doc } } },
   component: CpBodyMap,
   args: {
