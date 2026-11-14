@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // The web app: the sign-in until the cookies sign someone in, then the sidebar shell with the workouts
-// (design/mockups/agreed/web/app-workouts.html, app-workout.html) and the profile (the stories Web/Screens/App/Profile). The screen is the
+// (the stories Web/Screens/App/Workouts and Workout) and the profile (the stories Web/Screens/App/Profile). The screen is the
 // address: /workouts, /workouts/<id>, /profile; anything else goes to /workouts. Admins get a link to /admin at the
 // bottom of the sidebar, just above themselves.
 import { computed, onMounted, ref, watch } from 'vue'

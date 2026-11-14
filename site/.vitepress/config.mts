@@ -153,11 +153,7 @@ export default withMermaid(
                 collapsed: false,
                 items: [mockupSidebar('mobile')],
               },
-              {
-                text: 'Web',
-                collapsed: false,
-                items: [mockupSidebar('web')],
-              },
+              { text: 'Web screens', link: '/storybook/index.html?path=/docs/design-system-introduction--docs', target: '_self' },
               { text: 'Profile and settings', link: '/docs/profile-and-settings' },
               { text: 'Generating tokens and fonts', link: '/design/README' },
               { text: 'Body map shapes: credits', link: '/design/body-map-source/NOTICE' },
