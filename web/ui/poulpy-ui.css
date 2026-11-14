@@ -2953,9 +2953,6 @@
   .p-4 {
     padding: calc(var(--spacing) * 4);
   }
-  .p-6 {
-    padding: calc(var(--spacing) * 6);
-  }
   .px-2 {
     padding-inline: calc(var(--spacing) * 2);
   }
@@ -2997,9 +2994,6 @@
   }
   .text-start {
     text-align: start;
-  }
-  .font-mono {
-    font-family: var(--font-mono);
   }
   .text-2xl {
     font-size: var(--text-2xl);
@@ -3207,9 +3201,6 @@
     }
   }
   @media (width >= 40rem) {
-    .sm\:col-span-2 {
-      grid-column: span 2 / span 2;
-    }
     @layer daisyui.l1.l2 {
       .sm\:cp-modal-middle {
         place-items: center;
@@ -3340,17 +3331,11 @@
     .lg\:top-8 {
       top: calc(var(--spacing) * 8);
     }
-    .lg\:col-span-1 {
-      grid-column: span 1 / span 1;
-    }
     .lg\:flex {
       display: flex;
     }
     .lg\:hidden {
       display: none;
-    }
-    .lg\:grid-cols-4 {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
     }
     .lg\:grid-cols-\[minmax\(0\,1fr\)_22rem\] {
       grid-template-columns: minmax(0,1fr) 22rem;
