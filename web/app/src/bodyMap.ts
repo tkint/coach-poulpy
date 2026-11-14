@@ -32,6 +32,9 @@ const GROUP_OF: Record<string, string> = {
 /** What "full body" lights: every muscle area, but not the joints, the spine or the head. */
 const MUSCLE_AREAS = new Set(['trapezius', 'deltoid', 'pectoral', 'serratus', 'biceps', 'triceps', 'forearm', 'abs', 'obliques', 'back', 'scapula', 'lower-back', 'glutes', 'quads', 'adductors', 'hamstrings', 'calves'])
 
+/** The areas a person can pick: the ones that stand for a muscle group. */
+export const selectableAreas = Object.keys(GROUP_OF)
+
 /** The muscle group an area of the figure stands for, or nothing for an area that stands for none. */
 export const groupOfArea = (area: string): string | undefined => GROUP_OF[area]
 

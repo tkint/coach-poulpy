@@ -5,7 +5,7 @@
 // `heat` in the object runs from 1 (a little) to 3 (most) and a bare side means 3; an injury is drawn in the pain colour, its
 // `heat` how much it hurts. `description` says in words what the picture shows, since the figure alone is not readable by a screen reader.
 // `layout` shows the front, the back or both; `legend` puts the Less to More scale on top, on the right or hides it.
-// With `interactive`, an area `areaLabel` names is a button (`pick` says its area and side, `aria-pressed` says whether it is
+// With `interactive`, an area is a button (`selectable` narrows which, `areaLabel` names it; `pick` says its area and side, `aria-pressed` says whether it is
 // lit) and a pick updates `v-model:heat` or `v-model:injury` (`editing` says which); `interactive-mode` says whether a tap takes
 // the side tapped or both sides. A screen that does this writes its own legend, or none, with the legend `hidden`.
 import { computed } from 'vue'
@@ -37,8 +37,10 @@ const props = defineProps<{
   interactive?: boolean
   /** What a tap selects with `interactive`: the `individual` side tapped (the default) or `both` sides of the area. */
   interactiveMode?: 'individual' | 'both'
-  /** The name of an area as a button, or nothing for an area that cannot be picked. */
-  areaLabel?: (area: string) => string | undefined
+  /** The name of an area's side as a button, in the person's language; without it a button is named from the area as written. */
+  areaLabel?: (area: string, side: 'left' | 'right') => string
+  /** The areas a tap can pick with `interactive`; every area when left out. */
+  selectable?: string[]
 }>()
 const emit = defineEmits<{ pick: [area: string, side: 'left' | 'right']; 'update:heat': [areas: BodyAreas]; 'update:injury': [areas: BodyAreas] }>()
 
@@ -86,7 +88,9 @@ const views = computed(() => {
     paths: regions[name].map((region) => {
       if (region.skin || !region.key) return { d: region.d, outline: region.skin }
       const { area, side } = split(region.key)
-      const label = props.interactive && side ? props.areaLabel?.(area) : undefined
+      const pickable = props.interactive && !!side && (!props.selectable || props.selectable.includes(area))
+      // CLEANUP: the fallback name is the area as written, untranslated; give web/ui static translations so it reads in the person's language.
+      const label = pickable ? (props.areaLabel?.(area, side) ?? `${area}, ${side}`) : undefined
       return { d: region.d, area, side, label, heat: heatOf(props.heat, area, side), pain: heatOf(props.injury, area, side) }
     }),
   })

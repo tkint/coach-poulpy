@@ -5,7 +5,7 @@
 import { computed, reactive } from 'vue'
 import { GripVertical, Lock, Plus, X, Archive, Target } from '@lucide/vue'
 import { CpBadge, CpBodyMap, CpBreadcrumbs, CpButton, CpCard, CpChip, CpChipSelectField, CpErrorNote, CpSegmentedControl, CpSelectField, CpTextarea, CpTextField } from '@coach-poulpy/ui'
-import { groupAreas, groupOfArea } from '../../../app/src/bodyMap'
+import { groupAreas, groupOfArea, selectableAreas } from '../../../app/src/bodyMap'
 import AdminShell from './AdminShell.vue'
 
 type Texts = { en: string; fr: string }
@@ -52,10 +52,7 @@ const muscleLabel = (group: string) => muscleNames[group] ?? group
 const musclesList = computed(() => form.muscles.map(muscleLabel).join(', '))
 const lit = computed(() => groupAreas(form.muscles))
 const captions = { front: 'Front', back: 'Back' }
-const areaLabel = (area: string) => {
-  const group = groupOfArea(area)
-  return group ? muscleLabel(group) : undefined
-}
+const areaLabel = (area: string) => muscleLabel(groupOfArea(area) ?? area)
 const musclesSaid = computed(() => (form.muscles.length ? `Muscles worked: ${musclesList.value}.` : 'No muscle picked yet.'))
 const removeLabel = (text: string) => `Remove ${text}`
 
@@ -220,7 +217,7 @@ const slugLocked = computed(() => !props.isNew)
             </CpTextField>
           </CpCard>
           <CpCard title="Muscles" description="Tap an area to add or remove its muscle group." class="order-4 lg:order-none">
-            <CpBodyMap :heat="lit" :captions="captions" :description="musclesSaid" :area-label="areaLabel" interactive />
+            <CpBodyMap :heat="lit" :captions="captions" :description="musclesSaid" :area-label="areaLabel" :selectable="selectableAreas" interactive />
             <div class="flex flex-wrap items-center justify-center gap-3">
               <CpChip :model-value="form.muscles.includes('full_body')" compact>Full body</CpChip>
             </div>

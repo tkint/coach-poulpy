@@ -9,7 +9,7 @@ import { GripVertical, Lock, Plus, X } from '@lucide/vue'
 import { CpBadge, CpBodyMap, CpBreadcrumbs, CpButton, CpCard, CpChip, CpChipSelectField, CpErrorNote, CpPoulpyCard, CpSegmentedControl, CpSelectField, CpSuccessNote, CpTextarea, CpTextField } from '@coach-poulpy/ui'
 import { getCatalogExercise, saveCatalogExercise, type CatalogExercise, type ExerciseJson } from '../session'
 import { domainLabel, domainOptions } from '../catalogText'
-import { groupAreas, groupOfArea } from '../bodyMap'
+import { groupAreas, groupOfArea, selectableAreas } from '../bodyMap'
 import { navigate, search, withParams } from '../route'
 import { locale, shippedLanguages, t } from '../i18n'
 
@@ -212,10 +212,7 @@ function moveStep(from: number | undefined, to: number) {
 const muscleLabel = (code: string) => domainLabel('muscle', code)
 const lit = computed(() => groupAreas(form.muscles))
 const captions = computed(() => ({ front: t('app.bodyFront'), back: t('app.bodyBack') }))
-const areaLabel = (area: string) => {
-  const group = groupOfArea(area)
-  return group ? muscleLabel(group) : undefined
-}
+const areaLabel = (area: string) => muscleLabel(groupOfArea(area) ?? area)
 const musclesList = computed(() => form.muscles.map(muscleLabel).join(', '))
 const musclesSaid = computed(() => (form.muscles.length ? t('admin.musclesWorked', { list: musclesList.value }) : t('admin.musclesNone')))
 function pickArea(area: string) {
@@ -422,7 +419,7 @@ watch(form, () => (saved.value = false), { deep: true })
             </CpTextField>
           </CpCard>
           <CpCard :title="t('admin.exerciseMuscles')" :description="t('admin.musclesHint')" class="order-4 lg:order-none">
-            <CpBodyMap :heat="lit" :captions="captions" :description="musclesSaid" :area-label="areaLabel" interactive @pick="pickArea" />
+            <CpBodyMap :heat="lit" :captions="captions" :description="musclesSaid" :area-label="areaLabel" :selectable="selectableAreas" interactive @pick="pickArea" />
             <div class="flex flex-wrap items-center justify-center gap-3">
               <CpChip v-model="fullBody" compact>{{ muscleLabel('full_body') }}</CpChip>
             </div>
