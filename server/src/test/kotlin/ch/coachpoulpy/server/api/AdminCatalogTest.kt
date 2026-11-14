@@ -304,12 +304,17 @@ class AdminCatalogTest {
         assertEquals(all.drop(8).take(8) to all.size, listed("size" to "8", "page" to "2"))
         val byName = bundled.exercises.sortedBy { it.name.byLanguage.getValue("en").lowercase() }.map { it.slug.value }
         assertEquals(byName.take(8), listed("sort" to "name", "size" to "8").first)
-        assertEquals(byName.reversed().take(8), listed("sort" to "name", "order" to "desc", "size" to "8").first)
+        assertEquals(byName.reversed().take(8), listed("sort" to "-name", "size" to "8").first)
+
+        val byPatternThenName = bundled.exercises.sortedWith(compareBy({ it.movementPattern.name }, { it.name.byLanguage.getValue("en").lowercase() })).map { it.slug.value }
+        assertEquals(byPatternThenName.take(8), listed("sort" to "pattern,name", "size" to "8").first, "a second column orders the ties of the first")
+        val byPatternDescThenName = bundled.exercises.sortedWith(compareBy<Exercise>({ it.movementPattern.name }).reversed().thenBy { it.name.byLanguage.getValue("en").lowercase() }).map { it.slug.value }
+        assertEquals(byPatternDescThenName.take(5), listed("sort" to "-pattern,name", "size" to "5").first, "each column has its own direction")
 
         create(pikePushUp(fr = false))
         assertEquals("pike-push-up", listed("sort" to "languages", "size" to "1").first.single(), "missing French comes first")
         assertEquals("pike-push-up", listed("sort" to "change", "size" to "1").first.single(), "changes come first")
-        listOf("sort" to "colour", "order" to "up", "lifecycle" to "maybe", "content" to "later", "translation" to "half").forEach { (name, value) ->
+        listOf("sort" to "colour", "sort" to "name,-name", "sort" to "name,,pattern", "lifecycle" to "maybe", "content" to "later", "translation" to "half").forEach { (name, value) ->
             assertEquals(BAD_REQUEST, call(Request(GET, "/api/v1/admin/catalog/exercises").query(name, value)).status, name)
         }
     }

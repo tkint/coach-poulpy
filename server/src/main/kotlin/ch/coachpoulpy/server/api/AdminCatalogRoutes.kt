@@ -8,6 +8,7 @@ import ch.coachpoulpy.core.model.MovementPattern
 import ch.coachpoulpy.core.model.MuscleGroup
 import ch.coachpoulpy.server.admin.AdminCatalog
 import ch.coachpoulpy.server.admin.ContentState
+import ch.coachpoulpy.server.admin.ExerciseOrder
 import ch.coachpoulpy.server.admin.ExerciseQuery
 import ch.coachpoulpy.server.admin.ExerciseSort
 import ch.coachpoulpy.server.admin.Lifecycle
@@ -105,19 +106,25 @@ private val equipmentQuery = Query.optional("equipment", "Comma-separated equipm
 private val translationQuery = Query.optional("translation", "complete: every shipped language is written; incomplete: a language is missing")
 private val contentQuery = Query.optional("content", "draft (never published), modified, published or pending (anything the next publication would change)")
 private val lifecycleQuery = Query.optional("lifecycle", "active, retiring (retirement pending publication) or retired")
-private val sortQuery = Query.optional("sort", "catalog, name, pattern, languages, change or status (default catalog, the catalog's order)")
-private val orderQuery = Query.optional("order", "asc or desc (default asc)")
+private val sortQuery = Query.optional(
+    "sort",
+    "Comma-separated columns to sort by, first the most important: name, pattern, languages, change or status. A leading - sorts " +
+        "that column descending, as in -change,name. A column once at most. Without it the catalog's order.",
+)
 private val pageQuery = Query.int().defaulted("page", 1, "The page, from 1")
 private val sizeQuery = Query.int().defaulted("size", ExerciseQuery.DEFAULT_PAGE_SIZE, "Exercises per page, up to ${ExerciseQuery.MAX_PAGE_SIZE}")
 
-private val sorts = mapOf(
-    "catalog" to ExerciseSort.Catalog,
-    "name" to ExerciseSort.Name,
-    "pattern" to ExerciseSort.Pattern,
-    "languages" to ExerciseSort.Languages,
-    "change" to ExerciseSort.Change,
-    "status" to ExerciseSort.Status,
-)
+private val sorts = ExerciseSort.entries.associateBy { it.name.lowercase() }
+
+/** The sorts in [text], such as `-change,name`; null when a word names no column or names one twice. */
+private fun orders(text: String?): List<ExerciseOrder>? {
+    if (text.isNullOrEmpty()) return emptyList()
+    val found = text.split(',').map { word ->
+        val column = sorts[word.removePrefix("-")] ?: return null
+        ExerciseOrder(column, ascending = !word.startsWith("-"))
+    }
+    return found.takeIf { it.map(ExerciseOrder::column).distinct().size == it.size }
+}
 
 /** The values of the enum named in [text], lowercase and comma-separated; null when a word names none. */
 private inline fun <reified E : Enum<E>> words(text: String?): Set<E>? {
@@ -133,11 +140,9 @@ private inline fun <reified E : Enum<E>> word(text: String?): Result<E?> {
 
 /** The table's question from the query string, or null when a value isn't one of the allowed words. */
 private fun Request.exerciseQuery(): ExerciseQuery? {
-    val sort = sortQuery(this)
-    val order = orderQuery(this)
     val translation = translationQuery(this)
     val lifecycle = lifecycleQuery(this)
-    if (sort != null && sort !in sorts || order !in listOf(null, "asc", "desc") || translation !in listOf(null, "complete", "incomplete")) return null
+    if (translation !in listOf(null, "complete", "incomplete")) return null
     val pattern = word<MovementPattern>(patternQuery(this)).getOrElse { return null }
     val content = word<ContentState>(contentQuery(this)).getOrElse { return null }
     val lifecycleState = when (lifecycle) {
@@ -156,8 +161,7 @@ private fun Request.exerciseQuery(): ExerciseQuery? {
         translationComplete = translation?.let { it == "complete" },
         content = content,
         lifecycle = lifecycleState,
-        sort = sort?.let(sorts::getValue) ?: ExerciseSort.Catalog,
-        ascending = order != "desc",
+        sort = orders(sortQuery(this)) ?: return null,
         page = pageQuery(this),
         size = sizeQuery(this),
     )
@@ -228,7 +232,6 @@ private fun listRoute(catalog: AdminCatalog): ContractRoute = EXERCISES meta {
     queries += contentQuery
     queries += lifecycleQuery
     queries += sortQuery
-    queries += orderQuery
     queries += pageQuery
     queries += sizeQuery
     security = requiresAdmin()

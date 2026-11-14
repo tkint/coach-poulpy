@@ -3,7 +3,7 @@
 // catalog draft in a paged table that is searched, filtered and sorted on the server, with rows picked for the
 // actions on several exercises. Content (what changed since the latest version), translations and lifecycle are
 // three separate columns and filters. The table's state lives in the URL (route.ts):
-// /admin/catalog?q=squat&pattern=squat&muscles=glutes,quadriceps&translation=incomplete&sort=name&order=desc&page=2.
+// /admin/catalog?q=squat&pattern=squat&muscles=glutes,quadriceps&translation=incomplete&sort=-change,name&page=2.
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { ChevronDown, ChevronUp, ChevronsUpDown, EllipsisVertical } from '@lucide/vue'
 import { CpBadge, CpCard, CpCheckbox, CpChip, CpDropdownMenu, CpErrorNote, CpMultiSelectField, CpPagination, CpPoulpyCard, CpSearchField, CpSelectField, CpTable } from '@coach-poulpy/ui'
@@ -15,15 +15,22 @@ import { t } from '../i18n'
 const PAGE_SIZE = 20
 const MAX_PAGE_SIZE = 100
 const BASE = '/admin/catalog'
-const SORTS: CatalogSort[] = ['catalog', 'name', 'pattern', 'languages', 'change', 'status']
+const SORTS: CatalogSort[] = ['name', 'pattern', 'languages', 'change', 'status']
 /** What each URL parameter is when it is absent; a default isn't written to the address. */
-const DEFAULTS = { q: '', pattern: '', muscles: '', positions: '', equipment: '', translation: '', content: '', lifecycle: '', sort: 'catalog', order: 'asc', page: '1' }
+const DEFAULTS = { q: '', pattern: '', muscles: '', positions: '', equipment: '', translation: '', content: '', lifecycle: '', sort: '', page: '1' }
 type Param = keyof typeof DEFAULTS
 /** The parameters that narrow the list: a change to one of them starts a new selection. */
 const FILTERS: Param[] = ['q', 'pattern', 'muscles', 'positions', 'equipment', 'translation', 'content', 'lifecycle']
 
 const param = (name: Param) => search.value.get(name) ?? DEFAULTS[name]
 const list = (name: Param) => param(name).split(',').filter(Boolean)
+/** The sorts in the address, the most important first; a word that is no column, or a column twice, is left out. */
+const sorts = computed(() =>
+  param('sort')
+    .split(',')
+    .map((word) => ({ column: word.replace(/^-/, '') as CatalogSort, descending: word.startsWith('-') }))
+    .filter((one, at, all) => SORTS.includes(one.column) && all.findIndex((other) => other.column === one.column) === at),
+)
 const query = computed<CatalogQuery>(() => ({
   q: param('q'),
   pattern: param('pattern'),
@@ -33,8 +40,7 @@ const query = computed<CatalogQuery>(() => ({
   translation: param('translation'),
   content: param('content'),
   lifecycle: param('lifecycle'),
-  sort: SORTS.find((sort) => sort === param('sort')) ?? 'catalog',
-  order: param('order') === 'desc' ? 'desc' : 'asc',
+  sort: sorts.value.map((one) => (one.descending ? `-${one.column}` : one.column)).join(','),
   page: Math.max(1, Number.parseInt(param('page'), 10) || 1),
   size: PAGE_SIZE,
 }))
@@ -67,11 +73,23 @@ const columns: { sort: CatalogSort; label: string }[] = [
   { sort: 'change', label: 'admin.catalogColContent' },
   { sort: 'status', label: 'admin.catalogColLifecycle' },
 ]
-const ariaSort = (sort: CatalogSort) => (query.value.sort !== sort ? 'none' : query.value.order === 'asc' ? 'ascending' : 'descending')
+const sortOf = (column: CatalogSort) => sorts.value.find((one) => one.column === column)
+const ariaSort = (column: CatalogSort) => {
+  const one = sortOf(column)
+  return !one ? 'none' : one.descending ? 'descending' : 'ascending'
+}
+/** Where the column stands among the sorts, shown once there is more than one. */
+const priority = (column: CatalogSort) => (sorts.value.length > 1 ? sorts.value.findIndex((one) => one.column === column) + 1 : 0)
 
-/** A new column sorts ascending first; the same column flips its direction. */
-function sortBy(sort: CatalogSort) {
-  go({ sort, order: query.value.sort === sort && query.value.order === 'asc' ? 'desc' : 'asc', page: '' })
+/**
+ * A click on a title goes round three states: ascending, descending, unsorted. The other columns keep their sorts,
+ * so the titles clicked in turn sort the list by the first, then by the second among its ties, and so on; a column
+ * sorted again keeps its place.
+ */
+function sortBy(column: CatalogSort) {
+  const one = sortOf(column)
+  const next = !one ? [...sorts.value, { column, descending: false }] : one.descending ? sorts.value.filter((other) => other !== one) : sorts.value.map((other) => (other === one ? { column, descending: true } : other))
+  go({ sort: next.map((it) => (it.descending ? `-${it.column}` : it.column)).join(','), page: '' })
 }
 
 // The search is typed in a draft and reaches the address after a pause, replacing the entry.
@@ -240,9 +258,10 @@ watch(
               <th v-for="column in columns" :key="column.sort" :aria-sort="ariaSort(column.sort)">
                 <button type="button" class="cp-btn cp-btn-ghost cp-btn-sm -ms-3 gap-1 whitespace-nowrap" @click="sortBy(column.sort)">
                   {{ t(column.label) }}
-                  <ChevronsUpDown v-if="query.sort !== column.sort" class="size-4 shrink-0" aria-hidden="true" />
-                  <ChevronUp v-else-if="query.order === 'asc'" class="size-4 shrink-0" aria-hidden="true" />
+                  <ChevronsUpDown v-if="!sortOf(column.sort)" class="size-4 shrink-0" aria-hidden="true" />
+                  <ChevronUp v-else-if="!sortOf(column.sort)?.descending" class="size-4 shrink-0" aria-hidden="true" />
                   <ChevronDown v-else class="size-4 shrink-0" aria-hidden="true" />
+                  <span v-if="priority(column.sort)" class="text-xs text-base-content/70" aria-hidden="true">{{ priority(column.sort) }}</span>
                 </button>
               </th>
             </tr>

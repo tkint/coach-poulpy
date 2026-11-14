@@ -17,8 +17,11 @@ import ch.coachpoulpy.server.catalog.ServerCatalog
 import ch.coachpoulpy.server.catalog.missingLanguages
 import org.http4k.events.Events
 
-/** The columns the admin's exercise table sorts on; [Catalog] is the catalog's own order. */
-enum class ExerciseSort { Catalog, Name, Pattern, Languages, Change, Status }
+/** The columns the admin's exercise table sorts on. Without a sort the table follows the catalog's own order. */
+enum class ExerciseSort { Name, Pattern, Languages, Change, Status }
+
+/** One sort of the table: a column, ascending or descending. A list of them sorts by the first, then the second among its ties, and so on. */
+data class ExerciseOrder(val column: ExerciseSort, val ascending: Boolean = true)
 
 /** Where an exercise stands against the latest published version, apart from its lifecycle and its translations. */
 enum class ContentState {
@@ -51,8 +54,8 @@ data class ExerciseQuery(
     val translationComplete: Boolean? = null,
     val content: ContentState? = null,
     val lifecycle: Lifecycle? = null,
-    val sort: ExerciseSort = ExerciseSort.Catalog,
-    val ascending: Boolean = true,
+    /** Empty for the catalog's order, which also settles every tie. */
+    val sort: List<ExerciseOrder> = emptyList(),
     val page: Int = 1,
     val size: Int = DEFAULT_PAGE_SIZE,
 ) {
@@ -80,7 +83,7 @@ private fun DraftExercise.lifecycle(): Lifecycle = when {
 /** One page of exercises, and how many match the filters in all. */
 data class ExercisePage(val exercises: List<DraftExercise>, val total: Int)
 
-/** Filters, sorts and cuts [all], given in the catalog's order, as [query] says; ties keep the catalog's order. */
+/** Filters, sorts and cuts [all], given in the catalog's order, as [query] says; ties after every sort keep the catalog's order. */
 fun exercisePageOf(all: List<DraftExercise>, query: ExerciseQuery): ExercisePage {
     val needle = query.text?.trim()?.lowercase().orEmpty()
     val matching = all.withIndex().filter { (_, draft) ->
@@ -94,16 +97,19 @@ fun exercisePageOf(all: List<DraftExercise>, query: ExerciseQuery): ExercisePage
             (query.lifecycle == null || draft.lifecycle() == query.lifecycle) &&
             (needle.isEmpty() || (listOf(exercise.slug.value) + exercise.name.all + exercise.aliases.all).any { text -> text.lowercase().contains(needle) })
     }
-    val key: Comparator<IndexedValue<DraftExercise>> = when (query.sort) {
-        ExerciseSort.Catalog -> compareBy { it.index }
+    fun comparator(column: ExerciseSort): Comparator<IndexedValue<DraftExercise>> = when (column) {
         ExerciseSort.Name -> compareBy { it.value.exercise.name.byLanguage.getValue(LocalizedText.ENGLISH).lowercase() }
-        ExerciseSort.Pattern -> compareBy { it.value.exercise.movementPattern }
+        ExerciseSort.Pattern -> compareBy { it.value.exercise.movementPattern.name }
         // Missing languages first when ascending, so what blocks publishing is found at once.
         ExerciseSort.Languages -> compareBy { -missingLanguages(it.value.exercise).size }
+        // The changed first when ascending.
         ExerciseSort.Change -> compareBy { it.value.change?.ordinal ?: Int.MAX_VALUE }
         ExerciseSort.Status -> compareBy { it.value.lifecycle() }
     }
-    val sorted = matching.sortedWith((if (query.ascending) key else key.reversed()).thenBy { it.index })
+    val order = query.sort.fold(compareBy<IndexedValue<DraftExercise>> { 0 }) { chain, sort ->
+        chain.then(comparator(sort.column).let { if (sort.ascending) it else it.reversed() })
+    }
+    val sorted = matching.sortedWith(order.thenBy { it.index })
     val size = query.size.coerceIn(1, ExerciseQuery.MAX_PAGE_SIZE)
     return ExercisePage(sorted.drop((query.page.coerceAtLeast(1) - 1) * size).take(size).map { it.value }, matching.size)
 }

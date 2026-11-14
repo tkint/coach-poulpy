@@ -202,7 +202,8 @@ export type CatalogExercise = {
   change: 'added' | 'edited' | 'retired' | 'offered' | null
   missing: string[]
 }
-export type CatalogSort = 'catalog' | 'name' | 'pattern' | 'languages' | 'change' | 'status'
+/** A column the catalog table sorts on. */
+export type CatalogSort = 'name' | 'pattern' | 'languages' | 'change' | 'status'
 /** The catalog table's question; an empty string asks for no filter. Lists are comma-separated lowercase words. */
 export type CatalogQuery = {
   q: string
@@ -213,8 +214,8 @@ export type CatalogQuery = {
   translation: string
   content: string
   lifecycle: string
-  sort: CatalogSort
-  order: 'asc' | 'desc'
+  /** Comma-separated columns, the most important first, each with a leading - for descending: `-change,name`. Empty for the catalog's order. */
+  sort: string
   page: number
   size: number
 }
