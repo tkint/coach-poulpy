@@ -1,0 +1,5 @@
+import{n as e}from"./rolldown-runtime-sJBDdmOt.js";var t,n,r,i;function a(){return(a=e((()=>{t={title:`Mobile/Components/Text field`,parameters:{docs:{description:{component:`The text field, drawn on the shared tokens with the isolated mobile stylesheet. Its shape and notes are in the design system tables. Light and dark follow the theme toolbar.`}}}},n=(e,t={})=>({render:()=>({components:t,template:`<div class="cp-mobile">${e}</div>`})}),r=n(`<div class="sample"><label class="label" for="name">Name</label>
+  <div class="box"><input id="name" value="Alex" /></div>
+  <span class="note">Shown to you only, on this phone.</span></div>`),i=[`Default`],r.parameters={...r.parameters,docs:{...r.parameters?.docs,source:{originalSource:`sample(\`<div class="sample"><label class="label" for="name">Name</label>
+  <div class="box"><input id="name" value="Alex" /></div>
+  <span class="note">Shown to you only, on this phone.</span></div>\`)`,...r.parameters?.docs?.source}}}})))()}a();export{r as Default,i as __namedExportsOrder,t as default};
