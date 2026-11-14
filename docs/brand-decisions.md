@@ -92,3 +92,11 @@ Add a decision here in the same PR as the brand change it explains, newest at th
 **Why:** "sex assigned at birth" is the wording most inclusive-forms guides recommend for a physiological question, because it describes what was recorded rather than who someone is, and it keeps gender out of it; "biological sex" and "birth sex" read as defining a person and are the terms trans and intersex people most often object to. The app also needs no gender at all: sex assigned at birth drives estimates, and pronouns drive wording.
 
 **Set aside:** one "Gender" field with Male, Female and Other (which mixes the two questions and makes "Other" the label for everyone outside two boxes); free-text sex (cannot feed an estimate); asking nothing (the estimates become less accurate for people who are happy to say). The wording was chosen from published guides and has **not yet been read by LGBTQ+ people**: that read is still to do, and the wording changes if it asks for it.
+
+## 14. Poulpy in 3D: a bubble plush in flat shading
+
+**Accepted, 14 November 2026.** Poulpy's 3D form is a round head tucked into eight puffy arms, drawn with flat cartoon shading. The rules of the shape are on the docs site's **Poulpy in 3D** page, and the shape is one file, [`design/poulpy-3d/model.mjs`](../design/poulpy-3d/model.mjs), so it can be reused and improved like the 2D drawings.
+
+**Why:** the owner wanted him chibi, natural and simple, "a bit like the mascot of Duolingo", so the model had to read like the 2D drawings turned into a solid, not like a rendered toy. Each rule was a correction from the owner on a model he could turn: the head sinks into the arms because resting on top of them looked stacked; the two colours share one smooth surface because a separate lining made a shelf; the whole underside is the other side's colour because a patch of the top colour showed between the arms; and the light stays in the room because shade painted on the model turned with him.
+
+**Set aside:** a dome head on puffy arms, the 2D drawing extruded (the head he preferred was rounder); a glossy vinyl ball on tiny feet (too photorealistic, arms too short); an egg head on long curling arms (less chibi, and too close to a real octopus); a one-piece bell with a scalloped hem. A dark outline is kept as an option, off by default.

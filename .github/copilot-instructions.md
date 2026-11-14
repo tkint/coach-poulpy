@@ -28,6 +28,7 @@ A firewall blocks most of the internet, including nodejs.org, the Gradle plugin 
 ./gradlew --offline :app-android:compileDebugKotlin                # the Android app compiles
 node design/build-tokens.mjs --check
 node design/build-poulpy.mjs --check
+node design/build-poulpy-3d.mjs --check
 node design/build-body-map.mjs --check
 node design/build-body-map-shapes.mjs --check
 node design/check-mockups.mjs

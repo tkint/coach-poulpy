@@ -12,6 +12,7 @@
   "devDependencies": {
     "@lucide/vue": "1.71.0",
     "mermaid": "11.17.2",
+    "three": "0.180.0",
     "vitepress": "1.6.4",
     "vitepress-plugin-mermaid": "2.0.17"
   }

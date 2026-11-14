@@ -63,6 +63,21 @@ The app icon is the brand book's: the happy blue Poulpy on Foam (`neutral.50`), 
 
 The alternate icons use the portrait or pose of the same name, scaled until its longest side fills 170 of the 200 square (on Android, until its farthest point sits on the 66 dp circle), so a pose with props or confetti draws Poulpy smaller. Their ids are those of `AppIcon` in the shared code and never change. Android switches between launcher aliases in the manifest; iOS lists the sets in `ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES` in `app-ios/project.yml`.
 
+## Poulpy in 3D
+
+`poulpy-3d/model.mjs` describes Poulpy's 3D shape in plain JavaScript, with no dependency: the proportions (`SHAPE`), the two faces (`FACES`) and how he is lit and shaded (`LOOK`) sit at the top of the file. `build-poulpy-3d.mjs` writes it as one binary glTF file per side, with his colours from `tokens.json`:
+
+```sh
+node design/build-poulpy-3d.mjs
+```
+
+| Generated file | Used by |
+| --- | --- |
+| `design/poulpy-3d/poulpy_blue.glb` | The blue, smiling side, for any 3D tool or engine |
+| `design/poulpy-3d/poulpy_ember.glb` | The ember, grumpy side |
+
+The script writes the files itself, byte for byte the same on every machine, and CI runs it with `--check`. The docs site's Poulpy in 3D page draws the same `model.mjs` live, lists the rules of the shape and says how to reuse it; the apps do not use the model yet.
+
 The rules for using Poulpy are in [`docs/brand.md`](../docs/brand.md); the full brand book is in `site/.vitepress/theme/brand-book/` and on the docs site, and the decisions behind it are in [`docs/brand-decisions.md`](../docs/brand-decisions.md).
 
 ## Icons

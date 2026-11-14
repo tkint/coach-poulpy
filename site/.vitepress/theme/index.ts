@@ -5,6 +5,7 @@ import BaseFieldSamples from './BaseFieldSamples.vue'
 import ComponentSamples from './ComponentSamples.vue'
 import MockupList from './MockupList.vue'
 import MockupPage from './MockupPage.vue'
+import Poulpy3d from './Poulpy3d.vue'
 import PoulpyGallery from './PoulpyGallery.vue'
 import SampleThemeSwitch from './SampleThemeSwitch.vue'
 import TokenSwatches from './TokenSwatches.vue'
@@ -20,6 +21,7 @@ export default {
     app.component('ComponentSamples', ComponentSamples)
     app.component('MockupList', MockupList)
     app.component('MockupPage', MockupPage)
+    app.component('Poulpy3d', Poulpy3d)
     app.component('PoulpyGallery', PoulpyGallery)
     app.component('TokenSwatches', TokenSwatches)
     app.component('WebComponentSamples', WebComponentSamples)
