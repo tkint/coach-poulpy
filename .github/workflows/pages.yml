@@ -2,8 +2,8 @@ name: Docs site
 
 # Builds and checks the docs site on every pull request so a broken page, a dead link or an
 # unpublished guideline fails CI. Main is published at the root of the gh-pages branch, and each
-# PR as a preview under pr-preview/pr-<number>/, linked from a comment and removed by the cleanup
-# job when the PR closes.
+# PR as a preview under pr-preview/pr-<number>/, linked from one comment (posted once the preview
+# answers) and removed by the cleanup job when the PR closes.
 # GitHub Pages serves the gh-pages branch (Settings > Pages > Deploy from a branch).
 on:
   pull_request:
@@ -143,7 +143,8 @@ jobs:
         with:
           name: site
           path: dist
-      # Publishes dist under pr-preview/pr-<number>/ and comments the link.
+      # Publishes dist under pr-preview/pr-<number>/. Its own comment is off: the one below carries
+      # the link, so the PR gets a single comment.
       - uses: rossjrw/pr-preview-action@v1
         id: preview
         with:
@@ -151,8 +152,20 @@ jobs:
           preview-branch: gh-pages
           umbrella-dir: pr-preview
           pages-base-url: ${{ needs.pages.outputs.base_url }}
-      # A second comment, kept up to date: the docs pages, sections and mockups this PR changes or
-      # builds, linked into its preview, so the owner reviews on the site. Agents write none of their own.
+          comment: false
+      # GitHub Pages takes a moment to serve what was just pushed. Wait until the preview answers, so
+      # the links in the comment work the moment it appears. Gives up after 10 minutes and comments anyway.
+      - name: Wait for the preview to be live
+        env:
+          PREVIEW_URL: ${{ steps.preview.outputs.preview-url }}
+        run: |
+          for _ in $(seq 1 60); do
+            if curl -fsS -o /dev/null "$PREVIEW_URL"; then echo "Preview is live"; exit 0; fi
+            sleep 10
+          done
+          echo "::warning::The preview did not answer within 10 minutes; commenting anyway"
+      # The one PR comment, kept up to date: the preview link, and the docs pages, sections and
+      # mockups this PR changes or builds, linked into it, so the owner reviews on the site. Agents write none of their own.
       - name: List the docs pages to review
         env:
           PR_BODY: ${{ github.event.pull_request.body }}
