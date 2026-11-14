@@ -12,7 +12,7 @@ const options = [
 ]
 const meta = {
   title: 'Fields/MultiSelectField',
-  parameters: { docs: { description: { component: doc } } },
+  parameters: { popover: true, docs: { description: { component: doc } } },
   component: CpMultiSelectField,
   args: { label: 'Muscles', placeholder: 'Any muscle', options, noneLabel: 'No muscle matches' },
   render: (args) => ({

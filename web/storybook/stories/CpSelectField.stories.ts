@@ -15,7 +15,7 @@ const meta = {
   args: { label: 'Format', options },
   // CLEANUP: the button is named by its label alone, so the value it shows is not part of its accessible name (WCAG 2.5.3);
   // name it by label and value, then drop this exemption.
-  parameters: { docs: { description: { component: doc } }, a11y: { test: 'todo' } },
+  parameters: { popover: true, docs: { description: { component: doc } }, a11y: { test: 'todo' } },
   render: (args) => ({
     components: { CpSelectField },
     setup: () => ({ args, value: ref('circuit') }),
