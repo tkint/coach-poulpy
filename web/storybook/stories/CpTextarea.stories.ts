@@ -1,9 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { ref } from 'vue'
 import { CpTextarea } from '@coach-poulpy/ui'
+import doc from './CpTextarea.md?raw'
 
 const meta = {
   title: 'Fields/Textarea',
+  parameters: { docs: { description: { component: doc } } },
   component: CpTextarea,
   args: { label: 'Notes' },
   render: (args) => ({

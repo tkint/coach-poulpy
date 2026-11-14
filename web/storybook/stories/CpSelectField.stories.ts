@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, within } from 'storybook/test'
 import { ref } from 'vue'
 import { CpSelectField } from '@coach-poulpy/ui'
+import doc from './CpSelectField.md?raw'
 
 const options = [
   { value: 'circuit', text: 'Circuit' },
@@ -14,7 +15,7 @@ const meta = {
   args: { label: 'Format', options },
   // CLEANUP: the button is named by its label alone, so the value it shows is not part of its accessible name (WCAG 2.5.3);
   // name it by label and value, then drop this exemption.
-  parameters: { a11y: { test: 'todo' } },
+  parameters: { docs: { description: { component: doc } }, a11y: { test: 'todo' } },
   render: (args) => ({
     components: { CpSelectField },
     setup: () => ({ args, value: ref('circuit') }),

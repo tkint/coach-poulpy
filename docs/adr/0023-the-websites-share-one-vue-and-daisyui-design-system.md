@@ -21,7 +21,7 @@ web/app                                  imports tokens.css and theme.css into i
 - **One theme, light and dark from the tokens.** DaisyUI's variables are `var(--cp-*)` references, so `tokens.css` alone switches light and dark (system setting, or `data-theme="light"` / `"dark"` on `<html>`), as it does for the mockups today. There is no second copy of the palette to drift from `design/tokens.json` ([ADR 0012](./0012-design-tokens-generated-from-one-file.md)).
 - **The roles map onto DaisyUI's names**: `primary` stays primary, `primaryContainer` is secondary (tonal), `grumpy` is accent, `surface`, `background` and `surfaceVariant` are base-100, 200 and 300. DaisyUI's warning is set to the error colour, because ember never means a warning.
 - **Web mockups stay plain HTML** ([ADR 0016](./0016-mockups-are-plain-html-in-the-repo.md)). They link `tokens.css` and the prebuilt `poulpy-ui.css`, and need no browser-side build. Tailwind keeps only the classes it finds in the components and in `design/mockups/*/web/`; the web build generates both CSS files from source, and the docs-site build copies the mockup stylesheet into its published assets. Generated CSS is ignored by Git and is never committed.
-- **The docs site shows the real components** on its Web components page, from source, with the embed build: no reset, no root colours, so the site keeps its own look. Each sample panel pins a theme with a `cp-theme-light` or `cp-theme-dark` class from `tokens.css`.
+- **The component workshop shows the real components** ([ADR 0028](./0028-storybook-is-the-component-workshop-of-the-design-system.md), [ADR 0029](./0029-mockups-are-stories-in-the-component-workshop.md)): it builds the same Tailwind, DaisyUI and `tokens.css`, and a toolbar switch sets light or dark.
 
 ## Why
 
@@ -34,4 +34,4 @@ web/app                                  imports tokens.css and theme.css into i
 - Phone and tablet mockups stay on `design/mockups/shared/mockup.css`, because they draw the native Compose and SwiftUI screens, which DaisyUI's look does not match (chosen by the owner on 7 November 2026). Only `web/` mockups use the shared CSS.
 - `web/` is an npm workspace: `web/ui` and `web/app` today, `web/landing` when the landing site is written. `tokens.css` moved from `web/src/styles/` to `web/ui/src/`.
 - DaisyUI and Tailwind are pinned to exact versions so builds produce reproducible CSS; upgrading them is a PR that regenerates the build output.
-- A component the websites need goes in `web/ui` with its classes on the [Web components](https://tkint.github.io/coach-poulpy/web-components) page, never as one-off styles in an app.
+- A component the websites need goes in `web/ui` with its stories and the classes it renders in the [component workshop](./0028-storybook-is-the-component-workshop-of-the-design-system.md), never as one-off styles in an app.

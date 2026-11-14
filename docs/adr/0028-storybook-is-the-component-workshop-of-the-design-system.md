@@ -14,7 +14,7 @@ The Vue components of `web/ui` ([ADR 0023](./0023-the-websites-share-one-vue-and
 - **Every story is also checked for accessibility** (axe, through `@storybook/addon-a11y`), in light and dark. A finding fails CI. A story that cannot pass yet is marked `a11y: { test: 'todo' }` with a `// CLEANUP:` comment that names the fix.
 - **Docs pages come from the stories.** Every component has an autodocs page that lists all its stories one under the other, with their code.
 - **The theme is the real one.** The workshop builds Tailwind, DaisyUI, `tokens.css` and `theme.css` as the web app does, with the stories as a source, and a toolbar switch sets `data-theme` to light or dark.
-- **The hand-built samples stay for now.** The [Web components](https://tkint.github.io/coach-poulpy/web-components) page still holds each component's classes for web mockups, which stories cannot show. Its live samples may be dropped once the stories cover every state and the owner agrees.
+- **The hand-built component pages are gone.** The Web components and Tokens pages of the docs site moved into the workshop (ADR 0029), so a component is described once.
 
 ## Why
 

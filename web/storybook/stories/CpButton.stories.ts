@@ -1,9 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, within } from 'storybook/test'
 import { CpButton } from '@coach-poulpy/ui'
+import doc from './CpButton.md?raw'
 
 const meta = {
   title: 'Actions/Button',
+  parameters: { docs: { description: { component: doc } } },
   component: CpButton,
   render: (args) => ({ components: { CpButton }, setup: () => ({ args }), template: '<CpButton v-bind="args">Start the session</CpButton>' }),
 } satisfies Meta<typeof CpButton>

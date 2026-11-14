@@ -2,9 +2,11 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, within } from 'storybook/test'
 import { EllipsisVertical } from '@lucide/vue'
 import { CpDropdownMenu } from '@coach-poulpy/ui'
+import doc from './CpDropdownMenu.md?raw'
 
 const meta = {
   title: 'Navigation/DropdownMenu',
+  parameters: { docs: { description: { component: doc } } },
   component: CpDropdownMenu,
   args: { label: 'More actions' },
   render: (args) => ({

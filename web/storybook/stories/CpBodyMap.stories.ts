@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, within } from 'storybook/test'
 import { CpBodyMap } from '@coach-poulpy/ui'
+import doc from './CpBodyMap.md?raw'
 
 // A stand-in figure: the real ones are the generated body map shapes.
 const figures = [
@@ -9,6 +10,7 @@ const figures = [
 ]
 const meta = {
   title: 'Display/BodyMap',
+  parameters: { docs: { description: { component: doc } } },
   component: CpBodyMap,
   args: { figures, description: 'Legs and chest worked most', less: 'Less', more: 'More' },
 } satisfies Meta<typeof CpBodyMap>

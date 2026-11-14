@@ -1,0 +1,14 @@
+import { Meta, Markdown } from '@storybook/addon-docs/blocks'
+import rules from '../../../../docs/design-system.md?raw'
+
+<Meta title="Design system/Rules" />
+
+{/* The rules are the Markdown file agents read in the repo (docs/design-system.md); this page only shows it. */}
+
+export const SITE = 'https://tkint.github.io/coach-poulpy'
+export const text = rules
+  .replace(/\]\(\.\.\/(design\/[^)]*)\)/g, '](https://github.com/tkint/coach-poulpy/blob/main/$1)')
+  .replace(/\]\(adr\/([^)]*?)\.md\)/g, `](${SITE}/docs/adr/$1)`)
+  .replace(/\]\(\.\/brand\.md(#[^)]*)?\)/g, `](${SITE}/docs/brand$1)`)
+
+<Markdown>{text}</Markdown>

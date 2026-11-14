@@ -59,7 +59,6 @@ function pageOf(file) {
     return { group: 'mockups', page: mockupPage(file, m[1], m[2]) }
   }
   if (file.startsWith('design/mockups/shared/')) return { group: 'mockups', page: 'mockups/' }
-  if (file === 'design/tokens.json') return { group: 'design', page: 'tokens' }
   if (file === 'design/build-poulpy.mjs' || file.startsWith('design/poulpy/')) return { group: 'design', page: 'drawings' }
   if (file.startsWith('site/.vitepress/theme/brand-book/')) return { group: 'design', page: 'brand-book' }
   if (!file.endsWith('.md') || file.includes('[')) return null // a [param].md route has no page of its own
@@ -67,7 +66,7 @@ function pageOf(file) {
   const path = isShared ? file : file.startsWith('site/') ? file.slice('site/'.length) : null
   if (path === null) return null
   const page = path.replace(/\.md$/, '').replace(/(^|\/)index$/, '$1')
-  const group = path.startsWith('mockups/') ? 'mockups' : path.startsWith('docs/adr/') ? 'decisions' : /^(docs\/brand|docs\/design-system|brand-book|drawings|tokens)/.test(path) ? 'design' : 'guidelines'
+  const group = path.startsWith('mockups/') ? 'mockups' : path.startsWith('docs/adr/') ? 'decisions' : /^(docs\/brand|docs\/design-system|brand-book|drawings)/.test(path) ? 'design' : 'guidelines'
   return { group, page }
 }
 

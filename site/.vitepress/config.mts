@@ -123,6 +123,7 @@ export default withMermaid(
         { text: 'Start here', link: '/CONTRIBUTING' },
         { text: 'Architecture', link: '/docs/architecture' },
         { text: 'Design system', link: '/docs/design-system' },
+        { text: 'Storybook', link: '/storybook/index.html', target: '_self' },
         { text: 'Brand', link: '/docs/brand' },
         { text: 'Translations', link: '/translations' },
       ],
@@ -144,10 +145,9 @@ export default withMermaid(
           ],
           [
             'Design system',
-            ['/docs/design-system', '/tokens', '/mobile-components', '/web-components', '/component-workshop', '/mockups/', '/docs/profile-and-settings', '/design/'],
+            ['/docs/design-system', '/mobile-components', '/mockups/', '/docs/profile-and-settings', '/design/'],
             [
               { text: 'How to use it', link: '/docs/design-system' },
-              { text: 'Tokens', link: '/tokens' },
               {
                 text: 'Mobile',
                 collapsed: false,
@@ -156,7 +156,7 @@ export default withMermaid(
               {
                 text: 'Web',
                 collapsed: false,
-                items: [{ text: 'Components', link: '/web-components', collapsed: true, items: headings('web-components') }, { text: 'Component workshop', link: '/component-workshop' }, mockupSidebar('web')],
+                items: [mockupSidebar('web')],
               },
               { text: 'Profile and settings', link: '/docs/profile-and-settings' },
               { text: 'Generating tokens and fonts', link: '/design/README' },

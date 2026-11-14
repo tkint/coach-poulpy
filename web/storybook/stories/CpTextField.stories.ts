@@ -2,9 +2,11 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, within } from 'storybook/test'
 import { ref } from 'vue'
 import { CpTextField } from '@coach-poulpy/ui'
+import doc from './CpTextField.md?raw'
 
 const meta = {
   title: 'Fields/TextField',
+  parameters: { docs: { description: { component: doc } } },
   component: CpTextField,
   args: { label: 'Email', type: 'email' },
   render: (args) => ({

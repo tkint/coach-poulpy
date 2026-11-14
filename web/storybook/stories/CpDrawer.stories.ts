@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, within } from 'storybook/test'
 import { Dumbbell, Menu } from '@lucide/vue'
 import { CpDrawer, CpDrawerItem } from '@coach-poulpy/ui'
+import doc from './CpDrawer.md?raw'
 
 const meta = {
   title: 'Navigation/Drawer',
@@ -9,7 +10,7 @@ const meta = {
   args: { toggleLabel: 'Toggle the menu', closeLabel: 'Close the menu' },
   // CLEANUP: the toggle is a <label> with an aria-label, which ARIA does not allow on a label; give the checkbox the name and
   // hide the label's icon from assistive technology, then drop this exemption.
-  parameters: { a11y: { test: 'todo' } },
+  parameters: { docs: { description: { component: doc } }, a11y: { test: 'todo' } },
   render: (args) => ({
     components: { CpDrawer, CpDrawerItem, Menu, Dumbbell },
     setup: () => ({ args }),

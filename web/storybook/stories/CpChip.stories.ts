@@ -2,9 +2,11 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, within } from 'storybook/test'
 import { ref } from 'vue'
 import { CpChip } from '@coach-poulpy/ui'
+import doc from './CpChip.md?raw'
 
 const meta = {
   title: 'Fields/Chip',
+  parameters: { docs: { description: { component: doc } } },
   component: CpChip,
   render: (args) => ({
     components: { CpChip },

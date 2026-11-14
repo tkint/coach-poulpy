@@ -1,8 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { CpBreadcrumbs } from '@coach-poulpy/ui'
+import doc from './CpBreadcrumbs.md?raw'
 
 const meta = {
   title: 'Navigation/Breadcrumbs',
+  parameters: { docs: { description: { component: doc } } },
   component: CpBreadcrumbs,
   args: { label: 'You are here' },
   render: (args) => ({

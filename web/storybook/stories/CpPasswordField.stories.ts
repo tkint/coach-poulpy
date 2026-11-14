@@ -2,9 +2,11 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, within } from 'storybook/test'
 import { ref } from 'vue'
 import { CpPasswordField } from '@coach-poulpy/ui'
+import doc from './CpPasswordField.md?raw'
 
 const meta = {
   title: 'Fields/PasswordField',
+  parameters: { docs: { description: { component: doc } } },
   component: CpPasswordField,
   args: { label: 'Password', showLabel: 'Show the password', hideLabel: 'Hide the password', autocomplete: 'new-password' },
   render: (args) => ({

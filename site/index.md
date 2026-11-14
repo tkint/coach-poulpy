@@ -22,8 +22,8 @@ features:
     details: Poulpy's two sides, six moods, eighteen drawings and the rules that keep him funny, never guilt.
     link: /docs/brand
   - title: Design system
-    details: Colour roles, type, spacing and components, with live tokens read from design/tokens.json.
-    link: /tokens
+    details: Colour roles, type, spacing and every web component in each state, in the Storybook workshop.
+    link: /storybook/index.html
   - title: Architecture
     details: Local-first apps over one Kotlin Multiplatform core, and the decisions behind it.
     link: /docs/architecture

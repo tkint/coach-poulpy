@@ -108,25 +108,25 @@ Suggested next step if the owner agrees: a spike that adds three MDX pages to `w
 
 ## Sources
 
-- Histoire npm record (versions and dates, peer ranges): https://registry.npmjs.org/histoire, https://registry.npmjs.org/histoire/1.0.0-beta.1, https://registry.npmjs.org/@histoire/plugin-vue/1.0.0-beta.1, https://registry.npmjs.org/@histoire/plugin-a11y
-- Histoire changelog: https://raw.githubusercontent.com/histoire-dev/histoire/main/CHANGELOG.md
-- Histoire releases: https://github.com/histoire-dev/histoire/releases
-- Histoire `main` package manifest and engines: https://raw.githubusercontent.com/histoire-dev/histoire/main/package.json, https://raw.githubusercontent.com/histoire-dev/histoire/main/packages/histoire/package.json
-- Histoire getting started: https://histoire.dev/guide/getting-started.html (source: https://raw.githubusercontent.com/histoire-dev/histoire/main/docs/guide/getting-started.md)
-- Histoire documentation and standalone pages: https://histoire.dev/guide/vue3/docs (source: https://raw.githubusercontent.com/histoire-dev/histoire/main/docs/guide/vue3/docs.md)
-- Histoire Markdown renderer: https://raw.githubusercontent.com/histoire-dev/histoire/main/packages/histoire/src/node/markdown/renderer.ts
-- Histoire testing: https://histoire.dev/guide/testing
-- Histoire visual testing: https://histoire.dev/guide/visual-testing
-- Histoire accessibility plugin: https://raw.githubusercontent.com/histoire-dev/histoire/main/docs/guide/plugins/a11y.md, official plugin list https://raw.githubusercontent.com/histoire-dev/histoire/main/docs/guide/plugins/official.md
-- Histoire embedding and base path: https://histoire.dev/guide/embedding
-- Histoire configuration: https://histoire.dev/guide/config, https://histoire.dev/reference/config (source: https://raw.githubusercontent.com/histoire-dev/histoire/main/docs/reference/config.md)
-- Histoire Node deployment: https://raw.githubusercontent.com/histoire-dev/histoire/main/docs/guide/deploy-node.md
-- Storybook npm record: https://registry.npmjs.org/storybook, https://registry.npmjs.org/@storybook/vue3-vite
-- Storybook MDX: https://storybook.js.org/docs/writing-docs/mdx
-- Storybook doc blocks: https://storybook.js.org/docs/writing-docs/doc-blocks
-- Storybook Vitest addon: https://storybook.js.org/docs/writing-tests/integrations/vitest-addon
-- Storybook accessibility testing: https://storybook.js.org/docs/writing-tests/accessibility-testing
-- Storybook publishing: https://storybook.js.org/docs/sharing/publish-storybook
-- Storybook toolbars and globals: https://storybook.js.org/docs/essentials/toolbars-and-globals
-- VitePress nav: https://vitepress.dev/reference/default-theme-nav
+- Histoire npm record (versions and dates, peer ranges): <https://registry.npmjs.org/histoire,> <https://registry.npmjs.org/histoire/1.0.0-beta.1,> <https://registry.npmjs.org/@histoire/plugin-vue/1.0.0-beta.1,> <https://registry.npmjs.org/@histoire/plugin-a11y>
+- Histoire changelog: <https://raw.githubusercontent.com/histoire-dev/histoire/main/CHANGELOG.md>
+- Histoire releases: <https://github.com/histoire-dev/histoire/releases>
+- Histoire `main` package manifest and engines: <https://raw.githubusercontent.com/histoire-dev/histoire/main/package.json,> <https://raw.githubusercontent.com/histoire-dev/histoire/main/packages/histoire/package.json>
+- Histoire getting started: <https://histoire.dev/guide/getting-started.html> (source: <https://raw.githubusercontent.com/histoire-dev/histoire/main/docs/guide/getting-started.md>)
+- Histoire documentation and standalone pages: <https://histoire.dev/guide/vue3/docs> (source: <https://raw.githubusercontent.com/histoire-dev/histoire/main/docs/guide/vue3/docs.md>)
+- Histoire Markdown renderer: <https://raw.githubusercontent.com/histoire-dev/histoire/main/packages/histoire/src/node/markdown/renderer.ts>
+- Histoire testing: <https://histoire.dev/guide/testing>
+- Histoire visual testing: <https://histoire.dev/guide/visual-testing>
+- Histoire accessibility plugin: <https://raw.githubusercontent.com/histoire-dev/histoire/main/docs/guide/plugins/a11y.md,> official plugin list <https://raw.githubusercontent.com/histoire-dev/histoire/main/docs/guide/plugins/official.md>
+- Histoire embedding and base path: <https://histoire.dev/guide/embedding>
+- Histoire configuration: <https://histoire.dev/guide/config,> <https://histoire.dev/reference/config> (source: <https://raw.githubusercontent.com/histoire-dev/histoire/main/docs/reference/config.md>)
+- Histoire Node deployment: <https://raw.githubusercontent.com/histoire-dev/histoire/main/docs/guide/deploy-node.md>
+- Storybook npm record: <https://registry.npmjs.org/storybook,> <https://registry.npmjs.org/@storybook/vue3-vite>
+- Storybook MDX: <https://storybook.js.org/docs/writing-docs/mdx>
+- Storybook doc blocks: <https://storybook.js.org/docs/writing-docs/doc-blocks>
+- Storybook Vitest addon: <https://storybook.js.org/docs/writing-tests/integrations/vitest-addon>
+- Storybook accessibility testing: <https://storybook.js.org/docs/writing-tests/accessibility-testing>
+- Storybook publishing: <https://storybook.js.org/docs/sharing/publish-storybook>
+- Storybook toolbars and globals: <https://storybook.js.org/docs/essentials/toolbars-and-globals>
+- VitePress nav: <https://vitepress.dev/reference/default-theme-nav>
 - In this repo: `docs/adr/0023-the-websites-share-one-vue-and-daisyui-design-system.md`, `docs/adr/0028-storybook-is-the-component-workshop-of-the-design-system.md`, `web/storybook/package.json`, `web/storybook/.storybook/main.ts`, `web/storybook/.storybook/preview.ts`, `site/.vitepress/config.mts`, `site/copy-docs.mjs`
