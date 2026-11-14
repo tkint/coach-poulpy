@@ -15,7 +15,7 @@ An agent that has already loaded a skill follows its instructions and does not n
 
 ## Start here: the issue-to-PR flow
 
-Most work follows the path in [CONTRIBUTING](/CONTRIBUTING). The skills map onto it like this:
+Most work follows the path in [CONTRIBUTING](../../CONTRIBUTING.md). The skills map onto it like this:
 
 | Step | Skill | Example |
 | --- | --- | --- |
