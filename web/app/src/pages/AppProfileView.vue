@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// The profile (design/mockups/agreed/web/app-profile.html): the account, a password-reset email, and where the data lives.
+// The profile (the story Web/Screens/App/Profile): the account, a password-reset email, and where the data lives.
 import { ref } from 'vue'
 import { Check } from '@lucide/vue'
 import { CpAvatar, CpBadge, CpButton, CpCard, CpErrorNote } from '@coach-poulpy/ui'
