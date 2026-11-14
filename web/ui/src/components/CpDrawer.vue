@@ -4,8 +4,9 @@
 // expanded state. Items in the sidebar hide their text with the `cp-is-drawer-close:hidden` variant
 // and show a tooltip with `cp-is-drawer-close:cp-tooltip`, as the Admin mockup does.
 import { onBeforeUnmount, onMounted, useId } from 'vue'
+import { uiText } from '../i18n'
 
-defineProps<{ toggleLabel: string; closeLabel: string }>()
+defineProps<{ toggleLabel?: string; closeLabel?: string }>()
 const open = defineModel<boolean>('open', { default: false })
 const id = useId()
 
@@ -24,16 +25,16 @@ onBeforeUnmount(() => large?.removeEventListener('change', sync))
 
 <template>
   <div class="cp-drawer lg:cp-drawer-open" data-component="drawer">
-    <input :id="id" v-model="open" type="checkbox" class="cp-drawer-toggle" :aria-label="toggleLabel">
+    <input :id="id" v-model="open" type="checkbox" class="cp-drawer-toggle" :aria-label="toggleLabel ?? uiText('ui.toggleNavigation')">
     <div class="cp-drawer-content flex flex-col">
       <nav class="cp-navbar w-full bg-base-100 px-2 shadow-sm md:px-4">
-        <label :for="id" :aria-label="toggleLabel" class="cp-btn cp-btn-square cp-btn-ghost"><slot name="toggle-icon" /></label>
+        <label :for="id" :aria-label="toggleLabel ?? uiText('ui.toggleNavigation')" class="cp-btn cp-btn-square cp-btn-ghost"><slot name="toggle-icon" /></label>
         <div class="px-2 font-bold"><slot name="title" /></div>
       </nav>
       <slot />
     </div>
     <div class="cp-drawer-side cp-is-drawer-close:overflow-visible">
-      <label :for="id" :aria-label="closeLabel" class="cp-drawer-overlay" />
+      <label :for="id" :aria-label="closeLabel ?? uiText('ui.closeNavigation')" class="cp-drawer-overlay" />
       <div class="flex min-h-full flex-col items-start border-r border-base-300 bg-base-100 cp-is-drawer-close:w-16 cp-is-drawer-open:w-64">
         <slot name="sidebar" />
       </div>
