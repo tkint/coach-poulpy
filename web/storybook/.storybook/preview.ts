@@ -14,13 +14,16 @@ const preview: Preview = {
   decorators: [
     (story, context) => {
       document.documentElement.dataset.theme = context.globals.theme
-      return { components: { story }, template: '<div class="bg-base-200 p-4"><story /></div>' }
+      // A popover opens past its component, and the docs page clips whatever leaves the story's box:
+      // stories that declare `parameters.popover` keep room below for it.
+      const room = context.parameters.popover ? ' style="padding-bottom: 18rem"' : ''
+      return { components: { story }, template: `<div class="bg-base-200 p-4"${room}><story /></div>` }
     },
   ],
   parameters: {
     layout: 'fullscreen',
     a11y: { test: 'error' },
-    options: { storySort: { order: ['Design system', ['Introduction', 'Rules', 'Tokens'], '*'] } },
+    options: { storySort: { order: ['Design system', ['Introduction', 'Rules', 'Tokens'], 'Core', 'Web', 'Mobile', '*'] } },
   },
 }
 export default preview

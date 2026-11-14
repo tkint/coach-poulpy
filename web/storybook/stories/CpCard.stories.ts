@@ -3,7 +3,7 @@ import { CpBadge, CpCard } from '@coach-poulpy/ui'
 import doc from './CpCard.md?raw'
 
 const meta = {
-  title: 'Display/Card',
+  title: 'Web/Components/Display/Card',
   parameters: { docs: { description: { component: doc } } },
   component: CpCard,
   render: (args) => ({

@@ -3,7 +3,7 @@ import { expect, within } from 'storybook/test'
 import { CpPoulpy, CpPoulpyCard, CpButton } from '@coach-poulpy/ui'
 import doc from './CpPoulpy.md?raw'
 
-const meta = { title: 'Poulpy/Poulpy', component: CpPoulpy, parameters: { docs: { description: { component: doc } } } } satisfies Meta<typeof CpPoulpy>
+const meta = { title: 'Core/Poulpy', component: CpPoulpy, parameters: { docs: { description: { component: doc } } } } satisfies Meta<typeof CpPoulpy>
 export default meta
 type Story = StoryObj<typeof meta>
 

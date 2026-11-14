@@ -5,7 +5,7 @@ import { CpChip } from '@coach-poulpy/ui'
 import doc from './CpChip.md?raw'
 
 const meta = {
-  title: 'Fields/Chip',
+  title: 'Web/Components/Fields/Chip',
   parameters: { docs: { description: { component: doc } } },
   component: CpChip,
   render: (args) => ({

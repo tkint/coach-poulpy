@@ -10,9 +10,9 @@ const options = [
   { value: 'bar', text: 'Barbell' },
 ]
 const meta = {
-  title: 'Fields/ChipSelectField',
+  title: 'Web/Components/Fields/ChipSelectField',
   component: CpChipSelectField,
-  parameters: { docs: { description: { component: doc } } },
+  parameters: { popover: true, docs: { description: { component: doc } } },
   args: { label: 'Equipment', placeholder: 'Add equipment', options, noneLabel: 'No equipment matches', removeLabel: (text: string) => `Remove ${text}` },
   render: (args, { name }) => ({
     components: { CpChipSelectField },

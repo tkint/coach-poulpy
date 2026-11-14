@@ -5,7 +5,7 @@ import { CpPagination } from '@coach-poulpy/ui'
 import doc from './CpPagination.md?raw'
 
 const meta = {
-  title: 'Navigation/Pagination',
+  title: 'Web/Components/Navigation/Pagination',
   parameters: { docs: { description: { component: doc } } },
   component: CpPagination,
   args: { pages: 12, previousLabel: 'Previous page', nextLabel: 'Next page', navLabel: 'Pages' },

@@ -5,8 +5,8 @@ import { CpDropdownMenu } from '@coach-poulpy/ui'
 import doc from './CpDropdownMenu.md?raw'
 
 const meta = {
-  title: 'Navigation/DropdownMenu',
-  parameters: { docs: { description: { component: doc } } },
+  title: 'Web/Components/Navigation/DropdownMenu',
+  parameters: { popover: true, docs: { description: { component: doc } } },
   component: CpDropdownMenu,
   args: { label: 'More actions' },
   render: (args) => ({

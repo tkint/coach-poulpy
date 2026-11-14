@@ -3,7 +3,7 @@ import { CpTable } from '@coach-poulpy/ui'
 import doc from './CpTable.md?raw'
 
 const meta = {
-  title: 'Display/Table',
+  title: 'Web/Components/Display/Table',
   parameters: { docs: { description: { component: doc } } },
   component: CpTable,
   render: () => ({

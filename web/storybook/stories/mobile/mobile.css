@@ -1,0 +1,77 @@
+/*
+ * The phone and tablet components, on the shared tokens only (ADR 0029). Everything sits under .cp-mobile,
+ * so nothing here reaches the Vue components, and the Vue components' classes never reach in.
+ * Colours, type, spacing and radii are var(--cp-*) from tokens.css; no raw values beyond sizes.
+ */
+.cp-mobile {
+  box-sizing: border-box;
+  display: flex; flex-direction: column; gap: var(--cp-space-lg);
+  padding: var(--cp-space-lg);
+  background: var(--cp-background); color: var(--cp-on-background);
+  font: var(--cp-type-body); font-family: var(--cp-font-body);
+  border: 1px solid var(--cp-outline); border-radius: var(--cp-radius-lg);
+  max-width: 440px;
+
+  & *, & *::before, & *::after { box-sizing: border-box; }
+  & button { font: inherit; color: inherit; border: 0; background: none; padding: 0; cursor: pointer; }
+  & svg { flex: none; }
+
+  & .row { display: flex; flex-wrap: wrap; gap: var(--cp-space-md); align-items: center; }
+  & .label { font-size: 13px; color: var(--cp-on-surface-variant); padding: 0 var(--cp-space-xs); display: block; }
+  & .note { font-size: 13px; color: var(--cp-on-surface-variant); padding: 0 var(--cp-space-xs); }
+  & .muted { color: var(--cp-on-surface-variant); }
+  & .sample { display: flex; flex-direction: column; gap: var(--cp-space-sm); }
+
+  & .btn { height: 56px; padding: 0 var(--cp-space-xl); border-radius: var(--cp-radius-pill); font-size: 17px; font-weight: 800; }
+  & .btn.sm { height: 48px; font-size: 16px; }
+  & .btn.primary { background: var(--cp-primary); color: var(--cp-on-primary); }
+  & .btn.tonal { background: var(--cp-primary-container); color: var(--cp-on-primary-container); }
+  & .btn.outline { background: var(--cp-surface); color: var(--cp-on-surface); border: 2px solid var(--cp-outline); }
+  & .btn.grumpy { background: var(--cp-grumpy); color: var(--cp-on-grumpy); }
+
+  & .chip { height: 36px; padding: 0 var(--cp-space-md); border-radius: var(--cp-radius-pill); font-size: 14px; font-weight: 700; background: var(--cp-surface); color: var(--cp-on-surface-variant); border: 1.5px solid var(--cp-outline); }
+  & .chip.on { background: var(--cp-primary); color: var(--cp-on-primary); border-color: var(--cp-primary); }
+
+  & .card { background: var(--cp-surface); border: 1px solid var(--cp-outline); border-radius: var(--cp-radius-md); padding: 14px; display: flex; gap: var(--cp-space-md); align-items: center; }
+  & .card-text { display: flex; flex-direction: column; }
+  & .card-text span { color: var(--cp-on-surface-variant); font-size: 14px; }
+  & .badge { width: 44px; height: 44px; border-radius: var(--cp-radius-pill); background: var(--cp-primary-container); color: var(--cp-on-primary-container); display: flex; align-items: center; justify-content: center; font-family: var(--cp-font-display); font-weight: 800; }
+
+  & .stepper { background: var(--cp-surface-variant); border-radius: var(--cp-radius-sm); padding: 6px var(--cp-space-sm); display: flex; flex-direction: column; align-items: center; min-width: 180px; }
+  & .stepper-row { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+  & .stepper button { width: 44px; height: 44px; border-radius: var(--cp-radius-pill); background: var(--cp-surface); color: var(--cp-primary); font-size: 22px; font-weight: 800; }
+  & .stepper .value { font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  & .eyebrow { font: var(--cp-type-label); letter-spacing: 0.08em; text-transform: uppercase; color: var(--cp-on-surface-variant); }
+
+  & .alert { display: flex; gap: 10px; align-items: center; border-radius: var(--cp-radius-md); padding: 12px 14px; font-size: 14px; font-weight: 700; color: var(--cp-error); border: 1.5px solid var(--cp-error); background: var(--cp-surface); }
+
+  & .box { height: 52px; border-radius: var(--cp-radius-md); border: 1.5px solid var(--cp-outline); background: var(--cp-surface); padding: 0 var(--cp-space-md); display: flex; align-items: center; gap: var(--cp-space-sm); }
+  & .box:focus-within { border-color: var(--cp-primary); }
+  & .box input { flex: 1; min-width: 0; width: 100%; background: transparent; border: 0; outline: 0; font: inherit; font-size: 17px; font-weight: 800; color: var(--cp-on-surface); }
+  & .select { width: 100%; justify-content: space-between; text-align: left; color: var(--cp-on-surface); }
+  & .select strong { display: block; }
+  & .unit { font-weight: 800; color: var(--cp-on-surface-variant); }
+  & .entry { display: flex; align-items: center; gap: var(--cp-space-sm); }
+  & .entry .box { flex: 1; }
+  & .entry button { width: 48px; height: 48px; border-radius: var(--cp-radius-pill); background: var(--cp-surface-variant); color: var(--cp-primary); font-size: 24px; font-weight: 800; }
+
+  & .sheet { background: var(--cp-surface); border: 1px solid var(--cp-outline); border-radius: var(--cp-radius-lg); padding: var(--cp-space-md); display: flex; flex-direction: column; gap: 10px; }
+  & .sheet-title { font-size: 18px; }
+  & .option { display: flex; align-items: center; gap: var(--cp-space-md); min-height: 44px; font-weight: 700; }
+  & .radio { width: 20px; height: 20px; border-radius: var(--cp-radius-pill); border: 2px solid var(--cp-outline); }
+  & .radio.on { border: 6px solid var(--cp-primary); }
+
+  & .slider { display: flex; align-items: center; }
+  & .dot { width: 14px; height: 14px; border-radius: var(--cp-radius-pill); background: var(--cp-primary); }
+  & .dot.off { background: var(--cp-outline); }
+  & .bar { flex: 1; height: 4px; background: var(--cp-primary); }
+  & .bar.off { background: var(--cp-outline); }
+  & .ends { display: flex; justify-content: space-between; font-size: 13px; color: var(--cp-on-surface-variant); }
+
+  & .chart { width: 100%; }
+  & .chart .grid { stroke: var(--cp-outline); stroke-width: 1; }
+  & .chart .tick { font-size: 8px; fill: var(--cp-on-surface-variant); }
+  & .chart .line { fill: none; stroke: var(--cp-primary); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+  & .empty { background: var(--cp-surface); border: 1px solid var(--cp-outline); border-radius: var(--cp-radius-md); padding: var(--cp-space-md); display: flex; flex-direction: column; gap: var(--cp-space-sm); align-items: flex-start; }
+  & .empty span { color: var(--cp-on-surface-variant); font-size: 14px; }
+}

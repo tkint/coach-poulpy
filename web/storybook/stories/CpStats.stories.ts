@@ -3,7 +3,7 @@ import { CpStat, CpStats } from '@coach-poulpy/ui'
 import doc from './CpStats.md?raw'
 
 const meta = {
-  title: 'Display/Stats',
+  title: 'Web/Components/Display/Stats',
   parameters: { docs: { description: { component: doc } } },
   component: CpStats,
   render: (args) => ({

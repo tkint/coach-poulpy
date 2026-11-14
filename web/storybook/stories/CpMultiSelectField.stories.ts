@@ -11,8 +11,8 @@ const options = [
   { value: 'calves', text: 'Calves' },
 ]
 const meta = {
-  title: 'Fields/MultiSelectField',
-  parameters: { docs: { description: { component: doc } } },
+  title: 'Web/Components/Fields/MultiSelectField',
+  parameters: { popover: true, docs: { description: { component: doc } } },
   component: CpMultiSelectField,
   args: { label: 'Muscles', placeholder: 'Any muscle', options, noneLabel: 'No muscle matches' },
   render: (args) => ({

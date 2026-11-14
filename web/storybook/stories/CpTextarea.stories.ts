@@ -4,7 +4,7 @@ import { CpBadge, CpTextarea } from '@coach-poulpy/ui'
 import doc from './CpTextarea.md?raw'
 
 const meta = {
-  title: 'Fields/Textarea',
+  title: 'Web/Components/Fields/Textarea',
   parameters: { docs: { description: { component: doc } } },
   component: CpTextarea,
   args: { label: 'Notes' },

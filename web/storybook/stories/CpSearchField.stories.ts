@@ -5,7 +5,7 @@ import { CpSearchField } from '@coach-poulpy/ui'
 import doc from './CpSearchField.md?raw'
 
 const meta = {
-  title: 'Fields/SearchField',
+  title: 'Web/Components/Fields/SearchField',
   parameters: { docs: { description: { component: doc } } },
   component: CpSearchField,
   args: { label: 'Search exercises', clearLabel: 'Clear the search', placeholder: 'Search' },

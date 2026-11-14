@@ -145,13 +145,13 @@ export default withMermaid(
           ],
           [
             'Design system',
-            ['/docs/design-system', '/mobile-components', '/mockups/', '/docs/profile-and-settings', '/design/'],
+            ['/docs/design-system', '/mockups/', '/docs/profile-and-settings', '/design/'],
             [
               { text: 'How to use it', link: '/docs/design-system' },
               {
                 text: 'Mobile',
                 collapsed: false,
-                items: [{ text: 'Components', link: '/mobile-components', collapsed: true, items: headings('mobile-components') }, mockupSidebar('mobile')],
+                items: [mockupSidebar('mobile')],
               },
               {
                 text: 'Web',
