@@ -8,7 +8,6 @@
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
       "Courier New", monospace;
     --spacing: 0.25rem;
-    --container-sm: 24rem;
     --text-xs: 0.75rem;
     --text-xs--line-height: calc(1 / 0.75);
     --text-sm: 0.875rem;
@@ -2446,12 +2445,6 @@
   .flex {
     display: flex;
   }
-  .grid {
-    display: grid;
-  }
-  .hidden {
-    display: none;
-  }
   .inline-block {
     display: inline-block;
   }
@@ -2520,13 +2513,6 @@
     width: calc(var(--spacing) * 5);
     height: calc(var(--spacing) * 5);
   }
-  .size-6 {
-    width: calc(var(--spacing) * 6);
-    height: calc(var(--spacing) * 6);
-  }
-  .h-16 {
-    height: calc(var(--spacing) * 16);
-  }
   .h-auto {
     height: auto;
   }
@@ -2541,9 +2527,6 @@
   }
   .min-h-full {
     min-height: 100%;
-  }
-  .min-h-screen {
-    min-height: 100vh;
   }
   .w-8 {
     width: calc(var(--spacing) * 8);
@@ -2578,9 +2561,6 @@
   .min-w-full {
     min-width: 100%;
   }
-  .flex-1 {
-    flex: 1;
-  }
   .shrink-0 {
     flex-shrink: 0;
   }
@@ -2593,26 +2573,6 @@
   .-translate-y-1\/2 {
     --tw-translate-y: calc(calc(1 / 2 * 100%) * -1);
     translate: var(--tw-translate-x) var(--tw-translate-y);
-  }
-  @layer daisyui.l1.l2.l3 {
-    .cp-link {
-      cursor: pointer;
-      text-decoration-line: underline;
-    }
-    .cp-link:focus {
-      --tw-outline-style: none;
-      outline-style: none;
-    }
-    @media (forced-colors: active) {
-      .cp-link:focus {
-        outline: 2px solid transparent;
-        outline-offset: 2px;
-      }
-    }
-    .cp-link:focus-visible {
-      outline: 2px solid currentColor;
-      outline-offset: 2px;
-    }
   }
   .cursor-pointer {
     cursor: pointer;
@@ -2661,9 +2621,6 @@
   }
   .gap-4 {
     gap: calc(var(--spacing) * 4);
-  }
-  .gap-6 {
-    gap: calc(var(--spacing) * 6);
   }
   .truncate {
     overflow: hidden;
@@ -2764,9 +2721,6 @@
   .bg-base-100 {
     background-color: var(--color-base-100);
   }
-  .bg-base-200 {
-    background-color: var(--color-base-200);
-  }
   .bg-primary {
     background-color: var(--color-primary);
   }
@@ -2809,9 +2763,6 @@
   }
   .px-2 {
     padding-inline: calc(var(--spacing) * 2);
-  }
-  .px-4 {
-    padding-inline: calc(var(--spacing) * 4);
   }
   .py-1 {
     padding-block: var(--spacing);
@@ -2873,9 +2824,6 @@
       --cp-alert-color: var(--color-success);
     }
   }
-  .text-base-content {
-    color: var(--color-base-content);
-  }
   .text-base-content\/70 {
     color: var(--color-base-content);
     @supports (color: color-mix(in lab, red, red)) {
@@ -2893,16 +2841,6 @@
   }
   .text-secondary-content {
     color: var(--color-secondary-content);
-  }
-  @layer daisyui.l1.l2 {
-    .cp-link-hover {
-      text-decoration-line: none;
-    }
-    @media (hover: hover) {
-      .cp-link-hover:hover {
-        text-decoration-line: underline;
-      }
-    }
   }
   .shadow-lg {
     --tw-shadow: 0 10px 15px -3px var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 4px 6px -4px var(--tw-shadow-color, rgb(0 0 0 / 0.1));
@@ -3038,9 +2976,6 @@
     }
   }
   @media (width >= 48rem) {
-    .md\:max-w-sm {
-      max-width: var(--container-sm);
-    }
     @layer daisyui.l1.l2 {
       .md\:cp-stats-horizontal {
         grid-auto-flow: column;
@@ -3058,17 +2993,8 @@
         border-block-end: none;
       }
     }
-    .md\:flex-row {
-      flex-direction: row;
-    }
-    .md\:items-center {
-      align-items: center;
-    }
     .md\:p-6 {
       padding: calc(var(--spacing) * 6);
-    }
-    .md\:p-8 {
-      padding: calc(var(--spacing) * 8);
     }
     .md\:px-4 {
       padding-inline: calc(var(--spacing) * 4);
@@ -3115,21 +3041,6 @@
       [dir="rtl"] :is(.lg\:cp-drawer-open > .cp-drawer-toggle ~ .cp-drawer-side > :not(.cp-drawer-overlay)) {
         translate: 0%;
       }
-    }
-    .lg\:sticky {
-      position: sticky;
-    }
-    .lg\:top-8 {
-      top: calc(var(--spacing) * 8);
-    }
-    .lg\:flex {
-      display: flex;
-    }
-    .lg\:hidden {
-      display: none;
-    }
-    .lg\:grid-cols-\[minmax\(0\,1fr\)_22rem\] {
-      grid-template-columns: minmax(0,1fr) 22rem;
     }
   }
   @layer daisyui.l1.l2.l3 {
