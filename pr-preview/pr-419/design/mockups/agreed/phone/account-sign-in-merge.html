@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Account · sign in, guest data joins</title>
+<meta name="mockup:screen" content="account-sign-in-merge">
+<meta name="mockup:section" content="Accounts">
+<meta name="mockup:issue" content="272">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../../../web/ui/src/tokens.css">
+<link rel="stylesheet" href="../../shared/mockup.css">
+<script src="../../shared/mockup-theme.js"></script>
+</head>
+<body>
+<main class="phone">
+  <div class="page-body" style="gap: var(--cp-space-lg); padding-top: 96px;">
+    <img src="../../../poulpy/pose_standing_tall.svg" alt="" width="140" height="127" style="align-self: center;">
+    
+    <div class="intro" style="text-align: center;"><h1 class="title" style="font-size: 30px; line-height: 34px;">Welcome back</h1>
+    <p class="muted">Your workouts and sessions on this phone are joining your account. Nothing is replaced, and both edits are kept.</p></div>
+    <section class="card progress-card" id="progress" data-component="progress-card" role="status">
+      <strong>Sending your training…</strong>
+      <div class="progress-track" aria-hidden="true"><span style="width: 62%;"></span></div>
+      <small class="numbers">18 of 29 sent</small>
+    </section>
+    <p class="field-note" style="text-align: center;">It carries on when you’re back online.</p>
+  </div>
+  <div class="action-bar">
+    <a class="primary-button" data-component="primary-button" href="account-settings-synced.html" style="flex: 1;">Continue</a>
+  </div>
+</main>
+</body>
+</html>
