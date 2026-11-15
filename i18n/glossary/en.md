@@ -75,4 +75,3 @@ Messages not listed here mean what their English says.
 | `unit.*` | Unit formats. `unit.minutesSeconds` and `unit.hoursMinutes`: the second argument is already two digits (“1 h 05”). |
 | `workout.deleteTitle` | `{name}` is the workout’s name, chosen by the person. |
 | `poulpy.*` | Poulpy, the octopus mascot, speaking in the first person. He lights one of his eight tentacles per finished session; eight make a full octopus. He is warm and never guilt-trips. His voice is described on the [brand](../../docs/brand.md) page. |
-
