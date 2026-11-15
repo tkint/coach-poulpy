@@ -1,4 +1,0 @@
-import{n as e}from"./rolldown-runtime-sJBDdmOt.js";import{f as t,l as n,u as r}from"./blocks-DuJnpHm9.js";import{a as i}from"./chunk-W22LQPXL-DAacIxBz.js";import{i as a,r as o}from"./react-DITjJg24.js";import{n as s,t as c}from"./markdown-pages-DB7BolgJ.js";function l(e){let t={h1:`h1`,...a(),...e.components};return(0,d.jsxs)(d.Fragment,{children:[(0,d.jsx)(r,{title:`Design system/Rules/Websites`}),`
-`,`
-`,(0,d.jsx)(t.h1,{id:`websites`,children:`Websites`}),`
-`,(0,d.jsx)(n,{children:f(`Websites`)})]})}function u(e={}){let{wrapper:t}={...a(),...e.components};return t?(0,d.jsx)(t,{...e,children:(0,d.jsx)(l,{...e})}):l(e)}var d,f;function p(){return(p=e((()=>{d=i(),o(),t(),c(),f=s(`design-system`).sections})))()}p();export{u as default,f as rules};
