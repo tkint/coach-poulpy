@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 
 const meta = {
-  title: 'Mobile/Components/Option sheet',
+  title: 'Mobile/Patterns/Option sheet',
   parameters: { docs: { canvas: { sourceState: 'none' }, description: { component: 'The option sheet, drawn on the shared tokens with the isolated mobile stylesheet. Its shape and notes are in the design system tables. Light and dark follow the theme toolbar.' } } },
 } satisfies Meta
 export default meta

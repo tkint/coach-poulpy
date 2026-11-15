@@ -1,12 +1,15 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
-import { screen } from './screens/screen'
+import { renderComponent } from './components/story'
 
 const meta = {
   title: 'Mobile/Components/Settings row',
-  parameters: { docs: { canvas: { sourceState: 'none' }, description: { component: 'A row that opens a settings page: an icon, a title, one line of detail and a chevron. In the stories it is `MobileSettingsRow`.' } } },
+  render: renderComponent('MobileSettingsRow', 'width: 390px; padding: 16px;'),
+  args: { icon: 'weight', title: 'Weight', detail: '72.6 kg · logged 3 days ago' },
+  argTypes: { icon: { control: 'text', description: 'A Lucide icon name.' }, picture: { control: 'text' } },
+  parameters: { docs: { canvas: { sourceState: 'none' }, description: { component: '`MobileSettingsRow`: a row that opens a settings page. An icon (or a picture), a title, one line of detail and a chevron.' } } },
 } satisfies Meta
 export default meta
-type Story = StoryObj
+type Story = StoryObj<typeof meta>
 
-export const Default: Story = screen(`<div style="width: 390px; padding: 16px;"><MobileSettingsRow icon="weight" title="Weight" detail="72.6 kg · logged 3 days ago" /></div>`)
-export const WithPicture: Story = screen(`<div style="width: 390px; padding: 16px;"><MobileSettingsRow picture="../../../poulpy/mood_happy.svg" title="App icon" detail="Happy · default" /></div>`)
+export const WithIcon: Story = {}
+export const WithPicture: Story = { args: { icon: undefined, picture: '../../../poulpy/mood_happy.svg', title: 'App icon', detail: 'Happy · default' } }

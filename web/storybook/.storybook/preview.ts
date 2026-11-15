@@ -27,7 +27,7 @@ const preview: Preview = {
   parameters: {
     layout: 'fullscreen',
     a11y: { test: 'error' },
-    options: { storySort: { order: ['Design system', ['Introduction', 'Rules', 'Tokens'], 'Core', 'Web', 'Mobile', '*'] } },
+    options: { storySort: { order: ['Design system', ['Introduction', 'Rules', 'Tokens'], 'Core', 'Web', 'Mobile', ['Components', 'Patterns', 'Screens'], '*'] } },
   },
 }
 export default preview

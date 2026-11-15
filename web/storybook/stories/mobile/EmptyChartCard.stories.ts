@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 
 const meta = {
-  title: 'Mobile/Components/Empty chart card',
+  title: 'Mobile/Patterns/Empty chart card',
   parameters: { docs: { canvas: { sourceState: 'none' }, description: { component: 'Shown instead of the chart when nothing is logged.' } } },
 } satisfies Meta
 export default meta
