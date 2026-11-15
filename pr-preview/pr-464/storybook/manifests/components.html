@@ -1,0 +1,1810 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Components Manifest</title>
+  <style>
+      :root {
+          --bg: #0b0c10;
+          --panel: #121318;
+          --muted: #9aa0a6;
+          --fg: #e8eaed;
+          --ok: #22c55e;
+          --info: #1e88e5;
+          --err: #c62828;
+          --ok-bg: #0c1a13;
+          --info-bg: #0c1624;
+          --err-bg: #1a0e0e;
+          --chip: #1f2330;
+          --border: #2b2f3a;
+          --link: #8ab4f8;
+          --active-ring: 1px; /* 1px active ring for pills and toggles */
+      }
+
+      * {
+          box-sizing: border-box;
+      }
+
+      html,
+      body {
+          margin: 0;
+          background: var(--bg);
+          color: var(--fg);
+          font: 14px/1.5 system-ui,
+          -apple-system,
+          Segoe UI,
+          Roboto,
+          Ubuntu,
+          Cantarell,
+          'Helvetica Neue',
+          Arial,
+          'Noto Sans';
+      }
+
+      .wrap {
+          max-width: 1100px;
+          margin: 0 auto;
+          padding: 16px 20px;
+      }
+
+      header {
+          position: sticky;
+          top: 0;
+          backdrop-filter: blur(6px);
+          background: color-mix(in srgb, var(--bg) 84%, transparent);
+          border-bottom: 1px solid var(--border);
+          z-index: 10;
+      }
+
+      h1 {
+          font-size: 20px;
+          margin: 0 0 6px;
+      }
+
+      .summary {
+          display: flex;
+          gap: 12px;
+          flex-wrap: wrap;
+          align-items: center;
+      }
+
+      /* Top filter pills */
+      .filter-pill {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          padding: 6px 12px;
+          border: 1px solid var(--border);
+          border-radius: 999px;
+          background: var(--panel);
+          text-decoration: none;
+          cursor: pointer;
+          user-select: none;
+          color: var(--fg);
+      }
+
+      .filter-pill.ok {
+          color: #b9f6ca;
+          border-color: color-mix(in srgb, var(--ok) 55%, var(--border));
+          background: color-mix(in srgb, var(--ok) 18%, #000);
+      }
+
+      .filter-pill.info {
+          color: #b3d9ff;
+          border-color: color-mix(in srgb, var(--info) 55%, var(--border));
+          background: var(--info-bg);
+      }
+
+      .filter-pill.err {
+          color: #ff9aa0;
+          border-color: color-mix(in srgb, var(--err) 55%, var(--border));
+          background: var(--err-bg);
+      }
+
+      .filter-pill.all {
+          color: #d7dbe0;
+          border-color: var(--border);
+          background: var(--panel);
+      }
+
+      .filter-pill[aria-disabled='true'] {
+          cursor: default;
+          text-decoration: none;
+      }
+
+      .filter-pill:focus,
+      .filter-pill:active {
+          outline: none;
+          box-shadow: none;
+      }
+
+      /* Selected top pill ring via :target */
+      #filter-all:target ~ header .filter-pill[data-k='all'],
+      #filter-errors:target ~ header .filter-pill[data-k='errors'],
+      #filter-infos:target ~ header .filter-pill[data-k='infos'],
+      #filter-story-errors:target ~ header .filter-pill[data-k='story-errors'],
+      #filter-story-warnings:target ~ header .filter-pill[data-k='story-warnings'],
+      #filter-no-api:target ~ header .filter-pill[data-k='no-api'],
+      #filter-doc-errors:target ~ header .filter-pill[data-k='docs'],
+      #filter-docs:target ~ header .filter-pill[data-k='docs'] {
+          box-shadow: 0 0 0 var(--active-ring) currentColor;
+          border-color: currentColor;
+      }
+
+      /* Hidden targets for filtering */
+      #filter-all,
+      #filter-errors,
+      #filter-infos,
+      #filter-story-errors,
+      #filter-story-warnings,
+      #filter-no-api,
+      #filter-doc-errors,
+      #filter-docs {
+          display: none;
+      }
+
+      main {
+          padding: 36px 0 40px;
+      }
+
+      .grid {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 18px;
+      }
+
+      /* one card per row */
+
+      .card {
+          border: 1px solid var(--border);
+          background: var(--panel);
+          border-radius: 14px;
+          padding: 14px;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          /* Keep a deep-linked card clear of the sticky header when scrolled into view */
+          scroll-margin-top: 110px;
+      }
+
+      /* Highlight the card deep-linked via components.html#<manifest-id> */
+      .card:target {
+          box-shadow: 0 0 0 2px var(--info);
+          border-color: var(--info);
+      }
+
+      .head {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+      }
+
+      .title {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 10px;
+      }
+
+      .title h2 {
+          font-size: 16px;
+          margin: 0;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+      }
+
+      .meta {
+          font-size: 12px;
+          color: var(--muted);
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+      }
+
+      .kv {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
+      }
+
+      .chip {
+          font-size: 12px;
+          padding: 4px 8px;
+          border-radius: 999px;
+          background: var(--chip);
+          border: 1px solid var(--border);
+      }
+
+      .hint {
+          color: var(--muted);
+          font-size: 12px;
+      }
+
+      .badges {
+          display: flex;
+          gap: 8px;
+          flex-wrap: wrap;
+      }
+
+      /* Per-card badges: labels become toggles when clickable */
+      .badge {
+          font-size: 12px;
+          padding: 3px 8px;
+          border-radius: 999px;
+          border: 1px solid var(--border);
+          background: var(--chip);
+          color: #d7dbe0;
+      }
+
+      .badge.ok {
+          color: #b9f6ca;
+          border-color: color-mix(in srgb, var(--ok) 55%, var(--border));
+      }
+
+      .badge.info {
+          color: #b3d9ff;
+          border-color: color-mix(in srgb, var(--info) 55%, var(--border));
+      }
+
+      .badge.err {
+          color: #ff9aa0;
+          border-color: color-mix(in srgb, var(--err) 55%, var(--border));
+      }
+
+      .snippet-warning {
+          margin-top: 8px;
+          padding: 8px 10px;
+          border-radius: 8px;
+          border: 1px solid color-mix(in srgb, var(--info) 45%, var(--border));
+          background: var(--info-bg);
+          color: #b3d9ff;
+          font-size: 12px;
+      }
+
+      .as-toggle {
+          cursor: pointer;
+      }
+
+      /* 1px ring on active toggle */
+      .tg-err:checked + label.as-toggle,
+      .tg-info:checked + label.as-toggle,
+      .tg-stories:checked + label.as-toggle,
+      .tg-docs:checked + label.as-toggle,
+      .tg-subcomponents:checked + label.as-toggle,
+      .tg-content:checked + label.as-toggle,
+      .tg-props:checked + label.as-toggle {
+          box-shadow: 0 0 0 var(--active-ring) currentColor;
+          border-color: currentColor;
+      }
+
+      /* Panels: hidden by default, shown when respective toggle checked */
+      .panels {
+          display: grid;
+          gap: 10px;
+      }
+
+      .panel {
+          display: none;
+      }
+
+      .tg-err:checked ~ .panels .panel-err {
+          display: grid;
+      }
+
+      .tg-info:checked ~ .panels .panel-info {
+          display: grid;
+          gap: 8px;
+      }
+
+      .tg-stories:checked ~ .panels .panel-stories {
+          display: grid;
+          gap: 8px;
+      }
+
+      .tg-docs:checked ~ .panels .panel-docs {
+          display: grid;
+          gap: 8px;
+      }
+
+      .tg-subcomponents:checked ~ .panels .panel-subcomponents {
+          display: grid;
+          gap: 8px;
+      }
+
+      .tg-content:checked ~ .panels .panel-content {
+          display: grid;
+          gap: 8px;
+      }
+
+      .tg-props:checked ~ .panels .panel-props {
+          display: grid;
+      }
+
+      /* Colored notes for API error + info */
+      .note {
+          padding: 12px;
+          border: 1px solid var(--border);
+          border-radius: 10px;
+      }
+
+      .note.err {
+          border-color: color-mix(in srgb, var(--err) 55%, var(--border));
+          background: var(--err-bg);
+          color: #ffd1d4;
+      }
+
+      .note.info {
+          border-color: color-mix(in srgb, var(--info) 55%, var(--border));
+          background: var(--info-bg);
+          color: #d6e8ff;
+      }
+
+      .note.ok {
+          border-color: color-mix(in srgb, var(--ok) 55%, var(--border));
+          background: var(--ok-bg);
+          color: var(--fg);
+      }
+
+      .note-title {
+          font-weight: 600;
+          margin-bottom: 6px;
+      }
+
+      .note-body {
+          white-space: normal;
+      }
+
+      /* Story error cards */
+      .ex {
+          padding: 10px;
+          border: 1px solid var(--border);
+          border-radius: 10px;
+          background: #0f131b;
+      }
+
+      .ex.err {
+          border-color: color-mix(in srgb, var(--err) 55%, var(--border));
+      }
+
+      .row {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-wrap: wrap;
+      }
+
+      .status-dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          display: inline-block;
+      }
+
+      .dot-ok {
+          background: var(--ok);
+      }
+
+      .dot-err {
+          background: var(--err);
+      }
+
+      .ex-name {
+          font-weight: 600;
+      }
+
+      /* Error groups (visible in errors filter) */
+      .error-groups {
+          display: none;
+          margin-bottom: 16px;
+      }
+
+      .group {
+          border: 1px solid var(--border);
+          background: var(--panel);
+          border-radius: 14px;
+          overflow: hidden;
+      }
+
+      .group + .group {
+          margin-top: 12px;
+      }
+
+      .group-header {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 12px 14px;
+          cursor: pointer;
+          border-bottom: 1px solid var(--border);
+      }
+
+      .group-header:hover {
+          background: #141722;
+      }
+
+      .group-title {
+          font-weight: 600;
+          flex: 1;
+      }
+
+      .group-count {
+          font-size: 12px;
+          color: var(--muted);
+      }
+
+      .group-cards {
+          display: none;
+          padding: 12px;
+      }
+
+      .group .card {
+          margin: 12px 0;
+      }
+
+      .group .card:first-child {
+          margin-top: 0;
+      }
+
+      .group .card:last-child {
+          margin-bottom: 0;
+      }
+
+      /* caret rotation */
+      .group-tg:checked + label .caret {
+          transform: rotate(90deg);
+      }
+
+      .caret {
+          transition: transform 0.15s ease;
+      }
+
+      /* toggle body */
+      .group-tg:checked ~ .group-cards {
+          display: block;
+      }
+
+      /* CSS-only filtering of cards via top pills */
+      #filter-errors:target ~ main .card:not(.has-error):not(.has-story-error) {
+          display: none;
+      }
+
+      #filter-infos:target ~ main .card:not(.has-info) {
+          display: none;
+      }
+
+      #filter-story-errors:target ~ main .card:not(.has-story-error) {
+          display: none;
+      }
+
+      #filter-story-warnings:target ~ main .card:not(.has-story-warning) {
+          display: none;
+      }
+
+      #filter-no-api:target ~ main .card:not(.missing-api) {
+          display: none;
+      }
+
+      #filter-doc-errors:target ~ main .card:not(.has-doc-error) {
+          display: none;
+      }
+
+      #filter-docs:target ~ main .card:has(> .tg-docs),
+      #filter-docs:target ~ main .card.is-doc {
+          display: block;
+      }
+
+      #filter-docs:target ~ main .card:not(:has(> .tg-docs)):not(.is-doc) {
+          display: none;
+      }
+
+      #filter-all:target ~ main .card {
+          display: block;
+      }
+
+      /* In errors view, hide standalone component-error cards in the regular grid (they will appear in groups) */
+      #filter-errors:target ~ main .grid .card.has-error {
+          display: none;
+      }
+
+      /* Show grouped section only in errors view */
+      #filter-errors:target ~ main .error-groups {
+          display: block;
+      }
+
+      /* Section titles */
+      .section-title {
+          font-size: 16px;
+          font-weight: 600;
+          color: var(--muted);
+          margin: 24px 0 12px;
+          padding-bottom: 8px;
+          border-bottom: 1px solid var(--border);
+      }
+      .section-title:first-child {
+          margin-top: 0;
+      }
+
+      /* When a toggle is checked, show the corresponding panel */
+      .card > .tg-err:checked ~ .panels .panel-err {
+          display: grid;
+      }
+      
+      .card > .tg-info:checked ~ .panels .panel-info {
+          display: grid;
+      }
+      
+      .card > .tg-stories:checked ~ .panels .panel-stories {
+          display: grid;
+      }
+
+      .card > .tg-docs:checked ~ .panels .panel-docs {
+          display: grid;
+      }
+
+      .card > .tg-subcomponents:checked ~ .panels .panel-subcomponents {
+          display: grid;
+      }
+
+      .card > .tg-content:checked ~ .panels .panel-content {
+          display: grid;
+      }
+
+      /* Add vertical spacing around panels only when any panel is visible */
+      .card > .tg-err:checked ~ .panels,
+      .card > .tg-info:checked ~ .panels,
+      .card > .tg-stories:checked ~ .panels,
+      .card > .tg-docs:checked ~ .panels,
+      .card > .tg-subcomponents:checked ~ .panels,
+      .card > .tg-content:checked ~ .panels,
+      .card > .tg-props:checked ~ .panels {
+          margin: 10px 0;
+      }
+
+      /* Optional: a subtle 1px ring on the active badge, using :has() if available */
+      @supports selector(.card:has(.tg-err:checked)) {
+          .card:has(.tg-err:checked) label[for$='-err'],
+          .card:has(.tg-info:checked) label[for$='-info'],
+          .card:has(.tg-stories:checked) label[for$='-stories'],
+          .card:has(.tg-docs:checked) label[for$='-docs'],
+          .card:has(.tg-subcomponents:checked) label[for$='-subcomponents'],
+          .card:has(.tg-content:checked) label[for$='-content'],
+          .card:has(.tg-props:checked) label[for$='-props'] {
+              box-shadow: 0 0 0 1px currentColor;
+              border-color: currentColor;
+          }
+      }
+
+      /* Wrap long lines in code blocks at ~120 characters */
+      pre, code {
+          font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      }
+      pre {
+          white-space: pre-wrap;
+          overflow-wrap: anywhere;
+          word-break: break-word;
+          overflow-x: auto; /* fallback for extremely long tokens */
+          margin: 8px 0 0;
+      }
+      pre > code {
+          display: block;
+          white-space: inherit;
+          overflow-wrap: inherit;
+          word-break: inherit;
+          inline-size: min(100%, 120ch);
+      }
+
+      /* MDX content container for docs */
+      .mdx-content {
+          background: #0f131b;
+          border: 1px solid var(--border);
+          border-radius: 10px;
+          padding: 12px;
+          max-height: 400px;
+          overflow-y: auto;
+          margin-top: 8px;
+      }
+  </style>
+</head>
+<body>
+<!-- Hidden targets for the top-level filters -->
+<span id="filter-all"></span>
+<span id="filter-errors"></span>
+<span id="filter-infos"></span>
+<span id="filter-story-errors"></span>
+<span id="filter-story-warnings"></span>
+<span id="filter-no-api"></span>
+<span id="filter-doc-errors"></span>
+<span id="filter-docs"></span>
+<header>
+  <div class="wrap">
+    <h1>Manifest Debugger</h1>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">25 docs ok</a></div>
+  </div>
+</header>
+<main>
+  <div class="wrap">
+    <div class="note info" style="margin-bottom: 16px;">
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>0.0s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <pre><code>typescript: {
+  reactDocgen: 'react-docgen-typescript',
+}</code></pre>
+            Note: <code>react-docgen-typescript</code> can be slower. If performance is acceptable for your project, it generally produces better results.
+            <a href="https://storybook.js.org/docs/api/main-config/main-config-typescript#reactdocgen" target="_blank">Learn more</a>
+          </div>
+    
+    
+    <h2 class="section-title">Unattached Docs</h2>
+    <div class="grid" role="list">
+      
+<article
+  class="card is-doc no-doc-error"
+  role="listitem"
+  aria-label="Docs">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> Design system/Introduction</h2>
+      <div class="badges">
+        
+        <label for="doc-0-design-system-introduction-docs-content" class="badge ok as-toggle">view content</label>
+      </div>
+    </div>
+    <div class="meta" title="./stories/design-system/Introduction.mdx">design-system-introduction--docs · ./stories/design-system/Introduction.mdx</div>
+    <div>export const rulesIntro = markdownPages(&#39;design-system&#39;).intro # Coach Poulpy design syste...</div>
+  </div>
+
+  <!-- Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="doc-0-design-system-introduction-docs-content" class="tg tg-content" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-content">
+          <div class="mdx-content">
+            <pre><code>import { Meta, Markdown } from &#39;@storybook/addon-docs/blocks&#39;
+import { markdownPages } from &#39;../markdown-pages&#39;
+
+export const rulesIntro = markdownPages(&#39;design-system&#39;).intro
+
+&lt;Meta title=&quot;Design system/Introduction&quot; /&gt;
+
+# Coach Poulpy design system
+
+&lt;Markdown&gt;{rulesIntro}&lt;/Markdown&gt;
+
+The landing site, the web app and these pages draw with one package, [`web/ui`](https://github.com/tkint/coach-poulpy/tree/main/web/ui): DaisyUI with the Poulpy theme and a few Vue components on top ([ADR 0023](https://tkint.github.io/coach-poulpy/docs/adr/0023-the-websites-share-one-vue-and-daisyui-design-system)). This workshop is its home ([ADR 0028](https://tkint.github.io/coach-poulpy/docs/adr/0028-storybook-is-the-component-workshop-of-the-design-system), [ADR 0029](https://tkint.github.io/coach-poulpy/docs/adr/0029-mockups-are-stories-in-the-component-workshop)).
+
+- **Rules**: how to use [colour](?path=/docs/design-system-rules-colour--docs), [type](?path=/docs/design-system-rules-type--docs), [space, radius and motion](?path=/docs/design-system-rules-space-radius-and-motion--docs), [icons](?path=/docs/design-system-rules-icons--docs), [accessibility](?path=/docs/design-system-rules-accessibility--docs), the [components](?path=/docs/design-system-rules-components--docs), the [screens](?path=/docs/design-system-rules-screens--docs) and the [websites](?path=/docs/design-system-rules-websites--docs). They are written in [`docs/design-system.md`](https://github.com/tkint/coach-poulpy/blob/main/docs/design-system.md), which agents read; these pages show it.
+- [Tokens](?path=/docs/design-system-tokens--docs): every value, read from `design/tokens.json`.
+- **Core**: what is the same on every platform: Poulpy and the body map. They are drawn here with the web components.
+- **Web &gt; Components**: each Vue component in every state, with its classes. Each state is a story and runs as a test in CI, with an accessibility check. Use the toolbar to switch between light and dark.
+- **Mobile &gt; Components**: the raw pieces of the Android and iOS screens (buttons, chips, fields, rows), one page each, with a story per variation and controls to try them.
+- **Mobile &gt; Patterns**: pieces composed from those, such as the nav bar, sheets and charts.
+- **Mobile &gt; Screens**: every agreed phone screen, built from the components and patterns, and the drafts ([ADR 0029](https://tkint.github.io/coach-poulpy/docs/adr/0029-mockups-are-stories-in-the-component-workshop)).
+
+## Classes
+
+Every DaisyUI class carries the `cp-` prefix (`cp-btn`, not `btn`); the few classes of our own (`cp-chip`, `cp-stepper`, `cp-type-*`...) never reuse a DaisyUI name. Tailwind&#39;s own utilities (`w-full`, `bg-secondary`) have no prefix. A component&#39;s docs page lists the classes it renders.
+
+Type has plain classes and no component: `cp-type-display`, `cp-type-title`, `cp-type-headline`, `cp-type-label`.
+</code></pre>
+          </div>
+        </div>
+  </div>
+</article>
+<article
+  class="card is-doc no-doc-error"
+  role="listitem"
+  aria-label="Docs">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> Design system/Rules/Colour</h2>
+      <div class="badges">
+        
+        <label for="doc-1-design-system-rules-colour-docs-content" class="badge ok as-toggle">view content</label>
+      </div>
+    </div>
+    <div class="meta" title="./stories/design-system/rules/Colour.mdx">design-system-rules-colour--docs · ./stories/design-system/rules/Colour.mdx</div>
+    <div>export const rules = markdownPages(&#39;design-system&#39;).sections # Colour</div>
+  </div>
+
+  <!-- Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="doc-1-design-system-rules-colour-docs-content" class="tg tg-content" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-content">
+          <div class="mdx-content">
+            <pre><code>import { Meta, Markdown } from &#39;@storybook/addon-docs/blocks&#39;
+import { markdownPages } from &#39;../../markdown-pages&#39;
+
+export const rules = markdownPages(&#39;design-system&#39;).sections
+
+&lt;Meta title=&quot;Design system/Rules/Colour&quot; /&gt;
+
+{/* Shown from docs/design-system.md: edit the rules there. */}
+
+# Colour
+
+&lt;Markdown&gt;{rules(&#39;Colour roles&#39;, &#39;Mood shades&#39;)}&lt;/Markdown&gt;
+</code></pre>
+          </div>
+        </div>
+  </div>
+</article>
+<article
+  class="card is-doc no-doc-error"
+  role="listitem"
+  aria-label="Docs">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> Design system/Rules/Type</h2>
+      <div class="badges">
+        
+        <label for="doc-2-design-system-rules-type-docs-content" class="badge ok as-toggle">view content</label>
+      </div>
+    </div>
+    <div class="meta" title="./stories/design-system/rules/Type.mdx">design-system-rules-type--docs · ./stories/design-system/rules/Type.mdx</div>
+    <div>export const rules = markdownPages(&#39;design-system&#39;).sections # Type</div>
+  </div>
+
+  <!-- Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="doc-2-design-system-rules-type-docs-content" class="tg tg-content" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-content">
+          <div class="mdx-content">
+            <pre><code>import { Meta, Markdown } from &#39;@storybook/addon-docs/blocks&#39;
+import { markdownPages } from &#39;../../markdown-pages&#39;
+
+export const rules = markdownPages(&#39;design-system&#39;).sections
+
+&lt;Meta title=&quot;Design system/Rules/Type&quot; /&gt;
+
+{/* Shown from docs/design-system.md: edit the rules there. */}
+
+# Type
+
+&lt;Markdown&gt;{rules(&#39;Type&#39;)}&lt;/Markdown&gt;
+</code></pre>
+          </div>
+        </div>
+  </div>
+</article>
+<article
+  class="card is-doc no-doc-error"
+  role="listitem"
+  aria-label="Docs">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> Design system/Rules/Space, radius and motion</h2>
+      <div class="badges">
+        
+        <label for="doc-3-design-system-rules-space-radius-and-motion-docs-content" class="badge ok as-toggle">view content</label>
+      </div>
+    </div>
+    <div class="meta" title="./stories/design-system/rules/Space.mdx">design-system-rules-space-radius-and-motion--docs · ./stories/design-system/rules/Space.mdx</div>
+    <div>export const rules = markdownPages(&#39;design-system&#39;).sections # Space, radius and motion</div>
+  </div>
+
+  <!-- Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="doc-3-design-system-rules-space-radius-and-motion-docs-content" class="tg tg-content" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-content">
+          <div class="mdx-content">
+            <pre><code>import { Meta, Markdown } from &#39;@storybook/addon-docs/blocks&#39;
+import { markdownPages } from &#39;../../markdown-pages&#39;
+
+export const rules = markdownPages(&#39;design-system&#39;).sections
+
+&lt;Meta title=&quot;Design system/Rules/Space, radius and motion&quot; /&gt;
+
+{/* Shown from docs/design-system.md: edit the rules there. */}
+
+# Space, radius and motion
+
+&lt;Markdown&gt;{rules(&#39;Space, radius, motion&#39;)}&lt;/Markdown&gt;
+</code></pre>
+          </div>
+        </div>
+  </div>
+</article>
+<article
+  class="card is-doc no-doc-error"
+  role="listitem"
+  aria-label="Docs">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> Design system/Rules/Icons</h2>
+      <div class="badges">
+        
+        <label for="doc-4-design-system-rules-icons-docs-content" class="badge ok as-toggle">view content</label>
+      </div>
+    </div>
+    <div class="meta" title="./stories/design-system/rules/Icons.mdx">design-system-rules-icons--docs · ./stories/design-system/rules/Icons.mdx</div>
+    <div>export const rules = markdownPages(&#39;design-system&#39;).sections # Icons</div>
+  </div>
+
+  <!-- Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="doc-4-design-system-rules-icons-docs-content" class="tg tg-content" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-content">
+          <div class="mdx-content">
+            <pre><code>import { Meta, Markdown } from &#39;@storybook/addon-docs/blocks&#39;
+import { markdownPages } from &#39;../../markdown-pages&#39;
+
+export const rules = markdownPages(&#39;design-system&#39;).sections
+
+&lt;Meta title=&quot;Design system/Rules/Icons&quot; /&gt;
+
+{/* Shown from docs/design-system.md: edit the rules there. */}
+
+# Icons
+
+&lt;Markdown&gt;{rules(&#39;Icons&#39;)}&lt;/Markdown&gt;
+</code></pre>
+          </div>
+        </div>
+  </div>
+</article>
+<article
+  class="card is-doc no-doc-error"
+  role="listitem"
+  aria-label="Docs">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> Design system/Rules/Accessibility</h2>
+      <div class="badges">
+        
+        <label for="doc-5-design-system-rules-accessibility-docs-content" class="badge ok as-toggle">view content</label>
+      </div>
+    </div>
+    <div class="meta" title="./stories/design-system/rules/Accessibility.mdx">design-system-rules-accessibility--docs · ./stories/design-system/rules/Accessibility.mdx</div>
+    <div>export const rules = markdownPages(&#39;design-system&#39;).sections # Accessibility</div>
+  </div>
+
+  <!-- Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="doc-5-design-system-rules-accessibility-docs-content" class="tg tg-content" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-content">
+          <div class="mdx-content">
+            <pre><code>import { Meta, Markdown } from &#39;@storybook/addon-docs/blocks&#39;
+import { markdownPages } from &#39;../../markdown-pages&#39;
+
+export const rules = markdownPages(&#39;design-system&#39;).sections
+
+&lt;Meta title=&quot;Design system/Rules/Accessibility&quot; /&gt;
+
+{/* Shown from docs/design-system.md: edit the rules there. */}
+
+# Accessibility
+
+&lt;Markdown&gt;{rules(&#39;Accessibility&#39;)}&lt;/Markdown&gt;
+</code></pre>
+          </div>
+        </div>
+  </div>
+</article>
+<article
+  class="card is-doc no-doc-error"
+  role="listitem"
+  aria-label="Docs">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> Design system/Rules/Components</h2>
+      <div class="badges">
+        
+        <label for="doc-6-design-system-rules-components-docs-content" class="badge ok as-toggle">view content</label>
+      </div>
+    </div>
+    <div class="meta" title="./stories/design-system/rules/Components.mdx">design-system-rules-components--docs · ./stories/design-system/rules/Components.mdx</div>
+    <div>export const rules = markdownPages(&#39;design-system&#39;).sections # Components</div>
+  </div>
+
+  <!-- Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="doc-6-design-system-rules-components-docs-content" class="tg tg-content" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-content">
+          <div class="mdx-content">
+            <pre><code>import { Meta, Markdown } from &#39;@storybook/addon-docs/blocks&#39;
+import { markdownPages } from &#39;../../markdown-pages&#39;
+
+export const rules = markdownPages(&#39;design-system&#39;).sections
+
+&lt;Meta title=&quot;Design system/Rules/Components&quot; /&gt;
+
+{/* Shown from docs/design-system.md: edit the rules there. */}
+
+# Components
+
+&lt;Markdown&gt;{rules(&#39;Components&#39;, &#39;Base fields&#39;)}&lt;/Markdown&gt;
+</code></pre>
+          </div>
+        </div>
+  </div>
+</article>
+<article
+  class="card is-doc no-doc-error"
+  role="listitem"
+  aria-label="Docs">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> Design system/Rules/Screens</h2>
+      <div class="badges">
+        
+        <label for="doc-7-design-system-rules-screens-docs-content" class="badge ok as-toggle">view content</label>
+      </div>
+    </div>
+    <div class="meta" title="./stories/design-system/rules/Screens.mdx">design-system-rules-screens--docs · ./stories/design-system/rules/Screens.mdx</div>
+    <div>export const rules = markdownPages(&#39;design-system&#39;).sections # Screens</div>
+  </div>
+
+  <!-- Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="doc-7-design-system-rules-screens-docs-content" class="tg tg-content" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-content">
+          <div class="mdx-content">
+            <pre><code>import { Meta, Markdown } from &#39;@storybook/addon-docs/blocks&#39;
+import { markdownPages } from &#39;../../markdown-pages&#39;
+
+export const rules = markdownPages(&#39;design-system&#39;).sections
+
+&lt;Meta title=&quot;Design system/Rules/Screens&quot; /&gt;
+
+{/* Shown from docs/design-system.md: edit the rules there. */}
+
+# Screens
+
+&lt;Markdown&gt;{rules(&#39;Screens&#39;)}&lt;/Markdown&gt;
+</code></pre>
+          </div>
+        </div>
+  </div>
+</article>
+<article
+  class="card is-doc no-doc-error"
+  role="listitem"
+  aria-label="Docs">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> Design system/Rules/Websites</h2>
+      <div class="badges">
+        
+        <label for="doc-8-design-system-rules-websites-docs-content" class="badge ok as-toggle">view content</label>
+      </div>
+    </div>
+    <div class="meta" title="./stories/design-system/rules/Websites.mdx">design-system-rules-websites--docs · ./stories/design-system/rules/Websites.mdx</div>
+    <div>export const rules = markdownPages(&#39;design-system&#39;).sections # Websites</div>
+  </div>
+
+  <!-- Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="doc-8-design-system-rules-websites-docs-content" class="tg tg-content" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-content">
+          <div class="mdx-content">
+            <pre><code>import { Meta, Markdown } from &#39;@storybook/addon-docs/blocks&#39;
+import { markdownPages } from &#39;../../markdown-pages&#39;
+
+export const rules = markdownPages(&#39;design-system&#39;).sections
+
+&lt;Meta title=&quot;Design system/Rules/Websites&quot; /&gt;
+
+{/* Shown from docs/design-system.md: edit the rules there. */}
+
+# Websites
+
+&lt;Markdown&gt;{rules(&#39;Websites&#39;, &#39;Web sizes&#39;)}&lt;/Markdown&gt;
+</code></pre>
+          </div>
+        </div>
+  </div>
+</article>
+<article
+  class="card is-doc no-doc-error"
+  role="listitem"
+  aria-label="Docs">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> Design system/Tokens</h2>
+      <div class="badges">
+        
+        <label for="doc-9-design-system-tokens-docs-content" class="badge ok as-toggle">view content</label>
+      </div>
+    </div>
+    <div class="meta" title="./stories/design-system/Tokens.mdx">design-system-tokens--docs · ./stories/design-system/Tokens.mdx</div>
+    <div># Tokens Every value below is read from [`design/tokens.json`](https://github.com/tkint/co...</div>
+  </div>
+
+  <!-- Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="doc-9-design-system-tokens-docs-content" class="tg tg-content" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-content">
+          <div class="mdx-content">
+            <pre><code>import { Meta, ColorPalette, ColorItem } from &#39;@storybook/addon-docs/blocks&#39;
+import tokens from &#39;../../../../design/tokens.json&#39;
+
+&lt;Meta title=&quot;Design system/Tokens&quot; /&gt;
+
+# Tokens
+
+Every value below is read from [`design/tokens.json`](https://github.com/tkint/coach-poulpy/blob/main/design/tokens.json) when the workshop is built, the same file that generates the Android, iOS and web themes ([ADR 0012](https://tkint.github.io/coach-poulpy/docs/adr/0012-design-tokens-generated-from-one-file)). How to use them is in the Rules pages, starting with [Colour](?path=/docs/design-system-rules-colour--docs).
+
+export const roles = Object.keys(tokens.theme.light).filter((name) =&gt; !name.startsWith(&#39;on&#39;))
+export const onRole = (role) =&gt; {
+  const name = &#39;on&#39; + role[0].toUpperCase() + role.slice(1)
+  return name in tokens.theme.light ? name : null
+}
+export const family = (font) =&gt; (font === &#39;display&#39; ? &quot;&#39;Baloo 2&#39;, sans-serif&quot; : &#39;Nunito, sans-serif&#39;)
+
+## Colour roles
+
+Each role with its text colour, in light and dark.
+
+&lt;div style={{ display: &#39;grid&#39;, gridTemplateColumns: &#39;repeat(auto-fit, minmax(300px, 1fr))&#39;, gap: 16 }}&gt;
+  {[&#39;light&#39;, &#39;dark&#39;].map((mode) =&gt; (
+    &lt;div key={mode} style={{ background: tokens.theme[mode].background, border: `1px solid ${tokens.theme[mode].outline}`, borderRadius: 16, padding: 16 }}&gt;
+      &lt;strong style={{ color: tokens.theme[mode].onBackground, textTransform: &#39;capitalize&#39; }}&gt;{mode}&lt;/strong&gt;
+      &lt;div style={{ display: &#39;grid&#39;, gridTemplateColumns: &#39;repeat(auto-fill, minmax(120px, 1fr))&#39;, gap: 8, marginTop: 12 }}&gt;
+        {roles.map((role) =&gt; (
+          &lt;div key={role} style={{ background: tokens.theme[mode][role], color: onRole(role) ? tokens.theme[mode][onRole(role)] : tokens.theme[mode].onBackground, border: `1px solid ${tokens.theme[mode].outline}`, borderRadius: 12, padding: 10, minHeight: 64, display: &#39;flex&#39;, flexDirection: &#39;column&#39;, justifyContent: &#39;space-between&#39; }}&gt;
+            &lt;span style={{ fontWeight: 800, fontSize: 13 }}&gt;{role}&lt;/span&gt;
+            &lt;code style={{ background: &#39;none&#39;, color: &#39;inherit&#39;, fontSize: 12 }}&gt;{tokens.theme[mode][role]}&lt;/code&gt;
+          &lt;/div&gt;
+        ))}
+      &lt;/div&gt;
+    &lt;/div&gt;
+  ))}
+&lt;/div&gt;
+
+## Mood spectrum
+
+&lt;ColorPalette&gt;
+  {Object.entries(tokens.mood).map(([name, hex]) =&gt; (
+    &lt;ColorItem key={name} title={name} subtitle={hex} colors={[hex]} /&gt;
+  ))}
+&lt;/ColorPalette&gt;
+
+## Palette
+
+{Object.entries(tokens.color).map(([name, steps]) =&gt; (
+  &lt;div key={name}&gt;
+    &lt;h3 style={{ textTransform: &#39;capitalize&#39; }}&gt;{name}&lt;/h3&gt;
+    &lt;ColorPalette&gt;
+      {Object.entries(steps).map(([step, hex]) =&gt; (
+        &lt;ColorItem key={step} title={step} subtitle={hex} colors={[hex]} /&gt;
+      ))}
+    &lt;/ColorPalette&gt;
+  &lt;/div&gt;
+))}
+
+## Type
+
+{Object.entries(tokens.type).map(([name, role]) =&gt; (
+  &lt;div key={name} style={{ display: &#39;grid&#39;, gridTemplateColumns: &#39;90px 1fr auto&#39;, alignItems: &#39;baseline&#39;, gap: 16, padding: &#39;8px 0&#39;, borderBottom: &#39;1px solid #8883&#39;, overflowX: &#39;auto&#39; }}&gt;
+    &lt;span style={{ fontSize: 12.5, fontWeight: 800, letterSpacing: &#39;0.08em&#39;, textTransform: &#39;uppercase&#39;, opacity: 0.7 }}&gt;{name}&lt;/span&gt;
+    &lt;span style={{ fontFamily: family(role.font), fontSize: role.size, lineHeight: `${role.lineHeight}px`, fontWeight: role.weight, letterSpacing: role.tracking ? `${role.tracking}em` : undefined, textTransform: name === &#39;label&#39; ? &#39;uppercase&#39; : undefined, fontVariantNumeric: role.tabular ? &#39;tabular-nums&#39; : undefined }}&gt;
+      {name === &#39;timer&#39; ? &#39;01:27&#39; : &#39;Leg day, Poulpy approves&#39;}
+    &lt;/span&gt;
+    &lt;code&gt;{role.size} / {role.lineHeight} · {role.weight}&lt;/code&gt;
+  &lt;/div&gt;
+))}
+
+## Space and radius
+
+{Object.entries(tokens.space).map(([name, px]) =&gt; (
+  &lt;div key={name} style={{ display: &#39;flex&#39;, alignItems: &#39;center&#39;, gap: 12, margin: &#39;6px 0&#39; }}&gt;
+    &lt;span style={{ minWidth: 60, fontSize: 12.5, fontWeight: 800, textTransform: &#39;uppercase&#39;, opacity: 0.7 }}&gt;{name}&lt;/span&gt;
+    &lt;span style={{ height: 12, width: px * 3, borderRadius: 6, background: &#39;currentColor&#39;, opacity: 0.6 }} /&gt;
+    &lt;code&gt;{px}&lt;/code&gt;
+  &lt;/div&gt;
+))}
+
+&lt;div style={{ display: &#39;flex&#39;, flexWrap: &#39;wrap&#39;, gap: 16, marginTop: 16 }}&gt;
+  {Object.entries(tokens.radius).map(([name, px]) =&gt; (
+    &lt;div key={name} style={{ display: &#39;flex&#39;, flexDirection: &#39;column&#39;, alignItems: &#39;center&#39;, gap: 6, fontSize: 13 }}&gt;
+      &lt;span style={{ width: 80, height: 80, borderRadius: Math.min(px, 40), border: &#39;2px solid currentColor&#39;, opacity: 0.6 }} /&gt;
+      &lt;span&gt;{name} · {px}&lt;/span&gt;
+    &lt;/div&gt;
+  ))}
+&lt;/div&gt;
+
+## Size
+
+&lt;table&gt;
+  &lt;thead&gt;&lt;tr&gt;&lt;th&gt;Token&lt;/th&gt;&lt;th&gt;Size&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;
+  &lt;tbody&gt;
+    {Object.entries(tokens.size).map(([name, px]) =&gt; (
+      &lt;tr key={name}&gt;&lt;td&gt;{name}&lt;/td&gt;&lt;td&gt;{px}&lt;/td&gt;&lt;/tr&gt;
+    ))}
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+## Motion
+
+&lt;table&gt;
+  &lt;thead&gt;&lt;tr&gt;&lt;th&gt;Token&lt;/th&gt;&lt;th&gt;Duration&lt;/th&gt;&lt;th&gt;Easing&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;
+  &lt;tbody&gt;
+    {Object.entries(tokens.motion).map(([name, m]) =&gt; (
+      &lt;tr key={name}&gt;&lt;td&gt;{name}&lt;/td&gt;&lt;td&gt;{m.duration} ms&lt;/td&gt;&lt;td&gt;&lt;code&gt;{m.easing ? `cubic-bezier(${m.easing.join(&#39;, &#39;)})` : &#39;standard&#39;}&lt;/code&gt;&lt;/td&gt;&lt;/tr&gt;
+    ))}
+  &lt;/tbody&gt;
+&lt;/table&gt;
+</code></pre>
+          </div>
+        </div>
+  </div>
+</article>
+<article
+  class="card is-doc no-doc-error"
+  role="listitem"
+  aria-label="Docs">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> Brand/Introduction</h2>
+      <div class="badges">
+        
+        <label for="doc-10-brand-introduction-docs-content" class="badge ok as-toggle">view content</label>
+      </div>
+    </div>
+    <div class="meta" title="./stories/brand/Introduction.mdx">brand-introduction--docs · ./stories/brand/Introduction.mdx</div>
+    <div>export const intro = markdownPages(&#39;brand&#39;).intro # Poulpy and the brand - [Character](?pa...</div>
+  </div>
+
+  <!-- Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="doc-10-brand-introduction-docs-content" class="tg tg-content" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-content">
+          <div class="mdx-content">
+            <pre><code>import { Meta, Markdown } from &#39;@storybook/addon-docs/blocks&#39;
+import { markdownPages } from &#39;../markdown-pages&#39;
+
+export const intro = markdownPages(&#39;brand&#39;).intro
+
+&lt;Meta title=&quot;Brand/Introduction&quot; /&gt;
+
+# Poulpy and the brand
+
+&lt;Markdown&gt;{intro}&lt;/Markdown&gt;
+
+- [Character](?path=/docs/brand-character--docs): what Poulpy is and never does, and his tentacles.
+- [Moods](?path=/docs/brand-moods--docs): his two sides, six moods, which drawing shows when, and the ember side.
+- [Inclusive by default](?path=/docs/brand-inclusive-by-default--docs) and [Voice, logo and type](?path=/docs/brand-voice-logo-and-type--docs).
+- [Drawings](?path=/docs/brand-drawings--docs): every portrait, pose and the loader, as generated.
+- [Poulpy in 3D](?path=/docs/brand-poulpy-in-3d--docs): the model to turn around, its rules and how to reuse it.
+- [Poulpy moves](?path=/docs/brand-poulpy-moves-turning--docs): how he turns, jumps and cheers in 3D, one move a page.
+- [Brand book](?path=/docs/brand-brand-book--docs): logo, colours, poses, type and behaviour, with every drawing live.
+- [Decisions](?path=/docs/brand-decisions--docs): what was decided and why. [Ideas for later](?path=/docs/brand-ideas-for-later--docs).
+
+These pages show [`docs/brand.md`](https://github.com/tkint/coach-poulpy/blob/main/docs/brand.md) and [`docs/brand-decisions.md`](https://github.com/tkint/coach-poulpy/blob/main/docs/brand-decisions.md), which agents read; edit the rules there.
+</code></pre>
+          </div>
+        </div>
+  </div>
+</article>
+<article
+  class="card is-doc no-doc-error"
+  role="listitem"
+  aria-label="Docs">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> Brand/Character</h2>
+      <div class="badges">
+        
+        <label for="doc-11-brand-character-docs-content" class="badge ok as-toggle">view content</label>
+      </div>
+    </div>
+    <div class="meta" title="./stories/brand/Character.mdx">brand-character--docs · ./stories/brand/Character.mdx</div>
+    <div>export const brand = markdownPages(&#39;brand&#39;).sections # Character</div>
+  </div>
+
+  <!-- Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="doc-11-brand-character-docs-content" class="tg tg-content" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-content">
+          <div class="mdx-content">
+            <pre><code>import { Meta, Markdown } from &#39;@storybook/addon-docs/blocks&#39;
+import { markdownPages } from &#39;../markdown-pages&#39;
+
+export const brand = markdownPages(&#39;brand&#39;).sections
+
+&lt;Meta title=&quot;Brand/Character&quot; /&gt;
+
+{/* Shown from docs/brand.md: edit the rules there. */}
+
+# Character
+
+&lt;Markdown&gt;{brand(&#39;Character rules&#39;, &#39;Tentacles&#39;)}&lt;/Markdown&gt;
+</code></pre>
+          </div>
+        </div>
+  </div>
+</article>
+<article
+  class="card is-doc no-doc-error"
+  role="listitem"
+  aria-label="Docs">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> Brand/Moods</h2>
+      <div class="badges">
+        
+        <label for="doc-12-brand-moods-docs-content" class="badge ok as-toggle">view content</label>
+      </div>
+    </div>
+    <div class="meta" title="./stories/brand/Moods.mdx">brand-moods--docs · ./stories/brand/Moods.mdx</div>
+    <div>export const brand = markdownPages(&#39;brand&#39;).sections # Moods</div>
+  </div>
+
+  <!-- Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="doc-12-brand-moods-docs-content" class="tg tg-content" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-content">
+          <div class="mdx-content">
+            <pre><code>import { Meta, Markdown } from &#39;@storybook/addon-docs/blocks&#39;
+import { markdownPages } from &#39;../markdown-pages&#39;
+
+export const brand = markdownPages(&#39;brand&#39;).sections
+
+&lt;Meta title=&quot;Brand/Moods&quot; /&gt;
+
+{/* Shown from docs/brand.md: edit the rules there. */}
+
+# Moods
+
+&lt;Markdown&gt;{brand(&#39;Moods&#39;, &#39;When each drawing shows&#39;, &#39;The ember side&#39;)}&lt;/Markdown&gt;
+</code></pre>
+          </div>
+        </div>
+  </div>
+</article>
+<article
+  class="card is-doc no-doc-error"
+  role="listitem"
+  aria-label="Docs">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> Brand/Inclusive by default</h2>
+      <div class="badges">
+        
+        <label for="doc-13-brand-inclusive-by-default-docs-content" class="badge ok as-toggle">view content</label>
+      </div>
+    </div>
+    <div class="meta" title="./stories/brand/Inclusive.mdx">brand-inclusive-by-default--docs · ./stories/brand/Inclusive.mdx</div>
+    <div>export const brand = markdownPages(&#39;brand&#39;).sections # Inclusive by default</div>
+  </div>
+
+  <!-- Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="doc-13-brand-inclusive-by-default-docs-content" class="tg tg-content" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-content">
+          <div class="mdx-content">
+            <pre><code>import { Meta, Markdown } from &#39;@storybook/addon-docs/blocks&#39;
+import { markdownPages } from &#39;../markdown-pages&#39;
+
+export const brand = markdownPages(&#39;brand&#39;).sections
+
+&lt;Meta title=&quot;Brand/Inclusive by default&quot; /&gt;
+
+{/* Shown from docs/brand.md: edit the rules there. */}
+
+# Inclusive by default
+
+&lt;Markdown&gt;{brand(&#39;Inclusive by default&#39;)}&lt;/Markdown&gt;
+</code></pre>
+          </div>
+        </div>
+  </div>
+</article>
+<article
+  class="card is-doc no-doc-error"
+  role="listitem"
+  aria-label="Docs">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> Brand/Voice, logo and type</h2>
+      <div class="badges">
+        
+        <label for="doc-14-brand-voice-logo-and-type-docs-content" class="badge ok as-toggle">view content</label>
+      </div>
+    </div>
+    <div class="meta" title="./stories/brand/Voice.mdx">brand-voice-logo-and-type--docs · ./stories/brand/Voice.mdx</div>
+    <div>export const brand = markdownPages(&#39;brand&#39;).sections # Voice, logo and type</div>
+  </div>
+
+  <!-- Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="doc-14-brand-voice-logo-and-type-docs-content" class="tg tg-content" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-content">
+          <div class="mdx-content">
+            <pre><code>import { Meta, Markdown } from &#39;@storybook/addon-docs/blocks&#39;
+import { markdownPages } from &#39;../markdown-pages&#39;
+
+export const brand = markdownPages(&#39;brand&#39;).sections
+
+&lt;Meta title=&quot;Brand/Voice, logo and type&quot; /&gt;
+
+{/* Shown from docs/brand.md: edit the rules there. */}
+
+# Voice, logo and type
+
+&lt;Markdown&gt;{brand(&#39;Voice&#39;, &#39;Logo and type&#39;)}&lt;/Markdown&gt;
+</code></pre>
+          </div>
+        </div>
+  </div>
+</article>
+<article
+  class="card is-doc no-doc-error"
+  role="listitem"
+  aria-label="Docs">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> Brand/Drawings</h2>
+      <div class="badges">
+        
+        <label for="doc-15-brand-drawings-docs-content" class="badge ok as-toggle">view content</label>
+      </div>
+    </div>
+    <div class="meta" title="./stories/brand/Drawings.mdx">brand-drawings--docs · ./stories/brand/Drawings.mdx</div>
+    <div># Drawings Poulpy&#39;s six mood portraits, his poses and the loader, as generated by [`design...</div>
+  </div>
+
+  <!-- Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="doc-15-brand-drawings-docs-content" class="tg tg-content" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-content">
+          <div class="mdx-content">
+            <pre><code>import { Meta, Canvas } from &#39;@storybook/addon-docs/blocks&#39;
+import * as Poulpy from &#39;../PoulpyReference.stories&#39;
+
+&lt;Meta title=&quot;Brand/Drawings&quot; /&gt;
+
+# Drawings
+
+Poulpy&#39;s six mood portraits, his poses and the loader, as generated by [`design/build-poulpy.mjs`](https://github.com/tkint/coach-poulpy/blob/main/design/build-poulpy.mjs). Portraits and poses share one 248 × 226 frame, so they can replace each other without moving. When each one shows is on the [Moods](?path=/docs/brand-moods--docs#when-each-drawing-shows) page. The same drawings, as the apps use them, are under [Core &gt; Poulpy](?path=/docs/core-poulpy--docs).
+
+&lt;Canvas of={Poulpy.Reference} sourceState=&quot;none&quot; /&gt;
+</code></pre>
+          </div>
+        </div>
+  </div>
+</article>
+<article
+  class="card is-doc no-doc-error"
+  role="listitem"
+  aria-label="Docs">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> Brand/Poulpy in 3D</h2>
+      <div class="badges">
+        
+        <label for="doc-16-brand-poulpy-in-3d-docs-content" class="badge ok as-toggle">view content</label>
+      </div>
+    </div>
+    <div class="meta" title="./stories/brand/Poulpy3d.mdx">brand-poulpy-in-3d--docs · ./stories/brand/Poulpy3d.mdx</div>
+    <div>export const page = markdownPages(&#39;poulpy-3d&#39;) export const parts = (page.intro + page.sec...</div>
+  </div>
+
+  <!-- Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="doc-16-brand-poulpy-in-3d-docs-content" class="tg tg-content" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-content">
+          <div class="mdx-content">
+            <pre><code>import { Meta, Markdown, Story } from &#39;@storybook/addon-docs/blocks&#39;
+import { markdownPages } from &#39;../markdown-pages&#39;
+import * as Live from &#39;./Brand.stories&#39;
+
+{/* Shown from docs/poulpy-3d.md: edit the text there. Each &lt;!-- live: Name --&gt; in it is the Brand.stories story of that name.
+    His moves have a page each, in poulpy-moves/, so no page runs two of them at once. */}
+
+export const page = markdownPages(&#39;poulpy-3d&#39;)
+export const parts = (page.intro + page.sections(&#39;The rules of the shape&#39;, &#39;His six moods&#39;, &#39;His twelve poses&#39;, &#39;His pictures&#39;, &#39;His moves&#39;, &#39;Using the model&#39;, &#39;Changing the design&#39;)).split(/&lt;!-- live: (\w+) --&gt;/)
+
+&lt;Meta title=&quot;Brand/Poulpy in 3D&quot; /&gt;
+
+# Poulpy in 3D
+
+{parts.map((part, index) =&gt; (index % 2 ? &lt;Story key={index} of={Live[part]} /&gt; : &lt;Markdown key={index}&gt;{part}&lt;/Markdown&gt;))}
+</code></pre>
+          </div>
+        </div>
+  </div>
+</article>
+<article
+  class="card is-doc no-doc-error"
+  role="listitem"
+  aria-label="Docs">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> Brand/Poulpy moves/Turning</h2>
+      <div class="badges">
+        
+        <label for="doc-17-brand-poulpy-moves-turning-docs-content" class="badge ok as-toggle">view content</label>
+      </div>
+    </div>
+    <div class="meta" title="./stories/brand/poulpy-moves/Turning.mdx">brand-poulpy-moves-turning--docs · ./stories/brand/poulpy-moves/Turning.mdx</div>
+    <div>export const parts = markdownPages(&#39;poulpy-3d&#39;).sections(&#39;Turning in short steps&#39;).split(/...</div>
+  </div>
+
+  <!-- Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="doc-17-brand-poulpy-moves-turning-docs-content" class="tg tg-content" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-content">
+          <div class="mdx-content">
+            <pre><code>import { Meta, Markdown, Story } from &#39;@storybook/addon-docs/blocks&#39;
+import { markdownPages } from &#39;../../markdown-pages&#39;
+import * as Live from &#39;../Brand.stories&#39;
+
+{/* Shown from docs/poulpy-3d.md: edit the text there. Each &lt;!-- live: Name --&gt; in it is the Brand.stories story of that name. */}
+
+export const parts = markdownPages(&#39;poulpy-3d&#39;).sections(&#39;Turning in short steps&#39;).split(/&lt;!-- live: (\w+) --&gt;/)
+
+&lt;Meta title=&quot;Brand/Poulpy moves/Turning&quot; /&gt;
+
+{parts.map((part, index) =&gt; (index % 2 ? &lt;Story key={index} of={Live[part]} /&gt; : &lt;Markdown key={index}&gt;{part.replace(/^## /, &#39;# &#39;)}&lt;/Markdown&gt;))}
+</code></pre>
+          </div>
+        </div>
+  </div>
+</article>
+<article
+  class="card is-doc no-doc-error"
+  role="listitem"
+  aria-label="Docs">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> Brand/Poulpy moves/Little jumps</h2>
+      <div class="badges">
+        
+        <label for="doc-18-brand-poulpy-moves-little-jumps-docs-content" class="badge ok as-toggle">view content</label>
+      </div>
+    </div>
+    <div class="meta" title="./stories/brand/poulpy-moves/Jumping.mdx">brand-poulpy-moves-little-jumps--docs · ./stories/brand/poulpy-moves/Jumping.mdx</div>
+    <div>export const parts = markdownPages(&#39;poulpy-3d&#39;).sections(&#39;Little jumps&#39;).split(//)</div>
+  </div>
+
+  <!-- Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="doc-18-brand-poulpy-moves-little-jumps-docs-content" class="tg tg-content" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-content">
+          <div class="mdx-content">
+            <pre><code>import { Meta, Markdown, Story } from &#39;@storybook/addon-docs/blocks&#39;
+import { markdownPages } from &#39;../../markdown-pages&#39;
+import * as Live from &#39;../Brand.stories&#39;
+
+{/* Shown from docs/poulpy-3d.md: edit the text there. Each &lt;!-- live: Name --&gt; in it is the Brand.stories story of that name. */}
+
+export const parts = markdownPages(&#39;poulpy-3d&#39;).sections(&#39;Little jumps&#39;).split(/&lt;!-- live: (\w+) --&gt;/)
+
+&lt;Meta title=&quot;Brand/Poulpy moves/Little jumps&quot; /&gt;
+
+{parts.map((part, index) =&gt; (index % 2 ? &lt;Story key={index} of={Live[part]} /&gt; : &lt;Markdown key={index}&gt;{part.replace(/^## /, &#39;# &#39;)}&lt;/Markdown&gt;))}
+</code></pre>
+          </div>
+        </div>
+  </div>
+</article>
+<article
+  class="card is-doc no-doc-error"
+  role="listitem"
+  aria-label="Docs">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> Brand/Poulpy moves/Jumping around</h2>
+      <div class="badges">
+        
+        <label for="doc-19-brand-poulpy-moves-jumping-around-docs-content" class="badge ok as-toggle">view content</label>
+      </div>
+    </div>
+    <div class="meta" title="./stories/brand/poulpy-moves/JumpingAround.mdx">brand-poulpy-moves-jumping-around--docs · ./stories/brand/poulpy-moves/JumpingAround.mdx</div>
+    <div>export const parts = markdownPages(&#39;poulpy-3d&#39;).sections(&#39;Jumping around&#39;).split(//)</div>
+  </div>
+
+  <!-- Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="doc-19-brand-poulpy-moves-jumping-around-docs-content" class="tg tg-content" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-content">
+          <div class="mdx-content">
+            <pre><code>import { Meta, Markdown, Story } from &#39;@storybook/addon-docs/blocks&#39;
+import { markdownPages } from &#39;../../markdown-pages&#39;
+import * as Live from &#39;../Brand.stories&#39;
+
+{/* Shown from docs/poulpy-3d.md: edit the text there. Each &lt;!-- live: Name --&gt; in it is the Brand.stories story of that name. */}
+
+export const parts = markdownPages(&#39;poulpy-3d&#39;).sections(&#39;Jumping around&#39;).split(/&lt;!-- live: (\w+) --&gt;/)
+
+&lt;Meta title=&quot;Brand/Poulpy moves/Jumping around&quot; /&gt;
+
+{parts.map((part, index) =&gt; (index % 2 ? &lt;Story key={index} of={Live[part]} /&gt; : &lt;Markdown key={index}&gt;{part.replace(/^## /, &#39;# &#39;)}&lt;/Markdown&gt;))}
+</code></pre>
+          </div>
+        </div>
+  </div>
+</article>
+<article
+  class="card is-doc no-doc-error"
+  role="listitem"
+  aria-label="Docs">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> Brand/Poulpy moves/The champion</h2>
+      <div class="badges">
+        
+        <label for="doc-20-brand-poulpy-moves-the-champion-docs-content" class="badge ok as-toggle">view content</label>
+      </div>
+    </div>
+    <div class="meta" title="./stories/brand/poulpy-moves/Cheering.mdx">brand-poulpy-moves-the-champion--docs · ./stories/brand/poulpy-moves/Cheering.mdx</div>
+    <div>export const parts = markdownPages(&#39;poulpy-3d&#39;).sections(&#39;The champion jumps for joy&#39;).spl...</div>
+  </div>
+
+  <!-- Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="doc-20-brand-poulpy-moves-the-champion-docs-content" class="tg tg-content" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-content">
+          <div class="mdx-content">
+            <pre><code>import { Meta, Markdown, Story } from &#39;@storybook/addon-docs/blocks&#39;
+import { markdownPages } from &#39;../../markdown-pages&#39;
+import * as Live from &#39;../Brand.stories&#39;
+
+{/* Shown from docs/poulpy-3d.md: edit the text there. Each &lt;!-- live: Name --&gt; in it is the Brand.stories story of that name. */}
+
+export const parts = markdownPages(&#39;poulpy-3d&#39;).sections(&#39;The champion jumps for joy&#39;).split(/&lt;!-- live: (\w+) --&gt;/)
+
+&lt;Meta title=&quot;Brand/Poulpy moves/The champion&quot; /&gt;
+
+{parts.map((part, index) =&gt; (index % 2 ? &lt;Story key={index} of={Live[part]} /&gt; : &lt;Markdown key={index}&gt;{part.replace(/^## /, &#39;# &#39;)}&lt;/Markdown&gt;))}
+</code></pre>
+          </div>
+        </div>
+  </div>
+</article>
+<article
+  class="card is-doc no-doc-error"
+  role="listitem"
+  aria-label="Docs">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> Brand/Poulpy moves/The cocky wink</h2>
+      <div class="badges">
+        
+        <label for="doc-21-brand-poulpy-moves-the-cocky-wink-docs-content" class="badge ok as-toggle">view content</label>
+      </div>
+    </div>
+    <div class="meta" title="./stories/brand/poulpy-moves/Winking.mdx">brand-poulpy-moves-the-cocky-wink--docs · ./stories/brand/poulpy-moves/Winking.mdx</div>
+    <div>export const parts = markdownPages(&#39;poulpy-3d&#39;).sections(&#39;The cocky one winks&#39;).split(//)</div>
+  </div>
+
+  <!-- Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="doc-21-brand-poulpy-moves-the-cocky-wink-docs-content" class="tg tg-content" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-content">
+          <div class="mdx-content">
+            <pre><code>import { Meta, Markdown, Story } from &#39;@storybook/addon-docs/blocks&#39;
+import { markdownPages } from &#39;../../markdown-pages&#39;
+import * as Live from &#39;../Brand.stories&#39;
+
+{/* Shown from docs/poulpy-3d.md: edit the text there. Each &lt;!-- live: Name --&gt; in it is the Brand.stories story of that name. */}
+
+export const parts = markdownPages(&#39;poulpy-3d&#39;).sections(&#39;The cocky one winks&#39;).split(/&lt;!-- live: (\w+) --&gt;/)
+
+&lt;Meta title=&quot;Brand/Poulpy moves/The cocky wink&quot; /&gt;
+
+{parts.map((part, index) =&gt; (index % 2 ? &lt;Story key={index} of={Live[part]} /&gt; : &lt;Markdown key={index}&gt;{part.replace(/^## /, &#39;# &#39;)}&lt;/Markdown&gt;))}
+</code></pre>
+          </div>
+        </div>
+  </div>
+</article>
+<article
+  class="card is-doc no-doc-error"
+  role="listitem"
+  aria-label="Docs">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> Brand/Brand book</h2>
+      <div class="badges">
+        
+        <label for="doc-22-brand-brand-book-docs-content" class="badge ok as-toggle">view content</label>
+      </div>
+    </div>
+    <div class="meta" title="./stories/brand/BrandBook.mdx">brand-brand-book--docs · ./stories/brand/BrandBook.mdx</div>
+    <div># Brand book The Poulpy brand book: logo, colours, poses, type, tokens and behaviour, with...</div>
+  </div>
+
+  <!-- Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="doc-22-brand-brand-book-docs-content" class="tg tg-content" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-content">
+          <div class="mdx-content">
+            <pre><code>import { Meta, Story } from &#39;@storybook/addon-docs/blocks&#39;
+import * as Live from &#39;./Brand.stories&#39;
+
+&lt;Meta title=&quot;Brand/Brand book&quot; /&gt;
+
+# Brand book
+
+The Poulpy brand book: logo, colours, poses, type, tokens and behaviour, with every drawing live. The rules are summed up on the [brand pages](?path=/docs/brand-introduction--docs), and what was decided and why is on [Decisions](?path=/docs/brand-decisions--docs). The book itself is `web/storybook/stories/brand/brand-book/`.
+
+&lt;Story of={Live.Book} /&gt;
+</code></pre>
+          </div>
+        </div>
+  </div>
+</article>
+<article
+  class="card is-doc no-doc-error"
+  role="listitem"
+  aria-label="Docs">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> Brand/Decisions</h2>
+      <div class="badges">
+        
+        <label for="doc-23-brand-decisions-docs-content" class="badge ok as-toggle">view content</label>
+      </div>
+    </div>
+    <div class="meta" title="./stories/brand/Decisions.mdx">brand-decisions--docs · ./stories/brand/Decisions.mdx</div>
+    <div>export const decisions = markdownPages(&#39;brand-decisions&#39;).all # Brand decisions</div>
+  </div>
+
+  <!-- Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="doc-23-brand-decisions-docs-content" class="tg tg-content" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-content">
+          <div class="mdx-content">
+            <pre><code>import { Meta, Markdown } from &#39;@storybook/addon-docs/blocks&#39;
+import { markdownPages } from &#39;../markdown-pages&#39;
+
+export const decisions = markdownPages(&#39;brand-decisions&#39;).all
+
+&lt;Meta title=&quot;Brand/Decisions&quot; /&gt;
+
+{/* Shown from docs/brand-decisions.md: add a decision there. */}
+
+# Brand decisions
+
+&lt;Markdown&gt;{decisions}&lt;/Markdown&gt;
+</code></pre>
+          </div>
+        </div>
+  </div>
+</article>
+<article
+  class="card is-doc no-doc-error"
+  role="listitem"
+  aria-label="Docs">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> Brand/Ideas for later</h2>
+      <div class="badges">
+        
+        <label for="doc-24-brand-ideas-for-later-docs-content" class="badge ok as-toggle">view content</label>
+      </div>
+    </div>
+    <div class="meta" title="./stories/brand/Ideas.mdx">brand-ideas-for-later--docs · ./stories/brand/Ideas.mdx</div>
+    <div>export const brand = markdownPages(&#39;brand&#39;).sections # Ideas for later</div>
+  </div>
+
+  <!-- Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="doc-24-brand-ideas-for-later-docs-content" class="tg tg-content" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-content">
+          <div class="mdx-content">
+            <pre><code>import { Meta, Markdown } from &#39;@storybook/addon-docs/blocks&#39;
+import { markdownPages } from &#39;../markdown-pages&#39;
+
+export const brand = markdownPages(&#39;brand&#39;).sections
+
+&lt;Meta title=&quot;Brand/Ideas for later&quot; /&gt;
+
+{/* Shown from docs/brand.md: edit the rules there. */}
+
+# Ideas for later
+
+&lt;Markdown&gt;{brand(&#39;Ideas for later&#39;)}&lt;/Markdown&gt;
+</code></pre>
+          </div>
+        </div>
+  </div>
+</article>
+    </div>
+    
+  </div>
+</main>
+</body>
+</html>  
