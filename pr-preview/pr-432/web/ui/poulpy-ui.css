@@ -1588,6 +1588,9 @@
   .relative {
     position: relative;
   }
+  .static {
+    position: static;
+  }
   .end-3 {
     inset-inline-end: calc(var(--spacing) * 3);
   }
@@ -1813,6 +1816,9 @@
   }
   .z-20 {
     z-index: 20;
+  }
+  .order-first {
+    order: -9999;
   }
   @layer daisyui.l1.l2.l3 {
     .cp-modal-box {
@@ -2445,6 +2451,9 @@
   .flex {
     display: flex;
   }
+  .hidden {
+    display: none;
+  }
   .inline-block {
     display: inline-block;
   }
@@ -2598,6 +2607,9 @@
   .flex-col {
     flex-direction: column;
   }
+  .flex-row {
+    flex-direction: row;
+  }
   .flex-wrap {
     flex-wrap: wrap;
   }
@@ -2609,6 +2621,9 @@
   }
   .justify-between {
     justify-content: space-between;
+  }
+  .justify-center {
+    justify-content: center;
   }
   .gap-1 {
     gap: var(--spacing);
@@ -3339,6 +3354,22 @@
     fill: var(--cp-heat3);
     stroke: var(--cp-heat3);
   }
+  .cp-body-part[data-pain] {
+    fill: var(--cp-pain);
+    @supports (color: color-mix(in lab, red, red)) {
+      fill: color-mix(in srgb, var(--cp-pain) 55%, transparent);
+    }
+    stroke: var(--cp-pain);
+  }
+  .cp-body-part[data-pain='1'] {
+    fill: var(--cp-pain);
+    @supports (color: color-mix(in lab, red, red)) {
+      fill: color-mix(in srgb, var(--cp-pain) 25%, transparent);
+    }
+  }
+  .cp-body-part[data-pain='3'] {
+    fill: var(--cp-pain);
+  }
   .cp-body-part-pick {
     cursor: pointer;
   }
@@ -3361,6 +3392,9 @@
     gap: var(--cp-space-sm);
     font-weight: 800;
     color: var(--cp-on-surface-variant);
+  }
+  .cp-heat-legend-right {
+    flex-direction: column;
   }
   .cp-heat-legend svg {
     width: 14px;

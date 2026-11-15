@@ -675,7 +675,9 @@ The landing site, the web app and these pages draw with one package, [`web/ui`](
 - [Tokens](?path=/docs/design-system-tokens--docs): every value, read from `design/tokens.json`.
 - **Core**: what is the same on every platform: Poulpy and the body map. They are drawn here with the web components.
 - **Web &gt; Components**: each Vue component in every state, with its classes. Each state is a story and runs as a test in CI, with an accessibility check. Use the toolbar to switch between light and dark.
-- **Mobile &gt; Components**: the Android and iOS components, one page each, on their own stylesheet. The mockups are on the docs site until they move here ([ADR 0029](https://tkint.github.io/coach-poulpy/docs/adr/0029-mockups-are-stories-in-the-component-workshop)).
+- **Mobile &gt; Components**: the raw pieces of the Android and iOS screens (buttons, chips, fields, rows), one page each, with a story per variation and controls to try them.
+- **Mobile &gt; Patterns**: pieces composed from those, such as the nav bar, sheets and charts.
+- **Mobile &gt; Screens**: every agreed phone screen, built from the components and patterns, and the drafts ([ADR 0029](https://tkint.github.io/coach-poulpy/docs/adr/0029-mockups-are-stories-in-the-component-workshop)).
 
 ## Classes
 
