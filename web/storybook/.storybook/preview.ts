@@ -1,11 +1,41 @@
 import type { Preview } from '@storybook/vue3-vite'
+import { DocsContainer, type DocsContainerProps } from '@storybook/addon-docs/blocks'
+import { addons } from 'storybook/preview-api'
+import { GLOBALS_UPDATED, SET_GLOBALS } from 'storybook/internal/core-events'
+import { createElement, useEffect, useState, type PropsWithChildren } from 'react'
 import { setUiLocale } from '@coach-poulpy/ui'
+import { preferredMode, rememberMode, themes, type Mode } from './themes'
 import './preview.css'
 
-// tokens.css switches light and dark from data-theme on <html>; the toolbar sets it.
+// tokens.css switches light and dark from data-theme on <html>; the toolbar sets it, and it opens in the docs site's mode.
+// A docs page with no story runs no decorator, so the page follows the toolbar here too.
+let mode: Mode = preferredMode()
+const follow = ({ globals }: { globals: { theme?: Mode } }) => {
+  if (globals.theme !== 'light' && globals.theme !== 'dark') return
+  mode = globals.theme
+  document.documentElement.dataset.theme = mode
+  rememberMode(mode)
+}
+addons.getChannel().on(SET_GLOBALS, follow)
+addons.getChannel().on(GLOBALS_UPDATED, follow)
+
+// The docs pages' own text, code blocks and tables take the same mode.
+function ThemedDocsContainer(props: PropsWithChildren<DocsContainerProps>) {
+  const [current, setCurrent] = useState(mode)
+  useEffect(() => {
+    const channel = props.context.channel
+    const update = ({ globals }: { globals: { theme?: Mode } }) => {
+      if (globals.theme === 'light' || globals.theme === 'dark') setCurrent(globals.theme)
+    }
+    channel.on(GLOBALS_UPDATED, update)
+    return () => channel.off(GLOBALS_UPDATED, update)
+  }, [props.context.channel])
+  return createElement(DocsContainer, { ...props, theme: themes[current] })
+}
+
 const preview: Preview = {
   tags: ['autodocs'],
-  initialGlobals: { theme: 'light', locale: 'en' },
+  initialGlobals: { theme: preferredMode(), locale: 'en' },
   globalTypes: {
     theme: {
       description: 'Light or dark',
@@ -33,6 +63,7 @@ const preview: Preview = {
   ],
   parameters: {
     layout: 'fullscreen',
+    docs: { container: ThemedDocsContainer },
     a11y: { test: 'error' },
     options: { storySort: { order: ['Design system', ['Introduction', 'Rules', ['Colour', 'Type', 'Space, radius and motion', 'Icons', 'Accessibility', 'Components', 'Screens', 'Websites'], 'Tokens'], 'Brand', ['Introduction', 'Character', 'Moods', 'Inclusive by default', 'Voice, logo and type', 'Drawings', 'Poulpy in 3D', 'Brand book', 'Decisions', 'Ideas for later'], 'Core', 'Web', ['Components', 'Patterns', 'Screens'], 'Mobile', ['Components', 'Patterns', 'Screens'], '*'] } },
   },
