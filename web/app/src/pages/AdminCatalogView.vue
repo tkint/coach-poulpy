@@ -7,7 +7,9 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { ChevronDown, ChevronUp, ChevronsUpDown, EllipsisVertical } from '@lucide/vue'
 import { CpBadge, CpButton, CpCard, CpCheckbox, CpChip, CpDropdownMenu, CpErrorNote, CpMultiSelectField, CpPagination, CpPoulpyCard, CpSearchField, CpSelectField, CpTable } from '@coach-poulpy/ui'
-import { listCatalogExercises, type CatalogExercise, type CatalogQuery, type CatalogSort } from '../session'
+import { getCatalogChanges, getCatalogExercise, listCatalogExercises, type CatalogChanges, type CatalogExercise, type CatalogQuery, type CatalogSort } from '../session'
+import AdminPublishDialog from './AdminPublishDialog.vue'
+import AdminRetireDialog from './AdminRetireDialog.vue'
 import { domainLabel, domainOptions } from '../catalogText'
 import { navigate, search, withParams } from '../route'
 import { t } from '../i18n'
@@ -181,6 +183,33 @@ const clearSelection = () => {
   picked.value = new Set()
 }
 
+// Publishing and retiring the selection (#389, #390). The changes are asked for once a selection exists, to count what
+// the selection has to publish; the retirement review loads the picked exercises when it is asked for.
+const changes = ref<CatalogChanges>()
+const publishOpen = ref(false)
+const retireOpen = ref(false)
+const retireRows = ref<CatalogExercise[]>([])
+const pendingSlugs = computed(() => {
+  const all = changes.value
+  return new Set(all ? [...all.added, ...all.edited, ...all.retired, ...all.offered].map((one) => one.slug) : [])
+})
+const pendingPicked = computed(() => [...picked.value].filter((slug) => pendingSlugs.value.has(slug)))
+const loadChanges = async () => {
+  changes.value = await getCatalogChanges()
+}
+watch(selectedCount, (count, before) => {
+  if (count > 0 && before === 0) loadChanges()
+})
+async function askRetire() {
+  const found = await Promise.all([...picked.value].map((slug) => getCatalogExercise(slug)))
+  retireRows.value = found.filter((row): row is CatalogExercise => row !== undefined)
+  retireOpen.value = true
+}
+async function afterWrite() {
+  clearSelection()
+  await Promise.all([load(), loadChanges()])
+}
+
 /** Every slug the filters match, a page of the largest size at a time. */
 async function selectAllMatching() {
   const found = new Set<string>()
@@ -250,7 +279,9 @@ watch(
                     <EllipsisVertical class="size-4" aria-hidden="true" />
                     <span class="cp-badge cp-badge-primary cp-badge-sm absolute -right-2 -top-2 z-10">{{ selectedCount }}</span>
                   </template>
-                  <!-- CLEANUP: Publish and Retire join this menu with the batch publication and the retirement of #389 and #390. -->
+                  <li><button type="button" :disabled="pendingPicked.length === 0" @click="publishOpen = true">{{ t('admin.catalogActionPublish') }} <span class="cp-badge cp-badge-sm">{{ pendingPicked.length }}</span></button></li>
+                  <li><button type="button" @click="askRetire">{{ t('admin.catalogActionRetire') }} <span class="cp-badge cp-badge-sm">{{ selectedCount }}</span></button></li>
+                  <li class="my-1 border-t border-base-300" aria-hidden="true"></li>
                   <li v-if="selectedCount < total"><button type="button" @click="selectAllMatching">{{ t('admin.catalogSelectAllMatching', { count: String(total) }) }}</button></li>
                   <li><button type="button" @click="clearSelection">{{ t('admin.catalogClearSelection') }}</button></li>
                 </CpDropdownMenu>
@@ -296,5 +327,7 @@ watch(
         </div>
       </template>
     </CpCard>
+    <AdminPublishDialog v-if="changes" v-model:open="publishOpen" :changes="changes" :slugs="pendingPicked" @published="afterWrite" />
+    <AdminRetireDialog v-model:open="retireOpen" :exercises="retireRows" @retired="afterWrite" />
   </main>
 </template>
