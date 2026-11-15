@@ -958,11 +958,14 @@
 .cp-screen .text-button { flex: 1; height: 48px; border-radius: var(--cp-radius-pill); font-size: 15px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
 .cp-screen .section-link { margin: 0 var(--cp-space-xs); font-size: 15px; font-weight: 800; color: var(--cp-primary); }
 .cp-screen .lead { margin: 0 var(--cp-space-xs); font-size: 14px; line-height: 20px; color: var(--cp-on-surface-variant); }
-/* The loader: Poulpy's outline swinging half a turn one way and then half a turn the other, forever (LoaderSwing in the shared code). */
-.cp-screen .poulpy-loader { display: inline-block; }
-.cp-screen .poulpy-loader img { display: block; width: 100%; height: 100%; animation: poulpy-swing 3.6s ease-in-out infinite; }
+/* The loader: Poulpy's outline swinging half a turn one way and then half a turn the other, forever, each of his eight tentacles
+   hanging loose and bending about its base (18.28 % from the top, as LoaderSwing.BASE) behind the turn (LoaderSwing in the shared code). */
+.cp-screen .poulpy-loader { --period: 3.6s; position: relative; display: inline-block; animation: poulpy-swing var(--period) ease-in-out infinite; }
+.cp-screen .poulpy-loader-tentacle { position: absolute; inset: 0; transform: rotate(calc(var(--tentacle) * 45deg)); }
+.cp-screen .poulpy-loader-tentacle img { display: block; width: 100%; height: 100%; transform-origin: 50% 18.28%; animation: poulpy-bend var(--period) linear infinite; animation-delay: calc(var(--period) * (var(--tentacle) * 0.012 - 1)); }
 @keyframes poulpy-swing { from, to { transform: rotate(-180deg); } 50% { transform: rotate(180deg); } }
-@media (prefers-reduced-motion: reduce) { .cp-screen .poulpy-loader img { animation-duration: 12s; } }
+@keyframes poulpy-bend { 0%, 50%, 100% { transform: rotate(0); } 12.5% { transform: rotate(-24deg); } 25% { transform: rotate(-32deg); } 37.5% { transform: rotate(-24deg); } 62.5% { transform: rotate(24deg); } 75% { transform: rotate(32deg); } 87.5% { transform: rotate(24deg); } }
+@media (prefers-reduced-motion: reduce) { .cp-screen .poulpy-loader { --period: 12s; } }
 
 /* ---------- Exercise search, equipment sheet, variations sheet ---------- */
 

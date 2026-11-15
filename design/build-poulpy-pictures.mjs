@@ -44,10 +44,10 @@ for (const [name, model] of Object.entries(pictures)) {
 }
 
 // The loader: just his outline seen from straight above, as the old loader was: the flower of his eight loose tentacles round
-// the head, with no line inside, in the brand blue, square and see-through, inside the circle he turns in. The line is bold
-// enough for the bases of neighbouring tentacles to touch. The apps swing the picture half a turn one way, then half a turn the other,
-// for as long as something loads.
-const LOADER_SIDE = 600, LOADER_LINE = 0.07 * LOADER_SIDE
+// the head, with no line inside, in the brand blue, see-through, inside the circle he turns in. The edge is rounded (no points)
+// and the line is bold enough for the bases of neighbouring tentacles to touch. The picture is ONE tentacle, standing up from
+// the middle of the square, because the apps draw eight of them and let each swing from its base as he turns (LoaderSwing).
+const LOADER_SIDE = 600, LOADER_LINE = 0.06 * LOADER_SIDE
 // How far each pixel inside a shape is from outside it (Felzenszwalb and Huttenlocher's distance transform, in pixels).
 function inside(shape, size) {
   const far = 1e20, f = Float64Array.from(shape, (v) => (v ? far : 0)), out = new Float64Array(size * size), d = new Float64Array(size), z = new Float64Array(size + 1), v = new Int32Array(size)
@@ -65,25 +65,41 @@ function inside(shape, size) {
   for (let y = 0; y < size; y++) { line((x) => out[y * size + x], (x, value) => { d[x] = value }); for (let x = 0; x < size; x++) out[y * size + x] = Math.sqrt(d[x]) }
   return out
 }
+// Shapes are true where they are, round their points with a disk: grow, shrink, and the two in the other order.
+const grow = (shape, by, size) => Uint8Array.from(inside(shape.map((v) => (v ? 0 : 1)), size), (d) => (d <= by ? 1 : 0))
+const shrink = (shape, by, size) => Uint8Array.from(inside(shape, size), (d) => (d > by ? 1 : 0))
+const rounded = (shape, { convex, concave }, size) => grow(shrink(concave ? shrink(grow(shape, concave, size), concave, size) : shape, convex, size), convex, size)
+// The tentacle at the top of his outline, and how far from the middle its base is, as a share of the square.
 function loader(model) {
-  const [r, g, b] = hex(colours.blue)
+  const [r, g, b] = hex(colours.blue), N = LOADER_SIDE
   // His whole shape from above, head and tentacles as one.
-  const px = icon(model, LOADER_SIDE, { reach: 0.49, tilt: 89.9, only: (name) => name === 'head' || name === 'head_lining' || name.startsWith('arm_'), like: model })
-  const cover = Float32Array.from({ length: LOADER_SIDE * LOADER_SIDE }, (_, i) => px[i * 4 + 3] / 255), depth = inside(cover.map((c) => (c >= 0.5 ? 1 : 0)), LOADER_SIDE)
-  const out = new Uint8Array(cover.length * 4)
-  // Only a line along the edge shows; inside it he is hollow.
-  for (let i = 0; i < cover.length; i++) {
-    out[i * 4] = r; out[i * 4 + 1] = g; out[i * 4 + 2] = b
-    out[i * 4 + 3] = Math.round(255 * Math.min(cover[i], Math.min(Math.max(LOADER_LINE - depth[i] + 0.5, 0), 1)))
-  }
-  return out
+  const px = icon(model, N, { reach: 0.46, tilt: 89.9, only: (name) => name === 'head' || name === 'head_lining' || name.startsWith('arm_'), like: model })
+  const flower = rounded(Uint8Array.from({ length: N * N }, (_, i) => (px[i * 4 + 3] >= 128 ? 1 : 0)), { convex: 0.02 * N, concave: 0.05 * N }, N)
+  // The hollow he is outlined round: the flower shrunk by the line, its inner points rounded as well.
+  const hollow = rounded(shrink(flower, LOADER_LINE, N), { convex: 0.025 * N, concave: 0.025 * N }, N)
+  // The line round one tentacle: the eighth of the turn round the top, and its two ends rounded off like the old loader's tails.
+  const half = N / 2, ring = Uint8Array.from({ length: N * N }, (_, i) => {
+    const x = i % N, y = Math.floor(i / N), angle = Math.atan2(x + 0.5 - half, half - y - 0.5)
+    return flower[i] && !hollow[i] && Math.abs(angle) <= Math.PI / 8 + 0.02 ? 1 : 0
+  })
+  const capped = rounded(ring, { convex: 0.45 * LOADER_LINE }, N), edge = inside(capped, N)
+  const out = new Uint8Array(N * N * 4)
+  for (let i = 0; i < N * N; i++) { out[i * 4] = r; out[i * 4 + 1] = g; out[i * 4 + 2] = b; out[i * 4 + 3] = Math.round(255 * Math.min(Math.max(edge[i] - 0.5, 0), 1)) }
+  // Where the line between two tentacles meets the head: along the eighth turn away from the top, out to where the flower ends.
+  let valley = 0
+  for (let d = 0; d < half; d += 0.25) { const x = Math.round(half + d * Math.sin(Math.PI / 8)), y = Math.round(half - d * Math.cos(Math.PI / 8)); if (flower[y * N + x]) valley = d }
+  // The tentacle bends where its two ends meet the head, halfway between them.
+  return { pixels: out, base: 0.5 - (valley * Math.cos(Math.PI / 8)) / N }
 }
+let loaderBase = 0
 {
-  const png = pngOf(loader(pictures.mood_happy), LOADER_SIDE, LOADER_SIDE)
-  files[`${OUT}/loader.png`] = png
-  files[`${ANDROID}/poulpy_loader.png`] = png
-  files[`${IOS}/PoulpyLoader.imageset/PoulpyLoader.png`] = png
-  files[`${IOS}/PoulpyLoader.imageset/Contents.json`] = JSON.stringify({ images: [{ filename: 'PoulpyLoader.png', idiom: 'universal', scale: '3x' }], info: { author: 'xcode', version: 1 } }, null, 2) + '\n'
+  const { pixels, base } = loader(pictures.mood_happy)
+  loaderBase = base
+  const png = pngOf(pixels, LOADER_SIDE, LOADER_SIDE)
+  files[`${OUT}/loader_tentacle.png`] = png
+  files[`${ANDROID}/poulpy_loader_tentacle.png`] = png
+  files[`${IOS}/PoulpyLoaderTentacle.imageset/PoulpyLoaderTentacle.png`] = png
+  files[`${IOS}/PoulpyLoaderTentacle.imageset/Contents.json`] = JSON.stringify({ images: [{ filename: 'PoulpyLoaderTentacle.png', idiom: 'universal', scale: '3x' }], info: { author: 'xcode', version: 1 } }, null, 2) + '\n'
 }
 
 // The app icons: the same pictures, fitted into the icon's square on the dark theme's background, as the owner asked.
@@ -180,6 +196,13 @@ for (const [path, content] of Object.entries(files)) {
 const list = (dir, keep) => (existsSync(join(root, dir)) ? readdirSync(join(root, dir)).filter(keep) : [])
 for (const [dir, keep] of [[OUT, (f) => f.endsWith('.png')], [ANDROID, (f) => /^poulpy_(mood|pose)_.*\.png$/.test(f)], [IOS, (f) => /^Poulpy(Mood|Pose|Loader).*\.imageset$/.test(f)]]) {
   for (const f of list(dir, keep)) if (!Object.keys(files).some((p) => p.startsWith(`${dir}/${f}`))) { console.error(`Not generated any more: ${dir}/${f}`); stale++ }
+}
+// Where a tentacle bends is a number the apps and the web repeat; they must say what the picture measures.
+const said = (4 * Math.round(loaderBase * 10000)) / 4 / 100
+for (const [file, pattern] of [['shared/src/commonMain/kotlin/ch/coachpoulpy/shared/LoaderSwing.kt', /BASE = ([\d.]+)f/], ['web/ui/src/theme.css', /transform-origin: 50% ([\d.]+)%/], ['web/storybook/stories/mobile/screens/screens.css', /transform-origin: 50% ([\d.]+)%/]]) {
+  const found = readFileSync(join(root, file), 'utf8').match(pattern)?.[1]
+  const want = pattern.source.includes('%') ? said.toFixed(2) : (loaderBase).toFixed(4)
+  if (found !== want) { console.error(`${file} says the loader's tentacle bends at ${found}, the picture says ${want}.`); stale++ }
 }
 if (stale) { console.error('Run `node design/build-poulpy-pictures.mjs` and commit the result.'); process.exit(1) }
 console.log(check ? 'Poulpy pictures are up to date.' : `Wrote ${Object.keys(files).length} pictures.`)

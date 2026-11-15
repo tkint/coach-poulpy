@@ -38,3 +38,33 @@ class LoaderSwingTest {
         }
     }
 }
+
+class LoaderTentaclesTest {
+    @Test
+    fun hangLooseWhenHeIsStillAtEitherEnd() {
+        assertEquals(0f, LoaderSwing.tentacleDegrees(0, 0), 0.001f)
+        assertEquals(0f, LoaderSwing.tentacleDegrees(LoaderSwing.MILLIS / 2, 0), 0.001f)
+    }
+
+    @Test
+    fun trailBehindTheTurnAndSwingTheOtherWayWhenHeTurnsBack() {
+        // He turns clockwise on the way there, so a tentacle is bent anticlockwise (negative), most at the middle of the way.
+        assertEquals(-LoaderSwing.BEND_DEGREES, LoaderSwing.tentacleDegrees(LoaderSwing.MILLIS / 4, 0), 0.001f)
+        assertEquals(LoaderSwing.BEND_DEGREES, LoaderSwing.tentacleDegrees(LoaderSwing.MILLIS * 3 / 4, 0), 0.001f)
+    }
+
+    @Test
+    fun eachFollowsALittleLaterThanTheOneBefore() {
+        val elapsed = LoaderSwing.MILLIS / 8
+        assertTrue(LoaderSwing.tentacleDegrees(elapsed, 0) != LoaderSwing.tentacleDegrees(elapsed, 5))
+        assertEquals(LoaderSwing.tentacleDegrees(elapsed, 3), LoaderSwing.tentacleDegrees(elapsed + LoaderSwing.MILLIS, 3), 0.001f)
+    }
+
+    @Test
+    fun neverBendPastTheMost() {
+        for (index in 0 until LoaderSwing.TENTACLES) for (ms in 0L..LoaderSwing.MILLIS step 53) {
+            val bend = LoaderSwing.tentacleDegrees(ms, index)
+            assertTrue(bend in -LoaderSwing.BEND_DEGREES - 0.001f..LoaderSwing.BEND_DEGREES + 0.001f, "$bend at $ms ms")
+        }
+    }
+}

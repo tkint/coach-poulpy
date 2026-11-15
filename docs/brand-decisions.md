@@ -122,7 +122,7 @@ It is done in steps, each reviewed on the [Poulpy in 3D](./poulpy-3d.md) page be
 3. Pictures rendered from the model, generated for Android, iOS and the website in place of the drawings. The pictures are generated and shown on the page, and the website, the docs and both apps use them: Android takes PNGs under the same `poulpy_<name>` names, iOS takes 3x imagesets under the same asset names.
 4. Live 3D on Home and on the end-of-session screen, each from an agreed mockup.
 
-The app icons are his pictures on Deep sea, in light and dark alike, and the loader is his outline from above, swinging half a turn one way and then half a turn the other. `design/build-poulpy.mjs` stays the source of the one-colour layer of the Android themed icons.
+The app icons are his pictures on Deep sea, in light and dark alike, and the loader is his outline from above, swinging half a turn one way and then half a turn the other with each tentacle hanging loose. `design/build-poulpy.mjs` stays the source of the one-colour layer of the Android themed icons.
 
 **Why:** the owner asked for it once the model could turn and jump, and chose pictures everywhere with live 3D on key screens over a 3D renderer on every screen, which would weigh on the apps for little gain on small portraits.
 

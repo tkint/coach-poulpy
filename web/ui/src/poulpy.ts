@@ -11,4 +11,4 @@ export type PoulpyDrawing =
   | 'mood_proud' | 'mood_happy' | 'mood_recovering' | 'mood_annoyed' | 'mood_grumpy' | 'mood_fuming'
   | 'pose_champion' | 'pose_cocky' | 'pose_exhausted' | 'pose_fuming' | 'pose_patched_up' | 'pose_pouting'
   | 'pose_shy' | 'pose_side_glance' | 'pose_sleeping' | 'pose_standing_tall' | 'pose_straining' | 'pose_thinking'
-  | 'loader'
+  | 'loader_tentacle'
