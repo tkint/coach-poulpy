@@ -338,6 +338,7 @@
   font-weight: 700;
 }
 .cp-screen .next-card--stacked { flex-direction: column; align-items: flex-start; gap: 2px; padding: var(--cp-space-md) var(--cp-space-lg); }
+.cp-screen .next-card--stacked .muted { font-weight: 500; }
 
 .cp-screen .player-actions { display: flex; gap: var(--cp-space-md); }
 .cp-screen .player-actions .secondary-button { padding: 0 22px; }
@@ -448,6 +449,10 @@
 .cp-screen .tentacle-ring img { position: absolute; left: 17px; top: 20px; width: 71px; height: 64px; }
 .cp-screen .poulpy-card h2 { font-family: var(--cp-font-display); font-size: 22px; line-height: 26px; font-weight: 700; }
 .cp-screen .poulpy-card p { font-size: 15px; line-height: 20px; font-weight: 600; }
+.cp-screen .poulpy-card-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.cp-screen .poulpy-card-meta { margin-top: 2px; font-size: 12px; letter-spacing: 0.06em; color: inherit; }
+.cp-screen .poulpy-card--compact h2 { font: var(--cp-type-headline); }
+.cp-screen .poulpy-card--compact p { font-weight: 500; }
 
 /* ---------- Search, tabs and filter chips ---------- */
 
