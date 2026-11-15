@@ -124,7 +124,9 @@ const showLegend = computed(() => !!props.legend && props.legend !== 'hidden' &&
               @click="pick(path.area!, path.side!)"
               @keydown.enter.prevent="pick(path.area!, path.side!)"
               @keydown.space.prevent="pick(path.area!, path.side!)"
-            />
+            >
+              <title>{{ path.label }}</title>
+            </path>
             <path v-else class="cp-body-part" :data-heat="path.heat" :data-pain="path.pain" :d="path.d" />
           </template>
         </svg>

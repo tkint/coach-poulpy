@@ -4,6 +4,9 @@ import { ref } from 'vue'
 import { CpBodyMap, type BodyAreas } from '@coach-poulpy/ui'
 import doc from './CpBodyMap.md?raw'
 
+/** A readable name for an area: its name, capitalised (the app passes its translated names). */
+const areaLabel = (area: string) => area.charAt(0).toUpperCase() + area.slice(1)
+
 const meta = {
   title: 'Web/Components/Display/Body map',
   parameters: { docs: { description: { component: doc } } },
@@ -43,8 +46,8 @@ export const FormModel: Story = {
   args: { heat: undefined, legend: 'hidden', interactive: true },
   render: (args) => ({
     components: { CpBodyMap },
-    setup: () => ({ args, areas: ref<BodyAreas>({ biceps: 'left' }), areaLabel: () => 'Biceps', selectable: ['biceps'] }),
-    template: '<CpBodyMap v-bind="args" v-model:heat="areas" :area-label="areaLabel" :selectable="selectable" /><p data-testid="areas">{{ JSON.stringify(areas) }}</p>',
+    setup: () => ({ args, areas: ref<BodyAreas>({ biceps: 'left' }), areaLabel }),
+    template: '<CpBodyMap v-bind="args" v-model:heat="areas" :area-label="areaLabel" /><p data-testid="areas">{{ JSON.stringify(areas) }}</p>',
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
@@ -71,25 +74,23 @@ export const InjuryModel: Story = {
   args: { heat: undefined, legend: 'hidden', interactive: true, editing: 'injury', description: 'Where it hurts' },
   render: (args) => ({
     components: { CpBodyMap },
-    setup: () => ({ args, hurt: ref<BodyAreas>({}), areaLabel: () => 'Shoulder', selectable: ['deltoid'] }),
-    template: '<CpBodyMap v-bind="args" v-model:injury="hurt" :area-label="areaLabel" :selectable="selectable" /><p data-testid="hurt">{{ JSON.stringify(hurt) }}</p>',
+    setup: () => ({ args, hurt: ref<BodyAreas>({}), areaLabel }),
+    template: '<CpBodyMap v-bind="args" v-model:injury="hurt" :area-label="areaLabel" /><p data-testid="hurt">{{ JSON.stringify(hurt) }}</p>',
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    await userEvent.click(canvas.getAllByRole('button', { name: 'Shoulder' })[0])
+    await userEvent.click(canvas.getAllByRole('button', { name: 'Deltoid' })[0])
     expect(canvas.getByTestId('hurt')).toHaveTextContent(/"deltoid":"(left|right)"/)
   },
 }
 
-/** The picture is a field: a `selectable` area is a button that says its area and side when it is pressed. */
+/** The picture is a field: every area is a button (`selectable` narrows which) that says its area and side when it is pressed. */
 export const Interactive: Story = {
   args: { interactive: true, heat: undefined, legend: 'hidden' },
   render: (args) => ({
     components: { CpBodyMap },
     setup: () => {
       const lit = ref<BodyAreas>({ biceps: 'left' })
-      const selectable = ['biceps', 'quads']
-      const areaLabel = (area: string) => (area === 'biceps' ? 'Biceps' : 'Quadriceps')
       const sides = (area: string) => (lit.value[area] === 'both' ? ['left', 'right'] : lit.value[area] ? [lit.value[area]] : [])
       const pick = (area: string, side: 'left' | 'right') => {
         const now = sides(area)
@@ -97,9 +98,9 @@ export const Interactive: Story = {
         const { [area]: _, ...rest } = lit.value
         lit.value = next.length === 2 ? { ...rest, [area]: 'both' } : next.length ? { ...rest, [area]: next[0] as 'left' | 'right' } : rest
       }
-      return { args, lit, areaLabel, selectable, pick }
+      return { args, lit, areaLabel, pick }
     },
-    template: '<CpBodyMap v-bind="args" :heat="lit" :area-label="areaLabel" :selectable="selectable" @pick="pick" />',
+    template: '<CpBodyMap v-bind="args" :heat="lit" :area-label="areaLabel" @pick="pick" />',
   }),
   play: async ({ canvasElement }) => {
     const biceps = within(canvasElement).getAllByRole('button', { name: 'Biceps' })
