@@ -16,6 +16,10 @@ type Story = StoryObj<typeof meta>
 export const Model: Story = { render: () => ({ components: { Poulpy3d }, template: '<Poulpy3d />' }) }
 /** Poulpy in 3D, turning in short steps, with the controls to try other feels. */
 export const Turning: Story = { render: () => ({ components: { Poulpy3d }, template: '<Poulpy3d motion="turn" />' }) }
+/** Poulpy in 3D, doing little jumps on the spot, with the controls to tune the jump. */
+export const Jumping: Story = { render: () => ({ components: { Poulpy3d }, template: '<Poulpy3d motion="jump" />' }) }
+/** The same jumps, each turning him a step. */
+export const JumpingAround: Story = { render: () => ({ components: { Poulpy3d }, template: '<Poulpy3d motion="jump-turn" />' }) }
 /** The brand book, drawn live. */
 export const Book: Story = {
   render: () => ({ components: { BrandBook }, template: '<BrandBook />' }),

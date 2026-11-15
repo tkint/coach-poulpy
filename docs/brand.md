@@ -8,7 +8,7 @@ Poulpy is a reversible plush octopus: blue and smiling on one side, grumpy on th
 - **Pain and rehab always win.** Someone who logged pain gets the Patched up pose and the blue side for 72 h, never ember.
 - **One way back, always short.** While Poulpy is ember, the catch-up offered is the shortest workout in the plan, and any finished session flips him straight back.
 - **Nothing promised, nothing missed.** With no plan, Poulpy stays on the blue side and only reacts to when you last trained.
-- **Poulpy never lifts his tentacles.** Every pose keeps the plush's shape and shows the mood with his face, shade, props and small effects.
+- **Poulpy never lifts his tentacles.** Every pose keeps the plush's shape and shows the mood with his face, shade, props and small effects. When he jumps, in 3D, they hang under him and follow.
 - **At most one notification a day** in Poulpy's voice, and turning them off keeps the mascot.
 - **Every line in French and English** from the start.
 - **Inclusive by default.** The app is LGBTQ+ friendly, and that is part of the brand: see [Inclusive by default](#inclusive-by-default).
@@ -102,7 +102,7 @@ The logo is the same drawing as the in-app Poulpy: a front view of the plush wit
 
 ## Poulpy in 3D
 
-Poulpy also exists as a 3D model: a bubble of a head tucked into eight puffy arms, in flat cartoon shading, with the other side's colour underneath. It is generated from `design/poulpy-3d/model.mjs` like the drawings are from their script, and the [Poulpy in 3D](./poulpy-3d.md) page shows it, lists its rules and says how to reuse or change it. In 3D his idle is to turn around on the spot in short steps of 20 to 30 degrees, with soft tentacles that trail behind each step and settle after it; they slide on the floor and never lift. The move is `design/poulpy-3d/motion.mjs` and plays on the same page. The apps do not use the model yet. See [Brand decisions](./brand-decisions.md), decision 14.
+Poulpy also exists as a 3D model: a bubble of a head tucked into eight puffy arms, in flat cartoon shading, with the other side's colour underneath. It is generated from `design/poulpy-3d/model.mjs` like the drawings are from their script, and the [Poulpy in 3D](./poulpy-3d.md) page shows it, lists its rules and says how to reuse or change it. In 3D his idle is to turn around on the spot in short steps of 20 to 30 degrees, with soft tentacles that trail behind each step and settle after it; they slide on the floor and never lift. He can also do little jumps, on the spot or turning a step at each: his head tucks into his tentacles, which widen flat, then he goes up with them hanging under him, their tips barely off the floor, tilting to one side. Turning, a jump can take him a whole turn around, or two. The moves are `design/poulpy-3d/motion.mjs` and play on the same page; the jump is a preview whose values are still being tuned. The apps do not use the model yet. See [Brand decisions](./brand-decisions.md), decisions 14 and 15.
 
 ## Ideas for later
 
