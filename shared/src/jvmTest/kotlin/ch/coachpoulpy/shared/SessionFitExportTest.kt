@@ -27,7 +27,7 @@ import kotlinx.datetime.TimeZone
 
 /** A session of the history as a .FIT file: its sport comes from what it holds, and the file is named by its start. */
 class SessionFitExportTest {
-    private val graph = AppGraph(DriverFactory())
+    private val graph = AppGraph(DriverFactory()).withSampleCatalog()
     private val export = SessionFitExport(graph.store, graph.compiler, graph.catalog)
     private val start = Instant.parse("2023-11-13T08:05:00Z")
 

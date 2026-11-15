@@ -1,9 +1,11 @@
 ---
-status: accepted, amended by 0026, catalog version superseded by 0030
+status: accepted, amended by 0026, catalog version superseded by 0030, superseded by 0032
 date: 2026-10-26
 ---
 
 # Catalog text lives in translation files
+
+> **Superseded by [ADR 0032](./0032-the-server-database-is-the-catalog-and-nothing-ships-bundled.md):** the `catalog` translation namespace, its merge and the bundled catalog are gone; exercise text lives in the server database.
 
 > **Superseded in part by [ADR 0030](./0030-the-catalog-changes-by-exercise-revision-not-by-catalog-version.md):** the catalog `version` and the CI check that raises it are replaced by per-exercise revisions. Text in translation files, keyed by slug, still holds for the bundled catalog.
 

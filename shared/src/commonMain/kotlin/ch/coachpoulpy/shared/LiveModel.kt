@@ -244,7 +244,7 @@ class LiveModel(
     private val memory: KeyValueStore,
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main),
     private val clock: Clock = Clock.System,
-    private val catalog: () -> Catalog = { Catalog.bundled },
+    private val catalog: () -> Catalog = { Catalog(emptyList()) },
     languageCode: String = "en",
 ) {
     private val labels = Labels(languageCode)

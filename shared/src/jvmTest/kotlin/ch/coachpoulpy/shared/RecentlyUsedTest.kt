@@ -1,6 +1,7 @@
 package ch.coachpoulpy.shared
 
 import ch.coachpoulpy.catalog.Catalog
+import ch.coachpoulpy.catalog.sample.SampleCatalog
 import ch.coachpoulpy.core.model.Equipment
 import ch.coachpoulpy.core.model.SessionRecord
 import ch.coachpoulpy.core.model.SessionId
@@ -28,10 +29,10 @@ class RecentlyUsedTest {
     private val store = LocalStore(DriverFactory(), clock = object : Clock {
         override fun now() = this@RecentlyUsedTest.now
     })
-    private fun model(catalog: Catalog = Catalog.bundled) = ExerciseListModel(catalog, "en") { recentlyUsedExercises(store) }
+    private fun model(catalog: Catalog = SampleCatalog.catalog) = ExerciseListModel(catalog, "en") { recentlyUsedExercises(store) }
 
     private fun picker(
-        catalog: Catalog = Catalog.bundled,
+        catalog: Catalog = SampleCatalog.catalog,
         query: String = "",
         focus: Set<ExerciseFocus> = emptySet(),
         ticked: Set<Equipment>? = null,
@@ -78,13 +79,13 @@ class RecentlyUsedTest {
         assertEquals(slugs.reversed().take(5), recent(listing))
         assertEquals("Recently used", listing.sections.first().title)
         assertTrue("bench-dip" in listing.sections.single { it.title == "Push" }.rows.map { it.slug })
-        assertEquals(Catalog.bundled.offered.size, listing.count)
+        assertEquals(SampleCatalog.catalog.offered.size, listing.count)
     }
 
     @Test
     fun retiredExercisesAreLeftOut() {
         save(workout("Old", "push-up", "plank"))
-        val catalog = Catalog(Catalog.bundled.exercises.map { if (it.slug.value == "plank") it.copy(retired = true) else it }, Catalog.bundled.variationGroups)
+        val catalog = Catalog(SampleCatalog.catalog.exercises.map { if (it.slug.value == "plank") it.copy(retired = true) else it }, SampleCatalog.catalog.variationGroups)
         assertEquals(listOf("push-up"), recent(picker(catalog)))
     }
 

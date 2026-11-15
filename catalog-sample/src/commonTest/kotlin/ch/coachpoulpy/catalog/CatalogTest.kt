@@ -1,5 +1,6 @@
 package ch.coachpoulpy.catalog
 
+import ch.coachpoulpy.catalog.sample.SampleCatalog
 import ch.coachpoulpy.core.model.Aliases
 import ch.coachpoulpy.core.model.Equipment
 import ch.coachpoulpy.core.model.Exercise
@@ -12,15 +13,15 @@ import kotlin.test.assertTrue
 
 class CatalogTest {
     @Test
-    fun bundledCatalogParsesWithUniqueSlugs() {
-        val exercises = Catalog.bundled.exercises
+    fun sampleCatalogParsesWithUniqueSlugs() {
+        val exercises = SampleCatalog.catalog.exercises
         assertTrue(exercises.isNotEmpty())
         assertEquals(exercises.size, exercises.map { it.slug }.toSet().size)
     }
 
     @Test
-    fun everyBundledExerciseHasInstructionsInBothLanguages() {
-        Catalog.bundled.exercises.forEach { exercise ->
+    fun everySampleExerciseHasInstructionsInBothLanguages() {
+        SampleCatalog.catalog.exercises.forEach { exercise ->
             assertTrue(exercise.instructions.isNotEmpty(), "${exercise.slug.value} has no instructions")
             exercise.instructions.forEach { text -> LANGUAGES.forEach { assertTrue(text.byLanguage[it].orEmpty().isNotBlank()) } }
         }
@@ -28,7 +29,7 @@ class CatalogTest {
 
     @Test
     fun retiredEntriesAreHiddenButStillFound() {
-        val push = Catalog.bundled.exercises.first()
+        val push = SampleCatalog.catalog.exercises.first()
         val catalog = Catalog(listOf(push.copy(retired = true)))
         assertTrue(catalog.offered.isEmpty())
         assertEquals(MeasurementMode.REPS, catalog[push.slug]?.measurement)
@@ -36,35 +37,35 @@ class CatalogTest {
 
     @Test
     fun jsonRoundTrips() {
-        val again = Catalog.fromJson(Catalog.bundled.toJson())
-        assertEquals(Catalog.bundled.exercises, again.exercises)
-        assertEquals(Catalog.bundled.variationGroups, again.variationGroups)
+        val again = Catalog.fromJson(SampleCatalog.catalog.toJson())
+        assertEquals(SampleCatalog.catalog.exercises, again.exercises)
+        assertEquals(SampleCatalog.catalog.variationGroups, again.variationGroups)
     }
 
     private fun slugs(vararg values: String) = values.map { ExerciseSlug(it) }
     private fun names(exercises: List<Exercise>) = exercises.map { it.slug.value }
 
     @Test
-    fun bundledVariationsAreOrderedEasiestToHardest() {
+    fun sampleVariationsAreOrderedEasiestToHardest() {
         val pushUps = listOf("knee-push-up", "incline-push-up", "push-up", "diamond-push-up", "one-arm-push-up")
-        assertEquals(pushUps, names(Catalog.bundled.variationsOf(ExerciseSlug("push-up"))))
-        assertEquals(pushUps, names(Catalog.bundled.variationsOf(ExerciseSlug("one-arm-push-up"))))
+        assertEquals(pushUps, names(SampleCatalog.catalog.variationsOf(ExerciseSlug("push-up"))))
+        assertEquals(pushUps, names(SampleCatalog.catalog.variationsOf(ExerciseSlug("one-arm-push-up"))))
         assertEquals(
             listOf("chair-squat", "bodyweight-squat", "goblet-squat"),
-            names(Catalog.bundled.variationsOf(ExerciseSlug("goblet-squat"))),
+            names(SampleCatalog.catalog.variationsOf(ExerciseSlug("goblet-squat"))),
         )
-        assertTrue(Catalog.bundled.variationsOf(ExerciseSlug("plank")).isEmpty())
+        assertTrue(SampleCatalog.catalog.variationsOf(ExerciseSlug("plank")).isEmpty())
     }
 
     @Test
     fun walksAndRunsAreOrderedEasiestToHardest() {
         assertEquals(
             listOf("walk-with-support", "gentle-walk", "walk", "brisk-walk"),
-            names(Catalog.bundled.variationsOf(ExerciseSlug("gentle-walk"))),
+            names(SampleCatalog.catalog.variationsOf(ExerciseSlug("gentle-walk"))),
         )
-        assertEquals(listOf("easy-run", "run"), names(Catalog.bundled.variationsOf(ExerciseSlug("run"))))
+        assertEquals(listOf("easy-run", "run"), names(SampleCatalog.catalog.variationsOf(ExerciseSlug("run"))))
         listOf("walk-with-support", "gentle-walk").forEach { slug ->
-            val walk = Catalog.bundled[ExerciseSlug(slug)]!!
+            val walk = SampleCatalog.catalog[ExerciseSlug(slug)]!!
             assertEquals(MeasurementMode.TIME, walk.measurement)
             assertTrue(walk.equipment.isEmpty(), "$slug needs nothing; a treadmill is only optional")
         }
@@ -72,13 +73,13 @@ class CatalogTest {
 
     @Test
     fun everyWalkAndRunCanBeDoneOnATreadmillButNotTheJumps() {
-        val treadmill = Catalog.bundled.offered.filter { Equipment.TREADMILL in it.optionalEquipment }.map { it.slug.value }.toSet()
+        val treadmill = SampleCatalog.catalog.offered.filter { Equipment.TREADMILL in it.optionalEquipment }.map { it.slug.value }.toSet()
         assertEquals(setOf("walk-with-support", "gentle-walk", "walk", "brisk-walk", "easy-run", "run"), treadmill)
     }
 
     @Test
     fun aVariationGroupNamingAnUnknownSlugIsRejected() {
-        val exercises = Catalog.bundled.exercises
+        val exercises = SampleCatalog.catalog.exercises
         assertFailsWith<IllegalArgumentException> {
             Catalog(exercises, listOf(slugs("push-up", "pushup-typo")))
         }
@@ -86,7 +87,7 @@ class CatalogTest {
 
     @Test
     fun anExerciseInTwoVariationGroupsIsRejected() {
-        val exercises = Catalog.bundled.exercises
+        val exercises = SampleCatalog.catalog.exercises
         assertFailsWith<IllegalArgumentException> {
             Catalog(exercises, listOf(slugs("knee-push-up", "push-up"), slugs("push-up", "diamond-push-up")))
         }
@@ -94,8 +95,8 @@ class CatalogTest {
 
     @Test
     fun retiredVariationsStayInTheirGroupButAreNotListed() {
-        val exercises = Catalog.bundled.exercises.map { if (it.slug.value == "incline-push-up") it.copy(retired = true) else it }
-        val catalog = Catalog(exercises, Catalog.bundled.variationGroups)
+        val exercises = SampleCatalog.catalog.exercises.map { if (it.slug.value == "incline-push-up") it.copy(retired = true) else it }
+        val catalog = Catalog(exercises, SampleCatalog.catalog.variationGroups)
         assertEquals(
             listOf("knee-push-up", "push-up", "diamond-push-up", "one-arm-push-up"),
             names(catalog.variationsOf(ExerciseSlug("push-up"))),
@@ -104,22 +105,22 @@ class CatalogTest {
 
     @Test
     fun aGroupWithOnlyOneOfferedExerciseHasNoVariations() {
-        val exercises = Catalog.bundled.exercises.map { if (it.slug.value == "knee-push-up") it.copy(retired = true) else it }
+        val exercises = SampleCatalog.catalog.exercises.map { if (it.slug.value == "knee-push-up") it.copy(retired = true) else it }
         val catalog = Catalog(exercises, listOf(slugs("knee-push-up", "push-up")))
         assertTrue(catalog.variationsOf(ExerciseSlug("push-up")).isEmpty())
     }
 
     @Test
-    fun bundledAliasesLoadPerLanguage() {
-        val rdl = Catalog.bundled[ExerciseSlug("romanian-deadlift")]!!
+    fun sampleAliasesLoadPerLanguage() {
+        val rdl = SampleCatalog.catalog[ExerciseSlug("romanian-deadlift")]!!
         assertEquals(listOf("RDL"), rdl.aliases["en"])
-        assertEquals(listOf("abdos"), Catalog.bundled[ExerciseSlug("plank")]!!.aliases["fr"])
-        assertTrue(Catalog.bundled[ExerciseSlug("wall-sit")]!!.aliases.all.isEmpty())
+        assertEquals(listOf("abdos"), SampleCatalog.catalog[ExerciseSlug("plank")]!!.aliases["fr"])
+        assertTrue(SampleCatalog.catalog[ExerciseSlug("wall-sit")]!!.aliases.all.isEmpty())
     }
 
     @Test
     fun anEmptyAliasIsRejected() {
-        val exercises = Catalog.bundled.exercises.map {
+        val exercises = SampleCatalog.catalog.exercises.map {
             if (it.slug.value == "plank") it.copy(aliases = Aliases(mapOf("fr" to listOf("abdos", " ")))) else it
         }
         assertFailsWith<IllegalArgumentException> { Catalog(exercises) }
@@ -127,26 +128,26 @@ class CatalogTest {
 
     @Test
     fun equipmentLoadsAsNeedsOfAlternatives() {
-        assertEquals(listOf(listOf(Equipment.DUMBBELL, Equipment.KETTLEBELL)), Catalog.bundled[ExerciseSlug("goblet-squat")]!!.equipment)
+        assertEquals(listOf(listOf(Equipment.DUMBBELL, Equipment.KETTLEBELL)), SampleCatalog.catalog[ExerciseSlug("goblet-squat")]!!.equipment)
         assertEquals(
             listOf(listOf(Equipment.DUMBBELL), listOf(Equipment.BENCH)),
-            Catalog.bundled[ExerciseSlug("dumbbell-bench-press")]!!.equipment,
+            SampleCatalog.catalog[ExerciseSlug("dumbbell-bench-press")]!!.equipment,
         )
-        val plank = Catalog.bundled[ExerciseSlug("plank")]!!
+        val plank = SampleCatalog.catalog[ExerciseSlug("plank")]!!
         assertTrue(plank.equipment.isEmpty())
         assertEquals(listOf(Equipment.MAT), plank.optionalEquipment)
     }
 
     @Test
     fun anEmptyNeedIsRejected() {
-        val exercises = Catalog.bundled.exercises.map { if (it.slug.value == "plank") it.copy(equipment = listOf(emptyList())) else it }
+        val exercises = SampleCatalog.catalog.exercises.map { if (it.slug.value == "plank") it.copy(equipment = listOf(emptyList())) else it }
         assertFailsWith<IllegalArgumentException> { Catalog(exercises) }
     }
 
     @Test
     fun aNeedHoldingBodyweightOrAMatIsRejected() {
         listOf(Equipment.BODYWEIGHT, Equipment.MAT).forEach { never ->
-            val exercises = Catalog.bundled.exercises.map {
+            val exercises = SampleCatalog.catalog.exercises.map {
                 if (it.slug.value == "plank") it.copy(equipment = listOf(listOf(Equipment.DUMBBELL, never))) else it
             }
             assertFailsWith<IllegalArgumentException> { Catalog(exercises) }
@@ -185,8 +186,8 @@ class CatalogTest {
 
     @Test
     fun everyExerciseInAVariationGroupHasANoteInBothLanguages() {
-        Catalog.bundled.variationGroups.flatten().forEach { slug ->
-            val note = Catalog.bundled[slug]?.variationNote
+        SampleCatalog.catalog.variationGroups.flatten().forEach { slug ->
+            val note = SampleCatalog.catalog[slug]?.variationNote
             assertTrue(note != null && LANGUAGES.all { note.byLanguage[it].orEmpty().isNotBlank() }, "${slug.value} has no variation note")
         }
     }

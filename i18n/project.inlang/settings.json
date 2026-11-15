@@ -12,7 +12,6 @@
     "pathPattern": {
       "app": "./messages/{locale}/app.json",
       "domain": "./messages/{locale}/domain.json",
-      "catalog": "./messages/{locale}/catalog.json",
       "server": "./messages/{locale}/server.json",
       "web": "./messages/{locale}/web.json",
       "ui": "./messages/{locale}/ui.json"

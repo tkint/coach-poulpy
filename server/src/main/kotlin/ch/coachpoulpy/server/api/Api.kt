@@ -1,6 +1,5 @@
 package ch.coachpoulpy.server.api
 
-import ch.coachpoulpy.catalog.Catalog
 import ch.coachpoulpy.server.admin.AdminAccounts
 import ch.coachpoulpy.server.admin.AdminAudit
 import ch.coachpoulpy.server.admin.AdminCatalog
@@ -43,11 +42,9 @@ const val API_PREFIX = "/api/v1"
 val Public: Security = NoSecurity
 
 /**
- * Every route: those under [API_PREFIX], and OAuth's under `/oauth`. [catalog] is the bundled one, which seeded the
- * server's catalog on its first start (ADR 0026); the routes serve what the database holds.
+ * Every route: those under [API_PREFIX], and OAuth's under `/oauth`. The catalog routes serve what the database holds (ADR 0032).
  */
 fun apiRoutes(
-    catalog: Catalog,
     accounts: Accounts,
     signIns: SignIns,
     passwordResets: PasswordResets,
@@ -62,7 +59,7 @@ fun apiRoutes(
     databaseAnswers: () -> Boolean = database::answers,
 ): List<ContractRoute> = listOf(
     publicStatusRoute(databaseAnswers),
-    catalogRoute(ServerCatalog(database, catalog)),
+    catalogRoute(ServerCatalog(database)),
     signUpRoute(accounts),
     confirmEmailRoute(accounts),
     confirmationStatusRoute(accounts),
@@ -72,8 +69,8 @@ fun apiRoutes(
     deleteMeRoute(accountDeletion),
     pushRoute(sync),
     pullRoute(sync),
-    workoutsRoute(WorkoutLibrary(database, catalog)),
-    workoutRoute(WorkoutLibrary(database, catalog)),
+    workoutsRoute(WorkoutLibrary(database, ServerCatalog(database)::published)),
+    workoutRoute(WorkoutLibrary(database, ServerCatalog(database)::published)),
     tokenRoute(signIns),
     revokeRoute(signIns),
 ) + webSessionRoutes(signIns, cookies) + adminRoutes(
@@ -82,13 +79,12 @@ fun apiRoutes(
     AdminSettings(database, settings, mailer, events),
     AdminStatus(database, mailer),
 ) + adminCatalogRoutes(
-    AdminCatalog(ServerCatalog(database, catalog), events),
+    AdminCatalog(ServerCatalog(database), events),
 )
 
 /** The API, described in OpenAPI at `/api/v1/openapi.json`, OAuth routes included. */
 fun api(
     version: String,
-    catalog: Catalog,
     accounts: Accounts,
     signIns: SignIns,
     passwordResets: PasswordResets,
@@ -110,5 +106,5 @@ fun api(
         apiRenderer = OpenApi3ApiRenderer(KotlinxSerialization),
     )
     descriptionPath = "$API_PREFIX/openapi.json"
-    routes += apiRoutes(catalog, accounts, signIns, passwordResets, accountDeletion, sync, database, audit, cookies, events, settings, mailer, databaseAnswers)
+    routes += apiRoutes(accounts, signIns, passwordResets, accountDeletion, sync, database, audit, cookies, events, settings, mailer, databaseAnswers)
 }

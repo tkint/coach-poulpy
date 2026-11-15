@@ -23,7 +23,7 @@ internal val BuilderModel.work: String get() = current.parts.first { it.kind == 
 internal fun BuilderModel.part(kind: PartKind): String = current.parts.last { it.kind == kind }.key
 
 class BuilderModelTest {
-    private val graph = AppGraph(DriverFactory())
+    private val graph = AppGraph(DriverFactory()).withSampleCatalog()
 
     private fun builder(format: WorkoutFormat, name: String = "Monday") = graph.createWorkout("en").apply {
         rename(name)

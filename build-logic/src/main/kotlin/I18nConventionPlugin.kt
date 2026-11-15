@@ -8,7 +8,6 @@ import org.gradle.api.attributes.LibraryElements
 import org.gradle.api.attributes.Usage
 import org.gradle.api.attributes.java.TargetJvmEnvironment
 import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.file.RegularFile
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
@@ -16,7 +15,6 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.JavaExec
-import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
@@ -83,10 +81,6 @@ abstract class I18nExtension @Inject constructor(private val project: Project) {
         return task
     }
 
-    /** [structure] with the `catalog` text merged back in, as `exercises.json` in the task's output directory. */
-    fun catalog(structure: RegularFile): TaskProvider<GenerateTranslations> =
-        register("mergeCatalogText", "catalog", emptyList()) { catalogStructure.set(structure) }
-
     private fun register(
         name: String,
         command: String,
@@ -110,7 +104,7 @@ abstract class I18nExtension @Inject constructor(private val project: Project) {
     }
 }
 
-/** One run of `tools/i18n`: `<command> <i18n dir> <arguments> [<catalog structure>] <output>`. */
+/** One run of `tools/i18n`: `<command> <i18n dir> <arguments> <output>`. */
 abstract class GenerateTranslations : JavaExec() {
     @get:InputDirectory
     @get:PathSensitive(PathSensitivity.RELATIVE)
@@ -119,11 +113,6 @@ abstract class GenerateTranslations : JavaExec() {
     @get:InputFile
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val settings: RegularFileProperty
-
-    @get:Optional
-    @get:InputFile
-    @get:PathSensitive(PathSensitivity.RELATIVE)
-    abstract val catalogStructure: RegularFileProperty
 
     @get:Input
     abstract val command: Property<String>
@@ -140,11 +129,7 @@ abstract class GenerateTranslations : JavaExec() {
             deleteRecursively()
             mkdirs()
         }
-        val target = if (catalogStructure.isPresent) output.resolve("exercises.json") else output
-        args = listOf(command.get(), messages.get().asFile.parentFile.path) +
-            arguments.get() +
-            listOfNotNull(catalogStructure.orNull?.asFile?.path) +
-            target.path
+        args = listOf(command.get(), messages.get().asFile.parentFile.path) + arguments.get() + output.path
         super.exec()
     }
 }

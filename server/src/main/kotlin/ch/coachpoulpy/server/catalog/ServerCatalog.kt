@@ -138,25 +138,23 @@ data class CatalogUpdate(val cursor: String, val exercises: List<PublishedRevisi
  * changes. Publishing gives the draft revision of each named exercise the next number of the publication
  * cursor (`seq`) and writes nothing else. There is no catalog version: a phone asks for the exercises
  * published after the cursor it last received ([since]).
- *
- * [bundled] is the catalog this server was built with: it fills the database the first time ([seed]).
  */
 class ServerCatalog(
     private val database: Database,
-    private val bundled: Catalog,
     private val clock: Clock = Clock.systemUTC(),
 ) {
     private val queries get() = database.queries.catalogQueries
 
     /**
-     * Fills an empty catalog from [bundled]: one revision per exercise, each published under its own
+     * Fills an empty catalog from [catalog]: one revision per exercise, each published under its own
      * number of the publication cursor. Does nothing once an exercise is stored. Returns whether it seeded.
+     * Only tests call it: the real catalog is made in the admin (ADR 0032).
      */
-    fun seed(): Boolean = database.queries.transactionWithResult {
+    fun seed(catalog: Catalog): Boolean = database.queries.transactionWithResult {
         queries.ensurePublication()
         if (queries.revisionCount().executeAsOne() > 0) return@transactionWithResult false
         val now = OffsetDateTime.now(clock)
-        val rows = rowsOf(bundled)
+        val rows = rowsOf(catalog)
         val last = queries.reserveSeqs(rows.size.toLong()).executeAsOne()
         rows.forEachIndexed { index, it ->
             queries.insertRevision(it.exercise.slug.value, 1, it.position, encode(it.exercise), it.group, it.rank, last - rows.size + 1 + index, now)
@@ -172,7 +170,7 @@ class ServerCatalog(
         if (rows.isEmpty()) null else CatalogUpdate(rows.maxOf { it.seq }.toString(), rows)
     }
 
-    /** The latest published revision of each exercise, as a catalog; empty before [seed]. */
+    /** The latest published revision of each exercise, as a catalog; empty before anything is published. */
     fun published(): Catalog = catalogOf(publishedRows())
 
     /** The draft, in the catalog's order, retired exercises included. */

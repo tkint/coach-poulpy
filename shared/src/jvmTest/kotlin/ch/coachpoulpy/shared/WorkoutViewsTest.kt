@@ -1,6 +1,7 @@
 package ch.coachpoulpy.shared
 
 import ch.coachpoulpy.catalog.Catalog
+import ch.coachpoulpy.catalog.sample.SampleCatalog
 import ch.coachpoulpy.core.model.ExerciseSlug
 import ch.coachpoulpy.core.model.Part
 import ch.coachpoulpy.core.model.PartId
@@ -21,7 +22,7 @@ import kotlin.time.Instant
 
 /** What the website is told about saved workouts: the list's filters, order and pages, and one workout's page, in either language. */
 class WorkoutViewsTest {
-    private val views = WorkoutViews(Catalog.bundled)
+    private val views = WorkoutViews(SampleCatalog.catalog)
 
     private fun workout(id: String, name: String, format: WorkoutFormat, slug: String = "push-up", reps: Int = 10) = Workout(
         WorkoutId(id), 1, name, format,

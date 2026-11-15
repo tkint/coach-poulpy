@@ -15,7 +15,7 @@ import kotlin.time.Duration.Companion.minutes
 
 /** Live offers, and a FIT export calls running, only workouts made of walks and runs. */
 class WalksAndRunsTest {
-    private val catalog = AppGraph(DriverFactory()).catalog
+    private val catalog = AppGraph(DriverFactory()).withSampleCatalog().catalog
 
     private fun step(slug: String) =
         Step.ExerciseStep(StepId(slug), ExerciseSlug(slug), Prescription(listOf(SetPrescription(Target.Time(5.minutes)))))

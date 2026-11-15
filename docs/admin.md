@@ -78,4 +78,4 @@ Sensitive values are values4k types that print masked: `EmailAddress` prints as 
 
 ## What comes next
 
-Editing variation groups, and a tool that copies the published revisions back into the repository's catalog files so the next build bundles it ([ADR 0026](./adr/0026-the-server-holds-the-catalog-as-a-draft-and-published-versions.md)). The status will take more checks, such as the database, and log viewing is its own issue.
+Editing variation groups. The status will take more checks, such as the database, and log viewing is its own issue.

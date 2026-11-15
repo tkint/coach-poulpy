@@ -1,6 +1,6 @@
 package ch.coachpoulpy.shared
 
-import ch.coachpoulpy.catalog.Catalog
+import ch.coachpoulpy.catalog.sample.SampleCatalog
 import ch.coachpoulpy.core.model.ExerciseSlug
 import ch.coachpoulpy.core.model.LocalizedText
 import ch.coachpoulpy.data.local.CatalogRevision
@@ -21,49 +21,43 @@ import kotlinx.coroutines.test.runTest
 
 class CatalogRepositoryTest {
     private val store = LocalStore(DriverFactory())
-    private val bundled = Catalog.bundled
-    private val squat = bundled.exercises.first()
+    private val sample = SampleCatalog.catalog
+    private val squat = sample.exercises.first()
 
     @Test
-    fun aFreshInstallHoldsTheBundledCatalogAtRevisionOneWithNoCursor() {
-        val repository = CatalogRepository(store, bundled)
-        assertEquals(bundled.exercises.map { it.slug }.toSet(), repository.current.exercises.map { it.slug }.toSet())
-        assertEquals(bundled.exercises.map { it.slug }.toSet(), store.catalogRevisions().filterValues { it == 1 }.keys)
+    fun aFreshInstallHoldsNoExercisesAndNoCursor() {
+        val repository = CatalogRepository(store)
+        assertTrue(repository.current.exercises.isEmpty())
         assertNull(repository.cursor)
-        assertEquals(bundled.variationGroups.size, repository.current.variationGroups.size)
     }
 
     @Test
-    fun relaunchingChangesNothingAndKeepsAnExerciseTheServerRevised() {
-        val repository = CatalogRepository(store, bundled)
-        val revised = squat.copy(name = LocalizedText(mapOf("en" to "Revised")))
-        assertEquals(1, repository.apply(listOf(CatalogRevision(revised, 2)), "9"))
-        assertEquals("Revised", repository.current[squat.slug]!!.name.byLanguage["en"])
+    fun relaunchingKeepsWhatTheServerPublishedAndItsCursor() {
+        val repository = CatalogRepository(store)
+        assertEquals(1, repository.apply(listOf(CatalogRevision(squat, 2)), "9"))
+        assertEquals(2, repository.current.revisionOf(squat.slug))
 
-        val relaunched = CatalogRepository(store, bundled)
-        assertEquals("Revised", relaunched.current[squat.slug]!!.name.byLanguage["en"], "the bundled revision 1 doesn't undo it")
+        val relaunched = CatalogRepository(store)
+        assertEquals(squat, relaunched.current[squat.slug])
+        assertEquals(2, relaunched.current.revisionOf(squat.slug))
         assertEquals("9", relaunched.cursor)
     }
 
     @Test
-    fun anAppUpdateThatBundlesAHigherRevisionReplacesTheStoredExercise() {
-        CatalogRepository(store, bundled)
-        val newer = Catalog(
-            bundled.exercises.map { if (it.slug == squat.slug) it.copy(name = LocalizedText(mapOf("en" to "From the new app"))) else it },
-            bundled.variationGroups,
-            mapOf(squat.slug to 2),
-        )
-        val repository = CatalogRepository(store, newer)
-        assertEquals("From the new app", repository.current[squat.slug]!!.name.byLanguage["en"])
-        assertEquals(2, repository.current.revisionOf(squat.slug))
+    fun anOlderRevisionNeverReplacesANewerOne() {
+        val repository = CatalogRepository(store)
+        repository.apply(listOf(CatalogRevision(squat.copy(name = LocalizedText(mapOf("en" to "Revised"))), 3)), "2")
+        assertEquals(0, repository.apply(listOf(CatalogRevision(squat, 2)), "3"))
+        assertEquals("Revised", repository.current[squat.slug]!!.name.byLanguage["en"])
     }
 
     @Test
-    fun aPhoneFromBeforeRevisionsGainsTheVariationGroupsAtLaunch() {
-        // What the migration leaves: every exercise at revision 1, no group on any of them.
-        store.applyCatalogRevisions(bundled.exercises.map { CatalogRevision(it, 1) })
-        assertTrue(store.catalogVariationGroups().isEmpty())
-        assertEquals(bundled.variationGroups.size, CatalogRepository(store, bundled).current.variationGroups.size)
+    fun anExerciseOfAnUpdateJoinsItsVariationGroup() {
+        val repository = CatalogRepository(store)
+        val group = sample.variationGroups.first()
+        val place = group.mapIndexed { rank, slug -> slug to rank }.toMap()
+        repository.apply(sample.exercises.filter { it.slug in place }.map { CatalogRevision(it, 1, 0, place.getValue(it.slug)) }, "1")
+        assertEquals(group, repository.current.variationGroups.first())
     }
 
     private val answer = """
@@ -86,7 +80,7 @@ class CatalogRepositoryTest {
 
     @Test
     fun anUpdateStoresTheExercisesAndTheCursorAndTheNextOneAsksAfterIt() = runTest {
-        val repository = CatalogRepository(store, bundled)
+        val repository = CatalogRepository(store)
         val seen = mutableListOf<String>()
         assertEquals(1, updater(repository, HttpStatusCode.OK, answer, seen).update())
         assertEquals("4", repository.cursor)
@@ -98,7 +92,7 @@ class CatalogRepositoryTest {
 
     @Test
     fun anUnreachableOrBrokenServerLeavesTheCatalogAndTheCursorAsTheyWere() = runTest {
-        val repository = CatalogRepository(store, bundled)
+        val repository = CatalogRepository(store)
         val before = repository.current.exercises.size
         assertFailsWith<Exception> { updater(repository, HttpStatusCode.ServiceUnavailable, "").update() }
         assertFailsWith<Exception> { updater(repository, HttpStatusCode.OK, "{\"cursor\": \"5\", \"exercises\": [{}]}").update() }

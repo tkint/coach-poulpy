@@ -28,7 +28,7 @@ import kotlinx.coroutines.withTimeout
 
 /** The muscles the workout page draws on the body map and lists under the exercises. */
 class WorkoutMusclesTest {
-    private val graph = AppGraph(DriverFactory())
+    private val graph = AppGraph(DriverFactory()).withSampleCatalog()
 
     private fun exercise(id: String, slug: String, target: Target, sets: Int = 1) =
         Step.ExerciseStep(StepId(id), ExerciseSlug(slug), Prescription(List(sets) { SetPrescription(target) }))
