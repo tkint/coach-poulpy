@@ -39,7 +39,7 @@ async function submit() {
       <CpErrorNote v-if="failed === 'refused'">{{ t('app.errorSignIn') }}</CpErrorNote>
       <CpErrorNote v-else-if="failed === 'throttled'">{{ t('admin.errorTooMany') }}</CpErrorNote>
       <CpErrorNote v-else-if="failed === 'offline'">{{ t('admin.errorOffline') }}</CpErrorNote>
-      <CpButton type="submit" class="w-full" :loading="failed === 'sending'">{{ t('admin.signIn') }}</CpButton>
+      <CpButton size="xl" type="submit" class="w-full" :loading="failed === 'sending'">{{ t('admin.signIn') }}</CpButton>
     </form>
   </SitePage>
 </template>

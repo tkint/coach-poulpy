@@ -9,3 +9,4 @@
 | `<CpTextField>` with `#icon` | an icon before the text inside `label.cp-input`, such as a lock on a slug that can't change |
 | `<CpTextField disabled>` | a field that can't be changed, such as a slug locked once its exercise is published |
 | `<CpTextField>` with `#status` | a slot under the hint for a badge, such as a field's translation status |
+| `<CpTextField size="lg">` | `cp-input-lg` in place of `cp-input-md`; `size` is the websites' scale (xs, sm, md, lg, xl, xxl), md when none is given |

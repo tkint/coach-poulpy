@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import CpIcon from './CpIcon.vue'
 // Details of the row picked in a list, in a panel that floats over the page from the right (the whole
 // width on a phone) with a dim backdrop, so the list under it never moves. A native <dialog> like
 // CpSheet: Escape and a click outside close it, and the page behind can't be reached meanwhile.
@@ -23,7 +24,7 @@ onMounted(() => dialog.value?.showModal())
           <slot name="subtitle" />
         </div>
         <button type="button" class="cp-btn cp-btn-circle cp-btn-ghost cp-btn-sm" :aria-label="closeLabel ?? uiText('ui.close')" @click="dialog?.close()">
-          <X class="size-5 shrink-0" aria-hidden="true" />
+          <CpIcon :icon="X" />
         </button>
       </div>
       <slot />

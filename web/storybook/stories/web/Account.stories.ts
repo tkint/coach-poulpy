@@ -40,7 +40,7 @@ const resetForm = (value: string, invalid: boolean, poulpy: string) => ({
       <form class="flex flex-col gap-6" @submit.prevent>
         <CpPasswordField v-model="password" label="New password" hint="8 characters or more." autocomplete="new-password" :invalid="invalid" />
         <CpErrorNote v-if="invalid">Use at least 8 characters.</CpErrorNote>
-        <CpButton type="submit" class="w-full">Save password</CpButton>
+        <CpButton size="xl" type="submit" class="w-full">Save password</CpButton>
       </form></SitePage>`,
   }),
 })

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { CpIcon } from '@coach-poulpy/ui'
 // The admin's accounts screen: filters, the table, and the details beside it (ADR 0029: composed from the Cp components,
 // as the web app's AdminAccountsView does, with static accounts).
 import { ref } from 'vue'
@@ -58,9 +59,9 @@ const ariaSort = (key: string) => (key === props.sort ? (props.order === 'asc' ?
                 <th v-for="column in columns" :key="column.key" :aria-sort="ariaSort(column.key)">
                   <button type="button" class="cp-btn cp-btn-ghost cp-btn-sm -ms-3 gap-1 whitespace-nowrap">
                     {{ column.label }}
-                    <ChevronsUpDown v-if="column.key !== sort" class="size-4 shrink-0" aria-hidden="true" />
-                    <ChevronUp v-else-if="order === 'asc'" class="size-4 shrink-0" aria-hidden="true" />
-                    <ChevronDown v-else class="size-4 shrink-0" aria-hidden="true" />
+                    <CpIcon :icon="ChevronsUpDown" size="sm" v-if="column.key !== sort" />
+                    <CpIcon :icon="ChevronUp" size="sm" v-else-if="order === 'asc'" />
+                    <CpIcon :icon="ChevronDown" size="sm" v-else />
                   </button>
                 </th>
               </tr>
@@ -82,7 +83,7 @@ const ariaSort = (key: string) => (key === props.sort ? (props.order === 'asc' ?
           </CpTable>
           <div class="flex flex-col items-center justify-between gap-3 sm:flex-row">
             <p class="text-sm text-base-content/70">{{ showing }}</p>
-            <CpPagination v-model:page="page" :pages="pages" />
+            <CpPagination size="sm" v-model:page="page" :pages="pages" />
           </div>
         </CpCard>
       </div>
@@ -97,9 +98,9 @@ const ariaSort = (key: string) => (key === props.sort ? (props.order === 'asc' ?
         </dl>
         <p v-if="!account()!.disabled" class="text-sm text-base-content/70">Disabling signs this account out everywhere and blocks sign-in until you enable it again. Nothing is deleted.</p>
         <div class="flex flex-wrap gap-2">
-          <CpButton v-if="account()!.disabled" size="md" class="gap-2"><RotateCcw class="size-4 shrink-0" aria-hidden="true" />Enable account</CpButton>
-          <CpButton v-else variant="outline" size="md" class="gap-2"><Ban class="size-4 shrink-0" aria-hidden="true" />Disable account</CpButton>
-          <CpButton variant="danger" size="md" class="gap-2"><Trash class="size-4 shrink-0" aria-hidden="true" />Delete account</CpButton>
+          <CpButton v-if="account()!.disabled" size="md" class="gap-2"><CpIcon :icon="RotateCcw" size="sm" />Enable account</CpButton>
+          <CpButton v-else variant="outline" size="md" class="gap-2"><CpIcon :icon="Ban" size="sm" />Disable account</CpButton>
+          <CpButton variant="danger" size="md" class="gap-2"><CpIcon :icon="Trash" size="sm" />Delete account</CpButton>
         </div>
       </CpSidePanel>
       <CpSheet v-if="account() && deleting" v-model:open="open" title="Delete this account?">
@@ -107,7 +108,7 @@ const ariaSort = (key: string) => (key === props.sort ? (props.order === 'asc' ?
         <CpTextField v-model="typed" label="Type the email to confirm" autocomplete="off" />
         <template #actions>
           <CpButton variant="ghost" size="md">Cancel</CpButton>
-          <CpButton variant="danger" size="md" class="gap-2" :disabled="typed !== account()!.email"><Trash class="size-4 shrink-0" aria-hidden="true" />Delete for good</CpButton>
+          <CpButton variant="danger" size="md" class="gap-2" :disabled="typed !== account()!.email"><CpIcon :icon="Trash" size="sm" />Delete for good</CpButton>
         </template>
       </CpSheet>
     </main>

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { CpIcon } from '@coach-poulpy/ui'
 // The web app: the sign-in until the cookies sign someone in, then the sidebar shell with the workouts
 // (the stories Web/Screens/App/Workouts and Workout) and the profile (the stories Web/Screens/App/Profile). The screen is the
 // address: /workouts, /workouts/<id>, /profile; anything else goes to /workouts. Admins get a link to /admin at the
@@ -49,7 +50,7 @@ async function leave() {
   <p v-if="!checked" class="p-8" role="status">{{ t('admin.checking') }}</p>
   <AppSignInPage v-else-if="!me" @signed-in="async () => (me = await currentAccount())" />
   <CpDrawer v-else v-model:open="open" class="bg-base-200 text-base-content">
-    <template #toggle-icon><PanelLeft class="size-5 shrink-0" aria-hidden="true" /></template>
+    <template #toggle-icon><CpIcon :icon="PanelLeft" /></template>
     <template #title>{{ title }}</template>
     <WorkoutsView v-if="view === 'workouts'" />
     <WorkoutView v-else-if="view === 'workout'" :id="workoutId" />
@@ -61,20 +62,20 @@ async function leave() {
       </div>
       <div class="w-full grow px-2">
         <CpNavMenu>
-          <CpDrawerItem :label="t('app.workoutsTitle')" :href="WORKOUTS" :active="view === 'workouts' || view === 'workout'" @click.prevent="navigate(WORKOUTS)"><template #icon><List class="size-5 shrink-0" aria-hidden="true" /></template></CpDrawerItem>
-          <CpDrawerItem :label="t('app.profileTitle')" :href="PROFILE" :active="view === 'profile'" @click.prevent="navigate(PROFILE)"><template #icon><UserRound class="size-5 shrink-0" aria-hidden="true" /></template></CpDrawerItem>
+          <CpDrawerItem :label="t('app.workoutsTitle')" :href="WORKOUTS" :active="view === 'workouts' || view === 'workout'" @click.prevent="navigate(WORKOUTS)"><template #icon><CpIcon :icon="List" /></template></CpDrawerItem>
+          <CpDrawerItem :label="t('app.profileTitle')" :href="PROFILE" :active="view === 'profile'" @click.prevent="navigate(PROFILE)"><template #icon><CpIcon :icon="UserRound" /></template></CpDrawerItem>
         </CpNavMenu>
       </div>
       <div class="flex w-full flex-col gap-2 p-2">
         <CpNavMenu v-if="me.role === 'admin'">
-          <CpDrawerItem :label="t('app.adminLink')" href="/admin"><template #icon><ShieldCheck class="size-5 shrink-0" aria-hidden="true" /></template></CpDrawerItem>
+          <CpDrawerItem :label="t('app.adminLink')" href="/admin"><template #icon><CpIcon :icon="ShieldCheck" /></template></CpDrawerItem>
         </CpNavMenu>
         <div class="flex items-center gap-3 px-2">
           <CpAvatar :initials="me.email.charAt(0).toUpperCase()" tone="primary" size="md" />
           <span class="truncate text-sm font-bold cp-is-drawer-close:hidden">{{ me.email }}</span>
         </div>
         <CpNavMenu>
-          <CpDrawerItem :label="t('admin.signOut')" @click="leave"><template #icon><LogOut class="size-5 shrink-0" aria-hidden="true" /></template></CpDrawerItem>
+          <CpDrawerItem :label="t('admin.signOut')" @click="leave"><template #icon><CpIcon :icon="LogOut" /></template></CpDrawerItem>
         </CpNavMenu>
       </div>
     </template>

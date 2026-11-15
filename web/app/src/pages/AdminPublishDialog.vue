@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { CpIcon } from '@coach-poulpy/ui'
 // The publication review of the catalog (the Web/Screens/Admin/Catalog stories, #389): the pending changes of the
 // selected exercises, each with its translation status and what it changes, and the field-by-field before and after
 // of an edit. Publishing gives each of them a new revision; no other exercise is written (ADR 0030).
@@ -101,7 +102,7 @@ async function publish() {
     <CpErrorNote v-else-if="failed">{{ t('admin.publishFailed') }}</CpErrorNote>
     <template #actions>
       <CpButton variant="ghost" size="md" @click="open = false">{{ t('admin.publishCancel') }}</CpButton>
-      <CpButton size="md" class="gap-2" :loading="publishing" :disabled="blocked || rows.length === 0" @click="publish"><CloudUpload class="size-5 shrink-0" aria-hidden="true" />{{ t('admin.publishConfirm') }}</CpButton>
+      <CpButton size="md" class="gap-2" :loading="publishing" :disabled="blocked || rows.length === 0" @click="publish"><CpIcon :icon="CloudUpload" />{{ t('admin.publishConfirm') }}</CpButton>
     </template>
   </CpDialog>
 </template>

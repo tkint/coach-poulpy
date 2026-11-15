@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { CpIcon } from '@coach-poulpy/ui'
 // CLEANUP: drawn with the classes of the mockup until the bulk retirement of #390 is built as a Cp component.
 import { CpBadge } from '@coach-poulpy/ui'
 import { X } from '@lucide/vue'
@@ -12,7 +13,7 @@ import { X } from '@lucide/vue'
           <h2 id="bulk-retire-title" class="cp-type-headline">Retire 3 selected exercises?</h2>
           <p class="text-sm text-base-content/70">These exercises stay available until you publish the changes. Existing workouts keep working and retain their history.</p>
         </div>
-        <button type="button" class="cp-btn cp-btn-ghost cp-btn-square cp-btn-sm" aria-label="Close retirement review"><X class="size-4 shrink-0" aria-hidden="true" /></button>
+        <button type="button" class="cp-btn cp-btn-ghost cp-btn-square cp-btn-sm" aria-label="Close retirement review"><CpIcon :icon="X" size="sm" /></button>
       </div>
       <div class="overflow-x-auto rounded-box border border-base-300">
         <table class="cp-table bg-base-100">

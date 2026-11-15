@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { CpIcon } from '@coach-poulpy/ui'
 // The web app's page frame: the sidebar with Workouts and Profile, the admin link, and the signed-in account (ADR 0029:
 // composed from the Cp components, as the web app's AppPage does).
 import { List, LogOut, PanelLeft, ShieldCheck, UserRound } from '@lucide/vue'
@@ -9,7 +10,7 @@ defineProps<{ title: string; active: 'workouts' | 'profile' }>()
 
 <template>
   <CpDrawer class="min-h-screen bg-base-200 text-base-content">
-    <template #toggle-icon><PanelLeft class="size-5 shrink-0" aria-hidden="true" /></template>
+    <template #toggle-icon><CpIcon :icon="PanelLeft" /></template>
     <template #title>{{ title }}</template>
     <slot />
     <template #sidebar>
@@ -19,20 +20,20 @@ defineProps<{ title: string; active: 'workouts' | 'profile' }>()
       </div>
       <div class="w-full grow px-2">
         <CpNavMenu>
-          <CpDrawerItem label="Workouts" :active="active === 'workouts'"><template #icon><List class="size-5 shrink-0" aria-hidden="true" /></template></CpDrawerItem>
-          <CpDrawerItem label="Profile" :active="active === 'profile'"><template #icon><UserRound class="size-5 shrink-0" aria-hidden="true" /></template></CpDrawerItem>
+          <CpDrawerItem label="Workouts" :active="active === 'workouts'"><template #icon><CpIcon :icon="List" /></template></CpDrawerItem>
+          <CpDrawerItem label="Profile" :active="active === 'profile'"><template #icon><CpIcon :icon="UserRound" /></template></CpDrawerItem>
         </CpNavMenu>
       </div>
       <div class="flex w-full flex-col gap-2 p-2">
         <CpNavMenu>
-          <CpDrawerItem label="Admin" href="#"><template #icon><ShieldCheck class="size-5 shrink-0" aria-hidden="true" /></template></CpDrawerItem>
+          <CpDrawerItem label="Admin" href="#"><template #icon><CpIcon :icon="ShieldCheck" /></template></CpDrawerItem>
         </CpNavMenu>
         <div class="flex items-center gap-3 px-2">
           <CpAvatar initials="A" tone="primary" size="md" />
           <span class="truncate text-sm font-bold cp-is-drawer-close:hidden">ana@example.com</span>
         </div>
         <CpNavMenu>
-          <CpDrawerItem label="Sign out"><template #icon><LogOut class="size-5 shrink-0" aria-hidden="true" /></template></CpDrawerItem>
+          <CpDrawerItem label="Sign out"><template #icon><CpIcon :icon="LogOut" /></template></CpDrawerItem>
         </CpNavMenu>
       </div>
     </template>

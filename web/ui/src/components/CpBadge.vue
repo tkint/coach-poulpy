@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import CpIcon from './CpIcon.vue'
 // A short label on a row: what kind of change, what state. Primary for the main kind, neutral for
 // system or quiet ones, outline for a state that stays plain, success for a state that is fine, error
 // for what went wrong (crimson, with its alert icon drawn in). Never ember, and not DaisyUI's warning.
@@ -17,7 +18,7 @@ const classes = {
 
 <template>
   <span class="cp-badge whitespace-nowrap" :class="[classes[tone], { 'cp-badge-sm': small }]" data-component="badge">
-    <CircleExclamationPoint v-if="tone === 'error' && !small" class="size-3 shrink-0" aria-hidden="true" />
+    <CpIcon :icon="CircleExclamationPoint" size="xs" v-if="tone === 'error' && !small" />
     <slot />
   </span>
 </template>

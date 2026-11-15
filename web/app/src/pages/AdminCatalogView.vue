@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { CpIcon } from '@coach-poulpy/ui'
 // The catalog screen of the admin (the Web/Screens/Admin/Catalog stories in the component workshop, #387): the exercises of the
 // catalog draft in a paged table that is searched, filtered and sorted on the server, with rows picked for the
 // actions on several exercises. Content (what changed since the latest version), translations and lifecycle are
@@ -273,20 +274,20 @@ watch(
           <CpBadge v-for="kind in pendingKinds" :key="kind.label" :tone="kind.tone">{{ t(kind.label) }} · {{ kind.count }}</CpBadge>
           <CpBadge v-if="missingCount > 0" tone="error">{{ t('admin.statusMissing', { count: String(missingCount) }) }}</CpBadge>
         </div>
-        <CpButton size="md" class="gap-2" @click="publishOpen = true"><CloudUpload class="size-5 shrink-0" aria-hidden="true" />{{ t('admin.statusReview') }}</CpButton>
+        <CpButton size="md" class="gap-2" @click="publishOpen = true"><CpIcon :icon="CloudUpload" />{{ t('admin.statusReview') }}</CpButton>
       </div>
     </CpCard>
     <CpCard>
       <div class="flex flex-wrap items-center gap-2" role="search" :aria-label="t('admin.catalogFiltersLabel')">
-        <CpSearchField v-model="draft" compact :label="t('admin.catalogSearchLabel')" :placeholder="t('admin.catalogSearch')" />
+        <CpSearchField size="sm" v-model="draft" compact :label="t('admin.catalogSearchLabel')" :placeholder="t('admin.catalogSearch')" />
         <CpChip v-model="pending" compact>{{ t('admin.catalogPending') }}</CpChip>
-        <CpSelectField v-model="pattern" compact :label="t('admin.filterPattern')" :options="patternOptions" />
-        <CpSelectField v-model="translation" compact :label="t('admin.filterTranslation')" :options="translationOptions" />
-        <CpSelectField v-model="content" compact :label="t('admin.filterContent')" :options="contentOptions" />
-        <CpSelectField v-model="lifecycle" compact :label="t('admin.filterLifecycle')" :options="lifecycleOptions" />
-        <CpMultiSelectField v-model="muscles" :label="t('admin.filterMuscles')" :placeholder="t('admin.filterMusclesPlaceholder')" :options="muscleOptions" :none-label="t('admin.filterNoMatch')" />
-        <CpMultiSelectField v-model="positions" :label="t('admin.filterPositions')" :placeholder="t('admin.filterPositionsPlaceholder')" :options="positionOptions" :none-label="t('admin.filterNoMatch')" />
-        <CpMultiSelectField v-model="equipment" :label="t('admin.filterEquipment')" :placeholder="t('admin.filterEquipmentPlaceholder')" :options="equipmentOptions" :none-label="t('admin.filterNoMatch')" />
+        <CpSelectField size="sm" v-model="pattern" compact :label="t('admin.filterPattern')" :options="patternOptions" />
+        <CpSelectField size="sm" v-model="translation" compact :label="t('admin.filterTranslation')" :options="translationOptions" />
+        <CpSelectField size="sm" v-model="content" compact :label="t('admin.filterContent')" :options="contentOptions" />
+        <CpSelectField size="sm" v-model="lifecycle" compact :label="t('admin.filterLifecycle')" :options="lifecycleOptions" />
+        <CpMultiSelectField size="sm" v-model="muscles" :label="t('admin.filterMuscles')" :placeholder="t('admin.filterMusclesPlaceholder')" :options="muscleOptions" :none-label="t('admin.filterNoMatch')" />
+        <CpMultiSelectField size="sm" v-model="positions" :label="t('admin.filterPositions')" :placeholder="t('admin.filterPositionsPlaceholder')" :options="positionOptions" :none-label="t('admin.filterNoMatch')" />
+        <CpMultiSelectField size="sm" v-model="equipment" :label="t('admin.filterEquipment')" :placeholder="t('admin.filterEquipmentPlaceholder')" :options="equipmentOptions" :none-label="t('admin.filterNoMatch')" />
         <button type="button" class="cp-link cp-link-hover text-sm" :class="{ invisible: !filtered }" :tabindex="filtered ? undefined : -1" :aria-hidden="!filtered" @click="clearFilters">{{ t('admin.filtersClear') }}</button>
         <CpButton size="md" class="ms-auto" @click="navigate('/admin/catalog/new')">{{ t('admin.exerciseNew') }}</CpButton>
       </div>
@@ -299,7 +300,7 @@ watch(
               <th class="w-12 text-center">
                 <CpDropdownMenu v-if="selectedCount" :label="t('admin.catalogSelectionActions', { count: String(selectedCount) })">
                   <template #trigger>
-                    <EllipsisVertical class="size-4" aria-hidden="true" />
+                    <CpIcon :icon="EllipsisVertical" size="sm" />
                     <span class="cp-badge cp-badge-primary cp-badge-sm absolute -right-2 -top-2 z-10">{{ selectedCount }}</span>
                   </template>
                   <li><button type="button" @click="askRetire">{{ t('admin.catalogActionRetire') }} <span class="cp-badge cp-badge-sm">{{ selectedCount }}</span></button></li>
@@ -312,9 +313,9 @@ watch(
               <th v-for="column in columns" :key="column.sort" :aria-sort="ariaSort(column.sort)">
                 <button type="button" class="cp-btn cp-btn-ghost cp-btn-sm -ms-3 gap-1 whitespace-nowrap" @click="sortBy(column.sort)">
                   {{ t(column.label) }}
-                  <ChevronsUpDown v-if="!sortOf(column.sort)" class="size-4 shrink-0" aria-hidden="true" />
-                  <ChevronUp v-else-if="!sortOf(column.sort)?.descending" class="size-4 shrink-0" aria-hidden="true" />
-                  <ChevronDown v-else class="size-4 shrink-0" aria-hidden="true" />
+                  <CpIcon :icon="ChevronsUpDown" size="sm" v-if="!sortOf(column.sort)" />
+                  <CpIcon :icon="ChevronUp" size="sm" v-else-if="!sortOf(column.sort)?.descending" />
+                  <CpIcon :icon="ChevronDown" size="sm" v-else />
                   <span v-if="priority(column.sort)" class="text-xs text-base-content/70" aria-hidden="true">{{ priority(column.sort) }}</span>
                 </button>
               </th>
@@ -345,7 +346,7 @@ watch(
         </CpTable>
         <div class="flex flex-col items-center justify-between gap-3 sm:flex-row">
           <p class="text-sm text-base-content/70">{{ showing }}</p>
-          <CpPagination v-model:page="page" :pages="pages" />
+          <CpPagination size="sm" v-model:page="page" :pages="pages" />
         </div>
       </template>
     </CpCard>

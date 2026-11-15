@@ -27,6 +27,7 @@ const files = {
       'base-fields': 'design-system-rules-components',
       screens: 'design-system-rules-screens',
       websites: 'design-system-rules-websites',
+      'web-sizes': 'design-system-rules-websites',
       icons: 'design-system-rules-icons',
       accessibility: 'design-system-rules-accessibility',
     } as Record<string, string>,
