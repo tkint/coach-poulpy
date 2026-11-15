@@ -27,6 +27,9 @@ targets:
     scheme: {}
     sources:
       - path: CoachPoulpy
+      # The loader's pictures are read from where the website reads them too, so they exist once.
+      - path: ../design/poulpy-3d/loader
+        buildPhase: resources
       - path: ../shared/build/generated/i18n/apple
         name: Strings
         buildPhase: resources

@@ -276,7 +276,7 @@ export function gleamPatch(towards = LOOK.gleam.towards) {
  *   Triangle meshes, already in place, and their colours as linear RGB. `flat` materials take no shading.
  *   His head and face are built where they sit at rest: whoever draws him lifts them by `headLift`.
  */
-export function buildPoulpy3d({ side = 'blue', mood, tone, face: faceName, features, on, stretch = 1, faceOnly = false, colours }) {
+export function buildPoulpy3d({ side = 'blue', mood, tone, face: faceName, features, on, stretch = 1, faceOnly = false, colours, armSize }) {
   if (mood) side = MOODS[mood].side
   const ember = side === 'ember', F = features ?? FACES[faceName ?? (mood ? MOODS[mood].face : ember ? 'grumpy' : 'happy')], { head, arms, face } = SHAPE
   const body = linear(tone ?? (ember ? colours.ember : colours.blue)), lining = linear(ember ? colours.blue : colours.ember), ink = linear(colours.ink)
@@ -303,7 +303,7 @@ export function buildPoulpy3d({ side = 'blue', mood, tone, face: faceName, featu
   const headCut = Math.acos((SHAPE.liningLine - head.centreY) / head.radius[1])
   part('head', 'body', egg(head.radius, { to: headCut, around: 48, down: 26, at: headCentre() }))
   part('head_lining', 'lining', egg(head.radius, { from: headCut, around: 48, down: 6, at: headCentre() }))
-  const armRadius = [arms.radius[0], arms.radius[1] * stretch, arms.radius[2]]
+  const armRadius = [(armSize ?? arms.radius)[0], (armSize ?? arms.radius)[1] * stretch, (armSize ?? arms.radius)[2]]
   const armY = armRadius[1], armCut = Math.acos((SHAPE.liningLine - armY) / armRadius[1])
   for (let k = 0; k < arms.count; k++) {
     const a = (k * TAU) / arms.count, c = Math.cos(a), s = Math.sin(a)

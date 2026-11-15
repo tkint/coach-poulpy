@@ -10,7 +10,7 @@ const config: StorybookConfig = {
   viteFinal: (viteConfig) => ({
     ...viteConfig,
     plugins: [...(viteConfig.plugins ?? []), vue(), tailwindcss()],
-    // web/ui reads Poulpy's drawings from design/poulpy, outside the web workspace.
+    // web/ui reads Poulpy's pictures from design/poulpy-3d, outside the web workspace.
     server: { ...viteConfig.server, fs: { allow: ['../..'] } },
   }),
 }

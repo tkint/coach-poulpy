@@ -43,7 +43,7 @@ Poulpy is a friendly, reversible plush octopus: blue and smiling by default, wit
 | A session overdue by 24 h | Grumpy | Pouting, with the catch-up offer |
 | Two sessions missed | Fuming | Fuming, with the same catch-up offer |
 | No plan, 7 days without training | Happy | Sleeping |
-| Loading | | The loader, Poulpy from above |
+| Loading | | The loader, Poulpy from underneath |
 
 Poses marked Current keep whatever mood Poulpy is in. The shared `PoulpyCoach` decides which drawing shows; `PoulpyDrawing` names every drawing.
 

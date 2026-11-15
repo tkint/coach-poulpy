@@ -43,6 +43,9 @@ android {
         }
     }
 
+    // The loader's pictures are read from where the website reads them too (design/poulpy-3d/loader), so they exist once.
+    sourceSets.getByName("main").assets.srcDir(rootProject.file("design/poulpy-3d/loader"))
+
     buildTypes {
         release {
             isMinifyEnabled = true

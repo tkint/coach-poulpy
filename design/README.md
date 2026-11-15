@@ -42,7 +42,7 @@ node design/build-body-map.mjs
 
 ## Poulpy's drawings
 
-`build-poulpy.mjs` draws the loading animation's top view and the themed (one-colour) layers of the app icons with the brand book's own drawing code, and writes them for each platform. His moods, poses and app icons are pictures of the 3D model, from `build-poulpy-pictures.mjs`:
+`build-poulpy.mjs` draws the themed (one-colour) layers of the Android app icons with the brand book's own drawing code. His moods, poses, loader and app icons are pictures of the 3D model, from `build-poulpy-pictures.mjs`:
 
 ```sh
 node design/build-poulpy.mjs
@@ -50,15 +50,13 @@ node design/build-poulpy.mjs
 
 | Generated file | Used by |
 | --- | --- |
-| `design/poulpy/*.svg` | Reference copies of the loader |
-| `app-android/src/main/res/drawable/poulpy_loader*.xml` | The loader as Android vector drawables |
-| `app-ios/CoachPoulpy/Assets.xcassets/Poulpy/PoulpyLoader*.imageset` | The loader as iOS vector assets |
+| `design/poulpy-3d/loader/{swing,clockwise}.png` | The loader, once for every platform: the website, Android (as assets) and iOS (in the bundle) all read these two files, from `build-poulpy-pictures.mjs` |
 | `app-android/src/main/res/drawable-nodpi/poulpy_*.png` | His moods and poses as Android pictures (`R.drawable.poulpy_pose_champion`), from `build-poulpy-pictures.mjs` |
 | `app-ios/CoachPoulpy/Assets.xcassets/Poulpy/Poulpy{Mood,Pose}*.imageset` | His moods and poses as iOS 3x pictures (`Image("PoulpyPoseChampion")`), from `build-poulpy-pictures.mjs` |
 | `app-android/src/main/res/drawable-nodpi/ic_launcher_[<id>_]foreground.png`, `drawable/ic_launcher_background.xml`, `drawable/ic_launcher_[<id>_]monochrome.xml`, `mipmap-anydpi-v26/ic_launcher[_<id>].xml` | The Android launcher icon: an adaptive icon with a Deep sea background, a picture of Poulpy and a themed (monochrome) silhouette layer |
 | `app-ios/CoachPoulpy/Assets.xcassets/AppIcon[<Id>].appiconset` | The iOS app icon: 1024 px PNGs for light, dark and tinted; the light and dark are alike, on Deep sea. The alternate icons Settings › App icon offers (`proud`, `annoyed`, `grumpy`, `champion`, `cocky`) are the sets with an id |
 
-Moods and poses are 744 × 678 pictures (the 3x of a 248 × 226 frame), so they can replace each other without moving. The loader (`loader`, and `loader_small` with a thicker line for sizes under 32) is Poulpy seen from above as a blue outline of eight round lobes with short tails; `PoulpyLoader` on Android and iOS turns it clockwise once every 2.4 s (10 s when animations are reduced) and replaces the old Spinning pose. CI runs it with `--check` too. The shared `PoulpyDrawing` enum names each drawing, and `PoulpyCoach` picks which one Today shows.
+Moods and poses are 744 × 678 pictures (the 3x of a 248 × 226 frame), so they can replace each other without moving. The loader is in `design/poulpy-3d/loader`, and only there: `swing.png` has the 48 frames of one cycle (8 across and 6 down, each a 240 px square) and `clockwise.png` is the one picture of the clockwise version, whose tentacles trail the same all the time. They show Poulpy's outline seen from straight below, with wider, shorter tentacles hanging loose on his arm springs, in the brand blue, see-through. The website, Android (as assets) and iOS (in the bundle) read those two files. `PoulpyLoader` on Android and iOS shows the frame of the moment and turns it, once every 3.6 s (12 s when animations are reduced), as `LoaderSwing` of the shared code says. It replaces the old Spinning pose. CI runs the generator with `--check` too. The shared `PoulpyDrawing` enum names each drawing, and `PoulpyCoach` picks which one Today shows.
 
 The app icon is the 3D happy blue Poulpy on Deep sea (`theme.dark.background`), the same in light and dark, so it works whichever theme the phone is in; the tinted iOS icon is its greyscale. On iOS he is scaled to fill 80 % of the square. On Android, he is scaled so his farthest point sits on the 66 dp circle every launcher mask keeps; the themed icon is still his drawn silhouette at half strength with the eyes and smile at full. The pictures are painted in plain JavaScript so every machine gets the same pixels; `--check` compares those pixels, not the compressed bytes.
 
