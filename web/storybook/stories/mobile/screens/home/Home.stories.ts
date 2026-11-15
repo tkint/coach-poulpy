@@ -46,10 +46,10 @@ export const HomePlanned: Story = {
   ...screen(screenHomePlanned),
   parameters: { mockup: { issue: 222 } },
 }
-/** Home · planned, with Poulpy playing when tapped (draft: decision 16, step 4). He stays a still picture; a tap plays one short animation for his mood, here the happy one's jump, then he settles back. */
+/** Home · planned, with Poulpy playing when tapped (agreed by the owner: decision 16, step 4). He stays a still picture; a tap plays one short animation for his mood, here the happy one's jump, then he settles back. */
 export const HomePlannedTap: Story = {
   name: "Planned, tap Poulpy",
-  tags: ['!autodocs', 'draft'],
+  tags: ['!autodocs', 'agreed'],
   ...screen(screenHomePlannedTap),
   parameters: { mockup: { issue: 222 } },
 }
