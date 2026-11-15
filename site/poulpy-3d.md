@@ -26,7 +26,7 @@ His idle move: Poulpy likes to turn around on the spot, a short step of 20 to 30
 
 <Poulpy3d motion="turn" />
 
-His arms are not stiff. Each one bends at three places, and every bend is a small spring: when he steps the arms trail behind, when he stops they swing a little past him and settle, the tips last. **Step** above sets how far he turns each time, from 5 to 90 degrees, keeping the small differences between one step and the next; 24 is the design. **Soft arms** loosens or stiffens those springs to try other feels; the middle of the slider is the design, and the far left is the stiff plush with no springs at all.
+His arms are not stiff. Each one bends at three places, and every bend is a small spring: when he steps the arms trail behind, when he stops they swing a little past him and settle, the tips last. The controls above are there to try other feels, and each shows its value so a setting can be quoted and written into the design. **Step** sets how far he turns each time, from 1 to 180 degrees, keeping the small differences between one step and the next; 24 is the design. **Soft arms** loosens or stiffens those springs: 1 is the design, 0 is the stiff plush with no springs at all and 4 is very floppy. **Speed** plays the whole move faster or slower, 1 being the design. The direction is seen from above; the design turns anticlockwise, to his left.
 
 - **The arms slide, they never lift.** Every bend turns flat on the floor, so the move keeps the plush's shape as the [brand rules](/docs/brand#character-rules) ask.
 - **He winds up, then goes.** A small lean back before each step, a quick turn, and a slight rock past the mark as he stops.
