@@ -48,6 +48,8 @@ function workshopEntry(file) {
   if (source === '') return null // removed in this PR
   const title = source.match(/(?:title: |<Meta title=)['"]([^'"]+)['"]/)?.[1]
   if (!title) return null
+  // Hidden stories (tags '!dev') only feed the docs pages that embed them, which are listed on their own.
+  if (/tags: \[[^\]]*'!dev'/.test(source)) return null
   const id = title.split('/').map(slug).join('-')
   const base = `${previewUrl}storybook/index.html?path=`
   const stories = file.endsWith('.mdx') ? [] : [...source.matchAll(/^export const (\w+)/gm)].map((m) => m[1])
