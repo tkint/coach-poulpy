@@ -4,6 +4,8 @@
 import { ref } from 'vue'
 import en from '../../../i18n/messages/en/ui.json'
 import fr from '../../../i18n/messages/fr/ui.json'
+import domainEn from '../../../i18n/messages/en/domain.json'
+import domainFr from '../../../i18n/messages/fr/domain.json'
 
 type Messages = { [key: string]: string | Messages }
 const messages: Record<string, Messages> = { en, fr }
@@ -24,4 +26,13 @@ export function uiText(id: string): string {
   for (const part of id.split('.')) found = typeof found === 'object' ? found[part] : undefined
   if (typeof found !== 'string') throw new Error(`No ui message ${id}`)
   return found
+}
+
+const bodyAreas: Record<string, Record<string, string>> = { en: domainEn.bodyArea, fr: domainFr.bodyArea }
+
+/** The name of a body map area as the shared `domain.bodyArea` words say it, such as "Left shoulder" for `deltoid` on the left. */
+export function bodyAreaText(area: string, side?: 'left' | 'right'): string {
+  const camel = area.replace(/-(\w)/g, (_, letter: string) => letter.toUpperCase())
+  const key = side ? `${camel}${side === 'left' ? 'Left' : 'Right'}` : camel
+  return bodyAreas[uiLocale.value]?.[key] ?? bodyAreas.en[key] ?? area
 }

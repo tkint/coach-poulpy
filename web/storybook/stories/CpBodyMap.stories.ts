@@ -4,9 +4,6 @@ import { ref } from 'vue'
 import { CpBodyMap, type BodyAreas } from '@coach-poulpy/ui'
 import doc from './CpBodyMap.md?raw'
 
-/** A readable name for an area: its name, capitalised (the app passes its translated names). */
-const areaLabel = (area: string) => area.charAt(0).toUpperCase() + area.slice(1)
-
 const meta = {
   title: 'Web/Components/Display/Body map',
   parameters: { docs: { description: { component: doc } } },
@@ -47,12 +44,12 @@ export const FormModel: Story = {
   args: { heat: undefined, legend: 'hidden', interactive: true },
   render: (args) => ({
     components: { CpBodyMap },
-    setup: () => ({ args, areas: ref<BodyAreas>({ biceps: 'left' }), areaLabel }),
-    template: '<CpBodyMap v-bind="args" v-model:heat="areas" :area-label="areaLabel" /><p data-testid="areas">{{ JSON.stringify(areas) }}</p>',
+    setup: () => ({ args, areas: ref<BodyAreas>({ biceps: 'left' }) }),
+    template: '<CpBodyMap v-bind="args" v-model:heat="areas" /><p data-testid="areas">{{ JSON.stringify(areas) }}</p>',
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    await userEvent.click(canvas.getAllByRole('button', { name: 'Biceps' }).find((one) => one.getAttribute('aria-pressed') === 'false')!)
+    await userEvent.click(canvas.getAllByRole('button', { name: /biceps/i }).find((one) => one.getAttribute('aria-pressed') === 'false')!)
     expect(canvas.getByTestId('areas')).toHaveTextContent('{"biceps":"both"}')
   },
 }
@@ -63,9 +60,9 @@ export const BothSides: Story = {
   args: { ...FormModel.args, interactiveMode: 'both' },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    await userEvent.click(canvas.getAllByRole('button', { name: 'Biceps' })[0])
+    await userEvent.click(canvas.getAllByRole('button', { name: /biceps/i })[0])
     expect(canvas.getByTestId('areas')).toHaveTextContent('{"biceps":"both"}')
-    await userEvent.click(canvas.getAllByRole('button', { name: 'Biceps' })[0])
+    await userEvent.click(canvas.getAllByRole('button', { name: /biceps/i })[0])
     expect(canvas.getByTestId('areas')).toHaveTextContent('{}')
   },
 }
@@ -75,12 +72,12 @@ export const InjuryModel: Story = {
   args: { heat: undefined, legend: 'hidden', interactive: true, editing: 'injury', description: 'Where it hurts' },
   render: (args) => ({
     components: { CpBodyMap },
-    setup: () => ({ args, hurt: ref<BodyAreas>({}), areaLabel }),
-    template: '<CpBodyMap v-bind="args" v-model:injury="hurt" :area-label="areaLabel" /><p data-testid="hurt">{{ JSON.stringify(hurt) }}</p>',
+    setup: () => ({ args, hurt: ref<BodyAreas>({}) }),
+    template: '<CpBodyMap v-bind="args" v-model:injury="hurt" /><p data-testid="hurt">{{ JSON.stringify(hurt) }}</p>',
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    await userEvent.click(canvas.getAllByRole('button', { name: 'Deltoid' })[0])
+    await userEvent.click(canvas.getAllByRole('button', { name: /shoulder/i })[0])
     expect(canvas.getByTestId('hurt')).toHaveTextContent(/"deltoid":"(left|right)"/)
   },
 }
@@ -99,12 +96,12 @@ export const Interactive: Story = {
         const { [area]: _, ...rest } = lit.value
         lit.value = next.length === 2 ? { ...rest, [area]: 'both' } : next.length ? { ...rest, [area]: next[0] as 'left' | 'right' } : rest
       }
-      return { args, lit, areaLabel, pick }
+      return { args, lit, pick }
     },
-    template: '<CpBodyMap v-bind="args" :heat="lit" :area-label="areaLabel" @pick="pick" />',
+    template: '<CpBodyMap v-bind="args" :heat="lit" @pick="pick" />',
   }),
   play: async ({ canvasElement }) => {
-    const biceps = within(canvasElement).getAllByRole('button', { name: 'Biceps' })
+    const biceps = within(canvasElement).getAllByRole('button', { name: /biceps/i })
     const pressed = () => biceps.filter((one) => one.getAttribute('aria-pressed') === 'true').length
     expect(biceps).toHaveLength(2)
     expect(pressed()).toBe(1)

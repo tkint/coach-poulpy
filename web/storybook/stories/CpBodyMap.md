@@ -12,9 +12,9 @@
 | `figure` | `shoulders` (default) or `hips` | the body figure |
 | `layout` | `both` (default), `front` or `back` | which figures are drawn |
 | `legend` | `hidden` (default), `top` or `right` | where the Less to More scale goes |
-| `less`, `more` | text | the words of the legend |
+| `less`, `more` | text | the words of the legend, the shared "Less" and "More" without them |
 | `interactive-mode` | `individual` (default) or `both` | with `interactive` and `v-model:heat` or `v-model:injury`: a tap toggles the side tapped, or both sides of the area |
-| `interactive`, `selectable`, `area-label` | flag, areas, `(area, side) => text` | every area is a button, or only the `selectable` ones; `area-label` names an area (the area as written without it); every area has that name as its title, interactive or not; `pick` says its `area` and `side` |
+| `interactive`, `selectable` | flag, areas | every area is a button, or only the `selectable` ones; every area is named "Left shoulder" and the like from the shared words, and has that name as its title, interactive or not; `pick` says its `area` and `side` |
 
 ## Areas
 
