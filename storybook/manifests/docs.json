@@ -70,7 +70,7 @@
       "name": "Docs",
       "path": "./stories/design-system/rules/Websites.mdx",
       "title": "Design system/Rules/Websites",
-      "content": "import { Meta, Markdown } from '@storybook/addon-docs/blocks'\nimport { markdownPages } from '../../markdown-pages'\n\nexport const rules = markdownPages('design-system').sections\n\n<Meta title=\"Design system/Rules/Websites\" />\n\n{/* Shown from docs/design-system.md: edit the rules there. */}\n\n# Websites\n\n<Markdown>{rules('Websites')}</Markdown>\n",
+      "content": "import { Meta, Markdown } from '@storybook/addon-docs/blocks'\nimport { markdownPages } from '../../markdown-pages'\n\nexport const rules = markdownPages('design-system').sections\n\n<Meta title=\"Design system/Rules/Websites\" />\n\n{/* Shown from docs/design-system.md: edit the rules there. */}\n\n# Websites\n\n<Markdown>{rules('Websites', 'Web sizes')}</Markdown>\n",
       "summary": "export const rules = markdownPages('design-system').sections # Websites"
     },
     "design-system-tokens--docs": {
