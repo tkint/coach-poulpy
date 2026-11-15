@@ -42,11 +42,6 @@ const headings = (page: string) =>
     link: `/${page}#${slug(m[1])}`,
   }))
 
-// The brand book's own sections: its headings are in the page's HTML, not in a Markdown file.
-const brandBookSections = [
-  ...readFileSync(join(here, 'theme/brand-book/book.html'), 'utf8').matchAll(/<h2 id="([^"]+)">([^<]+)<\/h2>/g),
-].map((m) => ({ text: m[2], link: `/brand-book#${m[1]}` }))
-
 /**
  * A relative link to a file the site doesn't publish (code, scripts, agent docs) becomes a link
  * to that file on GitHub, so the same Markdown works in the repo and on the site.
@@ -100,9 +95,9 @@ export default withMermaid(
       nav: [
         { text: 'Start here', link: '/CONTRIBUTING' },
         { text: 'Architecture', link: '/docs/architecture' },
-        { text: 'Design system', link: '/docs/design-system' },
-        { text: 'Storybook', link: '/storybook/index.html', target: '_blank', rel: 'noopener' },
-        { text: 'Brand', link: '/docs/brand' },
+        // The design system's and the brand's home is the component workshop (ADR 0028, ADR 0029, ADR 0032).
+        { text: 'Design system', link: '/storybook/index.html?path=/docs/design-system-introduction--docs', target: '_blank', rel: 'noopener' },
+        { text: 'Brand', link: '/storybook/index.html?path=/docs/brand-introduction--docs', target: '_blank', rel: 'noopener' },
         { text: 'Translations', link: '/translations' },
       ],
       // Each section shows only its own menu: a page gets the menu of the longest key its path starts
@@ -112,12 +107,12 @@ export default withMermaid(
         [
           [
             'Brand',
-            ['/docs/brand', '/drawings', '/poulpy-3d', '/brand-book'],
+            ['/docs/brand', '/docs/poulpy-3d'],
             [
-              { text: 'Poulpy and his moods', link: '/docs/brand' },
-              { text: 'Drawings', link: '/drawings' },
-              { text: 'Poulpy in 3D', link: '/poulpy-3d' },
-              { text: 'Brand book', link: '/brand-book', collapsed: true, items: brandBookSections },
+              // The brand's home is the component workshop (ADR 0032); its Markdown stays published for links.
+              { text: 'Poulpy, drawings, 3D and brand book', link: '/storybook/index.html?path=/docs/brand-introduction--docs', target: '_blank', rel: 'noopener' },
+              { text: 'Poulpy and his moods, as text', link: '/docs/brand' },
+              { text: 'Poulpy in 3D, as text', link: '/docs/poulpy-3d' },
               { text: 'Brand decisions', link: '/docs/brand-decisions' },
             ],
           ],
@@ -125,8 +120,8 @@ export default withMermaid(
             'Design system',
             ['/docs/design-system', '/docs/profile-and-settings', '/design/'],
             [
-              { text: 'How to use it', link: '/docs/design-system' },
-              { text: 'Components and screens', link: '/storybook/index.html?path=/docs/design-system-introduction--docs', target: '_blank', rel: 'noopener' },
+              { text: 'Rules, components and screens', link: '/storybook/index.html?path=/docs/design-system-introduction--docs', target: '_blank', rel: 'noopener' },
+              { text: 'The rules, as text', link: '/docs/design-system' },
               { text: 'Profile and settings', link: '/docs/profile-and-settings' },
               { text: 'Generating tokens and fonts', link: '/design/README' },
               { text: 'Body map shapes: credits', link: '/design/body-map-source/NOTICE' },

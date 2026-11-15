@@ -3,8 +3,8 @@
 // With `motion="turn"` he does his idle move himself (design/poulpy-3d/motion.mjs) and the viewer stays put.
 import { RotateCcw, RotateCw } from '@lucide/vue'
 import { onBeforeUnmount, onMounted, shallowRef, useTemplateRef, watch } from 'vue'
-import type { PoulpySide } from '../../../design/poulpy-3d/model.mjs'
-import type { Turn } from '../../../design/poulpy-3d/motion.mjs'
+import type { PoulpySide } from '../../../../design/poulpy-3d/model.mjs'
+import type { Turn } from '../../../../design/poulpy-3d/motion.mjs'
 import type { createPoulpyScene } from './poulpy3dScene'
 
 const { motion } = defineProps<{ motion?: 'turn' }>()
@@ -100,7 +100,7 @@ onMounted(async () => {
   // three.js is only fetched on this page, and only in the browser.
   try {
     const { createPoulpyScene } = await import('./poulpy3dScene')
-    if (motion) move = (await import('../../../design/poulpy-3d/motion.mjs')).createTurn({ softness: softness.value })
+    if (motion) move = (await import('../../../../design/poulpy-3d/motion.mjs')).createTurn({ softness: softness.value })
     if (!canvas.value) return
     scene = createPoulpyScene(canvas.value)
   } catch {
@@ -160,21 +160,21 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .poulpy-3d { display: flex; flex-direction: column; gap: 12px; margin: 16px 0; }
-.stage { position: relative; aspect-ratio: 4 / 3; max-height: 70vh; border-radius: 24px; background: var(--vp-c-bg-soft); overflow: hidden; }
+.stage { position: relative; aspect-ratio: 4 / 3; max-height: 70vh; border-radius: 24px; background: var(--cp-surface-variant); overflow: hidden; }
 .stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: grab; border-radius: 24px; }
 .stage canvas:active { cursor: grabbing; }
-.stage canvas:focus-visible { outline: 3px solid var(--vp-c-brand-1); outline-offset: -3px; }
-.hint, .failed { position: absolute; right: 16px; bottom: 10px; margin: 0; font-size: 13px; color: var(--vp-c-text-2); pointer-events: none; }
+.stage canvas:focus-visible { outline: 3px solid var(--cp-primary); outline-offset: -3px; }
+.hint, .failed { position: absolute; right: 16px; bottom: 10px; margin: 0; font-size: 13px; color: var(--cp-on-surface-variant); pointer-events: none; }
 .failed { inset: 0; display: grid; place-items: center; padding: 24px; text-align: center; }
 .controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
-.sides { display: inline-flex; gap: 4px; padding: 4px; border-radius: 999px; background: var(--vp-c-bg-soft); }
+.sides { display: inline-flex; gap: 4px; padding: 4px; border-radius: 999px; background: var(--cp-surface-variant); }
 .toggles { display: inline-flex; gap: 8px; }
-.choice, .toggle { height: 36px; padding: 0 16px; border-radius: 999px; border: 1px solid transparent; font-size: 14px; font-weight: 700; color: var(--vp-c-text-1); cursor: pointer; }
+.choice, .toggle { height: 36px; padding: 0 16px; border-radius: 999px; border: 1px solid transparent; font-size: 14px; font-weight: 700; color: var(--cp-on-surface); cursor: pointer; }
 .choice.icon { display: inline-grid; place-items: center; width: 40px; padding: 0; }
-.choice[aria-pressed='true'] { background: var(--vp-c-brand-1); color: var(--vp-c-bg); }
-.toggle { border-color: var(--vp-c-divider); }
-.toggle[aria-pressed='true'] { border-color: var(--vp-c-brand-1); color: var(--vp-c-brand-1); background: var(--vp-c-brand-soft); }
-.choice:focus-visible, .toggle:focus-visible { outline: 3px solid var(--vp-c-brand-1); outline-offset: 2px; }
+.choice[aria-pressed='true'] { background: var(--cp-primary); color: var(--cp-on-primary); }
+.toggle { border-color: var(--cp-outline); }
+.toggle[aria-pressed='true'] { border-color: var(--cp-primary); color: var(--cp-on-primary-container); background: var(--cp-primary-container); }
+.choice:focus-visible, .toggle:focus-visible { outline: 3px solid var(--cp-primary); outline-offset: 2px; }
 /* On a phone the switches still share one row. */
 @media (max-width: 480px) {
   .controls { column-gap: 4px; }
@@ -187,5 +187,5 @@ onBeforeUnmount(() => {
 .slider { flex: 1 1 100%; display: flex; align-items: center; gap: 10px; min-width: 0; font-size: 14px; font-weight: 700; }
 .slider span { flex: none; width: 5.5em; }
 .slider output { min-width: 3em; text-align: right; font-variant-numeric: tabular-nums; }
-.slider input { flex: 1; min-width: 0; height: 36px; accent-color: var(--vp-c-brand-1); }
+.slider input { flex: 1; min-width: 0; height: 36px; accent-color: var(--cp-primary); }
 </style>

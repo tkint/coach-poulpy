@@ -34,7 +34,7 @@ const preview: Preview = {
   parameters: {
     layout: 'fullscreen',
     a11y: { test: 'error' },
-    options: { storySort: { order: ['Design system', ['Introduction', 'Rules', 'Tokens'], 'Core', 'Web', ['Components', 'Patterns', 'Screens'], 'Mobile', ['Components', 'Patterns', 'Screens'], '*'] } },
+    options: { storySort: { order: ['Design system', ['Introduction', 'Rules', ['Colour', 'Type', 'Space, radius and motion', 'Icons', 'Accessibility', 'Components', 'Screens', 'Websites'], 'Tokens'], 'Brand', ['Introduction', 'Character', 'Moods', 'Inclusive by default', 'Voice, logo and type', 'Drawings', 'Poulpy in 3D', 'Brand book', 'Decisions', 'Ideas for later'], 'Core', 'Web', ['Components', 'Patterns', 'Screens'], 'Mobile', ['Components', 'Patterns', 'Screens'], '*'] } },
   },
 }
 export default preview

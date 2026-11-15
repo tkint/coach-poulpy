@@ -1,0 +1,12 @@
+import { Meta, Markdown } from '@storybook/addon-docs/blocks'
+import { markdownPages } from '../markdown-pages'
+
+export const brand = markdownPages('brand').sections
+
+<Meta title="Brand/Inclusive by default" />
+
+{/* Shown from docs/brand.md: edit the rules there. */}
+
+# Inclusive by default
+
+<Markdown>{brand('Inclusive by default')}</Markdown>

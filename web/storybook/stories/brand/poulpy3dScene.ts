@@ -3,9 +3,9 @@
 // joints of design/poulpy-3d/motion.mjs, so pose() can turn him and bend his arms. Poulpy3d.vue owns
 // the controls; this file owns the canvas and everything WebGL, and gives it all back on dispose().
 import * as THREE from 'three'
-import tokens from '../../../design/tokens.json'
-import { buildPoulpy3d, gleamPatch, LOOK, type PoulpyPart, type PoulpySide } from '../../../design/poulpy-3d/model.mjs'
-import { armJoints, armSkin, squashScale, type TurnPose } from '../../../design/poulpy-3d/motion.mjs'
+import tokens from '../../../../design/tokens.json'
+import { buildPoulpy3d, gleamPatch, LOOK, type PoulpyPart, type PoulpySide } from '../../../../design/poulpy-3d/model.mjs'
+import { armJoints, armSkin, squashScale, type TurnPose } from '../../../../design/poulpy-3d/motion.mjs'
 
 /** Where the viewer stands: degrees around Poulpy, degrees above (or below) him, and how far away. */
 export interface PoulpyView { turn: number; tilt: number; distance: number }

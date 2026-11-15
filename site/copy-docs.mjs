@@ -26,9 +26,3 @@ for (const path of shared) {
 }
 cpSync('../design/poulpy/mood_happy.svg', 'public/poulpy.svg')
 
-// Poulpy's drawings and 3D models are published at the same paths as in the repo, so the Drawings and
-// Poulpy in 3D pages can offer them to download.
-for (const path of ['design/poulpy', 'design/poulpy-3d']) {
-  rmSync(`public/${path}`, { recursive: true, force: true })
-  cpSync(`../${path}`, `public/${path}`, { recursive: true })
-}

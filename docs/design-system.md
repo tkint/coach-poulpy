@@ -1,6 +1,6 @@
 # Design system
 
-The app is calm and rounded, like the plush: one blue accent for actions, white or near-white surfaces, and only Poulpy and the Home header tint with his mood. Values live in [`design/tokens.json`](../design/tokens.json) and are generated into each platform (see [`design/README.md`](../design/README.md)); this page says how to use them. The live swatches are on the [Tokens](https://tkint.github.io/coach-poulpy/storybook/?path=/docs/design-system-tokens--docs) page of the component workshop.
+The app is calm and rounded, like the plush: one blue accent for actions, white or near-white surfaces, and only Poulpy and the Home header tint with his mood. Values live in [`design/tokens.json`](../design/tokens.json) and are generated into each platform (see [`design/README.md`](../design/README.md)); these rules say how to use them. The live swatches are on the [Tokens](https://tkint.github.io/coach-poulpy/storybook/?path=/docs/design-system-tokens--docs) page of the component workshop.
 
 ## Colour roles
 
@@ -67,14 +67,14 @@ Baloo 2 for display and titles, Nunito for everything else. Platforms map each r
 
 | Component | Shape | Notes |
 | --- | --- | --- |
-| Primary button | 44 high, pill, `primary` | One per screen |
-| Tonal button | 44 high, pill, `primaryContainer` | Secondary actions |
+| [Primary button](https://tkint.github.io/coach-poulpy/storybook/?path=/docs/mobile-components-button--docs) | 44 high, pill, `primary` | One per screen |
+| [Tonal button](https://tkint.github.io/coach-poulpy/storybook/?path=/docs/mobile-components-button--docs) | 44 high, pill, `primaryContainer` | Secondary actions |
 | Outline button | 44 high, pill, 2 px `outline` | Cancel, less important choices |
-| Grumpy button | 44 high, pill, `grumpy` | Only the catch-up action while Poulpy is ember |
-| Chip | 32 high, pill; on = `primary`, off = 1.5 px `outline` | Filters (muscle, equipment, format), with `aria-pressed` or selected state; `PoulpyChip` on both platforms |
+| [Grumpy button](https://tkint.github.io/coach-poulpy/storybook/?path=/docs/mobile-components-button--docs) | 44 high, pill, `grumpy` | Only the catch-up action while Poulpy is ember |
+| [Chip](https://tkint.github.io/coach-poulpy/storybook/?path=/docs/mobile-components-filter-chip--docs) | 32 high, pill; on = `primary`, off = 1.5 px `outline` | Filters (muscle, equipment, format), with `aria-pressed` or selected state; `PoulpyChip` on both platforms |
 | Choosing one value | A select field that opens a sheet for a longer list, or a native menu for a short one | Pills and chips are for filters and for view switches; a form asks for a value with a select, never a row of pills |
-| Search field | 44 high, pill, 1.5 px `outline`, `primary` while it holds text, a round clear button | `PillSearchField` on both platforms |
-| Stepper | Inset `surfaceVariant` box, label, minus and plus round buttons of 44 | Sets, reps, load, rest |
+| [Search field](https://tkint.github.io/coach-poulpy/storybook/?path=/docs/mobile-components-search-field--docs) | 44 high, pill, 1.5 px `outline`, `primary` while it holds text, a round clear button | `PillSearchField` on both platforms |
+| [Stepper](https://tkint.github.io/coach-poulpy/storybook/?path=/docs/mobile-components-stepper--docs) | Inset `surfaceVariant` box, label, minus and plus round buttons of 44 | Sets, reps, load, rest |
 | Pattern badge | 44 round, `primaryContainer`, one icon per movement pattern in `onPrimaryContainer` | Stands in for exercise pictures until real images exist |
 | Filter row | Search field, a row of chips, then the count line with one action at its right | `ListFilters` on both platforms, shared by the exercise and workout lists |
 | Poulpy card | 14 radius, `primaryContainer`, Poulpy happy on the blue side, a title, a line and one primary button | `PoulpyCard`: no results, an empty list |

@@ -5,7 +5,7 @@ import tokens from '../../../../design/tokens.json'
 
 # Tokens
 
-Every value below is read from [`design/tokens.json`](https://github.com/tkint/coach-poulpy/blob/main/design/tokens.json) when the workshop is built, the same file that generates the Android, iOS and web themes ([ADR 0012](https://tkint.github.io/coach-poulpy/docs/adr/0012-design-tokens-generated-from-one-file)). How to use them is on the [Rules](?path=/docs/design-system-rules--docs) page.
+Every value below is read from [`design/tokens.json`](https://github.com/tkint/coach-poulpy/blob/main/design/tokens.json) when the workshop is built, the same file that generates the Android, iOS and web themes ([ADR 0012](https://tkint.github.io/coach-poulpy/docs/adr/0012-design-tokens-generated-from-one-file)). How to use them is in the Rules pages, starting with [Colour](?path=/docs/design-system-rules-colour--docs).
 
 export const roles = Object.keys(tokens.theme.light).filter((name) => !name.startsWith('on'))
 export const onRole = (role) => {
