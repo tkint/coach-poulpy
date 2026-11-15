@@ -958,9 +958,17 @@
 .cp-screen .text-button { flex: 1; height: 48px; border-radius: var(--cp-radius-pill); font-size: 15px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
 .cp-screen .section-link { margin: 0 var(--cp-space-xs); font-size: 15px; font-weight: 800; color: var(--cp-primary); }
 .cp-screen .lead { margin: 0 var(--cp-space-xs); font-size: 14px; line-height: 20px; color: var(--cp-on-surface-variant); }
-@keyframes poulpy-spin { to { transform: rotate(360deg); } }
-.cp-screen .spin { animation: poulpy-spin 2.4s linear infinite; }
-@media (prefers-reduced-motion: reduce) { .cp-screen .spin { animation-duration: 10s; } }
+/* The loader: Poulpy's outline seen from underneath, drawn frame by frame from the 3D model (one picture of 48 frames, 8 across and 6 down,
+   played in turn) and swinging half a turn one way and then half a turn the other, forever (LoaderSwing in the shared code). */
+.cp-screen .poulpy-loader { --period: 3.6s; display: inline-block; animation: poulpy-swing var(--period) ease-in-out infinite; }
+.cp-screen .poulpy-loader-frames { display: block; width: 100%; height: 100%; background-image: var(--frames); background-size: 800% 600%; background-repeat: no-repeat; animation: poulpy-frames-across calc(var(--period) / 6) steps(8) infinite, poulpy-frames-down var(--period) steps(6) infinite; }
+.cp-screen .poulpy-loader--clockwise { animation-name: poulpy-turn; animation-timing-function: linear; }
+.cp-screen .poulpy-loader--clockwise .poulpy-loader-frames { background-size: 100% 100%; animation: none; }
+@keyframes poulpy-swing { from, to { transform: rotate(-180deg); } 50% { transform: rotate(180deg); } }
+@keyframes poulpy-turn { from { transform: rotate(0); } to { transform: rotate(360deg); } }
+@keyframes poulpy-frames-across { from { background-position-x: 0; } to { background-position-x: 114.2857%; } }
+@keyframes poulpy-frames-down { from { background-position-y: 0; } to { background-position-y: 120%; } }
+@media (prefers-reduced-motion: reduce) { .cp-screen .poulpy-loader { --period: 12s; } }
 
 /* ---------- Exercise search, equipment sheet, variations sheet ---------- */
 

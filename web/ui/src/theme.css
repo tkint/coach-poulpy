@@ -298,6 +298,52 @@
     height: auto;
   }
 
+  /* The loading indicator: Poulpy's outline seen from underneath, drawn frame by frame from the 3D model (design/build-poulpy-pictures.mjs):
+     one picture of 48 frames, 8 across and 6 down (design/poulpy-3d/loader/swing.png), played in turn while the whole thing swings half a turn one way and then half a
+     turn the other (LoaderSwing in the shared code). `--clockwise` only turns clockwise, holding one picture. With reduced motion
+     a cycle is slow. */
+  .cp-poulpy-loader {
+    --cp-poulpy-loader-period: 3.6s;
+    display: inline-block;
+    width: var(--cp-poulpy-loader-size, 48px);
+    height: var(--cp-poulpy-loader-size, 48px);
+    animation: cp-poulpy-swing var(--cp-poulpy-loader-period) ease-in-out infinite;
+  }
+  .cp-poulpy-loader-frames {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background-image: var(--cp-poulpy-loader-frames);
+    background-size: 800% 600%;
+    background-repeat: no-repeat;
+    /* Eight frames across a row, one row every eighth of a cycle (x), and six rows in all (y). */
+    animation:
+      cp-poulpy-frames-across calc(var(--cp-poulpy-loader-period) / 6) steps(8) infinite,
+      cp-poulpy-frames-down var(--cp-poulpy-loader-period) steps(6) infinite;
+  }
+  /* Turning clockwise he holds one shape, so it is one picture, not frames. */
+  .cp-poulpy-loader--clockwise { animation-name: cp-poulpy-turn; animation-timing-function: linear; }
+  .cp-poulpy-loader--clockwise .cp-poulpy-loader-frames { background-size: 100% 100%; animation: none; }
+  @keyframes cp-poulpy-swing {
+    from, to { transform: rotate(-180deg); }
+    50% { transform: rotate(180deg); }
+  }
+  @keyframes cp-poulpy-turn {
+    from { transform: rotate(0); }
+    to { transform: rotate(360deg); }
+  }
+  @keyframes cp-poulpy-frames-across {
+    from { background-position-x: 0; }
+    to { background-position-x: 114.2857%; }
+  }
+  @keyframes cp-poulpy-frames-down {
+    from { background-position-y: 0; }
+    to { background-position-y: 120%; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .cp-poulpy-loader { --cp-poulpy-loader-period: 12s; }
+  }
+
   /* An error is crimson, always with an icon and words: never ember. */
   .cp-error-note {
     border-radius: var(--cp-radius-md);
