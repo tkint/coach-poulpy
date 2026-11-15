@@ -1,39 +1,52 @@
--- The newest catalog version the phone has: seeded from the copy bundled in the app,
--- replaced when a newer version arrives. Entries are never deleted, only retired
--- inside their content, because workouts point at them by slug.
+-- The exercises the phone has, each at its newest revision: seeded from the copy bundled in the
+-- app, replaced exercise by exercise when the server publishes a newer revision (ADR 0030).
+-- Entries are never deleted, only retired inside their content, because workouts point at them
+-- by slug. An exercise in a variation group has the group's number and its rank, easiest first.
 CREATE TABLE catalog_exercise (
     slug TEXT NOT NULL PRIMARY KEY,
-    content TEXT NOT NULL
+    content TEXT NOT NULL,
+    revision INTEGER NOT NULL DEFAULT 1,
+    variation_group INTEGER,
+    variation_rank INTEGER
 );
 
+-- Where the last catalog update from the server stopped: the cursor it answered, kept as given.
+-- No row before the first update; the bundled catalog has none.
+CREATE TABLE catalog_cursor (
+    id INTEGER NOT NULL PRIMARY KEY CHECK (id = 0),
+    cursor TEXT NOT NULL
+);
+
+-- CLEANUP: nothing reads catalog_meta (the old catalog version) or catalog_variation_group (the old
+-- groups, now columns of catalog_exercise) any more. Drop both once no phone on an older build is
+-- left to migrate (ADR 0030, #440).
 CREATE TABLE catalog_meta (
     id INTEGER NOT NULL PRIMARY KEY CHECK (id = 0),
     version INTEGER NOT NULL
 );
 
--- Each variation group as a JSON list of slugs, easiest to hardest, replaced with every catalog version.
 CREATE TABLE catalog_variation_group (
     position INTEGER NOT NULL PRIMARY KEY,
     slugs TEXT NOT NULL
 );
 
-version:
-SELECT version FROM catalog_meta WHERE id = 0;
-
-setVersion:
-INSERT OR REPLACE INTO catalog_meta(id, version) VALUES (0, ?);
+revisions:
+SELECT slug, revision, variation_group, variation_rank FROM catalog_exercise;
 
 upsert:
-INSERT OR REPLACE INTO catalog_exercise(slug, content) VALUES (?, ?);
+INSERT OR REPLACE INTO catalog_exercise(slug, content, revision, variation_group, variation_rank) VALUES (?, ?, ?, ?, ?);
+
+setVariation:
+UPDATE catalog_exercise SET variation_group = ?, variation_rank = ? WHERE slug = ?;
 
 all:
 SELECT content FROM catalog_exercise;
 
-variationGroups:
-SELECT slugs FROM catalog_variation_group ORDER BY position;
+variationMembers:
+SELECT slug, variation_group, variation_rank FROM catalog_exercise WHERE variation_group IS NOT NULL ORDER BY variation_group, variation_rank;
 
-clearVariationGroups:
-DELETE FROM catalog_variation_group;
+cursor:
+SELECT cursor FROM catalog_cursor WHERE id = 0;
 
-insertVariationGroup:
-INSERT INTO catalog_variation_group(position, slugs) VALUES (?, ?);
+setCursor:
+INSERT OR REPLACE INTO catalog_cursor(id, cursor) VALUES (0, ?);

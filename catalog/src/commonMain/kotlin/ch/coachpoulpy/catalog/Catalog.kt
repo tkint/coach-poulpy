@@ -7,17 +7,20 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
 /**
- * One published version of the exercise catalog. The app ships [bundled] as the
- * starting copy and keeps the newest version it has in its database; a later
- * server publishes newer versions in the same JSON format.
+ * The exercise catalog. The app ships [bundled] as the starting copy and keeps each
+ * exercise's newest revision in its database; the server publishes newer revisions
+ * of single exercises (ADR 0030). The catalog as a whole has no version.
+ *
+ * [revisions] holds the revision of an exercise the bundled file numbers above 1; any
+ * other exercise is [revisionOf] 1.
  *
  * [variationGroups] are the catalog's variations: each group lists slugs of the same
  * movement from easiest to hardest, and an exercise belongs to at most one group.
  */
 class Catalog(
-    val version: Int,
     val exercises: List<Exercise>,
     val variationGroups: List<List<ExerciseSlug>> = emptyList(),
+    private val revisions: Map<ExerciseSlug, Int> = emptyMap(),
 ) {
     private val bySlug = exercises.associateBy { it.slug }
     private val groupOf: Map<ExerciseSlug, List<ExerciseSlug>>
@@ -58,14 +61,18 @@ class Catalog(
         return if (listed.any { it.slug != slug }) listed else emptyList()
     }
 
-    fun toJson(): String = json.encodeToString(CatalogFile.serializer(), CatalogFile(version, exercises, variationGroups))
+    /** The revision of the exercise [slug] this catalog holds: 1 unless the bundled file numbers it higher. */
+    fun revisionOf(slug: ExerciseSlug): Int = revisions[slug] ?: 1
+
+    fun toJson(): String = json.encodeToString(CatalogFile.serializer(), CatalogFile(exercises, variationGroups))
 
     companion object {
         private val json = Json { ignoreUnknownKeys = true }
 
         fun fromJson(text: String): Catalog {
             val file = json.decodeFromString(CatalogFile.serializer(), text)
-            return Catalog(file.version, file.exercises, file.variations)
+            val revisions = json.decodeFromString(CatalogRevisions.serializer(), text).exercises.associate { it.slug to it.revision }
+            return Catalog(file.exercises, file.variations, revisions)
         }
 
         val bundled: Catalog by lazy { fromJson(BUNDLED_EXERCISES_JSON) }
@@ -74,7 +81,13 @@ class Catalog(
 
 @Serializable
 private class CatalogFile(
-    val version: Int,
     val exercises: List<Exercise>,
     val variations: List<List<ExerciseSlug>> = emptyList(),
 )
+
+/** Only the revision each exercise of the file carries, which [Exercise] doesn't hold: 1 when absent. */
+@Serializable
+private class CatalogRevisions(val exercises: List<ExerciseRevision>)
+
+@Serializable
+private class ExerciseRevision(val slug: ExerciseSlug, val revision: Int = 1)

@@ -84,7 +84,7 @@ class RecentlyUsedTest {
     @Test
     fun retiredExercisesAreLeftOut() {
         save(workout("Old", "push-up", "plank"))
-        val catalog = Catalog(5, Catalog.bundled.exercises.map { if (it.slug.value == "plank") it.copy(retired = true) else it }, Catalog.bundled.variationGroups)
+        val catalog = Catalog(Catalog.bundled.exercises.map { if (it.slug.value == "plank") it.copy(retired = true) else it }, Catalog.bundled.variationGroups)
         assertEquals(listOf("push-up"), recent(picker(catalog)))
     }
 

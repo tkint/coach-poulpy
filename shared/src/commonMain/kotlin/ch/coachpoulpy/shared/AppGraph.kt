@@ -10,6 +10,7 @@ import ch.coachpoulpy.core.model.WorkoutId
 import ch.coachpoulpy.data.local.DriverFactory
 import ch.coachpoulpy.data.local.LocalStore
 import ch.coachpoulpy.data.remote.AccountClient
+import ch.coachpoulpy.data.remote.CatalogClient
 import ch.coachpoulpy.device.ftms.KableCentral
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -27,13 +28,16 @@ import kotlinx.datetime.TimeZone
 
 /**
  * Wires the app together once at start-up. Android builds it in its Application,
- * iOS in the App struct. Guest mode: nothing here talks to the network.
+ * iOS in the App struct. Guest mode: the only call a guest's phone makes is the catalog update.
  */
 class AppGraph(driverFactory: DriverFactory) {
     val compiler = TimelineCompiler()
     val store = LocalStore(driverFactory)
     val catalogRepository = CatalogRepository(store, Catalog.bundled)
     val catalog: Catalog get() = catalogRepository.current
+
+    /** Brings the catalog up to date from the API at [baseUrl], such as https://api.coach-poulpy.com; call `start()` once at launch. */
+    fun catalogUpdater(baseUrl: String) = CatalogUpdater(catalogRepository, CatalogClient(baseUrl))
 
     fun exerciseList(languageCode: String) = ExerciseListModel(catalog, languageCode) { recentlyUsedExercises(store) }
 

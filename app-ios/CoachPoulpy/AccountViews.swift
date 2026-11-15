@@ -12,6 +12,11 @@ struct AccountFlowStart: Identifiable {
 }
 
 extension AppGraph {
+    /// The exercises published since the last launch (ADR 0030): the only call a guest's phone makes. Offline, the phone keeps the catalog it has.
+    func startCatalogUpdate() {
+        catalogUpdater(baseUrl: "https://api.coach-poulpy.com").start()
+    }
+
     /// The one account of the app, made at launch so a signed-in phone syncs as soon as it opens.
     func makeAccount() -> AccountModel {
         account(
