@@ -12,7 +12,7 @@
     </label>
     <div class="format-line" id="format" data-component="format-line">
       <span class="label">Format</span>
-      <span class="chip" data-component="chip"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="list"><path d="M3 5h.01"/><path d="M3 12h.01"/><path d="M3 19h.01"/><path d="M8 5h13"/><path d="M8 12h13"/><path d="M8 19h13"/></svg>Sets</span>
+      <MobileFormatChip icon="list">Sets</MobileFormatChip>
       <span class="muted"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="lock"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>chosen at creation</span>
     </div>
     <section class="builder-part" id="warm-up" data-component="builder-part" aria-labelledby="warm-up-name">
@@ -68,7 +68,7 @@
           <button class="icon-button" type="button" aria-haspopup="menu" aria-label="More actions for Triceps dip"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="ellipsis-vertical"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg></button>
         </li><li class="step-card" data-component="builder-step">
           <span class="move-buttons" role="group" aria-label="Move Rest"><button type="button" data-move="up" aria-label="Move Rest up"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="chevron-up"><path d="m18 15-6-6-6 6"/></svg></button><button type="button" data-move="down" aria-label="Move Rest down"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="chevron-down"><path d="m6 9 6 6 6-6"/></svg></button></span>
-          <span class="row-text"><span class="role-tag" data-component="role-tag">Recover</span><strong>Rest</strong><span>1 min</span></span>
+          <span class="row-text"><MobileRoleTag>Recover</MobileRoleTag><strong>Rest</strong><span>1 min</span></span>
           <button class="icon-button" type="button" aria-haspopup="menu" aria-label="More actions for Rest"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="ellipsis-vertical"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg></button>
         </li>
         </ol>
@@ -95,7 +95,7 @@
   </div>
 
   <div class="scrim" aria-hidden="true"></div>
-  <section class="sheet" id="edit-step" data-component="sheet" role="dialog" aria-label="Edit Goblet squat" style="gap: var(--cp-space-md);">
+  <MobileSheet id="edit-step" aria-label="Edit Goblet squat" style="gap: var(--cp-space-md);">
     <span class="sheet-handle" aria-hidden="true"></span>
     <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: var(--cp-space-md);"><div class="sheet-title"><h2>Goblet squat</h2><p>In Work · 3 sets</p></div><button type="button" class="small-button" aria-label="See details of Goblet squat" style="gap: 6px; background: var(--cp-surface-variant); color: var(--cp-on-surface);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="info"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>Details</button></div>
     <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--cp-space-sm);"><button class="select-field" data-component="select-field" type="button" aria-haspopup="listbox" aria-label="Step, Exercise" style="grid-column: span 2;"><span><span class="label">Step</span><strong>Exercise</strong></span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="chevron-down"><path d="m6 9 6 6 6-6"/></svg></button><button class="select-field" data-component="select-field" type="button" aria-haspopup="listbox" aria-label="Measured by, Reps"><span><span class="label">Measured by</span><strong>Reps</strong></span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="chevron-down"><path d="m6 9 6 6 6-6"/></svg></button></div>
@@ -107,5 +107,5 @@
     </div>
     <span class="hint">Rest between sets shows from 2 sets. A walk or a run has no sets.</span>
     <MobileButton style="font-size: 16px;">Done</MobileButton>
-  </section>
+  </MobileSheet>
 </main>

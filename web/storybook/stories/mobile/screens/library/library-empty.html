@@ -1,10 +1,7 @@
 <main class="phone">
 <div class="screen-header" style="padding-bottom: 10px; gap: var(--cp-space-md);">
     <h1>Library</h1>
-    <div class="tabs" role="tablist" aria-label="Library" data-component="tabs">
-      <button type="button" role="tab" aria-selected="true">Workouts</button>
-      <button type="button" role="tab" aria-selected="false">Exercises</button>
-    </div>
+    <MobileTabs aria-label="Library" :tabs="['Workouts', 'Exercises']" selected="Workouts" />
   </div>
 
   <div style="flex: 1; min-height: 0; overflow: hidden; padding: var(--cp-space-sm) var(--cp-space-lg) 0;">

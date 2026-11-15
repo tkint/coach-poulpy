@@ -4,10 +4,7 @@
       <button type="button" class="icon-button" aria-label="Back to the workout"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="chevron-left"><path d="m15 18-6-6 6-6"/></svg></button>
       <div style="display: flex; flex-direction: column;"><h1 class="headline">Pick an exercise</h1><span class="muted" style="font-size: 13.5px; line-height: 18px; font-weight: 700;">For Lower body strength · Strength</span></div>
     </div>
-    <label class="search-field" data-component="search-field">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="search"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg>
-      <input type="search" placeholder="Name, muscle, mobility or floor" aria-label="Search exercises">
-    </label>
+    <MobileSearchField label="Search exercises" placeholder="Name, muscle, mobility or floor" />
     <div class="chip-row" role="group" aria-label="Filters">
       <MobileFilterChip icon="dumbbell" aria-haspopup="dialog" aria-label="Equipment" style="padding: 0 var(--cp-space-md); min-width: 48px;" />
       <MobileFilterChip icon="target" aria-haspopup="dialog" aria-label="Focus" style="padding: 0 var(--cp-space-md); min-width: 48px;" />
