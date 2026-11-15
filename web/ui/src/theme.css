@@ -298,58 +298,45 @@
     height: auto;
   }
 
-  /* The loading indicator: Poulpy's outline, swinging half a turn one way and then half a turn the other, forever, each of his
-     eight tentacles hanging loose and bending about its base (18.28 % from the top, as LoaderSwing.BASE) behind the turn. With
-     reduced motion it is slow. */
+  /* The loading indicator: Poulpy's outline seen from underneath, drawn frame by frame from the 3D model (design/build-poulpy-pictures.mjs):
+     one picture of 48 frames, 8 across and 6 down, played in turn while the whole thing swings half a turn one way and then half a
+     turn the other (LoaderSwing in the shared code). `--clockwise` only turns clockwise, with its own frames. With reduced motion
+     a cycle is slow. */
   .cp-poulpy-loader {
     --cp-poulpy-loader-period: 3.6s;
-    position: relative;
     display: inline-block;
     width: var(--cp-poulpy-loader-size, 48px);
     height: var(--cp-poulpy-loader-size, 48px);
     animation: cp-poulpy-swing var(--cp-poulpy-loader-period) ease-in-out infinite;
   }
-  .cp-poulpy-loader-tentacle {
-    position: absolute;
-    inset: 0;
-    transform: rotate(calc(var(--cp-tentacle) * 45deg));
-  }
-  .cp-poulpy-loader-tentacle img {
+  .cp-poulpy-loader-frames {
     display: block;
     width: 100%;
     height: 100%;
-    transform-origin: 50% 18.28%;
-    animation: cp-poulpy-bend var(--cp-poulpy-loader-period) linear infinite;
-    /* Each tentacle follows a little later than the one before. */
-    animation-delay: calc(var(--cp-poulpy-loader-period) * (var(--cp-tentacle) * 0.012 - 1));
+    background-image: var(--cp-poulpy-loader-frames);
+    background-size: 800% 600%;
+    background-repeat: no-repeat;
+    /* Eight frames across a row, one row every eighth of a cycle (x), and six rows in all (y). */
+    animation:
+      cp-poulpy-frames-across calc(var(--cp-poulpy-loader-period) / 6) steps(8) infinite,
+      cp-poulpy-frames-down var(--cp-poulpy-loader-period) steps(6) infinite;
   }
+  .cp-poulpy-loader--clockwise { animation-name: cp-poulpy-turn; animation-timing-function: linear; }
   @keyframes cp-poulpy-swing {
     from, to { transform: rotate(-180deg); }
     50% { transform: rotate(180deg); }
-  }
-  @keyframes cp-poulpy-bend {
-    0%, 50%, 100% { transform: rotate(0); }
-    12.5% { transform: rotate(-24deg); }
-    25% { transform: rotate(-32deg); }
-    37.5% { transform: rotate(-24deg); }
-    62.5% { transform: rotate(24deg); }
-    75% { transform: rotate(32deg); }
-    87.5% { transform: rotate(24deg); }
-  }
-  /* The other version: only clockwise, a full turn every period, each tentacle trailing behind (LoaderSwing.clockwise*). */
-  .cp-poulpy-loader--clockwise { animation: cp-poulpy-turn var(--cp-poulpy-loader-period) linear infinite; }
-  .cp-poulpy-loader--clockwise .cp-poulpy-loader-tentacle img {
-    animation-name: cp-poulpy-trail;
-    animation-delay: calc(var(--cp-poulpy-loader-period) * (var(--cp-tentacle) * 0.04 - 1));
   }
   @keyframes cp-poulpy-turn {
     from { transform: rotate(0); }
     to { transform: rotate(360deg); }
   }
-  @keyframes cp-poulpy-trail {
-    0%, 50%, 100% { transform: rotate(-28deg); }
-    25% { transform: rotate(-34deg); }
-    75% { transform: rotate(-22deg); }
+  @keyframes cp-poulpy-frames-across {
+    from { background-position-x: 0; }
+    to { background-position-x: 114.2857%; }
+  }
+  @keyframes cp-poulpy-frames-down {
+    from { background-position-y: 0; }
+    to { background-position-y: 120%; }
   }
   @media (prefers-reduced-motion: reduce) {
     .cp-poulpy-loader { --cp-poulpy-loader-period: 12s; }

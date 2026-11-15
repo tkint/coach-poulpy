@@ -1,66 +1,32 @@
 package ch.coachpoulpy.shared
 
-import kotlin.math.PI
 import kotlin.math.abs
-import kotlin.math.sin
 
 /**
- * How the loader moves. Poulpy, seen from above, swings from -[DEGREES] to +[DEGREES] and back, over and over, easing in and out
- * of each end (half a turn one way, then half a turn the other way, either side of upright). One there-and-back takes [MILLIS],
- * or [REDUCED_MILLIS] when the phone asks for less motion.
+ * How the loader moves. Poulpy, seen from underneath, is the 3D model's outline with loose tentacles, drawn frame by frame
+ * (design/build-poulpy-pictures.mjs): [FRAMES] pictures of one cycle, each showing how his tentacles hang at that moment relative
+ * to his body. The apps show the picture of the moment, [frame], and turn it by [degrees] (or [clockwiseDegrees]), so his turning
+ * stays smooth. One cycle takes [MILLIS], or [REDUCED_MILLIS] when the phone asks for less motion.
  *
- * His tentacles are loose: the loader is one tentacle picture drawn [TENTACLES] times, a turn of 360 / [TENTACLES] degrees apart,
- * and each bends about its base ([BASE], the share of the picture's height from its top where it meets his head) by
- * [tentacleDegrees], lagging behind the turn like something hanging free, each a little later than the one before.
- * The other version only turns clockwise, forever, one full turn every [MILLIS] ([clockwiseDegrees]); its tentacles trail behind the
- * turn at a steady lag that breathes a little ([clockwiseTentacleDegrees]).
- * Android and iOS only ask where things are at a given time and draw the picture turned by that many degrees.
+ * There are two versions. He swings from -[DEGREES] to +[DEGREES] and back, easing in and out of each end (half a turn one way,
+ * then half a turn the other way), or he only turns clockwise, one full turn per cycle. Each has its own frames.
  */
 object LoaderSwing {
     const val DEGREES = 180f
     const val MILLIS = 3_600L
     const val REDUCED_MILLIS = 12_000L
 
-    const val TENTACLES = 8
+    /** How many pictures one cycle is, in each version. */
+    const val FRAMES = 48
 
-    /** How far from the top of the tentacle picture, as a share of its height, a tentacle bends (see design/build-poulpy-pictures.mjs). */
-    const val BASE = 0.1828f
-
-    /** The most a tentacle bends, in degrees, when he turns at his fastest. */
-    const val BEND_DEGREES = 32f
-
-    /** How much later each tentacle follows than the one before, as a share of a cycle. */
-    private const val STAGGER = 0.012f
-
-    /** The steady lag of a tentacle behind the clockwise turn, and how far it breathes either side of it, in degrees. */
-    const val TRAIL_DEGREES = 28f
-    const val TRAIL_WOBBLE_DEGREES = 6f
-    private const val CLOCKWISE_STAGGER = 0.04f
-
-    /** The turn, from -[DEGREES] to [DEGREES], [elapsedMillis] after the loader appeared; the turn is clockwise when it grows. */
+    /** The swing, from -[DEGREES] to [DEGREES], [elapsedMillis] after the loader appeared; the turn is clockwise when it grows. */
     fun degrees(elapsedMillis: Long, periodMillis: Long = MILLIS): Float = DEGREES * (2f * ease(way(phase(elapsedMillis, periodMillis))) - 1f)
-
-    /**
-     * How far tentacle [index] bends about its base: against the turn, by most when he turns fastest, and not at all when he stops
-     * at either end. Positive is clockwise.
-     */
-    fun tentacleDegrees(elapsedMillis: Long, index: Int, periodMillis: Long = MILLIS): Float {
-        val phase = phase(elapsedMillis, periodMillis) - index * STAGGER
-        val wrapped = phase - kotlin.math.floor(phase)
-        val way = way(wrapped)
-        // Clockwise on the way there, which the tentacle trails; the other way on the way back.
-        val direction = if (wrapped < 0.5f) -1f else 1f
-        return direction * BEND_DEGREES * 4f * way * (1f - way)
-    }
 
     /** The clockwise-only version: 0 to 360 degrees, steadily, once every [periodMillis]. */
     fun clockwiseDegrees(elapsedMillis: Long, periodMillis: Long = MILLIS): Float = 360f * phase(elapsedMillis, periodMillis)
 
-    /** How far tentacle [index] trails behind the clockwise turn, about its base: [TRAIL_DEGREES] give or take [TRAIL_WOBBLE_DEGREES], each a little later than the one before. */
-    fun clockwiseTentacleDegrees(elapsedMillis: Long, index: Int, periodMillis: Long = MILLIS): Float {
-        val phase = phase(elapsedMillis, periodMillis) - index * CLOCKWISE_STAGGER
-        return -(TRAIL_DEGREES + TRAIL_WOBBLE_DEGREES * sin(2.0 * PI * phase).toFloat())
-    }
+    /** Which of the [FRAMES] pictures shows how his tentacles hang [elapsedMillis] after the loader appeared, from 0. */
+    fun frame(elapsedMillis: Long, periodMillis: Long = MILLIS): Int = (phase(elapsedMillis, periodMillis) * FRAMES).toInt().coerceAtMost(FRAMES - 1)
 
     private fun phase(elapsedMillis: Long, periodMillis: Long) = (elapsedMillis % periodMillis).toFloat() / periodMillis
 

@@ -12,60 +12,19 @@ class LoaderSwingTest {
     }
 
     @Test
-    fun passesUprightOnTheWayAndComesBackAndRepeatsForever() {
-        assertEquals(0f, LoaderSwing.degrees(LoaderSwing.MILLIS / 4), 0.001f)
-        assertEquals(-180f, LoaderSwing.degrees(LoaderSwing.MILLIS), 0.001f)
-        assertEquals(LoaderSwing.degrees(300), LoaderSwing.degrees(300 + 5 * LoaderSwing.MILLIS), 0.001f)
+    fun comesBackToWhereItStartedAtTheEndOfTheCycle() {
+        assertEquals(LoaderSwing.degrees(0), LoaderSwing.degrees(LoaderSwing.MILLIS), 0.001f)
     }
 
     @Test
-    fun theWayBackMirrorsTheWayThere() {
-        assertEquals(LoaderSwing.degrees(500), LoaderSwing.degrees(LoaderSwing.MILLIS - 500), 0.001f)
+    fun staysWithinHalfATurnEitherWay() {
+        for (t in 0L until LoaderSwing.MILLIS step 50) assertTrue(LoaderSwing.degrees(t) in -180f..180f)
     }
 
     @Test
-    fun easesIntoEachEndInsteadOfMovingAtASteadyRate() {
-        // A steady rate would have gone a quarter of the way after a quarter of the way there, to -90; easing is behind it.
-        val quarterOfTheWayThere = LoaderSwing.degrees(LoaderSwing.MILLIS / 8)
-        assertTrue(quarterOfTheWayThere < -LoaderSwing.DEGREES / 2, "$quarterOfTheWayThere")
-    }
-
-    @Test
-    fun neverLeavesTheSwing() {
-        for (ms in 0L..LoaderSwing.REDUCED_MILLIS step 97) {
-            val degrees = LoaderSwing.degrees(ms, LoaderSwing.REDUCED_MILLIS)
-            assertTrue(degrees in -LoaderSwing.DEGREES - 0.001f..LoaderSwing.DEGREES + 0.001f, "$degrees at $ms ms")
-        }
-    }
-}
-
-class LoaderTentaclesTest {
-    @Test
-    fun hangLooseWhenHeIsStillAtEitherEnd() {
-        assertEquals(0f, LoaderSwing.tentacleDegrees(0, 0), 0.001f)
-        assertEquals(0f, LoaderSwing.tentacleDegrees(LoaderSwing.MILLIS / 2, 0), 0.001f)
-    }
-
-    @Test
-    fun trailBehindTheTurnAndSwingTheOtherWayWhenHeTurnsBack() {
-        // He turns clockwise on the way there, so a tentacle is bent anticlockwise (negative), most at the middle of the way.
-        assertEquals(-LoaderSwing.BEND_DEGREES, LoaderSwing.tentacleDegrees(LoaderSwing.MILLIS / 4, 0), 0.001f)
-        assertEquals(LoaderSwing.BEND_DEGREES, LoaderSwing.tentacleDegrees(LoaderSwing.MILLIS * 3 / 4, 0), 0.001f)
-    }
-
-    @Test
-    fun eachFollowsALittleLaterThanTheOneBefore() {
-        val elapsed = LoaderSwing.MILLIS / 8
-        assertTrue(LoaderSwing.tentacleDegrees(elapsed, 0) != LoaderSwing.tentacleDegrees(elapsed, 5))
-        assertEquals(LoaderSwing.tentacleDegrees(elapsed, 3), LoaderSwing.tentacleDegrees(elapsed + LoaderSwing.MILLIS, 3), 0.001f)
-    }
-
-    @Test
-    fun neverBendPastTheMost() {
-        for (index in 0 until LoaderSwing.TENTACLES) for (ms in 0L..LoaderSwing.MILLIS step 53) {
-            val bend = LoaderSwing.tentacleDegrees(ms, index)
-            assertTrue(bend in -LoaderSwing.BEND_DEGREES - 0.001f..LoaderSwing.BEND_DEGREES + 0.001f, "$bend at $ms ms")
-        }
+    fun takesTwelveSecondsWhenTheyAreAskedForLessMotion() {
+        assertEquals(LoaderSwing.degrees(0), LoaderSwing.degrees(LoaderSwing.REDUCED_MILLIS, LoaderSwing.REDUCED_MILLIS), 0.001f)
+        assertEquals(180f, LoaderSwing.degrees(LoaderSwing.REDUCED_MILLIS / 2, LoaderSwing.REDUCED_MILLIS), 0.001f)
     }
 }
 
@@ -76,12 +35,20 @@ class LoaderClockwiseTest {
         assertEquals(90f, LoaderSwing.clockwiseDegrees(LoaderSwing.MILLIS / 4), 0.01f)
         assertEquals(0f, LoaderSwing.clockwiseDegrees(LoaderSwing.MILLIS))
     }
+}
+
+class LoaderFramesTest {
+    @Test
+    fun showsEachFrameInTurnAndStartsAgainAfterTheLast() {
+        assertEquals(0, LoaderSwing.frame(0))
+        assertEquals(LoaderSwing.FRAMES / 2, LoaderSwing.frame(LoaderSwing.MILLIS / 2))
+        assertEquals(LoaderSwing.FRAMES - 1, LoaderSwing.frame(LoaderSwing.MILLIS - 1))
+        assertEquals(0, LoaderSwing.frame(LoaderSwing.MILLIS))
+    }
 
     @Test
-    fun tentaclesTrailBehindTheTurn() {
-        for (t in 0L until LoaderSwing.MILLIS step 100) for (i in 0 until LoaderSwing.TENTACLES) {
-            val bend = LoaderSwing.clockwiseTentacleDegrees(t, i)
-            assertTrue(bend in -(LoaderSwing.TRAIL_DEGREES + LoaderSwing.TRAIL_WOBBLE_DEGREES)..-(LoaderSwing.TRAIL_DEGREES - LoaderSwing.TRAIL_WOBBLE_DEGREES))
-        }
+    fun slowsDownWithTheCycle() {
+        assertEquals(14, LoaderSwing.frame(LoaderSwing.MILLIS, LoaderSwing.REDUCED_MILLIS))
+        assertEquals(LoaderSwing.FRAMES / 2, LoaderSwing.frame(LoaderSwing.REDUCED_MILLIS / 2, LoaderSwing.REDUCED_MILLIS))
     }
 }

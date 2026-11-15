@@ -2,8 +2,6 @@ package ch.coachpoulpy.android.ui
 
 import android.provider.Settings
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -13,7 +11,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameMillis
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -26,10 +23,10 @@ import ch.coachpoulpy.android.R
 import ch.coachpoulpy.shared.LoaderSwing
 
 /**
- * The loading indicator: Poulpy's outline seen from above, swinging half a turn one way and then half a turn the other way,
- * forever, once every 3.6 s (12 s when the phone's animations are turned off). It is one tentacle drawn eight times, and each
- * tentacle hangs loose, bending about its base behind the turn. Where everything is at a given time is [LoaderSwing] in the
- * shared code. With `clockwise` he only turns clockwise, one full turn every 3.6 s, his tentacles trailing behind.
+ * The loading indicator: Poulpy's outline seen from underneath, his tentacles loose, one cycle every 3.6 s (12 s when the phone's
+ * animations are turned off). It swings half a turn one way and then half a turn the other way, or with `clockwise` only turns
+ * clockwise. The picture of each moment is drawn frame by frame from the 3D model (design/build-poulpy-pictures.mjs) and shows how
+ * his tentacles hang; the turn is smooth. Which frame and how far it is turned is [LoaderSwing] in the shared code.
  */
 @Composable
 fun PoulpyLoader(modifier: Modifier = Modifier, size: Dp = 48.dp, clockwise: Boolean = false) {
@@ -40,6 +37,12 @@ fun PoulpyLoader(modifier: Modifier = Modifier, size: Dp = 48.dp, clockwise: Boo
         val scale = Settings.Global.getFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f)
         if (scale == 0f) LoaderSwing.REDUCED_MILLIS else LoaderSwing.MILLIS
     }
+    val frames = remember(context, clockwise) {
+        val version = if (clockwise) "clockwise" else "swing"
+        List(LoaderSwing.FRAMES) { index ->
+            context.resources.getIdentifier("poulpy_loader_${version}_${"%02d".format(index)}", "drawable", context.packageName)
+        }
+    }
     var elapsed by remember { mutableLongStateOf(0L) }
     LaunchedEffect(periodMillis) {
         val start = withFrameMillis { it }
@@ -48,24 +51,12 @@ fun PoulpyLoader(modifier: Modifier = Modifier, size: Dp = 48.dp, clockwise: Boo
         }
     }
     val label = stringResource(R.string.common_loading)
-    Box(
-        modifier
+    Image(
+        painterResource(frames[LoaderSwing.frame(elapsed, periodMillis)]),
+        contentDescription = null,
+        modifier = modifier
             .size(size)
             .graphicsLayer { rotationZ = if (clockwise) LoaderSwing.clockwiseDegrees(elapsed, periodMillis) else LoaderSwing.degrees(elapsed, periodMillis) }
             .clearAndSetSemantics { contentDescription = label },
-    ) {
-        for (index in 0 until LoaderSwing.TENTACLES) {
-            // Each tentacle is turned round to its place first, then bent about its base.
-            Box(Modifier.fillMaxSize().graphicsLayer { rotationZ = index * 360f / LoaderSwing.TENTACLES }) {
-                Image(
-                    painterResource(R.drawable.poulpy_loader_tentacle),
-                    contentDescription = null,
-                    modifier = Modifier.fillMaxSize().graphicsLayer {
-                        rotationZ = if (clockwise) LoaderSwing.clockwiseTentacleDegrees(elapsed, index, periodMillis) else LoaderSwing.tentacleDegrees(elapsed, index, periodMillis)
-                        transformOrigin = TransformOrigin(0.5f, LoaderSwing.BASE)
-                    },
-                )
-            }
-        }
-    }
+    )
 }
