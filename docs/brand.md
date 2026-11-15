@@ -1,6 +1,6 @@
 # Brand
 
-Poulpy is a reversible plush octopus: blue and smiling on one side, grumpy on the other. In the app the grumpy side is ember, from burnt orange to red. **The side is the status** (are you keeping your plan?) **and the shade is the feeling** (what just happened). These rules, every drawing, Poulpy in 3D and the full brand book, with the logo and colours, are the Brand pages of the [component workshop](https://tkint.github.io/coach-poulpy/storybook/?path=/docs/brand-introduction--docs), and [Brand decisions](./brand-decisions.md) traces what was decided and why.
+Poulpy is a friendly, reversible plush octopus: blue and smiling by default, with a playful grumpy mood on his ember side. In the app, ember shifts from burnt orange to red as that mood intensifies. **The side is the status** (are you keeping your plan?) **and the shade is the feeling** (what just happened). These rules, every drawing, Poulpy in 3D and the full brand book, with the logo and colours, are the Brand pages of the [component workshop](https://tkint.github.io/coach-poulpy/storybook/?path=/docs/brand-introduction--docs), and [Brand decisions](./brand-decisions.md) traces what was decided and why.
 
 ## Character rules
 
