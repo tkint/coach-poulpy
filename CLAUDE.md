@@ -21,6 +21,7 @@ A training platform: Android and iOS apps first, guest-only and offline, with a 
 node design/build-tokens.mjs --check    # theme files match design/tokens.json
 node design/build-poulpy.mjs --check    # Poulpy drawings match their generator
 node design/build-poulpy-3d.mjs --check # Poulpy's 3D models match design/poulpy-3d/model.mjs and motion.mjs
+node design/build-poulpy-pictures.mjs --check # Poulpy's 3D pictures match the model
 node design/build-body-map.mjs --check  # body map figures match their generator
 node design/build-body-map-shapes.mjs --check  # body map shapes for the apps match design/body-map.json
 node design/build-icons.mjs --check     # the apps' Lucide icons match design/icons

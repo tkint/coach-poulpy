@@ -119,14 +119,14 @@ It is done in steps, each reviewed on the [Poulpy in 3D](./poulpy-3d.md) page be
 
 1. The six moods on the model: faces and shades. Done with this decision.
 2. The twelve poses and their props (done), then the loader and the app icons.
-3. Pictures rendered from the model, generated for Android, iOS and the website in place of the drawings.
+3. Pictures rendered from the model, generated for Android, iOS and the website in place of the drawings. The pictures are generated and shown on the page; the apps and the website switch to them once the owner has seen them.
 4. Live 3D on Home and on the end-of-session screen, each from an agreed mockup.
 
 Until step 3 the apps and the website keep the 2D drawings, and `design/build-poulpy.mjs` stays their source.
 
 **Why:** the owner asked for it once the model could turn and jump, and chose pictures everywhere with live 3D on key screens over a 3D renderer on every screen, which would weigh on the apps for little gain on small portraits.
 
-**Still open:** how the pictures are rendered so that every machine writes the same files.
+**Settled:** the pictures are painted by our own script in plain JavaScript (`design/poulpy-3d/picture.mjs`), so every machine writes the same pixels and CI can check them, as for the app icons. The owner chose it over photographing the workshop in a browser, whose pixels differ from machine to machine, and over tracing vector pictures, which would take far longer and flatten the shading.
 
 ## 17. In 3D, what is on Poulpy stays on him, the champion cheers and the cocky one winks
 

@@ -26,14 +26,15 @@ const screen = (c) => Math.round(255 * (c <= 0.0031308 ? 12.92 * c : 1.055 * c *
 /**
  * Paints Poulpy.
  * @param model what buildPoulpy3d or buildPoulpyPose returned
- * @param {{ width: number, height: number, turn?: number, tilt?: number, distance?: number, shadow?: string | null, smooth?: number }} options
- *   `width` and `height` in pixels. `turn`, `tilt` and `distance` are where the viewer stands, as in SHOT.
+ * @param {{ width: number, height: number, turn?: number, tilt?: number, distance?: number, centre?: number, shadow?: string | null, smooth?: number }} options
+ *   `width` and `height` in pixels. `turn`, `tilt` and `distance` are where the viewer stands, as in SHOT, looking at
+ *   the point `centre` high above the floor, half his height unless told otherwise.
  *   `shadow` is the floor shadow's `#RRGGBB` colour, or null for none. `smooth` is how many times finer than a
  *   pixel he is painted, each way, before the picture is brought down to size: 3 unless told otherwise.
  * @returns {Uint8Array} the picture as RGBA bytes, row by row from the top, see-through around him
  */
-export function paintPoulpy(model, { width, height, turn = SHOT.turn, tilt = SHOT.tilt, distance = SHOT.distance, shadow = null, smooth = 3 }) {
-  const W = width * smooth, H = height * smooth, centre = model.height / 2
+export function paintPoulpy(model, { width, height, turn = SHOT.turn, tilt = SHOT.tilt, distance = SHOT.distance, centre = model.height / 2, shadow = null, smooth = 3 }) {
+  const W = width * smooth, H = height * smooth
   // Where the viewer stands and what is right, up and ahead for them.
   const eye = [distance * Math.sin(turn * RAD) * Math.cos(tilt * RAD), centre + distance * Math.sin(tilt * RAD), distance * Math.cos(turn * RAD) * Math.cos(tilt * RAD)]
   const ahead = norm(sub([0, centre, 0], eye)), right = norm(cross(ahead, [0, 1, 0])), up = cross(right, ahead)

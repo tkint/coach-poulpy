@@ -134,6 +134,8 @@ jobs:
         run: node ../design/build-poulpy.mjs --check
       - name: Check Poulpy's 3D models match design/poulpy-3d/model.mjs and motion.mjs
         run: node ../design/build-poulpy-3d.mjs --check
+      - name: Check Poulpy's 3D pictures match the model
+        run: node ../design/build-poulpy-pictures.mjs --check
       - name: Check the body map figures match design/build-body-map.mjs
         run: node ../design/build-body-map.mjs --check
       - name: Check the generated body map shapes match design/body-map.json
