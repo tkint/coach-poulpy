@@ -1,13 +1,13 @@
 <main class="phone">
-  <header class="top-bar" style="justify-content: flex-start;"><a class="icon-button" href="#" aria-label="Close"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></a></header>
+  <header class="top-bar" style="justify-content: flex-start;"><button type="button" class="icon-button" aria-label="Close"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></header>
   <div class="form-body" style="padding-top: var(--cp-space-sm);">
     <div class="intro"><h1 class="title" style="font-size: 30px; line-height: 34px;">Sign in</h1><p class="muted">Use the account you made on another phone. What is on this phone joins your account; nothing is replaced.</p></div>
     
     
     <div class="field" id="email-field"><label class="label" for="email">Email</label><input class="text-field" id="email" type="email" value="alex@example.com" autocomplete="email"></div>
     <div class="field" id="password-field"><label class="label" for="password">Password</label><span class="password-field"><input class="text-field" id="password" type="password" value="" autocomplete="current-password"><button type="button" class="icon-button" aria-label="Show password" aria-pressed="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="eye"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg></button></span></div>
-    <a class="link forgot-link" href="#" id="forgot">Forgot your password?</a>
-    <p class="alt-line" id="alt-line">No account yet? <a class="link" href="#">Create one</a></p>
+    <button type="button" class="link forgot-link" id="forgot">Forgot your password?</button>
+    <p class="alt-line" id="alt-line">No account yet? <button type="button" class="link">Create one</button></p>
   </div>
   <div class="action-bar">
     <MobileButton style="flex: 1;">Sign in</MobileButton>

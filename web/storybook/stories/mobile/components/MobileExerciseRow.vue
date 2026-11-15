@@ -10,11 +10,11 @@ const chevron = lucideIcon('chevron-right')
 </script>
 
 <template>
-  <a v-if="link" class="list-row" data-component="exercise-row" href="#" style="min-height: 56px; padding-right: var(--cp-space-md);">
+  <button type="button" v-if="link" class="list-row" data-component="exercise-row" style="min-height: 56px; padding-right: var(--cp-space-md);">
     <span class="row-icon" aria-hidden="true"><component :is="lucideIcon(icon)" :size="22" aria-hidden="true" /></span>
     <span class="row-text"><strong>{{ name }}</strong><span>{{ detail }}</span></span>
     <span class="chevron"><component :is="chevron" :size="20" aria-hidden="true" /></span>
-  </a>
+  </button>
   <div v-else class="list-row recap-row" data-component="exercise-row">
     <span class="row-icon" aria-hidden="true"><component :is="lucideIcon(icon)" :size="22" aria-hidden="true" /></span>
     <span class="row-text"><strong>{{ name }}</strong><span>{{ detail }}</span></span>

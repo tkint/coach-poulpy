@@ -6,5 +6,5 @@ const info = lucideIcon('info')
 </script>
 
 <template>
-  <a class="info-button" data-component="info-button" href="#" aria-haspopup="dialog"><component :is="info" :size="20" aria-hidden="true" /></a>
+  <button type="button" class="info-button" data-component="info-button" aria-haspopup="dialog"><component :is="info" :size="20" aria-hidden="true" /></button>
 </template>

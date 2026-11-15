@@ -2,8 +2,8 @@
 <div class="screen-header" style="padding-bottom: 10px; gap: var(--cp-space-md);">
     <h1>Library</h1>
     <div class="tabs" role="tablist" aria-label="Library" data-component="tabs">
-      <a role="tab" href="#" aria-selected="true">Workouts</a>
-      <a role="tab" href="#" aria-selected="false">Exercises</a>
+      <button type="button" role="tab" aria-selected="true">Workouts</button>
+      <button type="button" role="tab" aria-selected="false">Exercises</button>
     </div>
     <label class="search-field search-field--filled" data-component="search-field">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="search"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg>
@@ -31,7 +31,7 @@
     </li>
   </ul>
 
-  <a class="fab" data-component="fab" href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg>New workout</a>
+  <button type="button" class="fab" data-component="fab"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg>New workout</button>
 
   <MobileNavBar active="library" />
 </main>

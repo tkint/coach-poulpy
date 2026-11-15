@@ -2,8 +2,8 @@
 <div class="screen-header" style="padding-bottom: 10px; gap: var(--cp-space-md);">
     <h1>Library</h1>
     <div class="tabs" role="tablist" aria-label="Library" data-component="tabs">
-      <a role="tab" href="#" aria-selected="true">Workouts</a>
-      <a role="tab" href="#" aria-selected="false">Exercises</a>
+      <button type="button" role="tab" aria-selected="true">Workouts</button>
+      <button type="button" role="tab" aria-selected="false">Exercises</button>
     </div>
     <label class="search-field search-field--filled" data-component="search-field">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="search"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg>
@@ -25,22 +25,22 @@
   <ul id="library" style="flex: 1; min-height: 0; overflow: hidden; padding: 0 var(--cp-space-lg); display: flex; flex-direction: column; gap: var(--cp-space-sm);">
     <li class="list-row" data-component="library-entry">
       <span class="row-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="list"><path d="M3 5h.01"/><path d="M3 12h.01"/><path d="M3 19h.01"/><path d="M8 5h13"/><path d="M8 12h13"/><path d="M8 19h13"/></svg></span>
-      <a class="row-text" href="#"><strong>Lower body strength</strong><span>Sets · 5 exercises · 40 min</span><span class="row-note row-note--done">Done today</span></a>
-      <a class="row-icon" href="#" aria-label="Start Lower body strength"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="play"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg></a>
+      <button type="button" class="row-text"><strong>Lower body strength</strong><span>Sets · 5 exercises · 40 min</span><span class="row-note row-note--done">Done today</span></button>
+      <button type="button" class="row-icon" aria-label="Start Lower body strength"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="play"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg></button>
     </li>
     <li class="list-row" data-component="library-entry">
       <span class="row-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="list"><path d="M3 5h.01"/><path d="M3 12h.01"/><path d="M3 19h.01"/><path d="M8 5h13"/><path d="M8 12h13"/><path d="M8 19h13"/></svg></span>
-      <a class="row-text" href="#"><strong>Full body</strong><span>Sets · 6 exercises · 42 min</span><span class="row-note row-note--planned">Planned · Thu 29 Oct</span></a>
-      <a class="row-icon" href="#" aria-label="Start Full body"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="play"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg></a>
+      <button type="button" class="row-text"><strong>Full body</strong><span>Sets · 6 exercises · 42 min</span><span class="row-note row-note--planned">Planned · Thu 29 Oct</span></button>
+      <button type="button" class="row-icon" aria-label="Start Full body"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="play"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg></button>
     </li>
     <li class="list-row" data-component="library-entry">
       <span class="row-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="repeat"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg></span>
-      <a class="row-text" href="#"><strong>Quick sweat</strong><span>Circuit · 4 rounds · 16 min</span><span class="row-note">Not done yet</span></a>
-      <a class="row-icon" href="#" aria-label="Start Quick sweat"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="play"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg></a>
+      <button type="button" class="row-text"><strong>Quick sweat</strong><span>Circuit · 4 rounds · 16 min</span><span class="row-note">Not done yet</span></button>
+      <button type="button" class="row-icon" aria-label="Start Quick sweat"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="play"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg></button>
     </li>
   </ul>
 
-  <a class="fab" data-component="fab" href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg>New workout</a>
+  <button type="button" class="fab" data-component="fab"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg>New workout</button>
 
   <MobileNavBar active="library" />
 </main>
