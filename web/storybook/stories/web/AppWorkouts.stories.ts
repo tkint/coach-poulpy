@@ -36,7 +36,7 @@ export const Default: Story = {
           <p class="text-base-content/70">The workouts on your phone, as they were last synced.</p>
         </div>
         <form class="flex flex-col gap-3 md:flex-row md:items-center" role="search" @submit.prevent>
-          <CpSearchField v-model="search" class="w-full md:max-w-sm" label="Search your workouts" clear-label="Clear the search" placeholder="Name or exercise" />
+          <CpSearchField v-model="search" class="w-full md:max-w-sm" label="Search your workouts" placeholder="Name or exercise" />
           <div class="flex gap-2" role="group" aria-label="Format">
             <CpChip v-for="one in ['All', 'Circuit', 'Sets']" :key="one" :model-value="(format || 'All') === one" @update:model-value="format = one === 'All' ? '' : one">{{ one }}</CpChip>
           </div>

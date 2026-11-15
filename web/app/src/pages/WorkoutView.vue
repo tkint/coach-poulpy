@@ -109,7 +109,7 @@ const here = computed(() => `${workoutsPath}/${encodeURIComponent(props.id)}`)
       <CpCard :title="t('app.changeOnPhoneTitle')">
         <p class="text-base-content/70">{{ t('app.changeOnPhoneBody') }}</p>
       </CpCard>
-      <CpSheet v-model:open="overview" :title="t('app.overviewButton')" :close-label="t('app.overviewClose')">
+      <CpSheet v-model:open="overview" :title="t('app.overviewButton')">
         <div class="flex flex-col gap-4 py-2"><WorkoutOverview :workout="workout" /></div>
       </CpSheet>
     </template>

@@ -8,7 +8,7 @@ defineProps<{ title: string; active: 'workouts' | 'profile' }>()
 </script>
 
 <template>
-  <CpDrawer toggle-label="Toggle the navigation" close-label="Close the navigation" class="min-h-screen bg-base-200 text-base-content">
+  <CpDrawer class="min-h-screen bg-base-200 text-base-content">
     <template #toggle-icon><PanelLeft class="size-5 shrink-0" aria-hidden="true" /></template>
     <template #title>{{ title }}</template>
     <slot />

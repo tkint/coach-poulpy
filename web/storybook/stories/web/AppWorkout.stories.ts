@@ -61,7 +61,7 @@ const page = (sheet: boolean) => ({
         </div>
       </div>
       <CpCard title="Change it on your phone"><p class="text-base-content/70">Workouts are read-only here. Open the app to edit, plan or start this one.</p></CpCard>
-      <CpSheet :open="sheet" title="Stats and muscles worked" close-label="Close">
+      <CpSheet :open="sheet" title="Stats and muscles worked">
         <div class="flex flex-col gap-4 py-2">
           <CpStats vertical class="w-full"><CpStat title="Done" value="3 times" /><CpStat title="Last time" value="Wed 21" /><CpStat title="Usually" value="31 min" /></CpStats>
           <CpBodyMap :heat="heat" legend="top" :description="description" />

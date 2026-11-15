@@ -226,7 +226,7 @@ watch(
     </div>
     <CpCard>
       <div class="flex flex-wrap items-center gap-2" role="search" :aria-label="t('admin.catalogFiltersLabel')">
-        <CpSearchField v-model="draft" compact :label="t('admin.catalogSearchLabel')" :clear-label="t('admin.catalogSearchClear')" :placeholder="t('admin.catalogSearch')" />
+        <CpSearchField v-model="draft" compact :label="t('admin.catalogSearchLabel')" :placeholder="t('admin.catalogSearch')" />
         <CpChip v-model="pending" compact>{{ t('admin.catalogPending') }}</CpChip>
         <CpSelectField v-model="pattern" compact :label="t('admin.filterPattern')" :options="patternOptions" />
         <CpSelectField v-model="translation" compact :label="t('admin.filterTranslation')" :options="translationOptions" />
@@ -292,7 +292,7 @@ watch(
         </CpTable>
         <div class="flex flex-col items-center justify-between gap-3 sm:flex-row">
           <p class="text-sm text-base-content/70">{{ showing }}</p>
-          <CpPagination v-model:page="page" :pages="pages" :nav-label="t('admin.pages')" :previous-label="t('admin.previousPage')" :next-label="t('admin.nextPage')" />
+          <CpPagination v-model:page="page" :pages="pages" />
         </div>
       </template>
     </CpCard>

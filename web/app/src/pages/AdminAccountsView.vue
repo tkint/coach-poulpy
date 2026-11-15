@@ -246,7 +246,7 @@ async function remove() {
         </CpTable>
         <div class="flex flex-col items-center justify-between gap-3 sm:flex-row">
           <p class="text-sm text-base-content/70">{{ showing }}</p>
-          <CpPagination v-model:page="page" :pages="pages" :nav-label="t('admin.pages')" :previous-label="t('admin.previousPage')" :next-label="t('admin.nextPage')" />
+          <CpPagination v-model:page="page" :pages="pages" />
         </div>
       </CpCard>
     </div>
@@ -275,7 +275,7 @@ async function remove() {
         </div>
       </template>
     </CpSidePanel>
-    <CpSheet v-if="selected" v-model:open="deleting" :title="t('admin.deleteTitle')" :close-label="t('admin.deleteClose')">
+    <CpSheet v-if="selected" v-model:open="deleting" :title="t('admin.deleteTitle')">
       <p class="py-2">{{ t('admin.deleteBody', { email: selected.email }) }}</p>
       <CpTextField v-model="typed" :label="t('admin.deleteConfirmLabel')" autocomplete="off" />
       <template #actions>

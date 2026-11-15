@@ -74,7 +74,7 @@ const what = (action: string) => (action in actions ? t(actions[action]) : actio
 <template>
   <p v-if="!checked" class="p-8" role="status">{{ t('admin.checking') }}</p>
   <AdminSignInPage v-else-if="!me" @signed-in="async () => enter(await currentAccount())" />
-  <CpDrawer v-else v-model:open="open" :toggle-label="t('admin.toggleNavigation')" :close-label="t('admin.closeNavigation')" class="bg-base-200 text-base-content">
+  <CpDrawer v-else v-model:open="open" class="bg-base-200 text-base-content">
     <template #toggle-icon>
       <PanelLeft class="size-5 shrink-0" aria-hidden="true" />
     </template>

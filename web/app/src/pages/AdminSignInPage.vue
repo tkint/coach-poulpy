@@ -31,8 +31,8 @@ async function submit() {
       <CpPasswordField
         v-model="password"
         :label="t('admin.password')"
-        :show-label="t('admin.showPassword')"
-        :hide-label="t('admin.hidePassword')"
+       
+       
         :invalid="failed === 'refused'"
         autocomplete="current-password"
       />
