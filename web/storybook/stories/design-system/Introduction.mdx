@@ -1,12 +1,15 @@
-import { Meta } from '@storybook/addon-docs/blocks'
+import { Meta, Markdown } from '@storybook/addon-docs/blocks'
+import { rulesIntro } from './rules/rules'
 
 <Meta title="Design system/Introduction" />
 
 # Coach Poulpy design system
 
+<Markdown>{rulesIntro}</Markdown>
+
 The landing site, the web app and these pages draw with one package, [`web/ui`](https://github.com/tkint/coach-poulpy/tree/main/web/ui): DaisyUI with the Poulpy theme and a few Vue components on top ([ADR 0023](https://tkint.github.io/coach-poulpy/docs/adr/0023-the-websites-share-one-vue-and-daisyui-design-system)). This workshop is its home ([ADR 0028](https://tkint.github.io/coach-poulpy/docs/adr/0028-storybook-is-the-component-workshop-of-the-design-system), [ADR 0029](https://tkint.github.io/coach-poulpy/docs/adr/0029-mockups-are-stories-in-the-component-workshop)).
 
-- [Rules](?path=/docs/design-system-rules--docs): how to use colour, type, space, components and Poulpy.
+- **Rules**: how to use [colour](?path=/docs/design-system-rules-colour--docs), [type](?path=/docs/design-system-rules-type--docs), [space, radius and motion](?path=/docs/design-system-rules-space-radius-and-motion--docs), [icons](?path=/docs/design-system-rules-icons--docs), [accessibility](?path=/docs/design-system-rules-accessibility--docs), the [components](?path=/docs/design-system-rules-components--docs), the [screens](?path=/docs/design-system-rules-screens--docs) and the [websites](?path=/docs/design-system-rules-websites--docs). They are written in [`docs/design-system.md`](https://github.com/tkint/coach-poulpy/blob/main/docs/design-system.md), which agents read; these pages show it.
 - [Tokens](?path=/docs/design-system-tokens--docs): every value, read from `design/tokens.json`.
 - **Core**: what is the same on every platform: Poulpy and the body map. They are drawn here with the web components.
 - **Web > Components**: each Vue component in every state, with its classes. Each state is a story and runs as a test in CI, with an accessibility check. Use the toolbar to switch between light and dark.

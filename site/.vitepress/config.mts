@@ -100,8 +100,8 @@ export default withMermaid(
       nav: [
         { text: 'Start here', link: '/CONTRIBUTING' },
         { text: 'Architecture', link: '/docs/architecture' },
-        { text: 'Design system', link: '/docs/design-system' },
-        { text: 'Storybook', link: '/storybook/index.html', target: '_blank', rel: 'noopener' },
+        // The design system's home is the component workshop (ADR 0028, ADR 0029): rules, tokens, components and screens.
+        { text: 'Design system', link: '/storybook/index.html?path=/docs/design-system-introduction--docs', target: '_blank', rel: 'noopener' },
         { text: 'Brand', link: '/docs/brand' },
         { text: 'Translations', link: '/translations' },
       ],
@@ -125,8 +125,8 @@ export default withMermaid(
             'Design system',
             ['/docs/design-system', '/docs/profile-and-settings', '/design/'],
             [
-              { text: 'How to use it', link: '/docs/design-system' },
-              { text: 'Components and screens', link: '/storybook/index.html?path=/docs/design-system-introduction--docs', target: '_blank', rel: 'noopener' },
+              { text: 'Rules, components and screens', link: '/storybook/index.html?path=/docs/design-system-introduction--docs', target: '_blank', rel: 'noopener' },
+              { text: 'The rules as one page', link: '/docs/design-system' },
               { text: 'Profile and settings', link: '/docs/profile-and-settings' },
               { text: 'Generating tokens and fonts', link: '/design/README' },
               { text: 'Body map shapes: credits', link: '/design/body-map-source/NOTICE' },
