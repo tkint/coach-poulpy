@@ -1,13 +1,16 @@
 <script setup lang="ts">
 // Poulpy in 3D, to turn around: the shape of design/poulpy-3d/model.mjs, drawn by poulpy3dScene.ts.
-// With `motion="turn"` he does his idle move himself (design/poulpy-3d/motion.mjs) and the viewer stays put.
+// With `motion` he moves himself (design/poulpy-3d/motion.mjs) and the viewer stays put: "turn" is his idle,
+// "jump" his little jumps on the spot and "jump-turn" the same jumps, each turning him a step.
 import { RotateCcw, RotateCw } from '@lucide/vue'
 import { onBeforeUnmount, onMounted, shallowRef, useTemplateRef, watch } from 'vue'
 import type { PoulpySide } from '../../../../design/poulpy-3d/model.mjs'
-import type { Turn } from '../../../../design/poulpy-3d/motion.mjs'
+import type { Jump, Turn } from '../../../../design/poulpy-3d/motion.mjs'
 import type { createPoulpyScene } from './poulpy3dScene'
 
-const { motion } = defineProps<{ motion?: 'turn' }>()
+const { motion } = defineProps<{ motion?: 'turn' | 'jump' | 'jump-turn' }>()
+const jumping = motion === 'jump' || motion === 'jump-turn'
+const turning = motion !== 'jump' // he turns, or without `motion` the viewer walks around him
 
 const canvas = useTemplateRef<HTMLCanvasElement>('canvas')
 const side = shallowRef<PoulpySide>('blue')
@@ -21,12 +24,19 @@ const softness = shallowRef(1) // how loose his arms are: 1 is the design
 // Seen from above, and named for him: without `motion` it is the viewer who walks around, the other way.
 const direction = shallowRef<'clockwise' | 'anticlockwise'>('anticlockwise')
 const step = shallowRef(24) // degrees he turns at each step, on average: 24 is the design
+// The jump's key values, in units (his head's radius is about 1): they start at the design, read from JUMP.
+const height = shallowRef(0) // how far his head goes up
+const lift = shallowRef(0) // how far he leaves the floor
+const tuck = shallowRef(0) // how far his head tucks into his arms before the jump
+const landing = shallowRef(0) // how far his head sinks into his arms as he lands
+const lean = shallowRef(0) // degrees he tilts to the side in the air
+const pause = shallowRef(0) // seconds between two jumps, on average
 const failed = shallowRef(false)
 
 let scene: ReturnType<typeof createPoulpyScene> | undefined
 let frame = 0
 let last = 0
-let move: Turn | undefined
+let move: Turn | Jump | undefined
 
 const sides: { id: PoulpySide; label: string }[] = [
   { id: 'blue', label: 'Blue' },
@@ -36,6 +46,7 @@ const directions = [
   { id: 'anticlockwise', label: 'Anticlockwise', icon: RotateCcw },
   { id: 'clockwise', label: 'Clockwise', icon: RotateCw },
 ] as const
+const moves = { turn: 'turning around in short steps', jump: 'doing little jumps on the spot', 'jump-turn': 'doing little jumps that turn him around' }
 const clamp = (value: number, low: number, high: number) => Math.min(high, Math.max(low, value))
 const wrap = (degrees: number) => ((degrees % 360) + 360) % 360
 
@@ -94,13 +105,24 @@ const look = () => scene?.look({ turn: -turn.value, tilt: tilt.value, distance: 
 watch([side, outline], show)
 watch([turn, tilt, distance], look)
 watch(softness, (value) => { if (move) move.softness = value })
-watch([step, direction], ([degrees, way]) => { if (move) move.stride = (degrees / 24) * (way === 'anticlockwise' ? 1 : -1) })
+const stride = () => (motion === 'jump' ? 0 : (step.value / 24) * (direction.value === 'anticlockwise' ? 1 : -1))
+watch([step, direction], () => { if (move) move.stride = stride() })
+watch([height, lift, tuck, landing, lean, pause], (values) => {
+  if (move && 'height' in move) [move.height, move.lift, move.tuck, move.landing, move.lean, move.pause] = values
+})
 
 onMounted(async () => {
   // three.js is only fetched on this page, and only in the browser.
   try {
     const { createPoulpyScene } = await import('./poulpy3dScene')
-    if (motion) move = (await import('../../../../design/poulpy-3d/motion.mjs')).createTurn({ softness: softness.value })
+    if (motion) {
+      const { createJump, createTurn } = await import('../../../../design/poulpy-3d/motion.mjs')
+      if (jumping) {
+        const jump = createJump({ softness: softness.value, stride: stride() })
+        ;[height.value, lift.value, tuck.value, landing.value, lean.value, pause.value] = [jump.height, jump.lift, jump.tuck, jump.landing, jump.lean, jump.pause]
+        move = jump
+      } else move = createTurn({ softness: softness.value })
+    }
     if (!canvas.value) return
     scene = createPoulpyScene(canvas.value)
   } catch {
@@ -127,7 +149,7 @@ onBeforeUnmount(() => {
         ref="canvas"
         tabindex="0"
         role="img"
-        :aria-label="motion ? 'Poulpy in 3D, turning around in short steps. Drag, or use the arrow keys, to look around him.' : 'Poulpy in 3D. Drag, or use the arrow keys, to turn him.'"
+        :aria-label="motion ? `Poulpy in 3D, ${moves[motion]}. Drag, or use the arrow keys, to look around him.` : 'Poulpy in 3D. Drag, or use the arrow keys, to turn him.'"
         @pointerdown="press"
         @pointermove="drag"
         @pointerup="release"
@@ -142,16 +164,24 @@ onBeforeUnmount(() => {
       <div class="sides" role="group" aria-label="Side">
         <button v-for="s in sides" :key="s.id" type="button" class="choice" :aria-pressed="side === s.id" :aria-label="`${s.label} side`" @click="side = s.id">{{ s.label }}<span class="wide">&nbsp;side</span></button>
       </div>
-      <div class="sides" role="group" aria-label="Direction, seen from above">
+      <div v-if="turning" class="sides" role="group" aria-label="Direction, seen from above">
         <button v-for="d in directions" :key="d.id" type="button" class="choice icon" :aria-pressed="direction === d.id" :aria-label="d.label" :title="d.label" @click="direction = d.id"><component :is="d.icon" :size="18" aria-hidden="true" /></button>
       </div>
       <div class="toggles">
         <button type="button" class="toggle" :aria-pressed="outline" @click="outline = !outline">Outline</button>
-        <button type="button" class="toggle" :aria-pressed="spinning" @click="spinning = !spinning">{{ motion ? 'Turn' : 'Spin' }}</button>
+        <button type="button" class="toggle" :aria-pressed="spinning" @click="spinning = !spinning">{{ jumping ? 'Jump' : motion ? 'Turn' : 'Spin' }}</button>
       </div>
       <label v-if="!motion" class="slider"><span>Turn</span><input v-model.number="turn" type="range" min="0" max="360" step="1" @input="spinning = false" /><output>{{ Math.round(turn) }}°</output></label>
       <label class="slider"><span>Tilt</span><input v-model.number="tilt" type="range" min="-89" max="89" step="1" /><output>{{ Math.round(tilt) }}°</output></label>
-      <label v-if="motion" class="slider"><span>Step</span><input v-model.number="step" type="range" min="1" max="180" step="1" /><output>{{ step }}°</output></label>
+      <template v-if="jumping">
+        <label class="slider"><span>Height</span><input v-model.number="height" type="range" min="0" max="1" step="0.01" /><output>{{ height.toFixed(2) }}</output></label>
+        <label class="slider"><span>Lift</span><input v-model.number="lift" type="range" min="0" max="0.6" step="0.01" /><output>{{ lift.toFixed(2) }}</output></label>
+        <label class="slider"><span>Tuck</span><input v-model.number="tuck" type="range" min="0" max="0.5" step="0.01" /><output>{{ tuck.toFixed(2) }}</output></label>
+        <label class="slider"><span>Landing</span><input v-model.number="landing" type="range" min="0" max="0.5" step="0.01" /><output>{{ landing.toFixed(2) }}</output></label>
+        <label class="slider"><span>Lean</span><input v-model.number="lean" type="range" min="0" max="30" step="0.5" /><output>{{ lean.toFixed(1) }}°</output></label>
+        <label class="slider"><span>Pause</span><input v-model.number="pause" type="range" min="0" max="3" step="0.05" /><output>{{ pause.toFixed(2) }} s</output></label>
+      </template>
+      <label v-if="motion && turning" class="slider"><span>Step</span><input v-model.number="step" type="range" min="1" max="180" step="1" /><output>{{ step }}°</output></label>
       <label v-if="motion" class="slider"><span>Soft arms</span><input v-model.number="softness" type="range" min="0" max="4" step="0.05" /><output>{{ softness.toFixed(2) }}</output></label>
       <label class="slider"><span>Speed</span><input v-model.number="speed" type="range" min="0.1" max="5" step="0.1" @input="spinning = true" /><output>{{ speed.toFixed(1) }}×</output></label>
     </div>
@@ -186,6 +216,6 @@ onBeforeUnmount(() => {
 }
 .slider { flex: 1 1 100%; display: flex; align-items: center; gap: 10px; min-width: 0; font-size: 14px; font-weight: 700; }
 .slider span { flex: none; width: 5.5em; }
-.slider output { min-width: 3em; text-align: right; font-variant-numeric: tabular-nums; }
+.slider output { min-width: 3.6em; text-align: right; font-variant-numeric: tabular-nums; }
 .slider input { flex: 1; min-width: 0; height: 36px; accent-color: var(--cp-primary); }
 </style>

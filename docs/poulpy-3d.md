@@ -10,7 +10,7 @@ These were settled with the owner on the first model; the reasons are in [Brand 
 
 - **Chibi, never realistic.** A big round head, big eyes, short arms. The face is the 2D drawing's, pressed onto the head, so every [drawing](https://tkint.github.io/coach-poulpy/storybook/?path=/docs/brand-drawings--docs) and the model show the same Poulpy.
 - **The head is tucked in.** It sinks into the arms, which wrap around its base, instead of resting on top of them.
-- **Eight arms, always down.** They lie on the floor as on the plush; a mood shows on his face and in his colour, never by lifting an arm.
+- **Eight arms, always down.** They lie on the floor as on the plush; a mood shows on his face and in his colour, never by lifting an arm. When he [jumps](#little-jumps) they hang under him.
 - **The other side is underneath.** Each arm is one smooth shape, the side's colour on top and the other side's colour below a low line, with no ridge or shelf between them. The base of the head is cut at the same height, so the whole underside is one colour: ember under the blue side, blue under the ember side.
 - **Flat, like a drawing.** Plain token colours, one soft shadow band and one faint gleam. No gloss, no reflections, no fabric texture.
 - **The light belongs to the room.** It comes from the viewer's upper left and stays there: the shade and the gleam slide over Poulpy as he turns, they are never painted on him.
@@ -30,7 +30,41 @@ His arms are not stiff. Each one bends at three places, and every bend is a smal
 - **No two steps or arms are quite alike.** The steps vary between 20 and 30 degrees and the pauses between 0.45 and 0.75 seconds, and each arm's springs are a little stiffer or softer than its neighbours', so the arms fall out of step with each other.
 - **Reduced motion keeps him still.** The preview starts paused for anyone who asked their device for less motion, and an app must do the same.
 
-The move is one file, [`design/poulpy-3d/motion.mjs`](../design/poulpy-3d/motion.mjs), next to the shape. `TURN` at its top holds every number: the steps and pauses, the wind-up, how eager and how bouncy his body is, how soft each length of arm is, how much the floor holds the arms back and how far the head dips. `createTurn()` runs it live, as the workshop's page does, and `bakeTurn()` writes it down frame by frame for the glTF files.
+The moves are one file, [`design/poulpy-3d/motion.mjs`](../design/poulpy-3d/motion.mjs), next to the shape. `TURN` at its top holds every number: the steps and pauses, the wind-up, how eager and how bouncy his body is, how soft each length of arm is, how much the floor holds the arms back and how far the head dips. `createTurn()` runs it live, as the workshop's page does, and `bakeTurn()` writes it down frame by frame for the glTF files.
+
+## Little jumps
+
+Poulpy can also jump on the spot. He tucks his head down into his arms, then goes up head first: his arms follow a little, just enough for him to leave the floor. In the air he tilts to one side, the other side at the next jump, and as he lands his head goes a little down into his arms before he stands again.
+
+<!-- live: Jumping -->
+
+**The jump is a preview, still being tuned.** It runs live here and is not in the glTF files yet: its values are written into them once the owner has settled them on this page. Every control shows its value so a setting can be quoted. Heights are in the model's units, where his head is about 1 from centre to edge.
+
+| Control | What it sets | Design |
+| --- | --- | --- |
+| **Height** | How far his head goes up | 0.36 |
+| **Lift** | How far he leaves the floor: the base of his arms follows his head by this much | 0.10 |
+| **Tuck** | How far his head goes down into his arms before the jump | 0.16 |
+| **Landing** | How far his head goes down into his arms as he lands | 0.10 |
+| **Lean** | How far he tilts to the side in the air, in degrees | 7 |
+| **Pause** | Seconds he stands between two jumps, on average | 0.55 |
+| **Soft arms** | How loosely his arms hang and trail, as for the turn | 1 |
+| **Speed** | Plays the whole move faster or slower | 1 |
+
+- **His head leads, his arms follow.** His head is pulled along the jump by a stiff spring and the base of his arms by a softer one, so the arms leave the floor after his head and land after it. In between his head comes a little out of them.
+- **The arms hang, he never raises them.** Up and down, each arm bends at the same three places as when he turns. A spring holds each length level with the one before it, its weight pulls it down and the floor stops it: the tips leave the floor last, hang a little in the air and touch down first. On the side he tilts to, the arms lie flat against the floor.
+- **His head squashes and stretches.** It widens as it tucks in and as he lands, and thins a little while it moves fast, keeping its volume.
+- **Reduced motion keeps him still**, as for the turn.
+
+### Jumping around
+
+The same jump can turn him: each jump takes him one step around, the steps being those of his turn. He winds up while he tucks, turns in the air and his arms trail behind as they do on the floor.
+
+<!-- live: JumpingAround -->
+
+**Step** and the two arrows work as for the turn; every other control is the jump's.
+
+`JUMP` in `motion.mjs` holds the jump's numbers, next to `TURN`, and `createJump()` runs it live. Given a `stride`, it turns him as `createTurn()` does.
 
 ## Using the model
 
@@ -57,7 +91,7 @@ Everything that defines him is at the top of `model.mjs`, in three plainly named
 - `FACES`: the eyes, cheeks, mouth and brows of each side, in the same units as the 2D drawings of `design/build-poulpy.mjs`.
 - `LOOK`: the light, the shadow band, the gleam and the outline.
 
-How he moves is in `motion.mjs`: `TURN` for the move and `RIG` for where the arms bend.
+How he moves is in `motion.mjs`: `TURN` for his turn, `JUMP` for his jump and `RIG` for where the arms bend.
 
 His colours are the `color.poulpy` tokens of [`design/tokens.json`](../design/tokens.json), never written into the model.
 
@@ -67,4 +101,4 @@ Edit, then regenerate and look at the workshop's page (`npm run storybook` in `w
 node design/build-poulpy-3d.mjs
 ```
 
-CI runs it with `--check` and fails when the committed glTF files no longer match `model.mjs` and `motion.mjs`. A new mood or pose in 3D starts as a new entry in `FACES`, or a new part in `buildPoulpy3d`; a new move starts next to `TURN` in `motion.mjs`. Both follow the [brand rules](./brand.md#character-rules) like any drawing.
+CI runs it with `--check` and fails when the committed glTF files no longer match `model.mjs` and `motion.mjs`. A new mood or pose in 3D starts as a new entry in `FACES`, or a new part in `buildPoulpy3d`; a new move starts next to `TURN` and `JUMP` in `motion.mjs`. Both follow the [brand rules](./brand.md#character-rules) like any drawing.

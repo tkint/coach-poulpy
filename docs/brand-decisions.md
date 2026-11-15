@@ -100,3 +100,13 @@ Add a decision here in the same PR as the brand change it explains, newest at th
 **Why:** the owner wanted him chibi, natural and simple, "a bit like the mascot of Duolingo", so the model had to read like the 2D drawings turned into a solid, not like a rendered toy. Each rule was a correction from the owner on a model he could turn: the head sinks into the arms because resting on top of them looked stacked; the two colours share one smooth surface because a separate lining made a shelf; the whole underside is the other side's colour because a patch of the top colour showed between the arms; and the light stays in the room because shade painted on the model turned with him.
 
 **Set aside:** a dome head on puffy arms, the 2D drawing extruded (the head he preferred was rounder); a glossy vinyl ball on tiny feet (too photorealistic, arms too short); an egg head on long curling arms (less chibi, and too close to a real octopus); a one-piece bell with a scalloped hem. A dark outline is kept as an option, off by default.
+
+## 15. Poulpy jumps, and his tentacles hang
+
+**Accepted, 15 November 2026.** In 3D Poulpy can do little jumps, on the spot or turning a step at each. He tucks his head into his tentacles, goes up head first, and his tentacles follow just enough for him to barely leave the floor; he tilts to one side in the air, and his head goes a little down into his tentacles as he lands. The move and its controls are on the [Poulpy in 3D](./poulpy-3d.md#little-jumps) page.
+
+This narrows [decision 8](#8-poulpy-never-lifts-his-tentacles) without overturning it: Poulpy still never raises a tentacle himself, as an arm would. In a jump they leave the floor only because he does, hanging soft under him, tips last.
+
+**Why:** the owner asked for the jump and described it. It is kept small so he stays the plush: a hop that barely clears the floor, not a leap.
+
+**Still open:** the jump's values (how high, how far off the floor, how deep the tuck and the landing, how much tilt, how long between jumps). It runs as a live preview with a control for each, and is written into the glTF files once the owner has settled them.

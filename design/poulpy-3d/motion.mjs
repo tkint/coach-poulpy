@@ -1,10 +1,11 @@
 // How Poulpy moves in 3D, with no dependency, next to the shape of model.mjs.
 //   design/build-poulpy-3d.mjs bakes it into the animated glTF files; the docs site's "Poulpy in 3D" page runs it live.
 //
-// One move so far, his idle: he turns around on the spot in short steps, stops, and goes again. His arms
-// are soft, so they trail behind each step and swing a little past it before settling. They only ever
-// slide on the floor: Poulpy never lifts them (brand decision 8).
-// To change the move, edit TURN below, then run `node design/build-poulpy-3d.mjs`.
+// Two moves. His idle, TURN: he turns around on the spot in short steps, stops, and goes again. And JUMP:
+// little jumps on the spot, which can also turn him a step each. His arms are soft, so they trail behind
+// a step and swing a little past it before settling, and they hang under him when he jumps. He never
+// raises them himself (brand decisions 8 and 15): on the floor they slide, in the air they droop.
+// To change a move, edit TURN or JUMP below, then run `node design/build-poulpy-3d.mjs`.
 import { SHAPE } from './model.mjs'
 
 export const TURN = {
@@ -30,11 +31,64 @@ export const TURN = {
   squash: { depth: 0.035, atSpeed: 160, speed: 19, damping: 0.3 },
 }
 
+export const JUMP = {
+  // Before a jump he tucks his head `depth` down into his arms and holds it for `seconds`.
+  tuck: { depth: 0.16, seconds: 0.26 },
+  // Then his head goes up by `height` and comes back in `seconds`. His arms only follow by `lift`, which is
+  // how far he leaves the floor: his head leads and comes a little out of them. One unit is about his head's radius.
+  air: { height: 0.36, lift: 0.1, seconds: 0.46 },
+  // As he lands his head goes `depth` down into his arms for `seconds`, then comes back up.
+  landing: { depth: 0.1, seconds: 0.18 },
+  // Seconds he stands still between two jumps, used in turn.
+  pauses: [0.6, 0.45, 0.7, 0.45],
+  // In the air he tilts `degrees` to one side, the other side at the next jump.
+  lean: { degrees: 7, speed: 13, damping: 0.5 },
+  // His head and the base of his arms are pulled to where they should be by springs, as his body is in TURN.
+  // The arms' one is the softer, so they leave the floor after his head and land after it.
+  head: { speed: 24, damping: 0.55 },
+  body: { speed: 15, damping: 0.6 },
+  // Up and down, each arm hangs at the same three places it bends at in TURN: a spring holds each length level
+  // with the one before it, softer towards the tip, `weight` pulls it down and the floor stops it.
+  // `limit` is the most one bend may open, in degrees.
+  arms: { speed: [24, 18, 14], damping: [0.5, 0.45, 0.4], weight: 7, limit: 38 },
+  // His head stretches by `stretch` of its height when it moves at `atSpeed` units a second, and squashes by
+  // `depth` when it is `atDepth` down in his arms. It widens or thins to keep its volume.
+  squash: { stretch: 0.05, atSpeed: 2.4, depth: 0.07, atDepth: 0.16, speed: 22, damping: 0.4 },
+}
+
 // Where an arm bends, as distances from his middle along the arm, and how wide each bend is spread.
 export const RIG = { bends: [0.5, 0.86, 1.22], spread: 0.2 }
 
 const RAD = Math.PI / 180
 const SUBSTEP = 1 / 240 // seconds; the springs are always advanced by this much, so every run is the same
+
+// The arms' sideways swing, shared by every move: each length of arm follows the one before it, and the
+// floor holds it back. `tick` is given where the body faces, how fast it turns and how loose the arms are.
+function armSwing(turn) {
+  const arms = turn.armVariety.slice(0, SHAPE.arms.count)
+  // Each arm's three lengths, by the way they point in the room (not yet relative to each other).
+  const angle = arms.map(() => [0, 0, 0]), swing = arms.map(() => [0, 0, 0])
+  return {
+    /** Each arm's three bends, relative to each other, for a body facing `at`. */
+    bends: (at) => angle.map((a) => [a[0] - at, a[1] - a[0], a[2] - a[1]]),
+    tick(h, at, speed, softness) {
+      const loose = Math.max(softness, 0), limit = turn.arms.limit * RAD
+      arms.forEach((variety, k) => {
+        let parent = at, parentSwing = speed
+        for (let i = 0; i < 3; i++) {
+          if (loose < 0.02) { angle[k][i] = parent; swing[k][i] = parentSwing; continue }
+          const w = (turn.arms.speed[i] * variety) / loose, d = turn.arms.damping[i]
+          swing[k][i] += (w * w * (parent - angle[k][i]) + 2 * d * w * (parentSwing - swing[k][i]) - turn.arms.drag * loose * swing[k][i]) * h
+          angle[k][i] += swing[k][i] * h
+          // A bend only opens so far: past it the arm is carried along.
+          const bend = angle[k][i] - parent
+          if (bend > limit || bend < -limit) { angle[k][i] = parent + (bend > 0 ? limit : -limit); swing[k][i] = parentSwing }
+          parent = angle[k][i]; parentSwing = swing[k][i]
+        }
+      })
+    },
+  }
+}
 
 /** How long one full turn takes, in seconds. */
 export function turnSeconds(turn = TURN) {
@@ -51,11 +105,9 @@ export function turnSeconds(turn = TURN) {
  *   much his head is squashed (negative) or stretched, and for each arm its three bends in radians.
  */
 export function createTurn({ softness = 1, stride = 1, turn = TURN } = {}) {
-  const arms = turn.armVariety.slice(0, SHAPE.arms.count)
   // Angles are kept from above, in radians: `at` is where the body faces, `to` where it should.
   let step = 0, phase = 0, clock = 0, base = 0, to = 0, at = 0, speed = 0, squash = 0, squashSpeed = 0
-  // Each arm's three lengths, by the way they point in the room (not yet relative to each other).
-  const angle = arms.map(() => [0, 0, 0]), swing = arms.map(() => [0, 0, 0])
+  const arms = armSwing(turn)
 
   function tick(h) {
     // The script: wind up, step, pause, next step.
@@ -73,21 +125,7 @@ export function createTurn({ softness = 1, stride = 1, turn = TURN } = {}) {
     speed += (b.speed * b.speed * (to - at) - 2 * b.damping * b.speed * speed) * h
     at += speed * h
 
-    // Each length of arm follows the one before it, and the floor holds it back.
-    const loose = Math.max(softness, 0), limit = turn.arms.limit * RAD
-    arms.forEach((variety, k) => {
-      let parent = at, parentSwing = speed
-      for (let i = 0; i < 3; i++) {
-        if (loose < 0.02) { angle[k][i] = parent; swing[k][i] = parentSwing; continue }
-        const w = (turn.arms.speed[i] * variety) / loose, d = turn.arms.damping[i]
-        swing[k][i] += (w * w * (parent - angle[k][i]) + 2 * d * w * (parentSwing - swing[k][i]) - turn.arms.drag * loose * swing[k][i]) * h
-        angle[k][i] += swing[k][i] * h
-        // A bend only opens so far: past it the arm is carried along.
-        const bend = angle[k][i] - parent
-        if (bend > limit || bend < -limit) { angle[k][i] = parent + (bend > 0 ? limit : -limit); swing[k][i] = parentSwing }
-        parent = angle[k][i]; parentSwing = swing[k][i]
-      }
-    })
+    arms.tick(h, at, speed, softness)
 
     // The head dips with speed and springs back.
     const s = turn.squash, goal = -s.depth * Math.min(Math.abs(speed) / (s.atSpeed * RAD), 1)
@@ -99,7 +137,121 @@ export function createTurn({ softness = 1, stride = 1, turn = TURN } = {}) {
   const sim = {
     softness,
     stride,
-    pose: () => ({ yaw: at, squash, arms: angle.map((a) => [a[0] - at, a[1] - a[0], a[2] - a[1]]) }),
+    pose: () => ({ yaw: at, squash, arms: arms.bends(at) }),
+    advance(seconds) {
+      softness = sim.softness
+      stride = sim.stride
+      owed += Math.min(Math.max(seconds, 0), 1)
+      while (owed >= SUBSTEP) { tick(SUBSTEP); owed -= SUBSTEP }
+      return sim.pose()
+    },
+  }
+  return sim
+}
+
+/**
+ * Poulpy jumping on the spot, as something to advance in time.
+ * @param {{ softness?: number, stride?: number, jump?: typeof JUMP, turn?: typeof TURN }} [options] `softness`
+ *   scales how loose the arms are, as in createTurn. `stride` makes each jump turn him too, by a step of
+ *   `turn` scaled as in createTurn: 0, the default, jumps on the spot.
+ * @returns The move. `softness`, `stride` and the jump's key values (`height`, `lift`, `tuck`, `landing`,
+ *   `lean` in degrees, `pause` in seconds on average) can be changed at any time. A pose is a turn's pose
+ *   and `{ lift, lean, head, droop }`: how far the base of his arms is off the floor, how far he tilts to
+ *   his side in radians, how far his head is out of his arms (negative is tucked in), and for each arm how
+ *   far each of its three bends hangs, in radians.
+ */
+export function createJump({ softness = 1, stride = 0, jump = JUMP, turn = TURN } = {}) {
+  const count = SHAPE.arms.count, variety = turn.armVariety.slice(0, count)
+  const rest = jump.pauses.reduce((sum, p) => sum + p, 0) / jump.pauses.length
+  // Where each length of arm ends, from his middle, and how long it is.
+  const ends = [...RIG.bends.slice(1), SHAPE.arms.ring + SHAPE.arms.radius[2]], lengths = ends.map((r, i) => r - RIG.bends[i])
+  const side = variety.map((_, k) => Math.sin((k * Math.PI * 2) / count)) // how far to his left each arm points
+  let hop = 0, phase = 0, clock = 0
+  // Heights are from where he stands: `head` and `body` (the base of his arms), each with its speed.
+  let head = 0, headSpeed = 0, body = 0, bodySpeed = 0, lean = 0, leanSpeed = 0, squash = 0, squashSpeed = 0
+  let base = 0, to = 0, at = 0, speed = 0
+  const swing = armSwing(turn)
+  // The end of each length of arm: its height in the room, its speed, and where it was asked to be last time.
+  const high = variety.map(() => [0, 0, 0]), rise = variety.map(() => [0, 0, 0]), asked = variety.map(() => [0, 0, 0])
+  const spring = (s, goal, value, rate) => s.speed * s.speed * (goal - value) - 2 * s.damping * s.speed * rate
+
+  function tick(h) {
+    // The script: tuck, jump, land, pause, next jump.
+    clock += h
+    const seconds = [jump.tuck.seconds, jump.air.seconds, jump.landing.seconds, (jump.pauses[hop % jump.pauses.length] * sim.pause) / rest]
+    while (clock >= seconds[phase]) {
+      clock -= seconds[phase]
+      phase = (phase + 1) % 4
+      if (phase === 0) { base = to; hop++ }
+    }
+    const through = clock / seconds[phase], turning = stride !== 0
+    const goal = phase === 0 ? -sim.tuck : phase === 1 ? sim.height * 4 * through * (1 - through) : phase === 2 ? -sim.landing : 0
+    if (turning) to = phase === 0 ? base - turn.windUp.degrees * RAD * (stride < 0 ? -1 : 1) : base + turn.steps[hop % turn.steps.length] * RAD * stride
+    else to = base
+
+    // His head follows the script, and the base of his arms follows his head, as far as the floor lets it.
+    headSpeed += spring(jump.head, goal, head, headSpeed) * h
+    head += headSpeed * h
+    leanSpeed += spring(jump.lean, phase === 1 ? sim.lean * RAD * (hop % 2 ? -1 : 1) : 0, lean, leanSpeed) * h
+    lean += leanSpeed * h
+    bodySpeed += spring(jump.body, sim.height > 0 ? (Math.max(head, 0) * sim.lift) / sim.height : 0, body, bodySpeed) * h
+    body += bodySpeed * h
+    // Tilted, the stiff middle of him would dip into the floor: it rides up on its edge instead.
+    const tilt = Math.sin(lean), floor = Math.abs(tilt) * RIG.bends[0]
+    if (body < floor) { body = floor; bodySpeed = Math.max(bodySpeed, 0) }
+
+    // Turning, when he does, is the same as in createTurn.
+    speed += (turn.body.speed * turn.body.speed * (to - at) - 2 * turn.body.damping * turn.body.speed * speed) * h
+    at += speed * h
+    swing.tick(h, at, speed, softness)
+
+    // Each length of arm hangs from the one before it, and the floor holds it up.
+    const loose = Math.max(softness, 0), limit = Math.sin(jump.arms.limit * RAD)
+    variety.forEach((v, k) => {
+      let off = 0 // how far the length before this one hangs off the straight arm
+      for (let i = 0; i < 3; i++) {
+        const straight = body + tilt * side[k] * ends[i], want = straight + off, wantSpeed = (want - asked[k][i]) / h
+        asked[k][i] = want
+        if (loose < 0.02) { high[k][i] = want; rise[k][i] = wantSpeed } else {
+          const w = (jump.arms.speed[i] * v) / loose, d = jump.arms.damping[i]
+          rise[k][i] += (w * w * (want - high[k][i]) + 2 * d * w * (wantSpeed - rise[k][i]) - jump.arms.weight) * h
+          high[k][i] += rise[k][i] * h
+        }
+        // A bend only opens so far, and nothing goes through the floor.
+        const most = lengths[i] * limit, bend = high[k][i] - want
+        if (bend > most || bend < -most) { high[k][i] = want + (bend > 0 ? most : -most); rise[k][i] = wantSpeed }
+        if (high[k][i] < 0) { high[k][i] = 0; rise[k][i] = Math.max(rise[k][i], 0) }
+        off = high[k][i] - straight
+      }
+    })
+
+    // The head stretches as it moves and squashes when it is down in the arms.
+    const s = jump.squash, deep = Math.min(Math.max((body - head) / s.atDepth, 0), 1)
+    squashSpeed += spring(s, s.stretch * Math.min(Math.abs(headSpeed) / s.atSpeed, 1) - s.depth * deep, squash, squashSpeed) * h
+    squash += squashSpeed * h
+  }
+
+  // How far each bend hangs: the slope of its length of arm, less the slope of the one before.
+  const droop = () => high.map((ys, k) => {
+    let before = 0, slope = 0
+    return ys.map((y, i) => {
+      const off = y - body - Math.sin(lean) * side[k] * ends[i], next = Math.asin(Math.min(Math.max((before - off) / lengths[i], -1), 1)), bend = next - slope
+      before = off; slope = next
+      return bend
+    })
+  })
+
+  let owed = 0
+  const sim = {
+    softness,
+    stride,
+    height: jump.air.height,
+    lift: jump.air.lift,
+    tuck: jump.tuck.depth,
+    landing: jump.landing.depth,
+    lean: jump.lean.degrees,
+    pause: rest,
+    pose: () => ({ yaw: at, squash, arms: swing.bends(at), lift: body, lean, head: head - body, droop: droop() }),
     advance(seconds) {
       softness = sim.softness
       stride = sim.stride
