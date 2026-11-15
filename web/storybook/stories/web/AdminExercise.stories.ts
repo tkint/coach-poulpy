@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import AdminExerciseScreen, { type Exercise } from './AdminExerciseScreen.vue'
 import AdminExerciseRetireDialog from './AdminExerciseRetireDialog.vue'
 
-// The admin's exercise screen (issues #386 and #338). Was design/mockups/agreed/web/admin-catalog-exercise*.html.
+// The admin's exercise screen (issues #386 and #338).
 const meta = {
   title: 'Web/Screens/Admin/Exercise',
   component: AdminExerciseScreen,

@@ -39,4 +39,4 @@ The logic is shared Kotlin (`WorkoutFile`, `WorkoutImport`) with tests; Android 
 ## On the phone
 
 - **Share** is in the menu of the workout page and opens the system share sheet with the file.
-- Opening a `.poulpyworkout` file from another app shows a preview with **Add to my library** and **Cancel**, then opens the new workout. The preview screens are the agreed mockups ([preview](../design/mockups/agreed/phone/workout-import.html), [refused file](../design/mockups/agreed/phone/workout-import-error.html)) and wait to be agreed before they are built.
+- Opening a `.poulpyworkout` file from another app shows a preview with **Add to my library** and **Cancel**, then opens the new workout. The preview screens are the agreed mockups ([preview](https://tkint.github.io/coach-poulpy/storybook/?path=/story/mobile-screens-workout-import--workout-import), [refused file](https://tkint.github.io/coach-poulpy/storybook/?path=/story/mobile-screens-workout-import--workout-import-error)) and wait to be agreed before they are built.

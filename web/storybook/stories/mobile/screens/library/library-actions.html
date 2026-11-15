@@ -12,62 +12,62 @@
 
   <div class="list-meta">
     <span aria-live="polite">7 workouts</span>
-    <button type="button" aria-label="Sort: Recently done">Recently done<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="chevron-down"><path d="m6 9 6 6 6-6"/></svg></button>
+    <button type="button" aria-label="Sort: Recently done">Recently done<MobileIcon name="chevron-down" :size="16" /></button>
   </div>
 
   <ul id="library" style="flex: 1; min-height: 0; overflow: hidden; padding: 0 var(--cp-space-lg); display: flex; flex-direction: column; gap: var(--cp-space-sm);">
     <li class="list-row" data-component="library-entry">
-      <span class="row-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="list"><path d="M3 5h.01"/><path d="M3 12h.01"/><path d="M3 19h.01"/><path d="M8 5h13"/><path d="M8 12h13"/><path d="M8 19h13"/></svg></span>
+      <span class="row-icon" aria-hidden="true"><MobileIcon name="list" :size="22" /></span>
       <button type="button" class="row-text"><strong>Lower body strength</strong><span>Sets · 5 exercises · 40 min</span><span class="row-note row-note--done">Done today</span></button>
-      <button type="button" class="row-icon" aria-label="Start Lower body strength"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="play"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg></button>
+      <button type="button" class="row-icon" aria-label="Start Lower body strength"><MobileIcon name="play" :size="20" /></button>
     </li>
     <li class="list-row" data-component="library-entry">
-      <span class="row-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="repeat"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg></span>
+      <span class="row-icon" aria-hidden="true"><MobileIcon name="repeat" :size="22" /></span>
       <button type="button" class="row-text"><strong>Demo intervals</strong><span>Circuit · 3 parts · 24 min</span><span class="row-note">Last done Fri 23 Oct</span></button>
-      <button type="button" class="row-icon" aria-label="Start Demo intervals"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="play"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg></button>
+      <button type="button" class="row-icon" aria-label="Start Demo intervals"><MobileIcon name="play" :size="20" /></button>
     </li>
     <li class="list-row" data-component="library-entry">
-      <span class="row-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="list"><path d="M3 5h.01"/><path d="M3 12h.01"/><path d="M3 19h.01"/><path d="M8 5h13"/><path d="M8 12h13"/><path d="M8 19h13"/></svg></span>
+      <span class="row-icon" aria-hidden="true"><MobileIcon name="list" :size="22" /></span>
       <button type="button" class="row-text"><strong>Upper body</strong><span>Sets · 4 exercises · 32 min</span><span class="row-note row-note--planned">Planned · Tue 27 Oct · +2</span></button>
-      <button type="button" class="row-icon" aria-label="Start Upper body"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="play"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg></button>
+      <button type="button" class="row-icon" aria-label="Start Upper body"><MobileIcon name="play" :size="20" /></button>
     </li>
     <li class="list-row" data-component="library-entry">
-      <span class="row-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="list"><path d="M3 5h.01"/><path d="M3 12h.01"/><path d="M3 19h.01"/><path d="M8 5h13"/><path d="M8 12h13"/><path d="M8 19h13"/></svg></span>
+      <span class="row-icon" aria-hidden="true"><MobileIcon name="list" :size="22" /></span>
       <button type="button" class="row-text"><strong>Full body</strong><span>Sets · 6 exercises · 42 min</span><span class="row-note row-note--planned">Planned · Thu 29 Oct</span></button>
-      <button type="button" class="row-icon" aria-label="Start Full body"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="play"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg></button>
+      <button type="button" class="row-icon" aria-label="Start Full body"><MobileIcon name="play" :size="20" /></button>
     </li>
     <li class="list-row" data-component="library-entry">
-      <span class="row-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="repeat"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg></span>
+      <span class="row-icon" aria-hidden="true"><MobileIcon name="repeat" :size="22" /></span>
       <button type="button" class="row-text"><strong>Core and mobility</strong><span>Circuit · 5 exercises · 18 min</span><span class="row-note">Last done Mon 5 Oct</span></button>
-      <button type="button" class="row-icon" aria-label="Start Core and mobility"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="play"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg></button>
+      <button type="button" class="row-icon" aria-label="Start Core and mobility"><MobileIcon name="play" :size="20" /></button>
     </li>
     <li class="list-row" data-component="library-entry">
-      <span class="row-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="repeat"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg></span>
+      <span class="row-icon" aria-hidden="true"><MobileIcon name="repeat" :size="22" /></span>
       <button type="button" class="row-text"><strong>Easy mobility</strong><span>Circuit · 6 exercises · 15 min</span><span class="row-note">Not done yet</span></button>
-      <button type="button" class="row-icon" aria-label="Start Easy mobility"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="play"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg></button>
+      <button type="button" class="row-icon" aria-label="Start Easy mobility"><MobileIcon name="play" :size="20" /></button>
     </li>
     <li class="list-row" data-component="library-entry">
-      <span class="row-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="repeat"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg></span>
+      <span class="row-icon" aria-hidden="true"><MobileIcon name="repeat" :size="22" /></span>
       <button type="button" class="row-text"><strong>Quick sweat</strong><span>Circuit · 4 rounds · 16 min</span><span class="row-note">Not done yet</span></button>
-      <button type="button" class="row-icon" aria-label="Start Quick sweat"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="play"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg></button>
+      <button type="button" class="row-icon" aria-label="Start Quick sweat"><MobileIcon name="play" :size="20" /></button>
     </li>
   </ul>
 
-  <button type="button" class="fab" data-component="fab"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg>New workout</button>
+  <button type="button" class="fab" data-component="fab"><MobileIcon name="plus" :size="22" />New workout</button>
 
   <MobileNavBar active="library" />
   <div class="scrim" aria-hidden="true"></div>
   <div class="row-menu" id="row-menu">
     <li class="list-row" data-component="library-entry">
-        <span class="row-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="list"><path d="M3 5h.01"/><path d="M3 12h.01"/><path d="M3 19h.01"/><path d="M8 5h13"/><path d="M8 12h13"/><path d="M8 19h13"/></svg></span>
+        <span class="row-icon" aria-hidden="true"><MobileIcon name="list" :size="22" /></span>
         <button type="button" class="row-text"><strong>Lower body strength</strong><span>Sets · 5 exercises · 40 min</span><span class="row-note row-note--done">Done today</span></button>
-        <button type="button" class="row-icon" aria-label="Start Lower body strength"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="play"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg></button>
+        <button type="button" class="row-icon" aria-label="Start Lower body strength"><MobileIcon name="play" :size="20" /></button>
       </li>
     <div class="popover-menu" role="menu" data-component="popover-menu">
-      <button type="button" role="menuitem"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="calendar-plus"><path d="M16 18h6"/><path d="M16 2v3"/><path d="M19 15v6"/><path d="M21 11.5V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h8.3"/><path d="M3 9h18"/><path d="M8 2v3"/></svg>Plan for a day</button>
-      <button type="button" role="menuitem"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="copy"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>Copy</button>
+      <button type="button" role="menuitem"><MobileIcon name="calendar-plus" :size="22" />Plan for a day</button>
+      <button type="button" role="menuitem"><MobileIcon name="copy" :size="22" />Copy</button>
       <hr>
-      <button type="button" class="danger" role="menuitem"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="trash"><path d="M10 11v6"/><path d="M14 11v6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Delete</button>
+      <button type="button" class="danger" role="menuitem"><MobileIcon name="trash" :size="22" />Delete</button>
     </div>
   </div>
 </main>

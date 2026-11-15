@@ -21,7 +21,7 @@ The admin's accounts table is the reference: `/admin/accounts?q=lea&role=admin&s
 
 ## The screens
 
-The agreed layouts and states are documented in the Web app mockups on the docs site.
+The agreed layouts and states are the Web > Screens stories of the [component workshop](https://tkint.github.io/coach-poulpy/storybook/?path=/docs/design-system-introduction--docs).
 
 - **Sign in** is the landing route. An already signed-in person goes straight to the workouts. Invalid credentials produce one generic refusal, without revealing which field was wrong.
 - **Status**, at `/status`, is public and reports only whether Coach Poulpy is up or down; it does not expose server configuration ([admin status](./admin.md#status)).

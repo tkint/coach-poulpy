@@ -3,8 +3,9 @@ import { dirname, join, posix, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vitepress'
 import { withMermaid } from 'vitepress-plugin-mermaid'
-import { listMockups, platforms, stages } from './mockups.mts'
-import { slug } from './mockup-labels'
+
+// A heading's anchor, as VitePress makes it.
+const slug = (title: string) => title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 
 const here = dirname(fileURLToPath(import.meta.url))
 // copy-docs.mjs mirrors the repo's shared Markdown into site/ at the same paths, so a path from
@@ -45,25 +46,6 @@ const headings = (page: string) =>
 const brandBookSections = [
   ...readFileSync(join(here, 'theme/brand-book/book.html'), 'utf8').matchAll(/<h2 id="([^"]+)">([^<]+)<\/h2>/g),
 ].map((m) => ({ text: m[2], link: `/brand-book#${m[1]}` }))
-
-// Mockups, per platform then per stage, each stage listing its screens, so drafts and agreed
-// screens never mix and web screens never sit among the app's.
-const mockups = listMockups()
-const mockupSidebar = (platform: keyof typeof platforms) => ({
-  text: 'Mockups',
-  link: `/mockups/${platform}/`,
-  collapsed: true,
-  items: (Object.keys(stages) as (keyof typeof stages)[]).map((stage) => ({
-    text: stages[stage],
-    link: `/mockups/${platform}/${stage}`,
-    collapsed: true,
-    // One entry per section, whose page shows all its states, never one per screen state.
-    items: [...new Map(mockups.filter((m) => m.stage === stage && m.platform === platform).map((m) => [m.sectionPath, m])).values()].map((m) => ({
-      text: m.group,
-      link: m.sectionPath,
-    })),
-  })),
-})
 
 /**
  * A relative link to a file the site doesn't publish (code, scripts, agent docs) becomes a link
@@ -109,10 +91,6 @@ export default withMermaid(
       ],
     ],
     markdown: { config: linksToGitHub },
-    // A generated page (a mockups section) is named by its params.
-    transformPageData: (pageData) => {
-      if (pageData.params?.title) pageData.title = pageData.params.title
-    },
     // The web design system (web/ui, ADR 0023) is imported from its source; dedupe keeps its
     // components on the site's own copy of Vue and of the Lucide icons (ADR 0024), since web/ui's
     // own packages are not installed when the site is built.
@@ -145,15 +123,10 @@ export default withMermaid(
           ],
           [
             'Design system',
-            ['/docs/design-system', '/mockups/', '/docs/profile-and-settings', '/design/'],
+            ['/docs/design-system', '/docs/profile-and-settings', '/design/'],
             [
               { text: 'How to use it', link: '/docs/design-system' },
-              {
-                text: 'Mobile',
-                collapsed: false,
-                items: [mockupSidebar('mobile')],
-              },
-              { text: 'Web screens', link: '/storybook/index.html?path=/docs/design-system-introduction--docs', target: '_blank', rel: 'noopener' },
+              { text: 'Components and screens', link: '/storybook/index.html?path=/docs/design-system-introduction--docs', target: '_blank', rel: 'noopener' },
               { text: 'Profile and settings', link: '/docs/profile-and-settings' },
               { text: 'Generating tokens and fonts', link: '/design/README' },
               { text: 'Body map shapes: credits', link: '/design/body-map-source/NOTICE' },

@@ -21,61 +21,61 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** Live · treadmill lost, finish?. Was design/mockups/agreed/phone/live-disconnected.html. */
+/** Live · treadmill lost, finish?. */
 export const LiveDisconnected: Story = {
   name: "Treadmill lost, finish?",
   ...screen(screenLiveDisconnected),
   parameters: { mockup: { issue: 104 } },
 }
-/** Live · belt still, finish?. Was design/mockups/agreed/phone/live-finish.html. */
+/** Live · belt still, finish?. */
 export const LiveFinish: Story = {
   name: "Belt still, finish?",
   ...screen(screenLiveFinish),
   parameters: { mockup: { issue: 104 } },
 }
-/** Player · walk step without a treadmill. Was design/mockups/agreed/phone/live-mixed-player-no-treadmill.html. */
+/** Player · walk step without a treadmill. */
 export const LiveMixedPlayerNoTreadmill: Story = {
   name: "Walk step without a treadmill",
   ...screen(screenLiveMixedPlayerNoTreadmill),
   parameters: { mockup: { issue: 82 } },
 }
-/** Player · mixed workout, paused on a strength step. Was design/mockups/agreed/phone/live-mixed-player-paused.html. */
+/** Player · mixed workout, paused on a strength step. */
 export const LiveMixedPlayerPaused: Story = {
   name: "Mixed workout, paused on a strength step",
   ...screen(screenLiveMixedPlayerPaused),
   parameters: { a11y: { test: 'todo' }, mockup: { issue: 220 } },
 }
-/** Player · mixed workout, strength step with treadmill numbers. Was design/mockups/agreed/phone/live-mixed-player-strength.html. */
+/** Player · mixed workout, strength step with treadmill numbers. */
 export const LiveMixedPlayerStrength: Story = {
   name: "Mixed workout, strength step with treadmill numbers",
   ...screen(screenLiveMixedPlayerStrength),
   parameters: { mockup: { issue: 220 } },
 }
-/** Player · walk step waits for the belt. Was design/mockups/agreed/phone/live-mixed-player-waits-for-belt.html. */
+/** Player · walk step waits for the belt. */
 export const LiveMixedPlayerWaitsForBelt: Story = {
   name: "Walk step waits for the belt",
   ...screen(screenLiveMixedPlayerWaitsForBelt),
   parameters: { mockup: { issue: 82 } },
 }
-/** Live · what are you doing?. Was design/mockups/agreed/phone/live-picker.html. */
+/** Live · what are you doing?. */
 export const LivePicker: Story = {
   name: "What are you doing?",
   ...screen(screenLivePicker),
   parameters: { mockup: { issue: 104 } },
 }
-/** Live · ready. Was design/mockups/agreed/phone/live-ready.html. */
+/** Live · ready. */
 export const LiveReady: Story = {
   name: "Ready",
   ...screen(screenLiveReady),
   parameters: { mockup: { issue: 104 } },
 }
-/** Live · summary. Was design/mockups/agreed/phone/live-summary.html. */
+/** Live · summary. */
 export const LiveSummary: Story = {
   name: "Summary",
   ...screen(screenLiveSummary),
   parameters: { mockup: { issue: 104 } },
 }
-/** Live · waiting for the treadmill. Was design/mockups/agreed/phone/live-waiting.html. */
+/** Live · waiting for the treadmill. */
 export const LiveWaiting: Story = {
   name: "Waiting for the treadmill",
   ...screen(screenLiveWaiting),

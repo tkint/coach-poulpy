@@ -3,7 +3,7 @@ import AdminCatalogScreen, { type Row } from './AdminCatalogScreen.vue'
 import AdminCatalogPublishDialog from './AdminCatalogPublishDialog.vue'
 import AdminCatalogRetireDialog from './AdminCatalogRetireDialog.vue'
 
-// The admin's catalog list (issue #336). Was design/mockups/agreed/web/admin-catalog*.html.
+// The admin's catalog list (issue #336).
 const meta = {
   title: 'Web/Screens/Admin/Catalog',
   component: AdminCatalogScreen,

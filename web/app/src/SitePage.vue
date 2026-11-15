@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// The frame of the account pages (design/mockups/agreed/web): the site's name, then Poulpy beside
+// The frame of the account pages (the Web > Screens > Account stories): the site's name, then Poulpy beside
 // the words from tablet width, above them on a phone.
 import { poulpyDrawings, type PoulpyDrawing } from '@coach-poulpy/ui'
 

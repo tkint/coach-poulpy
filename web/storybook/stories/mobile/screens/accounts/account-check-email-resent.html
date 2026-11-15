@@ -1,12 +1,12 @@
 <main class="phone">
-  <header class="top-bar" style="justify-content: flex-start;"><button type="button" class="icon-button" aria-label="Close"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></header>
+  <header class="top-bar" style="justify-content: flex-start;"><button type="button" class="icon-button" aria-label="Close"><MobileIcon name="x" :size="22" /></button></header>
   <div class="page-body" style="gap: var(--cp-space-lg); padding-top: var(--cp-space-lg);">
     <img src="../../../poulpy/pose_standing_tall.svg" alt="" width="132" height="120" style="align-self: center;">
     <p class="poulpy-line" id="poulpy-line">Take your time. I’ll wait by the mailbox.</p>
     <div class="intro" style="text-align: center;"><h1 class="title" style="font-size: 30px; line-height: 34px;">Check your email</h1>
     <p class="muted">If <strong>alex@example.com</strong> can get an account, a link is on its way. Open it on this phone to finish. It works for 24 hours.</p></div>
     <MobileInfoCard id="guest-note">Until then, your training stays on this phone and the app works as usual.</MobileInfoCard>
-    <p class="done-line" id="resent" role="status"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="check"><path d="M20 6 9 17l-5-5"/></svg><span>Link sent again.</span></p>
+    <p class="done-line" id="resent" role="status"><MobileIcon name="check" :size="18" /><span>Link sent again.</span></p>
     <div class="help-lines" id="help-lines"><p>Didn’t get the email? <button type="button" class="link">Send it again</button></p><p>Wrong address? <button type="button" class="link">Try again with another email</button></p></div>
   </div>
   <div class="action-bar">

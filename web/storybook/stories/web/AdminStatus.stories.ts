@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { CpBadge, CpCard, CpErrorNote, CpTable } from '@coach-poulpy/ui'
 import AdminShell from './AdminShell.vue'
 
-// The admin's status: the mail server and the pending registrations (issue #336). Was design/mockups/agreed/web/admin-status*.html.
+// The admin's status: the mail server and the pending registrations (issue #336).
 const meta = {
   title: 'Web/Screens/Admin/Status',
   tags: ['!autodocs', 'agreed'],

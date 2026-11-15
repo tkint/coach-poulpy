@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import { CpButton, CpErrorNote, CpPasswordField } from '@coach-poulpy/ui'
 import SitePage from './SitePage.vue'
 
-// The pages a confirmation or reset link opens (issue #310). Was design/mockups/agreed/web/account-*.html.
+// The pages a confirmation or reset link opens (issue #310).
 const meta = {
   title: 'Web/Screens/Account',
   tags: ['!autodocs', 'agreed'],

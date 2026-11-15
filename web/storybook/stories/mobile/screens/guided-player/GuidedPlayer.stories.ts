@@ -21,61 +21,61 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** Player · circuit round, no sets. Was design/mockups/agreed/phone/player-circuit-round.html. */
+/** Player · circuit round, no sets. */
 export const PlayerCircuitRound: Story = {
   name: "Circuit round, no sets",
   ...screen(screenPlayerCircuitRound),
   parameters: { mockup: { issue: 92 } },
 }
-/** Player · finished, a run. Was design/mockups/agreed/phone/player-finished-run.html. */
+/** Player · finished, a run. */
 export const PlayerFinishedRun: Story = {
   name: "Finished, a run",
   ...screen(screenPlayerFinishedRun),
   parameters: { mockup: { issue: 104 } },
 }
-/** Player · finished. Was design/mockups/agreed/phone/player-finished.html. */
+/** Player · finished. */
 export const PlayerFinished: Story = {
   name: "Finished",
   ...screen(screenPlayerFinished),
   parameters: { mockup: { issue: 104 } },
 }
-/** Player · sets workout, paused on set 2 of 3. Was design/mockups/agreed/phone/player-paused.html. */
+/** Player · sets workout, paused on set 2 of 3. */
 export const PlayerPaused: Story = {
   name: "Sets workout, paused on set 2 of 3",
   ...screen(screenPlayerPaused),
   parameters: { a11y: { test: 'todo' }, mockup: { issue: 220 } },
 }
-/** Player · ready. Was design/mockups/agreed/phone/player-ready.html. */
+/** Player · ready. */
 export const PlayerReady: Story = {
   name: "Ready",
   ...screen(screenPlayerReady),
   parameters: { mockup: { issue: 104 } },
 }
-/** Player · recover in a round. Was design/mockups/agreed/phone/player-recover.html. */
+/** Player · recover in a round. */
 export const PlayerRecover: Story = {
   name: "Recover in a round",
   ...screen(screenPlayerRecover),
   parameters: { mockup: { issue: 92 } },
 }
-/** Player · repeat in a sets workout. Was design/mockups/agreed/phone/player-repeat-in-sets.html. */
+/** Player · repeat in a sets workout. */
 export const PlayerRepeatInSets: Story = {
   name: "Repeat in a sets workout",
   ...screen(screenPlayerRepeatInSets),
   parameters: { mockup: { issue: 92 } },
 }
-/** Player · rest between sets. Was design/mockups/agreed/phone/player-rest.html. */
+/** Player · rest between sets. */
 export const PlayerRest: Story = {
   name: "Rest between sets",
   ...screen(screenPlayerRest),
   parameters: { mockup: { issue: 104 } },
 }
-/** Player · sets workout, set 2 of 3. Was design/mockups/agreed/phone/player-set.html. */
+/** Player · sets workout, set 2 of 3. */
 export const PlayerSet: Story = {
   name: "Sets workout, set 2 of 3",
   ...screen(screenPlayerSet),
   parameters: { mockup: { issue: 220 } },
 }
-/** Player · in the warm-up. Was design/mockups/agreed/phone/player-warm-up.html. */
+/** Player · in the warm-up. */
 export const PlayerWarmUp: Story = {
   name: "In the warm-up",
   ...screen(screenPlayerWarmUp),
