@@ -57,6 +57,7 @@ const files = {
       'the-rules-of-the-shape': 'brand-poulpy-in-3d',
       'his-six-moods': 'brand-poulpy-in-3d',
       'his-twelve-poses': 'brand-poulpy-in-3d',
+      'his-pictures': 'brand-poulpy-in-3d',
       'his-moves': 'brand-poulpy-in-3d',
       'turning-in-short-steps': 'brand-poulpy-moves-turning',
       'little-jumps': 'brand-poulpy-moves-little-jumps',

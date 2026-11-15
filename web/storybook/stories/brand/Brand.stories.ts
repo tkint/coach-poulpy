@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import BrandBook from './BrandBook.vue'
 import Poulpy3d from './Poulpy3d.vue'
+import PoulpyPictures from './PoulpyPictures.vue'
 
 // The live parts of the Brand pages: Poulpy in 3D and the brand book. Each shows on its page (Poulpy3d.mdx and the
 // pages of his moves in poulpy-moves/, one move a page so no page runs two at once, and BrandBook.mdx); the page names them, so they stay out of the sidebar.
@@ -18,6 +19,8 @@ export const Model: Story = { render: () => ({ components: { Poulpy3d }, templat
 export const Moods: Story = { render: () => ({ components: { Poulpy3d }, template: '<Poulpy3d moods />' }) }
 /** Poulpy in 3D in each of his twelve poses. */
 export const Poses: Story = { render: () => ({ components: { Poulpy3d }, template: '<Poulpy3d poses />' }) }
+/** The pictures painted from the 3D Poulpy: his six moods and twelve poses. */
+export const Pictures: Story = { render: () => ({ components: { PoulpyPictures }, template: '<PoulpyPictures />' }) }
 /** Poulpy in 3D, turning in short steps, with the controls to try other feels. */
 export const Turning: Story = { render: () => ({ components: { Poulpy3d }, template: '<Poulpy3d motion="turn" />' }) }
 /** Poulpy in 3D, doing little jumps on the spot, with the controls to tune the jump. */

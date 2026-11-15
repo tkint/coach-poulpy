@@ -38,6 +38,17 @@ The model also takes the twelve [poses](./brand.md#when-each-drawing-shows) of t
 - **He still never lifts an arm.** Standing tall stretches his arms taller and lifts his head with them; Side glance leans his head. Nothing else moves.
 - **The loader and the app icons are not here yet.** They are the next part of replacing the drawings with the model ([Brand decisions](./brand-decisions.md#16-the-3d-poulpy-replaces-the-drawings), decision 16); the apps and the website still show the 2D drawings.
 
+## His pictures
+
+Where the apps and the website do not need him live, they take a picture of him: one for each of the six moods and twelve poses, painted from the model. They are in [`design/poulpy-3d/pictures`](../design/poulpy-3d/pictures), one PNG each at 744 by 678 pixels, the same frame as the drawings they replace so a picture can take a drawing's place without moving anything. **They are transparent around him**, with no background and no tile, so they sit on a light or a dark screen alike; the preview below shows them on the page's own background.
+
+<!-- live: Pictures -->
+
+- **They are painted by our own script.** [`design/poulpy-3d/picture.mjs`](../design/poulpy-3d/picture.mjs) draws what `model.mjs` and `poses.mjs` build, pixel by pixel, in plain JavaScript with the look of `LOOK`: the same flat shading, gleam and floor shadow as the live view. No browser or graphics card is involved, so every machine writes the same pixels, as for the app icons.
+- **Every picture is taken from the same place.** He is seen from a little above and face on, close enough to fill the frame, and the same distance for all of them so he is the same size from one to the next.
+- **The floor shadow is part of the picture**: a see-through dark blue that fades to nothing, so it shows on a light screen and disappears on a dark one.
+- **Generated, never edited.** `node design/build-poulpy-pictures.mjs` writes them and CI runs it with `--check`. Change the model, a face or a pose, then regenerate.
+
 ## His moves
 
 He moves in 3D too. Each move has its own page in the component workshop, so only one runs at a time:

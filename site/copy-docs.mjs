@@ -24,5 +24,5 @@ for (const path of shared) {
   rmSync(path, { recursive: true, force: true })
   cpSync(`../${path}`, path, { recursive: true })
 }
-cpSync('../design/poulpy/mood_happy.svg', 'public/poulpy.svg')
+cpSync('../design/poulpy-3d/pictures/mood_happy.png', 'public/poulpy.png')
 
