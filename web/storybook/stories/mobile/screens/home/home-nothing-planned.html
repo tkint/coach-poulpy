@@ -4,17 +4,10 @@
     <h1>Home</h1>
   </div>
   <div class="page-body" style="padding-top: var(--cp-space-sm); gap: var(--cp-space-sm);">
-    <section class="poulpy-card" id="poulpy" data-component="poulpy-card" aria-label="Poulpy">
-      <div class="tentacle-ring">
-        <svg viewBox="0 0 200 200" width="104" height="104" role="img" aria-label="6 of 8 lit · 1 full octopus"><path class="lit" d="M117.65 9.20 A92.5 92.5 0 0 1 151.73 23.31"/><path class="lit" d="M176.69 48.27 A92.5 92.5 0 0 1 190.80 82.35"/><path class="lit" d="M190.80 117.65 A92.5 92.5 0 0 1 176.69 151.73"/><path class="lit" d="M151.73 176.69 A92.5 92.5 0 0 1 117.65 190.80"/><path class="lit" d="M82.35 190.80 A92.5 92.5 0 0 1 48.27 176.69"/><path class="lit" d="M23.31 151.73 A92.5 92.5 0 0 1 9.20 117.65"/><path d="M9.20 82.35 A92.5 92.5 0 0 1 23.31 48.27"/><path d="M48.27 23.31 A92.5 92.5 0 0 1 82.35 9.20"/></svg>
-        <img src="../../../poulpy/mood_recovering.svg" alt="Poulpy, recovering">
-      </div>
-      <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px;">
-        <h2>Resting</h2>
-        <p>Rest is training too.</p>
-        <span class="label" style="margin-top: 2px; font-size: 12px; letter-spacing: 0.06em; color: inherit;">6 of 8 lit · 1 full octopus</span>
-      </div>
-    </section>
+    <MobilePoulpyCard id="poulpy" aria-label="Poulpy" title="Resting" meta="6 of 8 lit · 1 full octopus">
+      <template #art><MobileTentacleRing :lit="6" label="6 of 8 lit · 1 full octopus" picture="../../../poulpy/mood_recovering.svg" picture-alt="Poulpy, recovering" /></template>
+      Rest is training too.
+    </MobilePoulpyCard>
     <section class="empty-state" id="nothing-planned" data-component="empty-state" aria-labelledby="nothing-planned-title" style="margin-top: var(--cp-space-xs); padding: var(--cp-space-md); gap: var(--cp-space-xs);">
       <h2 id="nothing-planned-title">Nothing planned today</h2>
       <p>Enjoy the rest, or pick a workout from your library if you feel like moving.</p>
