@@ -1,11 +1,14 @@
-import { Meta, Markdown, Story } from '@storybook/addon-docs/blocks'
-import { markdownPages } from '../../markdown-pages'
+import { Meta, Story } from '@storybook/addon-docs/blocks'
 import * as Live from '../Brand.stories'
-
-{/* Shown from docs/poulpy-3d.md: edit the text there. Each <!-- live: Name --> in it is the Brand.stories story of that name. */}
-
-export const parts = markdownPages('poulpy-3d').sections('Jumping around').split(/<!-- live: (\w+) -->/)
 
 <Meta title="Brand/Poulpy moves/Jumping around" />
 
-{parts.map((part, index) => (index % 2 ? <Story key={index} of={Live[part]} /> : <Markdown key={index}>{part.replace(/^## /, '# ')}</Markdown>))}
+# Jumping around
+
+The same [jump](?path=/docs/brand-poulpy-moves-little-jumps--docs) can turn him: each jump takes him one step around, the steps being those of his turn. He winds up while he tucks, turns in the air and his arms trail behind as they do on the floor.
+
+<Story of={Live.JumpingAround} />
+
+**Step** and the two arrows work as for the turn, and here Step goes up to 720 degrees: at 360 a jump is a whole turn, at 720 two. The steps keep their small differences, so he does not land facing quite the same way each time. Every other control is the jump's.
+
+Given a `stride`, `createJump()` turns him as `createTurn()` does.

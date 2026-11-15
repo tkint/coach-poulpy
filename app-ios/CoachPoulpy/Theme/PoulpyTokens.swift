@@ -110,7 +110,7 @@ enum PoulpyRadius {
     static let pill: CGFloat = 999
 }
 
-/// Control sizes from docs/design-system.md. Never write a literal height in a screen.
+/// Control sizes from web/storybook/stories/design-system/rules/. Never write a literal height in a screen.
 enum PoulpySize {
     static let button: CGFloat = 44
     static let buttonLarge: CGFloat = 52

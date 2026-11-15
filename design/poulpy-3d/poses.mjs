@@ -8,7 +8,7 @@
 //   `behind`  the same, behind him
 // The effects are flat, as in the drawing, and whoever draws him keeps them facing the viewer.
 // What is on him is part of his face: sweat, a tear. He never lifts an arm in any of them (brand decision 8).
-// To change a pose, edit POSES below and look at the page; the rules are in docs/poulpy-3d.md.
+// To change a pose, edit POSES below and look at the page; the rules are in web/storybook/stories/brand/Poulpy3d.mdx.
 import { SHAPE, FACES, MOODS, buildPoulpy3d, egg, facing, join, linear, pathPoints, tube } from './model.mjs'
 
 // The drawing's floor is y 165 and its middle x 100; 64 of its units are 1 in the model, for what stands around him.

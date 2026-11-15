@@ -4,7 +4,7 @@
 //
 // The look is LOOK in model.mjs: flat cartoon shading with one shadow band, a light that belongs to the room,
 // the gleam where that light hits his head, and a soft round shadow on the floor.
-// The rules are in docs/poulpy-3d.md.
+// The rules are in web/storybook/stories/brand/Poulpy3d.mdx.
 import { deflateSync } from 'node:zlib'
 import { LOOK, gleamPatch } from './model.mjs'
 

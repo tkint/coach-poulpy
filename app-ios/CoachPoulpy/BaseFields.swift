@@ -1,7 +1,7 @@
 import SwiftUI
 import UIKit
 
-// The base fields every form is built from (docs/design-system.md "Base fields"):
+// The base fields every form is built from (web/storybook/stories/design-system/rules/Components.mdx "Base fields"):
 // a text field, a select field that opens a sheet, a number field that selects its
 // text and opens the numeric keyboard, and option sheets (one choice, several, or a
 // step slider). Mockups: profile-edit, profile-*-sheet, body-log-sheet.
@@ -52,7 +52,7 @@ struct FieldNote: View {
     }
 }
 
-/// What is wrong with a field: crimson, with an icon (docs/design-system.md).
+/// What is wrong with a field: crimson, with an icon (web/storybook/stories/design-system/rules/).
 struct FieldError: View {
     let text: String
     init(_ text: String) { self.text = text }

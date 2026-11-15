@@ -54,7 +54,7 @@
 /* hero */
 .brand-book .hero { padding-block: 48px 40px; display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 32px; align-items: center; }
 .brand-book .hero .copy { display: grid; gap: 18px; min-width: 0; }
-/* The plush blue is too light for text (docs/design-system.md, Colour): the title's blue word uses the lagoon blue. */
+/* The plush blue is too light for text (web/storybook/stories/design-system/rules/Colour.mdx): the title's blue word uses the lagoon blue. */
 .brand-book .hero .hero-title .blue { color: var(--primary); }
 .brand-book .hero .hero-title .ember { color: var(--poulpy-ember); }
 .brand-book .hero .lede { font-size: 18px; }

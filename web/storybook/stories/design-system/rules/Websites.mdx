@@ -1,12 +1,32 @@
-import { Meta, Markdown } from '@storybook/addon-docs/blocks'
-import { markdownPages } from '../../markdown-pages'
-
-export const rules = markdownPages('design-system').sections
+import { Meta } from '@storybook/addon-docs/blocks'
 
 <Meta title="Design system/Rules/Websites" />
 
-{/* Shown from docs/design-system.md: edit the rules there. */}
-
 # Websites
 
-<Markdown>{rules('Websites', 'Web sizes')}</Markdown>
+The landing site, the web app, the web screens of the workshop and the docs site share one package, `web/ui`: DaisyUI with the Poulpy theme and a few Vue components ([ADR 0023](https://tkint.github.io/coach-poulpy/docs/adr/0023-the-websites-share-one-vue-and-daisyui-design-system)). Each component, in every state, with the classes it renders and its interaction and accessibility checks, is in the [component workshop](https://tkint.github.io/coach-poulpy/storybook/) ([ADR 0028](https://tkint.github.io/coach-poulpy/docs/adr/0028-storybook-is-the-component-workshop-of-the-design-system)).
+
+- Use the shared components (`CpButton`, `CpChip`...) in Vue, and never restyle a DaisyUI class in an app. A missing shape goes in `web/ui`, with its stories and the classes it renders in its docs, in the same PR.
+- Every DaisyUI class carries the `cp-` prefix (`cp-btn cp-btn-primary`). Our own classes (`cp-chip`, `cp-stepper`, `cp-type-label`...) never reuse a DaisyUI name, so the two cannot clash.
+- The roles above keep their meaning: `cp-btn-primary` is `primary`, `cp-btn-secondary` is the tonal `primaryContainer`, `cp-btn-accent` is `grumpy` and only for the catch-up action. Never use DaisyUI's `warning` classes: ember is not a warning, and a problem is an `error`.
+- Phone and tablet mockups keep their own stylesheet (`web/storybook/stories/mobile/screens/screens.css`): they draw the native screens, which DaisyUI's look does not match.
+- Icons on the websites and in every screen come from Lucide, as in the [Icons](?path=/docs/design-system-rules-icons--docs) section ([ADR 0024](https://tkint.github.io/coach-poulpy/docs/adr/0024-lucide-is-the-icon-set)).
+
+
+## Web sizes
+
+Buttons, fields and icons on the websites share one size scale, set with the `size` prop of the `Cp*` components: `xs`, `sm`, `md`, `lg`, `xl`, `xxl`. A component without a `size` is `md`. The numbers come from `webSize` in `design/tokens.json` (`--cp-control-*` and `--cp-icon-*` in the generated `tokens.css`); never write a literal height or icon size.
+
+| Size | Button and field height | Icon (`CpIcon`) |
+| --- | --- | --- |
+| `xs` | 24 | 12 |
+| `sm` | 32 | 16 |
+| `md` | 40 (the default) | 20 |
+| `lg` | 48 | 24 |
+| `xl` | 56 | 32 |
+| `xxl` | 64 | 40 |
+
+- Which components take `size`: `CpButton`, `CpTextField`, `CpPasswordField`, `CpSearchField`, `CpSelectField`, `CpMultiSelectField`, `CpChipSelectField`, `CpPagination`, `CpSegmentedControl`, and `CpIcon` for every Lucide icon. Each has a Sizes story in the workshop with a size control.
+- A screen's main action is `xl` (56), a card's actions and form fields are `md`, a list's own search is `lg`, and the controls of a filter bar or a table's pagination are `sm`. A control's own icons follow its size.
+- Draw an icon with `<CpIcon :icon="Search" size="sm" />`, never a Lucide component with a `size-*` class.
+- `CpChip`, `CpAvatar`, `CpBadge`, `CpTextarea` and `CpStepper` keep their own sizes for now.
