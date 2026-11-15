@@ -7,7 +7,7 @@
 // The same pictures go to the apps, under the names their screens already use:
 //   app-android/src/main/res/drawable-nodpi/poulpy_<name>.png                  Android, drawn at whatever size the screen gives
 //   app-ios/CoachPoulpy/Assets.xcassets/Poulpy/Poulpy<Name>.imageset           iOS, a 3x image
-// The apps and the website take these (see docs/poulpy-3d.md); paintPoulpy in poulpy-3d/picture.mjs paints them in plain
+// The apps and the website take these (see web/storybook/stories/brand/poulpy-3d.md); paintPoulpy in poulpy-3d/picture.mjs paints them in plain
 // JavaScript, so every machine writes the same pixels.
 import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync } from 'node:fs'
 import { dirname, join } from 'node:path'

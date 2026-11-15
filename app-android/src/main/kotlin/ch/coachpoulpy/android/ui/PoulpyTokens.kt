@@ -150,7 +150,7 @@ object PoulpyRadius {
     val pill = 999.dp
 }
 
-/** Control sizes from docs/design-system.md. Never write a literal height in a screen. */
+/** Control sizes from web/storybook/stories/design-system/design-system.md. Never write a literal height in a screen. */
 object PoulpySize {
     val button = 44.dp
     val buttonLarge = 52.dp

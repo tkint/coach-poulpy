@@ -1,6 +1,6 @@
 # Poulpy in 3D
 
-The plush as a solid you can turn around: a bubble of a head tucked into eight puffy arms, drawn with flat cartoon shading. One file, [`design/poulpy-3d/model.mjs`](../design/poulpy-3d/model.mjs), describes his shape; the [Poulpy in 3D](https://tkint.github.io/coach-poulpy/storybook/?path=/docs/brand-poulpy-in-3d--docs) page of the component workshop draws it live, with a page for each of [his moves](#his-moves), and [`design/build-poulpy-3d.mjs`](../design/build-poulpy-3d.mjs) writes it as glTF files. He is not in the apps yet: this is the reference to build from.
+The plush as a solid you can turn around: a bubble of a head tucked into eight puffy arms, drawn with flat cartoon shading. One file, [`design/poulpy-3d/model.mjs`](../../../../design/poulpy-3d/model.mjs), describes his shape; the [Poulpy in 3D](https://tkint.github.io/coach-poulpy/storybook/?path=/docs/brand-poulpy-in-3d--docs) page of the component workshop draws it live, with a page for each of [his moves](#his-moves), and [`design/build-poulpy-3d.mjs`](../../../../design/build-poulpy-3d.mjs) writes it as glTF files. He is not in the apps yet: this is the reference to build from.
 
 <!-- live: Model -->
 
@@ -27,7 +27,7 @@ The model makes the six [moods](./brand.md#moods) of the drawings: the same face
 
 ## His twelve poses
 
-The model also takes the twelve [poses](./brand.md#when-each-drawing-shows) of the drawings, each in the shade of its mood. They are in [`design/poulpy-3d/poses.mjs`](../design/poulpy-3d/poses.mjs), built on the shape and the faces of `model.mjs`.
+The model also takes the twelve [poses](./brand.md#when-each-drawing-shows) of the drawings, each in the shade of its mood. They are in [`design/poulpy-3d/poses.mjs`](../../../../design/poulpy-3d/poses.mjs), built on the shape and the faces of `model.mjs`.
 
 <!-- live: Poses -->
 
@@ -40,11 +40,11 @@ The model also takes the twelve [poses](./brand.md#when-each-drawing-shows) of t
 
 ## His pictures
 
-Where the apps and the website do not need him live, they take a picture of him: one for each of the six moods and twelve poses, painted from the model. They are in [`design/poulpy-3d/pictures`](../design/poulpy-3d/pictures), one PNG each at 744 by 678 pixels, the same frame as the drawings they replace so a picture can take a drawing's place without moving anything. **They are transparent around him**, with no background and no tile, so they sit on a light or a dark screen alike; the preview below shows them on the page's own background.
+Where the apps and the website do not need him live, they take a picture of him: one for each of the six moods and twelve poses, painted from the model. They are in [`design/poulpy-3d/pictures`](../../../../design/poulpy-3d/pictures), one PNG each at 744 by 678 pixels, the same frame as the drawings they replace so a picture can take a drawing's place without moving anything. **They are transparent around him**, with no background and no tile, so they sit on a light or a dark screen alike; the preview below shows them on the page's own background.
 
 <!-- live: Pictures -->
 
-- **They are painted by our own script.** [`design/poulpy-3d/picture.mjs`](../design/poulpy-3d/picture.mjs) draws what `model.mjs` and `poses.mjs` build, pixel by pixel, in plain JavaScript with the look of `LOOK`: the same flat shading, gleam and floor shadow as the live view. No browser or graphics card is involved, so every machine writes the same pixels, as for the app icons.
+- **They are painted by our own script.** [`design/poulpy-3d/picture.mjs`](../../../../design/poulpy-3d/picture.mjs) draws what `model.mjs` and `poses.mjs` build, pixel by pixel, in plain JavaScript with the look of `LOOK`: the same flat shading, gleam and floor shadow as the live view. No browser or graphics card is involved, so every machine writes the same pixels, as for the app icons.
 - **Every picture is taken from the same place.** He is seen from a little above and face on, close enough to fill the frame, and the same distance for all of them so he is the same size from one to the next.
 - **The floor shadow is part of the picture**: a see-through dark blue that fades to nothing, so it shows on a light screen and disappears on a dark one.
 - **Generated, never edited.** `node design/build-poulpy-pictures.mjs` writes them and CI runs it with `--check`. Change the model, a face or a pose, then regenerate.
@@ -59,7 +59,7 @@ He moves in 3D too. Each move has its own page in the component workshop, so onl
 - [The champion jumps for joy](#the-champion-jumps-for-joy), his medal bouncing and confetti flying.
 - [The cocky one winks](#the-cocky-one-winks), and stars pop up around him.
 
-All of them are one file, [`design/poulpy-3d/motion.mjs`](../design/poulpy-3d/motion.mjs), next to the shape. A preview only moves while it is on screen, and starts paused for anyone who asked their device for less motion; an app must do the same.
+All of them are one file, [`design/poulpy-3d/motion.mjs`](../../../../design/poulpy-3d/motion.mjs), next to the shape. A preview only moves while it is on screen, and starts paused for anyone who asked their device for less motion; an app must do the same.
 
 ## Turning in short steps
 
@@ -148,19 +148,19 @@ The switch picks the eye he shuts, named for him: his right eye, the design, is 
 
 | File | What it is |
 | --- | --- |
-| [poulpy_blue.glb](../design/poulpy-3d/poulpy_blue.glb) | The blue, smiling side, as binary glTF |
-| [poulpy_ember.glb](../design/poulpy-3d/poulpy_ember.glb) | The ember, grumpy side, as binary glTF |
-| [poulpy_blue_turn.glb](../design/poulpy-3d/poulpy_blue_turn.glb) | The blue side with the animation `turn`: one full turn in short steps, made to loop |
-| [poulpy_ember_turn.glb](../design/poulpy-3d/poulpy_ember_turn.glb) | The ember side with the same animation |
-| [`design/poulpy-3d/model.mjs`](../design/poulpy-3d/model.mjs) | The shape itself, as plain JavaScript with no dependency |
-| [`design/poulpy-3d/poses.mjs`](../design/poulpy-3d/poses.mjs) | His twelve poses, the same way |
-| [`design/poulpy-3d/motion.mjs`](../design/poulpy-3d/motion.mjs) | How he moves, the same way |
+| [poulpy_blue.glb](../../../../design/poulpy-3d/poulpy_blue.glb) | The blue, smiling side, as binary glTF |
+| [poulpy_ember.glb](../../../../design/poulpy-3d/poulpy_ember.glb) | The ember, grumpy side, as binary glTF |
+| [poulpy_blue_turn.glb](../../../../design/poulpy-3d/poulpy_blue_turn.glb) | The blue side with the animation `turn`: one full turn in short steps, made to loop |
+| [poulpy_ember_turn.glb](../../../../design/poulpy-3d/poulpy_ember_turn.glb) | The ember side with the same animation |
+| [`design/poulpy-3d/model.mjs`](../../../../design/poulpy-3d/model.mjs) | The shape itself, as plain JavaScript with no dependency |
+| [`design/poulpy-3d/poses.mjs`](../../../../design/poulpy-3d/poses.mjs) | His twelve poses, the same way |
+| [`design/poulpy-3d/motion.mjs`](../../../../design/poulpy-3d/motion.mjs) | How he moves, the same way |
 
 The glTF files open in any 3D tool or engine. Poulpy stands on the floor (y = 0, y up) and faces +z; his head is about one unit from centre to edge. In the two files that stand still, each part is its own named mesh (`head`, `head_lining`, `arm_1` to `arm_8` and their `_lining`, `eye_left`, `eye_left_shine`, `cheek_left`, `mouth`, `gleam`, plus `brow_left` and `brow_right` on the ember side; left and right are Poulpy's own), so a part can be recoloured, hidden or animated on its own.
 
 The two `_turn` files hold the same meshes, rigged. The node `turn` faces him and `squash` under it carries his head and face; each arm is skinned to `turn` and to its own chain of three joints, `arm_1_bend_1` to `arm_1_bend_3` from the head outwards. The animation `turn` plays one full turn at 30 frames a second and ends where it starts, so any player can loop it. It is a recording of the springs at their design values: an engine that wants them live, to change the softness or to react to something, runs `createTurn()` from `motion.mjs` on the same joints, as the workshop's preview does.
 
-A glTF file only carries shapes and plain matte colours. The look is the renderer's job, and `LOOK` in `model.mjs` gives its numbers: the light's direction as the viewer sees it, the shadow band's strength, where the gleam sits, and the outline's width and tint. A renderer that wants the gleam to follow the light drops the `gleam` mesh from the file and asks `gleamPatch(direction)` for a new one whenever Poulpy or the camera turns. [`poulpy3dScene.ts`](../web/storybook/stories/brand/poulpy3dScene.ts), which draws the workshop's preview with three.js, is the worked example.
+A glTF file only carries shapes and plain matte colours. The look is the renderer's job, and `LOOK` in `model.mjs` gives its numbers: the light's direction as the viewer sees it, the shadow band's strength, where the gleam sits, and the outline's width and tint. A renderer that wants the gleam to follow the light drops the `gleam` mesh from the file and asks `gleamPatch(direction)` for a new one whenever Poulpy or the camera turns. [`poulpy3dScene.ts`](../../../../web/storybook/stories/brand/poulpy3dScene.ts), which draws the workshop's preview with three.js, is the worked example.
 
 ## Changing the design
 
@@ -175,7 +175,7 @@ His poses are in `poses.mjs`: `POSES` gives each one its mood, its face, what he
 
 How he moves is in `motion.mjs`: `TURN` for his turn, `JUMP` for his jump, `CHEER` for the champion's, `WINK` for the cocky one's and `RIG` for where the arms bend.
 
-His colours are the `color.poulpy` tokens of [`design/tokens.json`](../design/tokens.json), never written into the model.
+His colours are the `color.poulpy` tokens of [`design/tokens.json`](../../../../design/tokens.json), never written into the model.
 
 Edit, then regenerate and look at the workshop's page (`npm run storybook` in `web/`):
 

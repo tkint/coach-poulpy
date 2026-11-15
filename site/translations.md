@@ -23,7 +23,7 @@ Your changes show up in the app's next build after the pull request is merged.
 - **Words in braces stay as they are.** `{name}` or `{count, number}` is filled in by the app. You can move it, but don't translate or rename it.
 - **Plurals have one sentence per form.** Fink shows a field for each form your language needs, such as one and many in French. `#` stands for the number.
 - **Type normally.** A plain apostrophe, three dots and ordinary spaces are fine. Typographic apostrophes, ellipses and your language's non-breaking spaces are added automatically after your changes are merged.
-- **Poulpy is a character.** He speaks in the first person, warmly, and never makes anyone feel guilty. His lines are grouped under `poulpy.` in Fink. His voice is described on the [brand](/docs/brand) page.
+- **Poulpy is a character.** He speaks in the first person, warmly, and never makes anyone feel guilty. His lines are grouped under `poulpy.` in Fink. His voice is described on the [brand](/storybook/index.html?path=/docs/brand-voice-logo-and-type--docs) page.
 - **Exercise texts come from the catalog.** Their messages start with the exercise's short name, like `goblet-squat.name`. Search aliases are extra words people might type when searching. They're never shown, so add the words people really use rather than translating the English list.
 
 ## Bring a new language

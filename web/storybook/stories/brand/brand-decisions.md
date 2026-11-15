@@ -1,6 +1,6 @@
 # Brand decisions
 
-What was decided about Poulpy and the brand, why, and when. The [brand page](./brand.md) and the brand book say what Poulpy is today; this page keeps the reasons, so a later change can see what it overturns. Architecture decisions live in [`docs/adr/`](./adr/) instead.
+What was decided about Poulpy and the brand, why, and when. The [brand page](./brand.md) and the brand book say what Poulpy is today; this page keeps the reasons, so a later change can see what it overturns. Architecture decisions live in [`docs/adr/`](../../../../docs/adr/) instead.
 
 Add a decision here in the same PR as the brand change it explains, newest at the bottom. When a decision is overturned, keep it, mark it superseded and link the one that replaces it.
 
@@ -69,7 +69,7 @@ Add a decision here in the same PR as the brand change it explains, newest at th
 
 ## 10. Colours generated from one tokens file
 
-**Accepted, 24 October 2026.** Once the colours were validated, they went into `design/tokens.json` and are generated into each platform's theme. See [ADR 0012](./adr/0012-design-tokens-generated-from-one-file.md).
+**Accepted, 24 October 2026.** Once the colours were validated, they went into `design/tokens.json` and are generated into each platform's theme. See [ADR 0012](../../../../docs/adr/0012-design-tokens-generated-from-one-file.md).
 
 ## 11. Tentacles never reset
 
@@ -95,7 +95,7 @@ Add a decision here in the same PR as the brand change it explains, newest at th
 
 ## 14. Poulpy in 3D: a bubble plush in flat shading
 
-**Accepted, 14 November 2026.** Poulpy's 3D form is a round head tucked into eight puffy arms, drawn with flat cartoon shading. The rules of the shape are on the [Poulpy in 3D](./poulpy-3d.md) page, and the shape is one file, [`design/poulpy-3d/model.mjs`](../design/poulpy-3d/model.mjs), so it can be reused and improved like the 2D drawings.
+**Accepted, 14 November 2026.** Poulpy's 3D form is a round head tucked into eight puffy arms, drawn with flat cartoon shading. The rules of the shape are on the [Poulpy in 3D](./poulpy-3d.md) page, and the shape is one file, [`design/poulpy-3d/model.mjs`](../../../../design/poulpy-3d/model.mjs), so it can be reused and improved like the 2D drawings.
 
 **Why:** the owner wanted him chibi, natural and simple, "a bit like the mascot of Duolingo", so the model had to read like the 2D drawings turned into a solid, not like a rendered toy. Each rule was a correction from the owner on a model he could turn: the head sinks into the arms because resting on top of them looked stacked; the two colours share one smooth surface because a separate lining made a shelf; the whole underside is the other side's colour because a patch of the top colour showed between the arms; and the light stays in the room because shade painted on the model turned with him.
 

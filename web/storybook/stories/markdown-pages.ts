@@ -1,11 +1,11 @@
-import brand from '../../../docs/brand.md?raw'
-import brandDecisions from '../../../docs/brand-decisions.md?raw'
-import designSystem from '../../../docs/design-system.md?raw'
-import poulpy3d from '../../../docs/poulpy-3d.md?raw'
+import brand from './brand/brand.md?raw'
+import brandDecisions from './brand/brand-decisions.md?raw'
+import designSystem from './design-system/design-system.md?raw'
+import poulpy3d from './brand/poulpy-3d.md?raw'
 
-// The design system rules and the brand are the Markdown files agents read in the repo (docs/design-system.md,
-// docs/brand.md, docs/brand-decisions.md, docs/poulpy-3d.md). The workshop shows them one topic per page: each page names the `## `
-// sections it holds, and the links are rewritten to work from the workshop.
+// The design system rules and the brand are Markdown files that live here, in the workshop, and that agents read in the
+// repo (design-system/design-system.md, brand/brand.md, brand/brand-decisions.md, brand/poulpy-3d.md; ADR 0032). The workshop
+// shows them one topic per page: each page names the `## ` sections it holds, and the links are rewritten to work from the workshop.
 
 const SITE = 'https://tkint.github.io/coach-poulpy'
 const REPO = 'https://github.com/tkint/coach-poulpy/blob/main'
@@ -80,12 +80,13 @@ const pageOf = (file: File, hash?: string) => {
 const linked = (file: File, markdown: string) =>
   markdown
     .replace(/\]\(#([^)]+)\)/g, (_, hash: string) => `](${pageOf(file, hash)})`)
-    .replace(/\]\(\.\/([\w-]+)\.md(?:#([^)]*))?\)/g, (link, name: string, hash?: string) =>
-      name in files ? `](${pageOf(name as File, hash)})` : `](${SITE}/docs/${name}${hash ? `#${hash}` : ''})`,
+    .replace(/\]\((?:\.|\.\.\/(?:brand|design-system))\/([\w-]+)\.md(?:#([^)]*))?\)/g, (link, name: string, hash?: string) =>
+      name in files ? `](${pageOf(name as File, hash)})` : link,
     )
-    .replace(/\]\(\.\.\/(design\/[^)]*)\)/g, `](${REPO}/$1)`)
-    .replace(/\]\(\.?\/?adr\/([^)]*?)\.md\)/g, `](${SITE}/docs/adr/$1)`)
-    .replace(/\]\(\.\/adr\/\)/g, `](${SITE}/decisions/)`)
+    .replace(/\]\(\.\.\/\.\.\/\.\.\/\.\.\/docs\/adr\/\)/g, `](${SITE}/decisions/)`)
+    .replace(/\]\(\.\.\/\.\.\/\.\.\/\.\.\/docs\/adr\/([^)]*?)\.md\)/g, `](${SITE}/docs/adr/$1)`)
+    .replace(/\]\(\.\.\/\.\.\/\.\.\/\.\.\/docs\/([\w-]+)\.md(#[^)]*)?\)/g, `](${SITE}/docs/$1$2)`)
+    .replace(/\]\(\.\.\/\.\.\/\.\.\/\.\.\/([^)]*)\)/g, `](${REPO}/$1)`)
     .replace(new RegExp(`\\]\\(${SITE}/storybook/\\?path=`, 'g'), '](?path=')
 
 /** The Markdown of a file, cut at its `## ` headings, for the pages that show it. */
@@ -95,7 +96,7 @@ export function markdownPages(file: File) {
   const sections = new Map(parts.map((part) => [anchor(part.match(/^## (.+)$/m)![1]), part]))
   // Every section has a page, so a new `## ` in the file fails the build until it is given one.
   if (Object.keys(pages).length > 0) {
-    for (const id of sections.keys()) if (!pages[id]) throw new Error(`Give the "${id}" section of docs/${file}.md a workshop page in markdown-pages.ts`)
+    for (const id of sections.keys()) if (!pages[id]) throw new Error(`Give the "${id}" section of ${file}.md a workshop page in markdown-pages.ts`)
   }
   return {
     /** The opening of the file, under its title. */
@@ -109,7 +110,7 @@ export function markdownPages(file: File) {
         headings
           .map((heading) => {
             const part = sections.get(anchor(heading))
-            if (!part) throw new Error(`docs/${file}.md has no "## ${heading}" section`)
+            if (!part) throw new Error(`${file}.md has no "## ${heading}" section`)
             return part
           })
           .join('\n'),

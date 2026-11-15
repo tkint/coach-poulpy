@@ -1,6 +1,6 @@
 # Design system
 
-The app is calm and rounded, like the plush: one blue accent for actions, white or near-white surfaces, and only Poulpy and the Home header tint with his mood. Values live in [`design/tokens.json`](../design/tokens.json) and are generated into each platform (see [`design/README.md`](../design/README.md)); these rules say how to use them. The live swatches are on the [Tokens](https://tkint.github.io/coach-poulpy/storybook/?path=/docs/design-system-tokens--docs) page of the component workshop.
+The app is calm and rounded, like the plush: one blue accent for actions, white or near-white surfaces, and only Poulpy and the Home header tint with his mood. Values live in [`design/tokens.json`](../../../../design/tokens.json) and are generated into each platform (see [`design/README.md`](../../../../design/README.md)); these rules say how to use them. The live swatches are on the [Tokens](https://tkint.github.io/coach-poulpy/storybook/?path=/docs/design-system-tokens--docs) page of the component workshop.
 
 ## Colour roles
 
@@ -35,7 +35,7 @@ Six shades, from `mood.*`, only on Poulpy himself, the Home header tint and mood
 | Blue (on track) | `recovering`, `happy`, `proud` |
 | Ember (a session slipped) | `annoyed`, `grumpy`, `fuming` |
 
-Which shade shows when is in [Brand](./brand.md#moods).
+Which shade shows when is in [Brand](../brand/brand.md#moods).
 
 ## Type
 
@@ -104,7 +104,7 @@ The fields every form is built from. Reference mockups: `profile-edit`, the thre
 
 ## Screens
 
-Every screen mockup is a story in the [component workshop](https://tkint.github.io/coach-poulpy/storybook/?path=/docs/design-system-introduction--docs) ([ADR 0029](adr/0029-mockups-are-stories-in-the-component-workshop.md)): the web screens under Web > Screens, composed from the `Cp*` components, and the phone screens under Mobile > Screens, built from the `Mobile*` components and patterns.
+Every screen mockup is a story in the [component workshop](https://tkint.github.io/coach-poulpy/storybook/?path=/docs/design-system-introduction--docs) ([ADR 0029](../../../../docs/adr/0029-mockups-are-stories-in-the-component-workshop.md)): the web screens under Web > Screens, composed from the `Cp*` components, and the phone screens under Mobile > Screens, built from the `Mobile*` components and patterns.
 
 - Build from an agreed mockup. If a screen has none, agree one through a PR before building it.
 - Each state of a screen is a story, in light and dark from the workshop's theme toolbar. A new screen or redesign is tagged `draft`; a PR that changes the tag to `agreed` is its approval, and nothing is built from a draft.
@@ -132,17 +132,17 @@ Buttons, fields and icons on the websites share one size scale, set with the `si
 
 ## Websites
 
-The landing site, the web app, the web screens of the workshop and the docs site share one package, `web/ui`: DaisyUI with the Poulpy theme and a few Vue components ([ADR 0023](adr/0023-the-websites-share-one-vue-and-daisyui-design-system.md)). Each component, in every state, with the classes it renders and its interaction and accessibility checks, is in the [component workshop](https://tkint.github.io/coach-poulpy/storybook/) ([ADR 0028](adr/0028-storybook-is-the-component-workshop-of-the-design-system.md)).
+The landing site, the web app, the web screens of the workshop and the docs site share one package, `web/ui`: DaisyUI with the Poulpy theme and a few Vue components ([ADR 0023](../../../../docs/adr/0023-the-websites-share-one-vue-and-daisyui-design-system.md)). Each component, in every state, with the classes it renders and its interaction and accessibility checks, is in the [component workshop](https://tkint.github.io/coach-poulpy/storybook/) ([ADR 0028](../../../../docs/adr/0028-storybook-is-the-component-workshop-of-the-design-system.md)).
 
 - Use the shared components (`CpButton`, `CpChip`...) in Vue, and never restyle a DaisyUI class in an app. A missing shape goes in `web/ui`, with its stories and the classes it renders in its docs, in the same PR.
 - Every DaisyUI class carries the `cp-` prefix (`cp-btn cp-btn-primary`). Our own classes (`cp-chip`, `cp-stepper`, `cp-type-label`...) never reuse a DaisyUI name, so the two cannot clash.
 - The roles above keep their meaning: `cp-btn-primary` is `primary`, `cp-btn-secondary` is the tonal `primaryContainer`, `cp-btn-accent` is `grumpy` and only for the catch-up action. Never use DaisyUI's `warning` classes: ember is not a warning, and a problem is an `error`.
 - Phone and tablet mockups keep their own stylesheet (`web/storybook/stories/mobile/screens/screens.css`): they draw the native screens, which DaisyUI's look does not match.
-- Icons on the websites and in every screen come from Lucide, as in the [Icons](#icons) section ([ADR 0024](adr/0024-lucide-is-the-icon-set.md)).
+- Icons on the websites and in every screen come from Lucide, as in the [Icons](#icons) section ([ADR 0024](../../../../docs/adr/0024-lucide-is-the-icon-set.md)).
 
 ## Icons
 
-Every icon is from [Lucide](https://lucide.dev), on every platform ([ADR 0024](adr/0024-lucide-is-the-icon-set.md)). Use its name for the action, never a home-made drawing of one Lucide already has. Icons take their colour from the roles above, and an error keeps its icon. Lucide's drawing stays as it is: a 24 box and a 2 wide round stroke, never filled; only the size changes (24 by default, 20 in chips and small buttons, 16 to 18 beside a line of text).
+Every icon is from [Lucide](https://lucide.dev), on every platform ([ADR 0024](../../../../docs/adr/0024-lucide-is-the-icon-set.md)). Use its name for the action, never a home-made drawing of one Lucide already has. Icons take their colour from the roles above, and an error keeps its icon. Lucide's drawing stays as it is: a 24 box and a 2 wide round stroke, never filled; only the size changes (24 by default, 20 in chips and small buttons, 16 to 18 beside a line of text).
 
 | Where | How |
 | --- | --- |

@@ -65,7 +65,7 @@ import ch.coachpoulpy.android.R
 import kotlin.math.roundToInt
 
 /*
- * The base fields every form is built from (docs/design-system.md "Base fields"):
+ * The base fields every form is built from (web/storybook/stories/design-system/design-system.md "Base fields"):
  * a text field, a select field that opens a sheet, a number field that selects its
  * text and opens the numeric keyboard, option sheets (one choice, several, or a step
  * slider). Mockups: profile-edit, profile-*-sheet, body-log-sheet.
@@ -141,7 +141,7 @@ internal fun PoulpyTextField(
     }
 }
 
-/** What is wrong with a field: crimson, with an icon (docs/design-system.md). */
+/** What is wrong with a field: crimson, with an icon (web/storybook/stories/design-system/design-system.md). */
 @Composable
 internal fun FieldError(text: String) {
     Row(Modifier.padding(horizontal = 4.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {

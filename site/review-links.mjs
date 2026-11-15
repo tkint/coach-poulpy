@@ -14,7 +14,6 @@ const groups = {
   built: 'Mockups this PR builds',
   decisions: 'Decisions',
   guidelines: 'Specs and guidelines',
-  design: 'Design system and brand',
 }
 
 // The component workshop is published under /storybook/ (ADR 0028). A changed story, its doc or
@@ -30,6 +29,9 @@ const storyFilesOf = (file) => {
   if (file.startsWith('design/poulpy-3d/motion.')) return git('ls-files', `${workshop}brand/poulpy-moves/`).split('\n').filter((f) => f.endsWith('.mdx'))
   if (file.startsWith('design/poulpy-3d/')) return [`${workshop}brand/Poulpy3d.mdx`]
   if (file.startsWith(`${workshop}brand/brand-book/`)) return [`${workshop}brand/BrandBook.mdx`]
+  // The rules and the brand are Markdown beside their pages (ADR 0032): a change shows on every page cut from the file.
+  if (file === `${workshop}design-system/design-system.md`) return git('ls-files', `${workshop}design-system/`).split('\n').filter((f) => f.endsWith('.mdx'))
+  if (/^web\/storybook\/stories\/brand\/(brand|brand-decisions|poulpy-3d)\.md$/.test(file)) return git('ls-files', `${workshop}brand/`).split('\n').filter((f) => f.endsWith('.mdx'))
   const stem = file.replace(/^.*\//, '').replace(/\.[^.]+$/, '')
   if (file.startsWith('web/ui/src/components/')) return git('ls-files', workshop).split('\n').filter((f) => f.endsWith(`/${stem}.stories.ts`))
   if (!file.startsWith(workshop)) return []
@@ -65,7 +67,7 @@ function pageOf(file) {
   const path = isShared ? file : file.startsWith('site/') ? file.slice('site/'.length) : null
   if (path === null) return null
   const page = path.replace(/\.md$/, '').replace(/(^|\/)index$/, '$1')
-  const group = path.startsWith('docs/adr/') ? 'decisions' : /^(docs\/brand|docs\/design-system|docs\/poulpy-3d)/.test(path) ? 'design' : 'guidelines'
+  const group = path.startsWith('docs/adr/') ? 'decisions' : 'guidelines'
   return { group, page }
 }
 

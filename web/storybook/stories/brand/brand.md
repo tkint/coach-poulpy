@@ -86,7 +86,7 @@ Poulpy is a plush with a blue side and a grumpy side, and nobody has to be one o
 - **Drawings and stories show a range of people.** Future share cards, the website and store images show different bodies, ages, genders and families, and may use the rainbow only as a deliberate Pride moment, never as decoration on Poulpy.
 - **Review before shipping.** Wording about sex, gender or bodies is read by people from the community before release, and changed when they say so; the owner decides ties.
 
-The reasons and the wording alternatives that were set aside are in [Brand decisions](./brand-decisions.md#13-inclusive-by-default). The profile fields that follow these rules are on [Profile and settings](./profile-and-settings.md).
+The reasons and the wording alternatives that were set aside are in [Brand decisions](./brand-decisions.md#13-inclusive-by-default). The profile fields that follow these rules are on [Profile and settings](../../../../docs/profile-and-settings.md).
 
 ## Tentacles
 
@@ -98,7 +98,7 @@ Poulpy speaks in short first-person lines, warm and a little cheeky: "6 of 8 ten
 
 ## Logo and type
 
-The logo is the same drawing as the in-app Poulpy: a front view of the plush with five visible arms and the ember lining peeking out underneath. The app icon is the 3D Poulpy, happy and blue, on Deep sea in light and dark alike, painted by `design/build-poulpy-pictures.mjs`. In Settings › App › App icon a person can swap it for another face of Poulpy: Proud, Annoyed, Grumpy, Champion or Cocky, each the picture the app already has, fitted into the icon. Choosing an icon is cosmetic; it never changes Poulpy's mood in the app. Headings use Baloo 2, body text Nunito; see the [design system](./design-system.md).
+The logo is the same drawing as the in-app Poulpy: a front view of the plush with five visible arms and the ember lining peeking out underneath. The app icon is the 3D Poulpy, happy and blue, on Deep sea in light and dark alike, painted by `design/build-poulpy-pictures.mjs`. In Settings › App › App icon a person can swap it for another face of Poulpy: Proud, Annoyed, Grumpy, Champion or Cocky, each the picture the app already has, fitted into the icon. Choosing an icon is cosmetic; it never changes Poulpy's mood in the app. Headings use Baloo 2, body text Nunito; see the [design system](../design-system/design-system.md).
 
 ## Poulpy in 3D
 

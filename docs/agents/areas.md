@@ -17,7 +17,7 @@ Read `CONTEXT.md`, `docs/adr/`, `docs/architecture.md`.
 
 ## Designer: screens and mockups
 
-Read [the design system](../design-system.md) and [ADR 0029](../adr/0029-mockups-are-stories-in-the-component-workshop.md).
+Read [the design system](https://tkint.github.io/coach-poulpy/storybook/?path=/docs/design-system-introduction--docs) and [ADR 0029](../adr/0029-mockups-are-stories-in-the-component-workshop.md).
 
 - A screen starts as a story in the component workshop tagged `draft`. A separate, later PR changes the tag to `agreed` once the owner has reviewed it in the PR's preview. Nothing is built from a draft, and a ticket with no agreed mockup waits for one.
 - Mockups use `var(--cp-*)` roles only, so one story works in light and dark. Check both with the workshop's theme toolbar before opening the PR. A phone screen is built from the `Mobile*` components and patterns; a piece it needs that they lack becomes one, with a story per variation.
@@ -28,20 +28,20 @@ Read [the design system](../design-system.md) and [ADR 0029](../adr/0029-mockups
 - A screen is built to its agreed mockup, all of it: every card, field, control, label and layout the mockup shows. Never ship a simpler stand-in (a plain select for a body map, no reordering, fewer fields) to get a working screen sooner, and never leave a part out without saying so. A part that can't be built as drawn, because the model, the server or a ticket held back by another issue doesn't support it, is named in the PR description and put to the owner before the work goes on; the owner decides between changing the mockup and building the missing piece. Compare the finished screen with the mockup, screenshot against screenshot, before opening the PR.
 - Words never break: text is laid out for the longest language. A tab label has about 12 characters of room; shrink or shorten it before letting a word wrap.
 - The warm-up is headed by the builder's sun icon in every mockup and screen.
-- Icons are Lucide, by their Lucide name, the same meaning with the same icon on every platform (the table in [the design system](../design-system.md#icons)). A phone mockup draws one with `<MobileIcon name="<name>" />` or a component's `icon` prop; an icon the apps don't have yet is added with `node design/build-icons.mjs --add <name>`, which also gives it to both apps.
-- The English screen copy follows `docs/brand.md`; every string is also added in French (see Translator below).
+- Icons are Lucide, by their Lucide name, the same meaning with the same icon on every platform (the table in [the design system](https://tkint.github.io/coach-poulpy/storybook/?path=/docs/design-system-rules-icons--docs)). A phone mockup draws one with `<MobileIcon name="<name>" />` or a component's `icon` prop; an icon the apps don't have yet is added with `node design/build-icons.mjs --add <name>`, which also gives it to both apps.
+- The English screen copy follows `web/storybook/stories/brand/brand.md`; every string is also added in French (see Translator below).
 - Theme files are generated from `design/tokens.json`: edit the tokens, then run `node design/build-tokens.mjs`.
 
 ## Poulpy keeper: the mascot
 
-Read [the brand](../brand.md) and [the brand decisions](../brand-decisions.md).
+Read [the brand](https://tkint.github.io/coach-poulpy/storybook/?path=/docs/brand-introduction--docs) and [the brand decisions](https://tkint.github.io/coach-poulpy/storybook/?path=/docs/brand-decisions--docs).
 
 - Poulpy is never guilt. Pain or rehab always shows the blue side for 72 h; errors are crimson with an icon, never ember.
 - Skipping a planned session never counts as missing it; only entries left hanging do. Ember is a comic mood, not a penalty.
 - Poulpy speaks in short first-person lines, warm and a little cheeky. He says *tu* in French while the app says *vous*.
-- A new reward, notification, pose or reaction rule is written into `docs/brand.md` (and `docs/brand-decisions.md` when it settles an open question) in the same PR. At most one notification a day.
+- A new reward, notification, pose or reaction rule is written into `web/storybook/stories/brand/brand.md` (and `web/storybook/stories/brand/brand-decisions.md` when it settles an open question) in the same PR. At most one notification a day.
 - Drawings are generated: edit `design/build-poulpy.mjs`, then run `node design/build-poulpy.mjs`.
-- The 3D model is generated too: edit `SHAPE`, `FACES`, `MOODS` or `LOOK` in `design/poulpy-3d/model.mjs`, `POSES` in `design/poulpy-3d/poses.mjs` for his poses, or `TURN`, `JUMP`, `CHEER`, `WINK` and `RIG` in `design/poulpy-3d/motion.mjs` for how he moves, then run `node design/build-poulpy-3d.mjs` and `node design/build-poulpy-pictures.mjs` (the pictures of his moods and poses). Its rules are in `docs/poulpy-3d.md`, shown with the live model on the Brand > Poulpy in 3D page of the component workshop and, one move a page, under Brand > Poulpy moves; change that file in the same PR as a rule.
+- The 3D model is generated too: edit `SHAPE`, `FACES`, `MOODS` or `LOOK` in `design/poulpy-3d/model.mjs`, `POSES` in `design/poulpy-3d/poses.mjs` for his poses, or `TURN`, `JUMP`, `CHEER`, `WINK` and `RIG` in `design/poulpy-3d/motion.mjs` for how he moves, then run `node design/build-poulpy-3d.mjs` and `node design/build-poulpy-pictures.mjs` (the pictures of his moods and poses). Its rules are in `web/storybook/stories/brand/poulpy-3d.md`, shown with the live model on the Brand > Poulpy in 3D page of the component workshop and, one move a page, under Brand > Poulpy moves; change that file in the same PR as a rule.
 - The body map figures are generated too: edit `design/build-body-map.mjs` or the outlines in `design/body-map-source/` (keep its NOTICE.md), then run `node design/build-body-map.mjs`.
 
 ## Translator: text in every language
