@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import AdminExerciseScreen, { type Exercise } from './AdminExerciseScreen.vue'
 import AdminExerciseRetireDialog from './AdminExerciseRetireDialog.vue'
+import AdminExerciseDeleteDialog from './AdminExerciseDeleteDialog.vue'
 
 // The admin's exercise screen (issues #386 and #338).
 const meta = {
@@ -82,4 +83,12 @@ export const SlugTaken: Story = { args: { exercise: { ...pike, slug: 'push-up' }
 export const Retire: Story = {
   args: { exercise: wallSit, badges: [{ text: 'Offered', tone: 'success' as const }] },
   render: (args) => ({ components: { AdminExerciseScreen, AdminExerciseRetireDialog }, setup: () => ({ args }), template: '<AdminExerciseScreen v-bind="args"><template #dialog><AdminExerciseRetireDialog /></template></AdminExerciseScreen>' }),
+}
+/** The danger zone of a draft that was never published: it can be deleted, after typing its slug. */
+export const DangerDraft: Story = { tags: ['draft'], args: { exercise: pike, badges: [{ text: 'New', tone: 'primary' as const }], neverPublished: true } }
+/** Deleting asks for the slug; the button stays off until it matches exactly. */
+export const Delete: Story = {
+  tags: ['draft'],
+  args: { exercise: pike, badges: [{ text: 'New', tone: 'primary' as const }], neverPublished: true },
+  render: (args) => ({ components: { AdminExerciseScreen, AdminExerciseDeleteDialog }, setup: () => ({ args }), template: '<AdminExerciseScreen v-bind="args"><template #dialog><AdminExerciseDeleteDialog slug="pike-push-up" typed="pike-push" /></template></AdminExerciseScreen>' }),
 }
