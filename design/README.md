@@ -78,9 +78,9 @@ node design/build-poulpy-3d.mjs
 | `design/poulpy-3d/poulpy_blue_turn.glb` | The blue side, rigged, with the animation `turn` |
 | `design/poulpy-3d/poulpy_ember_turn.glb` | The ember side, rigged, with the animation `turn` |
 
-The script writes the files itself, byte for byte the same on every machine, and CI runs it with `--check`. The docs site's Poulpy in 3D page draws the same `model.mjs` and runs the same `motion.mjs` live, lists the rules of the shape and of the move and says how to reuse it; the apps do not use the model yet.
+The script writes the files itself, byte for byte the same on every machine, and CI runs it with `--check`. The Brand > Poulpy in 3D page of the component workshop ([`docs/poulpy-3d.md`](../docs/poulpy-3d.md) and the live model) draws the same `model.mjs` and runs the same `motion.mjs` live, lists the rules of the shape and of the move and says how to reuse it; the apps do not use the model yet.
 
-The rules for using Poulpy are in [`docs/brand.md`](../docs/brand.md); the full brand book is in `site/.vitepress/theme/brand-book/` and on the docs site, and the decisions behind it are in [`docs/brand-decisions.md`](../docs/brand-decisions.md).
+The rules for using Poulpy are in [`docs/brand.md`](../docs/brand.md); the full brand book is in `web/storybook/stories/brand/brand-book/` and on the Brand > Brand book page of the component workshop, and the decisions behind it are in [`docs/brand-decisions.md`](../docs/brand-decisions.md).
 
 ## Icons
 
