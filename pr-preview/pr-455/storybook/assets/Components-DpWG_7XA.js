@@ -1,0 +1,4 @@
+import{n as e}from"./rolldown-runtime-sJBDdmOt.js";import{i as t,r as n}from"./react-DITjJg24.js";import{a as r}from"./chunk-W22LQPXL-DkWiGpo7.js";import{c as i,d as a,l as o}from"./blocks-DbOxbPv3.js";import{n as s,t as c}from"./markdown-pages-Ba0Cchwf.js";function l(e){let n={h1:`h1`,...t(),...e.components};return(0,d.jsxs)(d.Fragment,{children:[(0,d.jsx)(o,{title:`Design system/Rules/Components`}),`
+`,`
+`,(0,d.jsx)(n.h1,{id:`components`,children:`Components`}),`
+`,(0,d.jsx)(i,{children:f(`Components`,`Base fields`)})]})}function u(e={}){let{wrapper:n}={...t(),...e.components};return n?(0,d.jsx)(n,{...e,children:(0,d.jsx)(l,{...e})}):l(e)}var d,f;function p(){return(p=e((()=>{d=r(),n(),a(),c(),f=s(`design-system`).sections})))()}p();export{u as default,f as rules};
