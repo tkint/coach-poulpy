@@ -9,7 +9,7 @@ import { buildPoulpyPose, CONFETTI, GOLDEN, medalHinge, poseMood, STARS, starSha
 import { armJoints, armSkin, squashScale, type CheerPose, type JumpPose, type TurnPose, type WinkPose } from '../../../../design/poulpy-3d/motion.mjs'
 
 /** Where the viewer stands: degrees around Poulpy, degrees above (or below) him, and how far away. */
-export interface PoulpyView { turn: number; tilt: number; distance: number }
+export interface PoulpyView { turn: number; tilt: number; distance: number; /** The height he is looked at, half his height unless told. */ centre?: number; /** The view's height in degrees, 28 unless told. */ field?: number }
 
 export function createPoulpyScene(canvas: HTMLCanvasElement) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true })
@@ -84,21 +84,23 @@ export function createPoulpyScene(canvas: HTMLCanvasElement) {
   }
 
   function render() {
+    const here = view.centre ?? centre
+    if (camera.fov !== (view.field ?? 28)) { camera.fov = view.field ?? 28; camera.updateProjectionMatrix() }
     const turn = THREE.MathUtils.degToRad(view.turn), tilt = THREE.MathUtils.degToRad(view.tilt)
-    camera.position.set(view.distance * Math.sin(turn) * Math.cos(tilt), centre + view.distance * Math.sin(tilt), view.distance * Math.cos(turn) * Math.cos(tilt))
-    camera.lookAt(0, centre, 0)
+    camera.position.set(view.distance * Math.sin(turn) * Math.cos(tilt), here + view.distance * Math.sin(tilt), view.distance * Math.cos(turn) * Math.cos(tilt))
+    camera.lookAt(0, here, 0)
     camera.updateMatrixWorld()
     // The light and the gleam are placed from where the viewer stands, so they stay put in the room.
     if (cards) {
       // Each card stands across the line of sight, and is sized so its drawing looks as big as if it stood at his middle.
-      const towards = camera.position.clone().sub(light.target.position.set(0, centre, 0)).normalize()
+      const towards = camera.position.clone().sub(light.target.position.set(0, here, 0)).normalize()
       for (const [card, way] of [[cards.front, 1], [cards.back, -1]] as const) {
         card.quaternion.copy(camera.quaternion)
         card.position.set(0, CARD_CENTRE, 0).addScaledVector(towards, way * CARD_GAP)
         card.scale.setScalar((view.distance - way * CARD_GAP) / view.distance)
       }
     }
-    light.target.position.set(0, centre, 0)
+    light.target.position.set(0, here, 0)
     light.position.set(...(LOOK.light as [number, number, number])).normalize().transformDirection(camera.matrixWorld).multiplyScalar(10).add(light.target.position)
     if (gleam) {
       // gleamPatch works in Poulpy's own space, so the direction is turned back by however far he has turned and tilted.

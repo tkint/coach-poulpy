@@ -179,6 +179,34 @@ export function createTurn({ softness = 1, stride = 1, turn = TURN } = {}) {
 }
 
 /**
+ * Poulpy turned by something else (the loader's swing), his arms following loose behind it as they do in createTurn.
+ * @param {{ softness?: number, turn?: typeof TURN }} [options]
+ * @returns {{ softness: number, advance(seconds: number, yaw: number): TurnPose }} give it the time since the last call and where he
+ *   should face now, in radians seen from above; it works out how fast he is turning and lets each arm bend and trail.
+ */
+export function createFollow({ softness = 1, turn = TURN } = {}) {
+  const arms = armSwing(turn)
+  let at = null, owed = 0
+  const sim = {
+    softness,
+    advance(seconds, yaw) {
+      if (at === null) at = yaw
+      const span = Math.min(Math.max(seconds, 0), 1), from = at, speed = span > 0 ? (yaw - from) / span : 0
+      owed += span
+      let done = 0
+      while (owed >= SUBSTEP) {
+        done += SUBSTEP
+        arms.tick(SUBSTEP, from + (speed * done), speed, sim.softness)
+        owed -= SUBSTEP
+      }
+      at = yaw
+      return { yaw, squash: 0, arms: arms.bends(yaw) }
+    },
+  }
+  return sim
+}
+
+/**
  * Poulpy jumping on the spot, as something to advance in time.
  * @param {{ softness?: number, stride?: number, jump?: typeof JUMP, turn?: typeof TURN }} [options] `softness`
  *   scales how loose the arms are, as in createTurn. `stride` makes each jump turn him too, by a step of

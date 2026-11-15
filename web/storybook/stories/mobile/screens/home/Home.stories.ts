@@ -5,6 +5,7 @@ import screenHomeInProgress from './home-in-progress.html?raw'
 import screenHomeNext from './home-next.html?raw'
 import screenHomeNothingPlanned from './home-nothing-planned.html?raw'
 import screenHomePlanned from './home-planned.html?raw'
+import screenHomePlannedTap from './home-planned-tap.html?raw'
 
 // The Home screens of the apps (ADR 0029), drawn with the phone stylesheet (../screens.css).
 const meta = {
@@ -43,5 +44,12 @@ export const HomeNothingPlanned: Story = {
 export const HomePlanned: Story = {
   name: "Planned",
   ...screen(screenHomePlanned),
+  parameters: { mockup: { issue: 222 } },
+}
+/** Home · planned, with Poulpy playing when tapped (agreed by the owner: decision 16, step 4). He stays a still picture; a tap plays one short animation for his mood, here the happy one's jump, then he settles back. */
+export const HomePlannedTap: Story = {
+  name: "Planned, tap Poulpy",
+  tags: ['!autodocs', 'agreed'],
+  ...screen(screenHomePlannedTap),
   parameters: { mockup: { issue: 222 } },
 }

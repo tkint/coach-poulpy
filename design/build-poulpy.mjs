@@ -1,21 +1,15 @@
-// Generates Poulpy's loader and app icons for Android and iOS. His moods and poses are pictures of the 3D model,
-// made by build-poulpy-pictures.mjs.
+// Generates what is still drawn of Poulpy for Android: the launcher icons' background layer and their themed
+// (one-colour) layers. His moods, poses, loader and app icons are pictures of the 3D model, made by
+// build-poulpy-pictures.mjs.
 //   node design/build-poulpy.mjs          write the generated files
 //   node design/build-poulpy.mjs --check  fail if a generated file is out of date (used by CI)
 //
-// The drawing code (also what the alternate app icons are made from) is ported from the Poulpy brand book (web/storybook/stories/brand/brand-book/) so the apps draw exactly the
-// validated sketches. Each drawing is built as SVG, normalised (shapes become paths, text
-// becomes stroked lettering), then written as:
-//   design/poulpy/<name>.svg                                    reference copy (the loader)
-//   app-android/src/main/res/drawable/poulpy_<name>.xml         Android vector drawable
-//   app-ios/CoachPoulpy/Assets.xcassets/Poulpy/<Name>.imageset  iOS vector asset
-// and the app icon, from the brand book's icon (happy blue Poulpy on Foam), as:
-//   design/poulpy/app_icon*.svg                                 reference copies
-//   app-android/src/main/res/drawable/ic_launcher_*.xml         adaptive icon layers, with a themed (monochrome) layer
-//   app-ios/CoachPoulpy/Assets.xcassets/AppIcon.appiconset      1024 px PNGs: light, dark and tinted
-// and one alternate app icon per face the person can choose in Settings (ALTERNATE_ICONS below), the same way:
-//   design/poulpy/app_icon_<id>*.svg, app-android/.../ic_launcher_<id>_*.xml and mipmap-anydpi-v26/ic_launcher_<id>.xml,
-//   app-ios/CoachPoulpy/Assets.xcassets/AppIcon<Id>.appiconset
+// The drawing code is ported from the Poulpy brand book (web/storybook/stories/brand/brand-book/). Each drawing is built
+// as SVG, normalised (shapes become paths), then written as:
+//   app-android/src/main/res/drawable/ic_launcher_background.xml   the Deep sea background layer
+//   app-android/src/main/res/drawable/ic_launcher_[<id>_]monochrome.xml   the themed layer: his silhouette and face
+//   app-android/src/main/res/mipmap-anydpi-v26/ic_launcher[_<id>].xml   the adaptive icons, one per face the person can
+//                                                                       choose in Settings (ALTERNATE_ICONS below)
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -148,23 +142,6 @@ const POSES = {
   },
 }
 
-// The loading animation: Poulpy seen from above as a blue outline, eight big round lobes each
-// ending in a short tail that dips inward. The apps turn it clockwise, so the top moves left to
-// right. Small loaders get a thicker line.
-const LOADER_PATH = 'M73.7 36.4A26.4 26.4 0 1 1 126.3 36.4A26.4 26.4 0 0 1 122.4 52.3M126.3 36.4A26.4 26.4 0 1 1 163.6 73.7A26.4 26.4 0 0 1 149.6 82.1' +
-  'M163.6 73.7A26.4 26.4 0 1 1 163.6 126.3A26.4 26.4 0 0 1 147.7 122.4M163.6 126.3A26.4 26.4 0 1 1 126.3 163.6A26.4 26.4 0 0 1 117.9 149.6' +
-  'M126.3 163.6A26.4 26.4 0 1 1 73.7 163.6A26.4 26.4 0 0 1 77.6 147.7M73.7 163.6A26.4 26.4 0 1 1 36.4 126.3A26.4 26.4 0 0 1 50.4 117.9' +
-  'M36.4 126.3A26.4 26.4 0 1 1 36.4 73.7A26.4 26.4 0 0 1 52.3 77.6M36.4 73.7A26.4 26.4 0 1 1 73.7 36.4A26.4 26.4 0 0 1 82.1 50.4'
-const loader = (width) => s(LOADER_PATH, width, BLUE)
-
-// The moods and poses are pictures of the 3D model now (build-poulpy-pictures.mjs); what is drawn here is the loader
-// and the app icons. The loader is square.
-const LOADER_VIEW = { x: 0, y: 0, width: 200, height: 200 }
-const DRAWINGS = [
-  { name: 'loader', svg: loader(7), view: LOADER_VIEW },
-  { name: 'loader_small', svg: loader(10), view: LOADER_VIEW },
-]
-
 // The app icon, as the brand book draws it: Poulpy scaled into a 200 square on Foam, or Deep sea in the dark.
 const DEEP_SEA = tokens.theme.dark.background
 const ICON_POULPY = body(BLUE) + FACES.happy
@@ -211,7 +188,6 @@ function boundsOf(art) {
 const monoFace = (face) => face.replace(/<circle[^>]*fill="#fff"[^>]*\/>/g, '').replace(/<ellipse[^>]*opacity="[^"]*"[^>]*\/>/g, '').replaceAll(INK, '#000')
 const monochromeOf = (face) => `<path d="${silhouette()}" fill="#000" opacity=".5"/>${monoFace(face)}`
 
-function pascalOf(name) { return name.split('_').map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join('') }
 
 // ---------------------------------------------------------------------------
 // Normalising: parse the SVG fragment into a tree of groups and paths
@@ -392,32 +368,6 @@ function flatten(n, m) {
 // ---------------------------------------------------------------------------
 // Writers
 
-function svgOut(tree, VIEW) {
-  const walk = (n, pad) => {
-    if (n.group) {
-      const t = (n.transforms || []).map((x) => `${x.op}(${x.args.join(' ')})`).join(' ')
-      const inner = n.children.map((c) => walk(c, pad + '  ')).join('\n')
-      return t ? `${pad}<g transform="${t}">\n${inner}\n${pad}</g>` : inner
-    }
-    const attrs = [`d="${n.d}"`, `fill="${n.fill || 'none'}"`]
-    if (n.fill && n.fillAlpha !== undefined && n.fillAlpha !== 1) attrs.push(`fill-opacity="${fmt(n.fillAlpha)}"`)
-    if (n.stroke) {
-      attrs.push(`stroke="${n.stroke}"`, `stroke-width="${n.strokeWidth || 1}"`)
-      if (n.strokeAlpha !== undefined && n.strokeAlpha !== 1) attrs.push(`stroke-opacity="${fmt(n.strokeAlpha)}"`)
-      if (n.cap) attrs.push(`stroke-linecap="${n.cap}"`)
-      if (n.join) attrs.push(`stroke-linejoin="${n.join}"`)
-    }
-    return `${pad}<path ${attrs.join(' ')}/>`
-  }
-  return [
-    `<!-- ${banner} -->`,
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${VIEW.x} ${VIEW.y} ${VIEW.width} ${VIEW.height}" width="${VIEW.width}" height="${VIEW.height}">`,
-    walk(tree, '  '),
-    '</svg>',
-    '',
-  ].join('\n')
-}
-
 function vectorOut(tree, VIEW) {
   const walk = (n, pad) => {
     if (n.group) {
@@ -463,25 +413,7 @@ function vectorOut(tree, VIEW) {
   ].join('\n')
 }
 
-const imagesetContents = (file) => JSON.stringify({
-  images: [{ filename: file, idiom: 'universal' }],
-  info: { author: 'xcode', version: 1 },
-  properties: { 'preserves-vector-representation': true },
-}, null, 2) + '\n'
-
-const files = {
-  'app-ios/CoachPoulpy/Assets.xcassets/Poulpy/Contents.json': JSON.stringify({ info: { author: 'xcode', version: 1 } }, null, 2) + '\n',
-}
-for (const drawing of DRAWINGS) {
-  const tree = normalise(parse(drawing.svg))
-  const svg = svgOut(tree, drawing.view)
-  const asset = `Poulpy${pascalOf(drawing.name)}`
-  files[`design/poulpy/${drawing.name}.svg`] = svg
-  files[`app-android/src/main/res/drawable/poulpy_${drawing.name}.xml`] = vectorOut(tree, drawing.view)
-  files[`app-ios/CoachPoulpy/Assets.xcassets/Poulpy/${asset}.imageset/${asset}.svg`] = svg
-  files[`app-ios/CoachPoulpy/Assets.xcassets/Poulpy/${asset}.imageset/Contents.json`] = imagesetContents(`${asset}.svg`)
-}
-
+const files = {}
 const frame = launcherFrame()
 files['app-android/src/main/res/drawable/ic_launcher_background.xml'] = vectorOut(normalise(parse(`<rect x="0" y="0" width="108" height="108" fill="${DEEP_SEA}"/>`)), LAUNCHER_VIEW)
 files['app-android/src/main/res/drawable/ic_launcher_monochrome.xml'] = vectorOut(normalise(parse(`<g transform="${frame}">${monochrome()}</g>`)), LAUNCHER_VIEW)
