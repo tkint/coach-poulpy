@@ -4,7 +4,7 @@
 // How he moves is next door, in motion.mjs.
 // To change the design, edit SHAPE, FACES or LOOK below, then run `node design/build-poulpy-3d.mjs`.
 // Units: the head is about 1 wide from its centre. He stands on y = 0, y is up and his face looks along +z.
-// The rules this shape follows are on the docs site (site/poulpy-3d.md) and in docs/brand-decisions.md, decision 14.
+// The rules this shape follows are in docs/poulpy-3d.md (Brand > Poulpy in 3D in the component workshop) and in docs/brand-decisions.md, decision 14.
 
 export const SHAPE = {
   // A bubble: slightly wider than tall, tucked into the arms so they wrap around its base.

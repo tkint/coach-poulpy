@@ -220,8 +220,18 @@ export function drawBrandBook(): void {
     ["Neutral", [["0","#FFFFFF"],["50","#F4F9FC"],["100","#E6EFF5"],["300","#B6C4D0"],["500","#6B7C8C"],["700","#374555"],["900","#141A26"]]]
   ];
   document.getElementById("ramps").innerHTML = ramps.map(function (r) {
+    // The swatch label is small text: the ink or paper colour when it reaches 4.5:1 on the swatch, else black or white.
+    function labelColour(hex) {
+      var lum = function (h) {
+        var c = [1, 3, 5].map(function (i) { var v = parseInt(h.substr(i, 2), 16) / 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
+        return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+      };
+      var ratio = function (a, b) { var x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
+      var best = ["#141A26", "#F4F9FC", "#000000", "#FFFFFF"].filter(function (c) { return ratio(c, hex) >= 4.5; })[0];
+      return best || (ratio("#000000", hex) > ratio("#FFFFFF", hex) ? "#000000" : "#FFFFFF");
+    }
     return '<div class="ramp"><span class="lbl">' + r[0] + '</span>' + r[1].map(function (sw, i) {
-      var light = i < 4; return '<div class="sw" style="background:' + sw[1] + ';color:' + (light ? "#141A26" : "#F4F9FC") + (sw[1] === "#FFFFFF" ? ";border:1px solid #D3E0E9" : "") + '">' + sw[0] + '<br>' + sw[1] + '</div>';
+      return '<div class="sw" style="background:' + sw[1] + ';color:' + labelColour(sw[1]) + (sw[1] === "#FFFFFF" ? ";border:1px solid #D3E0E9" : "") + '">' + sw[0] + '<br>' + sw[1] + '</div>';
     }).join("") + '</div>';
   }).join("");
 
