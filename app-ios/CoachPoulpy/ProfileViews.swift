@@ -62,7 +62,7 @@ struct SettingsHub: View {
                 NavigationLink(value: SettingsPage.devices) { row(.gauge, "settings.devices", nil) }
                 Button { pickingIcon = true } label: {
                     HStack(spacing: 12) {
-                        Image(appIcon.drawing).resizable().scaledToFit().frame(width: 24, height: 24).frame(width: 26).accessibilityHidden(true)
+                        Image(appIcon.drawing).resizable().scaledToFit().frame(width: 30, height: 30).frame(width: 26).accessibilityHidden(true)
                         VStack(alignment: .leading, spacing: 0) {
                             Text("settings.appIcon").font(.poulpy(.headline)).foregroundStyle(PoulpyColor.onSurface)
                             Text(appIcon.label).font(.poulpy(.footnote)).foregroundStyle(PoulpyColor.onSurfaceVariant)
