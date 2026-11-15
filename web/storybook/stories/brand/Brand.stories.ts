@@ -26,6 +26,8 @@ export const Jumping: Story = { render: () => ({ components: { Poulpy3d }, templ
 export const JumpingAround: Story = { render: () => ({ components: { Poulpy3d }, template: '<Poulpy3d motion="jump-turn" />' }) }
 /** The champion jumping for joy: his medal bounces on its ribbon and confetti flies at each jump. */
 export const Cheering: Story = { render: () => ({ components: { Poulpy3d }, template: '<Poulpy3d motion="cheer" />' }) }
+/** The cocky one: eyes wide open, then a wink and a smirk as his stars pop up and twinkle. */
+export const Winking: Story = { render: () => ({ components: { Poulpy3d }, template: '<Poulpy3d motion="wink" />' }) }
 /** The brand book, drawn live. */
 export const Book: Story = {
   render: () => ({ components: { BrandBook }, template: '<BrandBook />' }),

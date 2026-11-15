@@ -264,18 +264,19 @@ export function gleamPatch(towards = LOOK.gleam.towards) {
 
 /**
  * Builds Poulpy for one side of the plush, or in one of his moods.
- * @param {{ side?: 'blue' | 'ember', mood?: keyof typeof MOODS, tone?: string, face?: keyof typeof FACES, features?: (string | number)[][], on?: { at: number[], marks: (string | number)[][] }, stretch?: number,
+ * @param {{ side?: 'blue' | 'ember', mood?: keyof typeof MOODS, tone?: string, face?: keyof typeof FACES, features?: (string | number)[][], on?: { at: number[], marks: (string | number)[][] }, stretch?: number, faceOnly?: boolean,
  *   colours: { blue: string, ember: string, ink: string } }} options
  *   `colours` are the `color.poulpy` tokens of design/tokens.json. With a `mood`, he takes its side and face,
  *   and `tone` (that mood's `mood` token) tints him; without one he is the plain side, happy or grumpy.
  *   `face` gives him another face of FACES, or `features` a face written out. `on` is marks laid on his head by its outline in the
  *   drawing and not by his face, a plaster or a vein: `at` is their middle in the drawing and `marks` their features. `stretch` makes his arms that many times taller, and lifts his head with them.
+ *   `faceOnly` builds his face alone, for whoever changes it while he moves.
  * @returns {{ parts: { name: string, material: string, positions: number[], normals: number[], indices: number[] }[],
  *   materials: Record<string, { colour: number[], flat?: boolean, outline?: number[] }>, height: number, headLift: number }}
  *   Triangle meshes, already in place, and their colours as linear RGB. `flat` materials take no shading.
  *   His head and face are built where they sit at rest: whoever draws him lifts them by `headLift`.
  */
-export function buildPoulpy3d({ side = 'blue', mood, tone, face: faceName, features, on, stretch = 1, colours }) {
+export function buildPoulpy3d({ side = 'blue', mood, tone, face: faceName, features, on, stretch = 1, faceOnly = false, colours }) {
   if (mood) side = MOODS[mood].side
   const ember = side === 'ember', F = features ?? FACES[faceName ?? (mood ? MOODS[mood].face : ember ? 'grumpy' : 'happy')], { head, arms, face } = SHAPE
   const body = linear(tone ?? (ember ? colours.ember : colours.blue)), lining = linear(ember ? colours.blue : colours.ember), ink = linear(colours.ink)
@@ -310,7 +311,6 @@ export function buildPoulpy3d({ side = 'blue', mood, tone, face: faceName, featu
     part(`arm_${k + 1}`, 'body', egg(armRadius, { ...placed, to: armCut, down: 14 }))
     part(`arm_${k + 1}_lining`, 'lining', egg(armRadius, { ...placed, from: armCut, down: 5 }))
   }
-
   // Every feature is in the flat drawing's coordinates, then pressed onto the head.
   // One unit of the model is the drawing's head radius, 63, and the drawing's middle is x 100, its baseline y 130.
   const U = 63
@@ -378,7 +378,9 @@ export function buildPoulpy3d({ side = 'blue', mood, tone, face: faceName, featu
         const eye = sticker(x, y, rx * es, ry * es, 0.06, { around: 24, down: 12 })
         part(`eye_${which(x)}`, 'ink', eye.shape)
         // The white dot sits on the eye, up and to the viewer's left, as in the drawing.
-        part(`eye_${which(x)}_shine`, 'shine', egg([0.044 * k, 0.044 * k, 0.02], { around: 12, down: 8, turn: eye.turn, at: add(eye.at, eye.turn([(dot / U) * k, 0.066 * k, 0.047])) }))
+        // A narrowed eye has a smaller dot, lower down, so it stays inside the eye.
+        const open = Math.min(ry / rx, 1)
+        part(`eye_${which(x)}_shine`, 'shine', egg([0.044 * k * open, 0.044 * k * open, 0.02], { around: 12, down: 8, turn: eye.turn, at: add(eye.at, eye.turn([(dot / U) * k * open, 0.066 * k * open, 0.047])) }))
       } else if (kind === 'half') {
         const [x, y, rx, ry = rx] = v
         part(`eye_${which(x)}`, 'ink', sticker(x, y, rx * es, ry * es, 0.06, { from: Math.PI / 2, around: 24, down: 8 }).shape)
@@ -434,5 +436,6 @@ export function buildPoulpy3d({ side = 'blue', mood, tone, face: faceName, featu
   }
   part('gleam', 'gleam', gleamPatch())
 
-  return { parts, materials, height: head.centreY + head.radius[1] + 2 * arms.radius[1] * (stretch - 1), headLift: 2 * arms.radius[1] * (stretch - 1) }
+  // His face alone is what was drawn on him: everything but his head, his arms and the gleam.
+  return { parts: faceOnly ? parts.filter(({ name }) => !/^(head|arm_|gleam)/.test(name)) : parts, materials, height: head.centreY + head.radius[1] + 2 * arms.radius[1] * (stretch - 1), headLift: 2 * arms.radius[1] * (stretch - 1) }
 }

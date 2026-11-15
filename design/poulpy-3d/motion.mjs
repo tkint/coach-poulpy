@@ -1,14 +1,15 @@
 // How Poulpy moves in 3D, with no dependency, next to the shape of model.mjs.
 //   design/build-poulpy-3d.mjs bakes it into the animated glTF files; the docs site's "Poulpy in 3D" page runs it live.
 //
-// Three moves. His idle, TURN: he turns around on the spot in short steps, stops, and goes again. JUMP:
-// little jumps on the spot, which can also turn him a step each. And CHEER, the champion's jumps of joy:
-// higher and closer together, his medal bouncing on its ribbon and confetti flying at each one. His arms are soft, so they trail behind
+// Four moves. His idle, TURN: he turns around on the spot in short steps, stops, and goes again. JUMP:
+// little jumps on the spot, which can also turn him a step each. CHEER, the champion's jumps of joy:
+// higher and closer together, his medal bouncing on its ribbon and confetti flying at each one. And WINK,
+// the cocky one's: eyes wide open, then a wink and a smirk as stars pop up around him and twinkle. His arms are soft, so they trail behind
 // a step and swing a little past it before settling, and they hang under him when he jumps. He never
 // raises them himself (brand decisions 8 and 15): on the floor they slide, in the air they droop.
-// To change a move, edit TURN, JUMP or CHEER below, then run `node design/build-poulpy-3d.mjs`.
+// To change a move, edit TURN, JUMP, CHEER or WINK below, then run `node design/build-poulpy-3d.mjs`.
 import { SHAPE } from './model.mjs'
-import { medalReach } from './poses.mjs'
+import { medalReach, STARS } from './poses.mjs'
 
 export const TURN = {
   // The size of each step, in degrees, seen from above and turning to his left. They add up to one full
@@ -70,6 +71,18 @@ export const CHEER = {
   // mostly upwards and `out` of that sideways. `gravity` and `drag` make them fall slowly, `flutter` pushes them
   // from side to side as they fall and `spin` is how fast they tumble, in radians a second.
   confetti: { pieces: 72, burst: 24, from: [1.5, 2.5], high: 0.6, speed: [8, 13], out: 0.28, gravity: 5, drag: 2.8, flutter: 2.2, spin: 9 },
+}
+
+export const WINK = {
+  // He looks, eyes wide open, for `open` seconds, shuts one eye in `shut`, holds the wink for `hold` and opens it again in `reopen`.
+  open: 1.3, shut: 0.13, hold: 1.7, reopen: 0.22,
+  // With the wink his head leans `degrees` to his right, the side of the eye he shuts, on a spring, and dips by `dip` of its height.
+  head: { degrees: 5, dip: 0.035, speed: 16, damping: 0.4 },
+  // The stars come with the wink, one every `apart` seconds: each grows on a spring that takes it a little past
+  // its size and back, and leaves the same way when he opens his eye. While it is there it twinkles: it grows
+  // and shrinks by `twinkle` of its size, `beats` times a second, turns on itself at `spin` radians a second and
+  // rocks by `rock` radians. No two stars keep the same time.
+  stars: { apart: 0.09, speed: 20, damping: 0.35, twinkle: 0.22, beats: 1.6, spin: 2.4, rock: 0.3 },
 }
 
 // Where an arm bends, as distances from his middle along the arm, and how wide each bend is spread.
@@ -353,6 +366,59 @@ export function createCheer({ cheer = CHEER, ...options } = {}) {
     return jump.pose()
   }
   return jump
+}
+
+/**
+ * The cocky one winking, as something to advance in time.
+ * @param {{ wink?: typeof WINK }} [options]
+ * @returns The move. A pose is a turn's pose, standing still, and `{ wink, tilt, stars }`: how far he is into
+ *   the wink, from 0 (eyes wide open) to 1, for winkFace in poses.mjs; how far his head leans to his right, in
+ *   radians; and for each star of STARS in poses.mjs `{ size, spin, rock }`: its size as a share of its own
+ *   (0 when it is not there), and how far it has turned on itself and rocked, in radians.
+ */
+export function createWink({ wink = WINK } = {}) {
+  const arms = Array.from({ length: SHAPE.arms.count }, () => [0, 0, 0]), ease = (t) => t * t * (3 - 2 * t)
+  const seconds = [wink.open, wink.shut, wink.hold, wink.reopen]
+  let phase = 0, clock = 0, time = 0, shut = 0, tilt = 0, tiltSpeed = 0, squash = 0, squashSpeed = 0
+  const stars = STARS.map(() => ({ size: 0, growth: 0 }))
+  const spring = (s, goal, value, rate) => s.speed * s.speed * (goal - value) - 2 * s.damping * s.speed * rate
+
+  function tick(h) {
+    clock += h
+    time += h
+    while (clock >= seconds[phase]) { clock -= seconds[phase]; phase = (phase + 1) % 4 }
+    const through = clock / seconds[phase]
+    shut = phase === 0 ? 0 : phase === 1 ? ease(through) : phase === 2 ? 1 : 1 - ease(through)
+    const winking = phase === 1 || phase === 2
+    tiltSpeed += spring(wink.head, winking ? wink.head.degrees * RAD : 0, tilt, tiltSpeed) * h
+    tilt += tiltSpeed * h
+    squashSpeed += spring(wink.head, winking ? -wink.head.dip : 0, squash, squashSpeed) * h
+    squash += squashSpeed * h
+    // Each star waits its turn after the eye has shut.
+    stars.forEach((star, i) => {
+      const there = phase === 2 && clock >= i * wink.stars.apart
+      star.growth += spring(wink.stars, there ? 1 : 0, star.size, star.growth) * h
+      star.size = Math.max(star.size + star.growth * h, 0)
+    })
+  }
+
+  let owed = 0
+  const sim = {
+    pose: () => ({
+      yaw: 0, squash, arms, wink: shut, tilt,
+      stars: stars.map((star, i) => {
+        // Each star keeps its own time: a little faster or slower, and starting elsewhere in its beat.
+        const own = 1 + 0.17 * ((i * 5) % 4 - 1.5), beat = time * own + i * 1.9
+        return { size: star.size * (1 + wink.stars.twinkle * Math.sin(beat * wink.stars.beats * Math.PI * 2)), spin: beat * wink.stars.spin * (i % 2 ? -1 : 1), rock: wink.stars.rock * Math.sin(beat * 2.3) }
+      }),
+    }),
+    advance(seconds) {
+      owed += Math.min(Math.max(seconds, 0), 1)
+      while (owed >= SUBSTEP) { tick(SUBSTEP); owed -= SUBSTEP }
+      return sim.pose()
+    },
+  }
+  return sim
 }
 
 /**

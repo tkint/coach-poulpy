@@ -62,6 +62,7 @@ const files = {
       'little-jumps': 'brand-poulpy-moves-little-jumps',
       'jumping-around': 'brand-poulpy-moves-jumping-around',
       'the-champion-jumps-for-joy': 'brand-poulpy-moves-the-champion',
+      'the-cocky-one-winks': 'brand-poulpy-moves-the-cocky-wink',
       'using-the-model': 'brand-poulpy-in-3d',
       'changing-the-design': 'brand-poulpy-in-3d',
     } as Record<string, string>,

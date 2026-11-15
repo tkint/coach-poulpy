@@ -128,14 +128,15 @@ Until step 3 the apps and the website keep the 2D drawings, and `design/build-po
 
 **Still open:** how the pictures are rendered so that every machine writes the same files.
 
-## 17. In 3D, what is on Poulpy stays on him, and the champion cheers
+## 17. In 3D, what is on Poulpy stays on him, the champion cheers and the cocky one winks
 
-**Accepted, 15 November 2026.** Two rules for the 3D poses, and one move:
+**Accepted, 15 November 2026.** Two rules for the 3D poses, and two moves:
 
 - Sweat and tears are part of his face, and plasters or a vein are wrapped onto his head. They stay on his skin when he turns. Only what is around him (sparks, puffs, bubbles, lettering) is flat and faces the viewer.
 - The champion has a move: he jumps for joy, his medal swings on its ribbon as a weight would and confetti flies at each jump, then lies on the floor. It is on [its own page](./poulpy-3d.md#the-champion-jumps-for-joy).
+- The cocky one has a move: he starts with both eyes wide open, then winks with his slight cocky smile. His stars appear with the wink, solid and twinkling. In 3D he has no halo and no "PR!" badge. It is on [its own page](./poulpy-3d.md#the-cocky-one-winks).
 - Each move has a page of its own in the component workshop, and a preview only moves while it is on screen.
 
-**Why:** the owner asked for each on seeing the twelve poses in 3D. Drops that faced the viewer slid over him as he turned, where sweat should stick; the plasters were pressed on straight from the front and dipped under his skin near the edge of his head; and several moves running on one page made it lag.
+**Why:** the owner asked for each on seeing the twelve poses in 3D. Drops that faced the viewer slid over him as he turned, where sweat should stick; the plasters were pressed on straight from the front and dipped under his skin near the edge of his head; and several moves running on one page made it lag. For the cocky one he asked for the wink, for stars that move in 3D instead of a still drawing, and to drop the badge and the halo.
 
-**Still open:** the cheer's values, like the jump's. It is a live preview, not in the glTF files yet.
+**Still open:** the cheer's and the wink's values, like the jump's. They are live previews, not in the glTF files yet.

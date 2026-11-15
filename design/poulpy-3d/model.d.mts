@@ -13,7 +13,7 @@ export const MOODS: Record<PoulpyMood, { side: PoulpySide; face: string }>
 export const LOOK: { light: number[]; gleam: { towards: number[]; size: number[]; tilt: number; white: number }; shade: number; outline: { width: number; ink: number } }
 export function linear(hex: string): number[]
 export function gleamPatch(towards?: number[]): PoulpyShape
-export function buildPoulpy3d(options: { side?: PoulpySide; mood?: PoulpyMood; tone?: string; face?: string; features?: (string | number)[][]; on?: { at: number[]; marks: (string | number)[][] }; stretch?: number; colours: { blue: string; ember: string; ink: string } }): Poulpy3d
+export function buildPoulpy3d(options: { side?: PoulpySide; mood?: PoulpyMood; tone?: string; face?: string; features?: (string | number)[][]; on?: { at: number[]; marks: (string | number)[][] }; stretch?: number; faceOnly?: boolean; colours: { blue: string; ember: string; ink: string } }): Poulpy3d
 export function egg(radius: number[], options?: { from?: number; to?: number; around?: number; down?: number; turn?: (p: number[]) => number[]; at?: number[] }): PoulpyShape
 export function join(...shapes: PoulpyShape[]): PoulpyShape
 export function facing(n: number[]): (p: number[]) => number[]

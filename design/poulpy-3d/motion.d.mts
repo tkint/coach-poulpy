@@ -9,6 +9,9 @@ export interface Jump { softness: number; stride: number; height: number; tuck: 
 /** A jump's pose and, for the champion: `medal`, how far it has swung up off his arm and slid to his left, in radians; `confetti`, each piece's `[x, y, z, turnX, turnY, turnZ]`, under the floor until it has flown. */
 export interface CheerPose extends JumpPose { medal: { lift: number; sway: number }; confetti: number[][] }
 export interface Cheer extends Jump { advance(seconds: number): CheerPose; pose(): CheerPose }
+/** A turn's pose, standing still, and for the cocky wink: `wink`, from 0 (eyes wide open) to 1; `tilt`, how far his head leans to his right, in radians; `stars`, each star's size as a share of its own and how far it has turned on itself and rocked, in radians. */
+export interface WinkPose extends TurnPose { wink: number; tilt: number; stars: { size: number; spin: number; rock: number }[] }
+export interface Wink { advance(seconds: number): WinkPose; pose(): WinkPose }
 export interface ArmJoint { name: string; arm: number; bend: number; at: number[] }
 export const TURN: {
   steps: number[]; pauses: number[]; windUp: { degrees: number; seconds: number }; stepSeconds: number
@@ -29,11 +32,17 @@ export const CHEER: {
   medal: { gravity: number; damping: number; bounce: number; most: number; sway: { slide: number; speed: number; damping: number; most: number } }
   confetti: { pieces: number; burst: number; from: number[]; high: number; speed: number[]; out: number; gravity: number; drag: number; flutter: number; spin: number }
 }
+export const WINK: {
+  open: number; shut: number; hold: number; reopen: number
+  head: { degrees: number; dip: number; speed: number; damping: number }
+  stars: { apart: number; speed: number; damping: number; twinkle: number; beats: number; spin: number; rock: number }
+}
 export const RIG: { bends: number[]; spread: number }
 export function turnSeconds(turn?: typeof TURN): number
 export function createTurn(options?: { softness?: number; stride?: number; turn?: typeof TURN }): Turn
 export function createJump(options?: { softness?: number; stride?: number; jump?: typeof JUMP; turn?: typeof TURN }): Jump
 export function createCheer(options?: { softness?: number; stride?: number; cheer?: typeof CHEER; turn?: typeof TURN }): Cheer
+export function createWink(options?: { wink?: typeof WINK }): Wink
 export function bakeTurn(options?: { fps?: number; turn?: typeof TURN }): { seconds: number; times: number[]; yaw: number[]; squash: number[]; arms: number[][][] }
 export function squashScale(squash: number): number[]
 export function armJoints(): ArmJoint[]

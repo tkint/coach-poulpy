@@ -11,6 +11,8 @@
 // To change a pose, edit POSES below and look at the page; the rules are in docs/poulpy-3d.md.
 import { SHAPE, FACES, MOODS, buildPoulpy3d, egg, facing, join, linear, pathPoints, tube } from './model.mjs'
 
+// The drawing's floor is y 165 and its middle x 100; 64 of its units are 1 in the model, for what stands around him.
+const CARD = 64
 const GOLD = '#F0B53A', STEEL = '#56687A', RUST = '#7A2C12', CLOUD = '#B6C4D0', NIGHT = '#1574B0', WHITE = '#FFFFFF'
 
 // A water drop and a four-point spark, as the drawings draw them.
@@ -34,7 +36,11 @@ const plaster = (turn) => [['shape', box(112, 50, 40, 13, 5, turn, 132, 56), '#F
 
 // The champion's confetti: its colours ('ember' is Poulpy's) and the size of a piece, in the drawing's units.
 // The pose draws it flat behind him; when he cheers it flies (CHEER in motion.mjs).
+export const GOLDEN = GOLD
 export const CONFETTI = { colours: [GOLD, 'ember', '#5BBEF0'], size: [9, 5] }
+
+// The cocky one's sparks, as the drawing has them: x, y and size. Still, they are flat; when he winks they are solid stars (STARS).
+const SPARKS = [[6, 52, 10], [196, 40, 8], [176, 4, 5], [24, 10, 5]]
 
 // Effects are lists like the faces' features, in the drawing's coordinates:
 //   ['shape', d, colour, { stroke, width, opacity }]   a closed SVG path, filled, with an optional edge
@@ -43,11 +49,8 @@ export const CONFETTI = { colours: [GOLD, 'ember', '#5BBEF0'], size: [9, 5] }
 //   ['text', x, y, size, colour, words, 'middle']       stroked lettering; 'middle' centres it on x
 // A colour of 'ink' is Poulpy's ink.
 export const POSES = {
-  cocky: {
-    mood: 'proud', face: 'cocky',
-    behind: [['oval', 100, 90, 96, 96, GOLD, { opacity: 0.12 }]],
-    around: [...sparks([6, 52, 10], [196, 40, 8], [176, 4, 5], [24, 10, 5]), ['shape', box(128, -12, 54, 24, 12), 'ink'], ['text', 155, 5, 14, GOLD, 'PR!', 'middle']],
-  },
+  // The drawing's halo and "PR!" badge are left out in 3D: the owner dropped them when he asked for the wink.
+  cocky: { mood: 'proud', face: 'cocky', around: sparks(...SPARKS) },
   straining: {
     mood: 'happy', face: [...FACES.straining, ...drops([137, 68, 0.9], [60, 74, 0.7])], props: ['dumbbell'],
     around: [['stroke', 'M12 70 l-12 -4 M10 86 l-14 0 M188 70 l12 -4 M190 86 l14 0', 3, STEEL]],
@@ -89,7 +92,7 @@ export const POSES = {
 }
 
 // Rounded stroke lettering for the few words drawn in the poses, on a 1-unit em, baseline at 0.
-// CLEANUP: the same letters as GLYPHS in design/build-poulpy.mjs; keep one copy once the pictures are
+// CLEANUP: the letters still drawn here, copied from GLYPHS in design/build-poulpy.mjs; keep one copy once the pictures are
 // rendered from this model and the 2D generator goes (brand decision 16).
 const GLYPHS = {
   h: { d: 'M0 -0.72 L0 0 M0 -0.3 Q0 -0.5 0.19 -0.5 Q0.38 -0.5 0.38 -0.3 L0.38 0', advance: 0.56 },
@@ -97,9 +100,6 @@ const GLYPHS = {
   p: { d: 'M0 -0.5 L0 0.24 M0 -0.25 Q0 -0.5 0.19 -0.5 Q0.38 -0.5 0.38 -0.25 Q0.38 0 0.19 0 Q0 0 0 -0.25', advance: 0.56 },
   z: { d: 'M0 -0.5 L0.36 -0.5 L0 0 L0.36 0', advance: 0.5 },
   '?': { d: 'M0 -0.56 Q0 -0.76 0.2 -0.76 Q0.4 -0.76 0.4 -0.56 Q0.4 -0.42 0.2 -0.34 L0.2 -0.22 M0.2 -0.02 L0.2 0', advance: 0.44 },
-  P: { d: 'M0 0 L0 -0.7 L0.2 -0.7 Q0.4 -0.7 0.4 -0.52 Q0.4 -0.34 0.2 -0.34 L0 -0.34', advance: 0.56 },
-  R: { d: 'M0 0 L0 -0.7 L0.2 -0.7 Q0.4 -0.7 0.4 -0.52 Q0.4 -0.34 0.2 -0.34 L0 -0.34 M0.2 -0.34 L0.4 0', advance: 0.58 },
-  '!': { d: 'M0 -0.7 L0 -0.24 M0 -0.02 L0 0', advance: 0.16 },
   '…': { d: 'M0 -0.02 L0 0 M0.26 -0.02 L0.26 0 M0.52 -0.02 L0.52 0', advance: 0.64 },
 }
 // The strokes of some words, as lists of points.
@@ -114,10 +114,49 @@ function lettering(x, y, size, words, anchor) {
   })
 }
 
+// --- the cocky wink --------------------------------------------------------------------------------
+
+const between = (a, b, t) => a + (b - a) * t
+/**
+ * His face as the cocky one winks: at 0 both eyes are wide open, at 1 his right eye is shut, his left brow has come up
+ * and his mouth is the cocky smirk. In between, the eye narrows to a line, then the line bends into the wink.
+ * The numbers are the drawing's, as in FACES; `[open, winking]` pairs are blended.
+ */
+export function winkFace(t) {
+  const at = (...pairs) => pairs.map(([open, winking]) => between(open, winking, t))
+  const shut = Math.min(t / 0.7, 1), bent = Math.max((t - 0.7) / 0.3, 0)
+  return [
+    shut < 1 ? ['eye', 80, between(96, 97, shut), between(9.5, 10, shut), between(11.5, 2.2, shut)] : ['curve', 69, 97 + bent, 80, 97 - 9 * bent, 91, 97 - bent, 4.5, 'eye_right'],
+    ['eye', 120, 96, ...at([9.5, 9], [11.5, 10.5])],
+    // His brow is not drawn while his eyes are wide open: it grows in as it goes up.
+    ...(t > 0 ? [['curve', ...at([109, 109], [80, 79], [120, 120], [75, 70], [131, 132], [80, 77]), 4.5 * Math.min(t / 0.4, 1), 'brow_left']] : []),
+    ['curve', ...at([91, 88], [113, 114], [100, 102], [119, 123], [109, 115], [113, 108]), 4.5, 'mouth'],
+    ...FACES.cocky.filter(([kind]) => kind === 'cheek'),
+  ]
+}
+
+/** The stars around the cocky one when he winks: where each is in the room, and its size from its middle to a tip. */
+export const STARS = SPARKS.map(([x, y, r], i) => ({ at: [(x - 100) / CARD, (165 - y) / CARD, [0.5, 0.35, -0.1, 0.1][i]], size: (r / CARD) * 1.5 }))
+/** A solid four-point star of size 1, cut like a gem so each face catches the light on its own. It faces +z. */
+export function starShape() {
+  const rim = Array.from({ length: 8 }, (_, i) => { const r = i % 2 ? 0.34 : 1, a = (i / 8) * Math.PI * 2; return [r * Math.sin(a), r * Math.cos(a), 0] })
+  const positions = [], normals = [], indices = []
+  rim.forEach((p, i) => {
+    const q = rim[(i + 1) % 8]
+    for (const [peak, a, b] of [[[0, 0, 0.3], q, p], [[0, 0, -0.3], p, q]]) {
+      const u = a.map((v, k) => v - peak[k]), w = b.map((v, k) => v - peak[k])
+      const n = [u[1] * w[2] - u[2] * w[1], u[2] * w[0] - u[0] * w[2], u[0] * w[1] - u[1] * w[0]], l = Math.hypot(...n)
+      indices.push(...[0, 1, 2].map((k) => positions.length / 3 + k))
+      positions.push(...peak, ...a, ...b)
+      for (let k = 0; k < 3; k++) normals.push(...n.map((v) => v / l))
+    }
+  })
+  return { positions, normals, indices }
+}
+
 // --- flat effects ----------------------------------------------------------------------------------
 
-// An effect of the drawing as flat shapes facing +z: the drawing's floor is y 165, and 64 of its units are 1 here.
-const CARD = 64
+// An effect of the drawing as flat shapes facing +z.
 const onCard = ([x, y]) => [(x - 100) / CARD, (165 - y) / CARD]
 // A filled outline, as a fan of triangles from its middle: `flat` takes points already on the card, `fan` the drawing's.
 function flat(points, z) {
@@ -223,14 +262,15 @@ const PROPS = {
  * Builds Poulpy in one of his poses.
  * @param {{ pose: keyof typeof POSES, effects?: boolean, tones: Record<string, string>, colours: { blue: string, ember: string, ink: string } }} options
  *   `tones` are the `mood` tokens of design/tokens.json and `colours` its `color.poulpy` tokens.
- *   `effects: false` leaves out the flat effects around him, for when he moves.
+ *   `effects: false` leaves out the flat effects around him, for when he moves, and `face` gives him another face
+ *   than the pose's: a name in FACES or a list of features.
  * @returns What buildPoulpy3d returns, and more: `headTilt`, how far his head leans to his right, in radians,
  *   for whoever draws him to apply with `headLift`; parts with `card` set to 'front' or 'back', the flat effects,
  *   drawn facing +z around his middle and to be kept facing the viewer, in front of him or behind; and
  *   materials that may have an `opacity`.
  */
-export function buildPoulpyPose({ pose, tones, colours, effects = true }) {
-  const { mood, face, on, stretch, headTilt = 0, props = [], around = [], behind = [] } = POSES[pose]
+export function buildPoulpyPose({ pose, tones, colours, effects = true, face = POSES[pose].face }) {
+  const { mood, on, stretch, headTilt = 0, props = [], around = [], behind = [] } = POSES[pose]
   const model = buildPoulpy3d({ mood, tone: tones[mood], face: typeof face === 'string' ? face : undefined, features: typeof face === 'string' ? undefined : face, on, stretch, colours })
   for (const prop of props) {
     const made = PROPS[prop](colours)

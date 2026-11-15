@@ -34,6 +34,7 @@ The model also takes the twelve [poses](./brand.md#when-each-drawing-shows) of t
 - **What he wears is solid.** The sweatband goes all the way around his head, the nightcap sits on it, the medal rests on his front arm and the dumbbell lies on the floor beside him: turn him and they turn with him.
 - **What is on him is on his skin.** The plasters and the vein are laid against his head where the drawing has them and wrapped around it; sweat and tears are part of his face. Turn him and they stay where they are.
 - **The comic effects stay flat and face the viewer.** Sparks, confetti, puffs, bubbles and lettering are the drawing's own, standing in front of him or behind him, and they keep facing whoever looks while he turns.
+- **Cocky has no halo and no "PR!" badge in 3D.** The owner dropped them; his sparks stay, and become solid stars when he [winks](#the-cocky-one-winks).
 - **He still never lifts an arm.** Standing tall stretches his arms taller and lifts his head with them; Side glance leans his head. Nothing else moves.
 - **The loader and the app icons are not here yet.** They are the next part of replacing the drawings with the model ([Brand decisions](./brand-decisions.md#16-the-3d-poulpy-replaces-the-drawings), decision 16); the apps and the website still show the 2D drawings.
 
@@ -45,6 +46,7 @@ He moves in 3D too. Each move has its own page in the component workshop, so onl
 - [Little jumps](#little-jumps) on the spot.
 - [Jumping around](#jumping-around): the same jumps, each turning him.
 - [The champion jumps for joy](#the-champion-jumps-for-joy), his medal bouncing and confetti flying.
+- [The cocky one winks](#the-cocky-one-winks), and stars pop up around him.
 
 All of them are one file, [`design/poulpy-3d/motion.mjs`](../design/poulpy-3d/motion.mjs), next to the shape. A preview only moves while it is on screen, and starts paused for anyone who asked their device for less motion; an app must do the same.
 
@@ -115,6 +117,20 @@ The Champion pose, moving: he cannot hold still. His jumps are the [little jumps
 
 The controls are the jump's, starting from the champion's own values: Height 0.50, Lean 9 and Pause 0.26. `CHEER` in `motion.mjs` holds those, the medal's weight, bounce and reach and the confetti's numbers, and `createCheer()` runs it live. Like the jump it is a preview, not in the glTF files yet.
 
+## The cocky one winks
+
+The Cocky pose, moving. He looks at you with both eyes wide open, then shuts his right eye, lifts his left brow and his mouth slides into the cocky smirk. He holds it, opens his eye and starts again.
+
+<!-- live: Winking -->
+
+- **His face moves, feature by feature.** The eye narrows to a line and the line bends into the wink; the brow and the mouth go from plain to cocky with it. `winkFace()` in `poses.mjs` gives his face at any point between the two, in the drawing's coordinates like every face.
+- **His head goes with it.** It leans a little to the side of the eye he shuts and dips, on a spring, then comes back.
+- **The stars come with the wink.** There are none while his eyes are open. As the eye shuts they pop up one after the other, each a little past its size and back, and they leave when he opens it.
+- **The stars are solid and they twinkle.** Each is a four-point star cut like a gem, in the room around him where the drawing has its sparks. It grows and shrinks, turns on itself and rocks, and no two keep the same time. Turn the view and they stay where they are.
+- **No halo, no badge.** The drawing's glow and its "PR!" are not part of him in 3D.
+
+`WINK` in `motion.mjs` holds the timing, the lean of his head and the stars' numbers, and `createWink()` runs it live. It is a preview, not in the glTF files yet.
+
 ## Using the model
 
 | File | What it is |
@@ -144,7 +160,7 @@ Everything that defines him is at the top of `model.mjs`, in three plainly named
 
 His poses are in `poses.mjs`: `POSES` gives each one its mood, its face, what he wears, what lies on his head and the effects around him, all in the drawing's coordinates, and `buildPoulpyPose({ pose })` builds it.
 
-How he moves is in `motion.mjs`: `TURN` for his turn, `JUMP` for his jump, `CHEER` for the champion's and `RIG` for where the arms bend.
+How he moves is in `motion.mjs`: `TURN` for his turn, `JUMP` for his jump, `CHEER` for the champion's, `WINK` for the cocky one's and `RIG` for where the arms bend.
 
 His colours are the `color.poulpy` tokens of [`design/tokens.json`](../design/tokens.json), never written into the model.
 
@@ -154,4 +170,4 @@ Edit, then regenerate and look at the workshop's page (`npm run storybook` in `w
 node design/build-poulpy-3d.mjs
 ```
 
-CI runs it with `--check` and fails when the committed glTF files no longer match `model.mjs` and `motion.mjs`. A new mood in 3D starts as a new entry in `FACES` and `MOODS`, a new pose as a new entry in `POSES`; a new move starts next to `TURN`, `JUMP` and `CHEER` in `motion.mjs`, with a page of its own in the workshop. Both follow the [brand rules](./brand.md#character-rules) like any drawing.
+CI runs it with `--check` and fails when the committed glTF files no longer match `model.mjs` and `motion.mjs`. A new mood in 3D starts as a new entry in `FACES` and `MOODS`, a new pose as a new entry in `POSES`; a new move starts next to `TURN`, `JUMP`, `CHEER` and `WINK` in `motion.mjs`, with a page of its own in the workshop. Both follow the [brand rules](./brand.md#character-rules) like any drawing.
