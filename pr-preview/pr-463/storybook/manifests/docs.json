@@ -169,6 +169,14 @@
       "content": "import { Meta, Markdown, Story } from '@storybook/addon-docs/blocks'\nimport { markdownPages } from '../../markdown-pages'\nimport * as Live from '../Brand.stories'\n\n{/* Shown from docs/poulpy-3d.md: edit the text there. Each <!-- live: Name --> in it is the Brand.stories story of that name. */}\n\nexport const parts = markdownPages('poulpy-3d').sections('The champion jumps for joy').split(/<!-- live: (\\w+) -->/)\n\n<Meta title=\"Brand/Poulpy moves/The champion\" />\n\n{parts.map((part, index) => (index % 2 ? <Story key={index} of={Live[part]} /> : <Markdown key={index}>{part.replace(/^## /, '# ')}</Markdown>))}\n",
       "summary": "export const parts = markdownPages('poulpy-3d').sections('The champion jumps for joy').spl..."
     },
+    "brand-poulpy-moves-the-cocky-wink--docs": {
+      "id": "brand-poulpy-moves-the-cocky-wink--docs",
+      "name": "Docs",
+      "path": "./stories/brand/poulpy-moves/Winking.mdx",
+      "title": "Brand/Poulpy moves/The cocky wink",
+      "content": "import { Meta, Markdown, Story } from '@storybook/addon-docs/blocks'\nimport { markdownPages } from '../../markdown-pages'\nimport * as Live from '../Brand.stories'\n\n{/* Shown from docs/poulpy-3d.md: edit the text there. Each <!-- live: Name --> in it is the Brand.stories story of that name. */}\n\nexport const parts = markdownPages('poulpy-3d').sections('The cocky one winks').split(/<!-- live: (\\w+) -->/)\n\n<Meta title=\"Brand/Poulpy moves/The cocky wink\" />\n\n{parts.map((part, index) => (index % 2 ? <Story key={index} of={Live[part]} /> : <Markdown key={index}>{part.replace(/^## /, '# ')}</Markdown>))}\n",
+      "summary": "export const parts = markdownPages('poulpy-3d').sections('The cocky one winks').split(//)"
+    },
     "brand-brand-book--docs": {
       "id": "brand-brand-book--docs",
       "name": "Docs",

@@ -620,7 +620,7 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">24 docs ok</a></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">25 docs ok</a></div>
   </div>
 </header>
 <main>
@@ -1643,10 +1643,51 @@ export const parts = markdownPages(&#39;poulpy-3d&#39;).sections(&#39;The champi
   aria-label="Docs">
   <div class="head">
     <div class="title">
+      <h2><span class="status-dot dot-ok"></span> Brand/Poulpy moves/The cocky wink</h2>
+      <div class="badges">
+        
+        <label for="doc-21-brand-poulpy-moves-the-cocky-wink-docs-content" class="badge ok as-toggle">view content</label>
+      </div>
+    </div>
+    <div class="meta" title="./stories/brand/poulpy-moves/Winking.mdx">brand-poulpy-moves-the-cocky-wink--docs · ./stories/brand/poulpy-moves/Winking.mdx</div>
+    <div>export const parts = markdownPages(&#39;poulpy-3d&#39;).sections(&#39;The cocky one winks&#39;).split(//)</div>
+  </div>
+
+  <!-- Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="doc-21-brand-poulpy-moves-the-cocky-wink-docs-content" class="tg tg-content" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-content">
+          <div class="mdx-content">
+            <pre><code>import { Meta, Markdown, Story } from &#39;@storybook/addon-docs/blocks&#39;
+import { markdownPages } from &#39;../../markdown-pages&#39;
+import * as Live from &#39;../Brand.stories&#39;
+
+{/* Shown from docs/poulpy-3d.md: edit the text there. Each &lt;!-- live: Name --&gt; in it is the Brand.stories story of that name. */}
+
+export const parts = markdownPages(&#39;poulpy-3d&#39;).sections(&#39;The cocky one winks&#39;).split(/&lt;!-- live: (\w+) --&gt;/)
+
+&lt;Meta title=&quot;Brand/Poulpy moves/The cocky wink&quot; /&gt;
+
+{parts.map((part, index) =&gt; (index % 2 ? &lt;Story key={index} of={Live[part]} /&gt; : &lt;Markdown key={index}&gt;{part.replace(/^## /, &#39;# &#39;)}&lt;/Markdown&gt;))}
+</code></pre>
+          </div>
+        </div>
+  </div>
+</article>
+<article
+  class="card is-doc no-doc-error"
+  role="listitem"
+  aria-label="Docs">
+  <div class="head">
+    <div class="title">
       <h2><span class="status-dot dot-ok"></span> Brand/Brand book</h2>
       <div class="badges">
         
-        <label for="doc-21-brand-brand-book-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-22-brand-brand-book-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
     <div class="meta" title="./stories/brand/BrandBook.mdx">brand-brand-book--docs · ./stories/brand/BrandBook.mdx</div>
@@ -1655,7 +1696,7 @@ export const parts = markdownPages(&#39;poulpy-3d&#39;).sections(&#39;The champi
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-21-brand-brand-book-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-22-brand-brand-book-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -1686,7 +1727,7 @@ The Poulpy brand book: logo, colours, poses, type, tokens and behaviour, with ev
       <h2><span class="status-dot dot-ok"></span> Brand/Decisions</h2>
       <div class="badges">
         
-        <label for="doc-22-brand-decisions-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-23-brand-decisions-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
     <div class="meta" title="./stories/brand/Decisions.mdx">brand-decisions--docs · ./stories/brand/Decisions.mdx</div>
@@ -1695,7 +1736,7 @@ The Poulpy brand book: logo, colours, poses, type, tokens and behaviour, with ev
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-22-brand-decisions-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-23-brand-decisions-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -1728,7 +1769,7 @@ export const decisions = markdownPages(&#39;brand-decisions&#39;).all
       <h2><span class="status-dot dot-ok"></span> Brand/Ideas for later</h2>
       <div class="badges">
         
-        <label for="doc-23-brand-ideas-for-later-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-24-brand-ideas-for-later-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
     <div class="meta" title="./stories/brand/Ideas.mdx">brand-ideas-for-later--docs · ./stories/brand/Ideas.mdx</div>
@@ -1737,7 +1778,7 @@ export const decisions = markdownPages(&#39;brand-decisions&#39;).all
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-23-brand-ideas-for-later-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-24-brand-ideas-for-later-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
