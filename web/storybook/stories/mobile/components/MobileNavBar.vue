@@ -15,8 +15,8 @@ const items = [
 
 <template>
   <nav class="nav-bar" aria-label="Main" data-component="nav-bar">
-    <a v-for="item in items" :key="item.key" class="nav-item" href="#" :aria-current="active === item.key ? 'page' : undefined">
+    <button type="button" v-for="item in items" :key="item.key" class="nav-item" :aria-current="active === item.key ? 'page' : undefined">
       <span><component :is="item.icon" :size="22" aria-hidden="true" /></span>{{ item.label }}
-    </a>
+    </button>
   </nav>
 </template>

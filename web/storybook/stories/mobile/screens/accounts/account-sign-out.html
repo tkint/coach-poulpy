@@ -1,5 +1,5 @@
 <main class="phone">
-  <header class="page-bar"><a class="icon-button" href="#" aria-label="Back to settings"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="chevron-left"><path d="m15 18-6-6 6-6"/></svg></a><div><h1>Account</h1></div></header>
+  <header class="page-bar"><button type="button" class="icon-button" aria-label="Back to settings"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="chevron-left"><path d="m15 18-6-6 6-6"/></svg></button><div><h1>Account</h1></div></header>
   <div class="form-body" style="padding-top: var(--cp-space-lg);">
     <div class="card account-card" id="account-email" data-component="account-card"><span class="label">Email</span><strong>alex@example.com</strong></div>
     <div class="sync-state" id="sync-state" role="status"><span class="dot" aria-hidden="true"></span><span><strong>Up to date</strong><small>Last synced 2 minutes ago</small></span></div>
@@ -9,7 +9,7 @@
     </div>
     <div class="leave-actions">
       <MobileButton kind="secondary" icon="log-out" id="sign-out">Sign out</MobileButton>
-      <a class="text-button text-button--danger" href="#" id="delete" style="flex: none;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="trash"><path d="M10 11v6"/><path d="M14 11v6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>&nbsp;Delete account</a>
+      <button type="button" class="text-button text-button--danger" id="delete" style="flex: none;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="trash"><path d="M10 11v6"/><path d="M14 11v6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>&nbsp;Delete account</button>
     </div>
   </div>
   <div class="scrim" aria-hidden="true"></div>
@@ -17,6 +17,6 @@
     <img src="../../../poulpy/pose_thinking.svg" alt="">
     <h2 id="dialog-title">Sign out?</h2>
     <p id="dialog-body">Everything is sent already. This phone goes back to an empty guest; your workouts and sessions stay in your account.</p>
-    <div class="actions"><a class="secondary-button" href="#">Cancel</a><a class="primary-button" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="log-out"><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg>Sign out</a></div>
+    <div class="actions"><button type="button" class="secondary-button">Cancel</button><button type="button" class="primary-button"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="log-out"><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg>Sign out</button></div>
   </div></div>
 </main>

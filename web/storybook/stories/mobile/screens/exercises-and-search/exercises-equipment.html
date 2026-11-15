@@ -2,8 +2,8 @@
 <div class="screen-header" style="padding-bottom: var(--cp-space-sm); gap: var(--cp-space-md);">
     <h1>Library</h1>
     <div class="tabs" role="tablist" aria-label="Library" data-component="tabs">
-      <a role="tab" href="#" aria-selected="false">Workouts</a>
-      <a role="tab" href="#" aria-selected="true">Exercises</a>
+      <button type="button" role="tab" aria-selected="false">Workouts</button>
+      <button type="button" role="tab" aria-selected="true">Exercises</button>
     </div>
     <label class="search-field" data-component="search-field">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="search"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg>
@@ -23,57 +23,21 @@
   <div id="catalog" style="flex: 1; min-height: 0; overflow: hidden; padding: 0 var(--cp-space-lg) var(--cp-space-lg); display: flex; flex-direction: column; gap: 6px;">
     <h2 class="label" style="margin: 10px var(--cp-space-xs) 2px;">Squat</h2>
     <ul style="display: flex; flex-direction: column; gap: var(--cp-space-sm);">
-      <li><a class="list-row" data-component="exercise-row" href="#" style="min-height: 56px; padding-right: var(--cp-space-md);">
-        <span class="row-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="person-standing"><circle cx="12" cy="5" r="1"/><path d="m9 20 3-6 3 6"/><path d="m6 8 6 2 6-2"/><path d="M12 10v4"/></svg></span>
-        <span class="row-text"><strong>Sit to stand</strong><span>Quadriceps, glutes · No equipment</span></span>
-        <span class="chevron"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="chevron-right"><path d="m9 18 6-6-6-6"/></svg></span>
-      </a></li>
-      <li><a class="list-row" data-component="exercise-row" href="#" style="min-height: 56px; padding-right: var(--cp-space-md);">
-        <span class="row-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="person-standing"><circle cx="12" cy="5" r="1"/><path d="m9 20 3-6 3 6"/><path d="m6 8 6 2 6-2"/><path d="M12 10v4"/></svg></span>
-        <span class="row-text"><strong>Bodyweight squat</strong><span>Quadriceps, glutes · No equipment</span></span>
-        <span class="chevron"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="chevron-right"><path d="m9 18 6-6-6-6"/></svg></span>
-      </a></li>
-      <li><a class="list-row" data-component="exercise-row" href="#" style="min-height: 56px; padding-right: var(--cp-space-md);">
-        <span class="row-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="person-standing"><circle cx="12" cy="5" r="1"/><path d="m9 20 3-6 3 6"/><path d="m6 8 6 2 6-2"/><path d="M12 10v4"/></svg></span>
-        <span class="row-text"><strong>Goblet squat</strong><span>Quadriceps, glutes · Dumbbell or kettlebell</span></span>
-        <span class="chevron"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="chevron-right"><path d="m9 18 6-6-6-6"/></svg></span>
-      </a></li>
-      <li><a class="list-row" data-component="exercise-row" href="#" style="min-height: 56px; padding-right: var(--cp-space-md);">
-        <span class="row-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="person-standing"><circle cx="12" cy="5" r="1"/><path d="m9 20 3-6 3 6"/><path d="m6 8 6 2 6-2"/><path d="M12 10v4"/></svg></span>
-        <span class="row-text"><strong>Wall sit</strong><span>Quadriceps, glutes · Hold</span></span>
-        <span class="chevron"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="chevron-right"><path d="m9 18 6-6-6-6"/></svg></span>
-      </a></li>
+      <li><MobileExerciseRow link icon="person-standing" name="Sit to stand" detail="Quadriceps, glutes · No equipment" /></li>
+      <li><MobileExerciseRow link icon="person-standing" name="Bodyweight squat" detail="Quadriceps, glutes · No equipment" /></li>
+      <li><MobileExerciseRow link icon="person-standing" name="Goblet squat" detail="Quadriceps, glutes · Dumbbell or kettlebell" /></li>
+      <li><MobileExerciseRow link icon="person-standing" name="Wall sit" detail="Quadriceps, glutes · Hold" /></li>
     </ul>
     <h2 class="label" style="margin: 10px var(--cp-space-xs) 2px;">Hinge</h2>
     <ul style="display: flex; flex-direction: column; gap: var(--cp-space-sm);">
-      <li><a class="list-row" data-component="exercise-row" href="#" style="min-height: 56px; padding-right: var(--cp-space-md);">
-        <span class="row-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="hand-grab"><path d="M18 11.5V9a2 2 0 0 0-2-2a2 2 0 0 0-2 2v1.4"/><path d="M14 10V8a2 2 0 0 0-2-2a2 2 0 0 0-2 2v2"/><path d="M10 9.9V9a2 2 0 0 0-2-2a2 2 0 0 0-2 2v5"/><path d="M6 14a2 2 0 0 0-2-2a2 2 0 0 0-2 2"/><path d="M18 11a2 2 0 1 1 4 0v3a8 8 0 0 1-8 8h-4a8 8 0 0 1-8-8 2 2 0 1 1 4 0"/></svg></span>
-        <span class="row-text"><strong>Glute bridge</strong><span>Glutes, hamstrings · Mat</span></span>
-        <span class="chevron"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="chevron-right"><path d="m9 18 6-6-6-6"/></svg></span>
-      </a></li>
-      <li><a class="list-row" data-component="exercise-row" href="#" style="min-height: 56px; padding-right: var(--cp-space-md);">
-        <span class="row-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="hand-grab"><path d="M18 11.5V9a2 2 0 0 0-2-2a2 2 0 0 0-2 2v1.4"/><path d="M14 10V8a2 2 0 0 0-2-2a2 2 0 0 0-2 2v2"/><path d="M10 9.9V9a2 2 0 0 0-2-2a2 2 0 0 0-2 2v5"/><path d="M6 14a2 2 0 0 0-2-2a2 2 0 0 0-2 2"/><path d="M18 11a2 2 0 1 1 4 0v3a8 8 0 0 1-8 8h-4a8 8 0 0 1-8-8 2 2 0 1 1 4 0"/></svg></span>
-        <span class="row-text"><strong>Romanian deadlift</strong><span>Hamstrings, glutes · Dumbbells or barbell</span></span>
-        <span class="chevron"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="chevron-right"><path d="m9 18 6-6-6-6"/></svg></span>
-      </a></li>
+      <li><MobileExerciseRow link icon="hand-grab" name="Glute bridge" detail="Glutes, hamstrings · Mat" /></li>
+      <li><MobileExerciseRow link icon="hand-grab" name="Romanian deadlift" detail="Hamstrings, glutes · Dumbbells or barbell" /></li>
     </ul>
     <h2 class="label" style="margin: 10px var(--cp-space-xs) 2px;">Lunge</h2>
     <ul style="display: flex; flex-direction: column; gap: var(--cp-space-sm);">
-      <li><a class="list-row" data-component="exercise-row" href="#" style="min-height: 56px; padding-right: var(--cp-space-md);">
-        <span class="row-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="footprints"><path d="M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 10 3.8 10 5.5c0 3.11-2 5.66-2 8.68V16a2 2 0 1 1-4 0Z"/><path d="M20 20v-2.38c0-2.12 1.03-3.12 1-5.62-.03-2.72-1.49-6-4.5-6C14.63 6 14 7.8 14 9.5c0 3.11 2 5.66 2 8.68V20a2 2 0 1 0 4 0Z"/><path d="M16 17h4"/><path d="M4 13h4"/></svg></span>
-        <span class="row-text"><strong>Reverse lunge</strong><span>Quadriceps, glutes · Each side</span></span>
-        <span class="chevron"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="chevron-right"><path d="m9 18 6-6-6-6"/></svg></span>
-      </a></li>
-      <li><a class="list-row" data-component="exercise-row" href="#" style="min-height: 56px; padding-right: var(--cp-space-md);">
-        <span class="row-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="footprints"><path d="M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 10 3.8 10 5.5c0 3.11-2 5.66-2 8.68V16a2 2 0 1 1-4 0Z"/><path d="M20 20v-2.38c0-2.12 1.03-3.12 1-5.62-.03-2.72-1.49-6-4.5-6C14.63 6 14 7.8 14 9.5c0 3.11 2 5.66 2 8.68V20a2 2 0 1 0 4 0Z"/><path d="M16 17h4"/><path d="M4 13h4"/></svg></span>
-        <span class="row-text"><strong>Walking lunge</strong><span>Quadriceps, glutes · Each side</span></span>
-        <span class="chevron"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="chevron-right"><path d="m9 18 6-6-6-6"/></svg></span>
-      </a></li>
-      <li><a class="list-row" data-component="exercise-row" href="#" style="min-height: 56px; padding-right: var(--cp-space-md);">
-        <span class="row-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="footprints"><path d="M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 10 3.8 10 5.5c0 3.11-2 5.66-2 8.68V16a2 2 0 1 1-4 0Z"/><path d="M20 20v-2.38c0-2.12 1.03-3.12 1-5.62-.03-2.72-1.49-6-4.5-6C14.63 6 14 7.8 14 9.5c0 3.11 2 5.66 2 8.68V20a2 2 0 1 0 4 0Z"/><path d="M16 17h4"/><path d="M4 13h4"/></svg></span>
-        <span class="row-text"><strong>Step-up</strong><span>Quadriceps, glutes · Bench · each side</span></span>
-        <span class="chevron"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="chevron-right"><path d="m9 18 6-6-6-6"/></svg></span>
-      </a></li>
+      <li><MobileExerciseRow link icon="footprints" name="Reverse lunge" detail="Quadriceps, glutes · Each side" /></li>
+      <li><MobileExerciseRow link icon="footprints" name="Walking lunge" detail="Quadriceps, glutes · Each side" /></li>
+      <li><MobileExerciseRow link icon="footprints" name="Step-up" detail="Quadriceps, glutes · Bench · each side" /></li>
     </ul>
   </div>
 

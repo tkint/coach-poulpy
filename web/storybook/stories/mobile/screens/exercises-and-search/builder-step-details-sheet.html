@@ -1,6 +1,6 @@
 <main class="phone" style="--frame-height: 1380px">
 <header class="top-bar" style="padding: var(--cp-space-xxxl) var(--cp-space-md) var(--cp-space-sm); justify-content: flex-start; gap: var(--cp-space-xs);">
-    <a class="icon-button" href="#" aria-label="Close"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></a>
+    <button type="button" class="icon-button" aria-label="Close"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
     <h1 class="headline" style="flex: 1;">New workout</h1>
     <MobileButton kind="small">Save</MobileButton>
   </header>
@@ -32,7 +32,7 @@
           <button class="icon-button" type="button" aria-haspopup="menu" aria-label="More actions for Arm circle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="ellipsis-vertical"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg></button>
         </li>
       </ol>
-      <a class="add-to-part" data-component="add-to-part" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg>Add to warm-up</a>
+      <button type="button" class="add-to-part" data-component="add-to-part"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg>Add to warm-up</button>
     </section>
     <section class="builder-part" id="work" data-component="builder-part" aria-labelledby="work-name">
       <div class="part-header" data-component="part-header">
@@ -74,7 +74,7 @@
         </ol>
       </li>
       </ol>
-      <a class="add-to-part" data-component="add-to-part" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg>Add to Work</a>
+      <button type="button" class="add-to-part" data-component="add-to-part"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg>Add to Work</button>
     </section>
     <section class="builder-part" id="cool-down" data-component="builder-part" aria-labelledby="cool-down-name">
       <div class="part-header" data-component="part-header">
@@ -89,14 +89,14 @@
           <button class="icon-button" type="button" aria-haspopup="menu" aria-label="More actions for Chest stretch"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="ellipsis-vertical"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg></button>
         </li>
       </ol>
-      <a class="add-to-part" data-component="add-to-part" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg>Add to cool down</a>
+      <button type="button" class="add-to-part" data-component="add-to-part"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg>Add to cool down</button>
     </section>
-    <a class="add-button" data-component="add-part-button" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg>Add a part</a>
+    <button type="button" class="add-button" data-component="add-part-button"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg>Add a part</button>
   </div>
 <div class="scrim"></div>
   <section class="sheet sheet--tall" id="exercise-sheet" data-component="sheet" role="dialog" aria-label="Goblet squat" style="gap: var(--cp-space-md); padding: 10px var(--cp-space-lg) var(--cp-space-lg);">
     <span class="sheet-handle"></span>
-    <div class="sheet-head" style="padding: 0;"><div class="sheet-title" style="flex: 1;"><span class="label label--primary">Squat · Reps</span><h2>Goblet squat</h2></div><a class="icon-button" href="#" aria-label="Close"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></a></div>
+    <div class="sheet-head" style="padding: 0;"><div class="sheet-title" style="flex: 1;"><span class="label label--primary">Squat · Reps</span><h2>Goblet squat</h2></div><button type="button" class="icon-button" aria-label="Close"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div>
     <div style="flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; gap: var(--cp-space-md);">
       <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--cp-space-md);">
         <div style="border-radius: var(--cp-radius-md); background: var(--cp-surface-variant); padding: var(--cp-space-md) var(--cp-space-md); display: flex; flex-direction: column; gap: var(--cp-space-xs);"><span class="label">Muscles</span><span style="font-size: 15px; line-height: 21px; font-weight: 700;" id="muscles-text">Quadriceps, glutes, core</span></div>
