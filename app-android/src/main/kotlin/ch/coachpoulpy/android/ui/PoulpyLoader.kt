@@ -18,10 +18,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import ch.coachpoulpy.android.R
+import ch.coachpoulpy.shared.LoaderSwing
 
 /**
- * The loading indicator: a picture of the 3D Poulpy seen from above, turning clockwise (the top moves left to right) once
- * every 2.4 s, or every 10 s when the phone's animations are turned off.
+ * The loading indicator: Poulpy's outline seen from above, swinging 45 degrees clockwise and back again, forever, once every
+ * 2.4 s (10 s when the phone's animations are turned off). The swing itself is [LoaderSwing] in the shared code.
  */
 @Composable
 fun PoulpyLoader(modifier: Modifier = Modifier, size: Dp = 48.dp) {
@@ -30,13 +31,13 @@ fun PoulpyLoader(modifier: Modifier = Modifier, size: Dp = 48.dp) {
     // scale, so Poulpy still turns, only slowly.
     val periodMillis = remember(context) {
         val scale = Settings.Global.getFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f)
-        if (scale == 0f) REDUCED_TURN_MILLIS else TURN_MILLIS
+        if (scale == 0f) LoaderSwing.REDUCED_MILLIS else LoaderSwing.MILLIS
     }
     var degrees by remember { mutableFloatStateOf(0f) }
     LaunchedEffect(periodMillis) {
         val start = withFrameMillis { it }
         while (true) {
-            withFrameMillis { now -> degrees = ((now - start) % periodMillis) * 360f / periodMillis }
+            withFrameMillis { now -> degrees = LoaderSwing.degrees(now - start, periodMillis) }
         }
     }
     Image(
@@ -45,6 +46,3 @@ fun PoulpyLoader(modifier: Modifier = Modifier, size: Dp = 48.dp) {
         modifier = modifier.size(size).graphicsLayer { rotationZ = degrees },
     )
 }
-
-private const val TURN_MILLIS = 2_400L
-private const val REDUCED_TURN_MILLIS = 10_000L

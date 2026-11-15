@@ -1,19 +1,20 @@
 import SwiftUI
+import Shared
 
-/// The loading indicator: a picture of the 3D Poulpy seen from above, turning clockwise (the top moves left to right) once
-/// every 2.4 s, or every 10 s with Reduce Motion.
+/// The loading indicator: Poulpy's outline seen from above, swinging 45 degrees clockwise and back again, forever, once every
+/// 2.4 s (10 s with Reduce Motion). The swing itself is `LoaderSwing` in the shared code.
 struct PoulpyLoader: View {
     var size: CGFloat = 48
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
-        let period = reduceMotion ? 10.0 : 2.4
+        let period = reduceMotion ? LoaderSwing.shared.REDUCED_MILLIS : LoaderSwing.shared.MILLIS
         TimelineView(.animation) { timeline in
-            let seconds = timeline.date.timeIntervalSinceReferenceDate
+            let millis = Int64(timeline.date.timeIntervalSinceReferenceDate * 1000)
             Image("PoulpyLoader")
                 .resizable()
                 .frame(width: size, height: size)
-                .rotationEffect(.degrees(seconds.truncatingRemainder(dividingBy: period) / period * 360))
+                .rotationEffect(.degrees(Double(LoaderSwing.shared.degrees(elapsedMillis: millis, periodMillis: period))))
         }
         .accessibilityElement()
         .accessibilityLabel(Text("common.loading"))

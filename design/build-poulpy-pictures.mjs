@@ -20,6 +20,7 @@ import { paintPoulpy, pngOf } from './poulpy-3d/picture.mjs'
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const tokens = JSON.parse(readFileSync(join(root, 'design/tokens.json'), 'utf8'))
 const colours = tokens.color.poulpy
+const hex = (c) => [1, 3, 5].map((i) => parseInt(c.slice(i, i + 2), 16))
 const OUT = 'design/poulpy-3d/pictures'
 
 // The frame of every picture, and where the viewer stands for all of them: close enough to fill it, looking at the
@@ -42,11 +43,45 @@ for (const [name, model] of Object.entries(pictures)) {
   files[`${IOS}/${asset}.imageset/Contents.json`] = JSON.stringify({ images: [{ filename: `${asset}.png`, idiom: 'universal', scale: '3x' }], info: { author: 'xcode', version: 1 } }, null, 2) + '\n'
 }
 
-// The loader: Poulpy seen from straight above, square, see-through, inside the circle he turns in, so the apps can spin the
-// picture without it ever leaving its frame.
-const LOADER_SIDE = 600
+// The loader: just his outline seen from straight above, with each of his eight tentacles loose, in the blue of the brand,
+// square and see-through, inside the circle he turns in. The apps swing the picture a quarter turn's half (45 degrees) one way,
+// then the other, for as long as something loads.
+const LOADER_SIDE = 600, LOADER_LINE = 0.045 * LOADER_SIDE
+// How far each pixel inside a shape is from outside it (Felzenszwalb and Huttenlocher's distance transform, in pixels).
+function inside(shape, size) {
+  const far = 1e20, f = Float64Array.from(shape, (v) => (v ? far : 0)), out = new Float64Array(size * size), d = new Float64Array(size), z = new Float64Array(size + 1), v = new Int32Array(size)
+  const line = (get, set) => {
+    let k = 0; v[0] = 0; z[0] = -far; z[1] = far
+    for (let q = 1; q < size; q++) {
+      let s
+      for (;;) { s = ((get(q) + q * q) - (get(v[k]) + v[k] * v[k])) / (2 * q - 2 * v[k]); if (s > z[k]) break; k-- }
+      k++; v[k] = q; z[k] = s; z[k + 1] = far
+    }
+    k = 0
+    for (let q = 0; q < size; q++) { while (z[k + 1] < q) k++; set(q, (q - v[k]) ** 2 + get(v[k])) }
+  }
+  for (let x = 0; x < size; x++) { line((y) => f[y * size + x], (y, value) => { out[y * size + x] = value }) }
+  for (let y = 0; y < size; y++) { line((x) => out[y * size + x], (x, value) => { d[x] = value }); for (let x = 0; x < size; x++) out[y * size + x] = Math.sqrt(d[x]) }
+  return out
+}
+function loader(model) {
+  const [r, g, b] = hex(colours.blue), alpha = new Float32Array(LOADER_SIDE * LOADER_SIDE)
+  const pieces = [...Array(8)].map((_, i) => (name) => name === `arm_${i + 1}` || name === `arm_${i + 1}_lining`).concat((name) => name === 'head' || name === 'head_lining')
+  for (const only of pieces) {
+    const px = icon(model, LOADER_SIDE, { reach: 0.49, tilt: 89.9, only, like: model }), cover = Float32Array.from({ length: alpha.length }, (_, i) => px[i * 4 + 3] / 255)
+    const depth = inside(cover.map((c) => (c >= 0.5 ? 1 : 0)), LOADER_SIDE)
+    // Inside its edge a piece is hollow, and it hides what is behind it; only its line shows.
+    for (let i = 0; i < alpha.length; i++) {
+      const line = Math.min(cover[i], Math.min(Math.max(LOADER_LINE - depth[i] + 0.5, 0), 1))
+      alpha[i] = line + alpha[i] * (1 - cover[i]) * (1 - line)
+    }
+  }
+  const out = new Uint8Array(alpha.length * 4)
+  for (let i = 0; i < alpha.length; i++) { out[i * 4] = r; out[i * 4 + 1] = g; out[i * 4 + 2] = b; out[i * 4 + 3] = Math.round(alpha[i] * 255) }
+  return out
+}
 {
-  const png = pngOf(icon(pictures.mood_happy, LOADER_SIDE, { reach: 0.49, tilt: 89.9 }), LOADER_SIDE, LOADER_SIDE)
+  const png = pngOf(loader(pictures.mood_happy), LOADER_SIDE, LOADER_SIDE)
   files[`${OUT}/loader.png`] = png
   files[`${ANDROID}/poulpy_loader.png`] = png
   files[`${IOS}/PoulpyLoader.imageset/PoulpyLoader.png`] = png
@@ -60,17 +95,18 @@ const LOADER_SIDE = 600
 //            by build-poulpy.mjs) and the themed layer stays a one-colour silhouette drawn there.
 const ICON_FACES = { happy: 'mood_happy', proud: 'mood_proud', annoyed: 'mood_annoyed', grumpy: 'mood_grumpy', champion: 'pose_champion', cocky: 'pose_cocky' }
 const ICON_BACKGROUND = tokens.theme.dark.background
-const hex = (c) => [1, 3, 5].map((i) => parseInt(c.slice(i, i + 2), 16))
 const ICON_SIDE = 1024
 
 // Poulpy as big as the icon needs, found by painting him once large and measuring what is covered.
-function icon(model, size, { reach, fill, background, tilt = 8 }) {
-  const big = 1024, src = paintPoulpy(model, { width: big, height: big, tilt, distance: 14, centre: model.height / 2, smooth: 2 })
+function icon(model, size, { reach, fill, background, tilt = 8, only, like = model }) {
+  // `only` paints just some of his parts, framed as `like` (all of him) is, so the pieces of one picture line up.
+  const big = 1024, shot = (m) => paintPoulpy(m, { width: big, height: big, tilt, distance: 14, centre: m.height / 2, smooth: 2 })
+  const src = only ? shot({ ...model, parts: model.parts.filter((part) => only(part.name)) }) : shot(model), whole = only ? shot(like) : src
   let x0 = big, y0 = big, x1 = -1, y1 = -1
-  for (let y = 0; y < big; y++) for (let x = 0; x < big; x++) if (src[(y * big + x) * 4 + 3] > 8) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y) }
+  for (let y = 0; y < big; y++) for (let x = 0; x < big; x++) if (whole[(y * big + x) * 4 + 3] > 8) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y) }
   const cx = (x0 + x1 + 1) / 2, cy = (y0 + y1 + 1) / 2
   let far = 0
-  if (reach) for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) if (src[(y * big + x) * 4 + 3] > 8) far = Math.max(far, Math.hypot(x + 0.5 - cx, y + 0.5 - cy))
+  if (reach) for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) if (whole[(y * big + x) * 4 + 3] > 8) far = Math.max(far, Math.hypot(x + 0.5 - cx, y + 0.5 - cy))
   // How many source pixels one icon pixel covers.
   const k = reach ? far / (reach * size) : Math.max(x1 - x0 + 1, y1 - y0 + 1) / (fill * size)
   const out = new Uint8Array(size * size * 4), bg = background && hex(background)

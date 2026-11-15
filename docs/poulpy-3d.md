@@ -36,7 +36,7 @@ The model also takes the twelve [poses](./brand.md#when-each-drawing-shows) of t
 - **The comic effects stay flat and face the viewer.** Sparks, confetti, puffs, bubbles and lettering are the drawing's own, standing in front of him or behind him, and they keep facing whoever looks while he turns.
 - **Cocky has no halo and no "PR!" badge in 3D.** The owner dropped them; his sparks stay, and become solid stars when he [winks](#the-cocky-one-winks).
 - **He still never lifts an arm.** Standing tall stretches his arms taller and lifts his head with them; Side glance leans his head. Nothing else moves.
-- **The loader is his picture from above.** He is seen from straight overhead, so the head is a round dome with eight lobes around it and his eyes peeking out at the bottom, and the apps turn it clockwise (the top moves left to right) once every 2.4 s, once every 10 s with reduced motion. He is fitted inside the circle he turns in, so he never leaves his frame.
+- **The loader is his outline from above.** He is seen from straight overhead and only his shape is drawn, in the brand blue and see-through: the round head and each of the eight tentacles loose around it, overlapping like petals. He swings 45° one way and then back the other way, forever, once every 2.4 s (once every 10 s with reduced motion), easing at each end. The swing is `LoaderSwing` in the shared Kotlin, and `PoulpyLoader` on Android and iOS, `MobilePoulpyLoader` and `CpPoulpyLoader` in the workshop all follow it. He is fitted inside the circle he turns in, so he never leaves his frame.
 
 ## His pictures
 

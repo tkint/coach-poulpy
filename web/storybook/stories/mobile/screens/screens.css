@@ -958,9 +958,11 @@
 .cp-screen .text-button { flex: 1; height: 48px; border-radius: var(--cp-radius-pill); font-size: 15px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
 .cp-screen .section-link { margin: 0 var(--cp-space-xs); font-size: 15px; font-weight: 800; color: var(--cp-primary); }
 .cp-screen .lead { margin: 0 var(--cp-space-xs); font-size: 14px; line-height: 20px; color: var(--cp-on-surface-variant); }
-@keyframes poulpy-spin { to { transform: rotate(360deg); } }
-.cp-screen .spin { animation: poulpy-spin 2.4s linear infinite; }
-@media (prefers-reduced-motion: reduce) { .cp-screen .spin { animation-duration: 10s; } }
+/* The loader: Poulpy's outline swinging 45 degrees one way and back, forever (LoaderSwing in the shared code). */
+.cp-screen .poulpy-loader { display: inline-block; }
+.cp-screen .poulpy-loader img { display: block; width: 100%; height: 100%; animation: poulpy-swing 2.4s ease-in-out infinite; }
+@keyframes poulpy-swing { 50% { transform: rotate(45deg); } }
+@media (prefers-reduced-motion: reduce) { .cp-screen .poulpy-loader img { animation-duration: 10s; } }
 
 /* ---------- Exercise search, equipment sheet, variations sheet ---------- */
 
