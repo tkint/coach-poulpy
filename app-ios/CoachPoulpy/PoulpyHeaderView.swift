@@ -50,13 +50,20 @@ struct PoulpyHeaderView: View {
             )
             .accessibilityElement()
             .accessibilityLabel(status.tentaclesCaption)
-            Image(status.drawing.imageName)
-                .resizable()
-                .scaledToFit()
-                .frame(width: art, height: art)
-                .accessibilityLabel(status.title)
-                .id(status.drawing.assetName)
-                .transition(.opacity)
+            // Home's compact Poulpy plays his move when tapped; the full-size one is only a picture.
+            Group {
+                if compact {
+                    PoulpyTapArt(drawing: status.drawing, description: status.title, art: art)
+                } else {
+                    Image(status.drawing.imageName)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: art, height: art)
+                        .accessibilityLabel(status.title)
+                }
+            }
+            .id(status.drawing.assetName)
+            .transition(.opacity)
         }
         .frame(width: side, height: side)
     }
