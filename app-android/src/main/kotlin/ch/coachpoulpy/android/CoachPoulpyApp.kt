@@ -22,6 +22,8 @@ class CoachPoulpyApp : Application() {
         super.onCreate()
         CrashCatcher.install(this)
         graph = AppGraph(DriverFactory(this))
+        // The only call a guest's phone makes: the exercises published since the last launch (ADR 0030). Offline, it keeps the catalog it has.
+        graph.catalogUpdater(BuildConfig.API_URL).start()
         account = graph.account(
             baseUrl = BuildConfig.API_URL,
             secrets = KeystoreSecrets(this),

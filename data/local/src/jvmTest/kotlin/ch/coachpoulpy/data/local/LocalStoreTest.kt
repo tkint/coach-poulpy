@@ -72,26 +72,56 @@ class LocalStoreTest {
     }
 
     @Test
-    fun exercisesLeftOutOfANewCatalogAreRetiredNotDeleted() {
+    fun anExerciseIsReplacedOnlyByAHigherRevision() {
         val store = LocalStore(DriverFactory())
-        store.replaceCatalog(1, listOf(exercise("squat"), exercise("lunge")))
-        store.replaceCatalog(2, listOf(exercise("squat")))
-
-        assertEquals(2, store.catalogVersion())
-        val bySlug = store.catalogExercises().associateBy { it.slug.value }
-        assertEquals(false, bySlug.getValue("squat").retired)
-        assertEquals(true, bySlug.getValue("lunge").retired)
+        fun named(name: String) = exercise("squat").copy(name = LocalizedText(mapOf("en" to name)))
+        assertEquals(1, store.applyCatalogRevisions(listOf(CatalogRevision(named("Squat"), 1))))
+        assertEquals(0, store.applyCatalogRevisions(listOf(CatalogRevision(named("Older"), 1))), "the same revision changes nothing")
+        assertEquals("Squat", store.catalogExercises().single().name.byLanguage["en"])
+        assertEquals(1, store.applyCatalogRevisions(listOf(CatalogRevision(named("Better squat"), 2))))
+        assertEquals(0, store.applyCatalogRevisions(listOf(CatalogRevision(named("Stale"), 1))), "a lower revision is ignored")
+        assertEquals("Better squat", store.catalogExercises().single().name.byLanguage["en"])
+        assertEquals(mapOf(ExerciseSlug("squat") to 2), store.catalogRevisions())
     }
 
     @Test
-    fun variationGroupsAreReplacedWithEachCatalogVersion() {
+    fun exercisesAnUpdateLeavesOutAreKeptAsTheyAre() {
         val store = LocalStore(DriverFactory())
-        val squat = listOf(ExerciseSlug("chair-squat"), ExerciseSlug("squat"))
-        store.replaceCatalog(1, listOf(exercise("chair-squat"), exercise("squat")), listOf(squat))
-        assertEquals(listOf(squat), store.catalogVariationGroups())
+        store.applyCatalogRevisions(listOf(CatalogRevision(exercise("squat"), 1), CatalogRevision(exercise("lunge"), 1)))
+        store.applyCatalogRevisions(listOf(CatalogRevision(exercise("squat").copy(retired = true), 2)), cursor = "7")
 
-        store.replaceCatalog(2, listOf(exercise("chair-squat"), exercise("squat")))
-        assertEquals(0, store.catalogVariationGroups().size)
+        val bySlug = store.catalogExercises().associateBy { it.slug.value }
+        assertEquals(true, bySlug.getValue("squat").retired)
+        assertEquals(false, bySlug.getValue("lunge").retired)
+        assertEquals("7", store.catalogCursor())
+    }
+
+    @Test
+    fun theCursorIsKeptWithTheExercisesOrNotAtAll() {
+        val store = LocalStore(DriverFactory())
+        assertEquals(null, store.catalogCursor())
+        store.applyCatalogRevisions(listOf(CatalogRevision(exercise("squat"), 1)))
+        assertEquals(null, store.catalogCursor(), "the bundled catalog has no cursor")
+        store.applyCatalogRevisions(listOf(CatalogRevision(exercise("lunge"), 1)), cursor = "3")
+        store.applyCatalogRevisions(emptyList())
+        assertEquals("3", store.catalogCursor(), "an update with no cursor leaves the last one")
+    }
+
+    @Test
+    fun variationGroupsFollowTheExercisesThatNameThem() {
+        val store = LocalStore(DriverFactory())
+        store.applyCatalogRevisions(
+            listOf(
+                CatalogRevision(exercise("squat"), 1, variationGroup = 0, variationRank = 1),
+                CatalogRevision(exercise("chair-squat"), 1, variationGroup = 0, variationRank = 0),
+                CatalogRevision(exercise("lunge"), 1),
+            ),
+        )
+        assertEquals(listOf(listOf(ExerciseSlug("chair-squat"), ExerciseSlug("squat"))), store.catalogVariationGroups())
+
+        // The same revision refreshes the group; a phone migrated from before groups were columns gets them this way.
+        store.applyCatalogRevisions(listOf(CatalogRevision(exercise("lunge"), 1, variationGroup = 1, variationRank = 0), CatalogRevision(exercise("squat"), 1, variationGroup = 1, variationRank = 1)))
+        assertEquals(2, store.catalogVariationGroups().size)
     }
 
     @Test
@@ -104,15 +134,16 @@ class LocalStoreTest {
         CoachPoulpyDatabase.Schema.migrate(driver, oldVersion = 1, newVersion = CoachPoulpyDatabase.Schema.version)
 
         val db = CoachPoulpyDatabase(driver)
-        db.catalogEntryQueries.setVersion(2)
-        assertEquals(2L, db.catalogEntryQueries.version().executeAsOne())
+        db.catalogEntryQueries.upsert("squat", "{}", 1, null, null)
+        assertEquals(1L, db.catalogEntryQueries.revisions().executeAsOne().revision)
+        assertEquals(null, db.catalogEntryQueries.cursor().executeAsOneOrNull())
         // Sessions done before history keep their rows, with nothing summed up yet.
         val old = db.sessionQueries.finished().executeAsOne()
         assertEquals("old", old.id)
         assertNull(old.summary)
         // The migrations reach the planning and variation tables too.
         assertEquals(0, db.plannedWorkoutQueries.plans().executeAsList().size)
-        assertEquals(0, db.catalogEntryQueries.variationGroups().executeAsList().size)
+        assertEquals(0, db.catalogEntryQueries.variationMembers().executeAsList().size)
     }
 
     @Test

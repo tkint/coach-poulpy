@@ -123,8 +123,7 @@ private fun rowsOf(catalog: Catalog): List<CatalogRow> {
 private fun catalogOf(rows: List<CatalogRow>): Catalog {
     val groups = rows.filter { it.group != null }.groupBy { it.group!! }.toSortedMap().values
         .map { group -> group.sortedBy { it.rank }.map { it.exercise.slug } }
-    // CLEANUP: the shared Catalog still carries a version nobody reads; the phone clients issue (#438) removes it.
-    return Catalog(0, rows.sortedBy { it.position }.map { it.exercise }, groups)
+    return Catalog(rows.sortedBy { it.position }.map { it.exercise }, groups)
 }
 
 /** One published revision of an exercise as a phone receives it: its [revision], its [seq] in the publication stream, and its variation group and rank. */
@@ -304,7 +303,7 @@ class ServerCatalog(
     private fun invalidity(exercise: Exercise): String? {
         if (!SLUG.matches(exercise.slug.value)) return "A slug is lowercase letters and digits joined by dashes, like goblet-squat"
         if (exercise.name.byLanguage[LocalizedText.ENGLISH].isNullOrBlank()) return "The English name is empty"
-        return runCatching { Catalog(0, listOf(exercise)) }.exceptionOrNull()?.message
+        return runCatching { Catalog(listOf(exercise)) }.exceptionOrNull()?.message
     }
 
     companion object {
