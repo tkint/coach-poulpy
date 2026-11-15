@@ -123,7 +123,6 @@ class LocalStore(driverFactory: DriverFactory, internal val clock: Clock = Clock
         add.forEach { planWorkout(workoutId, it) }
     }
 
-    /** The catalog version stored on the phone, or null before the first seed. */
     /** Adds a body measurement, or corrects the one already logged for that day (ADR 0017). */
     fun logBodyMeasurement(measurement: BodyMeasurement) = db.transaction {
         val queries = db.bodyMeasurementQueries

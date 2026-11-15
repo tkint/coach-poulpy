@@ -22,21 +22,16 @@ jobs:
           distribution: temurin
           java-version: 21
       - uses: gradle/actions/setup-gradle@v5
-      - name: Check the catalog version is raised with the catalog
-        # Fink's pull requests change catalog text but never raise its version (ADR 0015), and phones
-        # only take a catalog whose version is higher than the one they have.
+      - name: Check changed exercises carry a higher revision
+        # Fink's pull requests change catalog text without a bump (ADR 0015); each exercise now
+        # carries its own `revision`, and phones only take an exercise whose revision is higher (ADR 0030).
         if: github.event_name == 'pull_request'
         env:
           BASE: ${{ github.base_ref }}
         run: |
           git fetch --no-tags --depth=1 origin "$BASE"
-          if git diff --quiet FETCH_HEAD -- 'i18n/messages/*/catalog.json' catalog/data/exercises.json; then exit 0; fi
-          before=$(git show FETCH_HEAD:catalog/data/exercises.json | jq .version)
-          after=$(jq .version catalog/data/exercises.json)
-          if [ "$after" -le "$before" ]; then
-            echo "::error file=catalog/data/exercises.json::The catalog changed but its version is still $after. Raise \"version\" to $((before + 1)) before merging."
-            exit 1
-          fi
+          node --test catalog/tools/check-revisions.test.mjs
+          node catalog/tools/check-revisions.mjs FETCH_HEAD
       - name: Test shared modules, server and the string generator
         run: ./gradlew jvmTest jsTest :server:test :tools:i18n:test
       - name: Unpack the signing key

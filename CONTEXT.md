@@ -11,19 +11,19 @@ One movement from the curated catalog, identified by a slug that never changes.
 _Avoid_: Move, drill
 
 **Catalog**:
-The curated, versioned set of exercises shipped with the app and updated without an account.
+The curated set of exercises shipped with the app and updated, exercise by exercise, without an account. The catalog as a whole has no version.
 _Avoid_: Exercise database, library (the library is the user's)
 
-**Published version**:
-One numbered, finished catalog that phones download and store whole, in the same format as the one the app bundles. It never changes once published; the server serves the latest ([ADR 0026](docs/adr/0026-the-server-holds-the-catalog-as-a-draft-and-published-versions.md)).
-_Avoid_: Release (a release is an app build), catalog update
+**Revision**:
+One numbered, finished state of a single catalog exercise (1, 2, 3…). A published revision never changes; the server serves each exercise's latest, and a phone takes an exercise only when its revision is higher than the one it has ([ADR 0030](docs/adr/0030-the-catalog-changes-by-exercise-revision-not-by-catalog-version.md)).
+_Avoid_: Version (workouts and plans have versions; the catalog doesn't), release (a release is an app build), catalog update
 
 **Catalog draft**:
-The catalog the admin is editing on the server, which no phone sees until it is published as the next version; the admin shows what it adds, edits, retires and offers again since the latest published version; only those exercises get a new revision when it is published. Called the draft where only the catalog is meant; it is not a mockup draft or an unsaved workout.
+The catalog the admin is editing on the server, which no phone sees until its exercises are published; the admin shows what it adds, edits, retires and offers again since each exercise's latest published revision; publishing an exercise gives only that exercise a new revision. Called the draft where only the catalog is meant; it is not a mockup draft or an unsaved workout.
 _Avoid_: Staging, work in progress
 
 **Retired exercise**:
-A catalog exercise no longer offered, kept so the workouts that use it still open. The admin can offer it again in a later version.
+A catalog exercise no longer offered, kept so the workouts that use it still open. The admin can offer it again in a later revision.
 _Avoid_: Deleted exercise
 
 **Variation**:

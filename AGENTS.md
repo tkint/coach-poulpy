@@ -67,9 +67,7 @@ The Vue skills repository is explicitly an early community experiment; use its g
 
 The maintainer has rejected catalog-level versioning. The intended model is immutable revision history per exercise: a publication changes the revision of the exercise being published, not a global catalog snapshot or counter.
 
-Issue [#400](https://github.com/tkint/coach-poulpy/issues/400) is the dedicated removal and migration task. It covers the active implementation, API/client update contract, database migration, CI, documentation and historical ADR annotations. Until that work is implemented, legacy catalog-version fields and behavior still exist; never describe them as already removed or design new features around them.
-
-When working on catalog code or documentation, follow #400 and avoid extending the legacy model. Historical ADRs should be marked superseded as part of that dedicated change, not silently rewritten during unrelated work.
+[ADR 0030](docs/adr/0030-the-catalog-changes-by-exercise-revision-not-by-catalog-version.md) records the decision and issue [#400](https://github.com/tkint/coach-poulpy/issues/400) carried it out: the server, the phones, the admin and CI work by exercise `revision` and a publication cursor, and the catalog files carry no version. What remains of the old model (`catalog_version`, `catalog_meta`, `catalog_variation_group`) is marked `CLEANUP:` for a later migration; never build on it. Historical ADRs stay as written, marked superseded.
 
 ## Git and pull requests
 

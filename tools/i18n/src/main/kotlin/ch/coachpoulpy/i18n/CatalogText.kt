@@ -11,7 +11,7 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
 /**
- * Puts the exercise text of the `catalog` namespace back into the catalog's structure (ADR 0015), so each
+ * catalog file stays one document with every text as a map from language to string, the JSON phones
  * catalog version stays one document with every text as a map from language to string, the JSON phones
  * already store: `goblet-squat.name` becomes the exercise's `name`, `goblet-squat.instructions.0` its first
  * instruction, `goblet-squat.aliases` (comma-separated, optional per language) its `aliases`.
