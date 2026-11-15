@@ -4,7 +4,7 @@ import { CpIcon } from '@coach-poulpy/ui'
 // components, as the web app's AdminExerciseView does, with a static exercise). A text is written in one language at a
 // time; under each translatable field a badge says where the other language stands.
 import { computed, reactive } from 'vue'
-import { GripVertical, Lock, Plus, X, Archive, Target } from '@lucide/vue'
+import { GripVertical, Lock, Plus, X, Archive, Target, Trash2 } from '@lucide/vue'
 import { CpBadge, CpBodyMap, CpBreadcrumbs, CpButton, CpCard, CpChip, CpChipSelectField, CpErrorNote, CpSegmentedControl, CpSelectField, CpTextarea, CpTextField } from '@coach-poulpy/ui'
 import { groupAreas, groupOfArea, selectableAreas } from '../../../app/src/bodyMap'
 import AdminShell from './AdminShell.vue'
@@ -34,6 +34,8 @@ const props = withDefaults(defineProps<{
   isNew?: boolean
   badges?: { text: string; tone: 'success' | 'neutral' | 'outline' | 'primary' }[]
   slugTaken?: boolean
+  /** A saved draft that no publication has ever included: deleting it touches no phone. */
+  neverPublished?: boolean
   /** Said under the language switch: where the French text stands. */
   frenchFlagged?: boolean
 }>(), { language: 'en' })
@@ -179,14 +181,21 @@ const slugLocked = computed(() => !props.isNew)
               </div>
             </div>
           </CpCard>
-          <!-- CLEANUP: the retirement of an exercise is not built yet (#389): drawn with the classes of the mockup. -->
-          <CpCard v-if="!isNew" class="order-6 lg:order-none">
+          <CpCard v-if="!isNew" title="Danger zone" class="order-6 border border-error lg:order-none" data-component="danger-zone">
             <div class="flex flex-wrap items-center justify-between gap-4">
-              <div class="flex flex-col gap-1">
-                <h2 class="cp-card-title">Retire</h2>
+              <div class="flex min-w-0 flex-1 flex-col gap-1">
+                <h3 class="font-semibold">Retire this exercise</h3>
                 <p class="text-sm text-base-content/70">Prepares a lifecycle change. The exercise remains active until a publication includes its retirement. Workouts that use it still open; nothing is deleted, and you can offer it again later.</p>
               </div>
               <CpButton variant="outline" size="md" class="gap-2"><CpIcon :icon="Archive" />Prepare retirement</CpButton>
+            </div>
+            <div class="cp-divider my-0" role="separator"></div>
+            <div class="flex flex-wrap items-center justify-between gap-4">
+              <div class="flex min-w-0 flex-1 flex-col gap-1">
+                <h3 class="font-semibold">Delete this exercise</h3>
+                <p class="text-sm text-base-content/70">Removes the exercise from the catalog for good, with all its translations.<template v-if="!neverPublished"> It is published: phones that already downloaded it keep it, but workouts that use it lose it. Retire it instead unless this is a test exercise.</template></p>
+              </div>
+              <button type="button" class="cp-btn cp-btn-error gap-2"><Trash2 class="size-5 shrink-0" aria-hidden="true" />Delete exercise</button>
             </div>
           </CpCard>
         </div>

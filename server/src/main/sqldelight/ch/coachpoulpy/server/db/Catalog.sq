@@ -46,6 +46,10 @@ WHERE slug = :slug AND seq IS NULL;
 deleteDraftRevision:
 DELETE FROM catalog_exercise_revision WHERE slug = :slug AND seq IS NULL;
 
+-- Every revision of one exercise, published or not: it is gone from the catalog (beta).
+deleteExercise:
+DELETE FROM catalog_exercise_revision WHERE slug = :slug;
+
 -- Publishes the draft revision of one exercise, under the number :seq reserved for it.
 publishDraftRevision:
 UPDATE catalog_exercise_revision SET seq = :seq WHERE slug = :slug AND seq IS NULL;

@@ -138,6 +138,11 @@ class AdminCatalog(private val catalog: ServerCatalog, private val events: Event
         if (it is DraftResult.Saved) events(AdminAction(actor, "admin.catalog.retire", slug.value))
     }
 
+    /** Deletes the exercise [slug] with all its revisions; false when there is none. */
+    fun delete(actor: AccountId, slug: ExerciseSlug): Boolean = catalog.delete(slug).also {
+        if (it) events(AdminAction(actor, "admin.catalog.delete", slug.value))
+    }
+
     fun offer(actor: AccountId, slug: ExerciseSlug): DraftResult = catalog.offer(slug).also {
         if (it is DraftResult.Saved) events(AdminAction(actor, "admin.catalog.offer", slug.value))
     }
