@@ -1,19 +1,20 @@
 <script setup lang="ts">
 // Poulpy in 3D, to turn around: the shape of design/poulpy-3d/model.mjs, drawn by poulpy3dScene.ts.
+// With `moods` the switch picks one of his six moods instead of a side of the plush.
 // With `motion` he moves himself (design/poulpy-3d/motion.mjs) and the viewer stays put: "turn" is his idle,
 // "jump" his little jumps on the spot and "jump-turn" the same jumps, each turning him a step.
 import { RotateCcw, RotateCw } from '@lucide/vue'
 import { onBeforeUnmount, onMounted, shallowRef, useTemplateRef, watch } from 'vue'
-import type { PoulpySide } from '../../../../design/poulpy-3d/model.mjs'
+import type { PoulpyMood, PoulpySide } from '../../../../design/poulpy-3d/model.mjs'
 import type { Jump, Turn } from '../../../../design/poulpy-3d/motion.mjs'
 import type { createPoulpyScene } from './poulpy3dScene'
 
-const { motion } = defineProps<{ motion?: 'turn' | 'jump' | 'jump-turn' }>()
+const { motion, moods } = defineProps<{ motion?: 'turn' | 'jump' | 'jump-turn'; moods?: boolean }>()
 const jumping = motion === 'jump' || motion === 'jump-turn'
 const turning = motion !== 'jump' // he turns, or without `motion` the viewer walks around him
 
 const canvas = useTemplateRef<HTMLCanvasElement>('canvas')
-const side = shallowRef<PoulpySide>('blue')
+const side = shallowRef<PoulpySide | PoulpyMood>(moods ? 'happy' : 'blue')
 const outline = shallowRef(false)
 const turn = shallowRef(0) // degrees he has turned for the viewer, anticlockwise seen from above; 0 is face on
 const tilt = shallowRef(motion ? 26 : 17) // degrees above him; negative looks from below
@@ -39,10 +40,9 @@ let frame = 0
 let last = 0
 let move: Turn | Jump | undefined
 
-const sides: { id: PoulpySide; label: string }[] = [
-  { id: 'blue', label: 'Blue' },
-  { id: 'ember', label: 'Grumpy' },
-]
+const sides: { id: PoulpySide | PoulpyMood; label: string; suffix?: string }[] = moods
+  ? [{ id: 'proud', label: 'Proud' }, { id: 'happy', label: 'Happy' }, { id: 'recovering', label: 'Recovering' }, { id: 'annoyed', label: 'Annoyed' }, { id: 'grumpy', label: 'Grumpy' }, { id: 'fuming', label: 'Fuming' }]
+  : [{ id: 'blue', label: 'Blue', suffix: 'side' }, { id: 'ember', label: 'Grumpy', suffix: 'side' }]
 const directions = [
   { id: 'anticlockwise', label: 'Anticlockwise', icon: RotateCcw },
   { id: 'clockwise', label: 'Clockwise', icon: RotateCw },
@@ -162,8 +162,8 @@ onBeforeUnmount(() => {
       <p v-else class="hint">Drag any way to turn, pinch to zoom</p>
     </div>
     <div class="controls">
-      <div class="sides" role="group" aria-label="Side">
-        <button v-for="s in sides" :key="s.id" type="button" class="choice" :aria-pressed="side === s.id" :aria-label="`${s.label} side`" @click="side = s.id">{{ s.label }}<span class="wide">&nbsp;side</span></button>
+      <div class="sides" :class="{ moods }" role="group" :aria-label="moods ? 'Mood' : 'Side'">
+        <button v-for="s in sides" :key="s.id" type="button" class="choice" :aria-pressed="side === s.id" :aria-label="s.suffix ? `${s.label} ${s.suffix}` : s.label" @click="side = s.id">{{ s.label }}<span v-if="s.suffix" class="wide">&nbsp;{{ s.suffix }}</span></button>
       </div>
       <div v-if="turning" class="sides" role="group" aria-label="Direction, seen from above">
         <button v-for="d in directions" :key="d.id" type="button" class="choice icon" :aria-pressed="direction === d.id" :aria-label="d.label" :title="d.label" @click="direction = d.id"><component :is="d.icon" :size="18" aria-hidden="true" /></button>
@@ -200,6 +200,7 @@ onBeforeUnmount(() => {
 .failed { inset: 0; display: grid; place-items: center; padding: 24px; text-align: center; }
 .controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
 .sides { display: inline-flex; gap: 4px; padding: 4px; border-radius: 999px; background: var(--cp-surface-variant); }
+.sides.moods { flex-wrap: wrap; border-radius: 22px; }
 .toggles { display: inline-flex; gap: 8px; }
 .choice, .toggle { height: 36px; padding: 0 16px; border-radius: 999px; border: 1px solid transparent; font-size: 14px; font-weight: 700; color: var(--cp-on-surface); cursor: pointer; }
 .choice.icon { display: inline-grid; place-items: center; width: 40px; padding: 0; }

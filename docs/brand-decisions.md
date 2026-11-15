@@ -110,3 +110,21 @@ This narrows [decision 8](#8-poulpy-never-lifts-his-tentacles) without overturni
 **Why:** the owner asked for the jump and described it. The first preview let his head come up out of his tentacles; he corrected it: the head is always joined to them, and they may hang much steeper instead. Turning, one jump may be a whole turn, or two. It is kept small so he stays the plush: a hop that barely clears the floor, not a leap.
 
 **Still open:** the jump's values (how high, how deep the tuck and the landing, how far the tentacles widen and hang, how much tilt, how long between jumps). It runs as a live preview with a control for each, and is written into the glTF files once the owner has settled them.
+
+## 16. The 3D Poulpy replaces the drawings
+
+**Accepted, 15 November 2026.** The 2D drawings (six mood portraits, twelve poses, the loader and the app icons) are to be replaced by the 3D Poulpy. Everywhere a drawing shows today, a picture rendered from the model takes its place, generated like the drawings are; on a few key screens, such as Home and the end of a session, he is live and animated instead.
+
+It is done in steps, each reviewed on the [Poulpy in 3D](./poulpy-3d.md) page before the apps change:
+
+1. The six moods on the model: faces and shades. Done with this decision.
+2. The twelve poses and their props, then the loader and the app icons.
+3. Pictures rendered from the model, generated for Android, iOS and the website in place of the drawings.
+4. Live 3D on the key screens, each from an agreed mockup.
+
+Until step 3 the apps and the website keep the 2D drawings, and `design/build-poulpy.mjs` stays their source.
+
+**Why:** the owner asked for it once the model could turn and jump, and chose pictures everywhere with live 3D on key screens over a 3D renderer on every screen, which would weigh on the apps for little gain on small portraits.
+
+**Still open:** which screens are the key ones, and how the pictures are rendered so that every machine writes the same files.
+

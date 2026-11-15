@@ -4,7 +4,7 @@
 // the controls; this file owns the canvas and everything WebGL, and gives it all back on dispose().
 import * as THREE from 'three'
 import tokens from '../../../../design/tokens.json'
-import { buildPoulpy3d, gleamPatch, LOOK, type PoulpyPart, type PoulpySide } from '../../../../design/poulpy-3d/model.mjs'
+import { buildPoulpy3d, gleamPatch, LOOK, type PoulpyMood, type PoulpyPart, type PoulpySide } from '../../../../design/poulpy-3d/model.mjs'
 import { armJoints, armSkin, squashScale, type JumpPose, type TurnPose } from '../../../../design/poulpy-3d/motion.mjs'
 
 /** Where the viewer stands: degrees around Poulpy, degrees above (or below) him, and how far away. */
@@ -85,10 +85,10 @@ export function createPoulpyScene(canvas: HTMLCanvasElement) {
     renderer.render(scene, camera)
   }
 
-  /** Builds Poulpy again for a side of the plush, with or without the outline. */
-  function show(side: PoulpySide, outline: boolean) {
+  /** Builds Poulpy again for a side of the plush or one of his moods, with or without the outline. */
+  function show(as: PoulpySide | PoulpyMood, outline: boolean) {
     clear()
-    const model = buildPoulpy3d({ side, colours: tokens.color.poulpy })
+    const model = as === 'blue' || as === 'ember' ? buildPoulpy3d({ side: as, colours: tokens.color.poulpy }) : buildPoulpy3d({ mood: as, tone: tokens.mood[as], colours: tokens.color.poulpy })
     centre = model.height / 2
     poulpy = new THREE.Group()
     const turn = new THREE.Bone(), squash = new THREE.Group(), joints = armJoints(), bends: THREE.Bone[] = []
