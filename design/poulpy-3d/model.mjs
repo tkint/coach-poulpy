@@ -1,6 +1,7 @@
 // Poulpy in 3D: the one description of his shape, with no dependency, so anything can build him from it.
 //   design/build-poulpy-3d.mjs writes it as glTF files; the docs site's "Poulpy in 3D" page draws it live.
 //
+// How he moves is next door, in motion.mjs.
 // To change the design, edit SHAPE, FACES or LOOK below, then run `node design/build-poulpy-3d.mjs`.
 // Units: the head is about 1 wide from its centre. He stands on y = 0, y is up and his face looks along +z.
 // The rules this shape follows are on the docs site (site/poulpy-3d.md) and in docs/brand-decisions.md, decision 14.

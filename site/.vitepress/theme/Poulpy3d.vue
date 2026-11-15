@@ -1,33 +1,48 @@
 <script setup lang="ts">
 // Poulpy in 3D, to turn around: the shape of design/poulpy-3d/model.mjs, drawn by poulpy3dScene.ts.
+// With `motion="turn"` he does his idle move himself (design/poulpy-3d/motion.mjs) and the viewer stays put.
+import { RotateCcw, RotateCw } from '@lucide/vue'
 import { onBeforeUnmount, onMounted, shallowRef, useTemplateRef, watch } from 'vue'
 import type { PoulpySide } from '../../../design/poulpy-3d/model.mjs'
+import type { Turn } from '../../../design/poulpy-3d/motion.mjs'
 import type { createPoulpyScene } from './poulpy3dScene'
+
+const { motion } = defineProps<{ motion?: 'turn' }>()
 
 const canvas = useTemplateRef<HTMLCanvasElement>('canvas')
 const side = shallowRef<PoulpySide>('blue')
 const outline = shallowRef(false)
-const turn = shallowRef(0) // degrees around him, 0 is face on
-const tilt = shallowRef(17) // degrees above him; negative looks from below
+const turn = shallowRef(0) // degrees he has turned for the viewer, anticlockwise seen from above; 0 is face on
+const tilt = shallowRef(motion ? 26 : 17) // degrees above him; negative looks from below
 const distance = shallowRef(9.6)
 const speed = shallowRef(1)
-const spinning = shallowRef(false)
+const spinning = shallowRef(false) // the viewer walks around him, or with `motion` he moves
+const softness = shallowRef(1) // how loose his arms are: 1 is the design
+// Seen from above, and named for him: without `motion` it is the viewer who walks around, the other way.
+const direction = shallowRef<'clockwise' | 'anticlockwise'>('anticlockwise')
+const step = shallowRef(24) // degrees he turns at each step, on average: 24 is the design
 const failed = shallowRef(false)
 
 let scene: ReturnType<typeof createPoulpyScene> | undefined
 let frame = 0
 let last = 0
+let move: Turn | undefined
 
 const sides: { id: PoulpySide; label: string }[] = [
-  { id: 'blue', label: 'Blue side' },
-  { id: 'ember', label: 'Grumpy side' },
+  { id: 'blue', label: 'Blue' },
+  { id: 'ember', label: 'Grumpy' },
 ]
+const directions = [
+  { id: 'anticlockwise', label: 'Anticlockwise', icon: RotateCcw },
+  { id: 'clockwise', label: 'Clockwise', icon: RotateCw },
+] as const
 const clamp = (value: number, low: number, high: number) => Math.min(high, Math.max(low, value))
 const wrap = (degrees: number) => ((degrees % 360) + 360) % 360
 
-// A full turn takes about 13 s at speed 1.
+// A full turn of the viewer takes about 13 s at speed 1. With `motion`, Poulpy moves instead.
 function spin(now: number) {
-  if (spinning.value) turn.value = wrap(turn.value + ((now - last) / 1000) * 28 * speed.value)
+  if (spinning.value && move) scene?.pose(move.advance(((now - last) / 1000) * speed.value))
+  else if (spinning.value) turn.value = wrap(turn.value + ((now - last) / 1000) * 28 * speed.value * (direction.value === 'anticlockwise' ? 1 : -1))
   last = now
   frame = requestAnimationFrame(spin)
 }
@@ -38,14 +53,14 @@ let pinch = 0
 function press(event: PointerEvent) {
   canvas.value?.setPointerCapture(event.pointerId)
   fingers.set(event.pointerId, [event.clientX, event.clientY])
-  spinning.value = false
+  if (!motion) spinning.value = false
 }
 function drag(event: PointerEvent) {
   const from = fingers.get(event.pointerId)
   if (!from) return
   fingers.set(event.pointerId, [event.clientX, event.clientY])
   if (fingers.size === 1) {
-    turn.value = wrap(turn.value - (event.clientX - from[0]) * 0.6)
+    turn.value = wrap(turn.value + (event.clientX - from[0]) * 0.6)
     tilt.value = clamp(tilt.value + (event.clientY - from[1]) * 0.45, -89, 89)
   } else if (fingers.size === 2) {
     const [a, b] = [...fingers.values()]
@@ -65,23 +80,27 @@ function zoom(event: WheelEvent) {
   distance.value = clamp(distance.value * Math.exp(event.deltaY * 0.001), 5.5, 16)
 }
 function nudge(event: KeyboardEvent) {
-  const step = ({ ArrowLeft: [8, 0], ArrowRight: [-8, 0], ArrowUp: [0, 6], ArrowDown: [0, -6] } as Record<string, number[]>)[event.key]
+  const step = ({ ArrowLeft: [-8, 0], ArrowRight: [8, 0], ArrowUp: [0, 6], ArrowDown: [0, -6] } as Record<string, number[]>)[event.key]
   if (!step) return
   event.preventDefault()
-  spinning.value = false
+  if (!motion) spinning.value = false
   turn.value = wrap(turn.value + step[0])
   tilt.value = clamp(tilt.value + step[1], -89, 89)
 }
 
 const show = () => scene?.show(side.value, outline.value)
-const look = () => scene?.look({ turn: turn.value, tilt: tilt.value, distance: distance.value })
+// The scene wants where the viewer stands: the other way around from how far he has turned.
+const look = () => scene?.look({ turn: -turn.value, tilt: tilt.value, distance: distance.value })
 watch([side, outline], show)
 watch([turn, tilt, distance], look)
+watch(softness, (value) => { if (move) move.softness = value })
+watch([step, direction], ([degrees, way]) => { if (move) move.stride = (degrees / 24) * (way === 'anticlockwise' ? 1 : -1) })
 
 onMounted(async () => {
   // three.js is only fetched on this page, and only in the browser.
   try {
     const { createPoulpyScene } = await import('./poulpy3dScene')
+    if (motion) move = (await import('../../../design/poulpy-3d/motion.mjs')).createTurn({ softness: softness.value })
     if (!canvas.value) return
     scene = createPoulpyScene(canvas.value)
   } catch {
@@ -108,7 +127,7 @@ onBeforeUnmount(() => {
         ref="canvas"
         tabindex="0"
         role="img"
-        aria-label="Poulpy in 3D. Drag, or use the arrow keys, to turn him."
+        :aria-label="motion ? 'Poulpy in 3D, turning around in short steps. Drag, or use the arrow keys, to look around him.' : 'Poulpy in 3D. Drag, or use the arrow keys, to turn him.'"
         @pointerdown="press"
         @pointermove="drag"
         @pointerup="release"
@@ -121,15 +140,20 @@ onBeforeUnmount(() => {
     </div>
     <div class="controls">
       <div class="sides" role="group" aria-label="Side">
-        <button v-for="s in sides" :key="s.id" type="button" class="choice" :aria-pressed="side === s.id" @click="side = s.id">{{ s.label }}</button>
+        <button v-for="s in sides" :key="s.id" type="button" class="choice" :aria-pressed="side === s.id" :aria-label="`${s.label} side`" @click="side = s.id">{{ s.label }}<span class="wide">&nbsp;side</span></button>
+      </div>
+      <div class="sides" role="group" aria-label="Direction, seen from above">
+        <button v-for="d in directions" :key="d.id" type="button" class="choice icon" :aria-pressed="direction === d.id" :aria-label="d.label" :title="d.label" @click="direction = d.id"><component :is="d.icon" :size="18" aria-hidden="true" /></button>
       </div>
       <div class="toggles">
         <button type="button" class="toggle" :aria-pressed="outline" @click="outline = !outline">Outline</button>
-        <button type="button" class="toggle" :aria-pressed="spinning" @click="spinning = !spinning">Spin</button>
+        <button type="button" class="toggle" :aria-pressed="spinning" @click="spinning = !spinning">{{ motion ? 'Turn' : 'Spin' }}</button>
       </div>
-      <label class="slider">Turn <input v-model.number="turn" type="range" min="0" max="360" step="1" @input="spinning = false" /></label>
-      <label class="slider">Tilt <input v-model.number="tilt" type="range" min="-89" max="89" step="1" /></label>
-      <label class="slider">Speed <input v-model.number="speed" type="range" min="0.2" max="4" step="0.1" @input="spinning = true" /></label>
+      <label v-if="!motion" class="slider"><span>Turn</span><input v-model.number="turn" type="range" min="0" max="360" step="1" @input="spinning = false" /><output>{{ Math.round(turn) }}°</output></label>
+      <label class="slider"><span>Tilt</span><input v-model.number="tilt" type="range" min="-89" max="89" step="1" /><output>{{ Math.round(tilt) }}°</output></label>
+      <label v-if="motion" class="slider"><span>Step</span><input v-model.number="step" type="range" min="1" max="180" step="1" /><output>{{ step }}°</output></label>
+      <label v-if="motion" class="slider"><span>Soft arms</span><input v-model.number="softness" type="range" min="0" max="4" step="0.05" /><output>{{ softness.toFixed(2) }}</output></label>
+      <label class="slider"><span>Speed</span><input v-model.number="speed" type="range" min="0.1" max="5" step="0.1" @input="spinning = true" /><output>{{ speed.toFixed(1) }}×</output></label>
     </div>
   </div>
 </template>
@@ -146,10 +170,22 @@ onBeforeUnmount(() => {
 .sides { display: inline-flex; gap: 4px; padding: 4px; border-radius: 999px; background: var(--vp-c-bg-soft); }
 .toggles { display: inline-flex; gap: 8px; }
 .choice, .toggle { height: 36px; padding: 0 16px; border-radius: 999px; border: 1px solid transparent; font-size: 14px; font-weight: 700; color: var(--vp-c-text-1); cursor: pointer; }
+.choice.icon { display: inline-grid; place-items: center; width: 40px; padding: 0; }
 .choice[aria-pressed='true'] { background: var(--vp-c-brand-1); color: var(--vp-c-bg); }
 .toggle { border-color: var(--vp-c-divider); }
 .toggle[aria-pressed='true'] { border-color: var(--vp-c-brand-1); color: var(--vp-c-brand-1); background: var(--vp-c-brand-soft); }
 .choice:focus-visible, .toggle:focus-visible { outline: 3px solid var(--vp-c-brand-1); outline-offset: 2px; }
-.slider { flex: 1 1 180px; display: flex; align-items: center; gap: 10px; min-width: 0; font-size: 14px; font-weight: 700; }
+/* On a phone the switches still share one row. */
+@media (max-width: 480px) {
+  .controls { column-gap: 4px; }
+  .sides { gap: 2px; padding: 3px; }
+  .choice, .toggle { padding: 0 8px; font-size: 13px; }
+  .wide { display: none; }
+  .choice.icon { width: 32px; }
+  .toggles { gap: 4px; }
+}
+.slider { flex: 1 1 100%; display: flex; align-items: center; gap: 10px; min-width: 0; font-size: 14px; font-weight: 700; }
+.slider span { flex: none; width: 5.5em; }
+.slider output { min-width: 3em; text-align: right; font-variant-numeric: tabular-nums; }
 .slider input { flex: 1; min-width: 0; height: 36px; accent-color: var(--vp-c-brand-1); }
 </style>

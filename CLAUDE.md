@@ -20,7 +20,7 @@ A training platform: Android and iOS apps first, guest-only and offline, with a 
 ./gradlew jvmTest jsTest :server:test :tools:i18n:test   # shared logic, server and the string generator
 node design/build-tokens.mjs --check    # theme files match design/tokens.json
 node design/build-poulpy.mjs --check    # Poulpy drawings match their generator
-node design/build-poulpy-3d.mjs --check # Poulpy's 3D models match design/poulpy-3d/model.mjs
+node design/build-poulpy-3d.mjs --check # Poulpy's 3D models match design/poulpy-3d/model.mjs and motion.mjs
 node design/build-body-map.mjs --check  # body map figures match their generator
 node design/build-body-map-shapes.mjs --check  # body map shapes for the apps match design/body-map.json
 node design/build-icons.mjs --check     # the apps' Lucide icons match design/icons
@@ -32,7 +32,7 @@ Android and iOS only build in CI (`.github/workflows/ci.yml`); a PR is done when
 ## House rules
 
 - Logic goes in shared Kotlin with a test; Compose and SwiftUI code stays thin and mirrors the other platform.
-- Theme files, Poulpy drawings, his 3D models and body map figures are generated: edit `design/tokens.json`, `design/build-poulpy.mjs`, `design/poulpy-3d/model.mjs` or `design/build-body-map.mjs` and regenerate. The apps' body map shapes follow `design/body-map.json`: run `design/build-body-map-shapes.mjs` after it changes.
+- Theme files, Poulpy drawings, his 3D models and body map figures are generated: edit `design/tokens.json`, `design/build-poulpy.mjs`, `design/poulpy-3d/model.mjs` (or `motion.mjs` beside it, for how he moves) or `design/build-body-map.mjs` and regenerate. The apps' body map shapes follow `design/body-map.json`: run `design/build-body-map-shapes.mjs` after it changes.
 - Every icon is a Lucide icon by its Lucide name (ADR 0024): `@lucide/vue` on the web, the inline SVG with `data-lucide` in mockups, `Lucide.*` on Android and `LucideIcon`/`Label(_:lucide:)` on iOS. An icon the apps don't have yet is added with `node design/build-icons.mjs --add <name>`.
 - The websites, web mockups and docs samples share `web/ui` (Vue, DaisyUI, the Poulpy theme; ADR 0023): add a missing component there, never one-off styles in an app, and run `npm run build -w ui` in `web/` after changing its classes. A DaisyUI component a screen needs that `web/ui` lacks is added to `web/ui` in the same PR as a `Cp` component, with its stories and the classes it renders in `web/storybook/stories/` (ADR 0028); a mockup only uses the `cp-` classes of those components.
 - A screen is built to its agreed mockup in full, never a simpler stand-in; what can't be built as drawn is named in the PR and put to the owner first (`docs/agents/areas.md`, Designer).
