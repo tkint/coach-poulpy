@@ -49,7 +49,23 @@ const files = {
     } as Record<string, string>,
   },
   'brand-decisions': { source: brandDecisions, home: 'brand-decisions', pages: {} as Record<string, string> },
-  'poulpy-3d': { source: poulpy3d, home: 'brand-poulpy-in-3d', pages: {} as Record<string, string> },
+  'poulpy-3d': {
+    source: poulpy3d,
+    home: 'brand-poulpy-in-3d',
+    // Each of his moves has a page of its own, so no page runs two of them at once.
+    pages: {
+      'the-rules-of-the-shape': 'brand-poulpy-in-3d',
+      'his-six-moods': 'brand-poulpy-in-3d',
+      'his-twelve-poses': 'brand-poulpy-in-3d',
+      'his-moves': 'brand-poulpy-in-3d',
+      'turning-in-short-steps': 'brand-poulpy-s-moves-turning',
+      'little-jumps': 'brand-poulpy-s-moves-little-jumps',
+      'jumping-around': 'brand-poulpy-s-moves-jumping-around',
+      'the-champion-jumps-for-joy': 'brand-poulpy-s-moves-the-champion',
+      'using-the-model': 'brand-poulpy-in-3d',
+      'changing-the-design': 'brand-poulpy-in-3d',
+    } as Record<string, string>,
+  },
 }
 type File = keyof typeof files
 

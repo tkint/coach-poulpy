@@ -227,12 +227,22 @@ function press(x, y) {
   return { p: [x, y, z], n: norm([x / rx ** 2, dy / ry ** 2, z / rz ** 2]) }
 }
 
+// Where something travelling from `o` along `d` first meets the head, and which way the head faces there.
+// What would miss the head lands on its edge.
+function strike(o, d) {
+  const R = SHAPE.head.radius, C = headCentre()
+  const q = [0, 1, 2].map((k) => (o[k] - C[k]) / R[k]), e = [0, 1, 2].map((k) => d[k] / R[k])
+  const A = e[0] ** 2 + e[1] ** 2 + e[2] ** 2, B = 2 * (q[0] * e[0] + q[1] * e[1] + q[2] * e[2]), K = q[0] ** 2 + q[1] ** 2 + q[2] ** 2 - 1
+  const p = add(o, d, (-B - Math.sqrt(Math.max(B * B - 4 * A * K, 0))) / (2 * A))
+  return { p, n: norm([0, 1, 2].map((k) => (p[k] - C[k]) / R[k] ** 2)) }
+}
+
 /**
  * The gleam: a soft patch lying on the head where the light hits it. `towards` is the direction from the
  * head to the highlight, in Poulpy's own space; a renderer calls this again whenever he or the camera turns.
  */
 export function gleamPatch(towards = LOOK.gleam.towards) {
-  const rings = 6, around = 28, d = norm(towards), R = SHAPE.head.radius, C = headCentre()
+  const rings = 6, around = 28, d = norm(towards), C = headCentre()
   let t1 = [d[2], 0, -d[0]]
   t1 = Math.hypot(...t1) < 1e-6 ? [1, 0, 0] : norm(t1)
   const t2 = cross(d, t1), ca = Math.cos(LOOK.gleam.tilt), sa = Math.sin(LOOK.gleam.tilt)
@@ -240,12 +250,8 @@ export function gleamPatch(towards = LOOK.gleam.towards) {
   for (let i = 0; i <= rings; i++) for (let j = 0; j < around; j++) {
     const t = (j / around) * TAU, u = LOOK.gleam.size[0] * (i / rings) * Math.cos(t), v = LOOK.gleam.size[1] * (i / rings) * Math.sin(t)
     // Start outside the head, in front of the highlight, and travel back along `d` until the head is hit.
-    const o = add(add(add(C, t1, u * ca - v * sa), t2, u * sa + v * ca), d, 5)
-    const q = [0, 1, 2].map((k) => (o[k] - C[k]) / R[k]), e = [0, 1, 2].map((k) => -d[k] / R[k])
-    const A = e[0] ** 2 + e[1] ** 2 + e[2] ** 2, B = 2 * (q[0] * e[0] + q[1] * e[1] + q[2] * e[2]), K = q[0] ** 2 + q[1] ** 2 + q[2] ** 2 - 1
-    const hit = add(o, d, -(-B - Math.sqrt(Math.max(B * B - 4 * A * K, 0))) / (2 * A))
-    const n = norm([0, 1, 2].map((k) => (hit[k] - C[k]) / R[k] ** 2))
-    positions.push(...add(hit, n, 0.006)); normals.push(...n)
+    const { p, n } = strike(add(add(add(C, t1, u * ca - v * sa), t2, u * sa + v * ca), d, 5), d.map((v) => -v))
+    positions.push(...add(p, n, 0.006)); normals.push(...n)
   }
   for (let i = 0; i < rings; i++) for (let j = 0; j < around; j++) {
     const a = i * around + j, b = i * around + ((j + 1) % around), c = a + around, e2 = b + around
@@ -258,18 +264,18 @@ export function gleamPatch(towards = LOOK.gleam.towards) {
 
 /**
  * Builds Poulpy for one side of the plush, or in one of his moods.
- * @param {{ side?: 'blue' | 'ember', mood?: keyof typeof MOODS, tone?: string, face?: keyof typeof FACES, features?: (string | number)[][], on?: (string | number)[][], stretch?: number,
+ * @param {{ side?: 'blue' | 'ember', mood?: keyof typeof MOODS, tone?: string, face?: keyof typeof FACES, features?: (string | number)[][], on?: { at: number[], marks: (string | number)[][] }, stretch?: number,
  *   colours: { blue: string, ember: string, ink: string } }} options
  *   `colours` are the `color.poulpy` tokens of design/tokens.json. With a `mood`, he takes its side and face,
  *   and `tone` (that mood's `mood` token) tints him; without one he is the plain side, happy or grumpy.
- *   `face` gives him another face of FACES, or `features` a face written out. `on` is more features, laid on his head by its outline in the
- *   drawing and not by his face: a plaster, a mark. `stretch` makes his arms that many times taller, and lifts his head with them.
+ *   `face` gives him another face of FACES, or `features` a face written out. `on` is marks laid on his head by its outline in the
+ *   drawing and not by his face, a plaster or a vein: `at` is their middle in the drawing and `marks` their features. `stretch` makes his arms that many times taller, and lifts his head with them.
  * @returns {{ parts: { name: string, material: string, positions: number[], normals: number[], indices: number[] }[],
  *   materials: Record<string, { colour: number[], flat?: boolean, outline?: number[] }>, height: number, headLift: number }}
  *   Triangle meshes, already in place, and their colours as linear RGB. `flat` materials take no shading.
  *   His head and face are built where they sit at rest: whoever draws him lifts them by `headLift`.
  */
-export function buildPoulpy3d({ side = 'blue', mood, tone, face: faceName, features, on = [], stretch = 1, colours }) {
+export function buildPoulpy3d({ side = 'blue', mood, tone, face: faceName, features, on, stretch = 1, colours }) {
   if (mood) side = MOODS[mood].side
   const ember = side === 'ember', F = features ?? FACES[faceName ?? (mood ? MOODS[mood].face : ember ? 'grumpy' : 'happy')], { head, arms, face } = SHAPE
   const body = linear(tone ?? (ember ? colours.ember : colours.blue)), lining = linear(ember ? colours.blue : colours.ember), ink = linear(colours.ink)
@@ -310,18 +316,18 @@ export function buildPoulpy3d({ side = 'blue', mood, tone, face: faceName, featu
   const U = 63
   // Left and right are Poulpy's own: his left is the viewer's right.
   const which = (x) => (x > 100 ? 'left' : 'right')
-  // `lay` says where a point of the drawing lands, before it is pressed on, and `size` how much bigger things are drawn.
+  // `lay` says where a point of the drawing lands and which way the head faces there, and `size` how much bigger things are drawn.
   const draw = (features, lay, size) => {
-    const at = (x, y) => lay((x - 100) / U, (130 - y) / U)
+    const put = (x, y) => lay((x - 100) / U, (130 - y) / U)
     const sticker = (x, y, rx, ry, depth, detail, turnBy = 0) => {
-      const { p, n } = press(...at(x, y)), onto = facing(n), ca = Math.cos(turnBy), sa = Math.sin(turnBy)
+      const { p, n } = put(x, y), onto = facing(n), ca = Math.cos(turnBy), sa = Math.sin(turnBy)
       const turn = ([px, py, pz]) => onto([px * ca - py * sa, px * sa + py * ca, pz]), centre = add(p, n, -depth * 0.25)
       return { shape: egg([(rx / U) * size, (ry / U) * size, depth], { ...detail, turn, at: centre }), turn, at: centre }
     }
     // A round line following the head, with rounded ends.
     const line = (points, w) => {
       const r = (w / 2 / U) * size
-      const on = points.map(([x, y]) => { const { p, n } = press(...at(x, y)); return { p: add(p, n, r * 0.25), n } })
+      const on = points.map(([x, y]) => { const { p, n } = put(x, y); return { p: add(p, n, r * 0.25), n } })
       const sides = 10, positions = [], normals = [], indices = []
       on.forEach(({ p, n }, i) => {
         const a = on[Math.max(i - 1, 0)].p, b = on[Math.min(i + 1, on.length - 1)].p
@@ -338,20 +344,30 @@ export function buildPoulpy3d({ side = 'blue', mood, tone, face: faceName, featu
       const cap = (centre) => egg([r, r, r], { around: 10, down: 6, at: centre })
       return join({ positions, normals, indices }, cap(on[0].p), cap(on[on.length - 1].p))
     }
-    // A flat shape lying on the head, `lift` off it: a fan of triangles from its middle to its outline.
-    const patch = (outlinePoints, lift) => {
-      let around = outlinePoints.map(([x, y]) => at(x, y))
-      // Triangles face the viewer when the outline runs anticlockwise.
-      if (around.reduce((sum, [x, y], i) => { const [nx, ny] = around[(i + 1) % around.length]; return sum + x * ny - nx * y }, 0) < 0) around = around.reverse()
-      const mid = [0, 1].map((k) => around.reduce((sum, q) => sum + q[k], 0) / around.length)
-      const positions = [], normals = [], indices = []
-      for (const [x, y] of [mid, ...around]) { const { p, n } = press(x, y); positions.push(...add(p, n, lift)); normals.push(...n) }
-      around.forEach((_, i) => indices.push(0, 1 + i, 1 + ((i + 1) % around.length)))
-      return { positions, normals, indices }
-    }
     const straight = (x1, y1, x2, y2, n = 10) => Array.from({ length: n + 1 }, (_, i) => [x1 + ((x2 - x1) * i) / n, y1 + ((y2 - y1) * i) / n])
     // Straight stretches are cut into short steps too, so they follow the head.
     const steps = (points) => points.slice(1).flatMap((q, i) => straight(...points[i], ...q, Math.max(1, Math.ceil(Math.hypot(q[0] - points[i][0], q[1] - points[i][1]) / 4))).slice(i ? 1 : 0))
+    // A flat shape lying on the head, `lift` off it: rings of triangles from its middle to its outline, close
+    // enough to follow the head however big the shape is.
+    const patch = (outlinePoints, lift) => {
+      let around = steps([...outlinePoints, outlinePoints[0]]).slice(0, -1)
+      // Triangles face the viewer when the outline runs clockwise in the drawing, where y grows downwards.
+      if (around.reduce((sum, [x, y], i) => { const [nx, ny] = around[(i + 1) % around.length]; return sum + x * ny - nx * y }, 0) > 0) around = around.reverse()
+      const mid = [0, 1].map((k) => around.reduce((sum, q) => sum + q[k], 0) / around.length), rings = 4, n = around.length
+      const positions = [], normals = [], indices = []
+      const lie = (x, y) => { const on = put(x, y); positions.push(...add(on.p, on.n, lift)); normals.push(...on.n) }
+      lie(...mid)
+      for (let ring = 1; ring <= rings; ring++) for (const [x, y] of around) lie(mid[0] + ((x - mid[0]) * ring) / rings, mid[1] + ((y - mid[1]) * ring) / rings)
+      for (let i = 0; i < n; i++) {
+        const next = (i + 1) % n
+        indices.push(0, 1 + i, 1 + next)
+        for (let ring = 1; ring < rings; ring++) {
+          const a = 1 + (ring - 1) * n + i, b = 1 + (ring - 1) * n + next, c = a + n, d = b + n
+          indices.push(a, c, b, b, c, d)
+        }
+      }
+      return { positions, normals, indices }
+    }
     const es = face.eyes
     // Where each eye sits, so a lid can grow with its eye.
     const eyes = features.filter((feature) => feature[0] === 'eye' || feature[0] === 'half').map((feature) => [feature[1], feature[2]])
@@ -378,7 +394,7 @@ export function buildPoulpy3d({ side = 'blue', mood, tone, face: faceName, featu
         part(named, 'ink', line(pathPoints(`M${x1} ${y1} Q${cx} ${cy} ${x2} ${y2}`)[0], w))
       } else if (kind === 'path') {
         const [d, w, ...rest] = v, name = rest.pop(), colour = rest[0]
-        part(name, paint(colour), join(...pathPoints(d).map((points) => line(steps(points), w))))
+        part(name, paint(colour), join(...pathPoints(d).map((points) => line(steps(points.closed ? [...points, points[0]] : points), w))))
       } else if (kind === 'shape') {
         const [d, ...rest] = v, name = rest.pop(), colour = rest[0]
         part(name, paint(colour), join(...pathPoints(d).map((points) => patch(points, 0.012))))
@@ -405,10 +421,17 @@ export function buildPoulpy3d({ side = 'blue', mood, tone, face: faceName, featu
       } else throw new Error(`No way to draw a "${kind}"`)
     }
   }
-  // His face is the drawing's, a little bigger and wider apart. Anything else lies where the drawing's outline puts
+  // His face is the drawing's, a little bigger and wider apart. A mark lies where the drawing's outline puts
   // it: the drawing's head is 63 wide from its middle and 100 tall above the line where the arms hide it.
-  draw(F, (x, y) => [x * face.scale * face.spread, face.y + y * face.scale], face.scale)
-  draw(on, (x, y) => [x * head.radius[0], SHAPE.propLine + y * ((head.centreY + head.radius[1] - SHAPE.propLine) * U) / 100], 1.05)
+  draw(F, (x, y) => press(x * face.scale * face.spread, face.y + y * face.scale), face.scale)
+  if (on) {
+    // A mark is laid flat against his head where its middle touches, then wrapped onto it, so it keeps its shape
+    // and never leaves his head however near the edge it is.
+    const outline = (x, y) => [x * head.radius[0], SHAPE.propLine + y * ((head.centreY + head.radius[1] - SHAPE.propLine) * U) / 100]
+    const middle = outline((on.at[0] - 100) / U, (130 - on.at[1]) / U), touch = press(...middle)
+    const across = norm(cross([0, 1, 0], touch.n)), up = cross(touch.n, across)
+    draw(on.marks, (x, y) => { const [px, py] = outline(x, y); return strike(add(add(add(touch.p, across, px - middle[0]), up, py - middle[1]), touch.n, 2), touch.n.map((v) => -v)) }, 1.05)
+  }
   part('gleam', 'gleam', gleamPatch())
 
   return { parts, materials, height: head.centreY + head.radius[1] + 2 * arms.radius[1] * (stretch - 1), headLift: 2 * arms.radius[1] * (stretch - 1) }

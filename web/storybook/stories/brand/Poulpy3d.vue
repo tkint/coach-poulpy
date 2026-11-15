@@ -2,20 +2,23 @@
 // Poulpy in 3D, to turn around: the shape of design/poulpy-3d/model.mjs, drawn by poulpy3dScene.ts.
 // With `moods` the switch picks one of his six moods instead of a side of the plush, with `poses` one of his twelve poses.
 // With `motion` he moves himself (design/poulpy-3d/motion.mjs) and the viewer stays put: "turn" is his idle,
-// "jump" his little jumps on the spot and "jump-turn" the same jumps, each turning him a step.
+// "jump" his little jumps on the spot, "jump-turn" the same jumps, each turning him a step, and "cheer" the
+// champion's jumps of joy, with his medal and confetti. He only moves while he is on screen.
 import { RotateCcw, RotateCw } from '@lucide/vue'
 import { onBeforeUnmount, onMounted, shallowRef, useTemplateRef, watch } from 'vue'
 import type { PoulpyMood, PoulpySide } from '../../../../design/poulpy-3d/model.mjs'
 import type { PoulpyPose } from '../../../../design/poulpy-3d/poses.mjs'
-import type { Jump, Turn } from '../../../../design/poulpy-3d/motion.mjs'
+import type { Cheer, Jump, Turn } from '../../../../design/poulpy-3d/motion.mjs'
 import type { createPoulpyScene } from './poulpy3dScene'
 
-const { motion, moods, poses } = defineProps<{ motion?: 'turn' | 'jump' | 'jump-turn'; moods?: boolean; poses?: boolean }>()
-const jumping = motion === 'jump' || motion === 'jump-turn'
-const turning = motion !== 'jump' // he turns, or without `motion` the viewer walks around him
+const { motion, moods, poses } = defineProps<{ motion?: 'turn' | 'jump' | 'jump-turn' | 'cheer'; moods?: boolean; poses?: boolean }>()
+const cheering = motion === 'cheer'
+const jumping = motion === 'jump' || motion === 'jump-turn' || cheering
+const turning = motion !== 'jump' && !cheering // he turns, or without `motion` the viewer walks around him
 
 const canvas = useTemplateRef<HTMLCanvasElement>('canvas')
-const side = shallowRef<PoulpySide | PoulpyMood | PoulpyPose>(poses ? 'cocky' : moods ? 'happy' : 'blue')
+const stage = useTemplateRef<HTMLDivElement>('stage')
+const side = shallowRef<PoulpySide | PoulpyMood | PoulpyPose>(cheering ? 'champion' : poses ? 'cocky' : moods ? 'happy' : 'blue')
 const outline = shallowRef(false)
 const turn = shallowRef(0) // degrees he has turned for the viewer, anticlockwise seen from above; 0 is face on
 const tilt = shallowRef(motion ? 26 : 17) // degrees above him; negative looks from below
@@ -39,7 +42,9 @@ const failed = shallowRef(false)
 let scene: ReturnType<typeof createPoulpyScene> | undefined
 let frame = 0
 let last = 0
-let move: Turn | Jump | undefined
+let move: Turn | Jump | Cheer | undefined
+let onScreen = true
+let watching: IntersectionObserver | undefined
 
 const sides: { id: PoulpySide | PoulpyMood | PoulpyPose; label: string; suffix?: string }[] = poses
   ? [
@@ -54,14 +59,16 @@ const directions = [
   { id: 'anticlockwise', label: 'Anticlockwise', icon: RotateCcw },
   { id: 'clockwise', label: 'Clockwise', icon: RotateCw },
 ] as const
-const moves = { turn: 'turning around in short steps', jump: 'doing little jumps on the spot', 'jump-turn': 'doing little jumps that turn him around' }
+const moves = { turn: 'turning around in short steps', jump: 'doing little jumps on the spot', 'jump-turn': 'doing little jumps that turn him around', cheer: 'the champion, jumping for joy with his medal while confetti flies' }
 const clamp = (value: number, low: number, high: number) => Math.min(high, Math.max(low, value))
 const wrap = (degrees: number) => ((degrees % 360) + 360) % 360
 
 // A full turn of the viewer takes about 13 s at speed 1. With `motion`, Poulpy moves instead.
 function spin(now: number) {
-  if (spinning.value && move) scene?.pose(move.advance(((now - last) / 1000) * speed.value))
-  else if (spinning.value) turn.value = wrap(turn.value + ((now - last) / 1000) * 28 * speed.value * (direction.value === 'anticlockwise' ? 1 : -1))
+  // Off screen he waits, so several of him on a page cost no more than the one in view.
+  const moving = spinning.value && onScreen
+  if (moving && move) scene?.pose(move.advance(((now - last) / 1000) * speed.value))
+  else if (moving) turn.value = wrap(turn.value + ((now - last) / 1000) * 28 * speed.value * (direction.value === 'anticlockwise' ? 1 : -1))
   last = now
   frame = requestAnimationFrame(spin)
 }
@@ -107,13 +114,13 @@ function nudge(event: KeyboardEvent) {
   tilt.value = clamp(tilt.value + step[1], -89, 89)
 }
 
-const show = () => scene?.show(poses ? { pose: side.value as PoulpyPose } : (side.value as PoulpySide | PoulpyMood), outline.value)
+const show = () => scene?.show(cheering ? { pose: 'champion', effects: false } : poses ? { pose: side.value as PoulpyPose } : (side.value as PoulpySide | PoulpyMood), outline.value)
 // The scene wants where the viewer stands: the other way around from how far he has turned.
 const look = () => scene?.look({ turn: -turn.value, tilt: tilt.value, distance: distance.value })
 watch([side, outline], show)
 watch([turn, tilt, distance], look)
 watch(softness, (value) => { if (move) move.softness = value })
-const stride = () => (motion === 'jump' ? 0 : (step.value / 24) * (direction.value === 'anticlockwise' ? 1 : -1))
+const stride = () => (!turning ? 0 : (step.value / 24) * (direction.value === 'anticlockwise' ? 1 : -1))
 watch([step, direction], () => { if (move) move.stride = stride() })
 watch([height, tuck, landing, spread, hang, lean, pause], (values) => {
   if (move && 'height' in move) [move.height, move.tuck, move.landing, move.spread, move.hang, move.lean, move.pause] = values
@@ -124,9 +131,9 @@ onMounted(async () => {
   try {
     const { createPoulpyScene } = await import('./poulpy3dScene')
     if (motion) {
-      const { createJump, createTurn } = await import('../../../../design/poulpy-3d/motion.mjs')
+      const { createCheer, createJump, createTurn } = await import('../../../../design/poulpy-3d/motion.mjs')
       if (jumping) {
-        const jump = createJump({ softness: softness.value, stride: stride() })
+        const jump = (cheering ? createCheer : createJump)({ softness: softness.value, stride: stride() })
         ;[height.value, tuck.value, landing.value, spread.value, lean.value, pause.value] = [jump.height, jump.tuck, jump.landing, jump.spread, jump.lean, jump.pause]
         move = jump
       } else move = createTurn({ softness: softness.value })
@@ -140,19 +147,24 @@ onMounted(async () => {
   look()
   show()
   spinning.value = !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  if (stage.value) {
+    watching = new IntersectionObserver(([entry]) => { onScreen = entry.isIntersecting })
+    watching.observe(stage.value)
+  }
   last = performance.now()
   frame = requestAnimationFrame(spin)
 })
 
 onBeforeUnmount(() => {
   cancelAnimationFrame(frame)
+  watching?.disconnect()
   scene?.dispose()
 })
 </script>
 
 <template>
   <div class="poulpy-3d">
-    <div class="stage">
+    <div ref="stage" class="stage">
       <canvas
         ref="canvas"
         tabindex="0"
@@ -169,7 +181,7 @@ onBeforeUnmount(() => {
       <p v-else class="hint">Drag any way to turn, pinch to zoom</p>
     </div>
     <div class="controls">
-      <div class="sides" :class="{ moods: moods || poses }" role="group" :aria-label="poses ? 'Pose' : moods ? 'Mood' : 'Side'">
+      <div v-if="!cheering" class="sides" :class="{ moods: moods || poses }" role="group" :aria-label="poses ? 'Pose' : moods ? 'Mood' : 'Side'">
         <button v-for="s in sides" :key="s.id" type="button" class="choice" :aria-pressed="side === s.id" :aria-label="s.suffix ? `${s.label} ${s.suffix}` : s.label" @click="side = s.id">{{ s.label }}<span v-if="s.suffix" class="wide">&nbsp;{{ s.suffix }}</span></button>
       </div>
       <div v-if="turning" class="sides" role="group" aria-label="Direction, seen from above">

@@ -3,11 +3,11 @@
 //
 // A pose is a mood's shade, a face, and what the drawing adds:
 //   `props`   solid things he wears or that lie by him: a sweatband, a nightcap, a medal, a dumbbell
-//   `on`      marks lying on his head, in the drawing's coordinates: plasters, a vein
-//   `around`  the comic effects in front of him: sparks, drops, lettering, bubbles
+//   `on`      marks lying on his head, in the drawing's coordinates: plasters, a vein; `at` is their middle
+//   `around`  the comic effects in front of him: sparks, lettering, bubbles
 //   `behind`  the same, behind him
 // The effects are flat, as in the drawing, and whoever draws him keeps them facing the viewer.
-// He never lifts an arm in any of them (brand decision 8).
+// What is on him is part of his face: sweat, a tear. He never lifts an arm in any of them (brand decision 8).
 // To change a pose, edit POSES below and look at the page; the rules are in docs/poulpy-3d.md.
 import { SHAPE, FACES, MOODS, buildPoulpy3d, egg, facing, join, linear, pathPoints, tube } from './model.mjs'
 
@@ -26,10 +26,15 @@ function box(x, y, w, h, r, turn = 0, cx = x, cy = y) {
   }))
   return 'M' + points.map(([px, py]) => `${+px.toFixed(2)} ${+py.toFixed(2)}`).join(' L') + ' Z'
 }
-const drops = (...at) => at.map(([x, y, k]) => ['shape', drop(x, y, k), '#A8DDF7', { stroke: '#3AA6E0', width: 1.5 }])
+// Drops are on him, so they are features of his face: they stay on his skin when he turns.
+const drops = (...at) => at.flatMap(([x, y, k], i) => [['shape', drop(x, y, k), '#A8DDF7', `drop_${i + 1}`], ['path', drop(x, y, k), 1.5, '#3AA6E0', `drop_${i + 1}_edge`]])
 const sparks = (...at) => at.map(([x, y, r]) => ['shape', spark(x, y, r), GOLD])
 const puff = (x, y) => [[0, 0, 12], [13, -6, 10], [-12, -4, 9], [3, -15, 9]].map((p) => ['oval', x + p[0], y + p[1], p[2], p[2], '#E6EEF4', { stroke: CLOUD, width: 1.5 }])
 const plaster = (turn) => [['shape', box(112, 50, 40, 13, 5, turn, 132, 56), '#F5D7B5', 'plaster'], ['path', box(112, 50, 40, 13, 5, turn, 132, 56), 1.5, '#D9B48C', 'plaster_edge']]
+
+// The champion's confetti: its colours ('ember' is Poulpy's) and the size of a piece, in the drawing's units.
+// The pose draws it flat behind him; when he cheers it flies (CHEER in motion.mjs).
+export const CONFETTI = { colours: [GOLD, 'ember', '#5BBEF0'], size: [9, 5] }
 
 // Effects are lists like the faces' features, in the drawing's coordinates:
 //   ['shape', d, colour, { stroke, width, opacity }]   a closed SVG path, filled, with an optional edge
@@ -44,30 +49,29 @@ export const POSES = {
     around: [...sparks([6, 52, 10], [196, 40, 8], [176, 4, 5], [24, 10, 5]), ['shape', box(128, -12, 54, 24, 12), 'ink'], ['text', 155, 5, 14, GOLD, 'PR!', 'middle']],
   },
   straining: {
-    mood: 'happy', face: 'straining', props: ['dumbbell'],
-    around: [...drops([152, 50, 0.9], [46, 64, 0.7]), ['stroke', 'M12 70 l-12 -4 M10 86 l-14 0 M188 70 l12 -4 M190 86 l14 0', 3, STEEL]],
+    mood: 'happy', face: [...FACES.straining, ...drops([137, 68, 0.9], [60, 74, 0.7])], props: ['dumbbell'],
+    around: [['stroke', 'M12 70 l-12 -4 M10 86 l-14 0 M188 70 l12 -4 M190 86 l14 0', 3, STEEL]],
   },
   champion: {
     mood: 'proud', face: 'proud', props: ['medal'],
-    behind: [[-8, 40, GOLD, 20], [20, 0, 'ember', -30], [180, 4, '#5BBEF0', 40], [204, 50, GOLD, -15], [150, -14, 'ember', 10], [46, -12, '#5BBEF0', 60], [100, -24, GOLD, 30]]
-      .map(([x, y, colour, turn]) => ['shape', box(x, y, 9, 5, 1.5, turn), colour]),
+    behind: [[-8, 40, 0, 20], [20, 0, 1, -30], [180, 4, 2, 40], [204, 50, 0, -15], [150, -14, 1, 10], [46, -12, 2, 60], [100, -24, 0, 30]]
+      .map(([x, y, colour, turn]) => ['shape', box(x, y, ...CONFETTI.size, 1.5, turn), CONFETTI.colours[colour]]),
   },
   standingTall: {
     mood: 'proud', face: 'proud', stretch: 1.4,
     around: [['stroke', 'M-4 70 l0 -16 M-10 60 l6 -6 6 6 M204 70 l0 -16 M198 60 l6 -6 6 6', 3, STEEL]],
   },
   exhausted: {
-    mood: 'recovering', face: 'tired', props: ['sweatband'],
-    around: drops([30, 76, 1.1], [172, 88, 1], [160, 112, 0.7], [12, 128, 0.8], [194, 140, 0.9]),
+    mood: 'recovering', face: [...FACES.tired, ...drops([56, 96, 1.1], [145, 92, 1], [140, 116, 0.7], [62, 118, 0.8])], props: ['sweatband'],
   },
   sideGlance: { mood: 'recovering', face: 'glance', headTilt: 6, around: [['text', 160, 40, 22, STEEL, '…']] },
   sleeping: { mood: 'recovering', face: 'asleep', props: ['nightcap'], around: [['text', 160, 70, 24, NIGHT, 'z'], ['text', 178, 52, 17, NIGHT, 'z']] },
   patchedUp: {
-    mood: 'recovering', on: [...plaster(35), ...plaster(-35)],
+    mood: 'recovering', on: { at: [132, 56], marks: [...plaster(35), ...plaster(-35)] },
     // The tear is part of his face, so it sits on his cheek.
     face: [...FACES.hurt, ['shape', drop(66, 112, 0.55), '#A8DDF7', 'tear'], ['path', drop(66, 112, 0.55), 1.5, '#3AA6E0', 'tear_edge']],
   },
-  shy: { mood: 'happy', face: 'shy', around: drops([150, 62, 0.7]) },
+  shy: { mood: 'happy', face: [...FACES.shy, ...drops([136, 76, 0.7])] },
   thinking: {
     mood: 'happy', face: 'thinking',
     around: [['oval', 160, 44, 4, 4, CLOUD], ['oval', 172, 28, 6, 6, CLOUD], ['oval', 196, -4, 24, 18, WHITE, { stroke: CLOUD, width: 2 }], ['text', 196, 6, 26, NIGHT, '?', 'middle']],
@@ -78,7 +82,7 @@ export const POSES = {
   },
   fuming: {
     mood: 'fuming', face: 'fuming',
-    on: [['path', 'M140 50 q6 6 0 12 M152 50 q-6 6 0 12 M140 50 q6 -6 12 0 M140 62 q6 6 12 0', 3.5, '#FFDCC7', 'vein']],
+    on: { at: [146, 56], marks: [['path', 'M140 50 q6 6 0 12 M152 50 q-6 6 0 12 M140 50 q6 -6 12 0 M140 62 q6 6 12 0', 3.5, '#FFDCC7', 'vein']] },
     behind: [...puff(52, 6), ...puff(150, -2), ['stroke', 'M70 30 L64 18 M132 28 L140 14', 4, CLOUD]],
     around: [['stroke', 'M14 80 l-12 -4 M12 96 l-14 0 M186 80 l12 -4 M188 96 l14 0', 3, RUST]],
   },
@@ -155,6 +159,13 @@ function band(down, tip, width, out, n = 48) {
   return { positions, normals, indices }
 }
 
+// Where the medal lies at rest, and how far down his head its ribbon starts.
+const MEDAL = { at: [0, 0.43, 1.5], down: 1.95 }
+/** The medal's hinge, `[y, z]`: it swings up and down around the level line through it, where its ribbon leaves his head. */
+export const medalHinge = onHead(MEDAL.down, 0.55, 0.02).slice(1)
+/** How far the medal's middle is from its hinge, and how far below level it lies at rest, in radians. */
+export const medalReach = { length: Math.hypot(MEDAL.at[1] - medalHinge[0], MEDAL.at[2] - medalHinge[1]), rest: Math.atan2(medalHinge[0] - MEDAL.at[1], MEDAL.at[2] - medalHinge[1]) }
+
 // Each prop gives its parts and the colours they need; `colours` are the `color.poulpy` tokens. Matte, shaded like him.
 const PROPS = {
   // A white towelling band with an ember stripe, knotted on his left with two loose ends.
@@ -180,13 +191,13 @@ const PROPS = {
       ],
     }
   },
-  // A gold medal on an ember ribbon, resting on his front arm.
+  // A gold medal on an ember ribbon, resting on his front arm. It hangs from where the ribbon leaves his head.
   medal: ({ ember }) => {
-    const face = facing([0, 0.34, 0.94]), at = [0, 0.43, 1.5]
+    const face = facing([0, 0.34, 0.94]), at = MEDAL.at
     return {
       materials: { ribbon: { colour: linear(ember) }, gold: { colour: linear(GOLD) }, gold_rim: { colour: linear('#C98A0C') }, gold_shine: { colour: linear('#FFF3C4') } },
       parts: [
-        { name: 'medal_ribbon', material: 'ribbon', ...join(...[-1, 1].map((sgn) => tube([onHead(1.95, sgn * 0.55, 0.02), onHead(2.25, sgn * 0.3, 0.03), [sgn * 0.12, 0.6, 1.2], [sgn * 0.05, 0.56, 1.4]], 0.055))) },
+        { name: 'medal_ribbon', material: 'ribbon', ...join(...[-1, 1].map((sgn) => tube([onHead(MEDAL.down, sgn * 0.55, 0.02), onHead(2.25, sgn * 0.3, 0.03), [sgn * 0.12, 0.6, 1.2], [sgn * 0.05, 0.56, 1.4]], 0.055))) },
         { name: 'medal_rim', material: 'gold_rim', ...egg([0.25, 0.25, 0.045], { around: 28, turn: face, at }) },
         { name: 'medal', material: 'gold', ...egg([0.2, 0.2, 0.06], { around: 28, turn: face, at: face([0, 0, 0.012]).map((v, k) => v + at[k]) }) },
         { name: 'medal_shine', material: 'gold_shine', ...egg([0.09, 0.09, 0.02], { around: 16, down: 8, turn: face, at: face([0, 0, 0.062]).map((v, k) => v + at[k]) }) },
@@ -210,14 +221,15 @@ const PROPS = {
 
 /**
  * Builds Poulpy in one of his poses.
- * @param {{ pose: keyof typeof POSES, tones: Record<string, string>, colours: { blue: string, ember: string, ink: string } }} options
+ * @param {{ pose: keyof typeof POSES, effects?: boolean, tones: Record<string, string>, colours: { blue: string, ember: string, ink: string } }} options
  *   `tones` are the `mood` tokens of design/tokens.json and `colours` its `color.poulpy` tokens.
+ *   `effects: false` leaves out the flat effects around him, for when he moves.
  * @returns What buildPoulpy3d returns, and more: `headTilt`, how far his head leans to his right, in radians,
  *   for whoever draws him to apply with `headLift`; parts with `card` set to 'front' or 'back', the flat effects,
  *   drawn facing +z around his middle and to be kept facing the viewer, in front of him or behind; and
  *   materials that may have an `opacity`.
  */
-export function buildPoulpyPose({ pose, tones, colours }) {
+export function buildPoulpyPose({ pose, tones, colours, effects = true }) {
   const { mood, face, on, stretch, headTilt = 0, props = [], around = [], behind = [] } = POSES[pose]
   const model = buildPoulpy3d({ mood, tone: tones[mood], face: typeof face === 'string' ? face : undefined, features: typeof face === 'string' ? undefined : face, on, stretch, colours })
   for (const prop of props) {
@@ -231,8 +243,8 @@ export function buildPoulpyPose({ pose, tones, colours }) {
     model.materials[name] ??= { colour: linear(hex), flat: true, ...(opacity < 1 && { opacity }) }
     return name
   }
-  for (const [card, effects] of [['back', behind], ['front', around]]) {
-    effects.forEach(([kind, ...v], i) => {
+  for (const [card, drawn] of effects ? [['back', behind], ['front', around]] : []) {
+    drawn.forEach(([kind, ...v], i) => {
       // Later effects lie a hair in front of earlier ones.
       let z = i * 0.004
       const add = (material, shape) => { model.parts.push({ name: `effect_${card}_${i + 1}`, material, card, ...shape }); z += 0.001 }

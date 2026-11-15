@@ -127,3 +127,15 @@ Until step 3 the apps and the website keep the 2D drawings, and `design/build-po
 **Why:** the owner asked for it once the model could turn and jump, and chose pictures everywhere with live 3D on key screens over a 3D renderer on every screen, which would weigh on the apps for little gain on small portraits.
 
 **Still open:** how the pictures are rendered so that every machine writes the same files.
+
+## 17. In 3D, what is on Poulpy stays on him, and the champion cheers
+
+**Accepted, 15 November 2026.** Two rules for the 3D poses, and one move:
+
+- Sweat and tears are part of his face, and plasters or a vein are wrapped onto his head. They stay on his skin when he turns. Only what is around him (sparks, puffs, bubbles, lettering) is flat and faces the viewer.
+- The champion has a move: he jumps for joy, his medal swings on its ribbon as a weight would and confetti flies at each jump, then lies on the floor. It is on [its own page](./poulpy-3d.md#the-champion-jumps-for-joy).
+- Each move has a page of its own in the component workshop, and a preview only moves while it is on screen.
+
+**Why:** the owner asked for each on seeing the twelve poses in 3D. Drops that faced the viewer slid over him as he turned, where sweat should stick; the plasters were pressed on straight from the front and dipped under his skin near the edge of his head; and several moves running on one page made it lag.
+
+**Still open:** the cheer's values, like the jump's. It is a live preview, not in the glTF files yet.

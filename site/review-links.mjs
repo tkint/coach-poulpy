@@ -26,6 +26,8 @@ const storyFilesOf = (file) => {
   if (file.endsWith('.stories.ts') || file.endsWith('.mdx')) return file.startsWith(workshop) ? [file] : []
   // Generated drawings and the 3D model show on the Brand pages.
   if (file === 'design/build-poulpy.mjs' || file.startsWith('design/poulpy/')) return [`${workshop}brand/Drawings.mdx`, `${workshop}PoulpyReference.stories.ts`]
+  // His moves have a page each.
+  if (file.startsWith('design/poulpy-3d/motion.')) return git('ls-files', `${workshop}brand/poulpy-moves/`).split('\n').filter((f) => f.endsWith('.mdx'))
   if (file.startsWith('design/poulpy-3d/')) return [`${workshop}brand/Poulpy3d.mdx`]
   if (file.startsWith(`${workshop}brand/brand-book/`)) return [`${workshop}brand/BrandBook.mdx`]
   const stem = file.replace(/^.*\//, '').replace(/\.[^.]+$/, '')
