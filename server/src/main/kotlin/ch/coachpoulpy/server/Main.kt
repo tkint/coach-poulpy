@@ -121,7 +121,7 @@ fun main() {
         val email = requireNotNull(EmailAddress.parseOrNull(setting.trim())) { "ADMIN_EMAIL is not an email address" }
         if (promoteFirstAdmin(database, events, email)) println("$email is now an admin")
     }
-    // The catalog lives in the database: the admin edits and publishes it (ADR 0032), and nothing seeds it.
+    // The catalog lives in the database: the admin edits and publishes it (ADR 0033), and nothing seeds it.
     val http = app(version, database, accounts, signIns, passwordResets, accountDeletion, audit = audit, websiteOrigin = origin, events = events, settings = settings, mailer = mailer)
     // Jetty, for the server-sent events SunHttp can't hold open (#319).
     PolyHandler(http, sse = confirmationEvents(accounts)).asServer(Jetty(port)).start()

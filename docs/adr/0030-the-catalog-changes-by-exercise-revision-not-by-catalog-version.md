@@ -1,11 +1,11 @@
 ---
-status: accepted, bundled catalog superseded by 0032
+status: accepted, bundled catalog superseded by 0033
 date: 2026-11-14
 ---
 
 # The catalog changes by exercise revision, not by catalog version
 
-> **Superseded in part by [ADR 0032](./0032-the-server-database-is-the-catalog-and-nothing-ships-bundled.md):** the repository's catalog files and the bundled catalog are gone; the server database is the only source.
+> **Superseded in part by [ADR 0033](./0033-the-server-database-is-the-catalog-and-nothing-ships-bundled.md):** the repository's catalog files and the bundled catalog are gone; the server database is the only source.
 
 Supersedes the catalog version of [ADR 0008](./0008-curated-catalog-with-stable-slugs.md), [ADR 0015](./0015-catalog-text-lives-in-translation-files.md) and [ADR 0026](./0026-the-server-holds-the-catalog-as-a-draft-and-published-versions.md) ([#400](https://github.com/tkint/coach-poulpy/issues/400)).
 

@@ -42,7 +42,7 @@ const val API_PREFIX = "/api/v1"
 val Public: Security = NoSecurity
 
 /**
- * Every route: those under [API_PREFIX], and OAuth's under `/oauth`. The catalog routes serve what the database holds (ADR 0032).
+ * Every route: those under [API_PREFIX], and OAuth's under `/oauth`. The catalog routes serve what the database holds (ADR 0033).
  */
 fun apiRoutes(
     accounts: Accounts,

@@ -148,7 +148,7 @@ class ServerCatalog(
     /**
      * Fills an empty catalog from [catalog]: one revision per exercise, each published under its own
      * number of the publication cursor. Does nothing once an exercise is stored. Returns whether it seeded.
-     * Only tests call it: the real catalog is made in the admin (ADR 0032).
+     * Only tests call it: the real catalog is made in the admin (ADR 0033).
      */
     fun seed(catalog: Catalog): Boolean = database.queries.transactionWithResult {
         queries.ensurePublication()

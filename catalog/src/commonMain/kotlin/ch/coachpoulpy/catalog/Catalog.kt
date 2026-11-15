@@ -9,7 +9,7 @@ import kotlinx.serialization.json.Json
 /**
  * The exercise catalog. The server database holds it and publishes revisions of single
  * exercises; a phone keeps each exercise's newest revision in its own database (ADR 0030,
- * ADR 0032). The catalog as a whole has no version, and no copy ships with the apps.
+ * ADR 0033). The catalog as a whole has no version, and no copy ships with the apps.
  *
  * [revisions] holds the revision of an exercise numbered above 1; any other exercise is
  * [revisionOf] 1.

@@ -1,11 +1,11 @@
 ---
-status: accepted, amended by 0015, catalog version superseded by 0030, bundled catalog superseded by 0032
+status: accepted, amended by 0015, catalog version superseded by 0030, bundled catalog superseded by 0033
 date: 2026-10-24
 ---
 
 # A curated catalog with stable slugs, updated without an account
 
-> **Also superseded in part by [ADR 0032](./0032-the-server-database-is-the-catalog-and-nothing-ships-bundled.md):** nothing ships bundled any more; the server database is the catalog and phones download it.
+> **Also superseded in part by [ADR 0033](./0033-the-server-database-is-the-catalog-and-nothing-ships-bundled.md):** nothing ships bundled any more; the server database is the catalog and phones download it.
 
 > **Superseded in part by [ADR 0030](./0030-the-catalog-changes-by-exercise-revision-not-by-catalog-version.md):** the catalog version number below no longer exists; exercises change by revision. Stable slugs, retiring instead of deleting and updates without an account still hold.
 

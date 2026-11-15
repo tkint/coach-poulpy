@@ -7,7 +7,7 @@ import ch.coachpoulpy.data.local.LocalStore
 /**
  * Where the app reads the exercise catalog from: the phone's database. A fresh install holds no
  * exercises; an update from the server ([apply]) adds and replaces single exercises by their revision
- * (ADR 0030, ADR 0032).
+ * (ADR 0030, ADR 0033).
  */
 class CatalogRepository(private val store: LocalStore) {
     var current: Catalog = load()

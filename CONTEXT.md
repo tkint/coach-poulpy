@@ -11,7 +11,7 @@ One movement from the curated catalog, identified by a slug that never changes.
 _Avoid_: Move, drill
 
 **Catalog**:
-The curated set of exercises held in the server database, edited and published in the admin and downloaded by phones exercise by exercise, without an account. The catalog as a whole has no version, and nothing ships bundled ([ADR 0032](docs/adr/0032-the-server-database-is-the-catalog-and-nothing-ships-bundled.md)).
+The curated set of exercises held in the server database, edited and published in the admin and downloaded by phones exercise by exercise, without an account. The catalog as a whole has no version, and nothing ships bundled ([ADR 0033](docs/adr/0033-the-server-database-is-the-catalog-and-nothing-ships-bundled.md)).
 _Avoid_: Exercise database, library (the library is the user's)
 
 **Revision**:
