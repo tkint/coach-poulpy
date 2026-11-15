@@ -39,13 +39,14 @@ const spread = shallowRef(0) // how far his arms widen as his head tucks in
 const hang = shallowRef(1) // how heavy his arms hang in the air: 1 is the design
 const lean = shallowRef(0) // degrees he tilts to the side in the air
 const pause = shallowRef(0) // seconds between two jumps, on average
+const eye = shallowRef<'left' | 'right'>('right') // the eye he shuts when he winks, his own: the right one is the design
 const failed = shallowRef(false)
 
 let scene: ReturnType<typeof createPoulpyScene> | undefined
 let frame = 0
 let last = 0
 let move: Turn | Jump | Cheer | Wink | undefined
-let winkFace: ((t: number) => (string | number)[][]) | undefined
+let winkFace: ((t: number, side?: 'left' | 'right') => (string | number)[][]) | undefined
 let onScreen = true
 let watching: IntersectionObserver | undefined
 
@@ -58,6 +59,8 @@ const sides: { id: PoulpySide | PoulpyMood | PoulpyPose; label: string; suffix?:
   : moods
   ? [{ id: 'proud', label: 'Proud' }, { id: 'happy', label: 'Happy' }, { id: 'recovering', label: 'Recovering' }, { id: 'annoyed', label: 'Annoyed' }, { id: 'grumpy', label: 'Grumpy' }, { id: 'fuming', label: 'Fuming' }]
   : [{ id: 'blue', label: 'Blue', suffix: 'side' }, { id: 'ember', label: 'Grumpy', suffix: 'side' }]
+// Named for him: his right eye is on the viewer's left.
+const eyes = [{ id: 'right', label: 'His right eye' }, { id: 'left', label: 'His left eye' }] as const
 const directions = [
   { id: 'anticlockwise', label: 'Anticlockwise', icon: RotateCcw },
   { id: 'clockwise', label: 'Clockwise', icon: RotateCw },
@@ -117,10 +120,11 @@ function nudge(event: KeyboardEvent) {
   tilt.value = clamp(tilt.value + step[1], -89, 89)
 }
 
-const show = () => scene?.show(cheering ? { pose: 'champion', effects: false } : winking ? { pose: 'cocky', effects: false, faces: winkFace } : poses ? { pose: side.value as PoulpyPose } : (side.value as PoulpySide | PoulpyMood), outline.value)
+const show = () => scene?.show(cheering ? { pose: 'champion', effects: false } : winking ? { pose: 'cocky', effects: false, faces: winkFace && ((t: number) => winkFace!(t, eye.value)) } : poses ? { pose: side.value as PoulpyPose } : (side.value as PoulpySide | PoulpyMood), outline.value)
 // The scene wants where the viewer stands: the other way around from how far he has turned.
 const look = () => scene?.look({ turn: -turn.value, tilt: tilt.value, distance: distance.value })
-watch([side, outline], show)
+watch([side, outline, eye], show)
+watch(eye, (value) => { if (move && 'side' in move) move.side = value })
 watch([turn, tilt, distance], look)
 watch(softness, (value) => { if (move && 'softness' in move) move.softness = value })
 const stride = () => (!turning ? 0 : (step.value / 24) * (direction.value === 'anticlockwise' ? 1 : -1))
@@ -189,6 +193,9 @@ onBeforeUnmount(() => {
     <div class="controls">
       <div v-if="!posed" class="sides" :class="{ moods: moods || poses }" role="group" :aria-label="poses ? 'Pose' : moods ? 'Mood' : 'Side'">
         <button v-for="s in sides" :key="s.id" type="button" class="choice" :aria-pressed="side === s.id" :aria-label="s.suffix ? `${s.label} ${s.suffix}` : s.label" @click="side = s.id">{{ s.label }}<span v-if="s.suffix" class="wide">&nbsp;{{ s.suffix }}</span></button>
+      </div>
+      <div v-if="winking" class="sides" role="group" aria-label="The eye he shuts, his own">
+        <button v-for="e in eyes" :key="e.id" type="button" class="choice" :aria-pressed="eye === e.id" @click="eye = e.id">{{ e.label }}</button>
       </div>
       <div v-if="turning" class="sides" role="group" aria-label="Direction, seen from above">
         <button v-for="d in directions" :key="d.id" type="button" class="choice icon" :aria-pressed="direction === d.id" :aria-label="d.label" :title="d.label" @click="direction = d.id"><component :is="d.icon" :size="18" aria-hidden="true" /></button>

@@ -119,7 +119,7 @@ The controls are the jump's, starting from the champion's own values: Height 0.5
 
 ## The cocky one winks
 
-The Cocky pose, moving. He looks at you with both eyes wide open, then shuts his right eye, lifts his left brow and his mouth slides into the cocky smirk. He holds it, opens his eye and starts again.
+The Cocky pose, moving. He looks at you with both eyes wide open, then shuts one eye (his right, unless told otherwise), lifts the other brow and his mouth slides into the cocky smirk. He holds it, opens his eye and starts again.
 
 <!-- live: Winking -->
 
@@ -128,6 +128,8 @@ The Cocky pose, moving. He looks at you with both eyes wide open, then shuts his
 - **The stars come with the wink.** There are none while his eyes are open. As the eye shuts they pop up one after the other, each a little past its size and back, and they leave when he opens it.
 - **The stars are solid and they twinkle.** Each is a four-point star cut like a gem, in the room around him where the drawing has its sparks. It grows and shrinks, turns on itself and rocks, and no two keep the same time. Turn the view and they stay where they are.
 - **No halo, no badge.** The drawing's glow and its "PR!" are not part of him in 3D.
+
+The switch picks the eye he shuts, named for him: his right eye, the design, is on your left. His brow, his smirk and the lean of his head go to the other side with it.
 
 `WINK` in `motion.mjs` holds the timing, the lean of his head and the stars' numbers, and `createWink()` runs it live. It is a preview, not in the glTF files yet.
 

@@ -76,7 +76,7 @@ export const CHEER = {
 export const WINK = {
   // He looks, eyes wide open, for `open` seconds, shuts one eye in `shut`, holds the wink for `hold` and opens it again in `reopen`.
   open: 1.3, shut: 0.13, hold: 1.7, reopen: 0.22,
-  // With the wink his head leans `degrees` to his right, the side of the eye he shuts, on a spring, and dips by `dip` of its height.
+  // With the wink his head leans `degrees` to the side of the eye he shuts, on a spring, and dips by `dip` of its height.
   head: { degrees: 5, dip: 0.035, speed: 16, damping: 0.4 },
   // The stars come with the wink, one every `apart` seconds: each grows on a spring that takes it a little past
   // its size and back, and leaves the same way when he opens his eye. While it is there it twinkles: it grows
@@ -370,13 +370,13 @@ export function createCheer({ cheer = CHEER, ...options } = {}) {
 
 /**
  * The cocky one winking, as something to advance in time.
- * @param {{ wink?: typeof WINK }} [options]
- * @returns The move. A pose is a turn's pose, standing still, and `{ wink, tilt, stars }`: how far he is into
+ * @param {{ side?: 'left' | 'right', wink?: typeof WINK }} [options] `side` is the eye he shuts, his own; his head leans that way.
+ * @returns The move; `side` can be changed at any time. A pose is a turn's pose, standing still, and `{ wink, tilt, stars }`: how far he is into
  *   the wink, from 0 (eyes wide open) to 1, for winkFace in poses.mjs; how far his head leans to his right, in
- *   radians; and for each star of STARS in poses.mjs `{ size, spin, rock }`: its size as a share of its own
+ *   radians (to his left when negative); and for each star of STARS in poses.mjs `{ size, spin, rock }`: its size as a share of its own
  *   (0 when it is not there), and how far it has turned on itself and rocked, in radians.
  */
-export function createWink({ wink = WINK } = {}) {
+export function createWink({ side = 'right', wink = WINK } = {}) {
   const arms = Array.from({ length: SHAPE.arms.count }, () => [0, 0, 0]), ease = (t) => t * t * (3 - 2 * t)
   const seconds = [wink.open, wink.shut, wink.hold, wink.reopen]
   let phase = 0, clock = 0, time = 0, shut = 0, tilt = 0, tiltSpeed = 0, squash = 0, squashSpeed = 0
@@ -390,7 +390,7 @@ export function createWink({ wink = WINK } = {}) {
     const through = clock / seconds[phase]
     shut = phase === 0 ? 0 : phase === 1 ? ease(through) : phase === 2 ? 1 : 1 - ease(through)
     const winking = phase === 1 || phase === 2
-    tiltSpeed += spring(wink.head, winking ? wink.head.degrees * RAD : 0, tilt, tiltSpeed) * h
+    tiltSpeed += spring(wink.head, winking ? wink.head.degrees * RAD * (sim.side === 'left' ? -1 : 1) : 0, tilt, tiltSpeed) * h
     tilt += tiltSpeed * h
     squashSpeed += spring(wink.head, winking ? -wink.head.dip : 0, squash, squashSpeed) * h
     squash += squashSpeed * h
@@ -404,6 +404,7 @@ export function createWink({ wink = WINK } = {}) {
 
   let owed = 0
   const sim = {
+    side,
     pose: () => ({
       yaw: 0, squash, arms, wink: shut, tilt,
       stars: stars.map((star, i) => {

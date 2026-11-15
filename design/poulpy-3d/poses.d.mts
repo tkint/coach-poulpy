@@ -7,8 +7,8 @@ export const CONFETTI: { colours: string[]; size: number[] }
 export const medalHinge: number[]
 export const medalReach: { length: number; rest: number }
 /** `headTilt`: how far his head leans to his right, in radians. `effects: false` leaves out the flat effects around him; `face` gives him another face than the pose's. */
-/** His face as the cocky one winks, from 0 (eyes wide open) to 1 (the wink and the smirk), as features for buildPoulpy3d. */
-export function winkFace(t: number): (string | number)[][]
+/** His face as the cocky one winks, from 0 (eyes wide open) to 1 (the wink and the smirk), as features for buildPoulpy3d. `side` is the eye he shuts, his own: 'right' if left out. */
+export function winkFace(t: number, side?: 'left' | 'right'): (string | number)[][]
 /** The stars around the cocky one when he winks: where each is in the room and its size. */
 export const STARS: { at: number[]; size: number }[]
 /** The stars' gold. */

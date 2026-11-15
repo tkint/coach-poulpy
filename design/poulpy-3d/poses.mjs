@@ -120,12 +120,13 @@ const between = (a, b, t) => a + (b - a) * t
 /**
  * His face as the cocky one winks: at 0 both eyes are wide open, at 1 his right eye is shut, his left brow has come up
  * and his mouth is the cocky smirk. In between, the eye narrows to a line, then the line bends into the wink.
- * The numbers are the drawing's, as in FACES; `[open, winking]` pairs are blended.
+ * The numbers are the drawing's, as in FACES; `[open, winking]` pairs are blended. With `side` 'left' it is
+ * his left eye that shuts, and his whole face is the same the other way around.
  */
-export function winkFace(t) {
+export function winkFace(t, side = 'right') {
   const at = (...pairs) => pairs.map(([open, winking]) => between(open, winking, t))
   const shut = Math.min(t / 0.7, 1), bent = Math.max((t - 0.7) / 0.3, 0)
-  return [
+  const face = [
     shut < 1 ? ['eye', 80, between(96, 97, shut), between(9.5, 10, shut), between(11.5, 2.2, shut)] : ['curve', 69, 97 + bent, 80, 97 - 9 * bent, 91, 97 - bent, 4.5, 'eye_right'],
     ['eye', 120, 96, ...at([9.5, 9], [11.5, 10.5])],
     // His brow is not drawn while his eyes are wide open: it grows in as it goes up.
@@ -133,6 +134,10 @@ export function winkFace(t) {
     ['curve', ...at([91, 88], [113, 114], [100, 102], [119, 123], [109, 115], [113, 108]), 4.5, 'mouth'],
     ...FACES.cocky.filter(([kind]) => kind === 'cheek'),
   ]
+  if (side === 'right') return face
+  // The other way around: every x is swapped across his middle, and so are the names of his sides.
+  const other = { eye_right: 'eye_left', brow_left: 'brow_right' }
+  return face.map(([kind, ...v]) => [kind, ...v.map((value, i) => (typeof value === 'string' ? other[value] ?? value : (kind === 'curve' ? i < 6 && i % 2 === 0 : i === 0) ? 200 - value : value))])
 }
 
 /** The stars around the cocky one when he winks: where each is in the room, and its size from its middle to a tip. */
