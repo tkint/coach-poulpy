@@ -181,6 +181,17 @@
     fill: var(--cp-heat3);
     stroke: var(--cp-heat3);
   }
+  /* An area that hurts: the pain colour, a little to most by how opaque it is. It wins over the heat. */
+  .cp-body-part[data-pain] {
+    fill: color-mix(in srgb, var(--cp-pain) 55%, transparent);
+    stroke: var(--cp-pain);
+  }
+  .cp-body-part[data-pain='1'] {
+    fill: color-mix(in srgb, var(--cp-pain) 25%, transparent);
+  }
+  .cp-body-part[data-pain='3'] {
+    fill: var(--cp-pain);
+  }
   /* An area the person can tap (CpBodyMap with interactive): a pointer, and a ring when it has the keyboard focus. */
   .cp-body-part-pick {
     cursor: pointer;
@@ -204,6 +215,9 @@
     gap: var(--cp-space-sm);
     font-weight: 800;
     color: var(--cp-on-surface-variant);
+  }
+  .cp-heat-legend-right {
+    flex-direction: column;
   }
   .cp-heat-legend svg {
     width: 14px;

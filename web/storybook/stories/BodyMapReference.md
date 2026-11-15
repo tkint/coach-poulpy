@@ -1,0 +1,3 @@
+The body map is a front and a back muscle chart whose areas, left and right apart, light up: what an exercise works, where it hurts, and as a heat map how much a workout works each muscle. The figures are generated from `design/body-map.json` and shared by every platform: the apps draw the same shapes, in Wider shoulders or Wider hips.
+
+An area is named without its side (`biceps`, `lower-back`) and lit on `left`, `right` or `both`, with a heat from 1 (a little) to 3 (most); an injury is drawn in the pain colour. The web component that draws it and its props are under Web, Components, Display, Body map.

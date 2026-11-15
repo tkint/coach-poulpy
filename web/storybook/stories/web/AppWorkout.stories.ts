@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { List, Moon, Sun, Zap } from '@lucide/vue'
 import { CpBadge, CpBodyMap, CpBreadcrumbs, CpButton, CpCard, CpSheet, CpStat, CpStats } from '@coach-poulpy/ui'
-import { musclePickerFigures } from '../../../app/src/bodyMap'
+import { heatAreas } from '../../../app/src/bodyMap'
 import AppShell from './AppShell.vue'
 
 // One workout of the web app (issue #355). Was design/mockups/agreed/web/app-workout.html.
@@ -20,16 +20,13 @@ const parts = [
   { icon: Moon, name: 'Cool down', summary: '1 step · 1 min', rows: [['7', 'Chest stretch', '30 s hold · each side']] },
 ]
 // The heat the API sends for each area: shoulders and triceps most, then chest, back and biceps, a little core.
-const heat: Record<string, number> = { deltoid: 3, triceps: 3, pectoral: 2, back: 2, scapula: 2, 'lower-back': 2, biceps: 2, abs: 1, obliques: 1 }
-const figures = (musclePickerFigures([], { front: 'Front', back: 'Back' }, () => '') as { caption: string; paths: { d: string; key?: string; outline?: boolean; heat?: 1 | 2 | 3 }[] }[]).map((figure) => ({
-  caption: figure.caption,
-  paths: figure.paths.map(({ d, key, outline }) => (outline ? { d, outline } : { d, heat: key ? (heat[key.replace(/-(left|right)$/, '')] as 1 | 2 | 3 | undefined) : undefined })),
-}))
+const heat = heatAreas({ deltoid: 3, triceps: 3, pectoral: 2, back: 2, scapula: 2, 'lower-back': 2, biceps: 2, abs: 1, obliques: 1 })
+const captions = { front: 'Front', back: 'Back' }
 const description = 'Muscles worked: shoulders and triceps most, then chest, back and biceps, a little core'
 
 const page = (sheet: boolean) => ({
   components: { AppShell, CpBadge, CpBodyMap, CpBreadcrumbs, CpButton, CpCard, CpSheet, CpStat, CpStats, List },
-  setup: () => ({ parts, figures, description, sheet }),
+  setup: () => ({ parts, heat, captions, description, sheet }),
   template: `<AppShell title="Workouts" active="workouts">
     <main class="flex flex-col gap-6 p-4 md:p-8">
       <CpBreadcrumbs label="You are here"><li><a href="#">Workouts</a></li><li>Upper body</li></CpBreadcrumbs>
@@ -61,14 +58,14 @@ const page = (sheet: boolean) => ({
             <CpStat title="Last time" value="Wed 21" />
             <CpStat title="Usually" value="31 min" />
           </CpStats>
-          <CpCard title="Muscles worked"><CpBodyMap :figures="figures" :description="description" less="Less" more="More" /></CpCard>
+          <CpCard title="Muscles worked"><CpBodyMap :heat="heat" :captions="captions" legend="top" :description="description" less="Less" more="More" /></CpCard>
         </div>
       </div>
       <CpCard title="Change it on your phone"><p class="text-base-content/70">Workouts are read-only here. Open the app to edit, plan or start this one.</p></CpCard>
       <CpSheet :open="sheet" title="Stats and muscles worked" close-label="Close">
         <div class="flex flex-col gap-4 py-2">
           <CpStats vertical class="w-full"><CpStat title="Done" value="3 times" /><CpStat title="Last time" value="Wed 21" /><CpStat title="Usually" value="31 min" /></CpStats>
-          <CpBodyMap :figures="figures" :description="description" less="Less" more="More" />
+          <CpBodyMap :heat="heat" :captions="captions" legend="top" :description="description" less="Less" more="More" />
         </div>
       </CpSheet>
     </main></AppShell>`,

@@ -4,7 +4,7 @@
 import { computed } from 'vue'
 import { CpBodyMap, CpCard, CpStat, CpStats } from '@coach-poulpy/ui'
 import type { Workout } from '../workouts'
-import { bodyMapFigures } from '../bodyMap'
+import { heatAreas } from '../bodyMap'
 import { formatDay } from '../dates'
 import { t } from '../i18n'
 
@@ -12,7 +12,8 @@ const props = defineProps<{ workout: Workout; card?: boolean }>()
 
 const never = computed(() => t('app.statNever'))
 const lastTime = computed(() => (props.workout.history.lastDoneAt ? formatDay(props.workout.history.lastDoneAt) : never.value))
-const figures = computed(() => bodyMapFigures(props.workout.text.heat, { front: t('app.bodyFront'), back: t('app.bodyBack') }))
+const heat = computed(() => heatAreas(props.workout.text.heat))
+const captions = computed(() => ({ front: t('app.bodyFront'), back: t('app.bodyBack') }))
 const description = computed(() => t('app.musclesAlt', { list: props.workout.text.muscles.map((muscle) => muscle.label).join(', ') }))
 </script>
 
@@ -23,7 +24,7 @@ const description = computed(() => t('app.musclesAlt', { list: props.workout.tex
     <CpStat :title="t('app.statUsual')" :value="workout.text.usual || never" />
   </CpStats>
   <CpCard v-if="card" :title="t('app.musclesTitle')">
-    <CpBodyMap :figures="figures" :description="description" :less="t('app.heatLess')" :more="t('app.heatMore')" />
+    <CpBodyMap :heat="heat" :captions="captions" legend="top" :description="description" :less="t('app.heatLess')" :more="t('app.heatMore')" />
   </CpCard>
-  <CpBodyMap v-else :figures="figures" :description="description" :less="t('app.heatLess')" :more="t('app.heatMore')" />
+  <CpBodyMap v-else :heat="heat" :captions="captions" legend="top" :description="description" :less="t('app.heatLess')" :more="t('app.heatMore')" />
 </template>
