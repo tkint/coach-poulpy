@@ -11,7 +11,7 @@ enum class Pronouns { SHE_HER, HE_HIM, THEY_THEM, JUST_MY_NAME, CUSTOM, PREFER_N
 
 /**
  * Asked only for estimates such as calories and heart rate zones, never shown, never about gender.
- * A null answer means a neutral average ([docs/brand.md] "Inclusive by default").
+ * A null answer means a neutral average ([web/storybook/stories/brand/Inclusive.mdx]).
  */
 enum class SexAssignedAtBirth { FEMALE, MALE, INTERSEX, PREFER_NOT_TO_SAY }
 

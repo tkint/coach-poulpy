@@ -1,12 +1,41 @@
-import { Meta, Markdown } from '@storybook/addon-docs/blocks'
-import { markdownPages } from '../../markdown-pages'
-
-export const rules = markdownPages('design-system').sections
+import { Meta } from '@storybook/addon-docs/blocks'
 
 <Meta title="Design system/Rules/Colour" />
 
-{/* Shown from docs/design-system.md: edit the rules there. */}
-
 # Colour
 
-<Markdown>{rules('Colour roles', 'Mood shades')}</Markdown>
+## Colour roles
+
+Use roles, never raw palette steps, in screens. Each role has a light and a dark value.
+
+| Role | Use it for |
+| --- | --- |
+| `primary` / `onPrimary` | The main action on a screen (Start session, Save), selected chips, links, progress |
+| `primaryContainer` / `onPrimaryContainer` | Tonal buttons, selected rows, Poulpy's speech on the blue side |
+| `grumpy` / `onGrumpy` | The one action offered while Poulpy is on the ember side (Catch up, Flip him back) |
+| `grumpyContainer` / `onGrumpyContainer` | The Home header and cards while Poulpy is on the ember side |
+| `background`, `surface`, `surfaceVariant` | Screen, cards and sheets, inset fields and steppers |
+| `onSurfaceVariant`, `outline` | Secondary text and captions; card borders and dividers |
+| `success` | A confirmed save or a finished phase, with a check icon |
+| `error` / `onError` | Errors only: crimson, always with an icon and words |
+| `heat1`, `heat2`, `heat3` | How much a workout works each muscle on the body map, from a little to most. Orange, on the body map only: never for Poulpy's moods |
+| `pain` | A worked area that hurts, outlined on the body map. Purple, so it reads apart from the heat and is never mistaken for an error |
+
+Rules:
+
+- `poulpy.blue`, `poulpy.ember` and `poulpy.ink` are Poulpy's fabric and never change between light and dark.
+- The plush blue and ember are too light for white text: buttons use `primary` and `grumpy`.
+- Ember means "a session slipped", never "something broke". An error is crimson, so a cross Poulpy is never read as a failure.
+- Colours that must be told apart also differ in lightness, not hue alone.
+
+
+## Mood shades
+
+Six shades, from `mood.*`, only on Poulpy himself, the Home header tint and mood-coloured charts:
+
+| Side | Shades, calmest to strongest |
+| --- | --- |
+| Blue (on track) | `recovering`, `happy`, `proud` |
+| Ember (a session slipped) | `annoyed`, `grumpy`, `fuming` |
+
+Which shade shows when is in [Brand](?path=/docs/brand-moods--docs).

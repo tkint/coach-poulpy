@@ -54,7 +54,7 @@ Messages not listed here mean what their English says.
 | `devices.allowBluetooth` | Android only. |
 | `kind.footPod` | A small sensor clipped to the shoe that measures pace and cadence. |
 | `settings.languageNextLaunch` | iOS only. |
-| `profile.sex*` | The “sex assigned at birth” wording is deliberate ([decision 13](../../docs/brand-decisions.md#13-inclusive-by-default)): never “biological sex” or “birth sex”, and never gender. Keep it as a question about what was recorded, not about the person. |
+| `profile.sex*` | The “sex assigned at birth” wording is deliberate ([decision 13](https://tkint.github.io/coach-poulpy/storybook/?path=/docs/brand-decisions--docs)): never “biological sex” or “birth sex”, and never gender. Keep it as a question about what was recorded, not about the person. |
 | `profile.pronoun*` | The options of a select. In French the options are the pronouns themselves (Elle, Il, Iel), not “she / her” translated. |
 | `profile.pronounsNote` | A custom entry is shown as the person typed it and is never translated or corrected. |
 | `body.range1m`, `body.range3m`, `body.range1y`, `body.rangeAll` | Chart ranges: 1 month, 3 months, 1 year, all. A few characters only. |
@@ -74,4 +74,4 @@ Messages not listed here mean what their English says.
 | `count.position` | “3 of 5”, used in many places. |
 | `unit.*` | Unit formats. `unit.minutesSeconds` and `unit.hoursMinutes`: the second argument is already two digits (“1 h 05”). |
 | `workout.deleteTitle` | `{name}` is the workout’s name, chosen by the person. |
-| `poulpy.*` | Poulpy, the octopus mascot, speaking in the first person. He lights one of his eight tentacles per finished session; eight make a full octopus. He is warm and never guilt-trips. His voice is described on the [brand](../../docs/brand.md) page. |
+| `poulpy.*` | Poulpy, the octopus mascot, speaking in the first person. He lights one of his eight tentacles per finished session; eight make a full octopus. He is warm and never guilt-trips. His voice is described on the [brand](https://tkint.github.io/coach-poulpy/storybook/?path=/docs/brand-voice-logo-and-type--docs) page. |

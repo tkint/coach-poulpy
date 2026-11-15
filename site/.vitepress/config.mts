@@ -98,6 +98,7 @@ export default withMermaid(
         // The design system's and the brand's home is the component workshop (ADR 0028, ADR 0029, ADR 0032).
         { text: 'Design system', link: '/storybook/index.html?path=/docs/design-system-introduction--docs', target: '_blank', rel: 'noopener' },
         { text: 'Brand', link: '/storybook/index.html?path=/docs/brand-introduction--docs', target: '_blank', rel: 'noopener' },
+        { text: 'Design notes', link: '/docs/profile-and-settings' },
         { text: 'Translations', link: '/translations' },
       ],
       // Each section shows only its own menu: a page gets the menu of the longest key its path starts
@@ -106,22 +107,10 @@ export default withMermaid(
       sidebar: Object.fromEntries(
         [
           [
-            'Brand',
-            ['/docs/brand', '/docs/poulpy-3d'],
-            [
-              // The brand's home is the component workshop (ADR 0032); its Markdown stays published for links.
-              { text: 'Poulpy, drawings, 3D and brand book', link: '/storybook/index.html?path=/docs/brand-introduction--docs', target: '_blank', rel: 'noopener' },
-              { text: 'Poulpy and his moods, as text', link: '/docs/brand' },
-              { text: 'Poulpy in 3D, as text', link: '/docs/poulpy-3d' },
-              { text: 'Brand decisions', link: '/docs/brand-decisions' },
-            ],
-          ],
-          [
-            'Design system',
-            ['/docs/design-system', '/docs/profile-and-settings', '/design/'],
+            'Design notes',
+            ['/docs/profile-and-settings', '/design/'],
             [
               { text: 'Rules, components and screens', link: '/storybook/index.html?path=/docs/design-system-introduction--docs', target: '_blank', rel: 'noopener' },
-              { text: 'The rules, as text', link: '/docs/design-system' },
               { text: 'Profile and settings', link: '/docs/profile-and-settings' },
               { text: 'Generating tokens and fonts', link: '/design/README' },
               { text: 'Body map shapes: credits', link: '/design/body-map-source/NOTICE' },
