@@ -48,7 +48,7 @@ The public side is the web app's `/status` page, which anyone can open. It asks 
 
 ## Catalog
 
-The server holds the exercise catalog as a **catalog draft** the admin edits and **published revisions** that phones download, each exercise stored on its own as revisions numbered 1, 2, 3, so a publish writes only the exercises it names (`catalog_exercise_revision`; [ADR 0030](./adr/0030-the-catalog-changes-by-exercise-revision-not-by-catalog-version.md), [#337](https://github.com/tkint/coach-poulpy/issues/337), [#437](https://github.com/tkint/coach-poulpy/issues/437)). The screens are [#338](https://github.com/tkint/coach-poulpy/issues/338): the exercise list (`/admin/catalog`) and the exercise editor (`/admin/catalog/new`, `/admin/catalog/<slug>`, with `?lang=` for the language shown) are built; publishing and retiring wait on [#400](https://github.com/tkint/coach-poulpy/issues/400).
+The server holds the exercise catalog as a **catalog draft** the admin edits and **published revisions** that phones download, each exercise stored on its own as revisions numbered 1, 2, 3, so a publish writes only the exercises it names (`catalog_exercise_revision`; [ADR 0030](./adr/0030-the-catalog-changes-by-exercise-revision-not-by-catalog-version.md), [#337](https://github.com/tkint/coach-poulpy/issues/337), [#437](https://github.com/tkint/coach-poulpy/issues/437)). The screens are [#338](https://github.com/tkint/coach-poulpy/issues/338): the exercise list (`/admin/catalog`) and the exercise editor (`/admin/catalog/new`, `/admin/catalog/<slug>`, with `?lang=` for the language shown) are built; publishing and retiring are built into the list's selection menu ([#439](https://github.com/tkint/coach-poulpy/issues/439)).
 
 - **The first start seeds it** from the catalog the server was built with: its exercises become revision 1, published, and the draft starts equal to them. Later starts leave it alone.
 - **An exercise in the draft is the catalog's JSON**, every text a map from language to string (`{"en": "Goblet squat", "fr": "Squat gobelet"}`). Saving needs the English name; the other shipped languages can wait.
@@ -78,4 +78,4 @@ Sensitive values are values4k types that print masked: `EmailAddress` prints as 
 
 ## What comes next
 
-The catalog's publish and retirement screens ([#389](https://github.com/tkint/coach-poulpy/issues/389), [#390](https://github.com/tkint/coach-poulpy/issues/390)), editing variation groups, and a tool that copies the published revisions back into the repository's catalog files so the next build bundles it ([ADR 0026](./adr/0026-the-server-holds-the-catalog-as-a-draft-and-published-versions.md)). The status will take more checks, such as the database, and log viewing is its own issue.
+Editing variation groups. The status will take more checks, such as the database, and log viewing is its own issue.

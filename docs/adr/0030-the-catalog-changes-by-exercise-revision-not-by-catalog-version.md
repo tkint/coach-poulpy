@@ -1,9 +1,11 @@
 ---
-status: accepted
+status: accepted, bundled catalog superseded by 0033
 date: 2026-11-14
 ---
 
 # The catalog changes by exercise revision, not by catalog version
+
+> **Superseded in part by [ADR 0033](./0033-the-server-database-is-the-catalog-and-nothing-ships-bundled.md):** the repository's catalog files and the bundled catalog are gone; the server database is the only source.
 
 Supersedes the catalog version of [ADR 0008](./0008-curated-catalog-with-stable-slugs.md), [ADR 0015](./0015-catalog-text-lives-in-translation-files.md) and [ADR 0026](./0026-the-server-holds-the-catalog-as-a-draft-and-published-versions.md) ([#400](https://github.com/tkint/coach-poulpy/issues/400)).
 
@@ -32,7 +34,7 @@ The beta APKs (v0.x) hold the catalog in the phone's database with the bundled f
 - **Phone:** a new SQLDelight migration adds the exercise's `revision` and a one-row cursor table, keeps every row and slug, and gives each stored exercise revision 1. Workouts and sessions reference exercises by slug and are not touched. The old catalog `version` is read by nothing once the app uses revisions; its column is dropped by a later migration, after the apps that read it are no longer in use (marked `CLEANUP:`).
 - **Server:** a new Postgres migration adds `revision` and `seq` to `catalog_exercise_revision`, filled from the published revisions in publication order, keeping every slug and every published revision. `catalog_version` and `published_in` stay, marked `CLEANUP:`, until nothing reads them; a later migration drops them.
 - **Compatibility:** no released app downloads from the server yet, so `GET /api/v1/catalog` is kept until `GET /api/v1/catalog/exercises` ships and is then removed.
-- **The repository's catalog files** stay the source of the bundled catalog. Each exercise there may carry a `revision` (1 when absent), and CI checks that an exercise whose content changed has a higher `revision`, in place of the catalog version check of ADR 0015.
+- **The repository's catalog files** stay the source of the bundled catalog. Each exercise there may carry a `revision` (1 when absent). Exercises change from the admin, so CI has no check on the files, and the catalog version check of ADR 0015 is gone.
 
 ## Considered options
 

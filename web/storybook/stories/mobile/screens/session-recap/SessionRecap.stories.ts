@@ -16,37 +16,37 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** Session recap · circuit. Was design/mockups/agreed/phone/session-recap-circuit.html. */
+/** Session recap · circuit. */
 export const SessionRecapCircuit: Story = {
   name: "Circuit",
   ...screen(screenSessionRecapCircuit),
   parameters: { mockup: { issue: 223 } },
 }
-/** Session recap · treadmill run. Was design/mockups/agreed/phone/session-recap-run.html. */
+/** Session recap · treadmill run. */
 export const SessionRecapRun: Story = {
   name: "Treadmill run",
   ...screen(screenSessionRecapRun),
   parameters: { mockup: { issue: 223 } },
 }
-/** Session recap · sets, list open. Was design/mockups/agreed/phone/session-recap-sets-full.html. */
+/** Session recap · sets, list open. */
 export const SessionRecapSetsFull: Story = {
   name: "Sets, list open",
   ...screen(screenSessionRecapSetsFull),
   parameters: { mockup: { issue: 223 } },
 }
-/** Session recap · sets. Was design/mockups/agreed/phone/session-recap-sets.html. */
+/** Session recap · sets. */
 export const SessionRecapSets: Story = {
   name: "Sets",
   ...screen(screenSessionRecapSets),
   parameters: { mockup: { issue: 223 } },
 }
-/** Session recap · no sets logged. Was design/mockups/agreed/phone/session-recap-summary-only.html. */
+/** Session recap · no sets logged. */
 export const SessionRecapSummaryOnly: Story = {
   name: "No sets logged",
   ...screen(screenSessionRecapSummaryOnly),
   parameters: { mockup: { issue: 223 } },
 }
-/** Session recap · free recording. Was design/mockups/drafts/phone/session-recap-free.html. */
+/** Session recap · free recording. */
 export const SessionRecapFree: Story = {
   name: "Free recording",
   tags: ['!autodocs', 'draft'],

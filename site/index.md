@@ -10,20 +10,26 @@ hero:
   actions:
     - theme: brand
       text: Meet Poulpy
-      link: /docs/brand
+      link: /storybook/index.html?path=/docs/brand-introduction--docs
+      target: _blank
+      rel: noopener
     - theme: alt
       text: Design system
-      link: /docs/design-system
+      link: /storybook/index.html?path=/docs/design-system-introduction--docs
+      target: _blank
+      rel: noopener
     - theme: alt
       text: Architecture
       link: /docs/architecture
 features:
   - title: Brand
-    details: Poulpy's two sides, six moods, eighteen drawings and the rules that keep him funny, never guilt.
-    link: /docs/brand
+    details: Poulpy's two sides, six moods, eighteen drawings, his 3D model and the rules that keep him funny, never guilt, in the Storybook workshop.
+    link: /storybook/index.html?path=/docs/brand-introduction--docs
+    target: _blank
+    rel: noopener
   - title: Design system
-    details: Colour roles, type, spacing and every web component in each state, in the Storybook workshop.
-    link: /storybook/index.html
+    details: Colour roles, type, spacing, every component in each state and every screen, in the Storybook workshop.
+    link: /storybook/index.html?path=/docs/design-system-introduction--docs
     target: _blank
     rel: noopener
   - title: Architecture

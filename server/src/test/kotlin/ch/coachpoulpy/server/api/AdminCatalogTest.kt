@@ -44,10 +44,10 @@ class AdminCatalogTest {
     private val test = TestServer()
     private val events = RecordingEvents()
     private val http = app(
-        "0.7.0", test.catalog, test.database, test.accounts, test.signIns, test.passwordResets, test.accountDeletion, test.sync, test.audit,
+        "0.7.0", test.database, test.accounts, test.signIns, test.passwordResets, test.accountDeletion, test.sync, test.audit,
         events = events.and(test.audit.events), settings = test.settings, mailer = test.outgoing,
     )
-    private val bundled = test.catalog
+    private val bundled = test.catalog // what the tests start from
     private val adminToken: String
 
     init {
@@ -110,11 +110,11 @@ class AdminCatalogTest {
     private val goblet = bundled[ExerciseSlug("goblet-squat")]!!
 
     @Test
-    fun theFirstStartSeedsTheCatalogFromTheBundledOne() {
+    fun seedingFillsAnEmptyCatalogOnce() {
         assertEquals(bundled.exercises.size.toLong(), lastSeq(), "each seeded exercise takes a number of the cursor")
         assertEquals(bundled.exercises, test.serverCatalog.draft().map { it.exercise })
         assertTrue(test.serverCatalog.draft().all { it.published && it.change == null })
-        assertFalse(test.serverCatalog.seed(), "a second start leaves the catalog alone")
+        assertFalse(test.serverCatalog.seed(bundled), "a second start leaves the catalog alone")
         val rows = test.database.queries.catalogQueries.publishedExercises().executeAsList()
         assertEquals(bundled.exercises.map { it.slug.value }, rows.map { it.slug }, "one row per exercise, in the catalog's order")
         val response = publicCatalog()

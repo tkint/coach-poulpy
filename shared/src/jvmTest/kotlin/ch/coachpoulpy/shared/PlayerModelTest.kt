@@ -25,7 +25,7 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 
 class PlayerModelTest {
-    private val graph = AppGraph(DriverFactory())
+    private val graph = AppGraph(DriverFactory()).withSampleCatalog()
     private val clock = object : Clock {
         var now = Instant.fromEpochSeconds(1_700_000_000)
         override fun now() = now

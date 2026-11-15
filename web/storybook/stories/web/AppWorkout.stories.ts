@@ -4,7 +4,7 @@ import { CpBadge, CpBodyMap, CpBreadcrumbs, CpButton, CpCard, CpSheet, CpStat, C
 import { heatAreas } from '../../../app/src/bodyMap'
 import AppShell from './AppShell.vue'
 
-// One workout of the web app (issue #355). Was design/mockups/agreed/web/app-workout.html.
+// One workout of the web app (issue #355).
 const meta = {
   title: 'Web/Screens/App/Workout',
   tags: ['!autodocs', 'agreed'],

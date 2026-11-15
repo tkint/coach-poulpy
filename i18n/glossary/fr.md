@@ -6,7 +6,7 @@ Les règles de `en.md` s’appliquent aussi (identifiants, placeholders, pluriel
 
 - **L’application vouvoie** : « Vos séances », « Allumez d’abord l’appareil ».
 - **Poulpy tutoie** (`domain` → `poulpy.*`) : « Termine une séance et j’allume mon premier tentacule ». C’est un personnage qui parle, pas l’interface.
-- Les consignes d’exercice (`catalog` → `instructions`) vouvoient à l’impératif : « Tenez la charge contre la poitrine ».
+- Les consignes d’exercice (écrites dans l’admin) vouvoient à l’impératif : « Tenez la charge contre la poitrine ».
 - **Pas de genre pour la personne** : d’abord une tournure neutre, souvent l’impératif (« Allongez-vous sur le dos » plutôt que « Allongé sur le dos », « On y va ? » plutôt que « Prêt ? »). Quand aucune ne sonne naturel, l’écriture inclusive au point médian est permise sur un mot court (« Prêt·e ? », « Bienvenue, sportif·ve »), jamais de parenthèses ni de barre oblique. Évitez-la dans les phrases longues : les lecteurs d’écran la lisent mal. Poulpy, lui, est masculin : « Je suis prêt quand tu l’es ».
 - Les notes de variante (`variationNote`) décrivent, sans « on » : « S’asseoir sur une chaise et se relever ».
 

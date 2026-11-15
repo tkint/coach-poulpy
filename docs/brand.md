@@ -1,6 +1,6 @@
 # Brand
 
-Poulpy is a reversible plush octopus: blue and smiling on one side, grumpy on the other. In the app the grumpy side is ember, from burnt orange to red. **The side is the status** (are you keeping your plan?) **and the shade is the feeling** (what just happened). The full brand book, with the logo, colours and every drawing, is on the site's Brand book page, and [Brand decisions](./brand-decisions.md) traces what was decided and why.
+Poulpy is a reversible plush octopus: blue and smiling on one side, grumpy on the other. In the app the grumpy side is ember, from burnt orange to red. **The side is the status** (are you keeping your plan?) **and the shade is the feeling** (what just happened). These rules, every drawing, Poulpy in 3D and the full brand book, with the logo and colours, are the Brand pages of the [component workshop](https://tkint.github.io/coach-poulpy/storybook/?path=/docs/brand-introduction--docs), and [Brand decisions](./brand-decisions.md) traces what was decided and why.
 
 ## Character rules
 
@@ -102,7 +102,7 @@ The logo is the same drawing as the in-app Poulpy: a front view of the plush wit
 
 ## Poulpy in 3D
 
-Poulpy also exists as a 3D model: a bubble of a head tucked into eight puffy arms, in flat cartoon shading, with the other side's colour underneath. It is generated from `design/poulpy-3d/model.mjs` like the drawings are from their script, and the docs site's **Poulpy in 3D** page shows it, lists its rules and says how to reuse or change it. In 3D his idle is to turn around on the spot in short steps of 20 to 30 degrees, with soft tentacles that trail behind each step and settle after it; they slide on the floor and never lift. The move is `design/poulpy-3d/motion.mjs` and plays on the same page. The apps do not use the model yet. See [Brand decisions](./brand-decisions.md), decision 14.
+Poulpy also exists as a 3D model: a bubble of a head tucked into eight puffy arms, in flat cartoon shading, with the other side's colour underneath. It is generated from `design/poulpy-3d/model.mjs` like the drawings are from their script, and the [Poulpy in 3D](./poulpy-3d.md) page shows it, lists its rules and says how to reuse or change it. In 3D his idle is to turn around on the spot in short steps of 20 to 30 degrees, with soft tentacles that trail behind each step and settle after it; they slide on the floor and never lift. The move is `design/poulpy-3d/motion.mjs` and plays on the same page. The apps do not use the model yet. See [Brand decisions](./brand-decisions.md), decision 14.
 
 ## Ideas for later
 

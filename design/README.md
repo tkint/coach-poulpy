@@ -34,7 +34,7 @@ On iOS, also list any new file under `UIAppFonts` in `Info.plist`. Views use `.f
 
 ## Body map figures
 
-`build-body-map.mjs` draws the front and back muscle chart in both builds (wider shoulders, wider hips) and writes it into the profile mockups and into `design/body-map.json`, which the apps read. The muscle outlines come from `design/body-map-source/parts.json`, adapted from the MIT-licensed [hugobonifay/body-map](https://github.com/hugobonifay/body-map) (see `design/body-map-source/NOTICE.md`); the script turns them into plain curves, names each muscle, stretches the builds and leaves the skin transparent. To change a muscle, edit the script or the source outlines, then run:
+`build-body-map.mjs` draws the front and back muscle chart in both builds (wider shoulders, wider hips) and writes it into the profile screens' stories (`profile-pain-sheet`, `profile-body-figure-sheet`) and into `design/body-map.json`, which the apps read. The muscle outlines come from `design/body-map-source/parts.json`, adapted from the MIT-licensed [hugobonifay/body-map](https://github.com/hugobonifay/body-map) (see `design/body-map-source/NOTICE.md`); the script turns them into plain curves, names each muscle, stretches the builds and leaves the skin transparent. To change a muscle, edit the script or the source outlines, then run:
 
 ```sh
 node design/build-body-map.mjs
@@ -78,9 +78,9 @@ node design/build-poulpy-3d.mjs
 | `design/poulpy-3d/poulpy_blue_turn.glb` | The blue side, rigged, with the animation `turn` |
 | `design/poulpy-3d/poulpy_ember_turn.glb` | The ember side, rigged, with the animation `turn` |
 
-The script writes the files itself, byte for byte the same on every machine, and CI runs it with `--check`. The docs site's Poulpy in 3D page draws the same `model.mjs` and runs the same `motion.mjs` live, lists the rules of the shape and of the move and says how to reuse it; the apps do not use the model yet.
+The script writes the files itself, byte for byte the same on every machine, and CI runs it with `--check`. The Brand > Poulpy in 3D page of the component workshop ([`docs/poulpy-3d.md`](../docs/poulpy-3d.md) and the live model) draws the same `model.mjs` and runs the same `motion.mjs` live, lists the rules of the shape and of the move and says how to reuse it; the apps do not use the model yet.
 
-The rules for using Poulpy are in [`docs/brand.md`](../docs/brand.md); the full brand book is in `site/.vitepress/theme/brand-book/` and on the docs site, and the decisions behind it are in [`docs/brand-decisions.md`](../docs/brand-decisions.md).
+The rules for using Poulpy are in [`docs/brand.md`](../docs/brand.md); the full brand book is in `web/storybook/stories/brand/brand-book/` and on the Brand > Brand book page of the component workshop, and the decisions behind it are in [`docs/brand-decisions.md`](../docs/brand-decisions.md).
 
 ## Icons
 
@@ -97,4 +97,4 @@ node design/build-icons.mjs                       # write the apps' icons again
 | `app-ios/CoachPoulpy/Lucide.swift` | The `Lucide` enum (`.calendarPlus`), the `LucideIcon` view and `Label(_:lucide:)` |
 | `app-ios/CoachPoulpy/Assets.xcassets/Lucide/*.imageset` | iOS template vector images (`LucideCalendarPlus`) |
 
-The websites take the same icons from `@lucide/vue`, and the mockups inline the SVG with `data-lucide="<name>"`; `check-mockups.mjs` fails when a mockup icon is not the Lucide icon it names. To add an icon to a mockup, copy its complete drawing from `design/icons/<name>.svg` and include the matching `data-lucide` attribute; do not redraw or simplify the SVG. CI runs `build-icons.mjs --check`, which also fails when an image set is left over from an icon no longer in `icons/`. To move to a newer Lucide, raise `@lucide/vue` in `web/ui` and the docs site, then copy each icon again with `--add`.
+The websites and the phone mockups take the same icons from `@lucide/vue` by name (`MobileIcon` in the phone stories), so a mockup cannot draw an icon other than the one it names. CI runs `build-icons.mjs --check`, which also fails when an image set is left over from an icon no longer in `icons/`. To move to a newer Lucide, raise `@lucide/vue` in `web/ui` and the docs site, then copy each icon again with `--add`.

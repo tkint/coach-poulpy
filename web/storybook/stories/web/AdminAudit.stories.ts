@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { CpAvatar, CpBadge, CpCard, CpStat, CpStats, CpTable } from '@coach-poulpy/ui'
 import AdminShell from './AdminShell.vue'
 
-// The admin shell, showing the audit log (issue #336). Was design/mockups/agreed/web/admin-shell.html.
+// The admin shell, showing the audit log (issue #336).
 const meta = {
   title: 'Web/Screens/Admin/Audit log',
   tags: ['!autodocs', 'agreed'],

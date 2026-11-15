@@ -18,12 +18,11 @@ import kotlin.test.assertTrue
 
 class ApiTest {
     private val test = TestServer()
-    private val catalog = test.catalog
     private val server = test.http
 
     @Test
     fun everyRouteIsPublicOrDeclaresItsScopes() {
-        val undeclared = apiRoutes(catalog, test.accounts, test.signIns, test.passwordResets, test.accountDeletion, Sync(test.database), test.database).filter { it.meta.security == null }
+        val undeclared = apiRoutes(test.accounts, test.signIns, test.passwordResets, test.accountDeletion, Sync(test.database), test.database).filter { it.meta.security == null }
         assertEquals(emptyList(), undeclared.map { it.toString() }, "Routes with no security: set Public or the scopes they need")
     }
 
@@ -42,8 +41,8 @@ class ApiTest {
         val response = server(Request(GET, "/api/v1/catalog/exercises"))
         assertEquals(OK, response.status)
         val body = Json.parseToJsonElement(response.bodyString()).jsonObject
-        assertEquals(catalog.exercises.size, body.getValue("exercises").jsonArray.size)
-        assertEquals(catalog.exercises.size.toString(), body.getValue("cursor").jsonPrimitive.content)
+        assertEquals(test.catalog.exercises.size, body.getValue("exercises").jsonArray.size)
+        assertEquals(test.catalog.exercises.size.toString(), body.getValue("cursor").jsonPrimitive.content)
     }
 
     @Test

@@ -6,7 +6,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class SyncedSettingsTest {
-    private val graph = AppGraph(DriverFactory())
+    private val graph = AppGraph(DriverFactory()).withSampleCatalog()
     private val memory = MemoryStore()
     private val synced = SyncedSettings(memory, graph.store)
 

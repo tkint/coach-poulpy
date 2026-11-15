@@ -1,0 +1,12 @@
+import { Meta, Markdown } from '@storybook/addon-docs/blocks'
+import { markdownPages } from '../../markdown-pages'
+
+export const rules = markdownPages('design-system').sections
+
+<Meta title="Design system/Rules/Colour" />
+
+{/* Shown from docs/design-system.md: edit the rules there. */}
+
+# Colour
+
+<Markdown>{rules('Colour roles', 'Mood shades')}</Markdown>

@@ -87,8 +87,8 @@ import kotlinx.coroutines.launch
 
 /*
  * The account (docs/accounts.md): Settings' Account row and page, and the screens that open over the tabs
- * to sign in, sign up, confirm the email and reset a password. Mockups: design/mockups/agreed/phone/account-*.
- * Every decision is AccountModel's; these screens only show its answers.
+ * to sign in, sign up, confirm the email and reset a password. Mockups: Mobile > Screens > Accounts in the
+ * component workshop. Every decision is AccountModel's; these screens only show its answers.
  */
 
 /** The one account of the app, which syncs while the app is open (CoachPoulpyApp). */

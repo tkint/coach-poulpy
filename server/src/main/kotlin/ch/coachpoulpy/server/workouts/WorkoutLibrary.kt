@@ -25,8 +25,9 @@ class WorkoutDetail(val workout: Workout, val history: WorkoutHistory, val page:
  * and the sessions done of it, built into lists and pages by the shared [WorkoutViews] (ADR 0027).
  * Read-only: the phone is the source of truth and the website never writes a workout.
  */
-class WorkoutLibrary(private val database: Database, catalog: Catalog) {
-    private val views = WorkoutViews(catalog)
+class WorkoutLibrary(private val database: Database, private val catalog: () -> Catalog) {
+    /** Built per call, so a workout names the exercises as the admin last published them. */
+    private val views get() = WorkoutViews(catalog())
     private val queries get() = database.queries.syncQueries
 
     /** The language of the account's emails and screens, such as "fr". */

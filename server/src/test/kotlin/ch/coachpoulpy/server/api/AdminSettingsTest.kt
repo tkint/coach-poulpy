@@ -35,7 +35,7 @@ class AdminSettingsTest {
     private val test = TestServer()
     private val events = RecordingEvents()
     private val http = app(
-        "0.7.0", test.catalog, test.database, test.accounts, test.signIns, test.passwordResets, test.accountDeletion, test.sync, test.audit,
+        "0.7.0", test.database, test.accounts, test.signIns, test.passwordResets, test.accountDeletion, test.sync, test.audit,
         events = events.and(test.audit.events), settings = test.settings, mailer = test.outgoing,
     )
     private val adminToken: String

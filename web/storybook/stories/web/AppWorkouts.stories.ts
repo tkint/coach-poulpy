@@ -4,7 +4,7 @@ import { List, Repeat } from '@lucide/vue'
 import { CpBadge, CpCard, CpChip, CpSearchField, CpTable } from '@coach-poulpy/ui'
 import AppShell from './AppShell.vue'
 
-// The web app's workouts list (issue #355). Was design/mockups/agreed/web/app-workouts.html.
+// The web app's workouts list (issue #355).
 const meta = {
   title: 'Web/Screens/App/Workouts',
   tags: ['!autodocs', 'agreed'],

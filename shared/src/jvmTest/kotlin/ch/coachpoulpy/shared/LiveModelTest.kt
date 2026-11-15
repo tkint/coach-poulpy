@@ -1,5 +1,6 @@
 package ch.coachpoulpy.shared
 
+import ch.coachpoulpy.catalog.sample.SampleCatalog
 import ch.coachpoulpy.core.engine.TimelineCompiler
 import ch.coachpoulpy.data.local.DriverFactory
 import ch.coachpoulpy.data.local.LocalStore
@@ -41,7 +42,7 @@ class LiveModelTest {
         val compiler = TimelineCompiler()
         val settings = SettingsModel(memory, scope)
         val devices = DevicesModel(central, memory, scope, clock)
-        return Models(devices, LiveModel(devices, settings.state, store, compiler, memory, scope, clock), settings)
+        return Models(devices, LiveModel(devices, settings.state, store, compiler, memory, scope, clock, catalog = { SampleCatalog.catalog }), settings)
     }
 
     private fun TestScope.addTreadmill(models: Models) {
@@ -243,7 +244,7 @@ class LiveModelTest {
         val compiler = TimelineCompiler()
         val settings = SettingsModel(memory, backgroundScope)
         val devices = DevicesModel(treadmillOff, memory, backgroundScope)
-        val live = LiveModel(devices, settings.state, store, compiler, memory, backgroundScope)
+        val live = LiveModel(devices, settings.state, store, compiler, memory, backgroundScope, catalog = { SampleCatalog.catalog })
         devices.connectAutomatically()
         runCurrent()
         val connecting = live.state.value
@@ -664,7 +665,7 @@ class LiveModelTest {
         val settings = SettingsModel(memory, backgroundScope)
         val devices = DevicesModel(central, memory, backgroundScope, clock)
         val compiler = TimelineCompiler()
-        val live = LiveModel(devices, settings.state, LocalStore(DriverFactory()), compiler, memory, backgroundScope, clock, languageCode = "fr")
+        val live = LiveModel(devices, settings.state, LocalStore(DriverFactory()), compiler, memory, backgroundScope, clock, { SampleCatalog.catalog }, languageCode = "fr")
         runCurrent()
         assertEquals("Marche", live.state.value.choice?.name)
         assertEquals(listOf("Marche avec appui", "Marche douce", "Marche", "Marche rapide"), live.state.value.walking.map { it.name })

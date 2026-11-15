@@ -10,7 +10,7 @@ An issue written with the Feature or Bug form is already structured; refine it t
 2. **Read the context.** `CONTEXT.md` for the terms, the ADRs and docs of the area (`docs/agents/areas.md` says which), and the code and mockups the idea touches. Use the terms of `CONTEXT.md` in the rewritten issue.
 3. **Check the house rules** from `CLAUDE.md` that the idea implies:
    - every user-facing string in English and French;
-   - a new screen or redesign starts as a mockup in `design/mockups/drafts/`;
+   - a new screen or redesign starts as a mockup story tagged `draft` in the component workshop;
    - logic goes in shared Kotlin with a test;
    - a schema change is a migration, and existing phones keep their data;
    - Poulpy is never guilt (blue side for pain or rehab, crimson with an icon for errors).

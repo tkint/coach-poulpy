@@ -36,7 +36,7 @@ import kotlin.time.Instant
 
 /** Opening a finished session lists what was done, part by part, from its events (`session-recap-*` mockups). */
 class SessionRecapTest {
-    private val graph = AppGraph(DriverFactory())
+    private val graph = AppGraph(DriverFactory()).withSampleCatalog()
     private val start = Instant.parse("2026-10-24T18:05:00Z")
 
     private fun reps(count: Int, load: Load? = null) = SetPrescription(Target.Reps(count), load = load)

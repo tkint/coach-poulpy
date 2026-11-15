@@ -2,8 +2,8 @@ import SwiftUI
 import Shared
 
 // The account (docs/accounts.md): Settings' Account row and page, and the screens that open over the tabs to sign
-// in, sign up, confirm the email and reset a password. Mockups: design/mockups/agreed/phone/account-*. Every
-// decision is AccountModel's; these views only show its answers. Mirrors AccountScreens.kt on Android.
+// in, sign up, confirm the email and reset a password. Mockups: Mobile > Screens > Accounts in the component
+// workshop. Every decision is AccountModel's; these views only show its answers. Mirrors AccountScreens.kt on Android.
 
 /// An account screen opened over the tabs, from Settings or an email link.
 struct AccountFlowStart: Identifiable {

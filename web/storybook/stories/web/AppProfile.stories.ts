@@ -3,7 +3,7 @@ import { Check } from '@lucide/vue'
 import { CpAvatar, CpBadge, CpButton, CpCard } from '@coach-poulpy/ui'
 import AppShell from './AppShell.vue'
 
-// The web app's profile (issue #355). Was design/mockups/agreed/web/app-profile.html.
+// The web app's profile (issue #355).
 const meta = {
   title: 'Web/Screens/App/Profile',
   tags: ['!autodocs', 'agreed'],

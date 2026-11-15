@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@coach-poulpy/ui": "*",
+    "three": "0.180.0",
     "vue": "^3.5.44"
   },
   "devDependencies": {

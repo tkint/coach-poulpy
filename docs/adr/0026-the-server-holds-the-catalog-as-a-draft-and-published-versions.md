@@ -1,10 +1,12 @@
 ---
-status: accepted, numbered versions superseded by 0030
+status: accepted, numbered versions superseded by 0030, seeding from the bundled catalog superseded by 0033
 date: 2026-11-10
 ---
 
 # The server holds the catalog as a draft and published versions
 
+> **Also superseded in part by [ADR 0033](./0033-the-server-database-is-the-catalog-and-nothing-ships-bundled.md):** the server no longer seeds its catalog from a bundled one.
+>
 > **Superseded in part by [ADR 0030](./0030-the-catalog-changes-by-exercise-revision-not-by-catalog-version.md):** published *versions* (`catalog_version`, `published_in`, the latest version served whole) are replaced by per-exercise revisions and a publication cursor. The draft, revisions stored per exercise, the publishing rules and where the catalog comes from still hold; read "version" below as the old approach.
 
 Builds on [ADR 0008](./0008-curated-catalog-with-stable-slugs.md) and [ADR 0015](./0015-catalog-text-lives-in-translation-files.md).

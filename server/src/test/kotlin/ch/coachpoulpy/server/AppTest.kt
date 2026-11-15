@@ -1,6 +1,5 @@
 package ch.coachpoulpy.server
 
-import ch.coachpoulpy.catalog.Catalog
 import org.http4k.core.Method.GET
 import org.http4k.core.Method.OPTIONS
 import org.http4k.core.Request
@@ -14,20 +13,20 @@ class AppTest {
 
     @Test
     fun healthReportsTheVersion() {
-        val response = app("0.6.0", Catalog.bundled, test.database, test.accounts, test.signIns, test.passwordResets, test.accountDeletion, databaseAnswers = { true })(Request(GET, "/health"))
+        val response = app("0.6.0", test.database, test.accounts, test.signIns, test.passwordResets, test.accountDeletion, databaseAnswers = { true })(Request(GET, "/health"))
         assertEquals(OK, response.status)
         assertEquals("ok 0.6.0", response.bodyString())
     }
 
     @Test
     fun healthIsUnavailableWhileTheDatabaseIsDown() {
-        val response = app("0.6.0", Catalog.bundled, test.database, test.accounts, test.signIns, test.passwordResets, test.accountDeletion, databaseAnswers = { false })(Request(GET, "/health"))
+        val response = app("0.6.0", test.database, test.accounts, test.signIns, test.passwordResets, test.accountDeletion, databaseAnswers = { false })(Request(GET, "/health"))
         assertEquals(SERVICE_UNAVAILABLE, response.status)
     }
 
     @Test
     fun theWebsiteMayCallTheApiFromABrowser() {
-        val server = app("0.6.0", Catalog.bundled, test.database, test.accounts, test.signIns, test.passwordResets, test.accountDeletion, databaseAnswers = { true })
+        val server = app("0.6.0", test.database, test.accounts, test.signIns, test.passwordResets, test.accountDeletion, databaseAnswers = { true })
         val preflight = Request(OPTIONS, "/api/v1/accounts/confirm")
             .header("Origin", "https://app.coach-poulpy.com")
             .header("Access-Control-Request-Method", "POST")

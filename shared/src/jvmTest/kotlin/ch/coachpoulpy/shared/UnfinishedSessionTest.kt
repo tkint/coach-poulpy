@@ -27,7 +27,7 @@ import kotlinx.datetime.TimeZone
 
 /** A session left open when the app was closed: offered on Home, opened, discarded or closed with its totals. */
 class UnfinishedSessionTest {
-    private val graph = AppGraph(DriverFactory())
+    private val graph = AppGraph(DriverFactory()).withSampleCatalog()
     private val start = Instant.parse("2023-11-15T12:00:00Z")
 
     private fun workout(name: String = "Quick"): WorkoutId {

@@ -95,7 +95,7 @@ Add a decision here in the same PR as the brand change it explains, newest at th
 
 ## 14. Poulpy in 3D: a bubble plush in flat shading
 
-**Accepted, 14 November 2026.** Poulpy's 3D form is a round head tucked into eight puffy arms, drawn with flat cartoon shading. The rules of the shape are on the docs site's **Poulpy in 3D** page, and the shape is one file, [`design/poulpy-3d/model.mjs`](../design/poulpy-3d/model.mjs), so it can be reused and improved like the 2D drawings.
+**Accepted, 14 November 2026.** Poulpy's 3D form is a round head tucked into eight puffy arms, drawn with flat cartoon shading. The rules of the shape are on the [Poulpy in 3D](./poulpy-3d.md) page, and the shape is one file, [`design/poulpy-3d/model.mjs`](../design/poulpy-3d/model.mjs), so it can be reused and improved like the 2D drawings.
 
 **Why:** the owner wanted him chibi, natural and simple, "a bit like the mascot of Duolingo", so the model had to read like the 2D drawings turned into a solid, not like a rendered toy. Each rule was a correction from the owner on a model he could turn: the head sinks into the arms because resting on top of them looked stacked; the two colours share one smooth surface because a separate lining made a shelf; the whole underside is the other side's colour because a patch of the top colour showed between the arms; and the light stays in the room because shade painted on the model turned with him.
 

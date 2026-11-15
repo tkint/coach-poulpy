@@ -12,7 +12,8 @@ The brand, design system and architecture are published at [docs.coach-poulpy.co
 | `core/engine` | Timeline compiler, session state machine, event log |
 | `core/stats` | Derived metrics (placeholder) |
 | `types/treadmill` | Treadmill recording, summaries and step estimate |
-| `catalog` | Bundled exercise catalog, edited as JSON in `catalog/data/` |
+| `catalog` | The exercise catalog's shape and rules |
+| `catalog-sample` | A frozen set of exercises for tests only |
 | `data/local` | SQLDelight database on the phone |
 | `data/remote` | The phone's calls to the account API (Ktor), with token refresh |
 | `device/ftms` | Bluetooth treadmills (FTMS): decoding, connection with reconnect, Bluetooth through Kable |
@@ -64,15 +65,13 @@ The iOS build runs `./gradlew :shared:embedAndSignAppleFrameworkForXcode` itself
 
 ## The exercise catalog
 
-`catalog/data/exercises.json` holds the structure of the catalog shipped in the app, and `i18n/messages/<locale>/catalog.json` its text, keyed by slug (`goblet-squat.name`, `goblet-squat.instructions.0`). The build merges the two into one document with every text as a map from language to string, and that is what the app embeds ([ADR 0015](docs/adr/0015-catalog-text-lives-in-translation-files.md)). On start, the app adds to its database the exercises it lacks and replaces those the bundled file numbers at a higher `revision` than the phone's (1 when absent), and every screen reads the catalog from the database.
+The catalog lives in the server database: the admin creates, edits, publishes and retires exercises there, and nothing ships bundled with the apps ([ADR 0033](docs/adr/0033-the-server-database-is-the-catalog-and-nothing-ships-bundled.md)). A phone downloads the exercises published since its last update and keeps them in its own database, and every screen reads the catalog from there. A phone that has never downloaded it, such as a first launch with no connection, shows no exercises yet. Tests use a frozen sample (`catalog-sample`). Every exercise has a `slug` that never changes: workouts point at exercises by slug. To stop offering an exercise, retire it in the admin rather than deleting it, so workouts that use it still open.
 
-To change it today, edit the JSON or the text, raise `version` by one and ship a new build. CI fails a pull request that changes the catalog text without raising `version`, as Fink's pull requests do: raise it before merging. Keep every `slug`: workouts point at exercises by slug. To stop offering an exercise, set `"retired": true` rather than deleting it, so workouts that use it still open.
-
-`variations` lists the catalog's variation groups: each is the slugs of one movement made easier or harder, ordered from easiest to hardest. An exercise is in at most one group, and a retired one stays in its group but isn't shown. Every exercise in a group carries a `variationNote` message in every language, the one line the variations sheet shows under its name ("Knees down, a shorter lever").
+A variation group is the slugs of one movement made easier or harder, ordered from easiest to hardest. An exercise is in at most one group, and a retired one stays in its group but isn't shown. Every exercise in a group carries a `variationNote` in every language, the one line the variations sheet shows under its name ("Knees down, a shorter lever").
 
 An exercise's `equipment` lists what it needs, each need a list of alternatives: `[["DUMBBELL", "KETTLEBELL"]]` is a dumbbell or a kettlebell, `[["DUMBBELL"], ["BENCH"]]` is dumbbells and a bench. No need means bodyweight; `BODYWEIGHT` and `MAT` are never needs. Equipment that helps but isn't needed (a mat, a treadmill for a walk) goes in `optionalEquipment`. The Equipment filter shows an exercise when it uses something ticked, needed or optional, and every need has one alternative ticked; bodyweight-only exercises hide while anything is ticked, unless "No equipment" is.
 
-An exercise's optional `aliases` are other names people search with: one comma-separated message per language (`romanian-deadlift.aliases`), which a language may leave out. The search reads them like names but never shows them, and an alias can't be empty.
+An exercise's optional `aliases` are other names people search with, per language, which a language may leave out. The search reads them like names but never shows them, and an alias can't be empty.
 
 The admin publishes single exercises on the server, and on launch the app downloads those published since its last update, with no account needed (`CatalogUpdater`, [ADR 0030](docs/adr/0030-the-catalog-changes-by-exercise-revision-not-by-catalog-version.md)). That is separate from syncing a user's own data, so guests get catalog updates too.
 

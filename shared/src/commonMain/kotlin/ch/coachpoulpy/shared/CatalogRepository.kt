@@ -5,18 +5,13 @@ import ch.coachpoulpy.data.local.CatalogRevision
 import ch.coachpoulpy.data.local.LocalStore
 
 /**
- * Where the app reads the exercise catalog from: the phone's database, never the bundled file
- * directly. Each launch adds what the bundled catalog has that the database lacks; an update from the
- * server ([apply]) replaces single exercises by their revision (ADR 0030).
+ * Where the app reads the exercise catalog from: the phone's database. A fresh install holds no
+ * exercises; an update from the server ([apply]) adds and replaces single exercises by their revision
+ * (ADR 0030, ADR 0033).
  */
-class CatalogRepository(private val store: LocalStore, bundled: Catalog) {
-    var current: Catalog
+class CatalogRepository(private val store: LocalStore) {
+    var current: Catalog = load()
         private set
-
-    init {
-        store.applyCatalogRevisions(revisionsOf(bundled))
-        current = load()
-    }
 
     /** The cursor of the last update from the server, or null when there was none: ask for every exercise then. */
     val cursor: String? get() = store.catalogCursor()
@@ -32,9 +27,4 @@ class CatalogRepository(private val store: LocalStore, bundled: Catalog) {
     }
 
     private fun load() = Catalog(store.catalogExercises(), store.catalogVariationGroups(), store.catalogRevisions())
-
-    private fun revisionsOf(catalog: Catalog): List<CatalogRevision> {
-        val place = catalog.variationGroups.flatMapIndexed { group, slugs -> slugs.mapIndexed { rank, slug -> slug to (group to rank) } }.toMap()
-        return catalog.exercises.map { CatalogRevision(it, catalog.revisionOf(it.slug), place[it.slug]?.first, place[it.slug]?.second) }
-    }
 }

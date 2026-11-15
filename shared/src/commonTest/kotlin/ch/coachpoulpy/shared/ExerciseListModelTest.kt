@@ -1,6 +1,7 @@
 package ch.coachpoulpy.shared
 
 import ch.coachpoulpy.catalog.Catalog
+import ch.coachpoulpy.catalog.sample.SampleCatalog
 import ch.coachpoulpy.core.model.BodyPosition
 import ch.coachpoulpy.core.model.Equipment
 import ch.coachpoulpy.core.model.ExerciseFocus
@@ -12,7 +13,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class ExerciseListModelTest {
-    private fun model(language: String) = ExerciseListModel(Catalog.bundled, language)
+    private fun model(language: String) = ExerciseListModel(SampleCatalog.catalog, language)
 
     @Test
     fun rowsAreLocalized() {
@@ -113,7 +114,7 @@ class ExerciseListModelTest {
 
     @Test
     fun equipmentFindsEveryExerciseUsingItWithNamesFirst() {
-        val dumbbell = Catalog.bundled.offered.filter { Equipment.DUMBBELL in it.allEquipment }.map { it.slug.value }
+        val dumbbell = SampleCatalog.catalog.offered.filter { Equipment.DUMBBELL in it.allEquipment }.map { it.slug.value }
         assertEquals(11, dumbbell.size)
         val found = search("dumbbell")
         assertEquals(dumbbell.toSet(), found.toSet())
@@ -148,12 +149,12 @@ class ExerciseListModelTest {
 
     @Test
     fun typoMatchesRankAfterEveryExactTier() {
-        val exact = ExerciseSearch(Catalog.bundled.offered).rank("squat")!!
-        val typo = ExerciseSearch(Catalog.bundled.offered).rank("squta")!!
+        val exact = ExerciseSearch(SampleCatalog.catalog.offered).rank("squat")!!
+        val typo = ExerciseSearch(SampleCatalog.catalog.offered).rank("squta")!!
         assertTrue(typo.isNotEmpty() && typo.values.all { it.tier == 5 })
         assertTrue(exact.values.any { it.tier < 5 })
         // A query mixing an exact word and a typo still ranks after exact matches.
-        assertTrue(ExerciseSearch(Catalog.bundled.offered).rank("squat dumbell")!!.values.all { it.tier == 5 })
+        assertTrue(ExerciseSearch(SampleCatalog.catalog.offered).rank("squat dumbell")!!.values.all { it.tier == 5 })
     }
 
     @Test
@@ -180,7 +181,7 @@ class ExerciseListModelTest {
     fun anEmptySearchIsGroupedByMovementPatternInOrder() {
         val listing = model("en").filter()
         assertEquals(listOf("Squat", "Hinge", "Lunge", "Push", "Pull", "Carry", "Core", "Rotation", "Cardio", "Mobility", "Stretch"), listing.sections.map { it.title })
-        assertEquals(Catalog.bundled.offered.size, listing.count)
+        assertEquals(SampleCatalog.catalog.offered.size, listing.count)
         assertEquals("${listing.count} exercises", listing.countLabel)
         assertFalse(listing.searching)
         val squat = listing.sections.first().rows.map { it.slug }
@@ -253,7 +254,7 @@ class ExerciseListModelTest {
 
     @Test
     fun noEquipmentListsTheExercisesNeedingNothing() {
-        val free = Catalog.bundled.offered.filter { it.equipment.isEmpty() }.map { it.slug.value }
+        val free = SampleCatalog.catalog.offered.filter { it.equipment.isEmpty() }.map { it.slug.value }
         assertEquals(free.toSet(), fitting(Equipment.BODYWEIGHT).toSet())
         assertTrue("push-up" in free && "plank" in free && "reverse-lunge" in free)
         val withKettlebell = fitting(Equipment.BODYWEIGHT, Equipment.KETTLEBELL)
@@ -264,9 +265,9 @@ class ExerciseListModelTest {
     @Test
     fun tickingNothingIsNoFilter() {
         val all = model("en").filter(ticked = emptySet())
-        assertEquals(Catalog.bundled.offered.size, all.count)
+        assertEquals(SampleCatalog.catalog.offered.size, all.count)
         assertFalse(all.restricted)
-        assertEquals(Catalog.bundled.offered.size, model("en").filter(ticked = null).count)
+        assertEquals(SampleCatalog.catalog.offered.size, model("en").filter(ticked = null).count)
     }
 
     @Test
@@ -286,16 +287,16 @@ class ExerciseListModelTest {
             options.map { it.equipment },
         )
         val kettlebell = options.single { it.equipment == Equipment.KETTLEBELL }
-        assertEquals(Catalog.bundled.offered.count { Equipment.KETTLEBELL in it.allEquipment }, kettlebell.count)
+        assertEquals(SampleCatalog.catalog.offered.count { Equipment.KETTLEBELL in it.allEquipment }, kettlebell.count)
         assertEquals("${kettlebell.count} exercises", kettlebell.countLabel)
         val none = options.first()
         assertEquals("No equipment", none.label)
-        assertEquals(Catalog.bundled.offered.count { it.equipment.isEmpty() }, none.count)
+        assertEquals(SampleCatalog.catalog.offered.count { it.equipment.isEmpty() }, none.count)
     }
 
     @Test
     fun everyOfferedExerciseHasAFocusAndAPosition() {
-        val missing = Catalog.bundled.offered.filter { it.focus.isEmpty() || it.positions.isEmpty() }.map { it.slug.value }
+        val missing = SampleCatalog.catalog.offered.filter { it.focus.isEmpty() || it.positions.isEmpty() }.map { it.slug.value }
         assertEquals(emptyList(), missing)
     }
 
@@ -329,7 +330,7 @@ class ExerciseListModelTest {
         val list = model("fr")
         val mobility = list.focusOptions.single { it.value == ExerciseFocus.MOBILITY }
         assertEquals("Mobilité", mobility.label)
-        assertEquals(Catalog.bundled.offered.count { ExerciseFocus.MOBILITY in it.focus }, mobility.count)
+        assertEquals(SampleCatalog.catalog.offered.count { ExerciseFocus.MOBILITY in it.focus }, mobility.count)
         assertTrue(list.filter("au sol").rows.any { it.slug == "cat-cow" })
         assertTrue(model("en").filter("mobility").rows.any { it.slug == "arm-circles" })
     }

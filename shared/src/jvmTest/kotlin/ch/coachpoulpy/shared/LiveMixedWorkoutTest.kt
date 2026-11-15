@@ -1,5 +1,6 @@
 package ch.coachpoulpy.shared
 
+import ch.coachpoulpy.catalog.sample.SampleCatalog
 import ch.coachpoulpy.core.engine.SessionEvent
 import ch.coachpoulpy.core.engine.TimelineCompiler
 import ch.coachpoulpy.core.model.ExerciseSlug
@@ -37,7 +38,7 @@ class LiveMixedWorkoutTest {
         val memory = MemoryStore()
         val settings = SettingsModel(memory, backgroundScope)
         val devices = DevicesModel(central, memory, backgroundScope, clock)
-        return Models(devices, LiveModel(devices, settings.state, store, TimelineCompiler(), memory, backgroundScope, clock))
+        return Models(devices, LiveModel(devices, settings.state, store, TimelineCompiler(), memory, backgroundScope, clock, catalog = { SampleCatalog.catalog }))
     }
 
     private fun TestScope.addTreadmill(models: Models) {

@@ -33,7 +33,7 @@ import kotlinx.datetime.TimeZone
 class AppGraph(driverFactory: DriverFactory) {
     val compiler = TimelineCompiler()
     val store = LocalStore(driverFactory)
-    val catalogRepository = CatalogRepository(store, Catalog.bundled)
+    val catalogRepository = CatalogRepository(store)
     val catalog: Catalog get() = catalogRepository.current
 
     /** Brings the catalog up to date from the API at [baseUrl], such as https://api.coach-poulpy.com; call `start()` once at launch. */

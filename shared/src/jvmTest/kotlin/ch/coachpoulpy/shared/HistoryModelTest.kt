@@ -26,7 +26,7 @@ import kotlinx.coroutines.withTimeout
 import kotlinx.datetime.TimeZone
 
 class HistoryModelTest {
-    private val graph = AppGraph(DriverFactory())
+    private val graph = AppGraph(DriverFactory()).withSampleCatalog()
 
     // Wednesday 2023-11-15 in UTC.
     private val now = Instant.parse("2023-11-15T12:00:00Z")

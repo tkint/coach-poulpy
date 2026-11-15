@@ -1,6 +1,7 @@
 package ch.coachpoulpy.server
 
 import ch.coachpoulpy.catalog.Catalog
+import ch.coachpoulpy.catalog.sample.SampleCatalog
 import ch.coachpoulpy.server.accounts.AccountDeletion
 import ch.coachpoulpy.server.accounts.Accounts
 import ch.coachpoulpy.server.accounts.PasswordResets
@@ -62,13 +63,13 @@ class TestServer {
     val outgoing = SettingsMailer(mailer, settings::mailFrom, clock)
     val passwords = Passwords(memoryKib = 64, iterations = 1)
     val accounts = Accounts(database, outgoing, "https://app.example.com", passwords, clock)
-    val catalog: Catalog = Catalog.bundled
-    /** The catalog in the database, seeded from [catalog] as the server's first start does. */
-    val serverCatalog = ServerCatalog(database, catalog, clock).apply { seed() }
+    val catalog: Catalog = SampleCatalog.catalog
+    /** The catalog in the database, filled from [catalog] so a test starts with exercises. */
+    val serverCatalog = ServerCatalog(database, clock).apply { seed(catalog) }
     val signIns = SignIns(database, passwords, clock)
     val passwordResets = PasswordResets(database, outgoing, "https://app.example.com", signIns, passwords, clock)
     val accountDeletion = AccountDeletion(database, passwords)
     val sync = Sync(database)
     val audit = AdminAudit(database, clock)
-    val http = app("0.7.0", catalog, database, accounts, signIns, passwordResets, accountDeletion, sync, audit, settings = settings, mailer = outgoing)
+    val http = app("0.7.0", database, accounts, signIns, passwordResets, accountDeletion, sync, audit, settings = settings, mailer = outgoing)
 }
