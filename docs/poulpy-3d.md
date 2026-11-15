@@ -16,6 +16,16 @@ These were settled with the owner on the first model; the reasons are in [Brand 
 - **The light belongs to the room.** It comes from the viewer's upper left and stays there: the shade and the gleam slide over Poulpy as he turns, they are never painted on him.
 - **The outline is optional and off by default.** It is there for small sizes or busy backgrounds.
 
+## His six moods
+
+The model makes the six [moods](./brand.md#moods) of the drawings: the same faces, pressed onto the head feature by feature, and the same shades, from the `mood` tokens. The side of the plush follows the mood, so the three ember moods show blue underneath.
+
+<!-- live: Moods -->
+
+- **The faces are the drawings'.** Each face in `model.mjs` is written in the 2D drawing's own coordinates, so the two can be read side by side and a change to one is copied to the other.
+- **A mood changes his face and his shade, never his shape.** Heavy lids, brows, a smirk or clenched teeth lie on the head like the eyes do; his arms stay down.
+- **This is the first step of replacing the drawings with the model** ([Brand decisions](./brand-decisions.md#16-the-3d-poulpy-replaces-the-drawings), decision 16). The poses and their props come next; the apps and the website still show the 2D drawings.
+
 ## Turning in short steps
 
 His idle move: Poulpy likes to turn around on the spot, a short step of 20 to 30 degrees at a time, stopping after each one. Fifteen steps bring him all the way around, in about 17 seconds, and then he goes again.
@@ -79,7 +89,7 @@ The same jump can turn him: each jump takes him one step around, the steps being
 | [`design/poulpy-3d/model.mjs`](../design/poulpy-3d/model.mjs) | The shape itself, as plain JavaScript with no dependency |
 | [`design/poulpy-3d/motion.mjs`](../design/poulpy-3d/motion.mjs) | How he moves, the same way |
 
-The glTF files open in any 3D tool or engine. Poulpy stands on the floor (y = 0, y up) and faces +z; his head is about one unit from centre to edge. In the two files that stand still, each part is its own named mesh (`head`, `head_lining`, `arm_1` to `arm_8` and their `_lining`, `eye_left`, `eye_left_shine`, `cheek_left`, `mouth`, `gleam`, plus `brow_left` and `brow_right` on the ember side), so a part can be recoloured, hidden or animated on its own.
+The glTF files open in any 3D tool or engine. Poulpy stands on the floor (y = 0, y up) and faces +z; his head is about one unit from centre to edge. In the two files that stand still, each part is its own named mesh (`head`, `head_lining`, `arm_1` to `arm_8` and their `_lining`, `eye_left`, `eye_left_shine`, `cheek_left`, `mouth`, `gleam`, plus `brow_left` and `brow_right` on the ember side; left and right are Poulpy's own), so a part can be recoloured, hidden or animated on its own.
 
 The two `_turn` files hold the same meshes, rigged. The node `turn` faces him and `squash` under it carries his head and face; each arm is skinned to `turn` and to its own chain of three joints, `arm_1_bend_1` to `arm_1_bend_3` from the head outwards. The animation `turn` plays one full turn at 30 frames a second and ends where it starts, so any player can loop it. It is a recording of the springs at their design values: an engine that wants them live, to change the softness or to react to something, runs `createTurn()` from `motion.mjs` on the same joints, as the workshop's preview does.
 
@@ -90,7 +100,8 @@ A glTF file only carries shapes and plain matte colours. The look is the rendere
 Everything that defines him is at the top of `model.mjs`, in three plainly named objects:
 
 - `SHAPE`: the size of the head and how deep it sits, the number, size and reach of the arms, the height of the line between the two colours, and where the face sits.
-- `FACES`: the eyes, cheeks, mouth and brows of each side, in the same units as the 2D drawings of `design/build-poulpy.mjs`.
+- `FACES`: the eyes, lids, brows, mouth and cheeks of each face, feature by feature, in the coordinates of the 2D drawings of `design/build-poulpy.mjs`.
+- `MOODS`: for each of his six moods, the side of the plush and the face he makes. `buildPoulpy3d({ mood, tone })` builds him in one, tinted with that mood's `mood` token.
 - `LOOK`: the light, the shadow band, the gleam and the outline.
 
 How he moves is in `motion.mjs`: `TURN` for his turn, `JUMP` for his jump and `RIG` for where the arms bend.

@@ -65,7 +65,7 @@ The alternate icons use the portrait or pose of the same name, scaled until its 
 
 ## Poulpy in 3D
 
-`poulpy-3d/model.mjs` describes Poulpy's 3D shape in plain JavaScript, with no dependency: the proportions (`SHAPE`), the two faces (`FACES`) and how he is lit and shaded (`LOOK`) sit at the top of the file. `poulpy-3d/motion.mjs` describes how he moves the same way: `TURN` is his idle, turning around in short steps with soft arms that trail and settle. `JUMP` is his little jump, which runs live on the docs page and is not written into the glTF files yet. `build-poulpy-3d.mjs` writes both as binary glTF files, one per side standing still and one per side moving, with his colours from `tokens.json`:
+`poulpy-3d/model.mjs` describes Poulpy's 3D shape in plain JavaScript, with no dependency: the proportions (`SHAPE`), his faces (`FACES`), his six moods (`MOODS`) and how he is lit and shaded (`LOOK`) sit at the top of the file. `poulpy-3d/motion.mjs` describes how he moves the same way: `TURN` is his idle, turning around in short steps with soft arms that trail and settle. `JUMP` is his little jump, which runs live on the docs page and is not written into the glTF files yet. `build-poulpy-3d.mjs` writes both as binary glTF files, one per side standing still and one per side moving, with his colours from `tokens.json`:
 
 ```sh
 node design/build-poulpy-3d.mjs
