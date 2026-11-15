@@ -20,8 +20,8 @@ import androidx.compose.ui.unit.dp
 import ch.coachpoulpy.android.R
 
 /**
- * The loading indicator: Poulpy seen from above as a blue outline, turning clockwise (the top moves left to right) once every
- * 2.4 s, or every 10 s when the phone's animations are turned off. Below 32 dp the line is thicker.
+ * The loading indicator: a picture of the 3D Poulpy seen from above, turning clockwise (the top moves left to right) once
+ * every 2.4 s, or every 10 s when the phone's animations are turned off.
  */
 @Composable
 fun PoulpyLoader(modifier: Modifier = Modifier, size: Dp = 48.dp) {
@@ -40,7 +40,7 @@ fun PoulpyLoader(modifier: Modifier = Modifier, size: Dp = 48.dp) {
         }
     }
     Image(
-        painterResource(if (size < SMALL) R.drawable.poulpy_loader_small else R.drawable.poulpy_loader),
+        painterResource(R.drawable.poulpy_loader),
         contentDescription = stringResource(R.string.common_loading),
         modifier = modifier.size(size).graphicsLayer { rotationZ = degrees },
     )
@@ -48,4 +48,3 @@ fun PoulpyLoader(modifier: Modifier = Modifier, size: Dp = 48.dp) {
 
 private const val TURN_MILLIS = 2_400L
 private const val REDUCED_TURN_MILLIS = 10_000L
-private val SMALL = 32.dp

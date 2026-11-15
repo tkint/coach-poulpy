@@ -36,11 +36,11 @@ The model also takes the twelve [poses](./brand.md#when-each-drawing-shows) of t
 - **The comic effects stay flat and face the viewer.** Sparks, confetti, puffs, bubbles and lettering are the drawing's own, standing in front of him or behind him, and they keep facing whoever looks while he turns.
 - **Cocky has no halo and no "PR!" badge in 3D.** The owner dropped them; his sparks stay, and become solid stars when he [winks](#the-cocky-one-winks).
 - **He still never lifts an arm.** Standing tall stretches his arms taller and lifts his head with them; Side glance leans his head. Nothing else moves.
-- **The loader is not here yet.** It is the next part of replacing the drawings with the model ([Brand decisions](./brand-decisions.md#16-the-3d-poulpy-replaces-the-drawings), decision 16); the apps and the website show his pictures, and the app icons are his pictures on Deep sea.
+- **The loader is his picture from above.** He is seen from straight overhead, so the head is a round dome with eight lobes around it and his eyes peeking out at the bottom, and the apps turn it clockwise (the top moves left to right) once every 2.4 s, once every 10 s with reduced motion. He is fitted inside the circle he turns in, so he never leaves his frame.
 
 ## His pictures
 
-Where the apps and the website do not need him live, they take a picture of him: one for each of the six moods and twelve poses, painted from the model. They are in [`design/poulpy-3d/pictures`](../design/poulpy-3d/pictures), one PNG each at 744 by 678 pixels, the same frame as the drawings they replace so a picture can take a drawing's place without moving anything. **They are transparent around him**, with no background and no tile, so they sit on a light or a dark screen alike; the preview below shows them on the page's own background.
+Where the apps and the website do not need him live, they take a picture of him: one for each of the six moods and twelve poses, painted from the model, and one more for the loader. They are in [`design/poulpy-3d/pictures`](../design/poulpy-3d/pictures), one PNG each at 744 by 678 pixels, the same frame as the drawings they replace so a picture can take a drawing's place without moving anything. **They are transparent around him**, with no background and no tile, so they sit on a light or a dark screen alike; the preview below shows them on the page's own background.
 
 <!-- live: Pictures -->
 

@@ -1,4 +1,4 @@
-// Generates the pictures of Poulpy in 3D: the six moods and the twelve poses, painted from the model.
+// Generates the pictures of Poulpy in 3D: the six moods, the twelve poses, the loader and the app icons, painted from the model.
 //   node design/build-poulpy-pictures.mjs          write the pictures
 //   node design/build-poulpy-pictures.mjs --check  fail if a picture is out of date (used by CI)
 //
@@ -42,6 +42,17 @@ for (const [name, model] of Object.entries(pictures)) {
   files[`${IOS}/${asset}.imageset/Contents.json`] = JSON.stringify({ images: [{ filename: `${asset}.png`, idiom: 'universal', scale: '3x' }], info: { author: 'xcode', version: 1 } }, null, 2) + '\n'
 }
 
+// The loader: Poulpy seen from straight above, square, see-through, inside the circle he turns in, so the apps can spin the
+// picture without it ever leaving its frame.
+const LOADER_SIDE = 600
+{
+  const png = pngOf(icon(pictures.mood_happy, LOADER_SIDE, { reach: 0.49, tilt: 89.9 }), LOADER_SIDE, LOADER_SIDE)
+  files[`${OUT}/loader.png`] = png
+  files[`${ANDROID}/poulpy_loader.png`] = png
+  files[`${IOS}/PoulpyLoader.imageset/PoulpyLoader.png`] = png
+  files[`${IOS}/PoulpyLoader.imageset/Contents.json`] = JSON.stringify({ images: [{ filename: 'PoulpyLoader.png', idiom: 'universal', scale: '3x' }], info: { author: 'xcode', version: 1 } }, null, 2) + '\n'
+}
+
 // The app icons: the same pictures, fitted into the icon's square on the dark theme's background, as the owner asked.
 //   iOS      AppIcon.appiconset, AppIcon<Id>.appiconset   1024 px, light, dark and tinted (the light and dark are alike)
 //   Android  drawable-nodpi/ic_launcher_[<id>_]foreground.png   the 108 dp layer, with Poulpy inside the 66 dp circle that
@@ -53,8 +64,8 @@ const hex = (c) => [1, 3, 5].map((i) => parseInt(c.slice(i, i + 2), 16))
 const ICON_SIDE = 1024
 
 // Poulpy as big as the icon needs, found by painting him once large and measuring what is covered.
-function icon(model, size, { reach, fill, background }) {
-  const big = 1024, src = paintPoulpy(model, { width: big, height: big, tilt: 8, distance: 14, centre: model.height / 2, smooth: 2 })
+function icon(model, size, { reach, fill, background, tilt = 8 }) {
+  const big = 1024, src = paintPoulpy(model, { width: big, height: big, tilt, distance: 14, centre: model.height / 2, smooth: 2 })
   let x0 = big, y0 = big, x1 = -1, y1 = -1
   for (let y = 0; y < big; y++) for (let x = 0; x < big; x++) if (src[(y * big + x) * 4 + 3] > 8) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y) }
   const cx = (x0 + x1 + 1) / 2, cy = (y0 + y1 + 1) / 2
@@ -133,7 +144,7 @@ for (const [path, content] of Object.entries(files)) {
 }
 // A picture of something that is gone must go too.
 const list = (dir, keep) => (existsSync(join(root, dir)) ? readdirSync(join(root, dir)).filter(keep) : [])
-for (const [dir, keep] of [[OUT, (f) => f.endsWith('.png')], [ANDROID, (f) => /^poulpy_(mood|pose)_.*\.png$/.test(f)], [IOS, (f) => /^Poulpy(Mood|Pose).*\.imageset$/.test(f)]]) {
+for (const [dir, keep] of [[OUT, (f) => f.endsWith('.png')], [ANDROID, (f) => /^poulpy_(mood|pose)_.*\.png$/.test(f)], [IOS, (f) => /^Poulpy(Mood|Pose|Loader).*\.imageset$/.test(f)]]) {
   for (const f of list(dir, keep)) if (!Object.keys(files).some((p) => p.startsWith(`${dir}/${f}`))) { console.error(`Not generated any more: ${dir}/${f}`); stale++ }
 }
 if (stale) { console.error('Run `node design/build-poulpy-pictures.mjs` and commit the result.'); process.exit(1) }
