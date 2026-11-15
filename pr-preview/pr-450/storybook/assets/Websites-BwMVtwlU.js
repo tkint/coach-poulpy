@@ -1,0 +1,4 @@
+import{n as e}from"./rolldown-runtime-sJBDdmOt.js";import{i as t,r as n}from"./react-DITjJg24.js";import{a as r}from"./chunk-W22LQPXL-DkWiGpo7.js";import{c as i,l as a,s as o}from"./blocks-BhKoxvKy.js";import{n as s,t as c}from"./rules-MSBZjyFm.js";function l(e){let n={h1:`h1`,...t(),...e.components};return(0,d.jsxs)(d.Fragment,{children:[(0,d.jsx)(i,{title:`Design system/Rules/Websites`}),`
+`,`
+`,(0,d.jsx)(n.h1,{id:`websites`,children:`Websites`}),`
+`,(0,d.jsx)(o,{children:s(`Websites`)})]})}function u(e={}){let{wrapper:n}={...t(),...e.components};return n?(0,d.jsx)(n,{...e,children:(0,d.jsx)(l,{...e})}):l(e)}var d;function f(){return(f=e((()=>{d=r(),n(),a(),c()})))()}f();export{u as default};
