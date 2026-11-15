@@ -958,11 +958,11 @@
 .cp-screen .text-button { flex: 1; height: 48px; border-radius: var(--cp-radius-pill); font-size: 15px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
 .cp-screen .section-link { margin: 0 var(--cp-space-xs); font-size: 15px; font-weight: 800; color: var(--cp-primary); }
 .cp-screen .lead { margin: 0 var(--cp-space-xs); font-size: 14px; line-height: 20px; color: var(--cp-on-surface-variant); }
-/* The loader: Poulpy's outline swinging 45 degrees one way and back, forever (LoaderSwing in the shared code). */
+/* The loader: Poulpy's outline swinging half a turn one way and then half a turn the other, forever (LoaderSwing in the shared code). */
 .cp-screen .poulpy-loader { display: inline-block; }
-.cp-screen .poulpy-loader img { display: block; width: 100%; height: 100%; animation: poulpy-swing 2.4s ease-in-out infinite; }
-@keyframes poulpy-swing { 50% { transform: rotate(45deg); } }
-@media (prefers-reduced-motion: reduce) { .cp-screen .poulpy-loader img { animation-duration: 10s; } }
+.cp-screen .poulpy-loader img { display: block; width: 100%; height: 100%; animation: poulpy-swing 3.6s ease-in-out infinite; }
+@keyframes poulpy-swing { from, to { transform: rotate(-180deg); } 50% { transform: rotate(180deg); } }
+@media (prefers-reduced-motion: reduce) { .cp-screen .poulpy-loader img { animation-duration: 12s; } }
 
 /* ---------- Exercise search, equipment sheet, variations sheet ---------- */
 

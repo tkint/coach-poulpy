@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// The loading indicator on a phone: Poulpy's outline seen from above, swinging 45 degrees one way and back, forever. The
+// The loading indicator on a phone: Poulpy's outline seen from above, swinging half a turn one way and then half a turn the other, forever. The
 // app's PoulpyLoader does the same with LoaderSwing of the shared code. `size` is its width; `label` is what a screen reader
 // hears (what is loading).
 import { poulpyDrawings } from '@coach-poulpy/ui'

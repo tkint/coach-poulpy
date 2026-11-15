@@ -43,10 +43,11 @@ for (const [name, model] of Object.entries(pictures)) {
   files[`${IOS}/${asset}.imageset/Contents.json`] = JSON.stringify({ images: [{ filename: `${asset}.png`, idiom: 'universal', scale: '3x' }], info: { author: 'xcode', version: 1 } }, null, 2) + '\n'
 }
 
-// The loader: just his outline seen from straight above, with each of his eight tentacles loose, in the blue of the brand,
-// square and see-through, inside the circle he turns in. The apps swing the picture a quarter turn's half (45 degrees) one way,
-// then the other, for as long as something loads.
-const LOADER_SIDE = 600, LOADER_LINE = 0.045 * LOADER_SIDE
+// The loader: just his outline seen from straight above, as the old loader was: the flower of his eight loose tentacles round
+// the head, with no line inside, in the brand blue, square and see-through, inside the circle he turns in. The line is bold
+// enough for the bases of neighbouring tentacles to touch. The apps swing the picture half a turn one way, then half a turn the other,
+// for as long as something loads.
+const LOADER_SIDE = 600, LOADER_LINE = 0.07 * LOADER_SIDE
 // How far each pixel inside a shape is from outside it (Felzenszwalb and Huttenlocher's distance transform, in pixels).
 function inside(shape, size) {
   const far = 1e20, f = Float64Array.from(shape, (v) => (v ? far : 0)), out = new Float64Array(size * size), d = new Float64Array(size), z = new Float64Array(size + 1), v = new Int32Array(size)
@@ -65,19 +66,16 @@ function inside(shape, size) {
   return out
 }
 function loader(model) {
-  const [r, g, b] = hex(colours.blue), alpha = new Float32Array(LOADER_SIDE * LOADER_SIDE)
-  const pieces = [...Array(8)].map((_, i) => (name) => name === `arm_${i + 1}` || name === `arm_${i + 1}_lining`).concat((name) => name === 'head' || name === 'head_lining')
-  for (const only of pieces) {
-    const px = icon(model, LOADER_SIDE, { reach: 0.49, tilt: 89.9, only, like: model }), cover = Float32Array.from({ length: alpha.length }, (_, i) => px[i * 4 + 3] / 255)
-    const depth = inside(cover.map((c) => (c >= 0.5 ? 1 : 0)), LOADER_SIDE)
-    // Inside its edge a piece is hollow, and it hides what is behind it; only its line shows.
-    for (let i = 0; i < alpha.length; i++) {
-      const line = Math.min(cover[i], Math.min(Math.max(LOADER_LINE - depth[i] + 0.5, 0), 1))
-      alpha[i] = line + alpha[i] * (1 - cover[i]) * (1 - line)
-    }
+  const [r, g, b] = hex(colours.blue)
+  // His whole shape from above, head and tentacles as one.
+  const px = icon(model, LOADER_SIDE, { reach: 0.49, tilt: 89.9, only: (name) => name === 'head' || name === 'head_lining' || name.startsWith('arm_'), like: model })
+  const cover = Float32Array.from({ length: LOADER_SIDE * LOADER_SIDE }, (_, i) => px[i * 4 + 3] / 255), depth = inside(cover.map((c) => (c >= 0.5 ? 1 : 0)), LOADER_SIDE)
+  const out = new Uint8Array(cover.length * 4)
+  // Only a line along the edge shows; inside it he is hollow.
+  for (let i = 0; i < cover.length; i++) {
+    out[i * 4] = r; out[i * 4 + 1] = g; out[i * 4 + 2] = b
+    out[i * 4 + 3] = Math.round(255 * Math.min(cover[i], Math.min(Math.max(LOADER_LINE - depth[i] + 0.5, 0), 1)))
   }
-  const out = new Uint8Array(alpha.length * 4)
-  for (let i = 0; i < alpha.length; i++) { out[i * 4] = r; out[i * 4 + 1] = g; out[i * 4 + 2] = b; out[i * 4 + 3] = Math.round(alpha[i] * 255) }
   return out
 }
 {

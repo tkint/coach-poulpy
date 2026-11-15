@@ -61,7 +61,7 @@ Baloo 2 for display and titles, Nunito for everything else. Platforms map each r
 - Spacing steps: 4, 8, 12, 16, 24, 32, 48 (`xs` to `xxxl`). Pick a step; never a value between them.
 - Radius: 8 for chips and small fields, 10 for cards and rows, 14 for sheets, pill for buttons. Small cards stay close to square so their text reads first.
 - Controls stay compact: a standard button is 44 high, a large one 52, an icon button 40 (its touch area stays 44), a small button 34. The side gutter of a screen is 16, and rows are 56 high with a 32 to 40 avatar. In the apps these come from one place, `PoulpySize` (generated from `design/tokens.json`, next to `PoulpySpace` and `PoulpyRadius`); a screen never writes a literal height, gutter or corner radius.
-- Motion: the flip (700 ms with overshoot) is the one signature move, used only when Poulpy changes side. Mood shades fade in 300 ms. Everything else is 150 to 250 ms and plain. With reduced motion on, the loader slows to one swing in 10 s.
+- Motion: the flip (700 ms with overshoot) is the one signature move, used only when Poulpy changes side. Mood shades fade in 300 ms. Everything else is 150 to 250 ms and plain. With reduced motion on, the loader slows to one swing in 12 s.
 
 ## Components
 
@@ -81,7 +81,7 @@ Baloo 2 for display and titles, Nunito for everything else. Platforms map each r
 | Item menu | A long press (iOS context menu) or ⋮; actions with icons, a divider, then the destructive one | Destructive items and their confirmation are `error` with an icon, never ember; the confirmation says what goes and what stays |
 | Plan sheet | 14 radius sheet, a month from Monday; past days dimmed, today outlined, planned days `primary` | `PlanSheet` on both platforms; tick several days, save once |
 | Error banner | `error` tint, icon plus text | Never ember |
-| Loader | Poulpy's outline from above, a head with eight loose tentacles, swinging 45° one way and back, once every 2.4 s | `PoulpyLoader` on both platforms; replaces spinners |
+| Loader | Poulpy's outline from above, eight loose tentacles round a head you see through, swinging half a turn each way, once every 3.6 s | `PoulpyLoader` on both platforms; replaces spinners |
 
 ## Base fields
 

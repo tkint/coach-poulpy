@@ -21,8 +21,8 @@ import ch.coachpoulpy.android.R
 import ch.coachpoulpy.shared.LoaderSwing
 
 /**
- * The loading indicator: Poulpy's outline seen from above, swinging 45 degrees clockwise and back again, forever, once every
- * 2.4 s (10 s when the phone's animations are turned off). The swing itself is [LoaderSwing] in the shared code.
+ * The loading indicator: Poulpy's outline seen from above, swinging half a turn one way and then half a turn the other
+ * way, forever, once every 3.6 s (12 s when the phone's animations are turned off). The swing itself is [LoaderSwing] in the shared code.
  */
 @Composable
 fun PoulpyLoader(modifier: Modifier = Modifier, size: Dp = 48.dp) {

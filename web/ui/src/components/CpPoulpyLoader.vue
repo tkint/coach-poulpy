@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// The loading indicator: Poulpy's outline seen from above, swinging 45 degrees one way and back again, forever (the
+// The loading indicator: Poulpy's outline seen from above, swinging half a turn one way and then half a turn the other, forever (the
 // swing is the CSS of .cp-poulpy-loader; the phones' is LoaderSwing in the shared code). It is a status, so a screen
 // reader hears `label`, which says "Loading" in the page's language unless the page says what is loading.
 import { computed } from 'vue'

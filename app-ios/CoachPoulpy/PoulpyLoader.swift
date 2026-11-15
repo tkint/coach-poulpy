@@ -1,8 +1,8 @@
 import SwiftUI
 import Shared
 
-/// The loading indicator: Poulpy's outline seen from above, swinging 45 degrees clockwise and back again, forever, once every
-/// 2.4 s (10 s with Reduce Motion). The swing itself is `LoaderSwing` in the shared code.
+/// The loading indicator: Poulpy's outline seen from above, swinging half a turn one way and then half a turn the other
+/// way, forever, once every 3.6 s (12 s with Reduce Motion). The swing itself is `LoaderSwing` in the shared code.
 struct PoulpyLoader: View {
     var size: CGFloat = 48
     @Environment(\.accessibilityReduceMotion) private var reduceMotion

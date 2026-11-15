@@ -298,7 +298,7 @@
     height: auto;
   }
 
-  /* The loading indicator: Poulpy's outline, swinging 45 degrees one way and back, forever. With reduced motion it is slow. */
+  /* The loading indicator: Poulpy's outline, swinging half a turn one way and then half a turn the other, forever. With reduced motion it is slow. */
   .cp-poulpy-loader {
     display: inline-block;
     width: var(--cp-poulpy-loader-size, 48px);
@@ -308,13 +308,14 @@
     display: block;
     width: 100%;
     height: 100%;
-    animation: cp-poulpy-swing 2.4s ease-in-out infinite;
+    animation: cp-poulpy-swing 3.6s ease-in-out infinite;
   }
   @keyframes cp-poulpy-swing {
-    50% { transform: rotate(45deg); }
+    from, to { transform: rotate(-180deg); }
+    50% { transform: rotate(180deg); }
   }
   @media (prefers-reduced-motion: reduce) {
-    .cp-poulpy-loader img { animation-duration: 10s; }
+    .cp-poulpy-loader img { animation-duration: 12s; }
   }
 
   /* An error is crimson, always with an icon and words: never ember. */
