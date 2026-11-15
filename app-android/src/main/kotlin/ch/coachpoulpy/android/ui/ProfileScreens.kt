@@ -235,7 +235,7 @@ internal fun SettingsHub(graph: AppGraph, language: String, onPage: (SettingsPag
                             Image(
                                 painterResource(appIcon.drawingRes),
                                 contentDescription = null,
-                                modifier = Modifier.size(24.dp),
+                                modifier = Modifier.size(30.dp),
                             )
                         }
                     },
