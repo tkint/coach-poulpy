@@ -6,6 +6,8 @@ import Shared
 /// bending about its base behind the turn. Where everything is at a given time is `LoaderSwing` in the shared code.
 struct PoulpyLoader: View {
     var size: CGFloat = 48
+    /// Only turn clockwise, one full turn every 3.6 s, instead of swinging there and back.
+    var clockwise = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
@@ -17,14 +19,14 @@ struct PoulpyLoader: View {
                     Image("PoulpyLoaderTentacle")
                         .resizable()
                         .rotationEffect(
-                            .degrees(Double(LoaderSwing.shared.tentacleDegrees(elapsedMillis: elapsed, index: Int32(index), periodMillis: period))),
+                            .degrees(Double(clockwise ? LoaderSwing.shared.clockwiseTentacleDegrees(elapsedMillis: elapsed, index: Int32(index), periodMillis: period) : LoaderSwing.shared.tentacleDegrees(elapsedMillis: elapsed, index: Int32(index), periodMillis: period))),
                             anchor: UnitPoint(x: 0.5, y: CGFloat(LoaderSwing.shared.BASE))
                         )
                         .rotationEffect(.degrees(Double(index) * 360 / Double(LoaderSwing.shared.TENTACLES)))
                 }
             }
             .frame(width: size, height: size)
-            .rotationEffect(.degrees(Double(LoaderSwing.shared.degrees(elapsedMillis: elapsed, periodMillis: period))))
+            .rotationEffect(.degrees(Double(clockwise ? LoaderSwing.shared.clockwiseDegrees(elapsedMillis: elapsed, periodMillis: period) : LoaderSwing.shared.degrees(elapsedMillis: elapsed, periodMillis: period))))
         }
         .accessibilityElement()
         .accessibilityLabel(Text("common.loading"))

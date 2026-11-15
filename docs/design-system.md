@@ -81,7 +81,7 @@ Baloo 2 for display and titles, Nunito for everything else. Platforms map each r
 | Item menu | A long press (iOS context menu) or ⋮; actions with icons, a divider, then the destructive one | Destructive items and their confirmation are `error` with an icon, never ember; the confirmation says what goes and what stays |
 | Plan sheet | 14 radius sheet, a month from Monday; past days dimmed, today outlined, planned days `primary` | `PlanSheet` on both platforms; tick several days, save once |
 | Error banner | `error` tint, icon plus text | Never ember |
-| Loader | Poulpy's outline from above, eight rounded tentacles hanging loose, swinging half a turn each way, once every 3.6 s | `PoulpyLoader` on both platforms; replaces spinners |
+| Loader | Poulpy's outline from above, eight rounded tentacles hanging loose, swinging half a turn each way, once every 3.6 s; `clockwise` is the other version, which only turns one way | `PoulpyLoader` on both platforms; replaces spinners |
 
 ## Base fields
 

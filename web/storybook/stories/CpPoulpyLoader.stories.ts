@@ -6,7 +6,7 @@ import doc from './CpPoulpyLoader.md?raw'
 const meta = {
   title: 'Web/Components/Display/Poulpy loader',
   component: CpPoulpyLoader,
-  argTypes: { size: { control: { type: 'range', min: 16, max: 160, step: 8 } } },
+  argTypes: { spin: { control: 'inline-radio', options: ['swing', 'clockwise'] }, size: { control: { type: 'range', min: 16, max: 160, step: 8 } } },
   parameters: { docs: { description: { component: doc } } },
 } satisfies Meta<typeof CpPoulpyLoader>
 export default meta
@@ -18,6 +18,7 @@ export const Default: Story = {
     expect(within(canvasElement).getByRole('status', { name: 'Loading' })).toBeInTheDocument()
   },
 }
+export const Clockwise: Story = { args: { spin: 'clockwise' } }
 export const Large: Story = { args: { size: 112 } }
 export const Small: Story = { args: { size: 16 } }
 export const SaysWhatLoads: Story = {

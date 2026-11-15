@@ -336,6 +336,21 @@
     75% { transform: rotate(32deg); }
     87.5% { transform: rotate(24deg); }
   }
+  /* The other version: only clockwise, a full turn every period, each tentacle trailing behind (LoaderSwing.clockwise*). */
+  .cp-poulpy-loader--clockwise { animation: cp-poulpy-turn var(--cp-poulpy-loader-period) linear infinite; }
+  .cp-poulpy-loader--clockwise .cp-poulpy-loader-tentacle img {
+    animation-name: cp-poulpy-trail;
+    animation-delay: calc(var(--cp-poulpy-loader-period) * (var(--cp-tentacle) * 0.04 - 1));
+  }
+  @keyframes cp-poulpy-turn {
+    from { transform: rotate(0); }
+    to { transform: rotate(360deg); }
+  }
+  @keyframes cp-poulpy-trail {
+    0%, 50%, 100% { transform: rotate(-28deg); }
+    25% { transform: rotate(-34deg); }
+    75% { transform: rotate(-22deg); }
+  }
   @media (prefers-reduced-motion: reduce) {
     .cp-poulpy-loader { --cp-poulpy-loader-period: 12s; }
   }

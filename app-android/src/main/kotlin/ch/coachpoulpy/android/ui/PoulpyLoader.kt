@@ -29,10 +29,10 @@ import ch.coachpoulpy.shared.LoaderSwing
  * The loading indicator: Poulpy's outline seen from above, swinging half a turn one way and then half a turn the other way,
  * forever, once every 3.6 s (12 s when the phone's animations are turned off). It is one tentacle drawn eight times, and each
  * tentacle hangs loose, bending about its base behind the turn. Where everything is at a given time is [LoaderSwing] in the
- * shared code.
+ * shared code. With `clockwise` he only turns clockwise, one full turn every 3.6 s, his tentacles trailing behind.
  */
 @Composable
-fun PoulpyLoader(modifier: Modifier = Modifier, size: Dp = 48.dp) {
+fun PoulpyLoader(modifier: Modifier = Modifier, size: Dp = 48.dp, clockwise: Boolean = false) {
     val context = LocalContext.current
     // "Remove animations" sets the animator scale to 0. The frame clock below ignores that
     // scale, so Poulpy still turns, only slowly.
@@ -51,7 +51,7 @@ fun PoulpyLoader(modifier: Modifier = Modifier, size: Dp = 48.dp) {
     Box(
         modifier
             .size(size)
-            .graphicsLayer { rotationZ = LoaderSwing.degrees(elapsed, periodMillis) }
+            .graphicsLayer { rotationZ = if (clockwise) LoaderSwing.clockwiseDegrees(elapsed, periodMillis) else LoaderSwing.degrees(elapsed, periodMillis) }
             .clearAndSetSemantics { contentDescription = label },
     ) {
         for (index in 0 until LoaderSwing.TENTACLES) {
@@ -61,7 +61,7 @@ fun PoulpyLoader(modifier: Modifier = Modifier, size: Dp = 48.dp) {
                     painterResource(R.drawable.poulpy_loader_tentacle),
                     contentDescription = null,
                     modifier = Modifier.fillMaxSize().graphicsLayer {
-                        rotationZ = LoaderSwing.tentacleDegrees(elapsed, index, periodMillis)
+                        rotationZ = if (clockwise) LoaderSwing.clockwiseTentacleDegrees(elapsed, index, periodMillis) else LoaderSwing.tentacleDegrees(elapsed, index, periodMillis)
                         transformOrigin = TransformOrigin(0.5f, LoaderSwing.BASE)
                     },
                 )

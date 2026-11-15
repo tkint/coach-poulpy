@@ -5,12 +5,13 @@ const meta = {
   title: 'Mobile/Components/Poulpy loader',
   render: renderComponent('MobilePoulpyLoader', undefined, { content: '' }),
   args: { size: 48, label: 'Loading' },
-  argTypes: { size: { control: { type: 'range', min: 16, max: 160, step: 8 } } },
-  parameters: { docs: { canvas: { sourceState: 'none' }, description: { component: '`MobilePoulpyLoader`: the loading indicator, Poulpy\'s outline seen from above, swinging half a turn one way and then half a turn the other, forever, once every 3.6 s (12 s with reduced motion), each of his eight tentacles hanging loose behind the turn. It replaces spinners: 16 in a row, 48 in a list, 112 on a full page. `label` says what is loading, for a screen reader.' } } },
+  argTypes: { spin: { control: 'inline-radio', options: ['swing', 'clockwise'] }, size: { control: { type: 'range', min: 16, max: 160, step: 8 } } },
+  parameters: { docs: { canvas: { sourceState: 'none' }, description: { component: '`MobilePoulpyLoader`: the loading indicator, Poulpy\'s outline seen from above, swinging half a turn one way and then half a turn the other, forever, once every 3.6 s (12 s with reduced motion), each of his eight tentacles hanging loose behind the turn. It replaces spinners: 16 in a row, 48 in a list, 112 on a full page. `spin="clockwise"` is the other version: it only turns clockwise, a full turn every cycle. `label` says what is loading, for a screen reader.' } } },
 } satisfies Meta
 export default meta
 type Story = StoryObj<typeof meta>
 
 export const Default: Story = {}
+export const Clockwise: Story = { args: { spin: 'clockwise' } }
 export const Page: Story = { args: { size: 112, label: 'Searching for devices' } }
 export const InARow: Story = { args: { size: 16 } }

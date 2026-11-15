@@ -68,3 +68,20 @@ class LoaderTentaclesTest {
         }
     }
 }
+
+class LoaderClockwiseTest {
+    @Test
+    fun turnsClockwiseOnceEveryPeriod() {
+        assertEquals(0f, LoaderSwing.clockwiseDegrees(0))
+        assertEquals(90f, LoaderSwing.clockwiseDegrees(LoaderSwing.MILLIS / 4), 0.01f)
+        assertEquals(0f, LoaderSwing.clockwiseDegrees(LoaderSwing.MILLIS))
+    }
+
+    @Test
+    fun tentaclesTrailBehindTheTurn() {
+        for (t in 0L until LoaderSwing.MILLIS step 100) for (i in 0 until LoaderSwing.TENTACLES) {
+            val bend = LoaderSwing.clockwiseTentacleDegrees(t, i)
+            assertTrue(bend in -(LoaderSwing.TRAIL_DEGREES + LoaderSwing.TRAIL_WOBBLE_DEGREES)..-(LoaderSwing.TRAIL_DEGREES - LoaderSwing.TRAIL_WOBBLE_DEGREES))
+        }
+    }
+}

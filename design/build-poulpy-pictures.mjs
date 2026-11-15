@@ -74,7 +74,7 @@ function loader(model) {
   const [r, g, b] = hex(colours.blue), N = LOADER_SIDE
   // His whole shape from above, head and tentacles as one.
   const px = icon(model, N, { reach: 0.46, tilt: 89.9, only: (name) => name === 'head' || name === 'head_lining' || name.startsWith('arm_'), like: model })
-  const flower = rounded(Uint8Array.from({ length: N * N }, (_, i) => (px[i * 4 + 3] >= 128 ? 1 : 0)), { convex: 0.02 * N, concave: 0.05 * N }, N)
+  const flower = rounded(Uint8Array.from({ length: N * N }, (_, i) => (px[i * 4 + 3] >= 128 ? 1 : 0)), { convex: 0.11 * N, concave: 0.05 * N }, N)
   // The hollow he is outlined round: the flower shrunk by the line, its inner points rounded as well.
   const hollow = rounded(shrink(flower, LOADER_LINE, N), { convex: 0.025 * N, concave: 0.025 * N }, N)
   // The line round one tentacle: the eighth of the turn round the top, and its two ends rounded off like the old loader's tails.
@@ -82,7 +82,7 @@ function loader(model) {
     const x = i % N, y = Math.floor(i / N), angle = Math.atan2(x + 0.5 - half, half - y - 0.5)
     return flower[i] && !hollow[i] && Math.abs(angle) <= Math.PI / 8 + 0.02 ? 1 : 0
   })
-  const capped = rounded(ring, { convex: 0.45 * LOADER_LINE }, N), edge = inside(capped, N)
+  const edge = inside(ring, N)
   const out = new Uint8Array(N * N * 4)
   for (let i = 0; i < N * N; i++) { out[i * 4] = r; out[i * 4 + 1] = g; out[i * 4 + 2] = b; out[i * 4 + 3] = Math.round(255 * Math.min(Math.max(edge[i] - 0.5, 0), 1)) }
   // Where the line between two tentacles meets the head: along the eighth turn away from the top, out to where the flower ends.

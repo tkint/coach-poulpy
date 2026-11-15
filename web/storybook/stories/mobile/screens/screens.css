@@ -965,6 +965,10 @@
 .cp-screen .poulpy-loader-tentacle img { display: block; width: 100%; height: 100%; transform-origin: 50% 18.28%; animation: poulpy-bend var(--period) linear infinite; animation-delay: calc(var(--period) * (var(--tentacle) * 0.012 - 1)); }
 @keyframes poulpy-swing { from, to { transform: rotate(-180deg); } 50% { transform: rotate(180deg); } }
 @keyframes poulpy-bend { 0%, 50%, 100% { transform: rotate(0); } 12.5% { transform: rotate(-24deg); } 25% { transform: rotate(-32deg); } 37.5% { transform: rotate(-24deg); } 62.5% { transform: rotate(24deg); } 75% { transform: rotate(32deg); } 87.5% { transform: rotate(24deg); } }
+.cp-screen .poulpy-loader--clockwise { animation: poulpy-turn var(--period) linear infinite; }
+.cp-screen .poulpy-loader--clockwise .poulpy-loader-tentacle img { animation-name: poulpy-trail; animation-delay: calc(var(--period) * (var(--tentacle) * 0.04 - 1)); }
+@keyframes poulpy-turn { from { transform: rotate(0); } to { transform: rotate(360deg); } }
+@keyframes poulpy-trail { 0%, 50%, 100% { transform: rotate(-28deg); } 25% { transform: rotate(-34deg); } 75% { transform: rotate(-22deg); } }
 @media (prefers-reduced-motion: reduce) { .cp-screen .poulpy-loader { --period: 12s; } }
 
 /* ---------- Exercise search, equipment sheet, variations sheet ---------- */
