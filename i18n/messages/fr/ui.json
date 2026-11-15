@@ -9,6 +9,8 @@
     "showPassword": "Afficher le mot de passe",
     "hidePassword": "Masquer le mot de passe",
     "clearSearch": "Effacer la recherche",
+    "front": "Face",
+    "back": "Dos",
     "less": "Moins",
     "more": "Plus"
   }

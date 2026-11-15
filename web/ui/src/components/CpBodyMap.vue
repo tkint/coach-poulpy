@@ -5,8 +5,8 @@
 // `heat` in the object runs from 1 (a little) to 3 (most) and a bare side means 3; an injury is drawn in the pain colour, its
 // `heat` how much it hurts. `description` says in words what the picture shows, since the figure alone is not readable by a screen reader.
 // `layout` shows the front, the back or both; `legend` puts the Less to More scale on top, on the right or hides it.
-// Every area has a title, its name as a tooltip. With `interactive`, an area is a button (`selectable` narrows which; `pick` says its area and side, `aria-pressed` says whether it is
-// lit) and a pick updates `v-model:heat` or `v-model:injury` (`editing` says which); `interactive-mode` says whether a tap takes
+// Every area has a title, its name as a tooltip. With `editing` (`heat` or `injury`), an area is a button (`selectable` narrows which; `pick` says its area and side, `aria-pressed` says whether it is
+// lit) and a pick updates `v-model:heat` or `v-model:injury`, whichever `editing` says; without it the map is read-only; `interactive-mode` says whether a tap takes
 // the side tapped or both sides. A screen that does this writes its own legend, or none, with the legend `hidden`.
 import { computed } from 'vue'
 import { bodyAreaText, uiText } from '../i18n'
@@ -23,22 +23,18 @@ const props = defineProps<{
   heat?: BodyAreas
   /** What hurts; `v-model:injury` in a form. */
   injury?: BodyAreas
-  /** What a pick edits with `interactive`: the `heat` (the default) or the `injury`. */
-  editing?: 'heat' | 'injury'
+  /** What a pick edits: the `heat` or the `injury`. Left out or false, the map is read-only. */
+  editing?: false | 'heat' | 'injury'
   /** Wider shoulders (the default) or Wider hips. */
   figure?: 'shoulders' | 'hips'
-  captions: { front: string; back: string }
   description: string
-  less?: string
-  more?: string
   /** Which figures: `both` (the default), `front` or `back`. */
   layout?: 'front' | 'back' | 'both'
-  /** Where the Less to More legend goes: `hidden` (the default), `top` or `right`; its words are the shared ones, or `less` and `more`. */
+  /** Where the Less to More legend goes: `hidden` (the default), `top` or `right`; its words are the shared ones. */
   legend?: 'hidden' | 'top' | 'right'
-  interactive?: boolean
-  /** What a tap selects with `interactive`: the `individual` side tapped (the default) or `both` sides of the area. */
+  /** What a tap selects with `editing`: the `individual` side tapped (the default) or `both` sides of the area. */
   interactiveMode?: 'individual' | 'both'
-  /** The areas a tap can pick with `interactive`; every area when left out. */
+  /** The areas a tap can pick with `editing`; every area when left out. */
   selectable?: string[]
 }>()
 const emit = defineEmits<{ pick: [area: string, side: 'left' | 'right']; 'update:heat': [areas: BodyAreas]; 'update:injury': [areas: BodyAreas] }>()
@@ -83,11 +79,11 @@ const views = computed(() => {
   const regions = shapes[props.figure ?? 'shoulders'] as Record<'front' | 'back', Region[]>
   const view = (name: 'front' | 'back') => ({
     name,
-    caption: props.captions[name],
+    caption: uiText(`ui.${name}`),
     paths: regions[name].map((region) => {
       if (region.skin || !region.key) return { d: region.d, outline: region.skin }
       const { area, side } = split(region.key)
-      const pickable = props.interactive && !!side && (!props.selectable || props.selectable.includes(area))
+      const pickable = !!props.editing && !!side && (!props.selectable || props.selectable.includes(area))
       const label = bodyAreaText(area, side)
       return { d: region.d, area, side, label, pickable, heat: heatOf(props.heat, area, side), pain: heatOf(props.injury, area, side) }
     }),
@@ -100,13 +96,13 @@ const showLegend = computed(() => !!props.legend && props.legend !== 'hidden')
 <template>
   <div class="flex items-center justify-center gap-4" :class="legend === 'right' ? 'flex-row' : 'flex-col'" data-component="body-map">
     <p v-if="showLegend && legend === 'top'" class="cp-heat-legend order-first" aria-hidden="true">
-      {{ less ?? uiText('ui.less') }}
+      {{ uiText('ui.less') }}
       <svg v-for="heat in [1, 2, 3]" :key="heat" viewBox="0 0 14 14"><rect class="cp-body-part" :data-heat="heat" x="1" y="1" width="12" height="12" rx="3" /></svg>
-      {{ more ?? uiText('ui.more') }}
+      {{ uiText('ui.more') }}
     </p>
-    <div class="cp-body-map" :role="interactive ? 'group' : 'img'" :aria-label="description">
+    <div class="cp-body-map" :role="editing ? 'group' : 'img'" :aria-label="description">
       <figure v-for="view in views" :key="view.name" class="cp-body-view">
-        <svg viewBox="0 0 120 268" class="cp-body-figure" :aria-hidden="interactive ? undefined : 'true'">
+        <svg viewBox="0 0 120 268" class="cp-body-figure" :aria-hidden="editing ? undefined : 'true'">
           <template v-for="(path, i) in view.paths" :key="i">
             <path v-if="path.outline" class="cp-body-outline" :d="path.d" />
             <path
@@ -132,9 +128,9 @@ const showLegend = computed(() => !!props.legend && props.legend !== 'hidden')
       </figure>
     </div>
     <p v-if="showLegend && legend === 'right'" class="cp-heat-legend cp-heat-legend-right" aria-hidden="true">
-      {{ more ?? uiText('ui.more') }}
+      {{ uiText('ui.more') }}
       <svg v-for="heat in [3, 2, 1]" :key="heat" viewBox="0 0 14 14"><rect class="cp-body-part" :data-heat="heat" x="1" y="1" width="12" height="12" rx="3" /></svg>
-      {{ less ?? uiText('ui.less') }}
+      {{ uiText('ui.less') }}
     </p>
   </div>
 </template>

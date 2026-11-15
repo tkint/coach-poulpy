@@ -9,6 +9,8 @@
     "showPassword": "Show password",
     "hidePassword": "Hide password",
     "clearSearch": "Clear the search",
+    "front": "Front",
+    "back": "Back",
     "less": "Less",
     "more": "More"
   }

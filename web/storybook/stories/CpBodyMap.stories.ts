@@ -10,11 +10,8 @@ const meta = {
   component: CpBodyMap,
   args: {
     heat: { pectoral: 'both', biceps: { side: 'left', heat: 2 }, abs: { side: 'both', heat: 1 }, deltoid: 'both', triceps: { side: 'both', heat: 2 } },
-    captions: { front: 'Front', back: 'Back' },
     description: 'Chest and shoulders worked most',
     legend: 'top',
-    less: 'Less',
-    more: 'More',
   },
 } satisfies Meta<typeof CpBodyMap>
 export default meta
@@ -41,7 +38,7 @@ export const Hips: Story = { args: { figure: 'hips' } }
 
 /** In a form, `v-model:heat` holds the areas: picking a side toggles it, and both sides make `both`. */
 export const FormModel: Story = {
-  args: { heat: undefined, legend: 'hidden', interactive: true },
+  args: { heat: undefined, legend: 'hidden', editing: 'heat' },
   render: (args) => ({
     components: { CpBodyMap },
     setup: () => ({ args, areas: ref<BodyAreas>({ biceps: 'left' }) }),
@@ -69,7 +66,7 @@ export const BothSides: Story = {
 
 /** `v-model:injury` with `editing="injury"`: a pick edits what hurts, and the muscles worked stay as they are. */
 export const InjuryModel: Story = {
-  args: { heat: undefined, legend: 'hidden', interactive: true, editing: 'injury', description: 'Where it hurts' },
+  args: { heat: undefined, legend: 'hidden', editing: 'injury', description: 'Where it hurts' },
   render: (args) => ({
     components: { CpBodyMap },
     setup: () => ({ args, hurt: ref<BodyAreas>({}) }),
@@ -84,7 +81,7 @@ export const InjuryModel: Story = {
 
 /** The picture is a field: every area is a button (`selectable` narrows which) that says its area and side when it is pressed. */
 export const Interactive: Story = {
-  args: { interactive: true, heat: undefined, legend: 'hidden' },
+  args: { editing: 'heat', heat: undefined, legend: 'hidden' },
   render: (args) => ({
     components: { CpBodyMap },
     setup: () => {
