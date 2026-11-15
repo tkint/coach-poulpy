@@ -43,13 +43,14 @@ export function turnSeconds(turn = TURN) {
 
 /**
  * Poulpy turning, as something to advance in time.
- * @param {{ softness?: number, turn?: typeof TURN }} [options] `softness` scales how loose the arms are:
- *   1 is the design, 0 makes them stiff, 2 very floppy. It can be changed at any time.
- * @returns {{ softness: number, advance(seconds: number): TurnPose, pose(): TurnPose }}
+ * @param {{ softness?: number, stride?: number, turn?: typeof TURN }} [options] `softness` scales how loose
+ *   the arms are: 1 is the design, 0 makes them stiff, 2 very floppy. `stride` scales how far each step
+ *   turns: 1 is the design, 2 twice as far. Both can be changed at any time.
+ * @returns {{ softness: number, stride: number, advance(seconds: number): TurnPose, pose(): TurnPose }}
  *   A pose is `{ yaw, squash, arms }`: the way he faces in radians (it keeps growing turn after turn), how
  *   much his head is squashed (negative) or stretched, and for each arm its three bends in radians.
  */
-export function createTurn({ softness = 1, turn = TURN } = {}) {
+export function createTurn({ softness = 1, stride = 1, turn = TURN } = {}) {
   const arms = turn.armVariety.slice(0, SHAPE.arms.count)
   // Angles are kept from above, in radians: `at` is where the body faces, `to` where it should.
   let step = 0, phase = 0, clock = 0, base = 0, to = 0, at = 0, speed = 0, squash = 0, squashSpeed = 0
@@ -63,9 +64,9 @@ export function createTurn({ softness = 1, turn = TURN } = {}) {
     while (clock >= lengths[phase]) {
       clock -= lengths[phase]
       phase = (phase + 1) % 3
-      if (phase === 0) { base += turn.steps[step] * RAD; step = (step + 1) % turn.steps.length }
+      if (phase === 0) { base = to; step = (step + 1) % turn.steps.length }
     }
-    to = phase === 0 ? base - turn.windUp.degrees * RAD : phase === 1 ? base + turn.steps[step] * RAD : to
+    to = phase === 0 ? base - turn.windUp.degrees * RAD : phase === 1 ? base + turn.steps[step] * RAD * stride : to
 
     // The body follows.
     const b = turn.body
@@ -97,9 +98,11 @@ export function createTurn({ softness = 1, turn = TURN } = {}) {
   let owed = 0
   const sim = {
     softness,
+    stride,
     pose: () => ({ yaw: at, squash, arms: angle.map((a) => [a[0] - at, a[1] - a[0], a[2] - a[1]]) }),
     advance(seconds) {
       softness = sim.softness
+      stride = sim.stride
       owed += Math.min(Math.max(seconds, 0), 1)
       while (owed >= SUBSTEP) { tick(SUBSTEP); owed -= SUBSTEP }
       return sim.pose()

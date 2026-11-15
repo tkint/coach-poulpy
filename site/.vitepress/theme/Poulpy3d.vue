@@ -17,6 +17,7 @@ const distance = shallowRef(9.6)
 const speed = shallowRef(1)
 const spinning = shallowRef(false) // the viewer walks around him, or with `motion` he moves
 const softness = shallowRef(1) // how loose his arms are: 1 is the design
+const step = shallowRef(24) // degrees he turns at each step, on average: 24 is the design
 const failed = shallowRef(false)
 
 let scene: ReturnType<typeof createPoulpyScene> | undefined
@@ -85,6 +86,7 @@ const look = () => scene?.look({ turn: turn.value, tilt: tilt.value, distance: d
 watch([side, outline], show)
 watch([turn, tilt, distance], look)
 watch(softness, (value) => { if (move) move.softness = value })
+watch(step, (degrees) => { if (move) move.stride = degrees / 24 })
 
 onMounted(async () => {
   // three.js is only fetched on this page, and only in the browser.
@@ -138,6 +140,7 @@ onBeforeUnmount(() => {
       </div>
       <label v-if="!motion" class="slider">Turn <input v-model.number="turn" type="range" min="0" max="360" step="1" @input="spinning = false" /></label>
       <label class="slider">Tilt <input v-model.number="tilt" type="range" min="-89" max="89" step="1" /></label>
+      <label v-if="motion" class="slider">Step <input v-model.number="step" type="range" min="5" max="90" step="1" /><output>{{ step }}°</output></label>
       <label v-if="motion" class="slider">Soft arms <input v-model.number="softness" type="range" min="0" max="2" step="0.05" /></label>
       <label class="slider">Speed <input v-model.number="speed" type="range" min="0.2" :max="motion ? 2 : 4" step="0.1" @input="spinning = true" /></label>
     </div>
@@ -161,5 +164,6 @@ onBeforeUnmount(() => {
 .toggle[aria-pressed='true'] { border-color: var(--vp-c-brand-1); color: var(--vp-c-brand-1); background: var(--vp-c-brand-soft); }
 .choice:focus-visible, .toggle:focus-visible { outline: 3px solid var(--vp-c-brand-1); outline-offset: 2px; }
 .slider { flex: 1 1 180px; display: flex; align-items: center; gap: 10px; min-width: 0; font-size: 14px; font-weight: 700; }
+.slider output { min-width: 2.5em; font-variant-numeric: tabular-nums; }
 .slider input { flex: 1; min-width: 0; height: 36px; accent-color: var(--vp-c-brand-1); }
 </style>
