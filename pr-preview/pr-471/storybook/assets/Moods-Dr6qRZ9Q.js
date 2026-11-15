@@ -1,0 +1,4 @@
+import{n as e}from"./rolldown-runtime-sJBDdmOt.js";import{f as t,l as n,u as r}from"./blocks-DuJnpHm9.js";import{a as i}from"./chunk-W22LQPXL-DAacIxBz.js";import{i as a,r as o}from"./react-DITjJg24.js";import{n as s,t as c}from"./markdown-pages-BL5cQVne.js";function l(e){let t={h1:`h1`,...a(),...e.components};return(0,d.jsxs)(d.Fragment,{children:[(0,d.jsx)(r,{title:`Brand/Moods`}),`
+`,`
+`,(0,d.jsx)(t.h1,{id:`moods`,children:`Moods`}),`
+`,(0,d.jsx)(n,{children:f(`Moods`,`When each drawing shows`,`The ember side`)})]})}function u(e={}){let{wrapper:t}={...a(),...e.components};return t?(0,d.jsx)(t,{...e,children:(0,d.jsx)(l,{...e})}):l(e)}var d,f;function p(){return(p=e((()=>{d=i(),o(),t(),c(),f=s(`brand`).sections})))()}p();export{f as brand,u as default};
