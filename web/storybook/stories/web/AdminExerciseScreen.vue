@@ -33,7 +33,7 @@ const props = withDefaults(defineProps<{
   isNew?: boolean
   badges?: { text: string; tone: 'success' | 'neutral' | 'outline' | 'primary' }[]
   slugTaken?: boolean
-  /** A saved draft that no publication has ever included: the only kind that can be deleted. */
+  /** A saved draft that no publication has ever included: deleting it touches no phone. */
   neverPublished?: boolean
   /** Said under the language switch: where the French text stands. */
   frenchFlagged?: boolean
@@ -193,10 +193,9 @@ const slugLocked = computed(() => !props.isNew)
             <div class="flex flex-wrap items-center justify-between gap-4">
               <div class="flex min-w-0 flex-1 flex-col gap-1">
                 <h3 class="font-semibold">Delete this exercise</h3>
-                <p v-if="neverPublished" class="text-sm text-base-content/70">Removes this draft for good. It was never published, so no workout or phone uses it.</p>
-                <p v-else class="text-sm text-base-content/70">A published exercise cannot be deleted: workouts and history on phones refer to it. Retire it instead.</p>
+                <p class="text-sm text-base-content/70">Removes the exercise from the catalog for good, with all its translations.<template v-if="!neverPublished"> It is published: phones that already downloaded it keep it, but workouts that use it lose it. Retire it instead unless this is a test exercise.</template></p>
               </div>
-              <button type="button" class="cp-btn cp-btn-error gap-2" :disabled="!neverPublished"><Trash2 class="size-5 shrink-0" aria-hidden="true" />Delete exercise</button>
+              <button type="button" class="cp-btn cp-btn-error gap-2"><Trash2 class="size-5 shrink-0" aria-hidden="true" />Delete exercise</button>
             </div>
           </CpCard>
         </div>
