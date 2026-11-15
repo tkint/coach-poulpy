@@ -5,7 +5,7 @@
 // `heat` in the object runs from 1 (a little) to 3 (most) and a bare side means 3; an injury is drawn in the pain colour, its
 // `heat` how much it hurts. `description` says in words what the picture shows, since the figure alone is not readable by a screen reader.
 // `layout` shows the front, the back or both; `legend` puts the Less to More scale on top, on the right or hides it.
-// With `interactive`, an area is a button (`selectable` narrows which, `areaLabel` names it; `pick` says its area and side, `aria-pressed` says whether it is
+// Every area has a title, its name as a tooltip. With `interactive`, an area is a button (`selectable` narrows which, `areaLabel` names it; `pick` says its area and side, `aria-pressed` says whether it is
 // lit) and a pick updates `v-model:heat` or `v-model:injury` (`editing` says which); `interactive-mode` says whether a tap takes
 // the side tapped or both sides. A screen that does this writes its own legend, or none, with the legend `hidden`.
 import { computed } from 'vue'
@@ -90,8 +90,8 @@ const views = computed(() => {
       const { area, side } = split(region.key)
       const pickable = props.interactive && !!side && (!props.selectable || props.selectable.includes(area))
       // CLEANUP: the fallback name is the area as written, untranslated; give web/ui static translations so it reads in the person's language.
-      const label = pickable ? (props.areaLabel?.(area, side) ?? `${area}, ${side}`) : undefined
-      return { d: region.d, area, side, label, heat: heatOf(props.heat, area, side), pain: heatOf(props.injury, area, side) }
+      const label = side ? (props.areaLabel?.(area, side) ?? `${area}, ${side}`) : area
+      return { d: region.d, area, side, label, pickable, heat: heatOf(props.heat, area, side), pain: heatOf(props.injury, area, side) }
     }),
   })
   const shown = [view('front'), view('back')]
@@ -112,7 +112,7 @@ const showLegend = computed(() => !!props.legend && props.legend !== 'hidden' &&
           <template v-for="(path, i) in view.paths" :key="i">
             <path v-if="path.outline" class="cp-body-outline" :d="path.d" />
             <path
-              v-else-if="path.label"
+              v-else-if="path.pickable"
               class="cp-body-part cp-body-part-pick"
               :data-heat="path.heat"
               :data-pain="path.pain"
@@ -127,7 +127,7 @@ const showLegend = computed(() => !!props.legend && props.legend !== 'hidden' &&
             >
               <title>{{ path.label }}</title>
             </path>
-            <path v-else class="cp-body-part" :data-heat="path.heat" :data-pain="path.pain" :d="path.d" />
+            <path v-else class="cp-body-part" :data-heat="path.heat" :data-pain="path.pain" :d="path.d"><title>{{ path.label }}</title></path>
           </template>
         </svg>
         <figcaption>{{ view.caption }}</figcaption>

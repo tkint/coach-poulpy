@@ -27,6 +27,7 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {
   play: async ({ canvasElement }) => {
     expect(within(canvasElement).getByRole('img')).toHaveAccessibleName('Chest and shoulders worked most')
+    expect(canvasElement.querySelectorAll('.cp-body-part title').length).toBeGreaterThan(0)
   },
 }
 

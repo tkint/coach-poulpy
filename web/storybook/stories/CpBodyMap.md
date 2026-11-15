@@ -14,7 +14,7 @@
 | `legend` | `hidden` (default), `top` or `right` | where the Less to More scale goes |
 | `less`, `more` | text | the words of the legend |
 | `interactive-mode` | `individual` (default) or `both` | with `interactive` and `v-model:heat` or `v-model:injury`: a tap toggles the side tapped, or both sides of the area |
-| `interactive`, `selectable`, `area-label` | flag, areas, `(area, side) => text` | every area is a button, or only the `selectable` ones; `area-label` names it for a screen reader (the area as written without it); `pick` says its `area` and `side` |
+| `interactive`, `selectable`, `area-label` | flag, areas, `(area, side) => text` | every area is a button, or only the `selectable` ones; `area-label` names an area (the area as written without it); every area has that name as its title, interactive or not; `pick` says its `area` and `side` |
 
 ## Areas
 
