@@ -45,8 +45,8 @@ async function save() {
         v-model="password"
         :label="t('account.newPassword')"
         :hint="t('account.passwordHint')"
-        :show-label="t('account.showPassword')"
-        :hide-label="t('account.hidePassword')"
+       
+       
         :invalid="answer === 'too-short'"
         autocomplete="new-password"
       />

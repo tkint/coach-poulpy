@@ -20,7 +20,7 @@ const signIn = (password: string, failed: boolean): Story => ({
       <template #intro>The admin is for the people who look after Coach Poulpy.</template>
       <form class="flex flex-col gap-6" @submit.prevent>
         <CpTextField v-model="email" label="Email" type="email" autocomplete="username" :invalid="failed" />
-        <CpPasswordField v-model="password" label="Password" show-label="Show password" hide-label="Hide password" :invalid="failed" />
+        <CpPasswordField v-model="password" label="Password" :invalid="failed" />
         <CpErrorNote v-if="failed">Wrong email or password, or this account isn't an admin's.</CpErrorNote>
         <CpButton type="submit" class="w-full">Sign in</CpButton>
       </form></SitePage>`,

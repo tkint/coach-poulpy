@@ -66,7 +66,7 @@ const contentTone = { New: 'primary', Edited: 'neutral', 'Offered again': 'succe
       </section>
       <CpCard v-else>
         <div class="flex flex-wrap items-center gap-2" role="search" aria-label="Filter the exercises">
-          <CpSearchField v-model="search" compact label="Search exercises by name, slug or alias" clear-label="Clear the search" :placeholder="placeholder" />
+          <CpSearchField v-model="search" compact label="Search exercises by name, slug or alias" :placeholder="placeholder" />
           <CpChip v-model="pending" compact>Pending changes</CpChip>
           <CpSelectField v-model="pattern" compact label="Movement pattern" :options="all('Movement pattern', 'Squat', 'Hinge', 'Lunge', 'Push', 'Pull', 'Carry', 'Core', 'Rotation', 'Locomotion', 'Mobility', 'Stretch')" />
           <CpSelectField v-model="translation" compact label="Translation status" :options="all('Translation status', 'Complete', 'Incomplete')" />
@@ -121,7 +121,7 @@ const contentTone = { New: 'primary', Edited: 'neutral', 'Offered again': 'succe
         </CpTable>
         <div class="flex flex-col items-center justify-between gap-3 sm:flex-row">
           <p class="text-sm text-base-content/70">{{ showing }}</p>
-          <CpPagination v-model:page="page" :pages="pages" nav-label="Pages" previous-label="Previous page" next-label="Next page" />
+          <CpPagination v-model:page="page" :pages="pages" />
         </div>
       </CpCard>
     </main>

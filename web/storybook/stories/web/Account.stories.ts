@@ -38,7 +38,7 @@ const resetForm = (value: string, invalid: boolean, poulpy: string) => ({
     template: `<SitePage poulpy="${poulpy}" title="Choose a new password">
       <template #intro>Every phone signed in to this account will be signed out.</template>
       <form class="flex flex-col gap-6" @submit.prevent>
-        <CpPasswordField v-model="password" label="New password" hint="8 characters or more." show-label="Show password" hide-label="Hide password" autocomplete="new-password" :invalid="invalid" />
+        <CpPasswordField v-model="password" label="New password" hint="8 characters or more." autocomplete="new-password" :invalid="invalid" />
         <CpErrorNote v-if="invalid">Use at least 8 characters.</CpErrorNote>
         <CpButton type="submit" class="w-full">Save password</CpButton>
       </form></SitePage>`,

@@ -89,7 +89,7 @@ watch(() => JSON.stringify(query.value), load, { immediate: true })
       <p class="text-base-content/70">{{ t('app.workoutsIntro') }}</p>
     </div>
     <form class="flex flex-col gap-3 md:flex-row md:items-center" role="search" @submit.prevent>
-      <CpSearchField v-model="draft" class="w-full md:max-w-sm" :label="t('app.workoutsSearch')" :clear-label="t('app.workoutsClearSearch')" :placeholder="t('app.workoutsSearchPlaceholder')" />
+      <CpSearchField v-model="draft" class="w-full md:max-w-sm" :label="t('app.workoutsSearch')" :placeholder="t('app.workoutsSearchPlaceholder')" />
       <div class="flex gap-2" role="group" :aria-label="t('app.workoutsFormat')">
         <CpChip v-for="format in formats" :key="format.value" :model-value="query.format === format.value" @update:model-value="go({ format: format.value, page: '' })">{{ format.label }}</CpChip>
       </div>
@@ -123,7 +123,7 @@ watch(() => JSON.stringify(query.value), load, { immediate: true })
       </CpTable>
       <div class="flex flex-col items-center justify-between gap-3 sm:flex-row">
         <p class="text-base-content/70" aria-live="polite">{{ found.text.count }}</p>
-        <CpPagination v-if="pages > 1" v-model:page="page" :pages="pages" :nav-label="t('app.workoutsPages')" :previous-label="t('app.previousPage')" :next-label="t('app.nextPage')" />
+        <CpPagination v-if="pages > 1" v-model:page="page" :pages="pages" />
       </div>
     </CpCard>
   </main>

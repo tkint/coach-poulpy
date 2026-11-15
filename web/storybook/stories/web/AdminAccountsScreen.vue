@@ -82,7 +82,7 @@ const ariaSort = (key: string) => (key === props.sort ? (props.order === 'asc' ?
           </CpTable>
           <div class="flex flex-col items-center justify-between gap-3 sm:flex-row">
             <p class="text-sm text-base-content/70">{{ showing }}</p>
-            <CpPagination v-model:page="page" :pages="pages" nav-label="Pages" previous-label="Previous page" next-label="Next page" />
+            <CpPagination v-model:page="page" :pages="pages" />
           </div>
         </CpCard>
       </div>
@@ -102,7 +102,7 @@ const ariaSort = (key: string) => (key === props.sort ? (props.order === 'asc' ?
           <CpButton variant="danger" size="md" class="gap-2"><Trash class="size-4 shrink-0" aria-hidden="true" />Delete account</CpButton>
         </div>
       </CpSidePanel>
-      <CpSheet v-if="account() && deleting" v-model:open="open" title="Delete this account?" close-label="Close">
+      <CpSheet v-if="account() && deleting" v-model:open="open" title="Delete this account?">
         <p class="py-2">This removes <strong class="break-all">{{ account()!.email }}</strong> and everything saved for it, for good. It is the same deletion the user can ask for in the app. It cannot be undone.</p>
         <CpTextField v-model="typed" label="Type the email to confirm" autocomplete="off" />
         <template #actions>

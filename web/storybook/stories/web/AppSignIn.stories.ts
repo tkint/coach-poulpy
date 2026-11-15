@@ -23,7 +23,7 @@ const signIn = (password: string, failed: boolean): Story => ({
       </div>
       <form class="flex flex-col gap-6" novalidate @submit.prevent>
         <CpTextField v-model="email" label="Email" type="email" autocomplete="username" :invalid="failed" />
-        <CpPasswordField v-model="password" label="Password" show-label="Show password" hide-label="Hide password" :invalid="failed" autocomplete="current-password" />
+        <CpPasswordField v-model="password" label="Password" :invalid="failed" autocomplete="current-password" />
         <CpErrorNote v-if="failed">Wrong email or password.</CpErrorNote>
         <CpButton type="submit" class="w-full">Sign in</CpButton>
       </form></SitePage>`,
