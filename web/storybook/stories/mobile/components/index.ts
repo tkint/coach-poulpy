@@ -1,3 +1,9 @@
+import MobileFormatChip from './MobileFormatChip.vue'
+import MobileRoleTag from './MobileRoleTag.vue'
+import MobileSearchField from './MobileSearchField.vue'
+import MobileSheet from './MobileSheet.vue'
+import MobileSheetHandle from './MobileSheetHandle.vue'
+import MobileTabs from './MobileTabs.vue'
 import MobileButton from './MobileButton.vue'
 import MobileExerciseRow from './MobileExerciseRow.vue'
 import MobileFilterChip from './MobileFilterChip.vue'
@@ -8,4 +14,4 @@ import MobileSettingsRow from './MobileSettingsRow.vue'
 import MobileStatTile from './MobileStatTile.vue'
 
 /** The Vue components a phone screen's markup can use, by the name its template writes. */
-export const mobileComponents = { MobileButton, MobileExerciseRow, MobileFilterChip, MobileIconButton, MobileInfoButton, MobileNavBar, MobileSettingsRow, MobileStatTile }
+export const mobileComponents = { MobileFormatChip, MobileRoleTag, MobileSearchField, MobileSheet, MobileSheetHandle, MobileTabs, MobileButton, MobileExerciseRow, MobileFilterChip, MobileIconButton, MobileInfoButton, MobileNavBar, MobileSettingsRow, MobileStatTile }

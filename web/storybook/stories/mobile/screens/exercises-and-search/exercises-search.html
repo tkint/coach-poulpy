@@ -1,14 +1,8 @@
 <main class="phone">
 <div class="screen-header" style="padding-bottom: var(--cp-space-sm); gap: var(--cp-space-md);">
     <h1>Library</h1>
-    <div class="tabs" role="tablist" aria-label="Library" data-component="tabs">
-      <button type="button" role="tab" aria-selected="false">Workouts</button>
-      <button type="button" role="tab" aria-selected="true">Exercises</button>
-    </div>
-    <label class="search-field" data-component="search-field">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="search"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg>
-      <input type="search" value="dumbbell" placeholder="Name, muscle, mobility or floor" aria-label="Search exercises">
-    </label>
+    <MobileTabs aria-label="Library" :tabs="['Workouts', 'Exercises']" selected="Exercises" />
+    <MobileSearchField label="Search exercises" placeholder="Name, muscle, mobility or floor" value="dumbbell" />
     <div class="chip-row" role="group" aria-label="Filters">
       <MobileFilterChip icon="dumbbell" aria-haspopup="dialog" aria-label="Equipment" style="padding: 0 var(--cp-space-md); min-width: 48px;" />
       <MobileFilterChip icon="target" aria-haspopup="dialog" aria-label="Focus" style="padding: 0 var(--cp-space-md); min-width: 48px;" />
