@@ -65,7 +65,7 @@ The alternate icons use the portrait or pose of the same name, scaled until its 
 
 ## Poulpy in 3D
 
-`poulpy-3d/model.mjs` describes Poulpy's 3D shape in plain JavaScript, with no dependency: the proportions (`SHAPE`), the two faces (`FACES`) and how he is lit and shaded (`LOOK`) sit at the top of the file. `build-poulpy-3d.mjs` writes it as one binary glTF file per side, with his colours from `tokens.json`:
+`poulpy-3d/model.mjs` describes Poulpy's 3D shape in plain JavaScript, with no dependency: the proportions (`SHAPE`), the two faces (`FACES`) and how he is lit and shaded (`LOOK`) sit at the top of the file. `poulpy-3d/motion.mjs` describes how he moves the same way: `TURN` is his idle, turning around in short steps with soft arms that trail and settle. `build-poulpy-3d.mjs` writes both as binary glTF files, one per side standing still and one per side moving, with his colours from `tokens.json`:
 
 ```sh
 node design/build-poulpy-3d.mjs
@@ -75,8 +75,10 @@ node design/build-poulpy-3d.mjs
 | --- | --- |
 | `design/poulpy-3d/poulpy_blue.glb` | The blue, smiling side, for any 3D tool or engine |
 | `design/poulpy-3d/poulpy_ember.glb` | The ember, grumpy side |
+| `design/poulpy-3d/poulpy_blue_turn.glb` | The blue side, rigged, with the animation `turn` |
+| `design/poulpy-3d/poulpy_ember_turn.glb` | The ember side, rigged, with the animation `turn` |
 
-The script writes the files itself, byte for byte the same on every machine, and CI runs it with `--check`. The docs site's Poulpy in 3D page draws the same `model.mjs` live, lists the rules of the shape and says how to reuse it; the apps do not use the model yet.
+The script writes the files itself, byte for byte the same on every machine, and CI runs it with `--check`. The docs site's Poulpy in 3D page draws the same `model.mjs` and runs the same `motion.mjs` live, lists the rules of the shape and of the move and says how to reuse it; the apps do not use the model yet.
 
 The rules for using Poulpy are in [`docs/brand.md`](../docs/brand.md); the full brand book is in `site/.vitepress/theme/brand-book/` and on the docs site, and the decisions behind it are in [`docs/brand-decisions.md`](../docs/brand-decisions.md).
 

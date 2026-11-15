@@ -1,22 +1,28 @@
 <script setup lang="ts">
 // Poulpy in 3D, to turn around: the shape of design/poulpy-3d/model.mjs, drawn by poulpy3dScene.ts.
+// With `motion="turn"` he does his idle move himself (design/poulpy-3d/motion.mjs) and the viewer stays put.
 import { onBeforeUnmount, onMounted, shallowRef, useTemplateRef, watch } from 'vue'
 import type { PoulpySide } from '../../../design/poulpy-3d/model.mjs'
+import type { Turn } from '../../../design/poulpy-3d/motion.mjs'
 import type { createPoulpyScene } from './poulpy3dScene'
+
+const { motion } = defineProps<{ motion?: 'turn' }>()
 
 const canvas = useTemplateRef<HTMLCanvasElement>('canvas')
 const side = shallowRef<PoulpySide>('blue')
 const outline = shallowRef(false)
 const turn = shallowRef(0) // degrees around him, 0 is face on
-const tilt = shallowRef(17) // degrees above him; negative looks from below
+const tilt = shallowRef(motion ? 26 : 17) // degrees above him; negative looks from below
 const distance = shallowRef(9.6)
 const speed = shallowRef(1)
-const spinning = shallowRef(false)
+const spinning = shallowRef(false) // the viewer walks around him, or with `motion` he moves
+const softness = shallowRef(1) // how loose his arms are: 1 is the design
 const failed = shallowRef(false)
 
 let scene: ReturnType<typeof createPoulpyScene> | undefined
 let frame = 0
 let last = 0
+let move: Turn | undefined
 
 const sides: { id: PoulpySide; label: string }[] = [
   { id: 'blue', label: 'Blue side' },
@@ -25,9 +31,10 @@ const sides: { id: PoulpySide; label: string }[] = [
 const clamp = (value: number, low: number, high: number) => Math.min(high, Math.max(low, value))
 const wrap = (degrees: number) => ((degrees % 360) + 360) % 360
 
-// A full turn takes about 13 s at speed 1.
+// A full turn of the viewer takes about 13 s at speed 1. With `motion`, Poulpy moves instead.
 function spin(now: number) {
-  if (spinning.value) turn.value = wrap(turn.value + ((now - last) / 1000) * 28 * speed.value)
+  if (spinning.value && move) scene?.pose(move.advance(((now - last) / 1000) * speed.value))
+  else if (spinning.value) turn.value = wrap(turn.value + ((now - last) / 1000) * 28 * speed.value)
   last = now
   frame = requestAnimationFrame(spin)
 }
@@ -38,7 +45,7 @@ let pinch = 0
 function press(event: PointerEvent) {
   canvas.value?.setPointerCapture(event.pointerId)
   fingers.set(event.pointerId, [event.clientX, event.clientY])
-  spinning.value = false
+  if (!motion) spinning.value = false
 }
 function drag(event: PointerEvent) {
   const from = fingers.get(event.pointerId)
@@ -68,7 +75,7 @@ function nudge(event: KeyboardEvent) {
   const step = ({ ArrowLeft: [8, 0], ArrowRight: [-8, 0], ArrowUp: [0, 6], ArrowDown: [0, -6] } as Record<string, number[]>)[event.key]
   if (!step) return
   event.preventDefault()
-  spinning.value = false
+  if (!motion) spinning.value = false
   turn.value = wrap(turn.value + step[0])
   tilt.value = clamp(tilt.value + step[1], -89, 89)
 }
@@ -77,11 +84,13 @@ const show = () => scene?.show(side.value, outline.value)
 const look = () => scene?.look({ turn: turn.value, tilt: tilt.value, distance: distance.value })
 watch([side, outline], show)
 watch([turn, tilt, distance], look)
+watch(softness, (value) => { if (move) move.softness = value })
 
 onMounted(async () => {
   // three.js is only fetched on this page, and only in the browser.
   try {
     const { createPoulpyScene } = await import('./poulpy3dScene')
+    if (motion) move = (await import('../../../design/poulpy-3d/motion.mjs')).createTurn({ softness: softness.value })
     if (!canvas.value) return
     scene = createPoulpyScene(canvas.value)
   } catch {
@@ -108,7 +117,7 @@ onBeforeUnmount(() => {
         ref="canvas"
         tabindex="0"
         role="img"
-        aria-label="Poulpy in 3D. Drag, or use the arrow keys, to turn him."
+        :aria-label="motion ? 'Poulpy in 3D, turning around in short steps. Drag, or use the arrow keys, to look around him.' : 'Poulpy in 3D. Drag, or use the arrow keys, to turn him.'"
         @pointerdown="press"
         @pointermove="drag"
         @pointerup="release"
@@ -125,11 +134,12 @@ onBeforeUnmount(() => {
       </div>
       <div class="toggles">
         <button type="button" class="toggle" :aria-pressed="outline" @click="outline = !outline">Outline</button>
-        <button type="button" class="toggle" :aria-pressed="spinning" @click="spinning = !spinning">Spin</button>
+        <button type="button" class="toggle" :aria-pressed="spinning" @click="spinning = !spinning">{{ motion ? 'Turning' : 'Spin' }}</button>
       </div>
-      <label class="slider">Turn <input v-model.number="turn" type="range" min="0" max="360" step="1" @input="spinning = false" /></label>
+      <label v-if="!motion" class="slider">Turn <input v-model.number="turn" type="range" min="0" max="360" step="1" @input="spinning = false" /></label>
       <label class="slider">Tilt <input v-model.number="tilt" type="range" min="-89" max="89" step="1" /></label>
-      <label class="slider">Speed <input v-model.number="speed" type="range" min="0.2" max="4" step="0.1" @input="spinning = true" /></label>
+      <label v-if="motion" class="slider">Soft arms <input v-model.number="softness" type="range" min="0" max="2" step="0.05" /></label>
+      <label class="slider">Speed <input v-model.number="speed" type="range" min="0.2" :max="motion ? 2 : 4" step="0.1" @input="spinning = true" /></label>
     </div>
   </div>
 </template>

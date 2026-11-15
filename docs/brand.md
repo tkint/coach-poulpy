@@ -102,7 +102,7 @@ The logo is the same drawing as the in-app Poulpy: a front view of the plush wit
 
 ## Poulpy in 3D
 
-Poulpy also exists as a 3D model: a bubble of a head tucked into eight puffy arms, in flat cartoon shading, with the other side's colour underneath. It is generated from `design/poulpy-3d/model.mjs` like the drawings are from their script, and the docs site's **Poulpy in 3D** page shows it, lists its rules and says how to reuse or change it. The apps do not use it yet. See [Brand decisions](./brand-decisions.md), decision 14.
+Poulpy also exists as a 3D model: a bubble of a head tucked into eight puffy arms, in flat cartoon shading, with the other side's colour underneath. It is generated from `design/poulpy-3d/model.mjs` like the drawings are from their script, and the docs site's **Poulpy in 3D** page shows it, lists its rules and says how to reuse or change it. In 3D his idle is to turn around on the spot in short steps of 20 to 30 degrees, with soft tentacles that trail behind each step and settle after it; they slide on the floor and never lift. The move is `design/poulpy-3d/motion.mjs` and plays on the same page. The apps do not use the model yet. See [Brand decisions](./brand-decisions.md), decision 14.
 
 ## Ideas for later
 
