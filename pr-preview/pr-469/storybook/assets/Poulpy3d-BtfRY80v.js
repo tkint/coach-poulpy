@@ -1,5 +1,0 @@
-import{n as e}from"./rolldown-runtime-sJBDdmOt.js";import{d as t,f as n,l as r,u as i}from"./blocks-DuJnpHm9.js";import{a}from"./chunk-W22LQPXL-DAacIxBz.js";import{i as o,r as s}from"./react-DITjJg24.js";import{n as c,r as l}from"./Brand.stories-GUHYo_U8.js";import{n as u,t as d}from"./markdown-pages-c1lNWnhc.js";function f(e){let n={h1:`h1`,...o(),...e.components};return(0,m.jsxs)(m.Fragment,{children:[`
-`,`
-`,(0,m.jsx)(i,{title:`Brand/Poulpy in 3D`}),`
-`,(0,m.jsx)(n.h1,{id:`poulpy-in-3d`,children:`Poulpy in 3D`}),`
-`,g.map((e,n)=>n%2?(0,m.jsx)(t,{of:c[e]},n):(0,m.jsx)(r,{children:e},n))]})}function p(e={}){let{wrapper:t}={...o(),...e.components};return t?(0,m.jsx)(t,{...e,children:(0,m.jsx)(f,{...e})}):f(e)}var m,h,g;function _(){return(_=e((()=>{m=a(),s(),n(),d(),l(),h=u(`poulpy-3d`),g=(h.intro+h.sections(`The rules of the shape`,`His six moods`,`His twelve poses`,`His pictures`,`His moves`,`Using the model`,`Changing the design`)).split(/<!-- live: (\w+) -->/)})))()}_();export{p as default,h as page,g as parts};
