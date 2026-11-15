@@ -1,5 +1,4 @@
 <script setup lang="ts">
-// CLEANUP: drawn with the classes of the mockup until the deletion of an exercise is built as a Cp component.
 import { Trash2 } from '@lucide/vue'
 defineProps<{ slug: string; typed?: string; published?: boolean }>()
 </script>

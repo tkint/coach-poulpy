@@ -1,5 +1,4 @@
 <script setup lang="ts">
-// CLEANUP: drawn with the classes of the mockup until the retirement of an exercise (#389) is built as a Cp component.
 import { Archive } from '@lucide/vue'
 </script>
 

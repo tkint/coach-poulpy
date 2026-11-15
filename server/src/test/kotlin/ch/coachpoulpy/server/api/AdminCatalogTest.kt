@@ -21,6 +21,7 @@ import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import org.http4k.core.Method.DELETE
 import org.http4k.core.Method.GET
 import org.http4k.core.Method.POST
 import org.http4k.core.Method.PUT
@@ -78,6 +79,8 @@ class AdminCatalogTest {
         call(withJson(Request(PUT, "/api/v1/admin/catalog/exercises/$slug"), ServerCatalog.encode(exercise)))
 
     private fun retire(slug: String) = call(Request(POST, "/api/v1/admin/catalog/exercises/$slug/retire"))
+
+    private fun delete(slug: String) = call(Request(DELETE, "/api/v1/admin/catalog/exercises/$slug"))
 
     private fun get(slug: String) = call(Request(GET, "/api/v1/admin/catalog/exercises/$slug"))
 
@@ -154,6 +157,22 @@ class AdminCatalogTest {
         )
         assertEquals(NOT_FOUND, retire("no-such-exercise").status)
         assertEquals(NOT_FOUND, edit("no-such-exercise", pikePushUp()).status)
+    }
+
+    @Test
+    fun deletingAnExerciseRemovesItAndItsPublishedRevisionsForGood() {
+        create(pikePushUp())
+        assertEquals(NO_CONTENT, delete("pike-push-up").status)
+        assertEquals(NOT_FOUND, get("pike-push-up").status)
+
+        assertEquals(NO_CONTENT, delete("wall-sit").status)
+        assertEquals(NOT_FOUND, get("wall-sit").status)
+        assertTrue(ExerciseSlug("wall-sit") !in test.serverCatalog.published().exercises.map { it.slug })
+        assertEquals(NOT_FOUND, delete("wall-sit").status)
+        assertEquals(
+            listOf("admin.catalog.create" to "pike-push-up", "admin.catalog.delete" to "pike-push-up", "admin.catalog.delete" to "wall-sit"),
+            events.filterIsInstance<AdminAction>().map { it.action to it.target },
+        )
     }
 
     @Test

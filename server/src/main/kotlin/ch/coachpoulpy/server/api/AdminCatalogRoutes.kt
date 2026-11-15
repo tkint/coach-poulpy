@@ -30,6 +30,7 @@ import org.http4k.contract.Tag
 import org.http4k.contract.div
 import org.http4k.contract.meta
 import org.http4k.core.ContentType.Companion.APPLICATION_JSON
+import org.http4k.core.Method.DELETE
 import org.http4k.core.Method.GET
 import org.http4k.core.Method.POST
 import org.http4k.core.Method.PUT
@@ -40,6 +41,7 @@ import org.http4k.core.Status.Companion.BAD_REQUEST
 import org.http4k.core.Status.Companion.CONFLICT
 import org.http4k.core.Status.Companion.CREATED
 import org.http4k.core.Status.Companion.FORBIDDEN
+import org.http4k.core.Status.Companion.NO_CONTENT
 import org.http4k.core.Status.Companion.NOT_FOUND
 import org.http4k.core.Status.Companion.OK
 import org.http4k.core.with
@@ -177,6 +179,7 @@ fun adminCatalogRoutes(catalog: AdminCatalog): List<ContractRoute> = listOf(
     editRoute(catalog),
     retireRoute(catalog),
     offerRoute(catalog),
+    deleteRoute(catalog),
     changesRoute(catalog),
     publishRoute(catalog),
 )
@@ -335,6 +338,23 @@ private fun offerRoute(catalog: AdminCatalog): ContractRoute = EXERCISES / slugP
     returning(FORBIDDEN to "Not an admin, or not signed in through the website")
 } bindContract POST to { slug, _ ->
     { request: Request -> catalog.offer(request.admin().accountId, slug).toResponse(OK) }
+}
+
+private fun deleteRoute(catalog: AdminCatalog): ContractRoute = EXERCISES / slugPath meta {
+    summary = "Delete an exercise"
+    description = "Deletes the exercise for good, all its revisions included, published ones too (beta: the catalog is being built). " +
+        "The public catalog stops serving it at once, but a phone that already downloaded it keeps its copy, and a workout that uses it still opens there. " +
+        "404 unknown-exercise. Written to the audit log."
+    operationId = "deleteAdminCatalogExercise"
+    tags += catalogAdminTag
+    security = requiresAdmin()
+    returning(NO_CONTENT to "The exercise is deleted")
+    returning(NOT_FOUND to "No exercise with this slug")
+    returning(FORBIDDEN to "Not an admin, or not signed in through the website")
+} bindContract DELETE to { slug ->
+    { request: Request ->
+        if (catalog.delete(request.admin().accountId, slug)) Response(NO_CONTENT) else problem(NOT_FOUND, "unknown-exercise")
+    }
 }
 
 private fun MissingText.toResponse() = MissingTextResponse(exercise.slug.value, exercise.name.byLanguage, languages)

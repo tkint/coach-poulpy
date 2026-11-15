@@ -180,7 +180,6 @@ const slugLocked = computed(() => !props.isNew)
               </div>
             </div>
           </CpCard>
-          <!-- CLEANUP: the danger zone is not built yet: drawn with the classes of the mockup. -->
           <CpCard v-if="!isNew" title="Danger zone" class="order-6 border border-error lg:order-none" data-component="danger-zone">
             <div class="flex flex-wrap items-center justify-between gap-4">
               <div class="flex min-w-0 flex-1 flex-col gap-1">

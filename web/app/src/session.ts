@@ -331,3 +331,12 @@ export async function retireCatalogExercise(slug: string): Promise<boolean> {
     return false
   }
 }
+
+/** Deletes the exercise [slug] for good, published revisions included (beta). True when it worked. */
+export async function deleteCatalogExercise(slug: string): Promise<boolean> {
+  try {
+    return (await authorized(`/admin/catalog/exercises/${encodeURIComponent(slug)}`, 'DELETE')).ok
+  } catch {
+    return false
+  }
+}

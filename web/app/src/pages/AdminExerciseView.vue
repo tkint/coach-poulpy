@@ -5,7 +5,7 @@
 // at a time (`?lang=fr`), and under each translatable field a badge says whether every shipped language has it, so
 // the screen shows at once what a publication would refuse. Saving never needs every language; publishing does.
 import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
-import { GripVertical, Lock, Plus, X } from '@lucide/vue'
+import { Archive, GripVertical, Lock, Plus, Trash2, X } from '@lucide/vue'
 import { CpBadge, CpBodyMap, CpBreadcrumbs, CpButton, CpCard, CpChip, CpChipSelectField, CpErrorNote, CpPoulpyCard, CpSegmentedControl, CpSelectField, CpTextarea, CpTextField } from '@coach-poulpy/ui'
 import { getCatalogExercise, saveCatalogExercise, type CatalogExercise, type ExerciseJson } from '../session'
 import { domainLabel, domainOptions } from '../catalogText'
@@ -13,6 +13,8 @@ import { groupAreas, groupOfArea, selectableAreas } from '../bodyMap'
 import { navigate, search, withParams } from '../route'
 import { locale, shippedLanguages, t } from '../i18n'
 import { showToast } from '../toast'
+import AdminExerciseDeleteDialog from './AdminExerciseDeleteDialog.vue'
+import AdminExerciseRetireDialog from './AdminExerciseRetireDialog.vue'
 
 const props = defineProps<{ slug?: string }>()
 
@@ -237,6 +239,17 @@ async function save() {
   reason.value = answer.reason ?? ''
   failure.value = answer.error === 'slug-taken' ? 'slug-taken' : answer.error === 'invalid-exercise' ? 'invalid' : 'failed'
 }
+
+const retireOpen = ref(false)
+const deleteOpen = ref(false)
+async function afterRetired() {
+  showToast(t('admin.exerciseRetired'))
+  await navigate('/admin/catalog')
+}
+async function afterDeleted() {
+  showToast(t('admin.exerciseDeleted'))
+  await navigate('/admin/catalog')
+}
 </script>
 
 <template>
@@ -396,6 +409,25 @@ async function save() {
               </div>
             </div>
           </CpCard>
+          <CpCard v-if="!isNew && loaded" :title="t('admin.dangerTitle')" class="order-6 border border-error lg:order-none" data-component="danger-zone">
+            <template v-if="!loaded.exercise.retired">
+              <div class="flex flex-wrap items-center justify-between gap-4">
+                <div class="flex min-w-0 flex-1 flex-col gap-1">
+                  <h3 class="font-semibold">{{ t('admin.dangerRetireTitle') }}</h3>
+                  <p class="text-sm text-base-content/70">{{ t('admin.dangerRetireText') }}</p>
+                </div>
+                <CpButton variant="outline" size="md" class="gap-2" @click="retireOpen = true"><Archive class="size-5 shrink-0" aria-hidden="true" />{{ t('admin.dangerRetireButton') }}</CpButton>
+              </div>
+              <div class="cp-divider my-0" role="separator"></div>
+            </template>
+            <div class="flex flex-wrap items-center justify-between gap-4">
+              <div class="flex min-w-0 flex-1 flex-col gap-1">
+                <h3 class="font-semibold">{{ t('admin.dangerDeleteTitle') }}</h3>
+                <p class="text-sm text-base-content/70">{{ t('admin.dangerDeleteText') }}{{ loaded.published ? t('admin.dangerDeletePublished') : '' }}</p>
+              </div>
+              <CpButton variant="danger" size="md" class="gap-2" @click="deleteOpen = true"><Trash2 class="size-5 shrink-0" aria-hidden="true" />{{ t('admin.dangerDeleteButton') }}</CpButton>
+            </div>
+          </CpCard>
         </div>
         <div class="contents lg:flex lg:w-full lg:max-w-md lg:flex-col lg:gap-6" data-component="side-column">
           <CpCard :title="t('admin.exerciseVariations')" class="order-3 lg:order-none">
@@ -441,6 +473,10 @@ async function save() {
         <CpButton variant="ghost" size="md" @click="navigate('/admin/catalog')">{{ t('admin.exerciseCancel') }}</CpButton>
         <CpButton type="submit" form="exercise-form" size="md" :loading="saving">{{ isNew ? t('admin.exerciseAdd') : t('admin.exerciseSave') }}</CpButton>
       </div>
+      <template v-if="!isNew && loaded">
+        <AdminExerciseRetireDialog v-model:open="retireOpen" :slug="loaded.exercise.slug" :name="loaded.exercise.name[original] ?? loaded.exercise.slug" @retired="afterRetired" />
+        <AdminExerciseDeleteDialog v-model:open="deleteOpen" :slug="loaded.exercise.slug" :published="loaded.published" @deleted="afterDeleted" />
+      </template>
     </template>
   </main>
 </template>

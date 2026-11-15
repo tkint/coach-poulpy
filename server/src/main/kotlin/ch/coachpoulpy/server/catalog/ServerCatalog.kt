@@ -219,6 +219,16 @@ class ServerCatalog(
     /** Retires the exercise [slug] in the draft: it stays in the catalog, hidden, so workouts that use it still open. */
     fun retire(slug: ExerciseSlug): DraftResult = setRetired(slug, true)
 
+    /**
+     * Deletes the exercise [slug] for good, published revisions included (beta): the next published catalog no longer holds it,
+     * though a phone that already downloaded it keeps its copy. Returns whether it existed.
+     */
+    fun delete(slug: ExerciseSlug): Boolean = database.queries.transactionWithResult {
+        if (draftRows().none { it.exercise.slug == slug }) return@transactionWithResult false
+        queries.deleteExercise(slug.value)
+        true
+    }
+
     private fun setRetired(slug: ExerciseSlug, retired: Boolean): DraftResult = database.queries.transactionWithResult {
         val stored = draftRows().firstOrNull { it.exercise.slug == slug } ?: return@transactionWithResult DraftResult.Unknown
         val changed = stored.exercise.copy(retired = retired)
