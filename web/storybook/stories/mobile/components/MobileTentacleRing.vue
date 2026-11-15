@@ -3,7 +3,7 @@ import { computed } from 'vue'
 
 // Poulpy's eight tentacles as a ring: `lit` of them in primary, the last one lit brighter when it is `fresh` (just lit
 // by the session that ended), and a `picture` of Poulpy inside. `label` says the count in words. The large ring (104)
-// sits on Home; the small one (64) on a finished session.
+// sits on Home (a `MobilePoulpyTap` can go in its slot instead of the picture); the small one (64) on a finished session.
 const props = withDefaults(
   defineProps<{ lit: number; label: string; fresh?: boolean; size?: 104 | 64; picture?: string; pictureAlt?: string }>(),
   { size: 104, pictureAlt: '' },
@@ -27,6 +27,7 @@ const arcs = computed(() => {
     <svg viewBox="0 0 200 200" :width="size" :height="size" role="img" :aria-label="label">
       <path v-for="(arc, index) in arcs" :key="index" :class="{ lit: arc.lit, new: arc.fresh }" :d="arc.d" />
     </svg>
-    <img v-if="picture" :src="picture" :alt="pictureAlt" />
+    <img v-if="picture && !$slots.default" :src="picture" :alt="pictureAlt" />
+    <slot />
   </div>
 </template>
