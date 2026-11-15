@@ -1,0 +1,1 @@
+import{_ as s,o as i,c as o,a6 as a}from"./chunks/framework.w6g-bwRo.js";const k=JSON.parse('{"title":"Coach Poulpy","description":"","frontmatter":{},"headers":[],"relativePath":"CLAUDE.md","filePath":"CLAUDE.md"}'),d={name:"CLAUDE.md"};function n(t,e,c,l,r,h){return i(),o("div",null,[...e[0]||(e[0]=[a("",21)])])}const u=s(d,[["render",n]]);export{k as __pageData,u as default};
