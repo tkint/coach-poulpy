@@ -13,7 +13,6 @@ const props = defineProps<{ workout: Workout; card?: boolean }>()
 const never = computed(() => t('app.statNever'))
 const lastTime = computed(() => (props.workout.history.lastDoneAt ? formatDay(props.workout.history.lastDoneAt) : never.value))
 const heat = computed(() => heatAreas(props.workout.text.heat))
-const captions = computed(() => ({ front: t('app.bodyFront'), back: t('app.bodyBack') }))
 const description = computed(() => t('app.musclesAlt', { list: props.workout.text.muscles.map((muscle) => muscle.label).join(', ') }))
 </script>
 
@@ -24,7 +23,7 @@ const description = computed(() => t('app.musclesAlt', { list: props.workout.tex
     <CpStat :title="t('app.statUsual')" :value="workout.text.usual || never" />
   </CpStats>
   <CpCard v-if="card" :title="t('app.musclesTitle')">
-    <CpBodyMap :heat="heat" :captions="captions" legend="top" :description="description" :less="t('app.heatLess')" :more="t('app.heatMore')" />
+    <CpBodyMap :heat="heat" legend="top" :description="description" />
   </CpCard>
-  <CpBodyMap v-else :heat="heat" :captions="captions" legend="top" :description="description" :less="t('app.heatLess')" :more="t('app.heatMore')" />
+  <CpBodyMap v-else :heat="heat" legend="top" :description="description" />
 </template>
