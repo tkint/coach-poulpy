@@ -1,11 +1,20 @@
-import { Meta, Markdown, Story } from '@storybook/addon-docs/blocks'
-import { markdownPages } from '../../markdown-pages'
+import { Meta, Story } from '@storybook/addon-docs/blocks'
 import * as Live from '../Brand.stories'
-
-{/* Shown from web/storybook/stories/brand/poulpy-3d.md: edit the text there. Each <!-- live: Name --> in it is the Brand.stories story of that name. */}
-
-export const parts = markdownPages('poulpy-3d').sections('The cocky one winks').split(/<!-- live: (\w+) -->/)
 
 <Meta title="Brand/Poulpy moves/The cocky wink" />
 
-{parts.map((part, index) => (index % 2 ? <Story key={index} of={Live[part]} /> : <Markdown key={index}>{part.replace(/^## /, '# ')}</Markdown>))}
+# The cocky one winks
+
+The Cocky pose, moving. He looks at you with both eyes wide open, then shuts one eye (his right, unless told otherwise), lifts the other brow and his mouth slides into the cocky smirk. He holds it, opens his eye and starts again.
+
+<Story of={Live.Winking} />
+
+- **His face moves, feature by feature.** The eye narrows to a line and the line bends into the wink; the brow and the mouth go from plain to cocky with it. `winkFace()` in `poses.mjs` gives his face at any point between the two, in the drawing's coordinates like every face.
+- **His head goes with it.** It leans a little to the side of the eye he shuts and dips, on a spring, then comes back.
+- **The stars come with the wink.** There are none while his eyes are open. As the eye shuts they pop up one after the other, each a little past its size and back, and they leave when he opens it.
+- **The stars are solid and they twinkle.** Each is a four-point star cut like a gem, in the room around him where the drawing has its sparks. It grows and shrinks, turns on itself and rocks, and no two keep the same time. Turn the view and they stay where they are.
+- **No halo, no badge.** The drawing's glow and its "PR!" are not part of him in 3D.
+
+The switch picks the eye he shuts, named for him: his right eye, the design, is on your left. His brow, his smirk and the lean of his head go to the other side with it.
+
+`WINK` in `motion.mjs` holds the timing, the lean of his head and the stars' numbers, and `createWink()` runs it live. It is a preview, not in the glTF files yet.

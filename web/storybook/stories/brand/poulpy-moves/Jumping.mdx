@@ -1,11 +1,32 @@
-import { Meta, Markdown, Story } from '@storybook/addon-docs/blocks'
-import { markdownPages } from '../../markdown-pages'
+import { Meta, Story } from '@storybook/addon-docs/blocks'
 import * as Live from '../Brand.stories'
-
-{/* Shown from web/storybook/stories/brand/poulpy-3d.md: edit the text there. Each <!-- live: Name --> in it is the Brand.stories story of that name. */}
-
-export const parts = markdownPages('poulpy-3d').sections('Little jumps').split(/<!-- live: (\w+) -->/)
 
 <Meta title="Brand/Poulpy moves/Little jumps" />
 
-{parts.map((part, index) => (index % 2 ? <Story key={index} of={Live[part]} /> : <Markdown key={index}>{part.replace(/^## /, '# ')}</Markdown>))}
+# Little jumps
+
+Poulpy can also jump on the spot. He tucks his head down into his arms, which widen flat on the floor, then he goes up. His arms are part of him: their base goes up with his head and their tips hang a little lower, the last to leave the floor. In the air he tilts to one side, the other side at the next jump, and as he lands his head goes a little down into his arms before he stands again.
+
+<Story of={Live.Jumping} />
+
+**The jump is a preview, still being tuned.** It runs live here and is not in the glTF files yet: its values are written into them once the owner has settled them on this page. Every control shows its value so a setting can be quoted. Heights are in the model's units, where his head is about 1 from centre to edge.
+
+| Control | What it sets | Design |
+| --- | --- | --- |
+| **Height** | How far he goes up | 0.34 |
+| **Tuck** | How far his head goes down into his arms before the jump | 0.16 |
+| **Landing** | How far his head goes down into his arms as he lands | 0.10 |
+| **Spread** | How far his arms slide outwards when his head is tucked all the way in | 0.14 |
+| **Hang** | How heavy his arms are, so how low their tips hang in the air | 1 |
+| **Lean** | How far he tilts to the side in the air, in degrees | 7 |
+| **Pause** | Seconds he stands between two jumps, on average | 0.55 |
+| **Soft arms** | How loosely his arms hang and trail, as for the turn | 1 |
+| **Speed** | Plays the whole move faster or slower | 1 |
+
+- **His head never leaves his arms.** It goes down into them, to tuck and to land, and never up out of them: when he goes up they go with him.
+- **His arms widen as his head comes down.** They stay flat on the floor and slide outwards, as a plush does when it is pressed.
+- **The arms hang, he never raises them.** Up and down, each arm bends at the same three places as when he turns. A spring holds each length level with the one before it, its weight pulls it down and the floor stops it: the tips leave the floor last, hang under him in the air and touch down first. A length may hang nearly straight down when it has to. On the side he tilts to, the arms lie flat against the floor.
+- **His head squashes and stretches.** It widens as it tucks in and as he lands, and thins a little while it moves fast, keeping its volume.
+- **Reduced motion keeps him still**, as for the turn.
+
+`JUMP` in `motion.mjs` holds the jump's numbers, next to `TURN`, and `createJump()` runs it live.

@@ -1,12 +1,13 @@
-import { Meta, Markdown } from '@storybook/addon-docs/blocks'
-import { markdownPages } from '../../markdown-pages'
-
-export const rules = markdownPages('design-system').sections
+import { Meta } from '@storybook/addon-docs/blocks'
 
 <Meta title="Design system/Rules/Screens" />
 
-{/* Shown from web/storybook/stories/design-system/design-system.md: edit the rules there. */}
-
 # Screens
 
-<Markdown>{rules('Screens')}</Markdown>
+Every screen mockup is a story in the [component workshop](?path=/docs/design-system-introduction--docs) ([ADR 0029](https://tkint.github.io/coach-poulpy/docs/adr/0029-mockups-are-stories-in-the-component-workshop)): the web screens under Web > Screens, composed from the `Cp*` components, and the phone screens under Mobile > Screens, built from the `Mobile*` components and patterns.
+
+- Build from an agreed mockup. If a screen has none, agree one through a PR before building it.
+- Each state of a screen is a story, in light and dark from the workshop's theme toolbar. A new screen or redesign is tagged `draft`; a PR that changes the tag to `agreed` is its approval, and nothing is built from a draft.
+- CI runs every story as a test, with the accessibility check.
+
+The mockup is the design reference; this page defines the shared rules and components used to build it.

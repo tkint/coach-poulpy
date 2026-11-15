@@ -1,12 +1,14 @@
-import { Meta, Markdown } from '@storybook/addon-docs/blocks'
-import { markdownPages } from '../markdown-pages'
-
-export const brand = markdownPages('brand').sections
+import { Meta } from '@storybook/addon-docs/blocks'
 
 <Meta title="Brand/Voice, logo and type" />
 
-{/* Shown from web/storybook/stories/brand/brand.md: edit the rules there. */}
-
 # Voice, logo and type
 
-<Markdown>{brand('Voice', 'Logo and type')}</Markdown>
+## Voice
+
+Poulpy speaks in short first-person lines, warm and a little cheeky: "6 of 8 tentacles lit. One more and I'm doing a little dance." or "Thursday's run is still waiting. 20 minutes and I flip back, promise." He jokes about himself, never about the person. In French he says *tu*, like a friend, while the rest of the app says *vous*.
+
+
+## Logo and type
+
+The logo is the same drawing as the in-app Poulpy: a front view of the plush with five visible arms and the ember lining peeking out underneath. The app icon is the 3D Poulpy, happy and blue, on Deep sea in light and dark alike, painted by `design/build-poulpy-pictures.mjs`. In Settings › App › App icon a person can swap it for another face of Poulpy: Proud, Annoyed, Grumpy, Champion or Cocky, each the picture the app already has, fitted into the icon. Choosing an icon is cosmetic; it never changes Poulpy's mood in the app. Headings use Baloo 2, body text Nunito; see the [design system](?path=/docs/design-system-introduction--docs).

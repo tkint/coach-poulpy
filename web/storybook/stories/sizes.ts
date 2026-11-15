@@ -1,6 +1,6 @@
 import { cpSizes } from '@coach-poulpy/ui'
 
-// The size control of every web component that has the scale (web/storybook/stories/design-system/design-system.md, "Web sizes").
+// The size control of every web component that has the scale (web/storybook/stories/design-system/rules/Websites.mdx, "Web sizes").
 export const sizeArgType = {
   control: 'select',
   options: [...cpSizes],

@@ -7,7 +7,7 @@ This file is the entry point for Codex and other agents that follow `AGENTS.md`.
 1. Read [`CLAUDE.md`](CLAUDE.md) for the shared project rules and required checks. It remains the canonical detailed guide; do not duplicate it here.
 2. Read [`CONTEXT.md`](CONTEXT.md) and the relevant ADRs in `docs/adr/` before changing domain concepts, data, APIs or architecture.
 3. For cross-module work, read [`docs/architecture.md`](docs/architecture.md).
-4. For UI, copy, colors, icons or mascot work, read [`web/storybook/stories/design-system/design-system.md`](web/storybook/stories/design-system/design-system.md), [`web/storybook/stories/brand/brand.md`](web/storybook/stories/brand/brand.md) and the relevant mockups.
+4. For UI, copy, colors, icons or mascot work, read the MDX pages in [`web/storybook/stories/design-system/rules/`](web/storybook/stories/design-system/rules/) and [`web/storybook/stories/brand/`](web/storybook/stories/brand/) and the relevant mockups.
 5. Read the relevant area guidance in [`docs/agents/areas.md`](docs/agents/areas.md). The other guides in `docs/agents/` cover code-graph exploration, domain context, issue refinement, issue tracking and triage labels.
 6. Follow [`CONTRIBUTING.md`](CONTRIBUTING.md) for the issue-to-PR workflow.
 

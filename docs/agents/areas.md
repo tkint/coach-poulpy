@@ -29,7 +29,7 @@ Read [the design system](https://tkint.github.io/coach-poulpy/storybook/?path=/d
 - Words never break: text is laid out for the longest language. A tab label has about 12 characters of room; shrink or shorten it before letting a word wrap.
 - The warm-up is headed by the builder's sun icon in every mockup and screen.
 - Icons are Lucide, by their Lucide name, the same meaning with the same icon on every platform (the table in [the design system](https://tkint.github.io/coach-poulpy/storybook/?path=/docs/design-system-rules-icons--docs)). A phone mockup draws one with `<MobileIcon name="<name>" />` or a component's `icon` prop; an icon the apps don't have yet is added with `node design/build-icons.mjs --add <name>`, which also gives it to both apps.
-- The English screen copy follows `web/storybook/stories/brand/brand.md`; every string is also added in French (see Translator below).
+- The English screen copy follows `web/storybook/stories/brand/`; every string is also added in French (see Translator below).
 - Theme files are generated from `design/tokens.json`: edit the tokens, then run `node design/build-tokens.mjs`.
 
 ## Poulpy keeper: the mascot
@@ -39,9 +39,9 @@ Read [the brand](https://tkint.github.io/coach-poulpy/storybook/?path=/docs/bran
 - Poulpy is never guilt. Pain or rehab always shows the blue side for 72 h; errors are crimson with an icon, never ember.
 - Skipping a planned session never counts as missing it; only entries left hanging do. Ember is a comic mood, not a penalty.
 - Poulpy speaks in short first-person lines, warm and a little cheeky. He says *tu* in French while the app says *vous*.
-- A new reward, notification, pose or reaction rule is written into `web/storybook/stories/brand/brand.md` (and `web/storybook/stories/brand/brand-decisions.md` when it settles an open question) in the same PR. At most one notification a day.
+- A new reward, notification, pose or reaction rule is written into `web/storybook/stories/brand/` (and `web/storybook/stories/brand/Decisions.mdx` when it settles an open question) in the same PR. At most one notification a day.
 - Drawings are generated: edit `design/build-poulpy.mjs`, then run `node design/build-poulpy.mjs`.
-- The 3D model is generated too: edit `SHAPE`, `FACES`, `MOODS` or `LOOK` in `design/poulpy-3d/model.mjs`, `POSES` in `design/poulpy-3d/poses.mjs` for his poses, or `TURN`, `JUMP`, `CHEER`, `WINK` and `RIG` in `design/poulpy-3d/motion.mjs` for how he moves, then run `node design/build-poulpy-3d.mjs` and `node design/build-poulpy-pictures.mjs` (the pictures of his moods and poses). Its rules are in `web/storybook/stories/brand/poulpy-3d.md`, shown with the live model on the Brand > Poulpy in 3D page of the component workshop and, one move a page, under Brand > Poulpy moves; change that file in the same PR as a rule.
+- The 3D model is generated too: edit `SHAPE`, `FACES`, `MOODS` or `LOOK` in `design/poulpy-3d/model.mjs`, `POSES` in `design/poulpy-3d/poses.mjs` for his poses, or `TURN`, `JUMP`, `CHEER`, `WINK` and `RIG` in `design/poulpy-3d/motion.mjs` for how he moves, then run `node design/build-poulpy-3d.mjs` and `node design/build-poulpy-pictures.mjs` (the pictures of his moods and poses). Its rules are in `web/storybook/stories/brand/Poulpy3d.mdx`, shown with the live model on the Brand > Poulpy in 3D page of the component workshop and, one move a page, under Brand > Poulpy moves; change that file in the same PR as a rule.
 - The body map figures are generated too: edit `design/build-body-map.mjs` or the outlines in `design/body-map-source/` (keep its NOTICE.md), then run `node design/build-body-map.mjs`.
 
 ## Translator: text in every language

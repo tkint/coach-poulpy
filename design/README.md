@@ -79,9 +79,9 @@ node design/build-poulpy-3d.mjs
 | `design/poulpy-3d/poulpy_blue_turn.glb` | The blue side, rigged, with the animation `turn` |
 | `design/poulpy-3d/poulpy_ember_turn.glb` | The ember side, rigged, with the animation `turn` |
 
-The script writes the files itself, byte for byte the same on every machine, and CI runs it with `--check`. The Brand > Poulpy in 3D page of the component workshop ([`web/storybook/stories/brand/poulpy-3d.md`](../web/storybook/stories/brand/poulpy-3d.md) and the live model) draws the same `model.mjs` and runs the same `motion.mjs` live, lists the rules of the shape and of the move and says how to reuse it; the apps do not use the model yet.
+The script writes the files itself, byte for byte the same on every machine, and CI runs it with `--check`. The Brand > Poulpy in 3D page of the component workshop ([`web/storybook/stories/brand/Poulpy3d.mdx`](../web/storybook/stories/brand/Poulpy3d.mdx) and the live model) draws the same `model.mjs` and runs the same `motion.mjs` live, lists the rules of the shape and of the move and says how to reuse it; the apps do not use the model yet.
 
-The rules for using Poulpy are in [`web/storybook/stories/brand/brand.md`](../web/storybook/stories/brand/brand.md); the full brand book is in `web/storybook/stories/brand/brand-book/` and on the Brand > Brand book page of the component workshop, and the decisions behind it are in [`web/storybook/stories/brand/brand-decisions.md`](../web/storybook/stories/brand/brand-decisions.md).
+The rules for using Poulpy are in [`web/storybook/stories/brand/`](../web/storybook/stories/brand/); the full brand book is in `web/storybook/stories/brand/brand-book/` and on the Brand > Brand book page of the component workshop, and the decisions behind it are in [`web/storybook/stories/brand/Decisions.mdx`](../web/storybook/stories/brand/Decisions.mdx).
 
 ## Icons
 

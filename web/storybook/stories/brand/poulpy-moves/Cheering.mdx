@@ -1,11 +1,17 @@
-import { Meta, Markdown, Story } from '@storybook/addon-docs/blocks'
-import { markdownPages } from '../../markdown-pages'
+import { Meta, Story } from '@storybook/addon-docs/blocks'
 import * as Live from '../Brand.stories'
-
-{/* Shown from web/storybook/stories/brand/poulpy-3d.md: edit the text there. Each <!-- live: Name --> in it is the Brand.stories story of that name. */}
-
-export const parts = markdownPages('poulpy-3d').sections('The champion jumps for joy').split(/<!-- live: (\w+) -->/)
 
 <Meta title="Brand/Poulpy moves/The champion" />
 
-{parts.map((part, index) => (index % 2 ? <Story key={index} of={Live[part]} /> : <Markdown key={index}>{part.replace(/^## /, '# ')}</Markdown>))}
+# The champion jumps for joy
+
+The Champion pose, moving: he cannot hold still. His jumps are the [little jumps](?path=/docs/brand-poulpy-moves-little-jumps--docs), higher, leaning more and closer together, and two things answer them.
+
+<Story of={Live.Cheering} />
+
+- **His medal has its own weight.** It hangs on its ribbon from under his head and rests on his front arm. When he drops it floats up off him, then falls back on his arm with a small bounce; when he tilts it slides to that side and wobbles back. Nothing is drawn by hand: it is a weight on a hinge, pulled down and stopped by his arm.
+- **Confetti flies at each jump.** A burst leaves the floor around him as he does, goes up past his head and flutters down, tumbling. It lands flat and stays on the floor until it flies again, so the floor fills up as he goes on. The pieces are solid here and belong to the room: turn the view and they stay where they are. The still pose keeps its flat confetti.
+- **Every run is the same.** Where each piece starts and how it tumbles comes from a fixed list, not from chance, so the move can be written into a file later.
+- **He still never lifts an arm.** His joy is in the jump, his face, the medal and the confetti.
+
+The controls are the jump's, starting from the champion's own values: Height 0.50, Lean 9 and Pause 0.26. `CHEER` in `motion.mjs` holds those, the medal's weight, bounce and reach and the confetti's numbers, and `createCheer()` runs it live. Like the jump it is a preview, not in the glTF files yet.

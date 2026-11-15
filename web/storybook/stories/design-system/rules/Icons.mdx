@@ -1,12 +1,36 @@
-import { Meta, Markdown } from '@storybook/addon-docs/blocks'
-import { markdownPages } from '../../markdown-pages'
-
-export const rules = markdownPages('design-system').sections
+import { Meta } from '@storybook/addon-docs/blocks'
 
 <Meta title="Design system/Rules/Icons" />
 
-{/* Shown from web/storybook/stories/design-system/design-system.md: edit the rules there. */}
-
 # Icons
 
-<Markdown>{rules('Icons')}</Markdown>
+Every icon is from [Lucide](https://lucide.dev), on every platform ([ADR 0024](https://tkint.github.io/coach-poulpy/docs/adr/0024-lucide-is-the-icon-set)). Use its name for the action, never a home-made drawing of one Lucide already has. Icons take their colour from the roles above, and an error keeps its icon. Lucide's drawing stays as it is: a 24 box and a 2 wide round stroke, never filled; only the size changes (24 by default, 20 in chips and small buttons, 16 to 18 beside a line of text).
+
+| Where | How |
+| --- | --- |
+| Vue (web app, `web/ui`, docs site) | `@lucide/vue`: `<ChevronLeft class="size-5" aria-hidden="true" />` |
+| Phone mockups | `<MobileIcon name="chevron-left" :size="20" />`, or the `icon` prop of a `Mobile*` component |
+| Android | `Icon(Lucide.ChevronLeft, contentDescription = …)` |
+| iOS | `LucideIcon(.chevronLeft, size: 20)`, or `Label("action.back", lucide: .chevronLeft)` |
+
+The Android and iOS icons are generated from `design/icons/`: run `node design/build-icons.mjs --add <name>` for an icon not used yet.
+
+One icon per meaning, the same on every platform:
+
+| Meaning | Lucide icon |
+| --- | --- |
+| Back, previous; next, open a row | `chevron-left`; `chevron-right` |
+| Close, clear | `x` |
+| More actions | `ellipsis-vertical` |
+| Add; duplicate, copy | `plus`; `copy` |
+| Edit; delete | `pencil`; `trash` |
+| Share; export a file | `share-2`; `download` |
+| Plan a day | `calendar-plus` |
+| Error | `circle-exclamation-point` |
+| Tabs: Home, Library, Live, History, Settings | `house`, `library-big`, `activity`, `rotate-ccw-clock`, `settings` |
+| Warm-up, work, cool down | `sun`, `zap`, `moon` |
+| Circuit, sets | `repeat`, `list` |
+| Treadmill (no Lucide treadmill), foot pod, heart rate band | `gauge`, `footprints`, `heart-pulse` |
+| Filters: equipment, focus, position, zones, tags | `dumbbell`, `target`, `armchair`, `person-standing`, `tag` |
+
+The movement-pattern badge stands in for exercise pictures, and Lucide draws few people, so its icons are the nearest Lucide match rather than an exact one: squat `person-standing`, hinge `hand-grab`, lunge `footprints`, push `dumbbell`, pull `biceps-flexed`, carry `luggage`, core `shield`, rotation `rotate-cw`, locomotion `sport-shoe`, mobility `accessibility`, stretch `stretch-horizontal`.

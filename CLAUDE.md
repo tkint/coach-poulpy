@@ -7,7 +7,7 @@ A training platform: Android and iOS apps first, guest-only and offline, with a 
 - `CONTEXT.md`: the glossary. Name things with its terms in code, issues, tests and UI copy.
 - `docs/adr/`: decisions that look odd without their reason. Read the ones touching your area; say so explicitly if your change contradicts one.
 - `docs/architecture.md`: the overview, for anything spanning modules.
-- `web/storybook/stories/design-system/design-system.md` and `web/storybook/stories/brand/brand.md`: before any screen, colour, copy or Poulpy change.
+- The design system and brand pages, written as MDX in the component workshop: `web/storybook/stories/design-system/rules/*.mdx` (colour, type, components, screens, icons, accessibility) and `web/storybook/stories/brand/*.mdx` (character, moods, voice, Poulpy in 3D, decisions). Read them before any screen, colour, copy or Poulpy change.
 - `CONTRIBUTING.md`: the issue-to-PR flow and labels.
 - `docs/agents/refining-issues.md`: how to turn a Quick idea into an agent-ready issue ("refine #N").
 - `docs/agents/storybook-mcp.md`: before building or changing a web component or screen, start the component workshop (`cd web && npm run storybook`) so the `storybook` MCP server in `.mcp.json` answers: find the existing story and component first, reuse it, and run the story tests after.

@@ -1,12 +1,22 @@
-import { Meta, Markdown } from '@storybook/addon-docs/blocks'
-import { markdownPages } from '../../markdown-pages'
-
-export const rules = markdownPages('design-system').sections
+import { Meta } from '@storybook/addon-docs/blocks'
 
 <Meta title="Design system/Rules/Type" />
 
-{/* Shown from web/storybook/stories/design-system/design-system.md: edit the rules there. */}
-
 # Type
 
-<Markdown>{rules('Type')}</Markdown>
+Baloo 2 for display and titles, Nunito for everything else. Platforms map each role to a system text style so Dynamic Type and font scaling keep working (`.font(.poulpy(.headline))` on iOS, `MaterialTheme.typography` on Android).
+
+| Role | Font | Size / line | Use |
+| --- | --- | --- | --- |
+| `display` | Baloo 2 800 | 40 / 44 | Poulpy's line on Home, end-of-session headline |
+| `title` | Baloo 2 700 | 28 / 32 | Screen titles, workout name on its page |
+| `headline` | Baloo 2 700 | 21 / 25 | Section heads, the current exercise in the player |
+| `body` | Nunito 500 | 16 / 24 | Everything you read |
+| `label` | Nunito 800, tracked 0.08 em, upper case | 12.5 / 16 | Eyebrows, tab labels, "Next up" |
+| `timer` | Nunito 800, tabular figures | 64 / 64 | Timers and rep counts, which must not jitter |
+
+**Words never break.** Translations run longer than English (« Bibliothèque », « Échauffement »), so text is laid out for any length:
+
+- Text in a space of fixed width (tab labels, chips, stat tiles, stepper values) stays on one line and shrinks to fit, never below 9 sp / pt; past that it ends in an ellipsis. `FitText` on Android, `.lineLimit(1).minimumScaleFactor(…)` on iOS, whose tab bar already does it.
+- Buttons wrap their label between words rather than shrink it.
+- Every other text wraps between words only, never inside one, and never hyphenates.
