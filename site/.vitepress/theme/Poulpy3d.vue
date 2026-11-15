@@ -1,6 +1,7 @@
 <script setup lang="ts">
 // Poulpy in 3D, to turn around: the shape of design/poulpy-3d/model.mjs, drawn by poulpy3dScene.ts.
 // With `motion="turn"` he does his idle move himself (design/poulpy-3d/motion.mjs) and the viewer stays put.
+import { RotateCcw, RotateCw } from '@lucide/vue'
 import { onBeforeUnmount, onMounted, shallowRef, useTemplateRef, watch } from 'vue'
 import type { PoulpySide } from '../../../design/poulpy-3d/model.mjs'
 import type { Turn } from '../../../design/poulpy-3d/motion.mjs'
@@ -28,12 +29,12 @@ let last = 0
 let move: Turn | undefined
 
 const sides: { id: PoulpySide; label: string }[] = [
-  { id: 'blue', label: 'Blue side' },
-  { id: 'ember', label: 'Grumpy side' },
+  { id: 'blue', label: 'Blue' },
+  { id: 'ember', label: 'Grumpy' },
 ]
 const directions = [
-  { id: 'anticlockwise', label: 'Anticlockwise' },
-  { id: 'clockwise', label: 'Clockwise' },
+  { id: 'anticlockwise', label: 'Anticlockwise', icon: RotateCcw },
+  { id: 'clockwise', label: 'Clockwise', icon: RotateCw },
 ] as const
 const clamp = (value: number, low: number, high: number) => Math.min(high, Math.max(low, value))
 const wrap = (degrees: number) => ((degrees % 360) + 360) % 360
@@ -139,20 +140,20 @@ onBeforeUnmount(() => {
     </div>
     <div class="controls">
       <div class="sides" role="group" aria-label="Side">
-        <button v-for="s in sides" :key="s.id" type="button" class="choice" :aria-pressed="side === s.id" @click="side = s.id">{{ s.label }}</button>
+        <button v-for="s in sides" :key="s.id" type="button" class="choice" :aria-pressed="side === s.id" :aria-label="`${s.label} side`" @click="side = s.id">{{ s.label }}<span class="wide">&nbsp;side</span></button>
       </div>
       <div class="sides" role="group" aria-label="Direction, seen from above">
-        <button v-for="d in directions" :key="d.id" type="button" class="choice" :aria-pressed="direction === d.id" @click="direction = d.id">{{ d.label }}</button>
+        <button v-for="d in directions" :key="d.id" type="button" class="choice icon" :aria-pressed="direction === d.id" :aria-label="d.label" :title="d.label" @click="direction = d.id"><component :is="d.icon" :size="18" aria-hidden="true" /></button>
       </div>
       <div class="toggles">
         <button type="button" class="toggle" :aria-pressed="outline" @click="outline = !outline">Outline</button>
-        <button type="button" class="toggle" :aria-pressed="spinning" @click="spinning = !spinning">{{ motion ? 'Turning' : 'Spin' }}</button>
+        <button type="button" class="toggle" :aria-pressed="spinning" @click="spinning = !spinning">{{ motion ? 'Turn' : 'Spin' }}</button>
       </div>
-      <label v-if="!motion" class="slider">Turn <input v-model.number="turn" type="range" min="0" max="360" step="1" @input="spinning = false" /><output>{{ Math.round(turn) }}°</output></label>
-      <label class="slider">Tilt <input v-model.number="tilt" type="range" min="-89" max="89" step="1" /><output>{{ Math.round(tilt) }}°</output></label>
-      <label v-if="motion" class="slider">Step <input v-model.number="step" type="range" min="1" max="180" step="1" /><output>{{ step }}°</output></label>
-      <label v-if="motion" class="slider">Soft arms <input v-model.number="softness" type="range" min="0" max="4" step="0.05" /><output>{{ softness.toFixed(2) }}</output></label>
-      <label class="slider">Speed <input v-model.number="speed" type="range" min="0.1" max="5" step="0.1" @input="spinning = true" /><output>{{ speed.toFixed(1) }}×</output></label>
+      <label v-if="!motion" class="slider"><span>Turn</span><input v-model.number="turn" type="range" min="0" max="360" step="1" @input="spinning = false" /><output>{{ Math.round(turn) }}°</output></label>
+      <label class="slider"><span>Tilt</span><input v-model.number="tilt" type="range" min="-89" max="89" step="1" /><output>{{ Math.round(tilt) }}°</output></label>
+      <label v-if="motion" class="slider"><span>Step</span><input v-model.number="step" type="range" min="1" max="180" step="1" /><output>{{ step }}°</output></label>
+      <label v-if="motion" class="slider"><span>Soft arms</span><input v-model.number="softness" type="range" min="0" max="4" step="0.05" /><output>{{ softness.toFixed(2) }}</output></label>
+      <label class="slider"><span>Speed</span><input v-model.number="speed" type="range" min="0.1" max="5" step="0.1" @input="spinning = true" /><output>{{ speed.toFixed(1) }}×</output></label>
     </div>
   </div>
 </template>
@@ -169,11 +170,22 @@ onBeforeUnmount(() => {
 .sides { display: inline-flex; gap: 4px; padding: 4px; border-radius: 999px; background: var(--vp-c-bg-soft); }
 .toggles { display: inline-flex; gap: 8px; }
 .choice, .toggle { height: 36px; padding: 0 16px; border-radius: 999px; border: 1px solid transparent; font-size: 14px; font-weight: 700; color: var(--vp-c-text-1); cursor: pointer; }
+.choice.icon { display: inline-grid; place-items: center; width: 40px; padding: 0; }
 .choice[aria-pressed='true'] { background: var(--vp-c-brand-1); color: var(--vp-c-bg); }
 .toggle { border-color: var(--vp-c-divider); }
 .toggle[aria-pressed='true'] { border-color: var(--vp-c-brand-1); color: var(--vp-c-brand-1); background: var(--vp-c-brand-soft); }
 .choice:focus-visible, .toggle:focus-visible { outline: 3px solid var(--vp-c-brand-1); outline-offset: 2px; }
-.slider { flex: 1 1 180px; display: flex; align-items: center; gap: 10px; min-width: 0; font-size: 14px; font-weight: 700; }
+/* On a phone the switches still share one row. */
+@media (max-width: 480px) {
+  .controls { column-gap: 4px; }
+  .sides { gap: 2px; padding: 3px; }
+  .choice, .toggle { padding: 0 8px; font-size: 13px; }
+  .wide { display: none; }
+  .choice.icon { width: 32px; }
+  .toggles { gap: 4px; }
+}
+.slider { flex: 1 1 100%; display: flex; align-items: center; gap: 10px; min-width: 0; font-size: 14px; font-weight: 700; }
+.slider span { flex: none; width: 5.5em; }
 .slider output { min-width: 3em; text-align: right; font-variant-numeric: tabular-nums; }
 .slider input { flex: 1; min-width: 0; height: 36px; accent-color: var(--vp-c-brand-1); }
 </style>
