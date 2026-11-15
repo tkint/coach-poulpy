@@ -45,7 +45,7 @@ export function turnSeconds(turn = TURN) {
  * Poulpy turning, as something to advance in time.
  * @param {{ softness?: number, stride?: number, turn?: typeof TURN }} [options] `softness` scales how loose
  *   the arms are: 1 is the design, 0 makes them stiff, 2 very floppy. `stride` scales how far each step
- *   turns: 1 is the design, 2 twice as far. Both can be changed at any time.
+ *   turns: 1 is the design, 2 twice as far, and a negative one turns him the other way. Both can be changed at any time.
  * @returns {{ softness: number, stride: number, advance(seconds: number): TurnPose, pose(): TurnPose }}
  *   A pose is `{ yaw, squash, arms }`: the way he faces in radians (it keeps growing turn after turn), how
  *   much his head is squashed (negative) or stretched, and for each arm its three bends in radians.
@@ -66,7 +66,7 @@ export function createTurn({ softness = 1, stride = 1, turn = TURN } = {}) {
       phase = (phase + 1) % 3
       if (phase === 0) { base = to; step = (step + 1) % turn.steps.length }
     }
-    to = phase === 0 ? base - turn.windUp.degrees * RAD : phase === 1 ? base + turn.steps[step] * RAD * stride : to
+    to = phase === 0 ? base - turn.windUp.degrees * RAD * (stride < 0 ? -1 : 1) : phase === 1 ? base + turn.steps[step] * RAD * stride : to
 
     // The body follows.
     const b = turn.body
