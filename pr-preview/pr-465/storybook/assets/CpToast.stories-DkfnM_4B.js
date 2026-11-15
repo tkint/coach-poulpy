@@ -1,0 +1,7 @@
+import{n as e}from"./rolldown-runtime-sJBDdmOt.js";import{d as t,i as n}from"./iframe-Cutyr3Yn.js";var r;function i(){return(i=e((()=>{r='A short confirmation in the bottom right corner that goes by itself, such as "Exercise saved": `CpToast`. It is a status, never an alert, so it doesn\'t take the focus; the screen that shows it removes it after a few seconds. A failure that must be read again belongs in an error note on the screen.\n\n| Vue | Classes |\n| --- | --- |\n| `<CpToast>` | `cp-toast cp-toast-end cp-toast-bottom` around `cp-alert cp-alert-success` |\n'})))()}var a,o,s,c,l;function u(){return(u=e((()=>{n(),i(),{expect:a,within:o}=__STORYBOOK_MODULE_TEST__,s={title:`Web/Components/Display/Toast`,parameters:{docs:{description:{component:r}}},component:t,render:()=>({components:{CpToast:t},template:`<CpToast>Exercise saved</CpToast>`})},c={play:async({canvasElement:e})=>{a(o(e).getByRole(`status`)).toHaveTextContent(`Exercise saved`)}},l=[`Saved`],c.parameters={...c.parameters,docs:{...c.parameters?.docs,source:{originalSource:`{
+  play: async ({
+    canvasElement
+  }) => {
+    expect(within(canvasElement).getByRole('status')).toHaveTextContent('Exercise saved');
+  }
+}`,...c.parameters?.docs?.source}}}})))()}u();export{c as Saved,l as __namedExportsOrder,s as default};
