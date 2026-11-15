@@ -23,7 +23,7 @@ enum class ExerciseSort { Name, Pattern, Languages, Change, Status }
 /** One sort of the table: a column, ascending or descending. A list of them sorts by the first, then the second among its ties, and so on. */
 data class ExerciseOrder(val column: ExerciseSort, val ascending: Boolean = true)
 
-/** Where an exercise stands against the latest published version, apart from its lifecycle and its translations. */
+/** Where an exercise stands against its latest published revision, apart from its lifecycle and its translations. */
 enum class ContentState {
     /** Never published: a new exercise. */
     Draft,
@@ -31,14 +31,14 @@ enum class ContentState {
     /** Published, with edits the next publication would carry. */
     Modified,
 
-    /** The draft holds what the latest version holds, or only a lifecycle change. */
+    /** The draft holds what the latest published revision holds, or only a lifecycle change. */
     Published,
 
     /** Anything the next publication would change: a new exercise, an edit, a retirement or an offer again. */
     Pending,
 }
 
-/** Whether an exercise is offered, about to be retired by the next publication, or already retired in the latest version. */
+/** Whether an exercise is offered, about to be retired by the next publication, or already retired in its latest published revision. */
 enum class Lifecycle { Active, RetirementPending, Retired }
 
 /** What the admin asked of the exercise table: filters, one sort and a page. A null or empty filter lets everything through. */
@@ -73,7 +73,7 @@ private fun DraftExercise.inState(content: ContentState): Boolean = when (conten
     ContentState.Pending -> change != null
 }
 
-/** An exercise retired in the draft but not yet in the latest version is only about to be: its retirement is pending. */
+/** An exercise retired in the draft but not yet in its latest published revision is only about to be: its retirement is pending. */
 private fun DraftExercise.lifecycle(): Lifecycle = when {
     !exercise.retired -> Lifecycle.Active
     change == DraftChange.Retired -> Lifecycle.RetirementPending
@@ -117,7 +117,7 @@ fun exercisePageOf(all: List<DraftExercise>, query: ExerciseQuery): ExercisePage
 /**
  * The admin's side of the catalog (#337): the draft's exercises, created, edited, retired and offered
  * again, and publishing. Each write emits an [AdminAction] whose target is the exercise's slug, or the
- * version number for a publish.
+ * published slugs, comma-separated, for a publish.
  */
 class AdminCatalog(private val catalog: ServerCatalog, private val events: Events) {
     fun list(query: ExerciseQuery): ExercisePage = exercisePageOf(catalog.draft(), query)
@@ -144,7 +144,8 @@ class AdminCatalog(private val catalog: ServerCatalog, private val events: Event
 
     fun changes(): CatalogChanges = catalog.changes()
 
-    fun publish(actor: AccountId): PublishResult = catalog.publish().also {
-        if (it is PublishResult.Published) events(AdminAction(actor, "admin.catalog.publish", it.version.toString()))
+    /** Publishes the exercises [slugs], or every exercise with something to publish when null. */
+    fun publish(actor: AccountId, slugs: List<ExerciseSlug>? = null): PublishResult = catalog.publish(slugs).also {
+        if (it is PublishResult.Published) events(AdminAction(actor, "admin.catalog.publish", it.slugs.joinToString(",") { slug -> slug.value }))
     }
 }

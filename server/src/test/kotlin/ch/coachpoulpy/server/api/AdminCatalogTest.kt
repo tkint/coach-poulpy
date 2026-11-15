@@ -1,6 +1,5 @@
 package ch.coachpoulpy.server.api
 
-import ch.coachpoulpy.catalog.Catalog
 import ch.coachpoulpy.core.model.Exercise
 import ch.coachpoulpy.core.model.ExerciseSlug
 import ch.coachpoulpy.core.model.LocalizedText
@@ -84,12 +83,20 @@ class AdminCatalogTest {
 
     private fun changes() = body(call(Request(GET, "/api/v1/admin/catalog/changes")))
 
-    private fun publish() = call(Request(POST, "/api/v1/admin/catalog/publish"))
+    private fun publish(vararg slugs: String) = call(
+        Request(POST, "/api/v1/admin/catalog/publish").let { if (slugs.isEmpty()) it else withJson(it, """{"slugs": [${slugs.joinToString { s -> "\"$s\"" }}]}""") },
+    )
 
     private fun slugs(list: Any) = (list as kotlinx.serialization.json.JsonArray).map { it.jsonObject.getValue("slug").jsonPrimitive.content }
 
-    private fun publicCatalog(newerThan: Int? = null) =
-        http(Request(GET, "/api/v1/catalog").let { if (newerThan == null) it else it.query("newerThan", newerThan.toString()) })
+    private fun publicCatalog(after: String? = null) =
+        http(Request(GET, "/api/v1/catalog/exercises").let { if (after == null) it else it.query("after", after) })
+
+    /** The `seq` of the latest published revision: what the cursor counts. */
+    private fun lastSeq(): Long? = test.database.queries.catalogQueries.lastSeq().executeAsOne().latest
+
+    /** The slugs of an answer of the public route, in order. */
+    private fun answered(response: Response) = body(response).getValue("exercises").jsonArray.map { it.jsonObject.getValue("exercise").jsonObject.getValue("slug").jsonPrimitive.content }
 
     private fun pikePushUp(fr: Boolean = true) = Exercise(
         slug = ExerciseSlug("pike-push-up"),
@@ -104,15 +111,17 @@ class AdminCatalogTest {
 
     @Test
     fun theFirstStartSeedsTheCatalogFromTheBundledOne() {
-        assertEquals(bundled.version, test.serverCatalog.latestVersion())
+        assertEquals(bundled.exercises.size.toLong(), lastSeq(), "each seeded exercise takes a number of the cursor")
         assertEquals(bundled.exercises, test.serverCatalog.draft().map { it.exercise })
         assertTrue(test.serverCatalog.draft().all { it.published && it.change == null })
         assertFalse(test.serverCatalog.seed(), "a second start leaves the catalog alone")
-        val rows = test.database.queries.catalogQueries.versionExercises(bundled.version).executeAsList()
+        val rows = test.database.queries.catalogQueries.publishedExercises().executeAsList()
         assertEquals(bundled.exercises.map { it.slug.value }, rows.map { it.slug }, "one row per exercise, in the catalog's order")
         val response = publicCatalog()
         assertEquals(OK, response.status)
-        assertEquals(Json.parseToJsonElement(bundled.toJson()), Json.parseToJsonElement(response.bodyString()))
+        val served = body(response).getValue("exercises").jsonArray.map { it.jsonObject.getValue("exercise") }
+        assertEquals(bundled.exercises.map { Json.parseToJsonElement(ServerCatalog.encode(it)) }, served)
+        assertTrue(body(response).getValue("exercises").jsonArray.all { it.jsonObject.getValue("revision").jsonPrimitive.int == 1 }, "bundled exercises are revision 1")
     }
 
     @Test
@@ -138,7 +147,6 @@ class AdminCatalogTest {
         assertEquals(listOf("pike-push-up"), slugs(changes.getValue("added")))
         assertEquals(listOf("goblet-squat"), slugs(changes.getValue("edited")))
         assertEquals(listOf("wall-sit"), slugs(changes.getValue("retired")))
-        assertEquals(bundled.version + 1, changes.getValue("nextVersion").jsonPrimitive.int)
 
         assertEquals(
             listOf("admin.catalog.create" to "pike-push-up", "admin.catalog.edit" to "goblet-squat", "admin.catalog.retire" to "wall-sit", "admin.catalog.edit" to "wall-sit"),
@@ -173,32 +181,52 @@ class AdminCatalogTest {
     }
 
     @Test
-    fun publishingMakesTheNextVersionWhichThePublicCatalogServesInTheBundledFormat() {
+    fun publishingGivesEachChangedExerciseARevisionThePublicRouteServes() {
+        val first = body(publicCatalog()).getValue("cursor").jsonPrimitive.content
         create(pikePushUp())
         retire("wall-sit")
         val published = publish()
         assertEquals(OK, published.status)
-        val version = bundled.version + 1
-        assertEquals(version, body(published).getValue("version").jsonPrimitive.int)
-        assertEquals("admin.catalog.publish" to version.toString(), events.filterIsInstance<AdminAction>().last().let { it.action to it.target })
+        assertEquals(listOf("pike-push-up", "wall-sit"), body(published).getValue("slugs").jsonArray.map { it.jsonPrimitive.content })
+        assertEquals("admin.catalog.publish" to "pike-push-up,wall-sit", events.filterIsInstance<AdminAction>().last().let { it.action to it.target })
 
-        val response = publicCatalog(newerThan = bundled.version)
+        val response = publicCatalog(after = first)
         assertEquals(OK, response.status)
-        val document = Json.parseToJsonElement(response.bodyString()).jsonObject
-        assertEquals(setOf("version", "exercises", "variations"), document.keys, "the bundled document's shape")
-        val expected = Catalog(version, bundled.exercises.map { if (it.slug.value == "wall-sit") it.copy(retired = true) else it } + pikePushUp(), bundled.variationGroups)
-        assertEquals(Json.parseToJsonElement(expected.toJson()), document)
-        val served = Catalog.fromJson(response.bodyString())
-        assertEquals(version, served.version)
-        assertEquals(pikePushUp(), served[ExerciseSlug("pike-push-up")])
-        assertTrue(served[ExerciseSlug("wall-sit")]!!.retired)
-        assertEquals(NO_CONTENT, publicCatalog(newerThan = version).status)
+        assertEquals(listOf("pike-push-up", "wall-sit"), answered(response), "only what was published after the cursor")
+        val entries = body(response).getValue("exercises").jsonArray.map { it.jsonObject }
+        assertEquals(listOf(1, 2), entries.map { it.getValue("revision").jsonPrimitive.int })
+        assertEquals(pikePushUp(), ServerCatalog.decode(entries[0].getValue("exercise").toString()))
+        assertEquals("true", entries[1].getValue("exercise").jsonObject.getValue("retired").jsonPrimitive.content)
+        val cursor = body(response).getValue("cursor").jsonPrimitive.content
+        assertEquals((bundled.exercises.size + 2).toString(), cursor)
+        assertEquals(NO_CONTENT, publicCatalog(after = cursor).status)
 
         val after = changes()
-        assertEquals(version, after.getValue("version").jsonPrimitive.int)
         assertTrue(listOf("added", "edited", "retired").all { after.getValue(it).jsonArray.isEmpty() })
         assertEquals("true", body(get("pike-push-up")).getValue("published").jsonPrimitive.content)
         assertEquals(JsonNull, body(get("pike-push-up")).getValue("change"))
+    }
+
+    @Test
+    fun onlyTheNamedExercisesArePublished() {
+        create(pikePushUp())
+        edit("goblet-squat", goblet.copy(name = LocalizedText(mapOf("en" to "Goblet squat", "fr" to "Squat goblet"))))
+        val seq = lastSeq()!!
+        val published = publish("pike-push-up")
+        assertEquals(OK, published.status)
+        assertEquals(listOf("pike-push-up"), body(published).getValue("slugs").jsonArray.map { it.jsonPrimitive.content })
+        assertEquals(seq + 1, lastSeq())
+        assertEquals(listOf("goblet-squat"), slugs(changes().getValue("edited")), "the other exercise still waits")
+        assertEquals(CONFLICT, publish("wall-sit").status, "an exercise with nothing to publish is no change")
+        assertEquals(BAD_REQUEST, call(withJson(Request(POST, "/api/v1/admin/catalog/publish"), "{\"slugs\": 3}")).status)
+    }
+
+    @Test
+    fun aTranslationMissingElsewhereDoesNotHoldBackTheNamedExercise() {
+        create(pikePushUp(fr = false))
+        edit("goblet-squat", goblet.copy(name = LocalizedText(mapOf("en" to "Goblet squat", "fr" to "Squat goblet"))))
+        assertEquals(OK, publish("goblet-squat").status)
+        assertEquals(CONFLICT, publish("pike-push-up").status)
     }
 
     @Test
@@ -212,7 +240,7 @@ class AdminCatalogTest {
         assertEquals(CONFLICT, refused.status)
         assertEquals("missing-translations", body(refused).getValue("error").jsonPrimitive.content)
         assertEquals(listOf("pike-push-up"), slugs(body(refused).getValue("missing")))
-        assertEquals(bundled.version, test.serverCatalog.latestVersion())
+        assertEquals(bundled.exercises.size.toLong(), lastSeq())
 
         edit("pike-push-up", pikePushUp().copy(variationNote = LocalizedText(mapOf("en" to "Hips up", "fr" to " "))))
         assertEquals(CONFLICT, publish().status, "a blank text is missing too")
@@ -323,7 +351,7 @@ class AdminCatalogTest {
     fun aRetiredExerciseIsOfferedAgain() {
         retire("wall-sit")
         assertEquals(OK, call(Request(POST, "/api/v1/admin/catalog/exercises/wall-sit/offer")).status)
-        assertEquals(JsonNull, body(get("wall-sit")).getValue("change"), "back as the latest version has it")
+        assertEquals(JsonNull, body(get("wall-sit")).getValue("change"), "back as its latest published revision has it")
 
         retire("wall-sit")
         publish()
@@ -333,7 +361,10 @@ class AdminCatalogTest {
         assertEquals(listOf("wall-sit"), slugs(changes().getValue("offered")))
         assertEquals("admin.catalog.offer" to "wall-sit", events.filterIsInstance<AdminAction>().last().let { it.action to it.target })
         assertEquals(OK, publish().status)
-        assertFalse(Catalog.fromJson(publicCatalog().bodyString())[ExerciseSlug("wall-sit")]!!.retired)
+        val wallSit = body(publicCatalog()).getValue("exercises").jsonArray.map { it.jsonObject }
+            .last { it.getValue("exercise").jsonObject.getValue("slug").jsonPrimitive.content == "wall-sit" }
+        assertEquals(3, wallSit.getValue("revision").jsonPrimitive.int)
+        assertEquals("false", wallSit.getValue("exercise").jsonObject.getValue("retired").jsonPrimitive.content)
         assertEquals(NOT_FOUND, call(Request(POST, "/api/v1/admin/catalog/exercises/no-such-exercise/offer")).status)
     }
 
@@ -374,13 +405,13 @@ class AdminCatalogTest {
         assertEquals(OK, publish().status)
         assertEquals(before + 1, revisions.revisionCount().executeAsOne(), "the other exercises get no new row")
         assertEquals(
-            listOf(1 to bundled.version, 2 to bundled.version + 1),
-            revisions.revisionsOf("goblet-squat").executeAsList().map { it.revision to it.published_in },
+            listOf<Pair<Int, Long?>>(1 to bundled.exercises.indexOf(goblet) + 1L, 2 to bundled.exercises.size + 1L),
+            revisions.revisionsOf("goblet-squat").executeAsList().map { it.revision to it.seq },
         )
     }
 
     @Test
-    fun aDraftThatComesBackToTheLatestVersionIsDropped() {
+    fun aDraftThatComesBackToTheLatestPublishedRevisionIsDropped() {
         val before = revisions.revisionCount().executeAsOne()
         edit("goblet-squat", goblet.copy(name = LocalizedText(mapOf("en" to "Goblet squat", "fr" to "Squat goblet"))))
         edit("goblet-squat", goblet)
@@ -392,25 +423,26 @@ class AdminCatalogTest {
     }
 
     @Test
-    fun anOlderVersionIsStillRebuiltFromItsRevisions() {
+    fun aPhoneThatAsksAfterItsCursorGetsOnlyTheLaterRevisions() {
+        val first = body(publicCatalog()).getValue("cursor").jsonPrimitive.content
         edit("goblet-squat", goblet.copy(name = LocalizedText(mapOf("en" to "Goblet squat", "fr" to "Squat goblet"))))
-        retire("wall-sit")
         publish()
+        val second = publicCatalog(after = first)
+        assertEquals(listOf("goblet-squat"), answered(second))
+        assertEquals(2, body(second).getValue("exercises").jsonArray.single().jsonObject.getValue("revision").jsonPrimitive.int)
+
         create(pikePushUp())
         edit("goblet-squat", goblet.copy(name = LocalizedText(mapOf("en" to "Dumbbell goblet squat", "fr" to "Squat goblet"))))
         publish()
+        val third = publicCatalog(after = body(second).getValue("cursor").jsonPrimitive.content)
+        assertEquals(listOf("goblet-squat", "pike-push-up"), answered(third).sorted())
+        val goblet = body(third).getValue("exercises").jsonArray.map { it.jsonObject }.first { it.getValue("exercise").jsonObject.getValue("slug").jsonPrimitive.content == "goblet-squat" }
+        assertEquals(3, goblet.getValue("revision").jsonPrimitive.int)
+        assertEquals(bundled.exercises.size + 3, body(third).getValue("cursor").jsonPrimitive.content.toInt())
 
-        assertEquals(Json.parseToJsonElement(bundled.toJson()), Json.parseToJsonElement(test.serverCatalog.version(bundled.version)!!.toJson()))
-        val middle = test.serverCatalog.version(bundled.version + 1)!!
-        assertEquals("Squat goblet", middle[goblet.slug]!!.name.byLanguage["fr"])
-        assertEquals("Goblet squat", middle[goblet.slug]!!.name.byLanguage["en"])
-        assertTrue(middle[ExerciseSlug("wall-sit")]!!.retired)
-        assertEquals(null, middle[ExerciseSlug("pike-push-up")], "added only in the next version")
-        assertEquals(bundled.variationGroups, middle.variationGroups)
-        val latest = test.serverCatalog.version(bundled.version + 2)!!
-        assertEquals("Dumbbell goblet squat", latest[goblet.slug]!!.name.byLanguage["en"])
-        assertEquals(pikePushUp(), latest[ExerciseSlug("pike-push-up")])
-        assertEquals(Json.parseToJsonElement(latest.toJson()), Json.parseToJsonElement(publicCatalog().bodyString()))
+        val full = answered(publicCatalog())
+        assertEquals(bundled.exercises.size + 1, full.size, "without a cursor, every exercise once, at its latest revision")
+        assertEquals(full.size, full.toSet().size)
     }
 
     @Test

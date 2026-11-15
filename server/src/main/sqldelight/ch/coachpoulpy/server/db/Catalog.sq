@@ -1,45 +1,58 @@
-latestVersion:
-SELECT max(version) AS latest FROM catalog_version;
+-- The cursor a phone echoes: the latest `seq` taken, or null before the catalog is seeded.
+lastSeq:
+SELECT max(seq) AS latest FROM catalog_exercise_revision;
 
-insertVersion:
-INSERT INTO catalog_version (version, published_at) VALUES (:version, :publishedAt);
+-- The publication cursor's one row. Migration 13 fills it for a database that had a catalog; a new one starts at 0.
+ensurePublication:
+INSERT INTO catalog_publication (id, last_seq) VALUES (1, 0) ON CONFLICT (id) DO NOTHING;
 
--- What version :version holds: for each slug, its latest revision published up to it, in the catalog's order.
-versionExercises:
-SELECT r.slug, r.position, CAST(r.content AS TEXT) AS content, r.variation_group, r.variation_rank
+-- Takes :count numbers of the publication cursor, and answers the last. The row lock held until commit
+-- serialises publications, so numbers follow commit order.
+reserveSeqs:
+UPDATE catalog_publication SET last_seq = last_seq + :count WHERE id = 1 RETURNING last_seq;
+
+-- The latest published revision of each exercise, in the catalog's order.
+publishedExercises:
+SELECT r.slug, r.revision, r.seq, r.position, CAST(r.content AS TEXT) AS content, r.variation_group, r.variation_rank
 FROM catalog_exercise_revision r
-WHERE r.published_in = (
-    SELECT max(p.published_in) FROM catalog_exercise_revision p WHERE p.slug = r.slug AND p.published_in <= :version
-)
+WHERE r.seq = (SELECT max(p.seq) FROM catalog_exercise_revision p WHERE p.slug = r.slug AND p.seq IS NOT NULL)
 ORDER BY r.position, r.slug;
 
--- The draft revisions: the exercises edited, added, retired or offered again since the latest version.
+-- The exercises whose latest published revision came after the cursor :after, oldest publication first.
+publishedAfter:
+SELECT r.slug, r.revision, r.seq, r.position, CAST(r.content AS TEXT) AS content, r.variation_group, r.variation_rank
+FROM catalog_exercise_revision r
+WHERE r.seq > :after AND r.seq = (SELECT max(p.seq) FROM catalog_exercise_revision p WHERE p.slug = r.slug AND p.seq IS NOT NULL)
+ORDER BY r.seq;
+
+-- The draft revisions: the exercises edited, added, retired or offered again since their latest published revision.
 draftRevisions:
 SELECT slug, position, CAST(content AS TEXT) AS content, variation_group, variation_rank
-FROM catalog_exercise_revision WHERE published_in IS NULL ORDER BY position, slug;
+FROM catalog_exercise_revision WHERE seq IS NULL ORDER BY position, slug;
 
 latestRevision:
 SELECT max(revision) AS latest FROM catalog_exercise_revision WHERE slug = :slug;
 
 insertRevision:
-INSERT INTO catalog_exercise_revision (slug, revision, position, content, variation_group, variation_rank, published_in, created_at)
-VALUES (:slug, :revision, :position, CAST(:content AS JSONB), :variationGroup, :variationRank, :publishedIn, :createdAt);
+INSERT INTO catalog_exercise_revision (slug, revision, position, content, variation_group, variation_rank, seq, created_at)
+VALUES (:slug, :revision, :position, CAST(:content AS JSONB), :variationGroup, :variationRank, :seq, :createdAt);
 
 -- Changes a draft revision, its slug too, which the admin may do only until the exercise is first published.
 updateDraftRevision:
 UPDATE catalog_exercise_revision SET slug = :newSlug, content = CAST(:content AS JSONB), created_at = :createdAt
-WHERE slug = :slug AND published_in IS NULL;
+WHERE slug = :slug AND seq IS NULL;
 
--- A draft revision that came back to what the latest version holds.
+-- A draft revision that came back to what the latest published revision holds.
 deleteDraftRevision:
-DELETE FROM catalog_exercise_revision WHERE slug = :slug AND published_in IS NULL;
+DELETE FROM catalog_exercise_revision WHERE slug = :slug AND seq IS NULL;
 
-publishDraftRevisions:
-UPDATE catalog_exercise_revision SET published_in = :version WHERE published_in IS NULL;
+-- Publishes the draft revision of one exercise, under the number :seq reserved for it.
+publishDraftRevision:
+UPDATE catalog_exercise_revision SET seq = :seq WHERE slug = :slug AND seq IS NULL;
 
 -- For tests and the docs: how many revisions are stored, and what a slug has.
 revisionCount:
 SELECT count(*) FROM catalog_exercise_revision;
 
 revisionsOf:
-SELECT revision, published_in FROM catalog_exercise_revision WHERE slug = :slug ORDER BY revision;
+SELECT revision, seq FROM catalog_exercise_revision WHERE slug = :slug ORDER BY revision;

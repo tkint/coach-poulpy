@@ -49,7 +49,7 @@ import org.http4k.lens.Query
 import org.http4k.lens.int
 
 /**
- * One exercise of the draft: the shared Exercise JSON, whether a version holds it, what changed since (added, edited,
+ * One exercise of the draft: the shared Exercise JSON, whether a revision of it is published, what changed since (added, edited,
  * retired, offered or null) and the shipped languages some of its text lacks (empty when it is complete).
  */
 @Serializable
@@ -73,22 +73,22 @@ data class MissingTextResponse(val slug: String, val name: Map<String, String>, 
 
 @Serializable
 data class CatalogChangesResponse(
-    /** The latest published version. */
-    val version: Int,
-    /** The number publishing now would give. */
-    val nextVersion: Int,
     val added: List<ChangedExerciseResponse>,
-    /** Each with the fields that changed, before (the latest version) and after (the draft). */
+    /** Each with the fields that changed, before (the latest published revision) and after (the draft). */
     val edited: List<EditedExerciseResponse>,
     val retired: List<ChangedExerciseResponse>,
-    /** Retired in the latest version, offered again in the draft. */
+    /** Retired in its latest published revision, offered again in the draft. */
     val offered: List<ChangedExerciseResponse>,
     /** The exercises whose text lacks a shipped language; publishing is refused while there is one. */
     val missing: List<MissingTextResponse>,
 )
 
 @Serializable
-data class PublishedResponse(val version: Int)
+data class PublishedResponse(val slugs: List<String>)
+
+/** Which exercises to publish; without `slugs`, every exercise with something to publish. */
+@Serializable
+data class PublishRequest(val slugs: List<String>? = null)
 
 @Serializable
 data class PublishRefusedResponse(val error: String, val missing: List<MissingTextResponse>)
@@ -169,7 +169,7 @@ private fun Request.exerciseQuery(): ExerciseQuery? {
 
 private const val EXERCISES = "$API_PREFIX/admin/catalog/exercises"
 
-/** The admin's catalog routes (#337, ADR 0026): the draft's exercises, what changed since the last version, and publishing. */
+/** The admin's catalog routes (#337, ADR 0026): the draft's exercises, what changed since each exercise's latest published revision, and publishing. */
 fun adminCatalogRoutes(catalog: AdminCatalog): List<ContractRoute> = listOf(
     listRoute(catalog),
     getRoute(catalog),
@@ -219,7 +219,7 @@ private fun DraftResult.toResponse(saved: Status): Response = when (this) {
 private fun listRoute(catalog: AdminCatalog): ContractRoute = EXERCISES meta {
     summary = "List the draft's exercises"
     description = "One page of the catalog draft's exercises, filtered and sorted (the catalog's order by default), with how many match " +
-        "in all. Each says whether a published version holds it and what changed since the latest one: added, edited, retired, " +
+        "in all. Each says whether a revision of it is published and what changed since the latest one: added, edited, retired, " +
         "offered or null. A value that isn't an allowed word is a 400."
     operationId = "listAdminCatalogExercises"
     tags += catalogAdminTag
@@ -286,7 +286,7 @@ private fun createRoute(catalog: AdminCatalog): ContractRoute = EXERCISES meta {
 private fun editRoute(catalog: AdminCatalog): ContractRoute = EXERCISES / slugPath meta {
     summary = "Edit an exercise of the draft"
     description = "Replaces the exercise with the body, an exercise in the catalog's JSON; its retired state is kept (retire changes it). " +
-        "A different slug renames it, but only until a version publishes it: then 409 slug-published, since slugs never change " +
+        "A different slug renames it, but only until it has a published revision: then 409 slug-published, since slugs never change " +
         "(ADR 0008). 400 invalid-exercise, 404 unknown-exercise, 409 slug-taken. Written to the audit log."
     operationId = "editAdminCatalogExercise"
     tags += catalogAdminTag
@@ -324,7 +324,7 @@ private fun retireRoute(catalog: AdminCatalog): ContractRoute = EXERCISES / slug
 
 private fun offerRoute(catalog: AdminCatalog): ContractRoute = EXERCISES / slugPath / "offer" meta {
     summary = "Offer a retired exercise again"
-    description = "Undoes a retire in the draft: the next version lists the exercise for browsing and building again. " +
+    description = "Undoes a retire in the draft: its next published revision lists the exercise for browsing and building again. " +
         "Does nothing to an exercise that is offered. Written to the audit log."
     operationId = "offerAdminCatalogExercise"
     tags += catalogAdminTag
@@ -342,13 +342,13 @@ private fun MissingText.toResponse() = MissingTextResponse(exercise.slug.value, 
 private fun changesRoute(catalog: AdminCatalog): ContractRoute = "$API_PREFIX/admin/catalog/changes" meta {
     summary = "What publishing would change"
     description = "The draft against the latest published version: the exercises added, edited (each with its changed fields, " +
-        "before and after), retired and offered again since, the number the next " +
-        "version would take, and the exercises whose text still lacks a shipped language (${ServerCatalog.LANGUAGES.joinToString()})."
+        "before and after), retired and offered again since each exercise's latest published revision, " +
+        "and the exercises whose text still lacks a shipped language (${ServerCatalog.LANGUAGES.joinToString()})."
     operationId = "getAdminCatalogChanges"
     tags += catalogAdminTag
     security = requiresAdmin()
     produces += APPLICATION_JSON
-    returning(OK to "The changes, as {version, nextVersion, added, edited, retired, offered, missing}")
+    returning(OK to "The changes, as {added, edited, retired, offered, missing}")
     returning(FORBIDDEN to "Not an admin, or not signed in through the website")
 } bindContract GET to { _ ->
     val changes = catalog.changes()
@@ -356,8 +356,6 @@ private fun changesRoute(catalog: AdminCatalog): ContractRoute = "$API_PREFIX/ad
         OK,
         CatalogChangesResponse.serializer(),
         CatalogChangesResponse(
-            changes.version,
-            changes.nextVersion,
             changes.added.map { it.changed() },
             changes.edited.map { it.toResponse() },
             changes.retired.map { it.changed() },
@@ -369,19 +367,26 @@ private fun changesRoute(catalog: AdminCatalog): ContractRoute = "$API_PREFIX/ad
 
 private fun publishRoute(catalog: AdminCatalog): ContractRoute = "$API_PREFIX/admin/catalog/publish" meta {
     summary = "Publish the draft"
-    description = "Makes the draft the next catalog version, in the format the app bundles; GET /api/v1/catalog serves it from then on. " +
-        "409 missing-translations, with the exercises and languages, while a text lacks a shipped language " +
-        "(${ServerCatalog.LANGUAGES.joinToString()}); 409 no-changes when the draft is the latest version. Written to the audit log."
+    description = "Publishes the draft revision of each exercise named in the body's slugs, or of every exercise with something to publish " +
+        "when there is no body or no slugs; no other exercise is written, and GET /api/v1/catalog/exercises serves them from then on. " +
+        "409 missing-translations, with the exercises and languages, while an exercise being published lacks a text in a shipped language " +
+        "(${ServerCatalog.LANGUAGES.joinToString()}); 409 no-changes when none of them has anything to publish; 400 for a body that isn't " +
+        "{slugs: [...]}. Written to the audit log."
     operationId = "publishAdminCatalog"
     tags += catalogAdminTag
     security = requiresAdmin()
     produces += APPLICATION_JSON
-    returning(OK to "Published, as {version}")
+    returning(OK to "Published, as {slugs}: the exercises that got a new revision")
     returning(CONFLICT to "A text lacks a language, or nothing changed")
     returning(FORBIDDEN to "Not an admin, or not signed in through the website")
 } bindContract POST to { request ->
-    when (val result = catalog.publish(request.admin().accountId)) {
-        is PublishResult.Published -> json(OK, PublishedResponse.serializer(), PublishedResponse(result.version))
+    val requested = try {
+        request.bodyString().takeIf { it.isNotBlank() }?.let { ServerCatalog.json.decodeFromString(PublishRequest.serializer(), it) }?.slugs?.map(::ExerciseSlug)
+    } catch (e: IllegalArgumentException) {
+        return@to invalid(e.message ?: "The body is not {slugs: [...]}")
+    }
+    when (val result = catalog.publish(request.admin().accountId, requested)) {
+        is PublishResult.Published -> json(OK, PublishedResponse.serializer(), PublishedResponse(result.slugs.map { it.value }))
         PublishResult.NothingChanged -> json(CONFLICT, PublishRefusedResponse.serializer(), PublishRefusedResponse("no-changes", emptyList()))
         is PublishResult.MissingTranslations -> json(
             CONFLICT,
