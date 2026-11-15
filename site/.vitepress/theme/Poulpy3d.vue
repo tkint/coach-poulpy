@@ -11,14 +11,14 @@ const { motion } = defineProps<{ motion?: 'turn' }>()
 const canvas = useTemplateRef<HTMLCanvasElement>('canvas')
 const side = shallowRef<PoulpySide>('blue')
 const outline = shallowRef(false)
-const turn = shallowRef(0) // degrees around him, 0 is face on
+const turn = shallowRef(0) // degrees he has turned for the viewer, anticlockwise seen from above; 0 is face on
 const tilt = shallowRef(motion ? 26 : 17) // degrees above him; negative looks from below
 const distance = shallowRef(9.6)
 const speed = shallowRef(1)
 const spinning = shallowRef(false) // the viewer walks around him, or with `motion` he moves
 const softness = shallowRef(1) // how loose his arms are: 1 is the design
-// Seen from above. The viewer walking one way makes him seem to spin the other, so both are named for him.
-const direction = shallowRef<'clockwise' | 'anticlockwise'>(motion ? 'anticlockwise' : 'clockwise')
+// Seen from above, and named for him: without `motion` it is the viewer who walks around, the other way.
+const direction = shallowRef<'clockwise' | 'anticlockwise'>('anticlockwise')
 const step = shallowRef(24) // degrees he turns at each step, on average: 24 is the design
 const failed = shallowRef(false)
 
@@ -41,7 +41,7 @@ const wrap = (degrees: number) => ((degrees % 360) + 360) % 360
 // A full turn of the viewer takes about 13 s at speed 1. With `motion`, Poulpy moves instead.
 function spin(now: number) {
   if (spinning.value && move) scene?.pose(move.advance(((now - last) / 1000) * speed.value))
-  else if (spinning.value) turn.value = wrap(turn.value + ((now - last) / 1000) * 28 * speed.value * (direction.value === 'clockwise' ? 1 : -1))
+  else if (spinning.value) turn.value = wrap(turn.value + ((now - last) / 1000) * 28 * speed.value * (direction.value === 'anticlockwise' ? 1 : -1))
   last = now
   frame = requestAnimationFrame(spin)
 }
@@ -59,7 +59,7 @@ function drag(event: PointerEvent) {
   if (!from) return
   fingers.set(event.pointerId, [event.clientX, event.clientY])
   if (fingers.size === 1) {
-    turn.value = wrap(turn.value - (event.clientX - from[0]) * 0.6)
+    turn.value = wrap(turn.value + (event.clientX - from[0]) * 0.6)
     tilt.value = clamp(tilt.value + (event.clientY - from[1]) * 0.45, -89, 89)
   } else if (fingers.size === 2) {
     const [a, b] = [...fingers.values()]
@@ -79,7 +79,7 @@ function zoom(event: WheelEvent) {
   distance.value = clamp(distance.value * Math.exp(event.deltaY * 0.001), 5.5, 16)
 }
 function nudge(event: KeyboardEvent) {
-  const step = ({ ArrowLeft: [8, 0], ArrowRight: [-8, 0], ArrowUp: [0, 6], ArrowDown: [0, -6] } as Record<string, number[]>)[event.key]
+  const step = ({ ArrowLeft: [-8, 0], ArrowRight: [8, 0], ArrowUp: [0, 6], ArrowDown: [0, -6] } as Record<string, number[]>)[event.key]
   if (!step) return
   event.preventDefault()
   if (!motion) spinning.value = false
@@ -88,7 +88,8 @@ function nudge(event: KeyboardEvent) {
 }
 
 const show = () => scene?.show(side.value, outline.value)
-const look = () => scene?.look({ turn: turn.value, tilt: tilt.value, distance: distance.value })
+// The scene wants where the viewer stands: the other way around from how far he has turned.
+const look = () => scene?.look({ turn: -turn.value, tilt: tilt.value, distance: distance.value })
 watch([side, outline], show)
 watch([turn, tilt, distance], look)
 watch(softness, (value) => { if (move) move.softness = value })
