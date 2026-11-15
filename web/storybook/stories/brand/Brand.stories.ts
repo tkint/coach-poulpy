@@ -17,9 +17,8 @@ export const Model: Story = { render: () => ({ components: { Poulpy3d }, templat
 /** Poulpy in 3D, turning in short steps, with the controls to try other feels. */
 export const Turning: Story = { render: () => ({ components: { Poulpy3d }, template: '<Poulpy3d motion="turn" />' }) }
 /** The brand book, drawn live. */
-// CLEANUP: the brand book carries the axe findings it had on the docs site (the plush blue in its hero title and some
-// small grey labels are below the contrast minimum); fix them in the book, then drop the todo.
 export const Book: Story = {
   render: () => ({ components: { BrandBook }, template: '<BrandBook />' }),
-  parameters: { a11y: { test: 'todo' } },
+  // The light wordmark is the logo in its plush blue; WCAG 1.4.3 exempts logotypes from the contrast minimum.
+  parameters: { a11y: { context: { exclude: ['.wm.l .name .p'] } } },
 }
