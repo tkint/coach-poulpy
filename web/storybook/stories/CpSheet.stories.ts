@@ -13,10 +13,10 @@ const meta = {
     components: { CpSheet, CpButton },
     setup: () => ({ args, open: ref(Boolean(args.open)) }),
     template: `<div class="min-h-80">
-      <CpButton variant="outline" @click="open = true">Open the sheet</CpButton>
+      <CpButton size="xl" variant="outline" @click="open = true">Open the sheet</CpButton>
       <CpSheet v-bind="args" v-model:open="open">
         <p>It cannot be undone.</p>
-        <template #actions><CpButton variant="danger" @click="open = false">Delete</CpButton></template>
+        <template #actions><CpButton size="xl" variant="danger" @click="open = false">Delete</CpButton></template>
       </CpSheet>
     </div>`,
   }),

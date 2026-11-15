@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { CpIcon } from '@coach-poulpy/ui'
 // The accounts screen of the admin (the Web/Screens/Admin/Accounts stories in the component workshop): a paged table of every
 // account, sorted and filtered on the server, with the account picked in a panel floating on the right where it
 // is disabled, enabled or deleted after typing its email again (#336). It never shows a workout or health data.
@@ -226,9 +227,9 @@ async function remove() {
                 <th v-for="column in columns" :key="column.sort" :aria-sort="ariaSort(column.sort)">
                   <button type="button" class="cp-btn cp-btn-ghost cp-btn-sm -ms-3 gap-1 whitespace-nowrap" @click="sortBy(column.sort)">
                     {{ t(column.label) }}
-                    <ChevronsUpDown v-if="query.sort !== column.sort" class="size-4 shrink-0" aria-hidden="true" />
-                    <ChevronUp v-else-if="query.order === 'asc'" class="size-4 shrink-0" aria-hidden="true" />
-                    <ChevronDown v-else class="size-4 shrink-0" aria-hidden="true" />
+                    <CpIcon :icon="ChevronsUpDown" size="sm" v-if="query.sort !== column.sort" />
+                    <CpIcon :icon="ChevronUp" size="sm" v-else-if="query.order === 'asc'" />
+                    <CpIcon :icon="ChevronDown" size="sm" v-else />
                   </button>
                 </th>
               </tr>
@@ -250,7 +251,7 @@ async function remove() {
         </CpTable>
         <div class="flex flex-col items-center justify-between gap-3 sm:flex-row">
           <p class="text-sm text-base-content/70">{{ showing }}</p>
-          <CpPagination v-model:page="page" :pages="pages" />
+          <CpPagination size="sm" v-model:page="page" :pages="pages" />
         </div>
       </CpCard>
     </div>

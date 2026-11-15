@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { CpIcon } from '@coach-poulpy/ui'
 // The settings screen of the admin (the Web/Screens/Admin/Settings stories in the component workshop), at /admin/settings:
 // the from-address of the emails, saved without a deploy, and a test email to the admin's own address with the
 // saved settings (#339). The mail server itself (host, port, user, password) stays in the server's environment.
@@ -90,7 +91,7 @@ async function sendTest() {
         </div>
         <div>
           <CpButton variant="outline" size="md" :loading="testing" @click="sendTest">
-            <Send class="size-5 shrink-0" aria-hidden="true" />
+            <CpIcon :icon="Send" />
             {{ t('admin.testEmailSend') }}
           </CpButton>
         </div>

@@ -72,6 +72,18 @@
   --cp-radius-md: 10px;
   --cp-radius-lg: 14px;
   --cp-radius-pill: 999px;
+  --cp-control-xs: 24px;
+  --cp-control-sm: 32px;
+  --cp-control-md: 40px;
+  --cp-control-lg: 48px;
+  --cp-control-xl: 56px;
+  --cp-control-xxl: 64px;
+  --cp-icon-xs: 12px;
+  --cp-icon-sm: 16px;
+  --cp-icon-md: 20px;
+  --cp-icon-lg: 24px;
+  --cp-icon-xl: 32px;
+  --cp-icon-xxl: 40px;
   --cp-motion-flip: 700ms cubic-bezier(0.5, -0.35, 0.35, 1.4);
   --cp-motion-mood: 300ms;
   --cp-motion-quick: 200ms;

@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, within } from 'storybook/test'
 import { EllipsisVertical } from '@lucide/vue'
-import { CpDropdownMenu } from '@coach-poulpy/ui'
+import { CpDropdownMenu, CpIcon } from '@coach-poulpy/ui'
 import doc from './CpDropdownMenu.md?raw'
 
 const meta = {
@@ -10,10 +10,10 @@ const meta = {
   component: CpDropdownMenu,
   args: { label: 'More actions' },
   render: (args) => ({
-    components: { CpDropdownMenu, EllipsisVertical },
-    setup: () => ({ args }),
+    components: { CpDropdownMenu, CpIcon },
+    setup: () => ({ args, EllipsisVertical }),
     template: `<CpDropdownMenu v-bind="args">
-      <template #trigger><EllipsisVertical class="size-5" aria-hidden="true" /></template>
+      <template #trigger><CpIcon :icon="EllipsisVertical" /></template>
       <li><a>Rename</a></li><li><a>Duplicate</a></li>
     </CpDropdownMenu>`,
   }),

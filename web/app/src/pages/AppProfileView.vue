@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { CpIcon } from '@coach-poulpy/ui'
 // The profile (the story Web/Screens/App/Profile): the account, a password-reset email, and where the data lives.
 import { ref } from 'vue'
 import { Check } from '@lucide/vue'
@@ -27,7 +28,7 @@ async function sendResetLink() {
         <CpAvatar :initials="me.email.charAt(0).toUpperCase()" tone="primary" size="lg" />
         <div class="flex min-w-0 flex-col gap-1">
           <h2 class="cp-card-title truncate">{{ me.email }}</h2>
-          <CpBadge class="gap-1"><Check class="size-3 shrink-0" aria-hidden="true" />{{ t('app.emailConfirmed') }}</CpBadge>
+          <CpBadge class="gap-1"><CpIcon :icon="Check" size="xs" />{{ t('app.emailConfirmed') }}</CpBadge>
         </div>
       </div>
     </CpCard>
@@ -36,7 +37,7 @@ async function sendResetLink() {
       <CpErrorNote v-if="reset === 'offline'">{{ t('admin.errorOffline') }}</CpErrorNote>
       <p v-else-if="reset === 'done'" role="status">{{ t('app.resetLinkSent') }}</p>
       <div class="cp-card-actions">
-        <CpButton variant="outline" :loading="reset === 'sending'" @click="sendResetLink">{{ t('app.sendResetLink') }}</CpButton>
+        <CpButton size="xl" variant="outline" :loading="reset === 'sending'" @click="sendResetLink">{{ t('app.sendResetLink') }}</CpButton>
       </div>
     </CpCard>
     <CpCard :title="t('app.dataTitle')">

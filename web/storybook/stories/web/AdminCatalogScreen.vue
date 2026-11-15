@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { CpIcon } from '@coach-poulpy/ui'
 // The admin's catalog list: the toolbar, the table of exercises and its selection menu (ADR 0029: composed from the
 // Cp components, as the web app's AdminCatalogView does, with static exercises).
 import { ref } from 'vue'
@@ -57,14 +58,14 @@ const contentTone = { New: 'primary', Edited: 'neutral', 'Offered again': 'succe
           <p class="text-base-content/70">{{ intro }}</p>
         </div>
         <div v-if="error" class="flex flex-wrap gap-2">
-          <CpButton variant="outline" size="md" class="gap-2"><Plus class="size-5 shrink-0" aria-hidden="true" />New exercise</CpButton>
-          <CpButton size="md" class="gap-2" disabled><CloudUpload class="size-5 shrink-0" aria-hidden="true" />Publish changes</CpButton>
+          <CpButton variant="outline" size="md" class="gap-2"><CpIcon :icon="Plus" />New exercise</CpButton>
+          <CpButton size="md" class="gap-2" disabled><CpIcon :icon="CloudUpload" />Publish changes</CpButton>
         </div>
       </div>
       <section v-if="error" class="cp-card bg-base-100 shadow-sm">
         <div class="cp-card-body gap-4 p-4 md:p-6">
           <CpErrorNote>The catalog did not load. The server did not answer; nothing in the draft was lost.</CpErrorNote>
-          <div><CpButton variant="outline" size="md" class="gap-2"><RefreshCw class="size-5 shrink-0" aria-hidden="true" />Try again</CpButton></div>
+          <div><CpButton variant="outline" size="md" class="gap-2"><CpIcon :icon="RefreshCw" />Try again</CpButton></div>
         </div>
       </section>
       <template v-else>
@@ -79,22 +80,22 @@ const contentTone = { New: 'primary', Edited: 'neutral', 'Offered again': 'succe
             <CpBadge tone="outline">Retirement · 1</CpBadge>
             <CpBadge tone="error">1 lack a translation</CpBadge>
           </div>
-          <CpButton size="md" class="gap-2"><CloudUpload class="size-5 shrink-0" aria-hidden="true" />Review and publish</CpButton>
+          <CpButton size="md" class="gap-2"><CpIcon :icon="CloudUpload" />Review and publish</CpButton>
         </div>
       </CpCard>
       <CpCard>
         <div class="flex flex-wrap items-center gap-2" role="search" aria-label="Filter the exercises">
-          <CpSearchField v-model="search" compact label="Search exercises by name, slug or alias" :placeholder="placeholder" />
+          <CpSearchField size="sm" v-model="search" compact label="Search exercises by name, slug or alias" :placeholder="placeholder" />
           <CpChip v-model="pending" compact>Pending changes</CpChip>
-          <CpSelectField v-model="pattern" compact label="Movement pattern" :options="all('Movement pattern', 'Squat', 'Hinge', 'Lunge', 'Push', 'Pull', 'Carry', 'Core', 'Rotation', 'Locomotion', 'Mobility', 'Stretch')" />
-          <CpSelectField v-model="translation" compact label="Translation status" :options="all('Translation status', 'Complete', 'Incomplete')" />
-          <CpSelectField v-model="content" compact label="Content status" :options="all('Content status', 'Draft', 'Modified', 'Published', 'Pending publication')" />
-          <CpSelectField v-model="lifecycle" compact label="Lifecycle status" :options="all('Lifecycle status', 'Active', 'Retirement pending', 'Retired')" />
-          <CpMultiSelectField v-model="muscles" label="Muscles" placeholder="Muscles" none-label="Nothing matches" :options="options('Back', 'Biceps', 'Calves', 'Chest', 'Core', 'Forearms', 'Full body', 'Glutes', 'Hamstrings', 'Hips', 'Neck', 'Quadriceps', 'Shoulders', 'Triceps')" />
-          <CpMultiSelectField v-model="positions" label="Positions" placeholder="Positions" none-label="Nothing matches" :options="options('Standing', 'Seated', 'Floor')" />
-          <CpMultiSelectField v-model="equipment" label="Equipment" placeholder="Equipment" none-label="Nothing matches" :options="options('Band', 'Barbell', 'Bench or step', 'Bodyweight', 'Dumbbells', 'Kettlebell', 'Machine', 'Mat', 'Pull-up bar', 'Treadmill')" />
+          <CpSelectField size="sm" v-model="pattern" compact label="Movement pattern" :options="all('Movement pattern', 'Squat', 'Hinge', 'Lunge', 'Push', 'Pull', 'Carry', 'Core', 'Rotation', 'Locomotion', 'Mobility', 'Stretch')" />
+          <CpSelectField size="sm" v-model="translation" compact label="Translation status" :options="all('Translation status', 'Complete', 'Incomplete')" />
+          <CpSelectField size="sm" v-model="content" compact label="Content status" :options="all('Content status', 'Draft', 'Modified', 'Published', 'Pending publication')" />
+          <CpSelectField size="sm" v-model="lifecycle" compact label="Lifecycle status" :options="all('Lifecycle status', 'Active', 'Retirement pending', 'Retired')" />
+          <CpMultiSelectField size="sm" v-model="muscles" label="Muscles" placeholder="Muscles" none-label="Nothing matches" :options="options('Back', 'Biceps', 'Calves', 'Chest', 'Core', 'Forearms', 'Full body', 'Glutes', 'Hamstrings', 'Hips', 'Neck', 'Quadriceps', 'Shoulders', 'Triceps')" />
+          <CpMultiSelectField size="sm" v-model="positions" label="Positions" placeholder="Positions" none-label="Nothing matches" :options="options('Standing', 'Seated', 'Floor')" />
+          <CpMultiSelectField size="sm" v-model="equipment" label="Equipment" placeholder="Equipment" none-label="Nothing matches" :options="options('Band', 'Barbell', 'Bench or step', 'Bodyweight', 'Dumbbells', 'Kettlebell', 'Machine', 'Mat', 'Pull-up bar', 'Treadmill')" />
           <a href="#" class="cp-link cp-link-hover text-sm" @click.prevent>Clear filters</a>
-          <CpButton size="md" class="ms-auto gap-2"><Plus class="size-5 shrink-0" aria-hidden="true" />New exercise</CpButton>
+          <CpButton size="md" class="ms-auto gap-2"><CpIcon :icon="Plus" />New exercise</CpButton>
         </div>
         <CpTable>
           <thead>
@@ -102,7 +103,7 @@ const contentTone = { New: 'primary', Edited: 'neutral', 'Offered again': 'succe
               <th class="w-12 text-center">
                 <CpDropdownMenu v-if="selection" :label="`Actions for ${selection} selected ${selection === 1 ? 'exercise' : 'exercises'}`">
                   <template #trigger>
-                    <EllipsisVertical class="size-4" aria-hidden="true" />
+                    <CpIcon :icon="EllipsisVertical" size="sm" />
                     <span class="cp-badge cp-badge-primary cp-badge-sm absolute -right-2 -top-2 z-10">{{ selection }}</span>
                   </template>
                   <li><button type="button">Retire <span class="cp-badge cp-badge-sm">{{ selection }}</span></button></li>
@@ -113,7 +114,7 @@ const contentTone = { New: 'primary', Edited: 'neutral', 'Offered again': 'succe
                 <CpCheckbox v-else label="Select all exercises on this page" />
               </th>
               <th v-for="column in columns" :key="column" aria-sort="none">
-                <button type="button" class="cp-btn cp-btn-ghost cp-btn-sm -ms-3 gap-1 whitespace-nowrap">{{ column }}<ChevronsUpDown class="size-4 shrink-0" aria-hidden="true" /></button>
+                <button type="button" class="cp-btn cp-btn-ghost cp-btn-sm -ms-3 gap-1 whitespace-nowrap">{{ column }}<CpIcon :icon="ChevronsUpDown" size="sm" /></button>
               </th>
             </tr>
           </thead>
@@ -138,7 +139,7 @@ const contentTone = { New: 'primary', Edited: 'neutral', 'Offered again': 'succe
         </CpTable>
         <div class="flex flex-col items-center justify-between gap-3 sm:flex-row">
           <p class="text-sm text-base-content/70">{{ showing }}</p>
-          <CpPagination v-model:page="page" :pages="pages" />
+          <CpPagination size="sm" v-model:page="page" :pages="pages" />
         </div>
       </CpCard>
       </template>

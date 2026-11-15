@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, within } from 'storybook/test'
 import { ref } from 'vue'
-import { CpSelectField } from '@coach-poulpy/ui'
+import { CpSelectField, cpSizes } from '@coach-poulpy/ui'
+import { sizeArgType } from './sizes'
 import doc from './CpSelectField.md?raw'
 
 const options = [
@@ -12,6 +13,7 @@ const options = [
 const meta = {
   title: 'Web/Components/Fields/SelectField',
   component: CpSelectField,
+  argTypes: { size: sizeArgType },
   args: { label: 'Format', options },
   // CLEANUP: the button is named by its label alone, so the value it shows is not part of its accessible name (WCAG 2.5.3);
   // name it by label and value, then drop this exemption.
@@ -53,3 +55,12 @@ export const EscapeClosesThePanel: Story = {
   },
 }
 export const Compact: Story = { args: { compact: true } }
+
+/** Every step of the size scale, xs to xxl; md is what a component without a `size` draws. */
+export const Sizes: Story = {
+  render: (args) => ({
+    components: { CpSelectField },
+    setup: () => ({ args, cpSizes, value: ref('circuit') }),
+    template: '<div class="flex flex-col items-start gap-4 pb-8"><div v-for="s in cpSizes" :key="s" class="flex items-center gap-4"><span class="cp-type-label w-10">{{ s }}</span><CpSelectField v-bind="args" :size="s" v-model="value" /></div></div>',
+  }),
+}
