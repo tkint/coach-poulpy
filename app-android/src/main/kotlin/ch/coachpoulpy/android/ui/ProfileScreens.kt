@@ -230,11 +230,10 @@ internal fun SettingsHub(graph: AppGraph, language: String, onPage: (SettingsPag
                 var appIcon by remember { mutableStateOf(AppIconSwitch.current(context)) }
                 var pickingIcon by remember { mutableStateOf(false) }
                 SettingsRow(
-                    leading = { Image(painterResource(appIcon.drawingRes), contentDescription = null, modifier = Modifier.size(44.dp)) },
-                    title = stringResource(R.string.settings_appIcon),
-                    subtitle = appIcon.label(),
-                    onClick = { pickingIcon = true },
-                )
+                    Lucide.Image,
+                    stringResource(R.string.settings_appIcon),
+                    appIcon.label(),
+                ) { pickingIcon = true }
                 if (pickingIcon) {
                     AppIconSheet(
                         selected = appIcon,
