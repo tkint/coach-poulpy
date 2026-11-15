@@ -4,7 +4,7 @@ import { Send } from '@lucide/vue'
 import { CpButton, CpCard, CpDivider, CpErrorNote, CpSuccessNote, CpTextField } from '@coach-poulpy/ui'
 import AdminShell from './AdminShell.vue'
 
-// The admin's settings: the sender of the emails and a test email (issue #336). Was design/mockups/agreed/web/admin-settings-*.html.
+// The admin's settings: the sender of the emails and a test email (issue #336).
 const meta = {
   title: 'Web/Screens/Admin/Settings',
   tags: ['!autodocs', 'agreed'],

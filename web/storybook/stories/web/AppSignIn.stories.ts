@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import { CpButton, CpErrorNote, CpPasswordField, CpTextField } from '@coach-poulpy/ui'
 import SitePage from '../../../app/src/SitePage.vue'
 
-// The web app's sign-in (issue #355). Was design/mockups/agreed/web/app-sign-in*.html.
+// The web app's sign-in (issue #355).
 const meta = {
   title: 'Web/Screens/App/Sign in',
   tags: ['!autodocs', 'agreed'],

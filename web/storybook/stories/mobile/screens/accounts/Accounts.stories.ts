@@ -27,7 +27,6 @@ import screenAccountSignUp from './account-sign-up.html?raw'
 
 // The Accounts screens of the apps (ADR 0029), drawn with the phone stylesheet (../screens.css).
 // CLEANUP: the screens marked a11y todo carry axe findings the old mockups had (contrast of hints and past days, names of fields); fix them with the screens, then drop the todo.
-// CLEANUP: the screens marked a11y todo carry axe findings the old mockups had (contrast of hints and past days, names of fields); fix them with the screens, then drop the todo.
 const meta = {
   title: "Mobile/Screens/Accounts",
   tags: ['!autodocs', 'agreed'],
@@ -36,145 +35,145 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** Account · check your email, link sent again. Was design/mockups/agreed/phone/account-check-email-resent.html. */
+/** Account · check your email, link sent again. */
 export const AccountCheckEmailResent: Story = {
   name: "Check your email, link sent again",
   ...screen(screenAccountCheckEmailResent),
   parameters: { a11y: { test: 'todo' }, mockup: { issue: 272 } },
 }
-/** Account · check your email. Was design/mockups/agreed/phone/account-check-email.html. */
+/** Account · check your email. */
 export const AccountCheckEmail: Story = {
   name: "Check your email",
   ...screen(screenAccountCheckEmail),
   parameters: { mockup: { issue: 272 } },
 }
-/** Account · email confirmed, first upload (sheet). Was design/mockups/agreed/phone/account-confirmed.html. */
+/** Account · email confirmed, first upload (sheet). */
 export const AccountConfirmed: Story = {
   name: "Email confirmed, first upload (sheet)",
   ...screen(screenAccountConfirmed),
   parameters: { mockup: { issue: 272 } },
 }
-/** Account · delete account, wrong password. Was design/mockups/agreed/phone/account-delete-error.html. */
+/** Account · delete account, wrong password. */
 export const AccountDeleteError: Story = {
   name: "Delete account, wrong password",
   ...screen(screenAccountDeleteError),
   parameters: { mockup: { issue: 272 } },
 }
-/** Account · delete account. Was design/mockups/agreed/phone/account-delete.html. */
+/** Account · delete account. */
 export const AccountDelete: Story = {
   name: "Delete account",
   ...screen(screenAccountDelete),
   parameters: { mockup: { issue: 272 } },
 }
-/** Account · account, email not confirmed. Was design/mockups/agreed/phone/account-details-pending.html. */
+/** Account · account, email not confirmed. */
 export const AccountDetailsPending: Story = {
   name: "Account, email not confirmed",
   ...screen(screenAccountDetailsPending),
   parameters: { a11y: { test: 'todo' }, mockup: { issue: 272 } },
 }
-/** Account · account, signed in. Was design/mockups/agreed/phone/account-details.html. */
+/** Account · account, signed in. */
 export const AccountDetails: Story = {
   name: "Account, signed in",
   ...screen(screenAccountDetails),
   parameters: { mockup: { issue: 272 } },
 }
-/** Account · forgot password, link sent. Was design/mockups/agreed/phone/account-forgot-password-sent.html. */
+/** Account · forgot password, link sent. */
 export const AccountForgotPasswordSent: Story = {
   name: "Forgot password, link sent",
   ...screen(screenAccountForgotPasswordSent),
   parameters: { mockup: { issue: 272 } },
 }
-/** Account · forgot password. Was design/mockups/agreed/phone/account-forgot-password.html. */
+/** Account · forgot password. */
 export const AccountForgotPassword: Story = {
   name: "Forgot password",
   ...screen(screenAccountForgotPassword),
   parameters: { mockup: { issue: 272 } },
 }
-/** Account · link expired. Was design/mockups/agreed/phone/account-link-expired.html. */
+/** Account · link expired. */
 export const AccountLinkExpired: Story = {
   name: "Link expired",
   ...screen(screenAccountLinkExpired),
   parameters: { mockup: { issue: 272 } },
 }
-/** Account · choose a new password. Was design/mockups/agreed/phone/account-reset-password.html. */
+/** Account · choose a new password. */
 export const AccountResetPassword: Story = {
   name: "Choose a new password",
   ...screen(screenAccountResetPassword),
   parameters: { mockup: { issue: 272 } },
 }
-/** Account · settings, guest. Was design/mockups/agreed/phone/account-settings-guest.html. */
+/** Account · settings, guest. */
 export const AccountSettingsGuest: Story = {
   name: "Settings, guest",
   ...screen(screenAccountSettingsGuest),
   parameters: { mockup: { issue: 272 } },
 }
-/** Account · settings, email not confirmed. Was design/mockups/agreed/phone/account-settings-pending.html. */
+/** Account · settings, email not confirmed. */
 export const AccountSettingsPending: Story = {
   name: "Settings, email not confirmed",
   ...screen(screenAccountSettingsPending),
   parameters: { mockup: { issue: 272 } },
 }
-/** Account · settings, signed in. Was design/mockups/agreed/phone/account-settings-synced.html. */
+/** Account · settings, signed in. */
 export const AccountSettingsSynced: Story = {
   name: "Settings, signed in",
   ...screen(screenAccountSettingsSynced),
   parameters: { mockup: { issue: 272 } },
 }
-/** Account · sign in, wrong password. Was design/mockups/agreed/phone/account-sign-in-error.html. */
+/** Account · sign in, wrong password. */
 export const AccountSignInError: Story = {
   name: "Sign in, wrong password",
   ...screen(screenAccountSignInError),
   parameters: { mockup: { issue: 272 } },
 }
-/** Account · sign in, guest data joins. Was design/mockups/agreed/phone/account-sign-in-merge.html. */
+/** Account · sign in, guest data joins. */
 export const AccountSignInMerge: Story = {
   name: "Sign in, guest data joins",
   ...screen(screenAccountSignInMerge),
   parameters: { mockup: { issue: 272 } },
 }
-/** Account · sign in, password changed. Was design/mockups/agreed/phone/account-sign-in-reset-done.html. */
+/** Account · sign in, password changed. */
 export const AccountSignInResetDone: Story = {
   name: "Sign in, password changed",
   ...screen(screenAccountSignInResetDone),
   parameters: { mockup: { issue: 272 } },
 }
-/** Account · sign in. Was design/mockups/agreed/phone/account-sign-in.html. */
+/** Account · sign in. */
 export const AccountSignIn: Story = {
   name: "Sign in",
   ...screen(screenAccountSignIn),
   parameters: { mockup: { issue: 272 } },
 }
-/** Account · sign out, changes not sent. Was design/mockups/agreed/phone/account-sign-out-unsent.html. */
+/** Account · sign out, changes not sent. */
 export const AccountSignOutUnsent: Story = {
   name: "Sign out, changes not sent",
   ...screen(screenAccountSignOutUnsent),
   parameters: { mockup: { issue: 272 } },
 }
-/** Account · sign out. Was design/mockups/agreed/phone/account-sign-out.html. */
+/** Account · sign out. */
 export const AccountSignOut: Story = {
   name: "Sign out",
   ...screen(screenAccountSignOut),
   parameters: { mockup: { issue: 272 } },
 }
-/** Account · what is stored. Was design/mockups/agreed/phone/account-sign-up-consent-sheet.html. */
+/** Account · what is stored. */
 export const AccountSignUpConsentSheet: Story = {
   name: "What is stored",
   ...screen(screenAccountSignUpConsentSheet),
   parameters: { mockup: { issue: 272 } },
 }
-/** Account · sign up, errors. Was design/mockups/agreed/phone/account-sign-up-error.html. */
+/** Account · sign up, errors. */
 export const AccountSignUpError: Story = {
   name: "Sign up, errors",
   ...screen(screenAccountSignUpError),
   parameters: { mockup: { issue: 272 } },
 }
-/** Account · sign up, offline. Was design/mockups/agreed/phone/account-sign-up-offline.html. */
+/** Account · sign up, offline. */
 export const AccountSignUpOffline: Story = {
   name: "Sign up, offline",
   ...screen(screenAccountSignUpOffline),
   parameters: { mockup: { issue: 272 } },
 }
-/** Account · sign up. Was design/mockups/agreed/phone/account-sign-up.html. */
+/** Account · sign up. */
 export const AccountSignUp: Story = {
   name: "Sign up",
   ...screen(screenAccountSignUp),

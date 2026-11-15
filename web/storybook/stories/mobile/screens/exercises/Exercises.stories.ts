@@ -6,8 +6,6 @@ import screenExerciseVariations from './exercise-variations.html?raw'
 
 // The Exercises screens of the apps (ADR 0029), drawn with the phone stylesheet (../screens.css).
 // CLEANUP: the screens marked a11y todo carry axe findings the old mockups had (contrast of hints and past days, names of fields); fix them with the screens, then drop the todo.
-// CLEANUP: the screens marked a11y todo carry axe findings the old mockups had (contrast of hints and past days, names of fields); fix them with the screens, then drop the todo.
-// CLEANUP: the screens marked a11y todo carry axe findings the old mockups had (contrast of hints and past days, names of fields); fix them with the screens, then drop the todo.
 const meta = {
   title: "Mobile/Screens/Exercises",
   tags: ['!autodocs', 'agreed'],
@@ -16,19 +14,19 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** Exercise page · How to do it. Was design/mockups/agreed/phone/exercise-page-how-to.html. */
+/** Exercise page · How to do it. */
 export const ExercisePageHowTo: Story = {
   name: "How to do it",
   ...screen(screenExercisePageHowTo),
   parameters: { a11y: { test: 'todo' }, mockup: { issue: 104 } },
 }
-/** Exercise page. Was design/mockups/agreed/phone/exercise-page.html. */
+/** Exercise page. */
 export const ExercisePage: Story = {
   name: "Exercise page",
   ...screen(screenExercisePage),
   parameters: { a11y: { test: 'todo' }, mockup: { issue: 104 } },
 }
-/** Exercise page · variations. Was design/mockups/agreed/phone/exercise-variations.html. */
+/** Exercise page · variations. */
 export const ExerciseVariations: Story = {
   name: "Variations",
   ...screen(screenExerciseVariations),

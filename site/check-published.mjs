@@ -43,7 +43,7 @@ const queue = ['index.html']
 while (queue.length > 0) {
   const from = queue.shift()
   const html = readFileSync(join(dist, from), 'utf8')
-  // src too: the mockup pages show each mockup's HTML in an iframe.
+  // src too: a page can embed another in an iframe.
   for (const [, href] of html.matchAll(/(?:href|src)="([^"]+)"/g)) {
     const page = toPage(href, from)
     if (page && !reached.has(page)) {

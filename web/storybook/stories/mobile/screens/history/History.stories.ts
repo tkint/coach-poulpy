@@ -15,25 +15,25 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** History · calendar. Was design/mockups/agreed/phone/history-calendar.html. */
+/** History · calendar. */
 export const HistoryCalendar: Story = {
   name: "Calendar",
   ...screen(screenHistoryCalendar),
   parameters: { a11y: { test: 'todo' }, mockup: { issue: 104 } },
 }
-/** History · delete a session. Was design/mockups/agreed/phone/history-session-delete.html. */
+/** History · delete a session. */
 export const HistorySessionDelete: Story = {
   name: "Delete a session",
   ...screen(screenHistorySessionDelete),
   parameters: { mockup: { issue: 104 } },
 }
-/** History · share a session. Was design/mockups/agreed/phone/history-session-share.html. */
+/** History · share a session. */
 export const HistorySessionShare: Story = {
   name: "Share a session",
   ...screen(screenHistorySessionShare),
   parameters: { mockup: { issue: 104 } },
 }
-/** History · stats. Was design/mockups/agreed/phone/history-stats.html. */
+/** History · stats. */
 export const HistoryStats: Story = {
   name: "Stats",
   ...screen(screenHistoryStats),

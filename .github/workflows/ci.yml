@@ -148,5 +148,3 @@ jobs:
         working-directory: web/storybook
       - name: Run every story of the component workshop as a test (interactions and accessibility)
         run: npm test -w storybook
-      - name: Check the HTML mockups use only the design tokens, link only files in the repo and draw Lucide icons
-        run: node ../design/check-mockups.mjs

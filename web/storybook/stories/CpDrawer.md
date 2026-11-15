@@ -1,4 +1,4 @@
-`CpDrawer`: the admin's page frame. A full-height sidebar from a large screen up, folded to icons by the button in the top bar; on a smaller screen it slides over the page. It fills the browser window, so it has no live sample here: see it in the [Admin · Audit mockup](https://tkint.github.io/coach-poulpy/mockups/web/agreed/admin-audit).
+`CpDrawer`: the admin's page frame. A full-height sidebar from a large screen up, folded to icons by the button in the top bar; on a smaller screen it slides over the page. It fills the browser window, so it has no live sample here: see it in [Web > Screens > Admin > Audit log](https://tkint.github.io/coach-poulpy/storybook/?path=/docs/web-screens-admin-audit-log--docs).
 
 | Vue | Classes |
 | --- | --- |

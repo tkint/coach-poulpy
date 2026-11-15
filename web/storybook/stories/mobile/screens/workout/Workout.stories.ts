@@ -12,13 +12,13 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** Workout page · exercise sheet, pulled up. Was design/mockups/agreed/phone/workout-page-exercise-details-full.html. */
+/** Workout page · exercise sheet, pulled up. */
 export const WorkoutPageExerciseDetailsFull: Story = {
   name: "Exercise sheet, pulled up",
   ...screen(screenWorkoutPageExerciseDetailsFull),
   parameters: { mockup: { issue: 359 } },
 }
-/** Workout page · exercise sheet. Was design/mockups/agreed/phone/workout-page-exercise-details.html. */
+/** Workout page · exercise sheet. */
 export const WorkoutPageExerciseDetails: Story = {
   name: "Exercise sheet",
   ...screen(screenWorkoutPageExerciseDetails),

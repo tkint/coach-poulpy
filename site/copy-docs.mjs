@@ -6,8 +6,8 @@ import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { shared } from './published.mjs'
 
-// Generate the ignored Tailwind/DaisyUI styles before copying the plain-HTML mockups and before
-// VitePress imports the embed stylesheet. The docs build installs web/ dependencies first.
+// Generate the ignored Tailwind/DaisyUI styles before VitePress imports the embed stylesheet. The docs
+// build installs web/ dependencies first.
 execFileSync('npm', ['run', 'build', '-w', 'ui'], {
   cwd: resolve(dirname(fileURLToPath(import.meta.url)), '../web'),
   stdio: 'inherit',
@@ -26,10 +26,9 @@ for (const path of shared) {
 }
 cpSync('../design/poulpy/mood_happy.svg', 'public/poulpy.svg')
 
-// The mockups link the token CSS, the web design system's CSS and Poulpy's drawings by relative
-// path, so they are copied with them at the same paths as in the repo (ADR 0016, ADR 0023). The 3D
-// models go the same way, so the Poulpy in 3D page can offer them to download.
-for (const path of ['design/mockups', 'design/poulpy', 'design/poulpy-3d', 'web/ui/src/tokens.css', 'web/ui/poulpy-ui.css']) {
+// Poulpy's drawings and 3D models are published at the same paths as in the repo, so the Drawings and
+// Poulpy in 3D pages can offer them to download.
+for (const path of ['design/poulpy', 'design/poulpy-3d']) {
   rmSync(`public/${path}`, { recursive: true, force: true })
   cpSync(`../${path}`, `public/${path}`, { recursive: true })
 }

@@ -15,31 +15,31 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** Home · done. Was design/mockups/agreed/phone/home-done.html. */
+/** Home · done. */
 export const HomeDone: Story = {
   name: "Done",
   ...screen(screenHomeDone),
   parameters: { mockup: { issue: 222 } },
 }
-/** Home · in progress. Was design/mockups/agreed/phone/home-in-progress.html. */
+/** Home · in progress. */
 export const HomeInProgress: Story = {
   name: "In progress",
   ...screen(screenHomeInProgress),
   parameters: { mockup: { issue: 222 } },
 }
-/** Home · next session. Was design/mockups/agreed/phone/home-next.html. */
+/** Home · next session. */
 export const HomeNext: Story = {
   name: "Next session",
   ...screen(screenHomeNext),
   parameters: { mockup: { issue: 222 } },
 }
-/** Home · nothing planned. Was design/mockups/agreed/phone/home-nothing-planned.html. */
+/** Home · nothing planned. */
 export const HomeNothingPlanned: Story = {
   name: "Nothing planned",
   ...screen(screenHomeNothingPlanned),
   parameters: { mockup: { issue: 222 } },
 }
-/** Home · planned. Was design/mockups/agreed/phone/home-planned.html. */
+/** Home · planned. */
 export const HomePlanned: Story = {
   name: "Planned",
   ...screen(screenHomePlanned),

@@ -50,7 +50,7 @@
     </ul>
         <p class="pain-note" id="pain-window" data-component="poulpy-note"><img src="../../../poulpy/mood_recovering.svg" alt="">Your left shoulder still hurts. Go gently, I'll keep an eye on it with you.</p>
         <section id="planned-days" class="plan-summary" data-component="plan-summary" aria-label="Planned days">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="calendar"><path d="M8 2v3"/><path d="M16 2v3"/><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/></svg>
+          <MobileIcon name="calendar" :size="22" />
           <div><strong>3 sessions planned</strong><span>Next on Fri 30 Oct</span></div>
           <button type="button">Change days</button>
         </section>
@@ -61,13 +61,13 @@
         </div>
         <span class="label section-label">Exercises</span>
         <fieldset class="recap-part" data-component="recap-part" aria-label="Warm-up">
-          <legend class="part-header" data-component="part-header"><div class="part-title"><span class="part-icon " aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="sun"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg></span><div><h2>Warm-up</h2><p>2 exercises</p></div></div></legend><span class="part-time">2 min</span>
+          <legend class="part-header" data-component="part-header"><div class="part-title"><span class="part-icon " aria-hidden="true"><MobileIcon name="sun" :size="20" /></span><div><h2>Warm-up</h2><p>2 exercises</p></div></div></legend><span class="part-time">2 min</span>
           <ol class="steps"><li><MobileExerciseRow icon="person-standing" name="Jumping jack" detail="30 s" info /></li><li><MobileExerciseRow icon="person-standing" name="Arm circles" detail="30 s" info /></li></ol>
         </fieldset><fieldset class="recap-part" data-component="recap-part" aria-label="Work">
-          <legend class="part-header" data-component="part-header"><div class="part-title"><span class="part-icon part-icon--work" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="zap"><path d="M15.914 4a1.5 1.5 0 00-2.474-1.561l-9 9A1.5 1.5 0 005.5 14h4.002a.5.5 0 01.471.666L8.086 20a1.5 1.5 0 002.475 1.56l9-9A1.5 1.5 0 0018.5 10h-3.997a.5.5 0 01-.472-.667z"/></svg></span><div><h2>Work</h2><p>4 exercises</p></div></div></legend><span class="part-time">28 min</span>
+          <legend class="part-header" data-component="part-header"><div class="part-title"><span class="part-icon part-icon--work" aria-hidden="true"><MobileIcon name="zap" :size="20" /></span><div><h2>Work</h2><p>4 exercises</p></div></div></legend><span class="part-time">28 min</span>
           <ol class="steps"><li><MobileExerciseRow icon="person-standing" name="Push-up" detail="3 × 12" info /></li><li><MobileExerciseRow icon="dumbbell" name="One-arm dumbbell row" detail="3 × 10 each side · 14 kg" info /></li><li><MobileExerciseRow icon="dumbbell" name="Dumbbell overhead press" detail="3 × 8 · 10 kg" info /></li><li><MobileExerciseRow icon="person-standing" name="Plank" detail="2 × 40 s hold" info /></li></ol>
         </fieldset><fieldset class="recap-part" data-component="recap-part" aria-label="Cool down">
-          <legend class="part-header" data-component="part-header"><div class="part-title"><span class="part-icon " aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="moon"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/></svg></span><div><h2>Cool down</h2><p>1 exercise</p></div></div></legend><span class="part-time">2 min</span>
+          <legend class="part-header" data-component="part-header"><div class="part-title"><span class="part-icon " aria-hidden="true"><MobileIcon name="moon" :size="20" /></span><div><h2>Cool down</h2><p>1 exercise</p></div></div></legend><span class="part-time">2 min</span>
           <ol class="steps"><li><MobileExerciseRow icon="person-standing" name="Child’s pose" detail="90 s" info /></li></ol>
         </fieldset>
     </div>

@@ -11,7 +11,7 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** Session share card. Was design/mockups/agreed/phone/session-share-card.html. */
+/** Session share card. */
 export const SessionShareCard: Story = {
   name: "Session share card",
   ...screen(screenSessionShareCard),

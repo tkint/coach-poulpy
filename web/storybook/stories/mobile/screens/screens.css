@@ -1,6 +1,6 @@
 /*
  * The phone and tablet screens of the apps (ADR 0029): the stylesheet of the old plain-HTML mockups
- * (design/mockups/shared/mockup.css), with every rule under .cp-screen so none of it reaches the Vue
+ * (their mockup.css), with every rule under .cp-screen so none of it reaches the Vue
  * components (the screen renders in a shadow root, which also keeps the workshop's Tailwind reset out). Colours, type, spacing and radii are var(--cp-*) from tokens.css; no raw values beyond sizes.
  */
 .cp-screen * { box-sizing: border-box; }
