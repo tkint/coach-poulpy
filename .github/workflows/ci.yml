@@ -22,16 +22,6 @@ jobs:
           distribution: temurin
           java-version: 21
       - uses: gradle/actions/setup-gradle@v5
-      - name: Check changed exercises carry a higher revision
-        # Fink's pull requests change catalog text without a bump (ADR 0015); each exercise now
-        # carries its own `revision`, and phones only take an exercise whose revision is higher (ADR 0030).
-        if: github.event_name == 'pull_request'
-        env:
-          BASE: ${{ github.base_ref }}
-        run: |
-          git fetch --no-tags --depth=1 origin "$BASE"
-          node --test catalog/tools/check-revisions.test.mjs
-          node catalog/tools/check-revisions.mjs FETCH_HEAD
       - name: Test shared modules, server and the string generator
         run: ./gradlew jvmTest jsTest :server:test :tools:i18n:test
       - name: Unpack the signing key

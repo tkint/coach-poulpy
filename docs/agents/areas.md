@@ -52,7 +52,7 @@ Read [`i18n/README.md`](../../i18n/README.md) and the glossaries in `i18n/glossa
 - Counts must agree with their number: use an ICU plural for anything countable, so "1 rep" and « 1 tentacule » read right. Check the French forms (`one`, `many`, `other`) too.
 - French typography (non-breaking spaces before `: ; ? !` and inside « »), and the rest of the checks, are automated by `i18n/typography.mjs`.
 - Native speakers proofread in Fink, which opens pull requests. The docs page for them is "Proofread and translate" page of the Translations section; keep it free of repo paths.
-- Exercise text lives in `catalog.json`. Catalog slugs never change; retire an entry with `"retired": true`. Raise an exercise's `revision` whenever its content changes (CI checks it).
+- Exercise text lives in `catalog.json`. Catalog slugs never change; retire an entry with `"retired": true`. Exercises change from the admin as revisions; the bundled file is only the first-launch seed.
 - Text that might not fit on a phone (tab labels, buttons, chips) is read in French on a device before the language is called done.
 
 ## Maintainer: housekeeping (long-running)
