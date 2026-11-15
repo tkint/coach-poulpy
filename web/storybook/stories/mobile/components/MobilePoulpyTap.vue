@@ -1,12 +1,14 @@
 <script setup lang="ts">
 // Poulpy on Home (decision 16, step 4): his still picture, which stays still. A tap plays one short animation for his
 // current mood, in 3D, and he settles back to the picture. Only moods that have an animation respond: happy and proud
-// jump; the others get theirs later. With reduced motion a tap does nothing. The apps do the same with their own 3D.
+// jump, leaning to his left or his right at random; the others get theirs later. With reduced motion a tap does nothing. The apps do the same with their own 3D.
 import { computed, onBeforeUnmount, ref } from 'vue'
 import { poulpyDrawings } from '@coach-poulpy/ui'
 
 const props = defineProps<{ mood: 'proud' | 'happy' | 'recovering' | 'annoyed' | 'grumpy' | 'fuming'; label: string }>()
 const ANIMATED = ['proud', 'happy']
+const PICTURE_HEIGHT = 64
+const PAD = 24
 const picture = computed(() => (poulpyDrawings as Record<string, string>)[`mood_${props.mood}`])
 const playing = ref(false)
 const stage = ref<HTMLElement>()
@@ -23,8 +25,12 @@ async function play() {
   const { createJump } = await import('../../../../../design/poulpy-3d/motion.mjs')
   const scene = createPoulpyScene(canvas.value)
   scene.show(props.mood, false)
-  scene.look({ turn: 0, tilt: 8, distance: 14.5 })
+  // The same shot as his still picture (design/build-poulpy-pictures.mjs), on a canvas that reaches PAD px further each way
+  // so the jump is not cut off: the view grows with it, so he stays the picture's size and in its place.
+  scene.look({ turn: 0, tilt: 8, distance: 9.4, centre: 1.35, field: (2 * Math.atan(((PICTURE_HEIGHT + 2 * PAD) / PICTURE_HEIGHT) * Math.tan((14 * Math.PI) / 180)) * 180) / Math.PI })
+  // Each tap plays one of two jumps, at random: leaning to his left or to his right.
   const jump = createJump()
+  jump.lean *= Math.random() < 0.5 ? -1 : 1
   let last = performance.now(), clock = 0, high = false
   const tick = (now: number) => {
     const dt = (now - last) / 1000
