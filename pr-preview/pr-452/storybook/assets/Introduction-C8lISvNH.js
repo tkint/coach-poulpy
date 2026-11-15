@@ -1,0 +1,13 @@
+import{n as e}from"./rolldown-runtime-sJBDdmOt.js";import{i as t,r as n}from"./react-DITjJg24.js";import{a as r}from"./chunk-W22LQPXL-DkWiGpo7.js";import{c as i,d as a,l as o}from"./blocks-BnMRf1Ff.js";import{n as s,t as c}from"./markdown-pages-Ba0Cchwf.js";function l(e){let n={a:`a`,code:`code`,h1:`h1`,li:`li`,p:`p`,ul:`ul`,...t(),...e.components};return(0,d.jsxs)(d.Fragment,{children:[(0,d.jsx)(o,{title:`Brand/Introduction`}),`
+`,(0,d.jsx)(n.h1,{id:`poulpy-and-the-brand`,children:`Poulpy and the brand`}),`
+`,(0,d.jsx)(i,{children:f}),`
+`,(0,d.jsxs)(n.ul,{children:[`
+`,(0,d.jsxs)(n.li,{children:[(0,d.jsx)(n.a,{href:`?path=/docs/brand-character--docs`,children:`Character`}),`: what Poulpy is and never does, and his tentacles.`]}),`
+`,(0,d.jsxs)(n.li,{children:[(0,d.jsx)(n.a,{href:`?path=/docs/brand-moods--docs`,children:`Moods`}),`: his two sides, six moods, which drawing shows when, and the ember side.`]}),`
+`,(0,d.jsxs)(n.li,{children:[(0,d.jsx)(n.a,{href:`?path=/docs/brand-inclusive-by-default--docs`,children:`Inclusive by default`}),` and `,(0,d.jsx)(n.a,{href:`?path=/docs/brand-voice-logo-and-type--docs`,children:`Voice, logo and type`}),`.`]}),`
+`,(0,d.jsxs)(n.li,{children:[(0,d.jsx)(n.a,{href:`?path=/docs/brand-drawings--docs`,children:`Drawings`}),`: every portrait, pose and the loader, as generated.`]}),`
+`,(0,d.jsxs)(n.li,{children:[(0,d.jsx)(n.a,{href:`?path=/docs/brand-poulpy-in-3d--docs`,children:`Poulpy in 3D`}),`: the model to turn around, its rules and how to reuse it.`]}),`
+`,(0,d.jsxs)(n.li,{children:[(0,d.jsx)(n.a,{href:`?path=/docs/brand-brand-book--docs`,children:`Brand book`}),`: logo, colours, poses, type and behaviour, with every drawing live.`]}),`
+`,(0,d.jsxs)(n.li,{children:[(0,d.jsx)(n.a,{href:`?path=/docs/brand-decisions--docs`,children:`Decisions`}),`: what was decided and why. `,(0,d.jsx)(n.a,{href:`?path=/docs/brand-ideas-for-later--docs`,children:`Ideas for later`}),`.`]}),`
+`]}),`
+`,(0,d.jsxs)(n.p,{children:[`These pages show `,(0,d.jsx)(n.a,{href:`https://github.com/tkint/coach-poulpy/blob/main/docs/brand.md`,rel:`nofollow`,children:(0,d.jsx)(n.code,{children:`docs/brand.md`})}),` and `,(0,d.jsx)(n.a,{href:`https://github.com/tkint/coach-poulpy/blob/main/docs/brand-decisions.md`,rel:`nofollow`,children:(0,d.jsx)(n.code,{children:`docs/brand-decisions.md`})}),`, which agents read; edit the rules there.`]})]})}function u(e={}){let{wrapper:n}={...t(),...e.components};return n?(0,d.jsx)(n,{...e,children:(0,d.jsx)(l,{...e})}):l(e)}var d,f;function p(){return(p=e((()=>{d=r(),n(),a(),c(),f=s(`brand`).intro})))()}p();export{u as default,f as intro};
