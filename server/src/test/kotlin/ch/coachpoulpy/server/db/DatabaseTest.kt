@@ -63,7 +63,7 @@ class DatabaseTest {
                 """.trimIndent(),
             )
         }
-        ServerDatabase.Schema.migrate(postgres.postgresDatabase.asJdbcDriver(), 12, 13)
+        ServerDatabase.Schema.migrate(postgres.postgresDatabase.asJdbcDriver(), 13, 14)
         postgres.postgresDatabase.connection.use { connection ->
             val seqs = connection.createStatement().executeQuery("SELECT slug, revision, seq FROM catalog_exercise_revision ORDER BY slug, revision").use { rows ->
                 buildList { while (rows.next()) add(Triple(rows.getString(1), rows.getInt(2), rows.getObject(3) as Long?)) }

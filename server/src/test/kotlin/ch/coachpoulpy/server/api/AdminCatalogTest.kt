@@ -364,7 +364,7 @@ class AdminCatalogTest {
         val wallSit = body(publicCatalog()).getValue("exercises").jsonArray.map { it.jsonObject }
             .last { it.getValue("exercise").jsonObject.getValue("slug").jsonPrimitive.content == "wall-sit" }
         assertEquals(3, wallSit.getValue("revision").jsonPrimitive.int)
-        assertEquals("false", wallSit.getValue("exercise").jsonObject.getValue("retired").jsonPrimitive.content)
+        assertEquals(null, wallSit.getValue("exercise").jsonObject["retired"], "offered again: the default, so left out of the JSON")
         assertEquals(NOT_FOUND, call(Request(POST, "/api/v1/admin/catalog/exercises/no-such-exercise/offer")).status)
     }
 
