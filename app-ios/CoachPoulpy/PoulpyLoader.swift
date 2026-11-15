@@ -5,15 +5,20 @@ import Shared
 /// The loader's pictures, from the app's bundle (design/poulpy-3d/loader), read once for every loader on screen: the swing's sheet cut
 /// into its frames, or the one clockwise picture.
 private enum LoaderPictures {
+    private static func load(_ name: String) -> UIImage? {
+        guard let path = Bundle.main.path(forResource: name, ofType: "png") else { return nil }
+        return UIImage(contentsOfFile: path)
+    }
+
     static let swing: [UIImage] = {
-        guard let sheet = Bundle.main.path(forResource: "swing", ofType: "png").flatMap { UIImage(contentsOfFile: $0)?.cgImage } else { return [] }
+        guard let sheet = load("swing")?.cgImage else { return [] }
         let columns = Int(LoaderSwing.shared.COLUMNS), side = sheet.width / columns
         return (0..<Int(LoaderSwing.shared.FRAMES)).compactMap { index in
             sheet.cropping(to: CGRect(x: index % columns * side, y: index / columns * side, width: side, height: side))
                 .map { UIImage(cgImage: $0) }
         }
     }()
-    static let clockwise: UIImage? = Bundle.main.path(forResource: "clockwise", ofType: "png").flatMap { UIImage(contentsOfFile: $0) }
+    static let clockwise: UIImage? = load("clockwise")
 }
 
 /// The loading indicator: Poulpy's outline seen from underneath, his tentacles loose, one cycle every 3.6 s (12 s with Reduce Motion).
