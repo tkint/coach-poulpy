@@ -57,6 +57,13 @@ export const RemovingAValue: Story = {
     expect(within(canvasElement).queryByRole('button', { name: 'Remove Standing' })).toBeNull()
   },
 }
+/** Only a badge's cross takes a value out; a click on the badge itself leaves it. */
+export const ClickingABadgeKeepsIt: Story = {
+  play: async ({ canvasElement }) => {
+    await userEvent.click(canvasElement.querySelector('.cp-badge') as HTMLElement)
+    expect(within(canvasElement).getByRole('button', { name: 'Remove Standing' })).toBeInTheDocument()
+  },
+}
 export const EscapeClosesTheList: Story = {
   play: async ({ canvasElement }) => {
     await userEvent.click(within(canvasElement).getByRole('combobox'))
