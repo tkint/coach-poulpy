@@ -1,0 +1,12 @@
+import { Meta, Markdown } from '@storybook/addon-docs/blocks'
+import { markdownPages } from '../markdown-pages'
+
+export const decisions = markdownPages('brand-decisions').all
+
+<Meta title="Brand/Decisions" />
+
+{/* Shown from docs/brand-decisions.md: add a decision there. */}
+
+# Brand decisions
+
+<Markdown>{decisions}</Markdown>

@@ -24,6 +24,10 @@ const slug = (text) => text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^
 const storyIdOf = (name) => slug(name.replace(/([a-z0-9])([A-Z])/g, '$1 $2'))
 const storyFilesOf = (file) => {
   if (file.endsWith('.stories.ts') || file.endsWith('.mdx')) return file.startsWith(workshop) ? [file] : []
+  // Generated drawings and the 3D model show on the Brand pages.
+  if (file === 'design/build-poulpy.mjs' || file.startsWith('design/poulpy/')) return [`${workshop}brand/Drawings.mdx`, `${workshop}PoulpyReference.stories.ts`]
+  if (file.startsWith('design/poulpy-3d/')) return [`${workshop}brand/Poulpy3d.mdx`]
+  if (file.startsWith(`${workshop}brand/brand-book/`)) return [`${workshop}brand/BrandBook.mdx`]
   const stem = file.replace(/^.*\//, '').replace(/\.[^.]+$/, '')
   if (file.startsWith('web/ui/src/components/')) return git('ls-files', workshop).split('\n').filter((f) => f.endsWith(`/${stem}.stories.ts`))
   if (!file.startsWith(workshop)) return []
@@ -52,14 +56,12 @@ function workshopEntry(file) {
 
 // The page a changed file shows up on, or null when no page shows it.
 function pageOf(file) {
-  if (file === 'design/build-poulpy.mjs' || file.startsWith('design/poulpy/')) return { group: 'design', page: 'drawings' }
-  if (file.startsWith('site/.vitepress/theme/brand-book/')) return { group: 'design', page: 'brand-book' }
   if (!file.endsWith('.md') || file.includes('[')) return null // a [param].md route has no page of its own
   const isShared = shared.some((path) => file === path || file.startsWith(`${path}/`))
   const path = isShared ? file : file.startsWith('site/') ? file.slice('site/'.length) : null
   if (path === null) return null
   const page = path.replace(/\.md$/, '').replace(/(^|\/)index$/, '$1')
-  const group = path.startsWith('docs/adr/') ? 'decisions' : /^(docs\/brand|docs\/design-system|brand-book|drawings)/.test(path) ? 'design' : 'guidelines'
+  const group = path.startsWith('docs/adr/') ? 'decisions' : /^(docs\/brand|docs\/design-system|docs\/poulpy-3d)/.test(path) ? 'design' : 'guidelines'
   return { group, page }
 }
 

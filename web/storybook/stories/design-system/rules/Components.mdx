@@ -1,5 +1,7 @@
 import { Meta, Markdown } from '@storybook/addon-docs/blocks'
-import { rules } from './rules'
+import { markdownPages } from '../../markdown-pages'
+
+export const rules = markdownPages('design-system').sections
 
 <Meta title="Design system/Rules/Components" />
 
