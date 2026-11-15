@@ -446,6 +446,10 @@
 .cp-screen .tentacle-ring path { fill: none; stroke-width: 15; stroke-linecap: round; stroke: color-mix(in srgb, var(--cp-on-primary-container) 25%, transparent); }
 .cp-screen .tentacle-ring path.lit { stroke: var(--cp-primary); }
 .cp-screen .tentacle-ring path.new { stroke: var(--cp-on-primary-container); }
+.cp-screen .tentacle-ring .poulpy-tap { position: absolute; left: 17px; top: 20px; width: 71px; height: 64px; padding: 0; border: 0; background: none; cursor: pointer; border-radius: var(--cp-radius-lg); }
+.cp-screen .tentacle-ring .poulpy-tap img { left: 0; top: 0; }
+.cp-screen .poulpy-tap-stage { position: absolute; inset: -24px; pointer-events: none; }
+.cp-screen .poulpy-tap-stage canvas { display: block; width: 100%; height: 100%; }
 .cp-screen .tentacle-ring img { position: absolute; left: 17px; top: 20px; width: 71px; height: 64px; }
 .cp-screen .poulpy-card h2 { font-family: var(--cp-font-display); font-size: 22px; line-height: 26px; font-weight: 700; }
 .cp-screen .poulpy-card p { font-size: 15px; line-height: 20px; font-weight: 600; }
