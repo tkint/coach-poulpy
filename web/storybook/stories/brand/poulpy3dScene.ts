@@ -1,11 +1,12 @@
 // Draws the Poulpy of design/poulpy-3d/model.mjs with three.js: flat cartoon shading, a light that stays
 // in the room while he turns, the gleam that follows it and the optional outline. He is built on the
-// joints of design/poulpy-3d/motion.mjs, so pose() can turn him, lift him and bend his arms. Poulpy3d.vue owns
+// joints of design/poulpy-3d/motion.mjs, so pose() can turn him, lift him, bend his arms, swing his medal, throw confetti, change his face and light his stars. Poulpy3d.vue owns
 // the controls; this file owns the canvas and everything WebGL, and gives it all back on dispose().
 import * as THREE from 'three'
 import tokens from '../../../../design/tokens.json'
-import { buildPoulpy3d, gleamPatch, LOOK, type PoulpyMood, type PoulpyPart, type PoulpySide } from '../../../../design/poulpy-3d/model.mjs'
-import { armJoints, armSkin, squashScale, type JumpPose, type TurnPose } from '../../../../design/poulpy-3d/motion.mjs'
+import { buildPoulpy3d, gleamPatch, LOOK, type PoulpyMaterial, type PoulpyMood, type PoulpyPart, type PoulpySide } from '../../../../design/poulpy-3d/model.mjs'
+import { buildPoulpyPose, CONFETTI, GOLDEN, medalHinge, poseMood, STARS, starShape, type PoulpyPose } from '../../../../design/poulpy-3d/poses.mjs'
+import { armJoints, armSkin, squashScale, type CheerPose, type JumpPose, type TurnPose, type WinkPose } from '../../../../design/poulpy-3d/motion.mjs'
 
 /** Where the viewer stands: degrees around Poulpy, degrees above (or below) him, and how far away. */
 export interface PoulpyView { turn: number; tilt: number; distance: number }
@@ -42,12 +43,27 @@ export function createPoulpyScene(canvas: HTMLCanvasElement) {
   let gleam: THREE.BufferGeometry | undefined
   // What moves him: `turn` faces, lifts and tilts him, `squash` holds his head and face, `bends` are the arms'
   // joints and `hinges` the line each one hangs around.
-  let rig: { turn: THREE.Bone; squash: THREE.Group; bends: THREE.Bone[]; hinges: THREE.Vector3[]; rest: THREE.Vector3[]; skeleton: THREE.Skeleton } | undefined
-  let posed: TurnPose | JumpPose | undefined
+  // `slide` carries his medal around him and `medal` swings it up and down around its hinge.
+  let rig: { turn: THREE.Bone; squash: THREE.Group; slide: THREE.Group; medal: THREE.Group; bends: THREE.Bone[]; hinges: THREE.Vector3[]; rest: THREE.Vector3[]; skeleton: THREE.Skeleton } | undefined
+  let posed: TurnPose | JumpPose | CheerPose | WinkPose | undefined
+  // His face when it changes as he moves: the same face drawn at each step from 0 to 1, one shown at a time.
+  let faces: THREE.Group[] = []
+  const FACE_STEPS = 16
+  // The cocky one's stars, made when he first winks: solid, in the room around him.
+  let stars: THREE.Mesh[] = []
+  // The champion's confetti, made when he first cheers: every piece is the same small card, in the room and not on him.
+  let confetti: THREE.InstancedMesh | undefined
+  const piece = new THREE.Object3D()
   const back = new THREE.Quaternion(), hang = new THREE.Quaternion(), sideways = new THREE.Vector3()
   let centre = 1
+  // How his head is held when he stands in a pose: lifted with his arms, or leaning.
+  let stance = { headLift: 0, headTilt: 0 }
+  // The flat effects of a pose, kept facing the viewer in front of him and behind.
+  const CARD_GAP = 1.9, CARD_CENTRE = 1.04
+  let cards: { front: THREE.Group; back: THREE.Group } | undefined
   let view: PoulpyView = { turn: 0, tilt: 17, distance: 9.6 }
 
+  const toon = (tint: THREE.Color) => new THREE.MeshToonMaterial({ color: tint, emissive: tint.clone().multiplyScalar(LOOK.shade), gradientMap: ramp })
   const geometry = (shape: { positions: number[]; normals: number[]; indices: number[] }) => {
     const geo = new THREE.BufferGeometry()
     geo.setAttribute('position', new THREE.Float32BufferAttribute(shape.positions, 3))
@@ -59,7 +75,8 @@ export function createPoulpyScene(canvas: HTMLCanvasElement) {
     if (!poulpy) return
     rig?.skeleton.dispose()
     scene.remove(poulpy)
-    poulpy.traverse((node) => {
+    if (cards) scene.remove(cards.front, cards.back)
+    for (const group of [poulpy, ...(cards ? [cards.front, cards.back] : [])]) group.traverse((node) => {
       if (!(node instanceof THREE.Mesh)) return
       node.geometry.dispose()
       node.material.dispose()
@@ -72,6 +89,15 @@ export function createPoulpyScene(canvas: HTMLCanvasElement) {
     camera.lookAt(0, centre, 0)
     camera.updateMatrixWorld()
     // The light and the gleam are placed from where the viewer stands, so they stay put in the room.
+    if (cards) {
+      // Each card stands across the line of sight, and is sized so its drawing looks as big as if it stood at his middle.
+      const towards = camera.position.clone().sub(light.target.position.set(0, centre, 0)).normalize()
+      for (const [card, way] of [[cards.front, 1], [cards.back, -1]] as const) {
+        card.quaternion.copy(camera.quaternion)
+        card.position.set(0, CARD_CENTRE, 0).addScaledVector(towards, way * CARD_GAP)
+        card.scale.setScalar((view.distance - way * CARD_GAP) / view.distance)
+      }
+    }
     light.target.position.set(0, centre, 0)
     light.position.set(...(LOOK.light as [number, number, number])).normalize().transformDirection(camera.matrixWorld).multiplyScalar(10).add(light.target.position)
     if (gleam) {
@@ -85,31 +111,50 @@ export function createPoulpyScene(canvas: HTMLCanvasElement) {
     renderer.render(scene, camera)
   }
 
-  /** Builds Poulpy again for a side of the plush or one of his moods, with or without the outline. */
-  function show(as: PoulpySide | PoulpyMood, outline: boolean) {
+  /**
+   * Builds Poulpy again for a side of the plush, one of his moods or one of his poses, with or without the outline.
+   * A pose with `effects: false` leaves out the flat effects around him, for when he moves, and one with `faces`
+   * takes his face from it instead: the face at each step from 0 to 1, for pose() to pick from.
+   */
+  function show(as: PoulpySide | PoulpyMood | { pose: PoulpyPose; effects?: boolean; faces?: (t: number) => (string | number)[][] }, outline: boolean) {
     clear()
-    const model = as === 'blue' || as === 'ember' ? buildPoulpy3d({ side: as, colours: tokens.color.poulpy }) : buildPoulpy3d({ mood: as, tone: tokens.mood[as], colours: tokens.color.poulpy })
+    const colours = tokens.color.poulpy
+    const changing = typeof as === 'object' ? as.faces : undefined
+    const inPose = typeof as === 'object' ? buildPoulpyPose({ pose: as.pose, effects: as.effects, ...(changing && { face: [] }), tones: tokens.mood, colours }) : undefined
+    const model = inPose ?? (as === 'blue' || as === 'ember' ? buildPoulpy3d({ side: as, colours }) : buildPoulpy3d({ mood: as as PoulpyMood, tone: tokens.mood[as as PoulpyMood], colours }))
     centre = model.height / 2
+    stance = { headLift: model.headLift, headTilt: inPose?.headTilt ?? 0 }
+    cards = inPose ? { front: new THREE.Group(), back: new THREE.Group() } : undefined
     poulpy = new THREE.Group()
-    const turn = new THREE.Bone(), squash = new THREE.Group(), joints = armJoints(), bends: THREE.Bone[] = []
+    const turn = new THREE.Bone(), squash = new THREE.Group(), slide = new THREE.Group(), medal = new THREE.Group(), joints = armJoints(), bends: THREE.Bone[] = []
     joints.forEach((joint, i) => {
       const bone = new THREE.Bone(), parent = joint.bend === 0 ? turn : bends[i - 1]
       bone.position.fromArray(joint.at).sub(joint.bend === 0 ? new THREE.Vector3() : new THREE.Vector3().fromArray(joints[i - 1].at))
       parent.add(bone)
       bends.push(bone)
     })
-    turn.add(squash)
+    medal.position.set(0, medalHinge[0], medalHinge[1])
+    slide.add(medal)
+    turn.add(squash, slide)
     poulpy.add(turn)
     poulpy.updateMatrixWorld(true)
     // An arm hangs around the level line across it, which tips its far end down.
     const hinges = joints.map((joint) => new THREE.Vector3(joint.at[2], 0, -joint.at[0]).normalize())
-    rig = { turn, squash, bends, hinges, rest: bends.map((bone) => bone.position.clone()), skeleton: new THREE.Skeleton([turn, ...bends]) }
+    rig = { turn, squash, slide, medal, bends, hinges, rest: bends.map((bone) => bone.position.clone()), skeleton: new THREE.Skeleton([turn, ...bends]) }
     // His head and face ride on `squash`; an arm is skinned, so each of its points follows its bends.
     const place = (part: PoulpyPart, geo: THREE.BufferGeometry, material: THREE.Material) => {
       const arm = /^arm_(\d+)/.exec(part.name)
+      if (part.card && cards) {
+        const mesh = new THREE.Mesh(geo, material)
+        mesh.position.y = -CARD_CENTRE
+        cards[part.card].add(mesh)
+        return mesh
+      }
       if (!arm) {
         const mesh = new THREE.Mesh(geo, material)
-        squash.add(mesh)
+        // What he wears goes with his head, his medal hangs from its hinge and what lies by him stays on the floor.
+        if (part.name.startsWith('medal')) mesh.position.copy(medal.position).negate()
+        ;(part.name.startsWith('medal') ? medal : part.name.startsWith('dumbbell') ? poulpy! : squash).add(mesh)
         return mesh
       }
       const skin = armSkin(+arm[1] - 1, part.positions)
@@ -122,12 +167,12 @@ export function createPoulpyScene(canvas: HTMLCanvasElement) {
       return mesh
     }
     for (const part of model.parts) {
-      const { colour, flat, outline: edge } = model.materials[part.material]
+      const { colour, flat, outline: edge, opacity } = model.materials[part.material] as PoulpyMaterial
       const tint = new THREE.Color().setRGB(colour[0], colour[1], colour[2])
       const mesh = place(
         part,
         geometry(part),
-        flat ? new THREE.MeshBasicMaterial({ color: tint }) : new THREE.MeshToonMaterial({ color: tint, emissive: tint.clone().multiplyScalar(LOOK.shade), gradientMap: ramp }),
+        flat ? new THREE.MeshBasicMaterial({ color: tint, ...(opacity !== undefined && { transparent: true, opacity, depthWrite: false }) }) : toon(tint),
       )
       mesh.name = part.name
       if (part.name === 'gleam') gleam = mesh.geometry
@@ -137,19 +182,41 @@ export function createPoulpyScene(canvas: HTMLCanvasElement) {
         place(part, hull, new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(edge[0], edge[1], edge[2]), side: THREE.BackSide }))
       }
     }
+    faces = []
+    if (changing && typeof as === 'object') {
+      const { mood } = poseMood(as.pose)
+      for (let step = 0; step <= FACE_STEPS; step++) {
+        const face = buildPoulpy3d({ mood, tone: tokens.mood[mood], features: changing(step / FACE_STEPS), faceOnly: true, colours }), group = new THREE.Group()
+        for (const part of face.parts) {
+          const { colour, flat } = face.materials[part.material] as PoulpyMaterial, tint = new THREE.Color().setRGB(colour[0], colour[1], colour[2])
+          group.add(new THREE.Mesh(geometry(part), flat ? new THREE.MeshBasicMaterial({ color: tint }) : toon(tint)))
+        }
+        squash.add(group)
+        faces.push(group)
+      }
+    }
     scene.add(poulpy)
+    if (cards) scene.add(cards.front, cards.back)
     pose(posed)
   }
 
-  /** Puts him in a pose of his turn or his jump (design/poulpy-3d/motion.mjs); with none, he stands as modelled. */
-  function pose(next?: TurnPose | JumpPose) {
+  /** Puts him in a pose of his turn, his jump, his cheer or his wink (design/poulpy-3d/motion.mjs); with none, he stands as modelled. */
+  function pose(next?: TurnPose | JumpPose | CheerPose | WinkPose) {
     posed = next
     if (rig) {
-      const jump = next && 'droop' in next ? next : undefined
+      const jump = next && 'droop' in next ? next : undefined, cheer = next && 'medal' in next ? next : undefined, wink = next && 'wink' in next ? next : undefined
       rig.turn.rotation.set(0, next?.yaw ?? 0, jump?.lean ?? 0, 'YXZ')
       rig.turn.position.y = jump?.lift ?? 0
-      rig.squash.position.y = jump?.head ?? 0
+      rig.squash.position.y = stance.headLift + (jump?.head ?? 0)
+      rig.squash.rotation.z = stance.headTilt + (wink?.tilt ?? 0)
       rig.squash.scale.fromArray(squashScale(next?.squash ?? 0))
+      // His medal rests on his arm, so it stays on it when his head tucks in and slides out with it.
+      rig.medal.position.z = medalHinge[1] + (jump?.spread ?? 0)
+      rig.medal.rotation.x = -(cheer?.medal.lift ?? 0)
+      rig.slide.rotation.y = cheer?.medal.sway ?? 0
+      if (cheer) fly(cheer.confetti)
+      faces.forEach((face, step) => { face.visible = step === Math.round((wink?.wink ?? 0) * FACE_STEPS) })
+      if (wink) twinkle(wink.stars)
       rig.bends.forEach((bone, i) => {
         const arm = Math.floor(i / 3), bend = i % 3
         bone.quaternion.setFromAxisAngle(THREE.Object3D.DEFAULT_UP, next?.arms[arm][bend] ?? 0)
@@ -161,6 +228,41 @@ export function createPoulpyScene(canvas: HTMLCanvasElement) {
       shadow.scale.setScalar(1 - Math.min((jump?.lift ?? 0) * 0.4, 0.3))
     }
     render()
+  }
+
+  function fly(pieces: number[][]) {
+    if (!confetti) {
+      const [wide, tall] = CONFETTI.size.map((size) => size / 64)
+      confetti = new THREE.InstancedMesh(new THREE.PlaneGeometry(wide, tall), new THREE.MeshBasicMaterial({ side: THREE.DoubleSide }), pieces.length)
+      confetti.frustumCulled = false
+      const colours = CONFETTI.colours.map((colour) => new THREE.Color(colour === 'ember' ? tokens.color.poulpy.ember : colour))
+      pieces.forEach((_, i) => confetti!.setColorAt(i, colours[i % colours.length]))
+      scene.add(confetti)
+    }
+    pieces.forEach(([x, y, z, turnX, turnY, turnZ], i) => {
+      piece.position.set(x, y, z)
+      piece.rotation.set(turnX, turnY, turnZ, 'YXZ')
+      // A piece that has not flown yet is under the floor.
+      piece.scale.setScalar(y < 0 ? 0 : 1)
+      piece.updateMatrix()
+      confetti!.setMatrixAt(i, piece.matrix)
+    })
+    confetti.instanceMatrix.needsUpdate = true
+  }
+
+  function twinkle(all: WinkPose['stars']) {
+    if (!stars.length) {
+      stars = STARS.map(({ at }) => {
+        const star = new THREE.Mesh(geometry(starShape()), toon(new THREE.Color(GOLDEN)))
+        star.position.fromArray(at)
+        scene.add(star)
+        return star
+      })
+    }
+    all.forEach(({ size, spin, rock }, i) => {
+      stars[i].scale.setScalar(STARS[i].size * size)
+      stars[i].rotation.set(0, spin, rock, 'ZYX')
+    })
   }
 
   function look(next: PoulpyView) {
@@ -183,6 +285,10 @@ export function createPoulpyScene(canvas: HTMLCanvasElement) {
   function dispose() {
     resizing.disconnect()
     clear()
+    for (const star of stars) { star.geometry.dispose(); (star.material as THREE.Material).dispose() }
+    confetti?.geometry.dispose()
+    ;(confetti?.material as THREE.Material | undefined)?.dispose()
+    confetti?.dispose()
     shadow.geometry.dispose()
     shadow.material.map?.dispose()
     shadow.material.dispose()

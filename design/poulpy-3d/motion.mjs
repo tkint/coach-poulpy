@@ -1,12 +1,15 @@
 // How Poulpy moves in 3D, with no dependency, next to the shape of model.mjs.
 //   design/build-poulpy-3d.mjs bakes it into the animated glTF files; the docs site's "Poulpy in 3D" page runs it live.
 //
-// Two moves. His idle, TURN: he turns around on the spot in short steps, stops, and goes again. And JUMP:
-// little jumps on the spot, which can also turn him a step each. His arms are soft, so they trail behind
+// Four moves. His idle, TURN: he turns around on the spot in short steps, stops, and goes again. JUMP:
+// little jumps on the spot, which can also turn him a step each. CHEER, the champion's jumps of joy:
+// higher and closer together, his medal bouncing on its ribbon and confetti flying at each one. And WINK,
+// the cocky one's: eyes wide open, then a wink and a smirk as stars pop up around him and twinkle. His arms are soft, so they trail behind
 // a step and swing a little past it before settling, and they hang under him when he jumps. He never
 // raises them himself (brand decisions 8 and 15): on the floor they slide, in the air they droop.
-// To change a move, edit TURN or JUMP below, then run `node design/build-poulpy-3d.mjs`.
+// To change a move, edit TURN, JUMP, CHEER or WINK below, then run `node design/build-poulpy-3d.mjs`.
 import { SHAPE } from './model.mjs'
+import { medalReach, STARS } from './poses.mjs'
 
 export const TURN = {
   // The size of each step, in degrees, seen from above and turning to his left. They add up to one full
@@ -53,6 +56,33 @@ export const JUMP = {
   // His head stretches by `stretch` of its height when it moves at `atSpeed` units a second, and squashes by
   // `depth` when it is `atDepth` down in his arms. It widens or thins to keep its volume.
   squash: { stretch: 0.05, atSpeed: 2.4, depth: 0.07, atDepth: 0.16, speed: 22, damping: 0.4 },
+}
+
+export const CHEER = {
+  // The champion's jump is JUMP, higher, leaning more and with shorter pauses: he cannot hold still.
+  jump: { ...JUMP, air: { height: 0.5, seconds: 0.5 }, pauses: [0.3, 0.2, 0.35, 0.2], lean: { ...JUMP.lean, degrees: 9 } },
+  // His medal hangs on its ribbon and rests on his front arm. `gravity` pulls it down, in units a second squared:
+  // when he drops faster than that it floats up, by `most` radians at the most, and falls back on his arm with a
+  // `bounce` (the share of its speed it keeps). `damping` is the air and the ribbon calming it down.
+  // Sideways it is a spring: it slides to the side he tilts to, by `slide` of his tilt, and wobbles back.
+  medal: { gravity: 15, damping: 2.2, bounce: 0.35, most: 0.6, sway: { slide: 0.9, speed: 10, damping: 0.22, most: 0.22 } },
+  // Confetti: `burst` pieces fly up at each jump, out of `pieces` in all, so the oldest on the floor go again.
+  // They start `from` so far from his middle, at up to `high`, leave at `speed` units a second (lowest, highest),
+  // mostly upwards and `out` of that sideways. `gravity` and `drag` make them fall slowly, `flutter` pushes them
+  // from side to side as they fall and `spin` is how fast they tumble, in radians a second.
+  confetti: { pieces: 72, burst: 24, from: [1.5, 2.5], high: 0.6, speed: [8, 13], out: 0.28, gravity: 5, drag: 2.8, flutter: 2.2, spin: 9 },
+}
+
+export const WINK = {
+  // He looks, eyes wide open, for `open` seconds, shuts one eye in `shut`, holds the wink for `hold` and opens it again in `reopen`.
+  open: 1.3, shut: 0.13, hold: 1.7, reopen: 0.22,
+  // With the wink his head leans `degrees` to the side of the eye he shuts, on a spring, and dips by `dip` of its height.
+  head: { degrees: 5, dip: 0.035, speed: 16, damping: 0.4 },
+  // The stars come with the wink, one every `apart` seconds: each grows on a spring that takes it a little past
+  // its size and back, and leaves the same way when he opens his eye. While it is there it twinkles: it grows
+  // and shrinks by `twinkle` of its size, `beats` times a second, turns on itself at `spin` radians a second and
+  // rocks by `rock` radians. No two stars keep the same time.
+  stars: { apart: 0.09, speed: 20, damping: 0.35, twinkle: 0.22, beats: 1.6, spin: 2.4, rock: 0.3 },
 }
 
 // Where an arm bends, as distances from his middle along the arm, and how wide each bend is spread.
@@ -253,6 +283,137 @@ export function createJump({ softness = 1, stride = 0, jump = JUMP, turn = TURN 
     advance(seconds) {
       softness = sim.softness
       stride = sim.stride
+      owed += Math.min(Math.max(seconds, 0), 1)
+      while (owed >= SUBSTEP) { tick(SUBSTEP); owed -= SUBSTEP }
+      return sim.pose()
+    },
+  }
+  return sim
+}
+
+/**
+ * Poulpy the champion jumping for joy, as something to advance in time: createJump with the jump of `cheer`,
+ * his medal and the confetti. Every run is the same: the confetti's chances are drawn from a fixed list.
+ * @param {{ softness?: number, stride?: number, cheer?: typeof CHEER, turn?: typeof TURN }} [options] as for createJump.
+ * @returns The jump, whose poses also have `medal`, `{ lift, sway }`: how far it has swung up off his arm around
+ *   its hinge (medalHinge in poses.mjs) and how far it has slid to his left around him, in radians; and `confetti`,
+ *   for each piece `[x, y, z, turnX, turnY, turnZ]`: where it is in the room and how it is turned, in radians.
+ *   A piece that has not flown yet is under the floor.
+ */
+export function createCheer({ cheer = CHEER, ...options } = {}) {
+  const jump = createJump({ ...options, jump: cheer.jump })
+  const { advance: hop, pose: stand } = jump
+  // A fixed list of chances (mulberry32), so no two pieces are alike and every run is the same.
+  let seed = 20261115
+  const chance = () => {
+    seed = (seed + 0x6d2b79f5) | 0
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed)
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+  }
+  const between = ([low, high]) => low + (high - low) * chance()
+  const m = cheer.medal, c = cheer.confetti
+  // The medal: `below` is how far under level it hangs from its hinge, `sway` how far it has slid sideways.
+  let below = medalReach.rest, fall = 0, sway = 0, swaySpeed = 0, height = 0, climb = 0
+  const pieces = Array.from({ length: c.pieces }, () => ({ at: [0, -1, 0], speed: [0, 0, 0], turn: [0, 0, 0], spin: [0, 0, 0], beat: 0, flying: false }))
+  let next = 0, up = false
+
+  function tick(h) {
+    const pose = hop(SUBSTEP), was = climb
+    climb = (pose.lift + pose.head - height) / h
+    height = pose.lift + pose.head
+    // The hinge goes up and down with his head: what the medal feels is gravity and that.
+    fall += (((m.gravity + (climb - was) / h) / medalReach.length) * Math.cos(below) - m.damping * fall) * h
+    below += fall * h
+    if (below > medalReach.rest) { below = medalReach.rest; fall = fall > 0.6 ? -fall * m.bounce : Math.min(fall, 0) }
+    if (below < medalReach.rest - m.most) { below = medalReach.rest - m.most; fall = Math.max(fall, 0) }
+    swaySpeed += (m.sway.speed * m.sway.speed * (m.sway.slide * pose.lean - sway) - 2 * m.sway.damping * m.sway.speed * swaySpeed) * h
+    sway = Math.min(Math.max(sway + swaySpeed * h, -m.sway.most), m.sway.most)
+
+    // A burst as he leaves the floor.
+    if (pose.lift > 0.02 && !up) {
+      for (let i = 0; i < c.burst; i++) {
+        const piece = pieces[next], around = chance() * Math.PI * 2, far = between(c.from), speed = between(c.speed), out = (chance() * 2 - 1) * Math.PI
+        next = (next + 1) % pieces.length
+        piece.at = [Math.sin(around) * far, chance() * c.high, Math.cos(around) * far]
+        piece.speed = [Math.sin(out) * speed * c.out, speed, Math.cos(out) * speed * c.out]
+        piece.turn = [0, 1, 2].map(() => chance() * Math.PI * 2)
+        piece.spin = [0, 1, 2].map(() => (chance() * 2 - 1) * c.spin)
+        piece.beat = chance() * Math.PI * 2
+        piece.flying = true
+      }
+    }
+    up = pose.lift > 0.02
+    for (const piece of pieces) {
+      if (!piece.flying) continue
+      // Falling, a piece is pushed from side to side, across the way it is turned.
+      piece.beat += 6 * h
+      const push = piece.speed[1] < 0 ? c.flutter * Math.sin(piece.beat) : 0
+      piece.speed[0] += (push * Math.cos(piece.turn[1]) - c.drag * piece.speed[0]) * h
+      piece.speed[1] += (-c.gravity - c.drag * piece.speed[1]) * h
+      piece.speed[2] += (-push * Math.sin(piece.turn[1]) - c.drag * piece.speed[2]) * h
+      for (let k = 0; k < 3; k++) { piece.at[k] += piece.speed[k] * h; piece.turn[k] += piece.spin[k] * h }
+      // On the floor it lies flat and stays there until it flies again.
+      if (piece.at[1] <= 0.012 && piece.speed[1] < 0) { piece.at[1] = 0.012; piece.turn[0] = Math.PI / 2; piece.turn[2] = 0; piece.flying = false }
+    }
+  }
+
+  let owed = 0
+  jump.pose = () => ({ ...stand(), medal: { lift: medalReach.rest - below, sway }, confetti: pieces.map((piece) => [...piece.at, ...piece.turn]) })
+  jump.advance = (seconds) => {
+    owed += Math.min(Math.max(seconds, 0), 1)
+    while (owed >= SUBSTEP) { tick(SUBSTEP); owed -= SUBSTEP }
+    return jump.pose()
+  }
+  return jump
+}
+
+/**
+ * The cocky one winking, as something to advance in time.
+ * @param {{ side?: 'left' | 'right', wink?: typeof WINK }} [options] `side` is the eye he shuts, his own; his head leans that way.
+ * @returns The move; `side` can be changed at any time. A pose is a turn's pose, standing still, and `{ wink, tilt, stars }`: how far he is into
+ *   the wink, from 0 (eyes wide open) to 1, for winkFace in poses.mjs; how far his head leans to his right, in
+ *   radians (to his left when negative); and for each star of STARS in poses.mjs `{ size, spin, rock }`: its size as a share of its own
+ *   (0 when it is not there), and how far it has turned on itself and rocked, in radians.
+ */
+export function createWink({ side = 'right', wink = WINK } = {}) {
+  const arms = Array.from({ length: SHAPE.arms.count }, () => [0, 0, 0]), ease = (t) => t * t * (3 - 2 * t)
+  const seconds = [wink.open, wink.shut, wink.hold, wink.reopen]
+  let phase = 0, clock = 0, time = 0, shut = 0, tilt = 0, tiltSpeed = 0, squash = 0, squashSpeed = 0
+  const stars = STARS.map(() => ({ size: 0, growth: 0 }))
+  const spring = (s, goal, value, rate) => s.speed * s.speed * (goal - value) - 2 * s.damping * s.speed * rate
+
+  function tick(h) {
+    clock += h
+    time += h
+    while (clock >= seconds[phase]) { clock -= seconds[phase]; phase = (phase + 1) % 4 }
+    const through = clock / seconds[phase]
+    shut = phase === 0 ? 0 : phase === 1 ? ease(through) : phase === 2 ? 1 : 1 - ease(through)
+    const winking = phase === 1 || phase === 2
+    tiltSpeed += spring(wink.head, winking ? wink.head.degrees * RAD * (sim.side === 'left' ? -1 : 1) : 0, tilt, tiltSpeed) * h
+    tilt += tiltSpeed * h
+    squashSpeed += spring(wink.head, winking ? -wink.head.dip : 0, squash, squashSpeed) * h
+    squash += squashSpeed * h
+    // Each star waits its turn after the eye has shut.
+    stars.forEach((star, i) => {
+      const there = phase === 2 && clock >= i * wink.stars.apart
+      star.growth += spring(wink.stars, there ? 1 : 0, star.size, star.growth) * h
+      star.size = Math.max(star.size + star.growth * h, 0)
+    })
+  }
+
+  let owed = 0
+  const sim = {
+    side,
+    pose: () => ({
+      yaw: 0, squash, arms, wink: shut, tilt,
+      stars: stars.map((star, i) => {
+        // Each star keeps its own time: a little faster or slower, and starting elsewhere in its beat.
+        const own = 1 + 0.17 * ((i * 5) % 4 - 1.5), beat = time * own + i * 1.9
+        return { size: star.size * (1 + wink.stars.twinkle * Math.sin(beat * wink.stars.beats * Math.PI * 2)), spin: beat * wink.stars.spin * (i % 2 ? -1 : 1), rock: wink.stars.rock * Math.sin(beat * 2.3) }
+      }),
+    }),
+    advance(seconds) {
       owed += Math.min(Math.max(seconds, 0), 1)
       while (owed >= SUBSTEP) { tick(SUBSTEP); owed -= SUBSTEP }
       return sim.pose()
