@@ -1,15 +1,13 @@
 {
   "images": [
     {
-      "filename": "PoulpyPosePatchedUp.svg",
-      "idiom": "universal"
+      "filename": "PoulpyPosePatchedUp.png",
+      "idiom": "universal",
+      "scale": "3x"
     }
   ],
   "info": {
     "author": "xcode",
     "version": 1
-  },
-  "properties": {
-    "preserves-vector-representation": true
   }
 }

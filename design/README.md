@@ -42,7 +42,7 @@ node design/build-body-map.mjs
 
 ## Poulpy's drawings
 
-`build-poulpy.mjs` draws Poulpy's six mood portraits and twelve poses with the brand book's own drawing code, plus the loading animation's top view and the app icon, and writes them for each platform:
+`build-poulpy.mjs` draws the loading animation's top view and the themed (one-colour) layers of the app icons with the brand book's own drawing code, and writes them for each platform. His moods, poses and app icons are pictures of the 3D model, from `build-poulpy-pictures.mjs`:
 
 ```sh
 node design/build-poulpy.mjs
@@ -50,18 +50,19 @@ node design/build-poulpy.mjs
 
 | Generated file | Used by |
 | --- | --- |
-| `design/poulpy/*.svg` | Reference copies, to look at or reuse on the web |
-| `app-android/src/main/res/drawable/poulpy_*.xml` | Android vector drawables (`R.drawable.poulpy_pose_champion`) |
-| `app-ios/CoachPoulpy/Assets.xcassets/Poulpy/*.imageset` | iOS vector assets (`Image("PoulpyPoseChampion")`) |
-| `app-android/src/main/res/drawable/ic_launcher_*.xml`, `mipmap-anydpi-v26/ic_launcher.xml` | The Android launcher icon: an adaptive icon with a themed (monochrome) layer |
-| `app-ios/CoachPoulpy/Assets.xcassets/AppIcon.appiconset` | The iOS app icon: 1024 px PNGs for light, dark and tinted |
-| `ic_launcher_<id>_*.xml`, `mipmap-anydpi-v26/ic_launcher_<id>.xml`, `AppIcon<Id>.appiconset` | The alternate icons Settings › App icon offers (`proud`, `annoyed`, `grumpy`, `champion`, `cocky`), built the same way |
+| `design/poulpy/*.svg` | Reference copies of the loader |
+| `app-android/src/main/res/drawable/poulpy_loader*.xml` | The loader as Android vector drawables |
+| `app-ios/CoachPoulpy/Assets.xcassets/Poulpy/PoulpyLoader*.imageset` | The loader as iOS vector assets |
+| `app-android/src/main/res/drawable-nodpi/poulpy_*.png` | His moods and poses as Android pictures (`R.drawable.poulpy_pose_champion`), from `build-poulpy-pictures.mjs` |
+| `app-ios/CoachPoulpy/Assets.xcassets/Poulpy/Poulpy{Mood,Pose}*.imageset` | His moods and poses as iOS 3x pictures (`Image("PoulpyPoseChampion")`), from `build-poulpy-pictures.mjs` |
+| `app-android/src/main/res/drawable-nodpi/ic_launcher_[<id>_]foreground.png`, `drawable/ic_launcher_background.xml`, `drawable/ic_launcher_[<id>_]monochrome.xml`, `mipmap-anydpi-v26/ic_launcher[_<id>].xml` | The Android launcher icon: an adaptive icon with a Deep sea background, a picture of Poulpy and a themed (monochrome) silhouette layer |
+| `app-ios/CoachPoulpy/Assets.xcassets/AppIcon[<Id>].appiconset` | The iOS app icon: 1024 px PNGs for light, dark and tinted; the light and dark are alike, on Deep sea. The alternate icons Settings › App icon offers (`proud`, `annoyed`, `grumpy`, `champion`, `cocky`) are the sets with an id |
 
-Portraits and poses share one 248 × 226 frame, so they can replace each other without moving. The loader (`loader`, and `loader_small` with a thicker line for sizes under 32) is Poulpy seen from above as a blue outline of eight round lobes with short tails; `PoulpyLoader` on Android and iOS turns it clockwise once every 2.4 s (10 s when animations are reduced) and replaces the old Spinning pose. CI runs it with `--check` too. The shared `PoulpyDrawing` enum names each drawing, and `PoulpyCoach` picks which one Today shows.
+Moods and poses are 744 × 678 pictures (the 3x of a 248 × 226 frame), so they can replace each other without moving. The loader (`loader`, and `loader_small` with a thicker line for sizes under 32) is Poulpy seen from above as a blue outline of eight round lobes with short tails; `PoulpyLoader` on Android and iOS turns it clockwise once every 2.4 s (10 s when animations are reduced) and replaces the old Spinning pose. CI runs it with `--check` too. The shared `PoulpyDrawing` enum names each drawing, and `PoulpyCoach` picks which one Today shows.
 
-The app icon is the brand book's: the happy blue Poulpy on Foam (`neutral.50`), and on Deep sea (`theme.dark.background`) for the iOS dark icon. On Android, Poulpy is scaled so his farthest arm sits on the 66 dp circle every launcher mask keeps; the themed icon is his silhouette at half strength with the eyes and smile at full. iOS only takes PNGs, so the script rasterises the icon itself, in plain JavaScript so every machine gets the same pixels; `--check` compares those pixels, not the compressed bytes.
+The app icon is the 3D happy blue Poulpy on Deep sea (`theme.dark.background`), the same in light and dark, so it works whichever theme the phone is in; the tinted iOS icon is its greyscale. On iOS he is scaled to fill 80 % of the square. On Android, he is scaled so his farthest point sits on the 66 dp circle every launcher mask keeps; the themed icon is still his drawn silhouette at half strength with the eyes and smile at full. The pictures are painted in plain JavaScript so every machine gets the same pixels; `--check` compares those pixels, not the compressed bytes.
 
-The alternate icons use the portrait or pose of the same name, scaled until its longest side fills 170 of the 200 square (on Android, until its farthest point sits on the 66 dp circle), so a pose with props or confetti draws Poulpy smaller. Their ids are those of `AppIcon` in the shared code and never change. Android switches between launcher aliases in the manifest; iOS lists the sets in `ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES` in `app-ios/project.yml`.
+The alternate icons use the mood or pose picture of the same name, scaled the same way, so a pose with props or confetti draws Poulpy smaller. Their ids are those of `AppIcon` in the shared code and never change. Android switches between launcher aliases in the manifest; iOS lists the sets in `ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES` in `app-ios/project.yml`.
 
 ## Poulpy in 3D
 

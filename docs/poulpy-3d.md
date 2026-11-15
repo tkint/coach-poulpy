@@ -36,7 +36,7 @@ The model also takes the twelve [poses](./brand.md#when-each-drawing-shows) of t
 - **The comic effects stay flat and face the viewer.** Sparks, confetti, puffs, bubbles and lettering are the drawing's own, standing in front of him or behind him, and they keep facing whoever looks while he turns.
 - **Cocky has no halo and no "PR!" badge in 3D.** The owner dropped them; his sparks stay, and become solid stars when he [winks](#the-cocky-one-winks).
 - **He still never lifts an arm.** Standing tall stretches his arms taller and lifts his head with them; Side glance leans his head. Nothing else moves.
-- **The loader and the app icons are not here yet.** They are the next part of replacing the drawings with the model ([Brand decisions](./brand-decisions.md#16-the-3d-poulpy-replaces-the-drawings), decision 16); the apps and the website still show the 2D drawings.
+- **The loader is not here yet.** It is the next part of replacing the drawings with the model ([Brand decisions](./brand-decisions.md#16-the-3d-poulpy-replaces-the-drawings), decision 16); the apps and the website show his pictures, and the app icons are his pictures on Deep sea.
 
 ## His pictures
 
