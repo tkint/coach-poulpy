@@ -1,5 +1,0 @@
-import{n as e}from"./rolldown-runtime-sJBDdmOt.js";import{i as t,r as n}from"./react-DITjJg24.js";import{a as r}from"./chunk-W22LQPXL-DkWiGpo7.js";import{c as i,d as a,l as o,u as s}from"./blocks-BnMRf1Ff.js";import{n as c,r as l}from"./Brand.stories-XnA3ji1a.js";import{n as u,t as d}from"./markdown-pages-Ba0Cchwf.js";function f(e){let n={h1:`h1`,...t(),...e.components};return(0,m.jsxs)(m.Fragment,{children:[`
-`,`
-`,(0,m.jsx)(o,{title:`Brand/Poulpy in 3D`}),`
-`,(0,m.jsx)(n.h1,{id:`poulpy-in-3d`,children:`Poulpy in 3D`}),`
-`,h.map((e,t)=>t%2?(0,m.jsx)(s,{of:c[e]},t):(0,m.jsx)(i,{children:e},t))]})}function p(e={}){let{wrapper:n}={...t(),...e.components};return n?(0,m.jsx)(n,{...e,children:(0,m.jsx)(f,{...e})}):f(e)}var m,h;function g(){return(g=e((()=>{m=r(),n(),a(),d(),l(),h=u(`poulpy-3d`).all.split(/<!-- live: (\w+) -->/)})))()}g();export{p as default,h as parts};
