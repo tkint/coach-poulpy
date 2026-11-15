@@ -1,13 +1,15 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, within } from 'storybook/test'
 import { ref } from 'vue'
-import { CpPagination } from '@coach-poulpy/ui'
+import { CpPagination, cpSizes } from '@coach-poulpy/ui'
+import { sizeArgType } from './sizes'
 import doc from './CpPagination.md?raw'
 
 const meta = {
   title: 'Web/Components/Navigation/Pagination',
   parameters: { docs: { description: { component: doc } } },
   component: CpPagination,
+  argTypes: { size: sizeArgType },
   args: { pages: 12, previousLabel: 'Previous page', nextLabel: 'Next page', navLabel: 'Pages' },
   render: (args) => ({
     components: { CpPagination },
@@ -45,4 +47,13 @@ export const SaysItsOwnWordsInFrench: Story = {
   play: async ({ canvasElement }) => {
     expect(within(canvasElement).getByRole('button', { name: 'Page précédente' })).toBeDisabled()
   },
+}
+
+/** Every step of the size scale, xs to xxl; md is what a component without a `size` draws. */
+export const Sizes: Story = {
+  render: (args) => ({
+    components: { CpPagination },
+    setup: () => ({ args, cpSizes, value: ref(1) }),
+    template: '<div class="flex flex-col items-start gap-4 pb-8"><div v-for="s in cpSizes" :key="s" class="flex items-center gap-4"><span class="cp-type-label w-10">{{ s }}</span><CpPagination v-bind="args" :size="s" :nav-label="`Pages ${s}`" v-model:page="value" /></div></div>',
+  }),
 }

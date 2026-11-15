@@ -112,6 +112,24 @@ Every screen mockup is a story in the [component workshop](https://tkint.github.
 
 The mockup is the design reference; this page defines the shared rules and components used to build it.
 
+## Web sizes
+
+Buttons, fields and icons on the websites share one size scale, set with the `size` prop of the `Cp*` components: `xs`, `sm`, `md`, `lg`, `xl`, `xxl`. A component without a `size` is `md`. The numbers come from `webSize` in `design/tokens.json` (`--cp-control-*` and `--cp-icon-*` in the generated `tokens.css`); never write a literal height or icon size.
+
+| Size | Button and field height | Icon (`CpIcon`) |
+| --- | --- | --- |
+| `xs` | 24 | 12 |
+| `sm` | 32 | 16 |
+| `md` | 40 (the default) | 20 |
+| `lg` | 48 | 24 |
+| `xl` | 56 | 32 |
+| `xxl` | 64 | 40 |
+
+- Which components take `size`: `CpButton`, `CpTextField`, `CpPasswordField`, `CpSearchField`, `CpSelectField`, `CpMultiSelectField`, `CpChipSelectField`, `CpPagination`, `CpSegmentedControl`, and `CpIcon` for every Lucide icon. Each has a Sizes story in the workshop with a size control.
+- A screen's main action is `xl` (56), a card's actions and form fields are `md`, a list's own search is `lg`, and the controls of a filter bar or a table's pagination are `sm`. A control's own icons follow its size.
+- Draw an icon with `<CpIcon :icon="Search" size="sm" />`, never a Lucide component with a `size-*` class.
+- `CpChip`, `CpAvatar`, `CpBadge`, `CpTextarea` and `CpStepper` keep their own sizes for now.
+
 ## Websites
 
 The landing site, the web app, the web screens of the workshop and the docs site share one package, `web/ui`: DaisyUI with the Poulpy theme and a few Vue components ([ADR 0023](adr/0023-the-websites-share-one-vue-and-daisyui-design-system.md)). Each component, in every state, with the classes it renders and its interaction and accessibility checks, is in the [component workshop](https://tkint.github.io/coach-poulpy/storybook/) ([ADR 0028](adr/0028-storybook-is-the-component-workshop-of-the-design-system.md)).

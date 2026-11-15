@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { List, Moon, Sun, Zap } from '@lucide/vue'
-import { CpBadge, CpBodyMap, CpBreadcrumbs, CpButton, CpCard, CpSheet, CpStat, CpStats } from '@coach-poulpy/ui'
+import { CpBadge, CpBodyMap, CpBreadcrumbs, CpButton, CpCard, CpIcon, CpSheet, CpStat, CpStats } from '@coach-poulpy/ui'
 import { heatAreas } from '../../../app/src/bodyMap'
 import AppShell from './AppShell.vue'
 
@@ -24,15 +24,15 @@ const heat = heatAreas({ deltoid: 3, triceps: 3, pectoral: 2, back: 2, scapula: 
 const description = 'Muscles worked: shoulders and triceps most, then chest, back and biceps, a little core'
 
 const page = (sheet: boolean) => ({
-  components: { AppShell, CpBadge, CpBodyMap, CpBreadcrumbs, CpButton, CpCard, CpSheet, CpStat, CpStats, List },
-  setup: () => ({ parts, heat, description, sheet }),
+  components: { AppShell, CpBadge, CpBodyMap, CpBreadcrumbs, CpButton, CpCard, CpSheet, CpStat, CpStats, CpIcon },
+  setup: () => ({ parts, heat, description, sheet, List }),
   template: `<AppShell title="Workouts" active="workouts">
     <main class="flex flex-col gap-6 p-4 md:p-8">
       <CpBreadcrumbs label="You are here"><li><a href="#">Workouts</a></li><li>Upper body</li></CpBreadcrumbs>
       <div class="flex flex-col gap-2">
         <h1 class="cp-type-display">Upper body</h1>
         <p class="flex flex-wrap items-center gap-2 text-base-content/70">
-          <CpBadge tone="primary" class="gap-1"><List class="size-4 shrink-0" aria-hidden="true" />Sets</CpBadge>
+          <CpBadge tone="primary" class="gap-1"><CpIcon :icon="List" size="sm" />Sets</CpBadge>
           <span>7 exercises · about 32 min · barbell, dumbbells</span>
         </p>
       </div>
@@ -41,7 +41,7 @@ const page = (sheet: boolean) => ({
         <div class="flex flex-col gap-6">
           <CpCard v-for="part in parts" :key="part.name">
             <div class="flex items-center gap-3">
-              <component :is="part.icon" class="size-6 shrink-0 text-primary" aria-hidden="true" />
+              <CpIcon :icon="part.icon" size="lg" class="text-primary" />
               <div><h2 class="cp-card-title">{{ part.name }}</h2><p class="text-base-content/70">{{ part.summary }}</p></div>
             </div>
             <div class="overflow-x-auto" data-component="table">

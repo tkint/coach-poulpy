@@ -4,7 +4,7 @@
 // The address is /workouts/<id>. The words come from the API, the same as the phone's.
 import { computed, ref, watch } from 'vue'
 import { List, Moon, Repeat, Sun, Zap } from '@lucide/vue'
-import { CpBadge, CpBreadcrumbs, CpCard, CpErrorNote, CpPoulpyCard, CpSheet } from '@coach-poulpy/ui'
+import { CpBadge, CpBreadcrumbs, CpCard, CpErrorNote, CpIcon, CpPoulpyCard, CpSheet } from '@coach-poulpy/ui'
 import WorkoutOverview from './WorkoutOverview.vue'
 import { getWorkout, type PartText, type StepText, type Workout } from '../workouts'
 import { navigate, search } from '../route'
@@ -71,7 +71,7 @@ const here = computed(() => `${workoutsPath}/${encodeURIComponent(props.id)}`)
       <div class="flex flex-col gap-2">
         <h1 class="cp-type-display">{{ workout.workout.name }}</h1>
         <p class="flex flex-wrap items-center gap-2 text-base-content/70">
-          <CpBadge tone="primary" class="gap-1"><component :is="formatIcon" class="size-4 shrink-0" aria-hidden="true" />{{ workout.text.format }}</CpBadge>
+          <CpBadge tone="primary" class="gap-1"><CpIcon :icon="formatIcon" size="sm" />{{ workout.text.format }}</CpBadge>
           <span>{{ [workout.text.details, workout.text.equipment.join(', ')].filter(Boolean).join(' · ') }}</span>
         </p>
       </div>
@@ -80,7 +80,7 @@ const here = computed(() => `${workoutsPath}/${encodeURIComponent(props.id)}`)
         <div class="flex flex-col gap-6">
           <CpCard v-for="{ part, lines } in numbered" :key="part.key">
             <div class="flex items-center gap-3">
-              <component :is="partIcons[part.kind]" class="size-6 shrink-0 text-primary" aria-hidden="true" />
+              <CpIcon :icon="partIcons[part.kind]" size="lg" class="text-primary" />
               <div>
                 <h2 class="cp-card-title">{{ part.name }}</h2>
                 <p class="text-base-content/70">{{ [part.summary, part.time].filter(Boolean).join(' · ') }}</p>

@@ -3,3 +3,4 @@
 | Vue | Classes |
 | --- | --- |
 | `<CpSegmentedControl>` | `div.cp-join[role=group]` of `button.cp-join-item.cp-btn` (`cp-btn-primary` for the picked one, `cp-btn-outline` for the others, `aria-current`), with the alert icon (`svg.size-4.text-error`) after a flagged option's text |
+| `<CpSegmentedControl size="sm">` | `cp-btn-sm` on every button; `size` is the websites' scale (xs, sm, md, lg, xl, xxl), md when none is given |

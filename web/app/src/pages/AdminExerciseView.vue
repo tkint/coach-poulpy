@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { CpIcon } from '@coach-poulpy/ui'
 // The exercise screen of the admin (the stories Web/Screens/Admin/Exercise, web/storybook/stories/web/AdminExercise.stories.ts, #388): one exercise of the
 // catalog draft, edited at /admin/catalog/<slug>, or added at /admin/catalog/new. Saving writes the draft only: the
 // published exercise, which the apps download, stays as it is until a publication. A text is written in one language
@@ -304,7 +305,7 @@ async function save() {
                 :hint="locked ? t('admin.slugLocked') : t('admin.slugHint')"
                 @input="slugTouched = true"
               >
-                <template v-if="locked" #icon><Lock class="size-5 shrink-0" aria-hidden="true" /></template>
+                <template v-if="locked" #icon><CpIcon :icon="Lock" /></template>
               </CpTextField>
             </div>
             <div class="cp-divider my-0" role="separator"></div>
@@ -342,16 +343,16 @@ async function save() {
                       @keydown.up.prevent="moveStep(at, at - 1)"
                       @keydown.down.prevent="moveStep(at, at + 1)"
                     >
-                      <GripVertical class="size-4 shrink-0" aria-hidden="true" />
+                      <CpIcon :icon="GripVertical" size="sm" />
                     </button>
                     <button type="button" class="cp-btn cp-btn-circle cp-btn-ghost cp-btn-sm" :aria-label="t('admin.stepRemove', { n: String(at + 1) })" @click="removeStep(at)">
-                      <X class="size-4 shrink-0" aria-hidden="true" />
+                      <CpIcon :icon="X" size="sm" />
                     </button>
                   </div>
                 </li>
               </template>
             </ol>
-            <div><CpButton variant="outline" size="md" class="cp-btn-sm gap-2" @click="addStep"><Plus class="size-4 shrink-0" aria-hidden="true" />{{ t('admin.stepAdd') }}</CpButton></div>
+            <div><CpButton variant="outline" size="sm" class="gap-2" @click="addStep"><CpIcon :icon="Plus" size="sm" />{{ t('admin.stepAdd') }}</CpButton></div>
           </CpCard>
           <CpCard class="order-5 lg:order-none">
             <div class="grid gap-6 md:grid-cols-2">

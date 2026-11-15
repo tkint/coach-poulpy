@@ -3,7 +3,7 @@
 // phone synced, read-only. Its state lives in the URL (route.ts): /workouts?q=squat&format=sets&page=2. The words come from the API.
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { List, Repeat } from '@lucide/vue'
-import { CpBadge, CpCard, CpChip, CpErrorNote, CpPagination, CpPoulpyCard, CpSearchField, CpTable } from '@coach-poulpy/ui'
+import { CpBadge, CpCard, CpChip, CpErrorNote, CpIcon, CpPagination, CpPoulpyCard, CpSearchField, CpTable } from '@coach-poulpy/ui'
 import { listWorkouts, type WorkoutFormat, type WorkoutList, type WorkoutsQuery } from '../workouts'
 import { navigate, search, withParams } from '../route'
 import { formatDay } from '../dates'
@@ -89,7 +89,7 @@ watch(() => JSON.stringify(query.value), load, { immediate: true })
       <p class="text-base-content/70">{{ t('app.workoutsIntro') }}</p>
     </div>
     <form class="flex flex-col gap-3 md:flex-row md:items-center" role="search" @submit.prevent>
-      <CpSearchField v-model="draft" class="w-full md:max-w-sm" :label="t('app.workoutsSearch')" :placeholder="t('app.workoutsSearchPlaceholder')" />
+      <CpSearchField size="lg" v-model="draft" class="w-full md:max-w-sm" :label="t('app.workoutsSearch')" :placeholder="t('app.workoutsSearchPlaceholder')" />
       <div class="flex gap-2" role="group" :aria-label="t('app.workoutsFormat')">
         <CpChip v-for="format in formats" :key="format.value" :model-value="query.format === format.value" @update:model-value="go({ format: format.value, page: '' })">{{ format.label }}</CpChip>
       </div>
@@ -113,7 +113,7 @@ watch(() => JSON.stringify(query.value), load, { immediate: true })
           <tr v-for="workout in found.items" :key="workout.id" class="cp-hover">
             <td><a :href="href(workout.id)" class="cp-link cp-link-hover font-bold" @click.prevent="navigate(href(workout.id))">{{ workout.name }}</a></td>
             <td>
-              <CpBadge tone="primary" class="gap-1 whitespace-nowrap"><component :is="icon(workout.format)" class="size-4 shrink-0" aria-hidden="true" />{{ workout.text.format }}</CpBadge>
+              <CpBadge tone="primary" class="gap-1 whitespace-nowrap"><CpIcon :icon="icon(workout.format)" size="sm" />{{ workout.text.format }}</CpBadge>
             </td>
             <td class="whitespace-nowrap">{{ workout.text.exercises }}</td>
             <td class="whitespace-nowrap">{{ workout.text.length }}</td>
@@ -123,7 +123,7 @@ watch(() => JSON.stringify(query.value), load, { immediate: true })
       </CpTable>
       <div class="flex flex-col items-center justify-between gap-3 sm:flex-row">
         <p class="text-base-content/70" aria-live="polite">{{ found.text.count }}</p>
-        <CpPagination v-if="pages > 1" v-model:page="page" :pages="pages" />
+        <CpPagination size="sm" v-if="pages > 1" v-model:page="page" :pages="pages" />
       </div>
     </CpCard>
   </main>

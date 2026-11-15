@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { ref } from 'vue'
 import { List, Repeat } from '@lucide/vue'
-import { CpBadge, CpCard, CpChip, CpSearchField, CpTable } from '@coach-poulpy/ui'
+import { CpBadge, CpCard, CpChip, CpIcon, CpSearchField, CpTable } from '@coach-poulpy/ui'
 import AppShell from './AppShell.vue'
 
 // The web app's workouts list (issue #355).
@@ -27,8 +27,8 @@ const rows = [
 /** A read-only, searchable table of the workouts the phone synced. */
 export const Default: Story = {
   render: () => ({
-    components: { AppShell, CpBadge, CpCard, CpChip, CpSearchField, CpTable, List, Repeat },
-    setup: () => ({ rows, search: ref(''), format: ref('') }),
+    components: { AppShell, CpBadge, CpCard, CpChip, CpSearchField, CpTable, CpIcon },
+    setup: () => ({ rows, search: ref(''), format: ref(''), List, Repeat }),
     template: `<AppShell title="Workouts" active="workouts">
       <main class="flex flex-col gap-6 p-4 md:p-8">
         <div class="flex flex-col gap-1">
@@ -36,7 +36,7 @@ export const Default: Story = {
           <p class="text-base-content/70">The workouts on your phone, as they were last synced.</p>
         </div>
         <form class="flex flex-col gap-3 md:flex-row md:items-center" role="search" @submit.prevent>
-          <CpSearchField v-model="search" class="w-full md:max-w-sm" label="Search your workouts" placeholder="Name or exercise" />
+          <CpSearchField size="lg" v-model="search" class="w-full md:max-w-sm" label="Search your workouts" placeholder="Name or exercise" />
           <div class="flex gap-2" role="group" aria-label="Format">
             <CpChip v-for="one in ['All', 'Circuit', 'Sets']" :key="one" :model-value="(format || 'All') === one" @update:model-value="format = one === 'All' ? '' : one">{{ one }}</CpChip>
           </div>
@@ -47,7 +47,7 @@ export const Default: Story = {
             <tbody>
               <tr v-for="[name, kind, content, length, last] in rows" :key="name" class="cp-hover">
                 <td><a href="#" class="cp-link cp-link-hover font-bold">{{ name }}</a></td>
-                <td><CpBadge tone="primary" class="gap-1 whitespace-nowrap"><component :is="kind === 'Circuit' ? Repeat : List" class="size-4 shrink-0" aria-hidden="true" />{{ kind }}</CpBadge></td>
+                <td><CpBadge tone="primary" class="gap-1 whitespace-nowrap"><CpIcon :icon="kind === 'Circuit' ? Repeat : List" size="sm" />{{ kind }}</CpBadge></td>
                 <td class="whitespace-nowrap">{{ content }}</td>
                 <td class="whitespace-nowrap">{{ length }}</td>
                 <td class="whitespace-nowrap text-base-content/70">{{ last }}</td>

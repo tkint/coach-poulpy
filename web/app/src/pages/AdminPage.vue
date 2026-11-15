@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { CpIcon } from '@coach-poulpy/ui'
 // /admin: the sign-in until the cookies sign an admin in, then the admin shell
 // (the Web/Screens/Admin/Audit log story in the component workshop) with the audit log, the accounts, the settings and the status. A link at
 // the bottom of the sidebar goes back to the web app.
@@ -76,7 +77,7 @@ const what = (action: string) => (action in actions ? t(actions[action]) : actio
   <AdminSignInPage v-else-if="!me" @signed-in="async () => enter(await currentAccount())" />
   <CpDrawer v-else v-model:open="open" class="bg-base-200 text-base-content">
     <template #toggle-icon>
-      <PanelLeft class="size-5 shrink-0" aria-hidden="true" />
+      <CpIcon :icon="PanelLeft" />
     </template>
     <template #title>{{ t(titles[view]) }}</template>
     <AdminAccountsView v-if="view === 'accounts'" :own-account-id="me.accountId" />
@@ -129,24 +130,24 @@ const what = (action: string) => (action in actions ? t(actions[action]) : actio
       </div>
       <div class="w-full grow px-2"><CpNavMenu>
         <CpDrawerItem :label="t('admin.auditTitle')" href="/admin" :active="view === 'audit'" @click.prevent="navigate('/admin'); load()">
-          <template #icon><RotateCcwClock class="size-5 shrink-0" aria-hidden="true" /></template>
+          <template #icon><CpIcon :icon="RotateCcwClock" /></template>
         </CpDrawerItem>
         <CpDrawerItem :label="t('admin.navAccounts')" href="/admin/accounts" :active="view === 'accounts'" @click.prevent="navigate('/admin/accounts')">
-          <template #icon><Users class="size-5 shrink-0" aria-hidden="true" /></template>
+          <template #icon><CpIcon :icon="Users" /></template>
         </CpDrawerItem>
         <CpDrawerItem :label="t('admin.navCatalog')" href="/admin/catalog" :active="view === 'catalog' || view === 'exercise'" @click.prevent="navigate('/admin/catalog')">
-          <template #icon><BookOpen class="size-5 shrink-0" aria-hidden="true" /></template>
+          <template #icon><CpIcon :icon="BookOpen" /></template>
         </CpDrawerItem>
         <CpDrawerItem :label="t('admin.navSettings')" href="/admin/settings" :active="view === 'settings'" @click.prevent="navigate('/admin/settings')">
-          <template #icon><SlidersHorizontal class="size-5 shrink-0" aria-hidden="true" /></template>
+          <template #icon><CpIcon :icon="SlidersHorizontal" /></template>
         </CpDrawerItem>
         <CpDrawerItem :label="t('admin.navStatus')" href="/admin/status" :active="view === 'status'" @click.prevent="navigate('/admin/status')">
-          <template #icon><Activity class="size-5 shrink-0" aria-hidden="true" /></template>
+          <template #icon><CpIcon :icon="Activity" /></template>
         </CpDrawerItem>
       </CpNavMenu></div>
       <div class="flex w-full flex-col gap-2 p-2">
         <CpNavMenu>
-          <CpDrawerItem :label="t('admin.appLink')" href="/"><template #icon><ArrowLeft class="size-5 shrink-0" aria-hidden="true" /></template></CpDrawerItem>
+          <CpDrawerItem :label="t('admin.appLink')" href="/"><template #icon><CpIcon :icon="ArrowLeft" /></template></CpDrawerItem>
         </CpNavMenu>
         <div class="flex items-center gap-3 px-2">
           <CpAvatar :initials="initial(me.email)" tone="primary" size="md" />
@@ -154,7 +155,7 @@ const what = (action: string) => (action in actions ? t(actions[action]) : actio
         </div>
         <CpNavMenu>
           <CpDrawerItem :label="t('admin.signOut')" @click="leave">
-            <template #icon><LogOut class="size-5 shrink-0" aria-hidden="true" /></template>
+            <template #icon><CpIcon :icon="LogOut" /></template>
           </CpDrawerItem>
         </CpNavMenu>
       </div>

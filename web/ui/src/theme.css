@@ -73,6 +73,29 @@
     font: var(--cp-type-body);
   }
 
+  /* One size scale for buttons, fields and icons: xs, sm, md, lg, xl, xxl. Heights and icon boxes come from
+     tokens.css (--cp-control-*, --cp-icon-*). DaisyUI's own xs to xl classes keep their type and padding;
+     the height is the token's, and xxl is ours. */
+  .cp-btn-xs, .cp-input-xs { --cp-size: var(--cp-control-xs); }
+  .cp-btn-sm, .cp-input-sm { --cp-size: var(--cp-control-sm); }
+  .cp-btn-md, .cp-input-md { --cp-size: var(--cp-control-md); }
+  .cp-btn-lg, .cp-input-lg { --cp-size: var(--cp-control-lg); }
+  .cp-btn-xl, .cp-input-xl { --cp-size: var(--cp-control-xl); }
+  .cp-btn-xxl, .cp-input-xxl { --cp-size: var(--cp-control-xxl); }
+  .cp-btn-xxl {
+    --cp-fontsize: 1.5rem;
+    --cp-btn-p: 2rem;
+  }
+  .cp-input-xxl {
+    --cp-font-size-min: 1.5rem;
+  }
+  .cp-icon-xs { width: var(--cp-icon-xs); height: var(--cp-icon-xs); }
+  .cp-icon-sm { width: var(--cp-icon-sm); height: var(--cp-icon-sm); }
+  .cp-icon-md { width: var(--cp-icon-md); height: var(--cp-icon-md); }
+  .cp-icon-lg { width: var(--cp-icon-lg); height: var(--cp-icon-lg); }
+  .cp-icon-xl { width: var(--cp-icon-xl); height: var(--cp-icon-xl); }
+  .cp-icon-xxl { width: var(--cp-icon-xxl); height: var(--cp-icon-xxl); }
+
   /* Buttons (cp-btn cp-btn-xl): 56 high, pill, Nunito 800 at 16, wrapping their label between
      words rather than shrinking it. */
   .cp-btn-xl {
@@ -102,16 +125,14 @@
     --cp-size: 32px;
   }
 
-  /* Search field: 48 high, pill, primary while it holds text, with a round clear button. */
+  /* Search field: pill (its height is the size scale's, 48 for a list's own search), primary while it holds text, with a round clear button. */
   .cp-search-field {
-    --cp-size: 48px;
     --cp-input-color: var(--cp-outline);
     width: 100%;
     gap: var(--cp-space-sm);
   }
-  /* One control of a filter bar, as high as a small button and no wider than a short query needs. */
+  /* One control of a filter bar, no wider than a short query needs. */
   .cp-search-field-compact {
-    --cp-size: 32px;
     width: 14rem;
     max-width: 100%;
   }

@@ -3,3 +3,4 @@
 | Vue | Classes |
 | --- | --- |
 | `<CpSelectField>` | `div.cp-fieldset`, a `span.cp-type-label` and a `details` with a `summary.cp-btn.cp-btn-outline` and a `cp-card` `ul[role=listbox]` of option `button`s (`flex w-full items-center gap-3 rounded-field px-2 py-1 hover:bg-base-200`); `cp-btn-sm w-auto` and a `sr-only` label with `compact` |
+| `<CpSelectField size="sm">` | `cp-btn-sm` on the `summary`, as in a filter bar; `size` is the websites' scale (xs, sm, md, lg, xl, xxl), md when none is given |

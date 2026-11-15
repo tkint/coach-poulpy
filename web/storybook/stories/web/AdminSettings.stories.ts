@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { ref } from 'vue'
 import { Send } from '@lucide/vue'
-import { CpButton, CpCard, CpDivider, CpErrorNote, CpSuccessNote, CpTextField } from '@coach-poulpy/ui'
+import { CpButton, CpCard, CpDivider, CpErrorNote, CpIcon, CpSuccessNote, CpTextField } from '@coach-poulpy/ui'
 import AdminShell from './AdminShell.vue'
 
 // The admin's settings: the sender of the emails and a test email (issue #336).
@@ -16,8 +16,8 @@ type Story = StoryObj
 
 const settings = (from: string, outcome?: 'sent' | 'failed' | 'invalid'): Story => ({
   render: () => ({
-    components: { AdminShell, CpButton, CpCard, CpDivider, CpErrorNote, CpSuccessNote, CpTextField, Send },
-    setup: () => ({ from: ref(from), outcome }),
+    components: { AdminShell, CpButton, CpCard, CpDivider, CpErrorNote, CpSuccessNote, CpTextField, CpIcon },
+    setup: () => ({ from: ref(from), outcome, Send }),
     template: `<AdminShell title="Settings" active="settings">
       <main class="flex flex-col gap-6 p-4 md:p-8">
         <div class="flex flex-col gap-1">
@@ -37,7 +37,7 @@ const settings = (from: string, outcome?: 'sent' | 'failed' | 'invalid'): Story 
               <h3 class="cp-type-label">Test email</h3>
               <p class="text-sm text-base-content/70">Sends a message to ana@example.com with the saved settings.</p>
             </div>
-            <div><CpButton variant="outline" size="md" class="gap-2"><Send class="size-5 shrink-0" aria-hidden="true" />Send test email</CpButton></div>
+            <div><CpButton variant="outline" size="md" class="gap-2"><CpIcon :icon="Send" />Send test email</CpButton></div>
             <CpSuccessNote v-if="outcome === 'sent'">Test email sent to ana@example.com.</CpSuccessNote>
             <CpErrorNote v-if="outcome === 'failed'">The test email was not sent. The mail server said: 535 Authentication failed.</CpErrorNote>
           </div>

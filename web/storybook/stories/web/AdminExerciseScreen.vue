@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { CpIcon } from '@coach-poulpy/ui'
 // The admin's exercise screen: one exercise of the catalog draft, edited or added (ADR 0029: composed from the Cp
 // components, as the web app's AdminExerciseView does, with a static exercise). A text is written in one language at a
 // time; under each translatable field a badge says where the other language stands.
@@ -120,7 +121,7 @@ const slugLocked = computed(() => !props.isNew)
                 :error="slugTaken ? 'Another exercise already has this slug. Pick another one.' : undefined"
                 :hint="slugLocked ? 'Permanent identifier used by existing workouts. Not translated.' : 'Lowercase words joined by dashes. Editable until the exercise is first published, then never. Not translated.'"
               >
-                <template v-if="slugLocked" #icon><Lock class="size-5 shrink-0" aria-hidden="true" /></template>
+                <template v-if="slugLocked" #icon><CpIcon :icon="Lock" /></template>
               </CpTextField>
             </div>
             <div class="cp-divider my-0" role="separator"></div>
@@ -148,16 +149,16 @@ const slugLocked = computed(() => !props.isNew)
                   </div>
                   <div class="flex shrink-0 flex-col">
                     <button type="button" class="cp-btn cp-btn-circle cp-btn-ghost cp-btn-sm cursor-grab" :aria-label="`Move step ${at + 1}`" :disabled="form.steps.length < 2">
-                      <GripVertical class="size-4 shrink-0" aria-hidden="true" />
+                      <CpIcon :icon="GripVertical" size="sm" />
                     </button>
                     <button type="button" class="cp-btn cp-btn-circle cp-btn-ghost cp-btn-sm" :aria-label="`Remove step ${at + 1}`">
-                      <X class="size-4 shrink-0" aria-hidden="true" />
+                      <CpIcon :icon="X" size="sm" />
                     </button>
                   </div>
                 </li>
               </template>
             </ol>
-            <div><CpButton variant="outline" size="md" class="cp-btn-sm gap-2"><Plus class="size-4 shrink-0" aria-hidden="true" />Add step</CpButton></div>
+            <div><CpButton variant="outline" size="sm" class="gap-2"><CpIcon :icon="Plus" size="sm" />Add step</CpButton></div>
           </CpCard>
           <CpCard class="order-5 lg:order-none">
             <div class="grid gap-6 md:grid-cols-2">
@@ -185,7 +186,7 @@ const slugLocked = computed(() => !props.isNew)
                 <h2 class="cp-card-title">Retire</h2>
                 <p class="text-sm text-base-content/70">Prepares a lifecycle change. The exercise remains active until a publication includes its retirement. Workouts that use it still open; nothing is deleted, and you can offer it again later.</p>
               </div>
-              <CpButton variant="outline" size="md" class="gap-2"><Archive class="size-5 shrink-0" aria-hidden="true" />Prepare retirement</CpButton>
+              <CpButton variant="outline" size="md" class="gap-2"><CpIcon :icon="Archive" />Prepare retirement</CpButton>
             </div>
           </CpCard>
         </div>
@@ -199,9 +200,9 @@ const slugLocked = computed(() => !props.isNew)
                   <thead><tr><th scope="col" class="w-10 px-2 py-2"><span class="sr-only">Reorder</span></th><th scope="col" class="px-2 py-2 font-semibold">Exercise</th><th scope="col" class="w-12 px-2 py-2 text-right"><span class="sr-only">Focus</span></th></tr></thead>
                   <tbody>
                     <tr v-for="(row, at) in ['Sit to stand', 'Bodyweight squat', exercise.name.en]" :key="row" :class="{ 'bg-base-200': at === 2 }">
-                      <td class="w-10 px-2 py-2"><button type="button" class="cp-btn cp-btn-circle cp-btn-ghost cp-btn-sm" :aria-label="`Reorder ${row}`" title="Drag to reorder"><GripVertical class="size-4 shrink-0" aria-hidden="true" /></button></td>
+                      <td class="w-10 px-2 py-2"><button type="button" class="cp-btn cp-btn-circle cp-btn-ghost cp-btn-sm" :aria-label="`Reorder ${row}`" title="Drag to reorder"><CpIcon :icon="GripVertical" size="sm" /></button></td>
                       <td class="px-2 py-2"><a href="#" class="cp-link cp-link-hover font-semibold">{{ row }}</a></td>
-                      <td class="w-12 px-2 py-2 text-right"><span v-if="at === 2" class="cp-badge cp-badge-primary cp-badge-soft cp-badge-sm" title="Focus" aria-label="Focus"><Target class="size-3 shrink-0" aria-hidden="true" /></span></td>
+                      <td class="w-12 px-2 py-2 text-right"><span v-if="at === 2" class="cp-badge cp-badge-primary cp-badge-soft cp-badge-sm" title="Focus" aria-label="Focus"><CpIcon :icon="Target" size="xs" /></span></td>
                     </tr>
                   </tbody>
                 </table>

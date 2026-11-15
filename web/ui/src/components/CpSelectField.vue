@@ -3,12 +3,15 @@
 // while it is used, its options looking like the multi-select field's without the checkboxes: the chosen one is
 // bold with a check. Choosing, Escape or a click elsewhere closes it. With `compact` it is one control of a
 // filter bar: no visible label (the label still names it for assistive technology, and its first option usually
-// says it too) and only as wide as its longest option.
+// says it too) and only as wide as its longest option. `size` is the websites' scale (xs, sm, md, lg, xl, xxl); md when
+// none is given, and a filter bar's are `sm`.
 import { computed, ref, useId } from 'vue'
 import { Check, ChevronDown } from '@lucide/vue'
 import { useDismissable } from '../dismissable'
+import CpIcon from './CpIcon.vue'
+import { buttonSize, controlChevron, type CpSize } from './sizes'
 
-const props = defineProps<{ label: string; options: { value: string; text: string }[]; compact?: boolean }>()
+const props = withDefaults(defineProps<{ label: string; options: { value: string; text: string }[]; compact?: boolean; size?: CpSize }>(), { size: 'md' })
 const value = defineModel<string>()
 const root = ref<HTMLDetailsElement>()
 const labelId = useId()
@@ -24,9 +27,9 @@ const choose = (picked: string) => {
   <div class="cp-fieldset" data-component="select-field">
     <span :id="labelId" class="cp-type-label" :class="{ 'sr-only': compact }">{{ label }}</span>
     <details ref="root" class="relative" :class="compact ? 'w-auto' : 'w-full'">
-      <summary class="cp-btn cp-btn-outline list-none justify-between gap-2 font-normal" :class="compact ? 'cp-btn-sm' : 'w-full'" :aria-labelledby="labelId">
+      <summary class="cp-btn cp-btn-outline list-none justify-between gap-2 font-normal" :class="[buttonSize[size], { 'w-full': !compact }]" :aria-labelledby="labelId">
         <span class="truncate">{{ current }}</span>
-        <ChevronDown class="size-4 shrink-0" aria-hidden="true" />
+        <CpIcon :icon="ChevronDown" :size="controlChevron[size]" />
       </summary>
       <ul role="listbox" :aria-labelledby="labelId" class="cp-card absolute left-0 z-20 mt-2 flex max-h-60 min-w-full w-max max-w-80 flex-col overflow-y-auto border border-base-300 bg-base-100 p-2 shadow-lg">
         <li v-for="option in options" :key="option.value" role="presentation">
@@ -39,7 +42,7 @@ const choose = (picked: string) => {
             @click="choose(option.value)"
           >
             {{ option.text }}
-            <Check v-if="option.value === value" class="ms-auto size-4 shrink-0" aria-hidden="true" />
+            <CpIcon v-if="option.value === value" :icon="Check" size="sm" class="ms-auto" />
           </button>
         </li>
       </ul>

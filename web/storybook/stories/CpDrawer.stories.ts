@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, userEvent, within } from 'storybook/test'
 import { Dumbbell, Menu } from '@lucide/vue'
-import { CpDrawer, CpDrawerItem } from '@coach-poulpy/ui'
+import { CpDrawer, CpDrawerItem, CpIcon } from '@coach-poulpy/ui'
 import doc from './CpDrawer.md?raw'
 
 const meta = {
@@ -12,15 +12,15 @@ const meta = {
   // hide the label's icon from assistive technology, then drop this exemption.
   parameters: { docs: { description: { component: doc } }, a11y: { test: 'todo' } },
   render: (args) => ({
-    components: { CpDrawer, CpDrawerItem, Menu, Dumbbell },
-    setup: () => ({ args }),
+    components: { CpDrawer, CpDrawerItem, CpIcon },
+    setup: () => ({ args, Menu, Dumbbell }),
     template: `<CpDrawer v-bind="args">
-      <template #toggle-icon><Menu class="size-5" aria-hidden="true" /></template>
+      <template #toggle-icon><CpIcon :icon="Menu" /></template>
       <template #title>Coach Poulpy</template>
       <main class="p-4">Page content</main>
       <template #sidebar>
         <ul class="cp-menu w-full grow gap-1">
-          <CpDrawerItem label="Exercises" active><template #icon><Dumbbell class="size-5" aria-hidden="true" /></template></CpDrawerItem>
+          <CpDrawerItem label="Exercises" active><template #icon><CpIcon :icon="Dumbbell" /></template></CpDrawerItem>
         </ul>
       </template>
     </CpDrawer>`,

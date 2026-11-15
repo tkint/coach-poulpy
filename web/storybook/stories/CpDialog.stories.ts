@@ -17,7 +17,7 @@ const meta = {
     components: { CpDialog, CpButton },
     setup: () => ({ args, open: ref(Boolean(args.open)) }),
     template: `<div class="min-h-80">
-      <CpButton variant="outline" @click="open = true">Open the dialog</CpButton>
+      <CpButton size="xl" variant="outline" @click="open = true">Open the dialog</CpButton>
       <CpDialog v-bind="args" v-model:open="open">
         <p>Goblet squat · French name changed.</p>
         <template #actions>

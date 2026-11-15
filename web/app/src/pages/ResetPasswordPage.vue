@@ -52,7 +52,7 @@ async function save() {
       />
       <CpErrorNote v-if="answer === 'too-short'">{{ t('account.errorPasswordShort') }}</CpErrorNote>
       <CpErrorNote v-else-if="answer === 'offline'">{{ t('account.errorOffline') }}</CpErrorNote>
-      <CpButton type="submit" class="w-full" :loading="answer === 'sending'">{{ t('account.savePassword') }}</CpButton>
+      <CpButton size="xl" type="submit" class="w-full" :loading="answer === 'sending'">{{ t('account.savePassword') }}</CpButton>
     </form>
   </SitePage>
 </template>

@@ -228,6 +228,9 @@ function css() {
   }
   for (const [name, v] of Object.entries(tokens.space)) out.push(`  --cp-space-${name}: ${v}px;`)
   for (const [name, v] of Object.entries(tokens.radius)) out.push(`  --cp-radius-${name}: ${v}px;`)
+  // The websites' one size scale (xs to xxl): the height of a button or a field, and the box of an icon.
+  for (const [name, v] of Object.entries(tokens.webSize.control)) out.push(`  --cp-control-${name}: ${v}px;`)
+  for (const [name, v] of Object.entries(tokens.webSize.icon)) out.push(`  --cp-icon-${name}: ${v}px;`)
   for (const [name, m] of Object.entries(tokens.motion)) {
     out.push(`  --cp-motion-${name}: ${m.duration}ms${m.easing ? ` cubic-bezier(${m.easing.join(', ')})` : ''};`)
   }

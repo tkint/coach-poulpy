@@ -34,7 +34,7 @@ onMounted(confirm)
     <p v-if="answer === 'checking'">{{ t('account.checking') }}</p>
     <template v-else>
       <CpErrorNote>{{ t('account.errorOffline') }}</CpErrorNote>
-      <CpButton @click="confirm">{{ t('account.tryAgain') }}</CpButton>
+      <CpButton size="xl" @click="confirm">{{ t('account.tryAgain') }}</CpButton>
     </template>
   </SitePage>
 </template>
