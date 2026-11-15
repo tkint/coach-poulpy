@@ -45,6 +45,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -230,7 +231,15 @@ internal fun SettingsHub(graph: AppGraph, language: String, onPage: (SettingsPag
                 var appIcon by remember { mutableStateOf(AppIconSwitch.current(context)) }
                 var pickingIcon by remember { mutableStateOf(false) }
                 SettingsRow(
-                    leading = { Image(painterResource(appIcon.drawingRes), contentDescription = null, modifier = Modifier.size(44.dp)) },
+                    leading = {
+                        Box(Modifier.size(26.dp), contentAlignment = Alignment.Center) {
+                            Image(
+                                painterResource(appIcon.drawingRes),
+                                contentDescription = null,
+                                modifier = Modifier.size(30.dp).scale(1.6f).padding(bottom = 4.dp),
+                            )
+                        }
+                    },
                     title = stringResource(R.string.settings_appIcon),
                     subtitle = appIcon.label(),
                     onClick = { pickingIcon = true },
