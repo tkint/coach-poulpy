@@ -48,8 +48,6 @@
   & .box { height: 52px; border-radius: var(--cp-radius-md); border: 1.5px solid var(--cp-outline); background: var(--cp-surface); padding: 0 var(--cp-space-md); display: flex; align-items: center; gap: var(--cp-space-sm); }
   & .box:focus-within { border-color: var(--cp-primary); }
   & .box input { flex: 1; min-width: 0; width: 100%; background: transparent; border: 0; outline: 0; font: inherit; font-size: 17px; font-weight: 800; color: var(--cp-on-surface); }
-  & .select { width: 100%; justify-content: space-between; text-align: left; color: var(--cp-on-surface); }
-  & .select strong { display: block; }
   & .unit { font-weight: 800; color: var(--cp-on-surface-variant); }
   & .entry { display: flex; align-items: center; gap: var(--cp-space-sm); }
   & .entry .box { flex: 1; }

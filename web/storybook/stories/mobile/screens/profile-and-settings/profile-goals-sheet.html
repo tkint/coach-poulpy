@@ -5,7 +5,7 @@
   <MobileSheet id="goals-sheet" aria-label="Goals">
     <span class="sheet-handle"></span>
     <div class="sheet-title"><h2>Goals</h2><p>Pick as many as you like. Poulpy suggests workouts for all of them.</p></div>
-    <div class="option-list" role="group" aria-label="Goals"><label class="option-row" data-component="option-row"><span>Stay active</span><input type="checkbox" name="goals"></label><label class="option-row" data-component="option-row"><span>Build strength</span><input type="checkbox" name="goals" checked></label><label class="option-row" data-component="option-row"><span>Run further</span><input type="checkbox" name="goals" checked></label><label class="option-row" data-component="option-row"><span>Rehab</span><input type="checkbox" name="goals"></label><label class="option-row" data-component="option-row"><span>Something else</span><input type="checkbox" name="goals"></label></div>
+    <div class="option-list" role="group" aria-label="Goals"><MobileOptionRow control="checkbox" name="goals">Stay active</MobileOptionRow><MobileOptionRow control="checkbox" name="goals" checked>Build strength</MobileOptionRow><MobileOptionRow control="checkbox" name="goals" checked>Run further</MobileOptionRow><MobileOptionRow control="checkbox" name="goals">Rehab</MobileOptionRow><MobileOptionRow control="checkbox" name="goals">Something else</MobileOptionRow></div>
     <div class="sheet-actions"><button class="primary-button" type="button" style="flex: 1;">Save</button></div>
   </MobileSheet>
 </main>
