@@ -9,9 +9,9 @@ const drawings = Object.entries(files).map(([path, src]) => {
   return { key, src, name: key.replace(/^(mood|pose)_/, '').replace(/_/g, ' ').replace(/^./, (c) => c.toUpperCase()) }
 })
 const groups = [
-  { title: 'Moods', items: drawings.filter((one) => one.key.startsWith('mood_')) },
-  { title: 'Poses', items: drawings.filter((one) => one.key.startsWith('pose_')) },
-  { title: 'Loader', items: drawings.filter((one) => one.key.startsWith('loader')) },
+  { heading: 'Moods', items: drawings.filter((one) => one.key.startsWith('mood_')) },
+  { heading: 'Poses', items: drawings.filter((one) => one.key.startsWith('pose_')) },
+  { heading: 'Loader', items: drawings.filter((one) => one.key.startsWith('loader')) },
 ]
 
 // Poulpy as a cross-platform reference: every generated drawing. The Vue component is under Web / Components.
@@ -21,8 +21,8 @@ const meta = {
   render: () => ({
     setup: () => ({ groups }),
     template: `<div class="flex flex-col gap-8">
-      <section v-for="group in groups" :key="group.title" class="flex flex-col gap-3">
-        <h3 class="cp-type-title">{{ group.title }}</h3>
+      <section v-for="group in groups" :key="group.heading" class="flex flex-col gap-3">
+        <h3 class="cp-type-title">{{ group.heading }}</h3>
         <div class="flex flex-wrap gap-6">
           <figure v-for="item in group.items" :key="item.key" class="flex w-32 flex-col items-center gap-2 text-center">
             <img :src="item.src" :alt="item.name" class="h-24 w-24 object-contain" />
