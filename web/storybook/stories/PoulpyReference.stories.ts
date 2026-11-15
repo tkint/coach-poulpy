@@ -2,10 +2,10 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, within } from 'storybook/test'
 import doc from './PoulpyReference.md?raw'
 
-const files = import.meta.glob<string>('../../../design/poulpy/*.svg', { eager: true, query: '?url', import: 'default' })
-/** A drawing's file name, without its folder and extension, and its readable name. */
-const drawings = Object.entries(files).map(([path, src]) => {
-  const key = path.slice(path.lastIndexOf('/') + 1, -'.svg'.length)
+import { poulpyDrawings } from '@coach-poulpy/ui'
+
+/** A picture's file name, without its folder and extension, and its readable name. */
+const drawings = Object.entries(poulpyDrawings).map(([key, src]) => {
   return { key, src, name: key.replace(/^(mood|pose)_/, '').replace(/_/g, ' ').replace(/^./, (c) => c.toUpperCase()) }
 })
 const groups = [
@@ -14,7 +14,7 @@ const groups = [
   { heading: 'Loader', items: drawings.filter((one) => one.key.startsWith('loader')) },
 ]
 
-// Poulpy as a cross-platform reference: every generated drawing. The Vue component is under Web / Components.
+// Poulpy as a cross-platform reference: every picture and drawing of him. The Vue component is under Web / Components.
 const meta = {
   title: 'Core/Poulpy',
   parameters: { docs: { description: { component: doc } } },

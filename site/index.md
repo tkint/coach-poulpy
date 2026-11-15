@@ -5,7 +5,7 @@ hero:
   text: Train with a grumpy octopus
   tagline: Build workouts, follow plans and run guided sessions on Android and iPhone, coached by Poulpy. This site holds the brand, the design system and the architecture behind the app.
   image:
-    src: /poulpy.svg
+    src: /poulpy.png
     alt: Poulpy, happy
   actions:
     - theme: brand

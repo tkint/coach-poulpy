@@ -74,7 +74,7 @@ export default withMermaid(
     srcExclude: ['**/node_modules/**', 'README.md'],
     cleanUrls: true,
     head: [
-      ['link', { rel: 'icon', href: `${base}poulpy.svg` }],
+      ['link', { rel: 'icon', href: `${base}poulpy.png` }],
       ['link', { rel: 'preconnect', href: 'https://fonts.googleapis.com' }],
       ['link', { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' }],
       [
@@ -91,7 +91,7 @@ export default withMermaid(
     // own packages are not installed when the site is built.
     vite: { server: { fs: { allow: [repoRoot] } }, resolve: { dedupe: ['vue', '@lucide/vue'] } },
     themeConfig: {
-      logo: '/poulpy.svg',
+      logo: '/poulpy.png',
       nav: [
         { text: 'Start here', link: '/CONTRIBUTING' },
         { text: 'Architecture', link: '/docs/architecture' },
