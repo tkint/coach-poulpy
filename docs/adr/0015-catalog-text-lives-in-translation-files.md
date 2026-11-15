@@ -6,7 +6,7 @@ date: 2026-10-26
 # Catalog text lives in translation files
 
 > **Superseded by [ADR 0033](./0033-the-server-database-is-the-catalog-and-nothing-ships-bundled.md):** the `catalog` translation namespace, its merge and the bundled catalog are gone; exercise text lives in the server database.
-
+>
 > **Superseded in part by [ADR 0030](./0030-the-catalog-changes-by-exercise-revision-not-by-catalog-version.md):** the catalog `version` and the CI check that raises it are replaced by per-exercise revisions. Text in translation files, keyed by slug, still holds for the bundled catalog.
 
 Amends [ADR 0008](./0008-curated-catalog-with-stable-slugs.md).
