@@ -12,13 +12,13 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** Workout import · refused. Was design/mockups/agreed/phone/workout-import-error.html. */
+/** Workout import · refused. */
 export const WorkoutImportError: Story = {
   name: "Refused",
   ...screen(screenWorkoutImportError),
   parameters: { mockup: { issue: 129 } },
 }
-/** Workout import · preview. Was design/mockups/agreed/phone/workout-import.html. */
+/** Workout import · preview. */
 export const WorkoutImport: Story = {
   name: "Preview",
   ...screen(screenWorkoutImport),

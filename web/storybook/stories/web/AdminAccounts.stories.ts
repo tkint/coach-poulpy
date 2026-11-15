@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import AdminAccountsScreen, { type Account } from './AdminAccountsScreen.vue'
 
-// The admin's accounts (issue #336). Was design/mockups/agreed/web/admin-accounts*.html.
+// The admin's accounts (issue #336).
 const meta = {
   title: 'Web/Screens/Admin/Accounts',
   component: AdminAccountsScreen,

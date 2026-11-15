@@ -1,4 +1,4 @@
-// Draws the body map figures (front and back, two builds) and writes them into the mockups and the apps' data.
+// Draws the body map figures (front and back, two builds) and writes them into the phone screens' stories and the apps' data.
 //   node design/build-body-map.mjs          rewrite the figures
 //   node design/build-body-map.mjs --check  fail if a file differs from what this draws
 // The muscle outlines come from design/body-map-source/parts.json (see NOTICE.md there). Each muscle is one
@@ -9,7 +9,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
-const phone = join(root, 'design/mockups/agreed/phone')
+const phone = join(root, 'web/storybook/stories/mobile/screens/profile-and-settings')
 const files = ['profile-pain-sheet.html', 'profile-body-figure-sheet.html']
 const source = JSON.parse(readFileSync(join(root, 'design/body-map-source/parts.json'), 'utf8'))
 

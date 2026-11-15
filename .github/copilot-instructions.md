@@ -31,7 +31,6 @@ node design/build-poulpy.mjs --check
 node design/build-poulpy-3d.mjs --check
 node design/build-body-map.mjs --check
 node design/build-body-map-shapes.mjs --check
-node design/check-mockups.mjs
 (cd web && npm run build)
 (cd site && npm run build && node check-published.mjs)
 markdownlint-cli2

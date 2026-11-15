@@ -85,7 +85,7 @@ Baloo 2 for display and titles, Nunito for everything else. Platforms map each r
 
 ## Base fields
 
-The fields every form is built from. Reference mockups: `profile-edit`, the three `profile-*-sheet` pages, `body-log-sheet`, `body-log-height-sheet`. CSS classes are in `design/mockups/shared/mockup.css`. Build every new form from these, and move old screens to them as they are touched.
+The fields every form is built from. Reference mockups: `profile-edit`, the three `profile-*-sheet` pages, `body-log-sheet`, `body-log-height-sheet`, under Mobile > Screens > Profile and settings in the workshop. Build every new form from these, and move old screens to them as they are touched.
 
 | Field | Shape | Behaviour |
 | --- | --- | --- |
@@ -104,11 +104,11 @@ The fields every form is built from. Reference mockups: `profile-edit`, the thre
 
 ## Screens
 
-The web screens are stories in the [component workshop](https://tkint.github.io/coach-poulpy/storybook/?path=/docs/design-system-introduction--docs), under Web > Screens, composed from the `Cp*` components ([ADR 0029](adr/0029-mockups-are-stories-in-the-component-workshop.md)). The phone and tablet screens are still plain HTML in `design/mockups/` ([ADR 0016](adr/0016-mockups-are-plain-html-in-the-repo.md)), split by stage (`drafts/` and `agreed/`) and platform (`phone/`, `tablet/`), until they move to the workshop too.
+Every screen mockup is a story in the [component workshop](https://tkint.github.io/coach-poulpy/storybook/?path=/docs/design-system-introduction--docs) ([ADR 0029](adr/0029-mockups-are-stories-in-the-component-workshop.md)): the web screens under Web > Screens, composed from the `Cp*` components, and the phone screens under Mobile > Screens, built from the `Mobile*` components and patterns.
 
 - Build from an agreed mockup. If a screen has none, agree one through a PR before building it.
-- The [Mockups gallery](https://tkint.github.io/coach-poulpy/mockups/) shows each phone and tablet view and its available states in light and dark themes; the workshop shows the web screens, each state as a story.
-- CI checks mockup links, local assets, design tokens and required metadata with `node design/check-mockups.mjs`.
+- Each state of a screen is a story, in light and dark from the workshop's theme toolbar. A new screen or redesign is tagged `draft`; a PR that changes the tag to `agreed` is its approval, and nothing is built from a draft.
+- CI runs every story as a test, with the accessibility check.
 
 The mockup is the design reference; this page defines the shared rules and components used to build it.
 
@@ -119,7 +119,7 @@ The landing site, the web app, the web screens of the workshop and the docs site
 - Use the shared components (`CpButton`, `CpChip`...) in Vue, and never restyle a DaisyUI class in an app. A missing shape goes in `web/ui`, with its stories and the classes it renders in its docs, in the same PR.
 - Every DaisyUI class carries the `cp-` prefix (`cp-btn cp-btn-primary`). Our own classes (`cp-chip`, `cp-stepper`, `cp-type-label`...) never reuse a DaisyUI name, so the two cannot clash.
 - The roles above keep their meaning: `cp-btn-primary` is `primary`, `cp-btn-secondary` is the tonal `primaryContainer`, `cp-btn-accent` is `grumpy` and only for the catch-up action. Never use DaisyUI's `warning` classes: ember is not a warning, and a problem is an `error`.
-- Phone and tablet mockups keep `design/mockups/shared/mockup.css`: they draw the native screens.
+- Phone and tablet mockups keep their own stylesheet (`web/storybook/stories/mobile/screens/screens.css`): they draw the native screens, which DaisyUI's look does not match.
 - Icons on the websites and in every screen come from Lucide, as in the [Icons](#icons) section ([ADR 0024](adr/0024-lucide-is-the-icon-set.md)).
 
 ## Icons
@@ -129,11 +129,11 @@ Every icon is from [Lucide](https://lucide.dev), on every platform ([ADR 0024](a
 | Where | How |
 | --- | --- |
 | Vue (web app, `web/ui`, docs site) | `@lucide/vue`: `<ChevronLeft class="size-5" aria-hidden="true" />` |
-| Mockups | The Lucide SVG inline, with `data-lucide="chevron-left"`; `design/check-mockups.mjs` checks it |
+| Phone mockups | `<MobileIcon name="chevron-left" :size="20" />`, or the `icon` prop of a `Mobile*` component |
 | Android | `Icon(Lucide.ChevronLeft, contentDescription = …)` |
 | iOS | `LucideIcon(.chevronLeft, size: 20)`, or `Label("action.back", lucide: .chevronLeft)` |
 
-The Android and iOS icons, and the reference copies the mockups are checked against, are generated from `design/icons/`: run `node design/build-icons.mjs --add <name>` for an icon not used yet.
+The Android and iOS icons are generated from `design/icons/`: run `node design/build-icons.mjs --add <name>` for an icon not used yet.
 
 One icon per meaning, the same on every platform:
 

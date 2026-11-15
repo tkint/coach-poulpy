@@ -1,11 +1,11 @@
 <main class="phone player">
   <div class="session-progress" id="session-progress">
-    <button class="icon-button icon-button--filled" type="button" aria-label="Pause"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="pause"><rect x="14" y="3" width="5" height="18" rx="1"/><rect x="5" y="3" width="5" height="18" rx="1"/></svg></button>
+    <button class="icon-button icon-button--filled" type="button" aria-label="Pause"><MobileIcon name="pause" :size="20" /></button>
     <div>
       <span class="label numbers">Step 5 of 6 · 31:05</span>
       <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="6" aria-valuenow="4" aria-label="Session progress"><div style="width: 66%;"></div></div>
     </div>
-    <button type="button" class="icon-button icon-button--filled" aria-label="End session"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+    <button type="button" class="icon-button icon-button--filled" aria-label="End session"><MobileIcon name="x" :size="22" /></button>
   </div>
 
   <div class="player-step" id="current-step">

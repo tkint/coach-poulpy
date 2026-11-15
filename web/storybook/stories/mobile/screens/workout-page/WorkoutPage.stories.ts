@@ -20,55 +20,55 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** Workout page · delete. Was design/mockups/agreed/phone/workout-delete.html. */
+/** Workout page · delete. */
 export const WorkoutDelete: Story = {
   name: "Delete",
   ...screen(screenWorkoutDelete),
   parameters: { mockup: { issue: 104 } },
 }
-/** Workout page · menu. Was design/mockups/agreed/phone/workout-menu.html. */
+/** Workout page · menu. */
 export const WorkoutMenu: Story = {
   name: "Menu",
   ...screen(screenWorkoutMenu),
   parameters: { mockup: { issue: 104 } },
 }
-/** Workout page · half body map, half details. Was design/mockups/agreed/phone/workout-page-body-map.html. */
+/** Workout page · half body map, half details. */
 export const WorkoutPageBodyMap: Story = {
   name: "Half body map, half details",
   ...screen(screenWorkoutPageBodyMap),
   parameters: { mockup: { issue: 244 } },
 }
-/** Workout page · circuit in parts. Was design/mockups/agreed/phone/workout-page-circuit.html. */
+/** Workout page · circuit in parts. */
 export const WorkoutPageCircuit: Story = {
   name: "Circuit in parts",
   ...screen(screenWorkoutPageCircuit),
   parameters: { mockup: { issue: 92 } },
 }
-/** Workout page · details full screen. Was design/mockups/agreed/phone/workout-page-details.html. */
+/** Workout page · details full screen. */
 export const WorkoutPageDetails: Story = {
   name: "Details full screen",
   ...screen(screenWorkoutPageDetails),
   parameters: { mockup: { issue: 244 } },
 }
-/** Workout page · a worked muscle hurts. Was design/mockups/agreed/phone/workout-page-pain.html. */
+/** Workout page · a worked muscle hurts. */
 export const WorkoutPagePain: Story = {
   name: "A worked muscle hurts",
   ...screen(screenWorkoutPagePain),
   parameters: { mockup: { issue: 244 } },
 }
-/** Workout page · muscles and details. Was design/mockups/agreed/phone/workout-page-planned.html. */
+/** Workout page · muscles and details. */
 export const WorkoutPagePlanned: Story = {
   name: "Muscles and details",
   ...screen(screenWorkoutPagePlanned),
   parameters: { mockup: { issue: 244 } },
 }
-/** Workout page · sets in parts. Was design/mockups/agreed/phone/workout-page-sets.html. */
+/** Workout page · sets in parts. */
 export const WorkoutPageSets: Story = {
   name: "Sets in parts",
   ...screen(screenWorkoutPageSets),
   parameters: { mockup: { issue: 92 } },
 }
-/** Workout page · plan days. Was design/mockups/agreed/phone/workout-plan.html. */
+/** Workout page · plan days. */
 export const WorkoutPlan: Story = {
   name: "Plan days",
   ...screen(screenWorkoutPlan),

@@ -12,7 +12,7 @@
 
   <div class="list-meta">
     <span aria-live="polite">0 matches</span>
-    <button type="button" aria-label="Sort: Recently done">Recently done<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="chevron-down"><path d="m6 9 6 6 6-6"/></svg></button>
+    <button type="button" aria-label="Sort: Recently done">Recently done<MobileIcon name="chevron-down" :size="16" /></button>
   </div>
 
   <ul id="library" style="flex: 1; min-height: 0; overflow: hidden; padding: 0 var(--cp-space-lg); display: flex; flex-direction: column; gap: var(--cp-space-sm);">
@@ -24,7 +24,7 @@
     </li>
   </ul>
 
-  <button type="button" class="fab" data-component="fab"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg>New workout</button>
+  <button type="button" class="fab" data-component="fab"><MobileIcon name="plus" :size="22" />New workout</button>
 
   <MobileNavBar active="library" />
 </main>

@@ -20,7 +20,6 @@ import screenSettingsPreferences from './settings-preferences.html?raw'
 
 // The Profile and settings screens of the apps (ADR 0029), drawn with the phone stylesheet (../screens.css).
 // CLEANUP: the screens marked a11y todo carry axe findings the old mockups had (contrast of hints and past days, names of fields); fix them with the screens, then drop the todo.
-// CLEANUP: the screens marked a11y todo carry axe findings the old mockups had (contrast of hints and past days, names of fields); fix them with the screens, then drop the todo.
 const meta = {
   title: "Mobile/Screens/Profile and settings",
   tags: ['!autodocs', 'agreed'],
@@ -29,103 +28,103 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** Body · height, nothing logged. Was design/mockups/agreed/phone/body-height-empty.html. */
+/** Body · height, nothing logged. */
 export const BodyHeightEmpty: Story = {
   name: "Height, nothing logged",
   ...screen(screenBodyHeightEmpty),
   parameters: { mockup: { issue: undefined } },
 }
-/** Body · height (imperial). Was design/mockups/agreed/phone/body-height.html. */
+/** Body · height (imperial). */
 export const BodyHeight: Story = {
   name: "Height (imperial)",
   ...screen(screenBodyHeight),
   parameters: { mockup: { issue: undefined } },
 }
-/** Body · log a height (imperial). Was design/mockups/agreed/phone/body-log-height-sheet.html. */
+/** Body · log a height (imperial). */
 export const BodyLogHeightSheet: Story = {
   name: "Log a height (imperial)",
   ...screen(screenBodyLogHeightSheet),
   parameters: { mockup: { issue: undefined } },
 }
-/** Body · log a weight. Was design/mockups/agreed/phone/body-log-sheet.html. */
+/** Body · log a weight. */
 export const BodyLogSheet: Story = {
   name: "Log a weight",
   ...screen(screenBodyLogSheet),
   parameters: { mockup: { issue: undefined } },
 }
-/** Body · weight, nothing logged. Was design/mockups/agreed/phone/body-weight-empty.html. */
+/** Body · weight, nothing logged. */
 export const BodyWeightEmpty: Story = {
   name: "Weight, nothing logged",
   ...screen(screenBodyWeightEmpty),
   parameters: { mockup: { issue: undefined } },
 }
-/** Body · weight. Was design/mockups/agreed/phone/body-weight.html. */
+/** Body · weight. */
 export const BodyWeight: Story = {
   name: "Weight",
   ...screen(screenBodyWeight),
   parameters: { mockup: { issue: undefined } },
 }
-/** Settings · devices. Was design/mockups/agreed/phone/devices-list.html. */
+/** Settings · devices. */
 export const DevicesList: Story = {
   name: "Devices",
   ...screen(screenDevicesList),
   parameters: { a11y: { test: 'todo' }, mockup: { issue: undefined } },
 }
-/** Profile · body figure. Was design/mockups/agreed/phone/profile-body-figure-sheet.html. */
+/** Profile · body figure. */
 export const ProfileBodyFigureSheet: Story = {
   name: "Body figure",
   ...screen(screenProfileBodyFigureSheet),
   parameters: { a11y: { test: 'todo' }, mockup: { issue: undefined } },
 }
-/** Profile · edit. Was design/mockups/agreed/phone/profile-edit.html. */
+/** Profile · edit. */
 export const ProfileEdit: Story = {
   name: "Edit",
   ...screen(screenProfileEdit),
   parameters: { mockup: { issue: undefined } },
 }
-/** Profile · experience. Was design/mockups/agreed/phone/profile-experience-sheet.html. */
+/** Profile · experience. */
 export const ProfileExperienceSheet: Story = {
   name: "Experience",
   ...screen(screenProfileExperienceSheet),
   parameters: { mockup: { issue: undefined } },
 }
-/** Profile · goals. Was design/mockups/agreed/phone/profile-goals-sheet.html. */
+/** Profile · goals. */
 export const ProfileGoalsSheet: Story = {
   name: "Goals",
   ...screen(screenProfileGoalsSheet),
   parameters: { mockup: { issue: undefined } },
 }
-/** Profile · pain or rehab. Was design/mockups/agreed/phone/profile-pain-sheet.html. */
+/** Profile · pain or rehab. */
 export const ProfilePainSheet: Story = {
   name: "Pain or rehab",
   ...screen(screenProfilePainSheet),
   parameters: { mockup: { issue: undefined } },
 }
-/** Profile · pronouns. Was design/mockups/agreed/phone/profile-pronouns-sheet.html. */
+/** Profile · pronouns. */
 export const ProfilePronounsSheet: Story = {
   name: "Pronouns",
   ...screen(screenProfilePronounsSheet),
   parameters: { mockup: { issue: undefined } },
 }
-/** Profile · sex assigned at birth. Was design/mockups/agreed/phone/profile-sex-sheet.html. */
+/** Profile · sex assigned at birth. */
 export const ProfileSexSheet: Story = {
   name: "Sex assigned at birth",
   ...screen(screenProfileSexSheet),
   parameters: { mockup: { issue: undefined } },
 }
-/** Settings · choose an app icon. Was design/mockups/agreed/phone/settings-app-icon-sheet.html. */
+/** Settings · choose an app icon. */
 export const SettingsAppIconSheet: Story = {
   name: "Choose an app icon",
   ...screen(screenSettingsAppIconSheet),
   parameters: { mockup: { issue: 177 } },
 }
-/** Settings · app icon entry. Was design/mockups/agreed/phone/settings-general.html. */
+/** Settings · app icon entry. */
 export const SettingsGeneral: Story = {
   name: "App icon entry",
   ...screen(screenSettingsGeneral),
   parameters: { mockup: { issue: 177 } },
 }
-/** Settings · appearance and units. Was design/mockups/agreed/phone/settings-preferences.html. */
+/** Settings · appearance and units. */
 export const SettingsPreferences: Story = {
   name: "Appearance and units",
   ...screen(screenSettingsPreferences),
