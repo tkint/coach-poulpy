@@ -2,8 +2,9 @@
 // A sheet: rises from the bottom on a phone-width page, a dialog in the middle on a wide one.
 // A native <dialog>, so focus, Escape and the backdrop behave as the browser expects.
 import { ref, watch, onMounted } from 'vue'
+import { uiText } from '../i18n'
 
-defineProps<{ title: string; closeLabel: string }>()
+defineProps<{ title: string; closeLabel?: string }>()
 const open = defineModel<boolean>('open', { default: false })
 const dialog = ref<HTMLDialogElement>()
 
@@ -23,6 +24,6 @@ watch(open, sync)
       <slot />
       <div v-if="$slots.actions" class="cp-modal-action"><slot name="actions" /></div>
     </div>
-    <form method="dialog" class="cp-modal-backdrop"><button>{{ closeLabel }}</button></form>
+    <form method="dialog" class="cp-modal-backdrop"><button>{{ closeLabel ?? uiText('ui.close') }}</button></form>
   </dialog>
 </template>

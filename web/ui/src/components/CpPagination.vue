@@ -4,8 +4,9 @@
 // current page, with a gap (…) between.
 import { ChevronLeft, ChevronRight } from '@lucide/vue'
 import { computed } from 'vue'
+import { uiText } from '../i18n'
 
-const props = defineProps<{ pages: number; previousLabel: string; nextLabel: string; navLabel: string }>()
+const props = defineProps<{ pages: number; previousLabel?: string; nextLabel?: string; navLabel?: string }>()
 const page = defineModel<number>('page', { default: 1 })
 const items = computed<(number | 'gap')[]>(() => {
   const shown = [...new Set([1, page.value - 1, page.value, page.value + 1, props.pages])].filter((n) => n >= 1 && n <= props.pages).sort((a, b) => a - b)
@@ -15,9 +16,9 @@ const go = (to: number) => (page.value = Math.min(Math.max(to, 1), props.pages))
 </script>
 
 <template>
-  <nav :aria-label="navLabel" data-component="pagination">
+  <nav :aria-label="navLabel ?? uiText('ui.pages')" data-component="pagination">
     <div class="cp-join">
-      <button type="button" class="cp-join-item cp-btn cp-btn-sm" :disabled="page <= 1" :aria-label="previousLabel" @click="go(page - 1)">
+      <button type="button" class="cp-join-item cp-btn cp-btn-sm" :disabled="page <= 1" :aria-label="previousLabel ?? uiText('ui.previousPage')" @click="go(page - 1)">
         <ChevronLeft class="size-4 shrink-0" aria-hidden="true" />
       </button>
       <template v-for="(n, i) in items" :key="n === 'gap' ? `gap${i}` : n">
@@ -31,7 +32,7 @@ const go = (to: number) => (page.value = Math.min(Math.max(to, 1), props.pages))
           @click="go(n)"
         >{{ n }}</button>
       </template>
-      <button type="button" class="cp-join-item cp-btn cp-btn-sm" :disabled="page >= pages" :aria-label="nextLabel" @click="go(page + 1)">
+      <button type="button" class="cp-join-item cp-btn cp-btn-sm" :disabled="page >= pages" :aria-label="nextLabel ?? uiText('ui.nextPage')" @click="go(page + 1)">
         <ChevronRight class="size-4 shrink-0" aria-hidden="true" />
       </button>
     </div>

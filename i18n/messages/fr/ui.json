@@ -1,0 +1,17 @@
+{
+  "ui": {
+    "close": "Fermer",
+    "toggleNavigation": "Afficher ou masquer la navigation",
+    "closeNavigation": "Fermer la navigation",
+    "previousPage": "Page précédente",
+    "nextPage": "Page suivante",
+    "pages": "Pages",
+    "showPassword": "Afficher le mot de passe",
+    "hidePassword": "Masquer le mot de passe",
+    "clearSearch": "Effacer la recherche",
+    "front": "Face",
+    "back": "Dos",
+    "less": "Moins",
+    "more": "Plus"
+  }
+}
