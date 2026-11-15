@@ -1,3 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- The loader finds its frames by name (PoulpyLoader.kt), so the resource shrinker must keep them. -->
-<resources xmlns:tools="http://schemas.android.com/tools" tools:keep="@drawable/poulpy_loader_*" />

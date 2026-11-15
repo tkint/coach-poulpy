@@ -70,8 +70,10 @@ const rounded = (shape, { convex, concave }, size) => grow(shrink(concave ? shri
 // neighbours touch at the base, loose on the arm springs of motion.mjs, and only his outline drawn, in the brand blue and
 // see-through. There are two versions, and each is FRAMES pictures of one cycle: how the tentacles hang at that moment, relative
 // to his body. The apps turn the body themselves (LoaderSwing) and show the picture of the moment, so his turning stays smooth.
-//   swing      he swings from -180 to 180 degrees and back, once per cycle
-//   clockwise  he only turns clockwise, once per cycle
+//   swing      he swings from -180 to 180 degrees and back, once per cycle: all the frames in one picture, FRAMES in columns by rows
+//   clockwise  he only turns clockwise, steadily, so his tentacles trail the same way all the time: one picture
+// Both are in design/poulpy-3d/loader, the one place every platform reads them from (the website, Android's assets and iOS's bundle).
+const LOADER_DIR = 'design/poulpy-3d/loader'
 const LOADER = { frames: 48, side: 240, columns: 8, line: 0.045, arms: [0.44, 0.3, 0.5], softness: 2.4, versions: ['swing', 'clockwise'] }
 // Where a point of an arm goes when its bends are `angles` (each relative to the one before), as armSkin shares it out.
 const spin = ([x, y, z], [cx, cz], a) => { const dx = x - cx, dz = z - cz, c = Math.cos(a), s = Math.sin(a); return [cx + dx * c + dz * s, y, cz - dx * s + dz * c] }
@@ -118,20 +120,14 @@ function loaderPoses(version) {
 const LOADER_SECONDS = 3.6
 {
   const model = buildPoulpy3d({ mood: 'happy', tone: tokens.mood.happy, colours, armSize: LOADER.arms }), N = LOADER.side
-  for (const version of LOADER.versions) {
-    const rows = Math.ceil(LOADER.frames / LOADER.columns), sheet = new Uint8Array(LOADER.columns * N * rows * N * 4)
-    loaderPoses(version).forEach((pose, i) => {
-      const pixels = loaderFrame(model, pose), number = String(i).padStart(2, '0'), asset = `Poulpy${pascal(`loader_${version}_${number}`)}`
-      const png = pngOf(pixels, N, N)
-      files[`${ANDROID}/poulpy_loader_${version}_${number}.png`] = png
-      files[`${IOS}/${asset}.imageset/${asset}.png`] = png
-      files[`${IOS}/${asset}.imageset/Contents.json`] = JSON.stringify({ images: [{ filename: `${asset}.png`, idiom: 'universal', scale: '3x' }], info: { author: 'xcode', version: 1 } }, null, 2) + '\n'
-      const left = (i % LOADER.columns) * N, top = Math.floor(i / LOADER.columns) * N
-      for (let y = 0; y < N; y++) sheet.set(pixels.subarray(y * N * 4, (y + 1) * N * 4), ((top + y) * LOADER.columns * N + left) * 4)
-    })
-    // The website's and the mockups' copy: all the frames in one picture, FRAMES columns by rows.
-    files[`${OUT}/loader_${version}.png`] = pngOf(sheet, LOADER.columns * N, rows * N)
-  }
+  const rows = Math.ceil(LOADER.frames / LOADER.columns), sheet = new Uint8Array(LOADER.columns * N * rows * N * 4)
+  loaderPoses('swing').forEach((pose, i) => {
+    const pixels = loaderFrame(model, pose), left = (i % LOADER.columns) * N, top = Math.floor(i / LOADER.columns) * N
+    for (let y = 0; y < N; y++) sheet.set(pixels.subarray(y * N * 4, (y + 1) * N * 4), ((top + y) * LOADER.columns * N + left) * 4)
+  })
+  files[`${LOADER_DIR}/swing.png`] = pngOf(sheet, LOADER.columns * N, rows * N)
+  // Turning steadily he holds one shape: the tentacles trail as far as the springs let them, and stay there.
+  files[`${LOADER_DIR}/clockwise.png`] = pngOf(loaderFrame(model, loaderPoses('clockwise')[0]), N, N)
 }
 
 // The app icons: the same pictures, fitted into the icon's square on the dark theme's background, as the owner asked.
@@ -226,7 +222,7 @@ for (const [path, content] of Object.entries(files)) {
 }
 // A picture of something that is gone must go too.
 const list = (dir, keep) => (existsSync(join(root, dir)) ? readdirSync(join(root, dir)).filter(keep) : [])
-for (const [dir, keep] of [[OUT, (f) => f.endsWith('.png')], [ANDROID, (f) => /^poulpy_(mood|pose|loader)_.*\.png$/.test(f)], [IOS, (f) => /^Poulpy(Mood|Pose|Loader).*\.imageset$/.test(f)]]) {
+for (const [dir, keep] of [[OUT, (f) => f.endsWith('.png')], [LOADER_DIR, (f) => f.endsWith('.png')], [ANDROID, (f) => /^poulpy_(mood|pose|loader)_.*\.png$/.test(f)], [IOS, (f) => /^Poulpy(Mood|Pose|Loader).*\.imageset$/.test(f)]]) {
   for (const f of list(dir, keep)) if (!Object.keys(files).some((p) => p.startsWith(`${dir}/${f}`))) { console.error(`Not generated any more: ${dir}/${f}`); stale++ }
 }
 if (stale) { console.error('Run `node design/build-poulpy-pictures.mjs` and commit the result.'); process.exit(1) }

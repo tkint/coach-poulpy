@@ -299,8 +299,8 @@
   }
 
   /* The loading indicator: Poulpy's outline seen from underneath, drawn frame by frame from the 3D model (design/build-poulpy-pictures.mjs):
-     one picture of 48 frames, 8 across and 6 down, played in turn while the whole thing swings half a turn one way and then half a
-     turn the other (LoaderSwing in the shared code). `--clockwise` only turns clockwise, with its own frames. With reduced motion
+     one picture of 48 frames, 8 across and 6 down (design/poulpy-3d/loader/swing.png), played in turn while the whole thing swings half a turn one way and then half a
+     turn the other (LoaderSwing in the shared code). `--clockwise` only turns clockwise, holding one picture. With reduced motion
      a cycle is slow. */
   .cp-poulpy-loader {
     --cp-poulpy-loader-period: 3.6s;
@@ -321,7 +321,9 @@
       cp-poulpy-frames-across calc(var(--cp-poulpy-loader-period) / 6) steps(8) infinite,
       cp-poulpy-frames-down var(--cp-poulpy-loader-period) steps(6) infinite;
   }
+  /* Turning clockwise he holds one shape, so it is one picture, not frames. */
   .cp-poulpy-loader--clockwise { animation-name: cp-poulpy-turn; animation-timing-function: linear; }
+  .cp-poulpy-loader--clockwise .cp-poulpy-loader-frames { background-size: 100% 100%; animation: none; }
   @keyframes cp-poulpy-swing {
     from, to { transform: rotate(-180deg); }
     50% { transform: rotate(180deg); }

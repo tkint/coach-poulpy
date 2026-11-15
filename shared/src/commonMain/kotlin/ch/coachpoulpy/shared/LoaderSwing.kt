@@ -4,20 +4,21 @@ import kotlin.math.abs
 
 /**
  * How the loader moves. Poulpy, seen from underneath, is the 3D model's outline with loose tentacles, drawn frame by frame
- * (design/build-poulpy-pictures.mjs): [FRAMES] pictures of one cycle, each showing how his tentacles hang at that moment relative
- * to his body. The apps show the picture of the moment, [frame], and turn it by [degrees] (or [clockwiseDegrees]), so his turning
- * stays smooth. One cycle takes [MILLIS], or [REDUCED_MILLIS] when the phone asks for less motion.
- *
- * There are two versions. He swings from -[DEGREES] to +[DEGREES] and back, easing in and out of each end (half a turn one way,
- * then half a turn the other way), or he only turns clockwise, one full turn per cycle. Each has its own frames.
+ * (design/build-poulpy-pictures.mjs, into design/poulpy-3d/loader). He swings from -[DEGREES] to +[DEGREES] and back, easing in and
+ * out of each end (half a turn one way, then half a turn the other way): his tentacles trail behind, so there are [FRAMES] pictures
+ * of one cycle, in one sheet [COLUMNS] across, each showing how they hang at that moment relative to his body. The apps show the
+ * picture of the moment, [frame], and turn it by [degrees], so his turning stays smooth. The other version only turns clockwise, one
+ * full turn per cycle ([clockwiseDegrees]); his tentacles trail the same all the time, so it is one picture. One cycle takes
+ * [MILLIS], or [REDUCED_MILLIS] when the phone asks for less motion.
  */
 object LoaderSwing {
     const val DEGREES = 180f
     const val MILLIS = 3_600L
     const val REDUCED_MILLIS = 12_000L
 
-    /** How many pictures one cycle is, in each version. */
+    /** How many pictures the swing's cycle is, and how many of them are in each row of its sheet. */
     const val FRAMES = 48
+    const val COLUMNS = 8
 
     /** The swing, from -[DEGREES] to [DEGREES], [elapsedMillis] after the loader appeared; the turn is clockwise when it grows. */
     fun degrees(elapsedMillis: Long, periodMillis: Long = MILLIS): Float = DEGREES * (2f * ease(way(phase(elapsedMillis, periodMillis))) - 1f)
