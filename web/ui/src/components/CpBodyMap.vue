@@ -112,22 +112,22 @@ const showLegend = computed(() => !!props.legend && props.legend !== 'hidden' &&
           <template v-for="(path, i) in view.paths" :key="i">
             <path v-if="path.outline" class="cp-body-outline" :d="path.d" />
             <path
-              v-else-if="path.pickable"
-              class="cp-body-part cp-body-part-pick"
+              v-else
+              class="cp-body-part"
+              :class="{ 'cp-body-part-pick': path.pickable }"
               :data-heat="path.heat"
               :data-pain="path.pain"
               :d="path.d"
-              role="button"
-              tabindex="0"
-              :aria-label="path.label"
-              :aria-pressed="path.heat !== undefined || path.pain !== undefined"
-              @click="pick(path.area!, path.side!)"
-              @keydown.enter.prevent="pick(path.area!, path.side!)"
-              @keydown.space.prevent="pick(path.area!, path.side!)"
+              :role="path.pickable ? 'button' : undefined"
+              :tabindex="path.pickable ? 0 : undefined"
+              :aria-label="path.pickable ? path.label : undefined"
+              :aria-pressed="path.pickable ? path.heat !== undefined || path.pain !== undefined : undefined"
+              @click="path.pickable && pick(path.area!, path.side!)"
+              @keydown.enter.prevent="path.pickable && pick(path.area!, path.side!)"
+              @keydown.space.prevent="path.pickable && pick(path.area!, path.side!)"
             >
               <title>{{ path.label }}</title>
             </path>
-            <path v-else class="cp-body-part" :data-heat="path.heat" :data-pain="path.pain" :d="path.d"><title>{{ path.label }}</title></path>
           </template>
         </svg>
         <figcaption>{{ view.caption }}</figcaption>
