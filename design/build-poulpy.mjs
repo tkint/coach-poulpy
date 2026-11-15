@@ -1,11 +1,12 @@
-// Generates Poulpy's drawings (mood portraits and poses) for Android and iOS.
+// Generates Poulpy's loader and app icons for Android and iOS. His moods and poses are pictures of the 3D model,
+// made by build-poulpy-pictures.mjs.
 //   node design/build-poulpy.mjs          write the generated files
 //   node design/build-poulpy.mjs --check  fail if a generated file is out of date (used by CI)
 //
-// The drawing code is ported from the Poulpy brand book (web/storybook/stories/brand/brand-book/) so the apps draw exactly the
+// The drawing code (also what the alternate app icons are made from) is ported from the Poulpy brand book (web/storybook/stories/brand/brand-book/) so the apps draw exactly the
 // validated sketches. Each drawing is built as SVG, normalised (shapes become paths, text
 // becomes stroked lettering), then written as:
-//   design/poulpy/<name>.svg                                    reference copy
+//   design/poulpy/<name>.svg                                    reference copy (the loader)
 //   app-android/src/main/res/drawable/poulpy_<name>.xml         Android vector drawable
 //   app-ios/CoachPoulpy/Assets.xcassets/Poulpy/<Name>.imageset  iOS vector asset
 // and the app icon, from the brand book's icon (happy blue Poulpy on Foam), as:
@@ -157,12 +158,10 @@ const LOADER_PATH = 'M73.7 36.4A26.4 26.4 0 1 1 126.3 36.4A26.4 26.4 0 0 1 122.4
   'M36.4 126.3A26.4 26.4 0 1 1 36.4 73.7A26.4 26.4 0 0 1 52.3 77.6M36.4 73.7A26.4 26.4 0 1 1 73.7 36.4A26.4 26.4 0 0 1 82.1 50.4'
 const loader = (width) => s(LOADER_PATH, width, BLUE)
 
-// Portraits and poses share one frame, so they line up when swapped. The loader is square.
-const POSE_VIEW = { x: -24, y: -36, width: 248, height: 226 }
+// The moods and poses are pictures of the 3D model now (build-poulpy-pictures.mjs); what is drawn here is the loader
+// and the app icons. The loader is square.
 const LOADER_VIEW = { x: 0, y: 0, width: 200, height: 200 }
 const DRAWINGS = [
-  ...Object.keys(MOODS).map((mood) => ({ name: `mood_${snake(mood)}`, svg: portrait(mood), view: POSE_VIEW })),
-  ...Object.entries(POSES).map(([pose, draw]) => ({ name: `pose_${snake(pose)}`, svg: draw(), view: POSE_VIEW })),
   { name: 'loader', svg: loader(7), view: LOADER_VIEW },
   { name: 'loader_small', svg: loader(10), view: LOADER_VIEW },
 ]
@@ -222,7 +221,6 @@ const alternateIcon = (bg, art) => `<rect x="0" y="0" width="200" height="200" f
 const monoFace = (face) => face.replace(/<circle[^>]*fill="#fff"[^>]*\/>/g, '').replace(/<ellipse[^>]*opacity="[^"]*"[^>]*\/>/g, '').replaceAll(INK, '#000')
 const monochromeOf = (face) => `<path d="${silhouette()}" fill="#000" opacity=".5"/>${monoFace(face)}`
 
-function snake(name) { return name.replace(/[A-Z]/g, (c) => '_' + c.toLowerCase()) }
 function pascalOf(name) { return name.split('_').map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join('') }
 
 // ---------------------------------------------------------------------------

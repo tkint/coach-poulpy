@@ -50,9 +50,11 @@ node design/build-poulpy.mjs
 
 | Generated file | Used by |
 | --- | --- |
-| `design/poulpy/*.svg` | Reference copies, to look at or reuse on the web |
-| `app-android/src/main/res/drawable/poulpy_*.xml` | Android vector drawables (`R.drawable.poulpy_pose_champion`) |
-| `app-ios/CoachPoulpy/Assets.xcassets/Poulpy/*.imageset` | iOS vector assets (`Image("PoulpyPoseChampion")`) |
+| `design/poulpy/*.svg` | Reference copies of the loader and the app icons |
+| `app-android/src/main/res/drawable/poulpy_loader*.xml` | The loader as Android vector drawables |
+| `app-ios/CoachPoulpy/Assets.xcassets/Poulpy/PoulpyLoader*.imageset` | The loader as iOS vector assets |
+| `app-android/src/main/res/drawable-nodpi/poulpy_*.png` | His moods and poses as Android pictures (`R.drawable.poulpy_pose_champion`), from `build-poulpy-pictures.mjs` |
+| `app-ios/CoachPoulpy/Assets.xcassets/Poulpy/Poulpy{Mood,Pose}*.imageset` | His moods and poses as iOS 3x pictures (`Image("PoulpyPoseChampion")`), from `build-poulpy-pictures.mjs` |
 | `app-android/src/main/res/drawable/ic_launcher_*.xml`, `mipmap-anydpi-v26/ic_launcher.xml` | The Android launcher icon: an adaptive icon with a themed (monochrome) layer |
 | `app-ios/CoachPoulpy/Assets.xcassets/AppIcon.appiconset` | The iOS app icon: 1024 px PNGs for light, dark and tinted |
 | `ic_launcher_<id>_*.xml`, `mipmap-anydpi-v26/ic_launcher_<id>.xml`, `AppIcon<Id>.appiconset` | The alternate icons Settings › App icon offers (`proud`, `annoyed`, `grumpy`, `champion`, `cocky`), built the same way |
