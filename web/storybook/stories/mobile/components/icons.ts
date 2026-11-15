@@ -1,16 +1,9 @@
-import { ChevronRight, Contrast, Download, Gauge, Info, Mail, MoveVertical, UserRound, Weight } from '@lucide/vue'
+import { icons } from '@lucide/vue'
+import type { Component } from 'vue'
 
-/** The Lucide icons the mobile components draw by name, keyed by their Lucide name (ADR 0024). */
-export const mobileIcons = {
-  'chevron-right': ChevronRight,
-  contrast: Contrast,
-  download: Download,
-  gauge: Gauge,
-  info: Info,
-  mail: Mail,
-  'move-vertical': MoveVertical,
-  weight: Weight,
-  'user-round': UserRound,
+/** A Lucide icon by its Lucide name, such as `chevron-right` (ADR 0024). */
+export const lucideIcon = (name: string): Component => {
+  const icon = (icons as Record<string, Component>)[name.replace(/(^|-)(\w)/g, (_, __, c: string) => c.toUpperCase())]
+  if (!icon) throw new Error(`No Lucide icon called "${name}"`)
+  return icon
 }
-
-export type MobileIconName = keyof typeof mobileIcons

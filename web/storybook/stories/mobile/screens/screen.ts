@@ -14,7 +14,7 @@ const withTheme = (html: string) => html.replace(/(src="iframe\.html\?[^"]*)"/g,
 
 const markupOf = (html: string) => withTheme(html).replace(/(?:\.\.\/)+poulpy\/(\w+)\.svg/g, (path, name: string) => (poulpyDrawings as Record<string, string>)[name] ?? path)
 
-const Screen = defineComponent({
+export const Screen = defineComponent({
   props: { markup: { type: String, required: true }, reorder: Boolean },
   setup(props) {
     const host = ref<HTMLElement>()

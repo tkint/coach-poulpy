@@ -11,9 +11,9 @@
       <button class="clear-button" type="button" aria-label="Clear search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
     </label>
     <div class="chip-row" role="group" aria-label="Format">
-      <button class="filter-chip" data-component="filter-chip" type="button" aria-pressed="true">All</button>
-      <button class="filter-chip" data-component="filter-chip" type="button" aria-pressed="false">Circuit</button>
-      <button class="filter-chip" data-component="filter-chip" type="button" aria-pressed="false">Sets</button>
+      <MobileFilterChip aria-pressed="true">All</MobileFilterChip>
+      <MobileFilterChip aria-pressed="false">Circuit</MobileFilterChip>
+      <MobileFilterChip aria-pressed="false">Sets</MobileFilterChip>
     </div>
   </div>
 
@@ -27,7 +27,7 @@
       <img src="../../../poulpy/mood_happy.svg" alt="Poulpy, happy">
       <h2>Nothing for “zumba”</h2>
       <p>Try another word, or look in the exercises to build one.</p>
-      <button class="primary-button" data-component="primary-button" type="button">Clear search and filters</button>
+      <MobileButton>Clear search and filters</MobileButton>
     </li>
   </ul>
 

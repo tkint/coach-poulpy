@@ -82,7 +82,8 @@
 
 .cp-screen .primary-button,
 .cp-screen .tonal-button,
-.cp-screen .secondary-button {
+.cp-screen .secondary-button,
+.cp-screen .grumpy-button {
   height: 44px;
   border-radius: var(--cp-radius-pill);
   font-weight: 800;
@@ -94,9 +95,21 @@
 }
 .cp-screen .primary-button { background: var(--cp-primary); color: var(--cp-on-primary); }
 .cp-screen .secondary-button { border: 2px solid var(--cp-outline); color: var(--cp-on-surface); }
+/* Grumpy is only ever the catch-up action. */
+.cp-screen .grumpy-button { background: var(--cp-grumpy); color: var(--cp-on-grumpy); }
 .cp-screen .primary-button--large,
 .cp-screen .secondary-button--large,
-.cp-screen .tonal-button--large { height: 52px; font-size: 17px; }
+.cp-screen .tonal-button--large,
+.cp-screen .grumpy-button--large { height: 52px; font-size: 17px; }
+/* MobileButton's content keeps clear of the rounded ends. The room is on the content, not the button, so buttons that
+   share a row (flex: 1) keep the widths the screens give them. */
+.cp-screen .button-content { display: inline-flex; align-items: center; gap: var(--cp-space-sm); padding: 0 var(--cp-space-xl); white-space: nowrap; }
+.cp-screen .small-button .button-content { padding: 0; }
+/* A disabled button turns grey, so it never reads as one to tap. */
+.cp-screen :is(.primary-button, .secondary-button, .tonal-button, .grumpy-button, .small-button):is([disabled], [aria-disabled="true"]) { background: var(--cp-surface-variant); border-color: var(--cp-surface-variant); color: var(--cp-on-surface-variant); cursor: default; }
+/* A button on its own line fills it, as the screens draw it. */
+.cp-screen :is(.primary-button, .secondary-button, .tonal-button, .grumpy-button).button--block { width: 100%; }
+.cp-screen :is(.primary-button, .secondary-button, .tonal-button, .grumpy-button, .small-button, .icon-button, .filter-chip):focus-visible { outline: 3px solid var(--cp-primary); outline-offset: 2px; }
 
 .cp-screen .action-bar {
   padding: var(--cp-space-md) var(--cp-space-lg) 34px;
