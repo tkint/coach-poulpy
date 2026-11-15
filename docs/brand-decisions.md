@@ -127,4 +127,3 @@ Until step 3 the apps and the website keep the 2D drawings, and `design/build-po
 **Why:** the owner asked for it once the model could turn and jump, and chose pictures everywhere with live 3D on key screens over a 3D renderer on every screen, which would weigh on the apps for little gain on small portraits.
 
 **Still open:** which screens are the key ones, and how the pictures are rendered so that every machine writes the same files.
-
