@@ -25,7 +25,7 @@ const signIn = (password: string, failed: boolean): Story => ({
         <CpTextField v-model="email" label="Email" type="email" autocomplete="username" :invalid="failed" />
         <CpPasswordField v-model="password" label="Password" :invalid="failed" autocomplete="current-password" />
         <CpErrorNote v-if="failed">Wrong email or password.</CpErrorNote>
-        <CpButton type="submit" class="w-full">Sign in</CpButton>
+        <CpButton size="xl" type="submit" class="w-full">Sign in</CpButton>
       </form></SitePage>`,
   }),
 })

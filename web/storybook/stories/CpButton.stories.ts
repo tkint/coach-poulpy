@@ -1,12 +1,14 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
-import { expect, userEvent, within } from 'storybook/test'
-import { CpButton } from '@coach-poulpy/ui'
+import { expect, within } from 'storybook/test'
+import { CpButton, cpSizes } from '@coach-poulpy/ui'
+import { controlPx, sizeArgType } from './sizes'
 import doc from './CpButton.md?raw'
 
 const meta = {
   title: 'Web/Components/Actions/Button',
   parameters: { docs: { description: { component: doc } } },
   component: CpButton,
+  argTypes: { size: sizeArgType },
   render: (args) => ({ components: { CpButton }, setup: () => ({ args }), template: '<CpButton v-bind="args">Start the session</CpButton>' }),
 } satisfies Meta<typeof CpButton>
 export default meta
@@ -20,7 +22,6 @@ export const Ghost: Story = { args: { variant: 'ghost', size: 'xl' } }
 export const Grumpy: Story = { args: { variant: 'grumpy', size: 'xl' } }
 /** Crimson, for a deletion that cannot be undone. */
 export const Danger: Story = { args: { variant: 'danger', size: 'xl' } }
-export const Medium: Story = { args: { variant: 'primary', size: 'md' } }
 /** Waiting for an answer: the label stays in place under a spinner, and clicks are ignored. */
 export const Loading: Story = {
   args: { variant: 'primary', size: 'md', loading: true },
@@ -28,5 +29,24 @@ export const Loading: Story = {
     const button = within(canvasElement).getByRole('button')
     expect(button).toBeDisabled()
     expect(button).toHaveAttribute('aria-busy', 'true')
+  },
+}
+
+/** Every step of the size scale, xs to xxl; md is what a button without a `size` draws. */
+export const Sizes: Story = {
+  render: (args) => ({
+    components: { CpButton },
+    setup: () => ({ args, cpSizes }),
+    template: '<div class="flex flex-col items-start gap-4 pb-8"><div v-for="s in cpSizes" :key="s" class="flex items-center gap-4"><span class="cp-type-label w-10">{{ s }}</span><CpButton v-bind="args" :size="s">Start</CpButton></div></div>',
+  }),
+  play: async ({ canvasElement }) => {
+    const heights = within(canvasElement).getAllByRole('button').map((button) => Math.round(button.getBoundingClientRect().height))
+    expect(heights).toEqual(Object.values(controlPx))
+  },
+}
+/** Without a `size` a button is md. */
+export const DefaultsToMedium: Story = {
+  play: async ({ canvasElement }) => {
+    expect(Math.round(within(canvasElement).getByRole('button').getBoundingClientRect().height)).toBe(controlPx.md)
   },
 }

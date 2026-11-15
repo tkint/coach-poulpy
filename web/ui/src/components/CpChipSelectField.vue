@@ -3,12 +3,15 @@
 // narrows the list its panel shows while it is used. A picked value is checked in the list; clicking it again, its
 // badge's cross or Backspace in an empty field takes it out. Escape or a click elsewhere closes the panel. Enter
 // picks the first match, so it never sends the form. `ariaLabel` names a field whose label is written beside it
-// (a heading above, as the equipment's Required and Optional). The field's own label points at the input by `for`:
+// (a heading above, as the equipment's Required and Optional). `size` is the websites' scale (md when none is given);
+// it is the field's least height, which grows as badges wrap. The field's own label points at the input by `for`:
 // without it the browser hands a click on a badge to the first button inside, the first badge's cross.
 import { computed, onBeforeUnmount, onMounted, ref, useId } from 'vue'
 import { Check, ChevronDown, X } from '@lucide/vue'
+import CpIcon from './CpIcon.vue'
+import { buttonSize, controlChevron, inputSize, type CpSize } from './sizes'
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   label?: string
   ariaLabel?: string
   hint?: string
@@ -18,7 +21,8 @@ const props = defineProps<{
   noneLabel: string
   /** Names a badge's cross, such as "Remove Standing". */
   removeLabel: (text: string) => string
-}>()
+  size?: CpSize
+}>(), { size: 'md' })
 const picked = defineModel<string[]>({ default: () => [] })
 const needle = ref('')
 const open = ref(false)
@@ -65,11 +69,11 @@ onBeforeUnmount(() => {
 <template>
   <div ref="root" class="cp-fieldset relative" data-component="chip-select-field">
     <label v-if="label" class="cp-type-label" :for="id">{{ label }}</label>
-    <label :for="id" class="cp-input relative h-auto min-h-10 w-full flex-wrap gap-1 py-1 pe-9">
+    <label :for="id" class="cp-input relative h-auto min-h-10 w-full flex-wrap gap-1 py-1 pe-9" :class="inputSize[size]">
       <span v-for="value in picked" :key="value" class="cp-badge cp-badge-neutral cp-badge-soft gap-1 whitespace-nowrap">
         {{ textOf(value) }}
-        <button type="button" class="cp-btn cp-btn-circle cp-btn-ghost cp-btn-xs" :aria-label="removeLabel(textOf(value))" @click.prevent="remove(value)">
-          <X class="size-3 shrink-0" aria-hidden="true" />
+        <button type="button" class="cp-btn cp-btn-circle cp-btn-ghost" :class="buttonSize.xs" :aria-label="removeLabel(textOf(value))" @click.prevent="remove(value)">
+          <CpIcon :icon="X" size="xs" />
         </button>
       </span>
       <input
@@ -91,7 +95,7 @@ onBeforeUnmount(() => {
         @keydown.enter.prevent="pickFirst"
         @keydown.backspace="backspace"
       />
-      <ChevronDown class="pointer-events-none absolute end-3 top-1/2 size-4 -translate-y-1/2" aria-hidden="true" />
+      <CpIcon :icon="ChevronDown" :size="controlChevron[size]" class="pointer-events-none absolute end-3 top-1/2 -translate-y-1/2" />
     </label>
     <ul
       v-show="open"
@@ -110,7 +114,7 @@ onBeforeUnmount(() => {
           @click="toggle(option.value)"
         >
           {{ option.text }}
-          <Check v-if="picked.includes(option.value)" class="ms-auto size-4 shrink-0" aria-hidden="true" />
+          <CpIcon v-if="picked.includes(option.value)" :icon="Check" size="sm" class="ms-auto" />
         </button>
       </li>
       <li v-if="!shown.length" class="px-2 py-1 text-sm text-base-content/70">{{ noneLabel }}</li>

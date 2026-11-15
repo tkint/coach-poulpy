@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import CpIcon from './CpIcon.vue'
 // A dialog: a centred box over the page with a title, a line of help, a close button, the content and a row of
 // actions. For a review the person confirms (publishing, retiring). [wide] gives a long table room; [rising] makes
 // it rise from the bottom on a phone-width page, as a CpSheet does.
@@ -30,7 +31,7 @@ watch(open, sync)
           <p v-if="props.description" class="text-sm text-base-content/70">{{ props.description }}</p>
         </div>
         <form method="dialog">
-          <button class="cp-btn cp-btn-ghost cp-btn-square cp-btn-sm" :aria-label="props.closeLabel ?? uiText('ui.close')"><X class="size-5 shrink-0" aria-hidden="true" /></button>
+          <button class="cp-btn cp-btn-ghost cp-btn-square cp-btn-sm" :aria-label="props.closeLabel ?? uiText('ui.close')"><CpIcon :icon="X" /></button>
         </form>
       </div>
       <slot />

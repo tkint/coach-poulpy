@@ -3,3 +3,4 @@
 | Vue | Classes |
 | --- | --- |
 | `<CpPagination>` | `nav` around `div.cp-join` of `cp-join-item cp-btn cp-btn-sm` buttons, `cp-btn-active` and `aria-current="page"` on the current page |
+| `<CpPagination size="sm">` | `cp-btn-sm` on every button; `size` is the websites' scale (xs, sm, md, lg, xl, xxl), md when none is given |

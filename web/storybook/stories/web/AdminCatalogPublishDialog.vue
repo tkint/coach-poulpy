@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { CpIcon } from '@coach-poulpy/ui'
 // CLEANUP: drawn with the classes of the mockup until the batch publication of #389 is built as a Cp component.
 import { CloudUpload, X } from '@lucide/vue'
 </script>
@@ -11,7 +12,7 @@ import { CloudUpload, X } from '@lucide/vue'
           <h2 class="cp-type-headline" id="publish-title">Publish catalog changes</h2>
           <p class="text-sm text-base-content/70">Review the changes before publishing. Phones download the updated catalog the next time they open the app, guests included.</p>
         </div>
-        <button type="button" class="cp-btn cp-btn-ghost cp-btn-square cp-btn-sm" aria-label="Close publication review"><X class="size-4 shrink-0" aria-hidden="true" /></button>
+        <button type="button" class="cp-btn cp-btn-ghost cp-btn-square cp-btn-sm" aria-label="Close publication review"><CpIcon :icon="X" size="sm" /></button>
       </div>
       <div class="overflow-x-auto rounded-box border border-base-300">
         <table class="cp-table bg-base-100">
@@ -86,7 +87,7 @@ import { CloudUpload, X } from '@lucide/vue'
       <p class="text-sm text-base-content/70">Only changed fields are listed. Publishing makes these changes available to everyone on their next app open.</p>
       <div class="flex flex-wrap justify-end gap-2 border-t border-base-300 pt-4">
         <button type="button" class="cp-btn cp-btn-ghost">Cancel</button>
-        <button type="button" class="cp-btn cp-btn-primary gap-2"><CloudUpload class="size-5 shrink-0" aria-hidden="true" />Publish changes</button>
+        <button type="button" class="cp-btn cp-btn-primary gap-2"><CpIcon :icon="CloudUpload" />Publish changes</button>
       </div>
     </div>
     <div class="cp-modal-backdrop"><button type="button" tabindex="-1">Close publication review</button></div>

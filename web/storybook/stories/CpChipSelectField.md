@@ -3,3 +3,4 @@
 | Vue | Classes |
 | --- | --- |
 | `<CpChipSelectField>` | `div.cp-fieldset` around a `label.cp-type-label`, a `label.cp-input` holding `span.cp-badge.cp-badge-neutral.cp-badge-soft` badges (each with a `cp-btn cp-btn-circle cp-btn-ghost cp-btn-xs` cross), the `input[role=combobox]` and a chevron, a `cp-card` `ul[role=listbox]` of option `button`s (as the select field's) and an optional `p.cp-label` hint |
+| `<CpChipSelectField size="lg">` | `cp-input-lg`: the field's least height, which grows as badges wrap; `size` is the websites' scale (xs, sm, md, lg, xl, xxl), md when none is given |

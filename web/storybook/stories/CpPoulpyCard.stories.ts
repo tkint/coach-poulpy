@@ -9,7 +9,7 @@ const meta = {
   render: (args: { title: string; body: string; action?: string }) => ({
     components: { CpPoulpyCard, CpButton },
     setup: () => ({ args }),
-    template: `<CpPoulpyCard :title="args.title">{{ args.body }}<template v-if="args.action" #actions><CpButton>{{ args.action }}</CpButton></template></CpPoulpyCard>`,
+    template: `<CpPoulpyCard :title="args.title">{{ args.body }}<template v-if="args.action" #actions><CpButton size="xl">{{ args.action }}</CpButton></template></CpPoulpyCard>`,
   }),
 } satisfies Meta<typeof CpPoulpyCard>
 export default meta
