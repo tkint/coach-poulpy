@@ -34,7 +34,7 @@ The moves are one file, [`design/poulpy-3d/motion.mjs`](../design/poulpy-3d/moti
 
 ## Little jumps
 
-Poulpy can also jump on the spot. He tucks his head down into his arms, then goes up head first: his arms follow a little, just enough for him to leave the floor. In the air he tilts to one side, the other side at the next jump, and as he lands his head goes a little down into his arms before he stands again.
+Poulpy can also jump on the spot. He tucks his head down into his arms, which widen flat on the floor, then he goes up. His arms are part of him: their base goes up with his head and their tips hang a little lower, the last to leave the floor. In the air he tilts to one side, the other side at the next jump, and as he lands his head goes a little down into his arms before he stands again.
 
 <!-- live: Jumping -->
 
@@ -42,17 +42,19 @@ Poulpy can also jump on the spot. He tucks his head down into his arms, then goe
 
 | Control | What it sets | Design |
 | --- | --- | --- |
-| **Height** | How far his head goes up | 0.36 |
-| **Lift** | How far he leaves the floor: the base of his arms follows his head by this much | 0.10 |
+| **Height** | How far he goes up | 0.34 |
 | **Tuck** | How far his head goes down into his arms before the jump | 0.16 |
 | **Landing** | How far his head goes down into his arms as he lands | 0.10 |
+| **Spread** | How far his arms slide outwards when his head is tucked all the way in | 0.14 |
+| **Hang** | How heavy his arms are, so how low their tips hang in the air | 1 |
 | **Lean** | How far he tilts to the side in the air, in degrees | 7 |
 | **Pause** | Seconds he stands between two jumps, on average | 0.55 |
 | **Soft arms** | How loosely his arms hang and trail, as for the turn | 1 |
 | **Speed** | Plays the whole move faster or slower | 1 |
 
-- **His head leads, his arms follow.** His head is pulled along the jump by a stiff spring and the base of his arms by a softer one, so the arms leave the floor after his head and land after it. In between his head comes a little out of them.
-- **The arms hang, he never raises them.** Up and down, each arm bends at the same three places as when he turns. A spring holds each length level with the one before it, its weight pulls it down and the floor stops it: the tips leave the floor last, hang a little in the air and touch down first. On the side he tilts to, the arms lie flat against the floor.
+- **His head never leaves his arms.** It goes down into them, to tuck and to land, and never up out of them: when he goes up they go with him.
+- **His arms widen as his head comes down.** They stay flat on the floor and slide outwards, as a plush does when it is pressed.
+- **The arms hang, he never raises them.** Up and down, each arm bends at the same three places as when he turns. A spring holds each length level with the one before it, its weight pulls it down and the floor stops it: the tips leave the floor last, hang under him in the air and touch down first. A length may hang nearly straight down when it has to. On the side he tilts to, the arms lie flat against the floor.
 - **His head squashes and stretches.** It widens as it tucks in and as he lands, and thins a little while it moves fast, keeping its volume.
 - **Reduced motion keeps him still**, as for the turn.
 
@@ -62,7 +64,7 @@ The same jump can turn him: each jump takes him one step around, the steps being
 
 <!-- live: JumpingAround -->
 
-**Step** and the two arrows work as for the turn; every other control is the jump's.
+**Step** and the two arrows work as for the turn, and here Step goes up to 720 degrees: at 360 a jump is a whole turn, at 720 two. The steps keep their small differences, so he does not land facing quite the same way each time. Every other control is the jump's.
 
 `JUMP` in `motion.mjs` holds the jump's numbers, next to `TURN`, and `createJump()` runs it live. Given a `stride`, it turns him as `createTurn()` does.
 

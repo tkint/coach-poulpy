@@ -103,10 +103,10 @@ Add a decision here in the same PR as the brand change it explains, newest at th
 
 ## 15. Poulpy jumps, and his tentacles hang
 
-**Accepted, 15 November 2026.** In 3D Poulpy can do little jumps, on the spot or turning a step at each. He tucks his head into his tentacles, goes up head first, and his tentacles follow just enough for him to barely leave the floor; he tilts to one side in the air, and his head goes a little down into his tentacles as he lands. The move and its controls are on the [Poulpy in 3D](./poulpy-3d.md#little-jumps) page.
+**Accepted, 15 November 2026.** In 3D Poulpy can do little jumps, on the spot or turning a step at each. He tucks his head into his tentacles, which widen flat on the floor, then goes up; his tentacles stay joined to his head and their tips hang a little lower, barely off the floor. He tilts to one side in the air, and his head goes a little down into his tentacles as he lands. The move and its controls are on the [Poulpy in 3D](./poulpy-3d.md#little-jumps) page.
 
 This narrows [decision 8](#8-poulpy-never-lifts-his-tentacles) without overturning it: Poulpy still never raises a tentacle himself, as an arm would. In a jump they leave the floor only because he does, hanging soft under him, tips last.
 
-**Why:** the owner asked for the jump and described it. It is kept small so he stays the plush: a hop that barely clears the floor, not a leap.
+**Why:** the owner asked for the jump and described it. The first preview let his head come up out of his tentacles; he corrected it: the head is always joined to them, and they may hang much steeper instead. Turning, one jump may be a whole turn, or two. It is kept small so he stays the plush: a hop that barely clears the floor, not a leap.
 
-**Still open:** the jump's values (how high, how far off the floor, how deep the tuck and the landing, how much tilt, how long between jumps). It runs as a live preview with a control for each, and is written into the glTF files once the owner has settled them.
+**Still open:** the jump's values (how high, how deep the tuck and the landing, how far the tentacles widen and hang, how much tilt, how long between jumps). It runs as a live preview with a control for each, and is written into the glTF files once the owner has settled them.

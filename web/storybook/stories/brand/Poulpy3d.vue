@@ -25,10 +25,11 @@ const softness = shallowRef(1) // how loose his arms are: 1 is the design
 const direction = shallowRef<'clockwise' | 'anticlockwise'>('anticlockwise')
 const step = shallowRef(24) // degrees he turns at each step, on average: 24 is the design
 // The jump's key values, in units (his head's radius is about 1): they start at the design, read from JUMP.
-const height = shallowRef(0) // how far his head goes up
-const lift = shallowRef(0) // how far he leaves the floor
+const height = shallowRef(0) // how far he goes up
 const tuck = shallowRef(0) // how far his head tucks into his arms before the jump
 const landing = shallowRef(0) // how far his head sinks into his arms as he lands
+const spread = shallowRef(0) // how far his arms widen as his head tucks in
+const hang = shallowRef(1) // how heavy his arms hang in the air: 1 is the design
 const lean = shallowRef(0) // degrees he tilts to the side in the air
 const pause = shallowRef(0) // seconds between two jumps, on average
 const failed = shallowRef(false)
@@ -107,8 +108,8 @@ watch([turn, tilt, distance], look)
 watch(softness, (value) => { if (move) move.softness = value })
 const stride = () => (motion === 'jump' ? 0 : (step.value / 24) * (direction.value === 'anticlockwise' ? 1 : -1))
 watch([step, direction], () => { if (move) move.stride = stride() })
-watch([height, lift, tuck, landing, lean, pause], (values) => {
-  if (move && 'height' in move) [move.height, move.lift, move.tuck, move.landing, move.lean, move.pause] = values
+watch([height, tuck, landing, spread, hang, lean, pause], (values) => {
+  if (move && 'height' in move) [move.height, move.tuck, move.landing, move.spread, move.hang, move.lean, move.pause] = values
 })
 
 onMounted(async () => {
@@ -119,7 +120,7 @@ onMounted(async () => {
       const { createJump, createTurn } = await import('../../../../design/poulpy-3d/motion.mjs')
       if (jumping) {
         const jump = createJump({ softness: softness.value, stride: stride() })
-        ;[height.value, lift.value, tuck.value, landing.value, lean.value, pause.value] = [jump.height, jump.lift, jump.tuck, jump.landing, jump.lean, jump.pause]
+        ;[height.value, tuck.value, landing.value, spread.value, lean.value, pause.value] = [jump.height, jump.tuck, jump.landing, jump.spread, jump.lean, jump.pause]
         move = jump
       } else move = createTurn({ softness: softness.value })
     }
@@ -175,13 +176,14 @@ onBeforeUnmount(() => {
       <label class="slider"><span>Tilt</span><input v-model.number="tilt" type="range" min="-89" max="89" step="1" /><output>{{ Math.round(tilt) }}°</output></label>
       <template v-if="jumping">
         <label class="slider"><span>Height</span><input v-model.number="height" type="range" min="0" max="1" step="0.01" /><output>{{ height.toFixed(2) }}</output></label>
-        <label class="slider"><span>Lift</span><input v-model.number="lift" type="range" min="0" max="0.6" step="0.01" /><output>{{ lift.toFixed(2) }}</output></label>
         <label class="slider"><span>Tuck</span><input v-model.number="tuck" type="range" min="0" max="0.5" step="0.01" /><output>{{ tuck.toFixed(2) }}</output></label>
         <label class="slider"><span>Landing</span><input v-model.number="landing" type="range" min="0" max="0.5" step="0.01" /><output>{{ landing.toFixed(2) }}</output></label>
+        <label class="slider"><span>Spread</span><input v-model.number="spread" type="range" min="0" max="0.5" step="0.01" /><output>{{ spread.toFixed(2) }}</output></label>
+        <label class="slider"><span>Hang</span><input v-model.number="hang" type="range" min="0" max="4" step="0.05" /><output>{{ hang.toFixed(2) }}</output></label>
         <label class="slider"><span>Lean</span><input v-model.number="lean" type="range" min="0" max="30" step="0.5" /><output>{{ lean.toFixed(1) }}°</output></label>
         <label class="slider"><span>Pause</span><input v-model.number="pause" type="range" min="0" max="3" step="0.05" /><output>{{ pause.toFixed(2) }} s</output></label>
       </template>
-      <label v-if="motion && turning" class="slider"><span>Step</span><input v-model.number="step" type="range" min="1" max="180" step="1" /><output>{{ step }}°</output></label>
+      <label v-if="motion && turning" class="slider"><span>Step</span><input v-model.number="step" type="range" min="1" :max="jumping ? 720 : 180" step="1" /><output>{{ step }}°</output></label>
       <label v-if="motion" class="slider"><span>Soft arms</span><input v-model.number="softness" type="range" min="0" max="4" step="0.05" /><output>{{ softness.toFixed(2) }}</output></label>
       <label class="slider"><span>Speed</span><input v-model.number="speed" type="range" min="0.1" max="5" step="0.1" @input="spinning = true" /><output>{{ speed.toFixed(1) }}×</output></label>
     </div>

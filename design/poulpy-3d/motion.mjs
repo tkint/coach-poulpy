@@ -32,25 +32,24 @@ export const TURN = {
 }
 
 export const JUMP = {
-  // Before a jump he tucks his head `depth` down into his arms and holds it for `seconds`.
-  tuck: { depth: 0.16, seconds: 0.26 },
-  // Then his head goes up by `height` and comes back in `seconds`. His arms only follow by `lift`, which is
-  // how far he leaves the floor: his head leads and comes a little out of them. One unit is about his head's radius.
-  air: { height: 0.36, lift: 0.1, seconds: 0.46 },
-  // As he lands his head goes `depth` down into his arms for `seconds`, then comes back up.
+  // Before a jump he tucks his head `depth` down into his arms and holds it for `seconds`. His arms stay
+  // flat on the floor and widen: at the full depth each slides `spread` outwards.
+  tuck: { depth: 0.16, seconds: 0.26, spread: 0.14 },
+  // Then he goes up by `height` and comes back in `seconds`. His arms are part of him, so their base goes
+  // up with his head; their tips hang lower. One unit is about his head's radius.
+  air: { height: 0.34, seconds: 0.46 },
+  // As he lands his head goes `depth` down into his arms for `seconds`, and they widen again, then he stands.
   landing: { depth: 0.1, seconds: 0.18 },
   // Seconds he stands still between two jumps, used in turn.
   pauses: [0.6, 0.45, 0.7, 0.45],
   // In the air he tilts `degrees` to one side, the other side at the next jump.
   lean: { degrees: 7, speed: 13, damping: 0.5 },
-  // His head and the base of his arms are pulled to where they should be by springs, as his body is in TURN.
-  // The arms' one is the softer, so they leave the floor after his head and land after it.
+  // His head is pulled to where it should be by a spring, as his body is in TURN.
   head: { speed: 24, damping: 0.55 },
-  body: { speed: 15, damping: 0.6 },
   // Up and down, each arm hangs at the same three places it bends at in TURN: a spring holds each length level
   // with the one before it, softer towards the tip, `weight` pulls it down and the floor stops it.
-  // `limit` is the most one bend may open, in degrees.
-  arms: { speed: [24, 18, 14], damping: [0.5, 0.45, 0.4], weight: 7, limit: 38 },
+  // `limit` is the steepest a length of arm may hang, in degrees: nearly straight down when it has to.
+  arms: { speed: [21, 16, 12.5], damping: [0.5, 0.45, 0.4], weight: 22, limit: 78 },
   // His head stretches by `stretch` of its height when it moves at `atSpeed` units a second, and squashes by
   // `depth` when it is `atDepth` down in his arms. It widens or thins to keep its volume.
   squash: { stretch: 0.05, atSpeed: 2.4, depth: 0.07, atDepth: 0.16, speed: 22, damping: 0.4 },
@@ -154,11 +153,11 @@ export function createTurn({ softness = 1, stride = 1, turn = TURN } = {}) {
  * @param {{ softness?: number, stride?: number, jump?: typeof JUMP, turn?: typeof TURN }} [options] `softness`
  *   scales how loose the arms are, as in createTurn. `stride` makes each jump turn him too, by a step of
  *   `turn` scaled as in createTurn: 0, the default, jumps on the spot.
- * @returns The move. `softness`, `stride` and the jump's key values (`height`, `lift`, `tuck`, `landing`,
- *   `lean` in degrees, `pause` in seconds on average) can be changed at any time. A pose is a turn's pose
- *   and `{ lift, lean, head, droop }`: how far the base of his arms is off the floor, how far he tilts to
- *   his side in radians, how far his head is out of his arms (negative is tucked in), and for each arm how
- *   far each of its three bends hangs, in radians.
+ * @returns The move. `softness`, `stride` and the jump's key values (`height`, `tuck`, `landing`, `spread`,
+ *   `hang`, which scales the arms' weight, `lean` in degrees and `pause` in seconds on average) can be changed
+ *   at any time. A pose is a turn's pose and `{ lift, lean, head, spread, droop }`: how far he is off the
+ *   floor, how far he tilts to his side in radians, how far his head is tucked into his arms (negative, never
+ *   out of them), how far each arm has slid outwards, and for each arm how far each of its three bends hangs, in radians.
  */
 export function createJump({ softness = 1, stride = 0, jump = JUMP, turn = TURN } = {}) {
   const count = SHAPE.arms.count, variety = turn.armVariety.slice(0, count)
@@ -167,8 +166,9 @@ export function createJump({ softness = 1, stride = 0, jump = JUMP, turn = TURN 
   const ends = [...RIG.bends.slice(1), SHAPE.arms.ring + SHAPE.arms.radius[2]], lengths = ends.map((r, i) => r - RIG.bends[i])
   const side = variety.map((_, k) => Math.sin((k * Math.PI * 2) / count)) // how far to his left each arm points
   let hop = 0, phase = 0, clock = 0
-  // Heights are from where he stands: `head` and `body` (the base of his arms), each with its speed.
-  let head = 0, headSpeed = 0, body = 0, bodySpeed = 0, lean = 0, leanSpeed = 0, squash = 0, squashSpeed = 0
+  // Heights are from where he stands. His arms hold on to his head: their base, `body`, goes up with it,
+  // and stays on the floor when it tucks in.
+  let head = 0, headSpeed = 0, body = 0, lean = 0, leanSpeed = 0, squash = 0, squashSpeed = 0
   let base = 0, to = 0, at = 0, speed = 0
   const swing = armSwing(turn)
   // The end of each length of arm: its height in the room, its speed, and where it was asked to be last time.
@@ -189,16 +189,13 @@ export function createJump({ softness = 1, stride = 0, jump = JUMP, turn = TURN 
     if (turning) to = phase === 0 ? base - turn.windUp.degrees * RAD * (stride < 0 ? -1 : 1) : base + turn.steps[hop % turn.steps.length] * RAD * stride
     else to = base
 
-    // His head follows the script, and the base of his arms follows his head, as far as the floor lets it.
+    // His head follows the script and takes the base of his arms up with it.
     headSpeed += spring(jump.head, goal, head, headSpeed) * h
     head += headSpeed * h
     leanSpeed += spring(jump.lean, phase === 1 ? sim.lean * RAD * (hop % 2 ? -1 : 1) : 0, lean, leanSpeed) * h
     lean += leanSpeed * h
-    bodySpeed += spring(jump.body, sim.height > 0 ? (Math.max(head, 0) * sim.lift) / sim.height : 0, body, bodySpeed) * h
-    body += bodySpeed * h
-    // Tilted, the stiff middle of him would dip into the floor: it rides up on its edge instead.
-    const tilt = Math.sin(lean), floor = Math.abs(tilt) * RIG.bends[0]
-    if (body < floor) { body = floor; bodySpeed = Math.max(bodySpeed, 0) }
+    body = Math.max(head, 0)
+    const tilt = Math.sin(lean)
 
     // Turning, when he does, is the same as in createTurn.
     speed += (turn.body.speed * turn.body.speed * (to - at) - 2 * turn.body.damping * turn.body.speed * speed) * h
@@ -206,7 +203,7 @@ export function createJump({ softness = 1, stride = 0, jump = JUMP, turn = TURN 
     swing.tick(h, at, speed, softness)
 
     // Each length of arm hangs from the one before it, and the floor holds it up.
-    const loose = Math.max(softness, 0), limit = Math.sin(jump.arms.limit * RAD)
+    const loose = Math.max(softness, 0), limit = Math.sin(jump.arms.limit * RAD), weight = jump.arms.weight * sim.hang
     variety.forEach((v, k) => {
       let off = 0 // how far the length before this one hangs off the straight arm
       for (let i = 0; i < 3; i++) {
@@ -214,10 +211,10 @@ export function createJump({ softness = 1, stride = 0, jump = JUMP, turn = TURN 
         asked[k][i] = want
         if (loose < 0.02) { high[k][i] = want; rise[k][i] = wantSpeed } else {
           const w = (jump.arms.speed[i] * v) / loose, d = jump.arms.damping[i]
-          rise[k][i] += (w * w * (want - high[k][i]) + 2 * d * w * (wantSpeed - rise[k][i]) - jump.arms.weight) * h
+          rise[k][i] += (w * w * (want - high[k][i]) + 2 * d * w * (wantSpeed - rise[k][i]) - weight) * h
           high[k][i] += rise[k][i] * h
         }
-        // A bend only opens so far, and nothing goes through the floor.
+        // A length only hangs so steep, and nothing goes through the floor.
         const most = lengths[i] * limit, bend = high[k][i] - want
         if (bend > most || bend < -most) { high[k][i] = want + (bend > 0 ? most : -most); rise[k][i] = wantSpeed }
         if (high[k][i] < 0) { high[k][i] = 0; rise[k][i] = Math.max(rise[k][i], 0) }
@@ -246,12 +243,13 @@ export function createJump({ softness = 1, stride = 0, jump = JUMP, turn = TURN 
     softness,
     stride,
     height: jump.air.height,
-    lift: jump.air.lift,
     tuck: jump.tuck.depth,
     landing: jump.landing.depth,
+    spread: jump.tuck.spread,
+    hang: 1,
     lean: jump.lean.degrees,
     pause: rest,
-    pose: () => ({ yaw: at, squash, arms: swing.bends(at), lift: body, lean, head: head - body, droop: droop() }),
+    pose: () => ({ yaw: at, squash, arms: swing.bends(at), lift: body, lean, head: head - body, spread: sim.tuck > 0 ? sim.spread * Math.min(Math.max((body - head) / sim.tuck, 0), 1.5) : 0, droop: droop() }),
     advance(seconds) {
       softness = sim.softness
       stride = sim.stride

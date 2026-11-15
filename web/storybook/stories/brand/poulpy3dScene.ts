@@ -42,9 +42,9 @@ export function createPoulpyScene(canvas: HTMLCanvasElement) {
   let gleam: THREE.BufferGeometry | undefined
   // What moves him: `turn` faces, lifts and tilts him, `squash` holds his head and face, `bends` are the arms'
   // joints and `hinges` the line each one hangs around.
-  let rig: { turn: THREE.Bone; squash: THREE.Group; bends: THREE.Bone[]; hinges: THREE.Vector3[]; skeleton: THREE.Skeleton } | undefined
+  let rig: { turn: THREE.Bone; squash: THREE.Group; bends: THREE.Bone[]; hinges: THREE.Vector3[]; rest: THREE.Vector3[]; skeleton: THREE.Skeleton } | undefined
   let posed: TurnPose | JumpPose | undefined
-  const sideways = new THREE.Quaternion(), hang = new THREE.Quaternion()
+  const back = new THREE.Quaternion(), hang = new THREE.Quaternion(), sideways = new THREE.Vector3()
   let centre = 1
   let view: PoulpyView = { turn: 0, tilt: 17, distance: 9.6 }
 
@@ -77,7 +77,7 @@ export function createPoulpyScene(canvas: HTMLCanvasElement) {
     if (gleam) {
       // gleamPatch works in Poulpy's own space, so the direction is turned back by however far he has turned and tilted.
       const towards = new THREE.Vector3(...(LOOK.gleam.towards as [number, number, number])).normalize().transformDirection(camera.matrixWorld)
-      if (rig) towards.applyQuaternion(sideways.copy(rig.turn.quaternion).invert())
+      if (rig) towards.applyQuaternion(back.copy(rig.turn.quaternion).invert())
       const patch = gleamPatch(towards.toArray())
       gleam.setAttribute('position', new THREE.Float32BufferAttribute(patch.positions, 3))
       gleam.setAttribute('normal', new THREE.Float32BufferAttribute(patch.normals, 3))
@@ -103,7 +103,7 @@ export function createPoulpyScene(canvas: HTMLCanvasElement) {
     poulpy.updateMatrixWorld(true)
     // An arm hangs around the level line across it, which tips its far end down.
     const hinges = joints.map((joint) => new THREE.Vector3(joint.at[2], 0, -joint.at[0]).normalize())
-    rig = { turn, squash, bends, hinges, skeleton: new THREE.Skeleton([turn, ...bends]) }
+    rig = { turn, squash, bends, hinges, rest: bends.map((bone) => bone.position.clone()), skeleton: new THREE.Skeleton([turn, ...bends]) }
     // His head and face ride on `squash`; an arm is skinned, so each of its points follows its bends.
     const place = (part: PoulpyPart, geo: THREE.BufferGeometry, material: THREE.Material) => {
       const arm = /^arm_(\d+)/.exec(part.name)
@@ -154,9 +154,11 @@ export function createPoulpyScene(canvas: HTMLCanvasElement) {
         const arm = Math.floor(i / 3), bend = i % 3
         bone.quaternion.setFromAxisAngle(THREE.Object3D.DEFAULT_UP, next?.arms[arm][bend] ?? 0)
         if (jump) bone.quaternion.multiply(hang.setFromAxisAngle(rig!.hinges[i], jump.droop[arm][bend]))
+        // Each arm slides outwards from where it joins him: its first joint is straight out from his middle.
+        if (bend === 0) bone.position.copy(rig!.rest[i]).addScaledVector(sideways.set(rig!.rest[i].x, 0, rig!.rest[i].z).normalize(), jump?.spread ?? 0)
       })
       // His shadow gathers under him as he leaves the floor.
-      shadow.scale.setScalar(1 - Math.min((jump?.lift ?? 0) * 0.6, 0.3))
+      shadow.scale.setScalar(1 - Math.min((jump?.lift ?? 0) * 0.4, 0.3))
     }
     render()
   }
