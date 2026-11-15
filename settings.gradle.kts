@@ -39,6 +39,7 @@ include(
     ":core:stats",
     ":types:treadmill",
     ":catalog",
+    ":catalog-sample",
     ":data:local",
     ":data:remote",
     ":device:ftms",

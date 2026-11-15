@@ -26,7 +26,7 @@ import kotlinx.serialization.json.Json
 
 /** Steps with a role, repeats and rests, as in an interval run or a circuit. */
 class BuilderStepsTest {
-    private val graph = AppGraph(DriverFactory())
+    private val graph = AppGraph(DriverFactory()).withSampleCatalog()
 
     /**
      * Warm-up: run at 5:30 /km until button press. Work, repeat 4 times: run 400 m at 5:00 /km,

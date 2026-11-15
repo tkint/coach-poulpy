@@ -50,6 +50,7 @@ dependencies {
     runtimeOnly(libs.postgresql)
     runtimeOnly(libs.slf4j.simple)
     testImplementation(kotlin("test"))
+    testImplementation(projects.catalogSample)
     testImplementation(libs.embedded.postgres)
     testImplementation(platform(libs.embedded.postgres.binaries.bom))
 }

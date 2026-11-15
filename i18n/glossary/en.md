@@ -4,7 +4,7 @@ English is the source language: every other language translates from it. This pa
 
 ## How a message is written
 
-- **Ids** are `<group>.<camelCaseName>`: the group is the screen or area (`library.sortPlanned`, `muscle.chest`). Catalog ids are `<slug>.<field>`, with `<slug>.instructions.<n>` for each instruction in order. No id is the prefix of another.
+- **Ids** are `<group>.<camelCaseName>`: the group is the screen or area (`library.sortPlanned`, `muscle.chest`). No id is the prefix of another.
 - **Placeholders** are named ICU arguments. `{name}` is text, `{count, number}` is a whole number. Keep every placeholder of the English, with the same name; move it wherever the sentence needs it.
 - **Plurals** are ICU `plural`: `{count, plural, one {# session} other {# sessions}}`. `#` is the number. Give every form your language needs (French: `one`, `many`, `other`); Fink lists them.
 - **Apostrophes, ellipses and spaces** need no care: type ' and ... as usual. After each merge they become ’ and …, and the non-breaking spaces a language needs are added (French: before `: ; ! ? %` and inside « »).
@@ -18,7 +18,6 @@ Fink groups messages in three namespaces:
 | --- | --- |
 | `app` | The app’s screens |
 | `domain` | Words shown everywhere: muscles, equipment, units, workout types, step roles, Poulpy’s lines |
-| `catalog` | Exercise names, instructions, variation notes and search aliases |
 
 ## Translator notes
 
@@ -76,11 +75,3 @@ Messages not listed here mean what their English says.
 | `unit.*` | Unit formats. `unit.minutesSeconds` and `unit.hoursMinutes`: the second argument is already two digits (“1 h 05”). |
 | `workout.deleteTitle` | `{name}` is the workout’s name, chosen by the person. |
 | `poulpy.*` | Poulpy, the octopus mascot, speaking in the first person. He lights one of his eight tentacles per finished session; eight make a full octopus. He is warm and never guilt-trips. His voice is described on the [brand](../../docs/brand.md) page. |
-
-### catalog
-
-| Id | Note |
-| --- | --- |
-| `<slug>.aliases` | Other names people might search for, comma-separated, never shown. Optional per language: add the words people really type, not a translation of the English list. |
-| `<slug>.variationNote` | How this variation differs from its neighbours, shown under the name. |
-| `<slug>.instructions.<n>` | One step of how to do the exercise, in order, addressed to the person. |

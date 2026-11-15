@@ -7,12 +7,12 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
 /**
- * The exercise catalog. The app ships [bundled] as the starting copy and keeps each
- * exercise's newest revision in its database; the server publishes newer revisions
- * of single exercises (ADR 0030). The catalog as a whole has no version.
+ * The exercise catalog. The server database holds it and publishes revisions of single
+ * exercises; a phone keeps each exercise's newest revision in its own database (ADR 0030,
+ * ADR 0033). The catalog as a whole has no version, and no copy ships with the apps.
  *
- * [revisions] holds the revision of an exercise the bundled file numbers above 1; any
- * other exercise is [revisionOf] 1.
+ * [revisions] holds the revision of an exercise numbered above 1; any other exercise is
+ * [revisionOf] 1.
  *
  * [variationGroups] are the catalog's variations: each group lists slugs of the same
  * movement from easiest to hardest, and an exercise belongs to at most one group.
@@ -61,7 +61,7 @@ class Catalog(
         return if (listed.any { it.slug != slug }) listed else emptyList()
     }
 
-    /** The revision of the exercise [slug] this catalog holds: 1 unless the bundled file numbers it higher. */
+    /** The revision of the exercise [slug] this catalog holds: 1 unless [revisions] numbers it higher. */
     fun revisionOf(slug: ExerciseSlug): Int = revisions[slug] ?: 1
 
     fun toJson(): String = json.encodeToString(CatalogFile.serializer(), CatalogFile(exercises, variationGroups))
@@ -74,8 +74,6 @@ class Catalog(
             val revisions = json.decodeFromString(CatalogRevisions.serializer(), text).exercises.associate { it.slug to it.revision }
             return Catalog(file.exercises, file.variations, revisions)
         }
-
-        val bundled: Catalog by lazy { fromJson(BUNDLED_EXERCISES_JSON) }
     }
 }
 
@@ -85,7 +83,7 @@ private class CatalogFile(
     val variations: List<List<ExerciseSlug>> = emptyList(),
 )
 
-/** Only the revision each exercise of the file carries, which [Exercise] doesn't hold: 1 when absent. */
+/** Only the revision each exercise of the JSON carries, which [Exercise] doesn't hold: 1 when absent. */
 @Serializable
 private class CatalogRevisions(val exercises: List<ExerciseRevision>)
 

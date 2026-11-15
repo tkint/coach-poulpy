@@ -101,7 +101,7 @@ class LocalStoreTest {
         val store = LocalStore(DriverFactory())
         assertEquals(null, store.catalogCursor())
         store.applyCatalogRevisions(listOf(CatalogRevision(exercise("squat"), 1)))
-        assertEquals(null, store.catalogCursor(), "the bundled catalog has no cursor")
+        assertEquals(null, store.catalogCursor(), "a store that never updated has no cursor")
         store.applyCatalogRevisions(listOf(CatalogRevision(exercise("lunge"), 1)), cursor = "3")
         store.applyCatalogRevisions(emptyList())
         assertEquals("3", store.catalogCursor(), "an update with no cursor leaves the last one")

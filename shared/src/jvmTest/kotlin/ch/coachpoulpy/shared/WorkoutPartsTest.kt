@@ -31,7 +31,7 @@ import kotlinx.coroutines.withTimeout
 
 /** The workout page and the player say which part the user is in, in both formats. */
 class WorkoutPartsTest {
-    private val graph = AppGraph(DriverFactory())
+    private val graph = AppGraph(DriverFactory()).withSampleCatalog()
     private val clock = object : Clock {
         var now = Instant.fromEpochSeconds(1_700_000_000)
         override fun now() = now

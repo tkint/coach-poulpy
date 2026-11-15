@@ -47,7 +47,7 @@ class StatusTest {
     private val noMailAccounts = Accounts(test.database, noMail, "https://app.example.com", test.passwords, test.clock)
     private val noMailResets = PasswordResets(test.database, noMail, "https://app.example.com", test.signIns, test.passwords, test.clock)
     private val noMailHttp = app(
-        "0.7.0", test.catalog, test.database, noMailAccounts, test.signIns, noMailResets, test.accountDeletion, test.sync, test.audit,
+        "0.7.0", test.database, noMailAccounts, test.signIns, noMailResets, test.accountDeletion, test.sync, test.audit,
         settings = test.settings, mailer = noMail,
     )
     private val adminToken: String
@@ -101,7 +101,7 @@ class StatusTest {
     @Test
     fun thePublicStatusSaysDownWhileTheDatabaseDoesNotAnswer() {
         val http = app(
-            "0.7.0", test.catalog, test.database, test.accounts, test.signIns, test.passwordResets, test.accountDeletion, test.sync, test.audit,
+            "0.7.0", test.database, test.accounts, test.signIns, test.passwordResets, test.accountDeletion, test.sync, test.audit,
             databaseAnswers = { false },
         )
         val response = call(http, "/api/v1/status", token = null)

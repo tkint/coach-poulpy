@@ -1,6 +1,5 @@
 package ch.coachpoulpy.server
 
-import ch.coachpoulpy.catalog.Catalog
 import ch.coachpoulpy.server.accounts.AccountDeletion
 import ch.coachpoulpy.server.accounts.Accounts
 import ch.coachpoulpy.server.accounts.PasswordResets
@@ -79,7 +78,6 @@ fun websiteCors(origin: String) = ServerFilters.Cors(
  */
 fun app(
     version: String,
-    catalog: Catalog,
     database: Database,
     accounts: Accounts,
     signIns: SignIns,
@@ -96,7 +94,7 @@ fun app(
     "/health" bind GET to {
         if (databaseAnswers()) Response(OK).body("ok $version") else Response(SERVICE_UNAVAILABLE).body("database unavailable")
     },
-    authenticate(mapOf(SignIns.ACCESS_PREFIX to signIns.authenticator), cookies).then(api(version, catalog, accounts, signIns, passwordResets, accountDeletion, sync, database, audit, cookies, events, settings, mailer, databaseAnswers)),
+    authenticate(mapOf(SignIns.ACCESS_PREFIX to signIns.authenticator), cookies).then(api(version, accounts, signIns, passwordResets, accountDeletion, sync, database, audit, cookies, events, settings, mailer, databaseAnswers)),
 )) }
 
 fun main() {
@@ -123,9 +121,8 @@ fun main() {
         val email = requireNotNull(EmailAddress.parseOrNull(setting.trim())) { "ADMIN_EMAIL is not an email address" }
         if (promoteFirstAdmin(database, events, email)) println("$email is now an admin")
     }
-    // The first start fills the catalog from the bundled one (#337, ADR 0026); from then on the admin publishes it.
-    if (ServerCatalog(database, Catalog.bundled).seed()) println("The catalog starts from the bundled exercises")
-    val http = app(version, Catalog.bundled, database, accounts, signIns, passwordResets, accountDeletion, audit = audit, websiteOrigin = origin, events = events, settings = settings, mailer = mailer)
+    // The catalog lives in the database: the admin edits and publishes it (ADR 0033), and nothing seeds it.
+    val http = app(version, database, accounts, signIns, passwordResets, accountDeletion, audit = audit, websiteOrigin = origin, events = events, settings = settings, mailer = mailer)
     // Jetty, for the server-sent events SunHttp can't hold open (#319).
     PolyHandler(http, sse = confirmationEvents(accounts)).asServer(Jetty(port)).start()
     println("Coach Poulpy server $version listening on http://localhost:$port")

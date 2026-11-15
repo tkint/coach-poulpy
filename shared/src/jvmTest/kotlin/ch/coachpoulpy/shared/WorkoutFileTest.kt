@@ -36,7 +36,7 @@ import kotlinx.coroutines.Dispatchers
 
 /** A workout leaves as a `.poulpyworkout` file and comes back as a copy, or is refused with nothing saved. */
 class WorkoutFileTest {
-    private val graph = AppGraph(DriverFactory())
+    private val graph = AppGraph(DriverFactory()).withSampleCatalog()
     private val catalog = graph.catalog
 
     private fun exercise(id: String, slug: String, target: Target, side: Side = Side.BOTH) = Step.ExerciseStep(

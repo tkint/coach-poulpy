@@ -33,6 +33,9 @@ kotlin {
             implementation(projects.export.fit)
             implementation(libs.kotlinx.coroutines.core)
         }
+        commonTest.dependencies {
+            implementation(projects.catalogSample)
+        }
         jvmTest.dependencies {
             implementation(libs.kotlinx.coroutines.test)
             implementation(libs.ktor.client.mock)

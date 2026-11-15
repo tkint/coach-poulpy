@@ -99,7 +99,7 @@ flowchart TD
     shared["shared<br/>view models · iOS framework"]
     model["core/model<br/>domain types"]
     engine["core/engine<br/>timeline · Session"]
-    catalog["catalog<br/>bundled exercises"]
+    catalog["catalog<br/>exercise rules"]
     local["data/local<br/>SQLite · repositories"]
     remote["data/remote<br/>account API over HTTP"]
     ftms["device/ftms<br/>FTMS decoding"]
