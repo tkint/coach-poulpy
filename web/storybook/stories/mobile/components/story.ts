@@ -17,12 +17,14 @@ const attributes = (args: Args, skip: string[]) =>
 
 /**
  * The render of a mobile component's story: the component drawn the way the screens draw it (screens.css in a shadow
- * root), with its args as attributes and `label` as its content. It redraws when a control changes.
+ * root), in a `wrapper` styled by `frame`. Its args are its attributes, except the `content` one (`label` unless
+ * told otherwise; `''` for none), which goes between its tags. It redraws when a control changes.
  */
 export const renderComponent =
-  (tag: string, frame = 'width: 390px; padding: 16px; display: flex; gap: 8px; align-items: center;') =>
+  (tag: string, frame = 'width: 390px; padding: 16px; display: flex; gap: 8px; align-items: center;', { wrapper = 'div', content = 'label' } = {}) =>
   (args: Args) => {
-    const content = typeof args.label === 'string' ? args.label : ''
-    const element = content ? `<${tag}${attributes(args, ['label'])}>${content}</${tag}>` : `<${tag}${attributes(args, ['label'])} />`
-    return h(Screen, { key: JSON.stringify(args), markup: `<div style="${frame}">${element}</div>` })
+    const text = content && typeof args[content] === 'string' ? (args[content] as string) : ''
+    const skip = text ? [content] : []
+    const element = text ? `<${tag}${attributes(args, skip)}>${text}</${tag}>` : `<${tag}${attributes(args, skip)} />`
+    return h(Screen, { key: JSON.stringify(args), markup: `<${wrapper} style="${frame}">${element}</${wrapper}>` })
   }

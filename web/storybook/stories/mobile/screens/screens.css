@@ -1024,6 +1024,7 @@
 .cp-screen .option-row { min-height: 52px; padding: var(--cp-space-sm) var(--cp-space-lg); display: flex; align-items: center; gap: var(--cp-space-md); font-size: 16px; font-weight: 700; }
 .cp-screen .option-row + .option-row { border-top: 1px solid var(--cp-outline); }
 .cp-screen .option-row > span { flex: 1; }
+.cp-screen .option-row .hint { display: block; font-weight: 600; }
 .cp-screen .option-row input { width: 22px; height: 22px; accent-color: var(--cp-primary); }
 .cp-screen .field-note { font-size: 13px; line-height: 18px; color: var(--cp-on-surface-variant); }
 .cp-screen .line-chart { width: 100%; height: auto; display: block; }
@@ -1129,3 +1130,7 @@
 .cp-screen .help-lines { display: flex; flex-direction: column; gap: 2px; text-align: center; font-size: 14px; line-height: 20px; color: var(--cp-on-surface-variant); }
 .cp-screen .info-card--stack .help-lines { text-align: left; }
 .cp-screen .alt-line { font-size: 15px; line-height: 21px; color: var(--cp-on-surface-variant); text-align: center; margin-top: var(--cp-space-xs); }
+
+/* Badges: the row that sums a workout up (MobileBadge). */
+.cp-screen .badge { height: 30px; padding: 0 var(--cp-space-md) 0 10px; border-radius: var(--cp-radius-pill); background: var(--cp-surface); border: 1px solid var(--cp-outline); color: var(--cp-on-surface); font-size: 13.5px; font-weight: 800; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.cp-screen .badge--format { background: var(--cp-primary-container); border-color: var(--cp-primary-container); color: var(--cp-on-primary-container); }
