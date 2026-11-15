@@ -2,7 +2,7 @@
 <header class="top-bar" style="padding: var(--cp-space-xxxl) var(--cp-space-md) var(--cp-space-sm); justify-content: flex-start; gap: var(--cp-space-xs);">
     <a class="icon-button" href="#" aria-label="Close"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-lucide="x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></a>
     <h1 class="headline" style="flex: 1;">New workout</h1>
-    <a class="small-button" data-component="primary-button" href="#">Save</a>
+    <MobileButton kind="small">Save</MobileButton>
   </header>
 
   <div class="form-body">
@@ -100,13 +100,13 @@
     <div class="field" style="gap: var(--cp-space-sm);">
       <span class="label">Quick picks</span>
       <div class="chip-row chip-row--wrap">
-        <button class="filter-chip filter-chip--small" data-component="filter-chip" type="button" aria-pressed="false">1 km</button>
-        <button class="filter-chip filter-chip--small" data-component="filter-chip" type="button" aria-pressed="true">2 km</button>
-        <button class="filter-chip filter-chip--small" data-component="filter-chip" type="button" aria-pressed="false">5 km</button>
-        <button class="filter-chip filter-chip--small" data-component="filter-chip" type="button" aria-pressed="false">10 km</button>
-        <button class="filter-chip filter-chip--small" data-component="filter-chip" type="button" aria-pressed="false">Half marathon</button>
+        <MobileFilterChip small aria-pressed="false">1 km</MobileFilterChip>
+        <MobileFilterChip small aria-pressed="true">2 km</MobileFilterChip>
+        <MobileFilterChip small aria-pressed="false">5 km</MobileFilterChip>
+        <MobileFilterChip small aria-pressed="false">10 km</MobileFilterChip>
+        <MobileFilterChip small aria-pressed="false">Half marathon</MobileFilterChip>
       </div>
     </div>
-    <a class="primary-button" data-component="primary-button" href="#" style="font-size: 17px;">Done</a>
+    <MobileButton style="font-size: 17px;">Done</MobileButton>
   </section>
 </main>
