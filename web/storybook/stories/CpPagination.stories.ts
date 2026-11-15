@@ -31,3 +31,18 @@ export const LastPage: Story = {
   },
 }
 export const OnlyAFewPages: Story = { args: { pages: 3 } }
+
+// ADR 0031: with no labels passed, the component says its own words in the page's language.
+export const SaysItsOwnWords: Story = {
+  args: { previousLabel: undefined, nextLabel: undefined, navLabel: undefined },
+  play: async ({ canvasElement }) => {
+    expect(within(canvasElement).getByRole('button', { name: 'Previous page' })).toBeDisabled()
+  },
+}
+export const SaysItsOwnWordsInFrench: Story = {
+  args: { previousLabel: undefined, nextLabel: undefined, navLabel: undefined },
+  globals: { locale: 'fr' },
+  play: async ({ canvasElement }) => {
+    expect(within(canvasElement).getByRole('button', { name: 'Page précédente' })).toBeDisabled()
+  },
+}

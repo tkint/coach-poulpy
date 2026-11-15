@@ -5,8 +5,9 @@
 // Render it with `v-if` while a row is picked; it emits `close` once it has closed itself.
 import { X } from '@lucide/vue'
 import { onMounted, ref } from 'vue'
+import { uiText } from '../i18n'
 
-defineProps<{ title: string; closeLabel: string }>()
+defineProps<{ title: string; closeLabel?: string }>()
 defineEmits<{ close: [] }>()
 const dialog = ref<HTMLDialogElement>()
 onMounted(() => dialog.value?.showModal())
@@ -21,12 +22,12 @@ onMounted(() => dialog.value?.showModal())
           <h2 id="side-panel-title" class="cp-type-headline break-all">{{ title }}</h2>
           <slot name="subtitle" />
         </div>
-        <button type="button" class="cp-btn cp-btn-circle cp-btn-ghost cp-btn-sm" :aria-label="closeLabel" @click="dialog?.close()">
+        <button type="button" class="cp-btn cp-btn-circle cp-btn-ghost cp-btn-sm" :aria-label="closeLabel ?? uiText('ui.close')" @click="dialog?.close()">
           <X class="size-5 shrink-0" aria-hidden="true" />
         </button>
       </div>
       <slot />
     </div>
-    <form method="dialog" class="cp-modal-backdrop"><button>{{ closeLabel }}</button></form>
+    <form method="dialog" class="cp-modal-backdrop"><button>{{ closeLabel ?? uiText('ui.close') }}</button></form>
   </dialog>
 </template>
