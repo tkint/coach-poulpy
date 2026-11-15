@@ -1588,9 +1588,6 @@
   .relative {
     position: relative;
   }
-  .static {
-    position: static;
-  }
   .end-3 {
     inset-inline-end: calc(var(--spacing) * 3);
   }
