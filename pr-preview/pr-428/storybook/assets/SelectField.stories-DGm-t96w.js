@@ -1,7 +1,0 @@
-import{n as e}from"./rolldown-runtime-sJBDdmOt.js";import{n as t,t as n}from"./chevron-right-DP3cDGWK.js";var r,i,a,o;function s(){return(s=e((()=>{t(),r={title:`Mobile/Components/Select field`,parameters:{docs:{canvas:{sourceState:`none`},description:{component:`The select field, drawn on the shared tokens with the isolated mobile stylesheet. Its shape and notes are in the design system tables. Light and dark follow the theme toolbar.`}}}},i=(e,t={})=>({render:()=>({components:t,template:`<div class="cp-mobile">${e}</div>`})}),a=i(`<div class="sample">
-  <button type="button" class="box select"><span><span class="label">Experience</span><strong>Getting going</strong></span><ChevronRight :size="20" aria-hidden="true" /></button>
-  <button type="button" class="box select"><span><span class="label">Sex</span><strong class="muted">Not set</strong></span><ChevronRight :size="20" aria-hidden="true" /></button></div>`,{ChevronRight:n}),o=[`Default`],a.parameters={...a.parameters,docs:{...a.parameters?.docs,source:{originalSource:`sample(\`<div class="sample">
-  <button type="button" class="box select"><span><span class="label">Experience</span><strong>Getting going</strong></span><ChevronRight :size="20" aria-hidden="true" /></button>
-  <button type="button" class="box select"><span><span class="label">Sex</span><strong class="muted">Not set</strong></span><ChevronRight :size="20" aria-hidden="true" /></button></div>\`, {
-  ChevronRight
-})`,...a.parameters?.docs?.source}}}})))()}s();export{a as Default,o as __namedExportsOrder,r as default};
