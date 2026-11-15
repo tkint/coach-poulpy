@@ -1,12 +1,14 @@
 package ch.coachpoulpy.server.api
 
-import ch.coachpoulpy.catalog.Catalog
 import ch.coachpoulpy.server.TestServer
 import ch.coachpoulpy.server.sync.Sync
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import org.http4k.core.Method.GET
 import org.http4k.core.Request
+import org.http4k.core.Status.Companion.BAD_REQUEST
 import org.http4k.core.Status.Companion.NO_CONTENT
 import org.http4k.core.Status.Companion.OK
 import org.http4k.core.Status.Companion.UNAUTHORIZED
@@ -30,34 +32,34 @@ class ApiTest {
         val response = server(Request(GET, "/api/v1/openapi.json"))
         assertEquals(OK, response.status)
         val paths = Json.parseToJsonElement(response.bodyString()).jsonObject.getValue("paths").jsonObject
-        for (path in listOf("/api/v1/catalog", "/api/v1/accounts", "/api/v1/accounts/confirm", "/api/v1/me", "/oauth/token", "/oauth/revoke")) {
+        for (path in listOf("/api/v1/catalog/exercises", "/api/v1/accounts", "/api/v1/accounts/confirm", "/api/v1/me", "/oauth/token", "/oauth/revoke")) {
             assertTrue(path in paths, "paths were ${paths.keys}")
         }
     }
 
     @Test
     fun theCatalogNeedsNoAccount() {
-        val response = server(Request(GET, "/api/v1/catalog"))
+        val response = server(Request(GET, "/api/v1/catalog/exercises"))
         assertEquals(OK, response.status)
-        assertEquals(catalog.version, Catalog.fromJson(response.bodyString()).version)
-        assertEquals(catalog.exercises.size, Catalog.fromJson(response.bodyString()).exercises.size)
+        val body = Json.parseToJsonElement(response.bodyString()).jsonObject
+        assertEquals(catalog.exercises.size, body.getValue("exercises").jsonArray.size)
+        assertEquals(catalog.exercises.size.toString(), body.getValue("cursor").jsonPrimitive.content)
     }
 
     @Test
-    fun theCatalogIsSentToAnOlderPhone() {
-        val response = server(Request(GET, "/api/v1/catalog?newerThan=${catalog.version - 1}"))
-        assertEquals(OK, response.status)
+    fun aPhoneThatHasTheLatestCursorGetsNoContent() {
+        val cursor = Json.parseToJsonElement(server(Request(GET, "/api/v1/catalog/exercises")).bodyString()).jsonObject.getValue("cursor").jsonPrimitive.content
+        assertEquals(NO_CONTENT, server(Request(GET, "/api/v1/catalog/exercises?after=$cursor")).status)
     }
 
     @Test
-    fun aPhoneWithThisVersionOrNewerGetsNoContent() {
-        assertEquals(NO_CONTENT, server(Request(GET, "/api/v1/catalog?newerThan=${catalog.version}")).status)
-        assertEquals(NO_CONTENT, server(Request(GET, "/api/v1/catalog?newerThan=${catalog.version + 1}")).status)
+    fun aCursorThatIsNotOneIsRefused() {
+        assertEquals(BAD_REQUEST, server(Request(GET, "/api/v1/catalog/exercises?after=latest")).status)
     }
 
     @Test
     fun anUnknownTokenIsRefusedEvenOnAPublicRoute() {
-        val response = server(Request(GET, "/api/v1/catalog").header("Authorization", "Bearer cp_at_anything"))
+        val response = server(Request(GET, "/api/v1/catalog/exercises").header("Authorization", "Bearer cp_at_anything"))
         assertEquals(UNAUTHORIZED, response.status)
     }
 }

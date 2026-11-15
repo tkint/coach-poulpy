@@ -1,0 +1,31 @@
+-- The catalog changes by exercise revision, not by catalog version (#437, ADR 0030). A published
+-- revision takes the next `seq` of the publication cursor: a position in the stream of published
+-- revisions, taken under the row lock of `catalog_publication`. A draft revision has no `seq`.
+
+ALTER TABLE catalog_exercise_revision ADD COLUMN seq BIGINT;
+
+-- Every revision already published gets a `seq` in publication order: by the version that published it,
+-- then by slug (a slug has one revision per version, so the pair is unique).
+UPDATE catalog_exercise_revision SET seq = (
+    SELECT count(*) FROM catalog_exercise_revision o
+    WHERE o.published_in IS NOT NULL
+        AND (o.published_in < catalog_exercise_revision.published_in
+            OR (o.published_in = catalog_exercise_revision.published_in AND o.slug <= catalog_exercise_revision.slug))
+)
+WHERE published_in IS NOT NULL;
+
+-- A published revision no longer has `published_in`, so the draft is the revision without a `seq`.
+DROP INDEX catalog_exercise_revision_draft;
+CREATE UNIQUE INDEX catalog_exercise_revision_draft ON catalog_exercise_revision (slug) WHERE seq IS NULL;
+CREATE UNIQUE INDEX catalog_exercise_revision_seq ON catalog_exercise_revision (seq);
+
+-- The last `seq` taken. Reserving more under `UPDATE` serialises publications, so `seq` follows commit order.
+CREATE TABLE catalog_publication (
+    id INTEGER PRIMARY KEY CHECK (id = 1),
+    last_seq BIGINT NOT NULL
+);
+
+INSERT INTO catalog_publication (id, last_seq) SELECT 1, coalesce(max(seq), 0) FROM catalog_exercise_revision;
+
+-- CLEANUP: `catalog_version` and `catalog_exercise_revision.published_in` are read by nothing now that
+-- publications are numbered by `seq`; a later migration drops them (ADR 0030, #440).

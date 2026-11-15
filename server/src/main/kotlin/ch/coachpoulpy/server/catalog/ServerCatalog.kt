@@ -12,11 +12,11 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 
-/** What a draft exercise has become since the latest published version; null when it is the same. */
+/** What a draft exercise has become since its latest published revision; null when it is the same. */
 enum class DraftChange(val code: String) { Added("added"), Edited("edited"), Retired("retired"), Offered("offered") }
 
 /**
- * One field an edit changed, from the latest published version ([before]) to the draft ([after]); null where
+ * One field an edit changed, from the latest published revision ([before]) to the draft ([after]); null where
  * the field is absent. [field] is a path into the exercise JSON, one text per language and instruction:
  * `name.fr`, `instructions.1.en`, `variationNote.en`, `aliases.fr`, `muscleGroups`, `equipment`.
  */
@@ -25,27 +25,28 @@ data class FieldChange(val field: String, val before: JsonElement?, val after: J
 /** An edited exercise of the draft, and what changed in it. */
 data class EditedExercise(val exercise: Exercise, val fields: List<FieldChange>)
 
-/** One exercise of the draft as the admin sees it: whether a version already holds it, and what changed since. */
+/** One exercise of the draft as the admin sees it: whether a revision of it is published, and what changed since. */
 data class DraftExercise(val exercise: Exercise, val published: Boolean, val change: DraftChange?)
 
 /** An exercise that can't be published yet, and the shipped languages some of its text lacks. */
 data class MissingText(val exercise: Exercise, val languages: List<String>)
 
 /**
- * What publishing now would do: the draft against [version], the latest published one. [nextVersion]
- * is the number publishing would give. [missing] lists what must be translated first.
+ * What publishing now would do: the draft against each exercise's latest published revision.
+ * [missing] lists what must be translated first.
  */
 data class CatalogChanges(
-    val version: Int,
-    val nextVersion: Int,
     val added: List<Exercise>,
     val edited: List<EditedExercise>,
     val retired: List<Exercise>,
-    /** Retired in the latest version and offered again in the draft. */
+    /** Retired in the latest published revision and offered again in the draft. */
     val offered: List<Exercise>,
     val missing: List<MissingText>,
 ) {
     val isEmpty: Boolean get() = added.isEmpty() && edited.isEmpty() && retired.isEmpty() && offered.isEmpty()
+
+    /** The slugs of every exercise with something to publish. */
+    val pending: List<ExerciseSlug> get() = (added + edited.map { it.exercise } + retired + offered).map { it.slug }
 }
 
 /** What a write to the draft did, or why it was refused. */
@@ -54,19 +55,20 @@ sealed interface DraftResult {
     data object Unknown : DraftResult
     /** Another exercise already has the slug. */
     data object SlugTaken : DraftResult
-    /** The slug of an exercise a version already holds never changes (ADR 0008). */
+    /** The slug of an exercise with a published revision never changes (ADR 0008). */
     data object SlugPublished : DraftResult
     data class Invalid(val reason: String) : DraftResult
 }
 
 /** What publishing did, or why it didn't. */
 sealed interface PublishResult {
-    data class Published(val version: Int) : PublishResult
+    /** The exercises that got a new published revision. */
+    data class Published(val slugs: List<ExerciseSlug>) : PublishResult
     data object NothingChanged : PublishResult
     data class MissingTranslations(val missing: List<MissingText>) : PublishResult
 }
 
-/** [draft]'s change against [published], the same exercise in the latest version, or null when that version lacks it. */
+/** [draft]'s change against [published], the same exercise's latest published revision, or null when it has none. */
 fun changeOf(draft: Exercise, published: Exercise?): DraftChange? = when {
     published == null -> DraftChange.Added
     draft.retired && !published.retired -> DraftChange.Retired
@@ -103,7 +105,7 @@ fun missingLanguages(exercise: Exercise, required: List<String> = ServerCatalog.
 }
 
 /**
- * One exercise as the draft or a version holds it: its place in the catalog, and its variation group and
+ * One exercise as the draft or its latest published revision holds it: its place in the catalog, and its variation group and
  * rank in it (easiest first), null when it has no group.
  */
 private data class CatalogRow(val exercise: Exercise, val position: Int, val group: Int?, val rank: Int?)
@@ -117,22 +119,28 @@ private fun rowsOf(catalog: Catalog): List<CatalogRow> {
     }
 }
 
-/** The catalog document of [version] made of [rows]: the exercises in order and the variation groups they name. */
-private fun catalogOf(version: Int, rows: List<CatalogRow>): Catalog {
+/** The catalog made of [rows]: the exercises in order and the variation groups they name. */
+private fun catalogOf(rows: List<CatalogRow>): Catalog {
     val groups = rows.filter { it.group != null }.groupBy { it.group!! }.toSortedMap().values
         .map { group -> group.sortedBy { it.rank }.map { it.exercise.slug } }
-    return Catalog(version, rows.sortedBy { it.position }.map { it.exercise }, groups)
+    // CLEANUP: the shared Catalog still carries a version nobody reads; the phone clients issue (#438) removes it.
+    return Catalog(0, rows.sortedBy { it.position }.map { it.exercise }, groups)
 }
 
+/** One published revision of an exercise as a phone receives it: its [revision], its [seq] in the publication stream, and its variation group and rank. */
+data class PublishedRevision(val exercise: Exercise, val revision: Int, val seq: Long, val group: Int?, val rank: Int?)
+
+/** What a phone gets for a cursor: the exercises published since it, and the cursor to echo next time. */
+data class CatalogUpdate(val cursor: String, val exercises: List<PublishedRevision>)
+
 /**
- * The exercise catalog on the server (#337, ADR 0026): numbered published versions, and the draft the
- * admin edits. Each exercise is stored on its own as revisions: a publish marks the draft revisions as
- * published in the new version, so it writes only what changed, and version N holds each exercise's
- * latest revision published up to N. The server assembles a version into the document phones store and
- * the app bundles (ADR 0008, ADR 0015); the public catalog route serves the latest.
+ * The exercise catalog on the server (#337, #437, ADR 0030): the exercises' published revisions, and the
+ * draft revisions the admin edits. An exercise's revisions are numbered 1, 2, 3 and a published one never
+ * changes. Publishing gives the draft revision of each named exercise the next number of the publication
+ * cursor (`seq`) and writes nothing else. There is no catalog version: a phone asks for the exercises
+ * published after the cursor it last received ([since]).
  *
- * [bundled] is the catalog this server was built with: it fills the database the first time ([seed]),
- * and a published version always numbers past it, so a phone with a newer app still takes the next one.
+ * [bundled] is the catalog this server was built with: it fills the database the first time ([seed]).
  */
 class ServerCatalog(
     private val database: Database,
@@ -141,39 +149,32 @@ class ServerCatalog(
 ) {
     private val queries get() = database.queries.catalogQueries
 
-    /** The latest version's document, kept once assembled: a version never changes, and every phone launch asks for it. */
-    @Volatile
-    private var served: Pair<Int, String>? = null
-
     /**
-     * Fills an empty catalog from [bundled]: one revision per exercise, published in the bundled version.
-     * Does nothing once a version exists. Returns whether it seeded.
+     * Fills an empty catalog from [bundled]: one revision per exercise, each published under its own
+     * number of the publication cursor. Does nothing once an exercise is stored. Returns whether it seeded.
      */
     fun seed(): Boolean = database.queries.transactionWithResult {
-        if (queries.latestVersion().executeAsOne().latest != null) return@transactionWithResult false
+        queries.ensurePublication()
+        if (queries.revisionCount().executeAsOne() > 0) return@transactionWithResult false
         val now = OffsetDateTime.now(clock)
-        queries.insertVersion(bundled.version, now)
-        rowsOf(bundled).forEach {
-            queries.insertRevision(it.exercise.slug.value, 1, it.position, encode(it.exercise), it.group, it.rank, bundled.version, now)
+        val rows = rowsOf(bundled)
+        val last = queries.reserveSeqs(rows.size.toLong()).executeAsOne()
+        rows.forEachIndexed { index, it ->
+            queries.insertRevision(it.exercise.slug.value, 1, it.position, encode(it.exercise), it.group, it.rank, last - rows.size + 1 + index, now)
         }
         true
     }
 
-    /** The latest published version's number, or null before [seed]. */
-    fun latestVersion(): Int? = queries.latestVersion().executeAsOne().latest
-
-    /** The latest published version as the public route serves it: the bundled JSON format. Null before [seed]. */
-    fun latestDocument(): Pair<Int, String>? {
-        val version = latestVersion() ?: return null
-        served?.takeIf { it.first == version }?.let { return it }
-        return (version to catalogAt(version).toJson()).also { served = it }
+    /** The exercises whose latest published revision came after [after] (all of them without it), or null when there is none. */
+    fun since(after: Long?): CatalogUpdate? = database.queries.transactionWithResult {
+        val rows = queries.publishedAfter(after ?: 0L).executeAsList().map {
+            PublishedRevision(decode(it.content!!), it.revision, it.seq!!, it.variation_group, it.variation_rank)
+        }
+        if (rows.isEmpty()) null else CatalogUpdate(rows.maxOf { it.seq }.toString(), rows)
     }
 
-    /** The latest published version, or null before [seed]. */
-    fun published(): Catalog? = latestVersion()?.let(::catalogAt)
-
-    /** Published version [version], rebuilt from the revisions it holds; null for a version never published. */
-    fun version(version: Int): Catalog? = catalogAt(version).takeIf { it.exercises.isNotEmpty() }
+    /** The latest published revision of each exercise, as a catalog; empty before [seed]. */
+    fun published(): Catalog = catalogOf(publishedRows())
 
     /** The draft, in the catalog's order, retired exercises included. */
     fun draft(): List<DraftExercise> {
@@ -199,7 +200,7 @@ class ServerCatalog(
 
     /**
      * Replaces the exercise [slug] with [exercise], which keeps its retired state ([retire] and [offer] change it).
-     * A different slug in [exercise] renames it, only while no version holds it yet.
+     * A different slug in [exercise] renames it, only while it has no published revision.
      */
     fun edit(slug: ExerciseSlug, exercise: Exercise): DraftResult = database.queries.transactionWithResult {
         val draft = draftRows()
@@ -207,7 +208,7 @@ class ServerCatalog(
         invalidity(exercise)?.let { return@transactionWithResult DraftResult.Invalid(it) }
         val published = published()
         if (exercise.slug != slug) {
-            if (published?.get(slug) != null) return@transactionWithResult DraftResult.SlugPublished
+            if (published[slug] != null) return@transactionWithResult DraftResult.SlugPublished
             if (draft.any { it.exercise.slug == exercise.slug }) return@transactionWithResult DraftResult.SlugTaken
         }
         val edited = exercise.copy(retired = stored.exercise.retired)
@@ -215,7 +216,7 @@ class ServerCatalog(
         DraftResult.Saved(view(edited, published))
     }
 
-    /** Offers a retired exercise again in the draft: the next version lists it for browsing and building again. */
+    /** Offers a retired exercise again in the draft: its next published revision lists it for browsing and building again. */
     fun offer(slug: ExerciseSlug): DraftResult = setRetired(slug, false)
 
     /** Retires the exercise [slug] in the draft: it stays in the catalog, hidden, so workouts that use it still open. */
@@ -231,12 +232,12 @@ class ServerCatalog(
     /**
      * Writes [exercise] as the draft revision of [stored]'s exercise (renamed when its slug differs):
      * changes the draft revision, or starts one after the latest published revision. A draft that comes
-     * back to what the latest version holds is dropped, so publishing writes nothing for it.
+     * back to what the latest published revision holds is dropped, so publishing writes nothing for it.
      */
     private fun save(stored: CatalogRow, exercise: Exercise) {
         val slug = stored.exercise.slug.value
         val now = OffsetDateTime.now(clock)
-        val published = latestVersion()?.let { version -> publishedRows(version).firstOrNull { it.exercise.slug == stored.exercise.slug } }
+        val published = publishedRows().firstOrNull { it.exercise.slug == stored.exercise.slug }
         val row = stored.copy(exercise = exercise)
         val hasDraft = queries.draftRevisions().executeAsList().any { it.slug == slug }
         when {
@@ -249,14 +250,12 @@ class ServerCatalog(
         }
     }
 
-    /** What the draft changes since the latest published version, and what it still lacks to be published. */
+    /** What the draft changes since each exercise's latest published revision, and what it still lacks to be published. */
     fun changes(): CatalogChanges {
-        val published = checkNotNull(published()) { "The catalog isn't seeded" }
+        val published = published()
         val draft = draftExercises()
         val changed = draft.groupBy { changeOf(it, published[it.slug]) }
         return CatalogChanges(
-            version = published.version,
-            nextVersion = maxOf(published.version, bundled.version) + 1,
             added = changed[DraftChange.Added].orEmpty(),
             edited = changed[DraftChange.Edited].orEmpty().map { EditedExercise(it, fieldChanges(published[it.slug]!!, it)) },
             retired = changed[DraftChange.Retired].orEmpty(),
@@ -266,29 +265,30 @@ class ServerCatalog(
     }
 
     /**
-     * Publishes the draft as the next version: its draft revisions become published in it, and the
-     * exercises it didn't touch get no new row. Refused while nothing changed, or while some exercise
-     * lacks a text in one of the shipped [LANGUAGES].
+     * Publishes the draft revisions of [slugs], or of every exercise with something to publish when null:
+     * each gets the next number of the publication cursor, and no other exercise is written. A slug with
+     * nothing to publish is ignored. Refused while nothing is left to publish, or while an exercise being
+     * published lacks a text in one of the shipped [LANGUAGES].
      */
-    fun publish(): PublishResult = database.queries.transactionWithResult {
+    fun publish(slugs: List<ExerciseSlug>? = null): PublishResult = database.queries.transactionWithResult {
         val changes = changes()
-        if (changes.missing.isNotEmpty()) return@transactionWithResult PublishResult.MissingTranslations(changes.missing)
-        if (changes.isEmpty) return@transactionWithResult PublishResult.NothingChanged
-        catalogOf(changes.nextVersion, draftRows()) // checks the catalog's rules before anything is written
-        queries.insertVersion(changes.nextVersion, OffsetDateTime.now(clock))
-        queries.publishDraftRevisions(changes.nextVersion)
-        PublishResult.Published(changes.nextVersion)
+        val chosen = changes.pending.filter { slugs == null || it in slugs }
+        if (chosen.isEmpty()) return@transactionWithResult PublishResult.NothingChanged
+        val missing = changes.missing.filter { it.exercise.slug in chosen }
+        if (missing.isNotEmpty()) return@transactionWithResult PublishResult.MissingTranslations(missing)
+        catalogOf(draftRows()) // checks the catalog's rules before anything is written
+        val last = queries.reserveSeqs(chosen.size.toLong()).executeAsOne()
+        chosen.forEachIndexed { index, slug -> queries.publishDraftRevision(last - chosen.size + 1 + index, slug.value) }
+        PublishResult.Published(chosen)
     }
 
-    private fun publishedRows(version: Int): List<CatalogRow> =
-        queries.versionExercises(version).executeAsList().map { CatalogRow(decode(it.content!!), it.position, it.variation_group, it.variation_rank) }
+    private fun publishedRows(): List<CatalogRow> =
+        queries.publishedExercises().executeAsList().map { CatalogRow(decode(it.content!!), it.position, it.variation_group, it.variation_rank) }
 
-    private fun catalogAt(version: Int): Catalog = catalogOf(version, publishedRows(version))
-
-    /** The draft as the admin edits it: the latest version's exercises, with each draft revision in place of its exercise. */
+    /** The draft as the admin edits it: each exercise's latest published revision, with each draft revision in place of its exercise. */
     private fun draftRows(): List<CatalogRow> {
         val drafts = queries.draftRevisions().executeAsList().map { CatalogRow(decode(it.content!!), it.position, it.variation_group, it.variation_rank) }
-        val bySlug = latestVersion()?.let(::publishedRows).orEmpty().associateBy { it.exercise.slug.value }.toMutableMap()
+        val bySlug = publishedRows().associateBy { it.exercise.slug.value }.toMutableMap()
         drafts.forEach { bySlug.remove(it.exercise.slug.value) }
         return (bySlug.values + drafts).sortedWith(compareBy({ it.position }, { it.exercise.slug.value }))
     }

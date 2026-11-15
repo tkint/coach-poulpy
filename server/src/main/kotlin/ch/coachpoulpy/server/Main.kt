@@ -124,7 +124,7 @@ fun main() {
         if (promoteFirstAdmin(database, events, email)) println("$email is now an admin")
     }
     // The first start fills the catalog from the bundled one (#337, ADR 0026); from then on the admin publishes it.
-    if (ServerCatalog(database, Catalog.bundled).seed()) println("The catalog starts at the bundled version ${Catalog.bundled.version}")
+    if (ServerCatalog(database, Catalog.bundled).seed()) println("The catalog starts from the bundled exercises")
     val http = app(version, Catalog.bundled, database, accounts, signIns, passwordResets, accountDeletion, audit = audit, websiteOrigin = origin, events = events, settings = settings, mailer = mailer)
     // Jetty, for the server-sent events SunHttp can't hold open (#319).
     PolyHandler(http, sse = confirmationEvents(accounts)).asServer(Jetty(port)).start()
