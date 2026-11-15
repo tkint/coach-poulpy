@@ -1,5 +1,0 @@
-import{n as e}from"./rolldown-runtime-sJBDdmOt.js";import{d as t,f as n,l as r,u as i}from"./blocks-DuJnpHm9.js";import{a}from"./chunk-W22LQPXL-DAacIxBz.js";import{i as o,r as s}from"./react-DITjJg24.js";import{n as c,r as l}from"./Brand.stories-CGObfTR9.js";import{n as u,t as d}from"./markdown-pages-B4-JNdKf.js";function f(e){let n={h1:`h1`,...o(),...e.components};return(0,m.jsxs)(m.Fragment,{children:[`
-`,`
-`,(0,m.jsx)(i,{title:`Brand/Poulpy in 3D`}),`
-`,(0,m.jsx)(n.h1,{id:`poulpy-in-3d`,children:`Poulpy in 3D`}),`
-`,h.map((e,n)=>n%2?(0,m.jsx)(t,{of:c[e]},n):(0,m.jsx)(r,{children:e},n))]})}function p(e={}){let{wrapper:t}={...o(),...e.components};return t?(0,m.jsx)(t,{...e,children:(0,m.jsx)(f,{...e})}):f(e)}var m,h;function g(){return(g=e((()=>{m=a(),s(),n(),d(),l(),h=u(`poulpy-3d`).all.split(/<!-- live: (\w+) -->/)})))()}g();export{p as default,h as parts};
