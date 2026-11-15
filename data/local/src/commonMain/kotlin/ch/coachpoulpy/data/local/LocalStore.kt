@@ -35,7 +35,6 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.datetime.LocalDate
-import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 
@@ -43,7 +42,6 @@ import kotlinx.serialization.json.jsonObject
 class LocalStore(driverFactory: DriverFactory, internal val clock: Clock = Clock.System) {
     internal val db = CoachPoulpyDatabase(driverFactory.create())
     internal val json = Json { ignoreUnknownKeys = true }
-    private val slugList = ListSerializer(ExerciseSlug.serializer())
 
     fun saveWorkout(workout: Workout) = db.transaction {
         val base = db.workoutQueries.latestById(workout.id.value).executeAsOneOrNull()?.version?.toInt()
@@ -150,35 +148,45 @@ class LocalStore(driverFactory: DriverFactory, internal val clock: Clock = Clock
         record { BodyMeasurementChange(metric, day, null, clock.now()) }
     }
 
-    fun catalogVersion(): Int? = db.catalogEntryQueries.version().executeAsOneOrNull()?.toInt()
-
     fun catalogExercises(): List<Exercise> =
         db.catalogEntryQueries.all().executeAsList().map { json.decodeFromString(Exercise.serializer(), it) }
 
-    /** The catalog's variation groups, each easiest to hardest, in catalog order. */
+    /** The revision of each exercise the phone has, by slug. */
+    fun catalogRevisions(): Map<ExerciseSlug, Int> =
+        db.catalogEntryQueries.revisions().executeAsList().associate { ExerciseSlug(it.slug) to it.revision.toInt() }
+
+    /** The catalog's variation groups, each easiest to hardest, in group order. */
     fun catalogVariationGroups(): List<List<ExerciseSlug>> =
-        db.catalogEntryQueries.variationGroups().executeAsList().map { json.decodeFromString(slugList, it) }
+        db.catalogEntryQueries.variationMembers().executeAsList()
+            .groupBy { it.variation_group }.values
+            .map { members -> members.map { ExerciseSlug(it.slug) } }
+
+    /** The cursor of the last catalog update from the server, or null before the first one. */
+    fun catalogCursor(): String? = db.catalogEntryQueries.cursor().executeAsOneOrNull()
 
     /**
-     * Stores a whole catalog version. An entry the new version leaves out is kept as
-     * retired rather than deleted, so workouts that use it still open. Variation groups
-     * are replaced by the new version's.
+     * Stores [revisions] and, when given, the new [cursor], all at once: an interrupted update leaves
+     * the old exercises and the old cursor. An exercise is replaced only by a higher revision than the
+     * phone's own; at the same revision only its variation group and rank are refreshed; a lower one is
+     * ignored. An exercise the phone has but [revisions] leaves out stays as it is: nothing is deleted.
+     * Returns how many exercises were replaced or added.
      */
-    fun replaceCatalog(
-        version: Int,
-        exercises: List<Exercise>,
-        variationGroups: List<List<ExerciseSlug>> = emptyList(),
-    ) = db.transaction {
-        val incoming = exercises.map { it.slug }.toSet()
-        val dropped = catalogExercises().filter { it.slug !in incoming }.map { it.copy(retired = true) }
-        (exercises + dropped).forEach {
-            db.catalogEntryQueries.upsert(it.slug.value, json.encodeToString(Exercise.serializer(), it))
+    fun applyCatalogRevisions(revisions: List<CatalogRevision>, cursor: String? = null): Int = db.transactionWithResult {
+        val queries = db.catalogEntryQueries
+        val stored = catalogRevisions()
+        var changed = 0
+        revisions.forEach {
+            val have = stored[it.exercise.slug]
+            when {
+                have == null || it.revision > have -> {
+                    queries.upsert(it.exercise.slug.value, json.encodeToString(Exercise.serializer(), it.exercise), it.revision.toLong(), it.variationGroup?.toLong(), it.variationRank?.toLong())
+                    changed++
+                }
+                it.revision == have -> queries.setVariation(it.variationGroup?.toLong(), it.variationRank?.toLong(), it.exercise.slug.value)
+            }
         }
-        db.catalogEntryQueries.clearVariationGroups()
-        variationGroups.forEachIndexed { position, group ->
-            db.catalogEntryQueries.insertVariationGroup(position.toLong(), json.encodeToString(slugList, group))
-        }
-        db.catalogEntryQueries.setVersion(version.toLong())
+        if (cursor != null) queries.setCursor(cursor)
+        changed
     }
 
     /** [title] and [format] are kept as they were at the start, for the history. */

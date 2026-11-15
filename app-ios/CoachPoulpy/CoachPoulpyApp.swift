@@ -3,13 +3,14 @@ import Shared
 
 @main
 struct CoachPoulpyApp: App {
-    // Built once at launch. Guest mode: everything stays on the phone.
+    // Built once at launch. Guest mode: everything stays on the phone, except the catalog update.
     private let graph: AppGraph
     /// The account, made at launch so that a signed-in phone syncs as soon as the app opens.
     private let account: AccountModel
 
     init() {
         graph = IosAppGraphFactory().create()
+        graph.startCatalogUpdate()
         account = graph.makeAccount()
         PoulpyAppearance.apply()
     }

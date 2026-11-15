@@ -64,7 +64,7 @@ The iOS build runs `./gradlew :shared:embedAndSignAppleFrameworkForXcode` itself
 
 ## The exercise catalog
 
-`catalog/data/exercises.json` holds the structure of the catalog shipped in the app, and `i18n/messages/<locale>/catalog.json` its text, keyed by slug (`goblet-squat.name`, `goblet-squat.instructions.0`). The build merges the two into one document with every text as a map from language to string, and that is what the app embeds ([ADR 0015](docs/adr/0015-catalog-text-lives-in-translation-files.md)). On start, the app copies it into its database when its `version` is higher than the one the phone already has, and every screen reads the catalog from the database.
+`catalog/data/exercises.json` holds the structure of the catalog shipped in the app, and `i18n/messages/<locale>/catalog.json` its text, keyed by slug (`goblet-squat.name`, `goblet-squat.instructions.0`). The build merges the two into one document with every text as a map from language to string, and that is what the app embeds ([ADR 0015](docs/adr/0015-catalog-text-lives-in-translation-files.md)). On start, the app adds to its database the exercises it lacks and replaces those the bundled file numbers at a higher `revision` than the phone's (1 when absent), and every screen reads the catalog from the database.
 
 To change it today, edit the JSON or the text, raise `version` by one and ship a new build. CI fails a pull request that changes the catalog text without raising `version`, as Fink's pull requests do: raise it before merging. Keep every `slug`: workouts point at exercises by slug. To stop offering an exercise, set `"retired": true` rather than deleting it, so workouts that use it still open.
 
@@ -74,7 +74,7 @@ An exercise's `equipment` lists what it needs, each need a list of alternatives:
 
 An exercise's optional `aliases` are other names people search with: one comma-separated message per language (`romanian-deadlift.aliases`), which a language may leave out. The search reads them like names but never shows them, and an alias can't be empty.
 
-Later, an admin menu on the server will publish new versions in the same format, and the app will download them on launch with no account needed (`CatalogRepository.apply`). That is separate from syncing a user's own data, so guests get catalog updates too.
+The admin publishes single exercises on the server, and on launch the app downloads those published since its last update, with no account needed (`CatalogUpdater`, [ADR 0030](docs/adr/0030-the-catalog-changes-by-exercise-revision-not-by-catalog-version.md)). That is separate from syncing a user's own data, so guests get catalog updates too.
 
 ## Installing on family phones
 

@@ -1,0 +1,14 @@
+-- The catalog changes by exercise revision, not by catalog version (ADR 0030). Every exercise a phone
+-- has is revision 1; its variation group and rank are filled from the bundled catalog at the next
+-- launch. The cursor row appears with the first catalog update from the server.
+ALTER TABLE catalog_exercise ADD COLUMN revision INTEGER NOT NULL DEFAULT 1;
+ALTER TABLE catalog_exercise ADD COLUMN variation_group INTEGER;
+ALTER TABLE catalog_exercise ADD COLUMN variation_rank INTEGER;
+
+CREATE TABLE catalog_cursor (
+    id INTEGER NOT NULL PRIMARY KEY CHECK (id = 0),
+    cursor TEXT NOT NULL
+);
+
+-- CLEANUP: catalog_meta and catalog_variation_group are read by nothing now; drop them once no phone
+-- on an older build is left to migrate (#440).

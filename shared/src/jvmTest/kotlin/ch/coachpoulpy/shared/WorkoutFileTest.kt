@@ -135,7 +135,7 @@ class WorkoutFileTest {
             ExerciseSlug("old-move"), LocalizedText(mapOf("en" to "Old move")), movementPattern = MovementPattern.CORE,
             muscleGroups = listOf(MuscleGroup.CORE), measurement = MeasurementMode.REPS, retired = true,
         )
-        val withRetired = Catalog(catalog.version, catalog.exercises + retired, catalog.variationGroups)
+        val withRetired = Catalog(catalog.exercises + retired, catalog.variationGroups)
         val workout = sets().copy(parts = listOf(Part(PartId("one"), PartKind.WORK, listOf(exercise("a", "old-move", Target.Reps(5))))))
         assertNotNull(read(WorkoutFile.export(workout).content, withRetired).workout)
     }
