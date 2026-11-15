@@ -259,7 +259,6 @@
     "changeYes": "Oui",
     "changeNo": "Non",
     "changeNothing": "Rien",
-    "catalogActionPublish": "Publier",
     "catalogActionRetire": "Retirer",
     "publishTitle": "Publier les changements du catalogue",
     "publishIntro": "Relisez les changements avant de publier. Les téléphones téléchargent le catalogue à jour à la prochaine ouverture de l’application, invités compris.",
@@ -291,7 +290,14 @@
     "retireCancel": "Annuler",
     "retireConfirm": "Retirer {count} exercices",
     "retireConfirmOne": "Retirer 1 exercice",
-    "retireFailed": "Certains exercices n’ont pas pu être retirés. Réessayez."
+    "retireFailed": "Certains exercices n’ont pas pu être retirés. Réessayez.",
+    "statusUpToDateTitle": "Tout est publié",
+    "statusUpToDate": "Rien n’attend d’être publié : les téléphones ont chaque exercice dans son état actuel.",
+    "statusPendingTitle": "{count} changements attendent d’être publiés",
+    "statusPendingTitleOne": "1 changement attend d’être publié",
+    "statusPending": "Relisez-les puis publiez : les téléphones les téléchargent à leur prochaine ouverture de l’app.",
+    "statusMissing": "{count} sans traduction complète",
+    "statusReview": "Relire et publier"
   },
   "app": {
     "signInTitle": "Connexion",

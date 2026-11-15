@@ -21,3 +21,12 @@ export const Grumpy: Story = { args: { variant: 'grumpy', size: 'xl' } }
 /** Crimson, for a deletion that cannot be undone. */
 export const Danger: Story = { args: { variant: 'danger', size: 'xl' } }
 export const Medium: Story = { args: { variant: 'primary', size: 'md' } }
+/** Waiting for an answer: the label stays in place under a spinner, and clicks are ignored. */
+export const Loading: Story = {
+  args: { variant: 'primary', size: 'md', loading: true },
+  play: async ({ canvasElement }) => {
+    const button = within(canvasElement).getByRole('button')
+    expect(button).toBeDisabled()
+    expect(button).toHaveAttribute('aria-busy', 'true')
+  },
+}

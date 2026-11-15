@@ -79,7 +79,7 @@ async function sendTest() {
         <CpSuccessNote v-if="saved">{{ t('admin.mailFromSaved') }}</CpSuccessNote>
         <CpErrorNote v-if="saveFailed">{{ t('admin.saveError') }}</CpErrorNote>
         <div class="flex flex-wrap justify-end gap-2">
-          <CpButton type="submit" size="md" :disabled="saving">{{ t('admin.save') }}</CpButton>
+          <CpButton type="submit" size="md" :loading="saving">{{ t('admin.save') }}</CpButton>
         </div>
       </form>
       <CpDivider />
@@ -89,7 +89,7 @@ async function sendTest() {
           <p class="text-sm text-base-content/70">{{ t('admin.testEmailHint', { email: props.email }) }}</p>
         </div>
         <div>
-          <CpButton variant="outline" size="md" :disabled="testing" @click="sendTest">
+          <CpButton variant="outline" size="md" :loading="testing" @click="sendTest">
             <Send class="size-5 shrink-0" aria-hidden="true" />
             {{ t('admin.testEmailSend') }}
           </CpButton>

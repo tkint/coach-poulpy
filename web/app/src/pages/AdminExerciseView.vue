@@ -6,12 +6,13 @@
 // the screen shows at once what a publication would refuse. Saving never needs every language; publishing does.
 import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
 import { GripVertical, Lock, Plus, X } from '@lucide/vue'
-import { CpBadge, CpBodyMap, CpBreadcrumbs, CpButton, CpCard, CpChip, CpChipSelectField, CpErrorNote, CpPoulpyCard, CpSegmentedControl, CpSelectField, CpSuccessNote, CpTextarea, CpTextField } from '@coach-poulpy/ui'
+import { CpBadge, CpBodyMap, CpBreadcrumbs, CpButton, CpCard, CpChip, CpChipSelectField, CpErrorNote, CpPoulpyCard, CpSegmentedControl, CpSelectField, CpTextarea, CpTextField } from '@coach-poulpy/ui'
 import { getCatalogExercise, saveCatalogExercise, type CatalogExercise, type ExerciseJson } from '../session'
 import { domainLabel, domainOptions } from '../catalogText'
 import { groupAreas, groupOfArea, selectableAreas } from '../bodyMap'
 import { navigate, search, withParams } from '../route'
 import { locale, shippedLanguages, t } from '../i18n'
+import { showToast } from '../toast'
 
 const props = defineProps<{ slug?: string }>()
 
@@ -98,7 +99,6 @@ const state = ref<'loading' | 'ready' | 'missing' | 'failed'>('loading')
 const loaded = ref<CatalogExercise>()
 const form = reactive<Form>(fromExercise())
 const saving = ref(false)
-const saved = ref(false)
 const failure = ref<'failed' | 'invalid' | 'slug-taken'>()
 const reason = ref('')
 const isNew = computed(() => props.slug === undefined)
@@ -123,7 +123,6 @@ function apply(found: CatalogExercise | undefined) {
 }
 
 async function load() {
-  saved.value = false
   failure.value = undefined
   slugTouched.value = !isNew.value
   if (props.slug === undefined) {
@@ -225,23 +224,19 @@ const fullBody = computed({
 
 async function save() {
   saving.value = true
-  saved.value = false
   failure.value = undefined
   const answer = await saveCatalogExercise(props.slug, toExercise(form, loaded.value?.exercise))
-  saving.value = false
   if ('saved' in answer) {
-    saved.value = true
-    apply(answer.saved)
-    // A new exercise now has its own address.
-    if (isNew.value) navigate(withParams(`/admin/catalog/${encodeURIComponent(answer.saved.exercise.slug)}`, { lang: language.value }, { lang: shippedLanguages[0] }), 'replace')
+    // Back to the catalog, where the toast says the draft is saved and the list shows what changed. The button
+    // keeps spinning until the screen is gone, so it can't be pressed twice.
+    showToast(t('admin.exerciseSaved'))
+    navigate('/admin/catalog')
     return
   }
+  saving.value = false
   reason.value = answer.reason ?? ''
   failure.value = answer.error === 'slug-taken' ? 'slug-taken' : answer.error === 'invalid-exercise' ? 'invalid' : 'failed'
 }
-
-// Typing again clears what the last save said.
-watch(form, () => (saved.value = false), { deep: true })
 </script>
 
 <template>
@@ -275,13 +270,12 @@ watch(form, () => (saved.value = false), { deep: true })
           <div class="flex flex-wrap items-center gap-2">
             <CpSegmentedControl v-model="shown" :label="t('admin.exerciseLanguage')" :options="languages" />
             <CpButton variant="ghost" size="md" @click="navigate('/admin/catalog')">{{ t('admin.exerciseCancel') }}</CpButton>
-            <CpButton type="submit" form="exercise-form" size="md" :disabled="saving">{{ isNew ? t('admin.exerciseAdd') : t('admin.exerciseSave') }}</CpButton>
+            <CpButton type="submit" form="exercise-form" size="md" :loading="saving">{{ isNew ? t('admin.exerciseAdd') : t('admin.exerciseSave') }}</CpButton>
           </div>
         </div>
         <!-- Always there, hidden while the original shows, so switching language never moves the page. -->
         <p class="text-sm text-base-content/70" :class="{ invisible: !translating }" :aria-hidden="!translating">{{ t('admin.exerciseEditingLanguage', { language: languageName(translating ? language : shippedLanguages[1] ?? language) }) }}</p>
       </div>
-      <CpSuccessNote v-if="saved">{{ t('admin.exerciseSaved') }}</CpSuccessNote>
       <CpErrorNote v-if="failure === 'failed'">{{ t('admin.exerciseSaveFailed') }}</CpErrorNote>
       <CpErrorNote v-if="failure === 'invalid'">{{ t('admin.exerciseInvalid', { reason }) }}</CpErrorNote>
       <CpErrorNote v-if="failure === 'slug-taken'">{{ t('admin.exerciseSlugTakenNote') }}</CpErrorNote>
@@ -445,7 +439,7 @@ watch(form, () => (saved.value = false), { deep: true })
       </form>
       <div class="flex flex-wrap justify-end gap-2 lg:hidden" data-component="form-actions">
         <CpButton variant="ghost" size="md" @click="navigate('/admin/catalog')">{{ t('admin.exerciseCancel') }}</CpButton>
-        <CpButton type="submit" form="exercise-form" size="md" :disabled="saving">{{ isNew ? t('admin.exerciseAdd') : t('admin.exerciseSave') }}</CpButton>
+        <CpButton type="submit" form="exercise-form" size="md" :loading="saving">{{ isNew ? t('admin.exerciseAdd') : t('admin.exerciseSave') }}</CpButton>
       </div>
     </template>
   </main>

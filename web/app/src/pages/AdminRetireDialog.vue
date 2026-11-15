@@ -62,7 +62,7 @@ async function retire() {
     <CpErrorNote v-if="failed">{{ t('admin.retireFailed') }}</CpErrorNote>
     <template #actions>
       <CpButton variant="ghost" size="md" @click="open = false">{{ t('admin.retireCancel') }}</CpButton>
-      <CpButton variant="outline" size="md" :disabled="retiring || rows.length === 0" @click="retire">{{ confirm }}</CpButton>
+      <CpButton variant="outline" size="md" :loading="retiring" :disabled="rows.length === 0" @click="retire">{{ confirm }}</CpButton>
     </template>
   </CpDialog>
 </template>

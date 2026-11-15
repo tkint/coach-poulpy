@@ -259,7 +259,6 @@
     "changeYes": "Yes",
     "changeNo": "No",
     "changeNothing": "Nothing",
-    "catalogActionPublish": "Publish",
     "catalogActionRetire": "Retire",
     "publishTitle": "Publish catalog changes",
     "publishIntro": "Review the changes before publishing. Phones download the updated catalog the next time they open the app, guests included.",
@@ -291,7 +290,14 @@
     "retireCancel": "Cancel",
     "retireConfirm": "Retire {count} exercises",
     "retireConfirmOne": "Retire 1 exercise",
-    "retireFailed": "Some exercises couldn’t be retired. Try again."
+    "retireFailed": "Some exercises couldn’t be retired. Try again.",
+    "statusUpToDateTitle": "Everything is published",
+    "statusUpToDate": "Nothing is awaiting publication: phones have every exercise as it stands.",
+    "statusPendingTitle": "{count} changes await publication",
+    "statusPendingTitleOne": "1 change awaits publication",
+    "statusPending": "Review them, then publish: phones download them the next time they open the app.",
+    "statusMissing": "{count} lack a translation",
+    "statusReview": "Review and publish"
   },
   "app": {
     "signInTitle": "Sign in",

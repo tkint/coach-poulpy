@@ -101,7 +101,7 @@ async function publish() {
     <CpErrorNote v-else-if="failed">{{ t('admin.publishFailed') }}</CpErrorNote>
     <template #actions>
       <CpButton variant="ghost" size="md" @click="open = false">{{ t('admin.publishCancel') }}</CpButton>
-      <CpButton size="md" class="gap-2" :disabled="publishing || blocked || rows.length === 0" @click="publish"><CloudUpload class="size-5 shrink-0" aria-hidden="true" />{{ t('admin.publishConfirm') }}</CpButton>
+      <CpButton size="md" class="gap-2" :loading="publishing" :disabled="blocked || rows.length === 0" @click="publish"><CloudUpload class="size-5 shrink-0" aria-hidden="true" />{{ t('admin.publishConfirm') }}</CpButton>
     </template>
   </CpDialog>
 </template>

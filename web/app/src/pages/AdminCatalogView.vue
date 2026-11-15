@@ -4,8 +4,8 @@
 // actions on several exercises. Content (what changed since the latest version), translations and lifecycle are
 // three separate columns and filters. The table's state lives in the URL (route.ts):
 // /admin/catalog?q=squat&pattern=squat&muscles=glutes,quadriceps&translation=incomplete&sort=-change,name&page=2.
-import { computed, onBeforeUnmount, ref, watch } from 'vue'
-import { ChevronDown, ChevronUp, ChevronsUpDown, EllipsisVertical } from '@lucide/vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { ChevronDown, ChevronUp, ChevronsUpDown, CloudUpload, EllipsisVertical } from '@lucide/vue'
 import { CpBadge, CpButton, CpCard, CpCheckbox, CpChip, CpDropdownMenu, CpErrorNote, CpMultiSelectField, CpPagination, CpPoulpyCard, CpSearchField, CpSelectField, CpTable } from '@coach-poulpy/ui'
 import { getCatalogChanges, getCatalogExercise, listCatalogExercises, type CatalogChanges, type CatalogExercise, type CatalogQuery, type CatalogSort } from '../session'
 import AdminPublishDialog from './AdminPublishDialog.vue'
@@ -183,23 +183,32 @@ const clearSelection = () => {
   picked.value = new Set()
 }
 
-// Publishing and retiring the selection (#389, #390). The changes are asked for once a selection exists, to count what
-// the selection has to publish; the retirement review loads the picked exercises when it is asked for.
+// Publishing and retiring (#389, #390). The status card at the top says what awaits publication and opens the review of
+// all of it; the selection menu retires the picked exercises, whose review loads them when it is asked for.
 const changes = ref<CatalogChanges>()
 const publishOpen = ref(false)
 const retireOpen = ref(false)
 const retireRows = ref<CatalogExercise[]>([])
 const pendingSlugs = computed(() => {
   const all = changes.value
-  return new Set(all ? [...all.added, ...all.edited, ...all.retired, ...all.offered].map((one) => one.slug) : [])
+  return all ? [...all.added, ...all.edited, ...all.retired, ...all.offered].map((one) => one.slug) : []
 })
-const pendingPicked = computed(() => [...picked.value].filter((slug) => pendingSlugs.value.has(slug)))
+/** The counts the status card shows, by kind of change, left out when zero. */
+const pendingKinds = computed(() => {
+  const all = changes.value
+  if (!all) return []
+  return [
+    { label: 'admin.publishCreation', count: all.added.length, tone: 'primary' as const },
+    { label: 'admin.publishEdition', count: all.edited.length, tone: 'neutral' as const },
+    { label: 'admin.publishRetirement', count: all.retired.length, tone: 'outline' as const },
+    { label: 'admin.publishOffered', count: all.offered.length, tone: 'success' as const },
+  ].filter((kind) => kind.count > 0)
+})
+const missingCount = computed(() => changes.value?.missing.length ?? 0)
 const loadChanges = async () => {
   changes.value = await getCatalogChanges()
 }
-watch(selectedCount, (count, before) => {
-  if (count > 0 && before === 0) loadChanges()
-})
+onMounted(loadChanges)
 async function askRetire() {
   const found = await Promise.all([...picked.value].map((slug) => getCatalogExercise(slug)))
   retireRows.value = found.filter((row): row is CatalogExercise => row !== undefined)
@@ -253,6 +262,20 @@ watch(
       <h1 class="cp-type-display">{{ t('admin.catalogTitle') }}</h1>
       <p class="text-base-content/70">{{ t('admin.catalogIntro') }}</p>
     </div>
+    <CpCard
+      v-if="changes"
+      :title="pendingSlugs.length === 0 ? t('admin.statusUpToDateTitle') : pendingSlugs.length === 1 ? t('admin.statusPendingTitleOne') : t('admin.statusPendingTitle', { count: String(pendingSlugs.length) })"
+      :description="pendingSlugs.length === 0 ? t('admin.statusUpToDate') : t('admin.statusPending')"
+      data-component="catalog-status"
+    >
+      <div v-if="pendingSlugs.length > 0" class="flex flex-wrap items-center justify-between gap-3">
+        <div class="flex flex-wrap items-center gap-2">
+          <CpBadge v-for="kind in pendingKinds" :key="kind.label" :tone="kind.tone">{{ t(kind.label) }} · {{ kind.count }}</CpBadge>
+          <CpBadge v-if="missingCount > 0" tone="error">{{ t('admin.statusMissing', { count: String(missingCount) }) }}</CpBadge>
+        </div>
+        <CpButton size="md" class="gap-2" @click="publishOpen = true"><CloudUpload class="size-5 shrink-0" aria-hidden="true" />{{ t('admin.statusReview') }}</CpButton>
+      </div>
+    </CpCard>
     <CpCard>
       <div class="flex flex-wrap items-center gap-2" role="search" :aria-label="t('admin.catalogFiltersLabel')">
         <CpSearchField v-model="draft" compact :label="t('admin.catalogSearchLabel')" :placeholder="t('admin.catalogSearch')" />
@@ -279,10 +302,9 @@ watch(
                     <EllipsisVertical class="size-4" aria-hidden="true" />
                     <span class="cp-badge cp-badge-primary cp-badge-sm absolute -right-2 -top-2 z-10">{{ selectedCount }}</span>
                   </template>
-                  <li><button type="button" :disabled="pendingPicked.length === 0" @click="publishOpen = true">{{ t('admin.catalogActionPublish') }} <span class="cp-badge cp-badge-sm">{{ pendingPicked.length }}</span></button></li>
                   <li><button type="button" @click="askRetire">{{ t('admin.catalogActionRetire') }} <span class="cp-badge cp-badge-sm">{{ selectedCount }}</span></button></li>
                   <li class="my-1 border-t border-base-300" aria-hidden="true"></li>
-                  <li v-if="selectedCount < total"><button type="button" @click="selectAllMatching">{{ t('admin.catalogSelectAllMatching', { count: String(total) }) }}</button></li>
+                  <li><button type="button" :disabled="selectedCount >= total" @click="selectAllMatching">{{ t('admin.catalogSelectAllMatching', { count: String(total) }) }}</button></li>
                   <li><button type="button" @click="clearSelection">{{ t('admin.catalogClearSelection') }}</button></li>
                 </CpDropdownMenu>
                 <CpCheckbox v-else v-model="pageBox" :label="t('admin.catalogSelectPage')" :indeterminate="someOnPage && !allOnPage" />
@@ -327,7 +349,7 @@ watch(
         </div>
       </template>
     </CpCard>
-    <AdminPublishDialog v-if="changes" v-model:open="publishOpen" :changes="changes" :slugs="pendingPicked" @published="afterWrite" />
+    <AdminPublishDialog v-if="changes" v-model:open="publishOpen" :changes="changes" :slugs="pendingSlugs" @published="afterWrite" />
     <AdminRetireDialog v-model:open="retireOpen" :exercises="retireRows" @retired="afterWrite" />
   </main>
 </template>

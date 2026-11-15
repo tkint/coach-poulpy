@@ -4,7 +4,9 @@ import AppPage from './pages/AppPage.vue'
 import ConfirmEmailPage from './pages/ConfirmEmailPage.vue'
 import ResetPasswordPage from './pages/ResetPasswordPage.vue'
 import StatusPage from './pages/StatusPage.vue'
+import { CpToast } from '@coach-poulpy/ui'
 import { locale } from './i18n'
+import { toast } from './toast'
 
 // The web app is everything else: its sign-in first, then the profile. /status says whether Coach Poulpy is up.
 // The account email links, /confirm-email#<token> and /reset-password#<token>, open here when
@@ -22,6 +24,7 @@ document.documentElement.lang = locale
   <ResetPasswordPage v-else-if="page === '/reset-password'" :token="token" />
   <StatusPage v-else-if="page === '/status'" />
   <AppPage v-else />
+  <CpToast v-if="toast">{{ toast }}</CpToast>
 </template>
 
 <style>
