@@ -36,7 +36,7 @@ async function sendResetLink() {
       <CpErrorNote v-if="reset === 'offline'">{{ t('admin.errorOffline') }}</CpErrorNote>
       <p v-else-if="reset === 'done'" role="status">{{ t('app.resetLinkSent') }}</p>
       <div class="cp-card-actions">
-        <CpButton variant="outline" :disabled="reset === 'sending'" @click="sendResetLink">{{ t('app.sendResetLink') }}</CpButton>
+        <CpButton variant="outline" :loading="reset === 'sending'" @click="sendResetLink">{{ t('app.sendResetLink') }}</CpButton>
       </div>
     </CpCard>
     <CpCard :title="t('app.dataTitle')">

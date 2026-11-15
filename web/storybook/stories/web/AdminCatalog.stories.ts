@@ -49,6 +49,8 @@ export const Filtered: Story = {
     showing,
   },
 }
+/** Nothing is pending: the status card says everything is published. */
+export const UpToDate: Story = { args: { rows, showing, pending: 0 } }
 export const LoadError: Story = { args: { rows: [], error: true } }
 
 /** Retiring the three selected exercises asks first. */

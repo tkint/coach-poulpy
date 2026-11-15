@@ -57,6 +57,8 @@ const total = ref(0)
 const state = ref<'loading' | 'ready' | 'failed'>('loading')
 const selected = ref<AdminAccount>()
 const busy = ref(false)
+/** Which button waits for the server, so only that one spins. */
+const working = ref<'toggle' | 'delete'>()
 const deleting = ref(false)
 const typed = ref('')
 
@@ -170,6 +172,7 @@ async function toggle() {
   const account = selected.value
   if (!account) return
   busy.value = true
+  working.value = 'toggle'
   const done = await setAccountDisabled(account.id, !account.disabledAt)
   busy.value = false
   if (done) await load()
@@ -185,6 +188,7 @@ async function remove() {
   const account = selected.value
   if (!account || !confirmed.value) return
   busy.value = true
+  working.value = 'delete'
   const done = await deleteAccount(account.id, typed.value)
   busy.value = false
   deleting.value = false
@@ -268,10 +272,10 @@ async function remove() {
       <template v-else>
         <p v-if="!selected.disabledAt" class="text-sm text-base-content/70">{{ t('admin.disableHint') }}</p>
         <div class="flex flex-wrap gap-2">
-          <CpButton :variant="selected.disabledAt ? 'primary' : 'outline'" size="md" :disabled="busy" @click="toggle">
+          <CpButton :variant="selected.disabledAt ? 'primary' : 'outline'" size="md" :disabled="busy" :loading="busy && working === 'toggle'" @click="toggle">
             {{ selected.disabledAt ? t('admin.enable') : t('admin.disable') }}
           </CpButton>
-          <CpButton variant="danger" size="md" :disabled="busy" @click="askDelete">{{ t('admin.delete') }}</CpButton>
+          <CpButton variant="danger" size="md" :disabled="busy" :loading="busy && working === 'delete'" @click="askDelete">{{ t('admin.delete') }}</CpButton>
         </div>
       </template>
     </CpSidePanel>
@@ -280,7 +284,7 @@ async function remove() {
       <CpTextField v-model="typed" :label="t('admin.deleteConfirmLabel')" autocomplete="off" />
       <template #actions>
         <CpButton variant="outline" size="md" @click="deleting = false">{{ t('admin.deleteCancel') }}</CpButton>
-        <CpButton variant="danger" size="md" :disabled="!confirmed || busy" @click="remove">{{ t('admin.deleteConfirm') }}</CpButton>
+        <CpButton variant="danger" size="md" :disabled="!confirmed || busy" :loading="busy && working === 'delete'" @click="remove">{{ t('admin.deleteConfirm') }}</CpButton>
       </template>
     </CpSheet>
   </main>

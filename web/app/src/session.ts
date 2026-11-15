@@ -288,3 +288,46 @@ export async function changedFields(slug: string): Promise<FieldChange[] | undef
     return undefined
   }
 }
+
+/** An exercise a publication would add, retire or offer again. */
+export type ChangedExercise = { slug: string; name: Record<string, string> }
+/** An edited exercise and the fields its draft changed. */
+export type EditedExercise = { slug: string; name: Record<string, string>; fields: FieldChange[] }
+/** An exercise that lacks a text in some shipped languages, so it can't be published yet. */
+export type MissingText = { slug: string; name: Record<string, string>; languages: string[] }
+/** What publishing would do, per exercise: the draft against each exercise's latest published revision. */
+export type CatalogChanges = { added: ChangedExercise[]; edited: EditedExercise[]; retired: ChangedExercise[]; offered: ChangedExercise[]; missing: MissingText[] }
+
+/** What publishing would change, or nothing when it can't be loaded. */
+export async function getCatalogChanges(): Promise<CatalogChanges | undefined> {
+  try {
+    const response = await authorized('/admin/catalog/changes')
+    return response.ok ? ((await response.json()) as CatalogChanges) : undefined
+  } catch {
+    return undefined
+  }
+}
+
+/** What publishing answered: the exercises that got a new revision, or why not. */
+export type PublishAnswer = { published: string[] } | { error: 'missing-translations' | 'no-changes' | 'failed' }
+
+/** Publishes the draft revision of each of [slugs]; the other exercises are not written. */
+export async function publishCatalog(slugs: string[]): Promise<PublishAnswer> {
+  try {
+    const response = await authorized('/admin/catalog/publish', 'POST', { slugs })
+    if (response.ok) return { published: ((await response.json()) as { slugs: string[] }).slugs }
+    const problem = (await response.json().catch(() => ({}))) as { error?: string }
+    return problem.error === 'missing-translations' || problem.error === 'no-changes' ? { error: problem.error } : { error: 'failed' }
+  } catch {
+    return { error: 'failed' }
+  }
+}
+
+/** Retires the exercise [slug] in the draft; it stays offered until a publication carries it. True when it worked. */
+export async function retireCatalogExercise(slug: string): Promise<boolean> {
+  try {
+    return (await authorized(`/admin/catalog/exercises/${encodeURIComponent(slug)}/retire`, 'POST')).ok
+  } catch {
+    return false
+  }
+}

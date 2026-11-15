@@ -16,6 +16,8 @@ const props = withDefaults(defineProps<{
   translation?: string
   lifecycle?: string
   selection?: number
+  /** What awaits publication: the status card says so, or that everything is published. */
+  pending?: number
   showing?: string
   pages?: number
   error?: boolean
@@ -26,6 +28,7 @@ const props = withDefaults(defineProps<{
   translation: '',
   lifecycle: '',
   selection: 0,
+  pending: 4,
   pages: 4,
 })
 
@@ -64,7 +67,22 @@ const contentTone = { New: 'primary', Edited: 'neutral', 'Offered again': 'succe
           <div><CpButton variant="outline" size="md" class="gap-2"><RefreshCw class="size-5 shrink-0" aria-hidden="true" />Try again</CpButton></div>
         </div>
       </section>
-      <CpCard v-else>
+      <template v-else>
+      <CpCard
+        :title="pending === 0 ? 'Everything is published' : `${pending} changes await publication`"
+        :description="pending === 0 ? 'Nothing is awaiting publication: phones have every exercise as it stands.' : 'Review them, then publish: phones download them the next time they open the app.'"
+      >
+        <div v-if="pending > 0" class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex flex-wrap items-center gap-2">
+            <CpBadge tone="primary">Creation · 1</CpBadge>
+            <CpBadge tone="neutral">Edition · 2</CpBadge>
+            <CpBadge tone="outline">Retirement · 1</CpBadge>
+            <CpBadge tone="error">1 lack a translation</CpBadge>
+          </div>
+          <CpButton size="md" class="gap-2"><CloudUpload class="size-5 shrink-0" aria-hidden="true" />Review and publish</CpButton>
+        </div>
+      </CpCard>
+      <CpCard>
         <div class="flex flex-wrap items-center gap-2" role="search" aria-label="Filter the exercises">
           <CpSearchField v-model="search" compact label="Search exercises by name, slug or alias" :placeholder="placeholder" />
           <CpChip v-model="pending" compact>Pending changes</CpChip>
@@ -87,7 +105,6 @@ const contentTone = { New: 'primary', Edited: 'neutral', 'Offered again': 'succe
                     <EllipsisVertical class="size-4" aria-hidden="true" />
                     <span class="cp-badge cp-badge-primary cp-badge-sm absolute -right-2 -top-2 z-10">{{ selection }}</span>
                   </template>
-                  <li><button type="button">Publish <span class="cp-badge cp-badge-sm">2</span></button></li>
                   <li><button type="button">Retire <span class="cp-badge cp-badge-sm">{{ selection }}</span></button></li>
                   <li class="my-1 border-t border-base-300" aria-hidden="true" />
                   <li><button type="button">Select all</button></li>
@@ -124,6 +141,7 @@ const contentTone = { New: 'primary', Edited: 'neutral', 'Offered again': 'succe
           <CpPagination v-model:page="page" :pages="pages" />
         </div>
       </CpCard>
+      </template>
     </main>
     <slot />
   </AdminShell>
