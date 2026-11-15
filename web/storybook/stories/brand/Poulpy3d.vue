@@ -1,20 +1,21 @@
 <script setup lang="ts">
 // Poulpy in 3D, to turn around: the shape of design/poulpy-3d/model.mjs, drawn by poulpy3dScene.ts.
-// With `moods` the switch picks one of his six moods instead of a side of the plush.
+// With `moods` the switch picks one of his six moods instead of a side of the plush, with `poses` one of his twelve poses.
 // With `motion` he moves himself (design/poulpy-3d/motion.mjs) and the viewer stays put: "turn" is his idle,
 // "jump" his little jumps on the spot and "jump-turn" the same jumps, each turning him a step.
 import { RotateCcw, RotateCw } from '@lucide/vue'
 import { onBeforeUnmount, onMounted, shallowRef, useTemplateRef, watch } from 'vue'
 import type { PoulpyMood, PoulpySide } from '../../../../design/poulpy-3d/model.mjs'
+import type { PoulpyPose } from '../../../../design/poulpy-3d/poses.mjs'
 import type { Jump, Turn } from '../../../../design/poulpy-3d/motion.mjs'
 import type { createPoulpyScene } from './poulpy3dScene'
 
-const { motion, moods } = defineProps<{ motion?: 'turn' | 'jump' | 'jump-turn'; moods?: boolean }>()
+const { motion, moods, poses } = defineProps<{ motion?: 'turn' | 'jump' | 'jump-turn'; moods?: boolean; poses?: boolean }>()
 const jumping = motion === 'jump' || motion === 'jump-turn'
 const turning = motion !== 'jump' // he turns, or without `motion` the viewer walks around him
 
 const canvas = useTemplateRef<HTMLCanvasElement>('canvas')
-const side = shallowRef<PoulpySide | PoulpyMood>(moods ? 'happy' : 'blue')
+const side = shallowRef<PoulpySide | PoulpyMood | PoulpyPose>(poses ? 'cocky' : moods ? 'happy' : 'blue')
 const outline = shallowRef(false)
 const turn = shallowRef(0) // degrees he has turned for the viewer, anticlockwise seen from above; 0 is face on
 const tilt = shallowRef(motion ? 26 : 17) // degrees above him; negative looks from below
@@ -40,7 +41,13 @@ let frame = 0
 let last = 0
 let move: Turn | Jump | undefined
 
-const sides: { id: PoulpySide | PoulpyMood; label: string; suffix?: string }[] = moods
+const sides: { id: PoulpySide | PoulpyMood | PoulpyPose; label: string; suffix?: string }[] = poses
+  ? [
+      { id: 'cocky', label: 'Cocky' }, { id: 'straining', label: 'Straining' }, { id: 'champion', label: 'Champion' }, { id: 'standingTall', label: 'Standing tall' },
+      { id: 'exhausted', label: 'Exhausted' }, { id: 'sideGlance', label: 'Side glance' }, { id: 'sleeping', label: 'Sleeping' }, { id: 'patchedUp', label: 'Patched up' },
+      { id: 'shy', label: 'Shy' }, { id: 'thinking', label: 'Thinking' }, { id: 'pouting', label: 'Pouting' }, { id: 'fuming', label: 'Fuming' },
+    ]
+  : moods
   ? [{ id: 'proud', label: 'Proud' }, { id: 'happy', label: 'Happy' }, { id: 'recovering', label: 'Recovering' }, { id: 'annoyed', label: 'Annoyed' }, { id: 'grumpy', label: 'Grumpy' }, { id: 'fuming', label: 'Fuming' }]
   : [{ id: 'blue', label: 'Blue', suffix: 'side' }, { id: 'ember', label: 'Grumpy', suffix: 'side' }]
 const directions = [
@@ -100,7 +107,7 @@ function nudge(event: KeyboardEvent) {
   tilt.value = clamp(tilt.value + step[1], -89, 89)
 }
 
-const show = () => scene?.show(side.value, outline.value)
+const show = () => scene?.show(poses ? { pose: side.value as PoulpyPose } : (side.value as PoulpySide | PoulpyMood), outline.value)
 // The scene wants where the viewer stands: the other way around from how far he has turned.
 const look = () => scene?.look({ turn: -turn.value, tilt: tilt.value, distance: distance.value })
 watch([side, outline], show)
@@ -162,7 +169,7 @@ onBeforeUnmount(() => {
       <p v-else class="hint">Drag any way to turn, pinch to zoom</p>
     </div>
     <div class="controls">
-      <div class="sides" :class="{ moods }" role="group" :aria-label="moods ? 'Mood' : 'Side'">
+      <div class="sides" :class="{ moods: moods || poses }" role="group" :aria-label="poses ? 'Pose' : moods ? 'Mood' : 'Side'">
         <button v-for="s in sides" :key="s.id" type="button" class="choice" :aria-pressed="side === s.id" :aria-label="s.suffix ? `${s.label} ${s.suffix}` : s.label" @click="side = s.id">{{ s.label }}<span v-if="s.suffix" class="wide">&nbsp;{{ s.suffix }}</span></button>
       </div>
       <div v-if="turning" class="sides" role="group" aria-label="Direction, seen from above">

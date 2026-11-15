@@ -18,38 +18,73 @@ export const SHAPE = {
   // The face is the 2D drawing's, pressed onto the head: `y` is where the drawing's baseline sits,
   // `scale` its size, `spread` how far apart the features sit and `eyes` an extra size for the eyes.
   face: { y: 0.57, scale: 1.1, spread: 1.1, eyes: 1.25 },
+  // Where the drawing's baseline sits for whatever lies on his head by its outline (a plaster, a mark): the
+  // height at which his arms hide his head.
+  propLine: 0.45,
 }
 
 // Faces, written as in the 2D drawings (design/build-poulpy.mjs) and in their coordinates, so the two can be
 // read side by side: x grows to the viewer's right, y grows downwards, his head spans x 37 to 163 and sits
 // on y 130. Each feature is a small list:
-//   ['eye', x, y, rx, ry]            a round eye with its white dot
-//   ['half', x, y, r]                the lower half of an eye, for a heavy lid
+//   ['eye', x, y, rx, ry, dot]       a round eye with its white dot, `dot` to the side of the eye's middle (-3 if left out)
+//   ['half', x, y, rx, ry]           the lower half of an eye, for a heavy lid (`ry` is `rx` if left out)
 //   ['lid', x1, y1, x2, y2, width]   a straight line that belongs to an eye, and grows with it
 //   ['line', x1, y1, x2, y2, width]  a straight line: a brow, a flat mouth
 //   ['curve', x1, y1, cx, cy, x2, y2, width]  a curved line: start, pull, end
-//   ['teeth', x, y, width, height, corner]    clenched teeth
-//   ['blush', y, colour, strength]   the two cheeks
+//   ['path', d, width, colour]       any line, as an SVG path (M L Q T C, either case); ink if no colour
+//   ['shape', d, colour]             a closed SVG path, filled; ink if no colour
+//   ['oval', x, y, rx, ry, colour, turn]      a filled oval, turned by `turn` degrees; ink if no colour
+//   ['teeth', x, y, width, height, corner, gaps]  clenched teeth, with `gaps` lines between them
+//   ['cheek', x, y, rx, ry, colour, strength]     a blushing cheek, the colour mixed into his own
 // The last entry of a feature may be the name of its part; left and right are Poulpy's own.
-const BLUSH = ['blush', 112, '#F49A6B', 0.75], EMBER_BLUSH = ['blush', 114, '#8E2414', 0.4]
+const blush = (y, colour, strength, rx = 8, ry = 4.5) => [['cheek', 64, y, rx, ry, colour, strength], ['cheek', 136, y, rx, ry, colour, strength]]
+const BLUSH = blush(112, '#F49A6B', 0.75), EMBER_BLUSH = blush(114, '#8E2414', 0.4)
 export const FACES = {
-  happy: [['eye', 80, 96, 9, 10.5], ['eye', 120, 96, 9, 10.5], ['curve', 90, 112, 100, 123, 110, 112, 4.5, 'mouth'], BLUSH],
-  calm: [['curve', 71, 97, 80, 90, 89, 97, 4.5, 'eye_right'], ['curve', 111, 97, 120, 90, 129, 97, 4.5, 'eye_left'], ['curve', 92, 113, 100, 119, 108, 113, 4, 'mouth'], BLUSH],
+  happy: [['eye', 80, 96, 9, 10.5], ['eye', 120, 96, 9, 10.5], ['curve', 90, 112, 100, 123, 110, 112, 4.5, 'mouth'], ...BLUSH],
+  calm: [['curve', 71, 97, 80, 90, 89, 97, 4.5, 'eye_right'], ['curve', 111, 97, 120, 90, 129, 97, 4.5, 'eye_left'], ['curve', 92, 113, 100, 119, 108, 113, 4, 'mouth'], ...BLUSH],
   cocky: [
     ['half', 80, 97, 9], ['lid', 68, 95, 92, 93, 4, 'lid_right'], ['eye', 120, 96, 9, 10.5],
-    ['curve', 109, 79, 120, 70, 132, 77, 4.5, 'brow_left'], ['curve', 88, 114, 102, 123, 115, 108, 4.5, 'mouth'], BLUSH,
+    ['curve', 109, 79, 120, 70, 132, 77, 4.5, 'brow_left'], ['curve', 88, 114, 102, 123, 115, 108, 4.5, 'mouth'], ...BLUSH,
+  ],
+  proud: [['path', 'M70 99 Q80 86 90 99', 4.5, 'eye_right'], ['path', 'M110 99 Q120 86 130 99', 4.5, 'eye_left'], ['shape', 'M87 109 Q100 132 113 109 Z', 'mouth'], ...BLUSH],
+  tired: [
+    ['half', 80, 97, 9], ['half', 120, 97, 9], ['lid', 69, 98, 91, 95, 4, 'lid_right'], ['lid', 109, 95, 131, 98, 4, 'lid_left'],
+    ['path', 'M73 110 Q80 114 87 110 M113 110 Q120 114 127 110', 2.5, '#4B6274', 'eye_bags'],
+    ['oval', 100, 121, 8, 6.5, 'mouth'], ['oval', 100, 125, 5, 2.6, '#F07A7A', 'tongue'],
+  ],
+  hurt: [
+    ['eye', 80, 97, 9, 10.5], ['eye', 120, 97, 9, 10.5], ['oval', 84, 101, 2, 2, '#FFFFFF', 'eye_right_tear'], ['oval', 124, 101, 2, 2, '#FFFFFF', 'eye_left_tear'],
+    ['path', 'M68 82 Q78 76 88 80', 4, 'brow_right'], ['path', 'M132 82 Q122 76 112 80', 4, 'brow_left'], ['path', 'M91 117 q3 -3 6 0 t6 0 t6 0', 3.5, 'mouth'], ...BLUSH,
+  ],
+  straining: [['path', 'M70 90 L87 96 L70 102', 4.5, 'eye_right'], ['path', 'M130 90 L113 96 L130 102', 4.5, 'eye_left'], ['teeth', 87, 110, 26, 12, 5, 0], ...BLUSH],
+  pouting: [
+    ['eye', 84, 94, 8.5, 9.5, -5], ['eye', 124, 94, 8.5, 9.5, -5], ['line', 68, 79, 92, 85, 5, 'brow_right'], ['line', 134, 76, 110, 85, 5, 'brow_left'],
+    ['curve', 90, 110, 98, 104, 106, 110, 4.5, 'mouth'], ...EMBER_BLUSH,
+  ],
+  glance: [
+    ['half', 97.5, 99, 8.5], ['half', 130.5, 98, 6.5, 7.5], ['lid', 87, 98, 108, 96, 3.5, 'lid_right'], ['lid', 122, 96, 139, 97, 3.5, 'lid_left'],
+    ['curve', 108, 117, 115, 120, 122, 117, 4, 'mouth'], ['cheek', 86, 112, 7, 4, '#F49A6B', 0.7], ['cheek', 144, 111, 5, 3.5, '#F49A6B', 0.7],
+  ],
+  asleep: [['path', 'M71 96 Q80 104 89 96', 4.5, 'eye_right'], ['path', 'M111 96 Q120 104 129 96', 4.5, 'eye_left'], ['oval', 100, 117, 4, 4, 'mouth'], ...BLUSH],
+  shy: [
+    ['path', 'M70 100 Q80 92 90 100', 4.5, 'eye_right'], ['path', 'M110 100 Q120 92 130 100', 4.5, 'eye_left'], ['curve', 93, 116, 100, 121, 107, 116, 4, 'mouth'],
+    ...blush(112, '#F49A6B', 0.9, 12, 6), ['path', 'M60 110 l4 4 M66 109 l4 4 M128 109 l4 4 M134 110 l4 4', 2, '#C96A3E', 'blush_lines'],
+  ],
+  thinking: [
+    ['eye', 80, 97, 8, 9.5, 0], ['eye', 120, 95, 9.5, 11, 0], ['line', 66, 84, 90, 86, 4, 'brow_right'], ['path', 'M110 78 Q120 70 132 76', 4, 'brow_left'],
+    ['path', 'M90 116 q5 -4 10 0 t10 0', 4, 'mouth'], ...BLUSH,
   ],
   annoyed: [
     ['half', 80, 97, 9], ['half', 120, 97, 9], ['lid', 69, 96, 91, 96, 4, 'lid_right'], ['lid', 109, 96, 131, 96, 4, 'lid_left'],
-    ['line', 110, 82, 130, 78, 4, 'brow_left'], ['line', 91, 116, 109, 116, 4.5, 'mouth'], EMBER_BLUSH,
+    ['line', 110, 82, 130, 78, 4, 'brow_left'], ['line', 91, 116, 109, 116, 4.5, 'mouth'], ...EMBER_BLUSH,
   ],
   grumpy: [
     ['eye', 80, 98, 8.5, 9], ['eye', 120, 98, 8.5, 9], ['line', 66, 80, 92, 89, 5, 'brow_right'], ['line', 134, 80, 108, 89, 5, 'brow_left'],
-    ['curve', 89, 121, 100, 110, 111, 121, 4.5, 'mouth'], EMBER_BLUSH,
+    ['curve', 89, 121, 100, 110, 111, 121, 4.5, 'mouth'], ...EMBER_BLUSH,
   ],
   fuming: [
     ['eye', 81, 100, 7, 7.5], ['eye', 119, 100, 7, 7.5], ['line', 64, 82, 93, 93, 5.5, 'brow_right'], ['line', 136, 82, 107, 93, 5.5, 'brow_left'],
-    ['teeth', 86, 111, 28, 13, 5], EMBER_BLUSH,
+    ['teeth', 86, 111, 28, 13, 5, 2], ...EMBER_BLUSH,
   ],
 }
 
@@ -92,7 +127,7 @@ export function linear(hex) {
 const mix = (a, b, t) => a.map((v, i) => v + (b[i] - v) * t)
 
 // The rotation that turns "straight ahead" (+z) onto the direction n, as a function on vectors.
-function facing(n) {
+export function facing(n) {
   const v = [-n[1], n[0], 0], k = 1 / (1 + n[2])
   return ([x, y, z]) => {
     const w = cross(v, [x, y, z]), ww = cross(v, w)
@@ -102,7 +137,7 @@ function facing(n) {
 
 // A slice of an egg shape between two heights (theta 0 is the top, PI the bottom), already placed:
 // `turn` rotates each point and normal, `at` moves it.
-function egg(radius, { from = 0, to = Math.PI, around = 32, down = 16, turn = (p) => p, at = [0, 0, 0] } = {}) {
+export function egg(radius, { from = 0, to = Math.PI, around = 32, down = 16, turn = (p) => p, at = [0, 0, 0] } = {}) {
   const positions = [], normals = [], indices = []
   for (let i = 0; i <= down; i++) {
     const th = from + ((to - from) * i) / down
@@ -120,13 +155,65 @@ function egg(radius, { from = 0, to = Math.PI, around = 32, down = 16, turn = (p
   return { positions, normals, indices }
 }
 
-const join = (...shapes) => {
+export const join = (...shapes) => {
   const out = { positions: [], normals: [], indices: [] }
   for (const s of shapes) {
     const base = out.positions.length / 3
     out.positions.push(...s.positions); out.normals.push(...s.normals); out.indices.push(...s.indices.map((i) => i + base))
   }
   return out
+}
+
+/**
+ * The points of an SVG path, one list per stroke of the pen. Reads M, L, Q, T, C and Z, in either case;
+ * a list that Z closed has `closed` set. Curves become short straight steps.
+ */
+export function pathPoints(d) {
+  const tokens = d.match(/[a-zA-Z]|-?\d*\.?\d+/g), out = []
+  let i = 0, cmd = '', cur = [], x = 0, y = 0, qx = 0, qy = 0
+  const num = () => +tokens[i++]
+  const bend = (c, e, steps = 12) => {
+    for (let s = 1; s <= steps; s++) { const t = s / steps, u = 1 - t; cur.push([u * u * x + 2 * u * t * c[0] + t * t * e[0], u * u * y + 2 * u * t * c[1] + t * t * e[1]]) }
+    ;[qx, qy, x, y] = [c[0], c[1], e[0], e[1]]
+  }
+  while (i < tokens.length) {
+    if (/[a-zA-Z]/.test(tokens[i])) cmd = tokens[i++]
+    const rel = cmd === cmd.toLowerCase(), ox = rel ? x : 0, oy = rel ? y : 0, kind = cmd.toUpperCase()
+    if (kind === 'M') { x = ox + num(); y = oy + num(); cur = [[x, y]]; out.push(cur); cmd = rel ? 'l' : 'L' }
+    else if (kind === 'L') { x = ox + num(); y = oy + num(); cur.push([x, y]) }
+    else if (kind === 'Q') bend([ox + num(), oy + num()], [ox + num(), oy + num()])
+    else if (kind === 'T') bend([2 * x - qx, 2 * y - qy], [ox + num(), oy + num()])
+    else if (kind === 'C') {
+      const a = [ox + num(), oy + num()], b = [ox + num(), oy + num()], e = [ox + num(), oy + num()]
+      for (let s = 1; s <= 16; s++) { const t = s / 16, u = 1 - t; cur.push([0, 1].map((k) => u * u * u * [x, y][k] + 3 * u * u * t * a[k] + 3 * u * t * t * b[k] + t * t * t * e[k])) }
+      ;[x, y] = e
+    } else if (kind === 'Z') { cur.closed = true; [x, y] = cur[0] }
+    else throw new Error(`pathPoints cannot read "${cmd}" in "${d}"`)
+    if (kind !== 'Q' && kind !== 'T') { qx = x; qy = y }
+  }
+  return out
+}
+
+/** A round tube through points in space, with round ends. `radius` is one number or one per point. */
+export function tube(points, radius, sides = 10) {
+  const r = (i) => (Array.isArray(radius) ? radius[i] : radius), positions = [], normals = [], indices = []
+  let up = null
+  points.forEach((p, i) => {
+    const a = points[Math.max(i - 1, 0)], b = points[Math.min(i + 1, points.length - 1)], t = norm([b[0] - a[0], b[1] - a[1], b[2] - a[2]])
+    up ??= Math.abs(t[1]) < 0.9 ? [0, 1, 0] : [1, 0, 0]
+    const bn = norm(cross(t, up))
+    up = cross(bn, t)
+    for (let j = 0; j < sides; j++) {
+      const ang = (j / sides) * TAU, dir = add([0, 0, 0].map((_, k) => bn[k] * Math.cos(ang)), up, Math.sin(ang))
+      positions.push(...add(p, dir, r(i))); normals.push(...dir)
+    }
+  })
+  for (let i = 0; i < points.length - 1; i++) for (let j = 0; j < sides; j++) {
+    const a = i * sides + j, b = i * sides + ((j + 1) % sides), c = a + sides, d = b + sides
+    indices.push(a, c, b, b, c, d)
+  }
+  const cap = (i) => egg([r(i), r(i), r(i)], { around: 10, down: 6, at: points[i] })
+  return join({ positions, normals, indices }, cap(0), cap(points.length - 1))
 }
 
 // --- the head's surface ----------------------------------------------------------------------------
@@ -171,26 +258,36 @@ export function gleamPatch(towards = LOOK.gleam.towards) {
 
 /**
  * Builds Poulpy for one side of the plush, or in one of his moods.
- * @param {{ side?: 'blue' | 'ember', mood?: keyof typeof MOODS, tone?: string, colours: { blue: string, ember: string, ink: string } }} options
+ * @param {{ side?: 'blue' | 'ember', mood?: keyof typeof MOODS, tone?: string, face?: keyof typeof FACES, features?: (string | number)[][], on?: (string | number)[][], stretch?: number,
+ *   colours: { blue: string, ember: string, ink: string } }} options
  *   `colours` are the `color.poulpy` tokens of design/tokens.json. With a `mood`, he takes its side and face,
  *   and `tone` (that mood's `mood` token) tints him; without one he is the plain side, happy or grumpy.
+ *   `face` gives him another face of FACES, or `features` a face written out. `on` is more features, laid on his head by its outline in the
+ *   drawing and not by his face: a plaster, a mark. `stretch` makes his arms that many times taller, and lifts his head with them.
  * @returns {{ parts: { name: string, material: string, positions: number[], normals: number[], indices: number[] }[],
- *   materials: Record<string, { colour: number[], flat?: boolean, outline?: number[] }>, height: number }}
+ *   materials: Record<string, { colour: number[], flat?: boolean, outline?: number[] }>, height: number, headLift: number }}
  *   Triangle meshes, already in place, and their colours as linear RGB. `flat` materials take no shading.
+ *   His head and face are built where they sit at rest: whoever draws him lifts them by `headLift`.
  */
-export function buildPoulpy3d({ side = 'blue', mood, tone, colours }) {
+export function buildPoulpy3d({ side = 'blue', mood, tone, face: faceName, features, on = [], stretch = 1, colours }) {
   if (mood) side = MOODS[mood].side
-  const ember = side === 'ember', F = FACES[mood ? MOODS[mood].face : ember ? 'grumpy' : 'happy'], { head, arms, face } = SHAPE
+  const ember = side === 'ember', F = features ?? FACES[faceName ?? (mood ? MOODS[mood].face : ember ? 'grumpy' : 'happy')], { head, arms, face } = SHAPE
   const body = linear(tone ?? (ember ? colours.ember : colours.blue)), lining = linear(ember ? colours.blue : colours.ember), ink = linear(colours.ink)
-  const blush = F.find((feature) => feature[0] === 'blush')
+  const cheek = F.find((feature) => feature[0] === 'cheek')
   const outline = (c) => mix(c, ink, LOOK.outline.ink)
   const materials = {
     body: { colour: body, outline: outline(body) },
     lining: { colour: lining, outline: outline(lining) },
     ink: { colour: ink, flat: true },
     shine: { colour: [1, 1, 1], flat: true },
-    cheek: { colour: mix(body, linear(blush[2]), blush[3]) },
+    ...(cheek && { cheek: { colour: mix(body, linear(cheek[5]), cheek[6]) } }),
     gleam: { colour: mix(body, [1, 1, 1], LOOK.gleam.white) },
+  }
+  // A plain colour of its own, for a feature that is neither ink nor white.
+  const paint = (colour) => {
+    if (!colour) return 'ink'
+    materials[`paint_${colour.slice(1).toLowerCase()}`] ??= { colour: linear(colour), flat: true }
+    return `paint_${colour.slice(1).toLowerCase()}`
   }
   const parts = []
   const part = (name, material, shape) => parts.push({ name, material, ...shape })
@@ -199,103 +296,120 @@ export function buildPoulpy3d({ side = 'blue', mood, tone, colours }) {
   const headCut = Math.acos((SHAPE.liningLine - head.centreY) / head.radius[1])
   part('head', 'body', egg(head.radius, { to: headCut, around: 48, down: 26, at: headCentre() }))
   part('head_lining', 'lining', egg(head.radius, { from: headCut, around: 48, down: 6, at: headCentre() }))
-  const armY = arms.radius[1], armCut = Math.acos((SHAPE.liningLine - armY) / arms.radius[1])
+  const armRadius = [arms.radius[0], arms.radius[1] * stretch, arms.radius[2]]
+  const armY = armRadius[1], armCut = Math.acos((SHAPE.liningLine - armY) / armRadius[1])
   for (let k = 0; k < arms.count; k++) {
     const a = (k * TAU) / arms.count, c = Math.cos(a), s = Math.sin(a)
     const placed = { around: 28, turn: ([x, y, z]) => [x * c + z * s, y, -x * s + z * c], at: [s * arms.ring, armY, c * arms.ring] }
-    part(`arm_${k + 1}`, 'body', egg(arms.radius, { ...placed, to: armCut, down: 14 }))
-    part(`arm_${k + 1}_lining`, 'lining', egg(arms.radius, { ...placed, from: armCut, down: 5 }))
+    part(`arm_${k + 1}`, 'body', egg(armRadius, { ...placed, to: armCut, down: 14 }))
+    part(`arm_${k + 1}_lining`, 'lining', egg(armRadius, { ...placed, from: armCut, down: 5 }))
   }
 
-  // The face: every feature is in the flat drawing's coordinates, then pressed onto the head.
+  // Every feature is in the flat drawing's coordinates, then pressed onto the head.
   // One unit of the model is the drawing's head radius, 63, and the drawing's middle is x 100, its baseline y 130.
-  const U = 63, dx = (x) => (x - 100) / U, dy = (y) => (130 - y) / U
-  const fx = (x) => x * face.scale * face.spread, fy = (y) => face.y + y * face.scale
-  const sticker = (x, y, rx, ry, depth, detail) => {
-    const { p, n } = press(fx(x), fy(y)), turn = facing(n), at = add(p, n, -depth * 0.25)
-    return { shape: egg([rx * face.scale, ry * face.scale, depth], { ...detail, turn, at }), turn, at }
-  }
-  // A round line following the head, with rounded ends.
-  const line = (points, r) => {
-    const on = points.map(([x, y]) => { const { p, n } = press(fx(x), fy(y)); return { p: add(p, n, r * 0.25), n } })
-    const sides = 10, positions = [], normals = [], indices = []
-    on.forEach(({ p, n }, i) => {
-      const a = on[Math.max(i - 1, 0)].p, b = on[Math.min(i + 1, on.length - 1)].p
-      const t = norm([b[0] - a[0], b[1] - a[1], b[2] - a[2]]), bn = norm(cross(t, n)), up = cross(bn, t)
-      for (let j = 0; j < sides; j++) {
-        const ang = (j / sides) * TAU, dir = add([0, 0, 0].map((_, k) => bn[k] * Math.cos(ang)), up, Math.sin(ang))
-        positions.push(...add(p, dir, r)); normals.push(...dir)
-      }
-    })
-    for (let i = 0; i < on.length - 1; i++) for (let j = 0; j < sides; j++) {
-      const a = i * sides + j, b = i * sides + ((j + 1) % sides), c = a + sides, d = b + sides
-      indices.push(a, c, b, b, c, d)
-    }
-    const cap = (at) => egg([r, r, r], { around: 10, down: 6, at })
-    return join({ positions, normals, indices }, cap(on[0].p), cap(on[on.length - 1].p))
-  }
-  // A flat shape lying on the head, `lift` off it: a fan of triangles from its middle to its outline.
-  const patch = (outlinePoints, lift) => {
-    // Triangles face the viewer when the outline runs anticlockwise.
-    if (outlinePoints.reduce((sum, [x, y], i) => { const [nx, ny] = outlinePoints[(i + 1) % outlinePoints.length]; return sum + x * ny - nx * y }, 0) < 0) outlinePoints = [...outlinePoints].reverse()
-    const mid = [0, 1].map((k) => outlinePoints.reduce((sum, q) => sum + q[k], 0) / outlinePoints.length)
-    const positions = [], normals = [], indices = []
-    for (const [x, y] of [mid, ...outlinePoints]) { const { p, n } = press(fx(x), fy(y)); positions.push(...add(p, n, lift)); normals.push(...n) }
-    outlinePoints.forEach((_, i) => indices.push(0, 1 + i, 1 + ((i + 1) % outlinePoints.length)))
-    return { positions, normals, indices }
-  }
-  const curve = ([a, c, b], n = 18) => Array.from({ length: n + 1 }, (_, i) => {
-    const t = i / n, u = 1 - t
-    return [u * u * a[0] + 2 * u * t * c[0] + t * t * b[0], u * u * a[1] + 2 * u * t * c[1] + t * t * b[1]]
-  })
-  const straight = ([a, b], n = 10) => Array.from({ length: n + 1 }, (_, i) => [a[0] + ((b[0] - a[0]) * i) / n, a[1] + ((b[1] - a[1]) * i) / n])
-  const width = (w) => (w / 2 / U) * face.scale
+  const U = 63
   // Left and right are Poulpy's own: his left is the viewer's right.
   const which = (x) => (x > 100 ? 'left' : 'right')
-  const es = face.eyes, k = es * face.scale
-  // Where each eye sits, so a lid can grow with its eye.
-  const eyes = F.filter((feature) => feature[0] === 'eye' || feature[0] === 'half').map((feature) => [feature[1], feature[2]])
-  for (const feature of F) {
-    const [kind, ...v] = feature, named = typeof v[v.length - 1] === 'string' ? v.pop() : null
-    if (kind === 'eye') {
-      const [x, y, rx, ry] = v
-      const eye = sticker(dx(x), dy(y), (rx / U) * es, (ry / U) * es, 0.06, { around: 24, down: 12 })
-      part(`eye_${which(x)}`, 'ink', eye.shape)
-      // The white dot sits on the eye, up and to the viewer's left, as in the drawing.
-      part(`eye_${which(x)}_shine`, 'shine', egg([0.044 * k, 0.044 * k, 0.02], { around: 12, down: 8, turn: eye.turn, at: add(eye.at, eye.turn([-0.048 * k, 0.066 * k, 0.047])) }))
-    } else if (kind === 'half') {
-      const [x, y, r] = v
-      part(`eye_${which(x)}`, 'ink', sticker(dx(x), dy(y), (r / U) * es, (r / U) * es, 0.06, { from: Math.PI / 2, around: 24, down: 8 }).shape)
-    } else if (kind === 'lid') {
-      const [x1, y1, x2, y2, w] = v, mx = (x1 + x2) / 2
-      const [ex, ey] = eyes.reduce((best, e) => (Math.abs(e[0] - mx) < Math.abs(best[0] - mx) ? e : best))
-      const grown = (x, y) => [dx(ex + (x - ex) * es), dy(ey + (y - ey) * es)]
-      part(named, 'ink', line(straight([grown(x1, y1), grown(x2, y2)]), width(w)))
-    } else if (kind === 'line') {
-      const [x1, y1, x2, y2, w] = v
-      part(named, 'ink', line(straight([[dx(x1), dy(y1)], [dx(x2), dy(y2)]]), width(w)))
-    } else if (kind === 'curve') {
-      const [x1, y1, cx, cy, x2, y2, w] = v
-      part(named, 'ink', line(curve([[dx(x1), dy(y1)], [dx(cx), dy(cy)], [dx(x2), dy(y2)]]), width(w)))
-    } else if (kind === 'teeth') {
-      const [x, y, w, h, r] = v
-      // A rounded box, corner by corner.
-      const corners = [[x + w - r, y + r, -90], [x + w - r, y + h - r, 0], [x + r, y + h - r, 90], [x + r, y + r, 180]]
-      const box = corners.flatMap(([cx, cy, from]) => Array.from({ length: 5 }, (_, i) => {
-        const ang = ((from + (i * 90) / 4) * Math.PI) / 180
-        return [dx(cx + r * Math.cos(ang)), dy(cy + r * Math.sin(ang))]
-      }))
-      part('teeth', 'shine', patch(box, 0.012))
-      part('mouth', 'ink', join(
-        line([...box, box[0]], width(3.5)),
-        line(straight([[dx(x), dy(y + h / 2)], [dx(x + w), dy(y + h / 2)]]), width(2.5)),
-        ...[1, 2].map((i) => line(straight([[dx(x + (w * i) / 3), dy(y)], [dx(x + (w * i) / 3), dy(y + h)]], 4), width(2))),
-      ))
-    } else if (kind === 'blush') {
-      for (const x of [136, 64]) part(`cheek_${which(x)}`, 'cheek', sticker(dx(x), dy(v[0]), 8 / U, 4.5 / U, 0.03, { around: 16, down: 8 }).shape)
+  // `lay` says where a point of the drawing lands, before it is pressed on, and `size` how much bigger things are drawn.
+  const draw = (features, lay, size) => {
+    const at = (x, y) => lay((x - 100) / U, (130 - y) / U)
+    const sticker = (x, y, rx, ry, depth, detail, turnBy = 0) => {
+      const { p, n } = press(...at(x, y)), onto = facing(n), ca = Math.cos(turnBy), sa = Math.sin(turnBy)
+      const turn = ([px, py, pz]) => onto([px * ca - py * sa, px * sa + py * ca, pz]), centre = add(p, n, -depth * 0.25)
+      return { shape: egg([(rx / U) * size, (ry / U) * size, depth], { ...detail, turn, at: centre }), turn, at: centre }
+    }
+    // A round line following the head, with rounded ends.
+    const line = (points, w) => {
+      const r = (w / 2 / U) * size
+      const on = points.map(([x, y]) => { const { p, n } = press(...at(x, y)); return { p: add(p, n, r * 0.25), n } })
+      const sides = 10, positions = [], normals = [], indices = []
+      on.forEach(({ p, n }, i) => {
+        const a = on[Math.max(i - 1, 0)].p, b = on[Math.min(i + 1, on.length - 1)].p
+        const t = norm([b[0] - a[0], b[1] - a[1], b[2] - a[2]]), bn = norm(cross(t, n)), up = cross(bn, t)
+        for (let j = 0; j < sides; j++) {
+          const ang = (j / sides) * TAU, dir = add([0, 0, 0].map((_, k) => bn[k] * Math.cos(ang)), up, Math.sin(ang))
+          positions.push(...add(p, dir, r)); normals.push(...dir)
+        }
+      })
+      for (let i = 0; i < on.length - 1; i++) for (let j = 0; j < sides; j++) {
+        const a = i * sides + j, b = i * sides + ((j + 1) % sides), c = a + sides, d = b + sides
+        indices.push(a, c, b, b, c, d)
+      }
+      const cap = (centre) => egg([r, r, r], { around: 10, down: 6, at: centre })
+      return join({ positions, normals, indices }, cap(on[0].p), cap(on[on.length - 1].p))
+    }
+    // A flat shape lying on the head, `lift` off it: a fan of triangles from its middle to its outline.
+    const patch = (outlinePoints, lift) => {
+      let around = outlinePoints.map(([x, y]) => at(x, y))
+      // Triangles face the viewer when the outline runs anticlockwise.
+      if (around.reduce((sum, [x, y], i) => { const [nx, ny] = around[(i + 1) % around.length]; return sum + x * ny - nx * y }, 0) < 0) around = around.reverse()
+      const mid = [0, 1].map((k) => around.reduce((sum, q) => sum + q[k], 0) / around.length)
+      const positions = [], normals = [], indices = []
+      for (const [x, y] of [mid, ...around]) { const { p, n } = press(x, y); positions.push(...add(p, n, lift)); normals.push(...n) }
+      around.forEach((_, i) => indices.push(0, 1 + i, 1 + ((i + 1) % around.length)))
+      return { positions, normals, indices }
+    }
+    const straight = (x1, y1, x2, y2, n = 10) => Array.from({ length: n + 1 }, (_, i) => [x1 + ((x2 - x1) * i) / n, y1 + ((y2 - y1) * i) / n])
+    // Straight stretches are cut into short steps too, so they follow the head.
+    const steps = (points) => points.slice(1).flatMap((q, i) => straight(...points[i], ...q, Math.max(1, Math.ceil(Math.hypot(q[0] - points[i][0], q[1] - points[i][1]) / 4))).slice(i ? 1 : 0))
+    const es = face.eyes
+    // Where each eye sits, so a lid can grow with its eye.
+    const eyes = features.filter((feature) => feature[0] === 'eye' || feature[0] === 'half').map((feature) => [feature[1], feature[2]])
+    for (const feature of features) {
+      const [kind, ...v] = feature, named = typeof v[v.length - 1] === 'string' && !/^#/.test(v[v.length - 1]) && kind !== 'path' && kind !== 'shape' ? v.pop() : null
+      if (kind === 'eye') {
+        const [x, y, rx, ry, dot = -3] = v, k = es * size
+        const eye = sticker(x, y, rx * es, ry * es, 0.06, { around: 24, down: 12 })
+        part(`eye_${which(x)}`, 'ink', eye.shape)
+        // The white dot sits on the eye, up and to the viewer's left, as in the drawing.
+        part(`eye_${which(x)}_shine`, 'shine', egg([0.044 * k, 0.044 * k, 0.02], { around: 12, down: 8, turn: eye.turn, at: add(eye.at, eye.turn([(dot / U) * k, 0.066 * k, 0.047])) }))
+      } else if (kind === 'half') {
+        const [x, y, rx, ry = rx] = v
+        part(`eye_${which(x)}`, 'ink', sticker(x, y, rx * es, ry * es, 0.06, { from: Math.PI / 2, around: 24, down: 8 }).shape)
+      } else if (kind === 'lid') {
+        const [x1, y1, x2, y2, w] = v, mx = (x1 + x2) / 2
+        const [ex, ey] = eyes.reduce((best, e) => (Math.abs(e[0] - mx) < Math.abs(best[0] - mx) ? e : best))
+        part(named, 'ink', line(straight(ex + (x1 - ex) * es, ey + (y1 - ey) * es, ex + (x2 - ex) * es, ey + (y2 - ey) * es), w))
+      } else if (kind === 'line') {
+        const [x1, y1, x2, y2, w] = v
+        part(named, 'ink', line(straight(x1, y1, x2, y2), w))
+      } else if (kind === 'curve') {
+        const [x1, y1, cx, cy, x2, y2, w] = v
+        part(named, 'ink', line(pathPoints(`M${x1} ${y1} Q${cx} ${cy} ${x2} ${y2}`)[0], w))
+      } else if (kind === 'path') {
+        const [d, w, ...rest] = v, name = rest.pop(), colour = rest[0]
+        part(name, paint(colour), join(...pathPoints(d).map((points) => line(steps(points), w))))
+      } else if (kind === 'shape') {
+        const [d, ...rest] = v, name = rest.pop(), colour = rest[0]
+        part(name, paint(colour), join(...pathPoints(d).map((points) => patch(points, 0.012))))
+      } else if (kind === 'oval') {
+        const [x, y, rx, ry, colour, turnBy = 0] = v
+        part(named, paint(colour), sticker(x, y, rx, ry, 0.03, { around: 16, down: 8 }, (-turnBy * Math.PI) / 180).shape)
+      } else if (kind === 'teeth') {
+        const [x, y, w, h, r, gaps] = v
+        // A rounded box, corner by corner.
+        const corners = [[x + w - r, y + r, -90], [x + w - r, y + h - r, 0], [x + r, y + h - r, 90], [x + r, y + r, 180]]
+        const box = corners.flatMap(([cx, cy, from]) => Array.from({ length: 5 }, (_, i) => {
+          const ang = ((from + (i * 90) / 4) * Math.PI) / 180
+          return [cx + r * Math.cos(ang), cy + r * Math.sin(ang)]
+        }))
+        part('teeth', 'shine', patch(box, 0.012))
+        part('mouth', 'ink', join(
+          line([...box, box[0]], 3.5),
+          line(straight(x, y + h / 2, x + w, y + h / 2), 2.5),
+          ...Array.from({ length: gaps }, (_, i) => line(straight(x + (w * (i + 1)) / (gaps + 1), y, x + (w * (i + 1)) / (gaps + 1), y + h, 4), 2)),
+        ))
+      } else if (kind === 'cheek') {
+        const [x, y, rx, ry] = v
+        part(`cheek_${which(x)}`, 'cheek', sticker(x, y, rx, ry, 0.03, { around: 16, down: 8 }).shape)
+      } else throw new Error(`No way to draw a "${kind}"`)
     }
   }
+  // His face is the drawing's, a little bigger and wider apart. Anything else lies where the drawing's outline puts
+  // it: the drawing's head is 63 wide from its middle and 100 tall above the line where the arms hide it.
+  draw(F, (x, y) => [x * face.scale * face.spread, face.y + y * face.scale], face.scale)
+  draw(on, (x, y) => [x * head.radius[0], SHAPE.propLine + y * ((head.centreY + head.radius[1] - SHAPE.propLine) * U) / 100], 1.05)
   part('gleam', 'gleam', gleamPatch())
 
-  return { parts, materials, height: head.centreY + head.radius[1] }
+  return { parts, materials, height: head.centreY + head.radius[1] + 2 * arms.radius[1] * (stretch - 1), headLift: 2 * arms.radius[1] * (stretch - 1) }
 }

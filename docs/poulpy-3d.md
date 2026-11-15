@@ -24,7 +24,18 @@ The model makes the six [moods](./brand.md#moods) of the drawings: the same face
 
 - **The faces are the drawings'.** Each face in `model.mjs` is written in the 2D drawing's own coordinates, so the two can be read side by side and a change to one is copied to the other.
 - **A mood changes his face and his shade, never his shape.** Heavy lids, brows, a smirk or clenched teeth lie on the head like the eyes do; his arms stay down.
-- **This is the first step of replacing the drawings with the model** ([Brand decisions](./brand-decisions.md#16-the-3d-poulpy-replaces-the-drawings), decision 16). The poses and their props come next; the apps and the website still show the 2D drawings.
+
+## His twelve poses
+
+The model also takes the twelve [poses](./brand.md#when-each-drawing-shows) of the drawings, each in the shade of its mood. They are in [`design/poulpy-3d/poses.mjs`](../design/poulpy-3d/poses.mjs), built on the shape and the faces of `model.mjs`.
+
+<!-- live: Poses -->
+
+- **What he wears is solid.** The sweatband goes all the way around his head, the nightcap sits on it, the medal rests on his front arm and the dumbbell lies on the floor beside him: turn him and they turn with him.
+- **What lies on his head is pressed onto it**, like his face: the plasters, the vein, the tear.
+- **The comic effects stay flat and face the viewer.** Sparks, drops, confetti, puffs, bubbles and lettering are the drawing's own, standing in front of him or behind him, and they keep facing whoever looks while he turns.
+- **He still never lifts an arm.** Standing tall stretches his arms taller and lifts his head with them; Side glance leans his head. Nothing else moves.
+- **The loader and the app icons are not here yet.** They are the next part of replacing the drawings with the model ([Brand decisions](./brand-decisions.md#16-the-3d-poulpy-replaces-the-drawings), decision 16); the apps and the website still show the 2D drawings.
 
 ## Turning in short steps
 
@@ -87,6 +98,7 @@ The same jump can turn him: each jump takes him one step around, the steps being
 | [poulpy_blue_turn.glb](../design/poulpy-3d/poulpy_blue_turn.glb) | The blue side with the animation `turn`: one full turn in short steps, made to loop |
 | [poulpy_ember_turn.glb](../design/poulpy-3d/poulpy_ember_turn.glb) | The ember side with the same animation |
 | [`design/poulpy-3d/model.mjs`](../design/poulpy-3d/model.mjs) | The shape itself, as plain JavaScript with no dependency |
+| [`design/poulpy-3d/poses.mjs`](../design/poulpy-3d/poses.mjs) | His twelve poses, the same way |
 | [`design/poulpy-3d/motion.mjs`](../design/poulpy-3d/motion.mjs) | How he moves, the same way |
 
 The glTF files open in any 3D tool or engine. Poulpy stands on the floor (y = 0, y up) and faces +z; his head is about one unit from centre to edge. In the two files that stand still, each part is its own named mesh (`head`, `head_lining`, `arm_1` to `arm_8` and their `_lining`, `eye_left`, `eye_left_shine`, `cheek_left`, `mouth`, `gleam`, plus `brow_left` and `brow_right` on the ember side; left and right are Poulpy's own), so a part can be recoloured, hidden or animated on its own.
@@ -104,6 +116,8 @@ Everything that defines him is at the top of `model.mjs`, in three plainly named
 - `MOODS`: for each of his six moods, the side of the plush and the face he makes. `buildPoulpy3d({ mood, tone })` builds him in one, tinted with that mood's `mood` token.
 - `LOOK`: the light, the shadow band, the gleam and the outline.
 
+His poses are in `poses.mjs`: `POSES` gives each one its mood, its face, what he wears, what lies on his head and the effects around him, all in the drawing's coordinates, and `buildPoulpyPose({ pose })` builds it.
+
 How he moves is in `motion.mjs`: `TURN` for his turn, `JUMP` for his jump and `RIG` for where the arms bend.
 
 His colours are the `color.poulpy` tokens of [`design/tokens.json`](../design/tokens.json), never written into the model.
@@ -114,4 +128,4 @@ Edit, then regenerate and look at the workshop's page (`npm run storybook` in `w
 node design/build-poulpy-3d.mjs
 ```
 
-CI runs it with `--check` and fails when the committed glTF files no longer match `model.mjs` and `motion.mjs`. A new mood or pose in 3D starts as a new entry in `FACES`, or a new part in `buildPoulpy3d`; a new move starts next to `TURN` and `JUMP` in `motion.mjs`. Both follow the [brand rules](./brand.md#character-rules) like any drawing.
+CI runs it with `--check` and fails when the committed glTF files no longer match `model.mjs` and `motion.mjs`. A new mood in 3D starts as a new entry in `FACES` and `MOODS`, a new pose as a new entry in `POSES`; a new move starts next to `TURN` and `JUMP` in `motion.mjs`. Both follow the [brand rules](./brand.md#character-rules) like any drawing.

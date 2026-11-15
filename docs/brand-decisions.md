@@ -118,7 +118,7 @@ This narrows [decision 8](#8-poulpy-never-lifts-his-tentacles) without overturni
 It is done in steps, each reviewed on the [Poulpy in 3D](./poulpy-3d.md) page before the apps change:
 
 1. The six moods on the model: faces and shades. Done with this decision.
-2. The twelve poses and their props, then the loader and the app icons.
+2. The twelve poses and their props (done), then the loader and the app icons.
 3. Pictures rendered from the model, generated for Android, iOS and the website in place of the drawings.
 4. Live 3D on Home and on the end-of-session screen, each from an agreed mockup.
 
