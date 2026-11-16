@@ -309,19 +309,16 @@ private fun FormatLine(format: WorkoutFormat, label: String, onClick: () -> Unit
         Row(
             Modifier
                 .heightIn(min = 48.dp)
+                .clip(CircleShape)
+                .background(colors.primaryContainer)
                 .clickable(onClickLabel = description, role = Role.Button, onClick = onClick)
-                .semantics { contentDescription = description },
+                .semantics { contentDescription = description }
+                .padding(horizontal = 12.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-            Row(
-                Modifier.background(colors.primaryContainer, CircleShape).padding(horizontal = 12.dp, vertical = 6.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-            ) {
-                Icon(format.icon, contentDescription = null, tint = colors.onPrimaryContainer, modifier = Modifier.size(18.dp))
-                Text(label, fontWeight = FontWeight.ExtraBold, color = colors.onPrimaryContainer)
-            }
+            Icon(format.icon, contentDescription = null, tint = colors.onPrimaryContainer, modifier = Modifier.size(18.dp))
+            Text(label, fontWeight = FontWeight.ExtraBold, color = colors.onPrimaryContainer)
             Icon(Lucide.ChevronDown, contentDescription = null, tint = colors.onSurfaceVariant, modifier = Modifier.size(16.dp))
         }
     }
