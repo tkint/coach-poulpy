@@ -95,8 +95,7 @@
     "done": "OK",
     "cancel": "Annuler",
     "close": "Fermer",
-    "share": "Partager",
-    "saveToDevice": "Enregistrer sur l’appareil"
+    "share": "Partager"
   },
   "exercises": {
     "search": "Nom, muscle ou matériel",
@@ -437,6 +436,14 @@
   "shareImage": {
     "button": "Partager en image",
     "chooser": "Partager votre séance"
+  },
+  "shareWorkout": {
+    "title": "Partager cette séance",
+    "why": "Choisissez comment l’envoyer.",
+    "contact": "Partager à un contact",
+    "contactNote": "Dans un message, un e-mail ou une autre appli",
+    "save": "Enregistrer sur l’appareil",
+    "saveNote": "Garder le fichier dans un dossier de votre choix"
   },
   "shareSession": {
     "title": "Partager cette séance",

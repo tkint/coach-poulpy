@@ -23,6 +23,27 @@ private struct WorkoutFileItem: Transferable {
     }
 }
 
+/// A workout's file for the system's save dialog, to keep it in Files on the phone.
+private struct WorkoutDocument: FileDocument {
+    static var readableContentTypes: [UTType] { [.poulpyWorkout] }
+
+    let fileName: String
+    let content: String
+
+    init(_ file: WorkoutFileExport) {
+        fileName = file.fileName
+        content = file.content
+    }
+
+    init(configuration: ReadConfiguration) throws {
+        throw CocoaError(.fileReadUnsupportedScheme)
+    }
+
+    func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
+        FileWrapper(regularFileWithContents: Data(content.utf8))
+    }
+}
+
 /// What to open over the workout page.
 private enum Cover: Identifiable {
     case builder, player, copy
@@ -45,6 +66,9 @@ struct WorkoutPageView: View {
     @State private var cover: Cover?
     @State private var picking = false
     @State private var deleting = false
+    @State private var sharing = false
+    /// The workout's file, while the system's save dialog is open.
+    @State private var saving: WorkoutDocument?
     /// The exercise whose details are open; nil when none.
     @State private var detailing: DetailTarget?
     private let figure: BodyFigure
@@ -95,6 +119,19 @@ struct WorkoutPageView: View {
         .sheet(isPresented: $picking) {
             PlanSheet(name: state.name, planned: state.plans) { days in page.model.setDays(days: days) }
         }
+        .sheet(isPresented: $sharing) {
+            if #available(iOS 16.4, *) {
+                shareSheet(state).presentationCornerRadius(24)
+            } else {
+                shareSheet(state)
+            }
+        }
+        .fileExporter(
+            isPresented: Binding(get: { saving != nil }, set: { if !$0 { saving = nil } }),
+            document: saving,
+            contentType: .poulpyWorkout,
+            defaultFilename: saving?.fileName
+        ) { _ in saving = nil }
         .alert(state.deletePrompt.title, isPresented: $deleting) {
             Button("action.cancel", role: .cancel) {}
             Button("action.delete", role: .destructive) { page.model.delete() }
@@ -107,6 +144,24 @@ struct WorkoutPageView: View {
             case .player: PlayerView(graph: graph, workoutId: workoutId)
             case .copy: BuilderView(graph: graph, workoutId: nil, copyOf: workoutId)
             }
+        }
+    }
+
+    /// The ways the workout goes out: to a contact in any app, or saved to Files on the phone.
+    private func shareSheet(_ state: WorkoutPageState) -> some View {
+        ShareSheetView(title: "shareWorkout.title", why: "shareWorkout.why") {
+            ShareLink(item: WorkoutFileItem(make: { page.model.exportFile() }), preview: SharePreview(state.name)) {
+                ShareFormatRow(title: "shareWorkout.contact", note: "shareWorkout.contactNote", icon: .share2)
+            }
+            .buttonStyle(.plain)
+            Divider().overlay(PoulpyColor.outline)
+            Button {
+                sharing = false
+                saving = page.model.exportFile().map { WorkoutDocument($0) }
+            } label: {
+                ShareFormatRow(title: "shareWorkout.save", note: "shareWorkout.saveNote", icon: .download)
+            }
+            .buttonStyle(.plain)
         }
     }
 
@@ -125,12 +180,7 @@ struct WorkoutPageView: View {
             .accessibilityLabel("action.back")
             Spacer()
             Menu {
-                ShareLink(
-                    item: WorkoutFileItem(make: { page.model.exportFile() }),
-                    preview: SharePreview(state.name)
-                ) {
-                    Label("action.share", lucide: .share2)
-                }
+                Button { sharing = true } label: { Label("action.share", lucide: .share2) }
                 if state.editable {
                     Button { cover = .copy } label: { Label("action.copy", lucide: .copy) }
                 }

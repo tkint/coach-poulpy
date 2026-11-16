@@ -95,8 +95,7 @@
     "done": "Done",
     "cancel": "Cancel",
     "close": "Close",
-    "share": "Share",
-    "saveToDevice": "Save to device"
+    "share": "Share"
   },
   "exercises": {
     "search": "Name, muscle or equipment",
@@ -437,6 +436,14 @@
   "shareImage": {
     "button": "Share as an image",
     "chooser": "Share your session"
+  },
+  "shareWorkout": {
+    "title": "Share this workout",
+    "why": "Pick how to send it.",
+    "contact": "Share to a contact",
+    "contactNote": "In a message, an email or any app",
+    "save": "Save to device",
+    "saveNote": "Keep the file in a folder you pick"
   },
   "shareSession": {
     "title": "Share this session",

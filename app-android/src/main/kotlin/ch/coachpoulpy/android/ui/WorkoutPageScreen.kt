@@ -100,7 +100,8 @@ fun WorkoutPageScreen(
     val figure = remember(graph, memory) { graph.profile(memory).profile.value.bodyFigure ?: BodyFigure.SHOULDERS }
     val shareTitle = stringResource(R.string.workout_shareTitle)
     var menu by remember { mutableStateOf(false) }
-    // The system's save dialog, for keeping the file on the phone: the share sheet only offers apps. The generic binary
+    var sharing by remember { mutableStateOf(false) }
+    // The system's save dialog, for keeping the file on the phone: the system's share sheet only offers apps. The generic binary
     // type keeps Android from adding its own extension (the same as the .FIT file).
     val saveFile = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument(FIT_MIME_TYPE)) { target ->
         target?.let { model.exportFile()?.let { file -> saveWorkoutFile(context, file, it) } }
@@ -137,12 +138,7 @@ fun WorkoutPageScreen(
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.action_share)) },
                                 leadingIcon = { Icon(Lucide.Share2, contentDescription = null) },
-                                onClick = { menu = false; shareWorkout(context, model.exportFile(), shareTitle) },
-                            )
-                            DropdownMenuItem(
-                                text = { Text(stringResource(R.string.action_saveToDevice)) },
-                                leadingIcon = { Icon(Lucide.Download, contentDescription = null) },
-                                onClick = { menu = false; model.exportFile()?.let { saveFile.launch(it.fileName) } },
+                                onClick = { menu = false; sharing = true },
                             )
                             if (state.editable) {
                                 DropdownMenuItem(
@@ -188,6 +184,23 @@ fun WorkoutPageScreen(
         )
     }
 
+    if (sharing) {
+        ShareSheet(
+            title = R.string.shareWorkout_title,
+            why = R.string.shareWorkout_why,
+            choices = listOf(
+                ShareChoice(Lucide.Share2, R.string.shareWorkout_contact, R.string.shareWorkout_contactNote) {
+                    sharing = false
+                    shareWorkout(context, model.exportFile(), shareTitle)
+                },
+                ShareChoice(Lucide.Download, R.string.shareWorkout_save, R.string.shareWorkout_saveNote) {
+                    sharing = false
+                    model.exportFile()?.let { saveFile.launch(it.fileName) }
+                },
+            ),
+            onDismiss = { sharing = false },
+        )
+    }
     if (deleting) DeleteWorkoutDialog(state.deletePrompt, onDelete = { deleting = false; model.delete() }, onDismiss = { deleting = false })
 
     detailing?.let { slug ->
