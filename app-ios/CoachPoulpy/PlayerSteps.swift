@@ -73,7 +73,7 @@ enum PlayerSteps {
         @ViewBuilder message: () -> Message
     ) -> some View {
         Spacer(minLength: 0)
-        Image(PoulpyDrawing.straining.imageName).resizable().scaledToFit().frame(width: 130, height: 117).accessibilityHidden(true)
+        Image(PoulpyDrawing.straining.imageName).resizable().scaledToFit().frame(width: 180, height: 162).accessibilityHidden(true)
         partLine(state)
         Text(state.title).font(PoulpyFont.title).multilineTextAlignment(.center)
         message()
@@ -113,7 +113,7 @@ enum PlayerSteps {
         let showDone = !state.isTimed || alwaysDone
         Group {
         Spacer(minLength: 0)
-        Image(PoulpyDrawing.straining.imageName).resizable().scaledToFit().frame(width: 130, height: 117).accessibilityHidden(true)
+        Image(PoulpyDrawing.straining.imageName).resizable().scaledToFit().frame(width: 180, height: 162).accessibilityHidden(true)
         partLine(state)
         HStack(spacing: PoulpySpace.sm) {
             if let role = state.roleLabel { recoverTag(role) }
@@ -198,7 +198,7 @@ enum PlayerSteps {
                 .stroke(PoulpyMood.recovering.tone, style: StrokeStyle(lineWidth: 12 * 260 / 200, lineCap: .round))
                 .rotationEffect(.degrees(-90))
             VStack(spacing: PoulpySpace.xs) {
-                Image(PoulpyDrawing.sideGlance.imageName).resizable().scaledToFit().frame(width: 92, height: 83).accessibilityHidden(true)
+                Image(PoulpyDrawing.sideGlance.imageName).resizable().scaledToFit().frame(width: 112, height: 102).accessibilityHidden(true)
                 Text(clockPadded(remaining)).font(PoulpyFont.timer)
             }
         }
