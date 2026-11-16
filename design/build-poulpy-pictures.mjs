@@ -14,9 +14,9 @@ import { dirname, join } from 'node:path'
 import { inflateSync } from 'node:zlib'
 import { fileURLToPath } from 'node:url'
 import { buildPoulpy3d, MOODS } from './poulpy-3d/model.mjs'
-import { buildPoulpyPose, POSES } from './poulpy-3d/poses.mjs'
+import { buildPoulpyPose, CONFETTI, POSES } from './poulpy-3d/poses.mjs'
 import { paintPoulpy, pngOf } from './poulpy-3d/picture.mjs'
-import { armJoints, armSkin, createFollow, createJump, posePoulpy } from './poulpy-3d/motion.mjs'
+import { armJoints, armSkin, createCheer, createFollow, createJump, posePoulpy } from './poulpy-3d/motion.mjs'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const tokens = JSON.parse(readFileSync(join(root, 'design/tokens.json'), 'utf8'))
@@ -166,6 +166,36 @@ const MOVE_KINDS = {
       files[`${MOVES.dir}/mood_${mood}_${kind}.png`] = pngOf(sheet, MOVES.columns * width, rowsOf * height)
     }
   }
+}
+
+// The champion's celebration at the end of a session: he jumps for joy three times with his medal and confetti, then settles on his still
+// picture. The same shot as the still (pose_champion), on a canvas `pad` pixels bigger each way for the confetti, in sheets of `perSheet` frames
+// (`columns` across) so no sheet is wider or taller than a phone's GPU takes. The last `fade` seconds the confetti shrinks away, and the last frame is his still.
+// The numbers are also in PoulpyCheer.kt, which the build checks.
+const CHEER = { frames: 72, fps: 20, columns: 6, perSheet: 24, picture: 252, pad: 110, fade: 0.7 }
+{
+  const kotlin = readFileSync(join(root, 'shared/src/commonMain/kotlin/ch/coachpoulpy/shared/PoulpyCheer.kt'), 'utf8')
+  const picture = { width: Math.round((CHEER.picture * FRAME.width) / FRAME.height), height: CHEER.picture }
+  const size = { width: picture.width + 2 * CHEER.pad, height: picture.height + 2 * CHEER.pad }
+  for (const [name, value] of [['FRAMES', CHEER.frames], ['FPS', CHEER.fps], ['COLUMNS', CHEER.columns], ['SHEET_FRAMES', CHEER.perSheet], ['FRAME_WIDTH', size.width], ['FRAME_HEIGHT', size.height], ['PICTURE_WIDTH', picture.width], ['PICTURE_HEIGHT', picture.height]]) {
+    if (!new RegExp(`const val ${name} = ${value}\\b`).test(kotlin)) { console.error(`PoulpyCheer.kt: ${name} must be ${value}, as in design/build-poulpy-pictures.mjs.`); process.exit(1) }
+  }
+  const field = (2 * Math.atan((size.height / picture.height) * Math.tan((14 * Math.PI) / 180)) * 180) / Math.PI
+  const model = buildPoulpyPose({ pose: 'champion', effects: false, tones: tokens.mood, colours })
+  const confetti = CONFETTI.colours.map((colour) => (colour === 'ember' ? colours.ember : colour))
+  const cheer = createCheer(), rows = Math.ceil(CHEER.perSheet / CHEER.columns)
+  const sheets = Array.from({ length: CHEER.frames / CHEER.perSheet }, () => new Uint8Array(CHEER.columns * size.width * rows * size.height * 4))
+  for (let i = 0; i < CHEER.frames; i++) {
+    const last = i === CHEER.frames - 1
+    // The last frame is exactly his still picture: standing, the medal at rest, no confetti.
+    const pose = last ? { ...createCheer().pose(), confetti: [] } : i ? cheer.advance(1 / CHEER.fps) : cheer.pose()
+    pose.confettiScale = Math.min((CHEER.frames - 1 - i) / CHEER.fps / CHEER.fade, 1)
+    const { model: posed, placed } = posePoulpy(model, pose, { confetti })
+    const pixels = paintPoulpy(posed, { ...size, ...SHOT, field, placed, gather: 1 - Math.min((pose.lift ?? 0) * 0.4, 0.3) })
+    const sheet = sheets[Math.floor(i / CHEER.perSheet)], at = i % CHEER.perSheet, x = (at % CHEER.columns) * size.width, y = Math.floor(at / CHEER.columns) * size.height
+    for (let row = 0; row < size.height; row++) sheet.set(pixels.subarray(row * size.width * 4, (row + 1) * size.width * 4), ((y + row) * CHEER.columns * size.width + x) * 4)
+  }
+  sheets.forEach((sheet, n) => { files[`${MOVES.dir}/pose_champion_cheer_${n + 1}.png`] = pngOf(sheet, CHEER.columns * size.width, rows * size.height) })
 }
 
 // The app icons: the same pictures, fitted into the icon's square on the dark theme's background, as the owner asked.
