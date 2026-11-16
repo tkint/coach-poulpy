@@ -132,8 +132,7 @@ data class BuilderPartOption(val kind: PartKind, val name: String, val note: Str
 
 data class BuilderState(
     val name: String,
-    /** Null until it is chosen, once, when the workout is created; the screen asks first. */
-    val format: WorkoutFormat?,
+    val format: WorkoutFormat,
     val formatLabel: String,
     val parts: List<BuilderPart>,
     /** Every exercise and rest of every part, repeats opened up, in order. */
@@ -147,11 +146,18 @@ data class BuilderState(
 /** A card of the format sheet: Circuit or Sets, with its name. */
 data class WorkoutFormatOption(val format: WorkoutFormat, val label: String)
 
+/**
+ * What switching the workout to [format] would do. When [asks] is false both choices give the
+ * same steps (an empty workout, say) and the switch applies at once; otherwise the screen
+ * offers "Follow the new format" with [followLine] and "Keep the order" with [keepLine].
+ */
+data class FormatChange(val format: WorkoutFormat, val formatLabel: String, val asks: Boolean, val followLine: String, val keepLine: String)
+
 data class StepRoleOption(val role: StepRole, val label: String)
 
 /**
- * The workout builder. The format, Circuit or Sets, is chosen once when the workout is
- * created. The workout is parts in order (warm-up, work parts, cool down), each a list of
+ * The workout builder. The format, Circuit or Sets, is chosen when the workout is created and
+ * can be switched from the builder ([changeFormat]). The workout is parts in order (warm-up, work parts, cool down), each a list of
  * steps (exercises and rests) and repeats that run the steps inside them several times.
  * In a circuit an exercise is one set and the repeat sets the rounds; in Sets an exercise
  * has its sets and the rest between them. A walk or a run has a duration and an intensity.
@@ -163,8 +169,8 @@ class BuilderModel internal constructor(
     compiler: TimelineCompiler,
     languageCode: String,
     private val units: () -> UnitSystem = { UnitSystem.METRIC },
-    /** An exercise to add once the format is chosen, for an exercise page's "Add to a workout". */
-    private var pendingSlug: String? = null,
+    /** An exercise to start with, for an exercise page's "Add to a workout". */
+    firstExercise: String? = null,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private val labels = Labels(languageCode, units)
@@ -172,10 +178,16 @@ class BuilderModel internal constructor(
     private var draft = initial.mapLeaves { (it as? DraftEntry)?.inUnits(units()) ?: it }
     private var addedKey: String? = null
     private val mutableState = MutableStateFlow(render(draft))
+    init {
+        firstExercise?.let { slug ->
+            val work = draft.parts.first { it.kind == PartKind.WORK }
+            add(slug, work.key, (work.steps.singleOrNull() as? DraftRepeat)?.key)
+        }
+    }
 
     val isEditing: Boolean = initial.id != null
 
-    /** What the format sheet offers, asked once for a new workout. */
+    /** What the format sheet offers: when a workout is created, and from the builder's format line. */
     val formatOptions: List<WorkoutFormatOption> = WorkoutFormat.entries.map { WorkoutFormatOption(it, labels.format(it)) }
 
     val roleOptions: List<StepRoleOption> = StepRole.entries.map { StepRoleOption(it, labels.roleName(it)) }
@@ -189,17 +201,39 @@ class BuilderModel internal constructor(
 
     fun rename(name: String) = edit { copy(name = name) }
 
-    /**
-     * Sets the format of a new workout; it never changes after. In a circuit the work part
-     * starts as a repeat done three times, which holds the exercise waiting to be added.
-     */
-    fun chooseFormat(format: WorkoutFormat) {
-        if (draft.format != null) return
-        edit { copy(format = format, parts = parts.map { if (it.kind == PartKind.WORK && it.steps.isEmpty()) DraftPart.new(PartKind.WORK, format).copy(key = it.key) else it }) }
-        val slug = pendingSlug ?: return
-        pendingSlug = null
-        val work = draft.parts.first { it.kind == PartKind.WORK }
-        add(slug, work.key, (work.steps.singleOrNull() as? DraftRepeat)?.key)
+    /** What switching to [format] would do, or null when the workout already has it. */
+    fun formatChange(format: WorkoutFormat): FormatChange? {
+        if (draft.format == format) return null
+        val follow = draft.switchedTo(format, FormatSwitch.FOLLOW_NEW_FORMAT)
+        val keep = draft.switchedTo(format, FormatSwitch.KEEP_ORDER)
+        return FormatChange(format, labels.format(format), asks = follow.parts != keep.parts, followLine = orderLine(follow), keepLine = orderLine(keep))
+    }
+
+    /** How the first two steps of the first work part are done: "3 rounds of Bench press, Row", or "Bench press 3 times, then Row 3 times". */
+    private fun orderLine(of: WorkoutDraft): String {
+        fun name(entry: DraftEntry) = catalog[entry.exercise]?.let { labels.text(it.name) } ?: entry.exercise.value
+        val steps = of.parts.firstOrNull { it.kind == PartKind.WORK }?.steps.orEmpty().filter { it !is DraftRest }.take(2)
+        val parts = steps.mapNotNull { step ->
+            when (step) {
+                is DraftEntry -> if (step.hasSets()) labels.timesOf(name(step), step.sets) else name(step)
+                is DraftRepeat -> {
+                    val entries = step.steps.filterIsInstance<DraftEntry>()
+                    if (entries.size == 1) labels.timesOf(name(entries.single()), step.times) else labels.roundsOf(step.times, entries.joinToString(", ") { name(it) })
+                }
+                is DraftRest -> null
+            }
+        }
+        return when (parts.size) {
+            0 -> ""
+            1 -> parts[0]
+            else -> labels.then(parts[0], parts[1])
+        }
+    }
+
+    /** Switches the workout to [format], its steps rewritten as [how] says; nothing is saved until [save]. */
+    fun changeFormat(format: WorkoutFormat, how: FormatSwitch) {
+        if (draft.format == format) return
+        edit { switchedTo(format, how) }
     }
 
     /** Adds a part where it belongs: a warm-up first, a cool down last, a work part after the last one. */
@@ -232,7 +266,7 @@ class BuilderModel internal constructor(
      */
     fun add(slug: String, partKey: String, repeatKey: String? = null, role: StepRole = StepRole.WORK) {
         val exercise = catalog[ExerciseSlug(slug)] ?: return
-        val format = draft.format ?: return
+        val format = draft.format
         val entry = DraftEntry.new(exercise, format, units(), inRepeat = repeatKey != null)
             .copy(role = role)
             .let { if (it.walkOrRun) it.withDuration(DurationKind.DISTANCE) else it }
@@ -609,12 +643,12 @@ class BuilderModel internal constructor(
         return BuilderState(
             name = draft.name,
             format = draft.format,
-            formatLabel = draft.format?.let { labels.format(it) } ?: "",
+            formatLabel = labels.format(draft.format),
             parts = parts,
             rows = rows,
             partOptions = partOptions,
             addedKey = addedKey,
-            canSave = draft.format != null && rows.any { !it.isRest } &&
+            canSave = rows.any { !it.isRest } &&
                 draft.parts.all { it.steps.isNotEmpty() } && parts.all { part -> part.steps.all { it.repeatGroup?.rows?.isNotEmpty() ?: true } },
         )
     }

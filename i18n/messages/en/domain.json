@@ -150,6 +150,9 @@
     "perRound": "{sets} per round, {rounds}",
     "betweenSets": "{rest} between sets",
     "hold": "{duration} hold",
+    "roundsOf": "{rounds} of {names}",
+    "timesOf": "{name} {times}",
+    "then": "{first}, then {second}",
     "parts": "{count, plural, one {# part} other {# parts}}"
   },
   "unit": {
@@ -193,6 +196,8 @@
     "nappingLine": "Your tentacles are still lit. Wake me up with a session.",
     "painTitle": "Taking it easy",
     "painLine": "I’m patched up with you. No catching up, just rest.",
+    "gentleTitle": "Tentacle {lit, number} lit!",
+    "gentleLine": "A gentle session counts, and so does rest.",
     "workoutPainOne": "Your {area} still hurts. Go gently, I’ll keep an eye on it with you.",
     "workoutPainMany": "Your {areas} still hurt. Go gently, I’ll keep an eye on them with you."
   },
@@ -219,7 +224,8 @@
     "summarySkipped": "{count, number} skipped",
     "championHeading": "Champion!",
     "quote": "“Worth it. Probably.”",
-    "championQuote": "“Eight tentacles. No regrets.”"
+    "championQuote": "“Eight tentacles. No regrets.”",
+    "gentleQuote": "“Listening to your body is training too.”"
   },
   "recap": {
     "tileDuration": "Duration",

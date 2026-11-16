@@ -150,6 +150,9 @@
     "perRound": "{sets} par tour, {rounds}",
     "betweenSets": "{rest} entre les séries",
     "hold": "{duration} de maintien",
+    "roundsOf": "{rounds} de {names}",
+    "timesOf": "{name} {times}",
+    "then": "{first}, puis {second}",
     "parts": "{count, plural, one {# partie} many {# parties} other {# parties}}"
   },
   "unit": {
@@ -193,6 +196,8 @@
     "nappingLine": "Tes tentacules sont toujours allumés. Réveille-moi avec une séance.",
     "painTitle": "On y va doucement",
     "painLine": "Je suis rafistolé avec toi. Pas de rattrapage, juste du repos.",
+    "gentleTitle": "Tentacule {lit, number} allumé !",
+    "gentleLine": "Une séance tout en douceur compte, le repos aussi.",
     "workoutPainOne": "Ça fait encore mal : {area}. Vas-y doucement, je garde un œil dessus avec toi.",
     "workoutPainMany": "Ça fait encore mal : {areas}. Vas-y doucement, je garde un œil dessus avec toi."
   },
@@ -219,7 +224,8 @@
     "summarySkipped": "Séries passées : {count, number}",
     "championHeading": "Champion !",
     "quote": "« Ça valait le coup. Probablement. »",
-    "championQuote": "« Huit tentacules. Zéro regret. »"
+    "championQuote": "« Huit tentacules. Zéro regret. »",
+    "gentleQuote": "« Écouter son corps, c’est aussi s’entraîner. »"
   },
   "recap": {
     "tileDuration": "Durée",

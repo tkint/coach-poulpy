@@ -34,9 +34,8 @@ class PlayerModelTest {
 
     /** Twice 10 push-ups and a 45 s rest, then a 30 s plank. */
     private fun workout(): WorkoutId {
-        val builder = graph.createWorkout("en")
+        val builder = graph.createWorkout(WorkoutFormat.SETS, "en")
         builder.rename("Quick")
-        builder.chooseFormat(WorkoutFormat.SETS)
         builder.addRepeat(builder.work)
         val repeat = builder.state.value.parts.single().steps.single().key
         builder.add("push-up", builder.work, repeat)
@@ -47,12 +46,12 @@ class PlayerModelTest {
         return WorkoutId(builder.save()!!)
     }
 
-    private fun player(id: WorkoutId): PlayerModel {
+    private fun player(id: WorkoutId, painActive: Boolean = false): PlayerModel {
         val workout = graph.store.latestWorkout(id)!!
         return PlayerModel(
             workout, graph.compiler.compile(workout), graph.catalog, graph.store, "en",
             sessionId = "run-1", events = graph.store.events("run-1"),
-            clock = clock, scope = CoroutineScope(StandardTestDispatcher()),
+            clock = clock, scope = CoroutineScope(StandardTestDispatcher()), painActive = { painActive },
         )
     }
 
@@ -115,6 +114,17 @@ class PlayerModelTest {
         assertEquals(clock.now().toEpochMilliseconds() - 2.minutes.inWholeMilliseconds, finished.startedAtMillis)
         assertEquals(listOf("Time" to "2:00", "Sets" to "3"), finished.stats.map { it.label to it.value })
         assertEquals(1, finished.poulpy.tentaclesLit)
+    }
+
+    @Test
+    fun finishesGentlyWhilePainOrRehabIsActive() {
+        val player = player(workout(), painActive = true)
+        player.start()
+        player.stop()
+        val finished = player.finished(UnitSystem.METRIC)!!
+        assertEquals(PoulpyDrawing.PATCHED_UP, finished.drawing)
+        assertEquals("\u201cListening to your body is training too.\u201d", finished.quote)
+        assertEquals("A gentle session counts, and so does rest.", finished.poulpy.line)
     }
 
     @Test

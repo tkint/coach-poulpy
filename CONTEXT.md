@@ -47,7 +47,7 @@ A fact worth knowing before picking an exercise, worked out from the catalog rat
 _Avoid_: Keyword, label
 
 **Format**:
-How a workout is built, chosen when it is created and kept: a **circuit** goes round several exercises, each done once per round, so its exercises have no sets; **sets** does one exercise at a time, all its sets with a rest between them, then the next.
+How a workout is built, chosen when it is created and changeable from the builder (the exercises then either follow the new format or keep their order): a **circuit** goes round several exercises, each done once per round, so its exercises have no sets; **sets** does one exercise at a time, all its sets with a rest between them, then the next.
 _Avoid_: Workout type, kind, sport, category
 
 **Workout**:

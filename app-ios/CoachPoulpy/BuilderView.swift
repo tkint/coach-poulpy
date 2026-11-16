@@ -10,11 +10,14 @@ struct BuilderView: View {
     /// The exercise whose details are open over the picker; nil when none.
     @State private var previewing: PreviewTarget?
     @State private var addingPart = false
+    @State private var changingFormat = false
+    /// The switch waiting for "Follow the new format" or "Keep the order"; nil when none.
+    @State private var askingOrder: FormatChange?
     @Environment(\.dismiss) private var dismiss
 
-    /// [firstExercise] starts a new workout that already holds it, from an exercise page;
+    /// [newFormat] starts a new workout in that format, and [firstExercise] makes it already hold that exercise, from an exercise page;
     /// [copyOf] starts an unsaved copy of that workout; [importing] starts the workout of a file opened from another app.
-    init(graph: AppGraph, workoutId: String?, firstExercise: String? = nil, copyOf: String? = nil, importing: WorkoutImport? = nil) {
+    init(graph: AppGraph, workoutId: String?, newFormat: WorkoutFormat? = nil, firstExercise: String? = nil, copyOf: String? = nil, importing: WorkoutImport? = nil) {
         self.graph = graph
         _builder = StateObject(wrappedValue: {
             let language = Language.code
@@ -25,10 +28,12 @@ struct BuilderView: View {
                 model = copy
             } else if let workoutId, let edit = graph.editWorkout(workoutId: workoutId, languageCode: language) {
                 model = edit
-            } else if let firstExercise {
-                model = graph.createWorkoutWith(exerciseSlug: firstExercise, languageCode: language)
+            } else if let newFormat, let firstExercise {
+                model = graph.createWorkoutWith(format: newFormat, exerciseSlug: firstExercise, languageCode: language)
+            } else if let newFormat {
+                model = graph.createWorkout(format: newFormat, languageCode: language)
             } else {
-                model = graph.createWorkout(languageCode: language)
+                fatalError("A builder opens on a workout, a copy, an import or a new one with its format")
             }
             return Observed(model, current: model.current, watch: model.watch, close: { $0.close() })
         }())
@@ -48,16 +53,14 @@ struct BuilderView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
                     PoulpyTextField(label: "builder.name", text: Binding(get: { state.name }, set: { model.rename(name: $0) }))
-                    if let format = state.format {
-                        formatLine(format)
-                        ForEach(state.parts, id: \.key) { part in
-                            partBlock(part)
-                        }
-                        Button { addingPart = true } label: {
-                            dashedTile(Text("builder.addPart"), icon: .plus, height: 56)
-                        }
-                        .buttonStyle(.plain)
+                    formatLine(state.format)
+                    ForEach(state.parts, id: \.key) { part in
+                        partBlock(part)
                     }
+                    Button { addingPart = true } label: {
+                        dashedTile(Text("builder.addPart"), icon: .plus, height: 56)
+                    }
+                    .buttonStyle(.plain)
                 }
                 .padding(.horizontal, PoulpySpace.lg)
                 .padding(.top, 8)
@@ -109,9 +112,19 @@ struct BuilderView: View {
                     StepSheet(graph: graph, model: model, row: row, parts: state.parts, format: state.format) { editing = nil }
                 }
             }
-            // A new workout asks for its format first; closing the sheet without one leaves the builder.
-            .sheet(isPresented: Binding(get: { state.format == nil }, set: { if !$0 && state.format == nil { dismiss() } })) {
-                FormatSheet(options: model.formatOptions) { model.chooseFormat(format: $0) }
+            .sheet(isPresented: $changingFormat) {
+                FormatSheet(options: model.formatOptions, current: state.format, onChoose: { format in
+                    changingFormat = false
+                    if let change = model.formatChange(format: format) {
+                        if change.asks { askingOrder = change } else { model.changeFormat(format: format, how: .keepOrder) }
+                    }
+                }, onClose: { changingFormat = false })
+            }
+            .sheet(item: $askingOrder) { change in
+                FormatOrderSheet(change: change, onChoose: { choice in
+                    model.changeFormat(format: change.format, how: choice)
+                    askingOrder = nil
+                }, onClose: { askingOrder = nil })
             }
             .sheet(isPresented: $addingPart) {
                 PartSheet(options: state.partOptions) { kind in
@@ -148,18 +161,24 @@ struct BuilderView: View {
 
     private var editingRow: BuilderRow? { state.rows.first { $0.key == editing } }
 
-    /// Under the name: the format as a chip, with a lock, since it was chosen at creation and stays.
+    /// Under the name: the format as a chip with a chevron; a tap opens the format sheet to change it.
     private func formatLine(_ format: WorkoutFormat) -> some View {
         HStack(spacing: 10) {
             fieldLabel("builder.format")
-            Label(state.formatLabel, lucide: formatIcon(format))
-                .font(.poulpy(.subheadline).weight(.heavy))
-                .foregroundStyle(PoulpyColor.onPrimaryContainer)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .background(PoulpyColor.primaryContainer, in: Capsule())
-            LucideIcon(.lock, size: 16).foregroundStyle(PoulpyColor.onSurfaceVariant).accessibilityHidden(true)
-            Text("builder.formatLocked").font(.poulpy(.caption)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+            Button { changingFormat = true } label: {
+                HStack(spacing: 6) {
+                    Label(state.formatLabel, lucide: formatIcon(format))
+                        .font(.poulpy(.subheadline).weight(.heavy))
+                        .foregroundStyle(PoulpyColor.onPrimaryContainer)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(PoulpyColor.primaryContainer, in: Capsule())
+                    LucideIcon(.chevronDown, size: 16).foregroundStyle(PoulpyColor.onSurfaceVariant)
+                }
+                .frame(minHeight: 44)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("builder.changeFormat \(state.formatLabel)")
         }
     }
 
@@ -352,64 +371,6 @@ private func moveToPartMenu(_ key: String, from partKey: String, parts: [Builder
     }
 }
 
-/// The format, asked once when a workout is created: Circuit or Sets, each with what it fits and an example.
-private struct FormatSheet: View {
-    let options: [WorkoutFormatOption]
-    let onChoose: (WorkoutFormat) -> Void
-    @State private var chosen: WorkoutFormat = .circuit
-
-    var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 12) {
-                SheetTitle(title: Text("builder.formatTitle"), subtitle: Text("builder.formatSubtitle"))
-                ForEach(options, id: \.label) { option in
-                    card(option)
-                }
-                Button { onChoose(chosen) } label: {
-                    Text("builder.continue")
-                        .font(.poulpy(.body).weight(.heavy))
-                        .foregroundStyle(PoulpyColor.onPrimary)
-                        .frame(maxWidth: .infinity, minHeight: 52)
-                        .background(PoulpyColor.primary, in: Capsule())
-                }
-                .buttonStyle(.plain)
-            }
-            .padding(20)
-        }
-        .background(PoulpyColor.surface)
-        .presentationDetents([.large])
-    }
-
-    private func card(_ option: WorkoutFormatOption) -> some View {
-        let selected = chosen == option.format
-        let circuit = option.format == .circuit
-        return Button { chosen = option.format } label: {
-            VStack(alignment: .leading, spacing: 6) {
-                HStack(spacing: 10) {
-                    LucideIcon(formatIcon(option.format), size: 20)
-                        .foregroundStyle(selected ? PoulpyColor.onPrimary : PoulpyColor.onPrimaryContainer)
-                        .frame(width: 36, height: 36)
-                        .background(selected ? PoulpyColor.primary : PoulpyColor.primaryContainer, in: Circle())
-                    Text(option.label).font(.custom(PoulpyFontFace.baloo2Bold, size: 19, relativeTo: .headline))
-                }
-                Text(LocalizedStringKey(circuit ? "builder.circuitDescription" : "builder.setsDescription"))
-                    .font(.poulpy(.subheadline))
-                    .fixedSize(horizontal: false, vertical: true)
-                Text(LocalizedStringKey(circuit ? "builder.circuitExample" : "builder.setsExample"))
-                    .font(.poulpy(.caption))
-                    .foregroundStyle(PoulpyColor.onSurfaceVariant)
-            }
-            .foregroundStyle(PoulpyColor.onSurface)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(14)
-            .background(selected ? PoulpyColor.primaryContainer : PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
-            .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(selected ? PoulpyColor.primary : PoulpyColor.outline, lineWidth: selected ? 2 : 1))
-        }
-        .buttonStyle(.plain)
-        .accessibilityAddTraits(selected ? .isSelected : [])
-    }
-}
-
 /// "Add a part": warm-up, work and cool down, each saying where it goes or that it is already there.
 private struct PartSheet: View {
     let options: [BuilderPartOption]
@@ -445,7 +406,7 @@ private struct PartSheet: View {
 }
 
 /// A sheet's title and the line under it.
-private struct SheetTitle: View {
+struct SheetTitle: View {
     let title: Text
     let subtitle: Text
 

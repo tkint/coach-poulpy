@@ -35,6 +35,8 @@ object FinishedScreens {
     /**
      * The finished screen of a session. [workout] and [timeline] are what it followed, null when they are no longer on
      * the phone (the sets and the weight lifted are then left out); [poulpy] is what Poulpy says about the tentacle it lit.
+     * With [gentle] (pain or rehab is set and its time is not up) the finish is calm and stays on the blue side: Poulpy is patched up, with his
+     * own quote and line, and never the champion's jump and confetti, even when this session lit the eighth tentacle.
      */
     internal fun of(
         workoutName: String,
@@ -44,6 +46,7 @@ object FinishedScreens {
         poulpy: PoulpyStatus,
         units: UnitSystem,
         languageCode: String,
+        gentle: Boolean = false,
     ): FinishedScreen {
         val labels = Labels(languageCode)
         val phases = timeline?.phases.orEmpty()
@@ -74,7 +77,7 @@ object FinishedScreens {
                 else -> null
             },
         )
-        val champion = poulpy.tentaclesLit == PoulpyStatus.TENTACLES
+        val champion = poulpy.tentaclesLit == PoulpyStatus.TENTACLES && !gentle
         val start = events.firstOrNull { it is SessionEvent.Started }?.at
         val end = events.lastOrNull { it is SessionEvent.Finished }?.at
         val planned = phases.count { it is Phase.Work }
@@ -84,13 +87,26 @@ object FinishedScreens {
                 if (skipped > 0) " \u00b7 " + DomainText.shareSummarySkipped(languageCode, skipped) else ""
         return FinishedScreen(
             heading = if (champion) DomainText.shareChampionHeading(languageCode) else DomainText.shareWellDone(languageCode),
-            quote = if (champion) DomainText.shareChampionQuote(languageCode) else DomainText.shareQuote(languageCode),
-            drawing = if (champion) PoulpyDrawing.CHAMPION else PoulpyDrawing.EXHAUSTED,
+            quote = when {
+                gentle -> DomainText.shareGentleQuote(languageCode)
+                champion -> DomainText.shareChampionQuote(languageCode)
+                else -> DomainText.shareQuote(languageCode)
+            },
+            drawing = when {
+                gentle -> PoulpyDrawing.PATCHED_UP
+                champion -> PoulpyDrawing.CHAMPION
+                else -> PoulpyDrawing.EXHAUSTED
+            },
             workoutName = workoutName,
             startedAtMillis = start?.toEpochMilliseconds() ?: 0L,
             summary = summary,
             stats = FinishedStats.of(facts, units, languageCode),
-            poulpy = poulpy,
+            poulpy = if (gentle) {
+                poulpy.copy(
+                    mood = PoulpyStatus.Mood.RECOVERING, drawing = PoulpyDrawing.PATCHED_UP,
+                    title = DomainText.poulpyGentleTitle(languageCode, poulpy.tentaclesLit), line = DomainText.poulpyGentleLine(languageCode),
+                )
+            } else poulpy,
         )
     }
 }

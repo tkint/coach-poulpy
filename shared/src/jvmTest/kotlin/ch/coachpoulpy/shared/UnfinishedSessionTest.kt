@@ -31,9 +31,8 @@ class UnfinishedSessionTest {
     private val start = Instant.parse("2023-11-15T12:00:00Z")
 
     private fun workout(name: String = "Quick"): WorkoutId {
-        val builder = graph.createWorkout("en")
+        val builder = graph.createWorkout(WorkoutFormat.SETS, "en")
         builder.rename(name)
-        builder.chooseFormat(WorkoutFormat.SETS)
         builder.add("push-up", builder.work)
         return WorkoutId(builder.save()!!)
     }
