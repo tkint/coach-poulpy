@@ -41,6 +41,32 @@ const lean = shallowRef(0) // degrees he tilts to the side in the air
 const pause = shallowRef(0) // seconds between two jumps, on average
 const eye = shallowRef<'left' | 'right'>('right') // the eye he shuts when he winks, his own: the right one is the design
 const failed = shallowRef(false)
+// The values he is set to, as text to hand over: what the sliders say, for the move or the pose shown.
+const exported = shallowRef('')
+const copied = shallowRef(false)
+function values() {
+  const round = (n: number) => Math.round(n * 1000) / 1000
+  return {
+    page: motion ? `motion: ${motion}` : poses ? 'poses' : moods ? 'moods' : 'sides',
+    ...(posed ? {} : { shown: side.value }),
+    ...(winking ? { eye: eye.value } : {}),
+    view: { turn: round(turn.value), tilt: round(tilt.value), distance: round(distance.value) },
+    ...(jumping ? { jump: { height: round(height.value), tuck: round(tuck.value), landing: round(landing.value), spread: round(spread.value), hang: round(hang.value), lean: round(lean.value), pause: round(pause.value) } } : {}),
+    ...(motion && turning ? { step: step.value, direction: direction.value } : {}),
+    ...(motion && !winking ? { softArms: round(softness.value) } : {}),
+    speed: round(speed.value),
+  }
+}
+async function exportValues() {
+  exported.value = JSON.stringify(values(), null, 2)
+  try {
+    await navigator.clipboard.writeText(exported.value)
+    copied.value = true
+    setTimeout(() => { copied.value = false }, 2000)
+  } catch {
+    copied.value = false // the text below is there to copy by hand
+  }
+}
 
 let scene: ReturnType<typeof createPoulpyScene> | undefined
 let frame = 0
@@ -173,7 +199,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="poulpy-3d">
+  <div class="frame"><div class="poulpy-3d">
     <div ref="stage" class="stage">
       <canvas
         ref="canvas"
@@ -203,6 +229,7 @@ onBeforeUnmount(() => {
       <div class="toggles">
         <button type="button" class="toggle" :aria-pressed="outline" @click="outline = !outline">Outline</button>
         <button type="button" class="toggle" :aria-pressed="spinning" @click="spinning = !spinning">{{ winking ? 'Wink' : jumping ? 'Jump' : motion ? 'Turn' : 'Spin' }}</button>
+        <button type="button" class="toggle export" @click="exportValues">{{ copied ? 'Copied' : 'Export values' }}</button>
       </div>
       <label v-if="!motion" class="slider"><span>Turn</span><input v-model.number="turn" type="range" min="0" max="360" step="1" @input="spinning = false" /><output>{{ Math.round(turn) }}°</output></label>
       <label class="slider"><span>Tilt</span><input v-model.number="tilt" type="range" min="-89" max="89" step="1" /><output>{{ Math.round(tilt) }}°</output></label>
@@ -218,12 +245,23 @@ onBeforeUnmount(() => {
       <label v-if="motion && turning" class="slider"><span>Step</span><input v-model.number="step" type="range" min="1" :max="jumping ? 720 : 180" step="1" /><output>{{ step }}°</output></label>
       <label v-if="motion && !winking" class="slider"><span>Soft arms</span><input v-model.number="softness" type="range" min="0" max="4" step="0.05" /><output>{{ softness.toFixed(2) }}</output></label>
       <label class="slider"><span>Speed</span><input v-model.number="speed" type="range" min="0.1" max="5" step="0.1" @input="spinning = true" /><output>{{ speed.toFixed(1) }}×</output></label>
+      <label v-if="exported" class="exported"><span>Values to hand over</span><textarea readonly rows="8" :value="exported" @focus="($event.target as HTMLTextAreaElement).select()" /></label>
     </div>
-  </div>
+  </div></div>
 </template>
 
 <style scoped>
+.frame { container-type: inline-size; }
 .poulpy-3d { display: flex; flex-direction: column; gap: 12px; margin: 16px 0; }
+.exported { flex: 1 1 100%; display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 700; }
+.exported textarea { width: 100%; box-sizing: border-box; padding: 8px 10px; border-radius: 12px; border: 1px solid var(--cp-outline); background: var(--cp-surface); color: var(--cp-on-surface); font: 12px/1.4 ui-monospace, monospace; resize: vertical; }
+/* Wide enough, the controls are a panel beside him, and the sliders stay in view as the page scrolls. */
+@container (min-width: 760px) {
+  .poulpy-3d { display: grid; grid-template-columns: minmax(0, 1fr) 320px; align-items: start; gap: 24px; }
+  .controls { position: sticky; top: 16px; max-height: calc(100vh - 32px); overflow-y: auto; padding: 16px; border-radius: 24px; background: var(--cp-surface-variant); }
+  .controls .sides { background: var(--cp-surface); }
+  .stage { position: sticky; top: 16px; }
+}
 .stage { position: relative; aspect-ratio: 4 / 3; max-height: 70vh; border-radius: 24px; background: var(--cp-surface-variant); overflow: hidden; }
 .stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: grab; border-radius: 24px; }
 .stage canvas:active { cursor: grabbing; }
@@ -234,6 +272,7 @@ onBeforeUnmount(() => {
 .sides { display: inline-flex; gap: 4px; padding: 4px; border-radius: 999px; background: var(--cp-surface-variant); }
 .sides.moods { flex-wrap: wrap; border-radius: 22px; }
 .toggles { display: inline-flex; gap: 8px; }
+.export { white-space: nowrap; }
 .choice, .toggle { height: 36px; padding: 0 16px; border-radius: 999px; border: 1px solid transparent; font-size: 14px; font-weight: 700; color: var(--cp-on-surface); cursor: pointer; }
 .choice.icon { display: inline-grid; place-items: center; width: 40px; padding: 0; }
 .choice[aria-pressed='true'] { background: var(--cp-primary); color: var(--cp-on-primary); }
