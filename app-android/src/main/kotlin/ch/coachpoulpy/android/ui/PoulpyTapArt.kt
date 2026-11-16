@@ -47,7 +47,7 @@ private object MovePictures {
 }
 
 /**
- * Poulpy's still picture at [artSize], and when [drawing] has a move, a tap on him plays it: his jump, leaning to one side or the other at
+ * Poulpy's still picture at [artSize], and when [drawing] has a move, a tap on him plays it: his move (a jump leaning to one side or the other, or for the happy one sometimes a high jump with a full turn) at
  * random, frame by frame from the 3D model ([PoulpyMoves] in the shared code says which frame and when). The frames are bigger than the
  * picture, so he jumps out of its box and back into it. With the phone's animations turned off a tap does nothing.
  */
@@ -72,7 +72,7 @@ fun PoulpyTapArt(drawing: PoulpyDrawing, description: String, artSize: Dp, modif
             if (canMove) {
                 Modifier.clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {
                     val still = Settings.Global.getFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f) == 0f
-                    if (sheet == null && !still) sheet = PoulpyMoves.sheet(drawing, PoulpyMoves.Side.entries.random())
+                    if (sheet == null && !still) sheet = PoulpyMoves.sheet(drawing, PoulpyMoves.movesOf(drawing).random())
                 }
             } else Modifier,
         ),

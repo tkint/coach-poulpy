@@ -15,10 +15,18 @@ class PoulpyMovesTest {
     }
 
     @Test
-    fun namesTheSheetOfEachSide() {
-        assertEquals("mood_happy_left", PoulpyMoves.sheet(PoulpyDrawing.MOOD_HAPPY, PoulpyMoves.Side.LEFT))
-        assertEquals("mood_proud_right", PoulpyMoves.sheet(PoulpyDrawing.MOOD_PROUD, PoulpyMoves.Side.RIGHT))
-        assertNull(PoulpyMoves.sheet(PoulpyDrawing.MOOD_FUMING, PoulpyMoves.Side.LEFT))
+    fun namesTheSheetOfEachMove() {
+        assertEquals("mood_happy_left", PoulpyMoves.sheet(PoulpyDrawing.MOOD_HAPPY, PoulpyMoves.Move.LEFT))
+        assertEquals("mood_proud_right", PoulpyMoves.sheet(PoulpyDrawing.MOOD_PROUD, PoulpyMoves.Move.RIGHT))
+        assertEquals("mood_happy_spin", PoulpyMoves.sheet(PoulpyDrawing.MOOD_HAPPY, PoulpyMoves.Move.SPIN))
+        assertNull(PoulpyMoves.sheet(PoulpyDrawing.MOOD_FUMING, PoulpyMoves.Move.LEFT))
+    }
+
+    @Test
+    fun onlyHappySpins() {
+        assertEquals(listOf(PoulpyMoves.Move.LEFT, PoulpyMoves.Move.RIGHT, PoulpyMoves.Move.SPIN), PoulpyMoves.movesOf(PoulpyDrawing.MOOD_HAPPY))
+        assertEquals(listOf(PoulpyMoves.Move.LEFT, PoulpyMoves.Move.RIGHT), PoulpyMoves.movesOf(PoulpyDrawing.MOOD_PROUD))
+        assertNull(PoulpyMoves.sheet(PoulpyDrawing.MOOD_PROUD, PoulpyMoves.Move.SPIN))
     }
 
     @Test

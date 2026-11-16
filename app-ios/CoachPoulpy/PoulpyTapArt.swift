@@ -63,7 +63,8 @@ struct PoulpyTapArt: View {
         .contentShape(Rectangle())
         .onTapGesture {
             guard move == nil, !reduceMotion, moves.moves(drawing: drawing),
-                  let sheet = moves.sheet(drawing: drawing, side: [PoulpyMoves.Side.left, PoulpyMoves.Side.right].randomElement()!) else { return }
+                  let choice = moves.movesOf(drawing: drawing).randomElement(),
+                  let sheet = moves.sheet(drawing: drawing, move: choice) else { return }
             move = (sheet, Date())
         }
     }
