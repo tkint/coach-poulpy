@@ -29,12 +29,12 @@ const screen = (c) => Math.round(255 * (c <= 0.0031308 ? 12.92 * c : 1.055 * c *
  * @param {{ width: number, height: number, turn?: number, tilt?: number, distance?: number, centre?: number, shadow?: string | null, smooth?: number }} options
  *   `width` and `height` in pixels. `turn`, `tilt` and `distance` are where the viewer stands, as in SHOT, looking at
  *   the point `centre` high above the floor, half his height unless told otherwise. `field` is the view's height in degrees
- *   (SHOT.field unless told). `placed(part)` may give `{ point, way }` for a part, to put it somewhere other than where he stands. `gather` is how much of its size the floor shadow keeps (1, or less as he leaves the floor).
+ *   (SHOT.field unless told). `placed(part)` may give `{ point, way }` for a part, to put it somewhere other than where he stands. `gather` is how much of its size the floor shadow keeps (1, or less as he leaves the floor). `drift(part)` may give [x, y] to slide a flat effect across its card.
  *   `shadow` is the floor shadow's `#RRGGBB` colour, or null for none. `smooth` is how many times finer than a
  *   pixel he is painted, each way, before the picture is brought down to size: 3 unless told otherwise.
  * @returns {Uint8Array} the picture as RGBA bytes, row by row from the top, see-through around him
  */
-export function paintPoulpy(model, { width, height, turn = SHOT.turn, tilt = SHOT.tilt, distance = SHOT.distance, centre = model.height / 2, shadow = null, smooth = 3, field = SHOT.field, placed = null, gather = 1 }) {
+export function paintPoulpy(model, { width, height, turn = SHOT.turn, tilt = SHOT.tilt, distance = SHOT.distance, centre = model.height / 2, shadow = null, smooth = 3, field = SHOT.field, placed = null, gather = 1, drift = null }) {
   const W = width * smooth, H = height * smooth
   // Where the viewer stands and what is right, up and ahead for them.
   const eye = [distance * Math.sin(turn * RAD) * Math.cos(tilt * RAD), centre + distance * Math.sin(tilt * RAD), distance * Math.cos(turn * RAD) * Math.cos(tilt * RAD)]
@@ -85,7 +85,9 @@ export function paintPoulpy(model, { width, height, turn = SHOT.turn, tilt = SHO
     if (part.card) {
       const way = part.card === 'front' ? 1 : -1, size = (distance - way * CARD.gap) / distance
       const middle = [0, 1, 2].map((k) => [0, CARD.centre, 0][k] + towards[k] * way * CARD.gap)
-      return { point: ([x, y, z]) => [0, 1, 2].map((k) => middle[k] + (right[k] * x + up[k] * (y - CARD.centre) - ahead[k] * z) * size), way: (n) => inRoom(n) }
+      // `drift(part)` may slide a flat effect across the card, in the card's units.
+      const [dx, dy] = drift?.(part) ?? [0, 0]
+      return { point: ([x, y, z]) => [0, 1, 2].map((k) => middle[k] + (right[k] * (x + dx) + up[k] * (y + dy - CARD.centre) - ahead[k] * z) * size), way: (n) => inRoom(n) }
     }
     if (/^(arm_|dumbbell|medal)/.test(part.name)) return { point: (p) => p, way: (n) => n }
     return { point: ([x, y, z]) => [x * cl - y * sl, x * sl + y * cl + lift, z], way: ([x, y, z]) => [x * cl - y * sl, x * sl + y * cl, z] }

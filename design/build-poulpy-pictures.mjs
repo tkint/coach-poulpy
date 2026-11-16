@@ -16,6 +16,7 @@ import { fileURLToPath } from 'node:url'
 import { buildPoulpy3d, MOODS } from './poulpy-3d/model.mjs'
 import { buildPoulpyPose, CONFETTI, POSES } from './poulpy-3d/poses.mjs'
 import { paintPoulpy, pngOf } from './poulpy-3d/picture.mjs'
+import { MOOD_MOVES, fumeBoost, fumeDrift } from './poulpy-3d/moods.mjs'
 import { armJoints, armSkin, CHEER as CHEER_SHOW, createCheer, createFollow, createJump, posePoulpy } from './poulpy-3d/motion.mjs'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
@@ -165,6 +166,49 @@ const MOVE_KINDS = {
       }
       files[`${MOVES.dir}/mood_${mood}_${kind}.png`] = pngOf(sheet, MOVES.columns * width, rowsOf * height)
     }
+  }
+}
+
+// How Poulpy loses patience and calms down on Home (the moves validated on the workshop's "Poulpy moves" pages, design/poulpy-3d/moods.mjs): the turns between his
+// moods and the little moves with which he answers a tap while annoyed or fuming. The same shot, canvas and sheets as the moves above, one sheet each,
+// with as many frames as the move takes at MOVES.fps. His face changes half way round a turn, and his fumes drift as they do in the workshop. The last frame is
+// the still picture he settles on (pose_fuming when he is fuming), so there is no jump when the move ends. The count of frames of each is also in PoulpyMoods.kt.
+const MOOD_SHEETS = { toAnnoyed: 'to_annoyed', toFuming: 'to_fuming', shake: 'shake', shudder: 'shudder', calmDown: 'calm_down', backToNormal: 'back_to_normal' }
+const moodFrames = (move) => Math.ceil(move.seconds * MOVES.fps - 1e-9)
+{
+  const kotlin = readFileSync(join(root, 'shared/src/commonMain/kotlin/ch/coachpoulpy/shared/PoulpyMoods.kt'), 'utf8')
+  for (const [name, move] of Object.entries(MOOD_MOVES)) {
+    if (!new RegExp(`"mood_move_${MOOD_SHEETS[name]}", ${moodFrames(move)}\\b`).test(kotlin)) { console.error(`PoulpyMoods.kt: the sheet mood_move_${MOOD_SHEETS[name]} must have ${moodFrames(move)} frames, as in design/build-poulpy-pictures.mjs.`); process.exit(1) }
+  }
+  const height = (MOVES.picture + 2 * MOVES.pad) * MOVES.scale, width = Math.round(((MOVES.picture * FRAME.width) / FRAME.height + 2 * MOVES.pad) * MOVES.scale)
+  const field = (2 * Math.atan(((MOVES.picture + 2 * MOVES.pad) / MOVES.picture) * Math.tan((14 * Math.PI) / 180)) * 180) / Math.PI
+  const models = {
+    happy: buildPoulpy3d({ mood: 'happy', tone: tokens.mood.happy, colours }),
+    annoyed: buildPoulpy3d({ mood: 'annoyed', tone: tokens.mood.annoyed, colours }),
+    fuming: buildPoulpyPose({ pose: 'fuming', tones: tokens.mood, colours }),
+  }
+  for (const [name, plan] of Object.entries(MOOD_MOVES)) {
+    const frames = moodFrames(plan), rows = Math.ceil(frames / MOVES.columns), sheet = new Uint8Array(MOVES.columns * width * rows * height * 4)
+    const move = plan.make()
+    let shown = plan.from, swapped = false
+    for (let i = 0; i < frames; i++) {
+      const last = i === frames - 1, elapsed = i / MOVES.fps
+      const pose = last ? plan.make().pose() : i ? move.advance(1 / MOVES.fps) : move.pose()
+      if (last) shown = plan.to
+      else if (!swapped && (plan.swap === 'start' ? elapsed > 0.05 : Math.abs(pose.yaw ?? 0) > Math.PI)) { swapped = true; shown = plan.to }
+      const { model: posed, placed } = posePoulpy(models[shown], pose)
+      // The flat effects (his fumes) stay across the line of sight instead of riding on his head, and drift.
+      const behind = new Map(posed.parts.filter((part) => part.card === 'back').map((part, k) => [part, k]))
+      const boost = fumeBoost(plan, elapsed, shown === 'fuming' && plan.to === 'fuming')
+      const pixels = paintPoulpy(posed, {
+        width, height, ...SHOT, field, gather: 1 - Math.min((pose.lift ?? 0) * 0.4, 0.3),
+        placed: (part) => (part.card ? undefined : placed(part)),
+        drift: last ? null : (part) => (part.card === 'back' ? fumeDrift(behind.get(part), elapsed, boost) : null),
+      })
+      const left = (i % MOVES.columns) * width, top = Math.floor(i / MOVES.columns) * height
+      for (let y = 0; y < height; y++) sheet.set(pixels.subarray(y * width * 4, (y + 1) * width * 4), ((top + y) * MOVES.columns * width + left) * 4)
+    }
+    files[`${MOVES.dir}/mood_move_${MOOD_SHEETS[name]}.png`] = pngOf(sheet, MOVES.columns * width, rows * height)
   }
 }
 
