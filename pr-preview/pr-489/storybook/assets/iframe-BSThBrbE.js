@@ -1,1 +1,0 @@
-import{t as e}from"./iframe-CtiY23u2.js";e();
