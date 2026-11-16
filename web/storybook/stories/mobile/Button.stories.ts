@@ -28,12 +28,13 @@ export const Grumpy: Story = { args: { kind: 'grumpy', label: 'Catch up' } }
 export const WithIcon: Story = { args: { icon: 'play' } }
 export const Disabled: Story = { args: { kind: 'secondary', label: 'Skip', disabled: true } }
 
-/** Every step of the size scale, xs to xxl, one per line; md is what a button without a `size` draws. */
+/** Every step of the size scale, xs to xxl, one per line; md is what a button without a `size` draws. The kind and label follow the controls. */
 export const Sizes: Story = {
-  render: () => {
+  render: (args) => {
     const rows = sizes
-      .map((s) => `<div style="display: flex; align-items: center; gap: 16px;"><span style="width: 32px; font-size: 13px; color: var(--cp-on-surface-variant);">${s}</span><MobileButton size="${s}">Start now</MobileButton></div>`)
+      .map((s) => `<div style="display: flex; align-items: center; gap: 16px;"><span style="width: 40px; font-size: 13px; font-weight: 700; color: var(--cp-on-surface-variant);">${s}</span><MobileButton kind="${args.kind}" size="${s}"${args.icon ? ` icon="${args.icon}"` : ''}>${args.label}</MobileButton></div>`)
       .join('')
-    return h(Screen, { markup: `<div style="width: 390px; padding: 16px; display: flex; flex-direction: column; align-items: flex-start; gap: 12px;">${rows}</div>` })
+    return h(Screen, { key: JSON.stringify(args), markup: `<div style="width: 390px; padding: 16px 16px 32px; display: flex; flex-direction: column; align-items: flex-start; gap: 16px;">${rows}</div>` })
   },
+  args: { label: 'Start' },
 }
