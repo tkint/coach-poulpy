@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { screen } from '../screen'
+import screenHomeChampionTap from './home-champion-tap.html?raw'
 import screenHomeDone from './home-done.html?raw'
 import screenHomeInProgress from './home-in-progress.html?raw'
 import screenHomeNext from './home-next.html?raw'
@@ -51,5 +52,13 @@ export const HomePlannedTap: Story = {
   name: "Planned, tap Poulpy",
   tags: ['!autodocs', 'agreed'],
   ...screen(screenHomePlannedTap),
+  parameters: { mockup: { issue: 222 } },
+}
+
+/** Home · done, the eighth tentacle lit: Poulpy is the champion. He stays a still picture; a tap plays his celebration, the same three jumps of joy with his medal and confetti as on the end-of-session screen. */
+export const HomeChampionTap: Story = {
+  name: "Champion, tap Poulpy",
+  tags: ['!autodocs', 'draft'],
+  ...screen(screenHomeChampionTap),
   parameters: { mockup: { issue: 222 } },
 }

@@ -1,21 +1,27 @@
 <script setup lang="ts">
-// Poulpy as the champion on the end-of-session screen: his still picture, and when the screen opens he jumps for joy three times, with
-// his medal and confetti, in 3D, and settles back to the picture. A tap plays it again. With reduced motion he only stands there.
-// The mockup plays it live in the workshop; the phones play it baked from the model, frame by frame, as on Home (decision 16).
+// Poulpy as the champion: his still picture, and he jumps for joy three times, with his medal and confetti, in 3D, and settles back to the
+// picture. A tap plays it again. On the end-of-session screen he starts when it opens and goes on and on (a rest between two rounds); on Home
+// (`home`, a smaller picture in the ring) he only plays at a tap. With reduced motion he only stands there.
+// The mockup plays it live in the workshop; the phones play it baked from the model, frame by frame (decision 16).
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { poulpyDrawings } from '@coach-poulpy/ui'
 
-defineProps<{ label: string }>()
-const PICTURE_HEIGHT = 210 // the picture as the screen draws it, 230 wide
-const PAD = 110 // how much room the confetti has around it, in px
-const SECONDS = 3.9
+const props = withDefaults(defineProps<{ label: string; home?: boolean }>(), { home: false })
+const PAD_PER_HEIGHT = 110 / 210 // how much room the confetti has around the picture, in picture heights
+const SECONDS = 3.6
+const FADE = 0.7 // the confetti shrinks away over the last of it
+const REST_MILLIS = 1500 // on the end-of-session screen, how long he stands between two rounds
 const picture = (poulpyDrawings as Record<string, string>).pose_champion
+const PICTURE_HEIGHT = props.home ? 95 : 210 // the picture as the screen draws it
+const PAD = PICTURE_HEIGHT * PAD_PER_HEIGHT
 const playing = ref(false)
 const canvas = ref<HTMLCanvasElement>()
 let frame = 0
+let timer: ReturnType<typeof setTimeout> | undefined
 let stop = () => {}
 
 async function play() {
+  clearTimeout(timer)
   if (playing.value || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
   playing.value = true
   await Promise.resolve()
@@ -33,23 +39,29 @@ async function play() {
       const dt = (now - last) / 1000
       last = now
       clock += dt
-      scene.pose(cheer.advance(dt))
+      // The confetti shrinks away at the end, as on the phones, so he settles on his picture with none left.
+      scene.pose({ ...cheer.advance(dt), confettiScale: Math.min(Math.max((SECONDS - clock) / FADE, 0), 1) } as never)
       if (clock > SECONDS) return finish()
       frame = requestAnimationFrame(tick)
     }
-    const finish = () => { stop(); stop = () => {}; playing.value = false }
+    const finish = () => {
+      stop(); stop = () => {}; playing.value = false
+      // On the end-of-session screen he goes on and on.
+      if (!props.home) timer = setTimeout(play, REST_MILLIS)
+    }
     stop = () => { cancelAnimationFrame(frame); scene.dispose() }
     frame = requestAnimationFrame(tick)
   } catch {
     playing.value = false // no 3D in this browser: he just stands there
   }
 }
-onMounted(play)
-onBeforeUnmount(() => stop())
+// On the end-of-session screen he starts when it opens; on Home only at a tap.
+onMounted(() => { if (!props.home) play() })
+onBeforeUnmount(() => { clearTimeout(timer); stop() })
 </script>
 
 <template>
-  <button type="button" class="poulpy-cheer" :aria-label="`${label}. Tap and he jumps again`" data-component="poulpy-cheer" @click="play">
+  <button type="button" class="poulpy-cheer" :class="{ 'poulpy-cheer--home': home }" :aria-label="`${label}. Tap and he jumps`" data-component="poulpy-cheer" @click="play">
     <img :src="picture" alt="" :style="{ visibility: playing ? 'hidden' : 'visible' }" />
     <span v-if="playing" class="poulpy-cheer-stage" aria-hidden="true" :style="{ inset: `-${PAD}px` }"><canvas ref="canvas" /></span>
   </button>
