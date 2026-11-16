@@ -180,7 +180,7 @@ struct WorkoutPageView: View {
             .accessibilityLabel("action.back")
             Spacer()
             Menu {
-                Button { sharing = true } label: { Label("action.share", lucide: .share2) }
+                Button { sharing = true } label: { Label("action.export", lucide: .fileOutput) }
                 if state.editable {
                     Button { cover = .copy } label: { Label("action.copy", lucide: .copy) }
                 }

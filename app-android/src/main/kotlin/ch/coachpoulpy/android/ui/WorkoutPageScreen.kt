@@ -136,8 +136,8 @@ fun WorkoutPageScreen(
                         }
                         DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
                             DropdownMenuItem(
-                                text = { Text(stringResource(R.string.action_share)) },
-                                leadingIcon = { Icon(Lucide.Share2, contentDescription = null) },
+                                text = { Text(stringResource(R.string.action_export)) },
+                                leadingIcon = { Icon(Lucide.FileOutput, contentDescription = null) },
                                 onClick = { menu = false; sharing = true },
                             )
                             if (state.editable) {
