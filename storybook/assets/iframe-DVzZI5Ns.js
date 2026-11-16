@@ -1,1 +1,0 @@
-import{t as e}from"./iframe-BnUu_aSw.js";e();
