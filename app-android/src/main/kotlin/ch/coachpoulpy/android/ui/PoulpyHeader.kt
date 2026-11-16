@@ -72,7 +72,7 @@ fun PoulpyHeader(status: PoulpyStatus, modifier: Modifier = Modifier, compact: B
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(14.dp),
             ) {
-                ring(104.dp, 72.dp)
+                ring(132.dp, 106.dp)
                 Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     Text(status.title, style = MaterialTheme.typography.titleLarge)
                     Text(status.line, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)

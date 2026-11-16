@@ -12,7 +12,7 @@ struct PoulpyHeaderView: View {
         Group {
             if compact {
                 HStack(spacing: 14) {
-                    ring(side: 104, art: 72)
+                    ring(side: 132, art: 106)
                     VStack(alignment: .leading, spacing: 2) {
                         Text(status.title).font(PoulpyFont.headline)
                         Text(status.line).font(.poulpy(.subheadline).weight(.semibold))
