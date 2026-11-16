@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { screen } from '../screen'
 import screenPlayerCircuitRound from './player-circuit-round.html?raw'
+import screenPlayerFinishedChampion from './player-finished-champion.html?raw'
+import screenPlayerFinishedGentle from './player-finished-gentle.html?raw'
 import screenPlayerFinishedRun from './player-finished-run.html?raw'
 import screenPlayerFinished from './player-finished.html?raw'
 import screenPlayerPaused from './player-paused.html?raw'
@@ -32,6 +34,18 @@ export const PlayerFinishedRun: Story = {
   name: "Finished, a run",
   ...screen(screenPlayerFinishedRun),
   parameters: { mockup: { issue: 104 } },
+}
+/** Player · finished, the eighth tentacle lights: Poulpy the champion jumps for joy, then stands still; a tap plays it again. */
+export const PlayerFinishedChampion: Story = {
+  name: "Finished, champion",
+  tags: ['!autodocs', 'draft'],
+  ...screen(screenPlayerFinishedChampion),
+}
+/** Player · finished after pain or a rehab session marked too hard: the blue side, patched up, calm, no jump and no confetti. */
+export const PlayerFinishedGentle: Story = {
+  name: "Finished, rehab or pain",
+  tags: ['!autodocs', 'draft'],
+  ...screen(screenPlayerFinishedGentle),
 }
 /** Player · finished. */
 export const PlayerFinished: Story = {
