@@ -12,11 +12,12 @@ interface Move { advance: (seconds: number) => unknown }
 interface Variant { id: string; label: string; note: string; make: (clockwise: boolean) => Move; seconds: number; swap: 'half' | 'start'; boost?: number }
 interface Step { id: string; title: string; text: string; from: State; to: State; clockwise?: boolean; variants: Variant[] }
 
-// The three ways to spin, shared by every spin: exactly 360 degrees (no wiggle).
+// The three ways to spin, shared by every spin: exactly 360 degrees (no wiggle), and once: the pause after it is far longer than the move, so he
+// does not start a second one.
 const spinning = (hop: number, windUp: boolean): ((clockwise: boolean) => Move) => (clockwise) => {
   const stride = (clockwise ? -360 : 360) / 24
-  if (hop) { const move = createJump({ stride, wiggle: false }); move.height = hop; move.hang = 3; return move }
-  const turn = windUp ? { ...TURN, stepSeconds: 0.6, windUp: { degrees: 14, seconds: 0.3 }, body: { speed: 12, damping: 0.5 } } : TURN
+  if (hop) { const move = createJump({ stride, wiggle: false }); Object.assign(move, { height: hop, hang: 3, pause: 99 }); return move }
+  const turn = { ...TURN, pauses: [99], ...(windUp ? { stepSeconds: 0.6, windUp: { degrees: 14, seconds: 0.3 }, body: { speed: 12, damping: 0.5 } } : {}) }
   return createTurn({ stride, wiggle: false, turn } as never)
 }
 const SPINS: Pick<Variant, 'id' | 'label' | 'note' | 'make' | 'seconds' | 'swap'>[] = [
