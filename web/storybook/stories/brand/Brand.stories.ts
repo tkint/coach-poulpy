@@ -32,10 +32,20 @@ export const JumpingAround: Story = { render: () => ({ components: { Poulpy3d },
 export const Cheering: Story = { render: () => ({ components: { Poulpy3d }, template: '<Poulpy3d motion="cheer" />' }) }
 /** The cocky one: eyes wide open, then a wink and a smirk as his stars pop up and twinkle. */
 export const Winking: Story = { render: () => ({ components: { Poulpy3d }, template: '<Poulpy3d motion="wink" />' }) }
-/** Drafts of Home's annoyed and fuming moves: the spins between his moods and the fuming tuck, a few variants of each. */
-export const MoodMoves: Story = { render: () => ({ components: { PoulpyMoodMoves }, template: '<PoulpyMoodMoves />' }) }
-/** Poulpy fuming: the spin into it, the tuck when tapped, and the spin out of it. */
-export const Fuming: Story = { render: () => ({ components: { PoulpyMoodMoves }, template: '<PoulpyMoodMoves :only="[\'fuming\', \'tuck\', \'calm\']" />' }) }
+/** Poulpy fuming: how he answers a tap, no transitions. */
+export const Fuming: Story = { render: () => ({ components: { PoulpyMoodMoves }, template: `<PoulpyMoodMoves :only="['tuck']" />` }) }
+/** Poulpy annoyed: how he answers a tap, no transitions. */
+export const Annoyed: Story = { render: () => ({ components: { PoulpyMoodMoves }, template: `<PoulpyMoodMoves :only="['huff']" />` }) }
+/** The whole sequence from his normal self to fuming and back, played in one go. */
+export const Sequence: Story = { render: () => ({ components: { PoulpyMoodMoves }, template: `<PoulpyMoodMoves plain />` }) }
+/** Normal to annoyed: the spin. */
+export const ToAnnoyed: Story = { render: () => ({ components: { PoulpyMoodMoves }, template: `<PoulpyMoodMoves :only="['annoyed']" />` }) }
+/** Annoyed to fuming: the spin. */
+export const ToFuming: Story = { render: () => ({ components: { PoulpyMoodMoves }, template: `<PoulpyMoodMoves :only="['fuming']" />` }) }
+/** Fuming back to annoyed: the spin the other way. */
+export const CalmDown: Story = { render: () => ({ components: { PoulpyMoodMoves }, template: `<PoulpyMoodMoves :only="['calm']" />` }) }
+/** Annoyed back to normal: the spin the other way. */
+export const BackToNormal: Story = { render: () => ({ components: { PoulpyMoodMoves }, template: `<PoulpyMoodMoves :only="['normal']" />` }) }
 /** The brand book, drawn live. */
 export const Book: Story = {
   render: () => ({ components: { BrandBook }, template: '<BrandBook />' }),

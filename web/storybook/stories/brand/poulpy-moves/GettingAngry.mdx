@@ -5,19 +5,42 @@ import * as Live from '../Brand.stories'
 
 # Getting angry, and calming down
 
-Drafts for Home, to validate before anything is baked for the phones. Tapping Poulpy again and again makes him lose patience, and leaving him alone calms him down.
+Drafts for Home, to validate before anything is baked for the phones. Tapping Poulpy again and again makes him lose patience, and leaving him alone calms him down. Each change of mood is a full turn, and the face changes half way round; going down, the turn is **clockwise**.
 
-- After several taps he does a full turn and comes out of it **annoyed**. His face changes half way round.
-- Tapped again, he turns once more and comes out **fuming**, with his fumes puffing behind him.
-- Tapped while he is fuming, he **tucks** a little and comes back to standing, the fumes moving harder meanwhile.
-- After a while he goes back to annoyed, then to his normal self, each time by a full turn, now **clockwise**.
+First the whole run, with the variants chosen below:
 
-Each step has three variants to compare: pick one to watch it, or play the whole sequence with the ones chosen. The turns are exactly 360 degrees and go the other way when he calms down.
+<Story of={Live.Sequence} />
 
-<Story of={Live.MoodMoves} />
+## One preview per transition
+
+Each has three variants to compare. The turns are exactly 360 degrees.
+
+### Normal to annoyed
+
+After several taps he turns on the spot and comes out annoyed.
+
+<Story of={Live.ToAnnoyed} />
+
+### Annoyed to fuming
+
+Tapped again, he turns once more and comes out fuming, with his fumes puffing behind him.
+
+<Story of={Live.ToFuming} />
+
+### Fuming back to annoyed
+
+After a while he turns back, clockwise, and the fumes go.
+
+<Story of={Live.CalmDown} />
+
+### Annoyed back to normal
+
+Later still, the same turn back to his normal self.
+
+<Story of={Live.BackToNormal} />
+
+How he answers a tap in each mood, with no transition, is on [Annoyed](?path=/docs/brand-poulpy-moves-annoyed--docs) and [Fuming](?path=/docs/brand-poulpy-moves-fuming--docs).
 
 - **On the spot, with a hop, wind-up and whip** are three ways to make the same turn: feet on the floor, a small jump, or a lean back first that makes him rock past the mark. They are the move of [Turning](?path=/docs/brand-poulpy-moves-turning--docs) and [Jumping around](?path=/docs/brand-poulpy-moves-jumping-around--docs) with their values fixed.
-- **The tucks** are the first part of [a little jump](?path=/docs/brand-poulpy-moves-little-jumps--docs), kept on the floor: how deep he goes, how far his arms widen, and whether he pops back up or shudders.
-- **The fumes** are the flat puffs of the fuming pose, now bobbing and drifting, and faster while he tucks.
 
-Not decided yet: how many taps make him annoyed and fuming, how long he stays angry before he calms down, and what a tap does while he is annoyed (nothing, for now). These are for the Home mockup once the moves are chosen. Pain and rehab never show the ember side, so they never come in here.
+Not decided yet: how many taps make him annoyed and fuming, and how long he stays angry before he calms down. These are for the Home mockup once the moves are chosen. Pain and rehab never show the ember side, so they never come in here.

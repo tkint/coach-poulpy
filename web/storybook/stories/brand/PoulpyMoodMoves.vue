@@ -7,7 +7,8 @@ import { TURN, createJump, createTurn } from '../../../../design/poulpy-3d/motio
 import type { createPoulpyScene } from './poulpy3dScene'
 
 // `only` shows just some of the steps (the page of one mood's moves); with none, all five, as a sequence.
-const props = defineProps<{ only?: string[] }>()
+// `plain` leaves out the choice of variants: just the steps and the run.
+const props = defineProps<{ only?: string[]; plain?: boolean }>()
 type State = 'happy' | 'annoyed' | 'fuming'
 // A move is anything that gives a pose for a time step; `swap` says when the face changes: when he is half way round, or as he starts.
 interface Move { advance: (seconds: number) => unknown }
@@ -39,17 +40,25 @@ const TUCKS: Variant[] = [
   { id: 'shudder', label: 'Shudder', note: 'A short tuck and a shake from side to side, fumes at full steam.', make: tucking(0.16, 0.12, 0.05, 9), seconds: 1.9, swap: 'start', boost: 2 },
 ]
 
+// What an annoyed Poulpy does when he is tapped (not decided yet: for now a tap does nothing): short and grumpy, never a turn.
+const HUFFS: Variant[] = [
+  { id: 'shake', label: 'Shake', note: 'A quick shake of the head and body, side to side, without leaving the floor.', make: tucking(0.05, 0.03, 0, 12), seconds: 1.4, swap: 'start' },
+  { id: 'stomp', label: 'Stomp', note: 'A small stamp: he drops a little and lands with a bounce.', make: tucking(0.1, 0.06, 0.04, 0), seconds: 1.4, swap: 'start' },
+  { id: 'huff', label: 'Huff', note: 'He puffs up, then lets it out with a small lean.', make: tucking(0.14, 0.1, 0, 5), seconds: 1.6, swap: 'start' },
+]
+
 const allSteps: Step[] = [
   { id: 'annoyed', title: '1. Tapped a few times: he spins and turns annoyed', text: 'From his normal self, a full turn, and his face changes half way round.', from: 'happy', to: 'annoyed', variants: SPINS.map((v) => ({ ...v })) },
   { id: 'fuming', title: '2. Tapped again: he spins and goes fuming', text: 'The same turn, to the fuming one, with his fumes starting up behind him.', from: 'annoyed', to: 'fuming', variants: SPINS.map((v) => ({ ...v })) },
   { id: 'tuck', title: '3. Tapped while fuming: he tucks and the fumes move', text: 'He stays fuming and goes back to standing, the fumes puffing harder while he tucks.', from: 'fuming', to: 'fuming', variants: TUCKS },
+  { id: 'huff', title: 'Tapped while annoyed: he huffs', text: 'He stays annoyed and answers the tap with a short grumpy move.', from: 'annoyed', to: 'annoyed', variants: HUFFS },
   { id: 'calm', title: '4. After a while: he spins back to annoyed', text: 'The turn the other way, clockwise, and the fumes go.', from: 'fuming', to: 'annoyed', clockwise: true, variants: SPINS.map((v) => ({ ...v })) },
   { id: 'normal', title: '5. Later still: he spins back to normal', text: 'The same turn back, clockwise, to his normal self.', from: 'annoyed', to: 'happy', clockwise: true, variants: SPINS.map((v) => ({ ...v })) },
 ]
-const steps = props.only ? allSteps.filter((one) => props.only!.includes(one.id)) : allSteps
+const steps = props.only ? allSteps.filter((one) => props.only!.includes(one.id)) : allSteps.filter((one) => one.id !== 'huff')
 // What he does while one is chosen, to compare: the picked variant of each step, and the whole run.
 // The owner's pick of each step to start with: on the spot, on the spot, shudder, on the spot, with a hop.
-const picked = shallowRef<Record<string, string>>({ annoyed: 'spot', fuming: 'spot', tuck: 'shudder', calm: 'spot', normal: 'hop' })
+const picked = shallowRef<Record<string, string>>({ annoyed: 'spot', fuming: 'spot', tuck: 'shudder', huff: 'shake', calm: 'spot', normal: 'hop' })
 const playing = shallowRef('')
 const failed = shallowRef(false)
 
@@ -116,10 +125,10 @@ async function play(step: Step, variant: Variant) {
   if (playing.value === `${step.id}/${variant.id}`) { playing.value = ''; frame = requestAnimationFrame(idle) }
 }
 
-// Tapping him while he is fuming plays the tuck chosen in step 3, with its fumes.
+// Tapping him while he is fuming plays the tuck chosen, with its fumes; while he is annoyed, the huff chosen. Only on a page that shows them.
 function tap() {
-  const step = allSteps.find((one) => one.id === 'tuck')!
-  if (state === 'fuming' && !playing.value) play(step, step.variants.find((v) => v.id === picked.value.tuck) ?? step.variants[0])
+  const step = steps.find((one) => one.id === (state === 'fuming' ? 'tuck' : state === 'annoyed' ? 'huff' : ''))
+  if (step && !playing.value) play(step, step.variants.find((v) => v.id === picked.value[step.id]) ?? step.variants[0])
 }
 
 async function playAll() {
@@ -165,18 +174,18 @@ onBeforeUnmount(() => {
 <template>
   <div class="frame"><div class="mood-moves">
     <div ref="stage" class="stage" @click="tap">
-      <canvas ref="canvas" role="img" aria-label="Poulpy in 3D, going from his normal self to annoyed and fuming and back. Tap him while he is fuming and he tucks" />
+      <canvas ref="canvas" role="img" aria-label="Poulpy in 3D, in his moods from normal to annoyed and fuming. Tap him and he reacts to his mood" />
       <p v-if="failed" class="failed">The 3D preview could not start in this browser.</p>
     </div>
     <div class="steps">
-      <button type="button" class="play-all" :aria-pressed="playing === 'all'" @click="playAll">{{ only ? 'Play them one after the other' : 'Play the whole sequence' }}</button>
+      <button v-if="steps.length > 1" type="button" class="play-all" :aria-pressed="playing === 'all'" @click="playAll">{{ only ? 'Play them one after the other' : 'Play the whole sequence' }}</button>
       <section v-for="step in steps" :key="step.id" class="step">
-        <h3>{{ step.title }}</h3>
+        <h3>{{ only ? step.title.replace(/^\d\. /, '') : step.title }}</h3>
         <p>{{ step.text }}</p>
-        <div class="sides" role="group" :aria-label="step.title">
+        <div v-if="!plain" class="sides" role="group" :aria-label="step.title">
           <button v-for="variant in step.variants" :key="variant.id" type="button" class="choice" :aria-pressed="picked[step.id] === variant.id" :title="variant.note" @click="play(step, variant)">{{ variant.label }}</button>
         </div>
-        <p class="note">{{ step.variants.find((v) => v.id === picked[step.id])?.note }}</p>
+        <p v-if="!plain" class="note">{{ step.variants.find((v) => v.id === picked[step.id])?.note }}</p>
       </section>
     </div>
   </div></div>
