@@ -35,7 +35,7 @@
             android:name=".MainActivity"
             android:exported="true"
             android:windowSoftInputMode="adjustResize">
-            <!-- A .poulpyworkout file opened or shared from another app: the app shows what is in it before adding it. -->
+            <!-- A .poulpyworkout file opened or shared from another app: the app opens it in the builder. -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />

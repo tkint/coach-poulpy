@@ -475,47 +475,22 @@ struct SessionDetailView: View {
 
     /// The formats a session goes out in: a .FIT file to save, or an image to share.
     private var shareSheet: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text("shareSession.title").font(.poulpy(.title2).weight(.heavy)).accessibilityAddTraits(.isHeader)
-                Text("shareSession.why").font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+        ShareSheetView(title: "shareSession.title", why: "shareSession.why") {
+            Button {
+                sharing = false
+                saving = graph.sessionFitFile(sessionId: session.id).map { FitDocument($0) }
+            } label: {
+                ShareFormatRow(title: "shareSession.fit", note: "shareSession.fitNote", icon: .download)
             }
-            VStack(spacing: 0) {
-                Button {
-                    sharing = false
-                    saving = graph.sessionFitFile(sessionId: session.id).map { FitDocument($0) }
-                } label: {
-                    shareFormat("shareSession.fit", "shareSession.fitNote", icon: .download)
+            .buttonStyle(.plain)
+            Divider().overlay(PoulpyColor.outline)
+            if let card = graph.sessionShareCard(sessionId: session.id, units: units, languageCode: Language.code) {
+                ShareLink(item: ShareCardItem(card: card, scheme: colorScheme), preview: SharePreview(session.title)) {
+                    ShareFormatRow(title: "shareSession.image", note: "shareSession.imageNote", icon: .image)
                 }
                 .buttonStyle(.plain)
-                Divider().overlay(PoulpyColor.outline)
-                if let card = graph.sessionShareCard(sessionId: session.id, units: units, languageCode: Language.code) {
-                    ShareLink(item: ShareCardItem(card: card, scheme: colorScheme), preview: SharePreview(session.title)) {
-                        shareFormat("shareSession.image", "shareSession.imageNote", icon: .image)
-                    }
-                    .buttonStyle(.plain)
-                }
             }
-            .background(PoulpyColor.surfaceVariant, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
         }
-        .padding(20)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .presentationDetents([.height(260)])
-    }
-
-    private func shareFormat(_ title: LocalizedStringKey, _ note: LocalizedStringKey, icon: Lucide) -> some View {
-        HStack(spacing: 14) {
-            LucideIcon(icon).frame(width: 24)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title).font(.poulpy(.body).weight(.bold)).foregroundStyle(PoulpyColor.onSurface)
-                Text(note).font(.poulpy(.footnote)).foregroundStyle(PoulpyColor.onSurfaceVariant)
-            }
-            Spacer()
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 10)
-        .frame(minHeight: PoulpySize.row)
-        .contentShape(Rectangle())
     }
 }
 

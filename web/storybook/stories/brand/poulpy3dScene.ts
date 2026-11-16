@@ -216,7 +216,7 @@ export function createPoulpyScene(canvas: HTMLCanvasElement) {
       rig.medal.position.z = medalHinge[1] + (jump?.spread ?? 0)
       rig.medal.rotation.x = -(cheer?.medal.lift ?? 0)
       rig.slide.rotation.y = cheer?.medal.sway ?? 0
-      if (cheer) fly(cheer.confetti)
+      if (cheer) fly(cheer.confetti, (cheer as { confettiScale?: number }).confettiScale ?? 1)
       faces.forEach((face, step) => { face.visible = step === Math.round((wink?.wink ?? 0) * FACE_STEPS) })
       if (wink) twinkle(wink.stars)
       rig.bends.forEach((bone, i) => {
@@ -232,7 +232,7 @@ export function createPoulpyScene(canvas: HTMLCanvasElement) {
     render()
   }
 
-  function fly(pieces: number[][]) {
+  function fly(pieces: number[][], size = 1) {
     if (!confetti) {
       const [wide, tall] = CONFETTI.size.map((size) => size / 64)
       confetti = new THREE.InstancedMesh(new THREE.PlaneGeometry(wide, tall), new THREE.MeshBasicMaterial({ side: THREE.DoubleSide }), pieces.length)
@@ -245,7 +245,7 @@ export function createPoulpyScene(canvas: HTMLCanvasElement) {
       piece.position.set(x, y, z)
       piece.rotation.set(turnX, turnY, turnZ, 'YXZ')
       // A piece that has not flown yet is under the floor.
-      piece.scale.setScalar(y < 0 ? 0 : 1)
+      piece.scale.setScalar(y < 0 ? 0 : size)
       piece.updateMatrix()
       confetti!.setMatrixAt(i, piece.matrix)
     })

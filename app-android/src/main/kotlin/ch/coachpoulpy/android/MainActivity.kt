@@ -30,7 +30,7 @@ class MainActivity : ComponentActivity() {
     /** Set when the recording notification opened the app, until the Live tab shows. */
     private val openLive = mutableStateOf(false)
 
-    /** The text of a workout file another app opened here, until the preview shows. Empty when it couldn't be read. */
+    /** The text of a workout file another app opened here, until it opens in the builder. Empty when it couldn't be read. */
     private val importFile = mutableStateOf<String?>(null)
 
     /** The account screen an email link opens, such as "confirm:<token>", until it shows. */
@@ -114,7 +114,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    /** Reads a shared or opened `.poulpyworkout` into [importFile]; a file too big or unreadable becomes "", which the preview refuses. */
+    /** Reads a shared or opened `.poulpyworkout` into [importFile]; a file too big or unreadable becomes "", which the import refuses. */
     private fun readWorkoutFile(intent: Intent) {
         val uri = when (intent.action) {
             Intent.ACTION_VIEW -> intent.data

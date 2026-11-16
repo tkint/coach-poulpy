@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { screen } from '../screen'
 import screenWorkoutDelete from './workout-delete.html?raw'
+import screenWorkoutExport from './workout-export.html?raw'
 import screenWorkoutMenu from './workout-menu.html?raw'
 import screenWorkoutPageBodyMap from './workout-page-body-map.html?raw'
 import screenWorkoutPageCircuit from './workout-page-circuit.html?raw'
@@ -25,6 +26,12 @@ export const WorkoutDelete: Story = {
   name: "Delete",
   ...screen(screenWorkoutDelete),
   parameters: { mockup: { issue: 104 } },
+}
+/** Workout page · export sheet. */
+export const WorkoutExport: Story = {
+  name: "Export",
+  ...screen(screenWorkoutExport),
+  parameters: { mockup: { issue: 152 } },
 }
 /** Workout page · menu. */
 export const WorkoutMenu: Story = {
