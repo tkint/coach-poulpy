@@ -5,6 +5,8 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.indication
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -44,6 +46,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -304,25 +307,36 @@ internal fun SheetTitle(title: String, subtitle: String) {
 private fun FormatLine(format: WorkoutFormat, label: String, onClick: () -> Unit) {
     val colors = MaterialTheme.colorScheme
     val description = stringResource(R.string.builder_changeFormat, label)
+    val interactionSource = remember { MutableInteractionSource() }
     Row(Modifier.padding(bottom = 18.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
         FieldLabel(stringResource(R.string.builder_format))
-        Row(
+        Box(
             Modifier
                 .heightIn(min = 48.dp)
-                .clickable(onClickLabel = description, role = Role.Button, onClick = onClick)
+                .clip(CircleShape)
+                .clickable(
+                    interactionSource = interactionSource,
+                    indication = null,
+                    onClickLabel = description,
+                    role = Role.Button,
+                    onClick = onClick,
+                )
                 .semantics { contentDescription = description },
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            contentAlignment = Alignment.CenterStart,
         ) {
             Row(
-                Modifier.background(colors.primaryContainer, CircleShape).padding(horizontal = 12.dp, vertical = 6.dp),
+                Modifier
+                    .clip(CircleShape)
+                    .indication(interactionSource, ripple())
+                    .background(colors.primaryContainer)
+                    .padding(horizontal = 12.dp, vertical = 2.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 Icon(format.icon, contentDescription = null, tint = colors.onPrimaryContainer, modifier = Modifier.size(18.dp))
                 Text(label, fontWeight = FontWeight.ExtraBold, color = colors.onPrimaryContainer)
+                Icon(Lucide.ChevronDown, contentDescription = null, tint = colors.onSurfaceVariant, modifier = Modifier.size(16.dp))
             }
-            Icon(Lucide.ChevronDown, contentDescription = null, tint = colors.onSurfaceVariant, modifier = Modifier.size(16.dp))
         }
     }
 }
