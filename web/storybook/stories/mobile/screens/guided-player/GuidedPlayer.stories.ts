@@ -38,13 +38,13 @@ export const PlayerFinishedRun: Story = {
 /** Player · finished, the eighth tentacle lights: Poulpy the champion jumps for joy, then stands still; a tap plays it again. */
 export const PlayerFinishedChampion: Story = {
   name: "Finished, champion",
-  tags: ['!autodocs', 'draft'],
+  tags: ['!autodocs', 'agreed'],
   ...screen(screenPlayerFinishedChampion),
 }
 /** Player · finished after pain or a rehab session marked too hard: the blue side, patched up, calm, no jump and no confetti. */
 export const PlayerFinishedGentle: Story = {
   name: "Finished, rehab or pain",
-  tags: ['!autodocs', 'draft'],
+  tags: ['!autodocs', 'agreed'],
   ...screen(screenPlayerFinishedGentle),
 }
 /** Player · finished. */
