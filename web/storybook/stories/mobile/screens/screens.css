@@ -108,6 +108,37 @@
    share a row (flex: 1) keep the widths the screens give them. */
 .cp-screen .button-content { display: inline-flex; align-items: center; gap: var(--cp-space-sm); padding: 0 var(--cp-space-xl); white-space: nowrap; }
 .cp-screen .small-button .button-content { padding: 0; }
+/* The apps' button (draft): a rounded square on the websites' size scale. Heights come from --cp-control-* (design/tokens.json
+   `webSize`), the radius is the same 10 as the New workout button and the settings rows. Below 44 the touch area still
+   reaches 44 (the ::after), as for the 40 icon button. */
+.cp-screen .button {
+  --button-height: var(--cp-control-md);
+  position: relative;
+  height: var(--button-height);
+  border-radius: var(--cp-radius-md);
+  font-weight: 800;
+  font-size: 15px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.cp-screen .button .button-content { padding: 0 var(--cp-space-lg); }
+.cp-screen .button::after { content: ""; position: absolute; inset: 50% 0 auto; height: max(100%, 44px); transform: translateY(-50%); }
+.cp-screen .button[data-size="xs"] { --button-height: var(--cp-control-xs); font-size: 12px; }
+.cp-screen .button[data-size="sm"] { --button-height: var(--cp-control-sm); font-size: 14px; }
+.cp-screen .button[data-size="lg"] { --button-height: var(--cp-control-lg); font-size: 16px; }
+.cp-screen .button[data-size="xl"] { --button-height: var(--cp-control-xl); font-size: 17px; }
+.cp-screen .button[data-size="xxl"] { --button-height: var(--cp-control-xxl); font-size: 18px; }
+.cp-screen .button[data-size="xs"] .button-content { padding: 0 var(--cp-space-sm); gap: var(--cp-space-xs); }
+.cp-screen .button[data-size="sm"] .button-content { padding: 0 var(--cp-space-md); gap: var(--cp-space-xs); }
+.cp-screen .button--primary { background: var(--cp-primary); color: var(--cp-on-primary); }
+.cp-screen .button--tonal { background: var(--cp-primary-container); color: var(--cp-on-primary-container); }
+.cp-screen .button--secondary { box-shadow: inset 0 0 0 2px var(--cp-outline); color: var(--cp-on-surface); }
+/* Grumpy is only ever the catch-up action. */
+.cp-screen .button--grumpy { background: var(--cp-grumpy); color: var(--cp-on-grumpy); }
+.cp-screen .button:is([disabled], [aria-disabled="true"]) { background: var(--cp-surface-variant); box-shadow: none; color: var(--cp-on-surface-variant); cursor: default; }
+.cp-screen .button.button--block { display: flex; width: 100%; }
+.cp-screen .button:focus-visible { outline: 3px solid var(--cp-primary); outline-offset: 2px; }
 /* A disabled button turns grey, so it never reads as one to tap. */
 .cp-screen :is(.primary-button, .secondary-button, .tonal-button, .grumpy-button, .small-button):is([disabled], [aria-disabled="true"]) { background: var(--cp-surface-variant); border-color: var(--cp-surface-variant); color: var(--cp-on-surface-variant); cursor: default; }
 /* A button on its own line fills it, as the screens draw it. */
