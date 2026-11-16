@@ -28,17 +28,18 @@ const screen = (c) => Math.round(255 * (c <= 0.0031308 ? 12.92 * c : 1.055 * c *
  * @param model what buildPoulpy3d or buildPoulpyPose returned
  * @param {{ width: number, height: number, turn?: number, tilt?: number, distance?: number, centre?: number, shadow?: string | null, smooth?: number }} options
  *   `width` and `height` in pixels. `turn`, `tilt` and `distance` are where the viewer stands, as in SHOT, looking at
- *   the point `centre` high above the floor, half his height unless told otherwise.
+ *   the point `centre` high above the floor, half his height unless told otherwise. `field` is the view's height in degrees
+ *   (SHOT.field unless told). `placed(part)` may give `{ point, way }` for a part, to put it somewhere other than where he stands. `gather` is how much of its size the floor shadow keeps (1, or less as he leaves the floor).
  *   `shadow` is the floor shadow's `#RRGGBB` colour, or null for none. `smooth` is how many times finer than a
  *   pixel he is painted, each way, before the picture is brought down to size: 3 unless told otherwise.
  * @returns {Uint8Array} the picture as RGBA bytes, row by row from the top, see-through around him
  */
-export function paintPoulpy(model, { width, height, turn = SHOT.turn, tilt = SHOT.tilt, distance = SHOT.distance, centre = model.height / 2, shadow = null, smooth = 3 }) {
+export function paintPoulpy(model, { width, height, turn = SHOT.turn, tilt = SHOT.tilt, distance = SHOT.distance, centre = model.height / 2, shadow = null, smooth = 3, field = SHOT.field, placed = null, gather = 1 }) {
   const W = width * smooth, H = height * smooth
   // Where the viewer stands and what is right, up and ahead for them.
   const eye = [distance * Math.sin(turn * RAD) * Math.cos(tilt * RAD), centre + distance * Math.sin(tilt * RAD), distance * Math.cos(turn * RAD) * Math.cos(tilt * RAD)]
   const ahead = norm(sub([0, centre, 0], eye)), right = norm(cross(ahead, [0, 1, 0])), up = cross(right, ahead)
-  const reach = Math.tan((SHOT.field / 2) * RAD)
+  const reach = Math.tan((field / 2) * RAD)
   // A direction the viewer sees (x right, y up, z towards them), in the room.
   const inRoom = ([x, y, z]) => norm([0, 1, 2].map((k) => right[k] * x + up[k] * y - ahead[k] * z))
   const light = inRoom(LOOK.light)
@@ -78,6 +79,9 @@ export function paintPoulpy(model, { width, height, turn = SHOT.turn, tilt = SHO
   const lift = model.headLift ?? 0, lean = model.headTilt ?? 0, cl = Math.cos(lean), sl = Math.sin(lean)
   const towards = norm(sub(eye, [0, centre, 0]))
   const place = (part) => {
+    // A move poses what is not an arm itself (see posePoulpy in motion.mjs): where each point and each way it faces lands.
+    const own = placed?.(part)
+    if (own) return own
     if (part.card) {
       const way = part.card === 'front' ? 1 : -1, size = (distance - way * CARD.gap) / distance
       const middle = [0, 1, 2].map((k) => [0, CARD.centre, 0][k] + towards[k] * way * CARD.gap)
@@ -103,7 +107,7 @@ export function paintPoulpy(model, { width, height, turn = SHOT.turn, tilt = SHO
   if (shadow) {
     // A soft round shadow on the floor, strongest under him and gone at its edge.
     const tint = [1, 3, 5].map((i) => { const c = parseInt(shadow.slice(i, i + 2), 16) / 255; return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4 })
-    const half = SHOT.shadow.size / 2, corners = [[-half, 0.005, -half], [half, 0.005, -half], [half, 0.005, half], [-half, 0.005, half]]
+    const half = (SHOT.shadow.size * gather) / 2, corners = [[-half, 0.005, -half], [half, 0.005, -half], [half, 0.005, half], [-half, 0.005, half]]
     const fade = (far) => (far < 0.55 ? SHOT.shadow.strength + (0.16 - SHOT.shadow.strength) * (far / 0.55) : far < 1 ? 0.16 * (1 - (far - 0.55) / 0.45) : 0)
     for (const [i, j, k] of [[0, 1, 2], [0, 2, 3]]) {
       fill([corners[i], corners[j], corners[k]], (a, b, c) => {

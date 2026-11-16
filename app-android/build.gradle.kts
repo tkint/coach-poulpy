@@ -45,6 +45,8 @@ android {
 
     // The loader's pictures are read from where the website reads them too (design/poulpy-3d/loader), so they exist once.
     sourceSets.getByName("main").assets.srcDir(rootProject.file("design/poulpy-3d/loader"))
+    // So are the moves of Home's Poulpy (design/poulpy-3d/moves).
+    sourceSets.getByName("main").assets.srcDir(rootProject.file("design/poulpy-3d/moves"))
 
     buildTypes {
         release {
