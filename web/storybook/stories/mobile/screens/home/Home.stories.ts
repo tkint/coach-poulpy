@@ -55,10 +55,10 @@ export const HomePlannedTap: Story = {
   ...screen(screenHomePlannedTap),
   parameters: { mockup: { issue: 222 } },
 }
-/** Home · planned, with Poulpy losing patience when tapped again and again (draft). Five taps in a row make the happy one turn round and come out annoyed; three more make him turn round and come out fuming; each tap answers with a small move for his mood (a jump, a shake, a shudder). Left alone for 5 seconds he improves his mood by a step, each time by a full turn the other way round. The moves are the ones validated on Brand/Poulpy moves. */
+/** Home · planned, with Poulpy losing patience when tapped again and again (agreed by the owner: the moves are validated on Brand/Poulpy moves). Five taps in a row make the happy one turn round and come out annoyed; three more make him turn round and come out fuming; each tap answers with a small move for his mood (a jump, a shake, a shudder). Left alone for 5 seconds he improves his mood by a step, each time by a full turn the other way round. The moves are the ones validated on Brand/Poulpy moves. */
 export const HomeMoodTap: Story = {
   name: "Planned, tap Poulpy until he is angry",
-  tags: ['!autodocs', 'draft'],
+  tags: ['!autodocs', 'agreed'],
   ...screen(screenHomeMoodTap),
 }
 /** Home · done, the eighth tentacle lit: Poulpy is the champion. He stays a still picture; a tap plays his celebration, the same three jumps of joy with his medal and confetti as on the end-of-session screen. */

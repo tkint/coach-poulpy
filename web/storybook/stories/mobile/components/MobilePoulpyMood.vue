@@ -8,7 +8,7 @@
 // He is a still picture between moves. With reduced motion he does not move at all.
 import { nextTick, onBeforeUnmount, ref } from 'vue'
 import { poulpyDrawings } from '@coach-poulpy/ui'
-import { spinning, tucking, type Move } from '../../brand/moodMoves'
+import { MOOD_MOVES, tucking, type Move } from '../../brand/moodMoves'
 
 defineProps<{ label: string }>()
 type Mood = 'happy' | 'annoyed' | 'fuming'
@@ -19,14 +19,10 @@ const PICTURE_HEIGHT = 95
 const PAD = PICTURE_HEIGHT * PAD_PER_HEIGHT
 
 interface Plan { make: () => Move; seconds: number; swap: 'half' | 'start'; to: Mood; boost?: number }
+// The phones' moves (design/poulpy-3d/moods.mjs), plus the happy jump, which on the phones is the jump already baked for the happy Poulpy.
 const plans: Record<string, Plan> = {
   hop: { make: tucking(0.1, 0.1, 0.45, 6), seconds: 1.2, swap: 'start', to: 'happy' },
-  toAnnoyed: { make: () => spinning(0, false)(false), seconds: 1.5, swap: 'half', to: 'annoyed' },
-  toFuming: { make: () => spinning(0, false)(false), seconds: 1.5, swap: 'half', to: 'fuming' },
-  shake: { make: tucking(0.05, 0.03, 0, 12), seconds: 1.4, swap: 'start', to: 'annoyed' },
-  shudder: { make: tucking(0.16, 0.12, 0.05, 9), seconds: 1.9, swap: 'start', to: 'fuming', boost: 2 },
-  calmDown: { make: () => spinning(0, false)(true), seconds: 1.5, swap: 'half', to: 'annoyed' },
-  backToNormal: { make: () => spinning(0.45, false)(true), seconds: 1.7, swap: 'half', to: 'happy' },
+  ...(MOOD_MOVES as Record<string, Plan>),
 }
 
 const mood = ref<Mood>('happy')
@@ -36,7 +32,8 @@ let taps = 0
 let calm: ReturnType<typeof setTimeout> | undefined
 let stop = () => {}
 
-const picture = (m: Mood) => (poulpyDrawings as Record<string, string>)[`mood_${m}`]
+// His fuming picture is the pose with his fumes behind him, as the moves draw it.
+const picture = (m: Mood) => (poulpyDrawings as Record<string, string>)[m === 'fuming' ? 'pose_fuming' : `mood_${m}`]
 const reduced = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
 // Plays one move from the mood he is in, and lands on the mood the move ends in.
@@ -65,7 +62,7 @@ async function perform(plan: Plan) {
       const pose = move.advance(dt) as { yaw?: number }
       scene.pose(pose as never)
       if (shown !== plan.to && swapAt(pose)) { shown = plan.to; showMood(shown); scene.pose(pose as never) }
-      if (shown === 'fuming') scene.fumes(clock, plan.boost ? plan.boost * Math.max(0, Math.min(1, 1 - (elapsed - plan.seconds + 0.5) / 0.5)) : 0)
+      if (shown === 'fuming') scene.fumes(clock, plan.to === 'fuming' && plan.boost ? plan.boost * Math.max(0, Math.min(1, 1 - (elapsed - plan.seconds + 0.5) / 0.5)) : 0)
       if (elapsed < plan.seconds) { frame = requestAnimationFrame(tick); return }
       finish()
     }
