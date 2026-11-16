@@ -3,7 +3,7 @@
 // annoyed, tapped again he spins and goes fuming, tapped while fuming he tucks and his fumes puff, then after a while he spins back to annoyed and
 // to normal. Each step has a few variants to compare; one scene plays them (design/poulpy-3d/motion.mjs, poulpy3dScene.ts).
 import { onBeforeUnmount, onMounted, shallowRef, useTemplateRef } from 'vue'
-import { TURN, createJump, createTurn } from '../../../../design/poulpy-3d/motion.mjs'
+import { spinning, tucking, type Move } from './moodMoves'
 import type { createPoulpyScene } from './poulpy3dScene'
 
 // `only` shows just some of the steps (the page of one mood's moves); with none, all five, as a sequence.
@@ -11,29 +11,14 @@ import type { createPoulpyScene } from './poulpy3dScene'
 const props = defineProps<{ only?: string[]; plain?: boolean }>()
 type State = 'happy' | 'annoyed' | 'fuming'
 // A move is anything that gives a pose for a time step; `swap` says when the face changes: when he is half way round, or as he starts.
-interface Move { advance: (seconds: number) => unknown }
 interface Variant { id: string; label: string; note: string; make: (clockwise: boolean) => Move; seconds: number; swap: 'half' | 'start'; boost?: number }
 interface Step { id: string; title: string; text: string; from: State; to: State; clockwise?: boolean; variants: Variant[] }
 
-// The three ways to spin, shared by every spin: exactly 360 degrees (no wiggle), and once: the pause after it is far longer than the move, so he
-// does not start a second one.
-const spinning = (hop: number, windUp: boolean): ((clockwise: boolean) => Move) => (clockwise) => {
-  const stride = (clockwise ? -360 : 360) / 24
-  if (hop) { const move = createJump({ stride, wiggle: false }); Object.assign(move, { height: hop, hang: 3, pause: 99 }); return move }
-  const turn = { ...TURN, pauses: [99], ...(windUp ? { stepSeconds: 0.6, windUp: { degrees: 14, seconds: 0.3 }, body: { speed: 12, damping: 0.5 } } : {}) }
-  return createTurn({ stride, wiggle: false, turn } as never)
-}
 const SPINS: Pick<Variant, 'id' | 'label' | 'note' | 'make' | 'seconds' | 'swap'>[] = [
   { id: 'spot', label: 'On the spot', note: 'A quick turn, feet on the floor, arms trailing.', make: spinning(0, false), seconds: 1.5, swap: 'half' },
   { id: 'hop', label: 'With a hop', note: 'A small jump with a full turn in the air.', make: spinning(0.45, false), seconds: 1.7, swap: 'half' },
   { id: 'whip', label: 'Wind-up and whip', note: 'He leans back first, then whips round and rocks past the mark.', make: spinning(0, true), seconds: 2.1, swap: 'half' },
 ]
-// Tucks while he fumes: he stays on the floor and comes back to standing.
-const tucking = (tuck: number, spread: number, hop: number, lean: number): (() => Move) => () => {
-  const move = createJump()
-  Object.assign(move, { tuck, height: hop, landing: 0.05, spread, lean, pause: 99 })
-  return move
-}
 const TUCKS: Variant[] = [
   { id: 'small', label: 'Small tuck', note: 'He tucks a little and comes back up; the fumes puff twice as fast meanwhile.', make: tucking(0.12, 0.08, 0, 0), seconds: 1.8, swap: 'start', boost: 1 },
   { id: 'deep', label: 'Deep tuck, release', note: 'He squeezes down into his arms, then pops back up with a tiny hop.', make: tucking(0.22, 0.2, 0.08, 0), seconds: 2, swap: 'start', boost: 1.4 },

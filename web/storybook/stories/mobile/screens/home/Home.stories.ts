@@ -6,6 +6,7 @@ import screenHomeNext from './home-next.html?raw'
 import screenHomeNothingPlanned from './home-nothing-planned.html?raw'
 import screenHomePlanned from './home-planned.html?raw'
 import screenHomePlannedTap from './home-planned-tap.html?raw'
+import screenHomeMoodTap from './home-mood-tap.html?raw'
 
 // The Home screens of the apps (ADR 0029), drawn with the phone stylesheet (../screens.css).
 const meta = {
@@ -52,4 +53,10 @@ export const HomePlannedTap: Story = {
   tags: ['!autodocs', 'agreed'],
   ...screen(screenHomePlannedTap),
   parameters: { mockup: { issue: 222 } },
+}
+/** Home · planned, with Poulpy losing patience when tapped again and again (draft). Five taps in a row make the happy one turn round and come out annoyed; three more make him turn round and come out fuming; each tap answers with a small move for his mood (a jump, a shake, a shudder). Left alone for 5 seconds he improves his mood by a step, each time by a full turn the other way round. The moves are the ones validated on Brand/Poulpy moves. */
+export const HomeMoodTap: Story = {
+  name: "Planned, tap Poulpy until he is angry",
+  tags: ['!autodocs', 'draft'],
+  ...screen(screenHomeMoodTap),
 }
