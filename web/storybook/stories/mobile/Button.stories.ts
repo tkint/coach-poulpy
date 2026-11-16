@@ -8,7 +8,7 @@ const sizes = ['xs', 'sm', 'md', 'lg', 'xl', 'xxl'] as const
 const meta = {
   title: 'Mobile/Components/Button',
   tags: ['draft'],
-  render: renderComponent('MobileButton'),
+  render: renderComponent('MobileButton', 'width: 100%; max-width: 390px; display: flex; align-items: center;'),
   args: { label: 'Start now', kind: 'primary', size: 'md', icon: '' },
   argTypes: {
     kind: { control: 'inline-radio', options: ['primary', 'secondary', 'tonal', 'grumpy'] },
@@ -34,7 +34,7 @@ export const Sizes: Story = {
     const rows = sizes
       .map((s) => `<div style="display: flex; align-items: center; gap: 16px;"><span style="width: 40px; font-size: 13px; font-weight: 700; color: var(--cp-on-surface-variant);">${s}</span><MobileButton kind="${args.kind}" size="${s}"${args.icon ? ` icon="${args.icon}"` : ''}>${args.label}</MobileButton></div>`)
       .join('')
-    return h(Screen, { key: JSON.stringify(args), markup: `<div style="width: 100%; max-width: 390px; padding: 16px 16px 32px; display: flex; flex-direction: column; align-items: flex-start; gap: 16px;">${rows}</div>` })
+    return h(Screen, { key: JSON.stringify(args), markup: `<div style="width: 100%; max-width: 390px; display: flex; flex-direction: column; align-items: flex-start; gap: 16px;">${rows}</div>` })
   },
   args: { label: 'Start' },
 }
