@@ -438,9 +438,9 @@
     "chooser": "Partager votre séance"
   },
   "shareWorkout": {
-    "title": "Partager cette séance",
-    "why": "Choisissez comment l’envoyer.",
-    "contact": "Partager à un contact",
+    "title": "Exporter cette séance",
+    "why": "Envoyez-la à quelqu’un, ou gardez-en une copie.",
+    "contact": "Envoyer à un contact",
     "contactNote": "Dans un message, un e-mail ou une autre appli",
     "save": "Enregistrer sur l’appareil",
     "saveNote": "Garder le fichier dans un dossier de votre choix"

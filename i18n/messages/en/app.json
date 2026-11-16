@@ -438,9 +438,9 @@
     "chooser": "Share your session"
   },
   "shareWorkout": {
-    "title": "Share this workout",
-    "why": "Pick how to send it.",
-    "contact": "Share to a contact",
+    "title": "Export this workout",
+    "why": "Send it to someone, or keep a copy.",
+    "contact": "Send to a contact",
     "contactNote": "In a message, an email or any app",
     "save": "Save to device",
     "saveNote": "Keep the file in a folder you pick"
