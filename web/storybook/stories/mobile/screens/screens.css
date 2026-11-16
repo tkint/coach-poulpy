@@ -452,6 +452,7 @@
 .cp-screen .poulpy-cheer img { display: block; width: 100%; height: 100%; }
 /* On Home he is the champion in the tentacle ring, as the tap's Poulpy is. */
 .cp-screen .tentacle-ring .poulpy-cheer--home { position: absolute; left: 14px; top: 18.5px; width: 104px; height: 95px; margin: 0; border-radius: var(--cp-radius-lg); }
+.cp-screen .tentacle-ring .poulpy-cheer--home img { position: static; width: 100%; height: 100%; }
 .cp-screen .poulpy-cheer-stage { position: absolute; pointer-events: none; }
 .cp-screen .poulpy-cheer-stage canvas { display: block; width: 100%; height: 100%; }
 .cp-screen .poulpy-tap-stage { position: absolute; inset: -35.2px; pointer-events: none; }
