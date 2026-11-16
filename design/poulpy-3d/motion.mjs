@@ -244,7 +244,9 @@ export function createJump({ softness = 1, stride = 0, jump = JUMP, turn = TURN 
     }
     const through = clock / seconds[phase], turning = stride !== 0
     const goal = phase === 0 ? -sim.tuck : phase === 1 ? sim.height * 4 * through * (1 - through) : phase === 2 ? -sim.landing : 0
-    if (turning) to = phase === 0 ? base - turn.windUp.degrees * RAD * (stride < 0 ? -1 : 1) : base + turn.steps[hop % turn.steps.length] * RAD * stride
+    // He turns for as long as he is in the air: from his wind-up to the full step, eased, so he lands as the turn ends.
+    const wind = base - turn.windUp.degrees * RAD * (stride < 0 ? -1 : 1), full = base + turn.steps[hop % turn.steps.length] * RAD * stride
+    if (turning) to = phase === 0 ? wind : phase === 1 ? wind + (full - wind) * through * through * (3 - 2 * through) : full
     else to = base
 
     // His head follows the script and takes the base of his arms up with it.
