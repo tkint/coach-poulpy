@@ -31,6 +31,7 @@ const softness = shallowRef(1) // how loose his arms are: 1 is the design
 // Seen from above, and named for him: without `motion` it is the viewer who walks around, the other way.
 const direction = shallowRef<'clockwise' | 'anticlockwise'>('anticlockwise')
 const step = shallowRef(24) // degrees he turns at each step, on average: 24 is the design
+const wiggle = shallowRef(true) // on, each step differs a little as designed (20 to 30); off, every step is exactly `step`
 // The jump's key values, in units (his head's radius is about 1): they start at the design, read from JUMP.
 const height = shallowRef(0) // how far he goes up
 const tuck = shallowRef(0) // how far his head tucks into his arms before the jump
@@ -52,7 +53,7 @@ function values() {
     ...(winking ? { eye: eye.value } : {}),
     view: { turn: round(turn.value), tilt: round(tilt.value), distance: round(distance.value) },
     ...(jumping ? { jump: { height: round(height.value), tuck: round(tuck.value), landing: round(landing.value), spread: round(spread.value), hang: round(hang.value), lean: round(lean.value), pause: round(pause.value) } } : {}),
-    ...(motion && turning ? { step: step.value, direction: direction.value } : {}),
+    ...(motion && turning ? { step: step.value, wiggle: wiggle.value, direction: direction.value } : {}),
     ...(motion && !winking ? { softArms: round(softness.value) } : {}),
     speed: round(speed.value),
   }
@@ -155,6 +156,7 @@ watch([turn, tilt, distance], look)
 watch(softness, (value) => { if (move && 'softness' in move) move.softness = value })
 const stride = () => (!turning ? 0 : (step.value / 24) * (direction.value === 'anticlockwise' ? 1 : -1))
 watch([step, direction], () => { if (move && 'stride' in move) move.stride = stride() })
+watch(wiggle, (value) => { if (move && 'wiggle' in move) move.wiggle = value })
 watch([height, tuck, landing, spread, hang, lean, pause], (values) => {
   if (move && 'height' in move) [move.height, move.tuck, move.landing, move.spread, move.hang, move.lean, move.pause] = values
 })
@@ -169,7 +171,7 @@ onMounted(async () => {
         winkFace = (await import('../../../../design/poulpy-3d/poses.mjs')).winkFace
         move = createWink()
       } else if (jumping) {
-        const jump = (cheering ? createCheer : createJump)({ softness: softness.value, stride: stride() })
+        const jump = (cheering ? createCheer : createJump)({ softness: softness.value, stride: stride(), wiggle: wiggle.value })
         ;[height.value, tuck.value, landing.value, spread.value, lean.value, pause.value] = [jump.height, jump.tuck, jump.landing, jump.spread, jump.lean, jump.pause]
         move = jump
       } else move = createTurn({ softness: softness.value })
@@ -229,6 +231,7 @@ onBeforeUnmount(() => {
       <div class="toggles">
         <button type="button" class="toggle" :aria-pressed="outline" @click="outline = !outline">Outline</button>
         <button type="button" class="toggle" :aria-pressed="spinning" @click="spinning = !spinning">{{ winking ? 'Wink' : jumping ? 'Jump' : motion ? 'Turn' : 'Spin' }}</button>
+        <button v-if="motion && turning" type="button" class="toggle" :aria-pressed="wiggle" title="On, each step differs a little (20° to 30° around 24°). Off, every step is exactly the Step." @click="wiggle = !wiggle">Wiggle</button>
         <button type="button" class="toggle export" @click="exportValues">{{ copied ? 'Copied' : 'Export values' }}</button>
       </div>
       <label v-if="!motion" class="slider"><span>Turn</span><input v-model.number="turn" type="range" min="0" max="360" step="1" @input="spinning = false" /><output>{{ Math.round(turn) }}°</output></label>
