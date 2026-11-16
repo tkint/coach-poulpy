@@ -16,7 +16,7 @@ const meta = {
     icon: { control: 'text', description: 'A Lucide icon name, such as `play`.' },
     iconSize: { control: { type: 'number', min: 12, max: 24 } },
   },
-  parameters: { docs: { canvas: { sourceState: 'none' }, description: { component: '`MobileButton` (draft). A rounded square (10 radius, like the New workout button and the settings rows), never a pill, on the websites\' size scale: xs 24, sm 32, md 40, lg 48, xl 56, xxl 64. Every example is md; the Sizes story shows the rest. Below 44 the touch area still reaches 44. One primary button per screen; secondary (outlined) and tonal for the others; grumpy only for the catch-up action. Always a plain `type="button"`. `style`, `id` and `disabled` go through to the element.' } } },
+  parameters: { docs: { canvas: { sourceState: 'none' }, description: { component: '`MobileButton` (draft). A rounded square (10 radius, like the New workout button and the settings rows), never a pill, on the websites\' size scale: xs 24, sm 32, md 40, lg 48, xl 56, xxl 64. Every example is md; the Sizes story shows the rest, one per line. Below 44 the touch area still reaches 44. One primary button per screen; secondary (outlined) and tonal for the others; grumpy only for the catch-up action. Always a plain `type="button"`. `style`, `id` and `disabled` go through to the element.' } } },
 } satisfies Meta
 export default meta
 type Story = StoryObj<typeof meta>
@@ -28,12 +28,12 @@ export const Grumpy: Story = { args: { kind: 'grumpy', label: 'Catch up' } }
 export const WithIcon: Story = { args: { icon: 'play' } }
 export const Disabled: Story = { args: { kind: 'secondary', label: 'Skip', disabled: true } }
 
-/** Every step of the size scale, xs to xxl, in each kind; md is what a button without a `size` draws. */
+/** Every step of the size scale, xs to xxl, one per line; md is what a button without a `size` draws. */
 export const Sizes: Story = {
   render: () => {
-    const rows = (['primary', 'tonal', 'secondary'] as const)
-      .map((kind) => `<div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">${sizes.map((s) => `<MobileButton kind="${kind}" size="${s}">${s}</MobileButton>`).join('')}</div>`)
+    const rows = sizes
+      .map((s) => `<div style="display: flex; align-items: center; gap: 16px;"><span style="width: 32px; font-size: 13px; color: var(--cp-on-surface-variant);">${s}</span><MobileButton size="${s}">Start now</MobileButton></div>`)
       .join('')
-    return h(Screen, { markup: `<div style="width: 390px; padding: 16px; display: flex; flex-direction: column; gap: 16px;">${rows}</div>` })
+    return h(Screen, { markup: `<div style="width: 390px; padding: 16px; display: flex; flex-direction: column; align-items: flex-start; gap: 12px;">${rows}</div>` })
   },
 }
