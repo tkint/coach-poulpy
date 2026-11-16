@@ -1,14 +1,14 @@
 <script setup lang="ts">
-// Poulpy as the champion on the end-of-session screen: his still picture, and when the screen opens he jumps for joy twice, with
+// Poulpy as the champion on the end-of-session screen: his still picture, and when the screen opens he jumps for joy three times, with
 // his medal and confetti, in 3D, and settles back to the picture. A tap plays it again. With reduced motion he only stands there.
 // The mockup plays it live in the workshop; the phones play it baked from the model, frame by frame, as on Home (decision 16).
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { poulpyDrawings } from '@coach-poulpy/ui'
 
 defineProps<{ label: string }>()
-const PICTURE_HEIGHT = 155 // the picture as the screen draws it, 170 wide
-const PAD = 90 // how much room the confetti has around it, in px
-const SECONDS = 2.6
+const PICTURE_HEIGHT = 210 // the picture as the screen draws it, 230 wide
+const PAD = 110 // how much room the confetti has around it, in px
+const SECONDS = 3.9
 const picture = (poulpyDrawings as Record<string, string>).pose_champion
 const playing = ref(false)
 const canvas = ref<HTMLCanvasElement>()
