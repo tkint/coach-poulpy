@@ -173,10 +173,9 @@ struct BuilderView: View {
                     LucideIcon(.chevronDown, size: 16).foregroundStyle(PoulpyColor.onSurfaceVariant)
                 }
                 .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .frame(minHeight: 44)
+                .padding(.vertical, 3)
                 .background(PoulpyColor.primaryContainer, in: Capsule())
-                .clipShape(Capsule())
+                .frame(minHeight: 44)
                 .contentShape(Capsule())
             }
             .buttonStyle(.plain)
