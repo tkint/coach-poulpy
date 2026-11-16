@@ -34,6 +34,8 @@ export const Cheering: Story = { render: () => ({ components: { Poulpy3d }, temp
 export const Winking: Story = { render: () => ({ components: { Poulpy3d }, template: '<Poulpy3d motion="wink" />' }) }
 /** Drafts of Home's annoyed and fuming moves: the spins between his moods and the fuming tuck, a few variants of each. */
 export const MoodMoves: Story = { render: () => ({ components: { PoulpyMoodMoves }, template: '<PoulpyMoodMoves />' }) }
+/** Poulpy fuming: the spin into it, the tuck when tapped, and the spin out of it. */
+export const Fuming: Story = { render: () => ({ components: { PoulpyMoodMoves }, template: '<PoulpyMoodMoves :only="[\'fuming\', \'tuck\', \'calm\']" />' }) }
 /** The brand book, drawn live. */
 export const Book: Story = {
   render: () => ({ components: { BrandBook }, template: '<BrandBook />' }),
