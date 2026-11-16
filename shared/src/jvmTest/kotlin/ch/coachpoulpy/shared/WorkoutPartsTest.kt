@@ -137,9 +137,8 @@ class WorkoutPartsTest {
 
     @Test
     fun aSetsWorkoutCountsSetsOutsideARepeat() {
-        val builder = graph.createWorkout("fr")
+        val builder = graph.createWorkout(WorkoutFormat.SETS, "fr")
         builder.rename("Jambes")
-        builder.chooseFormat(WorkoutFormat.SETS)
         builder.add("goblet-squat", builder.work)
         val workout = graph.store.latestWorkout(WorkoutId(builder.save()!!))!!
         val player = PlayerModel(

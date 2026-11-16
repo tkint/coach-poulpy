@@ -36,10 +36,10 @@ export const LibraryExercises: Story = {
   ...screen(screenLibraryExercises),
   parameters: { mockup: { issue: 104 } },
 }
-/** Library · "New workout" opens the format sheet over the Library. Draft for #242. */
+/** Library · "New workout" opens the format sheet over the Library. */
 export const LibraryNewWorkoutSheet: Story = {
   name: "New workout, format sheet",
-  tags: ['!autodocs', 'draft'],
+  tags: ['!autodocs', 'agreed'],
   ...screen(screenLibraryNewWorkoutSheet),
   parameters: { mockup: { issue: 242 } },
 }

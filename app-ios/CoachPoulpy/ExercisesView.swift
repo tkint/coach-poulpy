@@ -463,11 +463,19 @@ private struct NoExercises: View {
 /// The two halves of an exercise's page.
 enum ExerciseTab { case muscles, how }
 
+/// The format picked for a new workout, to open its builder.
+private struct FormatPick: Identifiable {
+    let value: WorkoutFormat
+    var id: String { value.name }
+}
+
 struct ExerciseDetailView: View {
     let graph: AppGraph
     @State private var slug: String
     @State private var choosing = false
     @State private var adding = false
+    /// The format picked for "Add to a workout", which opens the builder holding this exercise.
+    @State private var building: FormatPick?
     @State private var tab = ExerciseTab.muscles
     @Environment(\.dismiss) private var dismiss
 
@@ -527,8 +535,14 @@ struct ExerciseDetailView: View {
             }
             .presentationDetents([.large])
         }
-        .fullScreenCover(isPresented: $adding) {
-            BuilderView(graph: graph, workoutId: nil, firstExercise: detail.slug)
+        .sheet(isPresented: $adding) {
+            FormatSheet(options: graph.formatOptions(languageCode: Language.code), current: nil, onChoose: { format in
+                adding = false
+                building = FormatPick(value: format)
+            }, onClose: { adding = false })
+        }
+        .fullScreenCover(item: $building) { format in
+            BuilderView(graph: graph, workoutId: nil, newFormat: format.value, firstExercise: detail.slug)
         }
     }
 

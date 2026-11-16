@@ -325,6 +325,15 @@ internal class Labels(private val languageCode: String, private val units: () ->
 
     fun times(count: Int) = DomainText.countTimes(languageCode, count)
 
+    /** "3 rounds of Bench press, Row", for what switching the format gives. */
+    fun roundsOf(rounds: Int, names: String) = DomainText.countRoundsOf(languageCode, rounds(rounds), names)
+
+    /** "Bench press 3 times". */
+    fun timesOf(name: String, count: Int) = DomainText.countTimesOf(languageCode, name, times(count))
+
+    /** "Bench press 3 times, then Row 3 times". */
+    fun then(first: String, second: String) = DomainText.countThen(languageCode, first, second)
+
     /** "6 sets". */
     fun sets(count: Int) = DomainText.countSets(languageCode, count)
 

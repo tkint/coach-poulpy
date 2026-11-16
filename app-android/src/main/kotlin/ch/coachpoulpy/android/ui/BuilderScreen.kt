@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -65,6 +66,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.selected
@@ -80,6 +82,8 @@ import ch.coachpoulpy.android.R
 import ch.coachpoulpy.core.model.PartKind
 import ch.coachpoulpy.core.model.StepRole
 import ch.coachpoulpy.core.model.WorkoutFormat
+import ch.coachpoulpy.shared.FormatChange
+import ch.coachpoulpy.shared.FormatSwitch
 import ch.coachpoulpy.shared.AppGraph
 import ch.coachpoulpy.shared.AmountUnit
 import ch.coachpoulpy.shared.BuilderModel
@@ -92,18 +96,17 @@ import ch.coachpoulpy.shared.DurationKind
 import ch.coachpoulpy.shared.IntensityKind
 import ch.coachpoulpy.shared.PaceUnit
 import ch.coachpoulpy.shared.WalkRunTarget
-import ch.coachpoulpy.shared.WorkoutFormatOption
 import ch.coachpoulpy.shared.WorkoutImport
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose: () -> Unit, firstExercise: String? = null, copyOf: String? = null, importing: WorkoutImport? = null) {
-    val model = remember(graph, language, workoutId, copyOf, importing) {
+fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose: () -> Unit, newFormat: WorkoutFormat? = null, firstExercise: String? = null, copyOf: String? = null, importing: WorkoutImport? = null) {
+    val model = remember(graph, language, workoutId, copyOf, importing, newFormat) {
         importing?.builder()
             ?: copyOf?.let { graph.duplicateWorkout(it, language) }
             ?: workoutId?.let { graph.editWorkout(it, language) }
-            ?: firstExercise?.let { graph.createWorkoutWith(it, language) }
-            ?: graph.createWorkout(language)
+            ?: newFormat?.let { format -> firstExercise?.let { graph.createWorkoutWith(format, it, language) } ?: graph.createWorkout(format, language) }
+            ?: error("A builder opens on a workout, a copy, an import or a new one with its format")
     }
     DisposableEffect(model) { onDispose { model.close() } }
     val state by model.state.collectAsStateWithLifecycle()
@@ -118,6 +121,9 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
     // The exercise whose details are open over the step's sheet; null when none.
     var detailing by rememberSaveable { mutableStateOf<String?>(null) }
     var addingPart by rememberSaveable { mutableStateOf(false) }
+    var changingFormat by rememberSaveable { mutableStateOf(false) }
+    // The switch waiting for "Follow the new format" or "Keep the order"; null when none.
+    var askingOrder by remember { mutableStateOf<FormatChange?>(null) }
     LaunchedEffect(state.addedKey) { state.addedKey?.let { editing = it } }
     val colors = MaterialTheme.colorScheme
     val list = rememberLazyListState()
@@ -188,8 +194,7 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
             item {
                 PoulpyTextField(stringResource(R.string.builder_name), state.name, model::rename, Modifier.padding(bottom = 14.dp).fillMaxWidth())
             }
-            val format = state.format ?: return@LazyColumn
-            item { FormatLine(format, state.formatLabel) }
+            item { FormatLine(state.format, state.formatLabel, onClick = { changingFormat = true }) }
             state.parts.forEach { part ->
                 item(key = "part-${part.key}") { BuilderPartHeader(model, part) }
                 part.steps.forEach { step ->
@@ -258,8 +263,21 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
         }
     }
 
-    if (state.format == null) {
-        FormatSheet(model.formatOptions, onChoose = model::chooseFormat, onClose = onClose)
+    if (changingFormat) {
+        FormatSheet(model.formatOptions, current = state.format, onChoose = { format ->
+            changingFormat = false
+            val change = model.formatChange(format)
+            if (change != null) {
+                if (change.asks) {
+                    askingOrder = change
+                } else {
+                    model.changeFormat(format, FormatSwitch.KEEP_ORDER)
+                }
+            }
+        }, onClose = { changingFormat = false })
+    }
+    askingOrder?.let { change ->
+        FormatOrderSheet(change, onChoose = { switch -> model.changeFormat(change.format, switch); askingOrder = null }, onClose = { askingOrder = null })
     }
     if (addingPart) {
         PartSheet(state.partOptions, onPick = { model.addPart(it); addingPart = false }, onDone = { addingPart = false })
@@ -272,79 +290,40 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
     }
 }
 
-/**
- * The format, asked once when a workout is created: Circuit or Sets, each with what it fits
- * and an example. Closing the sheet without choosing leaves the builder.
- */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun FormatSheet(options: List<WorkoutFormatOption>, onChoose: (WorkoutFormat) -> Unit, onClose: () -> Unit) {
-    val colors = MaterialTheme.colorScheme
-    var chosen by rememberSaveable { mutableStateOf(WorkoutFormat.CIRCUIT) }
-    ModalBottomSheet(onDismissRequest = onClose, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), containerColor = colors.surface) {
-        Column(
-            Modifier.padding(horizontal = PoulpySpace.lg).padding(bottom = 24.dp).navigationBarsPadding(),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            SheetTitle(stringResource(R.string.builder_formatTitle), stringResource(R.string.builder_formatSubtitle))
-            options.forEach { option ->
-                val format = option.format
-                val (description, example) = when (format) {
-                    WorkoutFormat.CIRCUIT -> R.string.builder_circuitDescription to R.string.builder_circuitExample
-                    WorkoutFormat.SETS -> R.string.builder_setsDescription to R.string.builder_setsExample
-                }
-                val selected = chosen == format
-                Surface(
-                    onClick = { chosen = format },
-                    shape = RoundedCornerShape(PoulpyRadius.md),
-                    color = if (selected) colors.primaryContainer else colors.surface,
-                    border = BorderStroke(if (selected) 2.dp else 1.dp, if (selected) colors.primary else colors.outline),
-                    modifier = Modifier.fillMaxWidth().semantics { this.selected = selected },
-                ) {
-                    Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                            Box(Modifier.size(36.dp).clip(CircleShape).background(if (selected) colors.primary else colors.primaryContainer), contentAlignment = Alignment.Center) {
-                                Icon(format.icon, contentDescription = null, tint = if (selected) colors.onPrimary else colors.onPrimaryContainer, modifier = Modifier.size(20.dp))
-                            }
-                            Text(option.label, style = PoulpyTextStyles.Headline.copy(fontSize = 19.sp, lineHeight = 23.sp))
-                        }
-                        Text(stringResource(description), style = MaterialTheme.typography.bodyMedium)
-                        Text(stringResource(example), style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
-                    }
-                }
-            }
-            Button(onClick = { onChoose(chosen) }, modifier = Modifier.fillMaxWidth().height(PoulpySize.buttonLarge)) {
-                Text(stringResource(R.string.builder_continue), fontWeight = FontWeight.ExtraBold)
-            }
-        }
-    }
-}
-
 /** A sheet's title and the line under it. */
 @Composable
-private fun SheetTitle(title: String, subtitle: String) {
+internal fun SheetTitle(title: String, subtitle: String) {
     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
         Text(title, style = MaterialTheme.typography.titleLarge)
         Text(subtitle, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
-/** Under the name: the format as a chip, with a lock, since it was chosen at creation and stays. */
+/** Under the name: the format as a chip with a chevron; a tap opens the format sheet to change it. */
 @Composable
-private fun FormatLine(format: WorkoutFormat, label: String) {
+private fun FormatLine(format: WorkoutFormat, label: String, onClick: () -> Unit) {
     val colors = MaterialTheme.colorScheme
+    val description = stringResource(R.string.builder_changeFormat, label)
     Row(Modifier.padding(bottom = 18.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
         FieldLabel(stringResource(R.string.builder_format))
         Row(
-            Modifier.background(colors.primaryContainer, CircleShape).padding(horizontal = 12.dp, vertical = 6.dp),
+            Modifier
+                .heightIn(min = 48.dp)
+                .clickable(onClickLabel = description, role = Role.Button, onClick = onClick)
+                .semantics { contentDescription = description },
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-            Icon(format.icon, contentDescription = null, tint = colors.onPrimaryContainer, modifier = Modifier.size(18.dp))
-            Text(label, fontWeight = FontWeight.ExtraBold, color = colors.onPrimaryContainer)
+            Row(
+                Modifier.background(colors.primaryContainer, CircleShape).padding(horizontal = 12.dp, vertical = 6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                Icon(format.icon, contentDescription = null, tint = colors.onPrimaryContainer, modifier = Modifier.size(18.dp))
+                Text(label, fontWeight = FontWeight.ExtraBold, color = colors.onPrimaryContainer)
+            }
+            Icon(Lucide.ChevronDown, contentDescription = null, tint = colors.onSurfaceVariant, modifier = Modifier.size(16.dp))
         }
-        Icon(Lucide.Lock, contentDescription = null, tint = colors.onSurfaceVariant, modifier = Modifier.size(16.dp))
-        Text(stringResource(R.string.builder_formatLocked), style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
     }
 }
 

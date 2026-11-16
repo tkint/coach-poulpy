@@ -150,6 +150,9 @@
     "perRound": "{sets} per round, {rounds}",
     "betweenSets": "{rest} between sets",
     "hold": "{duration} hold",
+    "roundsOf": "{rounds} of {names}",
+    "timesOf": "{name} {times}",
+    "then": "{first}, then {second}",
     "parts": "{count, plural, one {# part} other {# parts}}"
   },
   "unit": {

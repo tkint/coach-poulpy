@@ -55,7 +55,7 @@ private fun DraftRepeat.withOneSetEach() = copy(steps = steps.map { it.withOneSe
 
 private fun newKey() = Ids.newUuidV7()
 
-private fun DraftEntry.hasSets() = !walkOrRun && sets > 1
+internal fun DraftEntry.hasSets() = !walkOrRun && sets > 1
 
 /** Sets → Circuit, keeping the order: an exercise of N sets becomes N rounds of that exercise and its rest. */
 private fun List<DraftStep>.keepingOrderAsCircuit(): List<DraftStep> = flatMap { step ->
