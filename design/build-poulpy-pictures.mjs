@@ -14,9 +14,9 @@ import { dirname, join } from 'node:path'
 import { inflateSync } from 'node:zlib'
 import { fileURLToPath } from 'node:url'
 import { buildPoulpy3d, MOODS } from './poulpy-3d/model.mjs'
-import { buildPoulpyPose, POSES } from './poulpy-3d/poses.mjs'
+import { buildPoulpyPose, CONFETTI, POSES } from './poulpy-3d/poses.mjs'
 import { paintPoulpy, pngOf } from './poulpy-3d/picture.mjs'
-import { armJoints, armSkin, createFollow, createJump, posePoulpy } from './poulpy-3d/motion.mjs'
+import { armJoints, armSkin, CHEER as CHEER_SHOW, createCheer, createFollow, createJump, posePoulpy } from './poulpy-3d/motion.mjs'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const tokens = JSON.parse(readFileSync(join(root, 'design/tokens.json'), 'utf8'))
@@ -166,6 +166,59 @@ const MOVE_KINDS = {
       files[`${MOVES.dir}/mood_${mood}_${kind}.png`] = pngOf(sheet, MOVES.columns * width, rowsOf * height)
     }
   }
+}
+
+// The champion's celebration at the end of a session: he jumps for joy three times with his medal and confetti, then settles on his still
+// picture. The same shot as the still (pose_champion), on a canvas `pad` pixels bigger each way for the confetti, in sheets of `perSheet` frames
+// (`columns` across) so no sheet is wider or taller than a phone's GPU takes. The last `fade` seconds the confetti shrinks away, and the last frame is his still.
+// The numbers are also in PoulpyCheer.kt, which the build checks.
+const PARTY = { frames: 96, jumps: 4, pieces: 96, pauses: [0.3, 0.2, 0.34, 0.2] }
+const CHEER = { frames: 72, fps: 20, columns: 6, perSheet: 24, picture: 252, pad: 110, fade: 0.7 }
+{
+  const kotlin = readFileSync(join(root, 'shared/src/commonMain/kotlin/ch/coachpoulpy/shared/PoulpyCheer.kt'), 'utf8')
+  const picture = { width: Math.round((CHEER.picture * FRAME.width) / FRAME.height), height: CHEER.picture }
+  const size = { width: picture.width + 2 * CHEER.pad, height: picture.height + 2 * CHEER.pad }
+  for (const [name, value] of [['FRAMES', CHEER.frames], ['FPS', CHEER.fps], ['COLUMNS', CHEER.columns], ['SHEET_FRAMES', CHEER.perSheet], ['FRAME_WIDTH', size.width], ['FRAME_HEIGHT', size.height], ['PICTURE_WIDTH', picture.width], ['PICTURE_HEIGHT', picture.height]]) {
+    if (!new RegExp(`const val ${name} = ${value}\\b`).test(kotlin)) { console.error(`PoulpyCheer.kt: ${name} must be ${value}, as in design/build-poulpy-pictures.mjs.`); process.exit(1) }
+  }
+  const party = readFileSync(join(root, 'shared/src/commonMain/kotlin/ch/coachpoulpy/shared/PoulpyParty.kt'), 'utf8')
+  if (!new RegExp(`const val FRAMES = ${PARTY.frames}\\b`).test(party)) { console.error(`PoulpyParty.kt: FRAMES must be ${PARTY.frames}, as in design/build-poulpy-pictures.mjs.`); process.exit(1) }
+  const field = (2 * Math.atan((size.height / picture.height) * Math.tan((14 * Math.PI) / 180)) * 180) / Math.PI
+  const model = buildPoulpyPose({ pose: 'champion', effects: false, tones: tokens.mood, colours })
+  const confetti = CONFETTI.colours.map((colour) => (colour === 'ember' ? colours.ember : colour))
+  const rows = Math.ceil(CHEER.perSheet / CHEER.columns)
+  // Paints `frames` pictures of `next(i)`'s poses into sheets named `${name}_1`, `_2`...
+  const bake = (name, frames, next) => {
+    const sheets = Array.from({ length: frames / CHEER.perSheet }, () => new Uint8Array(CHEER.columns * size.width * rows * size.height * 4))
+    for (let i = 0; i < frames; i++) {
+      const pose = next(i)
+      const { model: posed, placed } = posePoulpy(model, pose, { confetti })
+      const pixels = paintPoulpy(posed, { ...size, ...SHOT, field, placed, gather: 1 - Math.min((pose.lift ?? 0) * 0.4, 0.3) })
+      const sheet = sheets[Math.floor(i / CHEER.perSheet)], at = i % CHEER.perSheet, x = (at % CHEER.columns) * size.width, y = Math.floor(at / CHEER.columns) * size.height
+      for (let row = 0; row < size.height; row++) sheet.set(pixels.subarray(row * size.width * 4, (row + 1) * size.width * 4), ((y + row) * CHEER.columns * size.width + x) * 4)
+    }
+    sheets.forEach((sheet, n) => { files[`${MOVES.dir}/${name}_${n + 1}.png`] = pngOf(sheet, CHEER.columns * size.width, rows * size.height) })
+  }
+
+  // The three jumps of the tap on Home. The last frame is exactly his still picture: standing, the medal at rest, no confetti.
+  const cheer = createCheer()
+  bake('pose_champion_cheer', CHEER.frames, (i) => {
+    const pose = i === CHEER.frames - 1 ? { ...createCheer().pose(), confetti: [] } : i ? cheer.advance(1 / CHEER.fps) : cheer.pose()
+    pose.confettiScale = Math.min((CHEER.frames - 1 - i) / CHEER.fps / CHEER.fade, 1)
+    return pose
+  })
+
+  // The finished screen's party: jumps that never rest. Four jumps with the same bursts every time (`cycle`), 96 pieces so each burst has the
+  // same share, in the time of 96 frames, so the last frame runs into the first and the loop has no seam. Three rounds are played first
+  // so frame 0 is a round in full swing, as the last one leaves it.
+  const dance = createCheer({ cheer: { ...CHEER_SHOW, jump: { ...CHEER_SHOW.jump, pauses: PARTY.pauses }, confetti: { ...CHEER_SHOW.confetti, pieces: PARTY.pieces } }, cycle: PARTY.jumps })
+  const tick = 1 / 100, round = Math.round(PARTY.frames / CHEER.fps / tick)
+  for (let i = 0; i < 3 * round; i++) dance.advance(tick)
+  bake('pose_champion_party', PARTY.frames, (i) => {
+    let pose = dance.pose()
+    for (let t = 0; t < (i ? Math.round(1 / CHEER.fps / tick) : 0); t++) pose = dance.advance(tick)
+    return pose
+  })
 }
 
 // The app icons: the same pictures, fitted into the icon's square on the dark theme's background, as the owner asked.
