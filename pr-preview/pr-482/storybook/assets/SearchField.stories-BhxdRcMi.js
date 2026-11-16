@@ -1,5 +1,0 @@
-import{n as e}from"./rolldown-runtime-sJBDdmOt.js";import{n as t,t as n}from"./story-DaR8Ip3m.js";var r,i,a,o;function s(){return(s=e((()=>{n(),r={title:`Mobile/Components/Search field`,render:t(`MobileSearchField`,`width: 390px; padding: 16px;`),args:{label:`Search your workouts`,placeholder:`Name, type or exercise`,value:``},parameters:{docs:{canvas:{sourceState:`none`},description:{component:"`MobileSearchField`: a magnifier, the field and, once something is typed, a button that clears it. `label` is the field's accessible name."}}}},i={},a={args:{value:`squat`}},o=[`Empty`,`Filled`],i.parameters={...i.parameters,docs:{...i.parameters?.docs,source:{originalSource:`{}`,...i.parameters?.docs?.source}}},a.parameters={...a.parameters,docs:{...a.parameters?.docs,source:{originalSource:`{
-  args: {
-    value: 'squat'
-  }
-}`,...a.parameters?.docs?.source}}}})))()}s();export{i as Empty,a as Filled,o as __namedExportsOrder,r as default};
