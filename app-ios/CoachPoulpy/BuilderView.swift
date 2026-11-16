@@ -170,12 +170,14 @@ struct BuilderView: View {
                     Label(state.formatLabel, lucide: formatIcon(format))
                         .font(.poulpy(.subheadline).weight(.heavy))
                         .foregroundStyle(PoulpyColor.onPrimaryContainer)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                        .background(PoulpyColor.primaryContainer, in: Capsule())
                     LucideIcon(.chevronDown, size: 16).foregroundStyle(PoulpyColor.onSurfaceVariant)
                 }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
                 .frame(minHeight: 44)
+                .background(PoulpyColor.primaryContainer, in: Capsule())
+                .clipShape(Capsule())
+                .contentShape(Capsule())
             }
             .buttonStyle(.plain)
             .accessibilityLabel("builder.changeFormat \(state.formatLabel)")
