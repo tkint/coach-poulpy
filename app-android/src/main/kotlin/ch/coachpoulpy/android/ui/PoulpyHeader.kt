@@ -59,7 +59,9 @@ fun PoulpyHeader(status: PoulpyStatus, modifier: Modifier = Modifier, compact: B
                 modifier = Modifier.fillMaxSize().semantics { contentDescription = status.tentaclesCaption },
             )
             Crossfade(status.drawing, animationSpec = tween(PoulpyMotion.moodMillis), label = "poulpy") { drawing ->
-                Image(painterResource(drawing.drawable), contentDescription = status.title, modifier = Modifier.size(artSize))
+                // Home's compact Poulpy plays his move when tapped; the full-size one is only a picture.
+                if (compact) PoulpyTapArt(drawing, status.title, artSize)
+                else Image(painterResource(drawing.drawable), contentDescription = status.title, modifier = Modifier.size(artSize))
             }
         }
     }

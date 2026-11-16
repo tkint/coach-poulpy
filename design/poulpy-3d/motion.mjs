@@ -510,3 +510,63 @@ export function armSkin(k, positions) {
   }
   return { joints, weights }
 }
+
+// ---- Posing him without a 3D engine ----
+// 3 by 3 matrices (row by row) and an offset make a placement; enough to move him as the rig of the scene does.
+const m3 = (a, b) => [0, 1, 2].flatMap((r) => [0, 1, 2].map((c) => a[r * 3] * b[c] + a[r * 3 + 1] * b[3 + c] + a[r * 3 + 2] * b[6 + c]))
+const m3v = (m, v) => [0, 1, 2].map((r) => m[r * 3] * v[0] + m[r * 3 + 1] * v[1] + m[r * 3 + 2] * v[2])
+const put = (a, b) => ({ m: m3(a.m, b.m), t: m3v(a.m, b.t).map((x, i) => x + a.t[i]) })
+const MOVE = { still: { m: [1, 0, 0, 0, 1, 0, 0, 0, 1], t: [0, 0, 0] } }
+const shift = (t) => ({ m: MOVE.still.m, t })
+const aroundY = (a) => ({ m: [Math.cos(a), 0, Math.sin(a), 0, 1, 0, -Math.sin(a), 0, Math.cos(a)], t: [0, 0, 0] })
+const aroundZ = (a) => ({ m: [Math.cos(a), -Math.sin(a), 0, Math.sin(a), Math.cos(a), 0, 0, 0, 1], t: [0, 0, 0] })
+const stretched = ([x, y, z]) => ({ m: [x, 0, 0, 0, y, 0, 0, 0, z], t: [0, 0, 0] })
+// Rodrigues: a turn of `a` around the unit `axis`.
+function aroundAxis([x, y, z], a) {
+  const c = Math.cos(a), s = Math.sin(a), k = 1 - c
+  return { m: [c + x * x * k, x * y * k - z * s, x * z * k + y * s, y * x * k + z * s, c + y * y * k, y * z * k - x * s, z * x * k - y * s, z * y * k + x * s, c + z * z * k], t: [0, 0, 0] }
+}
+const unit = (v) => { const l = Math.hypot(...v) || 1; return v.map((x) => x / l) }
+
+/**
+ * Poulpy in a pose of a move (createTurn, createJump), for a painter with no 3D engine: what the scene's rig does with its bones,
+ * written with plain matrices. His arms are bent into new points; his head and face are placed by the painter.
+ * @param model what buildPoulpy3d returned
+ * @param pose a pose of createTurn or createJump
+ * @returns {{ model: object, placed: (part: object) => ({ point: Function, way: Function } | undefined) }} the model with
+ *   his arms posed, and where the painter should put each of the other parts: pass both to paintPoulpy.
+ */
+export function posePoulpy(model, pose) {
+  const body = put(shift([0, pose.lift ?? 0, 0]), put(aroundY(pose.yaw ?? 0), aroundZ(pose.lean ?? 0)))
+  const head = put(body, put(shift([0, (model.headLift ?? 0) + (pose.head ?? 0), 0]), put(aroundZ(model.headTilt ?? 0), stretched(squashScale(pose.squash ?? 0)))))
+  const joints = armJoints()
+  const parts = model.parts.map((part) => {
+    const arm = /^arm_(\d+)/.exec(part.name)
+    if (!arm) return part
+    const k = +arm[1] - 1, own = joints.slice(k * 3, k * 3 + 3), skin = armSkin(k, part.positions)
+    // Each bend's placement in the room, as the rig's bones chain them, and what each does to a point of his arm at rest.
+    let chain = body
+    const moves = own.map((joint, i) => {
+      const before = i ? own[i - 1].at : [0, 0, 0], local = joint.at.map((x, n) => x - before[n])
+      if (i === 0) { const out = unit([joint.at[0], 0, joint.at[2]]); local.forEach((_, n) => { local[n] += out[n] * (pose.spread ?? 0) }) }
+      const hang = pose.droop ? aroundAxis(unit([joint.at[2], 0, -joint.at[0]]), pose.droop[k][i]) : MOVE.still
+      chain = put(chain, put(shift(local), put(aroundY(pose.arms[k][i]), hang)))
+      return put(chain, shift(joint.at.map((x) => -x)))
+    })
+    const positions = new Array(part.positions.length), normals = new Array(part.normals.length)
+    for (let p = 0; p < positions.length / 3; p++) {
+      const v = [0, 1, 2].map((n) => part.positions[p * 3 + n]), d = [0, 1, 2].map((n) => part.normals[p * 3 + n])
+      const at = [0, 0, 0], way = [0, 0, 0]
+      for (let s = 0; s < 4; s++) {
+        const w = skin.weights[p * 4 + s]
+        if (!w) continue
+        const move = s === 0 ? body : moves[s - 1], moved = m3v(move.m, v).map((x, n) => x + move.t[n]), turned = m3v(move.m, d)
+        for (let n = 0; n < 3; n++) { at[n] += moved[n] * w; way[n] += turned[n] * w }
+      }
+      for (let n = 0; n < 3; n++) { positions[p * 3 + n] = at[n]; normals[p * 3 + n] = way[n] }
+    }
+    return { ...part, positions, normals }
+  })
+  const placed = (part) => (/^arm_/.test(part.name) ? undefined : { point: (v) => m3v(head.m, v).map((x, n) => x + head.t[n]), way: (n) => unit(m3v(head.m, n)) })
+  return { model: { ...model, parts }, placed }
+}
