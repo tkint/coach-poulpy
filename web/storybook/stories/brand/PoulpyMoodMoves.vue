@@ -9,7 +9,7 @@ import type { createPoulpyScene } from './poulpy3dScene'
 type State = 'happy' | 'annoyed' | 'fuming'
 // A move is anything that gives a pose for a time step; `swap` says when the face changes: when he is half way round, or as he starts.
 interface Move { advance: (seconds: number) => unknown }
-interface Variant { id: string; label: string; note: string; make: (clockwise: boolean) => Move; seconds: number; swap: 'half' | 'start'; boost?: number }
+interface Variant { id: string; label: string; note: string; make: (clockwise: boolean) => Move; seconds: number; swap: 'half' | 'start'}
 interface Step { id: string; title: string; text: string; from: State; to: State; clockwise?: boolean; variants: Variant[] }
 
 // The three ways to spin, shared by every spin: exactly 360 degrees (no wiggle), and once: the pause after it is far longer than the move, so he
@@ -32,20 +32,21 @@ const tucking = (tuck: number, spread: number, hop: number, lean: number): (() =
   return move
 }
 const TUCKS: Variant[] = [
-  { id: 'small', label: 'Small tuck', note: 'He tucks a little and comes back up; the fumes puff twice as fast meanwhile.', make: tucking(0.12, 0.08, 0, 0), seconds: 1.8, swap: 'start', boost: 1 },
-  { id: 'deep', label: 'Deep tuck, release', note: 'He squeezes down into his arms, then pops back up with a tiny hop.', make: tucking(0.22, 0.2, 0.08, 0), seconds: 2, swap: 'start', boost: 1.4 },
-  { id: 'shudder', label: 'Shudder', note: 'A short tuck and a shake from side to side, fumes at full steam.', make: tucking(0.16, 0.12, 0.05, 9), seconds: 1.9, swap: 'start', boost: 2 },
+  { id: 'small', label: 'Small tuck', note: 'He tucks a little and comes back up; a burst of fumes goes off meanwhile.', make: tucking(0.12, 0.08, 0, 0), seconds: 1.8, swap: 'start' },
+  { id: 'deep', label: 'Deep tuck, release', note: 'He squeezes down into his arms, then pops back up with a tiny hop.', make: tucking(0.22, 0.2, 0.08, 0), seconds: 2, swap: 'start' },
+  { id: 'shudder', label: 'Shudder', note: 'A short tuck and a shake from side to side, with the burst of fumes.', make: tucking(0.16, 0.12, 0.05, 9), seconds: 1.9, swap: 'start' },
 ]
 
 const steps: Step[] = [
   { id: 'annoyed', title: '1. Tapped a few times: he spins and turns annoyed', text: 'From his normal self, a full turn, and his face changes half way round.', from: 'happy', to: 'annoyed', variants: SPINS.map((v) => ({ ...v })) },
-  { id: 'fuming', title: '2. Tapped again: he spins and goes fuming', text: 'The same turn, to the fuming one, with his fumes starting up behind him.', from: 'annoyed', to: 'fuming', variants: SPINS.map((v) => ({ ...v })) },
-  { id: 'tuck', title: '3. Tapped while fuming: he tucks and the fumes move', text: 'He stays fuming and goes back to standing, the fumes puffing harder while he tucks.', from: 'fuming', to: 'fuming', variants: TUCKS },
+  { id: 'fuming', title: '2. Tapped again: he spins and goes fuming', text: 'The same turn, to the fuming one: as he lands, a jet of smoke shoots out of his head and two balls of fume appear after it.', from: 'annoyed', to: 'fuming', variants: SPINS.map((v) => ({ ...v })) },
+  { id: 'tuck', title: '3. Tapped while fuming: he tucks and the fumes burst', text: 'He stays fuming and goes back to standing; the jet shoots again and the balls pop up after it. Tapping him in the picture while he is fuming does the same.', from: 'fuming', to: 'fuming', variants: TUCKS },
   { id: 'calm', title: '4. After a while: he spins back to annoyed', text: 'The turn the other way, clockwise, and the fumes go.', from: 'fuming', to: 'annoyed', clockwise: true, variants: SPINS.map((v) => ({ ...v })) },
   { id: 'normal', title: '5. Later still: he spins back to normal', text: 'The same turn back, clockwise, to his normal self.', from: 'annoyed', to: 'happy', clockwise: true, variants: SPINS.map((v) => ({ ...v })) },
 ]
 // What he does while one is chosen, to compare: the picked variant of each step, and the whole run.
-const picked = shallowRef<Record<string, string>>(Object.fromEntries(steps.map((s) => [s.id, s.variants[0].id])))
+// The owner's pick of each step to start with: on the spot, on the spot, shudder, on the spot, with a hop.
+const picked = shallowRef<Record<string, string>>({ annoyed: 'spot', fuming: 'spot', tuck: 'shudder', calm: 'spot', normal: 'hop' })
 const playing = shallowRef('')
 const failed = shallowRef(false)
 
@@ -56,15 +57,18 @@ let frame = 0
 let state: State = 'happy'
 let visible = true
 let observer: IntersectionObserver | undefined
-let clock = 0
-let boost = 0
+const seconds = () => performance.now() / 1000 // one clock for the fumes
+let burstStart = 0 // when the jets last shot out
 let run = 0 // each move gets a number; a new one stops the one before
 let sequence = 0 // the same for the whole sequence
 
-const show = (to: State) => {
+// `later` holds the burst of fumes back that many seconds: as he spins into fuming, it goes off when he lands.
+const show = (to: State, later = 0) => {
   state = to
+  burstStart = seconds() + later
   scene?.show(to === 'fuming' ? { pose: 'fuming', effects: true } : to, false)
   scene?.look({ turn: 0, tilt: 8, distance: 9.4, centre: 1.35 })
+  if (to === 'fuming') scene?.fumes(-1, seconds())
 }
 
 function perform(step: Step, variant: Variant): Promise<void> {
@@ -79,16 +83,18 @@ function perform(step: Step, variant: Variant): Promise<void> {
       const dt = Math.min((now - last) / 1000, 0.05)
       last = now
       elapsed += dt
-      clock += dt
       const pose = move.advance(dt) as { yaw?: number }
       scene?.pose(pose as never)
-      if (!swapped && (variant.swap === 'start' ? elapsed > 0.05 : Math.abs(pose.yaw ?? 0) > Math.PI)) { swapped = true; if (step.from !== step.to) show(step.to); scene?.pose(pose as never) }
-      boost = step.to === 'fuming' && swapped ? (variant.boost ?? 0.4) * Math.max(0, Math.min(1, 1 - (elapsed - variant.seconds + 0.5) / 0.5)) : 0
-      scene?.fumes(clock, boost)
+      if (!swapped && (variant.swap === 'start' ? elapsed > 0.05 : Math.abs(pose.yaw ?? 0) > Math.PI)) {
+        swapped = true
+        if (step.from !== step.to) show(step.to, 0.45)
+        else if (step.to === 'fuming') burstStart = seconds() // tapped while fuming: the jets shoot again
+        scene?.pose(pose as never)
+      }
+      if (state === 'fuming') scene?.fumes(seconds() - burstStart, seconds())
       if (elapsed >= variant.seconds) {
         if (step.from !== step.to && !swapped) show(step.to)
         scene?.pose(undefined)
-        boost = 0
         return resolve()
       }
       frame = requestAnimationFrame(tick)
@@ -98,8 +104,8 @@ function perform(step: Step, variant: Variant): Promise<void> {
 }
 
 // Between moves he stands, and when he is fuming his fumes drift.
-function idle(now: number) {
-  if (visible) { clock = now / 1000; if (state === 'fuming') scene?.fumes(clock, 0) }
+function idle() {
+  if (visible && state === 'fuming') scene?.fumes(seconds() - burstStart, seconds())
   frame = requestAnimationFrame(idle)
 }
 
@@ -110,6 +116,12 @@ async function play(step: Step, variant: Variant) {
   playing.value = `${step.id}/${variant.id}`
   await perform(step, variant)
   if (playing.value === `${step.id}/${variant.id}`) { playing.value = ''; frame = requestAnimationFrame(idle) }
+}
+
+// Tapping him while he is fuming plays the tuck chosen in step 3, with the burst of fumes.
+function tap() {
+  const step = steps.find((one) => one.id === 'tuck')!
+  if (state === 'fuming' && !playing.value) play(step, step.variants.find((v) => v.id === picked.value.tuck) ?? step.variants[0])
 }
 
 async function playAll() {
@@ -124,7 +136,7 @@ async function playAll() {
     await perform(step, variant)
     if (mine !== sequence) return
     // The tuck is followed by a few seconds of fumes before he calms down.
-    if (step.id === 'tuck') await new Promise((resolve) => { const end = performance.now() + 2500; const wait = (now: number) => { clock = now / 1000; scene?.fumes(clock, 0); now < end ? requestAnimationFrame(wait) : resolve(undefined) }; requestAnimationFrame(wait) })
+    if (step.id === 'tuck') await new Promise((resolve) => { const end = performance.now() + 2500; const wait = (now: number) => { scene?.fumes(seconds() - burstStart, seconds()); now < end ? requestAnimationFrame(wait) : resolve(undefined) }; requestAnimationFrame(wait) })
   }
   if (mine !== sequence) return
   playing.value = ''
@@ -154,8 +166,8 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="frame"><div class="mood-moves">
-    <div ref="stage" class="stage">
-      <canvas ref="canvas" role="img" aria-label="Poulpy in 3D, going from his normal self to annoyed and fuming and back" />
+    <div ref="stage" class="stage" @click="tap">
+      <canvas ref="canvas" role="img" aria-label="Poulpy in 3D, going from his normal self to annoyed and fuming and back. Tap him while he is fuming and he tucks" />
       <p v-if="failed" class="failed">The 3D preview could not start in this browser.</p>
     </div>
     <div class="steps">
