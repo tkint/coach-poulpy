@@ -1,0 +1,5 @@
+import{n as e}from"./rolldown-runtime-sJBDdmOt.js";import{vn as t,yn as n}from"./iframe-Dkekoaoh.js";var r,i,a,o;function s(){return(s=e((()=>{n(),r={title:`Mobile/Components/Alert`,parameters:{docs:{canvas:{sourceState:`none`},description:{component:"The error banner: `error` tint, an icon and text, never ember."}}}},i=(e,t={})=>({render:()=>({components:t,template:`<div class="cp-mobile">${e}</div>`})}),a=i(`<div class="alert" role="note"><CircleExclamationPoint :size="20" aria-hidden="true" />
+  The treadmill stopped answering. Recording resumes when it's back.</div>`,{CircleExclamationPoint:t}),o=[`Default`],a.parameters={...a.parameters,docs:{...a.parameters?.docs,source:{originalSource:`sample(\`<div class="alert" role="note"><CircleExclamationPoint :size="20" aria-hidden="true" />
+  The treadmill stopped answering. Recording resumes when it's back.</div>\`, {
+  CircleExclamationPoint
+})`,...a.parameters?.docs?.source}}}})))()}s();export{a as Default,o as __namedExportsOrder,r as default};
