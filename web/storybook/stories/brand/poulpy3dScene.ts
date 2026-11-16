@@ -267,6 +267,20 @@ export function createPoulpyScene(canvas: HTMLCanvasElement) {
     })
   }
 
+  /**
+   * Moves the flat puffs of his fumes (the fuming pose's effects, behind him): they bob and drift, by `boost` more when he is angrier.
+   * `seconds` is any clock that keeps running.
+   */
+  function fumes(seconds: number, boost = 0) {
+    if (!cards) return
+    cards.back.children.forEach((puff, i) => {
+      // Each puff is four ovals, then the strokes: the ovals of one puff move together.
+      const group = Math.floor(i / 4), t = seconds * (2.2 + boost * 2) + group * 1.7, sway = 0.05 + 0.1 * boost
+      puff.position.set(Math.sin(t * 0.8) * sway * 0.6, -CARD_CENTRE + Math.sin(t) * sway + boost * 0.05, 0)
+    })
+    render()
+  }
+
   function look(next: PoulpyView) {
     view = next
     render()
@@ -298,5 +312,5 @@ export function createPoulpyScene(canvas: HTMLCanvasElement) {
     renderer.dispose()
   }
 
-  return { show, look, pose, dispose }
+  return { show, look, pose, fumes, dispose }
 }
