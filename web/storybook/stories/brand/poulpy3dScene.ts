@@ -76,7 +76,6 @@ export function createPoulpyScene(canvas: HTMLCanvasElement) {
     rig?.skeleton.dispose()
     scene.remove(poulpy)
     if (cards) scene.remove(cards.front, cards.back)
-    fumeRig = undefined
     for (const group of [poulpy, ...(cards ? [cards.front, cards.back] : [])]) group.traverse((node) => {
       if (!(node instanceof THREE.Mesh)) return
       node.geometry.dispose()
@@ -268,56 +267,19 @@ export function createPoulpyScene(canvas: HTMLCanvasElement) {
     })
   }
 
-  // His fumes, made when first asked for (the fuming pose's effects behind him): each of the two balls of smoke is a group that pops in from its middle, and each
-  // of the two jets is a group that shoots out from where it leaves his head. They replace the drawing's own strokes.
-  let fumeRig: { balls: { group: THREE.Group; at: number }[]; jets: THREE.Group[] } | undefined
-  const onCard = (x: number, y: number): [number, number] => [(x - 100) / 64, (165 - y) / 64 - CARD_CENTRE]
-  function makeFumes() {
-    if (!cards) return
-    const parts = [...cards.back.children] as THREE.Mesh[], rig: NonNullable<typeof fumeRig> = { balls: [], jets: [] }
-    // The pose draws two balls (four ovals of two parts each, in the order of `puff` in poses.mjs) and then both jets as one stroke.
-    ;[[52, 6], [150, -2]].forEach(([x, y], k) => {
-      const [cx, cy] = onCard(x, y), group = new THREE.Group()
-      group.position.set(cx, cy, 0)
-      // The parts keep where they stand in the room: the group is at the ball's middle and each part is moved back by as much.
-      for (const mesh of parts.slice(k * 8, k * 8 + 8)) { mesh.position.set(-cx, -CARD_CENTRE - cy, 0); group.add(mesh) }
-      cards!.back.add(group)
-      rig.balls.push({ group, at: cy })
-    })
-    const stroke = parts[16]
-    stroke.visible = false
-    ;[[70, 30, 64, 18], [132, 28, 140, 14]].forEach(([x0, y0, x1, y1]) => {
-      const [bx, by] = onCard(x0, y0), [tx, ty] = onCard(x1, y1), length = Math.hypot(tx - bx, ty - by)
-      const geo = new THREE.PlaneGeometry(4 / 64, length)
-      geo.translate(0, length / 2, 0)
-      const group = new THREE.Group()
-      group.position.set(bx, by, 0.02)
-      group.rotation.z = Math.atan2(-(tx - bx), ty - by)
-      group.add(new THREE.Mesh(geo, stroke.material))
-      cards!.back.add(group)
-      rig.jets.push(group)
-    })
-    fumeRig = rig
-  }
   /**
-   * Plays his fumes: `since` is the seconds since the burst began, and `seconds` any clock that keeps running. First the two jets shoot out of his head
-   * and draw back, then the two balls of smoke pop in where they end and stay, bobbing. Before the burst nothing shows.
+   * Moves the flat puffs of his fumes (the fuming pose's effects, behind him): they bob and drift, by `boost` more when he is angrier.
+   * `seconds` is any clock that keeps running.
    */
-  function fumes(since: number, seconds: number) {
+  function fumes(seconds: number, boost = 0) {
     if (!cards) return
-    if (!fumeRig) makeFumes()
-    const clamp = (x: number) => Math.min(Math.max(x, 0), 1), out = (x: number) => 1 - (1 - x) ** 3, pop = (x: number) => 1 + 2.9 * (x - 1) ** 3 + 1.9 * (x - 1) ** 2
-    const reach = out(clamp(since / 0.28)) * (1 - out(clamp((since - 0.75) / 0.3)))
-    fumeRig!.jets.forEach((jet) => { jet.visible = reach > 0.01; jet.scale.set(1, Math.max(reach, 0.001), 1) })
-    const size = since < 0.32 ? 0 : pop(clamp((since - 0.32) / 0.4))
-    fumeRig!.balls.forEach(({ group }, k) => {
-      group.visible = size > 0.01
-      group.scale.setScalar(Math.max(size, 0.001) * (1 + Math.sin(seconds * 3 + k * 2) * 0.04))
-      group.position.y = fumeBase[k] + Math.sin(seconds * 2.2 + k * 1.7) * 0.04 * size
+    cards.back.children.forEach((puff, i) => {
+      // Each puff is four ovals, then the strokes: the ovals of one puff move together.
+      const group = Math.floor(i / 4), t = seconds * (2.2 + boost * 2) + group * 1.7, sway = 0.05 + 0.1 * boost
+      puff.position.set(Math.sin(t * 0.8) * sway * 0.6, -CARD_CENTRE + Math.sin(t) * sway + boost * 0.05, 0)
     })
     render()
   }
-  const fumeBase = [onCard(52, 6)[1], onCard(150, -2)[1]]
 
   function look(next: PoulpyView) {
     view = next
