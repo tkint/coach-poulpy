@@ -21,7 +21,7 @@ const attributes = (args: Args, skip: string[]) =>
  * told otherwise; `''` for none), which goes between its tags. It redraws when a control changes.
  */
 export const renderComponent =
-  (tag: string, frame = 'width: 390px; padding: 16px; display: flex; gap: 8px; align-items: center;', { wrapper = 'div', content = 'label' } = {}) =>
+  (tag: string, frame = 'width: 100%; max-width: 390px; padding: 16px; display: flex; gap: 8px; align-items: center;', { wrapper = 'div', content = 'label' } = {}) =>
   (args: Args) => {
     const text = content && typeof args[content] === 'string' ? (args[content] as string) : ''
     const skip = text ? [content] : []
