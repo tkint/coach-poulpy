@@ -3,6 +3,9 @@ import { screen } from '../screen'
 import screenLibraryActions from './library-actions.html?raw'
 import screenLibraryEmpty from './library-empty.html?raw'
 import screenLibraryExercises from './library-exercises.html?raw'
+import screenLibraryExercisesByEquipment from './library-exercises-by-equipment.html?raw'
+import screenLibraryExercisesByName from './library-exercises-by-name.html?raw'
+import screenLibraryExercisesSort from './library-exercises-sort.html?raw'
 import screenLibraryNewWorkoutSheet from './library-new-workout-sheet.html?raw'
 import screenLibraryNoResults from './library-no-results.html?raw'
 import screenLibrarySearch from './library-search.html?raw'
@@ -36,6 +39,27 @@ export const LibraryExercises: Story = {
   name: "Exercises",
   tags: ['!autodocs', 'draft'],
   ...screen(screenLibraryExercises),
+  parameters: { mockup: { issue: 104 } },
+}
+/** Library · exercises grouped by equipment, then by name. */
+export const LibraryExercisesByEquipment: Story = {
+  name: "Exercises by equipment",
+  tags: ['!autodocs', 'draft'],
+  ...screen(screenLibraryExercisesByEquipment),
+  parameters: { mockup: { issue: 104 } },
+}
+/** Library · exercises by name, no groups. */
+export const LibraryExercisesByName: Story = {
+  name: "Exercises by name",
+  tags: ['!autodocs', 'draft'],
+  ...screen(screenLibraryExercisesByName),
+  parameters: { mockup: { issue: 104 } },
+}
+/** Library · the sort menu: movement, name or equipment. */
+export const LibraryExercisesSort: Story = {
+  name: "Exercises sort menu",
+  tags: ['!autodocs', 'draft'],
+  ...screen(screenLibraryExercisesSort),
   parameters: { mockup: { issue: 104 } },
 }
 /** Library · "New workout" opens the format sheet over the Library. */
