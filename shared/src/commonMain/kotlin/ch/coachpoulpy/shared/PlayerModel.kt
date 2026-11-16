@@ -102,6 +102,8 @@ class PlayerModel internal constructor(
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main),
     /** Called once by [close]: the app knows the session is off screen. */
     private val onClose: () -> Unit = {},
+    /** Pain or rehab is set and its time is not up: the finished screen is then the gentle one, on the blue side. */
+    private val painActive: () -> Boolean = { false },
 ) {
     private var closed = false
     private val face = PlayerFace(workout, catalog, languageCode, units)
@@ -189,7 +191,7 @@ class PlayerModel internal constructor(
     fun finished(units: UnitSystem): FinishedScreen? {
         if (current().status != SessionState.Status.FINISHED) return null
         val poulpy = PoulpyCoach(languageCode).status(store.finishedSessionEndsNow(), clock.now())
-        return FinishedScreens.of(workout.name, workout, session.timeline, session.events, poulpy, units, languageCode)
+        return FinishedScreens.of(workout.name, workout, session.timeline, session.events, poulpy, units, languageCode, gentle = painActive())
     }
 
     /** Moves timed phases on. The ticker calls it; tests call it with a fake clock. */
