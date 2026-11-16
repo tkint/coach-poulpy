@@ -1,0 +1,17 @@
+import{n as e}from"./rolldown-runtime-sJBDdmOt.js";import{d as t,l as n,u as r}from"./blocks-BnrI-CoX.js";import{a as i}from"./chunk-W22LQPXL-DAacIxBz.js";import{i as a,r as o}from"./react-DITjJg24.js";import{c as s,m as c}from"./Brand.stories-dGBwcCu_.js";function l(e){let t={a:`a`,h1:`h1`,li:`li`,p:`p`,strong:`strong`,ul:`ul`,...a(),...e.components};return(0,d.jsxs)(d.Fragment,{children:[(0,d.jsx)(n,{title:`Brand/Poulpy moves/Getting angry`}),`
+`,(0,d.jsx)(t.h1,{id:`getting-angry-and-calming-down`,children:`Getting angry, and calming down`}),`
+`,(0,d.jsx)(t.p,{children:`Drafts for Home, to validate before anything is baked for the phones. Tapping Poulpy again and again makes him lose patience, and leaving him alone calms him down.`}),`
+`,(0,d.jsxs)(t.ul,{children:[`
+`,(0,d.jsxs)(t.li,{children:[`After several taps he does a full turn and comes out of it `,(0,d.jsx)(t.strong,{children:`annoyed`}),`. His face changes half way round.`]}),`
+`,(0,d.jsxs)(t.li,{children:[`Tapped again, he turns once more and comes out `,(0,d.jsx)(t.strong,{children:`fuming`}),`, with his fumes puffing behind him.`]}),`
+`,(0,d.jsxs)(t.li,{children:[`Tapped while he is fuming, he `,(0,d.jsx)(t.strong,{children:`tucks`}),` a little and comes back to standing, the fumes moving harder meanwhile.`]}),`
+`,(0,d.jsxs)(t.li,{children:[`After a while he goes back to annoyed, then to his normal self, each time by a full turn, now `,(0,d.jsx)(t.strong,{children:`clockwise`}),`.`]}),`
+`]}),`
+`,(0,d.jsx)(t.p,{children:`Each step has three variants to compare: pick one to watch it, or play the whole sequence with the ones chosen. The turns are exactly 360 degrees and go the other way when he calms down.`}),`
+`,(0,d.jsx)(r,{of:s}),`
+`,(0,d.jsxs)(t.ul,{children:[`
+`,(0,d.jsxs)(t.li,{children:[(0,d.jsx)(t.strong,{children:`On the spot, with a hop, wind-up and whip`}),` are three ways to make the same turn: feet on the floor, a small jump, or a lean back first that makes him rock past the mark. They are the move of `,(0,d.jsx)(t.a,{href:`?path=/docs/brand-poulpy-moves-turning--docs`,children:`Turning`}),` and `,(0,d.jsx)(t.a,{href:`?path=/docs/brand-poulpy-moves-jumping-around--docs`,children:`Jumping around`}),` with their values fixed.`]}),`
+`,(0,d.jsxs)(t.li,{children:[(0,d.jsx)(t.strong,{children:`The tucks`}),` are the first part of `,(0,d.jsx)(t.a,{href:`?path=/docs/brand-poulpy-moves-little-jumps--docs`,children:`a little jump`}),`, kept on the floor: how deep he goes, how far his arms widen, and whether he pops back up or shudders.`]}),`
+`,(0,d.jsxs)(t.li,{children:[(0,d.jsx)(t.strong,{children:`The fumes`}),` are the flat puffs of the fuming pose, now bobbing and drifting, and faster while he tucks.`]}),`
+`]}),`
+`,(0,d.jsx)(t.p,{children:`Not decided yet: how many taps make him annoyed and fuming, how long he stays angry before he calms down, and what a tap does while he is annoyed (nothing, for now). These are for the Home mockup once the moves are chosen. Pain and rehab never show the ember side, so they never come in here.`})]})}function u(e={}){let{wrapper:t}={...a(),...e.components};return t?(0,d.jsx)(t,{...e,children:(0,d.jsx)(l,{...e})}):l(e)}var d;function f(){return(f=e((()=>{d=i(),o(),t(),c()})))()}f();export{u as default};
