@@ -8,7 +8,7 @@
       <MobileSettingsRow icon="download" title="Export my data" detail="JSON, and your sessions as FIT files" />
     </div>
     <div class="leave-actions">
-      <MobileButton kind="secondary" icon="log-out" id="sign-out">Sign out</MobileButton>
+      <MobileButton kind="secondary" size="md" icon="log-out" id="sign-out">Sign out</MobileButton>
       <button type="button" class="text-button text-button--danger" id="delete" style="flex: none;"><MobileIcon name="trash" :size="20" />&nbsp;Delete account</button>
     </div>
   </div>
@@ -17,6 +17,6 @@
     <img src="../../../poulpy/pose_thinking.svg" alt="">
     <h2 id="dialog-title">Sign out?</h2>
     <p id="dialog-body">Everything is sent already. This phone goes back to an empty guest; your workouts and sessions stay in your account.</p>
-    <div class="actions"><button type="button" class="secondary-button">Cancel</button><button type="button" class="primary-button"><MobileIcon name="log-out" :size="20" />Sign out</button></div>
+    <div class="actions"><MobileButton kind="secondary" size="md">Cancel</MobileButton><MobileButton size="md"><MobileIcon name="log-out" :size="20" />Sign out</MobileButton></div>
   </div></div>
 </main>

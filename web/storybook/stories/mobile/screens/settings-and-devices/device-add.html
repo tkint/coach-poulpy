@@ -5,10 +5,10 @@
       <MobilePoulpyLoader :size="112" label="Poulpy is searching for devices" />
       <h2 role="status">Searching nearby devices…</h2>
       <p>Treadmills, foot pods and heart rate bands. Wake your device up and stay close to it.</p>
-      <button type="button" class="outline-button">Stop searching</button>
+      <MobileButton kind="secondary" size="md">Stop searching</MobileButton>
     </section>
     <span class="label label-row">Found nearby</span>
-    <article class="device-row" data-component="device-row"><span class="device-icon device-icon--sm" aria-hidden="true"><MobileIcon name="gauge" :size="22" /></span><span class="device-text" style="gap: var(--cp-space-xs);"><strong>Home treadmill</strong><span class="kind-tag">Treadmill</span></span><button type="button" class="small-button">Add</button></article>
+    <article class="device-row" data-component="device-row"><span class="device-icon device-icon--sm" aria-hidden="true"><MobileIcon name="gauge" :size="22" /></span><span class="device-text" style="gap: var(--cp-space-xs);"><strong>Home treadmill</strong><span class="kind-tag">Treadmill</span></span><MobileButton size="sm">Add</MobileButton></article>
     <article class="device-row" data-component="device-row"><span class="device-icon device-icon--sm device-icon--off" aria-hidden="true"><MobileIcon name="bluetooth" :size="22" /></span><span class="device-text" style="gap: var(--cp-space-xs);"><strong>Heart rate band</strong><span class="kind-tag">Heart rate</span></span></article>
     <span class="lead">Devices you already added are not listed here.</span>
   </div>

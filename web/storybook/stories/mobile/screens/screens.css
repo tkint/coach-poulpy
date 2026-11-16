@@ -83,31 +83,6 @@
 
 /* ---------- Buttons ---------- */
 
-.cp-screen .primary-button,
-.cp-screen .tonal-button,
-.cp-screen .secondary-button,
-.cp-screen .grumpy-button {
-  height: 44px;
-  border-radius: var(--cp-radius-pill);
-  font-weight: 800;
-  font-size: 17px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--cp-space-sm);
-}
-.cp-screen .primary-button { background: var(--cp-primary); color: var(--cp-on-primary); }
-.cp-screen .secondary-button { border: 2px solid var(--cp-outline); color: var(--cp-on-surface); }
-/* Grumpy is only ever the catch-up action. */
-.cp-screen .grumpy-button { background: var(--cp-grumpy); color: var(--cp-on-grumpy); }
-.cp-screen .primary-button--large,
-.cp-screen .secondary-button--large,
-.cp-screen .tonal-button--large,
-.cp-screen .grumpy-button--large { height: 52px; font-size: 17px; }
-/* MobileButton's content keeps clear of the rounded ends. The room is on the content, not the button, so buttons that
-   share a row (flex: 1) keep the widths the screens give them. */
-.cp-screen .button-content { display: inline-flex; align-items: center; gap: var(--cp-space-sm); padding: 0 var(--cp-space-xl); white-space: nowrap; }
-.cp-screen .small-button .button-content { padding: 0; }
 /* The apps' button (draft): a rounded square on the websites' size scale. Heights come from --cp-control-* (design/tokens.json
    `webSize`), the radius is the same 10 as the New workout button and the settings rows. Below 44 the touch area still
    reaches 44 (the ::after), as for the 40 icon button. */
@@ -140,10 +115,8 @@
 .cp-screen .button.button--block { display: flex; width: 100%; }
 .cp-screen .button:focus-visible { outline: 3px solid var(--cp-primary); outline-offset: 2px; }
 /* A disabled button turns grey, so it never reads as one to tap. */
-.cp-screen :is(.primary-button, .secondary-button, .tonal-button, .grumpy-button, .small-button):is([disabled], [aria-disabled="true"]) { background: var(--cp-surface-variant); border-color: var(--cp-surface-variant); color: var(--cp-on-surface-variant); cursor: default; }
 /* A button on its own line fills it, as the screens draw it. */
-.cp-screen :is(.primary-button, .secondary-button, .tonal-button, .grumpy-button).button--block { width: 100%; }
-.cp-screen :is(.primary-button, .secondary-button, .tonal-button, .grumpy-button, .small-button, .icon-button, .filter-chip):focus-visible { outline: 3px solid var(--cp-primary); outline-offset: 2px; }
+.cp-screen :is(.icon-button, .filter-chip):focus-visible { outline: 3px solid var(--cp-primary); outline-offset: 2px; }
 
 .cp-screen .action-bar {
   padding: var(--cp-space-md) var(--cp-space-lg) 34px;
@@ -372,8 +345,7 @@
 .cp-screen .next-card--stacked .muted { font-weight: 500; }
 
 .cp-screen .player-actions { display: flex; gap: var(--cp-space-md); }
-.cp-screen .player-actions .secondary-button { padding: 0 22px; }
-.cp-screen .player-actions .primary-button { flex: 1; }
+.cp-screen .player-actions .button--primary { flex: 1; }
 
 .cp-screen .rest-timer { position: relative; width: 260px; height: 260px; }
 .cp-screen .rest-timer > svg { position: absolute; inset: 0; transform: rotate(-90deg); }
@@ -386,7 +358,6 @@
 .cp-screen .adjust-buttons { display: flex; gap: var(--cp-space-md); }
 .cp-screen .adjust-buttons button { height: 48px; padding: 0 18px; border-radius: var(--cp-radius-pill); border: 2px solid var(--cp-outline); font-size: 16px; font-weight: 800; font-variant-numeric: tabular-nums; }
 
-.cp-screen .tonal-button { background: var(--cp-primary-container); color: var(--cp-on-primary-container); }
 
 /* ---------- App chrome: screen header, navigation bar ---------- */
 
@@ -635,7 +606,6 @@
   font-weight: 700;
   color: var(--cp-on-surface);
 }
-.cp-screen .small-button { height: 34px; padding: 0 18px; border-radius: var(--cp-radius-pill); background: var(--cp-primary); color: var(--cp-on-primary); font-weight: 800; font-size: 15px; display: flex; align-items: center; }
 
 .cp-screen .builder-step {
   border-radius: var(--cp-radius-md);
@@ -812,9 +782,8 @@
 .cp-screen .finish-card h2 { font: var(--cp-type-headline); font-size: 19px; line-height: 23px; }
 .cp-screen .finish-card p { font-size: 14px; line-height: 20px; }
 .cp-screen .finish-card .actions { display: flex; gap: var(--cp-space-sm); }
-.cp-screen .finish-card .secondary-button,
-.cp-screen .finish-card .primary-button { flex: 1; height: 40px; font-size: 15px; }
-.cp-screen .finish-card .secondary-button { background: var(--cp-surface); }
+.cp-screen .finish-card .button { flex: 1; }
+.cp-screen .finish-card .button--secondary { background: var(--cp-surface); }
 .cp-screen .recorder { border-radius: var(--cp-radius-lg); background: var(--cp-surface); border: 1px solid var(--cp-outline); padding: var(--cp-space-md) var(--cp-space-md); display: flex; flex-direction: column; gap: 10px; }
 .cp-screen .recorder .status { display: flex; align-items: baseline; justify-content: space-between; }
 .cp-screen .recorder .clock { font-size: 32px; line-height: 36px; font-weight: 800; font-variant-numeric: tabular-nums; }
@@ -823,8 +792,8 @@
 .cp-screen .recorder .state--paused { color: var(--cp-on-grumpy-container); }
 .cp-screen .recorder .actions { display: flex; gap: var(--cp-space-sm); }
 .cp-screen .recorder .icon-only { width: 44px; padding: 0; flex: none; }
-.cp-screen .recorder .actions .primary-button,
-.cp-screen .recorder .actions .secondary-button { flex: 1; height: 44px; font-size: 15px; }
+.cp-screen .button.icon-only .button-content { padding: 0; }
+.cp-screen .recorder .actions .button { flex: 1; }
 .cp-screen .recorder .actions .icon-only { flex: none; }
 .cp-screen .pick-chips { display: flex; gap: var(--cp-space-sm); flex-wrap: wrap; }
 .cp-screen .pick-chips button,
@@ -873,8 +842,7 @@
 .cp-screen .back-bar { padding: 48px var(--cp-space-md) 0; display: flex; align-items: center; gap: var(--cp-space-xs); }
 .cp-screen .back-bar h1 { font: var(--cp-type-headline); }
 .cp-screen .action-row { padding: var(--cp-space-md) var(--cp-space-lg) 28px; display: flex; gap: 10px; }
-.cp-screen .action-row .secondary-button,
-.cp-screen .action-row .primary-button { flex: 1; height: 48px; font-size: 16px; }
+.cp-screen .action-row .button { flex: 1; }
 
 /* ---------- History ---------- */
 
@@ -975,13 +943,11 @@
 .cp-screen .search-card { border-radius: var(--cp-radius-lg); background: var(--cp-primary-container); color: var(--cp-on-primary-container); padding: 22px var(--cp-space-lg); display: flex; flex-direction: column; align-items: center; gap: var(--cp-space-sm); text-align: center; }
 .cp-screen .search-card h2 { font: var(--cp-type-headline); }
 .cp-screen .search-card p { font-size: 15px; line-height: 21px; }
-.cp-screen .search-card .outline-button { margin-top: 6px; height: 44px; padding: 0 18px; border-radius: var(--cp-radius-pill); border: 2px solid var(--cp-primary); color: var(--cp-on-primary-container); font-size: 15px; font-weight: 800; display: flex; align-items: center; }
-.cp-screen .small-button { height: 44px; padding: 0 18px; border-radius: var(--cp-radius-pill); background: var(--cp-primary); color: var(--cp-on-primary); font-weight: 800; font-size: 15px; display: flex; align-items: center; }
 .cp-screen .empty-card { border-radius: var(--cp-radius-lg); background: var(--cp-primary-container); color: var(--cp-on-primary-container); padding: 28px 22px; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; }
 .cp-screen .empty-card img { width: 140px; height: 126px; }
 .cp-screen .empty-card h2 { font: var(--cp-type-headline); font-size: 23px; line-height: 27px; }
 .cp-screen .empty-card p { font-size: 15px; line-height: 22px; }
-.cp-screen .empty-card .primary-button { margin-top: 10px; height: 56px; padding: 0 26px; }
+.cp-screen .empty-card .button { margin-top: 10px; }
 .cp-screen .page-bar { padding: 48px 8px 0 12px; display: flex; align-items: center; gap: var(--cp-space-xs); }
 .cp-screen .page-bar > div { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .cp-screen .page-bar h1 { font: var(--cp-type-headline); }
@@ -999,7 +965,7 @@
 .cp-screen .switch-row small { font-size: 13px; line-height: 18px; color: var(--cp-on-surface-variant); }
 .cp-screen .switch-row input { width: 22px; height: 22px; accent-color: var(--cp-primary); margin: 0; }
 .cp-screen .text-button--danger { color: var(--cp-error); }
-.cp-screen .text-button { flex: 1; height: 48px; border-radius: var(--cp-radius-pill); font-size: 15px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+.cp-screen .text-button { flex: 1; height: 48px; border-radius: var(--cp-radius-md); font-size: 15px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
 .cp-screen .section-link { margin: 0 var(--cp-space-xs); font-size: 15px; font-weight: 800; color: var(--cp-primary); }
 .cp-screen .lead { margin: 0 var(--cp-space-xs); font-size: 14px; line-height: 20px; color: var(--cp-on-surface-variant); }
 /* The loader: Poulpy's outline seen from underneath, drawn frame by frame from the 3D model (one picture of 48 frames, 8 across and 6 down,
@@ -1023,17 +989,15 @@
 .cp-screen .no-results img { width: 96px; height: 86px; object-fit: contain; }
 .cp-screen .no-results h2 { font: var(--cp-type-headline); margin-top: var(--cp-space-xs); }
 .cp-screen .no-results p { font-size: 15px; line-height: 21px; }
-.cp-screen .no-results .primary-button { margin-top: var(--cp-space-sm); height: 48px; padding: 0 22px; font-size: 15px; }
+.cp-screen .no-results .button { margin-top: var(--cp-space-sm); }
 .cp-screen .check-list { display: flex; flex-direction: column; }
 .cp-screen .check-list label { min-height: 48px; display: flex; align-items: center; gap: 14px; border-bottom: 1px solid var(--cp-outline); font-size: 16px; font-weight: 700; }
 .cp-screen .check-list input { width: 22px; height: 22px; margin: 0; accent-color: var(--cp-primary); }
 .cp-screen .check-list label > span:first-of-type { flex: 1; }
 .cp-screen .check-list label > span:last-child { font-size: 14px; color: var(--cp-on-surface-variant); font-variant-numeric: tabular-nums; }
 .cp-screen .sheet-actions { display: flex; gap: var(--cp-space-sm); margin-top: var(--cp-space-xs); }
-.cp-screen .sheet-actions .secondary-button,
-.cp-screen .sheet-actions .primary-button { height: 56px; font-size: 16px; }
-.cp-screen .sheet-actions .secondary-button { flex: 1; }
-.cp-screen .sheet-actions .primary-button { flex: 1.6; }
+.cp-screen .sheet-actions .button--secondary { flex: 1; }
+.cp-screen .sheet-actions .button--primary { flex: 1.6; }
 .cp-screen .rung-list { display: flex; flex-direction: column; gap: 6px; }
 .cp-screen .rung { width: 100%; min-height: 60px; padding: var(--cp-space-sm) var(--cp-space-md); border-radius: var(--cp-radius-md); border: 1px solid var(--cp-outline); background: var(--cp-surface); text-align: left; display: flex; align-items: center; gap: var(--cp-space-md); }
 .cp-screen .rung[aria-current="true"] { border: 1.5px solid var(--cp-primary); background: var(--cp-primary-container); }

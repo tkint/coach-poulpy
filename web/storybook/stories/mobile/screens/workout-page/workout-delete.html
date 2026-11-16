@@ -64,14 +64,14 @@
   </div>
 
   <div class="action-bar">
-    <MobileButton kind="secondary" icon="pencil" :icon-size="18" style="flex: 1; font-size: 16px;">Edit</MobileButton>
-    <MobileButton icon="play" :icon-size="18" style="flex: 1.6;">Start now</MobileButton>
+    <MobileButton kind="secondary" size="md" icon="pencil" style="flex: 1;">Edit</MobileButton>
+    <MobileButton size="md" icon="play" style="flex: 1.6;">Start now</MobileButton>
   </div>
   <div class="scrim" aria-hidden="true"></div>
   <div class="dialog" id="delete-dialog"><div role="alertdialog" aria-modal="true" aria-labelledby="delete-title" aria-describedby="delete-body" data-component="dialog">
     <img src="../../../poulpy/pose_thinking.svg" alt="">
     <h2 id="delete-title">Delete Upper body?</h2>
     <p id="delete-body">It comes off its 3 planned days. The 3 times you did it stay in History.</p>
-    <div class="actions"><button type="button" class="secondary-button">Cancel</button><button type="button" class="danger-button"><MobileIcon name="trash" :size="20" />Delete</button></div>
+    <div class="actions"><MobileButton kind="secondary" size="md">Cancel</MobileButton><button type="button" class="danger-button"><MobileIcon name="trash" :size="20" />Delete</button></div>
   </div></div>
 </main>

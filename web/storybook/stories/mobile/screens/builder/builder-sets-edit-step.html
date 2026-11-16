@@ -2,7 +2,7 @@
 <header class="top-bar" style="padding: var(--cp-space-xxxl) var(--cp-space-md) var(--cp-space-sm); justify-content: flex-start; gap: var(--cp-space-xs);">
     <button type="button" class="icon-button" aria-label="Close"><MobileIcon name="x" :size="22" /></button>
     <h1 class="headline" style="flex: 1;">New workout</h1>
-    <MobileButton kind="small">Save</MobileButton>
+    <MobileButton size="sm">Save</MobileButton>
   </header>
 
   <div class="form-body">
@@ -96,7 +96,7 @@
   <div class="scrim" aria-hidden="true"></div>
   <MobileSheet id="edit-step" aria-label="Edit Goblet squat" style="gap: var(--cp-space-md);">
     <span class="sheet-handle" aria-hidden="true"></span>
-    <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: var(--cp-space-md);"><div class="sheet-title"><h2>Goblet squat</h2><p>In Work · 3 sets</p></div><button type="button" class="small-button" aria-label="See details of Goblet squat" style="gap: 6px; background: var(--cp-surface-variant); color: var(--cp-on-surface);"><MobileIcon name="info" :size="20" />Details</button></div>
+    <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: var(--cp-space-md);"><div class="sheet-title"><h2>Goblet squat</h2><p>In Work · 3 sets</p></div><MobileButton size="sm" aria-label="See details of Goblet squat" style="gap: 6px; background: var(--cp-surface-variant); color: var(--cp-on-surface);"><MobileIcon name="info" :size="20" />Details</MobileButton></div>
     <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--cp-space-sm);"><MobileSelectField label="Step" value="Exercise" opens="list" style="grid-column: span 2;" /><MobileSelectField label="Measured by" value="Reps" opens="list" /></div>
     <div style="display: flex; flex-direction: column; gap: var(--cp-space-sm);">
       <div class="field"><span class="label">Sets</span><div class="number-entry" data-component="number-entry"><button type="button" aria-label="Fewer sets">−</button><span class="number-field"><input inputmode="numeric" value="3" aria-label="Sets"></span><button type="button" aria-label="More sets">+</button></div></div>
@@ -105,6 +105,6 @@
       <div class="field"><span class="label">Weight</span><span class="number-field"><input inputmode="decimal" value="40" aria-label="Weight in kilograms"><span class="unit">kg</span></span></div>
     </div>
     <span class="hint">Rest between sets shows from 2 sets. A walk or a run has no sets.</span>
-    <MobileButton style="font-size: 16px;">Done</MobileButton>
+    <MobileButton size="md">Done</MobileButton>
   </MobileSheet>
 </main>
