@@ -49,4 +49,22 @@ class ShareCardTest {
         assertNotEquals(ordinary.heading, champion.heading)
         assertNotEquals(ordinary.quote, champion.quote)
     }
+
+    @Test
+    fun painOrRehabMakesTheFinishGentleEvenOnTheEighthTentacle() {
+        val now = Instant.fromEpochMilliseconds(10_000_000L)
+        val eight = PoulpyCoach("en").status(List(8) { Instant.fromEpochMilliseconds(1_000L * it) }, now)
+        val three = PoulpyCoach("en").status(List(3) { Instant.fromEpochMilliseconds(1_000L * it) }, now)
+        for (lit in listOf(three, eight)) {
+            val gentle = FinishedScreens.of("Knee rehab", null, null, emptyList(), lit, UnitSystem.METRIC, "en", gentle = true)
+            assertEquals(PoulpyDrawing.PATCHED_UP, gentle.drawing)
+            assertEquals("Well done!", gentle.heading)
+            assertEquals("\u201cListening to your body is training too.\u201d", gentle.quote)
+            assertEquals("Tentacle ${lit.tentaclesLit} lit!", gentle.poulpy.title)
+            assertEquals("A gentle session counts, and so does rest.", gentle.poulpy.line)
+            assertEquals(PoulpyStatus.Mood.RECOVERING, gentle.poulpy.mood)
+            assertEquals(true, gentle.poulpy.blueSide)
+        }
+        assertEquals("Tentacule 3 allum\u00e9\u00a0!", FinishedScreens.of("Rééducation", null, null, emptyList(), three, UnitSystem.METRIC, "fr", gentle = true).poulpy.title)
+    }
 }

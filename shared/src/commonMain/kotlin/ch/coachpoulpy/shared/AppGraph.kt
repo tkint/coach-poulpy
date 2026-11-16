@@ -210,5 +210,7 @@ class AppGraph(driverFactory: DriverFactory) {
         sessionId = sessionId,
         events = store.events(sessionId),
         onClose = { playersOpen.update { it - 1 } },
+        // The profile exists once Home has been shown, which is before any session starts.
+        painActive = { profileModel?.painActive() ?: false },
     ).also { playersOpen.update { it + 1 } }
 }
