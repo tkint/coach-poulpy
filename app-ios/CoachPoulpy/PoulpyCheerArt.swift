@@ -7,11 +7,15 @@ import Shared
 private enum CheerSheets {
     private static var cache: [Int: [UIImage]] = [:]
 
-    static func frames(_ index: Int) -> [UIImage] {
-        if let known = cache[index] { return known }
+    /// The frames of sheet `index` of the three jumps, or of the party that never stops when `party`. The two kinds are kept apart.
+    static func frames(_ index: Int, party: Bool) -> [UIImage] {
+        let key = party ? 100 + index : index
+        if let known = cache[key] { return known }
         let cheer = PoulpyCheer.shared
-        guard index < Int(cheer.SHEETS),
-              let path = Bundle.main.path(forResource: cheer.sheet(index: Int32(index)), ofType: "png"),
+        let name = party ? (index < Int(PoulpyParty.shared.SHEETS) ? PoulpyParty.shared.sheet(index: Int32(index)) : nil)
+                         : (index < Int(cheer.SHEETS) ? cheer.sheet(index: Int32(index)) : nil)
+        guard let name,
+              let path = Bundle.main.path(forResource: name, ofType: "png"),
               let image = UIImage(contentsOfFile: path)?.cgImage else { return [] }
         let columns = Int(cheer.COLUMNS), count = Int(cheer.SHEET_FRAMES)
         let width = image.width / columns, height = image.height / ((count + columns - 1) / columns)
@@ -19,8 +23,9 @@ private enum CheerSheets {
             image.cropping(to: CGRect(x: at % columns * width, y: at / columns * height, width: width, height: height))
                 .map { UIImage(cgImage: $0) }
         }
-        cache = cache.filter { $0.key >= index - 1 }
-        cache[index] = frames
+        // Only the sheet playing and the next are kept (and, in the party, the first, which comes again after the last).
+        cache = cache.filter { $0.key / 100 == (party ? 1 : 0) && abs($0.key % 100 - index) <= 1 || $0.key % 100 == 0 && party && $0.key >= 100 }
+        cache[key] = frames
         return frames
     }
 }
@@ -28,15 +33,13 @@ private enum CheerSheets {
 /// Poulpy's still picture at `art` points, and when `drawing` celebrates (the champion), he jumps for joy three times with his medal
 /// and confetti, frame by frame from the 3D model (`PoulpyCheer` in the shared code says which frame and when), and settles on the
 /// picture; a tap plays it again. The frames are bigger than the picture so the confetti has room. With `autoplay` he starts when the
-/// screen opens, otherwise only at a tap (Home); with `loop` he goes on celebrating after a short rest, for as long as the screen is
-/// open (the finished screen). With Reduce Motion he just stands there.
+/// screen opens, otherwise only at a tap (Home); with `loop` he never stops celebrating, round after round with no rest (`PoulpyParty`, a loop that ends where
+/// it starts), for as long as the screen is open (the finished screen). With Reduce Motion he just stands there.
 struct PoulpyCheerArt: View {
     let drawing: PoulpyDrawing
     let art: CGFloat
     var autoplay = true
     var loop = true
-    /// How long he stands on his picture between two celebrations when he goes on and on.
-    private let rest: TimeInterval = 1.5
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var start: Date?
 
@@ -46,8 +49,10 @@ struct PoulpyCheerArt: View {
             if let start {
                 TimelineView(.animation) { timeline in
                     let elapsed = Int64(timeline.date.timeIntervalSince(start) * 1000)
-                    if let index = cheer.frame(elapsedMillis: elapsed)?.intValue {
-                        let frames = CheerSheets.frames(Int(cheer.sheetOf(frame: Int32(index))))
+                    let index = loop ? Int(PoulpyParty.shared.frame(elapsedMillis: elapsed)) : cheer.frame(elapsedMillis: elapsed)?.intValue
+                    if let index {
+                        let sheet = loop ? Int(PoulpyParty.shared.sheetOf(frame: Int32(index))) : Int(cheer.sheetOf(frame: Int32(index)))
+                        let frames = CheerSheets.frames(sheet, party: loop)
                         let at = index % Int(cheer.SHEET_FRAMES)
                         if at < frames.count {
                             // The frame shows him the size of the still picture, with room around him: it is that much bigger, on the same centre.
@@ -82,10 +87,8 @@ struct PoulpyCheerArt: View {
         start = Date()
     }
 
-    /// He is back on his picture: when he goes on and on, he rests a moment and jumps again.
+    /// He is back on his picture.
     private func finish() {
         start = nil
-        guard loop else { return }
-        DispatchQueue.main.asyncAfter(deadline: .now() + rest) { play() }
     }
 }

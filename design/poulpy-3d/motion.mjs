@@ -333,17 +333,20 @@ export function createJump({ softness = 1, stride = 0, wiggle = true, jump = JUM
 /**
  * Poulpy the champion jumping for joy, as something to advance in time: createJump with the jump of `cheer`,
  * his medal and the confetti. Every run is the same: the confetti's chances are drawn from a fixed list.
- * @param {{ softness?: number, stride?: number, cheer?: typeof CHEER, turn?: typeof TURN }} [options] as for createJump.
+ * @param {{ softness?: number, stride?: number, cheer?: typeof CHEER, turn?: typeof TURN, cycle?: number }} [options] as for createJump. With `cycle`, the
+ *   confetti's chances start again every `cycle` jumps (and `cheer.confetti.pieces` is `cycle` bursts of pieces), so that once he has jumped
+ *   that many times to the pauses of his jump he repeats himself exactly: what a loop made of those jumps needs.
  * @returns The jump, whose poses also have `medal`, `{ lift, sway }`: how far it has swung up off his arm around
  *   its hinge (medalHinge in poses.mjs) and how far it has slid to his left around him, in radians; and `confetti`,
  *   for each piece `[x, y, z, turnX, turnY, turnZ]`: where it is in the room and how it is turned, in radians.
  *   A piece that has not flown yet is under the floor.
  */
-export function createCheer({ cheer = CHEER, ...options } = {}) {
+export function createCheer({ cheer = CHEER, cycle = 0, ...options } = {}) {
   const jump = createJump({ ...options, jump: cheer.jump })
   const { advance: hop, pose: stand } = jump
   // A fixed list of chances (mulberry32), so no two pieces are alike and every run is the same.
-  let seed = 20261115
+  const SEED = 20261115
+  let seed = SEED, bursts = 0
   const chance = () => {
     seed = (seed + 0x6d2b79f5) | 0
     let t = Math.imul(seed ^ (seed >>> 15), 1 | seed)
@@ -371,6 +374,8 @@ export function createCheer({ cheer = CHEER, ...options } = {}) {
 
     // A burst as he leaves the floor.
     if (pose.lift > 0.02 && !up) {
+      if (cycle && bursts % cycle === 0) seed = SEED
+      bursts++
       for (let i = 0; i < c.burst; i++) {
         const piece = pieces[next], around = chance() * Math.PI * 2, far = between(c.from), speed = between(c.speed), out = (chance() * 2 - 1) * Math.PI
         next = (next + 1) % pieces.length

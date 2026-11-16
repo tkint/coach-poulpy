@@ -37,3 +37,28 @@ class PoulpyCheerTest {
         assertEquals(3_600L, PoulpyCheer.MILLIS)
     }
 }
+
+class PoulpyPartyTest {
+    @Test
+    fun theSheetsHoldEveryFrame() {
+        assertEquals(PoulpyParty.FRAMES, PoulpyParty.SHEETS * PoulpyCheer.SHEET_FRAMES)
+        assertEquals((1..4).map { "pose_champion_party_$it" }, (0 until PoulpyParty.SHEETS).map { PoulpyParty.sheet(it) })
+        assertFailsWith<IllegalArgumentException> { PoulpyParty.sheet(PoulpyParty.SHEETS) }
+    }
+
+    @Test
+    fun neverRestsAndStartsAgainAfterTheLastFrame() {
+        assertEquals(0, PoulpyParty.frame(0))
+        assertEquals(PoulpyParty.FRAMES - 1, PoulpyParty.frame(PoulpyParty.MILLIS - 1))
+        assertEquals(0, PoulpyParty.frame(PoulpyParty.MILLIS))
+        assertEquals(1, PoulpyParty.frame(PoulpyParty.MILLIS + 1_000L / PoulpyCheer.FPS))
+        assertEquals(PoulpyParty.frame(12_345), PoulpyParty.frame(12_345 + 10 * PoulpyParty.MILLIS))
+        assertEquals(4_800L, PoulpyParty.MILLIS)
+    }
+
+    @Test
+    fun theLastSheetLeadsBackToTheFirst() {
+        assertEquals(PoulpyParty.SHEETS - 1, PoulpyParty.sheetOf(PoulpyParty.FRAMES - 1))
+        assertEquals(0, PoulpyParty.sheetOf(PoulpyParty.frame(PoulpyParty.MILLIS)))
+    }
+}
