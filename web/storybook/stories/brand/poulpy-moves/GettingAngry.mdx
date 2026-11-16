@@ -1,0 +1,46 @@
+import { Meta, Story } from '@storybook/addon-docs/blocks'
+import * as Live from '../Brand.stories'
+
+<Meta title="Brand/Poulpy moves/Getting angry" />
+
+# Getting angry, and calming down
+
+Drafts for Home, to validate before anything is baked for the phones. Tapping Poulpy again and again makes him lose patience, and leaving him alone calms him down. Each change of mood is a full turn, and the face changes half way round; going down, the turn is **clockwise**.
+
+First the whole run, with the variants chosen below:
+
+<Story of={Live.Sequence} />
+
+## One preview per transition
+
+Each has three variants to compare. The turns are exactly 360 degrees.
+
+### Normal to annoyed
+
+After several taps he turns on the spot and comes out annoyed.
+
+<Story of={Live.ToAnnoyed} />
+
+### Annoyed to fuming
+
+Tapped again, he turns once more and comes out fuming, with his fumes puffing behind him.
+
+<Story of={Live.ToFuming} />
+
+### Fuming back to annoyed
+
+After a while he turns back, clockwise, and the fumes go.
+
+<Story of={Live.CalmDown} />
+
+### Annoyed back to normal
+
+Later still, the same turn back to his normal self.
+
+<Story of={Live.BackToNormal} />
+
+How he answers a tap in each mood, with no transition, is on [Annoyed](?path=/docs/brand-poulpy-moves-annoyed--docs) and [Fuming](?path=/docs/brand-poulpy-moves-fuming--docs).
+
+- **On the spot, with a hop, wind-up and whip** are three ways to make the same turn: feet on the floor, a small jump, or a lean back first that makes him rock past the mark. They are the move of [Turning](?path=/docs/brand-poulpy-moves-turning--docs) and [Jumping around](?path=/docs/brand-poulpy-moves-jumping-around--docs) with their values fixed.
+
+Not decided yet: how many taps make him annoyed and fuming, and how long he stays angry before he calms down. These are for the Home mockup once the moves are chosen. Pain and rehab never show the ember side, so they never come in here.
