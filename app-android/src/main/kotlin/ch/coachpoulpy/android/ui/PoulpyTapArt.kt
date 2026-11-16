@@ -26,6 +26,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
+import ch.coachpoulpy.shared.PoulpyCheer
 import ch.coachpoulpy.shared.PoulpyDrawing
 import ch.coachpoulpy.shared.PoulpyMoves
 
@@ -53,6 +54,8 @@ private object MovePictures {
  */
 @Composable
 fun PoulpyTapArt(drawing: PoulpyDrawing, description: String, artSize: Dp, modifier: Modifier = Modifier) {
+    // The champion's tap is his celebration: the same three jumps of joy as at the end of a session, once.
+    if (PoulpyCheer.celebrates(drawing)) return PoulpyCheerArt(drawing, description, artSize, modifier, autoplay = false, loop = false)
     val context = LocalContext.current
     var sheet by remember { mutableStateOf<String?>(null) }
     var elapsed by remember { mutableStateOf(0L) }

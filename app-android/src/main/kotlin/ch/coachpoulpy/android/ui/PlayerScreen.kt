@@ -76,6 +76,7 @@ import ch.coachpoulpy.shared.FinishedStat
 import ch.coachpoulpy.shared.PlayerModel
 import ch.coachpoulpy.shared.PlayerState
 import ch.coachpoulpy.shared.PlayerStatus
+import ch.coachpoulpy.shared.PoulpyCheer
 import ch.coachpoulpy.shared.PoulpyDrawing
 import ch.coachpoulpy.shared.PoulpyStatus
 
@@ -132,7 +133,7 @@ private fun ColumnScope.Ready(state: PlayerState, onStart: () -> Unit, onClose: 
         Image(
             painterResource(PoulpyDrawing.STANDING_TALL.drawable),
             contentDescription = null,
-            modifier = Modifier.padding(vertical = PoulpySpace.lg).size(width = 200.dp, height = 180.dp),
+            modifier = Modifier.padding(vertical = PoulpySpace.lg).size(width = 260.dp, height = 234.dp),
         )
         PlayerLabel(stringResource(R.string.player_firstUp), color = MaterialTheme.colorScheme.primary)
         Text(state.title, style = PoulpyTextStyles.Title, textAlign = TextAlign.Center)
@@ -256,7 +257,7 @@ internal fun ColumnScope.WorkStep(state: PlayerState, paused: Boolean, onSkip: (
         Image(
             painterResource(PoulpyDrawing.STRAINING.drawable),
             contentDescription = null,
-            modifier = Modifier.padding(bottom = PoulpySpace.md).size(width = 130.dp, height = 117.dp),
+            modifier = Modifier.padding(bottom = PoulpySpace.md).size(width = 180.dp, height = 162.dp),
         )
         PartLine(state)
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(PoulpySpace.sm)) {
@@ -345,7 +346,7 @@ internal fun ColumnScope.RestStep(state: PlayerState, paused: Boolean, onSkip: (
                 drawArc(left, -90f, 360f * (remaining.toFloat() / total).coerceIn(0f, 1f), useCenter = false, topLeft = Offset(inset, inset), size = arc, style = Stroke(width, cap = StrokeCap.Round))
             }
             Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(PoulpySpace.xs)) {
-                Image(painterResource(PoulpyDrawing.SIDE_GLANCE.drawable), contentDescription = null, modifier = Modifier.size(width = 92.dp, height = 83.dp))
+                Image(painterResource(PoulpyDrawing.SIDE_GLANCE.drawable), contentDescription = null, modifier = Modifier.size(width = 112.dp, height = 102.dp))
                 Text(clockPadded(remaining), style = PoulpyTextStyles.Timer)
             }
         }
@@ -431,7 +432,10 @@ private fun ColumnScope.Finished(state: PlayerState, finished: FinishedScreen?, 
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
     ) {
-        Image(painterResource((finished?.drawing ?: PoulpyDrawing.EXHAUSTED).drawable), contentDescription = null, modifier = Modifier.size(150.dp))
+        // He is a little bigger here, and the champion jumps for joy (`player-finished-champion`).
+        val drawing = finished?.drawing ?: PoulpyDrawing.EXHAUSTED
+        if (PoulpyCheer.celebrates(drawing)) PoulpyCheerArt(drawing, description = "", artSize = 230.dp)
+        else Image(painterResource(drawing.drawable), contentDescription = null, modifier = Modifier.size(230.dp))
         Text(finished?.heading.orEmpty(), style = MaterialTheme.typography.displaySmall)
         finished?.let { Text(it.quote, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary, textAlign = TextAlign.Center) }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {

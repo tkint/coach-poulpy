@@ -8,8 +8,8 @@
 // a step and swing a little past it before settling, and they hang under him when he jumps. He never
 // raises them himself (brand decisions 8 and 15): on the floor they slide, in the air they droop.
 // To change a move, edit TURN, JUMP, CHEER or WINK below, then run `node design/build-poulpy-3d.mjs`.
-import { SHAPE } from './model.mjs'
-import { medalReach, STARS } from './poses.mjs'
+import { SHAPE, linear } from './model.mjs'
+import { CONFETTI, medalHinge, medalReach, STARS } from './poses.mjs'
 
 export const TURN = {
   // The size of each step, in degrees, seen from above and turning to his left. They add up to one full
@@ -333,17 +333,20 @@ export function createJump({ softness = 1, stride = 0, wiggle = true, jump = JUM
 /**
  * Poulpy the champion jumping for joy, as something to advance in time: createJump with the jump of `cheer`,
  * his medal and the confetti. Every run is the same: the confetti's chances are drawn from a fixed list.
- * @param {{ softness?: number, stride?: number, cheer?: typeof CHEER, turn?: typeof TURN }} [options] as for createJump.
+ * @param {{ softness?: number, stride?: number, cheer?: typeof CHEER, turn?: typeof TURN, cycle?: number }} [options] as for createJump. With `cycle`, the
+ *   confetti's chances start again every `cycle` jumps (and `cheer.confetti.pieces` is `cycle` bursts of pieces), so that once he has jumped
+ *   that many times to the pauses of his jump he repeats himself exactly: what a loop made of those jumps needs.
  * @returns The jump, whose poses also have `medal`, `{ lift, sway }`: how far it has swung up off his arm around
  *   its hinge (medalHinge in poses.mjs) and how far it has slid to his left around him, in radians; and `confetti`,
  *   for each piece `[x, y, z, turnX, turnY, turnZ]`: where it is in the room and how it is turned, in radians.
  *   A piece that has not flown yet is under the floor.
  */
-export function createCheer({ cheer = CHEER, ...options } = {}) {
+export function createCheer({ cheer = CHEER, cycle = 0, ...options } = {}) {
   const jump = createJump({ ...options, jump: cheer.jump })
   const { advance: hop, pose: stand } = jump
   // A fixed list of chances (mulberry32), so no two pieces are alike and every run is the same.
-  let seed = 20261115
+  const SEED = 20261115
+  let seed = SEED, bursts = 0
   const chance = () => {
     seed = (seed + 0x6d2b79f5) | 0
     let t = Math.imul(seed ^ (seed >>> 15), 1 | seed)
@@ -371,6 +374,8 @@ export function createCheer({ cheer = CHEER, ...options } = {}) {
 
     // A burst as he leaves the floor.
     if (pose.lift > 0.02 && !up) {
+      if (cycle && bursts % cycle === 0) seed = SEED
+      bursts++
       for (let i = 0; i < c.burst; i++) {
         const piece = pieces[next], around = chance() * Math.PI * 2, far = between(c.from), speed = between(c.speed), out = (chance() * 2 - 1) * Math.PI
         next = (next + 1) % pieces.length
@@ -543,11 +548,13 @@ const unit = (v) => { const l = Math.hypot(...v) || 1; return v.map((x) => x / l
  * Poulpy in a pose of a move (createTurn, createJump), for a painter with no 3D engine: what the scene's rig does with its bones,
  * written with plain matrices. His arms are bent into new points; his head and face are placed by the painter.
  * @param model what buildPoulpy3d returned
- * @param pose a pose of createTurn or createJump
+ * @param pose a pose of createTurn, createJump or createCheer. A cheer's medal swings on its hinge and slides around him, and its
+ *   confetti flies: each piece is a small flat card in the room (`confettiScale`, 1 unless the pose says, shrinks them all, to fade them out).
+ * @param {{ confetti?: string[] }} [options] `confetti` is the `#RRGGBB` of each colour of CONFETTI.colours, with Poulpy's ember in place of 'ember'.
  * @returns {{ model: object, placed: (part: object) => ({ point: Function, way: Function } | undefined) }} the model with
  *   his arms posed, and where the painter should put each of the other parts: pass both to paintPoulpy.
  */
-export function posePoulpy(model, pose) {
+export function posePoulpy(model, pose, { confetti = [] } = {}) {
   const body = put(shift([0, pose.lift ?? 0, 0]), put(aroundY(pose.yaw ?? 0), aroundZ(pose.lean ?? 0)))
   const head = put(body, put(shift([0, (model.headLift ?? 0) + (pose.head ?? 0), 0]), put(aroundZ(model.headTilt ?? 0), stretched(squashScale(pose.squash ?? 0)))))
   const joints = armJoints()
@@ -578,6 +585,25 @@ export function posePoulpy(model, pose) {
     }
     return { ...part, positions, normals }
   })
-  const placed = (part) => (/^arm_/.test(part.name) ? undefined : { point: (v) => m3v(head.m, v).map((x, n) => x + head.t[n]), way: (n) => unit(m3v(head.m, n)) })
-  return { model: { ...model, parts }, placed }
+  const by = (at) => ({ point: (v) => m3v(at.m, v).map((x, n) => x + at.t[n]), way: (n) => unit(m3v(at.m, n)) })
+  // His medal rides on his body, slides around it and swings up off his arm around its hinge (as the scene's rig does).
+  const [hingeY, hingeZ] = medalHinge
+  const medal = put(body, put(aroundY(pose.medal?.sway ?? 0), put(shift([0, hingeY, hingeZ + (pose.spread ?? 0)]), put(aroundAxis([1, 0, 0], -(pose.medal?.lift ?? 0)), shift([0, -hingeY, -hingeZ])))))
+  // Confetti: a unit-sized card for each piece, turned the way the scene turns it (Y, then X, then Z) and put where it is in the room.
+  const flying = pose.confetti ?? [], [wide, tall] = CONFETTI.size.map((size) => size / 64)
+  const cards = flying.map(([x, y, z, turnX, turnY, turnZ], i) => ({
+    at: put(shift([x, y, z]), put(aroundY(turnY), put(aroundAxis([1, 0, 0], turnX), put(aroundZ(turnZ), stretched(Array(3).fill(y < 0 ? 0 : pose.confettiScale ?? 1)))))),
+    colour: `confetti_${i % confetti.length}`,
+  }))
+  const card = { positions: [-wide / 2, -tall / 2, 0, wide / 2, -tall / 2, 0, wide / 2, tall / 2, 0, -wide / 2, tall / 2, 0], normals: [0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1], indices: [0, 1, 2, 0, 2, 3] }
+  const materials = { ...model.materials }
+  confetti.forEach((hex, k) => { materials[`confetti_${k}`] = { colour: linear(hex), flat: true } })
+  const confettiParts = confetti.length ? cards.map((c, i) => ({ name: `confetti_piece_${i}`, material: c.colour, ...card })) : []
+  const placed = (part) => {
+    if (/^arm_/.test(part.name)) return undefined
+    const piece = /^confetti_piece_(\d+)/.exec(part.name)
+    if (piece) return by(cards[+piece[1]].at)
+    return by(part.name.startsWith('medal') ? medal : head)
+  }
+  return { model: { ...model, materials, parts: [...parts, ...confettiParts] }, placed }
 }
