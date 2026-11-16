@@ -2,6 +2,8 @@ package ch.coachpoulpy.android.ui
 
 import android.content.Context
 import android.content.Intent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -98,6 +100,12 @@ fun WorkoutPageScreen(
     val figure = remember(graph, memory) { graph.profile(memory).profile.value.bodyFigure ?: BodyFigure.SHOULDERS }
     val shareTitle = stringResource(R.string.workout_shareTitle)
     var menu by remember { mutableStateOf(false) }
+    var sharing by remember { mutableStateOf(false) }
+    // The system's save dialog, for keeping the file on the phone: the system's share sheet only offers apps. The generic binary
+    // type keeps Android from adding its own extension (the same as the .FIT file).
+    val saveFile = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument(FIT_MIME_TYPE)) { target ->
+        target?.let { model.exportFile()?.let { file -> saveWorkoutFile(context, file, it) } }
+    }
     var deleting by remember { mutableStateOf(false) }
     var picking by remember { mutableStateOf(false) }
     // The exercise whose details are open; null when none.
@@ -128,9 +136,9 @@ fun WorkoutPageScreen(
                         }
                         DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
                             DropdownMenuItem(
-                                text = { Text(stringResource(R.string.action_share)) },
-                                leadingIcon = { Icon(Lucide.Share2, contentDescription = null) },
-                                onClick = { menu = false; shareWorkout(context, model.exportFile(), shareTitle) },
+                                text = { Text(stringResource(R.string.action_export)) },
+                                leadingIcon = { Icon(Lucide.FileOutput, contentDescription = null) },
+                                onClick = { menu = false; sharing = true },
                             )
                             if (state.editable) {
                                 DropdownMenuItem(
@@ -176,6 +184,23 @@ fun WorkoutPageScreen(
         )
     }
 
+    if (sharing) {
+        ShareSheet(
+            title = R.string.shareWorkout_title,
+            why = R.string.shareWorkout_why,
+            choices = listOf(
+                ShareChoice(Lucide.Share2, R.string.shareWorkout_contact, R.string.shareWorkout_contactNote) {
+                    sharing = false
+                    shareWorkout(context, model.exportFile(), shareTitle)
+                },
+                ShareChoice(Lucide.Download, R.string.shareWorkout_save, R.string.shareWorkout_saveNote) {
+                    sharing = false
+                    model.exportFile()?.let { saveFile.launch(it.fileName) }
+                },
+            ),
+            onDismiss = { sharing = false },
+        )
+    }
     if (deleting) DeleteWorkoutDialog(state.deletePrompt, onDelete = { deleting = false; model.delete() }, onDismiss = { deleting = false })
 
     detailing?.let { slug ->
@@ -481,6 +506,11 @@ private fun StatBox(label: String, value: String, modifier: Modifier) {
 private fun shortDay(millis: Long): String =
     java.time.format.DateTimeFormatter.ofPattern(android.text.format.DateFormat.getBestDateTimePattern(Locale.getDefault(), "dMMM"), Locale.getDefault())
         .format(Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()))
+
+/** Writes the workout [file] to [target], the place picked in the system's save dialog. */
+private fun saveWorkoutFile(context: Context, file: WorkoutFileExport, target: android.net.Uri) {
+    context.contentResolver.openOutputStream(target)?.use { it.write(file.content.toByteArray()) }
+}
 
 /**
  * Hands [file] to the system share sheet as a `.poulpyworkout` file. It is written under the cache folder and

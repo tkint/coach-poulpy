@@ -43,6 +43,7 @@ enum Lucide: String, CaseIterable {
     case ellipsisVertical = "LucideEllipsisVertical"
     case eye = "LucideEye"
     case eyeOff = "LucideEyeOff"
+    case fileOutput = "LucideFileOutput"
     case folderInput = "LucideFolderInput"
     case footprints = "LucideFootprints"
     case gauge = "LucideGauge"

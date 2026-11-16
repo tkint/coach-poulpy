@@ -43,7 +43,7 @@ fun CoachPoulpyRoot(
     graph: AppGraph,
     openLive: Boolean = false,
     onLiveOpened: () -> Unit = {},
-    /** The text of a workout file opened from another app, until the preview shows; [onImportOpened] says it was. */
+    /** The text of a workout file opened from another app, until it opens in the builder or is refused; [onImportOpened] says it was. */
     importFile: String? = null,
     onImportOpened: () -> Unit = {},
     /** An account step from an email link, such as "confirm:<token>"; [onAccountLinkOpened] says it showed. */
@@ -68,7 +68,7 @@ fun CoachPoulpyRoot(
 
     BackHandler(enabled = route != null) { close() }
 
-    // The file lives in memory only: after a rotation the preview is gone and the tabs show again.
+    // The file lives in memory only: after a rotation the import is gone and the tabs show again.
     var opened by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(importFile) {
         if (importFile != null) {
@@ -196,14 +196,18 @@ fun CoachPoulpyRoot(
             if (text == null) {
                 LaunchedEffect(Unit) { close() }
             } else {
-                ImportScreen(
-                    graph, language, fileText = text,
-                    onAdded = {
+                val import = remember(text, language) { graph.importWorkout(text, language) }
+                // A good file opens in the builder as an unsaved copy; one the builder can't hold is added and its page
+                // opens; a refused one says why.
+                when {
+                    !import.state.ready -> ImportScreen(import.state, onClose = { opened = null; close() })
+                    import.opensInBuilder -> BuilderScreen(graph, language, workoutId = null, importing = import, onClose = { opened = null; close() })
+                    else -> LaunchedEffect(import) {
+                        val id = import.add()
                         opened = null
-                        route = "workout:$it"
-                    },
-                    onClose = { opened = null; close() },
-                )
+                        route = if (id != null) "workout:$id" else null
+                    }
+                }
             }
         }
         "resume" -> PlayerScreen(graph, language, workoutId = null, onClose = close)

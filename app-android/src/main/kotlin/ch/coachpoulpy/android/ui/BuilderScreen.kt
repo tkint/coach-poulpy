@@ -93,12 +93,14 @@ import ch.coachpoulpy.shared.IntensityKind
 import ch.coachpoulpy.shared.PaceUnit
 import ch.coachpoulpy.shared.WalkRunTarget
 import ch.coachpoulpy.shared.WorkoutFormatOption
+import ch.coachpoulpy.shared.WorkoutImport
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose: () -> Unit, firstExercise: String? = null, copyOf: String? = null) {
-    val model = remember(graph, language, workoutId, copyOf) {
-        copyOf?.let { graph.duplicateWorkout(it, language) }
+fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose: () -> Unit, firstExercise: String? = null, copyOf: String? = null, importing: WorkoutImport? = null) {
+    val model = remember(graph, language, workoutId, copyOf, importing) {
+        importing?.builder()
+            ?: copyOf?.let { graph.duplicateWorkout(it, language) }
             ?: workoutId?.let { graph.editWorkout(it, language) }
             ?: firstExercise?.let { graph.createWorkoutWith(it, language) }
             ?: graph.createWorkout(language)
