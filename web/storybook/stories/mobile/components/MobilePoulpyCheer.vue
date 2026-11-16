@@ -3,7 +3,7 @@
 // picture. A tap plays it again. On the end-of-session screen he starts when it opens and goes on and on (a rest between two rounds); on Home
 // (`home`, a smaller picture in the ring) he only plays at a tap. With reduced motion he only stands there.
 // The mockup plays it live in the workshop; the phones play it baked from the model, frame by frame (decision 16).
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { poulpyDrawings } from '@coach-poulpy/ui'
 
 const props = withDefaults(defineProps<{ label: string; home?: boolean }>(), { home: false })
@@ -24,8 +24,9 @@ async function play() {
   clearTimeout(timer)
   if (playing.value || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
   playing.value = true
-  await Promise.resolve()
-  if (!canvas.value) return
+  // The canvas is drawn once `playing` is on the page.
+  await nextTick()
+  if (!canvas.value) { playing.value = false; if (!props.home) timer = setTimeout(play, REST_MILLIS); return }
   try {
     const { createPoulpyScene } = await import('../../brand/poulpy3dScene')
     const { createCheer } = await import('../../../../../design/poulpy-3d/motion.mjs')
