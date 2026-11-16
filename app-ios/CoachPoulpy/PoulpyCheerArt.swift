@@ -26,12 +26,17 @@ private enum CheerSheets {
 }
 
 /// Poulpy's still picture at `art` points, and when `drawing` celebrates (the champion), he jumps for joy three times with his medal
-/// and confetti when the screen opens, frame by frame from the 3D model (`PoulpyCheer` in the shared code says which frame and when),
-/// and settles on the picture; a tap plays it again. The frames are bigger than the picture so the confetti has room. With Reduce
-/// Motion he just stands there.
+/// and confetti, frame by frame from the 3D model (`PoulpyCheer` in the shared code says which frame and when), and settles on the
+/// picture; a tap plays it again. The frames are bigger than the picture so the confetti has room. With `autoplay` he starts when the
+/// screen opens, otherwise only at a tap (Home); with `loop` he goes on celebrating after a short rest, for as long as the screen is
+/// open (the finished screen). With Reduce Motion he just stands there.
 struct PoulpyCheerArt: View {
     let drawing: PoulpyDrawing
     let art: CGFloat
+    var autoplay = true
+    var loop = true
+    /// How long he stands on his picture between two celebrations when he goes on and on.
+    private let rest: TimeInterval = 1.5
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var start: Date?
 
@@ -54,7 +59,7 @@ struct PoulpyCheerArt: View {
                                 )
                         }
                     } else {
-                        Color.clear.onAppear { self.start = nil }
+                        Color.clear.onAppear { finish() }
                     }
                 }
                 .allowsHitTesting(false)
@@ -68,12 +73,19 @@ struct PoulpyCheerArt: View {
         }
         .frame(width: art, height: art)
         .contentShape(Rectangle())
-        .onAppear { play() }
+        .onAppear { if autoplay { play() } }
         .onTapGesture { play() }
     }
 
     private func play() {
         guard start == nil, !reduceMotion else { return }
         start = Date()
+    }
+
+    /// He is back on his picture: when he goes on and on, he rests a moment and jumps again.
+    private func finish() {
+        start = nil
+        guard loop else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + rest) { play() }
     }
 }
