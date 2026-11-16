@@ -206,6 +206,13 @@ export function createFollow({ softness = 1, turn = TURN } = {}) {
   return sim
 }
 
+// A step that is nearly one or more full turns is exactly that, so a jump that spins comes down facing the way it started; the
+// usual small differences between steps only show when he turns a little at a time.
+const whole = (degrees) => {
+  const turns = Math.round(Math.abs(degrees) / 360)
+  return turns >= 1 && Math.abs(Math.abs(degrees) - turns * 360) < 0.4 * Math.abs(degrees) ? Math.sign(degrees) * turns * 360 : degrees
+}
+
 /**
  * Poulpy jumping on the spot, as something to advance in time.
  * @param {{ softness?: number, stride?: number, jump?: typeof JUMP, turn?: typeof TURN }} [options] `softness`
@@ -245,7 +252,7 @@ export function createJump({ softness = 1, stride = 0, jump = JUMP, turn = TURN 
     const through = clock / seconds[phase], turning = stride !== 0
     const goal = phase === 0 ? -sim.tuck : phase === 1 ? sim.height * 4 * through * (1 - through) : phase === 2 ? -sim.landing : 0
     // He turns for as long as he is in the air: from his wind-up to the full step, eased, so he lands as the turn ends.
-    const wind = base - turn.windUp.degrees * RAD * (stride < 0 ? -1 : 1), full = base + turn.steps[hop % turn.steps.length] * RAD * stride
+    const wind = base - turn.windUp.degrees * RAD * (stride < 0 ? -1 : 1), full = base + whole(turn.steps[hop % turn.steps.length] * stride) * RAD
     if (turning) to = phase === 0 ? wind : phase === 1 ? wind + (full - wind) * through * through * (3 - 2 * through) : full
     else to = base
 
