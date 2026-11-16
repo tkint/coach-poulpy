@@ -636,6 +636,7 @@
     "uploadProgress": "{done, number} of {total, number} sent",
     "uploaded": "All sent: your training is in your account.",
     "uploadOffline": "It carries on when you’re back online.",
+    "continue": "Continue",
     "welcomeBackTitle": "Welcome back",
     "mergeBody": "Your workouts and sessions on this phone are joining your account. Nothing is replaced, and both edits are kept.",
     "signInIntro": "Use the account you made on another phone. What is on this phone joins your account; nothing is replaced.",

@@ -636,6 +636,7 @@
     "uploadProgress": "{done, number} sur {total, number} envoyés",
     "uploaded": "Tout est envoyé : votre entraînement est sur votre compte.",
     "uploadOffline": "L’envoi reprend dès que vous êtes de nouveau en ligne.",
+    "continue": "Continuer",
     "welcomeBackTitle": "Bon retour",
     "mergeBody": "Les entraînements et séances de ce téléphone rejoignent votre compte. Rien n’est remplacé, et les deux modifications sont gardées.",
     "signInIntro": "Utilisez le compte créé sur un autre téléphone. Ce qui se trouve sur ce téléphone rejoint votre compte, rien n’est remplacé.",
