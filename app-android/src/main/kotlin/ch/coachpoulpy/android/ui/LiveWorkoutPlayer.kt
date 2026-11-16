@@ -147,7 +147,7 @@ internal fun ColumnScope.StartStep(
         Image(
             painterResource(PoulpyDrawing.STRAINING.drawable),
             contentDescription = null,
-            modifier = Modifier.padding(bottom = PoulpySpace.md).size(width = 130.dp, height = 117.dp),
+            modifier = Modifier.padding(bottom = PoulpySpace.md).size(width = 180.dp, height = 162.dp),
         )
         PartLine(state)
         Text(state.title, style = PoulpyTextStyles.Title, textAlign = TextAlign.Center)

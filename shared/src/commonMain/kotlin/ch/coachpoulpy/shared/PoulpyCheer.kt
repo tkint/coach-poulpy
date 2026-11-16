@@ -21,6 +21,9 @@ object PoulpyCheer {
     const val PICTURE_WIDTH = 277
     const val PICTURE_HEIGHT = 252
 
+    /** Whether Poulpy as [drawing] celebrates when a screen opens: only the champion does. */
+    fun celebrates(drawing: PoulpyDrawing): Boolean = drawing == PoulpyDrawing.CHAMPION
+
     /** How long the celebration lasts. */
     const val MILLIS = FRAMES * 1_000L / FPS
 

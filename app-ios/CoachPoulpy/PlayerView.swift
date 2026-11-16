@@ -82,7 +82,7 @@ struct PlayerView: View {
         PlayerSteps.capsLabel(Text("\(state.workoutName) · \(state.exerciseCountLabel)"))
         Text("player.ready").font(PoulpyFont.display)
         Image(PoulpyDrawing.standingTall.imageName)
-            .resizable().scaledToFit().frame(width: 200, height: 180).padding(.vertical, PoulpySpace.lg).accessibilityHidden(true)
+            .resizable().scaledToFit().frame(width: 260, height: 234).padding(.vertical, PoulpySpace.lg).accessibilityHidden(true)
         PlayerSteps.capsLabel(Text("player.firstUp"), color: PoulpyColor.primary)
         Text(state.title).font(PoulpyFont.title).multilineTextAlignment(.center)
         if let detail = state.targetDetail {
@@ -138,7 +138,12 @@ struct PlayerView: View {
         let screen = model.finished(units: units)
         ScrollView {
             VStack(spacing: 16) {
-                Image((screen?.drawing ?? PoulpyDrawing.exhausted).imageName).resizable().scaledToFit().frame(width: 150, height: 150).accessibilityHidden(true)
+                // He is a little bigger here, and the champion jumps for joy (`player-finished-champion`).
+                if let drawing = screen?.drawing, PoulpyCheer.shared.celebrates(drawing: drawing) {
+                    PoulpyCheerArt(drawing: drawing, art: 230)
+                } else {
+                    Image((screen?.drawing ?? PoulpyDrawing.exhausted).imageName).resizable().scaledToFit().frame(width: 230, height: 230).accessibilityHidden(true)
+                }
                 Text(screen?.heading ?? "").font(.poulpy(.largeTitle))
                 if let quote = screen?.quote {
                     Text(quote).font(.poulpy(.headline).weight(.semibold)).foregroundStyle(PoulpyColor.primary).multilineTextAlignment(.center)

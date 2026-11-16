@@ -7,6 +7,11 @@ import kotlin.test.assertNull
 
 class PoulpyCheerTest {
     @Test
+    fun onlyTheChampionCelebrates() {
+        assertEquals(listOf(PoulpyDrawing.CHAMPION), PoulpyDrawing.entries.filter { PoulpyCheer.celebrates(it) })
+    }
+
+    @Test
     fun theSheetsHoldEveryFrame() {
         assertEquals(PoulpyCheer.FRAMES, PoulpyCheer.SHEETS * PoulpyCheer.SHEET_FRAMES)
         assertEquals(listOf("pose_champion_cheer_1", "pose_champion_cheer_2", "pose_champion_cheer_3"), (0 until PoulpyCheer.SHEETS).map { PoulpyCheer.sheet(it) })
