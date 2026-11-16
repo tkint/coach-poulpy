@@ -1,0 +1,95 @@
+package ch.coachpoulpy.android.ui
+
+import android.content.Context
+import android.graphics.BitmapFactory
+import android.provider.Settings
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.size
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameMillis
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
+import ch.coachpoulpy.shared.PoulpyDrawing
+import ch.coachpoulpy.shared.PoulpyMoves
+
+private const val STILL_HEIGHT_PER_WIDTH = 678f / 744f
+
+/** The sheets of the moves, from the app's assets (design/poulpy-3d/moves), cut into their frames once for every Poulpy on screen. */
+private object MovePictures {
+    private val cache = HashMap<String, List<BitmapPainter>>()
+
+    @Synchronized
+    fun frames(context: Context, sheet: String): List<BitmapPainter> = cache.getOrPut(sheet) {
+        val bitmap = context.applicationContext.assets.open("$sheet.png").use { BitmapFactory.decodeStream(it) }.asImageBitmap()
+        val width = bitmap.width / PoulpyMoves.COLUMNS
+        val height = bitmap.height / ((PoulpyMoves.FRAMES + PoulpyMoves.COLUMNS - 1) / PoulpyMoves.COLUMNS)
+        List(PoulpyMoves.FRAMES) { index ->
+            BitmapPainter(bitmap, IntOffset(index % PoulpyMoves.COLUMNS * width, index / PoulpyMoves.COLUMNS * height), IntSize(width, height))
+        }
+    }
+}
+
+/**
+ * Poulpy's still picture at [artSize], and when [drawing] has a move, a tap on him plays it: his jump, leaning to one side or the other at
+ * random, frame by frame from the 3D model ([PoulpyMoves] in the shared code says which frame and when). The frames are bigger than the
+ * picture, so he jumps out of its box and back into it. With the phone's animations turned off a tap does nothing.
+ */
+@Composable
+fun PoulpyTapArt(drawing: PoulpyDrawing, description: String, artSize: Dp, modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    var sheet by remember { mutableStateOf<String?>(null) }
+    var elapsed by remember { mutableStateOf(0L) }
+    LaunchedEffect(sheet) {
+        if (sheet == null) return@LaunchedEffect
+        val start = withFrameMillis { it }
+        elapsed = 0
+        while (PoulpyMoves.frame(elapsed) != null) {
+            withFrameMillis { now -> elapsed = now - start }
+        }
+        sheet = null
+    }
+    val frame = sheet?.let { name -> PoulpyMoves.frame(elapsed)?.let { MovePictures.frames(context, name)[it] } }
+    val canMove = PoulpyMoves.moves(drawing)
+    Box(
+        modifier.size(artSize).then(
+            if (canMove) {
+                Modifier.clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {
+                    val still = Settings.Global.getFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f) == 0f
+                    if (sheet == null && !still) sheet = PoulpyMoves.sheet(drawing, PoulpyMoves.Side.entries.random())
+                }
+            } else Modifier,
+        ),
+        contentAlignment = Alignment.Center,
+    ) {
+        Image(painterResource(drawing.drawable), contentDescription = description, modifier = Modifier.size(artSize).alpha(if (frame == null) 1f else 0f))
+        if (frame != null) {
+            // The frame shows him the size of the still picture, with room around him: it is that much bigger, on the same centre.
+            Image(
+                frame,
+                contentDescription = null,
+                modifier = Modifier.requiredSize(
+                    artSize * (PoulpyMoves.FRAME_WIDTH.toFloat() / PoulpyMoves.PICTURE_WIDTH),
+                    // The still picture is 744 by 678 pixels, so it is a little shorter than wide.
+                    artSize * (PoulpyMoves.FRAME_HEIGHT.toFloat() / PoulpyMoves.PICTURE_HEIGHT * STILL_HEIGHT_PER_WIDTH),
+                ),
+            )
+        }
+    }
+}

@@ -29,6 +29,8 @@ targets:
       - path: CoachPoulpy
       # The loader's pictures are read from where the website reads them too, so they exist once.
       - path: ../design/poulpy-3d/loader
+      # So are the moves of Home's Poulpy.
+      - path: ../design/poulpy-3d/moves
         buildPhase: resources
       - path: ../shared/build/generated/i18n/apple
         name: Strings

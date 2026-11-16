@@ -1,58 +1,30 @@
 <script setup lang="ts">
-// Poulpy on Home (decision 16, step 4): his still picture, which stays still. A tap plays one short animation for his
-// current mood, in 3D, and he settles back to the picture. Only moods that have an animation respond: happy and proud
-// jump, leaning to his left or his right at random; the others get theirs later. With reduced motion a tap does nothing. The apps do the same with their own 3D.
+// Poulpy on Home (decision 16, step 4): his still picture, which stays still. A tap plays one short move for his current mood,
+// frame by frame from the 3D model (design/poulpy-3d/moves; PoulpyMoves in the shared code is the phones' version), and he settles
+// back to the picture. Only moods that have a move respond: happy and proud jump, leaning to his left or his right at random; the
+// others get theirs later. With reduced motion a tap does nothing.
 import { computed, onBeforeUnmount, ref } from 'vue'
-import { poulpyDrawings } from '@coach-poulpy/ui'
+import { poulpyDrawings, poulpyMoves } from '@coach-poulpy/ui'
 
 const props = defineProps<{ mood: 'proud' | 'happy' | 'recovering' | 'annoyed' | 'grumpy' | 'fuming'; label: string }>()
-const ANIMATED = ['proud', 'happy']
-const PICTURE_HEIGHT = 64
-const PAD = 24
+const MOVE_MILLIS = 1250
 const picture = computed(() => (poulpyDrawings as Record<string, string>)[`mood_${props.mood}`])
-const playing = ref(false)
-const stage = ref<HTMLElement>()
-const canvas = ref<HTMLCanvasElement>()
-let frame = 0
-let stop = () => {}
+const playing = ref<string>()
+let timer: ReturnType<typeof setTimeout> | undefined
 
-async function play() {
-  if (playing.value || !ANIMATED.includes(props.mood) || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
-  playing.value = true
-  await Promise.resolve()
-  if (!canvas.value) return
-  const { createPoulpyScene } = await import('../../brand/poulpy3dScene')
-  const { createJump } = await import('../../../../../design/poulpy-3d/motion.mjs')
-  const scene = createPoulpyScene(canvas.value)
-  scene.show(props.mood, false)
-  // The same shot as his still picture (design/build-poulpy-pictures.mjs), on a canvas that reaches PAD px further each way
-  // so the jump is not cut off: the view grows with it, so he stays the picture's size and in its place.
-  scene.look({ turn: 0, tilt: 8, distance: 9.4, centre: 1.35, field: (2 * Math.atan(((PICTURE_HEIGHT + 2 * PAD) / PICTURE_HEIGHT) * Math.tan((14 * Math.PI) / 180)) * 180) / Math.PI })
-  // Each tap plays one of two jumps, at random: leaning to his left or to his right.
-  const jump = createJump()
-  jump.lean *= Math.random() < 0.5 ? -1 : 1
-  let last = performance.now(), clock = 0, high = false
-  const tick = (now: number) => {
-    const dt = (now - last) / 1000
-    last = now
-    clock += dt
-    const pose = jump.advance(dt)
-    scene.pose(pose)
-    if (pose.lift > 0.05) high = true
-    // One jump: up, down, settled; or give up after a few seconds.
-    if ((high && pose.lift < 0.004 && clock > 0.9) || clock > 3) return finish()
-    frame = requestAnimationFrame(tick)
-  }
-  const finish = () => { stop(); stop = () => {}; playing.value = false }
-  stop = () => { cancelAnimationFrame(frame); scene.dispose() }
-  frame = requestAnimationFrame(tick)
+function play() {
+  const sides = ['left', 'right']
+  const sheet = poulpyMoves[`mood_${props.mood}_${sides[Math.random() < 0.5 ? 0 : 1]}`]
+  if (playing.value || !sheet || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+  playing.value = sheet
+  timer = setTimeout(() => { playing.value = undefined }, MOVE_MILLIS)
 }
-onBeforeUnmount(() => stop())
+onBeforeUnmount(() => clearTimeout(timer))
 </script>
 
 <template>
   <button type="button" class="poulpy-tap" :aria-label="`${label}. Tap and he plays`" data-component="poulpy-tap" @click="play">
     <img :src="picture" alt="" :style="{ visibility: playing ? 'hidden' : 'visible' }" />
-    <span v-if="playing" ref="stage" class="poulpy-tap-stage" aria-hidden="true"><canvas ref="canvas" /></span>
+    <span v-if="playing" class="poulpy-tap-stage" aria-hidden="true"><span class="poulpy-tap-frames" :style="{ backgroundImage: `url(${playing})` }" /></span>
   </button>
 </template>
