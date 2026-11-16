@@ -252,7 +252,7 @@ private fun ColumnScope.WorkoutDetails(state: WorkoutPageState, onPlan: () -> Un
     }
     PlanRow(state, onPick = onPlan)
     Stats(state)
-    SectionLabel(stringResource(R.string.workout_exercises))
+    SectionLabel(stringResource(R.string.workout_exercises), Modifier.endsHalfStop())
     state.parts.forEach { part ->
         PartBlock(part.kind, part.name, part.summary, part.time) {
             var first = true
@@ -283,13 +283,13 @@ private fun ColumnScope.WorkoutDetails(state: WorkoutPageState, onPlan: () -> Un
 }
 
 @Composable
-private fun SectionLabel(text: String) {
+private fun SectionLabel(text: String, modifier: Modifier = Modifier) {
     Text(
         text.uppercase(Locale.getDefault()),
         style = MaterialTheme.typography.labelMedium,
         fontWeight = FontWeight.ExtraBold,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(start = 4.dp, top = 4.dp),
+        modifier = modifier.padding(start = 4.dp, top = 4.dp),
     )
 }
 

@@ -29,6 +29,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,11 +42,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.composed
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInParent
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.Velocity
@@ -65,12 +72,26 @@ private val PULL_DEAD_ZONE = 56.dp
 /** How much of a fling's speed counts when picking where the sheet rests: little, so only a wide drag changes the stop. */
 private const val FLING_SECONDS = 0.04f
 
+/** Where the content reports the end of what the half stop shows; null when the sheet keeps its fixed share. */
+private val LocalHalfEnd = compositionLocalOf<((Float) -> Unit)?> { null }
+
+/** The half stop of the sheet ends where this element starts, so what follows (the exercises) only shows once the sheet goes up. */
+internal fun Modifier.endsHalfStop(): Modifier = composed {
+    val report = LocalHalfEnd.current
+    if (report == null) this else onGloballyPositioned { report(it.positionInParent().y) }
+}
+
+/** The most of the screen the sheet takes at its half stop, when its content above the marker is long. */
+private const val HALF_MOST = 0.7f
+
 /**
  * A sheet over a full-height background (the body map of the workout page and the session recap), resting at three stops: peek shows its top, half
  * ([halfShare] of the screen left to the background) is the default, full covers the background and scrolls.
  * The handle drags or taps between stops; below full, dragging anywhere on the sheet moves it; at full, scrolling down
  * past the top of the content drags the sheet back down. [background] gets the room above the sheet, never less than
- * at the half stop, so what it draws does not shrink when the sheet goes up.
+ * at the half stop, so what it draws does not shrink when the sheet goes up. When the content has an element with
+ * [endsHalfStop], the half stop is where that element starts (never more than [HALF_MOST] of the screen) and [halfShare] is only
+ * the first guess, so a half-open sheet never shows part of what follows.
  */
 @Composable
 internal fun DetailSheet(
@@ -87,14 +108,19 @@ internal fun DetailSheet(
     BoxWithConstraints(modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         val density = LocalDensity.current
         val total = with(density) { maxHeight.toPx() }
-        val halfTop = total * halfShare
         val peekTop = total - with(density) { (SHEET_PEEK + WindowInsets.navigationBars.getBottom(density).toDp()).toPx() }
+        // Where the content above the marker ends, and the height of the action bar, once measured.
+        var contentEnd by remember { mutableFloatStateOf(-1f) }
+        var actionsHeight by remember { mutableFloatStateOf(0f) }
+        val handleHeight = with(density) { PoulpySize.touch.toPx() }
+        val halfTop = if (contentEnd < 0f) total * halfShare
+        else (total - handleHeight - contentEnd - actionsHeight).coerceIn(total * (1f - HALF_MOST), peekTop)
         val stops = listOf(peekTop, halfTop, 0f)
         val top = remember { Animatable(halfTop) }
         val scope = rememberCoroutineScope()
         val scroll = rememberScrollState()
         val expanded = stop == STOP_FULL
-        LaunchedEffect(stop, total) { top.animateTo(stops[stop]) }
+        LaunchedEffect(stop, total, halfTop) { top.animateTo(stops[stop]) }
 
         fun moveBy(delta: Float): Float {
             val target = (top.value + delta).coerceIn(0f, peekTop)
@@ -171,6 +197,7 @@ internal fun DetailSheet(
                 ) {
                     Box(Modifier.size(width = 40.dp, height = 5.dp).clip(RoundedCornerShape(PoulpyRadius.pill)).background(MaterialTheme.colorScheme.outline))
                 }
+                CompositionLocalProvider(LocalHalfEnd provides { contentEnd = it }) {
                 Column(
                     Modifier
                         .weight(1f)
@@ -182,9 +209,12 @@ internal fun DetailSheet(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     content = content,
                 )
+                }
                 if (actions != null) {
-                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                    actions()
+                    Column(Modifier.onSizeChanged { actionsHeight = it.height.toFloat() }) {
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                        actions()
+                    }
                 }
             }
         }
