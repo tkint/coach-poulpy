@@ -35,7 +35,7 @@ export const PlayerFinishedRun: Story = {
   ...screen(screenPlayerFinishedRun),
   parameters: { mockup: { issue: 104 } },
 }
-/** Player · finished, the eighth tentacle lights: Poulpy the champion jumps for joy three times, rests a moment and does it again, for as long as the screen is open. */
+/** Player · finished, the eighth tentacle lights: Poulpy the champion jumps for joy and never stops, jump after jump with no rest, for as long as the screen is open. */
 export const PlayerFinishedChampion: Story = {
   name: "Finished, champion",
   tags: ['!autodocs', 'agreed'],
