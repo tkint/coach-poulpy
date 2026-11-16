@@ -126,14 +126,15 @@ export function turnSeconds(turn = TURN) {
 
 /**
  * Poulpy turning, as something to advance in time.
- * @param {{ softness?: number, stride?: number, turn?: typeof TURN }} [options] `softness` scales how loose
+ * @param {{ softness?: number, stride?: number, wiggle?: boolean, turn?: typeof TURN }} [options] `softness` scales how loose
  *   the arms are: 1 is the design, 0 makes them stiff, 2 very floppy. `stride` scales how far each step
- *   turns: 1 is the design, 2 twice as far, and a negative one turns him the other way. Both can be changed at any time.
- * @returns {{ softness: number, stride: number, advance(seconds: number): TurnPose, pose(): TurnPose }}
+ *   turns: 1 is the design, 2 twice as far, and a negative one turns him the other way. `wiggle` (on unless told) keeps the
+ *   steps a little different from each other, as designed; off, every step is exactly the same. All can be changed at any time.
+ * @returns {{ softness: number, stride: number, wiggle: boolean, advance(seconds: number): TurnPose, pose(): TurnPose }}
  *   A pose is `{ yaw, squash, arms }`: the way he faces in radians (it keeps growing turn after turn), how
  *   much his head is squashed (negative) or stretched, and for each arm its three bends in radians.
  */
-export function createTurn({ softness = 1, stride = 1, turn = TURN } = {}) {
+export function createTurn({ softness = 1, stride = 1, wiggle = true, turn = TURN } = {}) {
   // Angles are kept from above, in radians: `at` is where the body faces, `to` where it should.
   let step = 0, phase = 0, clock = 0, base = 0, to = 0, at = 0, speed = 0, squash = 0, squashSpeed = 0
   const arms = armSwing(turn)
@@ -147,7 +148,7 @@ export function createTurn({ softness = 1, stride = 1, turn = TURN } = {}) {
       phase = (phase + 1) % 3
       if (phase === 0) { base = to; step = (step + 1) % turn.steps.length }
     }
-    to = phase === 0 ? base - turn.windUp.degrees * RAD * (stride < 0 ? -1 : 1) : phase === 1 ? base + turn.steps[step] * RAD * stride : to
+    to = phase === 0 ? base - turn.windUp.degrees * RAD * (stride < 0 ? -1 : 1) : phase === 1 ? base + stepDegrees(turn, step, stride, wiggle) * RAD : to
 
     // The body follows.
     const b = turn.body
@@ -166,10 +167,12 @@ export function createTurn({ softness = 1, stride = 1, turn = TURN } = {}) {
   const sim = {
     softness,
     stride,
+    wiggle,
     pose: () => ({ yaw: at, squash, arms: arms.bends(at) }),
     advance(seconds) {
       softness = sim.softness
       stride = sim.stride
+      wiggle = sim.wiggle
       owed += Math.min(Math.max(seconds, 0), 1)
       while (owed >= SUBSTEP) { tick(SUBSTEP); owed -= SUBSTEP }
       return sim.pose()
@@ -206,18 +209,22 @@ export function createFollow({ softness = 1, turn = TURN } = {}) {
   return sim
 }
 
+// How far a step turns, in degrees: with `wiggle` it is the design's step (they differ a little, 20 to 30, so he does not look
+// mechanical) times `stride`; without it every step is the average of them, times `stride`, so a step of 360° is exactly 360°.
+const stepDegrees = (turn, index, stride, wiggle) => (wiggle ? turn.steps[index % turn.steps.length] : turn.steps.reduce((sum, d) => sum + d, 0) / turn.steps.length) * stride
+
 /**
  * Poulpy jumping on the spot, as something to advance in time.
- * @param {{ softness?: number, stride?: number, jump?: typeof JUMP, turn?: typeof TURN }} [options] `softness`
+ * @param {{ softness?: number, stride?: number, wiggle?: boolean, jump?: typeof JUMP, turn?: typeof TURN }} [options] `softness`
  *   scales how loose the arms are, as in createTurn. `stride` makes each jump turn him too, by a step of
- *   `turn` scaled as in createTurn: 0, the default, jumps on the spot.
- * @returns The move. `softness`, `stride` and the jump's key values (`height`, `tuck`, `landing`, `spread`,
+ *   `turn` scaled as in createTurn (and `wiggle` as there): 0, the default, jumps on the spot.
+ * @returns The move. `softness`, `stride`, `wiggle` and the jump's key values (`height`, `tuck`, `landing`, `spread`,
  *   `hang`, which scales the arms' weight, `lean` in degrees and `pause` in seconds on average) can be changed
  *   at any time. A pose is a turn's pose and `{ lift, lean, head, spread, droop }`: how far he is off the
  *   floor, how far he tilts to his side in radians, how far his head is tucked into his arms (negative, never
  *   out of them), how far each arm has slid outwards, and for each arm how far each of its three bends hangs, in radians.
  */
-export function createJump({ softness = 1, stride = 0, jump = JUMP, turn = TURN } = {}) {
+export function createJump({ softness = 1, stride = 0, wiggle = true, jump = JUMP, turn = TURN } = {}) {
   const count = SHAPE.arms.count, variety = turn.armVariety.slice(0, count)
   const rest = jump.pauses.reduce((sum, p) => sum + p, 0) / jump.pauses.length
   // Where each length of arm ends, from his middle, and how long it is.
@@ -244,7 +251,9 @@ export function createJump({ softness = 1, stride = 0, jump = JUMP, turn = TURN 
     }
     const through = clock / seconds[phase], turning = stride !== 0
     const goal = phase === 0 ? -sim.tuck : phase === 1 ? sim.height * 4 * through * (1 - through) : phase === 2 ? -sim.landing : 0
-    if (turning) to = phase === 0 ? base - turn.windUp.degrees * RAD * (stride < 0 ? -1 : 1) : base + turn.steps[hop % turn.steps.length] * RAD * stride
+    // He turns for as long as he is in the air: from his wind-up to the full step, eased, so he lands as the turn ends.
+    const wind = base - turn.windUp.degrees * RAD * (stride < 0 ? -1 : 1), full = base + stepDegrees(turn, hop, stride, wiggle) * RAD
+    if (turning) to = phase === 0 ? wind : phase === 1 ? wind + (full - wind) * through * through * (3 - 2 * through) : full
     else to = base
 
     // His head follows the script and takes the base of his arms up with it.
@@ -300,6 +309,7 @@ export function createJump({ softness = 1, stride = 0, jump = JUMP, turn = TURN 
   const sim = {
     softness,
     stride,
+    wiggle,
     height: jump.air.height,
     tuck: jump.tuck.depth,
     landing: jump.landing.depth,
@@ -311,6 +321,7 @@ export function createJump({ softness = 1, stride = 0, jump = JUMP, turn = TURN 
     advance(seconds) {
       softness = sim.softness
       stride = sim.stride
+      wiggle = sim.wiggle
       owed += Math.min(Math.max(seconds, 0), 1)
       while (owed >= SUBSTEP) { tick(SUBSTEP); owed -= SUBSTEP }
       return sim.pose()
