@@ -11,11 +11,34 @@ private struct ScrollOffsetKey: PreferenceKey {
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = nextValue() }
 }
 
+/// Where the content reports the end of what the half stop shows, from the top of the content, however far it is scrolled.
+private struct HalfEndKey: PreferenceKey {
+    static var defaultValue: CGFloat?
+    static func reduce(value: inout CGFloat?, nextValue: () -> CGFloat?) { value = nextValue() ?? value }
+}
+
+/// The height of the action bar under the content.
+private struct ActionsHeightKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = nextValue() }
+}
+
+extension View {
+    /// The half stop of the detail sheet ends where this view starts, so what follows (the exercises) only shows once the sheet goes up.
+    func endsHalfStop() -> some View {
+        background(GeometryReader { marker in
+            Color.clear.preference(key: HalfEndKey.self, value: marker.frame(in: .named("detail-sheet-content")).minY)
+        })
+    }
+}
+
 /// A sheet over a full-height background (the body map of the workout page and the session recap), resting at three stops: peek shows its top,
 /// half (`halfShare` of the screen left to the background) is the default, full covers the background and scrolls.
 /// The handle drags or taps between stops; below full, dragging anywhere on the sheet moves it; at full, pulling
 /// down from the top of the content drags the sheet back down. `background` gets the room above the sheet, never less
 /// than at the half stop, so what it draws does not shrink when the sheet goes up, and the top safe area inset.
+/// When the content has a view with `endsHalfStop()`, the half stop is where that view starts (never more than `halfMost` of the screen) and
+/// `halfShare` is only the first guess, so a half-open sheet never shows part of what follows.
 struct DetailSheet<Background: View, Floating: View, Actions: View, Content: View>: View {
     let showBackgroundLabel: LocalizedStringKey
     let showDetailsLabel: LocalizedStringKey
@@ -38,10 +61,20 @@ struct DetailSheet<Background: View, Floating: View, Actions: View, Content: Vie
     @State private var pulled: CGFloat = 0
     @State private var pullStartedAtTop: Bool?
     @State private var contentOffset: CGFloat = 0
+    /// Where the content above the marker ends, and the height of the action bar, once measured.
+    @State private var contentEnd: CGFloat?
+    @State private var actionsHeight: CGFloat = 0
+
+    /// The most of the screen the sheet takes at its half stop, when its content above the marker is long.
+    private static var halfMost: CGFloat { 0.7 }
+    /// The height of the handle.
+    private static var handleHeight: CGFloat { 44 }
 
     var body: some View {
         GeometryReader { geo in
-            let halfTop = geo.size.height * halfShare
+            let halfTop = contentEnd.map {
+                min(max(geo.size.height - Self.handleHeight - $0 - actionsHeight, geo.size.height * (1 - Self.halfMost)), geo.size.height - Self.peekHeight - geo.safeAreaInsets.bottom)
+            } ?? geo.size.height * halfShare
             let peekTop = geo.size.height - Self.peekHeight - geo.safeAreaInsets.bottom
             let stops: [CGFloat] = [peekTop, halfTop, 0]
             let base = stops[stop.rawValue]
@@ -100,6 +133,7 @@ struct DetailSheet<Background: View, Floating: View, Actions: View, Content: Vie
             .gesture(drag)
             ScrollView {
                 content()
+                    .coordinateSpace(name: "detail-sheet-content")
                     .padding(.horizontal, PoulpySpace.lg)
                     .background(
                         GeometryReader { marker in
@@ -109,11 +143,14 @@ struct DetailSheet<Background: View, Floating: View, Actions: View, Content: Vie
             }
             .coordinateSpace(name: "detail-sheet-scroll")
             .onPreferenceChange(ScrollOffsetKey.self) { contentOffset = $0 }
+            .onPreferenceChange(HalfEndKey.self) { contentEnd = $0 }
             // Below full height the content stays put and dragging anywhere moves the sheet; at full height it scrolls.
             .scrollDisabled(stop != .full || pulled > 0)
             .simultaneousGesture(drag, including: stop == .full ? .none : .all)
             .simultaneousGesture(pull, including: stop == .full ? .all : .none)
             actions()
+                .background(GeometryReader { bar in Color.clear.preference(key: ActionsHeightKey.self, value: bar.size.height) })
+                .onPreferenceChange(ActionsHeightKey.self) { actionsHeight = $0 }
         }
         .frame(height: max(height, 0), alignment: .top)
         .background(

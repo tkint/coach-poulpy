@@ -216,7 +216,7 @@ struct WorkoutPageView: View {
             }
             planRow(state)
             stats(state)
-            sectionLabel("workout.exercises")
+            sectionLabel("workout.exercises").endsHalfStop()
             ForEach(state.parts, id: \.key) { part in
                 PartBlockView(kind: part.kind, name: part.name, summary: part.summary, time: part.time) {
                     ForEach(Array(part.steps.enumerated()), id: \.element.key) { index, step in
