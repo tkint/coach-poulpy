@@ -126,14 +126,15 @@ export function turnSeconds(turn = TURN) {
 
 /**
  * Poulpy turning, as something to advance in time.
- * @param {{ softness?: number, stride?: number, turn?: typeof TURN }} [options] `softness` scales how loose
+ * @param {{ softness?: number, stride?: number, wiggle?: boolean, turn?: typeof TURN }} [options] `softness` scales how loose
  *   the arms are: 1 is the design, 0 makes them stiff, 2 very floppy. `stride` scales how far each step
- *   turns: 1 is the design, 2 twice as far, and a negative one turns him the other way. Both can be changed at any time.
- * @returns {{ softness: number, stride: number, advance(seconds: number): TurnPose, pose(): TurnPose }}
+ *   turns: 1 is the design, 2 twice as far, and a negative one turns him the other way. `wiggle` (on unless told) keeps the
+ *   steps a little different from each other, as designed; off, every step is exactly the same. All can be changed at any time.
+ * @returns {{ softness: number, stride: number, wiggle: boolean, advance(seconds: number): TurnPose, pose(): TurnPose }}
  *   A pose is `{ yaw, squash, arms }`: the way he faces in radians (it keeps growing turn after turn), how
  *   much his head is squashed (negative) or stretched, and for each arm its three bends in radians.
  */
-export function createTurn({ softness = 1, stride = 1, turn = TURN } = {}) {
+export function createTurn({ softness = 1, stride = 1, wiggle = true, turn = TURN } = {}) {
   // Angles are kept from above, in radians: `at` is where the body faces, `to` where it should.
   let step = 0, phase = 0, clock = 0, base = 0, to = 0, at = 0, speed = 0, squash = 0, squashSpeed = 0
   const arms = armSwing(turn)
@@ -147,7 +148,7 @@ export function createTurn({ softness = 1, stride = 1, turn = TURN } = {}) {
       phase = (phase + 1) % 3
       if (phase === 0) { base = to; step = (step + 1) % turn.steps.length }
     }
-    to = phase === 0 ? base - turn.windUp.degrees * RAD * (stride < 0 ? -1 : 1) : phase === 1 ? base + turn.steps[step] * RAD * stride : to
+    to = phase === 0 ? base - turn.windUp.degrees * RAD * (stride < 0 ? -1 : 1) : phase === 1 ? base + stepDegrees(turn, step, stride, wiggle) * RAD : to
 
     // The body follows.
     const b = turn.body
@@ -166,10 +167,12 @@ export function createTurn({ softness = 1, stride = 1, turn = TURN } = {}) {
   const sim = {
     softness,
     stride,
+    wiggle,
     pose: () => ({ yaw: at, squash, arms: arms.bends(at) }),
     advance(seconds) {
       softness = sim.softness
       stride = sim.stride
+      wiggle = sim.wiggle
       owed += Math.min(Math.max(seconds, 0), 1)
       while (owed >= SUBSTEP) { tick(SUBSTEP); owed -= SUBSTEP }
       return sim.pose()
@@ -206,18 +209,22 @@ export function createFollow({ softness = 1, turn = TURN } = {}) {
   return sim
 }
 
+// How far a step turns, in degrees: with `wiggle` it is the design's step (they differ a little, 20 to 30, so he does not look
+// mechanical) times `stride`; without it every step is the average of them, times `stride`, so a step of 360° is exactly 360°.
+const stepDegrees = (turn, index, stride, wiggle) => (wiggle ? turn.steps[index % turn.steps.length] : turn.steps.reduce((sum, d) => sum + d, 0) / turn.steps.length) * stride
+
 /**
  * Poulpy jumping on the spot, as something to advance in time.
- * @param {{ softness?: number, stride?: number, jump?: typeof JUMP, turn?: typeof TURN }} [options] `softness`
+ * @param {{ softness?: number, stride?: number, wiggle?: boolean, jump?: typeof JUMP, turn?: typeof TURN }} [options] `softness`
  *   scales how loose the arms are, as in createTurn. `stride` makes each jump turn him too, by a step of
- *   `turn` scaled as in createTurn: 0, the default, jumps on the spot.
- * @returns The move. `softness`, `stride` and the jump's key values (`height`, `tuck`, `landing`, `spread`,
+ *   `turn` scaled as in createTurn (and `wiggle` as there): 0, the default, jumps on the spot.
+ * @returns The move. `softness`, `stride`, `wiggle` and the jump's key values (`height`, `tuck`, `landing`, `spread`,
  *   `hang`, which scales the arms' weight, `lean` in degrees and `pause` in seconds on average) can be changed
  *   at any time. A pose is a turn's pose and `{ lift, lean, head, spread, droop }`: how far he is off the
  *   floor, how far he tilts to his side in radians, how far his head is tucked into his arms (negative, never
  *   out of them), how far each arm has slid outwards, and for each arm how far each of its three bends hangs, in radians.
  */
-export function createJump({ softness = 1, stride = 0, jump = JUMP, turn = TURN } = {}) {
+export function createJump({ softness = 1, stride = 0, wiggle = true, jump = JUMP, turn = TURN } = {}) {
   const count = SHAPE.arms.count, variety = turn.armVariety.slice(0, count)
   const rest = jump.pauses.reduce((sum, p) => sum + p, 0) / jump.pauses.length
   // Where each length of arm ends, from his middle, and how long it is.
@@ -244,7 +251,9 @@ export function createJump({ softness = 1, stride = 0, jump = JUMP, turn = TURN 
     }
     const through = clock / seconds[phase], turning = stride !== 0
     const goal = phase === 0 ? -sim.tuck : phase === 1 ? sim.height * 4 * through * (1 - through) : phase === 2 ? -sim.landing : 0
-    if (turning) to = phase === 0 ? base - turn.windUp.degrees * RAD * (stride < 0 ? -1 : 1) : base + turn.steps[hop % turn.steps.length] * RAD * stride
+    // He turns for as long as he is in the air: from his wind-up to the full step, eased, so he lands as the turn ends.
+    const wind = base - turn.windUp.degrees * RAD * (stride < 0 ? -1 : 1), full = base + stepDegrees(turn, hop, stride, wiggle) * RAD
+    if (turning) to = phase === 0 ? wind : phase === 1 ? wind + (full - wind) * through * through * (3 - 2 * through) : full
     else to = base
 
     // His head follows the script and takes the base of his arms up with it.
@@ -300,6 +309,7 @@ export function createJump({ softness = 1, stride = 0, jump = JUMP, turn = TURN 
   const sim = {
     softness,
     stride,
+    wiggle,
     height: jump.air.height,
     tuck: jump.tuck.depth,
     landing: jump.landing.depth,
@@ -311,6 +321,7 @@ export function createJump({ softness = 1, stride = 0, jump = JUMP, turn = TURN 
     advance(seconds) {
       softness = sim.softness
       stride = sim.stride
+      wiggle = sim.wiggle
       owed += Math.min(Math.max(seconds, 0), 1)
       while (owed >= SUBSTEP) { tick(SUBSTEP); owed -= SUBSTEP }
       return sim.pose()
@@ -509,4 +520,64 @@ export function armSkin(k, positions) {
     weights.push(...share)
   }
   return { joints, weights }
+}
+
+// ---- Posing him without a 3D engine ----
+// 3 by 3 matrices (row by row) and an offset make a placement; enough to move him as the rig of the scene does.
+const m3 = (a, b) => [0, 1, 2].flatMap((r) => [0, 1, 2].map((c) => a[r * 3] * b[c] + a[r * 3 + 1] * b[3 + c] + a[r * 3 + 2] * b[6 + c]))
+const m3v = (m, v) => [0, 1, 2].map((r) => m[r * 3] * v[0] + m[r * 3 + 1] * v[1] + m[r * 3 + 2] * v[2])
+const put = (a, b) => ({ m: m3(a.m, b.m), t: m3v(a.m, b.t).map((x, i) => x + a.t[i]) })
+const MOVE = { still: { m: [1, 0, 0, 0, 1, 0, 0, 0, 1], t: [0, 0, 0] } }
+const shift = (t) => ({ m: MOVE.still.m, t })
+const aroundY = (a) => ({ m: [Math.cos(a), 0, Math.sin(a), 0, 1, 0, -Math.sin(a), 0, Math.cos(a)], t: [0, 0, 0] })
+const aroundZ = (a) => ({ m: [Math.cos(a), -Math.sin(a), 0, Math.sin(a), Math.cos(a), 0, 0, 0, 1], t: [0, 0, 0] })
+const stretched = ([x, y, z]) => ({ m: [x, 0, 0, 0, y, 0, 0, 0, z], t: [0, 0, 0] })
+// Rodrigues: a turn of `a` around the unit `axis`.
+function aroundAxis([x, y, z], a) {
+  const c = Math.cos(a), s = Math.sin(a), k = 1 - c
+  return { m: [c + x * x * k, x * y * k - z * s, x * z * k + y * s, y * x * k + z * s, c + y * y * k, y * z * k - x * s, z * x * k - y * s, z * y * k + x * s, c + z * z * k], t: [0, 0, 0] }
+}
+const unit = (v) => { const l = Math.hypot(...v) || 1; return v.map((x) => x / l) }
+
+/**
+ * Poulpy in a pose of a move (createTurn, createJump), for a painter with no 3D engine: what the scene's rig does with its bones,
+ * written with plain matrices. His arms are bent into new points; his head and face are placed by the painter.
+ * @param model what buildPoulpy3d returned
+ * @param pose a pose of createTurn or createJump
+ * @returns {{ model: object, placed: (part: object) => ({ point: Function, way: Function } | undefined) }} the model with
+ *   his arms posed, and where the painter should put each of the other parts: pass both to paintPoulpy.
+ */
+export function posePoulpy(model, pose) {
+  const body = put(shift([0, pose.lift ?? 0, 0]), put(aroundY(pose.yaw ?? 0), aroundZ(pose.lean ?? 0)))
+  const head = put(body, put(shift([0, (model.headLift ?? 0) + (pose.head ?? 0), 0]), put(aroundZ(model.headTilt ?? 0), stretched(squashScale(pose.squash ?? 0)))))
+  const joints = armJoints()
+  const parts = model.parts.map((part) => {
+    const arm = /^arm_(\d+)/.exec(part.name)
+    if (!arm) return part
+    const k = +arm[1] - 1, own = joints.slice(k * 3, k * 3 + 3), skin = armSkin(k, part.positions)
+    // Each bend's placement in the room, as the rig's bones chain them, and what each does to a point of his arm at rest.
+    let chain = body
+    const moves = own.map((joint, i) => {
+      const before = i ? own[i - 1].at : [0, 0, 0], local = joint.at.map((x, n) => x - before[n])
+      if (i === 0) { const out = unit([joint.at[0], 0, joint.at[2]]); local.forEach((_, n) => { local[n] += out[n] * (pose.spread ?? 0) }) }
+      const hang = pose.droop ? aroundAxis(unit([joint.at[2], 0, -joint.at[0]]), pose.droop[k][i]) : MOVE.still
+      chain = put(chain, put(shift(local), put(aroundY(pose.arms[k][i]), hang)))
+      return put(chain, shift(joint.at.map((x) => -x)))
+    })
+    const positions = new Array(part.positions.length), normals = new Array(part.normals.length)
+    for (let p = 0; p < positions.length / 3; p++) {
+      const v = [0, 1, 2].map((n) => part.positions[p * 3 + n]), d = [0, 1, 2].map((n) => part.normals[p * 3 + n])
+      const at = [0, 0, 0], way = [0, 0, 0]
+      for (let s = 0; s < 4; s++) {
+        const w = skin.weights[p * 4 + s]
+        if (!w) continue
+        const move = s === 0 ? body : moves[s - 1], moved = m3v(move.m, v).map((x, n) => x + move.t[n]), turned = m3v(move.m, d)
+        for (let n = 0; n < 3; n++) { at[n] += moved[n] * w; way[n] += turned[n] * w }
+      }
+      for (let n = 0; n < 3; n++) { positions[p * 3 + n] = at[n]; normals[p * 3 + n] = way[n] }
+    }
+    return { ...part, positions, normals }
+  })
+  const placed = (part) => (/^arm_/.test(part.name) ? undefined : { point: (v) => m3v(head.m, v).map((x, n) => x + head.t[n]), way: (n) => unit(m3v(head.m, n)) })
+  return { model: { ...model, parts }, placed }
 }

@@ -4,10 +4,15 @@
 const pictures = import.meta.glob<string>('../../../design/poulpy-3d/pictures/*.png', { eager: true, query: '?url', import: 'default' })
 // The loader's pictures are in design/poulpy-3d/loader, where the apps read them too: the swing's frames in one sheet, and the one clockwise picture.
 const loaders = import.meta.glob<string>('../../../design/poulpy-3d/loader/*.png', { eager: true, query: '?url', import: 'default' })
+// The moves of Home, frame by frame: one sheet for each picture and side (design/poulpy-3d/moves), 30 frames, 6 across and 5 down.
+const moves = import.meta.glob<string>('../../../design/poulpy-3d/moves/*.png', { eager: true, query: '?url', import: 'default' })
 const named = (files: Record<string, string>) =>
   Object.entries(files).map(([path, src]) => [path.slice(path.lastIndexOf('/') + 1, path.lastIndexOf('.')), src] as const)
 
 export const poulpyDrawings = Object.fromEntries([...named(pictures), ...named(loaders).map(([name, src]) => [`loader_${name}`, src] as const)]) as Record<PoulpyDrawing, string>
+
+/** The sheets of the moves, by name: `mood_happy_left`, `mood_happy_right`, `mood_proud_left`, `mood_proud_right`. */
+export const poulpyMoves = Object.fromEntries(named(moves)) as Record<string, string>
 
 export type PoulpyDrawing =
   | 'mood_proud' | 'mood_happy' | 'mood_recovering' | 'mood_annoyed' | 'mood_grumpy' | 'mood_fuming'
