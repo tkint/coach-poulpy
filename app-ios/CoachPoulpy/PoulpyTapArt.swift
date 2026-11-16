@@ -32,6 +32,15 @@ struct PoulpyTapArt: View {
     @State private var move: (sheet: String, start: Date)?
 
     var body: some View {
+        // The champion's tap is his celebration: the same three jumps of joy as at the end of a session, once.
+        if PoulpyCheer.shared.celebrates(drawing: drawing) {
+            PoulpyCheerArt(drawing: drawing, art: art, autoplay: false, loop: false)
+        } else {
+            moveArt
+        }
+    }
+
+    @ViewBuilder private var moveArt: some View {
         let moves = PoulpyMoves.shared
         ZStack {
             if let move {
