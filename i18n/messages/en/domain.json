@@ -195,8 +195,6 @@
     "painLine": "I’m patched up with you. No catching up, just rest.",
     "gentleTitle": "Tentacle {lit, number} lit!",
     "gentleLine": "A gentle session counts, and so does rest.",
-    "gentleTitle": "Tentacle {lit, number} lit!",
-    "gentleLine": "A gentle session counts, and so does rest.",
     "workoutPainOne": "Your {area} still hurts. Go gently, I’ll keep an eye on it with you.",
     "workoutPainMany": "Your {areas} still hurt. Go gently, I’ll keep an eye on them with you."
   },
@@ -224,7 +222,6 @@
     "championHeading": "Champion!",
     "quote": "“Worth it. Probably.”",
     "championQuote": "“Eight tentacles. No regrets.”",
-    "gentleQuote": "“Listening to your body is training too.”",
     "gentleQuote": "“Listening to your body is training too.”"
   },
   "recap": {
