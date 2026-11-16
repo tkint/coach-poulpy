@@ -25,58 +25,83 @@ internal fun BuilderModel.part(kind: PartKind): String = current.parts.last { it
 class BuilderModelTest {
     private val graph = AppGraph(DriverFactory()).withSampleCatalog()
 
-    private fun builder(format: WorkoutFormat, name: String = "Monday") = graph.createWorkout("en").apply {
+    private fun builder(format: WorkoutFormat, name: String = "Monday") = graph.createWorkout(format, "en").apply {
         rename(name)
-        chooseFormat(format)
     }
 
     @Test
-    fun aNewWorkoutAsksForItsFormatOnce() {
-        val builder = graph.createWorkout("en")
-        builder.rename("Monday")
-        assertNull(builder.current.format)
-        assertEquals(listOf(PartKind.WORK), builder.current.parts.map { it.kind })
-        builder.add("push-up", builder.work)
-        assertTrue(builder.current.rows.isEmpty(), "nothing is added before the format")
-        assertFalse(builder.current.canSave)
-
-        builder.chooseFormat(WorkoutFormat.CIRCUIT)
-        builder.chooseFormat(WorkoutFormat.SETS)
-        assertEquals(WorkoutFormat.CIRCUIT, builder.current.format)
-        assertEquals("Circuit", builder.current.formatLabel)
-        val repeat = assertNotNull(builder.current.parts.single().steps.single().repeatGroup, "a circuit's work starts as a repeat")
+    fun aNewWorkoutStartsInTheFormatItWasCreatedWith() {
+        val circuit = builder(WorkoutFormat.CIRCUIT)
+        assertEquals(WorkoutFormat.CIRCUIT, circuit.current.format)
+        assertEquals("Circuit", circuit.current.formatLabel)
+        val repeat = assertNotNull(circuit.current.parts.single().steps.single().repeatGroup, "a circuit's work starts as a repeat")
         assertEquals(3, repeat.times)
 
-        builder.add("push-up", builder.work, repeat.key)
+        circuit.add("push-up", circuit.work, repeat.key)
+        val id = assertNotNull(circuit.save())
+        assertEquals(WorkoutFormat.CIRCUIT, assertNotNull(graph.editWorkout(id, "en")).current.format)
+
+        val sets = builder(WorkoutFormat.SETS)
+        assertEquals(WorkoutFormat.SETS, sets.current.format)
+        assertEquals("Sets", sets.current.formatLabel)
+        assertTrue(sets.current.parts.single().steps.isEmpty(), "sets start with nothing in the work part")
+    }
+
+    @Test
+    fun theFormatSheetOffersCircuitAndSetsBeforeAnyBuilderExists() {
+        assertEquals(listOf("Circuit", "Sets"), graph.formatOptions("en").map { it.label })
+        assertEquals(listOf(WorkoutFormat.CIRCUIT, WorkoutFormat.SETS), graph.formatOptions("fr").map { it.format })
+    }
+
+    @Test
+    fun addToAWorkoutStartsTheNewWorkoutWithTheExerciseInEachFormat() {
+        val circuit = graph.createWorkoutWith(WorkoutFormat.CIRCUIT, "diamond-push-up", "en")
+        assertFalse(circuit.isEditing)
+        val repeat = circuit.current.parts.single().steps.single().repeatGroup!!
+        assertEquals(listOf("Diamond push-up"), repeat.rows.map { it.name })
+        assertEquals(listOf("diamond-push-up"), repeat.rows.map { it.slug })
+
+        val sets = graph.createWorkoutWith(WorkoutFormat.SETS, "diamond-push-up", "en")
+        assertEquals(listOf("diamond-push-up"), sets.current.rows.map { it.slug })
+        assertEquals(WorkoutFormat.SETS, sets.current.format)
+    }
+
+    @Test
+    fun switchingTheFormatAsksOnlyWhenTheChoicesDiffer() {
+        val builder = builder(WorkoutFormat.SETS)
+        assertNull(builder.formatChange(WorkoutFormat.SETS), "already in that format")
+        assertFalse(builder.formatChange(WorkoutFormat.CIRCUIT)!!.asks, "an empty workout has nothing to ask")
+
+        builder.add("goblet-squat", builder.work)
+        builder.add("push-up", builder.work)
+        val change = builder.formatChange(WorkoutFormat.CIRCUIT)!!
+        assertTrue(change.asks)
+        assertEquals("Circuit", change.formatLabel)
+        assertEquals("3 rounds of Goblet squat, Push-up", change.followLine)
+        assertEquals("Goblet squat 3 times, then Push-up 3 times", change.keepLine)
+    }
+
+    @Test
+    fun theSwitchAppliesToTheDraftAndOnlySavingStoresIt() {
+        val builder = builder(WorkoutFormat.SETS)
+        builder.add("goblet-squat", builder.work)
         val id = assertNotNull(builder.save())
         val edit = assertNotNull(graph.editWorkout(id, "en"))
-        assertEquals(WorkoutFormat.CIRCUIT, edit.current.format, "editing never asks again")
-    }
 
-    @Test
-    fun addToAWorkoutAddsTheExerciseOnceTheFormatIsChosen() {
-        val builder = graph.createWorkoutWith("diamond-push-up", "en")
-        assertFalse(builder.isEditing)
-        assertTrue(builder.current.rows.isEmpty())
+        edit.changeFormat(WorkoutFormat.CIRCUIT, FormatSwitch.FOLLOW_NEW_FORMAT)
+        assertEquals(WorkoutFormat.CIRCUIT, edit.current.format)
+        assertEquals(WorkoutFormat.SETS, assertNotNull(graph.editWorkout(id, "en")).current.format, "nothing is saved yet")
+        assertTrue(edit.current.canSave)
 
-        builder.chooseFormat(WorkoutFormat.CIRCUIT)
-        val repeat = builder.current.parts.single().steps.single().repeatGroup!!
-        assertEquals(listOf("Diamond push-up"), repeat.rows.map { it.name })
-    }
-
-    @Test
-    fun anExerciseStepKnowsTheSlugItsDetailsOpenAndARestHasNone() {
-        val builder = graph.createWorkoutWith("diamond-push-up", "en")
-        builder.chooseFormat(WorkoutFormat.CIRCUIT)
-        val repeat = builder.current.parts.single().steps.single().repeatGroup!!
-        assertEquals(listOf("diamond-push-up"), repeat.rows.map { it.slug })
+        edit.save()
+        assertEquals(WorkoutFormat.CIRCUIT, assertNotNull(graph.editWorkout(id, "en")).current.format)
+        assertEquals(2, graph.store.latestWorkout(WorkoutId(id))!!.version)
     }
 
     @Test
     fun weightIsTypedAndShownInThePoundsOfTheImperialSystem() {
-        val builder = BuilderModel(WorkoutDraft.empty(), graph.catalog, graph.store, graph.compiler, "en", { UnitSystem.IMPERIAL })
+        val builder = BuilderModel(WorkoutDraft.empty(WorkoutFormat.SETS), graph.catalog, graph.store, graph.compiler, "en", { UnitSystem.IMPERIAL })
         builder.rename("Legs")
-        builder.chooseFormat(WorkoutFormat.SETS)
         builder.add("goblet-squat", builder.work)
         val key = builder.current.addedKey!!
         builder.setWeight(key, "45")
@@ -261,9 +286,8 @@ class BuilderModelTest {
     @Test
     fun aWorkoutSavedWithoutANameIsNamedAfterItsExercises() {
         fun saved(vararg slugs: String, name: String = "  ", language: String = "en"): String {
-            val builder = graph.createWorkout(language)
+            val builder = graph.createWorkout(WorkoutFormat.SETS, language)
             builder.rename(name)
-            builder.chooseFormat(WorkoutFormat.SETS)
             slugs.forEach { builder.add(it, builder.work) }
             assertTrue(builder.current.canSave, "a blank name does not stop the save")
             return graph.store.latestWorkout(WorkoutId(builder.save()!!))!!.name
@@ -292,9 +316,8 @@ class BuilderModelTest {
     @Test
     fun partSummariesInMetricAndImperial() {
         fun runWorkout(units: UnitSystem, pace: String, paceUnit: PaceUnit): BuilderModel {
-            val builder = BuilderModel(WorkoutDraft.empty(), graph.catalog, graph.store, graph.compiler, "en", { units })
+            val builder = BuilderModel(WorkoutDraft.empty(WorkoutFormat.CIRCUIT), graph.catalog, graph.store, graph.compiler, "en", { units })
             builder.rename("Run")
-            builder.chooseFormat(WorkoutFormat.CIRCUIT)
             builder.addPart(PartKind.WARM_UP)
             builder.add("run", builder.part(PartKind.WARM_UP))
             val run = builder.current.addedKey!!
@@ -403,7 +426,7 @@ class BuilderModelTest {
 
     @Test
     fun valuePicksGoUpToTheMarathon() {
-        val builder = graph.createWorkout("fr")
+        val builder = graph.createWorkout(WorkoutFormat.SETS, "fr")
         assertEquals(listOf("10 min", "20 min", "30 min", "45 min", "1 h"), builder.durationPicks().map { it.label })
         assertEquals("Semi-marathon", builder.distancePicks(DistanceUnit.KM)[3].label)
         assertEquals(42_195.0, TargetInput.parseDistance(builder.distancePicks(DistanceUnit.MI).last().text, DistanceUnit.MI)!!, 1.0)

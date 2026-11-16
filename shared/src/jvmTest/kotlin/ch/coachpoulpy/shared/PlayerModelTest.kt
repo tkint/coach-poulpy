@@ -34,9 +34,8 @@ class PlayerModelTest {
 
     /** Twice 10 push-ups and a 45 s rest, then a 30 s plank. */
     private fun workout(): WorkoutId {
-        val builder = graph.createWorkout("en")
+        val builder = graph.createWorkout(WorkoutFormat.SETS, "en")
         builder.rename("Quick")
-        builder.chooseFormat(WorkoutFormat.SETS)
         builder.addRepeat(builder.work)
         val repeat = builder.state.value.parts.single().steps.single().key
         builder.add("push-up", builder.work, repeat)

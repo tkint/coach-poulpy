@@ -1,7 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { screen } from '../screen'
 import screenBuilderAddPart from './builder-add-part.html?raw'
-import screenBuilderChooseFormat from './builder-choose-format.html?raw'
+import screenBuilderChangeFormat from './builder-change-format.html?raw'
+import screenBuilderChangeFormatOrder from './builder-change-format-order.html?raw'
+import screenBuilderChangeFormatSheet from './builder-change-format-sheet.html?raw'
 import screenBuilderCircuitEditStep from './builder-circuit-edit-step.html?raw'
 import screenBuilderCircuitParts from './builder-circuit-parts.html?raw'
 import screenBuilderDistanceSheet from './builder-distance-sheet.html?raw'
@@ -27,11 +29,26 @@ export const BuilderAddPart: Story = {
   ...screen(screenBuilderAddPart, { reorder: true }),
   parameters: { mockup: { issue: 90 } },
 }
-/** Builder · choose the format. */
-export const BuilderChooseFormat: Story = {
-  name: "Choose the format",
-  ...screen(screenBuilderChooseFormat),
-  parameters: { mockup: { issue: 90 } },
+/** Builder · the format line is a control that opens the format sheet. */
+export const BuilderChangeFormat: Story = {
+  name: "Change the format",
+  tags: ['!autodocs', 'agreed'],
+  ...screen(screenBuilderChangeFormat, { reorder: true }),
+  parameters: { mockup: { issue: 243 } },
+}
+/** Builder · the format sheet with the current format selected. */
+export const BuilderChangeFormatSheet: Story = {
+  name: "Change the format, sheet",
+  tags: ['!autodocs', 'agreed'],
+  ...screen(screenBuilderChangeFormatSheet, { reorder: true }),
+  parameters: { mockup: { issue: 243 } },
+}
+/** Builder · after picking the other format: follow the new format or keep the order. */
+export const BuilderChangeFormatOrder: Story = {
+  name: "Change the format, order",
+  tags: ['!autodocs', 'agreed'],
+  ...screen(screenBuilderChangeFormatOrder, { reorder: true }),
+  parameters: { mockup: { issue: 243 } },
 }
 /** Builder · circuit, edit a step. */
 export const BuilderCircuitEditStep: Story = {

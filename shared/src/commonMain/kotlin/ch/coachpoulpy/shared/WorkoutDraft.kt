@@ -213,7 +213,7 @@ data class DraftPart(val key: String, val kind: PartKind, val steps: List<DraftS
 
     internal companion object {
         /** A new part; in a circuit, a work part starts as a repeat done three times. */
-        fun new(kind: PartKind, format: WorkoutFormat?) = DraftPart(
+        fun new(kind: PartKind, format: WorkoutFormat) = DraftPart(
             Ids.newUuidV7(),
             kind,
             if (kind == PartKind.WORK && format == WorkoutFormat.CIRCUIT) listOf(DraftRepeat(Ids.newUuidV7(), 3, emptyList())) else emptyList(),
@@ -223,22 +223,21 @@ data class DraftPart(val key: String, val kind: PartKind, val steps: List<DraftS
 
 /**
  * A workout being created or edited. Saving it stores a new version; old versions stay for past
- * sessions. [format] is null until it is chosen, once, when the workout is created.
+ * sessions. The [format] is chosen when the workout is created and can be switched in the builder.
  */
 data class WorkoutDraft(
     val id: WorkoutId?,
     val version: Int,
     val name: String,
-    val format: WorkoutFormat?,
+    val format: WorkoutFormat,
     val parts: List<DraftPart>,
 ) {
-    /** Only call once [format] is chosen. */
     internal fun toWorkout(autoName: (Workout) -> String): Workout {
         val workout = Workout(
             id = id ?: WorkoutId(Ids.newUuidV7()),
             version = version,
             name = name.trim(),
-            format = format!!,
+            format = format,
             parts = parts.map { it.toPart() },
         )
         return if (workout.name.isEmpty()) workout.copy(name = autoName(workout)) else workout
@@ -248,8 +247,8 @@ data class WorkoutDraft(
     internal val leaves: List<DraftStep> get() = parts.flatMap { part -> part.steps.flatMap { if (it is DraftRepeat) it.steps else listOf(it) } }
 
     companion object {
-        /** A new workout: no format yet, and one empty work part. */
-        internal fun empty() = WorkoutDraft(null, 1, "", null, listOf(DraftPart.new(PartKind.WORK, null)))
+        /** A new workout in [format] with one empty work part, which in a circuit starts as a repeat. */
+        internal fun empty(format: WorkoutFormat) = WorkoutDraft(null, 1, "", format, listOf(DraftPart.new(PartKind.WORK, format)))
 
         /**
          * Only workouts the builder could have made can be edited: parts of exercises, rests and

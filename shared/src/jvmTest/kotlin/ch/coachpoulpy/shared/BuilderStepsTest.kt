@@ -32,9 +32,8 @@ class BuilderStepsTest {
      * Warm-up: run at 5:30 /km until button press. Work, repeat 4 times: run 400 m at 5:00 /km,
      * recover walking 1 min 30 s. Cool down: run at 5:45 /km until the end.
      */
-    private fun intervalRun(builder: BuilderModel = graph.createWorkout("en")): BuilderModel {
+    private fun intervalRun(builder: BuilderModel = graph.createWorkout(WorkoutFormat.CIRCUIT, "en")): BuilderModel {
         builder.rename("4 × 400 m")
-        builder.chooseFormat(WorkoutFormat.CIRCUIT)
         builder.addPart(PartKind.WARM_UP)
         builder.addPart(PartKind.COOL_DOWN)
 
@@ -140,9 +139,8 @@ class BuilderStepsTest {
 
     @Test
     fun setsKeepTheirRestAndASupersetIsARepeat() {
-        val builder = graph.createWorkout("en")
+        val builder = graph.createWorkout(WorkoutFormat.SETS, "en")
         builder.rename("Legs and core")
-        builder.chooseFormat(WorkoutFormat.SETS)
         builder.add("goblet-squat", builder.work)
         builder.addRepeat(builder.work)
         val repeat = builder.state.value.parts.single().steps.last().key
@@ -172,9 +170,8 @@ class BuilderStepsTest {
 
     @Test
     fun stepsMoveIntoAndOutOfTheRepeatAbove() {
-        val builder = graph.createWorkout("en")
+        val builder = graph.createWorkout(WorkoutFormat.SETS, "en")
         builder.rename("Circuit")
-        builder.chooseFormat(WorkoutFormat.SETS)
         builder.addRepeat(builder.work)
         assertFalse(builder.state.value.canSave, "an empty repeat")
         builder.add("plank", builder.work)
@@ -194,8 +191,7 @@ class BuilderStepsTest {
 
     @Test
     fun dragAndMoveStayInsideTheListThatHoldsTheStep() {
-        val builder = graph.createWorkout("en")
-        builder.chooseFormat(WorkoutFormat.SETS)
+        val builder = graph.createWorkout(WorkoutFormat.SETS, "en")
         builder.add("goblet-squat", builder.work)
         builder.addRepeat(builder.work)
         val steps = { builder.state.value.parts.single().steps }
@@ -218,8 +214,7 @@ class BuilderStepsTest {
 
     @Test
     fun theChevronsStopAtTheEndsOfThePartAndOfTheRepeat() {
-        val builder = graph.createWorkout("en")
-        builder.chooseFormat(WorkoutFormat.SETS)
+        val builder = graph.createWorkout(WorkoutFormat.SETS, "en")
         builder.add("goblet-squat", builder.work)
         builder.addRepeat(builder.work)
         val steps = { builder.state.value.parts.single().steps }
@@ -242,8 +237,7 @@ class BuilderStepsTest {
 
     @Test
     fun anExerciseAddedToARepeatStartsAtOneSet() {
-        val builder = graph.createWorkout("en")
-        builder.chooseFormat(WorkoutFormat.SETS)
+        val builder = graph.createWorkout(WorkoutFormat.SETS, "en")
         builder.addRepeat(builder.work)
         builder.add("push-up", builder.work, builder.state.value.parts.single().steps.single().key)
         assertEquals(1, builder.state.value.rows.single().sets)
@@ -272,9 +266,8 @@ class BuilderStepsTest {
     /** Warm-up, two work parts of rounds and a cool down: built, saved, opened again and run. */
     @Test
     fun aCircuitInFourPartsComesBackAndRuns() {
-        val builder = graph.createWorkout("en")
+        val builder = graph.createWorkout(WorkoutFormat.CIRCUIT, "en")
         builder.rename("Full body burner")
-        builder.chooseFormat(WorkoutFormat.CIRCUIT)
         builder.addPart(PartKind.WARM_UP)
         builder.addPart(PartKind.WORK)
         builder.addPart(PartKind.COOL_DOWN)
@@ -303,9 +296,8 @@ class BuilderStepsTest {
     /** Warm-up, a bench press with rest between sets, a superset and a cool down: built, saved, opened again and run. */
     @Test
     fun aSetsWorkoutWithASupersetComesBackAndRuns() {
-        val builder = graph.createWorkout("en")
+        val builder = graph.createWorkout(WorkoutFormat.SETS, "en")
         builder.rename("Upper body")
-        builder.chooseFormat(WorkoutFormat.SETS)
         builder.addPart(PartKind.WARM_UP)
         builder.add("walk", builder.part(PartKind.WARM_UP))
         builder.add("dumbbell-bench-press", builder.work)
@@ -340,9 +332,8 @@ class BuilderStepsTest {
 
     @Test
     fun aStepIsAnExerciseOrRecovers() {
-        val builder = graph.createWorkout("en")
+        val builder = graph.createWorkout(WorkoutFormat.SETS, "en")
         assertEquals(listOf("Exercise", "Recover"), builder.roleOptions.map { it.label })
-        builder.chooseFormat(WorkoutFormat.SETS)
         builder.add("walk", builder.work, role = StepRole.RECOVER)
         assertEquals("Recover", builder.state.value.rows.single().roleLabel)
     }
@@ -382,8 +373,7 @@ class BuilderStepsTest {
 
     @Test
     fun aWalkOrRunStartsWithADistance() {
-        val builder = graph.createWorkout("en")
-        builder.chooseFormat(WorkoutFormat.SETS)
+        val builder = graph.createWorkout(WorkoutFormat.SETS, "en")
         builder.add("run", builder.work)
         val target = builder.state.value.rows.single().target!!
         assertEquals(DurationKind.DISTANCE, target.duration)
@@ -394,8 +384,7 @@ class BuilderStepsTest {
     /** The number fields type reps, a rest and the rest between sets; the − and + keep the same limits. */
     @Test
     fun typedNumbersAreKeptWithinTheLimits() {
-        val builder = graph.createWorkout("en")
-        builder.chooseFormat(WorkoutFormat.SETS)
+        val builder = graph.createWorkout(WorkoutFormat.SETS, "en")
         builder.add("push-up", builder.work)
         val press = builder.state.value.addedKey!!
         builder.addRest(builder.work)

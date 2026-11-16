@@ -6,6 +6,7 @@ import ch.coachpoulpy.core.model.BodyMetric
 import ch.coachpoulpy.core.model.SessionRecord
 import ch.coachpoulpy.core.model.Ids
 import ch.coachpoulpy.core.model.Workout
+import ch.coachpoulpy.core.model.WorkoutFormat
 import ch.coachpoulpy.core.model.WorkoutId
 import ch.coachpoulpy.data.local.DriverFactory
 import ch.coachpoulpy.data.local.LocalStore
@@ -118,13 +119,17 @@ class AppGraph(driverFactory: DriverFactory) {
         liveCreated.flatMapLatest { live -> live?.state?.map { it.recording != null } ?: flowOf(false) },
     ) { players, recording -> players > 0 || recording }.distinctUntilChanged()
 
-    // Not "newWorkout": Swift reserves the "new" prefix, and Kotlin would rename it.
-    fun createWorkout(languageCode: String) =
-        BuilderModel(WorkoutDraft.empty(), catalog, store, compiler, languageCode, ::units)
+    /** The cards of the format sheet, Circuit and Sets with their names, for a screen that asks before a builder exists. */
+    fun formatOptions(languageCode: String): List<WorkoutFormatOption> =
+        Labels(languageCode).let { labels -> WorkoutFormat.entries.map { WorkoutFormatOption(it, labels.format(it)) } }
 
-    /** A new workout that holds [exerciseSlug] once its format is chosen, for an exercise page's "Add to a workout". */
-    fun createWorkoutWith(exerciseSlug: String, languageCode: String) =
-        BuilderModel(WorkoutDraft.empty(), catalog, store, compiler, languageCode, ::units, pendingSlug = exerciseSlug)
+    // Not "newWorkout": Swift reserves the "new" prefix, and Kotlin would rename it.
+    fun createWorkout(format: WorkoutFormat, languageCode: String) =
+        BuilderModel(WorkoutDraft.empty(format), catalog, store, compiler, languageCode, ::units)
+
+    /** A new workout in [format] that holds [exerciseSlug], for an exercise page's "Add to a workout". */
+    fun createWorkoutWith(format: WorkoutFormat, exerciseSlug: String, languageCode: String) =
+        BuilderModel(WorkoutDraft.empty(format), catalog, store, compiler, languageCode, ::units, firstExercise = exerciseSlug)
 
     /** Null when the workout is gone or was not made with the builder. */
     fun editWorkout(workoutId: String, languageCode: String): BuilderModel? {

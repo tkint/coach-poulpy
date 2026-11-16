@@ -5,13 +5,13 @@ enum LibrarySection: Hashable { case workouts, exercises }
 
 /// What to open over the library.
 private enum Cover: Identifiable {
-    case builder
+    case builder(format: WorkoutFormat)
     case player(workoutId: String)
     case copy(workoutId: String)
 
     var id: String {
         switch self {
-        case .builder: return "builder"
+        case .builder(let format): return "builder:\(format.name)"
         case .player(let id): return "player:\(id)"
         case .copy(let id): return "copy:\(id)"
         }
@@ -27,6 +27,8 @@ struct LibraryView: View {
     @State private var kind: WorkoutFormat?
     @State private var sort = LibrarySort.recent
     @State private var cover: Cover?
+    /// The format sheet that "New workout" opens over the library, before the builder.
+    @State private var choosingFormat = false
     /// The workout whose plan sheet or delete alert is open, by id so a fresh row is used.
     @State private var planning: String?
     @State private var deleting: String?
@@ -65,15 +67,21 @@ struct LibraryView: View {
             .toolbar {
                 if section == .workouts && !library.value.rows.isEmpty {
                     Button {
-                        cover = .builder
+                        choosingFormat = true
                     } label: {
                         Label("library.newWorkout", lucide: .plus)
                     }
                 }
             }
+            .sheet(isPresented: $choosingFormat) {
+                FormatSheet(options: graph.formatOptions(languageCode: Language.code), current: nil, onChoose: { format in
+                    choosingFormat = false
+                    cover = .builder(format: format)
+                }, onClose: { choosingFormat = false })
+            }
             .fullScreenCover(item: $cover) { cover in
                 switch cover {
-                case .builder: BuilderView(graph: graph, workoutId: nil)
+                case .builder(let format): BuilderView(graph: graph, workoutId: nil, newFormat: format)
                 case .player(let id): PlayerView(graph: graph, workoutId: id)
                 case .copy(let id): BuilderView(graph: graph, workoutId: nil, copyOf: id)
                 }
@@ -127,7 +135,7 @@ struct LibraryView: View {
                     button: Text("library.buildFirst"),
                     icon: .plus,
                     poulpySize: 120
-                ) { cover = .builder }
+                ) { choosingFormat = true }
                 .padding(.horizontal, PoulpySpace.lg)
                 .padding(.top, 16)
             }

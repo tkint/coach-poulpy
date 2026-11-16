@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import ch.coachpoulpy.android.R
+import ch.coachpoulpy.core.model.WorkoutFormat
 import ch.coachpoulpy.shared.AppGraph
 
 private enum class Tab(@StringRes val label: Int, val icon: ImageVector) {
@@ -32,7 +33,7 @@ private enum class Tab(@StringRes val label: Int, val icon: ImageVector) {
 
 /**
  * The screen shown over the tabs, as a string so it survives rotation:
- * "import" (a workout file opened from another app), "builder:" (new), "builder:<id>", "builder-add:<slug>" (new, holding that exercise), "builder-copy:<id>" (an unsaved copy), "player:<id>", "resume", "workout:<id>", "exercise:<slug>", "session:<id>",
+ * "import" (a workout file opened from another app), "builder:<id>", "builder-new:<format>" (new, in that format), "builder-add:<format>:<slug>" (new, holding that exercise), "builder-copy:<id>" (an unsaved copy), "player:<id>", "resume", "workout:<id>", "exercise:<slug>", "session:<id>",
  * "device-add", "device-sources", "device:<key>", or "account:<step>" (see [AccountFlow]).
  */
 private typealias Route = String
@@ -101,6 +102,26 @@ fun CoachPoulpyRoot(
     }
     if (emailConfirmed) EmailConfirmedSheet(onDismiss = { emailConfirmed = false })
 
+    // The format of a new workout, asked in a sheet over the page that asked: "" for a workout of its own, or the slug of
+    // the exercise it starts with. Closing it leaves the page as it was.
+    var choosingFormatFor by rememberSaveable { mutableStateOf<String?>(null) }
+    choosingFormatFor?.let { slug ->
+        FormatSheet(
+            options = remember(language) { graph.formatOptions(language) },
+            current = null,
+            onChoose = { format ->
+                choosingFormatFor = null
+                if (slug.isEmpty()) {
+                    route = "builder-new:${format.name}"
+                } else {
+                    back = route
+                    route = "builder-add:${format.name}:$slug"
+                }
+            },
+            onClose = { choosingFormatFor = null },
+        )
+    }
+
     LaunchedEffect(openLive) {
         if (openLive) {
             route = null
@@ -152,7 +173,7 @@ fun CoachPoulpyRoot(
                     onView = { libraryView = it },
                     onOpenWorkout = { route = "workout:$it" },
                     onStart = { route = "player:$it" },
-                    onNew = { route = "builder:" },
+                    onNew = { choosingFormatFor = "" },
                     onCopy = { route = "builder-copy:$it" },
                     onOpenExercise = { route = "exercise:$it" },
                     modifier = modifier,
@@ -216,8 +237,12 @@ fun CoachPoulpyRoot(
         else -> {
             val (kind, arg) = current.split(':', limit = 2)
             when (kind) {
-                "builder" -> BuilderScreen(graph, language, workoutId = arg.ifEmpty { null }, onClose = close)
-                "builder-add" -> BuilderScreen(graph, language, workoutId = null, firstExercise = arg, onClose = close)
+                "builder" -> BuilderScreen(graph, language, workoutId = arg, onClose = close)
+                "builder-new" -> BuilderScreen(graph, language, workoutId = null, newFormat = WorkoutFormat.valueOf(arg), onClose = close)
+                "builder-add" -> {
+                    val (format, slug) = arg.split(':', limit = 2)
+                    BuilderScreen(graph, language, workoutId = null, newFormat = WorkoutFormat.valueOf(format), firstExercise = slug, onClose = close)
+                }
                 "builder-copy" -> BuilderScreen(graph, language, workoutId = null, copyOf = arg, onClose = close)
                 "player" -> PlayerScreen(graph, language, workoutId = arg, onClose = close)
                 "workout" -> WorkoutPageScreen(
@@ -239,10 +264,7 @@ fun CoachPoulpyRoot(
                         graph, language, slug = arg,
                         onBack = close,
                         onOpenExercise = { route = "exercise:$it" },
-                        onAddToWorkout = {
-                            back = current
-                            route = "builder-add:$it"
-                        },
+                        onAddToWorkout = { choosingFormatFor = it },
                     )
                 }
                 "session" -> SessionDetailScreen(graph, language, sessionId = arg, onBack = close)

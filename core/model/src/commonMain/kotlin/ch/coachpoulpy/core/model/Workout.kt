@@ -5,7 +5,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
- * How a workout is built, chosen when it is created. A circuit goes round several exercises,
+ * How a workout is built, chosen when it is created and changeable in the builder. A circuit goes round several exercises,
  * each done once per round, so its exercise steps hold one set. Sets does one exercise at a
  * time, all its sets with a rest between them, then the next.
  */
