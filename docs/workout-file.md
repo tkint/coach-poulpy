@@ -38,5 +38,5 @@ The logic is shared Kotlin (`WorkoutFile`, `WorkoutImport`) with tests; Android 
 
 ## On the phone
 
-- **Share** is in the menu of the workout page and opens the system share sheet with the file.
+- **Share** is in the menu of the workout page and opens the system share sheet with the file. On Android the menu also has **Save to device**, which keeps the file in a folder the person picks, since the share sheet only lists apps; on iOS the share sheet has Save to Files.
 - Opening a `.poulpyworkout` file from another app opens it in the builder as an unsaved copy ([#152](https://github.com/tkint/coach-poulpy/issues/152)). Save adds it to the library; leaving adds nothing. There is no separate preview screen. A refused file shows [why it can't be added](https://tkint.github.io/coach-poulpy/storybook/?path=/story/mobile-screens-workout-import--workout-import-error), an agreed mockup.

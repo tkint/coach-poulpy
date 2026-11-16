@@ -95,7 +95,8 @@
     "done": "OK",
     "cancel": "Annuler",
     "close": "Fermer",
-    "share": "Partager"
+    "share": "Partager",
+    "saveToDevice": "Enregistrer sur l’appareil"
   },
   "exercises": {
     "search": "Nom, muscle ou matériel",
