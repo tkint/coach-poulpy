@@ -3,6 +3,7 @@ import { screen } from '../screen'
 import screenLibraryActions from './library-actions.html?raw'
 import screenLibraryEmpty from './library-empty.html?raw'
 import screenLibraryExercises from './library-exercises.html?raw'
+import screenLibraryNewWorkoutSheet from './library-new-workout-sheet.html?raw'
 import screenLibraryNoResults from './library-no-results.html?raw'
 import screenLibrarySearch from './library-search.html?raw'
 import screenLibraryWorkouts from './library-workouts.html?raw'
@@ -34,6 +35,13 @@ export const LibraryExercises: Story = {
   name: "Exercises",
   ...screen(screenLibraryExercises),
   parameters: { mockup: { issue: 104 } },
+}
+/** Library · "New workout" opens the format sheet over the Library. Draft for #242. */
+export const LibraryNewWorkoutSheet: Story = {
+  name: "New workout, format sheet",
+  tags: ['!autodocs', 'draft'],
+  ...screen(screenLibraryNewWorkoutSheet),
+  parameters: { mockup: { issue: 242 } },
 }
 /** Library · no workout found. */
 export const LibraryNoResults: Story = {

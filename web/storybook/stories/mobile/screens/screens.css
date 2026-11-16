@@ -1160,3 +1160,6 @@
 /* Badges: the row that sums a workout up (MobileBadge). */
 .cp-screen .badge { height: 30px; padding: 0 var(--cp-space-md) 0 10px; border-radius: var(--cp-radius-pill); background: var(--cp-surface); border: 1px solid var(--cp-outline); color: var(--cp-on-surface); font-size: 13.5px; font-weight: 800; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
 .cp-screen .badge--format { background: var(--cp-primary-container); border-color: var(--cp-primary-container); color: var(--cp-on-primary-container); }
+
+/* The builder's format line is a button that opens the format sheet (#243). */
+.cp-screen .format-control { display: inline-flex; align-items: center; gap: var(--cp-space-xs); min-height: 44px; padding: 0 var(--cp-space-xs); border-radius: var(--cp-radius-pill); color: var(--cp-on-surface-variant); }
