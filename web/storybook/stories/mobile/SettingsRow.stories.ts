@@ -6,10 +6,11 @@ const meta = {
   render: renderComponent('MobileSettingsRow', 'width: 390px; padding: 16px;'),
   args: { icon: 'weight', title: 'Weight', detail: '72.6 kg · logged 3 days ago' },
   argTypes: { icon: { control: 'text', description: 'A Lucide icon name.' }, picture: { control: 'text' } },
-  parameters: { docs: { canvas: { sourceState: 'none' }, description: { component: '`MobileSettingsRow`: a row that opens a settings page. An icon (or a picture), a title, one line of detail and a chevron.' } } },
+  parameters: { docs: { canvas: { sourceState: 'none' }, description: { component: '`MobileSettingsRow`: a row that opens a settings page. An icon (or a picture), a title, one line of detail and a chevron. `card` stands it alone as its own card, with a `note` and a `start` button for a workout in the Library.' } } },
 } satisfies Meta
 export default meta
 type Story = StoryObj<typeof meta>
 
 export const WithIcon: Story = {}
 export const WithPicture: Story = { args: { icon: undefined, picture: '../../../poulpy/mood_happy.svg', title: 'App icon', detail: 'Happy · default' } }
+export const Card: Story = { args: { card: true, icon: 'list', title: 'Upper body', detail: 'Sets · 4 exercises · 32 min', note: 'Planned · Tue 27 Oct', noteTone: 'planned', start: 'Start Upper body' } }

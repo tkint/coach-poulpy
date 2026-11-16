@@ -21,6 +21,7 @@ type Story = StoryObj<typeof meta>
 /** Library · workout actions. */
 export const LibraryActions: Story = {
   name: "Workout actions",
+  tags: ['!autodocs', 'draft'],
   ...screen(screenLibraryActions),
   parameters: { a11y: { test: 'todo' }, mockup: { issue: 104 } },
 }
@@ -33,13 +34,14 @@ export const LibraryEmpty: Story = {
 /** Library · exercises. */
 export const LibraryExercises: Story = {
   name: "Exercises",
+  tags: ['!autodocs', 'draft'],
   ...screen(screenLibraryExercises),
   parameters: { mockup: { issue: 104 } },
 }
 /** Library · "New workout" opens the format sheet over the Library. */
 export const LibraryNewWorkoutSheet: Story = {
   name: "New workout, format sheet",
-  tags: ['!autodocs', 'agreed'],
+  tags: ['!autodocs', 'draft'],
   ...screen(screenLibraryNewWorkoutSheet),
   parameters: { mockup: { issue: 242 } },
 }
@@ -52,12 +54,14 @@ export const LibraryNoResults: Story = {
 /** Library · search “squat”. */
 export const LibrarySearch: Story = {
   name: "Search “squat”",
+  tags: ['!autodocs', 'draft'],
   ...screen(screenLibrarySearch),
   parameters: { a11y: { test: 'todo' }, mockup: { issue: 104 } },
 }
 /** Library · workouts. */
 export const LibraryWorkouts: Story = {
   name: "Workouts",
+  tags: ['!autodocs', 'draft'],
   ...screen(screenLibraryWorkouts),
   parameters: { a11y: { test: 'todo' }, mockup: { issue: 104 } },
 }
