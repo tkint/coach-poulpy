@@ -1,9 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { screen } from '../screen'
 import screenWorkoutImportError from './workout-import-error.html?raw'
-import screenWorkoutImport from './workout-import.html?raw'
 
-// The Workout import screens of the apps (ADR 0029), drawn with the phone stylesheet (../screens.css).
+// The Workout import screen of the apps: only a refused file has one, a good file opens in the builder (ADR 0029), drawn with the phone stylesheet (../screens.css).
 const meta = {
   title: "Mobile/Screens/Workout import",
   tags: ['!autodocs', 'agreed'],
@@ -16,11 +15,5 @@ type Story = StoryObj<typeof meta>
 export const WorkoutImportError: Story = {
   name: "Refused",
   ...screen(screenWorkoutImportError),
-  parameters: { mockup: { issue: 129 } },
-}
-/** Workout import · preview. */
-export const WorkoutImport: Story = {
-  name: "Preview",
-  ...screen(screenWorkoutImport),
   parameters: { mockup: { issue: 129 } },
 }

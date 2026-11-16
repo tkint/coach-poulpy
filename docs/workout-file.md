@@ -22,7 +22,7 @@ The file is named after the workout, lower case with dashes (`morning-circuit.po
 
 ## Importing
 
-Importing **creates a copy**: a new id made on the phone ([ADR 0005](adr/0005-ids-are-uuidv7-made-on-the-device.md)), version 1, the same name and parts. It never overwrites or merges into a workout of the library, and importing the same file twice makes two workouts. When the name is already in the library, the copy gets the usual copy name ("Upper body (copy)").
+Importing **makes a copy**, saved when the person saves it in the builder: a new id made on the phone ([ADR 0005](adr/0005-ids-are-uuidv7-made-on-the-device.md)), version 1, the same name and parts. It never overwrites or merges into a workout of the library, and saving the same file twice makes two workouts. When the name is already in the library, the copy gets the usual copy name ("Upper body (copy)").
 
 Everything is checked before anything is saved, and a refused file saves nothing:
 
@@ -34,9 +34,9 @@ Everything is checked before anything is saved, and a refused file saves nothing
 | A slug the catalog doesn't know | Names the unknown exercises; update the app. A **retired exercise** still imports. |
 | The workout breaks the rules of parts, repeats and formats | Incomplete or broken, so it can't be added. |
 
-The logic is shared Kotlin (`WorkoutFile`, `WorkoutImport`) with tests; Android and iOS only hand over bytes and show the preview.
+The logic is shared Kotlin (`WorkoutFile`, `WorkoutImport`) with tests; Android and iOS only hand over bytes and show the builder, or why a file was refused.
 
 ## On the phone
 
 - **Share** is in the menu of the workout page and opens the system share sheet with the file.
-- Opening a `.poulpyworkout` file from another app shows a preview with **Add to my library** and **Cancel**, then opens the new workout. The preview screens are the agreed mockups ([preview](https://tkint.github.io/coach-poulpy/storybook/?path=/story/mobile-screens-workout-import--workout-import), [refused file](https://tkint.github.io/coach-poulpy/storybook/?path=/story/mobile-screens-workout-import--workout-import-error)) and wait to be agreed before they are built.
+- Opening a `.poulpyworkout` file from another app opens it in the builder as an unsaved copy ([#152](https://github.com/tkint/coach-poulpy/issues/152)). Save adds it to the library; leaving adds nothing. There is no separate preview screen. A refused file shows [why it can't be added](https://tkint.github.io/coach-poulpy/storybook/?path=/story/mobile-screens-workout-import--workout-import-error), an agreed mockup.

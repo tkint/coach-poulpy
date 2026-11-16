@@ -173,26 +173,40 @@ class WorkoutFileTest {
     }
 
     @Test
-    fun addingSavesACopyAndARefusedFileSavesNothing() {
+    fun aGoodFileOpensInTheBuilderAsAnUnsavedCopyAndARefusedFileSavesNothing() {
         val before = graph.store.savedWorkouts().size
-        val model = graph.importWorkout(WorkoutFile.export(circuit("Imported circuit")).content, "en")
-        assertEquals(
-            WorkoutImportState(ready = true, name = "Imported circuit", formatLabel = "Circuit", partsLabel = "3 parts", stepsLabel = "4 steps"),
-            model.state,
-        )
-        val id = assertNotNull(model.add())
-        val saved = assertNotNull(graph.store.latestWorkout(WorkoutId(id)))
-        assertEquals(1, saved.version)
-        assertEquals(before + 1, graph.store.savedWorkouts().size)
-
-        val again = graph.importWorkout(WorkoutFile.export(circuit("Imported circuit")).content, "en")
-        assertEquals("Imported circuit (copy)", again.state.name)
+        val model = graph.importWorkout(WorkoutFile.export(sets()).content, "en")
+        assertEquals(WorkoutImportState(ready = true), model.state)
+        val builder = assertNotNull(model.builder())
+        assertEquals("Upper body", builder.current.name)
+        assertFalse(builder.isEditing)
+        assertEquals(before, graph.store.savedWorkouts().size)
 
         val broken = graph.importWorkout("nope", "en")
         assertFalse(broken.state.ready)
         assertEquals("This file can’t be read. It may be damaged.", broken.state.errorMessage)
+        assertNull(broken.builder())
         assertNull(broken.add())
-        assertEquals(before + 1, graph.store.savedWorkouts().size)
+        assertEquals(before, graph.store.savedWorkouts().size)
+    }
+
+    @Test
+    fun savingTheBuilderAddsTheImportAsANewWorkoutNamedAsACopyWhenTheNameIsTaken() {
+        graph.store.saveWorkout(sets())
+        val builder = assertNotNull(graph.importWorkout(WorkoutFile.export(sets()).content, "en").builder())
+        assertEquals("Upper body (copy)", builder.current.name)
+        val id = assertNotNull(builder.save())
+        assertEquals(1, assertNotNull(graph.store.latestWorkout(WorkoutId(id))).version)
+        assertEquals(2, graph.store.savedWorkouts().size)
+    }
+
+    @Test
+    fun aWorkoutTheBuilderCantHoldIsAddedDirectly() {
+        val model = graph.importWorkout(WorkoutFile.export(circuit("Imported circuit")).content, "en")
+        assertTrue(model.state.ready)
+        assertNull(model.builder())
+        val id = assertNotNull(model.add())
+        assertEquals(1, assertNotNull(graph.store.latestWorkout(WorkoutId(id))).version)
     }
 
     @Test

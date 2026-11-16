@@ -13,13 +13,15 @@ struct BuilderView: View {
     @Environment(\.dismiss) private var dismiss
 
     /// [firstExercise] starts a new workout that already holds it, from an exercise page;
-    /// [copyOf] starts an unsaved copy of that workout.
-    init(graph: AppGraph, workoutId: String?, firstExercise: String? = nil, copyOf: String? = nil) {
+    /// [copyOf] starts an unsaved copy of that workout; [importing] starts the workout of a file opened from another app.
+    init(graph: AppGraph, workoutId: String?, firstExercise: String? = nil, copyOf: String? = nil, importing: WorkoutImport? = nil) {
         self.graph = graph
         _builder = StateObject(wrappedValue: {
             let language = Language.code
             let model: BuilderModel
-            if let copyOf, let copy = graph.duplicateWorkout(workoutId: copyOf, languageCode: language) {
+            if let imported = importing?.builder() {
+                model = imported
+            } else if let copyOf, let copy = graph.duplicateWorkout(workoutId: copyOf, languageCode: language) {
                 model = copy
             } else if let workoutId, let edit = graph.editWorkout(workoutId: workoutId, languageCode: language) {
                 model = edit

@@ -74,8 +74,7 @@ struct RootView: View {
         .font(.poulpy(.body))
         .environment(\.unitSystem, settings.value.units)
         .preferredColorScheme(settings.value.theme.colorScheme)
-        // An account email link opens its screen over Settings; a .poulpyworkout file opened from another app shows a
-        // preview before it is added.
+        // An account email link opens its screen over Settings; a .poulpyworkout file opened from another app opens in the builder, or says why it can’t.
         .onOpenURL { url in
             if let step = accountStep(for: url) {
                 openFromLink(step)
