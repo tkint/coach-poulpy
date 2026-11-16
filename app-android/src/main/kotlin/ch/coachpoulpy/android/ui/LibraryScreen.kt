@@ -18,7 +18,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -280,9 +279,7 @@ private fun WorkoutCard(row: LibraryRow, onOpen: () -> Unit, onStart: () -> Unit
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                Box(Modifier.size(44.dp).clip(CircleShape).background(colors.primaryContainer), contentAlignment = Alignment.Center) {
-                    Icon(row.format.icon, contentDescription = null, tint = colors.onPrimaryContainer)
-                }
+                Icon(row.format.icon, contentDescription = null, tint = colors.primary, modifier = Modifier.size(22.dp))
                 Column(Modifier.weight(1f)) {
                     Text(row.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold)
                     Text(row.details, style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)

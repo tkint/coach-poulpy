@@ -19,6 +19,9 @@ data class ExerciseRow(val slug: String, val name: String, val details: String, 
 /** Rows under a movement pattern's [title], or untitled for search results. */
 data class ExerciseSection(val title: String?, val rows: List<ExerciseRow>)
 
+/** How the exercise list is ordered while nothing is typed: grouped by movement pattern, by name alone, or grouped by equipment. */
+enum class ExerciseSort { MOVEMENT, ALPHABETICAL, EQUIPMENT }
+
 /**
  * The exercise list as shown: grouped by movement pattern while nothing is typed, one
  * untitled section of ranked results while searching, and the count line over it.
@@ -120,8 +123,9 @@ class ExerciseListModel internal constructor(
      * Offered exercises matching [query] and every filter given. Inside one filter an exercise
      * needs any ticked item ([focus], [positions], [zones] by their area name without a side,
      * `pectoral`, and the equipment [ticked]); [tags] must all apply. An empty or null filter
-     * is off. With a query, one section of the best matches first ([ExerciseSearch]); without,
-     * a section per movement pattern, by name.
+     * is off. With a query, one section of the best matches first ([ExerciseSearch]); without, by
+     * [sort]: a section per movement pattern, one untitled section by name, or a section per
+     * equipment ("No equipment" first), each by name.
      * [withRecent], for the builder's picker, puts up to 5 recently used exercises
      * first while nothing is typed or filtered; they also stay in their pattern.
      */
@@ -133,6 +137,7 @@ class ExerciseListModel internal constructor(
         positions: Set<BodyPosition> = emptySet(),
         tags: Set<ExerciseTag> = emptySet(),
         zones: Set<String> = emptySet(),
+        sort: ExerciseSort = ExerciseSort.MOVEMENT,
     ): ExerciseListing {
         val owned = ticked?.takeIf { it.isNotEmpty() }
         val candidates = catalog.offered
@@ -144,9 +149,18 @@ class ExerciseListModel internal constructor(
         val narrowed = focus.isNotEmpty() || positions.isNotEmpty() || tags.isNotEmpty() || zones.isNotEmpty()
         val ranks = search.rank(query)
         val sections = if (ranks == null) {
-            MovementPattern.entries.mapNotNull { pattern ->
-                candidates.filter { it.movementPattern == pattern }.sortedWith(byName).takeIf { it.isNotEmpty() }
-                    ?.let { ExerciseSection(labels.pattern(pattern), it.map(::row)) }
+            when (sort) {
+                ExerciseSort.MOVEMENT -> MovementPattern.entries.mapNotNull { pattern ->
+                    candidates.filter { it.movementPattern == pattern }.sortedWith(byName).takeIf { it.isNotEmpty() }
+                        ?.let { ExerciseSection(labels.pattern(pattern), it.map(::row)) }
+                }
+                ExerciseSort.ALPHABETICAL -> candidates.sortedWith(byName).takeIf { it.isNotEmpty() }
+                    ?.let { listOf(ExerciseSection(null, it.map(::row))) }
+                    ?: emptyList()
+                ExerciseSort.EQUIPMENT -> Equipment.entries.mapNotNull { equipment ->
+                    candidates.filter { it.mainEquipment == equipment }.sortedWith(byName).takeIf { it.isNotEmpty() }
+                        ?.let { ExerciseSection(labels.equipment(equipment), it.map(::row)) }
+                }
             }
         } else {
             candidates.filter { it.slug in ranks }
@@ -207,6 +221,9 @@ class ExerciseListModel internal constructor(
      */
     private fun Exercise.uses(ticked: Set<Equipment>) =
         (Equipment.BODYWEIGHT in ticked && equipment.isEmpty()) || (fits(ticked) && allEquipment.any { it in ticked })
+
+    /** What the equipment sort groups it under: its first need's first option, or "No equipment" when it needs nothing. */
+    private val Exercise.mainEquipment get() = equipment.firstOrNull()?.firstOrNull() ?: Equipment.BODYWEIGHT
 
     /** True when the exercise works one of the body map areas named in [zones], on either side. */
     private fun Exercise.worksAny(zones: Set<String>) =

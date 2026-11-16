@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,6 +26,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -64,6 +67,7 @@ import ch.coachpoulpy.core.model.ExerciseFocus
 import ch.coachpoulpy.core.model.ExerciseTag
 import ch.coachpoulpy.shared.AppGraph
 import ch.coachpoulpy.shared.BodyView
+import ch.coachpoulpy.shared.ExerciseSort
 import ch.coachpoulpy.shared.Zones
 import ch.coachpoulpy.shared.ExerciseRow
 
@@ -95,8 +99,10 @@ fun ExerciseList(
     var tags by rememberSaveable(stateSaver = enumSetSaver<ExerciseTag>()) { mutableStateOf(emptySet()) }
     var picked by rememberSaveable(stateSaver = stringSetSaver) { mutableStateOf(emptySet()) }
     var sheet by rememberSaveable { mutableStateOf<FilterSheet?>(null) }
-    val listing = remember(model, query, ticked, focus, positions, tags, picked) {
-        model.filter(query, ticked, adding, focus, positions, tags, Zones.zones(picked))
+    var sort by rememberSaveable { mutableStateOf(ExerciseSort.MOVEMENT) }
+    var sorting by remember { mutableStateOf(false) }
+    val listing = remember(model, query, ticked, focus, positions, tags, picked, sort) {
+        model.filter(query, ticked, adding, focus, positions, tags, Zones.zones(picked), sort)
     }
     val tick = { value: Set<Equipment>? ->
         equipment.ticked = value
@@ -159,6 +165,21 @@ fun ExerciseList(
                 if (filtering) {
                     TextButton(onClick = clearFilters) {
                         Text(stringResource(R.string.exercises_clearFilters), fontWeight = FontWeight.ExtraBold)
+                    }
+                }
+                Box {
+                    TextButton(onClick = { sorting = true }) {
+                        Text(stringResource(sort.label), fontWeight = FontWeight.ExtraBold)
+                        Icon(Lucide.ChevronDown, contentDescription = stringResource(R.string.library_sort))
+                    }
+                    DropdownMenu(expanded = sorting, onDismissRequest = { sorting = false }) {
+                        ExerciseSort.entries.forEach { option ->
+                            DropdownMenuItem(
+                                text = { Text(stringResource(option.label)) },
+                                leadingIcon = { if (option == sort) Icon(Lucide.Check, contentDescription = null) else Spacer(Modifier.size(24.dp)) },
+                                onClick = { sort = option; sorting = false },
+                            )
+                        }
                     }
                 }
             },
@@ -430,7 +451,7 @@ private fun ExerciseCard(row: ExerciseRow, adding: Boolean, onClick: () -> Unit)
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            PatternBadge(row.pattern, size = 44.dp)
+            Icon(row.pattern.icon(), contentDescription = null, tint = colors.primary, modifier = Modifier.size(22.dp))
             Column(Modifier.weight(1f)) {
                 Text(row.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold)
                 Text(row.details, style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
@@ -498,3 +519,10 @@ private fun NoExercises(query: String, onClear: () -> Unit) {
     )
 }
 
+
+private val ExerciseSort.label: Int
+    get() = when (this) {
+        ExerciseSort.MOVEMENT -> R.string.exercises_sortMovement
+        ExerciseSort.ALPHABETICAL -> R.string.exercises_sortName
+        ExerciseSort.EQUIPMENT -> R.string.exercises_sortEquipment
+    }

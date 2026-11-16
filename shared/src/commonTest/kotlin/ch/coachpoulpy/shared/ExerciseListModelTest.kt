@@ -29,6 +29,29 @@ class ExerciseListModelTest {
     }
 
     @Test
+    fun sortByNameIsOneUntitledSectionAndByMovementKeepsThePatterns() {
+        val byName = model("en").filter(sort = ExerciseSort.ALPHABETICAL).sections.single()
+        assertEquals(null, byName.title)
+        assertEquals(model("en").filter().count, byName.rows.size)
+        assertTrue(model("en").filter(sort = ExerciseSort.MOVEMENT).sections.size > 1)
+    }
+
+    @Test
+    fun sortByEquipmentGroupsUnderNoEquipmentFirstAndListsEveryExerciseOnce() {
+        val list = model("en")
+        val sections = list.filter(sort = ExerciseSort.EQUIPMENT).sections
+        assertEquals("No equipment", sections.first().title)
+        assertEquals(list.filter().count, sections.sumOf { it.rows.size })
+        assertEquals(sections.size, sections.map { it.title }.distinct().size)
+    }
+
+    @Test
+    fun searchIgnoresTheSort() {
+        val list = model("en")
+        assertEquals(list.filter("squat").sections, list.filter("squat", sort = ExerciseSort.EQUIPMENT).sections)
+    }
+
+    @Test
     fun detailHasLocalizedInstructions() {
         val detail = model("fr").detail("plank")!!
         assertEquals("Gainage", detail.name)
