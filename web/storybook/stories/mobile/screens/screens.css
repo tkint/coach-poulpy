@@ -1158,3 +1158,7 @@
 .cp-screen fieldset.builder-block > .steps > li + li > .recap-row.list-row { border-top: 1px solid var(--cp-outline); }
 .cp-screen fieldset.builder-block > .steps > li > .repeat { margin: 2px 0; }
 .cp-screen .block-empty { padding: 10px 0 12px; font-size: 13px; line-height: 17px; color: var(--cp-on-surface-variant); }
+/* The Recover tag sits on the name's line, small, so a rest row stays two lines high. */
+.cp-screen .row-title { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.cp-screen .row-title .role-tag { align-self: center; height: 16px; padding: 0 6px; font-size: 10.5px; letter-spacing: 0.06em; }
+.cp-screen .row-text > .row-title { font-size: 15px; line-height: 20px; color: var(--cp-on-surface); font-variant-numeric: normal; }
