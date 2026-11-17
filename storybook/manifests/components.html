@@ -848,8 +848,8 @@ Baloo 2 for display and titles, Nunito for everything else. Platforms map each r
 ## Space, radius, motion
 
 - Spacing steps: 4, 8, 12, 16, 24, 32, 48 (`xs` to `xxxl`). Pick a step; never a value between them.
-- Radius: 8 for chips and small fields, 10 for cards and rows, 14 for sheets, pill for buttons. Small cards stay close to square so their text reads first.
-- Controls stay compact: a standard button is 44 high, a large one 52, an icon button 40 (its touch area stays 44), a small button 34. The side gutter of a screen is 16, and rows are 56 high with a 32 to 40 avatar. In the apps these come from one place, `PoulpySize` (generated from `design/tokens.json`, next to `PoulpySpace` and `PoulpyRadius`); a screen never writes a literal height, gutter or corner radius.
+- Radius: 8 for chips and small fields, 10 for cards, rows and buttons, 14 for sheets, pill for chips. Small cards stay close to square so their text reads first.
+- Controls stay compact: a button is 40 high by default and follows the size scale of the [Button](?path=/docs/mobile-components-button--docs) (xs 24 to xxl 64), an icon button 40; below 44 the touch area stays 44. The side gutter of a screen is 16, and rows are 56 high with a 32 to 40 avatar. In the apps these come from one place, `PoulpySize` (generated from `design/tokens.json`, next to `PoulpySpace` and `PoulpyRadius`); a screen never writes a literal height, gutter or corner radius.
 - Motion: the flip (700 ms with overshoot) is the one signature move, used only when Poulpy changes side. Mood shades fade in 300 ms. Everything else is 150 to 250 ms and plain. With reduced motion on, the loader slows to one swing in 12 s.
 </code></pre>
           </div>
@@ -975,7 +975,7 @@ The movement-pattern badge stands in for exercise pictures, and Lucide draws few
       </div>
     </div>
     <div class="meta" title="./stories/design-system/rules/Components.mdx">design-system-rules-components--docs · ./stories/design-system/rules/Components.mdx</div>
-    <div># Components | Component | Shape | Notes | | --- | --- | --- | | [Primary button](?path=/d...</div>
+    <div># Components | Component | Shape | Notes | | --- | --- | --- | | [Button](?path=/docs/mobi...</div>
   </div>
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
@@ -995,10 +995,7 @@ The movement-pattern badge stands in for exercise pictures, and Lucide draws few
 
 | Component | Shape | Notes |
 | --- | --- | --- |
-| [Primary button](?path=/docs/mobile-components-button--docs) | 44 high, pill, `primary` | One per screen |
-| [Tonal button](?path=/docs/mobile-components-button--docs) | 44 high, pill, `primaryContainer` | Secondary actions |
-| Outline button | 44 high, pill, 2 px `outline` | Cancel, less important choices |
-| [Grumpy button](?path=/docs/mobile-components-button--docs) | 44 high, pill, `grumpy` | Only the catch-up action while Poulpy is ember |
+| [Button](?path=/docs/mobile-components-button--docs) | Rounded square (10 radius), never a pill, on the websites&#39; size scale: xs 24, sm 32, md 40 (the default), lg 48, xl 56, xxl 64; below 44 the touch area still reaches 44 | `MobileButton` in the mockups, `size` in the apps. Primary: one per screen. Tonal (`primaryContainer`): secondary actions. Secondary (2 px `outline`): cancel, less important choices. Grumpy: only the catch-up action while Poulpy is ember. A top bar&#39;s button is `sm`, a screen&#39;s or sheet&#39;s main action `xl`, a card&#39;s actions `md` |
 | [Chip](?path=/docs/mobile-components-filter-chip--docs) | 32 high, pill; on = `primary`, off = 1.5 px `outline` | Filters (muscle, equipment, format), with `aria-pressed` or selected state; `PoulpyChip` on both platforms |
 | Choosing one value | A select field that opens a sheet for a longer list, or a native menu for a short one | Pills and chips are for filters and for view switches; a form asks for a value with a select, never a row of pills |
 | [Search field](?path=/docs/mobile-components-search-field--docs) | 44 high, pill, 1.5 px `outline`, `primary` while it holds text, a round clear button | `PillSearchField` on both platforms |
