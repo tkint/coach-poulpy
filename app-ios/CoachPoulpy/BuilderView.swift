@@ -9,8 +9,6 @@ struct BuilderView: View {
     @State private var picking: PickTarget?
     /// The exercise whose details are open over the picker; nil when none.
     @State private var previewing: PreviewTarget?
-    /// Whether saving was tried without a name, which shows what the name field is missing.
-    @State private var nameAsked = false
     @State private var changingFormat = false
     /// The switch waiting for "Follow the new format" or "Keep the order"; nil when none.
     @State private var askingOrder: FormatChange?
@@ -51,7 +49,6 @@ struct BuilderView: View {
                 VStack(alignment: .leading, spacing: 14) {
                     PoulpyTextField(
                         label: "builder.name", text: Binding(get: { state.name }, set: { model.rename(name: $0) }),
-                        error: nameAsked && !state.hasName ? NSLocalizedString("builder.nameError", comment: "") : nil,
                         placeholder: "builder.namePlaceholder"
                     )
                     formatLine(state.format)
@@ -77,7 +74,7 @@ struct BuilderView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button {
-                        if !state.hasName { nameAsked = true } else if model.save() != nil { dismiss() }
+                        if model.save() != nil { dismiss() }
                     } label: {
                         Text("action.save")
                     }

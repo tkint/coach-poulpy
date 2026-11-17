@@ -211,7 +211,6 @@
     "circuitHint": "A circuit has no sets: the repeat around it sets the rounds.",
     "setsHint": "Rest between sets shows from 2 sets. A walk or a run has no sets.",
     "namePlaceholder": "Name your workout",
-    "nameError": "Give your workout a name to save it.",
     "emptyOptional": "Nothing planned. Tap to add an exercise.",
     "emptyWork": "Tap to add an exercise."
   },

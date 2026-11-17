@@ -211,7 +211,6 @@
     "circuitHint": "Un circuit n’a pas de séries : la boucle qui l’entoure fixe le nombre de tours.",
     "setsHint": "Le repos entre les séries apparaît dès 2 séries. Une marche ou une course n’a pas de séries.",
     "namePlaceholder": "Nommez votre séance",
-    "nameError": "Donnez un nom à votre séance pour l’enregistrer.",
     "emptyOptional": "Rien de prévu. Touchez pour ajouter un exercice.",
     "emptyWork": "Touchez pour ajouter un exercice."
   },

@@ -232,14 +232,17 @@ data class WorkoutDraft(
     val format: WorkoutFormat,
     val parts: List<DraftPart>,
 ) {
-    /** The workout this draft saves as: an empty warm-up or cool down is left out. */
-    internal fun toWorkout() = Workout(
-        id = id ?: WorkoutId(Ids.newUuidV7()),
-        version = version,
-        name = name.trim(),
-        format = format,
-        parts = parts.filter { it.kind == PartKind.WORK || it.steps.isNotEmpty() }.map { it.toPart() },
-    )
+    /** The workout this draft saves as: an empty warm-up or cool down is left out, and a blank name becomes [autoName]. */
+    internal fun toWorkout(autoName: (Workout) -> String): Workout {
+        val workout = Workout(
+            id = id ?: WorkoutId(Ids.newUuidV7()),
+            version = version,
+            name = name.trim(),
+            format = format,
+            parts = parts.filter { it.kind == PartKind.WORK || it.steps.isNotEmpty() }.map { it.toPart() },
+        )
+        return if (workout.name.isEmpty()) workout.copy(name = autoName(workout)) else workout
+    }
 
     /** The warm-up, the work and the cool down, each there even when empty, as the builder shows them. */
     internal fun withAllParts() = copy(

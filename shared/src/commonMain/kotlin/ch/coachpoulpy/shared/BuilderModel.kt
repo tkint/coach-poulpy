@@ -135,9 +135,7 @@ data class BuilderState(
     val rows: List<BuilderRow>,
     /** The exercise or rest added last, so the screen can open it. */
     val addedKey: String?,
-    /** False for a blank name: saving asks for one instead. */
-    val hasName: Boolean,
-    /** Whether the workout has what it takes to be saved, a name aside. */
+    /** Whether the workout has what it takes to be saved; a blank name becomes one made from its exercises. */
     val canSave: Boolean,
 )
 
@@ -491,10 +489,10 @@ class BuilderModel internal constructor(
         return texts.map { ValuePick("$it ${unit.symbol}", it) }
     }
 
-    /** Saves the workout and returns its id, or null when it is not ready ([BuilderState.canSave]) or has no name ([BuilderState.hasName]). */
+    /** Saves the workout and returns its id, or null when it is not ready ([BuilderState.canSave]). */
     fun save(): String? {
-        if (!state.value.canSave || !state.value.hasName) return null
-        val workout = draft.toWorkout()
+        if (!state.value.canSave) return null
+        val workout = draft.toWorkout { it.autoName(catalog, labels) }
         store.saveWorkout(workout)
         draft = draft.copy(id = workout.id, version = workout.version + 1)
         return workout.id.value
@@ -584,7 +582,6 @@ class BuilderModel internal constructor(
             parts = parts,
             rows = rows,
             addedKey = addedKey,
-            hasName = draft.name.isNotBlank(),
             canSave = rows.any { !it.isRest } &&
                 draft.parts.first { it.kind == PartKind.WORK }.steps.isNotEmpty() &&
                 parts.all { part -> part.steps.all { it.repeatGroup?.rows?.isNotEmpty() ?: true } },

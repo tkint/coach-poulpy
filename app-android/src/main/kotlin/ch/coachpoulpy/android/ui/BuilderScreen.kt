@@ -113,8 +113,6 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
     var editing by rememberSaveable { mutableStateOf<String?>(null) }
     // The exercise whose details are open over the step's sheet; null when none.
     var detailing by rememberSaveable { mutableStateOf<String?>(null) }
-    // Whether saving was tried without a name, which shows what the name field is missing.
-    var nameAsked by rememberSaveable { mutableStateOf(false) }
     var changingFormat by rememberSaveable { mutableStateOf(false) }
     // The switch waiting for "Follow the new format" or "Keep the order"; null when none.
     var askingOrder by remember { mutableStateOf<FormatChange?>(null) }
@@ -161,7 +159,7 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
                 },
                 actions = {
                     PoulpyButton(
-                        onClick = { if (!state.hasName) nameAsked = true else if (model.save() != null) onClose() },
+                        onClick = { if (model.save() != null) onClose() },
                         size = PoulpyButtonSize.Sm,
                         enabled = state.canSave,
                         modifier = Modifier.padding(end = 12.dp),
@@ -183,7 +181,6 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
                     stringResource(R.string.builder_name), state.name, model::rename,
                     Modifier.padding(bottom = 14.dp).fillMaxWidth(),
                     placeholder = stringResource(R.string.builder_namePlaceholder),
-                    error = if (nameAsked && !state.hasName) stringResource(R.string.builder_nameError) else null,
                 )
             }
             item { FormatLine(state.format, state.formatLabel, onClick = { changingFormat = true }) }

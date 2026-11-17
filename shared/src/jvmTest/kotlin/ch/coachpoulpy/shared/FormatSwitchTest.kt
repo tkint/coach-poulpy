@@ -35,7 +35,7 @@ class FormatSwitchTest {
     private fun WorkoutDraft.shown() = parts.map { p -> p.steps.joinToString(" | ") { it.show() } }
 
     private fun WorkoutDraft.assertValid() {
-        val workout = toWorkout()
+        val workout = toWorkout { "auto" }
         assertEquals(emptySet(), workout.problems())
     }
 
