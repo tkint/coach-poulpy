@@ -3,6 +3,9 @@ import { screen } from '../screen'
 import screenLibraryActions from './library-actions.html?raw'
 import screenLibraryEmpty from './library-empty.html?raw'
 import screenLibraryExercises from './library-exercises.html?raw'
+import screenLibraryExercisesByEquipment from './library-exercises-by-equipment.html?raw'
+import screenLibraryExercisesByName from './library-exercises-by-name.html?raw'
+import screenLibraryExercisesSort from './library-exercises-sort.html?raw'
 import screenLibraryNewWorkoutSheet from './library-new-workout-sheet.html?raw'
 import screenLibraryNoResults from './library-no-results.html?raw'
 import screenLibrarySearch from './library-search.html?raw'
@@ -21,6 +24,7 @@ type Story = StoryObj<typeof meta>
 /** Library · workout actions. */
 export const LibraryActions: Story = {
   name: "Workout actions",
+  tags: ['!autodocs', 'agreed'],
   ...screen(screenLibraryActions),
   parameters: { a11y: { test: 'todo' }, mockup: { issue: 104 } },
 }
@@ -33,7 +37,29 @@ export const LibraryEmpty: Story = {
 /** Library · exercises. */
 export const LibraryExercises: Story = {
   name: "Exercises",
+  tags: ['!autodocs', 'agreed'],
   ...screen(screenLibraryExercises),
+  parameters: { mockup: { issue: 104 } },
+}
+/** Library · exercises grouped by equipment, then by name. */
+export const LibraryExercisesByEquipment: Story = {
+  name: "Exercises by equipment",
+  tags: ['!autodocs', 'agreed'],
+  ...screen(screenLibraryExercisesByEquipment),
+  parameters: { mockup: { issue: 104 } },
+}
+/** Library · exercises by name, no groups. */
+export const LibraryExercisesByName: Story = {
+  name: "Exercises by name",
+  tags: ['!autodocs', 'agreed'],
+  ...screen(screenLibraryExercisesByName),
+  parameters: { mockup: { issue: 104 } },
+}
+/** Library · the sort menu: movement, name or equipment. */
+export const LibraryExercisesSort: Story = {
+  name: "Exercises sort menu",
+  tags: ['!autodocs', 'agreed'],
+  ...screen(screenLibraryExercisesSort),
   parameters: { mockup: { issue: 104 } },
 }
 /** Library · "New workout" opens the format sheet over the Library. */
@@ -52,12 +78,14 @@ export const LibraryNoResults: Story = {
 /** Library · search “squat”. */
 export const LibrarySearch: Story = {
   name: "Search “squat”",
+  tags: ['!autodocs', 'agreed'],
   ...screen(screenLibrarySearch),
   parameters: { a11y: { test: 'todo' }, mockup: { issue: 104 } },
 }
 /** Library · workouts. */
 export const LibraryWorkouts: Story = {
   name: "Workouts",
+  tags: ['!autodocs', 'agreed'],
   ...screen(screenLibraryWorkouts),
   parameters: { a11y: { test: 'todo' }, mockup: { issue: 104 } },
 }

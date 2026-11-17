@@ -1,5 +1,5 @@
 <main class="phone">
-<div class="screen-header" style="padding-bottom: var(--cp-space-sm); gap: var(--cp-space-md);">
+<div class="screen-header" style="padding-bottom: 10px; gap: var(--cp-space-md);">
     <h1>Library</h1>
     <MobileTabs aria-label="Library" :tabs="['Workouts', 'Exercises']" selected="Exercises" />
     <MobileSearchField label="Search exercises" placeholder="Name, muscle, mobility or floor" />
@@ -12,7 +12,10 @@
     </div>
   </div>
 
-  <div class="list-meta"><span aria-live="polite">34 exercises</span></div>
+  <div class="list-meta">
+    <span aria-live="polite">34 exercises</span>
+    <button type="button" aria-label="Sort: Movement">Movement<MobileIcon name="chevron-down" :size="16" /></button>
+  </div>
 
   <div id="catalog" style="flex: 1; min-height: 0; overflow: hidden; padding: 0 var(--cp-space-lg) var(--cp-space-lg); display: flex; flex-direction: column; gap: 6px;">
     <h2 class="label" style="margin: 10px var(--cp-space-xs) 2px;">Squat</h2>

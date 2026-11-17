@@ -1046,6 +1046,13 @@
 .cp-screen .settings-row strong { font-size: 16px; line-height: 22px; font-weight: 800; }
 .cp-screen .settings-row small { font-size: 13px; line-height: 18px; font-weight: 600; color: var(--cp-on-surface-variant); }
 .cp-screen .settings-row > svg:last-child { color: var(--cp-on-surface-variant); }
+/* The same row as its own card (the Library), apart from the next one instead of joined to it. */
+.cp-screen .settings-row--card { border-radius: var(--cp-radius-md); background: var(--cp-surface); border: 1px solid var(--cp-outline); padding-right: var(--cp-space-sm); }
+.cp-screen .settings-row__main { flex: 1; min-width: 0; display: flex; flex-direction: column; align-self: stretch; justify-content: center; text-align: start; }
+.cp-screen .settings-row > svg:first-child:not(:last-child) { flex: none; }
+.cp-screen .settings-row :is(span, .settings-row__main) > .row-note { align-self: flex-start; margin-top: 3px; font-size: 12.5px; line-height: 16px; font-weight: 700; color: var(--cp-on-surface-variant); }
+.cp-screen .settings-row .row-note--planned { font-weight: 800; padding: 2px var(--cp-space-sm); border-radius: var(--cp-radius-pill); background: var(--cp-primary-container); color: var(--cp-on-primary-container); }
+.cp-screen .settings-row .row-note--done { font-weight: 800; color: var(--cp-success); }
 .cp-screen .option-list { border-radius: var(--cp-radius-md); background: var(--cp-surface-variant); display: flex; flex-direction: column; }
 .cp-screen .option-row { min-height: 52px; padding: var(--cp-space-sm) var(--cp-space-lg); display: flex; align-items: center; gap: var(--cp-space-md); font-size: 16px; font-weight: 700; }
 .cp-screen .option-row + .option-row { border-top: 1px solid var(--cp-outline); }

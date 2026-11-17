@@ -218,9 +218,7 @@ struct LibraryView: View {
             } label: {
                 HStack(spacing: 12) {
                     LucideIcon(formatIcon(row.format), size: 22)
-                        .foregroundStyle(PoulpyColor.onPrimaryContainer)
-                        .frame(width: 44, height: 44)
-                        .background(PoulpyColor.primaryContainer, in: Circle())
+                        .foregroundStyle(PoulpyColor.primary)
                         .accessibilityHidden(true)
                     VStack(alignment: .leading, spacing: 1) {
                         Text(row.name).font(.poulpy(.headline)).foregroundStyle(PoulpyColor.onSurface)

@@ -16,41 +16,13 @@
   </div>
 
   <ul id="library" style="flex: 1; min-height: 0; overflow: hidden; padding: 0 var(--cp-space-lg); display: flex; flex-direction: column; gap: var(--cp-space-sm);">
-    <li class="list-row" data-component="library-entry">
-      <span class="row-icon" aria-hidden="true"><MobileIcon name="list" :size="22" /></span>
-      <button type="button" class="row-text"><strong>Lower body strength</strong><span>Sets · 5 exercises · 40 min</span><span class="row-note row-note--done">Done today</span></button>
-      <button type="button" class="row-icon" aria-label="Start Lower body strength"><MobileIcon name="play" :size="20" /></button>
-    </li>
-    <li class="list-row" data-component="library-entry">
-      <span class="row-icon" aria-hidden="true"><MobileIcon name="repeat" :size="22" /></span>
-      <button type="button" class="row-text"><strong>Demo intervals</strong><span>Circuit · 3 parts · 24 min</span><span class="row-note">Last done Fri 23 Oct</span></button>
-      <button type="button" class="row-icon" aria-label="Start Demo intervals"><MobileIcon name="play" :size="20" /></button>
-    </li>
-    <li class="list-row" data-component="library-entry">
-      <span class="row-icon" aria-hidden="true"><MobileIcon name="list" :size="22" /></span>
-      <button type="button" class="row-text"><strong>Upper body</strong><span>Sets · 4 exercises · 32 min</span><span class="row-note row-note--planned">Planned · Tue 27 Oct · +2</span></button>
-      <button type="button" class="row-icon" aria-label="Start Upper body"><MobileIcon name="play" :size="20" /></button>
-    </li>
-    <li class="list-row" data-component="library-entry">
-      <span class="row-icon" aria-hidden="true"><MobileIcon name="list" :size="22" /></span>
-      <button type="button" class="row-text"><strong>Full body</strong><span>Sets · 6 exercises · 42 min</span><span class="row-note row-note--planned">Planned · Thu 29 Oct</span></button>
-      <button type="button" class="row-icon" aria-label="Start Full body"><MobileIcon name="play" :size="20" /></button>
-    </li>
-    <li class="list-row" data-component="library-entry">
-      <span class="row-icon" aria-hidden="true"><MobileIcon name="repeat" :size="22" /></span>
-      <button type="button" class="row-text"><strong>Core and mobility</strong><span>Circuit · 5 exercises · 18 min</span><span class="row-note">Last done Mon 5 Oct</span></button>
-      <button type="button" class="row-icon" aria-label="Start Core and mobility"><MobileIcon name="play" :size="20" /></button>
-    </li>
-    <li class="list-row" data-component="library-entry">
-      <span class="row-icon" aria-hidden="true"><MobileIcon name="repeat" :size="22" /></span>
-      <button type="button" class="row-text"><strong>Easy mobility</strong><span>Circuit · 6 exercises · 15 min</span><span class="row-note">Not done yet</span></button>
-      <button type="button" class="row-icon" aria-label="Start Easy mobility"><MobileIcon name="play" :size="20" /></button>
-    </li>
-    <li class="list-row" data-component="library-entry">
-      <span class="row-icon" aria-hidden="true"><MobileIcon name="repeat" :size="22" /></span>
-      <button type="button" class="row-text"><strong>Quick sweat</strong><span>Circuit · 4 rounds · 16 min</span><span class="row-note">Not done yet</span></button>
-      <button type="button" class="row-icon" aria-label="Start Quick sweat"><MobileIcon name="play" :size="20" /></button>
-    </li>
+    <li><MobileSettingsRow card icon="list" title="Lower body strength" detail="Sets · 5 exercises · 40 min" note="Done today" note-tone="done" start="Start Lower body strength" /></li>
+    <li><MobileSettingsRow card icon="repeat" title="Demo intervals" detail="Circuit · 3 parts · 24 min" note="Last done Fri 23 Oct" start="Start Demo intervals" /></li>
+    <li><MobileSettingsRow card icon="list" title="Upper body" detail="Sets · 4 exercises · 32 min" note="Planned · Tue 27 Oct · +2" note-tone="planned" start="Start Upper body" /></li>
+    <li><MobileSettingsRow card icon="list" title="Full body" detail="Sets · 6 exercises · 42 min" note="Planned · Thu 29 Oct" note-tone="planned" start="Start Full body" /></li>
+    <li><MobileSettingsRow card icon="repeat" title="Core and mobility" detail="Circuit · 5 exercises · 18 min" note="Last done Mon 5 Oct" start="Start Core and mobility" /></li>
+    <li><MobileSettingsRow card icon="repeat" title="Easy mobility" detail="Circuit · 6 exercises · 15 min" note="Not done yet" start="Start Easy mobility" /></li>
+    <li><MobileSettingsRow card icon="repeat" title="Quick sweat" detail="Circuit · 4 rounds · 16 min" note="Not done yet" start="Start Quick sweat" /></li>
   </ul>
 
   <button type="button" class="fab" data-component="fab"><MobileIcon name="plus" :size="22" />New workout</button>

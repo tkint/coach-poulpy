@@ -1,0 +1,34 @@
+<main class="phone">
+<div class="screen-header" style="padding-bottom: 10px; gap: var(--cp-space-md);">
+    <h1>Library</h1>
+    <MobileTabs aria-label="Library" :tabs="['Workouts', 'Exercises']" selected="Exercises" />
+    <MobileSearchField label="Search exercises" placeholder="Name, muscle, mobility or floor" />
+    <div class="chip-row" role="group" aria-label="Filters">
+      <MobileFilterChip icon="dumbbell" aria-haspopup="dialog" aria-label="Equipment" style="padding: 0 var(--cp-space-md); min-width: 48px;" />
+      <MobileFilterChip icon="target" aria-haspopup="dialog" aria-label="Focus" style="padding: 0 var(--cp-space-md); min-width: 48px;" />
+      <MobileFilterChip icon="armchair" aria-haspopup="dialog" aria-label="Position" style="padding: 0 var(--cp-space-md); min-width: 48px;" />
+      <MobileFilterChip icon="person-standing" aria-haspopup="dialog" aria-label="Zones" style="padding: 0 var(--cp-space-md); min-width: 48px;" />
+      <MobileFilterChip icon="tag" aria-haspopup="dialog" aria-label="Tags" style="padding: 0 var(--cp-space-md); min-width: 48px;" />
+    </div>
+  </div>
+
+  <div class="list-meta">
+    <span aria-live="polite">34 exercises</span>
+    <button type="button" aria-label="Sort: Name">Name<MobileIcon name="chevron-down" :size="16" /></button>
+  </div>
+
+  <div id="catalog" style="flex: 1; min-height: 0; overflow: hidden; padding: 0 var(--cp-space-lg) var(--cp-space-lg); display: flex; flex-direction: column; gap: 6px;">
+    <ul style="display: flex; flex-direction: column; gap: var(--cp-space-sm);">
+      <li><MobileExerciseRow link icon="person-standing" name="Bodyweight squat" detail="Quadriceps, glutes · No equipment" /></li>
+      <li><MobileExerciseRow link icon="hand-grab" name="Glute bridge" detail="Glutes, hamstrings · Mat" /></li>
+      <li><MobileExerciseRow link icon="person-standing" name="Goblet squat" detail="Quadriceps, glutes · Dumbbell or kettlebell" /></li>
+      <li><MobileExerciseRow link icon="hand-grab" name="Kettlebell swing" detail="Glutes, hamstrings · Kettlebell" /></li>
+      <li><MobileExerciseRow link icon="footprints" name="Reverse lunge" detail="Quadriceps, glutes · Each side" /></li>
+      <li><MobileExerciseRow link icon="hand-grab" name="Romanian deadlift" detail="Hamstrings, glutes · Dumbbells or barbell" /></li>
+      <li><MobileExerciseRow link icon="person-standing" name="Sit to stand" detail="Quadriceps, glutes · No equipment" /></li>
+      <li><MobileExerciseRow link icon="footprints" name="Step-up" detail="Quadriceps, glutes · Bench · each side" /></li>
+    </ul>
+  </div>
+
+  <MobileNavBar active="library" />
+</main>

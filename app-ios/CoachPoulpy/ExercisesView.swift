@@ -25,6 +25,7 @@ struct ExerciseList<Row: View>: View {
     @State private var tags: Set<ExerciseTag> = []
     @State private var picked: Set<String> = []
     @State private var sheet: FilterSheet?
+    @State private var sort = ExerciseSort.movement
     private let figure: BodyFigure
 
     init(graph: AppGraph, withRecent: Bool = false, @ViewBuilder row: @escaping (ExerciseRow) -> Row) {
@@ -52,6 +53,16 @@ struct ExerciseList<Row: View>: View {
         picked = []
     }
 
+    private let sorts: [ExerciseSort] = [.movement, .alphabetical, .equipment]
+
+    private func sortTitle(_ sort: ExerciseSort) -> LocalizedStringKey {
+        switch sort {
+        case .alphabetical: return "exercises.sortName"
+        case .equipment: return "exercises.sortEquipment"
+        default: return "exercises.sortMovement"
+        }
+    }
+
     /// How many exercises the list would hold with one filter changed, for "Show N exercises".
     private func count(
         ticked: Set<Equipment>? = nil,
@@ -64,7 +75,7 @@ struct ExerciseList<Row: View>: View {
         return Int(model.filter(
             query: query, ticked: ticked ?? self.ticked, withRecent: false,
             focus: focus ?? self.focus, positions: positions ?? self.positions,
-            tags: tags ?? self.tags, zones: zones
+            tags: tags ?? self.tags, zones: zones, sort: sort
         ).count)
     }
 
@@ -73,7 +84,7 @@ struct ExerciseList<Row: View>: View {
         let zoneCount = Zones.shared.zones(picked: picked).count
         let listing = model.filter(
             query: query, ticked: ticked, withRecent: withRecent,
-            focus: focus, positions: positions, tags: tags, zones: Zones.shared.zones(picked: picked)
+            focus: focus, positions: positions, tags: tags, zones: Zones.shared.zones(picked: picked), sort: sort
         )
         VStack(spacing: 0) {
             ListFilters(query: $query, placeholder: "exercises.search", label: "exercises.searchLabel", countLabel: listing.countLabel) {
@@ -102,6 +113,19 @@ struct ExerciseList<Row: View>: View {
                     Button("exercises.clearFilters") { clearFilters() }
                         .font(.poulpy(.subheadline).weight(.heavy))
                         .foregroundStyle(PoulpyColor.primary)
+                }
+                Menu {
+                    Picker("library.sort", selection: $sort) {
+                        ForEach(sorts, id: \.self) { option in
+                            Text(sortTitle(option)).tag(option)
+                        }
+                    }
+                } label: {
+                    HStack(spacing: 4) {
+                        Text(sortTitle(sort))
+                        LucideIcon(.chevronDown, size: 14)
+                    }
+                    .font(.poulpy(.subheadline).weight(.heavy))
                 }
             }
             ScrollView {
@@ -364,14 +388,15 @@ private struct FilterSheetActions: View {
     }
 }
 
-/// One exercise as a card: pattern badge, name, details, then a chevron, or a round plus in the builder's picker.
+/// One exercise as a card: pattern icon, name, details, then a chevron, or a round plus in the builder's picker.
 struct ExerciseRowView: View {
     let row: ExerciseRow
     var adding = false
 
     var body: some View {
         HStack(spacing: 12) {
-            PatternBadge(pattern: row.pattern, size: 44)
+            PatternIcon(pattern: row.pattern, size: 22)
+                .foregroundStyle(PoulpyColor.primary)
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 1) {
                 Text(row.name).font(.poulpy(.headline).weight(.heavy)).foregroundStyle(PoulpyColor.onSurface)
