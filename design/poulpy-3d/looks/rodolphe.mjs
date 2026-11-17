@@ -60,19 +60,21 @@ const armTop = (r) => arms.radius[1] + arms.radius[1] * Math.sqrt(Math.max(1 - (
 // --- what he wears ---------------------------------------------------------------------------------
 
 // The headband goes over the top of his head from one side to the other, leaning a little back.
-const BAND = { back: 0.32, reach: 1.5, radius: 0.06 }
+const BAND = { back: 0.32, reach: 1.5, radius: 0.034 }
 const bandAt = (t) => onHead([Math.sin(t), Math.cos(t) * Math.cos(BAND.back), -Math.cos(t) * Math.sin(BAND.back)], BAND.radius * 0.6)
-// The antlers stand on the band, `at` from the top; each is a fat felt beam that curls up and out, with two tines.
-const ANTLER = { at: 0.62, radius: [0.095, 0.088, 0.08, 0.075], tine: 0.068 }
+// The antlers stand on the band, `at` from the top; each is a fat felt beam that curls up and out, with three tines.
+// The beam starts slim where it meets the band and fills out above it; every end is round.
+const ANTLER = { at: 0.6, radius: [0.05, 0.09, 0.11, 0.105, 0.1, 0.095], tine: [0.085, 0.08, 0.075] }
 
 function antler(sign) {
   const { p, n } = bandAt(sign * ANTLER.at), out = norm([sign, 0, 0]), up = [0, 1, 0]
   // The beam: out of the band along the head's normal, then bending outwards and back up. The tines lean a little forward.
   const go = (a, b, c, d = 0) => add(add(add(add(p, n, a), out, b), up, c), [0, 0, 1], d)
-  const beam = [go(0, 0, 0), go(0.14, 0.02, 0.03), go(0.26, 0.1, 0.06), go(0.32, 0.22, 0.12)]
-  const tineLow = [go(0.12, 0.01, 0.02), go(0.18, -0.08, 0.1, 0.04), go(0.2, -0.1, 0.16, 0.07)]
-  const tineHigh = [go(0.25, 0.08, 0.05), go(0.33, 0.06, 0.14, 0.04), go(0.36, 0.05, 0.2, 0.07)]
-  return join(tube(beam, ANTLER.radius, 14), tube(tineLow, ANTLER.tine, 12), tube(tineHigh, ANTLER.tine, 12))
+  const beam = [go(0, 0, 0), go(0.1, 0.01, 0.02), go(0.22, 0.04, 0.05), go(0.36, 0.14, 0.1), go(0.46, 0.3, 0.17), go(0.5, 0.42, 0.24)]
+  const tineLow = [go(0.16, 0.03, 0.03), go(0.25, -0.1, 0.13, 0.05), go(0.28, -0.15, 0.24, 0.09)]
+  const tineMid = [go(0.3, 0.09, 0.08), go(0.42, 0.04, 0.2, 0.05), go(0.47, 0.01, 0.31, 0.09)]
+  const tineHigh = [go(0.42, 0.24, 0.14), go(0.53, 0.22, 0.27, 0.04), go(0.57, 0.2, 0.36, 0.07)]
+  return join(tube(beam, ANTLER.radius, 16), ...[tineLow, tineMid, tineHigh].map((tine) => tube(tine, ANTLER.tine, 14)))
 }
 
 // The scarf: puffy knitted pieces in turn red and white, all around the base of his head, sitting on his arms. It is
