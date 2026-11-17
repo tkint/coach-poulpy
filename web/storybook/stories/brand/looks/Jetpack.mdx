@@ -1,0 +1,20 @@
+import { Meta, Story } from '@storybook/addon-docs/blocks'
+import * as Jetpack from './Jetpack.stories'
+
+<Meta of={Jetpack} />
+
+# Poulpy with a jetpack
+
+**Draft, to validate.** A look: Poulpy in a costume and a move of his own, for fun moments. He wears a little rocket pack and zooms from one side to the other, grinning, flames and smoke under him and his tentacles trailing. It is not in the apps and nothing is baked from it until the owner agrees it.
+
+<Story of={Jetpack.Flying} />
+
+- **The pack is solid, part of him.** Two little white rockets on a plate across the back of his head, each with a round blue nose, a blue stripe, a fin and a steel nozzle. They lean in at the top so their nozzles point down and a little out, clear of his tentacles. Turn him and they turn with him; face on, you see their sides and their flames.
+- **He grins.** Eyes wide open and a big open smile, on the blue side in the happy shade: flying is fun, never a chore.
+- **The flames and the smoke are comic effects.** Each flame is three flat layers, orange, yellow and pale cream, facing the viewer like the sparks and puffs of the poses and pointing the way its nozzle does. They are fire, gold and yellow, never the ember of his grumpy side. They flicker and burn longer as he pushes off. The smoke is the fuming pose's puffs, light with a grey-blue edge: they leave the flames' tips, grow, drift and shrink away, and stay in the room, so he leaves a trail as he zooms. Overlapping puffs make one cloud with one outline.
+- **He zooms, banks and looks where he goes.** He hovers well off the floor, bobbing, and a spring takes him from one side to the other, overshooting a little before he settles. Going sideways he banks into the turn and turns his face a little towards where he is going.
+- **His tentacles hang and trail, he never lifts them.** In the air they hang heavier than in [a jump](?path=/docs/brand-poulpy-moves-little-jumps--docs), as if he pulled a few G's, and they lag behind him on the same three bends: they trail as he sets off and swing on past him as he stops. Brand decision 8 holds: he never raises a tentacle himself.
+
+The look is `JETPACK` and `buildPoulpyJetpack()` in [`design/poulpy-3d/jetpack.mjs`](https://github.com/tkint/coach-poulpy/blob/main/design/poulpy-3d/jetpack.mjs); the flight is `ZOOM` and `createZoom()` in [`motion.mjs`](https://github.com/tkint/coach-poulpy/blob/main/design/poulpy-3d/motion.mjs). It is a live preview, not in the glTF files or the pictures.
+
+**Still open:** where the look shows in the apps, if anywhere, and its values (how far and how fast he zooms, how heavy his tentacles hang, how long the flames burn).
