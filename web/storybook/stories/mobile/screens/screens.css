@@ -1108,7 +1108,11 @@
 .cp-screen .badge--format { background: var(--cp-primary-container); border-color: var(--cp-primary-container); color: var(--cp-on-primary-container); }
 
 /* The builder's format line is a button that opens the format sheet (#243). */
-.cp-screen .format-control { display: inline-flex; align-items: center; gap: var(--cp-space-xs); min-height: 44px; padding: 0 var(--cp-space-xs); border-radius: var(--cp-radius-pill); color: var(--cp-on-surface-variant); }
+.cp-screen .format-control { display: inline-flex; align-items: center; min-height: 44px; border-radius: var(--cp-radius-pill); }
+.cp-screen .format-pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 12px; border-radius: var(--cp-radius-pill); background: var(--cp-primary-container); color: var(--cp-on-primary-container); }
+.cp-screen .format-pill strong { font-size: 15px; line-height: 20px; font-weight: 800; }
+.cp-screen .format-pill > svg:last-child { color: var(--cp-on-surface-variant); }
+.cp-screen .format-control:focus-visible { outline: 3px solid var(--cp-primary); outline-offset: 2px; }
 
 /* CLEANUP: the blocks of the workout details and the session recaps, copied from their screens' <style> blocks so the builder can use them; move them here for good and drop the nine copies (workout-page-*, session-recap-*). */
 /* Blocks and exercises as in the session recap; the info button replaces the time. */
