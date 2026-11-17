@@ -443,26 +443,12 @@ private func shortDay(_ millis: Int64) -> String {
     Date(timeIntervalSince1970: Double(millis) / 1000).formatted(.dateTime.day().month(.abbreviated))
 }
 
-/// The icon of a part, as the builder adds it: the sun for a warm-up, a bolt for work, the moon for a cool down.
-/// A part's icon in its round badge, filled for work, as on the workout page and in the builder.
-struct PartBadge: View {
-    let kind: PartKind
-
-    var body: some View {
-        let work = kind == .work
-        LucideIcon(partIcon(kind), size: 20)
-            .foregroundStyle(work ? PoulpyColor.onPrimary : PoulpyColor.onPrimaryContainer)
-            .frame(width: 36, height: 36)
-            .background(work ? PoulpyColor.primary : PoulpyColor.primaryContainer, in: Circle())
-            .accessibilityHidden(true)
-    }
-}
-
 /// The icon of a format: a loop for a circuit, a list for sets.
 func formatIcon(_ format: WorkoutFormat) -> Lucide {
     format == .circuit ? .repeat : .list
 }
 
+/// The icon of a part: the sun for a warm-up, a bolt for work, the moon for a cool down.
 func partIcon(_ kind: PartKind) -> Lucide {
     switch kind {
     case .warmUp: return .sun

@@ -78,6 +78,8 @@ struct PoulpyTextField: View {
     var secure = false
     /// What the field is, so the password manager can fill it.
     var contentType: UITextContentType? = nil
+    /// What the empty field suggests typing, in the muted colour.
+    var placeholder: LocalizedStringKey = ""
     @FocusState private var focused: Bool
     @State private var shown = false
 
@@ -87,9 +89,9 @@ struct PoulpyTextField: View {
                 HStack(spacing: 8) {
                     Group {
                         if secure && !shown {
-                            SecureField("", text: $text)
+                            SecureField(placeholder, text: $text)
                         } else {
-                            TextField("", text: $text)
+                            TextField(placeholder, text: $text)
                         }
                     }
                     .font(.poulpy(.headline))

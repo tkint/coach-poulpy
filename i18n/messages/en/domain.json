@@ -94,17 +94,14 @@
     "warmUp": "Warm-up",
     "work": "Work",
     "coolDown": "Cool down",
-    "workNumbered": "Work {number, number}",
     "addToWarmUp": "Add to warm-up",
-    "addToWork": "{number, plural, =0 {Add to Work} other {Add to Work #}}",
+    "addToWork": "Add to Work",
     "addToCoolDown": "Add to cool down",
     "inWarmUp": "In the warm-up",
-    "inWork": "{number, plural, =0 {In Work} other {In Work #}}",
+    "inWork": "In Work",
     "inCoolDown": "In the cool down",
-    "alreadyIn": "Already in this workout",
-    "goesFirst": "Goes first",
-    "goesLast": "Goes last",
-    "addedAfter": "Added after {after} as {part}"
+    "optional": "Optional",
+    "nothingYet": "Nothing yet"
   },
   "side": {
     "left": "Left side",

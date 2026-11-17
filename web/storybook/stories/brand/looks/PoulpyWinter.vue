@@ -100,7 +100,7 @@ onMounted(async () => {
     if (!canvas.value) return
     scene = createPoulpyScene(canvas.value)
     model = { model: buildWinterPoulpy({ tones: tokens.default.mood, colours: tokens.default.color.poulpy }) }
-    effects = createWinterEffects(scene.stage.scene, scene.stage.camera, { flakes: WINTER.snow.flakes, puffs: WINTER.puffs.count * 3 })
+    effects = createWinterEffects(scene.room, scene.camera, { flakes: WINTER.snow.flakes, puffs: WINTER.puffs.count * 3 })
     move = createWinter()
     // A few seconds in, so the snow is already falling and a breath is in the air.
     for (let i = 0; i < 59; i++) move.advance(0.1)
