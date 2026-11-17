@@ -16,7 +16,6 @@ import screenBuilderTidyRepeatMenu from './builder-tidy-repeat-menu.html?raw'
 import screenBuilderTidyNameError from './builder-tidy-name-error.html?raw'
 import screenBuilderTidyEmptyOptionalBlocks from './builder-tidy-empty-optional-blocks.html?raw'
 import screenBuilderTidyRepeatHeader from './builder-tidy-repeat-header.html?raw'
-import screenBuilderTidyRepeatAddMenu from './builder-tidy-repeat-add-menu.html?raw'
 import screenBuilderTidyRepeatCountSheet from './builder-tidy-repeat-count-sheet.html?raw'
 import screenBuilderTidyRepeatEmpty from './builder-tidy-repeat-empty.html?raw'
 import screenBuilderStepMenu from './builder-step-menu.html?raw'
@@ -127,10 +126,10 @@ export const BuilderTidyAddMenu: Story = {
   parameters: { mockup: {} },
 }
 
-/** Builder · the actions of a repeat. */
+/** Builder · the ⋮ of a repeat: edit the repetitions, add an exercise or a rest (never a repeat inside a repeat), then the usual actions. */
 export const BuilderTidyRepeatMenu: Story = {
   name: "Repeat menu",
-  tags: ['!autodocs', 'agreed'],
+  tags: ['!autodocs', 'draft'],
   ...screen(screenBuilderTidyRepeatMenu, { reorder: true }),
   parameters: { mockup: {} },
 }
@@ -159,13 +158,6 @@ export const BuilderTidyRepeatHeader: Story = {
   parameters: { mockup: {} },
 }
 
-/** Builder · the ⋮ of a repeat starts with Add an exercise and Add a rest (never a repeat inside a repeat), then the usual actions. */
-export const BuilderTidyRepeatAddMenu: Story = {
-  name: "Repeat menu with add",
-  tags: ['!autodocs', 'draft'],
-  ...screen(screenBuilderTidyRepeatAddMenu, { reorder: true }),
-  parameters: { mockup: {} },
-}
 
 /** Builder · tapping the title or the count of a repeat opens a sheet with a number field. */
 export const BuilderTidyRepeatCountSheet: Story = {

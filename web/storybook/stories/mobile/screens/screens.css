@@ -1165,7 +1165,9 @@
 .cp-screen .row-text > .row-title { font-size: 15px; line-height: 20px; color: var(--cp-on-surface); font-variant-numeric: normal; }
 
 /* Builder · a repeat's header: one line, "Repeat 3 times", opens the count sheet (draft). */
-.cp-screen .repeat-header .repeat-title { flex: 1; display: flex; align-items: center; min-height: 40px; text-align: left; }
-.cp-screen .repeat-header .repeat-title strong { font-size: 14px; line-height: 18px; }
+.cp-screen .repeat-header .repeat-title { flex: 1; display: flex; align-items: center; min-height: 36px; text-align: left; }
+.cp-screen .repeat-header { padding: 0 0 0 var(--cp-space-xs); gap: 6px; }
+.cp-screen .repeat-header .icon-button { width: 36px; height: 36px; }
+.cp-screen .repeat-header .repeat-title strong { font-size: 13px; line-height: 16px; }
 .cp-screen .repeat-header .repeat-title:focus-visible { outline: 3px solid var(--cp-primary); outline-offset: 2px; }
 .cp-screen .repeat .block-empty { min-height: 44px; padding: var(--cp-space-sm) var(--cp-space-md); text-align: center; color: var(--cp-on-surface-variant); }
