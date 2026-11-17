@@ -34,8 +34,6 @@ class BuilderStepsTest {
      */
     private fun intervalRun(builder: BuilderModel = graph.createWorkout(WorkoutFormat.CIRCUIT, "en")): BuilderModel {
         builder.rename("4 × 400 m")
-        builder.addPart(PartKind.WARM_UP)
-        builder.addPart(PartKind.COOL_DOWN)
 
         builder.add("run", builder.part(PartKind.WARM_UP))
         val warmUp = builder.state.value.addedKey!!
@@ -102,7 +100,7 @@ class BuilderStepsTest {
         assertEquals(StepRole.RECOVER, work[2].role)
         assertEquals(Target.Open, work.last().target)
         assertEquals(PartKind.COOL_DOWN, work.last().part)
-        assertTrue(work.drop(1).dropLast(1).all { it.part == PartKind.WORK && it.workPart == null })
+        assertTrue(work.drop(1).dropLast(1).all { it.part == PartKind.WORK })
     }
 
     @Test
@@ -143,7 +141,7 @@ class BuilderStepsTest {
         builder.rename("Legs and core")
         builder.add("goblet-squat", builder.work)
         builder.addRepeat(builder.work)
-        val repeat = builder.state.value.parts.single().steps.last().key
+        val repeat = builder.state.value.parts[1].steps.last().key
         builder.setRepeatTimes(repeat, 3)
         builder.add("push-up", builder.work, repeat)
         builder.addRest(builder.work, repeat)
@@ -174,19 +172,20 @@ class BuilderStepsTest {
         builder.rename("Circuit")
         builder.addRepeat(builder.work)
         assertFalse(builder.state.value.canSave, "an empty repeat")
+        builder.add("push-up", builder.work)
+        assertTrue(builder.state.value.canSave, "the first step went into the empty repeat")
         builder.add("plank", builder.work)
         val plank = builder.state.value.addedKey!!
-        assertTrue(builder.state.value.rows.single().canMoveIntoRepeat)
+        assertTrue(builder.state.value.rows.last().canMoveIntoRepeat)
 
         builder.moveIntoRepeatAbove(plank)
-        val steps = { builder.state.value.parts.single().steps }
+        val steps = { builder.state.value.parts[1].steps }
         assertEquals(1, steps().size)
-        assertEquals(plank, steps().single().repeatGroup!!.rows.single().key)
-        assertTrue(builder.state.value.canSave)
+        assertEquals(listOf("Push-up", "Plank"), steps().single().repeatGroup!!.rows.map { it.name })
 
         builder.moveOutOfRepeat(plank)
         assertEquals(listOf(null, plank), steps().map { it.row?.key })
-        assertTrue(steps().first().repeatGroup!!.rows.isEmpty())
+        assertEquals(listOf("Push-up"), steps().first().repeatGroup!!.rows.map { it.name })
     }
 
     @Test
@@ -194,7 +193,7 @@ class BuilderStepsTest {
         val builder = graph.createWorkout(WorkoutFormat.SETS, "en")
         builder.add("goblet-squat", builder.work)
         builder.addRepeat(builder.work)
-        val steps = { builder.state.value.parts.single().steps }
+        val steps = { builder.state.value.parts[1].steps }
         val repeat = steps().last().key
         builder.add("push-up", builder.work, repeat)
         val push = builder.state.value.addedKey!!
@@ -217,7 +216,7 @@ class BuilderStepsTest {
         val builder = graph.createWorkout(WorkoutFormat.SETS, "en")
         builder.add("goblet-squat", builder.work)
         builder.addRepeat(builder.work)
-        val steps = { builder.state.value.parts.single().steps }
+        val steps = { builder.state.value.parts[1].steps }
         val repeat = steps().last().key
         builder.add("push-up", builder.work, repeat)
         builder.add("plank", builder.work, repeat)
@@ -239,7 +238,7 @@ class BuilderStepsTest {
     fun anExerciseAddedToARepeatStartsAtOneSet() {
         val builder = graph.createWorkout(WorkoutFormat.SETS, "en")
         builder.addRepeat(builder.work)
-        builder.add("push-up", builder.work, builder.state.value.parts.single().steps.single().key)
+        builder.add("push-up", builder.work, builder.state.value.parts[1].steps.single().key)
         assertEquals(1, builder.state.value.rows.single().sets)
     }
 
@@ -263,33 +262,28 @@ class BuilderStepsTest {
         assertNull(player.state.value.roleLabel)
     }
 
-    /** Warm-up, two work parts of rounds and a cool down: built, saved, opened again and run. */
+    /** Warm-up, a work part of rounds and a cool down: built, saved, opened again and run. */
     @Test
-    fun aCircuitInFourPartsComesBackAndRuns() {
+    fun aCircuitInThreePartsComesBackAndRuns() {
         val builder = graph.createWorkout(WorkoutFormat.CIRCUIT, "en")
         builder.rename("Full body burner")
-        builder.addPart(PartKind.WARM_UP)
-        builder.addPart(PartKind.WORK)
-        builder.addPart(PartKind.COOL_DOWN)
-        val (warmUp, first, second, coolDown) = builder.state.value.parts
-        builder.add("jumping-jack", warmUp.key)
-        builder.add("goblet-squat", first.key, first.steps.single().key)
-        builder.add("push-up", first.key, first.steps.single().key)
-        builder.addRest(first.key, first.steps.single().key)
-        builder.add("plank", second.key, second.steps.single().key)
-        builder.add("hamstring-stretch", coolDown.key)
+        val (warmUpPart, workPart, coolDownPart) = builder.state.value.parts
+        builder.add("jumping-jack", warmUpPart.key)
+        builder.add("goblet-squat", workPart.key, workPart.steps.single().key)
+        builder.add("push-up", workPart.key, workPart.steps.single().key)
+        builder.addRest(workPart.key, workPart.steps.single().key)
+        builder.add("hamstring-stretch", coolDownPart.key)
         val id = assertNotNull(builder.save())
 
         val saved = graph.store.latestWorkout(WorkoutId(id))!!
-        assertEquals(listOf(PartKind.WARM_UP, PartKind.WORK, PartKind.WORK, PartKind.COOL_DOWN), saved.parts.map { it.kind })
+        assertEquals(listOf(PartKind.WARM_UP, PartKind.WORK, PartKind.COOL_DOWN), saved.parts.map { it.kind })
         val edit = assertNotNull(graph.editWorkout(id, "en"))
-        assertEquals(listOf("Warm-up", "Work 1", "Work 2", "Cool down"), edit.state.value.parts.map { it.name })
+        assertEquals(listOf("Warm-up", "Work", "Cool down"), edit.state.value.parts.map { it.name })
         assertEquals("3 rounds · about 6 min", edit.state.value.parts[1].summary)
         assertEquals(saved.steps, graph.store.latestWorkout(WorkoutId(edit.save()!!))!!.steps)
 
         val work = graph.compiler.compile(saved).phases.filterIsInstance<Phase.Work>()
-        assertEquals(listOf(1, 1, 2, 2, 3, 3), work.filter { it.workPart == 1 }.map { it.round })
-        assertEquals(3, work.count { it.workPart == 2 })
+        assertEquals(listOf(1, 1, 2, 2, 3, 3), work.filter { it.part == PartKind.WORK }.map { it.round })
         assertEquals(PartKind.COOL_DOWN, work.last().part)
     }
 
@@ -298,7 +292,6 @@ class BuilderStepsTest {
     fun aSetsWorkoutWithASupersetComesBackAndRuns() {
         val builder = graph.createWorkout(WorkoutFormat.SETS, "en")
         builder.rename("Upper body")
-        builder.addPart(PartKind.WARM_UP)
         builder.add("walk", builder.part(PartKind.WARM_UP))
         builder.add("dumbbell-bench-press", builder.work)
         val press = builder.state.value.addedKey!!
@@ -334,7 +327,8 @@ class BuilderStepsTest {
     fun aStepIsAnExerciseOrRecovers() {
         val builder = graph.createWorkout(WorkoutFormat.SETS, "en")
         assertEquals(listOf("Exercise", "Recover"), builder.roleOptions.map { it.label })
-        builder.add("walk", builder.work, role = StepRole.RECOVER)
+        builder.add("walk", builder.work)
+        builder.setRole(builder.state.value.addedKey!!, StepRole.RECOVER)
         assertEquals("Recover", builder.state.value.rows.single().roleLabel)
     }
 

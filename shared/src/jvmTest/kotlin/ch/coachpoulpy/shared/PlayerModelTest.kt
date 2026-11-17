@@ -37,7 +37,7 @@ class PlayerModelTest {
         val builder = graph.createWorkout(WorkoutFormat.SETS, "en")
         builder.rename("Quick")
         builder.addRepeat(builder.work)
-        val repeat = builder.state.value.parts.single().steps.single().key
+        val repeat = builder.state.value.parts[1].steps.single().key
         builder.add("push-up", builder.work, repeat)
         builder.addRest(builder.work, repeat)
         builder.changeRest(builder.state.value.addedKey!!, -1)

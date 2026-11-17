@@ -1,6 +1,6 @@
 // Poulpy the cook, a look: a tall white toque on his head, a curled French moustache under his eyes, and the face of
 // someone who knows his sauce is the best. Built on the shape and the faces of model.mjs, like a pose of poses.mjs,
-// with no dependency. The workshop's Brand > Looks > The cook page draws it live, and its idle (CHEF in motion.mjs)
+// with no dependency. The workshop's Brand > Poulpy looks > The cook page draws it live, and its idle (CHEF in motion.mjs)
 // lifts his chin and twitches his moustache.
 //
 // His face, on the proud blue side: a wide, confident grin with a few clenched teeth, eyes wide open and both brows up.

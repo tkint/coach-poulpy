@@ -32,6 +32,7 @@ data class Workout(
     fun problems(): Set<WorkoutProblem> = buildSet {
         val kinds = parts.map { it.kind }
         if (PartKind.WORK !in kinds) add(WorkoutProblem.NO_WORK_PART)
+        if (kinds.count { it == PartKind.WORK } > 1) add(WorkoutProblem.SEVERAL_WORK_PARTS)
         if (kinds.withIndex().any { (i, kind) -> kind == PartKind.WARM_UP && i != 0 }) add(WorkoutProblem.WARM_UP_NOT_FIRST)
         if (kinds.withIndex().any { (i, kind) -> kind == PartKind.COOL_DOWN && i != kinds.lastIndex }) add(WorkoutProblem.COOL_DOWN_NOT_LAST)
         val groups = steps.filterIsInstance<Step.Group>()
@@ -46,11 +47,11 @@ data class Workout(
 
 /** A rule of [Workout.problems] that a workout breaks. */
 @Serializable
-enum class WorkoutProblem { NO_WORK_PART, WARM_UP_NOT_FIRST, COOL_DOWN_NOT_LAST, NESTED_REPEAT, SETS_IN_CIRCUIT }
+enum class WorkoutProblem { NO_WORK_PART, SEVERAL_WORK_PARTS, WARM_UP_NOT_FIRST, COOL_DOWN_NOT_LAST, NESTED_REPEAT, SETS_IN_CIRCUIT }
 
 /**
  * One section of a workout: the warm-up, a work part or the cool down. A workout has at most
- * one warm-up, first, at least one work part, and at most one cool down, last.
+ * one warm-up, first, exactly one work part, and at most one cool down, last.
  */
 @Serializable
 data class Part(

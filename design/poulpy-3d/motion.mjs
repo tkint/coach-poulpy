@@ -7,10 +7,14 @@
 // the cocky one's: eyes wide open, then a wink and a smirk as stars pop up around him and twinkle. His arms are soft, so they trail behind
 // a step and swing a little past it before settling, and they hang under him when he jumps. He never
 // raises them himself (brand decisions 8 and 15): on the floor they slide, in the air they droop.
-// The cook's idle, CHEF, puffs him up and twitches his moustache (looks/chef.mjs).
-// To change a move, edit TURN, JUMP, CHEER, WINK or CHEF below, then run `node design/build-poulpy-3d.mjs`.
+// To change a move, edit TURN, JUMP, CHEER, WINK, DJ or CHEF below, then run `node design/build-poulpy-3d.mjs`.
+//
+// And the looks' idles: DJ, the DJ's (design/poulpy-3d/looks/dj.mjs), his head bobbing to the beat while he scratches one
+// record, the other turns and music notes float up around him. CHEF, the cook's (design/poulpy-3d/looks/chef.mjs), puffs
+// him up and twitches his moustache.
 import { SHAPE, linear } from './model.mjs'
 import { CONFETTI, medalHinge, medalReach, STARS } from './poses.mjs'
+import { DJ_ARMS, DJ_NOTES } from './looks/dj.mjs'
 
 export const TURN = {
   // The size of each step, in degrees, seen from above and turning to his left. They add up to one full
@@ -84,6 +88,22 @@ export const WINK = {
   // and shrinks by `twinkle` of its size, `beats` times a second, turns on itself at `spin` radians a second and
   // rocks by `rock` radians. No two stars keep the same time.
   stars: { apart: 0.09, speed: 20, damping: 0.35, twinkle: 0.22, beats: 1.6, spin: 2.4, rock: 0.3 },
+}
+
+export const DJ = {
+  // The beat, in beats a minute. Four beats make a bar.
+  tempo: 108,
+  // On each beat his head nods forward by `nod` degrees and dips by `dip` of its height, for `down` of the beat, then comes
+  // back up; it leans `sway` degrees to one side, then to the other, a beat each. Springs carry it, so it never snaps.
+  // All of it is slight: he is into the music, not dancing.
+  head: { nod: 2.2, dip: 0.018, sway: 1.2, down: 0.3, speed: 15, damping: 0.55 },
+  // The record under his right arm plays, turning at `spin` radians a second. On the other one he scratches: his arm
+  // slides `degrees` out and back as `pattern` says, one entry a half beat (1 out, 0 back), and the record rocks with
+  // it, `drag` times as far as his arm turns. His front arm rides the mixer, `ride` degrees to one side a bar, then to the other.
+  decks: { spin: 3.6, scratch: { degrees: 9, pattern: [0, 0, 0, 0, 1, 0, 1, 0], drag: 2.8, speed: 30, damping: 0.55 }, ride: 3, rideSpeed: 6 },
+  // A note starts every `every` beats, the next of DJ_NOTES in turn. It pops up on a spring a little past its size,
+  // floats up by `rise` in `life` seconds, sways `sway` from side to side and rocks `rock` radians, then shrinks away.
+  notes: { every: 2, life: 2.6, rise: 1, sway: 0.07, rock: 0.25, speed: 18, damping: 0.38 },
 }
 
 // The cook's idle (looks/chef.mjs): he stands still for `rest` seconds, then puffs himself up, sure of his sauce. His chin
@@ -480,10 +500,82 @@ export function createWink({ side = 'right', wink = WINK } = {}) {
 }
 
 /**
+ * The DJ playing, as something to advance in time.
+ * @param {{ dj?: typeof DJ }} [options]
+ * @returns The move. A pose is a turn's pose, standing still, with two of his arms sliding on the decks, and
+ *   `{ nod, tilt, records, notes }`: how far his head nods forward and leans to his right, in radians; how far each record of
+ *   DJ_PLATTERS (looks/dj.mjs) has turned, in radians, anticlockwise seen from above; and for each note of DJ_NOTES
+ *   `{ at, size, rock }`: where it is in the room, its height (0 when it is not there) and how far it has rocked, in radians.
+ */
+export function createDj({ dj = DJ } = {}) {
+  const arms = Array.from({ length: SHAPE.arms.count }, () => [0, 0, 0])
+  const spring = (s, goal, value, rate) => s.speed * s.speed * (goal - value) - 2 * s.damping * s.speed * rate
+  const beatSeconds = 60 / dj.tempo, { head, decks } = dj
+  let time = 0, nod = 0, nodSpeed = 0, squash = 0, squashSpeed = 0, tilt = 0, tiltSpeed = 0
+  let slide = 0, slideSpeed = 0, ride = 0, rideSpeed = 0, playing = 0
+  const notes = DJ_NOTES.map(() => ({ age: Infinity, size: 0, growth: 0 }))
+  let started = -1
+
+  function tick(h) {
+    time += h
+    const beats = time / beatSeconds, beat = Math.floor(beats), into = beats - beat
+    // His head: down on the beat, up after it, leaning to one side then the other.
+    const down = into < head.down
+    nodSpeed += spring(head, down ? head.nod * RAD : 0, nod, nodSpeed) * h
+    nod += nodSpeed * h
+    squashSpeed += spring(head, down ? -head.dip : 0, squash, squashSpeed) * h
+    squash += squashSpeed * h
+    tiltSpeed += spring(head, head.sway * RAD * (beat % 2 ? -1 : 1), tilt, tiltSpeed) * h
+    tilt += tiltSpeed * h
+    // The decks: one record plays, his arm scratches the other, his front arm rides the mixer.
+    playing += decks.spin * h
+    const scratch = decks.scratch, half = Math.floor(beats * 2) % scratch.pattern.length
+    slideSpeed += spring(scratch, scratch.pattern[half] * scratch.degrees * RAD, slide, slideSpeed) * h
+    slide += slideSpeed * h
+    const rider = { speed: decks.rideSpeed, damping: 0.7 }
+    rideSpeed += spring(rider, decks.ride * RAD * (Math.floor(beat / 4) % 2 ? -1 : 1), ride, rideSpeed) * h
+    ride += rideSpeed * h
+    // A new note every few beats, the next one in turn.
+    const due = Math.floor(beats / dj.notes.every)
+    if (due > started) { started = due; notes[due % notes.length].age = 0 }
+    notes.forEach((n) => {
+      n.age += h
+      n.growth += spring(dj.notes, n.age < dj.notes.life ? 1 : 0, n.size, n.growth) * h
+      n.size = Math.max(n.size + n.growth * h, 0)
+    })
+  }
+
+  let owed = 0
+  const sim = {
+    pose() {
+      // The scratching arm bends at its last two joints, so its tip slides over the record; the others lie still.
+      const [right, left] = DJ_ARMS, bends = arms.map((a) => [...a])
+      bends[left] = [0, slide * 0.65, slide * 0.35]
+      bends[0] = [0, ride * 0.6, ride * 0.4]
+      bends[right] = [0, -ride * 0.3, -ride * 0.2]
+      return {
+        yaw: 0, squash, arms: bends, nod, tilt,
+        records: [playing, -slide * decks.scratch.drag],
+        notes: DJ_NOTES.map(({ from, size }, i) => {
+          const { age } = notes[i], t = Math.min(age / dj.notes.life, 1.2), up = dj.notes.rise * (1 - (1 - Math.min(t, 1)) ** 2)
+          return { at: [from[0] + dj.notes.sway * Math.sin(age * 2.6 + i * 1.7), from[1] + up, from[2]], size: notes[i].size * size, rock: dj.notes.rock * Math.sin(age * 3.1 + i) }
+        }),
+      }
+    },
+    advance(seconds) {
+      owed += Math.min(Math.max(seconds, 0), 1)
+      while (owed >= SUBSTEP) { tick(SUBSTEP); owed -= SUBSTEP }
+      return sim.pose()
+    },
+  }
+  return sim
+}
+
+/**
  * The cook's idle, as something to advance in time.
  * @param {{ chef?: typeof CHEF }} [options]
  * @returns The move. A pose is a turn's pose, standing still, and `{ chin, twitch }`: how far his chin is up, in radians,
- *   his head tipping back around CHEF.chin.pivot; and how far into a moustache twitch he is, from 0 to 1, for chefFace in looks/chef.mjs.
+ *   his head tipping back around CHEF.chin.pivot; and how far into a moustache twitch he is, from 0 to 1, for buildChef in looks/chef.mjs.
  */
 export function createChef({ chef = CHEF } = {}) {
   const arms = Array.from({ length: SHAPE.arms.count }, () => [0, 0, 0])

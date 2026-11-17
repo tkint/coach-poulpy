@@ -56,7 +56,7 @@ internal class PlayerFace(
             exerciseSlug = work?.exercise?.value,
             pattern = exercise?.movementPattern,
             partKind = here?.part,
-            partLabel = here?.let { labels.partLine(labels.part(it.part, it.workPart), it.round, it.rounds) },
+            partLabel = here?.let { labels.partLine(labels.part(it.part), it.round, it.rounds) },
             roleLabel = if (phase is Phase.Rest) labels.role(StepRole.RECOVER) else work?.let { labels.role(it.role) },
             setNumber = sets?.first ?: 0,
             setCount = sets?.second ?: 0,
@@ -105,8 +105,8 @@ internal class PlayerFace(
             then?.let { labels.restThen(after.duration.inWholeSeconds.toInt(), thenLabel(it, current)) }
         }
         is Phase.Work ->
-            if (here != null && (after.part != here.part || after.workPart != here.workPart)) {
-                labels.part(after.part, after.workPart) + " · " + nameOf(after)
+            if (here != null && after.part != here.part) {
+                labels.part(after.part) + " · " + nameOf(after)
             } else {
                 nameOf(after) + " · " + detailOf(after)
             }

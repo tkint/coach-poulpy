@@ -103,26 +103,29 @@ internal class Labels(private val languageCode: String, private val units: () ->
         WorkoutFormat.SETS -> DomainText.formatSets(languageCode)
     }
 
-    /** "Warm-up", "Work", or "Work 2" when the workout has several work parts ([number]). */
-    fun part(kind: PartKind, number: Int? = null) = when (kind) {
+    /** "Warm-up", "Work" or "Cool down". */
+    fun part(kind: PartKind) = when (kind) {
         PartKind.WARM_UP -> DomainText.partWarmUp(languageCode)
-        PartKind.WORK -> if (number == null) DomainText.partWork(languageCode) else DomainText.partWorkNumbered(languageCode, number)
+        PartKind.WORK -> DomainText.partWork(languageCode)
         PartKind.COOL_DOWN -> DomainText.partCoolDown(languageCode)
     }
 
-    /** "Add to warm-up", "Add to Work 2": the link at the end of a part in the builder; [number] as in [part]. */
-    fun addTo(kind: PartKind, number: Int? = null) = when (kind) {
+    /** "Add to warm-up": the label of a part's + button in the builder. */
+    fun addTo(kind: PartKind) = when (kind) {
         PartKind.WARM_UP -> DomainText.partAddToWarmUp(languageCode)
-        PartKind.WORK -> DomainText.partAddToWork(languageCode, number ?: 0)
+        PartKind.WORK -> DomainText.partAddToWork(languageCode)
         PartKind.COOL_DOWN -> DomainText.partAddToCoolDown(languageCode)
     }
 
-    /** "In Work 2", where a step sits; [number] as in [part]. */
-    fun inPart(kind: PartKind, number: Int? = null) = when (kind) {
+    /** "In Work", where a step sits. */
+    fun inPart(kind: PartKind) = when (kind) {
         PartKind.WARM_UP -> DomainText.partInWarmUp(languageCode)
-        PartKind.WORK -> DomainText.partInWork(languageCode, number ?: 0)
+        PartKind.WORK -> DomainText.partInWork(languageCode)
         PartKind.COOL_DOWN -> DomainText.partInCoolDown(languageCode)
     }
+
+    /** What a part with no step says under its name in the builder: "Optional" for the warm-up and the cool down, "Nothing yet" for the work. */
+    fun partEmpty(kind: PartKind) = if (kind == PartKind.WORK) DomainText.partNothingYet(languageCode) else DomainText.partOptional(languageCode)
 
     /** "once per round, 4 rounds", for a step of a circuit's repeat. */
     fun oncePerRound(roundCount: Int) = DomainText.countOncePerRound(languageCode, rounds(roundCount))
@@ -135,16 +138,6 @@ internal class Labels(private val languageCode: String, private val units: () ->
     }
 
     fun rounds(count: Int) = DomainText.countRounds(languageCode, count)
-
-    /** Why a part cannot be added again. */
-    val alreadyInWorkout get() = DomainText.partAlreadyIn(languageCode)
-
-    /** Where a new part goes: "Goes first", "Goes last", or "Added after Work 2 as Work 3". */
-    fun partGoes(kind: PartKind, after: String, name: String) = when (kind) {
-        PartKind.WARM_UP -> DomainText.partGoesFirst(languageCode)
-        PartKind.WORK -> DomainText.partAddedAfter(languageCode, after = after, part = name)
-        PartKind.COOL_DOWN -> DomainText.partGoesLast(languageCode)
-    }
 
     /** The player's part line: "Work 1 · round 2 of 4", or the [part] alone outside a repeat. */
     fun partLine(part: String, round: Int, rounds: Int) =
