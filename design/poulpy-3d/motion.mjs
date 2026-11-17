@@ -486,7 +486,7 @@ export function createWink({ side = 'right', wink = WINK } = {}) {
   return sim
 }
 
-// The jetpack look's flight (looks/jetpack.mjs), a draft: he hovers off the floor and zooms from one side to the other, grinning.
+// The jetpack look's flight (looks/jetpack.mjs), a draft: he hovers off the floor and zooms from one side to the other, smiling.
 export const ZOOM = {
   // He hovers `hover` off the floor and bobs `bob` up and down, `beats` times a second.
   hover: 1.4, bob: 0.07, beats: 0.8,
@@ -501,7 +501,7 @@ export const ZOOM = {
   // towards the tip; flying, they are heavier (`weight`, the G's) and they trail behind as he zooms. The G's also hold them back from
   // swinging: `damping` near 1 lets them lag and settle with hardly a swing past him. `limit` is the most one bend may open, in degrees.
   arms: { speed: [13, 10.5, 8.5], damping: [0.9, 0.85, 0.8], weight: 30, limit: 75 },
-  // His face comes alive with the push: his grin opens and his cheeks push up (jetpackFace in looks/jetpack.mjs) on a lively spring, and
+  // His smile widens a touch with the push (jetpackFace in looks/jetpack.mjs), on a spring, and
   // his head widens by `squash` of its height and wobbles back.
   grin: { speed: 9, damping: 0.45 }, squash: { depth: 0.06, speed: 14, damping: 0.3 },
   // The flames burn at `idle` of their length while he hovers and up to `idle + thrust` as he pushes hardest (`atPush` units a second
@@ -573,7 +573,7 @@ export function createZoom({ softness = 1, zoom = ZOOM, nozzles = [], flame = 1 
     yawSpeed += spring(zoom.lean, going * zoom.face * RAD, yaw, yawSpeed) * h
     yaw += yawSpeed * h
     body = placement()
-    // His grin and his head follow the push.
+    // His smile and his head follow the push.
     const pushing = Math.min(push / zoom.flames.atPush, 1)
     exciteSpeed += spring(zoom.grin, pushing, excite, exciteSpeed) * h
     excite = Math.max(0, Math.min(1.1, excite + exciteSpeed * h))
@@ -658,7 +658,7 @@ export function createZoom({ softness = 1, zoom = ZOOM, nozzles = [], flame = 1 
     const flicker = 1 + zoom.flames.flicker * (Math.sin(t * 2.1 + i * 2.3) * 0.6 + Math.sin(t * 3.7 + i) * 0.4)
     return [burn * flicker, 1 + 0.5 * (flicker - 1) + 0.1 * (burn - zoom.flames.idle)]
   })
-  // His face, for jetpackFace: how far into his grin he is.
+  // His face, for jetpackFace: how far his smile has widened.
   const face = () => Math.min(excite, 1)
   // A puff grows fast, holds, then shrinks away at the end of its life.
   const puffSizes = () => puffs.map((p) => {

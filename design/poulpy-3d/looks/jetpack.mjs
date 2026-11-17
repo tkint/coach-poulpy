@@ -1,22 +1,22 @@
 // Poulpy with a jetpack, a look: a draft for the owner to watch, not in the apps. He wears a little rocket pack on his back and zooms from
-// side to side, grinning, while his tentacles hang and trail under him. Built on the shape and the faces of model.mjs; how he flies is
+// side to side, smiling, eyes shut with joy, while his tentacles hang and trail under him. Built on the shape and the faces of model.mjs; how he flies is
 // ZOOM in motion.mjs. The workshop's Brand > Poulpy looks > Jetpack page draws him live.
 //
 // The pack is solid, part of him: two little rockets on a plate across the back of his head, a nose, a stripe and a fin on each and a
 // nozzle under each. The flames and the smoke are comic effects: flat, and kept facing the viewer by whoever draws him. He never lifts a
 // tentacle (brand decision 8): flying, they only hang and trail.
 // To change it, edit JETPACK below (and ZOOM in motion.mjs) and look at the page.
-import { buildPoulpy3d, egg, join, linear, tube } from '../model.mjs'
+import { FACES, buildPoulpy3d, egg, join, linear, tube } from '../model.mjs'
 
 const NIGHT = '#1574B0', STEEL = '#56687A'
 
 export const JETPACK = {
   // He is happy, on the blue side: flying is fun.
   mood: 'happy',
-  // His grin, which moves (see jetpackFace below), in the drawings' coordinates (see FACES in model.mjs). Each `[hovering, dashing]` pair
-  // is blended by how hard he pushes: `smile` is the open smile's half width and depth, `corners` how high its corners sit, `eyes` the
-  // eyes' height (they narrow as his cheeks push up), `cheeks` the cheeks' height and half width.
-  grin: { smile: [[12, 12], [15.5, 15.5]], corners: [107, 104.5], eyes: [11, 8], cheeks: [[112, 8], [108, 10]] },
+  // His face, the DJ's (DJ_FACE in dj.mjs), in the drawings' coordinates (see FACES in model.mjs): eyes shut in two happy arcs and a small
+  // smile, a little lopsided, with the happy blush. He is enjoying the ride. `smile` is the mouth as a curve (start, pull, end) while he
+  // hovers and as he pushes hardest: it only widens a touch (jetpackFace below).
+  smile: [[90, 112, 101, 122, 111, 111], [88.5, 111.5, 101, 123, 112.5, 110]],
   // The two tanks, his right one at -x: where the foot of each stands (out, up, back), how long and thick it is, how tall its round nose
   // is, and how far it leans in at the top, in degrees, so its nozzle and its flame point down and out, clear of his tentacles.
   tank: { x: 1.1, y: 0.56, z: -0.55, length: 0.78, radius: 0.3, nose: 0.28, splay: 22 },
@@ -31,21 +31,15 @@ export const JETPACK = {
 const { tank } = JETPACK
 const RAD = Math.PI / 180
 
-const between = (a, b, t) => a + (b - a) * t
 /**
- * His face as he flies, as features for buildPoulpy3d. From `t` 0 to 1 he goes from hovering to dashing: the smile opens wider and its
- * corners rise, his cheeks push up and his eyes narrow above them. He does not blink yet: a natural, rare blink may come later.
+ * His face as he flies, as features for buildPoulpy3d: eyes shut in happy arcs, a small lopsided smile and the happy blush. From `t` 0
+ * (hovering) to 1 (pushing hardest) the smile widens a touch; nothing else moves.
  */
 export function jetpackFace(t) {
-  const { grin } = JETPACK, push = Math.max(0, Math.min(t, 1))
-  const at = ([a, b]) => between(a, b, push)
-  const w = at(grin.smile.map((s) => s[0])), d = at(grin.smile.map((s) => s[1])), y = at(grin.corners)
-  const tall = at(grin.eyes), [cheekY, cheekX] = [at(grin.cheeks.map((c) => c[0])), at(grin.cheeks.map((c) => c[1]))]
+  const push = Math.max(0, Math.min(t, 1)), [rest, wide] = JETPACK.smile
   return [
-    ['eye', 80, 94 - push, 9.5, tall], ['eye', 120, 94 - push, 9.5, tall],
-    ['shape', `M${100 - w} ${y} Q100 ${y + 4} ${100 + w} ${y} Q${100 + w - 2} ${y + d} 100 ${y + d} Q${100 - w + 2} ${y + d} ${100 - w} ${y} Z`, 'mouth'],
-    ['oval', 100, y + d - 4, w * 0.55, 3 + push, '#F07A7A', 'tongue'],
-    ['cheek', 64, cheekY, cheekX, 4.5 + push, '#F49A6B', 0.75], ['cheek', 136, cheekY, cheekX, 4.5 + push, '#F49A6B', 0.75],
+    ['curve', 71, 98, 80, 90, 89, 98, 4.5, 'eye_right'], ['curve', 111, 98, 120, 90, 129, 98, 4.5, 'eye_left'],
+    ['curve', ...rest.map((v, i) => v + (wide[i] - v) * push), 4.5, 'mouth'], ...FACES.happy.filter(([kind]) => kind === 'cheek'),
   ]
 }
 /**
