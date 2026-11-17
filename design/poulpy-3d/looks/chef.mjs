@@ -3,13 +3,11 @@
 // with no dependency. The workshop's Brand > Looks > The cook page draws it live, and its idle (CHEF in motion.mjs)
 // lifts his chin and twitches his moustache.
 //
-// Two faces to choose from, both on the proud blue side:
-//   cocky  the cocky face of FACES, one lid down and one brow up, with the smirk moved under the moustache
-//   grin   a very wide, clenched, toothy grin from cheek to cheek, eyes wide open and both brows up
+// His face, on the proud blue side: a wide, confident grin with a few clenched teeth, eyes wide open and both brows up.
 // The moustache is part of his face, written in the drawing's coordinates like every feature, so it stays on his skin
 // when he turns; the toque is solid, sits on his head and goes wherever his head goes. He has no arms (brand decision 8).
-// To change the look, edit TOQUE, MOUSTACHE or CHEF_FACES below and look at the page.
-import { FACES, buildPoulpy3d, linear, tube, join } from '../model.mjs'
+// To change the look, edit TOQUE, MOUSTACHE or CHEF_FACE below and look at the page.
+import { buildPoulpy3d, linear, tube, join } from '../model.mjs'
 
 // The toque, in units of the model (his head is about 1 from its middle). `profile` is its outline from the bottom of its
 // band to the top of its puff, as [distance from its middle, height], turned around its middle; `pleats` puts that many soft
@@ -30,14 +28,17 @@ export const TOQUE = {
 
 // The moustache: a handlebar, thick under his middle and thinning out to two tips that curl up and in. Written as the
 // drawing's paths, for his right side (the viewer's left); his left side is the same, swapped across his middle.
-// `twitch` lifts the tips by that many drawing units at the top of a twitch, and curls them a little tighter.
+// `size` scales it, across and up, around `middle`, the point under his middle where its two wings meet. `twitch` lifts the tips by that
+// many drawing units at the top of a twitch, and curls them a little tighter.
 export const MOUSTACHE = {
   wing: 'M100 105 C94 102.5 85 102.5 79 106 C76.5 107.5 74.5 107.5 72.5 105.5 C73.5 110.5 79 114 86.5 114 C92.5 114 97 112.5 100 111.5',
-  curl: 'M73.5 106.5 Q67.5 104.5 68.5 99 Q70 94.5 74.5 96 Q77 97.5 75 100.5',
+  curl: 'M73.5 106.5 Q67 106 66.5 101.5 Q67 97.5 71 98 Q73.5 99 72 102',
   curlWidth: 3.4,
+  size: [1.35, 1.12],
+  middle: [100, 108],
   twitch: 3.2,
   // How far the whole moustache sits below where its paths are written.
-  drop: 2,
+  drop: -1,
   colour: null, // ink, like his eyes and brows
 }
 
@@ -51,13 +52,17 @@ const reshape = (d, to) => d.replace(/(-?\d*\.?\d+)\s+(-?\d*\.?\d+)/g, (_, x, y)
  */
 export function moustache(t = 0) {
   // How far a point is from his middle, as a share of the moustache's half width, squared: the tips move, the middle does not.
-  const lift = (x, y) => { const far = Math.min(Math.abs(x - 100) / 28, 1.2) ** 2; return [x + Math.sign(100 - x) * 0.6 * t * far, y + MOUSTACHE.drop - MOUSTACHE.twitch * t * far] }
+  const { size, middle: [mx, my] } = MOUSTACHE
+  const lift = (x, y) => {
+    const far = Math.min(Math.abs(x - 100) / 28, 1.2) ** 2, lx = x + Math.sign(100 - x) * 0.6 * t * far, ly = y - MOUSTACHE.twitch * t * far
+    return [mx + (lx - mx) * size[0], my + (ly - my) * size[1] + MOUSTACHE.drop]
+  }
   const right = reshape(MOUSTACHE.wing, lift), curl = reshape(MOUSTACHE.curl, lift)
   // Both wings are one shape: his right wing out from his middle and back, then his left one, walked the other way.
   const colour = MOUSTACHE.colour ? [MOUSTACHE.colour] : []
   return [
     ['shape', `${right} ${reverseCubic(mirror(right))} Z`, ...colour, 'moustache'],
-    ['path', `${curl} ${mirror(curl)}`, MOUSTACHE.curlWidth, ...colour, 'moustache_curls'],
+    ['path', `${curl} ${mirror(curl)}`, MOUSTACHE.curlWidth * size[1], ...colour, 'moustache_curls'],
   ]
 }
 
@@ -72,32 +77,24 @@ function reverseCubic(d) {
   return curves.reverse().map(([s, c1, c2]) => `C${at(c2)} ${at(c1)} ${at(s)}`).join(' ')
 }
 
-// The two faces, without the moustache. Left and right are Poulpy's own, as in FACES.
-const BLUSH = FACES.cocky.filter(([kind]) => kind === 'cheek')
-export const CHEF_FACES = {
-  // FACES.cocky with its eyes a little higher, to make room, and its smirk moved down under the moustache.
-  cocky: [
-    ...FACES.cocky.filter(([kind, ...v]) => kind !== 'cheek' && v[v.length - 1] !== 'mouth').map(([kind, ...v]) => [kind, ...v.map((value, i) => (typeof value === 'number' && (kind === 'curve' || kind === 'lid' ? i % 2 === 1 && i < (kind === 'curve' ? 6 : 4) : i === 1) ? value - 5 : value))]),
-    ['curve', 89, 122, 103, 129, 115, 117, 4.5, 'mouth'],
-    ...BLUSH,
-  ],
-  // A grin from cheek to cheek, teeth clenched, eyes wide and both brows up: nothing can go wrong in his kitchen.
-  grin: [
-    ['eye', 80, 91, 8.5, 10], ['eye', 120, 91, 8.5, 10],
-    ['curve', 67, 75, 79, 67, 91, 72, 4.5, 'brow_right'], ['curve', 109, 72, 121, 67, 133, 75, 4.5, 'brow_left'],
-    ['shape', 'M70 108 Q100 119 130 108 Q127 129 100 131 Q73 129 70 108 Z', '#FFFFFF', 'teeth'],
-    ['path', 'M70 108 Q100 119 130 108 Q127 129 100 131 Q73 129 70 108 Z', 3.5, 'mouth'],
-    ['path', 'M72 116 Q100 126 128 116', 2.5, 'teeth_line'],
-    ['path', 'M86 114.5 L86 129 M100 116.5 L100 131 M114 114.5 L114 129', 2, 'teeth_gaps'],
-    ['cheek', 61, 106, 7, 4.5, '#F49A6B', 0.75], ['cheek', 139, 106, 7, 4.5, '#F49A6B', 0.75],
-  ],
-}
+// His face, without the moustache: a confident grin, narrower than his cheeks, with only a few top teeth showing under the
+// moustache and the bottom ones; eyes wide open and both brows up, set high to leave the moustache room.
+// Left and right are Poulpy's own, as in FACES.
+export const CHEF_FACE = [
+  ['eye', 80, 85, 8.5, 10], ['eye', 120, 85, 8.5, 10],
+  ['curve', 67, 69, 79, 61, 91, 66, 4.5, 'brow_right'], ['curve', 109, 66, 121, 61, 133, 69, 4.5, 'brow_left'],
+  ['shape', 'M78 109 Q100 119 122 109 Q119 128 100 130 Q81 128 78 109 Z', '#FFFFFF', 'teeth'],
+  ['path', 'M78 109 Q100 119 122 109 Q119 128 100 130 Q81 128 78 109 Z', 3.5, 'mouth'],
+  ['path', 'M80 118 Q100 126 120 118', 2.5, 'teeth_line'],
+  ['path', 'M93 119 L93 129 M107 119 L107 129', 2, 'teeth_gaps'],
+  ['cheek', 60, 108, 7, 4.5, '#F49A6B', 0.75], ['cheek', 140, 108, 7, 4.5, '#F49A6B', 0.75],
+]
 
 /** The mood the cook is drawn in: proud, on the blue side. */
 export const CHEF_MOOD = 'proud'
 
-/** His face as a cook, `twitch` into a moustache twitch (0 at rest, 1 tips up): one of CHEF_FACES and the moustache over it. */
-export const chefFace = (face = 'cocky', twitch = 0) => [...CHEF_FACES[face], ...moustache(twitch)]
+/** His face as a cook, `twitch` into a moustache twitch (0 at rest, 1 tips up): CHEF_FACE and the moustache over it. */
+export const chefFace = (twitch = 0) => [...CHEF_FACE, ...moustache(twitch)]
 
 // --- the toque ---------------------------------------------------------------------------------------
 
@@ -180,14 +177,14 @@ export function toque() {
 
 /**
  * Builds Poulpy the cook.
- * @param {{ face?: 'cocky' | 'grin' | null, twitch?: number, tones: Record<string, string>, colours: { blue: string, ember: string, ink: string }, faceOnly?: boolean }} options
- *   `face` picks one of CHEF_FACES (null for none, for whoever draws his face apart while he moves) and `twitch` how far
+ * @param {{ face?: boolean, twitch?: number, tones: Record<string, string>, colours: { blue: string, ember: string, ink: string }, faceOnly?: boolean }} options
+ *   `face: false` leaves his face out, for whoever draws it apart while he moves, and `twitch` is how far
  *   into a moustache twitch he is. `tones` are the `mood` tokens of design/tokens.json and `colours` its `color.poulpy`
  *   tokens. He is always proud, on the blue side (CHEF_MOOD). `faceOnly` builds his face alone, without his head or toque.
  * @returns What buildPoulpy3d returns, with the toque among his parts (it goes with his head) and `height` up to its top.
  */
-export function buildChef({ face = 'cocky', twitch = 0, tones, colours, faceOnly = false }) {
-  const model = buildPoulpy3d({ mood: CHEF_MOOD, tone: tones[CHEF_MOOD], features: face ? chefFace(face, twitch) : [], colours, faceOnly })
+export function buildChef({ face = true, twitch = 0, tones, colours, faceOnly = false }) {
+  const model = buildPoulpy3d({ mood: CHEF_MOOD, tone: tones[CHEF_MOOD], features: face ? chefFace(twitch) : [], colours, faceOnly })
   // The moustache lies over his mouth, so it is lifted a hair further off his skin than the teeth under it.
   for (const part of model.parts) if (part.name === 'moustache') part.positions = part.positions.map((v, i) => v + part.normals[i] * 0.008)
   if (faceOnly) return model

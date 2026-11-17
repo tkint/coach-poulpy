@@ -1,16 +1,11 @@
 <script setup lang="ts">
-// Poulpy the cook (design/poulpy-3d/looks/chef.mjs), live: his two faces side by side, each in its own view drawn by
-// poulpy3dScene.ts, so the owner can pick one. Both run the cook's idle (CHEF in motion.mjs) on the same clock: his chin
-// goes up and his moustache twitches. One set of controls turns both. Nothing moves off screen or with reduced motion.
+// Poulpy the cook (design/poulpy-3d/looks/chef.mjs), live, drawn by poulpy3dScene.ts, running the cook's idle (CHEF in
+// motion.mjs): his chin goes up and his moustache twitches. Nothing moves off screen or with reduced motion.
 import { onBeforeUnmount, onMounted, shallowRef, useTemplateRef, watch } from 'vue'
-import type { ChefFace } from '../../../../../design/poulpy-3d/looks/chef.mjs'
 import type { Chef } from '../../../../../design/poulpy-3d/motion.mjs'
 import type { createPoulpyScene } from '../poulpy3dScene'
 
-const variants: { face: ChefFace; label: string; about: string }[] = [
-  { face: 'cocky', label: 'A · Cocky', about: 'One lid down, one brow up, and a smirk under the moustache.' },
-  { face: 'grin', label: 'B · Big grin', about: 'Eyes wide, brows up and a toothy grin from cheek to cheek.' },
-]
+const variants = [{ face: 'grin', about: 'Eyes wide, brows up and a confident grin under a big curled moustache.' }]
 
 const stages = useTemplateRef<HTMLDivElement[]>('stages')
 const canvases = useTemplateRef<HTMLCanvasElement[]>('canvases')
@@ -55,10 +50,9 @@ onMounted(async () => {
     if (!canvases.value?.length) return
     const colours = tokens.color.poulpy, tones = tokens.mood
     scenes = canvases.value.map((canvas) => createPoulpyScene(canvas))
-    showAll = () => scenes.forEach((scene, i) => {
-      const { face } = variants[i]
-      // His face is drawn apart, at each step of a twitch, so the idle can twitch his moustache.
-      scene.show({ model: buildChef({ face: null, tones, colours }), faces: (t) => buildChef({ face, twitch: t, tones, colours, faceOnly: true }) }, outline.value)
+    // His face is drawn apart, at each step of a twitch, so the idle can twitch his moustache.
+    showAll = () => scenes.forEach((scene) => {
+      scene.show({ model: buildChef({ face: false, tones, colours }), faces: (t) => buildChef({ twitch: t, tones, colours, faceOnly: true }) }, outline.value)
     })
     idle = createChef()
   } catch {
@@ -89,7 +83,7 @@ onBeforeUnmount(() => {
           <canvas ref="canvases" role="img" :aria-label="`Poulpy the cook in a tall white toque and a curled moustache, ${v.about.toLowerCase()}`" />
           <p v-if="failed" class="failed">The 3D preview could not start in this browser.</p>
         </div>
-        <figcaption><strong>{{ v.label }}</strong> {{ v.about }}</figcaption>
+        <figcaption>{{ v.about }}</figcaption>
       </figure>
     </div>
     <div class="controls">
@@ -105,12 +99,11 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .poulpy-chef { display: flex; flex-direction: column; gap: 12px; margin: 16px 0; }
-.variants { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+.variants { display: grid; max-width: 420px; gap: 16px; }
 .variant { margin: 0; display: flex; flex-direction: column; gap: 8px; }
 .stage { position: relative; aspect-ratio: 5 / 6; border-radius: 24px; background: var(--cp-surface-variant); overflow: hidden; }
 .stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; border-radius: 24px; }
 figcaption { font-size: 14px; color: var(--cp-on-surface-variant); }
-figcaption strong { color: var(--cp-on-surface); margin-right: 4px; }
 .failed { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; padding: 24px; text-align: center; font-size: 13px; color: var(--cp-on-surface-variant); }
 .controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
 .toggles { display: inline-flex; gap: 8px; }
