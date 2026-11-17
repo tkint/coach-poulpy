@@ -101,6 +101,8 @@ internal fun PoulpyTextField(
     keyboardType: KeyboardType = KeyboardType.Text,
     password: Boolean = false,
     contentType: ContentType? = null,
+    /** What the empty field suggests typing, in the muted colour. */
+    placeholder: String? = null,
 ) {
     var focused by remember { mutableStateOf(false) }
     var shown by remember { mutableStateOf(false) }
@@ -122,6 +124,14 @@ internal fun PoulpyTextField(
                     visualTransformation = if (password && !shown) PasswordVisualTransformation() else VisualTransformation.None,
                     modifier = Modifier.weight(1f).onFocusChanged { focused = it.isFocused }
                         .then(if (contentType != null) Modifier.semantics { this.contentType = contentType } else Modifier),
+                    decorationBox = { field ->
+                        Box(contentAlignment = Alignment.CenterStart) {
+                            if (value.isEmpty() && placeholder != null) {
+                                Text(placeholder, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, color = colors.onSurfaceVariant)
+                            }
+                            field()
+                        }
+                    },
                 )
                 if (password) {
                     IconButton(onClick = { shown = !shown }) {

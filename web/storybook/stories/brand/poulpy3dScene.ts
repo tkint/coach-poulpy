@@ -5,7 +5,7 @@
 // the controls; this file owns the canvas and everything WebGL, and gives it all back on dispose().
 import * as THREE from 'three'
 import tokens from '../../../../design/tokens.json'
-import { buildPoulpy3d, gleamPatch, LOOK, type PoulpyMaterial, type PoulpyMood, type PoulpyPart, type PoulpySide } from '../../../../design/poulpy-3d/model.mjs'
+import { buildPoulpy3d, gleamPatch, LOOK, type Poulpy3d, type PoulpyMaterial, type PoulpyMood, type PoulpyPart, type PoulpySide } from '../../../../design/poulpy-3d/model.mjs'
 import { buildPoulpyPose, CONFETTI, GOLDEN, medalHinge, poseMood, STARS, starShape, type PoulpyPose } from '../../../../design/poulpy-3d/poses.mjs'
 import { armJoints, armSkin, squashScale, type CheerPose, type DjPose, type JumpPose, type TurnPose, type WinkPose } from '../../../../design/poulpy-3d/motion.mjs'
 import { buildDj, DJ_KIT, DJ_NOTES, DJ_PLATTERS, noteShape } from '../../../../design/poulpy-3d/looks/dj.mjs'
@@ -123,14 +123,18 @@ export function createPoulpyScene(canvas: HTMLCanvasElement) {
   /**
    * Builds Poulpy again for a side of the plush, one of his moods or one of his poses, with or without the outline.
    * A pose with `effects: false` leaves out the flat effects around him, for when he moves, and one with `faces`
-   * takes his face from it instead: the face at each step from 0 to 1, for pose() to pick from. A look (`{ look: 'dj' }`) is built by
-   * its own file in design/poulpy-3d/looks, without its still effects: they move when he plays.
+   * takes his face from it instead: the face at each step from 0 to 1, for pose() to pick from. `{ model }` shows a Poulpy built
+   * elsewhere, a look (design/poulpy-3d/looks/): what he wears rides on his head. The DJ (`{ look: 'dj' }`) is built by its own
+   * file, without its still effects: they move when he plays.
    */
-  function show(as: PoulpySide | PoulpyMood | { pose: PoulpyPose; effects?: boolean; faces?: (t: number) => (string | number)[][] } | { look: 'dj' }, outline: boolean) {
+  function show(as: PoulpySide | PoulpyMood | { pose: PoulpyPose; effects?: boolean; faces?: (t: number) => (string | number)[][] } | { model: Poulpy3d & { headTilt?: number } } | { look: 'dj' }, outline: boolean) {
     clear()
     const colours = tokens.color.poulpy
     const changing = typeof as === 'object' && 'pose' in as ? as.faces : undefined
-    const inPose = typeof as !== 'object' ? undefined : 'look' in as ? buildDj({ tones: tokens.mood, colours, effects: false }) : buildPoulpyPose({ pose: as.pose, effects: as.effects, ...(changing && { face: [] }), tones: tokens.mood, colours })
+    const inPose = typeof as !== 'object' ? undefined
+      : 'model' in as ? as.model
+      : 'look' in as ? buildDj({ tones: tokens.mood, colours, effects: false })
+      : buildPoulpyPose({ pose: as.pose, effects: as.effects, ...(changing && { face: [] }), tones: tokens.mood, colours })
     const model = inPose ?? (as === 'blue' || as === 'ember' ? buildPoulpy3d({ side: as, colours }) : buildPoulpy3d({ mood: as as PoulpyMood, tone: tokens.mood[as as PoulpyMood], colours }))
     centre = model.height / 2
     stance = { headLift: model.headLift, headTilt: inPose?.headTilt ?? 0 }
@@ -225,10 +229,12 @@ export function createPoulpyScene(canvas: HTMLCanvasElement) {
     if (rig) {
       const jump = next && 'droop' in next ? next : undefined, cheer = next && 'medal' in next ? next : undefined, wink = next && 'wink' in next ? next : undefined
       const dj = next && 'records' in next ? next : undefined
+      // A pose with `tilt` leans his head: the wink's, the DJ's bob, or a look's idle.
+      const leaning = next && 'tilt' in next ? next : undefined
       rig.turn.rotation.set(0, next?.yaw ?? 0, jump?.lean ?? 0, 'YXZ')
       rig.turn.position.y = jump?.lift ?? 0
       rig.squash.position.y = stance.headLift + (jump?.head ?? 0)
-      rig.squash.rotation.z = stance.headTilt + (wink?.tilt ?? dj?.tilt ?? 0)
+      rig.squash.rotation.z = stance.headTilt + (leaning?.tilt ?? 0)
       // The DJ nods around the floor under his middle, so his head bobs forward and his arms stay put.
       rig.squash.rotation.x = dj?.nod ?? 0
       records.forEach((record, i) => { record.rotation.y = dj?.records[i] ?? 0 })
@@ -353,5 +359,6 @@ export function createPoulpyScene(canvas: HTMLCanvasElement) {
     renderer.dispose()
   }
 
-  return { show, look, pose, fumes, dispose }
+  // `room` is the three.js scene, for a look to add what goes on around him (falling leaves); it removes and disposes of it itself.
+  return { show, look, pose, fumes, dispose, room: scene }
 }

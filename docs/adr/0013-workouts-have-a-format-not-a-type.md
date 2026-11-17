@@ -25,4 +25,4 @@ Not changed: `SETS_IN_CIRCUIT` stays, so the format is still more than a present
 
 ## Amendment: one work part
 
-A workout has exactly one work part. A second work part added only a labelled chunk with its own subtotal; in a circuit, separate repeats do that job, and in sets each exercise carries its own sets. The builder mockups (design/builder-tidy) show it. The shared model still allows several until the apps follow; no migration is planned while the app is in test.
+A workout has exactly one work part. A second work part added only a labelled chunk with its own subtotal; in a circuit, separate repeats do that job, and in sets each exercise carries its own sets. The builder mockups (design/builder-tidy) show it. `Workout.problems()` reports `SEVERAL_WORK_PARTS` for more than one, so such a workout cannot be built, imported or edited; no migration was written while the app is in test.
