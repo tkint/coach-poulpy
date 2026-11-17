@@ -44,13 +44,14 @@ export function createJump(options?: { softness?: number; stride?: number; jump?
 export function createCheer(options?: { softness?: number; stride?: number; cheer?: typeof CHEER; turn?: typeof TURN }): Cheer
 export function createWink(options?: { side?: 'left' | 'right'; wink?: typeof WINK }): Wink
 /** A jump's pose (`head` and `spread` are 0) and, for the jetpack look: `shift`, how far he is to the viewer's right; `flames`, each nozzle's flames as `[length, width]` scales; `puffs`, each puff of smoke `[x, y, z, size]` in the room, size 0 when it is not there. */
-export interface ZoomPose extends JumpPose { shift: number; flames: number[][]; puffs: number[][] }
+export interface ZoomPose extends JumpPose { face: number; shift: number; flames: number[][]; puffs: number[][] }
 export interface Zoom { softness: number; advance(seconds: number): ZoomPose; pose(): ZoomPose }
 export const ZOOM: {
   hover: number; bob: number; beats: number
-  stops: number[]; seconds: number[]; body: { speed: number; damping: number }
+  stops: number[]; seconds: number[]; glide: number; body: { speed: number; damping: number }
   bank: number; face: number; atSpeed: number; most: number; lean: { speed: number; damping: number }
   arms: { speed: number[]; damping: number[]; weight: number; limit: number }
+  grin: { speed: number; damping: number }; squash: { depth: number; speed: number; damping: number }; blinks: number[]; blink: number
   flames: { idle: number; thrust: number; atPush: number; flicker: number; beats: number }
   smoke: { pieces: number; rate: number; life: number[]; speed: number; drag: number; rise: number; size: number[] }
 }

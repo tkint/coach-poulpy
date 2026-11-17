@@ -466,23 +466,27 @@ export function createWink({ side = 'right', wink = WINK } = {}) {
   return sim
 }
 
-// The jetpack look's flight (jetpack.mjs), a draft: he hovers off the floor and zooms from one side to the other, grinning.
+// The jetpack look's flight (looks/jetpack.mjs), a draft: he hovers off the floor and zooms from one side to the other, grinning.
 export const ZOOM = {
   // He hovers `hover` off the floor and bobs `bob` up and down, `beats` times a second.
   hover: 1.4, bob: 0.07, beats: 0.8,
-  // He zooms to each of `stops` in turn (how far to the viewer's right, in units), `seconds` after the last: a spring takes him there,
-  // `speed` how eagerly and `damping` how soon he settles (lower lets him overshoot and come back).
-  stops: [1.35, -1.35], seconds: [1.5, 1.7], body: { speed: 7.5, damping: 0.6 },
+  // He zooms to each of `stops` in turn (how far to the viewer's right, in units), `seconds` after the last. Where he heads glides there
+  // in `glide` seconds, easing in and out, and a spring takes him after it: `speed` how eagerly and `damping` how soon he settles (lower
+  // lets him overshoot and come back).
+  stops: [1.3, -1.3], seconds: [2.3, 2.5], glide: 0.75, body: { speed: 6, damping: 0.8 },
   // Going sideways he banks into the way he goes and turns his face a little towards it: `bank` and `face` are the degrees at `atSpeed` units a second,
   // on springs, and never more than `most` times that.
-  bank: 16, face: 20, atSpeed: 5, most: 1.3, lean: { speed: 11, damping: 0.55 },
+  bank: 14, face: 18, atSpeed: 3.6, most: 1.2, lean: { speed: 9, damping: 0.7 },
   // His tentacles hang from his head as in JUMP, a spring at each bend holding each length in line with the one before it, softer
-  // towards the tip; flying, they are heavier (`weight`, the G's) and they trail behind as he zooms. `limit` is the most one bend may
-  // open, in degrees.
-  arms: { speed: [12, 9.5, 7.5], damping: [0.42, 0.36, 0.3], weight: 26, limit: 80 },
+  // towards the tip; flying, they are heavier (`weight`, the G's) and they trail behind as he zooms. The G's also hold them back from
+  // swinging: `damping` near 1 lets them lag and settle with hardly a swing past him. `limit` is the most one bend may open, in degrees.
+  arms: { speed: [13, 10.5, 8.5], damping: [0.9, 0.85, 0.8], weight: 30, limit: 75 },
+  // His face comes alive with the push: his grin opens and his cheeks push up (jetpackFace in looks/jetpack.mjs) on a lively spring, and
+  // his head widens by `squash` of its height and wobbles back. Hovering, he blinks every `blinks` seconds in turn, each blink `blink` long.
+  grin: { speed: 9, damping: 0.45 }, squash: { depth: 0.06, speed: 14, damping: 0.3 }, blinks: [2.6, 1.9, 3.2], blink: 0.18,
   // The flames burn at `idle` of their length while he hovers and up to `idle + thrust` as he pushes hardest (`atPush` units a second
   // squared, sideways); they flicker by `flicker`, about `beats` times a second, each nozzle on its own time.
-  flames: { idle: 0.8, thrust: 0.6, atPush: 40, flicker: 0.14, beats: 9 },
+  flames: { idle: 0.8, thrust: 0.6, atPush: 10, flicker: 0.14, beats: 9 },
   // The smoke: puffs leave the flames' tips, `rate` a second from each nozzle (more when he pushes), out of `pieces` in all. Each lives
   // `life` seconds (shortest, longest), leaves downwards at `speed` units a second, slows with `drag`, rises with `rise` and grows to
   // `size` (smallest, biggest), then shrinks away. It stays in the room, so he leaves a trail.
@@ -494,8 +498,9 @@ export const ZOOM = {
  * drawn from a fixed list.
  * @param {{ softness?: number, zoom?: typeof ZOOM, nozzles?: { at: number[], way: number[] }[], flame?: number }} [options] `softness`
  *   scales how loose his tentacles are, as in createTurn. `nozzles` are where the flames come out and the way they point, as he stands
- *   (NOZZLES in jetpack.mjs), and `flame` the length of the longest flame: the smoke leaves from its tip.
- * @returns The move. A pose is a jump's pose (`spread` and `head` are 0) and `{ shift, flames, puffs }`: how far he is to the viewer's
+ *   (NOZZLES in looks/jetpack.mjs), and `flame` the length of the longest flame: the smoke leaves from its tip.
+ * @returns The move. A pose is a jump's pose (`spread` and `head` are 0) and `{ face, shift, flames, puffs }`: his face for jetpackFace in
+ *   looks/jetpack.mjs (0 to 0.75 his grin as he pushes, 0.75 to 1 a blink); how far he is to the viewer's
  *   right; each nozzle's flames as `[length, width]` scales of their drawn size; and each puff of smoke `[x, y, z, size]`, in the room, of
  *   size 0 when it is not there.
  */
@@ -519,7 +524,8 @@ export function createZoom({ softness = 1, zoom = ZOOM, nozzles = [], flame = 1 
   const between = ([low, high]) => low + (high - low) * chance()
 
   let time = 0, clock = 0, leg = 0, x = zoom.stops[zoom.stops.length - 1], vx = 0, push = 0, lift = zoom.hover
-  let bank = 0, bankSpeed = 0, yaw = 0, yawSpeed = 0, owedSmoke = 0, next = 0
+  let bank = 0, bankSpeed = 0, yaw = 0, yawSpeed = 0, owedSmoke = 0, next = 0, from = x
+  let excite = 0, exciteSpeed = 0, squash = 0, squashSpeed = 0, blinkAt = 0, blinks = 0
   // Where he is in the room: his turn, then his place.
   const placement = () => put(shift([x, lift, 0]), put(aroundY(yaw), aroundZ(bank)))
   // The end of each length of each tentacle, in the room, and how fast it goes; `asked` is where it was asked to be last time.
@@ -533,8 +539,9 @@ export function createZoom({ softness = 1, zoom = ZOOM, nozzles = [], flame = 1 
     time += h
     clock += h
     // The script: off to the next stop every so often. A spring takes him there; the push is how hard the pack works sideways.
-    while (clock >= zoom.seconds[leg % zoom.seconds.length]) { clock -= zoom.seconds[leg % zoom.seconds.length]; leg++ }
-    const ax = spring(zoom.body, zoom.stops[leg % zoom.stops.length], x, vx)
+    while (clock >= zoom.seconds[leg % zoom.seconds.length]) { clock -= zoom.seconds[leg % zoom.seconds.length]; from = zoom.stops[leg % zoom.stops.length]; leg++ }
+    const glide = Math.min(clock / zoom.glide, 1), to = zoom.stops[leg % zoom.stops.length]
+    const ax = spring(zoom.body, from + (to - from) * glide * glide * (3 - 2 * glide), x, vx)
     vx += ax * h
     x += vx * h
     push += (Math.abs(ax) - push) * Math.min(h * 12, 1)
@@ -546,6 +553,14 @@ export function createZoom({ softness = 1, zoom = ZOOM, nozzles = [], flame = 1 
     yawSpeed += spring(zoom.lean, going * zoom.face * RAD, yaw, yawSpeed) * h
     yaw += yawSpeed * h
     body = placement()
+    // His grin and his head follow the push; hovering, he blinks now and then.
+    const pushing = Math.min(push / zoom.flames.atPush, 1)
+    exciteSpeed += spring(zoom.grin, pushing, excite, exciteSpeed) * h
+    excite = Math.max(0, Math.min(1.1, excite + exciteSpeed * h))
+    squashSpeed += spring(zoom.squash, -zoom.squash.depth * pushing, squash, squashSpeed) * h
+    squash += squashSpeed * h
+    blinkAt += h
+    if (blinkAt >= zoom.blinks[blinks % zoom.blinks.length] + zoom.blink) { blinkAt = 0; blinks++ }
 
     // Each length of tentacle is pulled in line with the one before it and down by its weight, and keeps its length.
     const loose = Math.max(softness, 0), limit = zoom.arms.limit * RAD
@@ -625,6 +640,12 @@ export function createZoom({ softness = 1, zoom = ZOOM, nozzles = [], flame = 1 
     const flicker = 1 + zoom.flames.flicker * (Math.sin(t * 2.1 + i * 2.3) * 0.6 + Math.sin(t * 3.7 + i) * 0.4)
     return [burn * flicker, 1 + 0.5 * (flicker - 1) + 0.1 * (burn - zoom.flames.idle)]
   })
+  // His face, for jetpackFace: how far into his grin while he dashes, or into a blink while he hovers.
+  const face = () => {
+    const into = blinkAt - zoom.blinks[blinks % zoom.blinks.length]
+    if (into > 0 && excite < 0.3) return 0.75 + 0.25 * Math.sin((into / zoom.blink) * Math.PI)
+    return 0.75 * Math.min(excite, 1)
+  }
   // A puff grows fast, holds, then shrinks away at the end of its life.
   const puffSizes = () => puffs.map((p) => {
     if (p.age >= p.life) return [0, -1, 0, 0]
@@ -635,7 +656,7 @@ export function createZoom({ softness = 1, zoom = ZOOM, nozzles = [], flame = 1 
   let owed = 0
   const sim = {
     softness,
-    pose: () => ({ yaw, squash: 0, lift, lean: bank, head: 0, spread: 0, shift: x, ...bends(), flames: flames(), puffs: puffSizes() }),
+    pose: () => ({ yaw, squash, lift, face: face(), lean: bank, head: 0, spread: 0, shift: x, ...bends(), flames: flames(), puffs: puffSizes() }),
     advance(seconds) {
       softness = sim.softness
       owed += Math.min(Math.max(seconds, 0), 1)
@@ -645,7 +666,6 @@ export function createZoom({ softness = 1, zoom = ZOOM, nozzles = [], flame = 1 
   }
   // A few seconds in the air first, so his tentacles hang and the smoke is already trailing when he shows.
   for (let i = 0; i < 2 / SUBSTEP; i++) tick(SUBSTEP)
-  clock = 0
   return sim
 }
 

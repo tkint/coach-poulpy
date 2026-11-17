@@ -4,10 +4,10 @@
 // the controls; this file owns the canvas and everything WebGL, and gives it all back on dispose().
 import * as THREE from 'three'
 import tokens from '../../../../design/tokens.json'
-import { buildPoulpy3d, gleamPatch, LOOK, type PoulpyMaterial, type PoulpyMood, type PoulpyPart, type PoulpySide } from '../../../../design/poulpy-3d/model.mjs'
+import { buildPoulpy3d, gleamPatch, LOOK, type Poulpy3d, type PoulpyMaterial, type PoulpyMood, type PoulpyPart, type PoulpySide } from '../../../../design/poulpy-3d/model.mjs'
 import { buildPoulpyPose, CONFETTI, GOLDEN, medalHinge, poseMood, STARS, starShape, type PoulpyPose } from '../../../../design/poulpy-3d/poses.mjs'
 import { armJoints, armSkin, squashScale, type CheerPose, type JumpPose, type TurnPose, type WinkPose, type ZoomPose } from '../../../../design/poulpy-3d/motion.mjs'
-import { buildPoulpyJetpack, JETPACK, NOZZLES, puffShape } from '../../../../design/poulpy-3d/jetpack.mjs'
+import { buildPoulpyJetpack, JETPACK, jetpackFace, NOZZLES, puffShape } from '../../../../design/poulpy-3d/looks/jetpack.mjs'
 
 /** Where the viewer stands: degrees around Poulpy, degrees above (or below) him, and how far away. */
 export interface PoulpyView { turn: number; tilt: number; distance: number; /** The height he is looked at, half his height unless told. */ centre?: number; /** The view's height in degrees, 28 unless told. */ field?: number }
@@ -133,16 +133,18 @@ export function createPoulpyScene(canvas: HTMLCanvasElement) {
   /**
    * Builds Poulpy again for a side of the plush, one of his moods or one of his poses, with or without the outline.
    * A pose with `effects: false` leaves out the flat effects around him, for when he moves, and one with `faces`
-   * takes his face from it instead: the face at each step from 0 to 1, for pose() to pick from. `{ look: 'jetpack' }` is the jetpack look
-   * (design/poulpy-3d/jetpack.mjs), its flames kept facing the viewer.
+   * takes his face from it instead: the face at each step from 0 to 1, for pose() to pick from. `{ model }` shows a Poulpy built
+   * elsewhere, a look (design/poulpy-3d/looks/): what he wears rides on his head. `{ look: 'jetpack' }` is the jetpack look
+   * (design/poulpy-3d/looks/jetpack.mjs), its flames kept facing the viewer.
    */
-  function show(as: PoulpySide | PoulpyMood | { pose: PoulpyPose; effects?: boolean; faces?: (t: number) => (string | number)[][] } | { look: 'jetpack' }, outline: boolean) {
+  function show(as: PoulpySide | PoulpyMood | { pose: PoulpyPose; effects?: boolean; faces?: (t: number) => (string | number)[][] } | { model: Poulpy3d & { headTilt?: number } } | { look: 'jetpack' }, outline: boolean) {
     clear()
     const colours = tokens.color.poulpy
-    const look = typeof as === 'object' && 'look' in as ? buildPoulpyJetpack({ tones: tokens.mood, colours }) : undefined
+    const look = typeof as === 'object' && 'look' in as ? buildPoulpyJetpack({ tones: tokens.mood, colours, face: [] }) : undefined
     const posing = typeof as === 'object' && 'pose' in as ? as : undefined
-    const changing = posing?.faces
-    const inPose = posing ? buildPoulpyPose({ pose: posing.pose, effects: posing.effects, ...(changing && { face: [] }), tones: tokens.mood, colours }) : undefined
+    // The jetpack look's face changes as he flies, like the cocky one's as he winks.
+    const changing = posing?.faces ?? (look ? jetpackFace : undefined)
+    const inPose = typeof as === 'object' && 'model' in as ? as.model : posing ? buildPoulpyPose({ pose: posing.pose, effects: posing.effects, ...(changing && { face: [] }), tones: tokens.mood, colours }) : undefined
     const model = inPose ?? look ?? (as === 'blue' || as === 'ember' ? buildPoulpy3d({ side: as, colours }) : buildPoulpy3d({ mood: as as PoulpyMood, tone: tokens.mood[as as PoulpyMood], colours }))
     centre = model.height / 2
     stance = { headLift: model.headLift, headTilt: inPose?.headTilt ?? 0 }
@@ -212,8 +214,8 @@ export function createPoulpyScene(canvas: HTMLCanvasElement) {
       }
     }
     faces = []
-    if (changing && posing) {
-      const { mood } = poseMood(posing.pose)
+    if (changing) {
+      const mood = posing ? poseMood(posing.pose).mood : JETPACK.mood
       for (let step = 0; step <= FACE_STEPS; step++) {
         const face = buildPoulpy3d({ mood, tone: tokens.mood[mood], features: changing(step / FACE_STEPS), faceOnly: true, colours }), group = new THREE.Group()
         for (const part of face.parts) {
@@ -234,6 +236,8 @@ export function createPoulpyScene(canvas: HTMLCanvasElement) {
     posed = next
     if (rig) {
       const jump = next && 'droop' in next ? next : undefined, cheer = next && 'medal' in next ? next : undefined, wink = next && 'wink' in next ? next : undefined
+      // A pose with `tilt` leans his head: the wink's, or a look's idle.
+      const leaning = next && 'tilt' in next ? next : undefined
       rig.turn.rotation.set(0, next?.yaw ?? 0, jump?.lean ?? 0, 'YXZ')
       const zoom = next && 'puffs' in next ? next : undefined
       rig.turn.position.set(zoom?.shift ?? 0, jump?.lift ?? 0, 0)
@@ -241,14 +245,14 @@ export function createPoulpyScene(canvas: HTMLCanvasElement) {
       flames.forEach((flame, i) => flame.scale.set(zoom?.flames[i][1] ?? 1, zoom?.flames[i][0] ?? 1, 1))
       if (zoom) puff(zoom.puffs)
       rig.squash.position.y = stance.headLift + (jump?.head ?? 0)
-      rig.squash.rotation.z = stance.headTilt + (wink?.tilt ?? 0)
+      rig.squash.rotation.z = stance.headTilt + (leaning?.tilt ?? 0)
       rig.squash.scale.fromArray(squashScale(next?.squash ?? 0))
       // His medal rests on his arm, so it stays on it when his head tucks in and slides out with it.
       rig.medal.position.z = medalHinge[1] + (jump?.spread ?? 0)
       rig.medal.rotation.x = -(cheer?.medal.lift ?? 0)
       rig.slide.rotation.y = cheer?.medal.sway ?? 0
       if (cheer) fly(cheer.confetti, (cheer as { confettiScale?: number }).confettiScale ?? 1)
-      faces.forEach((face, step) => { face.visible = step === Math.round((wink?.wink ?? 0) * FACE_STEPS) })
+      faces.forEach((face, step) => { face.visible = step === Math.round((wink?.wink ?? zoom?.face ?? 0) * FACE_STEPS) })
       if (wink) twinkle(wink.stars)
       rig.bends.forEach((bone, i) => {
         const arm = Math.floor(i / 3), bend = i % 3
@@ -370,5 +374,6 @@ export function createPoulpyScene(canvas: HTMLCanvasElement) {
     renderer.dispose()
   }
 
-  return { show, look, pose, fumes, dispose }
+  // `room` is the three.js scene, for a look to add what goes on around him (falling leaves); it removes and disposes of it itself.
+  return { show, look, pose, fumes, dispose, room: scene }
 }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// Poulpy with a jetpack, zooming from side to side (design/poulpy-3d/jetpack.mjs, ZOOM in motion.mjs), drawn by poulpy3dScene.ts. A draft look:
+// Poulpy with a jetpack, zooming from side to side (design/poulpy-3d/looks/jetpack.mjs, ZOOM in motion.mjs), drawn by poulpy3dScene.ts. A draft look:
 // he flies while he is on screen, and stands still with reduced motion. Drag to look around him; the controls loosen his tentacles and
 // change the speed.
 import { onBeforeUnmount, onMounted, shallowRef, useTemplateRef, watch } from 'vue'
@@ -61,7 +61,7 @@ onMounted(async () => {
   // three.js is only fetched on this page, and only in the browser.
   try {
     const [{ createPoulpyScene }, { createZoom }, { JETPACK, NOZZLES }] = await Promise.all([
-      import('../poulpy3dScene'), import('../../../../../design/poulpy-3d/motion.mjs'), import('../../../../../design/poulpy-3d/jetpack.mjs'),
+      import('../poulpy3dScene'), import('../../../../../design/poulpy-3d/motion.mjs'), import('../../../../../design/poulpy-3d/looks/jetpack.mjs'),
     ])
     if (!canvas.value) return
     move = createZoom({ softness: softness.value, nozzles: NOZZLES, flame: JETPACK.flames[0][1] })

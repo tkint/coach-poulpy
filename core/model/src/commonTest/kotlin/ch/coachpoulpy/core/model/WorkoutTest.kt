@@ -14,12 +14,11 @@ class WorkoutTest {
     private fun workout(format: WorkoutFormat, vararg parts: Part) = Workout(WorkoutId("w"), 1, "Test", format, parts.toList())
 
     @Test
-    fun aWarmUpFirstWorkPartsAndACoolDownLastAreValid() {
+    fun aWarmUpFirstAWorkPartAndACoolDownLastAreValid() {
         val workout = workout(
             WorkoutFormat.CIRCUIT,
             part(PartKind.WARM_UP, exercise("jumping-jack")),
-            part(PartKind.WORK, exercise("squat")),
-            part(PartKind.WORK, exercise("plank")),
+            part(PartKind.WORK, exercise("squat"), exercise("plank")),
             part(PartKind.COOL_DOWN, exercise("stretch")),
         )
 
@@ -32,12 +31,17 @@ class WorkoutTest {
         assertEquals(setOf(WorkoutProblem.NO_WORK_PART), workout(WorkoutFormat.SETS, part(PartKind.WARM_UP, exercise("walk"))).problems())
         assertEquals(
             setOf(WorkoutProblem.WARM_UP_NOT_FIRST, WorkoutProblem.COOL_DOWN_NOT_LAST),
-            workout(WorkoutFormat.SETS, part(PartKind.WORK), part(PartKind.WARM_UP), part(PartKind.COOL_DOWN), part(PartKind.WORK)).problems(),
+            workout(WorkoutFormat.SETS, part(PartKind.COOL_DOWN), part(PartKind.WARM_UP), part(PartKind.WORK)).problems(),
         )
         assertEquals(
             setOf(WorkoutProblem.WARM_UP_NOT_FIRST),
             workout(WorkoutFormat.SETS, part(PartKind.WARM_UP), part(PartKind.WARM_UP), part(PartKind.WORK)).problems(),
         )
+    }
+
+    @Test
+    fun severalWorkPartsAreAProblem() {
+        assertEquals(setOf(WorkoutProblem.SEVERAL_WORK_PARTS), workout(WorkoutFormat.SETS, part(PartKind.WORK), part(PartKind.WORK)).problems())
     }
 
     @Test

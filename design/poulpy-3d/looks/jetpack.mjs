@@ -6,20 +6,17 @@
 // nozzle under each. The flames and the smoke are comic effects: flat, and kept facing the viewer by whoever draws him. He never lifts a
 // tentacle (brand decision 8): flying, they only hang and trail.
 // To change it, edit JETPACK below (and ZOOM in motion.mjs) and look at the page.
-import { FACES, buildPoulpy3d, egg, join, linear, tube } from './model.mjs'
+import { buildPoulpy3d, egg, join, linear, tube } from '../model.mjs'
 
 const NIGHT = '#1574B0', STEEL = '#56687A'
 
 export const JETPACK = {
   // He is happy, on the blue side: flying is fun.
   mood: 'happy',
-  // A wide grin, as in the drawings' coordinates (see FACES in model.mjs): eyes wide open and a big open smile.
-  face: [
-    ['eye', 80, 94, 9.5, 11.5], ['eye', 120, 94, 9.5, 11.5],
-    ['shape', 'M80 106 Q100 111 120 106 Q117 131 100 131 Q83 131 80 106 Z', 'mouth'],
-    ['oval', 100, 124.5, 8.5, 4.2, '#F07A7A', 'tongue'],
-    ...FACES.happy.filter(([kind]) => kind === 'cheek'),
-  ],
+  // His grin, which moves (see jetpackFace below), in the drawings' coordinates (see FACES in model.mjs). Each `[hovering, dashing]` pair
+  // is blended by how hard he pushes: `smile` is the open smile's half width and depth, `corners` how high its corners sit, `eyes` the
+  // eyes' height (they narrow as his cheeks push up), `cheeks` the cheeks' height and half width.
+  grin: { smile: [[12, 12], [15.5, 15.5]], corners: [107, 104.5], eyes: [11, 8], cheeks: [[112, 8], [108, 10]] },
   // The two tanks, his right one at -x: where the foot of each stands (out, up, back), how long and thick it is, how tall its round nose
   // is, and how far it leans in at the top, in degrees, so its nozzle and its flame point down and out, clear of his tentacles.
   tank: { x: 1.1, y: 0.56, z: -0.55, length: 0.78, radius: 0.3, nose: 0.28, splay: 22 },
@@ -33,6 +30,27 @@ export const JETPACK = {
 
 const { tank } = JETPACK
 const RAD = Math.PI / 180
+
+const between = (a, b, t) => a + (b - a) * t
+/**
+ * His face as he flies, as features for buildPoulpy3d. From `t` 0 to 0.75 he goes from hovering to dashing: the smile opens wider and its
+ * corners rise, his cheeks push up and his eyes narrow above them. From 0.75 to 1 he blinks, from his hovering face: his eyes close into
+ * two happy curves at 1.
+ */
+export function jetpackFace(t) {
+  const { grin } = JETPACK, push = t <= 0.75 ? t / 0.75 : 0, blink = Math.max((t - 0.75) / 0.25, 0)
+  const at = ([a, b]) => between(a, b, push)
+  const w = at(grin.smile.map((s) => s[0])), d = at(grin.smile.map((s) => s[1])), y = at(grin.corners)
+  const tall = at(grin.eyes) * (1 - blink * 0.85), [cheekY, cheekX] = [at(grin.cheeks.map((c) => c[0])), at(grin.cheeks.map((c) => c[1]))]
+  // Past most of the blink the eye is a line bending into a smile, as when the cocky one winks.
+  const eye = (x, side) => (blink < 0.75 ? ['eye', x, 94 - push, 9.5, tall] : ['curve', x - 9, 95, x, 101, x + 9, 95, 4.5, `eye_${side}`])
+  return [
+    eye(80, 'right'), eye(120, 'left'),
+    ['shape', `M${100 - w} ${y} Q100 ${y + 4} ${100 + w} ${y} Q${100 + w - 2} ${y + d} 100 ${y + d} Q${100 - w + 2} ${y + d} ${100 - w} ${y} Z`, 'mouth'],
+    ['oval', 100, y + d - 4, w * 0.55, 3 + push, '#F07A7A', 'tongue'],
+    ['cheek', 64, cheekY, cheekX, 4.5 + push, '#F49A6B', 0.75], ['cheek', 136, cheekY, cheekX, 4.5 + push, '#F49A6B', 0.75],
+  ]
+}
 /**
  * Where each flame comes out, his right then his left, as he stands: `at`, the middle of the end of the nozzle, and `way`, the way the
  * flame points from there, down and a little outwards.
@@ -97,10 +115,11 @@ export function puffShape(edge = 0, n = 28) {
  * Builds Poulpy with his jetpack: buildPoulpy3d in the look's mood and face, with the pack's parts (named `jetpack…`) and, unless `flames`
  * is false, one flat flame of each layer per nozzle (named `jetpack_flame_<nozzle>_<layer>`, both from 1), drawn hanging from (0, 0) and
  * facing +z: whoever draws him puts each at its nozzle, keeps it facing the viewer and pointing its nozzle's way, and stretches it as it flickers.
- * @param {{ tones: Record<string, string>, colours: { blue: string, ember: string, ink: string }, flames?: boolean }} options
+ * `face` gives him other features than his hovering grin, `[]` none, for whoever changes his face as he flies (jetpackFace).
+ * @param {{ tones: Record<string, string>, colours: { blue: string, ember: string, ink: string }, flames?: boolean, face?: (string | number)[][] }} options
  */
-export function buildPoulpyJetpack({ tones, colours, flames = true }) {
-  const model = buildPoulpy3d({ mood: JETPACK.mood, tone: tones[JETPACK.mood], features: JETPACK.face, colours })
+export function buildPoulpyJetpack({ tones, colours, flames = true, face = jetpackFace(0) }) {
+  const model = buildPoulpy3d({ mood: JETPACK.mood, tone: tones[JETPACK.mood], features: face, colours })
   const made = pack()
   Object.assign(model.materials, made.materials)
   model.parts.push(...made.parts)
