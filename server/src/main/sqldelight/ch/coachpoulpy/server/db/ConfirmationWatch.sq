@@ -5,6 +5,10 @@ INSERT INTO confirmation_watch (token_hash, key_hash, account_id, expires_at) VA
 markConfirmed:
 UPDATE confirmation_watch SET confirmed = TRUE WHERE token_hash = ? RETURNING key_hash;
 
+-- The account's email was confirmed by an admin (#382): gives the key of each of its watches, so the phones listening hear.
+markConfirmedForAccount:
+UPDATE confirmation_watch SET confirmed = TRUE WHERE account_id = ? RETURNING key_hash;
+
 -- Whether a link mailed with this key was opened, while the key still works.
 isConfirmed:
 SELECT EXISTS (SELECT 1 FROM confirmation_watch WHERE key_hash = :keyHash AND confirmed AND expires_at > :now);

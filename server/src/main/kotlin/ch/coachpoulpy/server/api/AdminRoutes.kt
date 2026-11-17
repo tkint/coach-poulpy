@@ -57,6 +57,7 @@ fun adminRoutes(audit: AdminAudit, accounts: AdminAccounts, settings: AdminSetti
     testEmailRoute(settings),
     statusRoute(status),
     pendingRegistrationsRoute(status),
+    confirmPendingRegistrationRoute(accounts),
 )
 
 private fun auditRoute(audit: AdminAudit): ContractRoute = "$API_PREFIX/admin/audit" meta {
@@ -111,6 +112,7 @@ private fun AccountAction.toResponse(): Response = when (this) {
     AccountAction.Done -> Response(NO_CONTENT)
     AccountAction.Unknown -> Response(NOT_FOUND).with(adminProblemBody of Problem("unknown-account"))
     AccountAction.OwnAccount -> Response(CONFLICT).with(adminProblemBody of Problem("own-account"))
+    AccountAction.AlreadyConfirmed -> Response(CONFLICT).with(adminProblemBody of Problem("already-confirmed"))
     AccountAction.ConfirmationMismatch -> Response(BAD_REQUEST).with(adminProblemBody of Problem("confirmation-mismatch"))
 }
 
@@ -330,7 +332,7 @@ data class MailStatusResponse(
 data class AdminStatusResponse(val mail: MailStatusResponse)
 
 @Serializable
-data class PendingRegistrationResponse(val email: String, val signedUpAt: String, val linkExpiresAt: String?)
+data class PendingRegistrationResponse(val id: String, val email: String, val signedUpAt: String, val linkExpiresAt: String?)
 
 @Serializable
 data class PendingRegistrationsResponse(val registrations: List<PendingRegistrationResponse>)
@@ -360,21 +362,38 @@ private fun statusRoute(status: AdminStatus): ContractRoute = "$API_PREFIX/admin
 
 private fun pendingRegistrationsRoute(status: AdminStatus): ContractRoute = "$API_PREFIX/admin/pending-registrations" meta {
     summary = "The accounts not confirmed yet"
-    description = "The ${AdminStatus.PENDING_LIMIT} newest accounts whose email isn't confirmed, newest first: the address, when it signed up, " +
+    description = "The ${AdminStatus.PENDING_LIMIT} newest accounts whose email isn't confirmed, newest first: the id, the address, when it signed up, " +
         "and when its latest confirmation link expires (null when none is left). Sends no email."
     operationId = "getAdminPendingRegistrations"
     tags += adminTag
     security = requiresAdmin()
     returning(
         OK,
-        pendingBody to PendingRegistrationsResponse(listOf(PendingRegistrationResponse("lea@example.com", "2026-11-09T07:41:00Z", "2026-11-10T07:41:00Z"))),
+        pendingBody to PendingRegistrationsResponse(listOf(PendingRegistrationResponse("0190d4d2-0000-7000-8000-000000000042", "lea@example.com", "2026-11-09T07:41:00Z", "2026-11-10T07:41:00Z"))),
         "The pending registrations",
         definitionId = "PendingRegistrations",
     )
     returning(FORBIDDEN to "Not an admin, or not signed in through the website")
 } bindContract GET to { _ ->
     val registrations = status.pendingRegistrations().map {
-        PendingRegistrationResponse(it.email, it.signedUpAt.toInstant().toString(), it.linkExpiresAt?.toInstant()?.toString())
+        PendingRegistrationResponse(it.id.toString(), it.email, it.signedUpAt.toInstant().toString(), it.linkExpiresAt?.toInstant()?.toString())
     }
     Response(OK).with(pendingBody of PendingRegistrationsResponse(registrations))
 }
+
+private fun confirmPendingRegistrationRoute(accounts: AdminAccounts): ContractRoute =
+    "$API_PREFIX/admin/pending-registrations" / accountId / "confirm" meta {
+        summary = "Confirm a pending registration by hand"
+        description = "Marks the account's email confirmed without its link, as following the link does: the account can sign in and its " +
+            "pending links stop working. For an address nobody proved, such as when the email never arrived. An account already confirmed " +
+            "is a 409 already-confirmed. Written to the audit log with the masked address."
+        operationId = "confirmAdminPendingRegistration"
+        tags += adminTag
+        security = requiresAdmin()
+        returning(NO_CONTENT to "The email is confirmed")
+        returning(NOT_FOUND to "Unknown account")
+        returning(CONFLICT to "Already confirmed")
+        returning(FORBIDDEN to "Not an admin, or not signed in through the website")
+    } bindContract POST to { id, _ ->
+        { request: Request -> accounts.confirm(request.admin().accountId, id).toResponse() }
+    }
