@@ -7,7 +7,7 @@ date: 2026-10-26
 
 Supersedes [ADR 0004](./0004-workout-types-are-modules-over-one-engine.md).
 
-A workout no longer has a workout type (strength, conditioning, rehab, mobility, treadmill). It has a **format**, circuit or sets, chosen when it is created and changeable in the builder (see the amendment below), and is made of **parts**: an optional warm-up, one or more work parts and an optional cool down.
+A workout no longer has a workout type (strength, conditioning, rehab, mobility, treadmill). It has a **format**, circuit or sets, chosen when it is created and changeable in the builder (see the amendment below), and is made of **parts**: an optional warm-up, one work part and an optional cool down.
 
 The five type modules had converged on one rule: a time or a hold runs a timer, and reps, a distance or an open target wait for a tap. The type only decided which exercises the builder offered and a label, while people kept mixing a run warm-up with squats or a walk cool down with stretches. What they actually choose is how the workout is built: rounds through several exercises, each done once per round, or one exercise at a time with all its sets. That is the format. Warming up and cooling down are sections of the workout rather than tags on single steps, so they became parts.
 
@@ -22,3 +22,7 @@ The format was first chosen once and kept. Someone who wants the same exercises 
 The switch is about the order the exercises are done in, so it asks. **Follow the new format** reorders them the way the new format does them (A A A B B B ⇄ A B, A B, A B); **Keep the order** rewrites only the steps to fit the format's one rule (an exercise step of a circuit holds one set and the repeat around it does the rounds). The conversion is one pure function in shared Kotlin (`switchedTo` in `FormatSwitch.kt`) and its result always passes `Workout.problems()`; the warm-up and the cool down always keep the order. It applies to the draft; saving stores a new version like any edit, and past sessions keep pointing at the version they followed. No migration: each version already stores its own format (`workout_version.format`).
 
 Not changed: `SETS_IN_CIRCUIT` stays, so the format is still more than a presentation.
+
+## Amendment: one work part
+
+A workout has exactly one work part. A second work part added only a labelled chunk with its own subtotal; in a circuit, separate repeats do that job, and in sets each exercise carries its own sets. The builder mockups (design/builder-tidy) show it. The shared model still allows several until the apps follow; no migration is planned while the app is in test.
