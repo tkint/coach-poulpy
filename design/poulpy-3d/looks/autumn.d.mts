@@ -9,6 +9,8 @@ export const AUTUMN: {
     knot: { around: number; size: number[] }
     ends: { aside: number; reach: number }[]; wide: number; thick: number; endStripes: number
     fringe: { threads: number; length: number }
+    /** Keeps the scarf clear of his arms however they trail (scarf() says how); the autumn look leaves it out. */
+    fit?: { out: number; by: number; margin: number; slope: number }
   }
   leaves: {
     count: number; seed: number; colours: string[]; size: number[]; from: number; around: number[]; depth: number; fall: number[]

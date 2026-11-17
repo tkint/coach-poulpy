@@ -103,14 +103,45 @@ function armTop(x, z) {
   return top
 }
 
+// The highest the top of an arm comes within `reach` of (x, z) on the floor, with the arms swung up to `margin` radians either
+// way around his middle, as they are when they trail behind him.
+function armTopNear(x, z, reach, margin) {
+  let top = 0
+  for (const turn of [-1, -0.5, 0, 0.5, 1].map((t) => t * margin)) {
+    const c = Math.cos(turn), sn = Math.sin(turn)
+    for (let i = 0; i < 9; i++) {
+      const a = (i * TAU) / 8, r = i === 8 ? 0 : reach, px = x + r * Math.cos(a), pz = z + r * Math.sin(a)
+      top = Math.max(top, armTop(px * c - pz * sn, px * sn + pz * c))
+    }
+  }
+  return top
+}
+
 /**
  * The scarf's parts and their colours, built where his head sits at rest, from numbers shaped like AUTUMN.scarf. Other looks
  * wear the same scarf in their own colours (winter.mjs): they pass AUTUMN.scarf with other `wool` and `stripe`.
+ * With `fit` the scarf keeps clear of his arms, however they trail: the roll sits `fit.out` further out from his head and
+ * dips between his arms but rides over each one, the knot sits on top of them and the ends lie on them and hang off their
+ * tips no steeper than `fit.slope`, all `fit.by` above any arm swung up to `fit.margin` radians either way.
  */
 export function scarf(s) {
   const [w, d] = headAt(s.height), out = (around) => norm([Math.sin(around) / w, 0, Math.cos(around) / d])
+  const fit = s.fit, reach = fit?.out ?? 0
+  // How high the roll's middle must be at each angle around him to clear his arms, eased so it rises and dips smoothly.
+  const rise = (() => {
+    if (!fit) return () => s.height
+    const tall = s.half[1] * (1 + s.swell), thick = s.half[0] * (1 + s.swell), many = 144, ringR = Math.hypot(w, d) / Math.SQRT2 + reach
+    const need = Array.from({ length: many }, (_, i) => {
+      const a = (i / many) * TAU, n = out(a), x = w * Math.sin(a) + n[0] * (s.half[0] * (1 - s.sink) + reach), z = d * Math.cos(a) + n[2] * (s.half[0] * (1 - s.sink) + reach)
+      return armTopNear(x, z, thick, fit.margin) + tall + fit.by
+    })
+    return (around) => need.reduce((top, y, i) => {
+      const gap = Math.abs((((around - (i / many) * TAU) % TAU) + TAU + Math.PI) % TAU - Math.PI)
+      return Math.max(top, y - fit.slope * gap * ringR)
+    }, s.height)
+  })()
   // A point of the roll's middle line: on his head, then out by its thickness, less what sinks in.
-  const middle = (around) => { const n = out(around); return [w * Math.sin(around) + n[0] * s.half[0] * (1 - s.sink), s.height, d * Math.cos(around) + n[2] * s.half[0] * (1 - s.sink)] }
+  const middle = (around) => { const n = out(around); return [w * Math.sin(around) + n[0] * s.half[0] * (1 - s.sink) + n[0] * reach, rise(around), d * Math.cos(around) + n[2] * s.half[0] * (1 - s.sink) + n[2] * reach] }
   // The roll goes around in stripes; each stripe is its own short roll, so the colours meet sharply.
   const wool = [], stripes = [], steps = 6
   for (let i = 0; i < s.stripes; i++) {
@@ -120,7 +151,9 @@ export function scarf(s) {
   }
   // The knot sits on the roll, out from it, and the two ends leave it over his arm.
   const knotAt = middle(s.knot.around), n = out(s.knot.around)
-  const knot = egg(s.knot.size, { around: 20, down: 12, at: [knotAt[0] + n[0] * s.half[0] * 0.75, knotAt[1] - 0.01, knotAt[2] + n[2] * s.half[0] * 0.75] })
+  const knotMiddle = [knotAt[0] + n[0] * s.half[0] * 0.75, knotAt[1] - 0.01, knotAt[2] + n[2] * s.half[0] * 0.75]
+  if (fit) knotMiddle[1] = Math.max(knotMiddle[1], armTopNear(knotMiddle[0], knotMiddle[2], Math.max(s.knot.size[0], s.knot.size[2]), fit.margin) + s.knot.size[1] + fit.by)
+  const knot = egg(s.knot.size, { around: 20, down: 12, at: knotMiddle })
   for (const end of s.ends) {
     const around = s.knot.around + end.aside, way = [Math.sin(around), 0, Math.cos(around)], sideways = [Math.cos(around), 0, -Math.sin(around)]
     // From the knot outwards, lying on the arm (or the floor) and hanging off its tip.
@@ -129,6 +162,11 @@ export function scarf(s) {
       const r = start + ((end.reach - start) * k) / count, x = way[0] * r, z = way[2] * r
       return [x, Math.max(armTop(x, z), 0) + s.thick / 2 + 0.012, z]
     })
+    if (fit) {
+      // Clear of every arm under any part of the end's width, and draped: no steeper than `fit.slope` off what holds it up.
+      const step = (end.reach - start) / count, need = line.map(([x, , z]) => armTopNear(x, z, s.wide / 2, fit.margin) + s.thick / 2 + fit.by)
+      line.forEach((p, k) => { p[1] = Math.max(p[1], ...need.map((y, j) => y - fit.slope * Math.abs(k - j) * step)) })
+    }
     // The end starts in the knot, so it is lifted to it along the first stretch.
     line[0][1] = Math.max(line[0][1], knotAt[1] - 0.02)
     line[1][1] = Math.max(line[1][1], (line[0][1] + line[2][1]) / 2)
