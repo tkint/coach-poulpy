@@ -10,6 +10,11 @@ import screenBuilderRunParts from './builder-run-parts.html?raw'
 import screenBuilderRunTarget from './builder-run-target.html?raw'
 import screenBuilderSetsEditStep from './builder-sets-edit-step.html?raw'
 import screenBuilderSetsSuperset from './builder-sets-superset.html?raw'
+import screenBuilderTidyEmpty from './builder-tidy-empty.html?raw'
+import screenBuilderTidyWorkOnly from './builder-tidy-work-only.html?raw'
+import screenBuilderTidyAddMenu from './builder-tidy-add-menu.html?raw'
+import screenBuilderTidyRepeatMenu from './builder-tidy-repeat-menu.html?raw'
+import screenBuilderTidyNameError from './builder-tidy-name-error.html?raw'
 import screenBuilderStepMenu from './builder-step-menu.html?raw'
 
 // The Builder screens of the apps (ADR 0029), drawn with the phone stylesheet (../screens.css).
@@ -100,3 +105,43 @@ export const BuilderStepMenu: Story = {
   parameters: { mockup: { issue: 90 } },
 }
 
+
+/** Builder · a new workout with nothing in it yet. */
+export const BuilderTidyEmpty: Story = {
+  name: "Empty workout",
+  tags: ['!autodocs', 'draft'],
+  ...screen(screenBuilderTidyEmpty, { reorder: true }),
+  parameters: { mockup: {} },
+}
+
+/** Builder · only a Work part; a warm-up and a cool down are one tap away. */
+export const BuilderTidyWorkOnly: Story = {
+  name: "Work only",
+  tags: ['!autodocs', 'draft'],
+  ...screen(screenBuilderTidyWorkOnly, { reorder: true }),
+  parameters: { mockup: {} },
+}
+
+/** Builder · the + of a block offers an exercise, a repeat or a rest. */
+export const BuilderTidyAddMenu: Story = {
+  name: "Add menu",
+  tags: ['!autodocs', 'draft'],
+  ...screen(screenBuilderTidyAddMenu, { reorder: true }),
+  parameters: { mockup: {} },
+}
+
+/** Builder · the actions of a repeat. */
+export const BuilderTidyRepeatMenu: Story = {
+  name: "Repeat menu",
+  tags: ['!autodocs', 'draft'],
+  ...screen(screenBuilderTidyRepeatMenu, { reorder: true }),
+  parameters: { mockup: {} },
+}
+
+/** Builder · saving without a name. */
+export const BuilderTidyNameError: Story = {
+  name: "Name missing",
+  tags: ['!autodocs', 'draft'],
+  ...screen(screenBuilderTidyNameError, { reorder: true }),
+  parameters: { mockup: {} },
+}

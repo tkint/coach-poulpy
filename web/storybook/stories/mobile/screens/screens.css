@@ -1157,3 +1157,4 @@
 .cp-screen fieldset.builder-block > .steps { padding: 4px 0; }
 .cp-screen fieldset.builder-block > .steps > li + li > .recap-row.list-row { border-top: 1px solid var(--cp-outline); }
 .cp-screen fieldset.builder-block > .steps > li > .repeat { margin: 2px 0; }
+.cp-screen .block-empty { padding: 10px 0 12px; font-size: 13px; line-height: 17px; color: var(--cp-on-surface-variant); }

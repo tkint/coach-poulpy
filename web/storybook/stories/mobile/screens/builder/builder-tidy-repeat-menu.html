@@ -1,0 +1,59 @@
+<main class="phone" style="--frame-height: 900px">
+<header class="top-bar" style="padding: var(--cp-space-xxxl) var(--cp-space-md) var(--cp-space-sm); justify-content: flex-start; gap: var(--cp-space-xs);">
+    <button type="button" class="icon-button" aria-label="Close"><MobileIcon name="x" :size="22" /></button>
+    <h1 class="headline" style="flex: 1;">New workout</h1>
+    <MobileButton size="sm">Save</MobileButton>
+  </header>
+
+  <div class="page-body builder-body">
+    <label class="field"><span class="label">Name</span><input class="text-field" type="text" value="Upper body"></label>
+    <div class="format-line" id="format" data-component="format-line"><span class="label">Format</span>
+      <button type="button" class="format-control" data-component="format-control" aria-haspopup="dialog" aria-label="Format: Sets. Change it"><span class="format-pill"><MobileIcon name="list" :size="18" /><strong>Sets</strong><MobileIcon name="chevron-down" :size="16" /></span></button></div>
+    <fieldset class="recap-part builder-block" id="warm-up" data-component="recap-part" aria-label="Warm-up">
+          <legend class="part-header" data-component="part-header"><div class="part-title"><span class="part-icon" aria-hidden="true"><MobileIcon name="sun" :size="20" /></span><div><h2>Warm-up</h2><p>2 exercises · about 6 min</p></div></div></legend>
+          <ol class="steps" data-reorder><li><div class="list-row recap-row builder-row" data-component="builder-row">
+              <button type="button" class="row-main"><span class="row-icon" aria-hidden="true"><MobileIcon name="footprints" :size="18" /></span><span class="row-text"><strong>Walk</strong><span>5 min</span></span></button>
+              <button class="icon-button icon-button--quiet" type="button" aria-haspopup="menu" aria-label="More actions for Walk"><MobileIcon name="ellipsis-vertical" :size="20" /></button>
+            </div></li><li><div class="list-row recap-row builder-row" data-component="builder-row">
+              <button type="button" class="row-main"><span class="row-icon" aria-hidden="true"><MobileIcon name="person-standing" :size="18" /></span><span class="row-text"><strong>Arm circle</strong><span>30 s</span></span></button>
+              <button class="icon-button icon-button--quiet" type="button" aria-haspopup="menu" aria-label="More actions for Arm circle"><MobileIcon name="ellipsis-vertical" :size="20" /></button>
+            </div></li></ol>
+          <button class="part-add" type="button" data-component="part-add" aria-label="Add to warm-up"><MobileIcon name="plus" :size="20" /></button>
+        </fieldset>
+    <fieldset class="recap-part builder-block" id="work" data-component="recap-part" aria-label="Work">
+          <legend class="part-header" data-component="part-header"><div class="part-title"><span class="part-icon part-icon--work" aria-hidden="true"><MobileIcon name="zap" :size="20" /></span><div><h2>Work</h2><p>4 exercises · about 25 min</p></div></div></legend>
+          <ol class="steps" data-reorder><li><div class="list-row recap-row builder-row" data-component="builder-row">
+              <button type="button" class="row-main"><span class="row-icon" aria-hidden="true"><MobileIcon name="dumbbell" :size="18" /></span><span class="row-text"><strong>Goblet squat</strong><span>3 × 8 · 40 kg · 2 min between sets</span></span></button>
+              <button class="icon-button icon-button--quiet" type="button" aria-haspopup="menu" aria-label="More actions for Goblet squat"><MobileIcon name="ellipsis-vertical" :size="20" /></button>
+            </div></li><li><div class="list-row recap-row builder-row" data-component="builder-row">
+              <button type="button" class="row-main"><span class="row-icon" aria-hidden="true"><MobileIcon name="dumbbell" :size="18" /></span><span class="row-text"><strong>Bent-over row</strong><span>3 × 10 · 30 kg · 1 min 30 s between sets</span></span></button>
+              <button class="icon-button icon-button--quiet" type="button" aria-haspopup="menu" aria-label="More actions for Bent-over row"><MobileIcon name="ellipsis-vertical" :size="20" /></button>
+            </div></li><li><section class="repeat" data-component="repeat" aria-label="Repeat 3 times">
+              <div class="repeat-header"><MobileIcon name="repeat" :size="20" /><strong>Repeat</strong>
+                <span class="repeat-count" role="group" aria-label="Number of times"><button type="button" aria-label="Fewer times">−</button><span>3 times</span><button type="button" aria-label="More times">+</button></span>
+                <button class="icon-button icon-button--quiet" type="button" aria-haspopup="menu" aria-label="More actions for this repeat"><MobileIcon name="ellipsis-vertical" :size="20" /></button></div>
+              <ol class="steps"><li><div class="list-row recap-row builder-row" data-component="builder-row">
+              <button type="button" class="row-main"><span class="row-icon" aria-hidden="true"><MobileIcon name="dumbbell" :size="18" /></span><span class="row-text"><strong>Biceps curl</strong><span>12 reps · 10 kg</span></span></button>
+              <button class="icon-button icon-button--quiet" type="button" aria-haspopup="menu" aria-label="More actions for Biceps curl"><MobileIcon name="ellipsis-vertical" :size="20" /></button>
+            </div></li><li><div class="list-row recap-row builder-row" data-component="builder-row">
+              <button type="button" class="row-main"><span class="row-icon" aria-hidden="true"><MobileIcon name="person-standing" :size="18" /></span><span class="row-text"><strong>Triceps dip</strong><span>12 reps</span></span></button>
+              <button class="icon-button icon-button--quiet" type="button" aria-haspopup="menu" aria-label="More actions for Triceps dip"><MobileIcon name="ellipsis-vertical" :size="20" /></button>
+            </div></li><li><div class="list-row recap-row builder-row" data-component="builder-row">
+              <button type="button" class="row-main"><span class="row-icon" aria-hidden="true"><MobileIcon name="timer" :size="18" /></span><span class="row-text"><MobileRoleTag>Recover</MobileRoleTag><strong>Rest</strong><span>1 min</span></span></button>
+              <button class="icon-button icon-button--quiet" type="button" aria-haspopup="menu" aria-label="More actions for Rest"><MobileIcon name="ellipsis-vertical" :size="20" /></button>
+            </div></li></ol>
+            </section></li></ol>
+          <button class="part-add" type="button" data-component="part-add" aria-label="Add to Work"><MobileIcon name="plus" :size="20" /></button>
+        </fieldset>
+    <fieldset class="recap-part builder-block" id="cool-down" data-component="recap-part" aria-label="Cool down">
+          <legend class="part-header" data-component="part-header"><div class="part-title"><span class="part-icon" aria-hidden="true"><MobileIcon name="moon" :size="20" /></span><div><h2>Cool down</h2><p>1 exercise · 1 min</p></div></div></legend>
+          <ol class="steps" data-reorder><li><div class="list-row recap-row builder-row" data-component="builder-row">
+              <button type="button" class="row-main"><span class="row-icon" aria-hidden="true"><MobileIcon name="person-standing" :size="18" /></span><span class="row-text"><strong>Chest stretch</strong><span>30 s hold · each side</span></span></button>
+              <button class="icon-button icon-button--quiet" type="button" aria-haspopup="menu" aria-label="More actions for Chest stretch"><MobileIcon name="ellipsis-vertical" :size="20" /></button>
+            </div></li></ol>
+          <button class="part-add" type="button" data-component="part-add" aria-label="Add to cool down"><MobileIcon name="plus" :size="20" /></button>
+        </fieldset>
+  </div>
+  <div class="scrim" aria-hidden="true" style="background: transparent;"></div>
+  <div class="popover-menu" role="menu" aria-label="Actions for this repeat" data-component="popover-menu" style="position: absolute; top: 562px; right: 20px;"><button type="button" role="menuitem"><MobileIcon name="copy" :size="22" />Duplicate</button><button type="button" role="menuitem"><MobileIcon name="arrow-up" :size="22" />Move up</button><button type="button" role="menuitem"><MobileIcon name="arrow-down" :size="22" />Move down</button><hr><button type="button" role="menuitem" class="danger"><MobileIcon name="trash" :size="22" />Delete</button></div>
+</main>
