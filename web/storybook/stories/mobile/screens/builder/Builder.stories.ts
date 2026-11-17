@@ -11,7 +11,6 @@ import screenBuilderRunTarget from './builder-run-target.html?raw'
 import screenBuilderSetsEditStep from './builder-sets-edit-step.html?raw'
 import screenBuilderSetsSuperset from './builder-sets-superset.html?raw'
 import screenBuilderTidyEmpty from './builder-tidy-empty.html?raw'
-import screenBuilderTidyWorkOnly from './builder-tidy-work-only.html?raw'
 import screenBuilderTidyAddMenu from './builder-tidy-add-menu.html?raw'
 import screenBuilderTidyRepeatMenu from './builder-tidy-repeat-menu.html?raw'
 import screenBuilderTidyNameError from './builder-tidy-name-error.html?raw'
@@ -107,7 +106,7 @@ export const BuilderStepMenu: Story = {
 }
 
 
-/** Builder · a new workout with nothing in it yet. */
+/** Builder · a new workout with nothing in it yet; the warm-up and cool down are always there, empty and optional. */
 export const BuilderTidyEmpty: Story = {
   name: "Empty workout",
   tags: ['!autodocs', 'draft'],
@@ -115,13 +114,6 @@ export const BuilderTidyEmpty: Story = {
   parameters: { mockup: {} },
 }
 
-/** Builder · only a Work part; a warm-up and a cool down are one tap away. */
-export const BuilderTidyWorkOnly: Story = {
-  name: "Work only",
-  tags: ['!autodocs', 'draft'],
-  ...screen(screenBuilderTidyWorkOnly, { reorder: true }),
-  parameters: { mockup: {} },
-}
 
 /** Builder · the + of a block offers an exercise, a repeat or a rest. */
 export const BuilderTidyAddMenu: Story = {
@@ -147,9 +139,9 @@ export const BuilderTidyNameError: Story = {
   parameters: { mockup: {} },
 }
 
-/** Builder · warm-up and cool down always shown, empty, instead of the "Add a warm-up" and "Add a cool down" links. */
+/** Builder · a Work part with nothing planned before or after it. */
 export const BuilderTidyEmptyOptionalBlocks: Story = {
-  name: "Empty warm-up and cool down",
+  name: "Nothing planned before and after",
   tags: ['!autodocs', 'draft'],
   ...screen(screenBuilderTidyEmptyOptionalBlocks, { reorder: true }),
   parameters: { mockup: {} },
