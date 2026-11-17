@@ -1164,10 +1164,8 @@
 .cp-screen .row-title .role-tag { align-self: center; height: 16px; padding: 0 6px; font-size: 10.5px; letter-spacing: 0.06em; }
 .cp-screen .row-text > .row-title { font-size: 15px; line-height: 20px; color: var(--cp-on-surface); font-variant-numeric: normal; }
 
-/* Builder · a repeat's header: the title and count open the count sheet; a discreet + adds to the repeat (draft). */
-.cp-screen .repeat-header .repeat-title { flex: 1; display: flex; align-items: center; gap: var(--cp-space-sm); justify-content: space-between; min-height: 44px; text-align: left; }
-.cp-screen .repeat-header .repeat-title strong { flex: 0 0 auto; }
-.cp-screen .repeat-header .repeat-times { font-size: 14px; font-weight: 700; color: var(--cp-on-primary-container); font-variant-numeric: tabular-nums; }
-.cp-screen .repeat-header .repeat-add { width: 28px; height: 28px; border-radius: var(--cp-radius-sm); background: color-mix(in srgb, var(--cp-primary) 12%, transparent); color: var(--cp-on-primary-container); display: flex; align-items: center; justify-content: center; }
-.cp-screen .repeat-header .repeat-title:focus-visible, .cp-screen .repeat-header .repeat-add:focus-visible { outline: 3px solid var(--cp-primary); outline-offset: 2px; }
+/* Builder · a repeat's header: one line, "Repeat 3 times", opens the count sheet (draft). */
+.cp-screen .repeat-header .repeat-title { flex: 1; display: flex; align-items: center; min-height: 40px; text-align: left; }
+.cp-screen .repeat-header .repeat-title strong { font-size: 14px; line-height: 18px; }
+.cp-screen .repeat-header .repeat-title:focus-visible { outline: 3px solid var(--cp-primary); outline-offset: 2px; }
 .cp-screen .repeat .block-empty { min-height: 44px; padding: var(--cp-space-sm) var(--cp-space-md); text-align: center; color: var(--cp-on-surface-variant); }

@@ -151,7 +151,7 @@ export const BuilderTidyEmptyOptionalBlocks: Story = {
   parameters: { mockup: {} },
 }
 
-/** Builder · a repeat's title and count open the count sheet; a discreet + in the header adds to the repeat. */
+/** Builder · a repeat's one-line title "Repeat 3 times" opens the count sheet; the ⋮ holds the actions, adding included. */
 export const BuilderTidyRepeatHeader: Story = {
   name: "Repeat header",
   tags: ['!autodocs', 'draft'],
@@ -159,9 +159,9 @@ export const BuilderTidyRepeatHeader: Story = {
   parameters: { mockup: {} },
 }
 
-/** Builder · the + of a repeat offers an exercise or a rest (never a repeat inside a repeat). */
+/** Builder · the ⋮ of a repeat starts with Add an exercise and Add a rest (never a repeat inside a repeat), then the usual actions. */
 export const BuilderTidyRepeatAddMenu: Story = {
-  name: "Repeat add menu",
+  name: "Repeat menu with add",
   tags: ['!autodocs', 'draft'],
   ...screen(screenBuilderTidyRepeatAddMenu, { reorder: true }),
   parameters: { mockup: {} },
