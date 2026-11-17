@@ -620,7 +620,7 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">29 docs ok</a></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">30 docs ok</a></div>
   </div>
 </header>
 <main>
@@ -2464,6 +2464,58 @@ import * as Live from &#39;./Autumn.stories&#39;
 - **Every run is the same.** Where each leaf falls and how it swings comes from a fixed list, not from chance, and the leaves have already been falling for a while when he appears.
 
 `AUTUMN` in [`design/poulpy-3d/looks/autumn.mjs`](https://github.com/tkint/coach-poulpy/blob/main/design/poulpy-3d/looks/autumn.mjs) holds every number: his cheeks, the scarf, the leaves and his idle. `buildAutumn()` builds him in his scarf and `createAutumn()` runs the leaves and the sway live. Like the moves, it is a preview: it is not in the glTF files nor in the apps&#39; pictures.
+</code></pre>
+          </div>
+        </div>
+  </div>
+</article>
+<article
+  class="card is-doc no-doc-error"
+  role="listitem"
+  aria-label="Docs">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> Brand/Poulpy looks/Jetpack</h2>
+      <div class="badges">
+        
+        <label for="doc-29-brand-poulpy-looks-jetpack-docs-content" class="badge ok as-toggle">view content</label>
+      </div>
+    </div>
+    <div class="meta" title="./stories/brand/looks/Jetpack.mdx">brand-poulpy-looks-jetpack--docs · ./stories/brand/looks/Jetpack.mdx</div>
+    <div># Poulpy with a jetpack **Draft, to validate.** A look: Poulpy in a costume and a move of ...</div>
+  </div>
+
+  <!-- Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="doc-29-brand-poulpy-looks-jetpack-docs-content" class="tg tg-content" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-content">
+          <div class="mdx-content">
+            <pre><code>import { Meta, Story } from &#39;@storybook/addon-docs/blocks&#39;
+import * as Jetpack from &#39;./Jetpack.stories&#39;
+
+&lt;Meta title=&quot;Brand/Poulpy looks/Jetpack&quot; /&gt;
+
+# Poulpy with a jetpack
+
+**Draft, to validate.** A look: Poulpy in a costume and a move of his own, for fun moments. He wears a little rocket pack and zooms from one side to the other, smiling with his eyes shut, flames and smoke under him and his tentacles trailing. It is not in the apps and nothing is baked from it until the owner agrees it.
+
+&lt;Story of={Jetpack.Flying} /&gt;
+
+- **The pack is solid, part of him.** Two little white rockets on a plate across the back of his head, each with a round blue nose, a blue stripe, a fin and a steel nozzle. They lean in at the top so their nozzles point down and a little out, clear of his tentacles. Turn him and they turn with him; face on, you see their sides and their flames.
+- **He is enjoying the ride.** His face is [the DJ&#39;s](?path=/docs/brand-looks-the-dj--docs): eyes shut in two happy arcs, a small smile, a little lopsided, and the happy blush, on the blue side in the happy shade. Flying is fun, never a chore. As he pushes off, his smile widens a touch, and nothing else on his face moves. His head widens a little with the push and wobbles back as he stops. `jetpackFace()` gives his face at any point between hovering and dashing. He does not blink for now; a natural, infrequent blink may come later.
+- **The flames and the smoke are comic effects.** Each flame is three flat layers, orange, yellow and pale cream, facing the viewer like the sparks and puffs of the poses and pointing the way its nozzle does. They are fire, gold and yellow, never the ember of his grumpy side. They flicker and burn longer as he pushes off. The smoke is the fuming pose&#39;s puffs, light with a grey-blue edge: they leave the flames&#39; tips, grow, drift and shrink away, and stay in the room, so he leaves a trail as he zooms. Overlapping puffs make one cloud with one outline.
+- **He zooms, banks and looks where he goes.** He hovers well off the floor, bobbing, and glides from one side to the other, easing in and out, with a short hover at each end. Going sideways he banks into the turn and turns his face a little towards where he is going.
+- **His tentacles hang and trail, he never lifts them.** In the air they hang heavier than in [a jump](?path=/docs/brand-poulpy-moves-little-jumps--docs), as if he pulled a few G&#39;s, and they lag behind him on the same three bends: they trail as he sets off and settle as he stops, with hardly a swing past him, because the G&#39;s weigh them down. Brand decision 8 holds: he never raises a tentacle himself.
+
+The look is `JETPACK` and `buildPoulpyJetpack()` in [`design/poulpy-3d/looks/jetpack.mjs`](https://github.com/tkint/coach-poulpy/blob/main/design/poulpy-3d/looks/jetpack.mjs); the flight is `ZOOM` and `createZoom()` in [`motion.mjs`](https://github.com/tkint/coach-poulpy/blob/main/design/poulpy-3d/motion.mjs). It is a live preview, not in the glTF files or the pictures.
+
+**Where he will show:** probably at the end of a session, where the screen has room for him to zoom about. Nothing is built there until this page is agreed.
+
+**Still open:** its values (how far and how fast he zooms, how heavy his tentacles hang, how long the flames burn).
 </code></pre>
           </div>
         </div>
