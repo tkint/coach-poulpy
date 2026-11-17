@@ -83,7 +83,8 @@ function nudge(event: KeyboardEvent) {
 const look = () => scene?.look({ turn: -turn.value, tilt: tilt.value, distance: distance.value, centre: 1.45 })
 let model: Parameters<ReturnType<typeof createPoulpyScene>['show']>[0] | undefined
 const show = () => { if (model) scene?.show(model, outline.value) }
-watch([turn, tilt, distance], look)
+// The snow and his breath turn to face the viewer again, even while he stands still.
+watch([turn, tilt, distance], () => { look(); draw(0) })
 watch(outline, show)
 // A switch flipped while he is still is seen at once.
 watch([snow, breath], () => draw(0))

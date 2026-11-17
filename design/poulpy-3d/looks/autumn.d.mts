@@ -9,9 +9,6 @@ export const AUTUMN: {
     knot: { around: number; size: number[] }
     ends: { aside: number; reach: number }[]; wide: number; thick: number; endStripes: number
     fringe: { threads: number; length: number }
-    /** A flat band in place of the round roll, and the knot and ends kept clear of his arms (scarf() says how); autumn leaves both out. */
-    band?: { top: number; bottom: number; thick: number; sink: number; knot: number }
-    fit?: { by: number; margin: number; slope: number }
   }
   leaves: {
     count: number; seed: number; colours: string[]; size: number[]; from: number; around: number[]; depth: number; fall: number[]
