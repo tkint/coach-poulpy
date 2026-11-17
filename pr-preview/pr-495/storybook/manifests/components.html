@@ -620,7 +620,7 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">29 docs ok</a></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">30 docs ok</a></div>
   </div>
 </header>
 <main>
@@ -2426,19 +2426,68 @@ The app icons are his pictures on Deep sea, in light and dark alike, and the loa
   aria-label="Docs">
   <div class="head">
     <div class="title">
-      <h2><span class="status-dot dot-ok"></span> Brand/Looks/The cook</h2>
+      <h2><span class="status-dot dot-ok"></span> Brand/Poulpy looks/Autumn</h2>
       <div class="badges">
         
-        <label for="doc-28-brand-looks-the-cook-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-28-brand-poulpy-looks-autumn-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
-    <div class="meta" title="./stories/brand/looks/Chef.mdx">brand-looks-the-cook--docs · ./stories/brand/looks/Chef.mdx</div>
+    <div class="meta" title="./stories/brand/looks/Autumn.mdx">brand-poulpy-looks-autumn--docs · ./stories/brand/looks/Autumn.mdx</div>
+    <div># Poulpy in autumn **Draft.** A look for the season, to review here before it goes anywher...</div>
+  </div>
+
+  <!-- Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="doc-28-brand-poulpy-looks-autumn-docs-content" class="tg tg-content" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-content">
+          <div class="mdx-content">
+            <pre><code>import { Meta, Story } from &#39;@storybook/addon-docs/blocks&#39;
+import * as Live from &#39;./Autumn.stories&#39;
+
+&lt;Meta title=&quot;Brand/Poulpy looks/Autumn&quot; /&gt;
+
+# Poulpy in autumn
+
+**Draft.** A look for the season, to review here before it goes anywhere else: Poulpy, happy and cosy in a little white and red striped scarf, while maple leaves fall around him.
+
+&lt;Story of={Live.Autumn} /&gt;
+
+- **He is happy Poulpy, on the blue side.** A look is never a mood of its own: it is his happy face and shade, with cheeks a little rosier from the cold.
+- **The scarf is part of him.** It goes all the way around his head where his arms meet it, sinks a little into their soft tops and is knotted on his left, above his second arm. Its two ends lie over that arm and hang off its tip, with a short fringe. Turn him and it turns with him; it never covers his smile.
+- **The scarf&#39;s red is poppy, not the error crimson nor the ember side.** Off-white wool (`#FBF6EE`) and poppy red (`#E5373A`), brighter and warmer than the crimson of errors (`#C8264A`) and redder than the ember (`#D9622B`). With its white stripes it reads as knitting, never as a state.
+- **The leaves are flat, like the comic effects of his poses.** Three autumn oranges, each a five-lobed maple leaf. Falling, a leaf faces the viewer and swings from side to side like a pendulum: it falls quickest through the middle of a swing and tilts up at each end, and now and then half turns over. On the floor it settles flat, stays a moment and goes, and another one falls from the top. They fall around him, never through him.
+- **He sways and breathes.** Once every 6.4 s he turns a little to one side and the other, his head leaning a moment later, and his head stretches and settles with his breath. His arms trail the sway on the same springs as his turn, and they stay on the floor.
+- **Every run is the same.** Where each leaf falls and how it swings comes from a fixed list, not from chance, and the leaves have already been falling for a while when he appears.
+
+`AUTUMN` in [`design/poulpy-3d/looks/autumn.mjs`](https://github.com/tkint/coach-poulpy/blob/main/design/poulpy-3d/looks/autumn.mjs) holds every number: his cheeks, the scarf, the leaves and his idle. `buildAutumn()` builds him in his scarf and `createAutumn()` runs the leaves and the sway live. Like the moves, it is a preview: it is not in the glTF files nor in the apps&#39; pictures.
+</code></pre>
+          </div>
+        </div>
+  </div>
+</article>
+<article
+  class="card is-doc no-doc-error"
+  role="listitem"
+  aria-label="Docs">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> Brand/Poulpy looks/The cook</h2>
+      <div class="badges">
+        
+        <label for="doc-29-brand-poulpy-looks-the-cook-docs-content" class="badge ok as-toggle">view content</label>
+      </div>
+    </div>
+    <div class="meta" title="./stories/brand/looks/Chef.mdx">brand-poulpy-looks-the-cook--docs · ./stories/brand/looks/Chef.mdx</div>
     <div># Poulpy the cook **Draft.** Poulpy dressed up as a cook who is sure of everything: a tall...</div>
   </div>
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-28-brand-looks-the-cook-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-29-brand-poulpy-looks-the-cook-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -2448,7 +2497,7 @@ The app icons are his pictures on Deep sea, in light and dark alike, and the loa
             <pre><code>import { Meta, Story } from &#39;@storybook/addon-docs/blocks&#39;
 import * as Live from &#39;./Chef.stories&#39;
 
-&lt;Meta title=&quot;Brand/Looks/The cook&quot; /&gt;
+&lt;Meta title=&quot;Brand/Poulpy looks/The cook&quot; /&gt;
 
 # Poulpy the cook
 
