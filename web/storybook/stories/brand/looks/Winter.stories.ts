@@ -11,5 +11,5 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** Winter Poulpy: a beanie and a scarf, snow falling around him and his breath puffing out as mist. */
+/** Winter Poulpy: ear muffs and a scarf, snow falling around him and his breath puffing out as mist. */
 export const Live: Story = { render: () => ({ components: { PoulpyWinter }, template: '<PoulpyWinter />' }) }

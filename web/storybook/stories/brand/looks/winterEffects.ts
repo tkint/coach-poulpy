@@ -24,13 +24,10 @@ function painted(pieces: { shape: PoulpyShape; colour: string }[]) {
 export function createWinterEffects(scene: THREE.Scene, camera: THREE.Camera, sizes: { flakes: number; puffs: number }) {
   const shapes = winterShapes()
   const flat = new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.DoubleSide })
-  // Every flake is in both meshes: as a round one it is hidden among the crystals, and the other way round.
-  const kinds = [painted(shapes.flake), painted(shapes.crystal)].map((geo) => {
-    const mesh = new THREE.InstancedMesh(geo, flat, sizes.flakes)
-    mesh.frustumCulled = false
-    scene.add(mesh)
-    return mesh
-  })
+  // Every flake is a six-armed crystal, all of them one mesh.
+  const snow = new THREE.InstancedMesh(painted(shapes.crystal), flat, sizes.flakes)
+  snow.frustumCulled = false
+  scene.add(snow)
   // Each puff has its own material, so it fades on its own; it never hides what is behind it.
   const mist = painted(shapes.puff)
   const puffs = Array.from({ length: sizes.puffs }, () => {
@@ -47,16 +44,14 @@ export function createWinterEffects(scene: THREE.Scene, camera: THREE.Camera, si
 
   /** Places the snow and the puffs of a pose of createWinter(); `snow` and `breath` show or hide each. */
   function update(pose: WinterPose, show: { snow: boolean; breath: boolean }) {
-    pose.snow.forEach(([x, y, z, size, angle, crystal], i) => {
+    pose.snow.forEach(([x, y, z, size, angle], i) => {
       piece.position.set(x, y, z)
       facingViewer(angle)
-      kinds.forEach((mesh, kind) => {
-        piece.scale.setScalar(show.snow && kind === crystal ? size : 0)
-        piece.updateMatrix()
-        mesh.setMatrixAt(i, piece.matrix)
-      })
+      piece.scale.setScalar(show.snow ? size : 0)
+      piece.updateMatrix()
+      snow.setMatrixAt(i, piece.matrix)
     })
-    for (const mesh of kinds) mesh.instanceMatrix.needsUpdate = true
+    snow.instanceMatrix.needsUpdate = true
     pose.breath.forEach(([x, y, z, size, opacity, angle], i) => {
       const mesh = puffs[i]
       if (!mesh) return
@@ -70,7 +65,7 @@ export function createWinterEffects(scene: THREE.Scene, camera: THREE.Camera, si
   }
 
   function dispose() {
-    for (const mesh of kinds) { scene.remove(mesh); mesh.geometry.dispose(); mesh.dispose() }
+    scene.remove(snow); snow.geometry.dispose(); snow.dispose()
     for (const mesh of puffs) { scene.remove(mesh); (mesh.material as THREE.Material).dispose() }
     mist.dispose()
     flat.dispose()

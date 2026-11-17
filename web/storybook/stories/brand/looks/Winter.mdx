@@ -5,18 +5,20 @@ import * as Winter from './Winter.stories'
 
 # Winter Poulpy
 
-**Draft.** A look for the cold months, to review before anything is built from it: Poulpy, happy, in a knitted beanie and a scarf, while snow falls around him and his breath shows in the cold air.
+**Draft.** A look for the cold months, to review before anything is built from it: Poulpy, happy, in fluffy ear muffs and a scarf, while snow falls around him and his breath shows in the cold air.
 
 <Story of={Winter.Live} />
 
-- **What he wears is solid and part of him**, like the poses' props. The beanie is a knitted dome in his ember with a cream stripe and a fluffy cream pompom; its cuff is folded up, clear of his eyes in front and pulled further down at the back. The scarf is the same ember knit, wrapped once around the base of his head, just under his smile and on top of his arms, with soft folds. It is knotted on his left, and its two ends, each with two cream stripes, lie over his arms: the long one drapes over his front arm down to the floor.
+- **What he wears is solid and part of him**, like the poses' props. The set is a warm cream and a deep berry: never ember, which is his angry side, and not the autumn scarf's red, and both stand out against his blue.
+- **The scarf is the [autumn look](?path=/docs/brand-poulpy-looks-autumn--docs)'s**, the same shape in the same place, cream with berry stripes. Winter builds it with the autumn look's own code, so the two stay one scarf.
+- **The ear muffs sit where the DJ's headset does**: a thin berry band over his head and a big fluffy cream muff on each side, over where his ears would be, covered in small tufts so its outline is furry.
 - **He is happy, on the blue side.** His face is the happy one, with rosier cheeks from the cold. Winter is cosy, never cold and miserable.
-- **Snow falls all around him.** Round flakes, white with a frosty edge so they show on a light page too, and a few six-armed crystals. Each falls at its own pace, sways and turns on itself, and melts where it lands. The flakes are flat and face the viewer, like the comic effects, but they are in the room: walk around him and they stay where they are. They never fall through him. Every run is the same: where each flake falls comes from a fixed list, as the champion's confetti does.
+- **Snow falls around him.** A few six-armed crystals in frost blue, which shows on a light page and a dark one. Each falls at its own pace, sways and turns on itself, and melts where it lands. The flakes are flat and face the viewer, like the comic effects, but they are in the room: walk around him and they stay where they are. They never fall through him. Every run is the same: where each flake falls comes from a fixed list, as the champion's confetti does.
 - **His breath shows.** Each time he breathes out, his head squashes a little and three small puffs of mist leave his mouth and drift off to the side he looks to, clear of his eyes, rising, growing and fading. They are pale and soft-edged, nothing like the fuming pose's puffs: cold breath, not anger.
 - **His idle is gentle.** He looks a little to one side, then to the other, on a soft spring; his head leans with him and his arms trail behind, as in his turn. He never lifts an arm.
 
 **Move** plays or stops him, **Snow** and **Breath** show or hide them, **Outline** is the optional outline. Drag to look around him.
 
-`WINTER` in [`design/poulpy-3d/looks/winter.mjs`](https://github.com/tkint/coach-poulpy/blob/main/design/poulpy-3d/looks/winter.mjs) holds every number: the colours, the beanie's and the scarf's shapes, the sway, the breath and the snow. `buildWinterPoulpy()` builds him and `createWinter()` runs his idle. A look keeps to its own file, so looks never step on each other. It is a live preview only: not in the glTF files, the pictures or the apps.
+`WINTER` in [`design/poulpy-3d/looks/winter.mjs`](https://github.com/tkint/coach-poulpy/blob/main/design/poulpy-3d/looks/winter.mjs) holds every number: the colours, the ear muffs, the sway, the breath and the snow. `buildWinterPoulpy()` builds him and `createWinter()` runs his idle. A look keeps to its own file, so looks never step on each other. It is a live preview only: not in the glTF files, the pictures or the apps.
 
-**Open for the owner:** the colours of the set (Poulpy's ember with cream, to stand out from his blue), whether the scarf ends should have a fringe (it read as little fingers at small sizes, so it is left out), and how strong the breath should be.
+**Open for the owner:** the set's colours (cream and berry), and how strong the breath should be.

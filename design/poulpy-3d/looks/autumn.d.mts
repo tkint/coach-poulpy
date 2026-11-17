@@ -22,5 +22,7 @@ export const AUTUMN: {
 export interface AutumnPose extends TurnPose { tilt: number; leaves: number[][] }
 export interface Autumn { advance(seconds: number): AutumnPose; pose(): AutumnPose }
 export function buildAutumn(options: { tones: Record<PoulpyMood, string>; colours: { blue: string; ember: string; ink: string }; autumn?: typeof AUTUMN }): Poulpy3d & { headTilt: number }
+/** The scarf's parts and their materials (`scarf_wool`, `scarf_stripe`), from numbers shaped like AUTUMN.scarf, for any look that wears it. */
+export function scarf(s: typeof AUTUMN.scarf): { materials: Poulpy3d['materials']; parts: Poulpy3d['parts'] }
 export function leafShape(): PoulpyShape
 export function createAutumn(options?: { autumn?: typeof AUTUMN }): Autumn
