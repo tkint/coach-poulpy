@@ -1165,3 +1165,16 @@
 
 /* The builder's format line is a button that opens the format sheet (#243). */
 .cp-screen .format-control { display: inline-flex; align-items: center; gap: var(--cp-space-xs); min-height: 44px; padding: 0 var(--cp-space-xs); border-radius: var(--cp-radius-pill); color: var(--cp-on-surface-variant); }
+
+/* ---------- Builder, tidied: the workout page's rows and parts, editable (draft) ---------- */
+
+.cp-screen .page-body .field { gap: 6px; }
+.cp-screen .part-add { width: 40px; height: 40px; flex: none; border-radius: var(--cp-radius-md); background: var(--cp-primary-container); color: var(--cp-on-primary-container); display: flex; align-items: center; justify-content: center; }
+.cp-screen .part-add:focus-visible { outline: 3px solid var(--cp-primary); outline-offset: 2px; }
+.cp-screen .part-header > div { flex: 1; min-width: 0; }
+.cp-screen .step-row--builder { padding: 2px 2px 2px var(--cp-space-md); gap: 0; }
+.cp-screen .step-row--builder .step-main { flex: 1; min-width: 0; min-height: 52px; display: flex; align-items: center; gap: var(--cp-space-md); text-align: start; }
+.cp-screen .repeat-header .repeat-count { margin-left: auto; padding: 2px; }
+.cp-screen .repeat-header .repeat-count button { width: 32px; height: 32px; }
+.cp-screen .repeat-header .repeat-count span { min-width: 52px; font-size: 14px; }
+.cp-screen .repeat-header > strong { flex: 1; }

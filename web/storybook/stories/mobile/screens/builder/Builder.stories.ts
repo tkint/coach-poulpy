@@ -11,6 +11,8 @@ import screenBuilderRunParts from './builder-run-parts.html?raw'
 import screenBuilderRunTarget from './builder-run-target.html?raw'
 import screenBuilderSetsEditStep from './builder-sets-edit-step.html?raw'
 import screenBuilderSetsSuperset from './builder-sets-superset.html?raw'
+import screenBuilderTidyParts from './builder-tidy-parts.html?raw'
+import screenBuilderTidySingleWork from './builder-tidy-single-work.html?raw'
 import screenBuilderStepMenu from './builder-step-menu.html?raw'
 
 // The Builder screens of the apps (ADR 0029), drawn with the phone stylesheet (../screens.css).
@@ -97,4 +99,19 @@ export const BuilderStepMenu: Story = {
   name: "Step actions",
   ...screen(screenBuilderStepMenu, { reorder: true }),
   parameters: { mockup: { issue: 90 } },
+}
+
+/** Builder, tidied · the workout page's layout, several work parts kept. */
+export const BuilderTidyParts: Story = {
+  name: "Tidy, several work parts",
+  tags: ['!autodocs', 'draft'],
+  ...screen(screenBuilderTidyParts, { reorder: true }),
+  parameters: { mockup: {} },
+}
+/** Builder, tidied · the workout page's layout, one work part. */
+export const BuilderTidySingleWork: Story = {
+  name: "Tidy, one work part",
+  tags: ['!autodocs', 'draft'],
+  ...screen(screenBuilderTidySingleWork, { reorder: true }),
+  parameters: { mockup: {} },
 }
