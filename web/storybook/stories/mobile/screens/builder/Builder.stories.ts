@@ -11,7 +11,7 @@ import screenBuilderRunParts from './builder-run-parts.html?raw'
 import screenBuilderRunTarget from './builder-run-target.html?raw'
 import screenBuilderSetsEditStep from './builder-sets-edit-step.html?raw'
 import screenBuilderSetsSuperset from './builder-sets-superset.html?raw'
-import screenBuilderTidyParts from './builder-tidy-parts.html?raw'
+import screenBuilderTidyCircuit from './builder-tidy-circuit.html?raw'
 import screenBuilderTidySingleWork from './builder-tidy-single-work.html?raw'
 import screenBuilderStepMenu from './builder-step-menu.html?raw'
 
@@ -101,17 +101,17 @@ export const BuilderStepMenu: Story = {
   parameters: { mockup: { issue: 90 } },
 }
 
-/** Builder, tidied · the workout page's layout, several work parts kept. */
-export const BuilderTidyParts: Story = {
-  name: "Tidy, several work parts",
-  tags: ['!autodocs', 'draft'],
-  ...screen(screenBuilderTidyParts, { reorder: true }),
-  parameters: { mockup: {} },
-}
-/** Builder, tidied · the workout page's layout, one work part. */
+/** Builder, tidied · the workout page's layout, a Sets workout with one work part. */
 export const BuilderTidySingleWork: Story = {
-  name: "Tidy, one work part",
+  name: "Tidy, Sets",
   tags: ['!autodocs', 'draft'],
   ...screen(screenBuilderTidySingleWork, { reorder: true }),
+  parameters: { mockup: {} },
+}
+/** Builder, tidied · a Circuit workout with one work part. */
+export const BuilderTidyCircuit: Story = {
+  name: "Tidy, Circuit",
+  tags: ['!autodocs', 'draft'],
+  ...screen(screenBuilderTidyCircuit, { reorder: true }),
   parameters: { mockup: {} },
 }
