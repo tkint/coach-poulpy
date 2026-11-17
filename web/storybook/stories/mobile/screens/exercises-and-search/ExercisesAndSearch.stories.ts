@@ -26,6 +26,7 @@ type Story = StoryObj<typeof meta>
 /** Builder · Exercise details of an added step. */
 export const BuilderStepDetailsSheet: Story = {
   name: "Exercise details of an added step",
+  tags: ['!autodocs', 'agreed'],
   ...screen(screenBuilderStepDetailsSheet),
   parameters: { mockup: { issue: 189 } },
 }

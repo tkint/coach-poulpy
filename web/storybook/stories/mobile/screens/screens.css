@@ -23,9 +23,9 @@
 .cp-screen ul { list-style: none; padding: 0; }
 .cp-screen button { font: inherit; color: inherit; border: 0; background: none; padding: 0; margin: 0; cursor: pointer; }
 /* Every tap target is a plain button, so in a browser it does nothing. A row still fills its line and reads from the start. */
-.cp-screen button:is(.card, .list-row, .step-row, .settings-row, .session-row, .profile-card, .device-row, .option-row, .link, .text-link, .section-link, .value-link, .add-to-part, .row-text),
+.cp-screen button:is(.card, .list-row, .settings-row, .session-row, .profile-card, .device-row, .option-row, .link, .text-link, .section-link, .value-link, .add-to-part, .row-text),
 .cp-screen :is(.list-row, .popover-menu, .calendar) button { text-align: start; }
-.cp-screen button:is(.card, .list-row, .step-row, .settings-row) { width: 100%; }
+.cp-screen button:is(.card, .list-row, .settings-row) { width: 100%; }
 .cp-screen svg { flex: none; }
 
 /* ---------- Device frames ---------- */
@@ -172,19 +172,6 @@
 
 .cp-screen .workout-details { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 15px; line-height: 21px; color: var(--cp-on-surface-variant); }
 
-.cp-screen .plan-button {
-  height: 48px;
-  flex: none;
-  border-radius: var(--cp-radius-md);
-  border: 2px dashed var(--cp-primary);
-  color: var(--cp-primary);
-  font-size: 15px;
-  font-weight: 800;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--cp-space-sm);
-}
 
 .cp-screen .stat-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--cp-space-sm); }
 .cp-screen .stat-tile {
@@ -199,7 +186,6 @@
 .cp-screen .stat-tile strong { font-size: 19px; line-height: 24px; font-weight: 800; font-variant-numeric: tabular-nums; }
 
 /* A part: header (icon, name, summary), then its steps. */
-.cp-screen .part { display: flex; flex-direction: column; gap: var(--cp-space-sm); }
 .cp-screen .part-header { display: flex; align-items: center; gap: 10px; padding: var(--cp-space-xs) 0 0 2px; }
 .cp-screen .part-icon {
   width: 36px;
@@ -217,33 +203,6 @@
 
 .cp-screen .steps { display: flex; flex-direction: column; gap: var(--cp-space-sm); }
 
-.cp-screen .step-row {
-  border-radius: var(--cp-radius-md);
-  background: var(--cp-surface);
-  padding: 10px var(--cp-space-md);
-  display: flex;
-  align-items: center;
-  gap: var(--cp-space-md);
-}
-.cp-screen .step-number {
-  width: 32px;
-  height: 32px;
-  border-radius: var(--cp-radius-pill);
-  background: var(--cp-primary-container);
-  color: var(--cp-on-primary-container);
-  font-family: var(--cp-font-display);
-  font-weight: 800;
-  font-size: 15px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex: none;
-}
-.cp-screen .step-number--rest { background: var(--cp-surface-variant); color: var(--cp-on-surface-variant); }
-.cp-screen .step-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.cp-screen .step-text strong { font-weight: 800; font-size: 16px; line-height: 22px; }
-.cp-screen .step-text span:last-child { font-size: 14px; line-height: 19px; color: var(--cp-on-surface-variant); font-variant-numeric: tabular-nums; }
-.cp-screen .step-row > svg { color: var(--cp-on-surface-variant); }
 
 .cp-screen .repeat {
   border-radius: var(--cp-radius-md);
@@ -740,21 +699,6 @@
 .cp-screen .select-field strong { font-size: 16px; line-height: 22px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .cp-screen .select-field > svg { color: var(--cp-on-surface-variant); }
 
-.cp-screen .part-option {
-  text-align: left;
-  min-height: 56px;
-  border-radius: var(--cp-radius-md);
-  border: 1.5px solid var(--cp-outline);
-  background: var(--cp-surface);
-  padding: 10px var(--cp-space-md);
-  display: flex;
-  align-items: center;
-  gap: var(--cp-space-md);
-}
-.cp-screen .part-option strong { font-family: var(--cp-font-display); font-size: 19px; line-height: 23px; font-weight: 700; }
-.cp-screen .part-option span span { font-size: 14px; line-height: 20px; color: var(--cp-on-surface-variant); }
-.cp-screen .part-option[disabled] { color: var(--cp-on-surface-variant); cursor: default; }
-.cp-screen .part-option[disabled] .round-icon { background: var(--cp-surface-variant); color: var(--cp-on-surface-variant); }
 .cp-screen .row-text > .role-tag { font-size: 11.5px; line-height: 22px; color: var(--cp-on-surface-variant); }
 
 /* ---------- Live ---------- */
@@ -1164,4 +1108,58 @@
 .cp-screen .badge--format { background: var(--cp-primary-container); border-color: var(--cp-primary-container); color: var(--cp-on-primary-container); }
 
 /* The builder's format line is a button that opens the format sheet (#243). */
-.cp-screen .format-control { display: inline-flex; align-items: center; gap: var(--cp-space-xs); min-height: 44px; padding: 0 var(--cp-space-xs); border-radius: var(--cp-radius-pill); color: var(--cp-on-surface-variant); }
+.cp-screen .format-control { display: inline-flex; align-items: center; min-height: 44px; border-radius: var(--cp-radius-pill); }
+.cp-screen .format-pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 12px; border-radius: var(--cp-radius-pill); background: var(--cp-primary-container); color: var(--cp-on-primary-container); }
+.cp-screen .format-pill strong { font-size: 15px; line-height: 20px; font-weight: 800; }
+.cp-screen .format-pill > svg:last-child { color: var(--cp-on-surface-variant); }
+.cp-screen .format-control:focus-visible { outline: 3px solid var(--cp-primary); outline-offset: 2px; }
+
+/* CLEANUP: the blocks of the workout details and the session recaps, copied from their screens' <style> blocks so the builder can use them; move them here for good and drop the nine copies (workout-page-*, session-recap-*). */
+/* Blocks and exercises as in the session recap; the info button replaces the time. */
+.cp-screen .recap-part { display: flex; flex-direction: column; }
+.cp-screen .recap-row { min-height: 0; }
+.cp-screen .recap-row .row-icon { flex: none; width: 32px; height: 32px; }
+.cp-screen .recap-row .row-icon svg { width: 18px; height: 18px; }
+.cp-screen .recap-row .row-text strong { font-size: 15px; line-height: 20px; }
+.cp-screen .recap-row .row-text > span { font-size: 13px; line-height: 17px; }
+.cp-screen .recap-row.list-row { background: transparent; border: 0; border-top: 1px solid var(--cp-outline); border-radius: 0; padding: 6px 0; gap: 10px; }
+.cp-screen .recap-part .steps { gap: 0; }
+.cp-screen .recap-part .steps > li:first-child .recap-row.list-row { border-top: 0; }
+.cp-screen .recap-part .part-icon { width: 24px; height: 24px; }
+.cp-screen .recap-part .part-icon svg { width: 14px; height: 14px; }
+.cp-screen .recap-part .part-header h2 { color: var(--cp-primary); font-size: 15px; line-height: 20px; white-space: nowrap; }
+.cp-screen .recap-part .part-header p { font-size: 12.5px; line-height: 16px; white-space: nowrap; }
+.cp-screen fieldset.recap-part { position: relative; min-inline-size: 0; margin: var(--cp-space-md) 0 0; padding: 0 10px; border: 1px solid var(--cp-outline); border-radius: var(--cp-radius-sm); background: transparent; }
+.cp-screen fieldset.recap-part .part-header { display: block; max-width: 100%; margin-left: 2px; padding: 0 6px; background: transparent; }
+.cp-screen fieldset.recap-part .part-header > .part-title { display: flex; align-items: center; gap: 6px; padding: 0; }
+.cp-screen fieldset.recap-part .part-title > div { display: flex; align-items: baseline; gap: var(--cp-space-sm); min-width: 0; }
+.cp-screen .part-time { position: absolute; top: -22px; right: 8px; padding: 0 6px; background: var(--cp-surface); font-size: 12.5px; line-height: 16px; font-weight: 800; color: var(--cp-on-surface-variant); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.cp-screen .info-button { flex: none; width: 44px; height: 44px; margin: -6px -10px -6px 0; border-radius: var(--cp-radius-pill); display: flex; align-items: center; justify-content: center; color: var(--cp-on-surface-variant); }
+.cp-screen .section-label { margin: 0 var(--cp-space-xs); }
+
+/* ---------- Builder, laid out like the workout details: outlined blocks, compact rows (draft) ---------- */
+
+.cp-screen .builder-body { gap: 14px; }
+.cp-screen fieldset.builder-block .part-add { position: absolute; top: -26px; right: 8px; width: 28px; height: 28px; border-radius: var(--cp-radius-sm); background: var(--cp-background); border: 1px solid var(--cp-outline); color: var(--cp-on-surface-variant); display: flex; align-items: center; justify-content: center; }
+.cp-screen .part-add:focus-visible { outline: 3px solid var(--cp-primary); outline-offset: 2px; }
+.cp-screen .builder-row.list-row { padding: 0; }
+.cp-screen .builder-row .icon-button { width: 44px; height: 44px; margin-right: -8px; }
+.cp-screen .builder-row .row-main { flex: 1; min-width: 0; min-height: 44px; display: flex; align-items: center; gap: 10px; text-align: start; }
+.cp-screen .repeat-header .repeat-count { margin-left: auto; padding: 0; background: transparent; gap: 2px; }
+.cp-screen .repeat-header .repeat-count button { width: 28px; height: 28px; border-radius: var(--cp-radius-sm); background: color-mix(in srgb, var(--cp-primary) 12%, transparent); color: var(--cp-on-primary-container); font-size: 18px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.cp-screen .repeat-header .repeat-count span { min-width: 56px; font-size: 14px; font-weight: 700; }
+.cp-screen .repeat-header > strong { flex: 1; }
+.cp-screen .repeat .recap-row.list-row { background: var(--cp-surface); border: 0; border-radius: var(--cp-radius-sm); padding: 0 0 0 8px; }
+.cp-screen .repeat .recap-part .steps, .cp-screen .repeat .steps { gap: 4px; }
+.cp-screen .builder-block .repeat { padding: 6px; gap: 4px; }
+.cp-screen .builder-block .repeat-header strong { font-size: 15px; line-height: 20px; }
+.cp-screen fieldset.builder-block { padding-top: 0; padding-bottom: 0; }
+.cp-screen fieldset.builder-block > .steps { padding: 4px 0; }
+.cp-screen fieldset.builder-block > .steps > li + li > .recap-row.list-row { border-top: 1px solid var(--cp-outline); }
+.cp-screen fieldset.builder-block > .steps > li > .repeat { margin: 2px 0; }
+.cp-screen .block-empty { display: block; width: 100%; min-height: 44px; padding: 13px 0; text-align: start; font-size: 13px; line-height: 18px; color: var(--cp-on-surface-variant); border-radius: var(--cp-radius-sm); }
+.cp-screen .block-empty:focus-visible { outline: 3px solid var(--cp-primary); outline-offset: -3px; }
+/* The Recover tag sits on the name's line, small, so a rest row stays two lines high. */
+.cp-screen .row-title { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.cp-screen .row-title .role-tag { align-self: center; height: 16px; padding: 0 6px; font-size: 10.5px; letter-spacing: 0.06em; }
+.cp-screen .row-text > .row-title { font-size: 15px; line-height: 20px; color: var(--cp-on-surface); font-variant-numeric: normal; }

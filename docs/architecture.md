@@ -43,7 +43,7 @@ Every workout shares the same concepts, whatever its format. Planned content is 
 | Concept | What it holds |
 | --- | --- |
 | Exercise | Stable slug, names in French and English, movement pattern, muscle groups, equipment needs (each a list of alternatives) and optional equipment, measurement (reps, time, distance, hold), per-side flag, images, instruction steps |
-| Workout | Name, format (circuit or sets), parts (an optional warm-up, one or more work parts, an optional cool down) each holding a tree of steps, estimated duration, tags |
+| Workout | Name, format (circuit or sets), parts (an optional warm-up, one work part, an optional cool down) each holding a tree of steps, estimated duration, tags |
 | Step | An exercise step (exercise, prescription, and a role: exercise or recover), a group (sequence, superset, circuit, interval set with rounds), or a rest |
 | Prescription | Sets, and per set a target (reps, duration, distance, hold), an optional load, intensity (RPE, speed, incline, heart rate zone), tempo, and rest before the next set |
 | Plan | Name, goal, weeks of days, each day holding zero or more workouts |
