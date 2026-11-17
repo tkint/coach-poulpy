@@ -5,7 +5,7 @@ import { onBeforeUnmount, onMounted, shallowRef, useTemplateRef, watch } from 'v
 import type { Chef } from '../../../../../design/poulpy-3d/motion.mjs'
 import type { createPoulpyScene } from '../poulpy3dScene'
 
-const variants = [{ face: 'grin', about: 'Eyes wide, brows up and a confident grin under a big curled moustache.' }]
+const variants = [{ face: 'grin', about: 'Eyes wide, brows up and a small confident grin under a big, solid curled moustache.' }]
 
 const stages = useTemplateRef<HTMLDivElement[]>('stages')
 const canvases = useTemplateRef<HTMLCanvasElement[]>('canvases')
