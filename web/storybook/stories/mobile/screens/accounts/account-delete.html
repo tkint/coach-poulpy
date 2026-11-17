@@ -8,7 +8,7 @@
       <MobileSettingsRow icon="download" title="Export my data" detail="JSON, and your sessions as FIT files" />
     </div>
     <div class="leave-actions">
-      <MobileButton kind="secondary" icon="log-out" id="sign-out">Sign out</MobileButton>
+      <MobileButton kind="secondary" size="md" icon="log-out" id="sign-out">Sign out</MobileButton>
       <button type="button" class="text-button text-button--danger" id="delete" style="flex: none;"><MobileIcon name="trash" :size="20" />&nbsp;Delete account</button>
     </div>
   </div>
@@ -18,6 +18,6 @@
     <div class="sheet-title"><h2>Delete your account?</h2><p>This deletes everything stored in your account, right away and for good. Every phone signed in goes back to a guest and keeps its own copy. Backups age out within 30 days.</p></div>
     
     <div class="field" id="delete-password-field"><label class="label" for="delete-password">Enter your password to confirm</label><span class="password-field"><input class="text-field" id="delete-password" type="password" value="" autocomplete="current-password"><button type="button" class="icon-button" aria-label="Show password" aria-pressed="false"><MobileIcon name="eye" :size="22" /></button></span></div>
-    <div class="sheet-actions"><button type="button" class="secondary-button">Cancel</button><button type="button" class="danger-button" style="flex: 1.6;"><MobileIcon name="trash" :size="20" />Delete account</button></div>
+    <div class="sheet-actions"><MobileButton kind="secondary" size="xl">Cancel</MobileButton><button type="button" class="danger-button" style="flex: 1.6;"><MobileIcon name="trash" :size="20" />Delete account</button></div>
   </MobileSheet>
 </main>

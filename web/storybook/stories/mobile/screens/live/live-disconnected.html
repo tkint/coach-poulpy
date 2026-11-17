@@ -23,15 +23,15 @@
           <div><h2>Lost the treadmill</h2><p>It disconnected 2 min ago. Poulpy keeps trying. With no answer, the session ends at 12:18, when it was last seen.</p></div>
         </div>
         <div class="actions">
-          <button class="secondary-button" type="button">Keep going</button>
-          <button type="button" class="primary-button">Finish</button>
+          <MobileButton kind="secondary" size="md">Keep going</MobileButton>
+          <MobileButton size="md">Finish</MobileButton>
         </div>
       </section>
       <section class="recorder" id="recorder" aria-label="Recorder" data-component="recorder">
         <div class="status"><span class="clock">12:18</span><span class="state state--paused"><span class="dot" aria-hidden="true"></span>Paused · Walk</span></div>
         <div class="actions">
-          <button class="secondary-button icon-only" type="button" aria-label="Resume recording"><MobileIcon name="play" :size="22" /></button>
-          <button type="button" class="primary-button">Finish</button>
+          <MobileButton kind="secondary" size="md" class="icon-only" aria-label="Resume recording"><MobileIcon name="play" :size="22" /></MobileButton>
+          <MobileButton size="md">Finish</MobileButton>
         </div>
       </section>
   </div>

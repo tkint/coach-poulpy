@@ -23,15 +23,15 @@
           <div><h2>Finished walking?</h2><p>The belt stopped 10 min ago. With no answer, Poulpy finishes the session at 12:18 in 10 min.</p></div>
         </div>
         <div class="actions">
-          <button class="secondary-button" type="button">Keep going</button>
-          <button type="button" class="primary-button">Finish</button>
+          <MobileButton kind="secondary" size="md">Keep going</MobileButton>
+          <MobileButton size="md">Finish</MobileButton>
         </div>
       </section>
       <section class="recorder" id="recorder" aria-label="Recorder" data-component="recorder">
         <div class="status"><span class="clock">12:18</span><span class="state state--paused"><span class="dot" aria-hidden="true"></span>Paused · Walk</span></div>
         <div class="actions">
-          <button class="secondary-button icon-only" type="button" aria-label="Resume recording"><MobileIcon name="play" :size="22" /></button>
-          <button type="button" class="primary-button">Finish</button>
+          <MobileButton kind="secondary" size="md" class="icon-only" aria-label="Resume recording"><MobileIcon name="play" :size="22" /></MobileButton>
+          <MobileButton size="md">Finish</MobileButton>
         </div>
       </section>
   </div>
