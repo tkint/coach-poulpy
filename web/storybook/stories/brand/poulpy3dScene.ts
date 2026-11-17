@@ -4,7 +4,7 @@
 // the controls; this file owns the canvas and everything WebGL, and gives it all back on dispose().
 import * as THREE from 'three'
 import tokens from '../../../../design/tokens.json'
-import { buildPoulpy3d, gleamPatch, LOOK, type PoulpyMaterial, type PoulpyMood, type PoulpyPart, type PoulpySide } from '../../../../design/poulpy-3d/model.mjs'
+import { buildPoulpy3d, gleamPatch, LOOK, type Poulpy3d, type PoulpyMaterial, type PoulpyMood, type PoulpyPart, type PoulpySide } from '../../../../design/poulpy-3d/model.mjs'
 import { buildPoulpyPose, CONFETTI, GOLDEN, medalHinge, poseMood, STARS, starShape, type PoulpyPose } from '../../../../design/poulpy-3d/poses.mjs'
 import { armJoints, armSkin, squashScale, type CheerPose, type JumpPose, type TurnPose, type WinkPose } from '../../../../design/poulpy-3d/motion.mjs'
 
@@ -116,14 +116,17 @@ export function createPoulpyScene(canvas: HTMLCanvasElement) {
   /**
    * Builds Poulpy again for a side of the plush, one of his moods or one of his poses, with or without the outline.
    * A pose with `effects: false` leaves out the flat effects around him, for when he moves, and one with `faces`
-   * takes his face from it instead: the face at each step from 0 to 1, for pose() to pick from.
+   * takes his face from it instead: the face at each step from 0 to 1, for pose() to pick from. `model` shows him as
+   * built elsewhere, in a look (design/poulpy-3d/looks/).
    */
-  function show(as: PoulpySide | PoulpyMood | { pose: PoulpyPose; effects?: boolean; faces?: (t: number) => (string | number)[][] }, outline: boolean) {
+  function show(as: PoulpySide | PoulpyMood | { pose: PoulpyPose; effects?: boolean; faces?: (t: number) => (string | number)[][] } | { model: Poulpy3d }, outline: boolean) {
     clear()
     const colours = tokens.color.poulpy
-    const changing = typeof as === 'object' ? as.faces : undefined
-    const inPose = typeof as === 'object' ? buildPoulpyPose({ pose: as.pose, effects: as.effects, ...(changing && { face: [] }), tones: tokens.mood, colours }) : undefined
-    const model = inPose ?? (as === 'blue' || as === 'ember' ? buildPoulpy3d({ side: as, colours }) : buildPoulpy3d({ mood: as as PoulpyMood, tone: tokens.mood[as as PoulpyMood], colours }))
+    const given = typeof as === 'object' && 'model' in as ? as.model : undefined
+    const posing = typeof as === 'object' && 'pose' in as ? as : undefined
+    const changing = posing?.faces
+    const inPose = posing ? buildPoulpyPose({ pose: posing.pose, effects: posing.effects, ...(changing && { face: [] }), tones: tokens.mood, colours }) : undefined
+    const model = given ?? inPose ?? (as === 'blue' || as === 'ember' ? buildPoulpy3d({ side: as, colours }) : buildPoulpy3d({ mood: as as PoulpyMood, tone: tokens.mood[as as PoulpyMood], colours }))
     centre = model.height / 2
     stance = { headLift: model.headLift, headTilt: inPose?.headTilt ?? 0 }
     cards = inPose ? { front: new THREE.Group(), back: new THREE.Group() } : undefined
@@ -181,12 +184,12 @@ export function createPoulpyScene(canvas: HTMLCanvasElement) {
       if (outline && edge) {
         // The outline is the same shape, a little bigger, seen from inside.
         const hull = geometry({ ...part, positions: part.positions.map((p, i) => p + part.normals[i] * LOOK.outline.width) })
-        place(part, hull, new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(edge[0], edge[1], edge[2]), side: THREE.BackSide }))
+        place(part, hull, new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(edge[0], edge[1], edge[2]), side: THREE.BackSide })).name = `${part.name}_outline`
       }
     }
     faces = []
-    if (changing && typeof as === 'object') {
-      const { mood } = poseMood(as.pose)
+    if (changing && posing) {
+      const { mood } = poseMood(posing.pose)
       for (let step = 0; step <= FACE_STEPS; step++) {
         const face = buildPoulpy3d({ mood, tone: tokens.mood[mood], features: changing(step / FACE_STEPS), faceOnly: true, colours }), group = new THREE.Group()
         for (const part of face.parts) {
@@ -210,7 +213,7 @@ export function createPoulpyScene(canvas: HTMLCanvasElement) {
       rig.turn.rotation.set(0, next?.yaw ?? 0, jump?.lean ?? 0, 'YXZ')
       rig.turn.position.y = jump?.lift ?? 0
       rig.squash.position.y = stance.headLift + (jump?.head ?? 0)
-      rig.squash.rotation.z = stance.headTilt + (wink?.tilt ?? 0)
+      rig.squash.rotation.z = stance.headTilt + (next && 'tilt' in next ? next.tilt : 0)
       rig.squash.scale.fromArray(squashScale(next?.squash ?? 0))
       // His medal rests on his arm, so it stays on it when his head tucks in and slides out with it.
       rig.medal.position.z = medalHinge[1] + (jump?.spread ?? 0)
@@ -281,6 +284,13 @@ export function createPoulpyScene(canvas: HTMLCanvasElement) {
     render()
   }
 
+  /** His parts whose names start with `name`, outlines included, for whoever moves one of them on its own (a look's idle). */
+  function parts(name: string) {
+    const found: THREE.Mesh[] = []
+    poulpy?.traverse((node: THREE.Object3D) => { if (node instanceof THREE.Mesh && node.name.startsWith(name)) found.push(node) })
+    return found
+  }
+
   function look(next: PoulpyView) {
     view = next
     render()
@@ -312,5 +322,5 @@ export function createPoulpyScene(canvas: HTMLCanvasElement) {
     renderer.dispose()
   }
 
-  return { show, look, pose, fumes, dispose }
+  return { show, look, pose, fumes, parts, render, dispose }
 }
