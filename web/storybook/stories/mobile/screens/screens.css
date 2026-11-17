@@ -1140,14 +1140,14 @@
 /* ---------- Builder, laid out like the workout details: outlined blocks, compact rows (draft) ---------- */
 
 .cp-screen .builder-body { gap: 14px; }
-.cp-screen fieldset.builder-block .part-add { position: absolute; top: -28px; right: 8px; width: 32px; height: 32px; border-radius: var(--cp-radius-md); background: var(--cp-primary-container); color: var(--cp-on-primary-container); display: flex; align-items: center; justify-content: center; }
+.cp-screen fieldset.builder-block .part-add { position: absolute; top: -26px; right: 8px; width: 28px; height: 28px; border-radius: var(--cp-radius-sm); background: var(--cp-background); border: 1px solid var(--cp-outline); color: var(--cp-on-surface-variant); display: flex; align-items: center; justify-content: center; }
 .cp-screen .part-add:focus-visible { outline: 3px solid var(--cp-primary); outline-offset: 2px; }
 .cp-screen .builder-row.list-row { padding: 0; }
 .cp-screen .builder-row .icon-button { width: 44px; height: 44px; margin-right: -8px; }
 .cp-screen .builder-row .row-main { flex: 1; min-width: 0; min-height: 44px; display: flex; align-items: center; gap: 10px; text-align: start; }
-.cp-screen .repeat-header .repeat-count { margin-left: auto; padding: 2px; }
-.cp-screen .repeat-header .repeat-count button { width: 32px; height: 32px; }
-.cp-screen .repeat-header .repeat-count span { min-width: 52px; font-size: 14px; }
+.cp-screen .repeat-header .repeat-count { margin-left: auto; padding: 0; background: transparent; gap: 2px; }
+.cp-screen .repeat-header .repeat-count button { width: 28px; height: 28px; border-radius: var(--cp-radius-sm); background: color-mix(in srgb, var(--cp-primary) 12%, transparent); color: var(--cp-on-primary-container); font-size: 18px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.cp-screen .repeat-header .repeat-count span { min-width: 56px; font-size: 14px; font-weight: 700; }
 .cp-screen .repeat-header > strong { flex: 1; }
 .cp-screen .repeat .recap-row.list-row { background: var(--cp-surface); border: 0; border-radius: var(--cp-radius-sm); padding: 0 0 0 8px; }
 .cp-screen .repeat .recap-part .steps, .cp-screen .repeat .steps { gap: 4px; }
