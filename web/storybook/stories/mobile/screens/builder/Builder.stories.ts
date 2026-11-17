@@ -15,6 +15,7 @@ import screenBuilderTidyWorkOnly from './builder-tidy-work-only.html?raw'
 import screenBuilderTidyAddMenu from './builder-tidy-add-menu.html?raw'
 import screenBuilderTidyRepeatMenu from './builder-tidy-repeat-menu.html?raw'
 import screenBuilderTidyNameError from './builder-tidy-name-error.html?raw'
+import screenBuilderTidyEmptyOptionalBlocks from './builder-tidy-empty-optional-blocks.html?raw'
 import screenBuilderStepMenu from './builder-step-menu.html?raw'
 
 // The Builder screens of the apps (ADR 0029), drawn with the phone stylesheet (../screens.css).
@@ -143,5 +144,13 @@ export const BuilderTidyNameError: Story = {
   name: "Name missing",
   tags: ['!autodocs', 'draft'],
   ...screen(screenBuilderTidyNameError, { reorder: true }),
+  parameters: { mockup: {} },
+}
+
+/** Builder · warm-up and cool down always shown, empty, instead of the "Add a warm-up" and "Add a cool down" links. */
+export const BuilderTidyEmptyOptionalBlocks: Story = {
+  name: "Empty warm-up and cool down",
+  tags: ['!autodocs', 'draft'],
+  ...screen(screenBuilderTidyEmptyOptionalBlocks, { reorder: true }),
   parameters: { mockup: {} },
 }
