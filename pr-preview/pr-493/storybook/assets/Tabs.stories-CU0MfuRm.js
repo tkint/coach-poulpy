@@ -1,0 +1,5 @@
+import{n as e}from"./rolldown-runtime-sJBDdmOt.js";import{C as t,r as n}from"./createLucideIcon-DV8V5Z3X.js";import{n as r,t as i}from"./screen-DRBc4Wk1.js";var a,o,s,c;function l(){return(l=e((()=>{n(),r(),a={title:`Mobile/Components/Tabs`,args:{selected:`Workouts`},argTypes:{selected:{control:`inline-radio`,options:[`Workouts`,`Exercises`]}},render:e=>t(i,{key:e.selected,markup:`<div style="width: 390px; padding: 16px;"><MobileTabs aria-label="Library" :tabs="['Workouts', 'Exercises']" selected="${e.selected}" /></div>`}),parameters:{docs:{canvas:{sourceState:`none`},description:{component:"`MobileTabs`: two or three tabs that switch a page's view, one selected. `aria-label` names the group."}}}},o={},s={args:{selected:`Exercises`}},c=[`FirstSelected`,`SecondSelected`],o.parameters={...o.parameters,docs:{...o.parameters?.docs,source:{originalSource:`{}`,...o.parameters?.docs?.source}}},s.parameters={...s.parameters,docs:{...s.parameters?.docs,source:{originalSource:`{
+  args: {
+    selected: 'Exercises'
+  }
+}`,...s.parameters?.docs?.source}}}})))()}l();export{o as FirstSelected,s as SecondSelected,c as __namedExportsOrder,a as default};
