@@ -339,17 +339,7 @@ private fun heatColor(extras: PoulpyExtraColors, heat: Int) = when (heat) {
     else -> extras.heat3
 }
 
-/** A part's icon in its round badge, filled for work, as on the workout page and in the builder. */
-@Composable
-internal fun PartBadge(kind: PartKind) {
-    val colors = MaterialTheme.colorScheme
-    val work = kind == PartKind.WORK
-    Box(Modifier.size(36.dp).clip(CircleShape).background(if (work) colors.primary else colors.primaryContainer), contentAlignment = Alignment.Center) {
-        Icon(kind.icon, contentDescription = null, tint = if (work) colors.onPrimary else colors.onPrimaryContainer, modifier = Modifier.size(20.dp))
-    }
-}
-
-/** The icon of a part, as the builder adds it: the sun for a warm-up, a bolt for work, the moon for a cool down. */
+/** The icon of a part: the sun for a warm-up, a bolt for work, the moon for a cool down. */
 internal val PartKind.icon: ImageVector
     get() = when (this) {
         PartKind.WARM_UP -> Lucide.Sun

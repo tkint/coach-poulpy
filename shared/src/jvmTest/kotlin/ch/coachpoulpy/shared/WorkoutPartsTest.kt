@@ -48,15 +48,15 @@ class WorkoutPartsTest {
             listOf(
                 Part(PartId("warm-up"), PartKind.WARM_UP, listOf(exercise("walk-in", "walk", Target.Time(5.minutes)))),
                 Part(
-                    PartId("work-1"), PartKind.WORK,
+                    PartId("work"), PartKind.WORK,
                     listOf(
                         Step.Group(
                             StepId("repeat"), GroupKind.CIRCUIT, rounds = 2,
                             children = listOf(exercise("push-up", "push-up", Target.Reps(10)), Step.Rest(StepId("rest"), 30.seconds)),
                         ),
+                        exercise("plank", "plank", Target.Hold(30.seconds)),
                     ),
                 ),
-                Part(PartId("work-2"), PartKind.WORK, listOf(exercise("plank", "plank", Target.Hold(30.seconds)))),
                 Part(PartId("cool-down"), PartKind.COOL_DOWN, listOf(exercise("walk-out", "walk", Target.Time(1.minutes)))),
             ),
         )
@@ -75,17 +75,16 @@ class WorkoutPartsTest {
         val page = WorkoutPageModel(circuit().id, graph.store, graph.compiler, graph.catalog, "en", scope = CoroutineScope(Dispatchers.Default))
         val state = runBlocking { withTimeout(5.seconds) { page.state.first { it.loaded } } }
 
-        assertEquals(listOf("Warm-up", "Work 1", "Work 2", "Cool down"), state.parts.map { it.name })
-        assertEquals(listOf(PartKind.WARM_UP, PartKind.WORK, PartKind.WORK, PartKind.COOL_DOWN), state.parts.map { it.kind })
+        assertEquals(listOf("Warm-up", "Work", "Cool down"), state.parts.map { it.name })
+        assertEquals(listOf(PartKind.WARM_UP, PartKind.WORK, PartKind.COOL_DOWN), state.parts.map { it.kind })
         assertEquals("1 step" to "5 min", state.parts[0].summary to state.parts[0].time)
-        assertEquals("2 rounds" to "about 2 min", state.parts[1].summary to state.parts[1].time)
-        assertEquals("1 exercise" to "1 min", state.parts[2].summary to state.parts[2].time)
-        assertEquals("1 step" to "1 min", state.parts[3].summary to state.parts[3].time)
+        assertEquals("2 exercises" to "about 3 min", state.parts[1].summary to state.parts[1].time)
+        assertEquals("1 step" to "1 min", state.parts[2].summary to state.parts[2].time)
         assertEquals("Circuit", state.formatLabel)
 
         // No Warm-up or Cool down tag on the rows: the header says it. Rests keep Recover.
         assertNull(state.parts[0].steps.single().row!!.roleLabel)
-        val repeat = state.parts[1].steps.single().repeatGroup!!
+        val repeat = state.parts[1].steps.first().repeatGroup!!
         assertEquals(listOf(null, "Recover"), repeat.rows.map { it.roleLabel })
         page.close()
     }
@@ -104,14 +103,14 @@ class WorkoutPartsTest {
         player.tick()
         with(player.state.value) {
             assertEquals("Push-up", title)
-            assertEquals("Work 1 · round 1 of 2", partLabel)
+            assertEquals("Work · round 1 of 2", partLabel)
             assertEquals(0, setCount)
             assertEquals("round 2 of 2", nextRound)
         }
 
         player.done()
         with(player.state.value) {
-            assertEquals("Work 1 · round 1 of 2", partLabel)
+            assertEquals("Work · round 1 of 2", partLabel)
             assertEquals("Recover", roleLabel)
             assertEquals("round 2 of 2", nextRound)
         }
@@ -119,14 +118,14 @@ class WorkoutPartsTest {
         clock.advance(30.seconds)
         player.tick()
         with(player.state.value) {
-            assertEquals("Work 1 · round 2 of 2", partLabel)
+            assertEquals("Work · round 2 of 2", partLabel)
             assertNull(nextRound, "the plank is outside the repeat")
         }
 
         player.done()
         clock.advance(30.seconds)
         player.tick()
-        assertEquals("Work 2", player.state.value.partLabel)
+        assertEquals("Work", player.state.value.partLabel)
         clock.advance(30.seconds)
         player.tick()
         with(player.state.value) {

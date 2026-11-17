@@ -63,12 +63,14 @@ class WorkoutFileTest {
         tags = listOf("morning"),
     )
 
-    /** Two work parts in the sets format. */
+    /** One work part in the sets format. */
     private fun sets() = Workout(
         WorkoutId("sets"), 2, "Upper body", WorkoutFormat.SETS,
         listOf(
-            Part(PartId("one"), PartKind.WORK, listOf(exercise("a", "push-up", Target.Reps(8)))),
-            Part(PartId("two"), PartKind.WORK, listOf(exercise("b", "plank", Target.Hold(40.seconds)), Step.Rest(StepId("r"), 60.seconds))),
+            Part(
+                PartId("one"), PartKind.WORK,
+                listOf(exercise("a", "push-up", Target.Reps(8)), exercise("b", "plank", Target.Hold(40.seconds)), Step.Rest(StepId("r"), 60.seconds)),
+            ),
         ),
     )
 
@@ -163,6 +165,8 @@ class WorkoutFileTest {
     fun aWorkoutBreakingTheRulesIsRefused() {
         val noWork = sets().copy(parts = listOf(Part(PartId("w"), PartKind.WARM_UP, listOf(exercise("a", "walk", Target.Time(1.minutes))))))
         assertRefused(WorkoutFileProblem.INVALID_WORKOUT, WorkoutFile.export(noWork).content)
+        val twoWorks = sets().copy(parts = sets().parts + sets().parts.map { it.copy(id = PartId("two")) })
+        assertRefused(WorkoutFileProblem.INVALID_WORKOUT, WorkoutFile.export(twoWorks).content)
     }
 
     @Test

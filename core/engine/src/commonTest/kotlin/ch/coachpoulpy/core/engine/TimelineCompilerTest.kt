@@ -71,21 +71,17 @@ class TimelineCompilerTest {
     }
 
     @Test
-    fun phasesCarryTheirPartAndNumberWorkPartsOnlyWhenThereAreSeveral() {
+    fun phasesCarryTheirPart() {
         val one = SetPrescription(Target.Time(30.seconds))
-        val several = workout(
+        val workout = workout(
             WorkoutFormat.CIRCUIT,
             part(PartKind.WARM_UP, exercise("jumping-jack", one)),
             part(PartKind.WORK, exercise("squat", one)),
-            part(PartKind.WORK, exercise("plank", one)),
             part(PartKind.COOL_DOWN, exercise("stretch", one)),
         )
-        val single = workout(WorkoutFormat.CIRCUIT, part(PartKind.WORK, exercise("squat", one)))
 
-        val phases = compiler.compile(several).phases.filterIsInstance<Phase.Work>()
+        val phases = compiler.compile(workout).phases.filterIsInstance<Phase.Work>()
 
-        assertEquals(listOf(PartKind.WARM_UP, PartKind.WORK, PartKind.WORK, PartKind.COOL_DOWN), phases.map { it.part })
-        assertEquals(listOf(null, 1, 2, null), phases.map { it.workPart })
-        assertEquals(null, (compiler.compile(single).phases.single() as Phase.Work).workPart)
+        assertEquals(listOf(PartKind.WARM_UP, PartKind.WORK, PartKind.COOL_DOWN), phases.map { it.part })
     }
 }
