@@ -1,0 +1,5 @@
+import{n as e}from"./rolldown-runtime-sJBDdmOt.js";var t,n,r,i;function a(){return(a=e((()=>{t={title:`Mobile/Patterns/Empty chart card`,parameters:{docs:{canvas:{sourceState:`none`},description:{component:`Shown instead of the chart when nothing is logged.`}}}},n=(e,t={})=>({render:()=>({components:t,template:`<div class="cp-mobile">${e}</div>`})}),r=n(`<div class="empty"><strong>No weight yet</strong>
+  <span>Log it once to see your chart. It stays on this phone, and only you see it.</span>
+  <button type="button" class="btn primary sm">Log your weight</button></div>`),i=[`Default`],r.parameters={...r.parameters,docs:{...r.parameters?.docs,source:{originalSource:`sample(\`<div class="empty"><strong>No weight yet</strong>
+  <span>Log it once to see your chart. It stays on this phone, and only you see it.</span>
+  <button type="button" class="btn primary sm">Log your weight</button></div>\`)`,...r.parameters?.docs?.source}}}})))()}a();export{r as Default,i as __namedExportsOrder,t as default};
