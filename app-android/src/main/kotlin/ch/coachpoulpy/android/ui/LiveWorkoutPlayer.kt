@@ -161,17 +161,18 @@ internal fun ColumnScope.StartStep(
         )
     }
     Spacer(Modifier.height(PoulpySpace.lg))
-    Button(onClick = onStart, modifier = Modifier.fillMaxWidth().height(PoulpySize.buttonLarge)) {
-        Text(startLabel, fontSize = 19.sp, fontWeight = FontWeight.ExtraBold)
+    PoulpyButton(onClick = onStart, size = PoulpyButtonSize.Lg, modifier = Modifier.fillMaxWidth()) {
+        Text(startLabel)
     }
     // Done cuts the step short without the feel of skipping it.
     Row(horizontalArrangement = Arrangement.spacedBy(PoulpySpace.md), modifier = Modifier.fillMaxWidth().padding(top = PoulpySpace.md)) {
         listOf(R.string.player_skip to onSkip, R.string.player_done to onDone).forEach { (label, action) ->
-            OutlinedButton(
+            PoulpyButton(
                 onClick = action,
-                border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
-                modifier = Modifier.weight(1f).height(PoulpySize.buttonLarge),
-            ) { Text(stringResource(label), fontSize = 17.sp, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onSurface) }
+                kind = PoulpyButtonKind.Secondary,
+                size = PoulpyButtonSize.Lg,
+                modifier = Modifier.weight(1f),
+            ) { Text(stringResource(label), color = MaterialTheme.colorScheme.onSurface) }
         }
     }
 }

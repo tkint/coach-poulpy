@@ -58,11 +58,9 @@ struct ImportView: View {
         .safeAreaInset(edge: .bottom) {
             Button(action: onClose) {
                 Text("action.close")
-                    .font(.poulpy(.body).weight(.heavy))
-                    .frame(maxWidth: .infinity, minHeight: 48)
-                    .overlay(Capsule().stroke(PoulpyColor.outline, lineWidth: 2))
+                    .frame(maxWidth: .infinity)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(PoulpyButtonStyle(.secondary, size: .lg))
             .padding(.horizontal, PoulpySpace.lg)
             .padding(.vertical, 12)
             .background(PoulpyColor.surface)

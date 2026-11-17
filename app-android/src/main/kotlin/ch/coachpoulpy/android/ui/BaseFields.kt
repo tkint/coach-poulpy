@@ -261,13 +261,14 @@ internal fun SheetFrame(
                 clear?.let { TextButton(onClick = { it(); onDismiss() }) { Text(stringResource(R.string.profile_clear), fontWeight = FontWeight.ExtraBold) } }
             }
             Row(Modifier.padding(top = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(
+                PoulpyButton(
                     onClick = onDismiss,
-                    modifier = Modifier.weight(1f).height(PoulpySize.buttonLarge),
-                    border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
-                ) { Text(stringResource(R.string.action_cancel), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onSurface) }
-                Button(onClick = { onSave(); onDismiss() }, modifier = Modifier.weight(1.6f).height(PoulpySize.buttonLarge)) {
-                    Text(stringResource(R.string.action_save), fontWeight = FontWeight.ExtraBold)
+                    kind = PoulpyButtonKind.Secondary,
+                    size = PoulpyButtonSize.Lg,
+                    modifier = Modifier.weight(1f),
+                ) { Text(stringResource(R.string.action_cancel), color = MaterialTheme.colorScheme.onSurface) }
+                PoulpyButton(onClick = { onSave(); onDismiss() }, size = PoulpyButtonSize.Lg, modifier = Modifier.weight(1.6f)) {
+                    Text(stringResource(R.string.action_save))
                 }
             }
         }

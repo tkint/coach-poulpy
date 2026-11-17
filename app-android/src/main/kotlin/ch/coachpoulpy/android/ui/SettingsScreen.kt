@@ -101,7 +101,7 @@ internal fun ColumnScope.Devices(graph: AppGraph, onOpen: (DeviceRoute) -> Unit)
                 Image(painterResource(R.drawable.poulpy_pose_standing_tall), contentDescription = null, modifier = Modifier.size(140.dp))
                 Text(stringResource(R.string.devices_emptyTitle), style = MaterialTheme.typography.headlineSmall, textAlign = TextAlign.Center)
                 Text(stringResource(R.string.devices_emptyBody), textAlign = TextAlign.Center)
-                Button(onClick = { onOpen(DeviceRoute.Add) }, modifier = Modifier.padding(top = 8.dp).height(PoulpySize.buttonLarge)) {
+                PoulpyButton(onClick = { onOpen(DeviceRoute.Add) }, size = PoulpyButtonSize.Lg, modifier = Modifier.padding(top = 8.dp)) {
                     Icon(Lucide.Plus, contentDescription = null)
                     Spacer(Modifier.size(8.dp))
                     Text(stringResource(R.string.devices_addFirst))
@@ -146,7 +146,7 @@ private fun KnownRow(device: KnownDeviceUi, onClick: () -> Unit, onConnect: () -
                 )
             }
             if (device.status == ConnectionStatus.IDLE || device.status == ConnectionStatus.FAILED) {
-                FilledTonalButton(onClick = onConnect) { Text(stringResource(R.string.devices_connect)) }
+                PoulpyButton(onClick = onConnect, kind = PoulpyButtonKind.Tonal) { Text(stringResource(R.string.devices_connect)) }
             } else {
                 Icon(Lucide.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
             }
@@ -227,7 +227,7 @@ fun DeviceAddScreen(graph: AppGraph, onBack: () -> Unit) {
                 Text(stringResource(R.string.treadmill_scanning), style = MaterialTheme.typography.headlineSmall, textAlign = TextAlign.Center)
                 Text(stringResource(R.string.devices_scanHint), textAlign = TextAlign.Center)
                 if (state.scanning) {
-                    OutlinedButton(onClick = onBack) { Text(stringResource(R.string.treadmill_stopScan)) }
+                    PoulpyButton(onClick = onBack, kind = PoulpyButtonKind.Secondary) { Text(stringResource(R.string.treadmill_stopScan)) }
                 }
             }
         }
@@ -242,7 +242,7 @@ fun DeviceAddScreen(graph: AppGraph, onBack: () -> Unit) {
                         Text(device.name, fontWeight = FontWeight.ExtraBold)
                         Text(stringResource(device.kind.label), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
-                    Button(onClick = { model.add(device.key); onBack() }) { Text(stringResource(R.string.devices_addOne)) }
+                    PoulpyButton(onClick = { model.add(device.key); onBack() }) { Text(stringResource(R.string.devices_addOne)) }
                 }
             }
         }
@@ -314,15 +314,15 @@ fun DeviceScreen(graph: AppGraph, key: String, onBack: () -> Unit, onSources: ()
         BluetoothProblems(bluetooth)
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             if (device.status == ConnectionStatus.IDLE || device.status == ConnectionStatus.FAILED) {
-                Button(onClick = { bluetooth.whenReady { model.connect(device.key) } }, modifier = Modifier.weight(1f).height(PoulpySize.button)) {
+                PoulpyButton(onClick = { bluetooth.whenReady { model.connect(device.key) } }, modifier = Modifier.weight(1f)) {
                     Text(stringResource(R.string.devices_connect))
                 }
             } else {
-                OutlinedButton(onClick = { model.disconnect(device.key) }, modifier = Modifier.weight(1f).height(PoulpySize.button)) {
+                PoulpyButton(onClick = { model.disconnect(device.key) }, kind = PoulpyButtonKind.Secondary, modifier = Modifier.weight(1f)) {
                     Text(stringResource(R.string.devices_disconnect))
                 }
             }
-            TextButton(onClick = { confirmForget = true }, modifier = Modifier.weight(1f).height(PoulpySize.button)) {
+            TextButton(onClick = { confirmForget = true }, modifier = Modifier.weight(1f).height(PoulpySize.touch)) {
                 Text(stringResource(R.string.devices_forget), color = PoulpyTheme.extraColors.grumpy)
             }
         }
@@ -378,7 +378,7 @@ private fun BluetoothProblems(bluetooth: BluetoothGate, onAllow: (() -> Unit)? =
     }
     if (bluetooth.permissionDenied) {
         Text(stringResource(R.string.devices_permissionNeeded), color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
-        onAllow?.let { Button(onClick = it) { Text(stringResource(R.string.devices_allowBluetooth)) } }
+        onAllow?.let { PoulpyButton(onClick = it) { Text(stringResource(R.string.devices_allowBluetooth)) } }
     }
 }
 

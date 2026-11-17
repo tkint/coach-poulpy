@@ -181,10 +181,9 @@ struct LiveView: View {
             Text("live.emptyTitle").font(PoulpyFont.headline).multilineTextAlignment(.center)
             Text("live.emptyBody").multilineTextAlignment(.center)
             Button(action: onManageDevices) {
-                Text("live.manageDevices").font(.poulpy(.headline)).padding(.horizontal, PoulpySpace.lg).frame(height: PoulpySize.buttonLarge)
+                Text("live.manageDevices")
             }
-            .buttonStyle(.borderedProminent)
-            .buttonBorderShape(.capsule)
+            .buttonStyle(PoulpyButtonStyle(.primary, size: .lg))
             .padding(.top, PoulpySpace.sm)
         }
         .foregroundStyle(PoulpyColor.onPrimaryContainer)
@@ -330,10 +329,9 @@ struct LiveView: View {
             HStack(spacing: 8) {
                 Button { model.startRecording(key: state.selected) } label: {
                     Text(LocalizedStringKey(state.hasTreadmill && state.followTreadmill ? "live.waitTreadmill" : "treadmill.start"))
-                        .font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: PoulpySize.buttonLarge)
+                        .frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.borderedProminent)
-                .buttonBorderShape(.capsule)
+                .buttonStyle(PoulpyButtonStyle(.primary, size: .lg))
                 if state.hasTreadmill {
                     followToggle
                 }
@@ -389,36 +387,31 @@ struct LiveView: View {
                 HStack(spacing: 8) {
                     Button { model.resumeRecording() } label: {
                         Label("treadmill.resume", lucide: .play)
-                            .font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: PoulpySize.button)
+                            .frame(maxWidth: .infinity)
                     }
-                    .buttonStyle(.bordered)
-                    .buttonBorderShape(.capsule)
+                    .buttonStyle(PoulpyButtonStyle(.secondary, size: .md))
                     Button { model.endStep() } label: {
-                        Text("live.endStep").font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: PoulpySize.button)
+                        Text("live.endStep").frame(maxWidth: .infinity)
                     }
-                    .buttonStyle(.bordered)
-                    .buttonBorderShape(.capsule)
+                    .buttonStyle(PoulpyButtonStyle(.secondary, size: .md))
                     .disabled(recording.restSeconds != nil)
                 }
                 Button { model.stopRecording() } label: {
-                    Text("treadmill.stop").font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: PoulpySize.button)
+                    Text("treadmill.stop").frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.borderedProminent)
-                .buttonBorderShape(.capsule)
+                .buttonStyle(PoulpyButtonStyle(.primary, size: .md))
             } else {
                 HStack(spacing: 8) {
                     Button { model.pauseRecording() } label: {
                         Label("treadmill.pause", lucide: .pause)
-                            .font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: PoulpySize.button)
+                            .frame(maxWidth: .infinity)
                     }
-                    .buttonStyle(.bordered)
-                    .buttonBorderShape(.capsule)
+                    .buttonStyle(PoulpyButtonStyle(.secondary, size: .md))
                     if !recording.freeRun {
                         Button { model.skipPhase() } label: {
-                            Text("treadmill.skip").font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: PoulpySize.button)
+                            Text("treadmill.skip").frame(maxWidth: .infinity)
                         }
-                        .buttonStyle(.bordered)
-                        .buttonBorderShape(.capsule)
+                        .buttonStyle(PoulpyButtonStyle(.secondary, size: .md))
                     }
                 }
             }
@@ -530,15 +523,13 @@ struct LiveView: View {
             .accessibilityElement(children: .combine)
             HStack(spacing: 8) {
                 Button { model.cancelWaiting() } label: {
-                    Text("action.cancel").font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: PoulpySize.button)
+                    Text("action.cancel").frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.bordered)
-                .buttonBorderShape(.capsule)
+                .buttonStyle(PoulpyButtonStyle(.secondary, size: .md))
                 Button { model.startNow() } label: {
-                    Text("live.startNow").font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: PoulpySize.button)
+                    Text("live.startNow").frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.bordered)
-                .buttonBorderShape(.capsule)
+                .buttonStyle(PoulpyButtonStyle(.secondary, size: .md))
             }
         }
     }
@@ -565,15 +556,13 @@ struct LiveView: View {
             }
             HStack(spacing: 8) {
                 Button { model.keepGoing() } label: {
-                    Text("live.keepGoing").font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: PoulpySize.button)
+                    Text("live.keepGoing").frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.bordered)
-                .buttonBorderShape(.capsule)
+                .buttonStyle(PoulpyButtonStyle(.secondary, size: .md))
                 Button { model.stopRecording() } label: {
-                    Text("treadmill.stop").font(.poulpy(.headline)).frame(maxWidth: .infinity).frame(height: PoulpySize.button)
+                    Text("treadmill.stop").frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.borderedProminent)
-                .buttonBorderShape(.capsule)
+                .buttonStyle(PoulpyButtonStyle(.primary, size: .md))
             }
         }
         .padding(14)

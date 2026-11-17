@@ -409,23 +409,17 @@ struct WorkoutPageView: View {
                     cover = .builder
                 } label: {
                     Label("action.edit", lucide: .pencil)
-                        .font(.poulpy(.body).weight(.heavy))
-                        .frame(maxWidth: .infinity, minHeight: 52)
-                        .foregroundStyle(PoulpyColor.onSurface)
-                        .overlay(Capsule().stroke(PoulpyColor.outline, lineWidth: 2))
+                        .frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(PoulpyButtonStyle(.secondary, size: .lg))
             }
             Button {
                 cover = .player
             } label: {
                 Label("workout.start", lucide: .play)
-                    .font(.poulpy(.body).weight(.heavy))
-                    .frame(maxWidth: .infinity, minHeight: 52)
-                    .foregroundStyle(PoulpyColor.onPrimary)
-                    .background(PoulpyColor.primary, in: Capsule())
+                    .frame(maxWidth: .infinity)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(PoulpyButtonStyle(.primary, size: .lg))
             .layoutPriority(1)
         }
         .padding(.horizontal, PoulpySpace.lg)

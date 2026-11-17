@@ -92,13 +92,8 @@ struct BuilderView: View {
                         if model.save() != nil { dismiss() }
                     } label: {
                         Text("action.save")
-                            .font(.poulpy(.subheadline).weight(.heavy))
-                            .padding(.horizontal, 18)
-                            .frame(height: 36)
-                            .foregroundStyle(PoulpyColor.onPrimary)
-                            .background(PoulpyColor.primary.opacity(state.canSave ? 1 : 0.4), in: Capsule())
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(PoulpyButtonStyle(.primary, size: .sm))
                     .disabled(!state.canSave)
                 }
             }
@@ -438,12 +433,9 @@ private struct StepSheet: View {
                     .id(row.key)
                 Button(action: onDone) {
                     Text("action.done")
-                        .font(.poulpy(.body).weight(.heavy))
-                        .foregroundStyle(PoulpyColor.onPrimary)
-                        .frame(maxWidth: .infinity, minHeight: 52)
-                        .background(PoulpyColor.primary, in: Capsule())
+                        .frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(PoulpyButtonStyle(.primary, size: .lg))
             }
             .padding(20)
         }
@@ -943,12 +935,9 @@ private struct ValueSheet: View {
                 if apply(text) { onDone() } else { invalid = true }
             } label: {
                 Text("action.done")
-                    .font(.poulpy(.body).weight(.heavy))
-                    .foregroundStyle(PoulpyColor.onPrimary)
-                    .frame(maxWidth: .infinity, minHeight: 52)
-                    .background(PoulpyColor.primary, in: Capsule())
+                    .frame(maxWidth: .infinity)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(PoulpyButtonStyle(.primary, size: .lg))
             Spacer(minLength: 0)
         }
         .padding(20)

@@ -423,15 +423,16 @@ private fun SheetHeading(title: String, hint: String) {
 @Composable
 private fun SheetActions(count: Int, onClear: () -> Unit, onShow: () -> Unit) {
     Row(Modifier.padding(top = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        OutlinedButton(
+        PoulpyButton(
             onClick = onClear,
-            border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
-            modifier = Modifier.weight(1f).height(PoulpySize.buttonLarge),
+            kind = PoulpyButtonKind.Secondary,
+            size = PoulpyButtonSize.Lg,
+            modifier = Modifier.weight(1f),
         ) {
-            Text(stringResource(R.string.exercises_filterClear), fontWeight = FontWeight.ExtraBold)
+            Text(stringResource(R.string.exercises_filterClear))
         }
-        Button(onClick = onShow, modifier = Modifier.weight(1.6f).height(PoulpySize.buttonLarge)) {
-            Text(pluralStringResource(R.plurals.exercises_filterShow, count, count), fontWeight = FontWeight.ExtraBold)
+        PoulpyButton(onClick = onShow, size = PoulpyButtonSize.Lg, modifier = Modifier.weight(1.6f)) {
+            Text(pluralStringResource(R.plurals.exercises_filterShow, count, count))
         }
     }
 }

@@ -82,12 +82,9 @@ struct PlanSheet: View {
                 dismiss()
             } label: {
                 Text(upcoming.isEmpty ? NSLocalizedString("plan.keepUnplanned", comment: "") : String.localizedStringWithFormat(NSLocalizedString("plan.save %lld", comment: ""), Int64(upcoming.count)))
-                    .font(.poulpy(.body).weight(.heavy))
-                    .frame(maxWidth: .infinity, minHeight: 52)
-                    .foregroundStyle(PoulpyColor.onPrimary)
-                    .background(PoulpyColor.primary, in: Capsule())
+                    .frame(maxWidth: .infinity)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(PoulpyButtonStyle(.primary, size: .lg))
         }
         .padding(20)
         .presentationDetents([.large])

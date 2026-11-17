@@ -112,9 +112,7 @@ enum PoulpyRadius {
 
 /// Control sizes from web/storybook/stories/design-system/rules/. Never write a literal height in a screen.
 enum PoulpySize {
-    static let button: CGFloat = 44
-    static let buttonLarge: CGFloat = 52
-    static let buttonSmall: CGFloat = 34
+    static let boxField: CGFloat = 52
     static let iconButton: CGFloat = 40
     static let touch: CGFloat = 44
     static let chip: CGFloat = 32
@@ -123,6 +121,26 @@ enum PoulpySize {
     static let row: CGFloat = 56
     static let avatarSmall: CGFloat = 32
     static let avatar: CGFloat = 40
+}
+
+/// The one size scale of buttons (web/storybook/stories/design-system/rules/Components.mdx); the websites use the same numbers.
+enum PoulpyControl {
+    static let xs: CGFloat = 24
+    static let sm: CGFloat = 32
+    static let md: CGFloat = 40
+    static let lg: CGFloat = 48
+    static let xl: CGFloat = 56
+    static let xxl: CGFloat = 64
+}
+
+/// The icon beside a button's label, by the button's size.
+enum PoulpyControlIcon {
+    static let xs: CGFloat = 12
+    static let sm: CGFloat = 16
+    static let md: CGFloat = 20
+    static let lg: CGFloat = 24
+    static let xl: CGFloat = 32
+    static let xxl: CGFloat = 40
 }
 
 enum PoulpyMotion {

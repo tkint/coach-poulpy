@@ -551,7 +551,7 @@ internal fun BodyScreen(graph: AppGraph, metric: BodyMetric, language: String, o
         subtitle = state.latest?.let { stringResource(R.string.body_lastLogged, mediumDate(it.day.toJava())) } ?: stringResource(R.string.body_nothingLogged),
         onBack = onBack,
         modifier = modifier,
-        action = { Button(onClick = { logging = true }, modifier = Modifier.height(PoulpySize.buttonSmall)) { Text(stringResource(R.string.body_log), fontWeight = FontWeight.ExtraBold) } },
+        action = { PoulpyButton(onClick = { logging = true }, size = PoulpyButtonSize.Sm) { Text(stringResource(R.string.body_log)) } },
     ) {
         if (state.history.isEmpty()) {
             PoulpyCard(
@@ -800,13 +800,14 @@ private fun LogSheet(metric: BodyMetric, system: UnitSystem, language: String, s
                 if (day == today) stringResource(R.string.body_today, mediumDate(day)) else mediumDate(day),
             ) { pickingDate = true }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(
+                PoulpyButton(
                     onClick = onDismiss,
-                    modifier = Modifier.weight(1f).height(PoulpySize.buttonLarge),
-                    border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
-                ) { Text(stringResource(R.string.action_cancel), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onSurface) }
-                Button(onClick = { typed?.let { onSave(it, day); onDismiss() } }, enabled = typed != null, modifier = Modifier.weight(1.6f).height(PoulpySize.buttonLarge)) {
-                    Text(stringResource(R.string.action_save), fontWeight = FontWeight.ExtraBold)
+                    kind = PoulpyButtonKind.Secondary,
+                    size = PoulpyButtonSize.Lg,
+                    modifier = Modifier.weight(1f),
+                ) { Text(stringResource(R.string.action_cancel), color = MaterialTheme.colorScheme.onSurface) }
+                PoulpyButton(onClick = { typed?.let { onSave(it, day); onDismiss() } }, size = PoulpyButtonSize.Lg, enabled = typed != null, modifier = Modifier.weight(1.6f)) {
+                    Text(stringResource(R.string.action_save))
                 }
             }
         }

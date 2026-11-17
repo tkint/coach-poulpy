@@ -132,11 +132,12 @@ internal fun AppIconSheet(selected: AppIcon, onPick: (AppIcon) -> Unit, onDismis
                 Text(stringResource(R.string.appIcon_tapNote), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Text(stringResource(R.string.appIcon_iosNote), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            OutlinedButton(
+            PoulpyButton(
                 onClick = onDismiss,
-                modifier = Modifier.fillMaxWidth().height(PoulpySize.buttonLarge),
-                border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
-            ) { Text(stringResource(R.string.action_cancel), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onSurface) }
+                kind = PoulpyButtonKind.Secondary,
+                size = PoulpyButtonSize.Lg,
+                modifier = Modifier.fillMaxWidth(),
+            ) { Text(stringResource(R.string.action_cancel), color = MaterialTheme.colorScheme.onSurface) }
         }
     }
 }

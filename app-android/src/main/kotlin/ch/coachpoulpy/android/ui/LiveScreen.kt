@@ -194,7 +194,7 @@ private fun NothingConnected(onManageDevices: () -> Unit, modifier: Modifier) {
             Image(painterResource(R.drawable.poulpy_pose_standing_tall), contentDescription = null, modifier = Modifier.size(140.dp))
             Text(stringResource(R.string.live_emptyTitle), style = MaterialTheme.typography.headlineSmall, textAlign = TextAlign.Center)
             Text(stringResource(R.string.live_emptyBody), textAlign = TextAlign.Center)
-            Button(onClick = onManageDevices, modifier = Modifier.padding(top = 8.dp).height(PoulpySize.buttonLarge)) {
+            PoulpyButton(onClick = onManageDevices, size = PoulpyButtonSize.Lg, modifier = Modifier.padding(top = 8.dp)) {
                 Text(stringResource(R.string.live_manageDevices))
             }
         }
@@ -358,7 +358,7 @@ private fun ChoicePicker(state: LiveUiState, model: LiveModel) {
     }
     if (state.hasTreadmill) FollowMode(state.followTreadmill)
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-        Button(onClick = start, modifier = Modifier.weight(1f).height(PoulpySize.buttonLarge)) {
+        PoulpyButton(onClick = start, size = PoulpyButtonSize.Lg, modifier = Modifier.weight(1f)) {
             Text(stringResource(if (state.hasTreadmill && state.followTreadmill) R.string.live_waitTreadmill else R.string.treadmill_start))
         }
         if (state.hasTreadmill) FollowToggle(state.followTreadmill, model::setFollowTreadmill)
@@ -461,27 +461,29 @@ private fun Recording(recording: RecordingUi, units: UnitSystem, model: LiveMode
     // Recording: only Pause (and Skip in a workout). Paused: Resume, End step or Finish.
     if (recording.paused) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedButton(onClick = model::resumeRecording, modifier = Modifier.weight(1f).height(PoulpySize.buttonLarge)) {
+            PoulpyButton(onClick = model::resumeRecording, kind = PoulpyButtonKind.Secondary, size = PoulpyButtonSize.Lg, modifier = Modifier.weight(1f)) {
                 Icon(Lucide.Play, contentDescription = null)
                 Spacer(Modifier.size(6.dp))
                 Text(stringResource(R.string.treadmill_resume))
             }
-            OutlinedButton(
+            PoulpyButton(
                 onClick = model::endStep,
+                kind = PoulpyButtonKind.Secondary,
+                size = PoulpyButtonSize.Lg,
                 enabled = recording.restSeconds == null,
-                modifier = Modifier.weight(1f).height(PoulpySize.buttonLarge),
+                modifier = Modifier.weight(1f),
             ) { Text(stringResource(R.string.live_endStep)) }
         }
-        Button(onClick = model::stopRecording, modifier = Modifier.fillMaxWidth().height(PoulpySize.buttonLarge)) { Text(stringResource(R.string.treadmill_stop)) }
+        PoulpyButton(onClick = model::stopRecording, size = PoulpyButtonSize.Lg, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.treadmill_stop)) }
     } else {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedButton(onClick = model::pauseRecording, modifier = Modifier.weight(1f).height(PoulpySize.buttonLarge)) {
+            PoulpyButton(onClick = model::pauseRecording, kind = PoulpyButtonKind.Secondary, size = PoulpyButtonSize.Lg, modifier = Modifier.weight(1f)) {
                 Icon(Lucide.Pause, contentDescription = null)
                 Spacer(Modifier.size(6.dp))
                 Text(stringResource(R.string.treadmill_pause))
             }
             if (!recording.freeRun) {
-                OutlinedButton(onClick = model::skipPhase, modifier = Modifier.weight(1f).height(PoulpySize.buttonLarge)) { Text(stringResource(R.string.treadmill_skip)) }
+                PoulpyButton(onClick = model::skipPhase, kind = PoulpyButtonKind.Secondary, size = PoulpyButtonSize.Lg, modifier = Modifier.weight(1f)) { Text(stringResource(R.string.treadmill_skip)) }
             }
         }
     }
@@ -599,8 +601,8 @@ private fun Waiting(choice: LiveChoice, model: LiveModel) {
         }
     }
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        OutlinedButton(onClick = model::cancelWaiting, modifier = Modifier.weight(1f).height(PoulpySize.buttonLarge)) { Text(stringResource(R.string.action_cancel)) }
-        OutlinedButton(onClick = model::startNow, modifier = Modifier.weight(1f).height(PoulpySize.buttonLarge)) { Text(stringResource(R.string.live_startNow)) }
+        PoulpyButton(onClick = model::cancelWaiting, kind = PoulpyButtonKind.Secondary, size = PoulpyButtonSize.Lg, modifier = Modifier.weight(1f)) { Text(stringResource(R.string.action_cancel)) }
+        PoulpyButton(onClick = model::startNow, kind = PoulpyButtonKind.Secondary, size = PoulpyButtonSize.Lg, modifier = Modifier.weight(1f)) { Text(stringResource(R.string.live_startNow)) }
     }
 }
 
@@ -645,8 +647,8 @@ internal fun FinishCard(prompt: FinishPromptUi, model: LiveModel) {
                 }
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(onClick = model::keepGoing, modifier = Modifier.weight(1f).height(PoulpySize.button)) { Text(stringResource(R.string.live_keepGoing)) }
-                Button(onClick = model::stopRecording, modifier = Modifier.weight(1f).height(PoulpySize.button)) { Text(stringResource(R.string.treadmill_stop)) }
+                PoulpyButton(onClick = model::keepGoing, kind = PoulpyButtonKind.Secondary, modifier = Modifier.weight(1f)) { Text(stringResource(R.string.live_keepGoing)) }
+                PoulpyButton(onClick = model::stopRecording, modifier = Modifier.weight(1f)) { Text(stringResource(R.string.treadmill_stop)) }
             }
         }
     }

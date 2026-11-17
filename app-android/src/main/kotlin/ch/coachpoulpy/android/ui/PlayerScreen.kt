@@ -139,9 +139,9 @@ private fun ColumnScope.Ready(state: PlayerState, onStart: () -> Unit, onClose: 
         Text(state.title, style = PoulpyTextStyles.Title, textAlign = TextAlign.Center)
         state.targetDetail?.let { Text(it, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurfaceVariant) }
     }
-    Button(onClick = onStart, modifier = Modifier.fillMaxWidth().height(PoulpySize.buttonLarge)) {
-        Icon(Lucide.Play, contentDescription = null, modifier = Modifier.size(24.dp))
-        Text(stringResource(R.string.player_start), modifier = Modifier.padding(start = PoulpySpace.sm), fontSize = 19.sp, fontWeight = FontWeight.ExtraBold)
+    PoulpyButton(onClick = onStart, size = PoulpyButtonSize.Lg, modifier = Modifier.fillMaxWidth()) {
+        Icon(Lucide.Play, contentDescription = null, modifier = Modifier.size(PoulpyControlIcon.md))
+        Text(stringResource(R.string.player_start), modifier = Modifier.padding(start = PoulpySpace.sm))
     }
 }
 
@@ -302,23 +302,24 @@ internal fun ColumnScope.WorkStep(state: PlayerState, paused: Boolean, onSkip: (
     }
     Spacer(Modifier.height(PoulpySpace.lg))
     Row(horizontalArrangement = Arrangement.spacedBy(PoulpySpace.md), modifier = Modifier.fillMaxWidth().alpha(if (paused) PAUSED_DIM else 1f)) {
-        OutlinedButton(
+        PoulpyButton(
             onClick = onSkip,
+            kind = PoulpyButtonKind.Secondary,
+            size = PoulpyButtonSize.Lg,
             enabled = !paused,
             colors = ButtonDefaults.outlinedButtonColors(disabledContentColor = MaterialTheme.colorScheme.onSurface),
-            border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
-            contentPadding = PaddingValues(horizontal = 22.dp),
-            modifier = Modifier.then(if (!showDone) Modifier.weight(1f) else Modifier).height(PoulpySize.buttonLarge),
-        ) { Text(stringResource(R.string.player_skip), fontSize = 19.sp, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onSurface) }
+            modifier = Modifier.then(if (!showDone) Modifier.weight(1f) else Modifier),
+        ) { Text(stringResource(R.string.player_skip), color = MaterialTheme.colorScheme.onSurface) }
         if (showDone) {
-            Button(
+            PoulpyButton(
                 onClick = onDone,
+                size = PoulpyButtonSize.Lg,
                 enabled = !paused,
                 colors = ButtonDefaults.buttonColors(disabledContainerColor = MaterialTheme.colorScheme.primary, disabledContentColor = MaterialTheme.colorScheme.onPrimary),
-                modifier = Modifier.weight(1f).height(PoulpySize.buttonLarge),
+                modifier = Modifier.weight(1f),
             ) {
-                Icon(Lucide.Check, contentDescription = null, modifier = Modifier.size(24.dp))
-                Text(stringResource(R.string.player_done), fontSize = 19.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = PoulpySpace.sm))
+                Icon(Lucide.Check, contentDescription = null, modifier = Modifier.size(PoulpyControlIcon.md))
+                Text(stringResource(R.string.player_done), modifier = Modifier.padding(start = PoulpySpace.sm))
             }
         }
     }
@@ -367,8 +368,10 @@ internal fun ColumnScope.RestStep(state: PlayerState, paused: Boolean, onSkip: (
         }
     }
     Spacer(Modifier.height(PoulpySpace.lg))
-    Button(
+    PoulpyButton(
         onClick = onSkip,
+        kind = PoulpyButtonKind.Tonal,
+        size = PoulpyButtonSize.Lg,
         enabled = !paused,
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer,
@@ -376,10 +379,10 @@ internal fun ColumnScope.RestStep(state: PlayerState, paused: Boolean, onSkip: (
             disabledContainerColor = MaterialTheme.colorScheme.primaryContainer,
             disabledContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
         ),
-        modifier = Modifier.fillMaxWidth().alpha(if (paused) PAUSED_DIM else 1f).height(PoulpySize.buttonLarge),
+        modifier = Modifier.fillMaxWidth().alpha(if (paused) PAUSED_DIM else 1f),
     ) {
-        Icon(Lucide.SkipForward, contentDescription = null, modifier = Modifier.size(22.dp))
-        Text(stringResource(R.string.player_skipRest), fontSize = 19.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = PoulpySpace.sm))
+        Icon(Lucide.SkipForward, contentDescription = null, modifier = Modifier.size(PoulpyControlIcon.md))
+        Text(stringResource(R.string.player_skipRest), modifier = Modifier.padding(start = PoulpySpace.sm))
     }
 }
 
@@ -388,13 +391,12 @@ private const val REST_STEP = 15
 
 @Composable
 private fun AdjustButton(label: String, enabled: Boolean, onClick: () -> Unit) {
-    OutlinedButton(
+    PoulpyButton(
         onClick = onClick,
+        kind = PoulpyButtonKind.Secondary,
+        size = PoulpyButtonSize.Lg,
         enabled = enabled,
-        border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
-        contentPadding = PaddingValues(horizontal = 18.dp),
-        modifier = Modifier.height(48.dp),
-    ) { Text(label, fontSize = 16.sp, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onSurface) }
+    ) { Text(label, color = MaterialTheme.colorScheme.onSurface) }
 }
 
 /** "WORK 1 · ROUND 2 OF 4": the part this step is in, with its icon. */
@@ -454,11 +456,11 @@ private fun ColumnScope.Finished(state: PlayerState, finished: FinishedScreen?, 
             TentacleLitCard(finished.poulpy)
         }
     }
-    OutlinedButton(onClick = onShare, modifier = Modifier.fillMaxWidth().height(PoulpySize.buttonLarge)) {
+    PoulpyButton(onClick = onShare, kind = PoulpyButtonKind.Secondary, size = PoulpyButtonSize.Lg, modifier = Modifier.fillMaxWidth()) {
         Icon(Lucide.Share2, contentDescription = null, modifier = Modifier.padding(end = 8.dp))
         Text(stringResource(R.string.shareImage_button))
     }
-    Button(onClick = onClose, modifier = Modifier.fillMaxWidth().height(PoulpySize.buttonLarge).padding(top = 8.dp)) { Text(stringResource(R.string.player_close)) }
+    PoulpyButton(onClick = onClose, size = PoulpyButtonSize.Lg, modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) { Text(stringResource(R.string.player_close)) }
 }
 
 @Composable

@@ -94,9 +94,9 @@ fun ExerciseDetailScreen(
             }
             HorizontalDivider(color = colors.surfaceVariant)
             Box(Modifier.navigationBarsPadding().padding(start = PoulpySpace.lg, end = PoulpySpace.lg, top = 12.dp, bottom = 16.dp)) {
-                Button(onClick = { onAddToWorkout(detail.slug) }, modifier = Modifier.fillMaxWidth().height(PoulpySize.buttonLarge)) {
+                PoulpyButton(onClick = { onAddToWorkout(detail.slug) }, size = PoulpyButtonSize.Lg, modifier = Modifier.fillMaxWidth()) {
                     Icon(Lucide.Plus, contentDescription = null)
-                    Text(stringResource(R.string.exercise_add), fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 8.dp))
+                    Text(stringResource(R.string.exercise_add), modifier = Modifier.padding(start = 8.dp))
                 }
             }
         }
@@ -190,7 +190,7 @@ internal fun VariationButton(detail: ExerciseDetail, onClick: () -> Unit) {
         shape = RoundedCornerShape(PoulpyRadius.pill),
         color = colors.surfaceVariant,
         contentColor = colors.onPrimaryContainer,
-        modifier = Modifier.height(PoulpySize.button).semantics {
+        modifier = Modifier.height(PoulpySize.touch).semantics {
             contentDescription = label
             role = Role.Button
         },

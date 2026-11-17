@@ -104,8 +104,8 @@ internal fun FormatOrderSheet(change: FormatChange, onChoose: (FormatSwitch) -> 
             val follows = if (change.format == WorkoutFormat.CIRCUIT) R.string.builder_followToCircuit else R.string.builder_followToSets
             OrderCard(stringResource(R.string.builder_followTitle), stringResource(follows), change.followLine) { onChoose(FormatSwitch.FOLLOW_NEW_FORMAT) }
             OrderCard(stringResource(R.string.builder_keepTitle), stringResource(R.string.builder_keepDescription), change.keepLine) { onChoose(FormatSwitch.KEEP_ORDER) }
-            OutlinedButton(onClick = onClose, modifier = Modifier.fillMaxWidth().height(PoulpySize.buttonLarge)) {
-                Text(stringResource(R.string.action_cancel), fontWeight = FontWeight.ExtraBold)
+            PoulpyButton(onClick = onClose, kind = PoulpyButtonKind.Secondary, size = PoulpyButtonSize.Lg, modifier = Modifier.fillMaxWidth()) {
+                Text(stringResource(R.string.action_cancel))
             }
         }
     }

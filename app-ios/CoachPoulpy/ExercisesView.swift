@@ -369,19 +369,14 @@ private struct FilterSheetActions: View {
         HStack(spacing: 8) {
             Button(action: clear) {
                 Text("exercises.filterClear")
-                    .font(.poulpy(.callout).weight(.heavy))
                     .frame(maxWidth: .infinity)
-                    .frame(height: PoulpySize.buttonLarge)
-                    .overlay(Capsule().stroke(PoulpyColor.outline, lineWidth: 2))
             }
+            .buttonStyle(PoulpyButtonStyle(.secondary, size: .lg))
             Button(action: show) {
                 Text("exercises.filterShow \(count)")
-                    .font(.poulpy(.callout).weight(.heavy))
-                    .foregroundStyle(PoulpyColor.onPrimary)
                     .frame(maxWidth: .infinity)
-                    .frame(height: PoulpySize.buttonLarge)
-                    .background(PoulpyColor.primary, in: Capsule())
             }
+            .buttonStyle(PoulpyButtonStyle(.primary, size: .lg))
         }
         .buttonStyle(.plain)
         .padding(.top, 4)
@@ -541,13 +536,9 @@ struct ExerciseDetailView: View {
                 adding = true
             } label: {
                 Label("exercise.add", lucide: .plus)
-                    .font(.poulpy(.callout).weight(.heavy))
-                    .foregroundStyle(PoulpyColor.onPrimary)
                     .frame(maxWidth: .infinity)
-                    .frame(height: PoulpySize.buttonLarge)
-                    .background(PoulpyColor.primary, in: Capsule())
             }
-            .buttonStyle(.plain)
+            .buttonStyle(PoulpyButtonStyle(.primary, size: .lg))
             .padding(.horizontal, PoulpySpace.lg)
             .padding(.top, 12)
             .padding(.bottom, 8)
@@ -759,7 +750,7 @@ struct VariationButtonLabel: View {
         .foregroundStyle(PoulpyColor.onPrimaryContainer)
         .padding(.leading, 14)
         .padding(.trailing, 12)
-        .frame(height: PoulpySize.button)
+        .frame(height: PoulpySize.touch)
         .background(PoulpyColor.surfaceVariant, in: Capsule())
     }
 }

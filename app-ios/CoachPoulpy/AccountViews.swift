@@ -172,12 +172,9 @@ struct AccountPage: View {
                     VStack(spacing: 4) {
                         Button { dialog = signedIn.upToDate ? .signOut : .unsent } label: {
                             Text("account.signOut")
-                                .font(.poulpy(.headline).weight(.heavy))
-                                .foregroundStyle(PoulpyColor.onSurface)
-                                .frame(maxWidth: .infinity, minHeight: 52)
-                                .overlay(Capsule().stroke(PoulpyColor.outline, lineWidth: 2))
+                                .frame(maxWidth: .infinity)
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(PoulpyButtonStyle(.secondary, size: .lg))
                         Button { deleting = true } label: {
                             Text("account.deleteAccount").font(.poulpy(.headline).weight(.heavy)).foregroundStyle(PoulpyColor.error).frame(minHeight: 44)
                         }
@@ -243,12 +240,9 @@ private struct DeleteSheet: View {
                 HStack(spacing: 8) {
                     Button { dismiss() } label: {
                         Text("action.cancel")
-                            .font(.poulpy(.headline).weight(.heavy))
-                            .foregroundStyle(PoulpyColor.onSurface)
-                            .frame(maxWidth: .infinity, minHeight: 56)
-                            .overlay(Capsule().stroke(PoulpyColor.outline, lineWidth: 2))
+                            .frame(maxWidth: .infinity)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(PoulpyButtonStyle(.secondary, size: .xl))
                     Button {
                         busy = true
                         Task { @MainActor in
@@ -260,8 +254,8 @@ private struct DeleteSheet: View {
                         Text("account.deleteAccount")
                             .font(.poulpy(.headline).weight(.heavy))
                             .foregroundStyle(PoulpyColor.onError)
-                            .frame(maxWidth: .infinity, minHeight: 56)
-                            .background(PoulpyColor.error.opacity(password.isEmpty || busy ? 0.4 : 1), in: Capsule())
+                            .frame(maxWidth: .infinity, minHeight: PoulpyControl.xl)
+                            .background(PoulpyColor.error.opacity(password.isEmpty || busy ? 0.4 : 1), in: RoundedRectangle(cornerRadius: PoulpyRadius.md))
                     }
                     .buttonStyle(.plain)
                     .disabled(password.isEmpty || busy)
@@ -784,12 +778,9 @@ private struct PrimaryButton: View {
     var body: some View {
         Button(action: action) {
             Text(title)
-                .font(.poulpy(.headline).weight(.heavy))
-                .foregroundStyle(PoulpyColor.onPrimary)
-                .frame(maxWidth: .infinity, minHeight: 56)
-                .background(PoulpyColor.primary.opacity(enabled ? 1 : 0.4), in: Capsule())
+                .frame(maxWidth: .infinity)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(PoulpyButtonStyle(.primary, size: .xl))
         .disabled(!enabled)
     }
 }
