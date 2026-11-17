@@ -21,7 +21,7 @@ import screenBuilderStepMenu from './builder-step-menu.html?raw'
 // CLEANUP: the screens marked a11y todo carry axe findings the old mockups had (contrast of hints and past days, names of fields); fix them with the screens, then drop the todo.
 const meta = {
   title: "Mobile/Screens/Builder",
-  tags: ['!autodocs', 'draft'],
+  tags: ['!autodocs', 'agreed'],
   parameters: { layout: 'fullscreen', mockup: {}, docs: { canvas: { sourceState: 'none' } } },
 } satisfies Meta
 export default meta
@@ -30,77 +30,77 @@ type Story = StoryObj<typeof meta>
 /** Builder · the format line is a control that opens the format sheet. */
 export const BuilderChangeFormat: Story = {
   name: "Change the format",
-  tags: ['!autodocs', 'draft'],
+  tags: ['!autodocs', 'agreed'],
   ...screen(screenBuilderChangeFormat, { reorder: true }),
   parameters: { mockup: { issue: 243 } },
 }
 /** Builder · the format sheet with the current format selected. */
 export const BuilderChangeFormatSheet: Story = {
   name: "Change the format, sheet",
-  tags: ['!autodocs', 'draft'],
+  tags: ['!autodocs', 'agreed'],
   ...screen(screenBuilderChangeFormatSheet, { reorder: true }),
   parameters: { mockup: { issue: 243 } },
 }
 /** Builder · after picking the other format: follow the new format or keep the order. */
 export const BuilderChangeFormatOrder: Story = {
   name: "Change the format, order",
-  tags: ['!autodocs', 'draft'],
+  tags: ['!autodocs', 'agreed'],
   ...screen(screenBuilderChangeFormatOrder, { reorder: true }),
   parameters: { mockup: { issue: 243 } },
 }
 /** Builder · circuit, edit a step. */
 export const BuilderCircuitEditStep: Story = {
   name: "Circuit, edit a step",
-  tags: ['!autodocs', 'draft'],
+  tags: ['!autodocs', 'agreed'],
   ...screen(screenBuilderCircuitEditStep, { reorder: true }),
   parameters: { a11y: { test: 'todo' }, mockup: { issue: 90 } },
 }
 /** Builder · circuit in parts. */
 export const BuilderCircuitParts: Story = {
   name: "Circuit in parts",
-  tags: ['!autodocs', 'draft'],
+  tags: ['!autodocs', 'agreed'],
   ...screen(screenBuilderCircuitParts, { reorder: true }),
   parameters: { mockup: { issue: 90 } },
 }
 /** Builder · type a distance. */
 export const BuilderDistanceSheet: Story = {
   name: "Type a distance",
-  tags: ['!autodocs', 'draft'],
+  tags: ['!autodocs', 'agreed'],
   ...screen(screenBuilderDistanceSheet, { reorder: true }),
   parameters: { mockup: { issue: 90 } },
 }
 /** Builder · run in parts. */
 export const BuilderRunParts: Story = {
   name: "Run in parts",
-  tags: ['!autodocs', 'draft'],
+  tags: ['!autodocs', 'agreed'],
   ...screen(screenBuilderRunParts, { reorder: true }),
   parameters: { mockup: { issue: 90 } },
 }
 /** Builder · run, edit a step. */
 export const BuilderRunTarget: Story = {
   name: "Run, edit a step",
-  tags: ['!autodocs', 'draft'],
+  tags: ['!autodocs', 'agreed'],
   ...screen(screenBuilderRunTarget, { reorder: true }),
   parameters: { a11y: { test: 'todo' }, mockup: { issue: 90 } },
 }
 /** Builder · sets, edit a step. */
 export const BuilderSetsEditStep: Story = {
   name: "Sets, edit a step",
-  tags: ['!autodocs', 'draft'],
+  tags: ['!autodocs', 'agreed'],
   ...screen(screenBuilderSetsEditStep, { reorder: true }),
   parameters: { a11y: { test: 'todo' }, mockup: { issue: 90 } },
 }
 /** Builder · sets with a superset. */
 export const BuilderSetsSuperset: Story = {
   name: "Sets with a superset",
-  tags: ['!autodocs', 'draft'],
+  tags: ['!autodocs', 'agreed'],
   ...screen(screenBuilderSetsSuperset, { reorder: true }),
   parameters: { mockup: { issue: 151 } },
 }
 /** Builder · step actions. */
 export const BuilderStepMenu: Story = {
   name: "Step actions",
-  tags: ['!autodocs', 'draft'],
+  tags: ['!autodocs', 'agreed'],
   ...screen(screenBuilderStepMenu, { reorder: true }),
   parameters: { mockup: { issue: 90 } },
 }
@@ -109,7 +109,7 @@ export const BuilderStepMenu: Story = {
 /** Builder · a new workout with nothing in it yet; the warm-up and cool down are always there, empty and optional. */
 export const BuilderTidyEmpty: Story = {
   name: "Empty workout",
-  tags: ['!autodocs', 'draft'],
+  tags: ['!autodocs', 'agreed'],
   ...screen(screenBuilderTidyEmpty, { reorder: true }),
   parameters: { mockup: {} },
 }
@@ -118,7 +118,7 @@ export const BuilderTidyEmpty: Story = {
 /** Builder · the + of a block offers an exercise, a repeat or a rest. */
 export const BuilderTidyAddMenu: Story = {
   name: "Add menu",
-  tags: ['!autodocs', 'draft'],
+  tags: ['!autodocs', 'agreed'],
   ...screen(screenBuilderTidyAddMenu, { reorder: true }),
   parameters: { mockup: {} },
 }
@@ -126,7 +126,7 @@ export const BuilderTidyAddMenu: Story = {
 /** Builder · the actions of a repeat. */
 export const BuilderTidyRepeatMenu: Story = {
   name: "Repeat menu",
-  tags: ['!autodocs', 'draft'],
+  tags: ['!autodocs', 'agreed'],
   ...screen(screenBuilderTidyRepeatMenu, { reorder: true }),
   parameters: { mockup: {} },
 }
@@ -134,7 +134,7 @@ export const BuilderTidyRepeatMenu: Story = {
 /** Builder · saving without a name. */
 export const BuilderTidyNameError: Story = {
   name: "Name missing",
-  tags: ['!autodocs', 'draft'],
+  tags: ['!autodocs', 'agreed'],
   ...screen(screenBuilderTidyNameError, { reorder: true }),
   parameters: { mockup: {} },
 }
@@ -142,7 +142,7 @@ export const BuilderTidyNameError: Story = {
 /** Builder · a Work part with nothing planned before or after it. */
 export const BuilderTidyEmptyOptionalBlocks: Story = {
   name: "Nothing planned before and after",
-  tags: ['!autodocs', 'draft'],
+  tags: ['!autodocs', 'agreed'],
   ...screen(screenBuilderTidyEmptyOptionalBlocks, { reorder: true }),
   parameters: { mockup: {} },
 }
