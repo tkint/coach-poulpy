@@ -13,7 +13,6 @@ import screenBuilderSetsSuperset from './builder-sets-superset.html?raw'
 import screenBuilderTidyEmpty from './builder-tidy-empty.html?raw'
 import screenBuilderTidyAddMenu from './builder-tidy-add-menu.html?raw'
 import screenBuilderTidyRepeatMenu from './builder-tidy-repeat-menu.html?raw'
-import screenBuilderTidyNameError from './builder-tidy-name-error.html?raw'
 import screenBuilderTidyEmptyOptionalBlocks from './builder-tidy-empty-optional-blocks.html?raw'
 import screenBuilderTidyRepeatHeader from './builder-tidy-repeat-header.html?raw'
 import screenBuilderTidyRepeatCountSheet from './builder-tidy-repeat-count-sheet.html?raw'
@@ -134,13 +133,6 @@ export const BuilderTidyRepeatMenu: Story = {
   parameters: { mockup: {} },
 }
 
-/** Builder · saving without a name. */
-export const BuilderTidyNameError: Story = {
-  name: "Name missing",
-  tags: ['!autodocs', 'agreed'],
-  ...screen(screenBuilderTidyNameError, { reorder: true }),
-  parameters: { mockup: {} },
-}
 
 /** Builder · a Work part with nothing planned before or after it. */
 export const BuilderTidyEmptyOptionalBlocks: Story = {
