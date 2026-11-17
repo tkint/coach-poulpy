@@ -3,15 +3,26 @@ import Shared
 
 /// A part as an outlined block, its icon, name and summary sitting on the top border's left and its `time` on the right
 /// (`session-recap-*` and `workout-page-*` mockups). The border breaks around both, so neither needs a background of its
-/// own. `content` is its rows, which the caller separates.
-struct PartBlockView<Content: View>: View {
+/// own. `content` is its rows, which the caller separates. The builder puts a button on the border's right end as `corner`
+/// (a 44 pt square, its edge on the border's right end, centred on the border line).
+struct PartBlockView<Content: View, Corner: View>: View {
     let kind: PartKind
     let name: String
     let summary: String
     let time: String
     @ViewBuilder let content: () -> Content
+    @ViewBuilder let corner: () -> Corner
     @State private var headerWidth: CGFloat = 0
     @State private var timeWidth: CGFloat = 0
+
+    init(kind: PartKind, name: String, summary: String, time: String, @ViewBuilder content: @escaping () -> Content, @ViewBuilder corner: @escaping () -> Corner) {
+        self.kind = kind
+        self.name = name
+        self.summary = summary
+        self.time = time
+        self.content = content
+        self.corner = corner
+    }
 
     var body: some View {
         let gap = PoulpySpace.sm
@@ -35,6 +46,9 @@ struct PartBlockView<Content: View>: View {
                         .offset(x: -gap, y: -9)
                 }
             }
+            .overlay(alignment: .topTrailing) {
+                corner().offset(x: 0, y: -22)
+            }
             .onPreferenceChange(HeaderWidthKey.self) { headerWidth = $0 }
             .onPreferenceChange(TimeWidthKey.self) { timeWidth = $0 }
             .padding(.top, 13)
@@ -54,6 +68,12 @@ struct PartBlockView<Content: View>: View {
         .padding(.horizontal, 6)
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(.isHeader)
+    }
+}
+
+extension PartBlockView where Corner == EmptyView {
+    init(kind: PartKind, name: String, summary: String, time: String, @ViewBuilder content: @escaping () -> Content) {
+        self.init(kind: kind, name: name, summary: summary, time: time, content: content, corner: { EmptyView() })
     }
 }
 

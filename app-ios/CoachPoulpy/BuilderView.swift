@@ -5,11 +5,12 @@ import Shared
 struct BuilderView: View {
     let graph: AppGraph
     @StateObject private var builder: Observed<BuilderModel, BuilderState>
-    /// Where the exercise being picked goes (a part, or one of its repeats) and as what; nil when not picking.
+    /// The part the exercise being picked goes to; nil when not picking.
     @State private var picking: PickTarget?
     /// The exercise whose details are open over the picker; nil when none.
     @State private var previewing: PreviewTarget?
-    @State private var addingPart = false
+    /// Whether saving was tried without a name, which shows what the name field is missing.
+    @State private var nameAsked = false
     @State private var changingFormat = false
     /// The switch waiting for "Follow the new format" or "Keep the order"; nil when none.
     @State private var askingOrder: FormatChange?
@@ -44,36 +45,23 @@ struct BuilderView: View {
 
     /// The step being edited in the sheet: the one just added, or the one tapped.
     @State private var editing: String?
-    /// The step or repeat the chevrons moved last: the list scrolls just enough to show it.
-    @State private var movedKey: String?
-
     var body: some View {
         NavigationStack {
-            ScrollViewReader { scroller in
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
-                    PoulpyTextField(label: "builder.name", text: Binding(get: { state.name }, set: { model.rename(name: $0) }))
+                    PoulpyTextField(
+                        label: "builder.name", text: Binding(get: { state.name }, set: { model.rename(name: $0) }),
+                        error: nameAsked && !state.hasName ? NSLocalizedString("builder.nameError", comment: "") : nil,
+                        placeholder: "builder.namePlaceholder"
+                    )
                     formatLine(state.format)
                     ForEach(state.parts, id: \.key) { part in
                         partBlock(part)
                     }
-                    Button { addingPart = true } label: {
-                        dashedTile(Text("builder.addPart"), icon: .plus, height: 56)
-                    }
-                    .buttonStyle(.plain)
                 }
                 .padding(.horizontal, PoulpySpace.lg)
                 .padding(.top, 8)
                 .padding(.bottom, PoulpySpace.xl)
-            }
-            .onChange(of: movedKey) { key in
-                // Once the move has its new place, scroll only as far as it takes to show the step in full.
-                guard let key else { return }
-                DispatchQueue.main.async {
-                    withAnimation(.easeInOut(duration: 0.25)) { scroller.scrollTo(key) }
-                    movedKey = nil
-                }
-            }
             }
             .background(PoulpyColor.background)
             .navigationTitle(LocalizedStringKey(model.isEditing ? "builder.editTitle" : "builder.newTitle"))
@@ -89,7 +77,7 @@ struct BuilderView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button {
-                        if model.save() != nil { dismiss() }
+                        if !state.hasName { nameAsked = true } else if model.save() != nil { dismiss() }
                     } label: {
                         Text("action.save")
                     }
@@ -104,7 +92,7 @@ struct BuilderView: View {
             }
             .sheet(isPresented: Binding(get: { editingRow != nil }, set: { if !$0 { editing = nil } })) {
                 if let row = editingRow {
-                    StepSheet(graph: graph, model: model, row: row, parts: state.parts, format: state.format) { editing = nil }
+                    StepSheet(graph: graph, model: model, row: row, format: state.format) { editing = nil }
                 }
             }
             .sheet(isPresented: $changingFormat) {
@@ -121,23 +109,17 @@ struct BuilderView: View {
                     askingOrder = nil
                 }, onClose: { askingOrder = nil })
             }
-            .sheet(isPresented: $addingPart) {
-                PartSheet(options: state.partOptions) { kind in
-                    model.addPart(kind: kind)
-                    addingPart = false
-                }
-            }
             .sheet(item: $picking) { target in
                 NavigationStack {
                     ExerciseList(graph: graph, withRecent: true) { row in
                         PickerRowView(row: row, onOpen: { previewing = PreviewTarget(slug: row.slug) }) {
-                            model.add(slug: row.slug, partKey: target.partKey, repeatKey: target.repeatKey, role: target.role)
+                            model.add(slug: row.slug, partKey: target.partKey, repeatKey: nil)
                             picking = nil
                         }
                     }
                     .sheet(item: $previewing) { preview in
                         ExerciseInfoSheet(graph: graph, slug: preview.slug, onAction: { slug in
-                            model.add(slug: slug, partKey: target.partKey, repeatKey: target.repeatKey, role: target.role)
+                            model.add(slug: slug, partKey: target.partKey, repeatKey: nil)
                             previewing = nil
                             picking = nil
                         })
@@ -178,158 +160,172 @@ struct BuilderView: View {
         }
     }
 
-    /// A part: its header, its steps and repeats, and "Add to Work 1".
+    /// A part as an outlined block, like on the workout page: its steps as rows, a small + on the border to add to it,
+    /// and while it is empty one line that opens the exercise list. The warm-up and the cool down are optional.
     private func partBlock(_ part: BuilderPart) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            partHeader(part)
-            ForEach(part.steps, id: \.key) { step in
-                if let row = step.row {
-                    card(row)
-                } else if let group = step.repeatGroup {
-                    repeatBlock(group, in: part.key).id(group.key)
+        let empty = part.steps.isEmpty
+        return PartBlockView(kind: part.kind, name: part.name, summary: part.summary, time: "") {
+            if empty {
+                Button { picking = PickTarget(partKey: part.key) } label: {
+                    Text(LocalizedStringKey(part.kind == .work ? "builder.emptyWork" : "builder.emptyOptional"))
+                        .font(.poulpy(.footnote))
+                        .foregroundStyle(PoulpyColor.onSurfaceVariant)
+                        .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                        .contentShape(Rectangle())
                 }
+                .buttonStyle(.plain)
+                .accessibilityLabel(Text(part.addLabel))
+            } else {
+                VStack(spacing: 0) {
+                    ForEach(Array(part.steps.enumerated()), id: \.element.key) { index, step in
+                        if index > 0 { Divider().overlay(PoulpyColor.outline) }
+                        if let row = step.row {
+                            stepRow(row, inRepeat: false)
+                        } else if let group = step.repeatGroup {
+                            repeatBlock(group)
+                        }
+                    }
+                }
+                .padding(.vertical, 4)
             }
-            addStepButton(Text(part.addLabel), height: 56, part: part.key, repeatKey: nil)
+        } corner: {
+            addButton(part, compact: empty)
         }
-        .padding(.bottom, 8)
     }
 
-    /// A part's header: its icon, name and summary, and a menu to move a work part or delete the part.
-    private func partHeader(_ part: BuilderPart) -> some View {
-        HStack(spacing: 10) {
-            PartBadge(kind: part.kind)
-            VStack(alignment: .leading, spacing: 0) {
-                Text(part.name).font(.poulpy(.title3).weight(.heavy)).foregroundStyle(PoulpyColor.onSurface)
-                Text(part.summary).font(.poulpy(.footnote)).monospacedDigit().foregroundStyle(PoulpyColor.onSurfaceVariant)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            if part.canMoveUp || part.canMoveDown || part.canDelete {
-                Menu {
-                    if part.canMoveUp {
-                        Button { model.movePartUp(key: part.key) } label: { Label("builder.moveUp", lucide: .arrowUp) }
-                    }
-                    if part.canMoveDown {
-                        Button { model.movePartDown(key: part.key) } label: { Label("builder.moveDown", lucide: .arrowDown) }
-                    }
-                    if part.canDelete {
-                        Divider()
-                        Button(role: .destructive) { model.removePart(key: part.key) } label: { Label("builder.delete", lucide: .trash) }
-                    }
-                } label: {
-                    LucideIcon(.ellipsisVertical, size: 20).frame(width: 44, height: 44)
-                }
+    /// The small square + on a block's border: a tap asks what to add. An exercise is picked from the exercise list; a repeat or a rest is added right away.
+    private func addButton(_ part: BuilderPart, compact: Bool) -> some View {
+        Menu {
+            Button { picking = PickTarget(partKey: part.key) } label: { Label("builder.addExercise", lucide: .personStanding) }
+            Button { model.addRepeat(partKey: part.key) } label: { Label("builder.addRepeat", lucide: .repeat) }
+            Button { model.addRest(partKey: part.key, repeatKey: nil) } label: { Label("builder.addRest", lucide: .timer) }
+        } label: {
+            LucideIcon(.plus, size: compact ? 16 : 20)
                 .foregroundStyle(PoulpyColor.onSurfaceVariant)
-                .accessibilityLabel(Text(L("builder.moreActions %@", part.name)))
-            }
+                .frame(width: 28, height: 28)
+                .background(PoulpyColor.background, in: RoundedRectangle(cornerRadius: PoulpyRadius.sm))
+                .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.sm).stroke(PoulpyColor.outline, lineWidth: 1))
+                .frame(width: 44, height: 44)
+                .contentShape(Rectangle())
         }
+        .accessibilityLabel(Text(part.addLabel))
     }
 
-    private func card(_ row: BuilderRow) -> some View {
-        EntryCard(
-            model: model, row: row, roleOptions: model.roleOptions, parts: state.parts, open: false,
-            onOpen: { editing = row.key },
-            onMove: { move(row.key, by: $0) }
-        )
-        .id(row.key)
+    /// A step of the workout as a row, like on the workout page: its movement badge, name (with the Recover tag on its line)
+    /// and what it asks for. A tap edits it in a sheet; the ⋮ menu has the rest. Inside a repeat the row sits on a card.
+    private func stepRow(_ row: BuilderRow, inRepeat: Bool) -> some View {
+        HStack(spacing: 0) {
+            Button { editing = row.key } label: {
+                HStack(spacing: 10) {
+                    if row.isRest {
+                        LucideIcon(.timer, size: 16).foregroundStyle(PoulpyColor.onSurfaceVariant)
+                            .frame(width: 32, height: 32)
+                            .background(PoulpyColor.surfaceVariant, in: Circle())
+                            .accessibilityHidden(true)
+                    } else {
+                        PatternBadge(pattern: row.pattern, size: 32)
+                    }
+                    VStack(alignment: .leading, spacing: 0) {
+                        HStack(spacing: 6) {
+                            Text(row.name).font(.poulpy(.subheadline).weight(.heavy)).foregroundStyle(PoulpyColor.onSurface).lineLimit(1)
+                            if let role = row.roleLabel { RoleTag(label: role, recover: row.role == .recover, compact: true) }
+                        }
+                        Text(row.summary).font(.poulpy(.footnote)).monospacedDigit().foregroundStyle(PoulpyColor.onSurfaceVariant)
+                    }
+                    Spacer(minLength: 0)
+                }
+                .padding(.vertical, 6)
+                .frame(minHeight: 44)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(Text(L("builder.open %@", row.name)))
+            stepMenu(row)
+        }
+        .padding(.leading, inRepeat ? 8 : 0)
+        .background(inRepeat ? PoulpyColor.surface : Color.clear, in: RoundedRectangle(cornerRadius: PoulpyRadius.sm))
     }
 
-    /// A repeat: its header with − N times +, its steps inside a tinted block, and a way to add one.
-    private func repeatBlock(_ group: BuilderRepeat, in partKey: String) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
+    /// Edit, duplicate, the moves that apply (up, down, into the repeat above, out of its repeat), and delete.
+    private func stepMenu(_ row: BuilderRow) -> some View {
+        Menu {
+            Button("builder.edit") { editing = row.key }
+            Button("builder.duplicate") { model.duplicate(key: row.key) }
+            if row.canMoveUp { Button("builder.moveUp") { move(row.key, by: -1) } }
+            if row.canMoveDown { Button("builder.moveDown") { move(row.key, by: 1) } }
+            if row.canMoveIntoRepeat { Button("builder.moveIntoRepeat") { model.moveIntoRepeatAbove(key: row.key) } }
+            if row.repeatKey != nil { Button("builder.moveOutOfRepeat") { model.moveOutOfRepeat(key: row.key) } }
+            Divider()
+            Button(role: .destructive) { model.remove(key: row.key) } label: { Label("builder.delete", lucide: .trash) }
+        } label: {
+            LucideIcon(.ellipsisVertical, size: 20).frame(width: 44, height: 44)
+        }
+        .foregroundStyle(PoulpyColor.onSurfaceVariant)
+        .padding(.trailing, -8)
+        .accessibilityLabel(Text(L("builder.moreActions %@", row.name)))
+    }
+
+    /// A repeat inside a block: "Repeat", how many times as a small − N times +, and a menu; its steps sit in it as rows.
+    private func repeatBlock(_ group: BuilderRepeat) -> some View {
+        VStack(spacing: 4) {
             HStack(spacing: 8) {
-                MoveChevrons(
-                    upLabel: Text("builder.moveRepeatUp"),
-                    downLabel: Text("builder.moveRepeatDown"),
-                    canMoveUp: group.canMoveUp,
-                    canMoveDown: group.canMoveDown,
-                    onMove: { move(group.key, by: $0) }
-                )
-                LucideIcon(.repeat, size: 20).foregroundStyle(PoulpyColor.primary)
+                LucideIcon(.repeat, size: 20).foregroundStyle(PoulpyColor.primary).padding(.leading, 4).accessibilityHidden(true)
                 Text("builder.repeat")
-                    .font(.custom(PoulpyFontFace.baloo2Bold, size: 19, relativeTo: .headline))
+                    .font(.poulpy(.subheadline).weight(.heavy))
                     .foregroundStyle(PoulpyColor.onPrimaryContainer)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                HStack(spacing: 4) {
-                    timesButton(.minus, "builder.repeatFewer") { model.setRepeatTimes(key: group.key, times: group.times - 1) }
+                HStack(spacing: 2) {
+                    squareStep("−", "builder.repeatFewer") { model.setRepeatTimes(key: group.key, times: group.times - 1) }
                     Text(group.timesLabel)
-                        .font(.poulpy(.subheadline).weight(.heavy))
+                        .font(.poulpy(.footnote).weight(.bold))
                         .monospacedDigit()
                         .foregroundStyle(PoulpyColor.onPrimaryContainer)
-                        .frame(minWidth: 58)
-                    timesButton(.plus, "builder.repeatMore") { model.setRepeatTimes(key: group.key, times: group.times + 1) }
+                        .frame(width: 56)
+                    squareStep("+", "builder.repeatMore") { model.setRepeatTimes(key: group.key, times: group.times + 1) }
                 }
-                .padding(4)
-                .background(PoulpyColor.surface.opacity(0.6), in: Capsule())
+                .accessibilityElement(children: .contain)
                 Menu {
                     Button { model.duplicate(key: group.key) } label: { Label("builder.duplicate", lucide: .copy) }
-                    moveToPartMenu(group.key, from: partKey, parts: state.parts, model: model)
+                    if group.canMoveUp { Button { move(group.key, by: -1) } label: { Label("builder.moveUp", lucide: .arrowUp) } }
+                    if group.canMoveDown { Button { move(group.key, by: 1) } label: { Label("builder.moveDown", lucide: .arrowDown) } }
                     Divider()
                     Button(role: .destructive) { model.remove(key: group.key) } label: { Label("builder.delete", lucide: .trash) }
                 } label: {
                     LucideIcon(.ellipsisVertical, size: 20).frame(width: 44, height: 44)
                 }
                 .foregroundStyle(PoulpyColor.onSurfaceVariant)
+                .padding(.trailing, -8)
                 .accessibilityLabel(Text("builder.repeatActions"))
             }
-            .accessibilityElement(children: .contain)
-            VStack(spacing: 6) {
-                ForEach(group.rows, id: \.key) { row in
-                    card(row)
-                }
-                addStepButton(Text("builder.addToRepeat"), height: 44, part: partKey, repeatKey: group.key)
+            ForEach(group.rows, id: \.key) { row in
+                stepRow(row, inRepeat: true)
             }
-            .padding(.leading, 10)
         }
-        .padding(EdgeInsets(top: 4, leading: 6, bottom: 10, trailing: 8))
-        // The agreed `.builder-repeat` look: primary container mixed 55% with the background, plus a 1.5pt border.
-        .background(PoulpyColor.background, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
-        .background(PoulpyColor.primaryContainer.opacity(0.55), in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
-        .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).strokeBorder(PoulpyColor.primaryContainer, lineWidth: 1.5))
+        .padding(6)
+        .background(PoulpyColor.primaryContainer, in: RoundedRectangle(cornerRadius: PoulpyRadius.md))
+        .padding(.vertical, 2)
     }
 
-    private func timesButton(_ symbol: Lucide, _ description: LocalizedStringKey, _ action: @escaping () -> Void) -> some View {
+    /// A small square − or +, discreet beside the repeat's count; its touch area is bigger than it looks.
+    private func squareStep(_ sign: String, _ description: LocalizedStringKey, _ action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            LucideIcon(symbol, size: 18)
-                .foregroundStyle(PoulpyColor.primary)
-                .frame(width: 36, height: 36)
-                .background(PoulpyColor.surface, in: Circle())
+            Text(sign)
+                .font(.poulpy(.body).weight(.bold))
+                .foregroundStyle(PoulpyColor.onPrimaryContainer)
+                .frame(width: 28, height: 28)
+                .background(PoulpyColor.primary.opacity(0.12), in: RoundedRectangle(cornerRadius: PoulpyRadius.sm))
+                .frame(width: 40, height: 40)
+                .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .accessibilityLabel(Text(description))
     }
 
-    /// "Add to Work 1": asks what to add. An exercise or a recovery is picked from the exercise
-    /// list; a rest, or a repeat at the end of a part (none inside a repeat), is added right away.
-    private func addStepButton(_ label: Text, height: CGFloat, part: String, repeatKey: String?) -> some View {
-        Menu {
-            Button { picking = PickTarget(partKey: part, repeatKey: repeatKey, role: .work) } label: { Label("builder.addExercise", lucide: .dumbbell) }
-            Button { picking = PickTarget(partKey: part, repeatKey: repeatKey, role: .recover) } label: { Label("builder.addRecover", lucide: .footprints) }
-            Button { model.addRest(partKey: part, repeatKey: repeatKey) } label: { Label("builder.addRest", lucide: .timer) }
-            if repeatKey == nil {
-                Button { model.addRepeat(partKey: part) } label: { Label("builder.addRepeat", lucide: .repeat) }
-            }
-        } label: {
-            dashedTile(label, icon: .plus, height: height)
-        }
-        .buttonStyle(.plain)
-    }
-
-    private func dashedTile(_ label: Text, icon: Lucide, height: CGFloat) -> some View {
-        Label { label } icon: { LucideIcon(icon) }
-            .font(.poulpy(height < 56 ? .subheadline : .body).weight(.heavy))
-            .foregroundStyle(PoulpyColor.primary)
-            .frame(maxWidth: .infinity, minHeight: height)
-            .overlay(RoundedRectangle(cornerRadius: height < 56 ? 12 : 16).stroke(PoulpyPalette.lagoon300, style: StrokeStyle(lineWidth: 2, dash: [8, 6])))
-            .contentShape(RoundedRectangle(cornerRadius: PoulpyRadius.lg))
-    }
-
-    /// Moves a step or a repeat one place up (-1) or down (1) among its siblings, sliding it there.
+    /// Moves a step or a repeat one place up (-1) or down (1) among its siblings.
     private func move(_ key: String, by direction: Int) {
         withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
             if direction < 0 { model.moveUp(key: key) } else { model.moveDown(key: key) }
         }
-        UIImpactFeedbackGenerator(style: .light).impactOccurred()
-        movedKey = key
     }
 
     private func fieldLabel(_ key: LocalizedStringKey) -> some View {
@@ -343,61 +339,28 @@ private struct PreviewTarget: Identifiable {
     var id: String { slug }
 }
 
-/// Where a picked exercise goes: the part [partKey], or its repeat [repeatKey]; and what it is for.
+/// The part a picked exercise goes to.
 private struct PickTarget: Identifiable {
     let partKey: String
-    let repeatKey: String?
-    let role: StepRole
 
-    var id: String { "\(partKey)-\(repeatKey ?? "")-\(role.name)" }
+    var id: String { partKey }
 }
 
-/// "Move to another part" in a step's or a repeat's menu: the other parts by name.
-@ViewBuilder
-private func moveToPartMenu(_ key: String, from partKey: String, parts: [BuilderPart], model: BuilderModel) -> some View {
-    let others = parts.filter { $0.key != partKey }
-    if !others.isEmpty {
-        Menu {
-            ForEach(others, id: \.key) { part in
-                Button(part.name) { model.moveToPart(key: key, partKey: part.key) }
-            }
-        } label: {
-            Label("builder.moveToPart", lucide: .folderInput)
-        }
-    }
-}
-
-/// "Add a part": warm-up, work and cool down, each saying where it goes or that it is already there.
-private struct PartSheet: View {
-    let options: [BuilderPartOption]
-    let onPick: (PartKind) -> Void
+/// The small tag on a step's name line, or above it in the step sheet: "RECOVER".
+private struct RoleTag: View {
+    let label: String
+    let recover: Bool
+    var compact = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            SheetTitle(title: Text("builder.addPart"), subtitle: Text("builder.addPartSubtitle"))
-            ForEach(options, id: \.name) { option in
-                Button { onPick(option.kind) } label: {
-                    HStack(spacing: 12) {
-                        PartBadge(kind: option.kind)
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(option.name).font(.poulpy(.body).weight(.heavy)).foregroundStyle(PoulpyColor.onSurface)
-                            Text(option.note).font(.poulpy(.caption)).foregroundStyle(PoulpyColor.onSurfaceVariant)
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    }
-                    .padding(12)
-                    .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
-                    .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(PoulpyColor.outline, lineWidth: 1))
-                    .opacity(option.enabled ? 1 : 0.5)
-                }
-                .buttonStyle(.plain)
-                .disabled(!option.enabled)
-            }
-            Spacer(minLength: 0)
-        }
-        .padding(20)
-        .background(PoulpyColor.surface)
-        .presentationDetents([.medium])
+        Text(label)
+            .textCase(.uppercase)
+            .font(.custom(PoulpyFontFace.nunitoExtraBold, size: compact ? 10.5 : 11.5, relativeTo: .caption2))
+            .kerning(compact ? 0.6 : 0.9)
+            .foregroundStyle(recover ? PoulpyColor.onSurfaceVariant : PoulpyColor.onPrimaryContainer)
+            .padding(.horizontal, compact ? 6 : 8)
+            .padding(.vertical, compact ? 1 : 3)
+            .background(recover ? PoulpyColor.surfaceVariant : PoulpyColor.primaryContainer, in: Capsule())
     }
 }
 
@@ -419,7 +382,6 @@ private struct StepSheet: View {
     let graph: AppGraph
     let model: BuilderModel
     let row: BuilderRow
-    let parts: [BuilderPart]
     let format: WorkoutFormat?
     let onDone: () -> Void
     /// The exercise whose details are open over this sheet; nil when none.
@@ -428,7 +390,7 @@ private struct StepSheet: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 14) {
-                EntryCard(model: model, row: row, roleOptions: model.roleOptions, parts: parts, format: format, open: true, onOpen: {}, onMove: { _ in },
+                EntryCard(model: model, row: row, roleOptions: model.roleOptions, format: format,
                           onDetails: { detailing = PreviewTarget(slug: row.slug) })
                     .id(row.key)
                 Button(action: onDone) {
@@ -448,61 +410,24 @@ private struct StepSheet: View {
     }
 }
 
-/// The up and down chevrons that move a step or a repeat among its siblings. A chevron at the end of the
-/// list stays in place, dimmed and disabled, so nothing jumps. Each is 44 pt wide and 32 pt tall, as in the agreed mockup.
-private struct MoveChevrons: View {
-    let upLabel: Text
-    let downLabel: Text
-    let canMoveUp: Bool
-    let canMoveDown: Bool
-    let onMove: (Int) -> Void
-
-    var body: some View {
-        VStack(spacing: 0) {
-            chevron(.chevronUp, upLabel, enabled: canMoveUp) { onMove(-1) }
-            chevron(.chevronDown, downLabel, enabled: canMoveDown) { onMove(1) }
-        }
-    }
-
-    private func chevron(_ symbol: Lucide, _ label: Text, enabled: Bool, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            LucideIcon(symbol, size: 20)
-                .foregroundStyle(enabled ? PoulpyColor.primary : PoulpyColor.outline)
-                .frame(width: 44, height: 32)
-                .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .disabled(!enabled)
-        .accessibilityLabel(label)
-    }
-}
-
-/// A step of the workout. Folded: its role, name and summary. Open: where it is, what the step
-/// is for, then reps and weight for an exercise, with its sets and the rest between them in a
-/// Sets workout; a duration and intensity for a walk or a run; or the length of a rest.
+/// A step of the workout, open in its sheet: where it is, what the step is for, then reps and weight for an
+/// exercise, with its sets and the rest between them in a Sets workout; a duration and intensity for a walk
+/// or a run; or the length of a rest.
 private struct EntryCard: View {
     let model: BuilderModel
     let row: BuilderRow
     let roleOptions: [StepRoleOption]
-    let parts: [BuilderPart]
     let format: WorkoutFormat?
-    let open: Bool
-    let onOpen: () -> Void
-    let onMove: (Int) -> Void
-    /// Opens the exercise's details, from the step's sheet; nil elsewhere.
+    /// Opens the exercise's details.
     var onDetails: (() -> Void)?
     @State private var weight: String
     @State private var editing: TargetField?
 
-    init(model: BuilderModel, row: BuilderRow, roleOptions: [StepRoleOption], parts: [BuilderPart], format: WorkoutFormat? = nil, open: Bool, onOpen: @escaping () -> Void, onMove: @escaping (Int) -> Void, onDetails: (() -> Void)? = nil) {
+    init(model: BuilderModel, row: BuilderRow, roleOptions: [StepRoleOption], format: WorkoutFormat? = nil, onDetails: (() -> Void)? = nil) {
         self.model = model
         self.row = row
         self.roleOptions = roleOptions
-        self.parts = parts
         self.format = format
-        self.open = open
-        self.onOpen = onOpen
-        self.onMove = onMove
         self.onDetails = onDetails
         _weight = State(initialValue: row.weight)
     }
@@ -510,40 +435,16 @@ private struct EntryCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 10) {
-                if !open {
-                    MoveChevrons(
-                        upLabel: Text(L("builder.moveStepUp %@", row.name)),
-                        downLabel: Text(L("builder.moveStepDown %@", row.name)),
-                        canMoveUp: row.canMoveUp,
-                        canMoveDown: row.canMoveDown,
-                        onMove: onMove
-                    )
-                }
-                Button(action: onOpen) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        if let role = row.roleLabel { roleTag(role) }
-                        Text(row.name).font(.custom(PoulpyFontFace.baloo2Bold, size: 19, relativeTo: .headline))
-                        if open {
-                            Text(row.place).font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
-                        }
-                        if !open || row.isRest {
-                            Text(row.summary).font(.poulpy(.subheadline)).monospacedDigit().foregroundStyle(PoulpyColor.onSurfaceVariant)
-                        }
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                // The chevrons move a step up and down; moving into a repeat or out of it are actions on the card.
-                .accessibilityActions {
-                    if row.canMoveIntoRepeat {
-                        Button("builder.moveIntoRepeat") { model.moveIntoRepeatAbove(key: row.key) }
-                    }
-                    if row.repeatKey != nil {
-                        Button("builder.moveOutOfRepeat") { model.moveOutOfRepeat(key: row.key) }
+                VStack(alignment: .leading, spacing: 2) {
+                    if let role = row.roleLabel { RoleTag(label: role, recover: row.role == .recover) }
+                    Text(row.name).font(.custom(PoulpyFontFace.baloo2Bold, size: 19, relativeTo: .headline))
+                    Text(row.place).font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+                    if row.isRest {
+                        Text(row.summary).font(.poulpy(.subheadline)).monospacedDigit().foregroundStyle(PoulpyColor.onSurfaceVariant)
                     }
                 }
-                if open, !row.isRest, let onDetails {
+                .frame(maxWidth: .infinity, alignment: .leading)
+                if !row.isRest, let onDetails {
                     Button(action: onDetails) {
                         Label("builder.details", lucide: .info)
                             .font(.poulpy(.subheadline).weight(.heavy))
@@ -555,15 +456,12 @@ private struct EntryCard: View {
                     .buttonStyle(.plain)
                     .accessibilityLabel(Text(L("exercise.details %@", row.name)))
                 }
-                if !open {
-                    stepMenu
-                }
             }
-            if open && row.isRest {
+            if row.isRest {
                 numberCell("builder.duration", row.restSeconds, unit: .seconds, set: { model.setRest(key: row.key, seconds: $0) },
                            less: { model.changeRest(key: row.key, steps: -1) }, more: { model.changeRest(key: row.key, steps: 1) })
                     .padding(.trailing, 4)
-            } else if open {
+            } else {
                 select("builder.step", value: roleOptions.first(where: { $0.role == row.role })?.label ?? "") {
                     ForEach(roleOptions, id: \.label) { option in
                         Button(option.label) { model.setRole(key: row.key, role: option.role) }
@@ -571,9 +469,9 @@ private struct EntryCard: View {
                 }
                 .padding(.trailing, 4)
             }
-            if open, !row.isRest, let target = row.target {
+            if !row.isRest, let target = row.target {
                 targetEditor(target)
-            } else if open, !row.isRest {
+            } else if !row.isRest {
                 if row.showsSets {
                     numberCell("builder.sets", row.sets, unit: nil, set: { model.setSets(key: row.key, sets: $0) },
                                less: { model.setSets(key: row.key, sets: row.sets - 1) }, more: { model.setSets(key: row.key, sets: row.sets + 1) })
@@ -595,43 +493,9 @@ private struct EntryCard: View {
                     .foregroundStyle(PoulpyColor.onSurfaceVariant)
             }
         }
-        .padding(EdgeInsets(top: open ? 10 : 6, leading: open ? 12 : 6, bottom: open ? 14 : 6, trailing: 8))
+        .padding(EdgeInsets(top: 10, leading: 12, bottom: 14, trailing: 8))
         .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
         .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(PoulpyColor.outline, lineWidth: 1))
-    }
-
-    /// The small tag above a step's name: "RECOVER".
-    private func roleTag(_ label: String) -> some View {
-        let recover = row.role == .recover
-        return Text(label)
-            .textCase(.uppercase)
-            .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 11.5, relativeTo: .caption2))
-            .kerning(0.9)
-            .foregroundStyle(recover ? PoulpyColor.onSurfaceVariant : PoulpyColor.onPrimaryContainer)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 3)
-            .background(recover ? PoulpyColor.surfaceVariant : PoulpyColor.primaryContainer, in: Capsule())
-    }
-
-    /// Edit, duplicate, the moves into or out of a repeat when they apply, the move to another part, and delete.
-    private var stepMenu: some View {
-        Menu {
-            Button(action: onOpen) { Label("builder.edit", lucide: .pencil) }
-            Button { model.duplicate(key: row.key) } label: { Label("builder.duplicate", lucide: .copy) }
-            if row.canMoveIntoRepeat {
-                Button { model.moveIntoRepeatAbove(key: row.key) } label: { Label("builder.moveIntoRepeat", lucide: .repeat) }
-            }
-            if row.repeatKey != nil {
-                Button { model.moveOutOfRepeat(key: row.key) } label: { Label("builder.moveOutOfRepeat", lucide: .logOut) }
-            }
-            moveToPartMenu(row.key, from: row.partKey, parts: parts, model: model)
-            Divider()
-            Button(role: .destructive) { model.remove(key: row.key) } label: { Label("builder.delete", lucide: .trash) }
-        } label: {
-            LucideIcon(.ellipsisVertical, size: 20).frame(width: 44, height: 44)
-        }
-        .foregroundStyle(PoulpyColor.onSurfaceVariant)
-        .accessibilityLabel(Text(L("builder.moreActions %@", row.name)))
     }
 
     /// A compact select: its label just above the chosen value, and a chevron; a tap lists the options.

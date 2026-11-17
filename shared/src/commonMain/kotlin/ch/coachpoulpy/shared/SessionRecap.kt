@@ -99,7 +99,7 @@ internal class SessionRecaps(
         )
     }
 
-    /** The sets done in the work parts, by muscle group; walks and runs and exercises the catalog lost add nothing. */
+    /** The sets done in the work part, by muscle group; walks and runs and exercises the catalog lost add nothing. */
     private fun musclesWorked(workout: Workout, phases: List<Phase>, done: Set<Int>): WorkoutMuscles {
         val sets = linkedMapOf<MuscleGroup, Int>()
         workout.parts.filter { it.kind == PartKind.WORK }.flatMap { part -> part.steps.flatMap { it.exerciseSteps() } }
@@ -150,10 +150,7 @@ internal class SessionRecaps(
         millis: Map<Int, Long>,
         walksOnly: Boolean,
     ): List<RecapPart> {
-        val severalWorkParts = workout.parts.count { it.kind == PartKind.WORK } > 1
-        var workParts = 0
         return workout.parts.mapNotNull { part ->
-            if (part.kind == PartKind.WORK) workParts++
             val steps = part.steps.flatMap { it.exerciseSteps() }.mapNotNull { step ->
                 val own = phases.indices.filter { (phases[it] as? Phase.Work)?.step == step.id }
                 val ended = own.filter { it in done || it in skipped }
@@ -172,7 +169,7 @@ internal class SessionRecaps(
             RecapPart(
                 key = part.id.value,
                 kind = part.kind,
-                name = labels.part(part.kind, workParts.takeIf { severalWorkParts && part.kind == PartKind.WORK }),
+                name = labels.part(part.kind),
                 summary = listOfNotNull(if (walksOnly) DomainText.countSteps(languageCode, steps.size) else labels.exercises(steps.size), summary).joinToString(" · "),
                 time = clock(steps.flatMap { it.third }.mapNotNull { millis[it] }.takeIf { it.isNotEmpty() }?.sum()),
                 rows = rows,

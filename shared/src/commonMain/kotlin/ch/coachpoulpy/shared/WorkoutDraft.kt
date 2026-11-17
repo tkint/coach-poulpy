@@ -207,7 +207,7 @@ data class DraftEntry(
     }
 }
 
-/** A part of the workout in the builder: the warm-up, a work part or the cool down, with its steps. */
+/** A part of the workout in the builder: the warm-up, the work part or the cool down, with its steps. */
 data class DraftPart(val key: String, val kind: PartKind, val steps: List<DraftStep>) {
     internal fun toPart() = Part(PartId(key), kind, steps.map { it.toModelStep() })
 
@@ -232,23 +232,26 @@ data class WorkoutDraft(
     val format: WorkoutFormat,
     val parts: List<DraftPart>,
 ) {
-    internal fun toWorkout(autoName: (Workout) -> String): Workout {
-        val workout = Workout(
-            id = id ?: WorkoutId(Ids.newUuidV7()),
-            version = version,
-            name = name.trim(),
-            format = format,
-            parts = parts.map { it.toPart() },
-        )
-        return if (workout.name.isEmpty()) workout.copy(name = autoName(workout)) else workout
-    }
+    /** The workout this draft saves as: an empty warm-up or cool down is left out. */
+    internal fun toWorkout() = Workout(
+        id = id ?: WorkoutId(Ids.newUuidV7()),
+        version = version,
+        name = name.trim(),
+        format = format,
+        parts = parts.filter { it.kind == PartKind.WORK || it.steps.isNotEmpty() }.map { it.toPart() },
+    )
+
+    /** The warm-up, the work and the cool down, each there even when empty, as the builder shows them. */
+    internal fun withAllParts() = copy(
+        parts = listOf(PartKind.WARM_UP, PartKind.WORK, PartKind.COOL_DOWN).map { kind -> parts.firstOrNull { it.kind == kind } ?: DraftPart.new(kind, format) },
+    )
 
     /** Every exercise and rest of every part, repeats opened up, in order. */
     internal val leaves: List<DraftStep> get() = parts.flatMap { part -> part.steps.flatMap { if (it is DraftRepeat) it.steps else listOf(it) } }
 
     companion object {
         /** A new workout in [format] with one empty work part, which in a circuit starts as a repeat. */
-        internal fun empty(format: WorkoutFormat) = WorkoutDraft(null, 1, "", format, listOf(DraftPart.new(PartKind.WORK, format)))
+        internal fun empty(format: WorkoutFormat) = WorkoutDraft(null, 1, "", format, listOf(DraftPart.new(PartKind.WORK, format))).withAllParts()
 
         /**
          * Only workouts the builder could have made can be edited: parts of exercises, rests and

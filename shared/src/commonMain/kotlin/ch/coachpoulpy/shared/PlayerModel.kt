@@ -41,7 +41,7 @@ data class PlayerState(
     val pattern: MovementPattern?,
     /** The part this step is in, for its icon; a rest takes the part of the step before it. */
     val partKind: PartKind?,
-    /** "Warm-up", "Work 2", or "Work 1 · round 2 of 4" inside a repeat. */
+    /** "Warm-up", "Work", or "Work · round 2 of 4" inside a repeat. */
     val partLabel: String?,
     /** "Recover" on rests and recover steps; null for work steps. */
     val roleLabel: String?,

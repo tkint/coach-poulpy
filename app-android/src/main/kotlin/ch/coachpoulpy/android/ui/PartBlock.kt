@@ -39,14 +39,23 @@ import ch.coachpoulpy.core.model.PartKind
 
 /**
  * A part as an outlined block, its icon, name and summary on the top border's left and its [time] on the right
- * (`session-recap-*` and `workout-page-*` mockups); [content] is its rows, which the caller separates.
+ * (`session-recap-*` and `workout-page-*` mockups); [content] is its rows, which the caller separates. The builder
+ * puts a button on the border's right end as [corner] (a 48 dp square, centred on the border).
  */
 @Composable
-internal fun PartBlock(kind: PartKind, name: String, summary: String, time: String, content: @Composable ColumnScope.() -> Unit) {
+internal fun PartBlock(
+    kind: PartKind,
+    name: String,
+    summary: String,
+    time: String,
+    corner: (@Composable () -> Unit)? = null,
+    content: @Composable ColumnScope.() -> Unit,
+) {
     val colors = MaterialTheme.colorScheme
     var headerWidth by remember { mutableIntStateOf(0) }
     var timeWidth by remember { mutableIntStateOf(0) }
-    Box(Modifier.fillMaxWidth().padding(top = 13.dp)) {
+    // Room above the border for a corner button's touch area, which a parent would not pass touches to outside its bounds.
+    Box(Modifier.fillMaxWidth().padding(top = if (corner != null) 24.dp else 13.dp)) {
         Column(
             Modifier
                 .fillMaxWidth()
@@ -112,5 +121,6 @@ internal fun PartBlock(kind: PartKind, name: String, summary: String, time: Stri
                     .padding(horizontal = 6.dp),
             )
         }
+        corner?.let { Box(Modifier.align(Alignment.TopEnd).offset(x = 2.dp, y = (-24).dp)) { it() } }
     }
 }

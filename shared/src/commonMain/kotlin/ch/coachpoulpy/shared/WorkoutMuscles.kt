@@ -32,7 +32,7 @@ data class WorkoutMuscles(
         }
 
         /**
-         * The sets each muscle group gets from the work of [workout]: the exercises of its work parts, not the
+         * The sets each muscle group gets from the work of [workout]: the exercises of its work part, not the
          * warm-up or cool down and not recovery steps, each counted for all its sets and every round of the repeats around it.
          * An exercise that is not in the [catalog] adds nothing.
          */
