@@ -23,9 +23,9 @@
 .cp-screen ul { list-style: none; padding: 0; }
 .cp-screen button { font: inherit; color: inherit; border: 0; background: none; padding: 0; margin: 0; cursor: pointer; }
 /* Every tap target is a plain button, so in a browser it does nothing. A row still fills its line and reads from the start. */
-.cp-screen button:is(.card, .list-row, .step-row, .settings-row, .session-row, .profile-card, .device-row, .option-row, .link, .text-link, .section-link, .value-link, .add-to-part, .row-text),
+.cp-screen button:is(.card, .list-row, .settings-row, .session-row, .profile-card, .device-row, .option-row, .link, .text-link, .section-link, .value-link, .add-to-part, .row-text),
 .cp-screen :is(.list-row, .popover-menu, .calendar) button { text-align: start; }
-.cp-screen button:is(.card, .list-row, .step-row, .settings-row) { width: 100%; }
+.cp-screen button:is(.card, .list-row, .settings-row) { width: 100%; }
 .cp-screen svg { flex: none; }
 
 /* ---------- Device frames ---------- */
@@ -172,19 +172,6 @@
 
 .cp-screen .workout-details { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 15px; line-height: 21px; color: var(--cp-on-surface-variant); }
 
-.cp-screen .plan-button {
-  height: 48px;
-  flex: none;
-  border-radius: var(--cp-radius-md);
-  border: 2px dashed var(--cp-primary);
-  color: var(--cp-primary);
-  font-size: 15px;
-  font-weight: 800;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--cp-space-sm);
-}
 
 .cp-screen .stat-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--cp-space-sm); }
 .cp-screen .stat-tile {
@@ -199,7 +186,6 @@
 .cp-screen .stat-tile strong { font-size: 19px; line-height: 24px; font-weight: 800; font-variant-numeric: tabular-nums; }
 
 /* A part: header (icon, name, summary), then its steps. */
-.cp-screen .part { display: flex; flex-direction: column; gap: var(--cp-space-sm); }
 .cp-screen .part-header { display: flex; align-items: center; gap: 10px; padding: var(--cp-space-xs) 0 0 2px; }
 .cp-screen .part-icon {
   width: 36px;
@@ -217,33 +203,6 @@
 
 .cp-screen .steps { display: flex; flex-direction: column; gap: var(--cp-space-sm); }
 
-.cp-screen .step-row {
-  border-radius: var(--cp-radius-md);
-  background: var(--cp-surface);
-  padding: 10px var(--cp-space-md);
-  display: flex;
-  align-items: center;
-  gap: var(--cp-space-md);
-}
-.cp-screen .step-number {
-  width: 32px;
-  height: 32px;
-  border-radius: var(--cp-radius-pill);
-  background: var(--cp-primary-container);
-  color: var(--cp-on-primary-container);
-  font-family: var(--cp-font-display);
-  font-weight: 800;
-  font-size: 15px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex: none;
-}
-.cp-screen .step-number--rest { background: var(--cp-surface-variant); color: var(--cp-on-surface-variant); }
-.cp-screen .step-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.cp-screen .step-text strong { font-weight: 800; font-size: 16px; line-height: 22px; }
-.cp-screen .step-text span:last-child { font-size: 14px; line-height: 19px; color: var(--cp-on-surface-variant); font-variant-numeric: tabular-nums; }
-.cp-screen .step-row > svg { color: var(--cp-on-surface-variant); }
 
 .cp-screen .repeat {
   border-radius: var(--cp-radius-md);
