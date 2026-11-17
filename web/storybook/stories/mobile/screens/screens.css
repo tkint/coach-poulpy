@@ -1177,7 +1177,7 @@
 /* ---------- Builder, laid out like the workout details: outlined blocks, compact rows (draft) ---------- */
 
 .cp-screen .builder-body { gap: 14px; }
-.cp-screen fieldset.builder-block .part-add { position: absolute; top: -22px; right: 6px; width: 40px; height: 40px; border-radius: var(--cp-radius-md); background: var(--cp-primary-container); color: var(--cp-on-primary-container); display: flex; align-items: center; justify-content: center; }
+.cp-screen fieldset.builder-block .part-add { position: absolute; top: -28px; right: 8px; width: 32px; height: 32px; border-radius: var(--cp-radius-md); background: var(--cp-primary-container); color: var(--cp-on-primary-container); display: flex; align-items: center; justify-content: center; }
 .cp-screen fieldset.builder-block { padding-top: 6px; padding-bottom: 6px; }
 .cp-screen .part-add:focus-visible { outline: 3px solid var(--cp-primary); outline-offset: 2px; }
 .cp-screen .builder-row { padding-right: 0; }
