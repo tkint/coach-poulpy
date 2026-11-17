@@ -15,6 +15,10 @@ import screenBuilderTidyAddMenu from './builder-tidy-add-menu.html?raw'
 import screenBuilderTidyRepeatMenu from './builder-tidy-repeat-menu.html?raw'
 import screenBuilderTidyNameError from './builder-tidy-name-error.html?raw'
 import screenBuilderTidyEmptyOptionalBlocks from './builder-tidy-empty-optional-blocks.html?raw'
+import screenBuilderTidyRepeatHeader from './builder-tidy-repeat-header.html?raw'
+import screenBuilderTidyRepeatAddMenu from './builder-tidy-repeat-add-menu.html?raw'
+import screenBuilderTidyRepeatCountSheet from './builder-tidy-repeat-count-sheet.html?raw'
+import screenBuilderTidyRepeatEmpty from './builder-tidy-repeat-empty.html?raw'
 import screenBuilderStepMenu from './builder-step-menu.html?raw'
 
 // The Builder screens of the apps (ADR 0029), drawn with the phone stylesheet (../screens.css).
@@ -144,5 +148,37 @@ export const BuilderTidyEmptyOptionalBlocks: Story = {
   name: "Nothing planned before and after",
   tags: ['!autodocs', 'agreed'],
   ...screen(screenBuilderTidyEmptyOptionalBlocks, { reorder: true }),
+  parameters: { mockup: {} },
+}
+
+/** Builder · a repeat's title and count open the count sheet; a discreet + in the header adds to the repeat. */
+export const BuilderTidyRepeatHeader: Story = {
+  name: "Repeat header",
+  tags: ['!autodocs', 'draft'],
+  ...screen(screenBuilderTidyRepeatHeader, { reorder: true }),
+  parameters: { mockup: {} },
+}
+
+/** Builder · the + of a repeat offers an exercise or a rest (never a repeat inside a repeat). */
+export const BuilderTidyRepeatAddMenu: Story = {
+  name: "Repeat add menu",
+  tags: ['!autodocs', 'draft'],
+  ...screen(screenBuilderTidyRepeatAddMenu, { reorder: true }),
+  parameters: { mockup: {} },
+}
+
+/** Builder · tapping the title or the count of a repeat opens a sheet with a number field. */
+export const BuilderTidyRepeatCountSheet: Story = {
+  name: "Repeat count sheet",
+  tags: ['!autodocs', 'draft'],
+  ...screen(screenBuilderTidyRepeatCountSheet, { reorder: true }),
+  parameters: { mockup: {} },
+}
+
+/** Builder · a repeat with nothing in it says "Tap to add an exercise." like the other blocks. */
+export const BuilderTidyRepeatEmpty: Story = {
+  name: "Empty repeat",
+  tags: ['!autodocs', 'draft'],
+  ...screen(screenBuilderTidyRepeatEmpty, { reorder: true }),
   parameters: { mockup: {} },
 }
