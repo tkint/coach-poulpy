@@ -33,19 +33,16 @@ const RAD = Math.PI / 180
 
 const between = (a, b, t) => a + (b - a) * t
 /**
- * His face as he flies, as features for buildPoulpy3d. From `t` 0 to 0.75 he goes from hovering to dashing: the smile opens wider and its
- * corners rise, his cheeks push up and his eyes narrow above them. From 0.75 to 1 he blinks, from his hovering face: his eyes close into
- * two happy curves at 1.
+ * His face as he flies, as features for buildPoulpy3d. From `t` 0 to 1 he goes from hovering to dashing: the smile opens wider and its
+ * corners rise, his cheeks push up and his eyes narrow above them. He does not blink yet: a natural, rare blink may come later.
  */
 export function jetpackFace(t) {
-  const { grin } = JETPACK, push = t <= 0.75 ? t / 0.75 : 0, blink = Math.max((t - 0.75) / 0.25, 0)
+  const { grin } = JETPACK, push = Math.max(0, Math.min(t, 1))
   const at = ([a, b]) => between(a, b, push)
   const w = at(grin.smile.map((s) => s[0])), d = at(grin.smile.map((s) => s[1])), y = at(grin.corners)
-  const tall = at(grin.eyes) * (1 - blink * 0.85), [cheekY, cheekX] = [at(grin.cheeks.map((c) => c[0])), at(grin.cheeks.map((c) => c[1]))]
-  // Past most of the blink the eye is a line bending into a smile, as when the cocky one winks.
-  const eye = (x, side) => (blink < 0.75 ? ['eye', x, 94 - push, 9.5, tall] : ['curve', x - 9, 95, x, 101, x + 9, 95, 4.5, `eye_${side}`])
+  const tall = at(grin.eyes), [cheekY, cheekX] = [at(grin.cheeks.map((c) => c[0])), at(grin.cheeks.map((c) => c[1]))]
   return [
-    eye(80, 'right'), eye(120, 'left'),
+    ['eye', 80, 94 - push, 9.5, tall], ['eye', 120, 94 - push, 9.5, tall],
     ['shape', `M${100 - w} ${y} Q100 ${y + 4} ${100 + w} ${y} Q${100 + w - 2} ${y + d} 100 ${y + d} Q${100 - w + 2} ${y + d} ${100 - w} ${y} Z`, 'mouth'],
     ['oval', 100, y + d - 4, w * 0.55, 3 + push, '#F07A7A', 'tongue'],
     ['cheek', 64, cheekY, cheekX, 4.5 + push, '#F49A6B', 0.75], ['cheek', 136, cheekY, cheekX, 4.5 + push, '#F49A6B', 0.75],

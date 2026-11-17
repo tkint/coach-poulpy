@@ -11,7 +11,7 @@ export const JETPACK: {
 }
 /** Where each flame comes out, his right then his left, as he stands, and the way it points. */
 export const NOZZLES: { at: number[]; way: number[] }[]
-/** His face as he flies: 0 to 0.75 from hovering to dashing, 0.75 to 1 a blink. */
+/** His face as he flies: from hovering (0) to dashing (1). */
 export function jetpackFace(t: number): (string | number)[][]
 export function flameShape(length: number, width: number, z?: number, n?: number): PoulpyShape
 export function puffShape(edge?: number, n?: number): PoulpyShape
