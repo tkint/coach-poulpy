@@ -77,10 +77,10 @@ export function moustache(t = 0) {
 }
 
 // His face, without the moustache: a confident toothy grin, small and under the moustache, with a few top teeth and the
-// bottom ones showing; eyes wide open and both brows up, set high to leave the moustache room. `smile` scales the grin
-// around its middle. Left and right are Poulpy's own, as in FACES.
-export const SMILE = { size: 0.8, middle: [100, 117] }
-const smile = (d) => d.replace(/(-?\d*\.?\d+)\s+(-?\d*\.?\d+)/g, (_, x, y) => [SMILE.middle[0] + (x - SMILE.middle[0]) * SMILE.size, SMILE.middle[1] + (y - SMILE.middle[1]) * SMILE.size].map((v) => +v.toFixed(2)).join(' '))
+// bottom ones showing; eyes wide open and both brows up, set high to leave the moustache room. SMILE scales the grin,
+// across and up, around `middle`: it is short, and its top is tucked under the moustache. Left and right are Poulpy's own, as in FACES.
+export const SMILE = { size: [0.8, 0.66], middle: [100, 112] }
+const smile = (d) => d.replace(/(-?\d*\.?\d+)\s+(-?\d*\.?\d+)/g, (_, x, y) => [SMILE.middle[0] + (x - SMILE.middle[0]) * SMILE.size[0], SMILE.middle[1] + (y - SMILE.middle[1]) * SMILE.size[1]].map((v) => +v.toFixed(2)).join(' '))
 const GRIN = 'M78 109 Q100 119 122 109 Q119 128 100 130 Q81 128 78 109 Z'
 export const CHEF_FACE = [
   ['eye', 80, 85, 8.5, 10], ['eye', 120, 85, 8.5, 10],

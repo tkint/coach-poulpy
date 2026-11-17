@@ -2,7 +2,7 @@
 import type { Poulpy3d, PoulpyShape } from '../model.mjs'
 export const TOQUE: { at: number[]; lean: number; back: number; band: { top: number; line: number }; profile: number[][]; pleats: number; fold: number; colour: string; seam: string }
 export const MOUSTACHE: { path: string; size: number[]; middle: number[]; drop: number; thick: number; tip: number; taper: number; twitch: number; colour: string }
-export const SMILE: { size: number; middle: number[] }
+export const SMILE: { size: number[]; middle: number[] }
 /** His face, without the moustache. */
 export const CHEF_FACE: (string | number)[][]
 export const CHEF_MOOD: 'proud'
