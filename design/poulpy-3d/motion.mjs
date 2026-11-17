@@ -7,7 +7,8 @@
 // the cocky one's: eyes wide open, then a wink and a smirk as stars pop up around him and twinkle. His arms are soft, so they trail behind
 // a step and swing a little past it before settling, and they hang under him when he jumps. He never
 // raises them himself (brand decisions 8 and 15): on the floor they slide, in the air they droop.
-// To change a move, edit TURN, JUMP, CHEER or WINK below, then run `node design/build-poulpy-3d.mjs`.
+// The cook's idle, CHEF, puffs him up and twitches his moustache (looks/chef.mjs).
+// To change a move, edit TURN, JUMP, CHEER, WINK or CHEF below, then run `node design/build-poulpy-3d.mjs`.
 import { SHAPE, linear } from './model.mjs'
 import { CONFETTI, medalHinge, medalReach, STARS } from './poses.mjs'
 
@@ -83,6 +84,18 @@ export const WINK = {
   // and shrinks by `twinkle` of its size, `beats` times a second, turns on itself at `spin` radians a second and
   // rocks by `rock` radians. No two stars keep the same time.
   stars: { apart: 0.09, speed: 20, damping: 0.35, twinkle: 0.22, beats: 1.6, spin: 2.4, rock: 0.3 },
+}
+
+// The cook's idle (looks/chef.mjs): he stands still for `rest` seconds, then puffs himself up, sure of his sauce. His chin
+// goes up by `degrees`, his head tipping back around the point `pivot` high above the floor, and his head grows `puff` taller,
+// both on the `head` spring. He holds it for `hold` seconds, and `delay` into it his moustache twitches `count` times, each
+// twitch taking `seconds`; then he settles back.
+export const CHEF = {
+  rest: 1.8, hold: 1.5,
+  chin: { degrees: 6, pivot: 0.6 },
+  puff: 0.035,
+  head: { speed: 11, damping: 0.5 },
+  twitch: { count: 2, seconds: 0.2, delay: 0.3 },
 }
 
 // Where an arm bends, as distances from his middle along the arm, and how wide each bend is spread.
@@ -457,6 +470,41 @@ export function createWink({ side = 'right', wink = WINK } = {}) {
         return { size: star.size * (1 + wink.stars.twinkle * Math.sin(beat * wink.stars.beats * Math.PI * 2)), spin: beat * wink.stars.spin * (i % 2 ? -1 : 1), rock: wink.stars.rock * Math.sin(beat * 2.3) }
       }),
     }),
+    advance(seconds) {
+      owed += Math.min(Math.max(seconds, 0), 1)
+      while (owed >= SUBSTEP) { tick(SUBSTEP); owed -= SUBSTEP }
+      return sim.pose()
+    },
+  }
+  return sim
+}
+
+/**
+ * The cook's idle, as something to advance in time.
+ * @param {{ chef?: typeof CHEF }} [options]
+ * @returns The move. A pose is a turn's pose, standing still, and `{ chin, twitch }`: how far his chin is up, in radians,
+ *   his head tipping back around CHEF.chin.pivot; and how far into a moustache twitch he is, from 0 to 1, for chefFace in looks/chef.mjs.
+ */
+export function createChef({ chef = CHEF } = {}) {
+  const arms = Array.from({ length: SHAPE.arms.count }, () => [0, 0, 0])
+  const spring = (s, goal, value, rate) => s.speed * s.speed * (goal - value) - 2 * s.damping * s.speed * rate
+  let clock = 0, chin = 0, chinSpeed = 0, squash = 0, squashSpeed = 0, twitch = 0
+
+  function tick(h) {
+    clock = (clock + h) % (chef.rest + chef.hold)
+    const puffed = clock >= chef.rest, into = clock - chef.rest - chef.twitch.delay
+    chinSpeed += spring(chef.head, puffed ? chef.chin.degrees * RAD : 0, chin, chinSpeed) * h
+    chin += chinSpeed * h
+    squashSpeed += spring(chef.head, puffed ? chef.puff : 0, squash, squashSpeed) * h
+    squash += squashSpeed * h
+    // Each twitch goes up and back down in one smooth bump.
+    const which = Math.floor(into / chef.twitch.seconds)
+    twitch = puffed && into >= 0 && which < chef.twitch.count ? Math.sin((Math.PI * (into - which * chef.twitch.seconds)) / chef.twitch.seconds) ** 2 : 0
+  }
+
+  let owed = 0
+  const sim = {
+    pose: () => ({ yaw: 0, squash, arms, chin, twitch }),
     advance(seconds) {
       owed += Math.min(Math.max(seconds, 0), 1)
       while (owed >= SUBSTEP) { tick(SUBSTEP); owed -= SUBSTEP }

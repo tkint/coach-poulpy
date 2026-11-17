@@ -12,6 +12,9 @@ export interface Cheer extends Jump { advance(seconds: number): CheerPose; pose(
 /** A turn's pose, standing still, and for the cocky wink: `wink`, from 0 (eyes wide open) to 1; `tilt`, how far his head leans to his right, in radians, negative to his left; `stars`, each star's size as a share of its own and how far it has turned on itself and rocked, in radians. */
 export interface WinkPose extends TurnPose { wink: number; tilt: number; stars: { size: number; spin: number; rock: number }[] }
 export interface Wink { side: 'left' | 'right'; advance(seconds: number): WinkPose; pose(): WinkPose }
+/** A turn's pose, standing still, and for the cook's idle: `chin`, how far his chin is up, in radians; `twitch`, how far into a moustache twitch he is, from 0 to 1. */
+export interface ChefPose extends TurnPose { chin: number; twitch: number }
+export interface Chef { advance(seconds: number): ChefPose; pose(): ChefPose }
 export interface ArmJoint { name: string; arm: number; bend: number; at: number[] }
 export const TURN: {
   steps: number[]; pauses: number[]; windUp: { degrees: number; seconds: number }; stepSeconds: number
@@ -37,12 +40,14 @@ export const WINK: {
   head: { degrees: number; dip: number; speed: number; damping: number }
   stars: { apart: number; speed: number; damping: number; twinkle: number; beats: number; spin: number; rock: number }
 }
+export const CHEF: { rest: number; hold: number; chin: { degrees: number; pivot: number }; puff: number; head: { speed: number; damping: number }; twitch: { count: number; seconds: number; delay: number } }
 export const RIG: { bends: number[]; spread: number }
 export function turnSeconds(turn?: typeof TURN): number
 export function createTurn(options?: { softness?: number; stride?: number; turn?: typeof TURN }): Turn
 export function createJump(options?: { softness?: number; stride?: number; jump?: typeof JUMP; turn?: typeof TURN }): Jump
 export function createCheer(options?: { softness?: number; stride?: number; cheer?: typeof CHEER; turn?: typeof TURN }): Cheer
 export function createWink(options?: { side?: 'left' | 'right'; wink?: typeof WINK }): Wink
+export function createChef(options?: { chef?: typeof CHEF }): Chef
 export function bakeTurn(options?: { fps?: number; turn?: typeof TURN }): { seconds: number; times: number[]; yaw: number[]; squash: number[]; arms: number[][][] }
 export function squashScale(squash: number): number[]
 export function armJoints(): ArmJoint[]
