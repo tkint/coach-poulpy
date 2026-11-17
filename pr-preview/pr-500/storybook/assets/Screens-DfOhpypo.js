@@ -1,0 +1,9 @@
+import{n as e}from"./rolldown-runtime-sJBDdmOt.js";import{d as t,l as n}from"./blocks-BnrI-CoX.js";import{a as r}from"./chunk-W22LQPXL-DAacIxBz.js";import{i,r as a}from"./react-DITjJg24.js";function o(e){let t={a:`a`,code:`code`,h1:`h1`,li:`li`,p:`p`,ul:`ul`,...i(),...e.components};return(0,c.jsxs)(c.Fragment,{children:[(0,c.jsx)(n,{title:`Design system/Rules/Screens`}),`
+`,(0,c.jsx)(t.h1,{id:`screens`,children:`Screens`}),`
+`,(0,c.jsxs)(t.p,{children:[`Every screen mockup is a story in the `,(0,c.jsx)(t.a,{href:`?path=/docs/design-system-introduction--docs`,children:`component workshop`}),` (`,(0,c.jsx)(t.a,{href:`https://tkint.github.io/coach-poulpy/docs/adr/0029-mockups-are-stories-in-the-component-workshop`,rel:`nofollow`,children:`ADR 0029`}),`): the web screens under Web > Screens, composed from the `,(0,c.jsx)(t.code,{children:`Cp*`}),` components, and the phone screens under Mobile > Screens, built from the `,(0,c.jsx)(t.code,{children:`Mobile*`}),` components and patterns.`]}),`
+`,(0,c.jsxs)(t.ul,{children:[`
+`,(0,c.jsx)(t.li,{children:`Build from an agreed mockup. If a screen has none, agree one through a PR before building it.`}),`
+`,(0,c.jsxs)(t.li,{children:[`Each state of a screen is a story, in light and dark from the workshop's theme toolbar. A new screen or redesign is tagged `,(0,c.jsx)(t.code,{children:`draft`}),`; a PR that changes the tag to `,(0,c.jsx)(t.code,{children:`agreed`}),` is its approval, and nothing is built from a draft.`]}),`
+`,(0,c.jsx)(t.li,{children:`CI runs every story as a test, with the accessibility check.`}),`
+`]}),`
+`,(0,c.jsx)(t.p,{children:`The mockup is the design reference; this page defines the shared rules and components used to build it.`})]})}function s(e={}){let{wrapper:t}={...i(),...e.components};return t?(0,c.jsx)(t,{...e,children:(0,c.jsx)(o,{...e})}):o(e)}var c;function l(){return(l=e((()=>{c=r(),a(),t()})))()}l();export{s as default};
