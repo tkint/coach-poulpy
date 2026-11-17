@@ -22,10 +22,11 @@ export const WINTER = {
   // The set's two colours: a warm cream wool and a deep berry. Never ember, his angry side, nor the autumn scarf's red; both
   // stand out against his blue, the cream by its lightness and the berry by its depth.
   wool: '#FBF4E6', berry: '#8C2F5E',
-  // The scarf is the autumn look's (autumn.mjs), the same shape in the same place, in the winter colours. `height` sets it a
-  // little lower and `fit` a little further out, tucked in among the tops of his arms: it dips between them and rides over
-  // each, and its knot and ends lie on them, `by` clear of any arm swung `margin` radians (his idle swings the tips about 7°).
-  scarf: { ...AUTUMN.scarf, wool: '#FBF4E6', stripe: '#8C2F5E', height: 0.62, half: [0.085, 0.08], swell: 0.06, fit: { out: 0.07, by: 0.03, margin: 0.14, slope: 1 } },
+  // The scarf is the autumn look's (autumn.mjs), knot, ends and stripes, in the winter colours, but its roll is a `band`: a
+  // clean, flat knitted band hugging his head from the bottom of his smile (`top`) down to just above the tops of his arms
+  // (`bottom`: they are 0.6 high where they meet his head), `thick` deep. Its knot and ends lie on his arms, `fit.by` clear of
+  // any arm swung `fit.margin` radians (his idle swings the tips about 7 degrees).
+  scarf: { ...AUTUMN.scarf, wool: '#FBF4E6', stripe: '#8C2F5E', band: { top: 0.79, bottom: 0.632, thick: 0.15, sink: 0.3, knot: 0.55 }, fit: { by: 0.03, margin: 0.14, slope: 1 } },
   // The ear muffs sit where the DJ's headset does (dj.mjs): each muff `down` from the top of his head (an angle), on his side,
   // over where his ears would be, `lift` off his skin. A thin berry `band` goes over the top `out` off his head. Each muff is a
   // ball `size` wide and `depth` deep, covered in `tufts` smaller balls `tuft` of its size, so its outline is furry.

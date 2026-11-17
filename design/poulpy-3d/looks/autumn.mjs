@@ -117,41 +117,86 @@ function armTopNear(x, z, reach, margin) {
   return top
 }
 
+// A knitted band around his head, for a look that passes `band` to scarf(): seen side on it is a flat strip with softly rounded
+// corners, `thick` deep, from `top` down to `bottom`, lying against his head (sunk `sink` of its depth into it) and leaning with
+// it. It is the same all the way around; the look keeps `bottom` above the tops of his arms.
+// Returns its stripes, each its own piece so the colours meet sharply, and `at(around, u)`: a point of its outside `u` of the
+// way from top to bottom, and the way out there.
+function band(s) {
+  const b = s.band, hd = b.thick / 2, { radius, centreY } = SHAPE.head, across = (radius[0] + radius[2]) / 2
+  // Round in the middle, it is pressed to his head's own width and depth.
+  const kx = radius[0] / across, kz = radius[2] / across
+  const headR = (y) => across * Math.sqrt(Math.max(1 - ((y - centreY) / radius[1]) ** 2, 0))
+  // Its side-on shape: a rounded square (a superellipse) `hd` deep and `hv` tall, centred `yc` high on his head, turned to lie
+  // along it. `hv` and `yc` are found so its top and bottom land on `top` and `bottom`.
+  const shape = (yc, hv) => {
+    const e = 0.01, t = norm([headR(yc + e) - headR(yc - e), 2 * e, 0]), n = [t[1], -t[0]], r0 = headR(yc), off = hd - b.sink * b.thick
+    const middle = [r0 + n[0] * off, yc + n[1] * off]
+    const many = 48, ring = Array.from({ length: many }, (_, i) => {
+      const a = (i / many) * TAU, c = Math.cos(a), sn = Math.sin(a), u = Math.sign(c) * Math.abs(c) ** 0.5, v = Math.sign(sn) * Math.abs(sn) ** 0.5
+      // The way out of a superellipse of power 4 at that point.
+      const gu = u ** 3 / hd, gv = v ** 3 / hv, l = Math.hypot(gu, gv) || 1, nu = gu / l, nv = gv / l
+      return [middle[0] + n[0] * u * hd + t[0] * v * hv, middle[1] + n[1] * u * hd + t[1] * v * hv, n[0] * nu + t[0] * nv, n[1] * nu + t[1] * nv]
+    })
+    return { ring, middle, n, t }
+  }
+  let yc = (b.top + b.bottom) / 2, hv = (b.top - b.bottom) / 2
+  for (let i = 0; i < 30; i++) {
+    const { ring } = shape(yc, hv), high = Math.max(...ring.map((p) => p[1])), low = Math.min(...ring.map((p) => p[1]))
+    hv *= (b.top - b.bottom) / (high - low)
+    yc += (b.top + b.bottom) / 2 - (high + low) / 2
+  }
+  const { ring, middle, n, t } = shape(yc, hv), count = ring.length, steps = 8, pieces = []
+  for (let i = 0; i < s.stripes; i++) {
+    const positions = [], normals = [], indices = []
+    for (let j = 0; j <= steps; j++) {
+      const a = ((i + j / steps) / s.stripes) * TAU, sa = Math.sin(a), ca = Math.cos(a)
+      for (const [r, y, nr, ny] of ring) { positions.push(sa * r * kx, y, ca * r * kz); normals.push(...norm([(sa * nr) / kx, ny, (ca * nr) / kz])) }
+    }
+    for (let j = 0; j < steps; j++) for (let k = 0; k < count; k++) {
+      const p = j * count + k, q = j * count + ((k + 1) % count), r = p + count, w = q + count
+      indices.push(p, q, r, q, w, r)
+    }
+    pieces.push({ positions, normals, indices })
+  }
+  const at = (around, u) => {
+    const r = middle[0] + n[0] * hd + t[0] * hv * (1 - 2 * u), y = middle[1] + n[1] * hd + t[1] * hv * (1 - 2 * u), sa = Math.sin(around), ca = Math.cos(around)
+    return { p: [sa * r * kx, y, ca * r * kz], n: norm([sa * n[0], n[1], ca * n[0]]) }
+  }
+  return { pieces, at }
+}
+
 /**
  * The scarf's parts and their colours, built where his head sits at rest, from numbers shaped like AUTUMN.scarf. Other looks
  * wear the same scarf in their own colours (winter.mjs): they pass AUTUMN.scarf with other `wool` and `stripe`.
- * With `fit` the scarf keeps clear of his arms, however they trail: the roll sits `fit.out` further out from his head and
- * dips between his arms but rides over each one, the knot sits on top of them and the ends lie on them and hang off their
- * tips no steeper than `fit.slope`, all `fit.by` above any arm swung up to `fit.margin` radians either way.
+ * With `band` the round roll gives way to a flat knitted band (see band()), its knot sitting on it `band.knot` of the way down. With `fit` the knot sits on top of his arms and the ends lie on them and hang off their tips no steeper than
+ * `fit.slope`, all `fit.by` above any arm swung up to `fit.margin` radians either way, as they are when they trail behind him.
  */
 export function scarf(s) {
   const [w, d] = headAt(s.height), out = (around) => norm([Math.sin(around) / w, 0, Math.cos(around) / d])
-  const fit = s.fit, reach = fit?.out ?? 0
-  // How high the roll's middle must be at each angle around him to clear his arms, eased so it rises and dips smoothly.
-  const rise = (() => {
-    if (!fit) return () => s.height
-    const tall = s.half[1] * (1 + s.swell), thick = s.half[0] * (1 + s.swell), many = 144, ringR = Math.hypot(w, d) / Math.SQRT2 + reach
-    const need = Array.from({ length: many }, (_, i) => {
-      const a = (i / many) * TAU, n = out(a), x = w * Math.sin(a) + n[0] * (s.half[0] * (1 - s.sink) + reach), z = d * Math.cos(a) + n[2] * (s.half[0] * (1 - s.sink) + reach)
-      return armTopNear(x, z, thick, fit.margin) + tall + fit.by
-    })
-    return (around) => need.reduce((top, y, i) => {
-      const gap = Math.abs((((around - (i / many) * TAU) % TAU) + TAU + Math.PI) % TAU - Math.PI)
-      return Math.max(top, y - fit.slope * gap * ringR)
-    }, s.height)
-  })()
-  // A point of the roll's middle line: on his head, then out by its thickness, less what sinks in.
-  const middle = (around) => { const n = out(around); return [w * Math.sin(around) + n[0] * s.half[0] * (1 - s.sink) + n[0] * reach, rise(around), d * Math.cos(around) + n[2] * s.half[0] * (1 - s.sink) + n[2] * reach] }
-  // The roll goes around in stripes; each stripe is its own short roll, so the colours meet sharply.
-  const wool = [], stripes = [], steps = 6
-  for (let i = 0; i < s.stripes; i++) {
-    const from = (i / s.stripes) * TAU, points = Array.from({ length: steps + 1 }, (_, k) => middle(from + ((k / steps) * TAU) / s.stripes))
-    const swell = (k) => s.half.map((r) => r * (1 + s.swell * Math.sin((Math.PI * k) / steps)))
-    ;(i % 2 ? wool : stripes).push(sweep(points, (k) => out(from + ((k / steps) * TAU) / s.stripes), swell, { sides: 16 }))
+  const fit = s.fit, wool = [], stripes = []
+  let knotAt, knotMiddle
+  if (s.band) {
+    const made = band(s)
+    made.pieces.forEach((piece, i) => (i % 2 ? wool : stripes).push(piece))
+    const on = made.at(s.knot.around, s.band.knot)
+    knotAt = on.p
+    knotMiddle = on.p.map((v, k) => v + on.n[k] * s.knot.size[2] * 0.6)
+  } else {
+    // A point of the roll's middle line: on his head, then out by its thickness, less what sinks in.
+    const middle = (around) => { const n = out(around); return [w * Math.sin(around) + n[0] * s.half[0] * (1 - s.sink), s.height, d * Math.cos(around) + n[2] * s.half[0] * (1 - s.sink)] }
+    // The roll goes around in stripes; each stripe is its own short roll, so the colours meet sharply.
+    const steps = 6
+    for (let i = 0; i < s.stripes; i++) {
+      const from = (i / s.stripes) * TAU, points = Array.from({ length: steps + 1 }, (_, k) => middle(from + ((k / steps) * TAU) / s.stripes))
+      const swell = (k) => s.half.map((r) => r * (1 + s.swell * Math.sin((Math.PI * k) / steps)))
+      ;(i % 2 ? wool : stripes).push(sweep(points, (k) => out(from + ((k / steps) * TAU) / s.stripes), swell, { sides: 16 }))
+    }
+    // The knot sits on the roll, out from it, and the two ends leave it over his arm.
+    knotAt = middle(s.knot.around)
+    const n = out(s.knot.around)
+    knotMiddle = [knotAt[0] + n[0] * s.half[0] * 0.75, knotAt[1] - 0.01, knotAt[2] + n[2] * s.half[0] * 0.75]
   }
-  // The knot sits on the roll, out from it, and the two ends leave it over his arm.
-  const knotAt = middle(s.knot.around), n = out(s.knot.around)
-  const knotMiddle = [knotAt[0] + n[0] * s.half[0] * 0.75, knotAt[1] - 0.01, knotAt[2] + n[2] * s.half[0] * 0.75]
   if (fit) knotMiddle[1] = Math.max(knotMiddle[1], armTopNear(knotMiddle[0], knotMiddle[2], Math.max(s.knot.size[0], s.knot.size[2]), fit.margin) + s.knot.size[1] + fit.by)
   const knot = egg(s.knot.size, { around: 20, down: 12, at: knotMiddle })
   for (const end of s.ends) {
