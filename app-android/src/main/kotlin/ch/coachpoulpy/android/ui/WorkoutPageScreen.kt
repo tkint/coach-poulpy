@@ -156,14 +156,14 @@ fun WorkoutPageScreen(
             actions = {
                 Row(Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = PoulpySpace.lg, vertical = 12.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     if (state.editable) {
-                        OutlinedButton(onClick = onEdit, modifier = Modifier.weight(1f).height(PoulpySize.buttonLarge)) {
+                        PoulpyButton(onClick = onEdit, kind = PoulpyButtonKind.Secondary, size = PoulpyButtonSize.Lg, modifier = Modifier.weight(1f)) {
                             Icon(Lucide.Pencil, contentDescription = null)
-                            Text(stringResource(R.string.action_edit), fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 6.dp))
+                            Text(stringResource(R.string.action_edit), modifier = Modifier.padding(start = 6.dp))
                         }
                     }
-                    Button(onClick = onStart, modifier = Modifier.weight(1.6f).height(PoulpySize.buttonLarge)) {
+                    PoulpyButton(onClick = onStart, size = PoulpyButtonSize.Lg, modifier = Modifier.weight(1.6f)) {
                         Icon(Lucide.Play, contentDescription = null)
-                        Text(stringResource(R.string.workout_start), fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 6.dp))
+                        Text(stringResource(R.string.workout_start), modifier = Modifier.padding(start = 6.dp))
                     }
                 }
             },
@@ -460,22 +460,21 @@ private fun PlanRow(state: WorkoutPageState, onPick: () -> Unit) {
                 fontWeight = FontWeight.ExtraBold,
                 color = colors.onSurface,
                 modifier = Modifier
-                    .heightIn(min = PoulpySize.buttonSmall)
-                    .clip(RoundedCornerShape(PoulpyRadius.pill))
+                    .heightIn(min = PoulpyControl.sm)
+                    .clip(RoundedCornerShape(PoulpyRadius.md))
                     .background(colors.surface)
                     .clickable(role = Role.Button, onClick = onPick)
                     .padding(horizontal = PoulpySpace.md, vertical = 8.dp),
             )
         }
     } else {
-        OutlinedButton(
+        PoulpyButton(
             onClick = onPick,
-            border = BorderStroke(2.dp, PoulpyPalette.Lagoon300),
-            shape = RoundedCornerShape(PoulpyRadius.md),
-            modifier = Modifier.fillMaxWidth().height(PoulpySize.button),
+            kind = PoulpyButtonKind.Secondary,
+            modifier = Modifier.fillMaxWidth(),
         ) {
             Icon(Lucide.CalendarPlus, contentDescription = null)
-            Text(stringResource(R.string.workout_plan), fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 8.dp))
+            Text(stringResource(R.string.workout_plan), modifier = Modifier.padding(start = 8.dp))
         }
     }
 }

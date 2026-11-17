@@ -64,13 +64,8 @@ struct PoulpyCard: View {
                     }
                     button
                 }
-                .font(.poulpy(.subheadline).weight(.heavy))
-                .padding(.horizontal, 22)
-                .frame(height: PoulpySize.button)
-                .foregroundStyle(PoulpyColor.onPrimary)
-                .background(PoulpyColor.primary, in: Capsule())
             }
-            .buttonStyle(.plain)
+            .buttonStyle(PoulpyButtonStyle(.primary, size: .md))
             .padding(.top, 8)
         }
         .multilineTextAlignment(.center)

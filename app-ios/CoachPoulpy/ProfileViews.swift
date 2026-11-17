@@ -487,12 +487,8 @@ struct BodyView: View {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button { logging = true } label: {
                     Text("body.log")
-                        .font(.poulpy(.subheadline).weight(.heavy))
-                        .foregroundStyle(PoulpyColor.onPrimary)
-                        .padding(.horizontal, 18)
-                        .frame(height: PoulpySize.buttonSmall)
-                        .background(PoulpyColor.primary, in: Capsule())
                 }
+                .buttonStyle(PoulpyButtonStyle(.primary, size: .sm))
             }
         }
         .sheet(isPresented: $logging) {

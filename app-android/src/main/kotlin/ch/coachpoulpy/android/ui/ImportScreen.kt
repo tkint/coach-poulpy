@@ -54,8 +54,8 @@ fun ImportScreen(state: WorkoutImportState, onClose: () -> Unit) {
         },
         bottomBar = {
             Column(Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = PoulpySpace.lg, vertical = 12.dp)) {
-                OutlinedButton(onClick = onClose, modifier = Modifier.fillMaxWidth().height(PoulpySize.buttonLarge)) {
-                    Text(stringResource(R.string.action_close), fontWeight = FontWeight.ExtraBold)
+                PoulpyButton(onClick = onClose, kind = PoulpyButtonKind.Secondary, size = PoulpyButtonSize.Lg, modifier = Modifier.fillMaxWidth()) {
+                    Text(stringResource(R.string.action_close))
                 }
             }
         },

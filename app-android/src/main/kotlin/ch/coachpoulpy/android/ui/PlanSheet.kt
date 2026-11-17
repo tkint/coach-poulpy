@@ -111,14 +111,14 @@ fun PlanSheet(name: String, planned: List<PlannedDay>, onSave: (List<PlanDate>) 
                     }
                 }
             }
-            Button(
+            PoulpyButton(
                 onClick = { onSave(ticked.filter { !it.isBefore(today) }.map { PlanDate(it.year, it.monthValue, it.dayOfMonth) }) },
-                modifier = Modifier.fillMaxWidth().height(PoulpySize.buttonLarge),
+                size = PoulpyButtonSize.Lg,
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 val count = ticked.count { !it.isBefore(today) }
                 Text(
                     if (count == 0) stringResource(R.string.plan_keepUnplanned) else pluralStringResource(R.plurals.plan_save, count, count),
-                    fontWeight = FontWeight.ExtraBold,
                 )
             }
         }

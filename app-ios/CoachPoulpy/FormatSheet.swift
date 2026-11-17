@@ -84,12 +84,9 @@ struct FormatOrderSheet: View {
                 }
                 Button(action: onClose) {
                     Text("action.cancel")
-                        .font(.poulpy(.body).weight(.heavy))
-                        .foregroundStyle(PoulpyColor.primary)
-                        .frame(maxWidth: .infinity, minHeight: 52)
-                        .overlay(Capsule().stroke(PoulpyColor.outline, lineWidth: 1))
+                        .frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(PoulpyButtonStyle(.secondary, size: .lg))
             }
             .padding(20)
         }

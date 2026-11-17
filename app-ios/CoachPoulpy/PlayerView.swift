@@ -93,12 +93,9 @@ struct PlayerView: View {
             model.start()
         } label: {
             Label("player.start", lucide: .play)
-                .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 19, relativeTo: .body))
-                .foregroundStyle(PoulpyColor.onPrimary)
-                .frame(maxWidth: .infinity, minHeight: 64)
-                .background(PoulpyColor.primary, in: Capsule())
+                .frame(maxWidth: .infinity)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(PoulpyButtonStyle(.primary, size: .lg))
     }
 
     @ViewBuilder
@@ -192,16 +189,16 @@ struct PlayerView: View {
         }
         if let card = model.shareCard(units: units) {
             ShareLink(item: ShareCardItem(card: card, scheme: colorScheme), preview: SharePreview(card.title)) {
-                Label("shareImage.button", lucide: .share2).frame(maxWidth: .infinity, minHeight: 44)
+                Label("shareImage.button", lucide: .share2).frame(maxWidth: .infinity)
             }
-            .buttonStyle(.bordered)
+            .buttonStyle(PoulpyButtonStyle(.secondary, size: .lg))
         }
         Button {
             dismiss()
         } label: {
-            Text("player.close").frame(maxWidth: .infinity, minHeight: 44)
+            Text("player.close").frame(maxWidth: .infinity)
         }
-        .buttonStyle(.borderedProminent)
+        .buttonStyle(PoulpyButtonStyle(.primary, size: .lg))
     }
 
     /// A short tick for the last seconds of a timer and a longer sound when a phase starts.

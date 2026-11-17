@@ -152,9 +152,7 @@ object PoulpyRadius {
 
 /** Control sizes from web/storybook/stories/design-system/rules/. Never write a literal height in a screen. */
 object PoulpySize {
-    val button = 44.dp
-    val buttonLarge = 52.dp
-    val buttonSmall = 34.dp
+    val boxField = 52.dp
     val iconButton = 40.dp
     val touch = 44.dp
     val chip = 32.dp
@@ -163,6 +161,26 @@ object PoulpySize {
     val row = 56.dp
     val avatarSmall = 32.dp
     val avatar = 40.dp
+}
+
+/** The one size scale of buttons (web/storybook/stories/design-system/rules/Components.mdx); the websites use the same numbers. */
+object PoulpyControl {
+    val xs = 24.dp
+    val sm = 32.dp
+    val md = 40.dp
+    val lg = 48.dp
+    val xl = 56.dp
+    val xxl = 64.dp
+}
+
+/** The icon beside a button's label, by the button's size. */
+object PoulpyControlIcon {
+    val xs = 12.dp
+    val sm = 16.dp
+    val md = 20.dp
+    val lg = 24.dp
+    val xl = 32.dp
+    val xxl = 40.dp
 }
 
 internal val PoulpyShapes = Shapes(small = RoundedCornerShape(8.dp), medium = RoundedCornerShape(10.dp), large = RoundedCornerShape(14.dp))

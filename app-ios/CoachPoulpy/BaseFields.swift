@@ -252,23 +252,17 @@ struct SheetActions: View {
         HStack(spacing: 8) {
             Button { dismiss() } label: {
                 Text("action.cancel")
-                    .font(.poulpy(.headline).weight(.heavy))
-                    .foregroundStyle(PoulpyColor.onSurface)
-                    .frame(maxWidth: .infinity, minHeight: 56)
-                    .overlay(Capsule().stroke(PoulpyColor.outline, lineWidth: 2))
+                    .frame(maxWidth: .infinity)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(PoulpyButtonStyle(.secondary, size: .xl))
             Button {
                 onSave()
                 dismiss()
             } label: {
                 Text("action.save")
-                    .font(.poulpy(.headline).weight(.heavy))
-                    .foregroundStyle(PoulpyColor.onPrimary)
-                    .frame(maxWidth: .infinity, minHeight: 56)
-                    .background(PoulpyColor.primary.opacity(canSave ? 1 : 0.4), in: Capsule())
+                    .frame(maxWidth: .infinity)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(PoulpyButtonStyle(.primary, size: .xl))
             .disabled(!canSave)
         }
         .padding(.horizontal, PoulpySpace.lg)

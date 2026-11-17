@@ -28,17 +28,19 @@ fun CrashDialog(report: String, closed: Boolean, onDismiss: () -> Unit) {
         title = { Text(stringResource(if (closed) R.string.crash_title else R.string.crash_titleRunning), textAlign = TextAlign.Center) },
         text = { Text(stringResource(if (closed) R.string.crash_body else R.string.crash_bodyRunning), textAlign = TextAlign.Center) },
         confirmButton = {
-            Button(onClick = {
+            PoulpyButton(
+                onClick = {
                 val send = Intent(Intent.ACTION_SEND)
                     .setType("text/plain")
                     .putExtra(Intent.EXTRA_SUBJECT, "Coach Poulpy crash")
                     .putExtra(Intent.EXTRA_TEXT, report)
                 context.startActivity(Intent.createChooser(send, chooserTitle))
                 onDismiss()
-            }) { Text(stringResource(R.string.crash_send), fontWeight = FontWeight.ExtraBold) }
+            },
+) { Text(stringResource(R.string.crash_send)) }
         },
         dismissButton = {
-            OutlinedButton(onClick = onDismiss) { Text(stringResource(R.string.crash_notNow), fontWeight = FontWeight.ExtraBold) }
+            PoulpyButton(onClick = onDismiss, kind = PoulpyButtonKind.Secondary) { Text(stringResource(R.string.crash_notNow)) }
         },
     )
 }

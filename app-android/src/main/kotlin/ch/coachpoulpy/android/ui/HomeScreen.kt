@@ -179,30 +179,29 @@ private fun PlannedCard(item: TodayItem, onOpen: () -> Unit, onGo: () -> Unit, o
             Row(horizontalArrangement = Arrangement.spacedBy(PoulpySpace.sm)) {
                 if (inProgress) {
                     // Destructive, so crimson with an icon, never ember.
-                    OutlinedButton(
+                    PoulpyButton(
                         onClick = { discarding = true },
+                        kind = PoulpyButtonKind.Secondary,
                         border = BorderStroke(1.dp, colors.error),
-                        modifier = Modifier.weight(1f).height(PoulpySize.button),
+                        modifier = Modifier.weight(1f),
                     ) {
                         Icon(Lucide.Trash, contentDescription = null, tint = colors.error)
                         Text(
                             stringResource(R.string.home_discard),
                             color = colors.error,
-                            fontWeight = FontWeight.ExtraBold,
                             modifier = Modifier.padding(start = 6.dp),
                         )
                     }
                 } else {
-                    OutlinedButton(onClick = onOpen, enabled = item.workoutId != null, modifier = Modifier.weight(1f).height(PoulpySize.button)) {
-                        Text(stringResource(R.string.home_seeWorkout), fontWeight = FontWeight.ExtraBold)
+                    PoulpyButton(onClick = onOpen, kind = PoulpyButtonKind.Secondary, enabled = item.workoutId != null, modifier = Modifier.weight(1f)) {
+                        Text(stringResource(R.string.home_seeWorkout))
                     }
                 }
-                Button(onClick = onGo, modifier = Modifier.weight(1.4f).height(PoulpySize.button)) {
+                PoulpyButton(onClick = onGo, modifier = Modifier.weight(1.4f)) {
                     Icon(Lucide.Play, contentDescription = null)
                     // "Open", not "Resume": the session comes back paused.
                     Text(
                         stringResource(if (inProgress) R.string.home_openSession else R.string.action_start),
-                        fontWeight = FontWeight.ExtraBold,
                         modifier = Modifier.padding(start = 6.dp),
                     )
                 }
@@ -314,9 +313,9 @@ private fun RestCard(state: HomeState, onOpenLibrary: () -> Unit) {
             stringResource(if (state.hasWorkouts) R.string.home_restBody else R.string.home_firstBody),
             style = MaterialTheme.typography.bodyMedium,
         )
-        Button(onClick = onOpenLibrary, modifier = Modifier.padding(top = PoulpySpace.xs).height(PoulpySize.button)) {
+        PoulpyButton(onClick = onOpenLibrary, modifier = Modifier.padding(top = PoulpySpace.xs)) {
             Icon(Lucide.LibraryBig, contentDescription = null)
-            Text(stringResource(R.string.home_openLibrary), fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 8.dp))
+            Text(stringResource(R.string.home_openLibrary), modifier = Modifier.padding(start = 8.dp))
         }
     }
 }

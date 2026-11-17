@@ -223,11 +223,12 @@ internal fun AccountPage(onBack: () -> Unit, onFlow: (String) -> Unit, modifier:
                 }
                 // CLEANUP: Export my data (account-details mockup) waits for an export of the whole phone (#304).
                 Column(Modifier.fillMaxWidth().padding(top = 8.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    OutlinedButton(
+                    PoulpyButton(
                         onClick = { dialog = if (current.upToDate) LeaveDialog.SIGN_OUT else LeaveDialog.UNSENT },
-                        modifier = Modifier.fillMaxWidth().height(PoulpySize.buttonLarge),
-                        border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
-                    ) { Text(stringResource(R.string.account_signOut), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onSurface) }
+                        kind = PoulpyButtonKind.Secondary,
+                        size = PoulpyButtonSize.Lg,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) { Text(stringResource(R.string.account_signOut), color = MaterialTheme.colorScheme.onSurface) }
                     TextButton(onClick = { deleting = true }) {
                         Text(stringResource(R.string.account_deleteAccount), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.error)
                     }
@@ -251,15 +252,15 @@ internal fun AccountPage(onBack: () -> Unit, onFlow: (String) -> Unit, modifier:
             icon = { Image(painterResource(R.drawable.poulpy_pose_thinking), contentDescription = null, modifier = Modifier.size(96.dp)) },
             title = { Text(stringResource(R.string.account_signOutTitle), textAlign = TextAlign.Center) },
             text = { Text(stringResource(R.string.account_signOutBody), textAlign = TextAlign.Center) },
-            confirmButton = { Button(onClick = { signOut(false) }) { Text(stringResource(R.string.account_signOut), fontWeight = FontWeight.ExtraBold) } },
-            dismissButton = { OutlinedButton(onClick = { dialog = null }) { Text(stringResource(R.string.action_cancel), fontWeight = FontWeight.ExtraBold) } },
+            confirmButton = { PoulpyButton(onClick = { signOut(false) }) { Text(stringResource(R.string.account_signOut)) } },
+            dismissButton = { PoulpyButton(onClick = { dialog = null }, kind = PoulpyButtonKind.Secondary) { Text(stringResource(R.string.action_cancel)) } },
         )
         LeaveDialog.UNSENT -> AlertDialog(
             onDismissRequest = { dialog = null },
             icon = { Icon(Lucide.CircleExclamationPoint, contentDescription = null, tint = MaterialTheme.colorScheme.error) },
             title = { Text(stringResource(R.string.account_unsentTitle), textAlign = TextAlign.Center) },
             text = { Text(stringResource(R.string.account_unsentBody), textAlign = TextAlign.Center) },
-            confirmButton = { Button(onClick = { dialog = null }) { Text(stringResource(R.string.account_waitForUpload), fontWeight = FontWeight.ExtraBold) } },
+            confirmButton = { PoulpyButton(onClick = { dialog = null }) { Text(stringResource(R.string.account_waitForUpload)) } },
             dismissButton = {
                 TextButton(onClick = { signOut(true) }) {
                     Text(stringResource(R.string.account_signOutAnyway), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.error)
@@ -290,12 +291,13 @@ private fun DeleteSheet(account: AccountModel, onDismiss: () -> Unit) {
             }
             PoulpyTextField(stringResource(R.string.account_deletePassword), password, { password = it }, password = true)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(
+                PoulpyButton(
                     onClick = onDismiss,
-                    modifier = Modifier.weight(1f).height(PoulpySize.buttonLarge),
-                    border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
-                ) { Text(stringResource(R.string.action_cancel), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onSurface) }
-                Button(
+                    kind = PoulpyButtonKind.Secondary,
+                    size = PoulpyButtonSize.Lg,
+                    modifier = Modifier.weight(1f),
+                ) { Text(stringResource(R.string.action_cancel), color = MaterialTheme.colorScheme.onSurface) }
+                PoulpyButton(
                     onClick = {
                         busy = true
                         scope.launch {
@@ -304,10 +306,11 @@ private fun DeleteSheet(account: AccountModel, onDismiss: () -> Unit) {
                             if (result == DeleteResult.DELETED) onDismiss() else problem = result
                         }
                     },
+                    size = PoulpyButtonSize.Lg,
                     enabled = password.isNotEmpty() && !busy,
-                    modifier = Modifier.weight(1.6f).height(PoulpySize.buttonLarge),
+                    modifier = Modifier.weight(1.6f),
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error, contentColor = MaterialTheme.colorScheme.onError),
-                ) { Text(stringResource(R.string.account_deleteAccount), fontWeight = FontWeight.ExtraBold) }
+                ) { Text(stringResource(R.string.account_deleteAccount)) }
             }
         }
     }
@@ -431,8 +434,8 @@ private fun ConsentSheet(onDismiss: () -> Unit) {
                 fontWeight = FontWeight.ExtraBold,
                 modifier = Modifier.padding(horizontal = 4.dp),
             )
-            Button(onClick = onDismiss, modifier = Modifier.fillMaxWidth().padding(top = 4.dp).height(PoulpySize.buttonLarge)) {
-                Text(stringResource(R.string.account_gotIt), fontWeight = FontWeight.ExtraBold)
+            PoulpyButton(onClick = onDismiss, size = PoulpyButtonSize.Lg, modifier = Modifier.fillMaxWidth().padding(top = 4.dp)) {
+                Text(stringResource(R.string.account_gotIt))
             }
         }
     }
@@ -576,8 +579,8 @@ fun EmailConfirmedSheet(onDismiss: () -> Unit) {
             Poulpy(R.drawable.poulpy_pose_champion, R.string.account_confirmedPoulpy)
             Text(stringResource(R.string.account_confirmedTitle), style = MaterialTheme.typography.headlineMedium, fontSize = 30.sp, lineHeight = 34.sp)
             UploadProgress(account)
-            Button(onClick = onDismiss, modifier = Modifier.fillMaxWidth().height(PoulpySize.buttonLarge)) {
-                Text(stringResource(R.string.account_continue), fontWeight = FontWeight.ExtraBold)
+            PoulpyButton(onClick = onDismiss, size = PoulpyButtonSize.Lg, modifier = Modifier.fillMaxWidth()) {
+                Text(stringResource(R.string.account_continue))
             }
         }
     }
@@ -692,8 +695,8 @@ private fun AccountFrame(onClose: (() -> Unit)?, action: Int, busy: Boolean, onA
         },
         bottomBar = {
             Box(Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = PoulpySpace.lg, vertical = 12.dp)) {
-                Button(onClick = onAction, enabled = !busy, modifier = Modifier.fillMaxWidth().height(PoulpySize.buttonLarge)) {
-                    Text(stringResource(action), fontWeight = FontWeight.ExtraBold)
+                PoulpyButton(onClick = onAction, size = PoulpyButtonSize.Lg, enabled = !busy, modifier = Modifier.fillMaxWidth()) {
+                    Text(stringResource(action))
                 }
             }
         },

@@ -130,13 +130,12 @@ fun ExerciseInfoSheet(
             if (!(adding && listing) && (adding || closeLabel != null)) {
                 HorizontalDivider(Modifier.padding(top = 12.dp), color = colors.surfaceVariant)
                 Box(Modifier.navigationBarsPadding().padding(start = PoulpySpace.lg, end = PoulpySpace.lg, top = 12.dp, bottom = 16.dp)) {
-                    Button(onClick = { onAction(detail.slug) }, modifier = Modifier.fillMaxWidth().height(PoulpySize.buttonLarge)) {
+                    PoulpyButton(onClick = { onAction(detail.slug) }, size = PoulpyButtonSize.Lg, modifier = Modifier.fillMaxWidth()) {
                         if (adding) {
                             Icon(Lucide.Plus, contentDescription = null)
                         }
                         Text(
                             stringResource(if (adding || closeLabel == null) R.string.exercise_addHere else closeLabel),
-                            fontWeight = FontWeight.ExtraBold,
                             modifier = Modifier.padding(start = if (adding) 8.dp else 0.dp),
                         )
                     }

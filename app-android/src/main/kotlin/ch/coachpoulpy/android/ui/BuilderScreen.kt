@@ -173,13 +173,13 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
                     }
                 },
                 actions = {
-                    Button(
+                    PoulpyButton(
                         onClick = { if (model.save() != null) onClose() },
+                        size = PoulpyButtonSize.Sm,
                         enabled = state.canSave,
-                        contentPadding = PaddingValues(horizontal = 18.dp),
-                        modifier = Modifier.padding(end = 12.dp).height(PoulpySize.buttonSmall),
+                        modifier = Modifier.padding(end = 12.dp),
                     ) {
-                        Text(stringResource(R.string.action_save), fontWeight = FontWeight.ExtraBold)
+                        Text(stringResource(R.string.action_save))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = colors.background, scrolledContainerColor = colors.background),
@@ -550,9 +550,9 @@ private fun StepSheet(model: BuilderModel, row: BuilderRow, format: WorkoutForma
                     SheetTitle(row.name, row.place)
                 }
                 if (!row.isRest) {
-                    FilledTonalButton(onClick = onDetails, contentPadding = PaddingValues(horizontal = 14.dp)) {
-                        Icon(Lucide.Info, contentDescription = null, modifier = Modifier.size(20.dp))
-                        Text(stringResource(R.string.builder_details), fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 6.dp))
+                    PoulpyButton(onClick = onDetails, kind = PoulpyButtonKind.Tonal) {
+                        Icon(Lucide.Info, contentDescription = null, modifier = Modifier.size(PoulpyControlIcon.md))
+                        Text(stringResource(R.string.builder_details), modifier = Modifier.padding(start = 6.dp))
                     }
                 }
             }
@@ -598,8 +598,8 @@ private fun StepSheet(model: BuilderModel, row: BuilderRow, format: WorkoutForma
                     }
                 }
             }
-            Button(onClick = onDone, modifier = Modifier.fillMaxWidth().height(PoulpySize.buttonLarge)) {
-                Text(stringResource(R.string.action_done), fontWeight = FontWeight.ExtraBold)
+            PoulpyButton(onClick = onDone, size = PoulpyButtonSize.Lg, modifier = Modifier.fillMaxWidth()) {
+                Text(stringResource(R.string.action_done))
             }
         }
     }
@@ -700,7 +700,7 @@ private fun PoulpySelect(label: String, value: String, options: List<Pair<String
             shape = RoundedCornerShape(PoulpyRadius.md),
             color = colors.surface,
             border = BorderStroke(1.5.dp, colors.outline),
-            modifier = Modifier.fillMaxWidth().height(PoulpySize.buttonLarge).semantics { contentDescription = "$label, $value" },
+            modifier = Modifier.fillMaxWidth().height(PoulpySize.boxField).semantics { contentDescription = "$label, $value" },
         ) {
             Row(Modifier.padding(start = 12.dp, end = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
@@ -924,7 +924,7 @@ private fun ValueSheet(model: BuilderModel, key: String, target: WalkRunTarget, 
                     text,
                     { text = it; invalid = false },
                     label = title,
-                    modifier = Modifier.weight(1f).height(PoulpySize.buttonLarge),
+                    modifier = Modifier.weight(1f).height(PoulpySize.boxField),
                     keyboard = KeyboardOptions(keyboardType = if (decimal) KeyboardType.Decimal else KeyboardType.Text),
                     center = true,
                 )
@@ -962,8 +962,8 @@ private fun ValueSheet(model: BuilderModel, key: String, target: WalkRunTarget, 
                     PoulpyChip(selected = text == pick.text, onClick = { if (apply(pick.text)) onDone() }, label = pick.label)
                 }
             }
-            Button(onClick = { if (apply(text)) onDone() else invalid = true }, modifier = Modifier.fillMaxWidth().height(PoulpySize.buttonLarge)) {
-                Text(stringResource(R.string.action_done), fontWeight = FontWeight.ExtraBold)
+            PoulpyButton(onClick = { if (apply(text)) onDone() else invalid = true }, size = PoulpyButtonSize.Lg, modifier = Modifier.fillMaxWidth()) {
+                Text(stringResource(R.string.action_done))
             }
         }
     }

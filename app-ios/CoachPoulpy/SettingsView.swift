@@ -89,13 +89,8 @@ private struct DevicesList: View {
                         Text("devices.emptyBody").multilineTextAlignment(.center)
                         NavigationLink(value: DeviceRoute.add) {
                             Label("devices.addFirst", lucide: .plus)
-                                .font(.poulpy(.headline))
-                                .foregroundStyle(PoulpyColor.onPrimary)
-                                .padding(.horizontal, 24)
-                                .frame(height: PoulpySize.buttonLarge)
-                                .background(PoulpyColor.primary, in: Capsule())
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(PoulpyButtonStyle(.primary, size: .lg))
                         .padding(.top, PoulpySpace.sm)
                         Text("devices.switchOn").font(.poulpy(.footnote))
                     }
@@ -256,8 +251,7 @@ private struct DeviceAddView: View {
                                 devices.model.add(key: device.key)
                                 dismiss()
                             }
-                            .buttonStyle(.borderedProminent)
-                            .buttonBorderShape(.capsule)
+                            .buttonStyle(PoulpyButtonStyle(.primary, size: .md))
                         }
                     }
                 }

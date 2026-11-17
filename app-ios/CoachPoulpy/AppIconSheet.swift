@@ -80,12 +80,9 @@ struct AppIconSheet: View {
             .safeAreaInset(edge: .bottom) {
                 Button { dismiss() } label: {
                     Text("action.cancel")
-                        .font(.poulpy(.headline).weight(.heavy))
-                        .foregroundStyle(PoulpyColor.onSurface)
-                        .frame(maxWidth: .infinity, minHeight: 56)
-                        .overlay(Capsule().stroke(PoulpyColor.outline, lineWidth: 2))
+                        .frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(PoulpyButtonStyle(.secondary, size: .xl))
                 .padding(20)
             }
         }

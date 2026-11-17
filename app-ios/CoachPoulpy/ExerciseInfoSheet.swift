@@ -82,13 +82,9 @@ struct ExerciseInfoSheet: View {
                             Text(closeLabel)
                         }
                     }
-                        .font(.poulpy(.callout).weight(.heavy))
-                        .foregroundStyle(PoulpyColor.onPrimary)
                         .frame(maxWidth: .infinity)
-                        .frame(height: PoulpySize.buttonLarge)
-                        .background(PoulpyColor.primary, in: Capsule())
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(PoulpyButtonStyle(.primary, size: .lg))
                 .padding(.horizontal, PoulpySpace.lg)
                 .padding(.top, 12)
                 .padding(.bottom, 8)

@@ -112,9 +112,9 @@ fun PoulpyCard(
         Image(painterResource(R.drawable.poulpy_mood_happy), contentDescription = null, modifier = Modifier.size(poulpySize))
         Text(title, style = MaterialTheme.typography.titleLarge, color = colors.onPrimaryContainer, textAlign = TextAlign.Center)
         Text(body, style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant, textAlign = TextAlign.Center)
-        Button(onClick = onClick, modifier = Modifier.padding(top = 8.dp).height(PoulpySize.button)) {
+        PoulpyButton(onClick = onClick, modifier = Modifier.padding(top = 8.dp)) {
             if (buttonIcon != null) Icon(buttonIcon, contentDescription = null, modifier = Modifier.padding(end = 8.dp).size(20.dp))
-            Text(button, fontWeight = FontWeight.ExtraBold)
+            Text(button)
         }
     }
 }

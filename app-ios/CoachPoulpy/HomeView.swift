@@ -149,9 +149,9 @@ struct HomeView: View {
                     Button { discarding = true } label: {
                         Label("home.discard", lucide: .trash)
                             .font(.poulpy(.body).weight(.heavy))
-                            .frame(maxWidth: .infinity, minHeight: 48)
+                            .frame(maxWidth: .infinity, minHeight: PoulpyControl.lg)
                             .foregroundStyle(PoulpyColor.error)
-                            .overlay(Capsule().stroke(PoulpyColor.error, lineWidth: 2))
+                            .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.md).stroke(PoulpyColor.error, lineWidth: 2))
                     }
                     .buttonStyle(.plain)
                 } else if let workoutId = item.workoutId {
@@ -159,23 +159,18 @@ struct HomeView: View {
                         WorkoutPageView(graph: graph, workoutId: workoutId)
                     } label: {
                         Text("home.seeWorkout")
-                            .font(.poulpy(.body).weight(.heavy))
-                            .frame(maxWidth: .infinity, minHeight: 48)
-                            .overlay(Capsule().stroke(PoulpyColor.outline, lineWidth: 2))
+                            .frame(maxWidth: .infinity)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(PoulpyButtonStyle(.secondary, size: .lg))
                 }
                 Button {
                     if inProgress && item.live { onOpenLive() } else { cover = .player(workoutId: inProgress ? nil : item.workoutId) }
                 } label: {
                     // "Open", not "Resume": the session comes back paused.
                     Label(LocalizedStringKey(inProgress ? "home.openSession" : "action.start"), lucide: .play)
-                        .font(.poulpy(.body).weight(.heavy))
-                        .frame(maxWidth: .infinity, minHeight: 48)
-                        .foregroundStyle(PoulpyColor.onPrimary)
-                        .background(PoulpyColor.primary, in: Capsule())
+                        .frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(PoulpyButtonStyle(.primary, size: .lg))
                 .layoutPriority(1)
             }
         }
@@ -244,13 +239,8 @@ struct HomeView: View {
             Text(LocalizedStringKey(firstTime ? "home.firstBody" : "home.restBody")).font(.poulpy(.subheadline))
             Button(action: onOpenLibrary) {
                 Label("home.openLibrary", lucide: .libraryBig)
-                    .font(.poulpy(.body).weight(.heavy))
-                    .padding(.horizontal, PoulpySpace.lg)
-                    .frame(minHeight: PoulpySize.button)
-                    .foregroundStyle(PoulpyColor.onPrimary)
-                    .background(PoulpyColor.primary, in: Capsule())
             }
-            .buttonStyle(.plain)
+            .buttonStyle(PoulpyButtonStyle(.primary, size: .md))
             .padding(.top, PoulpySpace.xs)
         }
         .foregroundStyle(PoulpyColor.onSurface)

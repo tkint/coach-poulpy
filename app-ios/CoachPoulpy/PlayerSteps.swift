@@ -81,12 +81,9 @@ enum PlayerSteps {
         Spacer(minLength: 0)
         Button(action: onStart) {
             Text(startLabel)
-                .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 19, relativeTo: .body))
-                .foregroundStyle(PoulpyColor.onPrimary)
-                .frame(maxWidth: .infinity, minHeight: 64)
-                .background(PoulpyColor.primary, in: Capsule())
+                .frame(maxWidth: .infinity)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(PoulpyButtonStyle(.primary, size: .lg))
         // Done cuts the step short without the feel of skipping it.
         HStack(spacing: PoulpySpace.md) {
             outlinedButton("player.skip", action: onSkip)
@@ -97,12 +94,9 @@ enum PlayerSteps {
     private static func outlinedButton(_ key: LocalizedStringKey, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(key)
-                .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 17, relativeTo: .body))
-                .foregroundStyle(PoulpyColor.onBackground)
-                .frame(maxWidth: .infinity, minHeight: 56)
-                .overlay(Capsule().stroke(PoulpyColor.outline, lineWidth: 2))
+                .frame(maxWidth: .infinity)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(PoulpyButtonStyle(.secondary, size: .xl))
     }
 
     /// An exercise: Poulpy straining, the part, the name, the set, the big target, what comes next, Skip and Done (`player-set`, `player-circuit-round`).
@@ -155,22 +149,17 @@ enum PlayerSteps {
                 onSkip()
             } label: {
                 Text("player.skip")
-                    .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 19, relativeTo: .body))
-                    .foregroundStyle(PoulpyColor.onBackground)
-                    .padding(.horizontal, 22)
-                    .frame(maxWidth: showDone ? nil : .infinity, minHeight: 64)
-                    .overlay(Capsule().stroke(PoulpyColor.outline, lineWidth: 2))
+                    .frame(maxWidth: showDone ? nil : .infinity)
             }
+            .buttonStyle(PoulpyButtonStyle(.secondary, size: .lg))
             if showDone {
                 Button {
                     onDone()
                 } label: {
                     Label("player.done", lucide: .check)
-                        .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 19, relativeTo: .body))
-                        .foregroundStyle(PoulpyColor.onPrimary)
-                        .frame(maxWidth: .infinity, minHeight: 64)
-                        .background(PoulpyColor.primary, in: Capsule())
+                        .frame(maxWidth: .infinity)
                 }
+                .buttonStyle(PoulpyButtonStyle(.primary, size: .lg))
             }
         }
         .buttonStyle(.plain)
@@ -231,12 +220,9 @@ enum PlayerSteps {
             onSkip()
         } label: {
             Label("player.skipRest", lucide: .skipForward)
-                .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 19, relativeTo: .body))
-                .foregroundStyle(PoulpyColor.onPrimaryContainer)
-                .frame(maxWidth: .infinity, minHeight: 64)
-                .background(PoulpyColor.primaryContainer, in: Capsule())
+                .frame(maxWidth: .infinity)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(PoulpyButtonStyle(.tonal, size: .lg))
         .disabled(paused)
         }
         .opacity(paused ? pausedDim : 1)
@@ -248,13 +234,8 @@ enum PlayerSteps {
     static func adjustButton(_ title: LocalizedStringKey, paused: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(title)
-                .font(.custom(PoulpyFontFace.nunitoExtraBold, size: 16, relativeTo: .body).monospacedDigit())
-                .foregroundStyle(PoulpyColor.onBackground)
-                .padding(.horizontal, 18)
-                .frame(minHeight: 48)
-                .overlay(Capsule().stroke(PoulpyColor.outline, lineWidth: 2))
         }
-        .buttonStyle(.plain)
+        .buttonStyle(PoulpyButtonStyle(.secondary, size: .lg))
         .disabled(paused)
     }
 
