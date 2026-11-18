@@ -100,6 +100,8 @@ data class BuilderRepeat(
     val key: String,
     val times: Int,
     val timesLabel: String,
+    /** "Repeat 3 times", the one line that opens the count sheet. */
+    val title: String,
     val rows: List<BuilderRow>,
     /** Whether the up and down chevrons can move the repeat: not at the top or bottom of its part. */
     val canMoveUp: Boolean,
@@ -560,7 +562,7 @@ class BuilderModel internal constructor(
             val steps = part.steps.mapIndexed { index, step ->
                 if (step is DraftRepeat) {
                     val rows = step.steps.mapIndexed { i, child -> row(child, step, step.steps.getOrNull(i - 1), i > 0, i < step.steps.lastIndex) }
-                    BuilderStep(step.key, null, BuilderRepeat(step.key, step.times, labels.times(step.times), rows, index > 0, index < part.steps.lastIndex))
+                    BuilderStep(step.key, null, BuilderRepeat(step.key, step.times, labels.times(step.times), labels.repeatTitle(step.times), rows, index > 0, index < part.steps.lastIndex))
                 } else {
                     BuilderStep(step.key, row(step, null, part.steps.getOrNull(index - 1), index > 0, index < part.steps.lastIndex), null)
                 }

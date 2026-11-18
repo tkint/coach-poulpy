@@ -56,6 +56,8 @@ enum Lucide: String, CaseIterable {
     case libraryBig = "LucideLibraryBig"
     case link = "LucideLink"
     case list = "LucideList"
+    case listIndentDecrease = "LucideListIndentDecrease"
+    case listIndentIncrease = "LucideListIndentIncrease"
     case lock = "LucideLock"
     case logIn = "LucideLogIn"
     case logOut = "LucideLogOut"

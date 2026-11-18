@@ -132,6 +132,7 @@
     "position": "{index, number} of {count, number}",
     "roundOf": "round {round, number} of {rounds, number}",
     "times": "{count, number} times",
+    "repeatTimes": "Repeat {times}",
     "reps": "{count, plural, one {# rep} other {# reps}}",
     "steps": "{count, plural, one {# step} other {# steps}}",
     "exercises": "{count, plural, one {# exercise} other {# exercises}}",

@@ -7,6 +7,8 @@ struct BuilderView: View {
     @StateObject private var builder: Observed<BuilderModel, BuilderState>
     /// The part the exercise being picked goes to; nil when not picking.
     @State private var picking: PickTarget?
+    /// The repeat whose count is being edited in the sheet; nil when none.
+    @State private var countingRepeat: String?
     /// The exercise whose details are open over the picker; nil when none.
     @State private var previewing: PreviewTarget?
     @State private var changingFormat = false
@@ -92,6 +94,11 @@ struct BuilderView: View {
                     StepSheet(graph: graph, model: model, row: row, format: state.format) { editing = nil }
                 }
             }
+            .sheet(isPresented: Binding(get: { countingGroup != nil }, set: { if !$0 { countingRepeat = nil } })) {
+                if let group = countingGroup {
+                    RepeatCountSheet(model: model, group: group) { countingRepeat = nil }
+                }
+            }
             .sheet(isPresented: $changingFormat) {
                 FormatSheet(options: model.formatOptions, current: state.format, onChoose: { format in
                     changingFormat = false
@@ -110,13 +117,13 @@ struct BuilderView: View {
                 NavigationStack {
                     ExerciseList(graph: graph, withRecent: true) { row in
                         PickerRowView(row: row, onOpen: { previewing = PreviewTarget(slug: row.slug) }) {
-                            model.add(slug: row.slug, partKey: target.partKey, repeatKey: nil)
+                            model.add(slug: row.slug, partKey: target.partKey, repeatKey: target.repeatKey)
                             picking = nil
                         }
                     }
                     .sheet(item: $previewing) { preview in
                         ExerciseInfoSheet(graph: graph, slug: preview.slug, onAction: { slug in
-                            model.add(slug: slug, partKey: target.partKey, repeatKey: nil)
+                            model.add(slug: slug, partKey: target.partKey, repeatKey: target.repeatKey)
                             previewing = nil
                             picking = nil
                         })
@@ -134,6 +141,10 @@ struct BuilderView: View {
     }
 
     private var editingRow: BuilderRow? { state.rows.first { $0.key == editing } }
+
+    private var countingGroup: BuilderRepeat? {
+        state.parts.flatMap { $0.steps }.compactMap { $0.repeatGroup }.first { $0.key == countingRepeat }
+    }
 
     /// Under the name: the format as a chip with a chevron; a tap opens the format sheet to change it.
     private func formatLine(_ format: WorkoutFormat) -> some View {
@@ -163,7 +174,7 @@ struct BuilderView: View {
         let empty = part.steps.isEmpty
         return PartBlockView(kind: part.kind, name: part.name, summary: part.summary, time: "") {
             if empty {
-                Button { picking = PickTarget(partKey: part.key) } label: {
+                Button { picking = PickTarget(partKey: part.key, repeatKey: nil) } label: {
                     Text(LocalizedStringKey(part.kind == .work ? "builder.emptyWork" : "builder.emptyOptional"))
                         .font(.poulpy(.footnote))
                         .foregroundStyle(PoulpyColor.onSurfaceVariant)
@@ -179,7 +190,7 @@ struct BuilderView: View {
                         if let row = step.row {
                             stepRow(row, inRepeat: false)
                         } else if let group = step.repeatGroup {
-                            repeatBlock(group)
+                            repeatBlock(part, group)
                         }
                     }
                 }
@@ -193,7 +204,7 @@ struct BuilderView: View {
     /// The small square + on a block's border: a tap asks what to add. An exercise is picked from the exercise list; a repeat or a rest is added right away.
     private func addButton(_ part: BuilderPart, compact: Bool) -> some View {
         Menu {
-            Button { picking = PickTarget(partKey: part.key) } label: { Label("builder.addExercise", lucide: .personStanding) }
+            Button { picking = PickTarget(partKey: part.key, repeatKey: nil) } label: { Label("builder.addExercise", lucide: .personStanding) }
             Button { model.addRepeat(partKey: part.key) } label: { Label("builder.addRepeat", lucide: .repeat) }
             Button { model.addRest(partKey: part.key, repeatKey: nil) } label: { Label("builder.addRest", lucide: .timer) }
         } label: {
@@ -243,15 +254,15 @@ struct BuilderView: View {
         .background(inRepeat ? PoulpyColor.surface : Color.clear, in: RoundedRectangle(cornerRadius: PoulpyRadius.sm))
     }
 
-    /// Edit, duplicate, the moves that apply (up, down, into the repeat above, out of its repeat), and delete.
+    /// Edit, duplicate, the moves that apply (up, down, into the repeat above, out of its repeat), and delete, an icon on every line.
     private func stepMenu(_ row: BuilderRow) -> some View {
         Menu {
-            Button("builder.edit") { editing = row.key }
-            Button("builder.duplicate") { model.duplicate(key: row.key) }
-            if row.canMoveUp { Button("builder.moveUp") { move(row.key, by: -1) } }
-            if row.canMoveDown { Button("builder.moveDown") { move(row.key, by: 1) } }
-            if row.canMoveIntoRepeat { Button("builder.moveIntoRepeat") { model.moveIntoRepeatAbove(key: row.key) } }
-            if row.repeatKey != nil { Button("builder.moveOutOfRepeat") { model.moveOutOfRepeat(key: row.key) } }
+            Button { editing = row.key } label: { Label("builder.edit", lucide: .pencil) }
+            Button { model.duplicate(key: row.key) } label: { Label("builder.duplicate", lucide: .copy) }
+            if row.canMoveUp { Button { move(row.key, by: -1) } label: { Label("builder.moveUp", lucide: .arrowUp) } }
+            if row.canMoveDown { Button { move(row.key, by: 1) } label: { Label("builder.moveDown", lucide: .arrowDown) } }
+            if row.canMoveIntoRepeat { Button { model.moveIntoRepeatAbove(key: row.key) } label: { Label("builder.moveIntoRepeat", lucide: .listIndentIncrease) } }
+            if row.repeatKey != nil { Button { model.moveOutOfRepeat(key: row.key) } label: { Label("builder.moveOutOfRepeat", lucide: .listIndentDecrease) } }
             Divider()
             Button(role: .destructive) { model.remove(key: row.key) } label: { Label("builder.delete", lucide: .trash) }
         } label: {
@@ -262,37 +273,52 @@ struct BuilderView: View {
         .accessibilityLabel(Text(L("builder.moreActions %@", row.name)))
     }
 
-    /// A repeat inside a block: "Repeat", how many times as a small − N times +, and a menu; its steps sit in it as rows.
-    private func repeatBlock(_ group: BuilderRepeat) -> some View {
+    /// A repeat inside a block: one compact line, "Repeat 3 times", that opens the count sheet, and a menu; its steps sit in it
+    /// as rows. An empty repeat says so in one line that opens the exercise list, like an empty block.
+    private func repeatBlock(_ part: BuilderPart, _ group: BuilderRepeat) -> some View {
         VStack(spacing: 4) {
-            HStack(spacing: 8) {
-                LucideIcon(.repeat, size: 20).foregroundStyle(PoulpyColor.primary).padding(.leading, 4).accessibilityHidden(true)
-                Text("builder.repeat")
-                    .font(.poulpy(.subheadline).weight(.heavy))
-                    .foregroundStyle(PoulpyColor.onPrimaryContainer)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                HStack(spacing: 2) {
-                    squareStep("−", "builder.repeatFewer") { model.setRepeatTimes(key: group.key, times: group.times - 1) }
-                    Text(group.timesLabel)
-                        .font(.poulpy(.footnote).weight(.bold))
-                        .monospacedDigit()
-                        .foregroundStyle(PoulpyColor.onPrimaryContainer)
-                        .frame(width: 56)
-                    squareStep("+", "builder.repeatMore") { model.setRepeatTimes(key: group.key, times: group.times + 1) }
+            HStack(spacing: 0) {
+                Button { countingRepeat = group.key } label: {
+                    HStack(spacing: 8) {
+                        LucideIcon(.repeat, size: 18).foregroundStyle(PoulpyColor.primary).accessibilityHidden(true)
+                        Text(group.title)
+                            .font(.poulpy(.footnote).weight(.heavy))
+                            .foregroundStyle(PoulpyColor.onPrimaryContainer)
+                        Spacer(minLength: 0)
+                    }
+                    .padding(.horizontal, 4)
+                    .frame(minHeight: 36)
+                    .contentShape(Rectangle())
                 }
-                .accessibilityElement(children: .contain)
+                .buttonStyle(.plain)
+                .accessibilityHint(Text("builder.editRepeats"))
                 Menu {
+                    Button { countingRepeat = group.key } label: { Label("builder.editRepeats", lucide: .pencil) }
+                    Divider()
+                    Button { picking = PickTarget(partKey: part.key, repeatKey: group.key) } label: { Label("builder.addExercise", lucide: .personStanding) }
+                    Button { model.addRest(partKey: part.key, repeatKey: group.key) } label: { Label("builder.addRest", lucide: .timer) }
+                    Divider()
                     Button { model.duplicate(key: group.key) } label: { Label("builder.duplicate", lucide: .copy) }
                     if group.canMoveUp { Button { move(group.key, by: -1) } label: { Label("builder.moveUp", lucide: .arrowUp) } }
                     if group.canMoveDown { Button { move(group.key, by: 1) } label: { Label("builder.moveDown", lucide: .arrowDown) } }
                     Divider()
                     Button(role: .destructive) { model.remove(key: group.key) } label: { Label("builder.delete", lucide: .trash) }
                 } label: {
-                    LucideIcon(.ellipsisVertical, size: 20).frame(width: 44, height: 44)
+                    LucideIcon(.ellipsisVertical, size: 20).frame(width: 36, height: 36)
                 }
                 .foregroundStyle(PoulpyColor.onSurfaceVariant)
-                .padding(.trailing, -8)
                 .accessibilityLabel(Text("builder.repeatActions"))
+            }
+            if group.rows.isEmpty {
+                Button { picking = PickTarget(partKey: part.key, repeatKey: group.key) } label: {
+                    Text("builder.emptyWork")
+                        .font(.poulpy(.footnote))
+                        .foregroundStyle(PoulpyColor.onSurfaceVariant)
+                        .frame(maxWidth: .infinity, minHeight: 44)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(Text("builder.addExercise"))
             }
             ForEach(group.rows, id: \.key) { row in
                 stepRow(row, inRepeat: true)
@@ -301,21 +327,6 @@ struct BuilderView: View {
         .padding(6)
         .background(PoulpyColor.primaryContainer, in: RoundedRectangle(cornerRadius: PoulpyRadius.md))
         .padding(.vertical, 2)
-    }
-
-    /// A small square − or +, discreet beside the repeat's count; its touch area is bigger than it looks.
-    private func squareStep(_ sign: String, _ description: LocalizedStringKey, _ action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Text(sign)
-                .font(.poulpy(.body).weight(.bold))
-                .foregroundStyle(PoulpyColor.onPrimaryContainer)
-                .frame(width: 28, height: 28)
-                .background(PoulpyColor.primary.opacity(0.12), in: RoundedRectangle(cornerRadius: PoulpyRadius.sm))
-                .frame(width: 40, height: 40)
-                .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(Text(description))
     }
 
     /// Moves a step or a repeat one place up (-1) or down (1) among its siblings.
@@ -336,11 +347,47 @@ private struct PreviewTarget: Identifiable {
     var id: String { slug }
 }
 
-/// The part a picked exercise goes to.
+/// The part a picked exercise goes to, and the repeat of that part when it goes into one.
 private struct PickTarget: Identifiable {
     let partKey: String
+    let repeatKey: String?
 
-    var id: String { partKey }
+    var id: String { partKey + (repeatKey ?? "") }
+}
+
+/// Sets how many times a repeat runs: a number typed or nudged with − and +.
+private struct RepeatCountSheet: View {
+    let model: BuilderModel
+    let group: BuilderRepeat
+    let onDone: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("builder.repeat").font(.poulpy(.title2).weight(.heavy))
+            VStack(alignment: .leading, spacing: 4) {
+                Text("builder.repeatHowMany").textCase(.uppercase).font(PoulpyFont.label).kerning(1)
+                    .foregroundStyle(PoulpyColor.onSurfaceVariant).padding(.horizontal, 4)
+                NumberEntry(
+                    onLess: { model.setRepeatTimes(key: group.key, times: group.times - 1) },
+                    onMore: { model.setRepeatTimes(key: group.key, times: group.times + 1) },
+                    lessLabel: "builder.repeatFewer", moreLabel: "builder.repeatMore"
+                ) {
+                    StepNumberField(
+                        value: group.times, description: "builder.repeatHowMany", unit: L("builder.repeatUnit"),
+                        set: { model.setRepeatTimes(key: group.key, times: $0) }
+                    )
+                }
+            }
+            Button(action: onDone) {
+                Text("action.done").frame(maxWidth: .infinity)
+            }
+            .buttonStyle(PoulpyButtonStyle(.primary, size: .lg))
+            Spacer(minLength: 0)
+        }
+        .padding(20)
+        .background(PoulpyColor.surface)
+        .presentationDetents([.height(260)])
+    }
 }
 
 /// The small tag on a step's name line, or above it in the step sheet: "RECOVER".
