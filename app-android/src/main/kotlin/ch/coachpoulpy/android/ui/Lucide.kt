@@ -65,6 +65,8 @@ object Lucide {
     val LibraryBig: ImageVector by lazy { lucideIcon("library-big", "M 4 3 H 10 A 1 1 0 0 1 11 4 V 20 A 1 1 0 0 1 10 21 H 4 A 1 1 0 0 1 3 20 V 4 A 1 1 0 0 1 4 3 Z", "M 7 3 v 18", "M 20.4 18.9 c .2 .5 -.1 1.1 -.6 1.3 l -1.9 .7 c -.5 .2 -1.1 -.1 -1.3 -.6 L 11.1 5.1 c -.2 -.5 .1 -1.1 .6 -1.3 l 1.9 -.7 c .5 -.2 1.1 .1 1.3 .6 Z") }
     val Link: ImageVector by lazy { lucideIcon("link", "M 10 13 a 5 5 0 0 0 7.54 .54 l 3 -3 a 5 5 0 0 0 -7.07 -7.07 l -1.72 1.71", "M 14 11 a 5 5 0 0 0 -7.54 -.54 l -3 3 a 5 5 0 0 0 7.07 7.07 l 1.71 -1.71") }
     val List: ImageVector by lazy { lucideIcon("list", "M 3 5 h .01", "M 3 12 h .01", "M 3 19 h .01", "M 8 5 h 13", "M 8 12 h 13", "M 8 19 h 13") }
+    val ListIndentDecrease: ImageVector by lazy { lucideIcon("list-indent-decrease", "M 21 5 H 11", "M 21 12 H 11", "M 21 19 H 11", "m 7 8 -4 4 4 4") }
+    val ListIndentIncrease: ImageVector by lazy { lucideIcon("list-indent-increase", "M 21 5 H 11", "M 21 12 H 11", "M 21 19 H 11", "m 3 8 4 4 -4 4") }
     val Lock: ImageVector by lazy { lucideIcon("lock", "M 5 11 H 19 A 2 2 0 0 1 21 13 V 20 A 2 2 0 0 1 19 22 H 5 A 2 2 0 0 1 3 20 V 13 A 2 2 0 0 1 5 11 Z", "M 7 11 V 7 a 5 5 0 0 1 10 0 v 4") }
     val LogIn: ImageVector by lazy { lucideIcon("log-in", "m 10 17 5 -5 -5 -5", "M 15 12 H 3", "M 15 3 h 4 a 2 2 0 0 1 2 2 v 14 a 2 2 0 0 1 -2 2 h -4") }
     val LogOut: ImageVector by lazy { lucideIcon("log-out", "m 16 17 5 -5 -5 -5", "M 21 12 H 9", "M 9 21 H 5 a 2 2 0 0 1 -2 -2 V 5 a 2 2 0 0 1 2 -2 h 4") }

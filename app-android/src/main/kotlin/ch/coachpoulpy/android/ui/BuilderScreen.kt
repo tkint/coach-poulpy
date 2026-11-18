@@ -107,6 +107,10 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
     val state by model.state.collectAsStateWithLifecycle()
     // The part the exercise being picked goes to; null when not picking.
     var pickingPart by rememberSaveable { mutableStateOf<String?>(null) }
+    // The repeat of that part the exercise goes into; null when it goes to the part itself.
+    var pickingRepeat by rememberSaveable { mutableStateOf<String?>(null) }
+    // The repeat whose count is being edited in the sheet; null when none.
+    var countingRepeat by rememberSaveable { mutableStateOf<String?>(null) }
     // The exercise whose details are open over the picker; null when none.
     var previewing by rememberSaveable { mutableStateOf<String?>(null) }
     // The step being edited in the sheet: the one just added, or the one tapped.
@@ -120,18 +124,18 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
     val colors = MaterialTheme.colorScheme
     val list = rememberLazyListState()
     pickingPart?.let { part ->
-        BackHandler { pickingPart = null }
+        BackHandler { pickingPart = null; pickingRepeat = null }
         Scaffold(
             topBar = {
                 TopAppBar(
                     title = { Text(stringResource(R.string.builder_pickTitle)) },
-                    navigationIcon = { BackButton { pickingPart = null } },
+                    navigationIcon = { BackButton { pickingPart = null; pickingRepeat = null } },
                 )
             },
         ) { padding ->
             ExerciseList(
                 graph, language,
-                onPick = { model.add(it, part); pickingPart = null },
+                onPick = { model.add(it, part, pickingRepeat); pickingPart = null; pickingRepeat = null },
                 modifier = Modifier.padding(padding),
                 adding = true,
                 onOpen = { previewing = it },
@@ -140,7 +144,7 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
         previewing?.let { slug ->
             ExerciseInfoSheet(
                 graph, language, slug,
-                onAction = { model.add(it, part); previewing = null; pickingPart = null },
+                onAction = { model.add(it, part, pickingRepeat); previewing = null; pickingPart = null; pickingRepeat = null },
                 onDismiss = { previewing = null },
             )
         }
@@ -187,7 +191,7 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
             state.parts.forEach { part ->
                 item(key = "part-${part.key}") {
                     Box(Modifier.padding(bottom = 8.dp)) {
-                        BuilderPartBlock(model, part, onPick = { pickingPart = part.key }, onEdit = { editing = it })
+                        BuilderPartBlock(model, part, onPick = { repeatKey -> pickingPart = part.key; pickingRepeat = repeatKey }, onEdit = { editing = it }, onCount = { countingRepeat = it })
                     }
                 }
             }
@@ -209,6 +213,9 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
     }
     askingOrder?.let { change ->
         FormatOrderSheet(change, onChoose = { switch -> model.changeFormat(change.format, switch); askingOrder = null }, onClose = { askingOrder = null })
+    }
+    state.parts.flatMap { it.steps }.firstNotNullOfOrNull { step -> step.repeatGroup?.takeIf { it.key == countingRepeat } }?.let { repeat ->
+        RepeatCountSheet(model, repeat, onDone = { countingRepeat = null })
     }
     state.rows.firstOrNull { it.key == editing }?.let { row ->
         StepSheet(model, row, state.format, onDone = { editing = null }, onDetails = { detailing = row.slug })
@@ -271,7 +278,7 @@ private fun FormatLine(format: WorkoutFormat, label: String, onClick: () -> Unit
  * and while it is empty one line that opens the exercise list. The warm-up and the cool down are optional.
  */
 @Composable
-private fun BuilderPartBlock(model: BuilderModel, part: BuilderPart, onPick: () -> Unit, onEdit: (String) -> Unit) {
+private fun BuilderPartBlock(model: BuilderModel, part: BuilderPart, onPick: (String?) -> Unit, onEdit: (String) -> Unit, onCount: (String) -> Unit) {
     val colors = MaterialTheme.colorScheme
     val empty = part.steps.isEmpty()
     PartBlock(
@@ -280,7 +287,7 @@ private fun BuilderPartBlock(model: BuilderModel, part: BuilderPart, onPick: () 
             PartAddButton(
                 label = part.addLabel,
                 iconSize = if (empty) 16.dp else 20.dp,
-                onExercise = onPick,
+                onExercise = { onPick(null) },
                 onRest = { model.addRest(part.key) },
                 onRepeat = { model.addRepeat(part.key) },
             )
@@ -295,7 +302,7 @@ private fun BuilderPartBlock(model: BuilderModel, part: BuilderPart, onPick: () 
                     .fillMaxWidth()
                     .heightIn(min = 44.dp)
                     .clip(RoundedCornerShape(PoulpyRadius.sm))
-                    .clickable(onClickLabel = part.addLabel, onClick = onPick)
+                    .clickable(onClickLabel = part.addLabel) { onPick(null) }
                     .padding(vertical = 13.dp),
             )
         } else {
@@ -307,7 +314,7 @@ private fun BuilderPartBlock(model: BuilderModel, part: BuilderPart, onPick: () 
                     if (row != null) {
                         StepRow(model, row, onEdit = { onEdit(row.key) })
                     } else if (repeat != null) {
-                        RepeatBlock(model, repeat, onEdit)
+                        RepeatBlock(model, part, repeat, onEdit, onPick = { onPick(repeat.key) }, onCount = { onCount(repeat.key) })
                     }
                 }
             }
@@ -347,9 +354,12 @@ private fun PartAddButton(label: String, iconSize: Dp, onExercise: () -> Unit, o
     }
 }
 
-/** A repeat inside a block: "Repeat", how many times as a small − N times +, and a menu; its steps sit in it as rows. */
+/**
+ * A repeat inside a block: one compact line, "Repeat 3 times", that opens the count sheet, and a menu; its steps sit in it
+ * as rows. An empty repeat says so in one line that opens the exercise list, like an empty block.
+ */
 @Composable
-private fun RepeatBlock(model: BuilderModel, repeat: BuilderRepeat, onEdit: (String) -> Unit) {
+private fun RepeatBlock(model: BuilderModel, part: BuilderPart, repeat: BuilderRepeat, onEdit: (String) -> Unit, onPick: () -> Unit, onCount: () -> Unit) {
     val colors = MaterialTheme.colorScheme
     Column(
         Modifier
@@ -359,37 +369,83 @@ private fun RepeatBlock(model: BuilderModel, repeat: BuilderRepeat, onEdit: (Str
             .padding(6.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Icon(Lucide.Repeat, contentDescription = null, tint = colors.primary, modifier = Modifier.size(20.dp).padding(start = 4.dp))
-            Text(stringResource(R.string.builder_repeat), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.ExtraBold, color = colors.onPrimaryContainer, modifier = Modifier.weight(1f))
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                SquareStep("−", stringResource(R.string.builder_repeatFewer)) { model.setRepeatTimes(repeat.key, repeat.times - 1) }
-                Text(repeat.timesLabel, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = colors.onPrimaryContainer, textAlign = TextAlign.Center, modifier = Modifier.width(56.dp))
-                SquareStep("+", stringResource(R.string.builder_repeatMore)) { model.setRepeatTimes(repeat.key, repeat.times + 1) }
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                Modifier
+                    .weight(1f)
+                    .heightIn(min = 36.dp)
+                    .clip(RoundedCornerShape(PoulpyRadius.sm))
+                    .clickable(onClickLabel = stringResource(R.string.builder_editRepeats), role = Role.Button, onClick = onCount)
+                    .padding(horizontal = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Icon(Lucide.Repeat, contentDescription = null, tint = colors.primary, modifier = Modifier.size(18.dp))
+                Text(repeat.title, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.ExtraBold, color = colors.onPrimaryContainer)
             }
             ActionsMenu(
                 description = stringResource(R.string.builder_repeatActions),
+                onEditRepeats = onCount,
+                onAddExercise = onPick,
+                onAddRest = { model.addRest(part.key, repeat.key) },
                 onDuplicate = { model.duplicate(repeat.key) },
                 onMoveUp = if (repeat.canMoveUp) ({ model.moveUp(repeat.key) }) else null,
                 onMoveDown = if (repeat.canMoveDown) ({ model.moveDown(repeat.key) }) else null,
                 onRemove = { model.remove(repeat.key) },
-                icons = true,
+                compact = true,
+            )
+        }
+        if (repeat.rows.isEmpty()) {
+            Text(
+                stringResource(R.string.builder_emptyWork),
+                style = MaterialTheme.typography.bodySmall,
+                color = colors.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 44.dp)
+                    .clip(RoundedCornerShape(PoulpyRadius.sm))
+                    .clickable(onClickLabel = stringResource(R.string.builder_addExercise), onClick = onPick)
+                    .padding(vertical = 13.dp),
             )
         }
         repeat.rows.forEach { child -> StepRow(model, child, onEdit = { onEdit(child.key) }, inRepeat = true) }
     }
 }
 
-/** A small square − or +, discreet beside the repeat's count; its touch area is bigger than it looks. */
+/** The sheet that sets how many times a repeat runs: a number typed or nudged with − and +. */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SquareStep(sign: String, description: String, onClick: () -> Unit) {
+private fun RepeatCountSheet(model: BuilderModel, repeat: BuilderRepeat, onDone: () -> Unit) {
     val colors = MaterialTheme.colorScheme
-    Box(Modifier.size(40.dp).clickable(onClickLabel = description, role = Role.Button, onClick = onClick).semantics { contentDescription = description }, contentAlignment = Alignment.Center) {
-        Box(
-            Modifier.size(28.dp).background(colors.primary.copy(alpha = 0.12f), RoundedCornerShape(PoulpyRadius.sm)),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(sign, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = colors.onPrimaryContainer)
+    var text by remember(repeat.times) { mutableStateOf(repeat.times.toString()) }
+    ModalBottomSheet(onDismissRequest = onDone, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), containerColor = colors.surface) {
+        Column(Modifier.padding(horizontal = 20.dp).padding(bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Text(stringResource(R.string.builder_repeat), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.ExtraBold)
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                FieldLabel(stringResource(R.string.builder_repeatHowMany))
+                NumberEntry(
+                    onLess = { model.setRepeatTimes(repeat.key, repeat.times - 1) },
+                    onMore = { model.setRepeatTimes(repeat.key, repeat.times + 1) },
+                    Modifier.fillMaxWidth(),
+                    lessLabel = stringResource(R.string.builder_repeatFewer),
+                    moreLabel = stringResource(R.string.builder_repeatMore),
+                ) { fieldModifier ->
+                    NumberField(
+                        value = text,
+                        onValueChange = { typed ->
+                            text = typed
+                            typed.toIntOrNull()?.let { model.setRepeatTimes(repeat.key, it) }
+                        },
+                        description = stringResource(R.string.builder_repeatHowMany),
+                        modifier = fieldModifier,
+                        unit = stringResource(R.string.builder_repeatUnit),
+                    )
+                }
+            }
+            PoulpyButton(onClick = onDone, size = PoulpyButtonSize.Lg, modifier = Modifier.fillMaxWidth()) {
+                Text(stringResource(R.string.action_done))
+            }
         }
     }
 }
@@ -575,8 +631,8 @@ private fun RoleTag(label: String, role: StepRole) {
 }
 
 /**
- * The ⋮ menu of a step or a repeat: edit (a step only), duplicate, the moves that apply (up, down, into the repeat above,
- * out of its repeat), and delete. A repeat's menu has an icon on each line, a step's has none.
+ * The ⋮ menu of a step or a repeat, an icon on every line: edit (a step), edit repetitions and add an exercise or a rest
+ * (a repeat), duplicate, the moves that apply (up, down, into the repeat above, out of its repeat), and delete.
  */
 @Composable
 private fun ActionsMenu(
@@ -584,25 +640,37 @@ private fun ActionsMenu(
     onDuplicate: () -> Unit,
     onRemove: () -> Unit,
     onEdit: (() -> Unit)? = null,
+    onEditRepeats: (() -> Unit)? = null,
+    onAddExercise: (() -> Unit)? = null,
+    onAddRest: (() -> Unit)? = null,
     onMoveUp: (() -> Unit)? = null,
     onMoveDown: (() -> Unit)? = null,
     onMoveIn: (() -> Unit)? = null,
     onMoveOut: (() -> Unit)? = null,
-    icons: Boolean = false,
+    compact: Boolean = false,
 ) {
     val colors = MaterialTheme.colorScheme
     var expanded by remember { mutableStateOf(false) }
     Box {
-        IconButton(onClick = { expanded = true }) {
+        IconButton(onClick = { expanded = true }, modifier = if (compact) Modifier.size(36.dp) else Modifier) {
             Icon(Lucide.EllipsisVertical, contentDescription = description, tint = colors.onSurfaceVariant)
         }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            onEdit?.let { MenuLine(stringResource(R.string.builder_edit), Lucide.Pencil.takeIf { icons }) { expanded = false; it() } }
-            MenuLine(stringResource(R.string.builder_duplicate), Lucide.Copy.takeIf { icons }) { expanded = false; onDuplicate() }
-            onMoveUp?.let { MenuLine(stringResource(R.string.builder_moveUp), Lucide.ArrowUp.takeIf { icons }) { expanded = false; it() } }
-            onMoveDown?.let { MenuLine(stringResource(R.string.builder_moveDown), Lucide.ArrowDown.takeIf { icons }) { expanded = false; it() } }
-            onMoveIn?.let { MenuLine(stringResource(R.string.builder_moveIntoRepeat), Lucide.Repeat.takeIf { icons }) { expanded = false; it() } }
-            onMoveOut?.let { MenuLine(stringResource(R.string.builder_moveOutOfRepeat), Lucide.LogOut.takeIf { icons }) { expanded = false; it() } }
+            onEdit?.let { MenuLine(stringResource(R.string.builder_edit), Lucide.Pencil) { expanded = false; it() } }
+            onEditRepeats?.let {
+                MenuLine(stringResource(R.string.builder_editRepeats), Lucide.Pencil) { expanded = false; it() }
+                HorizontalDivider()
+            }
+            if (onAddExercise != null && onAddRest != null) {
+                MenuLine(stringResource(R.string.builder_addExercise), Lucide.PersonStanding) { expanded = false; onAddExercise() }
+                MenuLine(stringResource(R.string.builder_addRest), Lucide.Timer) { expanded = false; onAddRest() }
+                HorizontalDivider()
+            }
+            MenuLine(stringResource(R.string.builder_duplicate), Lucide.Copy) { expanded = false; onDuplicate() }
+            onMoveUp?.let { MenuLine(stringResource(R.string.builder_moveUp), Lucide.ArrowUp) { expanded = false; it() } }
+            onMoveDown?.let { MenuLine(stringResource(R.string.builder_moveDown), Lucide.ArrowDown) { expanded = false; it() } }
+            onMoveIn?.let { MenuLine(stringResource(R.string.builder_moveIntoRepeat), Lucide.ListIndentIncrease) { expanded = false; it() } }
+            onMoveOut?.let { MenuLine(stringResource(R.string.builder_moveOutOfRepeat), Lucide.ListIndentDecrease) { expanded = false; it() } }
             HorizontalDivider()
             DropdownMenuItem(
                 text = { Text(stringResource(R.string.builder_delete), color = colors.error) },
@@ -613,14 +681,10 @@ private fun ActionsMenu(
     }
 }
 
-/** A line of a ⋮ menu, with its icon when it has one. */
+/** A line of a ⋮ menu, with its icon. */
 @Composable
-private fun MenuLine(text: String, icon: ImageVector?, onClick: () -> Unit) {
-    if (icon != null) {
-        DropdownMenuItem(text = { Text(text) }, leadingIcon = { Icon(icon, contentDescription = null) }, onClick = onClick)
-    } else {
-        DropdownMenuItem(text = { Text(text) }, onClick = onClick)
-    }
+private fun MenuLine(text: String, icon: ImageVector, onClick: () -> Unit) {
+    DropdownMenuItem(text = { Text(text) }, leadingIcon = { Icon(icon, contentDescription = null) }, onClick = onClick)
 }
 
 /** A compact select: its label just above the chosen value, and a chevron; a tap lists the options. */
