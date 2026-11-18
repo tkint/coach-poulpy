@@ -1,9 +1,9 @@
 <script setup lang="ts">
-// Poulpy the cook (design/poulpy-3d/looks/chef.mjs), live in PoulpyLookViewer.vue, running the cook's idle (CHEF in
+// Poulpy the cook (design/poulpy-3d/looks/chef.mjs), live in ../PoulpyViewer.vue, running the cook's idle (CHEF in
 // motion.mjs): his chin goes up and his moustache twitches. Stopped, he stands as modelled.
-import PoulpyLookViewer, { type LiveLook, type PoulpyScene } from './PoulpyLookViewer.vue'
+import PoulpyViewer, { type LivePoulpy, type PoulpyScene } from '../PoulpyViewer.vue'
 
-async function start(scene: PoulpyScene): Promise<LiveLook> {
+async function start(scene: PoulpyScene): Promise<LivePoulpy> {
   const [{ buildChef }, { createChef }, tokens] = await Promise.all([
     import('../../../../../design/poulpy-3d/looks/chef.mjs'),
     import('../../../../../design/poulpy-3d/motion.mjs'),
@@ -22,10 +22,11 @@ async function start(scene: PoulpyScene): Promise<LiveLook> {
 
 <template>
   <!-- Framed for his toque: looked at a little higher than his middle, from a little further away. -->
-  <PoulpyLookViewer
+  <PoulpyViewer
     label="Poulpy the cook in a tall white toque and a curled moustache: eyes wide, brows up and a small confident grin."
     :framing="{ tilt: 14, distance: 10.4, centre: 1.62 }"
     move-label="Idle"
     :start="start"
+    :values="() => ({ page: 'look: cook' })"
   />
 </template>
