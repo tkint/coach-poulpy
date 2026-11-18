@@ -25,8 +25,7 @@
     <fieldset class="recap-part builder-block" id="work" data-component="recap-part" aria-label="Work">
           <legend class="part-header" data-component="part-header"><div class="part-title"><span class="part-icon part-icon--work" aria-hidden="true"><MobileIcon name="zap" :size="20" /></span><div><h2>Work</h2><p>1 exercise · about 20 min</p></div></div></legend>
           <ol class="steps" data-reorder><li><section class="repeat" data-component="repeat" aria-label="Repeat 6 times">
-              <div class="repeat-header"><MobileIcon name="repeat" :size="20" /><strong>Repeat</strong>
-                <span class="repeat-count" role="group" aria-label="Number of times"><button type="button" aria-label="Fewer times">−</button><span>6 times</span><button type="button" aria-label="More times">+</button></span>
+              <div class="repeat-header"><MobileIcon name="repeat" :size="18" /><button type="button" class="repeat-title" aria-haspopup="dialog"><strong>Repeat 6 times</strong></button>
                 <button class="icon-button icon-button--quiet" type="button" aria-haspopup="menu" aria-label="More actions for this repeat"><MobileIcon name="ellipsis-vertical" :size="20" /></button></div>
               <ol class="steps"><li><div class="list-row recap-row builder-row" data-component="builder-row">
               <button type="button" class="row-main"><span class="row-icon" aria-hidden="true"><MobileIcon name="footprints" :size="18" /></span><span class="row-text"><strong>Run</strong><span>400 m · 4:30 /km</span></span></button>
@@ -48,13 +47,13 @@
         </fieldset>
   </div>
   <div class="scrim" aria-hidden="true" style="background: transparent;"></div>
-  <div class="popover-menu" id="step-menu" role="menu" aria-label="Actions for Run" data-component="popover-menu" style="position: absolute; top: 515px; right: 28px; width: 232px;">
-    <button type="button" role="menuitem">Edit</button>
-    <button type="button" role="menuitem">Duplicate</button>
-    <button type="button" role="menuitem">Move up</button>
-    <button type="button" role="menuitem">Move down</button>
-    <button type="button" role="menuitem">Move out of the repeat</button>
+  <div class="popover-menu" id="step-menu" role="menu" aria-label="Actions for Run" data-component="popover-menu" style="position: absolute; top: 515px; right: 28px; width: 268px;">
+    <button type="button" role="menuitem"><MobileIcon name="pencil" :size="22" />Edit</button>
+    <button type="button" role="menuitem"><MobileIcon name="copy" :size="22" />Duplicate</button>
+    <button type="button" role="menuitem"><MobileIcon name="arrow-up" :size="22" />Move up</button>
+    <button type="button" role="menuitem"><MobileIcon name="arrow-down" :size="22" />Move down</button>
+    <button type="button" role="menuitem"><MobileIcon name="list-indent-decrease" :size="22" />Move out of the repeat</button>
     <hr>
-    <button type="button" class="danger" role="menuitem"><MobileIcon name="trash" :size="20" />Delete</button>
+    <button type="button" class="danger" role="menuitem"><MobileIcon name="trash" :size="22" />Delete</button>
   </div>
 </main>
