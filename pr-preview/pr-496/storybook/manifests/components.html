@@ -620,7 +620,7 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">31 docs ok</a></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">32 docs ok</a></div>
   </div>
 </header>
 <main>
@@ -1799,10 +1799,58 @@ import * as Live from &#39;./Autumn.stories&#39;
   aria-label="Docs">
   <div class="head">
     <div class="title">
+      <h2><span class="status-dot dot-ok"></span> Brand/Poulpy looks/The cook</h2>
+      <div class="badges">
+        
+        <label for="doc-18-brand-poulpy-looks-the-cook-docs-content" class="badge ok as-toggle">view content</label>
+      </div>
+    </div>
+    <div class="meta" title="./stories/brand/looks/Chef.mdx">brand-poulpy-looks-the-cook--docs · ./stories/brand/looks/Chef.mdx</div>
+    <div># Poulpy the cook **Draft.** Poulpy dressed up as a cook who is sure of everything: a tall...</div>
+  </div>
+
+  <!-- Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="doc-18-brand-poulpy-looks-the-cook-docs-content" class="tg tg-content" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-content">
+          <div class="mdx-content">
+            <pre><code>import { Meta, Story } from &#39;@storybook/addon-docs/blocks&#39;
+import * as Live from &#39;./Chef.stories&#39;
+
+&lt;Meta title=&quot;Brand/Poulpy looks/The cook&quot; /&gt;
+
+# Poulpy the cook
+
+**Draft.** Poulpy dressed up as a cook who is sure of everything: a tall white toque worn a little askew, a big curled French moustache and a confident grin.
+
+&lt;Story of={Live.Chef} /&gt;
+
+- **His face** is a small, confident toothy grin, short from top to bottom, its top tucked under the moustache so only a few teeth show. His eyes are wide open and both brows are up, set high so the moustache has room. It is our own drawing, made for Poulpy.
+- **The moustache is solid and big.** A thick, wide handlebar, a rounded volume that stands out from his face like the toque does, tapering from his middle to two tips that curl up beside his eyes, never over them. It is shaded like him, in a dark a little lighter than his ink, belongs to his face (it goes with his head and twitches) and lies over the grin&#39;s top teeth.
+- **The toque is solid.** A plain band, then a puff with soft folds and a light crease in each. It sits on his head, leans 9° to his left and 5° back, and goes wherever his head goes.
+- **His idle is small.** He stands still, then puffs himself up: his chin goes up 6° and his head grows a little taller, on a spring, and while he holds it his moustache twitches twice, tips up. Then he settles back. `CHEF` in `motion.mjs` holds the timing.
+- **Still Poulpy.** Proud, on the blue side, eight tentacles on the floor and no arms (brand decision 8). Turn him with the slider: the toque and the moustache stay where they belong.
+
+The look is in [`design/poulpy-3d/looks/chef.mjs`](https://github.com/tkint/coach-poulpy/blob/main/design/poulpy-3d/looks/chef.mjs): `TOQUE`, `MOUSTACHE`, `SMILE` and `CHEF_FACE`. It is a preview only: not in the glTF files, the pictures or the apps.
+</code></pre>
+          </div>
+        </div>
+  </div>
+</article>
+<article
+  class="card is-doc no-doc-error"
+  role="listitem"
+  aria-label="Docs">
+  <div class="head">
+    <div class="title">
       <h2><span class="status-dot dot-ok"></span> Brand/Poulpy looks/Jetpack</h2>
       <div class="badges">
         
-        <label for="doc-18-brand-poulpy-looks-jetpack-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-19-brand-poulpy-looks-jetpack-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
     <div class="meta" title="./stories/brand/looks/Jetpack.mdx">brand-poulpy-looks-jetpack--docs · ./stories/brand/looks/Jetpack.mdx</div>
@@ -1811,7 +1859,7 @@ import * as Live from &#39;./Autumn.stories&#39;
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-18-brand-poulpy-looks-jetpack-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-19-brand-poulpy-looks-jetpack-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -1854,7 +1902,7 @@ The look is `JETPACK` and `buildPoulpyJetpack()` in [`design/poulpy-3d/looks/jet
       <h2><span class="status-dot dot-ok"></span> Brand/Poulpy looks/Rodolphe</h2>
       <div class="badges">
         
-        <label for="doc-19-brand-poulpy-looks-rodolphe-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-20-brand-poulpy-looks-rodolphe-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
     <div class="meta" title="./stories/brand/looks/Rodolphe.mdx">brand-poulpy-looks-rodolphe--docs · ./stories/brand/looks/Rodolphe.mdx</div>
@@ -1863,7 +1911,7 @@ The look is `JETPACK` and `buildPoulpyJetpack()` in [`design/poulpy-3d/looks/jet
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-19-brand-poulpy-looks-rodolphe-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-20-brand-poulpy-looks-rodolphe-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -1923,7 +1971,7 @@ Turn the view and everything he wears goes round with him. The switch adds the o
       <h2><span class="status-dot dot-ok"></span> Brand/Poulpy moves/Turning</h2>
       <div class="badges">
         
-        <label for="doc-20-brand-poulpy-moves-turning-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-21-brand-poulpy-moves-turning-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
     <div class="meta" title="./stories/brand/poulpy-moves/Turning.mdx">brand-poulpy-moves-turning--docs · ./stories/brand/poulpy-moves/Turning.mdx</div>
@@ -1932,7 +1980,7 @@ Turn the view and everything he wears goes round with him. The switch adds the o
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-20-brand-poulpy-moves-turning-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-21-brand-poulpy-moves-turning-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -1973,7 +2021,7 @@ His arms are not stiff. Each one bends at three places, and every bend is a smal
       <h2><span class="status-dot dot-ok"></span> Brand/Poulpy moves/Little jumps</h2>
       <div class="badges">
         
-        <label for="doc-21-brand-poulpy-moves-little-jumps-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-22-brand-poulpy-moves-little-jumps-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
     <div class="meta" title="./stories/brand/poulpy-moves/Jumping.mdx">brand-poulpy-moves-little-jumps--docs · ./stories/brand/poulpy-moves/Jumping.mdx</div>
@@ -1982,7 +2030,7 @@ His arms are not stiff. Each one bends at three places, and every bend is a smal
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-21-brand-poulpy-moves-little-jumps-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-22-brand-poulpy-moves-little-jumps-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -2035,7 +2083,7 @@ Poulpy can also jump on the spot. He tucks his head down into his arms, which wi
       <h2><span class="status-dot dot-ok"></span> Brand/Poulpy moves/Jumping around</h2>
       <div class="badges">
         
-        <label for="doc-22-brand-poulpy-moves-jumping-around-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-23-brand-poulpy-moves-jumping-around-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
     <div class="meta" title="./stories/brand/poulpy-moves/JumpingAround.mdx">brand-poulpy-moves-jumping-around--docs · ./stories/brand/poulpy-moves/JumpingAround.mdx</div>
@@ -2044,7 +2092,7 @@ Poulpy can also jump on the spot. He tucks his head down into his arms, which wi
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-22-brand-poulpy-moves-jumping-around-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-23-brand-poulpy-moves-jumping-around-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -2079,7 +2127,7 @@ Given a `stride`, `createJump()` turns him as `createTurn()` does.
       <h2><span class="status-dot dot-ok"></span> Brand/Poulpy moves/The champion</h2>
       <div class="badges">
         
-        <label for="doc-23-brand-poulpy-moves-the-champion-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-24-brand-poulpy-moves-the-champion-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
     <div class="meta" title="./stories/brand/poulpy-moves/Cheering.mdx">brand-poulpy-moves-the-champion--docs · ./stories/brand/poulpy-moves/Cheering.mdx</div>
@@ -2088,7 +2136,7 @@ Given a `stride`, `createJump()` turns him as `createTurn()` does.
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-23-brand-poulpy-moves-the-champion-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-24-brand-poulpy-moves-the-champion-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -2126,7 +2174,7 @@ The controls are the jump&#39;s, starting from the champion&#39;s own values: He
       <h2><span class="status-dot dot-ok"></span> Brand/Poulpy moves/The cocky wink</h2>
       <div class="badges">
         
-        <label for="doc-24-brand-poulpy-moves-the-cocky-wink-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-25-brand-poulpy-moves-the-cocky-wink-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
     <div class="meta" title="./stories/brand/poulpy-moves/Winking.mdx">brand-poulpy-moves-the-cocky-wink--docs · ./stories/brand/poulpy-moves/Winking.mdx</div>
@@ -2135,7 +2183,7 @@ The controls are the jump&#39;s, starting from the champion&#39;s own values: He
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-24-brand-poulpy-moves-the-cocky-wink-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-25-brand-poulpy-moves-the-cocky-wink-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -2176,7 +2224,7 @@ The switch picks the eye he shuts, named for him: his right eye, the design, is 
       <h2><span class="status-dot dot-ok"></span> Brand/Poulpy moves/Annoyed</h2>
       <div class="badges">
         
-        <label for="doc-25-brand-poulpy-moves-annoyed-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-26-brand-poulpy-moves-annoyed-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
     <div class="meta" title="./stories/brand/poulpy-moves/Annoyed.mdx">brand-poulpy-moves-annoyed--docs · ./stories/brand/poulpy-moves/Annoyed.mdx</div>
@@ -2185,7 +2233,7 @@ The switch picks the eye he shuts, named for him: his right eye, the design, is 
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-25-brand-poulpy-moves-annoyed-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-26-brand-poulpy-moves-annoyed-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -2222,7 +2270,7 @@ None of them is a turn: the turn is kept for changing mood. They are the same li
       <h2><span class="status-dot dot-ok"></span> Brand/Poulpy moves/Fuming</h2>
       <div class="badges">
         
-        <label for="doc-26-brand-poulpy-moves-fuming-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-27-brand-poulpy-moves-fuming-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
     <div class="meta" title="./stories/brand/poulpy-moves/Fuming.mdx">brand-poulpy-moves-fuming--docs · ./stories/brand/poulpy-moves/Fuming.mdx</div>
@@ -2231,7 +2279,7 @@ None of them is a turn: the turn is kept for changing mood. They are the same li
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-26-brand-poulpy-moves-fuming-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-27-brand-poulpy-moves-fuming-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -2268,7 +2316,7 @@ How he gets here and how he calms down are on [Getting angry](?path=/docs/brand-
       <h2><span class="status-dot dot-ok"></span> Brand/Poulpy moves/Getting angry</h2>
       <div class="badges">
         
-        <label for="doc-27-brand-poulpy-moves-getting-angry-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-28-brand-poulpy-moves-getting-angry-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
     <div class="meta" title="./stories/brand/poulpy-moves/GettingAngry.mdx">brand-poulpy-moves-getting-angry--docs · ./stories/brand/poulpy-moves/GettingAngry.mdx</div>
@@ -2277,7 +2325,7 @@ How he gets here and how he calms down are on [Getting angry](?path=/docs/brand-
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-27-brand-poulpy-moves-getting-angry-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-28-brand-poulpy-moves-getting-angry-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -2344,7 +2392,7 @@ Not decided yet: how many taps make him annoyed and fuming, and how long he stay
       <h2><span class="status-dot dot-ok"></span> Brand/Brand book</h2>
       <div class="badges">
         
-        <label for="doc-28-brand-brand-book-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-29-brand-brand-book-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
     <div class="meta" title="./stories/brand/BrandBook.mdx">brand-brand-book--docs · ./stories/brand/BrandBook.mdx</div>
@@ -2353,7 +2401,7 @@ Not decided yet: how many taps make him annoyed and fuming, and how long he stay
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-28-brand-brand-book-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-29-brand-brand-book-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -2384,7 +2432,7 @@ The Poulpy brand book: logo, colours, poses, type, tokens and behaviour, with ev
       <h2><span class="status-dot dot-ok"></span> Brand/Decisions</h2>
       <div class="badges">
         
-        <label for="doc-29-brand-decisions-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-30-brand-decisions-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
     <div class="meta" title="./stories/brand/Decisions.mdx">brand-decisions--docs · ./stories/brand/Decisions.mdx</div>
@@ -2393,7 +2441,7 @@ The Poulpy brand book: logo, colours, poses, type, tokens and behaviour, with ev
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-29-brand-decisions-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-30-brand-decisions-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -2560,7 +2608,7 @@ The app icons are his pictures on Deep sea, in light and dark alike, and the loa
       <h2><span class="status-dot dot-ok"></span> Brand/Ideas for later</h2>
       <div class="badges">
         
-        <label for="doc-30-brand-ideas-for-later-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-31-brand-ideas-for-later-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
     <div class="meta" title="./stories/brand/Ideas.mdx">brand-ideas-for-later--docs · ./stories/brand/Ideas.mdx</div>
@@ -2569,7 +2617,7 @@ The app icons are his pictures on Deep sea, in light and dark alike, and the loa
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-30-brand-ideas-for-later-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-31-brand-ideas-for-later-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
