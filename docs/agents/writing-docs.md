@@ -11,7 +11,7 @@ A page is good when a reader finds what they came for in under a minute and can 
 5. **Write what and why, not how it is wired.** The reader wants behaviour and the reason for it. Class names and file names appear only when the reader will go looking for them.
 6. **Keep paragraphs short.** Three sentences is typical, five is the limit. Use a bullet list for parallel items, a table for a lookup, prose for reasoning. No chains of clauses joined by semicolons.
 7. **Fold the reference.** Detail that only some readers need goes in a `<details><summary>…</summary>` block, closed by default. It works on GitHub and on the site.
-8. **One audience per page.** Rules and behaviour (business) go on one page, wiring and class names (technical) on another that links back. A reader should never need to skip lines to find theirs.
+8. **One audience per page.** Rules and behaviour (business) go on one page, wiring and class names (technical) on another that links back. A reader should never need to skip lines to find theirs. On the site, business pages go in the **Product** menu and technical ones in **Technical** (`site/.vitepress/config.mts`).
 9. **Leave out what isn't true yet.** No "what comes next" lists and no work-in-progress notes: those belong in issues and the [roadmap](../roadmap.md).
 
 ## Wording
