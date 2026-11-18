@@ -1,7 +1,7 @@
 // Draws the Poulpy of design/poulpy-3d/model.mjs with three.js: flat cartoon shading, a light that stays
 // in the room while he turns, the gleam that follows it and the optional outline. He is built on the
 // joints of design/poulpy-3d/motion.mjs, so pose() can turn him, lift him, bend his arms, swing his medal, throw confetti, change his face and light his stars,
-// play the DJ's records and notes (design/poulpy-3d/looks/dj.mjs) and lift the cook's chin (looks/chef.mjs). Poulpy3d.vue owns
+// play the DJ's records and notes (design/poulpy-3d/looks/dj.mjs) and lift the cook's chin (looks/chef.mjs). PoulpyViewer.vue owns
 // the controls; this file owns the canvas and everything WebGL, and gives it all back on dispose().
 import * as THREE from 'three'
 import tokens from '../../../../design/tokens.json'
