@@ -3,20 +3,19 @@
 // With `moods` the switch picks one of his six moods instead of a side of the plush, with `poses` one of his twelve poses.
 // With `motion` he moves himself (design/poulpy-3d/motion.mjs) and the viewer stays put: "turn" is his idle,
 // "jump" his little jumps on the spot, "jump-turn" the same jumps, each turning him a step, and "cheer" the
-// champion's jumps of joy, with his medal and confetti. "wink" is the cocky one's wink, with his stars. "dj" is the DJ look
-// (design/poulpy-3d/looks/dj.mjs) playing his decks, his head bobbing as notes float up. He only moves while he is on screen.
+// champion's jumps of joy, with his medal and confetti. "wink" is the cocky one's wink, with his stars.
+// He only moves while he is on screen. (The DJ look plays on its own page, looks/PoulpyDj.vue.)
 import { RotateCcw, RotateCw } from '@lucide/vue'
 import { onBeforeUnmount, onMounted, shallowRef, useTemplateRef, watch } from 'vue'
 import type { PoulpyMood, PoulpySide } from '../../../../design/poulpy-3d/model.mjs'
 import type { PoulpyPose } from '../../../../design/poulpy-3d/poses.mjs'
-import type { Cheer, Dj, Jump, Turn, Wink } from '../../../../design/poulpy-3d/motion.mjs'
+import type { Cheer, Jump, Turn, Wink } from '../../../../design/poulpy-3d/motion.mjs'
 import type { createPoulpyScene } from './poulpy3dScene'
 
-const { motion, moods, poses } = defineProps<{ motion?: 'turn' | 'jump' | 'jump-turn' | 'cheer' | 'wink' | 'dj'; moods?: boolean; poses?: boolean }>()
+const { motion, moods, poses } = defineProps<{ motion?: 'turn' | 'jump' | 'jump-turn' | 'cheer' | 'wink'; moods?: boolean; poses?: boolean }>()
 const cheering = motion === 'cheer'
 const winking = motion === 'wink'
-const djing = motion === 'dj'
-const posed = cheering || winking || djing // he keeps one pose, so there is none to pick
+const posed = cheering || winking // he keeps one pose, so there is none to pick
 const jumping = motion === 'jump' || motion === 'jump-turn' || cheering
 const turning = motion !== 'jump' && !posed // he turns, or without `motion` the viewer walks around him
 
@@ -56,7 +55,7 @@ function values() {
     view: { turn: round(turn.value), tilt: round(tilt.value), distance: round(distance.value) },
     ...(jumping ? { jump: { height: round(height.value), tuck: round(tuck.value), landing: round(landing.value), spread: round(spread.value), hang: round(hang.value), lean: round(lean.value), pause: round(pause.value) } } : {}),
     ...(motion && turning ? { step: step.value, wiggle: wiggle.value, direction: direction.value } : {}),
-    ...(motion && !winking && !djing ? { softArms: round(softness.value) } : {}),
+    ...(motion && !winking ? { softArms: round(softness.value) } : {}),
     speed: round(speed.value),
   }
 }
@@ -74,7 +73,7 @@ async function exportValues() {
 let scene: ReturnType<typeof createPoulpyScene> | undefined
 let frame = 0
 let last = 0
-let move: Turn | Jump | Cheer | Wink | Dj | undefined
+let move: Turn | Jump | Cheer | Wink | undefined
 let winkFace: ((t: number, side?: 'left' | 'right') => (string | number)[][]) | undefined
 let onScreen = true
 let watching: IntersectionObserver | undefined
@@ -94,7 +93,7 @@ const directions = [
   { id: 'anticlockwise', label: 'Anticlockwise', icon: RotateCcw },
   { id: 'clockwise', label: 'Clockwise', icon: RotateCw },
 ] as const
-const moves = { turn: 'turning around in short steps', jump: 'doing little jumps on the spot', 'jump-turn': 'doing little jumps that turn him around', cheer: 'the champion, jumping for joy with his medal while confetti flies', wink: 'the cocky one, winking as stars pop up around him', dj: 'the DJ, playing his decks and bobbing his head as music notes float up around him' }
+const moves = { turn: 'turning around in short steps', jump: 'doing little jumps on the spot', 'jump-turn': 'doing little jumps that turn him around', cheer: 'the champion, jumping for joy with his medal while confetti flies', wink: 'the cocky one, winking as stars pop up around him' }
 const clamp = (value: number, low: number, high: number) => Math.min(high, Math.max(low, value))
 const wrap = (degrees: number) => ((degrees % 360) + 360) % 360
 
@@ -149,7 +148,7 @@ function nudge(event: KeyboardEvent) {
   tilt.value = clamp(tilt.value + step[1], -89, 89)
 }
 
-const show = () => scene?.show(djing ? { look: 'dj' } : cheering ? { pose: 'champion', effects: false } : winking ? { pose: 'cocky', effects: false, faces: winkFace && ((t: number) => winkFace!(t, eye.value)) } : poses ? { pose: side.value as PoulpyPose } : (side.value as PoulpySide | PoulpyMood), outline.value)
+const show = () => scene?.show(cheering ? { pose: 'champion', effects: false } : winking ? { pose: 'cocky', effects: false, faces: winkFace && ((t: number) => winkFace!(t, eye.value)) } : poses ? { pose: side.value as PoulpyPose } : (side.value as PoulpySide | PoulpyMood), outline.value)
 // The scene wants where the viewer stands: the other way around from how far he has turned.
 const look = () => scene?.look({ turn: -turn.value, tilt: tilt.value, distance: distance.value })
 watch([side, outline, eye], show)
@@ -168,9 +167,8 @@ onMounted(async () => {
   try {
     const { createPoulpyScene } = await import('./poulpy3dScene')
     if (motion) {
-      const { createCheer, createDj, createJump, createTurn, createWink } = await import('../../../../design/poulpy-3d/motion.mjs')
-      if (djing) move = createDj()
-      else if (winking) {
+      const { createCheer, createJump, createTurn, createWink } = await import('../../../../design/poulpy-3d/motion.mjs')
+      if (winking) {
         winkFace = (await import('../../../../design/poulpy-3d/poses.mjs')).winkFace
         move = createWink()
       } else if (jumping) {
@@ -233,7 +231,7 @@ onBeforeUnmount(() => {
       </div>
       <div class="toggles">
         <button type="button" class="toggle" :aria-pressed="outline" @click="outline = !outline">Outline</button>
-        <button type="button" class="toggle" :aria-pressed="spinning" @click="spinning = !spinning">{{ winking ? 'Wink' : djing ? 'Play' : jumping ? 'Jump' : motion ? 'Turn' : 'Spin' }}</button>
+        <button type="button" class="toggle" :aria-pressed="spinning" @click="spinning = !spinning">{{ winking ? 'Wink' : jumping ? 'Jump' : motion ? 'Turn' : 'Spin' }}</button>
         <button v-if="motion && turning" type="button" class="toggle" :aria-pressed="wiggle" title="On, each step differs a little (20° to 30° around 24°). Off, every step is exactly the Step." @click="wiggle = !wiggle">Wiggle</button>
         <button type="button" class="toggle export" @click="exportValues">{{ copied ? 'Copied' : 'Export values' }}</button>
       </div>
@@ -249,7 +247,7 @@ onBeforeUnmount(() => {
         <label class="slider"><span>Pause</span><input v-model.number="pause" type="range" min="0" max="3" step="0.05" /><output>{{ pause.toFixed(2) }} s</output></label>
       </template>
       <label v-if="motion && turning" class="slider"><span>Step</span><input v-model.number="step" type="range" min="1" :max="jumping ? 720 : 180" step="1" /><output>{{ step }}°</output></label>
-      <label v-if="motion && !winking && !djing" class="slider"><span>Soft arms</span><input v-model.number="softness" type="range" min="0" max="4" step="0.05" /><output>{{ softness.toFixed(2) }}</output></label>
+      <label v-if="motion && !winking" class="slider"><span>Soft arms</span><input v-model.number="softness" type="range" min="0" max="4" step="0.05" /><output>{{ softness.toFixed(2) }}</output></label>
       <label class="slider"><span>Speed</span><input v-model.number="speed" type="range" min="0.1" max="5" step="0.1" @input="spinning = true" /><output>{{ speed.toFixed(1) }}×</output></label>
       <label v-if="exported" class="exported"><span>Values to hand over</span><textarea readonly rows="8" :value="exported" @focus="($event.target as HTMLTextAreaElement).select()" /></label>
     </div>
