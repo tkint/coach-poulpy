@@ -128,7 +128,7 @@ export const BuilderTidyAddMenu: Story = {
 /** Builder · the ⋮ of a repeat: edit the repetitions, add an exercise or a rest (never a repeat inside a repeat), then the usual actions. */
 export const BuilderTidyRepeatMenu: Story = {
   name: "Repeat menu",
-  tags: ['!autodocs', 'draft'],
+  tags: ['!autodocs', 'agreed'],
   ...screen(screenBuilderTidyRepeatMenu, { reorder: true }),
   parameters: { mockup: {} },
 }
@@ -145,7 +145,7 @@ export const BuilderTidyEmptyOptionalBlocks: Story = {
 /** Builder · a repeat's one-line title "Repeat 3 times" opens the count sheet; the ⋮ holds the actions, adding included. */
 export const BuilderTidyRepeatHeader: Story = {
   name: "Repeat header",
-  tags: ['!autodocs', 'draft'],
+  tags: ['!autodocs', 'agreed'],
   ...screen(screenBuilderTidyRepeatHeader, { reorder: true }),
   parameters: { mockup: {} },
 }
@@ -154,7 +154,7 @@ export const BuilderTidyRepeatHeader: Story = {
 /** Builder · tapping the title or the count of a repeat opens a sheet with a number field. */
 export const BuilderTidyRepeatCountSheet: Story = {
   name: "Repeat count sheet",
-  tags: ['!autodocs', 'draft'],
+  tags: ['!autodocs', 'agreed'],
   ...screen(screenBuilderTidyRepeatCountSheet, { reorder: true }),
   parameters: { mockup: {} },
 }
@@ -162,7 +162,7 @@ export const BuilderTidyRepeatCountSheet: Story = {
 /** Builder · a repeat with nothing in it says "Tap to add an exercise." like the other blocks. */
 export const BuilderTidyRepeatEmpty: Story = {
   name: "Empty repeat",
-  tags: ['!autodocs', 'draft'],
+  tags: ['!autodocs', 'agreed'],
   ...screen(screenBuilderTidyRepeatEmpty, { reorder: true }),
   parameters: { mockup: {} },
 }
