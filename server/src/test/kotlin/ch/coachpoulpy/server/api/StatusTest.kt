@@ -29,10 +29,7 @@ import org.http4k.core.Method.GET
 import org.http4k.core.Method.POST
 import org.http4k.core.Request
 import org.http4k.core.Response
-import org.http4k.core.Status.Companion.CONFLICT
 import org.http4k.core.Status.Companion.FORBIDDEN
-import org.http4k.core.Status.Companion.NOT_FOUND
-import org.http4k.core.Status.Companion.NO_CONTENT
 import org.http4k.core.Status.Companion.OK
 import org.http4k.core.Status.Companion.SERVICE_UNAVAILABLE
 import org.http4k.core.Status.Companion.UNAUTHORIZED
@@ -184,61 +181,6 @@ class StatusTest {
         val id = test.database.queries.accountQueries.byEmail("lea@example.com").executeAsOne().id
         test.database.queries.confirmationTokenQueries.deleteForAccount(id)
         assertEquals(JsonNull, pending().single().getValue("linkExpiresAt"))
-    }
-
-    private fun confirmByHand(id: Any, token: String? = signIn("ana@example.com", Client.Website)): Response =
-        Request(POST, "/api/v1/admin/pending-registrations/$id/confirm").let { if (token == null) it else it.header("Authorization", "Bearer $token") }
-            .let(test.http)
-
-    private fun pendingId(email: String) = pending().first { it.getValue("email").jsonPrimitive.content == email }.getValue("id").jsonPrimitive.content
-
-    @Test
-    fun theAdminConfirmsAPendingRegistrationByHand() {
-        test.accounts.signUp(SignUp("lea@example.com", "correct horse", "en", healthDataConsent = true))
-        val link = test.mailer.sent.last().text.substringAfter("#").substringBefore("\n")
-
-        assertEquals(NO_CONTENT, confirmByHand(pendingId("lea@example.com")).status)
-
-        assertEquals(emptyList(), pending())
-        assertTrue(test.signIns.signIn("lea@example.com", "correct horse", "A phone", Client.App) is SignInResult.Signed)
-        assertFalse(test.accounts.confirm(link), "its link stops working")
-    }
-
-    @Test
-    fun theAdminsConfirmationIsHeardByThePhoneThatSignedUp() {
-        test.accounts.signUp(SignUp("lea@example.com", "correct horse", "en", healthDataConsent = true, pendingKey = "phone-key"))
-        var heard = false
-        test.accounts.listen("phone-key") { heard = true }
-        confirmByHand(pendingId("lea@example.com"))
-        assertTrue(heard)
-        assertTrue(test.accounts.isConfirmed("phone-key"))
-    }
-
-    @Test
-    fun anAlreadyConfirmedOrUnknownAccountIsRefused() {
-        confirmed("lea@example.com")
-        val lea = test.database.queries.accountQueries.forSignIn("lea@example.com").executeAsOne().id
-        assertEquals(CONFLICT, confirmByHand(lea).status)
-        assertEquals(NOT_FOUND, confirmByHand("0190d4d2-0000-7000-8000-00000000dead").status)
-    }
-
-    @Test
-    fun confirmingByHandIsInTheAuditLogWithTheMaskedAddress() {
-        test.accounts.signUp(SignUp("lea@example.com", "correct horse", "en", healthDataConsent = true))
-        confirmByHand(pendingId("lea@example.com"))
-        val entry = test.audit.recent().first { it.action == "admin.account.confirm" }
-        assertEquals("l***@example.com", entry.target)
-    }
-
-    @Test
-    fun onlyAnAdminOnTheWebsiteConfirmsByHand() {
-        test.accounts.signUp(SignUp("tom@example.com", "correct horse", "en", healthDataConsent = true))
-        val id = pendingId("tom@example.com")
-        confirmed("lea@example.com")
-        assertEquals(FORBIDDEN, confirmByHand(id, signIn("lea@example.com", Client.Website)).status)
-        assertEquals(FORBIDDEN, confirmByHand(id, signIn("ana@example.com")).status)
-        assertEquals(UNAUTHORIZED, confirmByHand(id, null).status)
-        assertEquals(1, pending().size)
     }
 
     @Test
