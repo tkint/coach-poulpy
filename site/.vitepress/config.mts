@@ -118,7 +118,7 @@ export default withMermaid(
           ],
           [
             'Architecture',
-            ['/docs/architecture', '/docs/roadmap', '/CONTEXT', '/docs/workout-file', '/docs/the-api', '/docs/accounts', '/docs/admin', '/docs/web-app', '/decisions/', '/docs/adr/', '/docs/research/'],
+            ['/docs/architecture', '/docs/roadmap', '/CONTEXT', '/docs/workout-file', '/docs/the-api', '/docs/accounts', '/docs/admin', '/docs/admin-internals', '/docs/web-app', '/decisions/', '/docs/adr/', '/docs/research/'],
             [
               { text: 'Overview', link: '/docs/architecture' },
               { text: 'Roadmap', link: '/docs/roadmap' },
@@ -127,6 +127,7 @@ export default withMermaid(
               { text: 'The API', link: '/docs/the-api' },
               { text: 'Accounts', link: '/docs/accounts' },
               { text: 'The admin area', link: '/docs/admin' },
+              { text: 'Admin internals', link: '/docs/admin-internals' },
               { text: 'The web app', link: '/docs/web-app' },
               { text: 'Decisions', link: '/decisions/', collapsed: true, items: adrs },
               { text: 'Research', collapsed: true, items: research },

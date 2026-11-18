@@ -11,7 +11,8 @@ A page is good when a reader finds what they came for in under a minute and can 
 5. **Write what and why, not how it is wired.** The reader wants behaviour and the reason for it. Class names and file names appear only when the reader will go looking for them.
 6. **Keep paragraphs short.** Three sentences is typical, five is the limit. Use a bullet list for parallel items, a table for a lookup, prose for reasoning. No chains of clauses joined by semicolons.
 7. **Fold the reference.** Detail that only some readers need goes in a `<details><summary>…</summary>` block, closed by default. It works on GitHub and on the site.
-8. **Leave out what isn't true yet.** No "what comes next" lists and no work-in-progress notes: those belong in issues and the [roadmap](../roadmap.md).
+8. **One audience per page.** Rules and behaviour (business) go on one page, wiring and class names (technical) on another that links back. A reader should never need to skip lines to find theirs.
+9. **Leave out what isn't true yet.** No "what comes next" lists and no work-in-progress notes: those belong in issues and the [roadmap](../roadmap.md).
 
 ## Wording
 
@@ -24,4 +25,4 @@ Plain, active and specific: "The server refuses it" beats "It is refused". Name 
 - Is anything here also written somewhere else? Keep one, link the other.
 - Is every route, status code or field list one the OpenAPI document already has? Delete it and link.
 
-[The admin area](../admin.md) is the worked example.
+[The admin area](../admin.md) and [Admin internals](../admin-internals.md) are the worked example.
