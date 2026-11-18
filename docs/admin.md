@@ -23,6 +23,7 @@ The **Accounts** screen lists accounts with email, role, confirmation, sign-in s
 An admin can:
 
 - **Disable** an account. It can't sign in and every device is signed out. **Enable** reverses it. A disabled account gets the same "wrong email or password" as any other refusal.
+- **Confirm email** for an unconfirmed account, in its side panel ([#382](https://github.com/tkint/coach-poulpy/issues/382)). Use it when the email never arrived, or when running locally with no mail server ([Trying it locally](./the-api.md#trying-it-locally)). It has the same effect as the person following the link. A dialog first says the admin vouches for an address nobody proved.
 - **Delete** an account after typing its email again. This removes the account and all its data, exactly as when a user deletes their own account.
 
 An admin can't disable or delete their own account.
@@ -37,11 +38,10 @@ The **Settings** screen changes the email from-address without a deploy.
 
 ## Status
 
-The **Status** screen shows whether mail works and who is waiting to confirm. It changes nothing except through one action ([#340](https://github.com/tkint/coach-poulpy/issues/340)).
+The **Status** screen shows whether mail works and who is waiting to confirm. It is read-only ([#340](https://github.com/tkint/coach-poulpy/issues/340)).
 
 - **Mail** says whether a mail server is set up and, if so, how the last email went: its kind (confirmation, password reset or test), when, and whether it worked. A server restart forgets it. The mail server's details are never shown.
-- **Pending registrations** are accounts whose email isn't confirmed, newest first, the last 100. Each row shows the address, when it signed up and when its latest link expires.
-- **Confirm by hand** ([#382](https://github.com/tkint/coach-poulpy/issues/382)) lets an admin confirm a pending row, for example when the email never arrived or when running locally with no mail server ([Trying it locally](./the-api.md#trying-it-locally)). It has the same effect as the person following the link. A dialog first says the admin vouches for an address nobody proved.
+- **Pending registrations** are accounts whose email isn't confirmed, newest first, the last 100. Each row shows the address, when it signed up and when its latest link expires. To confirm one, open the account in [Accounts](#accounts).
 
 The public `/status` page of the web app is separate. Anyone can open it. It says only whether Coach Poulpy is up or down, never how the server is configured.
 

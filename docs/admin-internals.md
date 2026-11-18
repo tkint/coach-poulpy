@@ -12,6 +12,7 @@ What to know before changing admin code: the decisions and the traps. The routes
 ## Accounts
 
 - `AdminAccounts.list` reads every account row and cuts the page in memory. That's enough for a back office. Move it into SQL if accounts reach the hundreds of thousands.
+- Confirming an account's email by hand (from Accounts) has the same effect as the link: the account can sign in, its pending links stop working and a phone waiting for the link hears it.
 - Disabling revokes every access and refresh token. Deleting runs the same code as the user's own deletion.
 
 ## Settings and mail
@@ -20,7 +21,6 @@ What to know before changing admin code: the decisions and the traps. The routes
 - Every email goes through `SettingsMailer`, which reads `mail-from` when it sends. That's why a saved address applies with no restart.
 - Mail is configured when `SMTP_HOST` is set. Without it, sending fails with `No mail server is set: SMTP_HOST is unset`, and the error isn't printed to the log.
 - `SettingsMailer.last` keeps the last send in memory, so a restart forgets it.
-- Confirming a pending registration by hand has the same effect as the link: the account can sign in, its pending links stop working and a phone waiting for the link hears it.
 - The public `GET /api/v1/status` must never say how the server is configured. A test holds it to that.
 
 ## Catalog
