@@ -96,12 +96,12 @@ function bandShape() {
 
 // The antlers sit low on the band, `at` from the top: chunky dark felt, a fat beam that rises and bows out with two
 // round tines branching outwards, and a little gold jingle bell on every tip. Nothing has a point.
-const ANTLER = { at: 0.5, size: 1.4, beam: [0.1, 0.13, 0.125, 0.115, 0.105], tine: 0.09, bell: 0.058 }
+const ANTLER = { at: 0.5, size: 1.4, tall: 1.4, beam: [0.1, 0.13, 0.125, 0.115, 0.105], tine: 0.09, bell: 0.058 }
 
 function antlerParts(sign) {
   const { p, n } = bandAt(sign * ANTLER.at, 0), out = [sign, 0, 0], up = [0, 1, 0]
-  // Measured from where the antler meets the band: `a` along his head's normal, `b` outwards, `c` up, `d` forwards, all but `a` times `size`.
-  const go = (a, b, c, d = 0) => add(add(add(add(p, n, a), out, b * ANTLER.size), up, c * ANTLER.size), [0, 0, 1], d * ANTLER.size)
+  // Measured from where the antler meets the band: `a` along his head's normal, `b` outwards, `c` up, `d` forwards, all but `a` times `size`, and `c` times `tall` too.
+  const go = (a, b, c, d = 0) => add(add(add(add(p, n, a), out, b * ANTLER.size), up, c * ANTLER.size * ANTLER.tall), [0, 0, 1], d * ANTLER.size)
   const beam = [go(0.02, 0, 0), go(0.04, 0.04, 0.14), go(0.04, 0.1, 0.28), go(0.04, 0.12, 0.42, -0.02), go(0.04, 0.09, 0.53, -0.03)]
   const tines = [
     [go(0.04, 0.05, 0.15), go(0.04, 0.16, 0.22, 0.03), go(0.04, 0.28, 0.25, 0.05)],
