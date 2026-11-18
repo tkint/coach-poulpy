@@ -430,5 +430,6 @@ export function createPoulpyScene(canvas: HTMLCanvasElement) {
   }
 
   // `room` is the three.js scene, for a look to add what goes on around him (falling leaves); it removes and disposes of it itself.
-  return { show, look, pose, fumes, dispose, room: scene }
+  // `camera` is the viewer, for a look whose effects turn to face it (the winter snow and breath).
+  return { show, look, pose, fumes, dispose, room: scene, camera }
 }
