@@ -105,6 +105,9 @@ export function createPoulpyScene(canvas: HTMLCanvasElement) {
     if (camera.fov !== (view.field ?? 28)) { camera.fov = view.field ?? 28; camera.updateProjectionMatrix() }
     const turn = THREE.MathUtils.degToRad(view.turn), tilt = THREE.MathUtils.degToRad(view.tilt)
     camera.position.set(view.distance * Math.sin(turn) * Math.cos(tilt), here + view.distance * Math.sin(tilt), view.distance * Math.cos(turn) * Math.cos(tilt))
+    // Up is the way the tilt would carry the viewer, not the room's up, so looking from straight above or below him (a tilt of
+    // ±90°) keeps the turn and never flips. Short of ±90° it gives the same camera as the room's up.
+    camera.up.set(-Math.sin(turn) * Math.sin(tilt), Math.cos(tilt), -Math.cos(turn) * Math.sin(tilt))
     camera.lookAt(0, here, 0)
     camera.updateMatrixWorld()
     // The light and the gleam are placed from where the viewer stands, so they stay put in the room.
