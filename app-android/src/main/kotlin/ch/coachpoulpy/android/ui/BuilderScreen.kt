@@ -414,6 +414,7 @@ private fun RepeatBlock(model: BuilderModel, part: BuilderPart, repeat: BuilderR
 }
 
 /** The sheet that sets how many times a repeat runs: a number typed or nudged with − and +. */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun RepeatCountSheet(model: BuilderModel, repeat: BuilderRepeat, onDone: () -> Unit) {
     val colors = MaterialTheme.colorScheme
