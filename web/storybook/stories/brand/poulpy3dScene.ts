@@ -1,7 +1,7 @@
 // Draws the Poulpy of design/poulpy-3d/model.mjs with three.js: flat cartoon shading, a light that stays
 // in the room while he turns, the gleam that follows it and the optional outline. He is built on the
 // joints of design/poulpy-3d/motion.mjs, so pose() can turn him, lift him, bend his arms, swing his medal, throw confetti, change his face and light his stars,
-// play the DJ's records and notes (design/poulpy-3d/looks/dj.mjs) and lift the cook's chin (looks/chef.mjs). Poulpy3d.vue owns
+// play the DJ's records and notes (design/poulpy-3d/looks/dj.mjs) and lift the cook's chin (looks/chef.mjs). PoulpyViewer.vue owns
 // the controls; this file owns the canvas and everything WebGL, and gives it all back on dispose().
 import * as THREE from 'three'
 import tokens from '../../../../design/tokens.json'
@@ -105,6 +105,9 @@ export function createPoulpyScene(canvas: HTMLCanvasElement) {
     if (camera.fov !== (view.field ?? 28)) { camera.fov = view.field ?? 28; camera.updateProjectionMatrix() }
     const turn = THREE.MathUtils.degToRad(view.turn), tilt = THREE.MathUtils.degToRad(view.tilt)
     camera.position.set(view.distance * Math.sin(turn) * Math.cos(tilt), here + view.distance * Math.sin(tilt), view.distance * Math.cos(turn) * Math.cos(tilt))
+    // Up is the way the tilt would carry the viewer, not the room's up, so looking from straight above or below him (a tilt of
+    // ±90°) keeps the turn and never flips. Short of ±90° it gives the same camera as the room's up.
+    camera.up.set(-Math.sin(turn) * Math.sin(tilt), Math.cos(tilt), -Math.cos(turn) * Math.sin(tilt))
     camera.lookAt(0, here, 0)
     camera.updateMatrixWorld()
     // The light and the gleam are placed from where the viewer stands, so they stay put in the room.
@@ -237,7 +240,7 @@ export function createPoulpyScene(canvas: HTMLCanvasElement) {
       if (outline && edge) {
         // The outline is the same shape, a little bigger, seen from inside.
         const hull = geometry({ ...part, positions: part.positions.map((p, i) => p + part.normals[i] * LOOK.outline.width) })
-        place(part, hull, new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(edge[0], edge[1], edge[2]), side: THREE.BackSide }))
+        place(part, hull, new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(edge[0], edge[1], edge[2]), side: THREE.BackSide })).name = `${part.name}_outline`
       }
     }
     faces = []
@@ -393,6 +396,13 @@ export function createPoulpyScene(canvas: HTMLCanvasElement) {
     render()
   }
 
+  /** His parts whose names start with `name`, outlines included, for whoever moves one of them on its own (a look's idle). */
+  function parts(name: string) {
+    const found: THREE.Mesh[] = []
+    poulpy?.traverse((node: THREE.Object3D) => { if (node instanceof THREE.Mesh && node.name.startsWith(name)) found.push(node) })
+    return found
+  }
+
   function look(next: PoulpyView) {
     view = next
     render()
@@ -431,5 +441,5 @@ export function createPoulpyScene(canvas: HTMLCanvasElement) {
 
   // `room` is the three.js scene, for a look to add what goes on around him (falling leaves); it removes and disposes of it itself.
   // `camera` is the viewer, for a look whose effects turn to face it (the winter snow and breath).
-  return { show, look, pose, fumes, dispose, room: scene, camera }
+  return { show, look, pose, fumes, parts, render, dispose, room: scene, camera }
 }

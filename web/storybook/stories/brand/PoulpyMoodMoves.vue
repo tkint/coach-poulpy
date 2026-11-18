@@ -1,10 +1,10 @@
 <script setup lang="ts">
 // Drafts of how Home's Poulpy gets angry and calms down, to validate before anything is baked for the phones: after several taps he spins and turns
 // annoyed, tapped again he spins and goes fuming, tapped while fuming he tucks and his fumes puff, then after a while he spins back to annoyed and
-// to normal. Each step has a few variants to compare; one scene plays them (design/poulpy-3d/motion.mjs, poulpy3dScene.ts).
-import { onBeforeUnmount, onMounted, shallowRef, useTemplateRef } from 'vue'
+// to normal. Each step has a few variants to compare; PoulpyViewer.vue draws him and runs the clock (design/poulpy-3d/motion.mjs, poulpy3dScene.ts).
+import { shallowRef, useTemplateRef } from 'vue'
 import { spinning, tucking, type Move } from './moodMoves'
-import type { createPoulpyScene } from './poulpy3dScene'
+import PoulpyViewer, { type LivePoulpy, type PoulpyScene } from './PoulpyViewer.vue'
 
 // `only` shows just some of the steps (the page of one mood's moves); with none, all five, as a sequence.
 // `plain` leaves out the choice of variants: just the steps and the run.
@@ -45,123 +45,118 @@ const steps = props.only ? allSteps.filter((one) => props.only!.includes(one.id)
 // The owner's pick of each step to start with: on the spot, on the spot, shudder, on the spot, with a hop.
 const picked = shallowRef<Record<string, string>>({ annoyed: 'spot', fuming: 'spot', tuck: 'shudder', huff: 'shake', calm: 'spot', normal: 'hop' })
 const playing = shallowRef('')
-const failed = shallowRef(false)
+const viewer = useTemplateRef<InstanceType<typeof PoulpyViewer>>('viewer')
 
-const canvas = useTemplateRef<HTMLCanvasElement>('canvas')
-const stage = useTemplateRef<HTMLDivElement>('stage')
-let scene: ReturnType<typeof createPoulpyScene> | undefined
-let frame = 0
+// What he does next, in order, each timed by the viewer's clock: a variant of a step, or a wait (with his fumes drifting, or not).
+type Action =
+  | { kind: 'perform'; step: Step; variant: Variant; move?: Move; elapsed: number; swapped: boolean }
+  | { kind: 'wait'; seconds: number; fumes: boolean }
+let queue: Action[] = []
+let scene: PoulpyScene | undefined
+let outlined = false
 let state: State = 'happy'
-let visible = true
-let observer: IntersectionObserver | undefined
 let clock = 0
 let boost = 0
-let run = 0 // each move gets a number; a new one stops the one before
-let sequence = 0 // the same for the whole sequence
 
 const show = (to: State) => {
   state = to
-  scene?.show(to === 'fuming' ? { pose: 'fuming', effects: true } : to, false)
-  scene?.look({ turn: 0, tilt: 8, distance: 9.4, centre: 1.35 })
+  scene?.show(to === 'fuming' ? { pose: 'fuming', effects: true } : to, outlined)
 }
 
-function perform(step: Step, variant: Variant): Promise<void> {
-  const mine = ++run
-  const move = variant.make(!!step.clockwise)
-  const fromState = step.from
-  show(fromState)
-  return new Promise((resolve) => {
-    let last = performance.now(), elapsed = 0, swapped = false
-    const tick = (now: number) => {
-      if (mine !== run) return resolve()
-      const dt = Math.min((now - last) / 1000, 0.05)
-      last = now
-      elapsed += dt
-      clock += dt
-      const pose = move.advance(dt) as { yaw?: number }
-      scene?.pose(pose as never)
-      if (!swapped && (variant.swap === 'start' ? elapsed > 0.05 : Math.abs(pose.yaw ?? 0) > Math.PI)) { swapped = true; if (step.from !== step.to) show(step.to); scene?.pose(pose as never) }
-      boost = step.to === 'fuming' && swapped ? (variant.boost ?? 0.4) * Math.max(0, Math.min(1, 1 - (elapsed - variant.seconds + 0.5) / 0.5)) : 0
-      scene?.fumes(clock, boost)
-      if (elapsed >= variant.seconds) {
-        if (step.from !== step.to && !swapped) show(step.to)
-        scene?.pose(undefined)
-        boost = 0
-        return resolve()
-      }
-      frame = requestAnimationFrame(tick)
-    }
-    frame = requestAnimationFrame(tick)
-  })
+// One step of the action at the head of the queue; true once it is over.
+function perform(action: Extract<Action, { kind: 'perform' }>, seconds: number) {
+  const { step, variant } = action
+  if (!action.move) {
+    action.move = variant.make(!!step.clockwise)
+    show(step.from)
+  }
+  const dt = Math.min(seconds, 0.05)
+  action.elapsed += dt
+  const pose = action.move.advance(dt) as { yaw?: number }
+  scene?.pose(pose as never)
+  if (!action.swapped && (variant.swap === 'start' ? action.elapsed > 0.05 : Math.abs(pose.yaw ?? 0) > Math.PI)) {
+    action.swapped = true
+    if (step.from !== step.to) show(step.to)
+    scene?.pose(pose as never)
+  }
+  boost = step.to === 'fuming' && action.swapped ? (variant.boost ?? 0.4) * Math.max(0, Math.min(1, 1 - (action.elapsed - variant.seconds + 0.5) / 0.5)) : 0
+  scene?.fumes(clock, boost)
+  if (action.elapsed < variant.seconds) return false
+  if (step.from !== step.to && !action.swapped) show(step.to)
+  scene?.pose(undefined)
+  boost = 0
+  return true
 }
 
-// Between moves he stands, and when he is fuming his fumes drift.
-function idle(now: number) {
-  if (visible) { clock = now / 1000; if (state === 'fuming') scene?.fumes(clock, 0) }
-  frame = requestAnimationFrame(idle)
+function advance(seconds: number) {
+  clock += seconds
+  const action = queue[0]
+  // Between moves he stands, and when he is fuming his fumes drift.
+  if (!action) { if (state === 'fuming') scene?.fumes(clock, 0); return }
+  let done: boolean
+  if (action.kind === 'perform') done = perform(action, seconds)
+  else {
+    action.seconds -= seconds
+    if (action.fumes) scene?.fumes(clock, 0)
+    done = action.seconds <= 0
+  }
+  if (!done) return
+  queue.shift()
+  if (!queue.length) playing.value = ''
 }
 
-async function play(step: Step, variant: Variant) {
-  sequence++
-  cancelAnimationFrame(frame)
+const variantOf = (step: Step) => step.variants.find((v) => v.id === picked.value[step.id]) ?? step.variants[0]
+
+function play(step: Step, variant: Variant) {
   picked.value = { ...picked.value, [step.id]: variant.id }
   playing.value = `${step.id}/${variant.id}`
-  await perform(step, variant)
-  if (playing.value === `${step.id}/${variant.id}`) { playing.value = ''; frame = requestAnimationFrame(idle) }
+  queue = [{ kind: 'perform', step, variant, elapsed: 0, swapped: false }]
+  viewer.value?.play()
 }
 
 // Tapping him while he is fuming plays the tuck chosen, with its fumes; while he is annoyed, the huff chosen. Only on a page that shows them.
 function tap() {
   const step = steps.find((one) => one.id === (state === 'fuming' ? 'tuck' : state === 'annoyed' ? 'huff' : ''))
-  if (step && !playing.value) play(step, step.variants.find((v) => v.id === picked.value[step.id]) ?? step.variants[0])
+  if (step && !playing.value) play(step, variantOf(step))
 }
 
-async function playAll() {
-  cancelAnimationFrame(frame)
+function playAll() {
   playing.value = 'all'
-  const mine = ++sequence
   show(steps[0].from)
-  for (const step of steps) {
-    await new Promise((resolve) => setTimeout(resolve, 900))
-    if (mine !== sequence) return
-    const variant = step.variants.find((v) => v.id === picked.value[step.id]) ?? step.variants[0]
-    await perform(step, variant)
-    if (mine !== sequence) return
-    // The tuck is followed by a few seconds of fumes before he calms down.
-    if (step.id === 'tuck') await new Promise((resolve) => { const end = performance.now() + 2500; const wait = (now: number) => { clock = now / 1000; scene?.fumes(clock, 0); now < end ? requestAnimationFrame(wait) : resolve(undefined) }; requestAnimationFrame(wait) })
-  }
-  if (mine !== sequence) return
-  playing.value = ''
-  frame = requestAnimationFrame(idle)
+  // A short pause before each step; the tuck is followed by a few seconds of fumes before he calms down.
+  queue = steps.flatMap((step): Action[] => [
+    { kind: 'wait', seconds: 0.9, fumes: false },
+    { kind: 'perform', step, variant: variantOf(step), elapsed: 0, swapped: false },
+    ...(step.id === 'tuck' ? [{ kind: 'wait', seconds: 2.5, fumes: true } as const] : []),
+  ])
+  viewer.value?.play()
 }
 
-onMounted(async () => {
-  try {
-    const { createPoulpyScene } = await import('./poulpy3dScene')
-    scene = createPoulpyScene(canvas.value!)
-    show(steps[0].from)
-    observer = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting })
-    observer.observe(stage.value!)
-    frame = requestAnimationFrame(idle)
-  } catch {
-    failed.value = true
+async function start(next: PoulpyScene): Promise<LivePoulpy> {
+  scene = next
+  return {
+    show(outline) {
+      outlined = outline
+      show(state)
+    },
+    advance,
+    dispose() { queue = []; scene = undefined },
   }
-})
-onBeforeUnmount(() => {
-  run++
-  sequence++
-  cancelAnimationFrame(frame)
-  observer?.disconnect()
-  scene?.dispose()
-})
+}
+// Starts as the first step does.
+state = steps[0].from
+const values = () => ({ page: `mood moves: ${steps.map((step) => step.id).join(', ')}`, ...(props.plain ? {} : { picked: Object.fromEntries(steps.map((step) => [step.id, picked.value[step.id]])) }) })
 </script>
 
 <template>
-  <div class="frame"><div class="mood-moves">
-    <div ref="stage" class="stage" @click="tap">
-      <canvas ref="canvas" role="img" aria-label="Poulpy in 3D, in his moods from normal to annoyed and fuming. Tap him and he reacts to his mood" />
-      <p v-if="failed" class="failed">The 3D preview could not start in this browser.</p>
-    </div>
+  <PoulpyViewer
+    ref="viewer"
+    label="Poulpy in 3D, in his moods from normal to annoyed and fuming. Tap him and he reacts to his mood."
+    :framing="{ tilt: 8, distance: 9.4, centre: 1.35 }"
+    :start="start"
+    :values="values"
+    @tap="tap"
+  >
     <div class="steps">
       <button v-if="steps.length > 1" type="button" class="play-all" :aria-pressed="playing === 'all'" @click="playAll">{{ only ? 'Play them one after the other' : 'Play the whole sequence' }}</button>
       <section v-for="step in steps" :key="step.id" class="step">
@@ -173,27 +168,16 @@ onBeforeUnmount(() => {
         <p v-if="!plain" class="note">{{ step.variants.find((v) => v.id === picked[step.id])?.note }}</p>
       </section>
     </div>
-  </div></div>
+  </PoulpyViewer>
 </template>
 
 <style scoped>
-.frame { container-type: inline-size; }
-.mood-moves { display: flex; flex-direction: column; gap: 16px; margin: 16px 0; }
-@container (min-width: 760px) {
-  .mood-moves { display: grid; grid-template-columns: minmax(0, 1fr) 360px; align-items: start; gap: 24px; }
-  .stage { position: sticky; top: 16px; }
-}
-.stage { position: relative; aspect-ratio: 4 / 3; max-height: 70vh; border-radius: 24px; background: var(--cp-surface-variant); overflow: hidden; }
-.stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; border-radius: 24px; }
-.failed { position: absolute; inset: 0; margin: 0; display: grid; place-items: center; padding: 24px; text-align: center; font-size: 13px; color: var(--cp-on-surface-variant); }
-.steps { display: flex; flex-direction: column; gap: 14px; }
-.step { display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; border-radius: 20px; background: var(--cp-surface-variant); }
+.steps { flex: 1 1 100%; display: flex; flex-direction: column; gap: 14px; }
+.step { display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; border-radius: 20px; background: var(--cp-surface); }
 .step h3 { margin: 0; font-size: 16px; }
 .step p { margin: 0; font-size: 14px; color: var(--cp-on-surface-variant); }
 .step .note { font-size: 13px; }
-.sides { display: flex; flex-wrap: wrap; gap: 4px; padding: 4px; border-radius: 22px; background: var(--cp-surface); }
-.choice, .play-all { height: 36px; padding: 0 16px; border-radius: 999px; border: 1px solid transparent; font-size: 14px; font-weight: 700; color: var(--cp-on-surface); cursor: pointer; }
-.choice[aria-pressed='true'] { background: var(--cp-primary); color: var(--cp-on-primary); }
-.play-all { border-color: var(--cp-primary); background: var(--cp-primary-container); color: var(--cp-on-primary-container); align-self: flex-start; }
-.choice:focus-visible, .play-all:focus-visible { outline: 3px solid var(--cp-primary); outline-offset: 2px; }
+.steps .step .sides { background: var(--cp-surface-variant); }
+.play-all { height: 36px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--cp-primary); background: var(--cp-primary-container); color: var(--cp-on-primary-container); font-size: 14px; font-weight: 700; cursor: pointer; align-self: flex-start; }
+.play-all:focus-visible { outline: 3px solid var(--cp-primary); outline-offset: 2px; }
 </style>
