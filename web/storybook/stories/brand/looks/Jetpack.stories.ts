@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import PoulpyJetpack from './PoulpyJetpack.vue'
 
-// Poulpy's jetpack look, live. A draft for the owner to watch (tagged `draft`): nothing is built from it until a PR agrees it.
-// Its page, Jetpack.mdx, shows the story, so the story stays out of the sidebar.
+// The live part of the jetpack look's page (Jetpack.mdx beside it), which names it, so it stays out of the sidebar. A draft: the
+// owner reviews it in the workshop before the look goes anywhere else.
 const meta = {
   title: 'Brand/Live looks/Jetpack',
   tags: ['!dev', '!autodocs', 'draft'],
@@ -12,4 +12,4 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 /** Poulpy with his jetpack, zooming from side to side, grinning, his tentacles trailing under him. */
-export const Flying: Story = { render: () => ({ components: { PoulpyJetpack }, template: '<PoulpyJetpack />' }) }
+export const Jetpack: Story = { render: () => ({ components: { PoulpyJetpack }, template: '<PoulpyJetpack />' }) }

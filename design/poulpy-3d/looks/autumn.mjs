@@ -103,8 +103,11 @@ function armTop(x, z) {
   return top
 }
 
-/** The scarf's parts and their colours, built where his head sits at rest. */
-function scarf(s) {
+/**
+ * The scarf's parts and their colours, built where his head sits at rest, from numbers shaped like AUTUMN.scarf. Other looks
+ * wear the same scarf in their own colours (winter.mjs): they pass AUTUMN.scarf with other `wool` and `stripe`.
+ */
+export function scarf(s) {
   const [w, d] = headAt(s.height), out = (around) => norm([Math.sin(around) / w, 0, Math.cos(around) / d])
   // A point of the roll's middle line: on his head, then out by its thickness, less what sinks in.
   const middle = (around) => { const n = out(around); return [w * Math.sin(around) + n[0] * s.half[0] * (1 - s.sink), s.height, d * Math.cos(around) + n[2] * s.half[0] * (1 - s.sink)] }
