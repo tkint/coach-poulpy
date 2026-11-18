@@ -51,6 +51,7 @@ fun adminRoutes(audit: AdminAudit, accounts: AdminAccounts, settings: AdminSetti
     getAccountRoute(accounts),
     disableAccountRoute(accounts),
     enableAccountRoute(accounts),
+    confirmEmailRoute(accounts),
     deleteAccountRoute(accounts),
     settingsRoute(settings),
     saveMailFromRoute(settings),
@@ -111,6 +112,7 @@ private fun AccountAction.toResponse(): Response = when (this) {
     AccountAction.Done -> Response(NO_CONTENT)
     AccountAction.Unknown -> Response(NOT_FOUND).with(adminProblemBody of Problem("unknown-account"))
     AccountAction.OwnAccount -> Response(CONFLICT).with(adminProblemBody of Problem("own-account"))
+    AccountAction.AlreadyConfirmed -> Response(CONFLICT).with(adminProblemBody of Problem("already-confirmed"))
     AccountAction.ConfirmationMismatch -> Response(BAD_REQUEST).with(adminProblemBody of Problem("confirmation-mismatch"))
 }
 
@@ -220,6 +222,22 @@ private fun enableAccountRoute(accounts: AdminAccounts): ContractRoute = "$API_P
     returning(FORBIDDEN to "Not an admin, or not signed in through the website")
 } bindContract POST to { id, _ ->
     { request: Request -> accounts.enable(request.admin().accountId, id).toResponse() }
+}
+
+private fun confirmEmailRoute(accounts: AdminAccounts): ContractRoute = "$API_PREFIX/admin/accounts" / accountId / "confirm-email" meta {
+    summary = "Confirm an account's email by hand"
+    description = "Marks the email confirmed without its link, as following the link does: the account can sign in and its pending " +
+        "links stop working. For an address nobody proved, such as when the email never arrived. An account already confirmed " +
+        "is a 409 already-confirmed. Written to the audit log with the masked address."
+    operationId = "confirmAdminAccountEmail"
+    tags += adminTag
+    security = requiresAdmin()
+    returning(NO_CONTENT to "The email is confirmed")
+    returning(NOT_FOUND to "Unknown account")
+    returning(CONFLICT to "Already confirmed")
+    returning(FORBIDDEN to "Not an admin, or not signed in through the website")
+} bindContract POST to { id, _ ->
+    { request: Request -> accounts.confirm(request.admin().accountId, id).toResponse() }
 }
 
 private fun deleteAccountRoute(accounts: AdminAccounts): ContractRoute = "$API_PREFIX/admin/accounts" / accountId meta {

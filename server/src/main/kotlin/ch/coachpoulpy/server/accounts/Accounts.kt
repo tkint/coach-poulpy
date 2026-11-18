@@ -28,6 +28,9 @@ data class SignUp(
     val pendingKey: String? = null,
 )
 
+/** What confirming an email by hand did. */
+enum class HandConfirmation { Done, Unknown, AlreadyConfirmed }
+
 /**
  * Signing up and confirming the email (docs/accounts.md). An account starts unconfirmed; the
  * link mailed to it confirms it, and until then the phone stays a guest.
@@ -89,17 +92,41 @@ class Accounts(
      * used or more than [CONFIRMATION_LIFETIME] old; a token works once.
      */
     fun confirm(token: String): Boolean {
-        val heard = database.queries.transactionWithResult<ByteArray?> {
+        val heard = database.queries.transactionWithResult<List<ByteArray>?> {
             val used = database.queries.confirmationTokenQueries.consume(hashOf(token)).executeAsOneOrNull()
             val now = OffsetDateTime.now(clock)
             if (used == null || !used.expires_at.isAfter(now)) return@transactionWithResult null
             database.queries.accountQueries.confirm(now, used.account_id)
             database.queries.confirmationTokenQueries.deleteForAccount(used.account_id)
-            database.queries.confirmationWatchQueries.markConfirmed(hashOf(token)).executeAsOneOrNull() ?: ByteArray(0)
+            // The key of the phone that signed up with this link; an empty one when it gave none.
+            listOfNotNull(database.queries.confirmationWatchQueries.markConfirmed(hashOf(token)).executeAsOneOrNull())
         } ?: return false
-        if (heard.isNotEmpty()) listeners.remove(heard.toHex())?.forEach { it() }
+        tell(heard)
         return true
     }
+
+    /**
+     * Confirms the email of the account [id] without its link, for an admin who vouches for the address
+     * (#382). Same effect as the link: the account can sign in, its links stop working and the phone
+     * that signed up hears it.
+     */
+    fun confirmByHand(id: UUID): HandConfirmation {
+        val heard = database.queries.transactionWithResult<List<ByteArray>?> {
+            val account = database.queries.accountQueries.adminViewById(id).executeAsOneOrNull() ?: return@transactionWithResult null
+            if (account.confirmed_at != null) return@transactionWithResult null
+            database.queries.accountQueries.confirm(OffsetDateTime.now(clock), id)
+            database.queries.confirmationTokenQueries.deleteForAccount(id)
+            database.queries.confirmationWatchQueries.markConfirmedForAccount(id).executeAsList()
+        }
+        if (heard == null) {
+            return if (database.queries.accountQueries.adminViewById(id).executeAsOneOrNull() == null) HandConfirmation.Unknown else HandConfirmation.AlreadyConfirmed
+        }
+        tell(heard)
+        return HandConfirmation.Done
+    }
+
+    /** Wakes the phones listening with these keys. */
+    private fun tell(keys: List<ByteArray>) = keys.forEach { listeners.remove(it.toHex())?.forEach { onConfirmed -> onConfirmed() } }
 
     /**
      * Calls [onConfirmed] once the link mailed with [pendingKey] is opened, or at once if it already

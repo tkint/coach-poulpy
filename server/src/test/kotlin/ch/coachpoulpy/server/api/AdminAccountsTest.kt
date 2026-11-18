@@ -224,4 +224,60 @@ class AdminAccountsTest {
         assertEquals(listOf("admin.account.delete", "admin.account.enable", "admin.account.disable"), entries.map { it.action })
         assertTrue(entries.all { it.target == id.toString() && it.actorEmail == "ana@example.com" })
     }
+
+    private fun signUpPending(email: String, pendingKey: String? = null): String {
+        test.accounts.signUp(SignUp(email, "correct horse", "en", healthDataConsent = true, pendingKey = pendingKey))
+        return test.mailer.sent.last().text.substringAfter("#").substringBefore("\n")
+    }
+
+    private fun confirmEmail(id: Any, token: String? = adminToken): Response =
+        call(Request(POST, "/api/v1/admin/accounts/$id/confirm-email"), token)
+
+    @Test
+    fun theAdminConfirmsAnEmailByHand() {
+        val link = signUpPending("lea@example.com")
+        assertFalse(test.signIns.signIn("lea@example.com", "correct horse", "A phone") is SignInResult.Signed)
+
+        assertEquals(NO_CONTENT, confirmEmail(idOf("lea@example.com")).status)
+
+        assertTrue(test.signIns.signIn("lea@example.com", "correct horse", "A phone") is SignInResult.Signed)
+        assertFalse(test.accounts.confirm(link), "its link stops working")
+    }
+
+    @Test
+    fun theAdminsConfirmationIsHeardByThePhoneThatSignedUp() {
+        signUpPending("lea@example.com", pendingKey = "phone-key")
+        var heard = false
+        test.accounts.listen("phone-key") { heard = true }
+        confirmEmail(idOf("lea@example.com"))
+        assertTrue(heard)
+        assertTrue(test.accounts.isConfirmed("phone-key"))
+    }
+
+    @Test
+    fun anAlreadyConfirmedOrUnknownAccountIsRefusedWhenConfirming() {
+        account("lea@example.com")
+        assertEquals(CONFLICT, confirmEmail(idOf("lea@example.com")).status)
+        assertEquals(NOT_FOUND, confirmEmail("0190d4d2-0000-7000-8000-00000000dead").status)
+    }
+
+    @Test
+    fun onlyAnAdminOnTheWebsiteConfirmsAnEmail() {
+        signUpPending("tom@example.com")
+        val id = idOf("tom@example.com")
+        account("lea@example.com")
+        assertEquals(FORBIDDEN, confirmEmail(id, signIn("lea@example.com", Client.Website).tokens.accessToken).status)
+        assertEquals(FORBIDDEN, confirmEmail(id, signIn("ana@example.com").tokens.accessToken).status)
+        assertEquals(UNAUTHORIZED, confirmEmail(id, null).status)
+        assertFalse(test.signIns.signIn("tom@example.com", "correct horse", "A phone") is SignInResult.Signed)
+    }
+
+    @Test
+    fun confirmingAnEmailIsInTheAuditLogWithTheMaskedAddress() {
+        signUpPending("lea@example.com")
+        confirmEmail(idOf("lea@example.com"))
+        val entry = test.audit.recent().first { it.action == "admin.account.confirm" }
+        assertEquals("l***@example.com", entry.target)
+        assertEquals("ana@example.com", entry.actorEmail)
+    }
 }

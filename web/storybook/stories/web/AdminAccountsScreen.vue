@@ -3,8 +3,8 @@ import { CpIcon } from '@coach-poulpy/ui'
 // The admin's accounts screen: filters, the table, and the details beside it (ADR 0029: composed from the Cp components,
 // as the web app's AdminAccountsView does, with static accounts).
 import { ref } from 'vue'
-import { Ban, ChevronDown, ChevronsUpDown, ChevronUp, RotateCcw, Trash } from '@lucide/vue'
-import { CpAvatar, CpBadge, CpButton, CpCard, CpPagination, CpPoulpyCard, CpSelectField, CpSheet, CpSidePanel, CpTable, CpTextField } from '@coach-poulpy/ui'
+import { Ban, ChevronDown, CircleCheck, ChevronsUpDown, ChevronUp, RotateCcw, Trash } from '@lucide/vue'
+import { CpAvatar, CpBadge, CpButton, CpCard, CpPagination, CpPoulpyCard, CpSelectField, CpSheet, CpSidePanel, CpSuccessNote, CpTable, CpTextField } from '@coach-poulpy/ui'
 import AdminShell from './AdminShell.vue'
 
 export interface Account { email: string; role: 'Member' | 'Admin'; confirmed: boolean; disabled: boolean; created: string }
@@ -20,6 +20,8 @@ const props = withDefaults(defineProps<{
   selected?: string
   disabledSince?: string
   deleting?: boolean
+  confirming?: boolean
+  justConfirmed?: boolean
   typed?: string
 }>(), { pages: 3, signIn: '', search: '', sort: 'created', order: 'desc', typed: '' })
 
@@ -96,13 +98,23 @@ const ariaSort = (key: string) => (key === props.sort ? (props.order === 'asc' ?
           <div><dt class="cp-type-label">Created</dt><dd>{{ account()!.created }}</dd></div>
           <div><dt class="cp-type-label">Sign-in</dt><dd>{{ account()!.disabled ? `Blocked since ${disabledSince}` : 'Allowed' }}</dd></div>
         </dl>
+        <CpSuccessNote v-if="justConfirmed">{{ account()!.email }} is confirmed and can sign in.</CpSuccessNote>
+        <p v-if="!account()!.confirmed" class="text-sm text-base-content/70">This email was never confirmed. Confirm it only when you trust the address, for example when the confirmation email never arrived.</p>
         <p v-if="!account()!.disabled" class="text-sm text-base-content/70">Disabling signs this account out everywhere and blocks sign-in until you enable it again. Nothing is deleted.</p>
         <div class="flex flex-wrap gap-2">
+          <CpButton v-if="!account()!.confirmed" size="md" class="gap-2"><CpIcon :icon="CircleCheck" size="sm" />Confirm email</CpButton>
           <CpButton v-if="account()!.disabled" size="md" class="gap-2"><CpIcon :icon="RotateCcw" size="sm" />Enable account</CpButton>
           <CpButton v-else variant="outline" size="md" class="gap-2"><CpIcon :icon="Ban" size="sm" />Disable account</CpButton>
           <CpButton variant="danger" size="md" class="gap-2"><CpIcon :icon="Trash" size="sm" />Delete account</CpButton>
         </div>
       </CpSidePanel>
+      <CpSheet v-if="account() && confirming" v-model:open="open" title="Confirm this email?">
+        <p class="py-2">You vouch for <strong class="break-all">{{ account()!.email }}</strong>, an address nobody proved. The account can sign in at once and its confirmation links stop working. This is written to the audit log.</p>
+        <template #actions>
+          <CpButton variant="ghost" size="md">Cancel</CpButton>
+          <CpButton size="md" class="gap-2"><CpIcon :icon="CircleCheck" size="sm" />Confirm email</CpButton>
+        </template>
+      </CpSheet>
       <CpSheet v-if="account() && deleting" v-model:open="open" title="Delete this account?">
         <p class="py-2">This removes <strong class="break-all">{{ account()!.email }}</strong> and everything saved for it, for good. It is the same deletion the user can ask for in the app. It cannot be undone.</p>
         <CpTextField v-model="typed" label="Type the email to confirm" autocomplete="off" />

@@ -75,7 +75,7 @@ fun apiRoutes(
     revokeRoute(signIns),
 ) + webSessionRoutes(signIns, cookies) + adminRoutes(
     audit,
-    AdminAccounts(database, signIns, accountDeletion, events),
+    AdminAccounts(database, signIns, accountDeletion, accounts, events),
     AdminSettings(database, settings, mailer, events),
     AdminStatus(database, mailer),
 ) + adminCatalogRoutes(
