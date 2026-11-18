@@ -5,7 +5,7 @@
 // of poses.mjs and moves like the moves of motion.mjs, and keeps to their rules: his arms stay on the floor, what he
 // wears is solid and goes with his head, and he is shaded flat.
 //   FACE       his happy face, a little higher so his nose fits between his eyes and his smile
-//   COLOURS    the felt of the antlers and the band, the nose, the scarf's two stripes
+//   COLOURS    the felt of the antlers, the band and the ears, the bells, the holly, the nose, the scarf's two stripes
 //   IDLE       how he sways to a tune, his nose glowing on the beat; createRodolpheIdle runs it
 // To change the look, edit FACE, COLOURS, the shapes in buildRodolphe or IDLE, then look at the page.
 import { SHAPE, buildPoulpy3d, egg, facing, join, linear, tube } from '../model.mjs'
@@ -14,8 +14,14 @@ import { createFollow } from '../motion.mjs'
 // His colours. The reds are a bright, warm cherry, lighter and yellower than the error crimson (#C8264A) and redder than
 // any ember shade, and he wears them on his blue side only: Rodolphe is always happy.
 export const COLOURS = {
-  antler: '#A8744A', // soft felt antlers
-  band: '#6B4429', // the headband they stand on
+  antler: '#5E3A22', // chunky dark-brown felt antlers
+  band: '#9A6A42', // the flat felt headband they stand on
+  bell: '#F0B53A', // the jingle bells on the antlers' tips, the gold of his medal
+  slot: '#8A5A12', // the slot across each bell
+  ear: '#C89A6A', // the outside of his felt ears
+  inner: '#F5E6CC', // their cream inside
+  holly: '#2E8B4E', // the holly leaves
+  berry: '#E2373F', // the holly berries, the scarf's red
   nose: '#F2353A',
   lit: '#FF8C8C', // what his nose turns towards as it glows
   glow: '#FF5A4E', // the light his nose gives off, drawn by whoever makes it glow
@@ -59,22 +65,82 @@ const armTop = (r) => arms.radius[1] + arms.radius[1] * Math.sqrt(Math.max(1 - (
 
 // --- what he wears ---------------------------------------------------------------------------------
 
-// The headband goes over the top of his head from one side to the other, leaning a little back.
-const BAND = { back: 0.32, reach: 1.5, radius: 0.034 }
-const bandAt = (t) => onHead([Math.sin(t), Math.cos(t) * Math.cos(BAND.back), -Math.cos(t) * Math.sin(BAND.back)], BAND.radius * 0.6)
-// The antlers stand on the band, `at` from the top; each is a fat felt beam that curls up and out, with three tines.
-// The beam starts slim where it meets the band and fills out above it; every end is round.
-const ANTLER = { at: 0.6, radius: [0.05, 0.09, 0.11, 0.105, 0.1, 0.095], tine: [0.085, 0.08, 0.075] }
+// The headband: a flat, broad felt strip over the top of his head, leaning a little back. Seen from above it is wide
+// front to back; seen from the front it is thin. It stops well above his sides.
+const BAND = { back: 0.3, reach: 1.02, width: 0.1, thick: 0.026 }
+const bandAt = (t, out = BAND.thick) => onHead([Math.sin(t), Math.cos(t) * Math.cos(BAND.back), -Math.cos(t) * Math.sin(BAND.back)], out)
+// Along the band at `t`: where it is, the way it runs, the way it faces and what is across it (towards his front).
+function bandFrame(t, out) {
+  const { p, n } = bandAt(t, out), ahead = bandAt(t + 0.01, out).p, along = norm(ahead.map((v, k) => v - p[k]))
+  return { p, n, along, across: norm(cross(along, n)) }
+}
+// A flat strip with round edges: an oval section, `width` across and `thick` through, swept along the band.
+function bandShape() {
+  const steps = 40, sides = 20, positions = [], normals = [], indices = []
+  for (let i = 0; i <= steps; i++) {
+    const { p, n, across } = bandFrame(-BAND.reach + (2 * BAND.reach * i) / steps, BAND.thick)
+    for (let j = 0; j < sides; j++) {
+      const a = (j / sides) * Math.PI * 2, c = Math.cos(a), sn = Math.sin(a)
+      positions.push(...add(add(p, across, c * BAND.width), n, sn * BAND.thick))
+      normals.push(...norm(add(across.map((v) => (v * c) / BAND.width), n, sn / BAND.thick)))
+    }
+  }
+  for (let i = 0; i < steps; i++) for (let j = 0; j < sides; j++) {
+    const a = i * sides + j, b = i * sides + ((j + 1) % sides), c = a + sides, d = b + sides
+    indices.push(a, c, b, b, c, d)
+  }
+  // Each end is a flat round cap.
+  const cap = (t) => { const { p, n, along } = bandFrame(t, BAND.thick); return egg([BAND.width, BAND.thick, BAND.thick * 1.6], { around: 20, down: 10, turn: lying(along, n), at: p }) }
+  return join({ positions, normals, indices }, cap(-BAND.reach), cap(BAND.reach))
+}
 
-function antler(sign) {
-  const { p, n } = bandAt(sign * ANTLER.at), out = norm([sign, 0, 0]), up = [0, 1, 0]
-  // The beam: out of the band along the head's normal, then bending outwards and back up. The tines lean a little forward.
-  const go = (a, b, c, d = 0) => add(add(add(add(p, n, a), out, b), up, c), [0, 0, 1], d)
-  const beam = [go(0, 0, 0), go(0.1, 0.01, 0.02), go(0.22, 0.04, 0.05), go(0.36, 0.14, 0.1), go(0.46, 0.3, 0.17), go(0.5, 0.42, 0.24)]
-  const tineLow = [go(0.16, 0.03, 0.03), go(0.25, -0.1, 0.13, 0.05), go(0.28, -0.15, 0.24, 0.09)]
-  const tineMid = [go(0.3, 0.09, 0.08), go(0.42, 0.04, 0.2, 0.05), go(0.47, 0.01, 0.31, 0.09)]
-  const tineHigh = [go(0.42, 0.24, 0.14), go(0.53, 0.22, 0.27, 0.04), go(0.57, 0.2, 0.36, 0.07)]
-  return join(tube(beam, ANTLER.radius, 16), ...[tineLow, tineMid, tineHigh].map((tine) => tube(tine, ANTLER.tine, 14)))
+// The antlers sit low on the band, `at` from the top: chunky dark felt, a fat beam that rises and bows out with two
+// round tines branching outwards, and a little gold jingle bell on every tip. Nothing has a point.
+const ANTLER = { at: 0.5, size: 1.4, beam: [0.1, 0.13, 0.125, 0.115, 0.105], tine: 0.09, bell: 0.058 }
+
+function antlerParts(sign) {
+  const { p, n } = bandAt(sign * ANTLER.at, 0), out = [sign, 0, 0], up = [0, 1, 0]
+  // Measured from where the antler meets the band: `a` along his head's normal, `b` outwards, `c` up, `d` forwards, all but `a` times `size`.
+  const go = (a, b, c, d = 0) => add(add(add(add(p, n, a), out, b * ANTLER.size), up, c * ANTLER.size), [0, 0, 1], d * ANTLER.size)
+  const beam = [go(0.02, 0, 0), go(0.04, 0.04, 0.14), go(0.04, 0.1, 0.28), go(0.04, 0.12, 0.42, -0.02), go(0.04, 0.09, 0.53, -0.03)]
+  const tines = [
+    [go(0.04, 0.05, 0.15), go(0.04, 0.16, 0.22, 0.03), go(0.04, 0.28, 0.25, 0.05)],
+    [go(0.04, 0.11, 0.33), go(0.04, 0.2, 0.41, 0.03), go(0.04, 0.29, 0.46, 0.05)],
+  ]
+  // A bell hangs just past each tip, the way the tip points, with a short dark slot across its front.
+  const tips = [beam, ...tines].map((line) => {
+    const end = line[line.length - 1], before = line[line.length - 2], way = norm(end.map((v, k) => v - before[k]))
+    return add(end, way, (line === beam ? ANTLER.beam[ANTLER.beam.length - 1] : ANTLER.tine) + ANTLER.bell * 0.7)
+  })
+  const front = norm([0, -0.25, 0.97])
+  return {
+    felt: join(tube(beam, ANTLER.beam, 18), ...tines.map((tine) => tube(tine, ANTLER.tine, 16))),
+    bells: join(...tips.map((at) => egg([ANTLER.bell, ANTLER.bell, ANTLER.bell], { around: 18, down: 12, at }))),
+    slots: join(...tips.map((at) => egg([ANTLER.bell * 0.7, ANTLER.bell * 0.16, ANTLER.bell * 0.3], { around: 12, down: 6, at: add(at, front, ANTLER.bell * 0.9), turn: facing(front) }))),
+  }
+}
+
+// A little felt reindeer ear on each side of the band, below and outside the antlers, pointing outwards and a little
+// up: tan outside, cream inside, the inside facing forwards. Round, like a leaf of felt.
+const EAR = { at: 0.86, size: [0.2, 0.1, 0.035], lift: 0.35 }
+function ear(sign) {
+  const { p, n } = bandFrame(sign * EAR.at, BAND.thick)
+  const way = norm(add([sign, 0, 0], [0, 1, 0], EAR.lift)), at = add(add(p, way, EAR.size[0] * 0.85), n, 0.02), turn = lying(way, [0, 0, 1])
+  return {
+    outer: egg([EAR.size[1], EAR.size[2], EAR.size[0]], { around: 18, down: 10, turn, at }),
+    inner: egg([EAR.size[1] * 0.55, EAR.size[2] * 0.6, EAR.size[0] * 0.66], { around: 16, down: 8, turn, at: add(add(at, [0, 0, 1], EAR.size[2] * 0.7), way, -EAR.size[0] * 0.08) }),
+  }
+}
+
+// A sprig of holly at the front of each antler's base: three round-ended leaves lying on the band, and three berries.
+function holly(sign) {
+  const { p, across } = bandFrame(sign * ANTLER.at, BAND.thick * 1.6), front = add(p, across, BAND.width * 0.75)
+  const leaves = [-0.9, 0.15, 1.2].map((angle, i) => {
+    const way = norm(add([sign * Math.cos(angle), 0, 0], [0, 1, 0], Math.sin(angle) * 0.8))
+    return egg([0.07, 0.022, 0.125], { around: 14, down: 8, turn: lying(way, across), at: add(add(front, way, 0.1), across, 0.02 * i) })
+  })
+  const berries = [[0, 0.025], [0.06, -0.02], [-0.055, -0.03]].map(([dx, dy]) => egg([0.046, 0.046, 0.046], { around: 14, down: 8, at: add(add(add(front, [1, 0, 0], dx * sign), [0, 1, 0], dy), across, 0.05) }))
+  return { leaves: join(...leaves), berries: join(...berries) }
 }
 
 // The scarf: puffy knitted pieces in turn red and white, all around the base of his head, sitting on his arms. It is
@@ -127,17 +193,22 @@ export const noseBulb = { at: nose().at, radius: (NOSE.r / 63) * face.scale }
  * Builds Rodolphe, standing still.
  * @param {{ colours: { blue: string, ember: string, ink: string }, tone?: string }} options `colours` are the `color.poulpy`
  *   tokens and `tone` the happy `mood` token.
- * @returns what buildPoulpy3d returns, with his antlers, his nose and his scarf among the parts: `antlers`, `antler_band`,
- *   `nose`, `nose_shine`, `scarf_red`, `scarf_white` and its ends `scarf_end_red`, `scarf_end_white`.
+ * @returns what buildPoulpy3d returns, with his headband, his nose and his scarf among the parts: `antler_band`, `antlers`,
+ *   `antler_bells`, `antler_bell_slots`, `ears`, `ears_inner`, `holly`, `holly_berries`, `nose`, `nose_shine`, `scarf_red`, `scarf_white` and its ends `scarf_end_red`, `scarf_end_white`.
  *   They ride with his head.
  */
 export function buildRodolphe({ colours, tone }) {
   const model = buildPoulpy3d({ mood: 'happy', tone, features: FACE, colours })
-  const band = Array.from({ length: 41 }, (_, i) => bandAt(-BAND.reach + (2 * BAND.reach * i) / 40).p)
-  const scarfShape = scarf(), noseShape = nose()
+  const scarfShape = scarf(), noseShape = nose(), antlers = [antlerParts(1), antlerParts(-1)], ears = [ear(1), ear(-1)], sprigs = [holly(1), holly(-1)]
   Object.assign(model.materials, {
     antler: { colour: linear(COLOURS.antler) },
     antler_band: { colour: linear(COLOURS.band) },
+    bell: { colour: linear(COLOURS.bell) },
+    bell_slot: { colour: linear(COLOURS.slot), flat: true },
+    ear: { colour: linear(COLOURS.ear) },
+    ear_inner: { colour: linear(COLOURS.inner) },
+    holly: { colour: linear(COLOURS.holly) },
+    berry: { colour: linear(COLOURS.berry) },
     nose: { colour: linear(COLOURS.nose) },
     scarf_red: { colour: linear(COLOURS.scarf) },
     scarf_white: { colour: linear(COLOURS.white) },
@@ -145,8 +216,14 @@ export function buildRodolphe({ colours, tone }) {
   // The gleam stays the last of his parts, as in model.mjs.
   const gleam = model.parts.pop()
   model.parts.push(
-    { name: 'antler_band', material: 'antler_band', ...tube(band, BAND.radius, 12) },
-    { name: 'antlers', material: 'antler', ...join(antler(1), antler(-1)) },
+    { name: 'antler_band', material: 'antler_band', ...bandShape() },
+    { name: 'antlers', material: 'antler', ...join(...antlers.map((a) => a.felt)) },
+    { name: 'antler_bells', material: 'bell', ...join(...antlers.map((a) => a.bells)) },
+    { name: 'antler_bell_slots', material: 'bell_slot', ...join(...antlers.map((a) => a.slots)) },
+    { name: 'ears', material: 'ear', ...join(...ears.map((e) => e.outer)) },
+    { name: 'ears_inner', material: 'ear_inner', ...join(...ears.map((e) => e.inner)) },
+    { name: 'holly', material: 'holly', ...join(...sprigs.map((h) => h.leaves)) },
+    { name: 'holly_berries', material: 'berry', ...join(...sprigs.map((h) => h.berries)) },
     { name: 'scarf_red', material: 'scarf_red', ...scarfShape.red },
     { name: 'scarf_white', material: 'scarf_white', ...scarfShape.white },
     { name: 'scarf_end_red', material: 'scarf_red', ...scarfShape.endRed },
@@ -156,10 +233,10 @@ export function buildRodolphe({ colours, tone }) {
     gleam,
   )
   // The antlers rise above his head.
-  model.height = Math.max(model.height, ...band.map((p) => p[1]), antlerTop())
+  const top = join(antlers[0].felt, antlers[0].bells)
+  for (let i = 1; i < top.positions.length; i += 3) model.height = Math.max(model.height, top.positions[i])
   return model
 }
-const antlerTop = () => { const shape = join(antler(1)); let top = 0; for (let i = 1; i < shape.positions.length; i += 3) top = Math.max(top, shape.positions[i]); return top }
 
 // --- his idle --------------------------------------------------------------------------------------
 

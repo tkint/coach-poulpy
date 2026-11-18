@@ -1,7 +1,7 @@
 // Types for rodolphe.mjs, for the docs site and any other TypeScript reader.
 import type { Poulpy3d } from '../model.mjs'
 import type { TurnPose } from '../motion.mjs'
-export const COLOURS: { antler: string; band: string; nose: string; lit: string; glow: string; scarf: string; white: string }
+export const COLOURS: { antler: string; band: string; bell: string; slot: string; ear: string; inner: string; holly: string; berry: string; nose: string; lit: string; glow: string; scarf: string; white: string }
 export const FACE: (string | number)[][]
 /** Where the scarf is knotted: its ends swing around the upright line through it. */
 export const scarfKnot: number[]
