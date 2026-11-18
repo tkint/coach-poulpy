@@ -12,6 +12,9 @@ export interface Cheer extends Jump { advance(seconds: number): CheerPose; pose(
 /** A turn's pose, standing still, and for the cocky wink: `wink`, from 0 (eyes wide open) to 1; `tilt`, how far his head leans to his right, in radians, negative to his left; `stars`, each star's size as a share of its own and how far it has turned on itself and rocked, in radians. */
 export interface WinkPose extends TurnPose { wink: number; tilt: number; stars: { size: number; spin: number; rock: number }[] }
 export interface Wink { side: 'left' | 'right'; advance(seconds: number): WinkPose; pose(): WinkPose }
+/** A turn's pose, standing still, and for the cook's idle: `chin`, how far his chin is up, in radians; `twitch`, how far into a moustache twitch he is, from 0 to 1. */
+export interface ChefPose extends TurnPose { chin: number; twitch: number }
+export interface Chef { advance(seconds: number): ChefPose; pose(): ChefPose }
 /** A turn's pose, standing still, for the DJ: `nod` and `tilt`, how far his head nods forward and leans to his right, in radians; `records`, how far each record has turned, anticlockwise from above; `notes`, each note's place in the room, height (0 when it is not there) and rock, in radians. */
 export interface DjPose extends TurnPose { nod: number; tilt: number; records: number[]; notes: { at: number[]; size: number; rock: number }[] }
 export interface Dj { advance(seconds: number): DjPose; pose(): DjPose }
@@ -40,6 +43,7 @@ export const WINK: {
   head: { degrees: number; dip: number; speed: number; damping: number }
   stars: { apart: number; speed: number; damping: number; twinkle: number; beats: number; spin: number; rock: number }
 }
+export const CHEF: { rest: number; hold: number; chin: { degrees: number; pivot: number }; puff: number; head: { speed: number; damping: number }; twitch: { count: number; seconds: number; delay: number } }
 export const DJ: {
   tempo: number
   head: { nod: number; dip: number; sway: number; down: number; speed: number; damping: number }
@@ -52,7 +56,7 @@ export function createTurn(options?: { softness?: number; stride?: number; turn?
 export function createJump(options?: { softness?: number; stride?: number; jump?: typeof JUMP; turn?: typeof TURN }): Jump
 export function createCheer(options?: { softness?: number; stride?: number; cheer?: typeof CHEER; turn?: typeof TURN }): Cheer
 export function createWink(options?: { side?: 'left' | 'right'; wink?: typeof WINK }): Wink
-<<<<<<< HEAD
+export function createChef(options?: { chef?: typeof CHEF }): Chef
 /** A jump's pose (`head` and `spread` are 0) and, for the jetpack look: `shift`, how far he is to the viewer's right; `flames`, each nozzle's flames as `[length, width]` scales; `puffs`, each puff of smoke `[x, y, z, size]` in the room, size 0 when it is not there. */
 export interface ZoomPose extends JumpPose { face: number; shift: number; flames: number[][]; puffs: number[][] }
 export interface Zoom { softness: number; advance(seconds: number): ZoomPose; pose(): ZoomPose }
@@ -66,9 +70,7 @@ export const ZOOM: {
   smoke: { pieces: number; rate: number; life: number[]; speed: number; drag: number; rise: number; size: number[] }
 }
 export function createZoom(options?: { softness?: number; zoom?: typeof ZOOM; nozzles?: { at: number[]; way: number[] }[]; flame?: number }): Zoom
-=======
 export function createDj(options?: { dj?: typeof DJ }): Dj
->>>>>>> origin/main
 export function bakeTurn(options?: { fps?: number; turn?: typeof TURN }): { seconds: number; times: number[]; yaw: number[]; squash: number[]; arms: number[][][] }
 export function squashScale(squash: number): number[]
 export function armJoints(): ArmJoint[]
