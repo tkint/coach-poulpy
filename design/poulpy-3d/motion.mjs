@@ -7,9 +7,14 @@
 // the cocky one's: eyes wide open, then a wink and a smirk as stars pop up around him and twinkle. His arms are soft, so they trail behind
 // a step and swing a little past it before settling, and they hang under him when he jumps. He never
 // raises them himself (brand decisions 8 and 15): on the floor they slide, in the air they droop.
-// To change a move, edit TURN, JUMP, CHEER or WINK below, then run `node design/build-poulpy-3d.mjs`.
+// To change a move, edit TURN, JUMP, CHEER, WINK, DJ or CHEF below, then run `node design/build-poulpy-3d.mjs`.
+//
+// And the looks' idles: DJ, the DJ's (design/poulpy-3d/looks/dj.mjs), his head bobbing to the beat while he scratches one
+// record, the other turns and music notes float up around him. CHEF, the cook's (design/poulpy-3d/looks/chef.mjs), puffs
+// him up and twitches his moustache.
 import { SHAPE, linear } from './model.mjs'
 import { CONFETTI, medalHinge, medalReach, STARS } from './poses.mjs'
+import { DJ_ARMS, DJ_NOTES } from './looks/dj.mjs'
 
 export const TURN = {
   // The size of each step, in degrees, seen from above and turning to his left. They add up to one full
@@ -83,6 +88,34 @@ export const WINK = {
   // and shrinks by `twinkle` of its size, `beats` times a second, turns on itself at `spin` radians a second and
   // rocks by `rock` radians. No two stars keep the same time.
   stars: { apart: 0.09, speed: 20, damping: 0.35, twinkle: 0.22, beats: 1.6, spin: 2.4, rock: 0.3 },
+}
+
+export const DJ = {
+  // The beat, in beats a minute. Four beats make a bar.
+  tempo: 108,
+  // On each beat his head nods forward by `nod` degrees and dips by `dip` of its height, for `down` of the beat, then comes
+  // back up; it leans `sway` degrees to one side, then to the other, a beat each. Springs carry it, so it never snaps.
+  // All of it is slight: he is into the music, not dancing.
+  head: { nod: 2.2, dip: 0.018, sway: 1.2, down: 0.3, speed: 15, damping: 0.55 },
+  // The record under his right arm plays, turning at `spin` radians a second. On the other one he scratches: his arm
+  // slides `degrees` out and back as `pattern` says, one entry a half beat (1 out, 0 back), and the record rocks with
+  // it, `drag` times as far as his arm turns. His front arm rides the mixer, `ride` degrees to one side a bar, then to the other.
+  decks: { spin: 3.6, scratch: { degrees: 9, pattern: [0, 0, 0, 0, 1, 0, 1, 0], drag: 2.8, speed: 30, damping: 0.55 }, ride: 3, rideSpeed: 6 },
+  // A note starts every `every` beats, the next of DJ_NOTES in turn. It pops up on a spring a little past its size,
+  // floats up by `rise` in `life` seconds, sways `sway` from side to side and rocks `rock` radians, then shrinks away.
+  notes: { every: 2, life: 2.6, rise: 1, sway: 0.07, rock: 0.25, speed: 18, damping: 0.38 },
+}
+
+// The cook's idle (looks/chef.mjs): he stands still for `rest` seconds, then puffs himself up, sure of his sauce. His chin
+// goes up by `degrees`, his head tipping back around the point `pivot` high above the floor, and his head grows `puff` taller,
+// both on the `head` spring. He holds it for `hold` seconds, and `delay` into it his moustache twitches `count` times, each
+// twitch taking `seconds`; then he settles back.
+export const CHEF = {
+  rest: 1.8, hold: 1.5,
+  chin: { degrees: 6, pivot: 0.6 },
+  puff: 0.035,
+  head: { speed: 11, damping: 0.5 },
+  twitch: { count: 2, seconds: 0.2, delay: 0.3 },
 }
 
 // Where an arm bends, as distances from his middle along the arm, and how wide each bend is spread.
@@ -466,6 +499,310 @@ export function createWink({ side = 'right', wink = WINK } = {}) {
   return sim
 }
 
+// The jetpack look's flight (looks/jetpack.mjs), a draft: he hovers off the floor and zooms from one side to the other, smiling.
+export const ZOOM = {
+  // He hovers `hover` off the floor and bobs `bob` up and down, `beats` times a second.
+  hover: 1.4, bob: 0.07, beats: 0.8,
+  // He zooms to each of `stops` in turn (how far to the viewer's right, in units), `seconds` after the last. Where he heads glides there
+  // in `glide` seconds, easing in and out, and a spring takes him after it: `speed` how eagerly and `damping` how soon he settles (lower
+  // lets him overshoot and come back).
+  stops: [1.3, -1.3], seconds: [2.3, 2.5], glide: 0.75, body: { speed: 6, damping: 0.8 },
+  // Going sideways he banks into the way he goes and turns his face a little towards it: `bank` and `face` are the degrees at `atSpeed` units a second,
+  // on springs, and never more than `most` times that.
+  bank: 14, face: 18, atSpeed: 3.6, most: 1.2, lean: { speed: 9, damping: 0.7 },
+  // His tentacles hang from his head as in JUMP, a spring at each bend holding each length in line with the one before it, softer
+  // towards the tip; flying, they are heavier (`weight`, the G's) and they trail behind as he zooms. The G's also hold them back from
+  // swinging: `damping` near 1 lets them lag and settle with hardly a swing past him. `limit` is the most one bend may open, in degrees.
+  arms: { speed: [13, 10.5, 8.5], damping: [0.9, 0.85, 0.8], weight: 30, limit: 75 },
+  // His smile widens a touch with the push (jetpackFace in looks/jetpack.mjs), on a spring, and
+  // his head widens by `squash` of its height and wobbles back.
+  grin: { speed: 9, damping: 0.45 }, squash: { depth: 0.06, speed: 14, damping: 0.3 },
+  // The flames burn at `idle` of their length while he hovers and up to `idle + thrust` as he pushes hardest (`atPush` units a second
+  // squared, sideways); they flicker by `flicker`, about `beats` times a second, each nozzle on its own time.
+  flames: { idle: 0.8, thrust: 0.6, atPush: 10, flicker: 0.14, beats: 9 },
+  // The smoke: puffs leave the flames' tips, `rate` a second from each nozzle (more when he pushes), out of `pieces` in all. Each lives
+  // `life` seconds (shortest, longest), leaves downwards at `speed` units a second, slows with `drag`, rises with `rise` and grows to
+  // `size` (smallest, biggest), then shrinks away. It stays in the room, so he leaves a trail.
+  smoke: { pieces: 48, rate: 9, life: [0.9, 1.4], speed: 2.2, drag: 3, rise: 0.15, size: [0.18, 0.34] },
+}
+
+/**
+ * Poulpy with his jetpack zooming from side to side, as something to advance in time. Every run is the same: the smoke's chances are
+ * drawn from a fixed list.
+ * @param {{ softness?: number, zoom?: typeof ZOOM, nozzles?: { at: number[], way: number[] }[], flame?: number }} [options] `softness`
+ *   scales how loose his tentacles are, as in createTurn. `nozzles` are where the flames come out and the way they point, as he stands
+ *   (NOZZLES in looks/jetpack.mjs), and `flame` the length of the longest flame: the smoke leaves from its tip.
+ * @returns The move. A pose is a jump's pose (`spread` and `head` are 0) and `{ face, shift, flames, puffs }`: his face for jetpackFace in
+ *   looks/jetpack.mjs (0 hovering to 1 pushing hardest); how far he is to the viewer's
+ *   right; each nozzle's flames as `[length, width]` scales of their drawn size; and each puff of smoke `[x, y, z, size]`, in the room, of
+ *   size 0 when it is not there.
+ */
+export function createZoom({ softness = 1, zoom = ZOOM, nozzles = [], flame = 1 } = {}) {
+  const count = SHAPE.arms.count, variety = TURN.armVariety.slice(0, count)
+  const ends = [...RIG.bends.slice(1), SHAPE.arms.ring + SHAPE.arms.radius[2]], lengths = ends.map((r, i) => r - RIG.bends[i])
+  const out = variety.map((_, k) => { const a = (k * Math.PI * 2) / count; return [Math.sin(a), 0, Math.cos(a)] }) // each arm, from his middle
+  const across = out.map(([x, , z]) => [z, 0, -x]) // the line each arm hangs around
+  const root = out.map((d) => [d[0] * RIG.bends[0], SHAPE.arms.radius[1], d[2] * RIG.bends[0]])
+  const spring = (s, goal, value, rate) => s.speed * s.speed * (goal - value) - 2 * s.damping * s.speed * rate
+  const add = (a, b, k = 1) => [a[0] + b[0] * k, a[1] + b[1] * k, a[2] + b[2] * k]
+  const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
+  // A fixed list of chances (mulberry32), as for the champion's confetti.
+  let seed = 20261117
+  const chance = () => {
+    seed = (seed + 0x6d2b79f5) | 0
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed)
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+  }
+  const between = ([low, high]) => low + (high - low) * chance()
+
+  let time = 0, clock = 0, leg = 0, x = zoom.stops[zoom.stops.length - 1], vx = 0, push = 0, lift = zoom.hover
+  let bank = 0, bankSpeed = 0, yaw = 0, yawSpeed = 0, owedSmoke = 0, next = 0, from = x
+  let excite = 0, exciteSpeed = 0, squash = 0, squashSpeed = 0
+  // Where he is in the room: his turn, then his place.
+  const placement = () => put(shift([x, lift, 0]), put(aroundY(yaw), aroundZ(bank)))
+  // The end of each length of each tentacle, in the room, and how fast it goes; `asked` is where it was asked to be last time.
+  let body = placement()
+  const ends3 = out.map((d, k) => lengths.map((_, i) => body.t.map((t, n) => t + m3v(body.m, add(root[k], d, ends[i] - RIG.bends[0]))[n])))
+  const speeds = out.map(() => lengths.map(() => [0, 0, 0])), asked = ends3.map((arm) => arm.map((p) => [...p]))
+  const roots = out.map((_, k) => body.t.map((t, n) => t + m3v(body.m, root[k])[n]))
+  const puffs = Array.from({ length: zoom.smoke.pieces }, () => ({ at: [0, -1, 0], speed: [0, 0, 0], age: 0, life: 0, size: 0 }))
+
+  function tick(h) {
+    time += h
+    clock += h
+    // The script: off to the next stop every so often. A spring takes him there; the push is how hard the pack works sideways.
+    while (clock >= zoom.seconds[leg % zoom.seconds.length]) { clock -= zoom.seconds[leg % zoom.seconds.length]; from = zoom.stops[leg % zoom.stops.length]; leg++ }
+    const glide = Math.min(clock / zoom.glide, 1), to = zoom.stops[leg % zoom.stops.length]
+    const ax = spring(zoom.body, from + (to - from) * glide * glide * (3 - 2 * glide), x, vx)
+    vx += ax * h
+    x += vx * h
+    push += (Math.abs(ax) - push) * Math.min(h * 12, 1)
+    lift = zoom.hover + zoom.bob * Math.sin(time * zoom.beats * Math.PI * 2)
+    // He banks into the way he goes and looks a little towards it.
+    const going = Math.max(-zoom.most, Math.min(zoom.most, vx / zoom.atSpeed))
+    bankSpeed += spring(zoom.lean, -going * zoom.bank * RAD, bank, bankSpeed) * h
+    bank += bankSpeed * h
+    yawSpeed += spring(zoom.lean, going * zoom.face * RAD, yaw, yawSpeed) * h
+    yaw += yawSpeed * h
+    body = placement()
+    // His smile and his head follow the push.
+    const pushing = Math.min(push / zoom.flames.atPush, 1)
+    exciteSpeed += spring(zoom.grin, pushing, excite, exciteSpeed) * h
+    excite = Math.max(0, Math.min(1.1, excite + exciteSpeed * h))
+    squashSpeed += spring(zoom.squash, -zoom.squash.depth * pushing, squash, squashSpeed) * h
+    squash += squashSpeed * h
+
+    // Each length of tentacle is pulled in line with the one before it and down by its weight, and keeps its length.
+    const loose = Math.max(softness, 0), limit = zoom.arms.limit * RAD
+    out.forEach((d, k) => {
+      let parent = body.t.map((t, n) => t + m3v(body.m, root[k])[n]), way = m3v(body.m, d), parentSpeed = parent.map((v, n) => (v - roots[k][n]) / h)
+      roots[k] = parent
+      for (let i = 0; i < 3; i++) {
+        const want = add(parent, way, lengths[i]), wantSpeed = want.map((v, n) => (v - asked[k][i][n]) / h), p = ends3[k][i], v = speeds[k][i]
+        asked[k][i] = want
+        if (loose < 0.02) { ends3[k][i] = want; speeds[k][i] = wantSpeed } else {
+          const w = (zoom.arms.speed[i] * variety[k]) / loose, damp = zoom.arms.damping[i]
+          for (let n = 0; n < 3; n++) v[n] += (w * w * (want[n] - p[n]) + 2 * damp * w * (wantSpeed[n] - v[n]) - (n === 1 ? zoom.arms.weight : 0)) * h
+          for (let n = 0; n < 3; n++) p[n] += v[n] * h
+        }
+        // Back to its length, and never bent past the limit.
+        let u = ends3[k][i].map((v, n) => v - parent[n])
+        const l = Math.hypot(...u) || 1
+        u = u.map((v) => v / l)
+        const bent = Math.acos(Math.max(-1, Math.min(1, dot(u, way))))
+        if (bent > limit) {
+          const side = add(u, way, -Math.cos(bent)), sl = Math.hypot(...side) || 1
+          u = add(way.map((v) => v * Math.cos(limit)), side, Math.sin(limit) / sl)
+        }
+        ends3[k][i] = add(parent, u, lengths[i])
+        // Its speed along the length is the parent's: it does not stretch.
+        const s = speeds[k][i], rel = s.map((v, n) => v - parentSpeed[n]), along = dot(rel, u)
+        speeds[k][i] = add(s, u, -along)
+        parent = ends3[k][i]; way = u; parentSpeed = speeds[k][i]
+      }
+    })
+
+    // The smoke: new puffs at the flames' tips, blown out along them and left in the room.
+    owedSmoke += zoom.smoke.rate * (1 + Math.min(push / zoom.flames.atPush, 1.5)) * h
+    while (owedSmoke >= 1 && nozzles.length) {
+      owedSmoke -= 1
+      for (const nozzle of nozzles) {
+        const puff = puffs[next], way = m3v(body.m, nozzle.way), tip = add(body.t.map((t, n) => t + m3v(body.m, nozzle.at)[n]), way, flame * zoom.flames.idle)
+        next = (next + 1) % puffs.length
+        const spread = [chance() - 0.5, chance() - 0.5, chance() - 0.5]
+        puff.at = add(tip, spread, 0.12)
+        puff.speed = add(way, spread, 0.8).map((v) => v * zoom.smoke.speed)
+        puff.age = 0
+        puff.life = between(zoom.smoke.life)
+        puff.size = between(zoom.smoke.size)
+      }
+    }
+    for (const puff of puffs) {
+      if (puff.age >= puff.life) continue
+      puff.age += h
+      puff.speed = puff.speed.map((v, n) => v + ((n === 1 ? zoom.smoke.rise : 0) - zoom.smoke.drag * v) * h)
+      puff.at = add(puff.at, puff.speed, h)
+      if (puff.at[1] < 0.05) puff.at[1] = 0.05
+    }
+  }
+
+  // How each bend of each tentacle is turned: sideways first, then hanging, each in the frame the bend before it left.
+  function bends() {
+    const arms = [], droop = []
+    out.forEach((d, k) => {
+      let frame = body.m, parent = body.t.map((t, n) => t + m3v(body.m, root[k])[n])
+      const yaws = [], hangs = []
+      for (let i = 0; i < 3; i++) {
+        const u = ends3[k][i].map((v, n) => (v - parent[n]) / lengths[i]), seen = [0, 1, 2].map((r) => frame[r] * u[0] + frame[3 + r] * u[1] + frame[6 + r] * u[2])
+        const turn = Math.atan2(dot(seen, across[k]), dot(seen, d)), hang = Math.asin(Math.max(-1, Math.min(1, -seen[1] / (Math.hypot(...seen) || 1))))
+        yaws.push(turn); hangs.push(hang)
+        frame = m3(m3(frame, aroundY(turn).m), aroundAxis(across[k], hang).m)
+        parent = ends3[k][i]
+      }
+      arms.push(yaws); droop.push(hangs)
+    })
+    return { arms, droop }
+  }
+
+  // Each flame flickers on its own time, and burns longer as he pushes.
+  const flames = () => nozzles.map((_, i) => {
+    const t = time * zoom.flames.beats, burn = zoom.flames.idle + zoom.flames.thrust * Math.min(push / zoom.flames.atPush, 1)
+    const flicker = 1 + zoom.flames.flicker * (Math.sin(t * 2.1 + i * 2.3) * 0.6 + Math.sin(t * 3.7 + i) * 0.4)
+    return [burn * flicker, 1 + 0.5 * (flicker - 1) + 0.1 * (burn - zoom.flames.idle)]
+  })
+  // His face, for jetpackFace: how far his smile has widened.
+  const face = () => Math.min(excite, 1)
+  // A puff grows fast, holds, then shrinks away at the end of its life.
+  const puffSizes = () => puffs.map((p) => {
+    if (p.age >= p.life) return [0, -1, 0, 0]
+    const t = p.age / p.life, grow = 1 - (1 - Math.min(t / 0.25, 1)) ** 2, fade = t > 0.6 ? 1 - ((t - 0.6) / 0.4) ** 2 : 1
+    return [...p.at, p.size * grow * fade]
+  })
+
+  let owed = 0
+  const sim = {
+    softness,
+    pose: () => ({ yaw, squash, lift, face: face(), lean: bank, head: 0, spread: 0, shift: x, ...bends(), flames: flames(), puffs: puffSizes() }),
+    advance(seconds) {
+      softness = sim.softness
+      owed += Math.min(Math.max(seconds, 0), 1)
+      while (owed >= SUBSTEP) { tick(SUBSTEP); owed -= SUBSTEP }
+      return sim.pose()
+    },
+  }
+  // A few seconds in the air first, so his tentacles hang and the smoke is already trailing when he shows.
+  for (let i = 0; i < 2 / SUBSTEP; i++) tick(SUBSTEP)
+  return sim
+}
+
+/**
+ * The DJ playing, as something to advance in time.
+ * @param {{ dj?: typeof DJ }} [options]
+ * @returns The move. A pose is a turn's pose, standing still, with two of his arms sliding on the decks, and
+ *   `{ nod, tilt, records, notes }`: how far his head nods forward and leans to his right, in radians; how far each record of
+ *   DJ_PLATTERS (looks/dj.mjs) has turned, in radians, anticlockwise seen from above; and for each note of DJ_NOTES
+ *   `{ at, size, rock }`: where it is in the room, its height (0 when it is not there) and how far it has rocked, in radians.
+ */
+export function createDj({ dj = DJ } = {}) {
+  const arms = Array.from({ length: SHAPE.arms.count }, () => [0, 0, 0])
+  const spring = (s, goal, value, rate) => s.speed * s.speed * (goal - value) - 2 * s.damping * s.speed * rate
+  const beatSeconds = 60 / dj.tempo, { head, decks } = dj
+  let time = 0, nod = 0, nodSpeed = 0, squash = 0, squashSpeed = 0, tilt = 0, tiltSpeed = 0
+  let slide = 0, slideSpeed = 0, ride = 0, rideSpeed = 0, playing = 0
+  const notes = DJ_NOTES.map(() => ({ age: Infinity, size: 0, growth: 0 }))
+  let started = -1
+
+  function tick(h) {
+    time += h
+    const beats = time / beatSeconds, beat = Math.floor(beats), into = beats - beat
+    // His head: down on the beat, up after it, leaning to one side then the other.
+    const down = into < head.down
+    nodSpeed += spring(head, down ? head.nod * RAD : 0, nod, nodSpeed) * h
+    nod += nodSpeed * h
+    squashSpeed += spring(head, down ? -head.dip : 0, squash, squashSpeed) * h
+    squash += squashSpeed * h
+    tiltSpeed += spring(head, head.sway * RAD * (beat % 2 ? -1 : 1), tilt, tiltSpeed) * h
+    tilt += tiltSpeed * h
+    // The decks: one record plays, his arm scratches the other, his front arm rides the mixer.
+    playing += decks.spin * h
+    const scratch = decks.scratch, half = Math.floor(beats * 2) % scratch.pattern.length
+    slideSpeed += spring(scratch, scratch.pattern[half] * scratch.degrees * RAD, slide, slideSpeed) * h
+    slide += slideSpeed * h
+    const rider = { speed: decks.rideSpeed, damping: 0.7 }
+    rideSpeed += spring(rider, decks.ride * RAD * (Math.floor(beat / 4) % 2 ? -1 : 1), ride, rideSpeed) * h
+    ride += rideSpeed * h
+    // A new note every few beats, the next one in turn.
+    const due = Math.floor(beats / dj.notes.every)
+    if (due > started) { started = due; notes[due % notes.length].age = 0 }
+    notes.forEach((n) => {
+      n.age += h
+      n.growth += spring(dj.notes, n.age < dj.notes.life ? 1 : 0, n.size, n.growth) * h
+      n.size = Math.max(n.size + n.growth * h, 0)
+    })
+  }
+
+  let owed = 0
+  const sim = {
+    pose() {
+      // The scratching arm bends at its last two joints, so its tip slides over the record; the others lie still.
+      const [right, left] = DJ_ARMS, bends = arms.map((a) => [...a])
+      bends[left] = [0, slide * 0.65, slide * 0.35]
+      bends[0] = [0, ride * 0.6, ride * 0.4]
+      bends[right] = [0, -ride * 0.3, -ride * 0.2]
+      return {
+        yaw: 0, squash, arms: bends, nod, tilt,
+        records: [playing, -slide * decks.scratch.drag],
+        notes: DJ_NOTES.map(({ from, size }, i) => {
+          const { age } = notes[i], t = Math.min(age / dj.notes.life, 1.2), up = dj.notes.rise * (1 - (1 - Math.min(t, 1)) ** 2)
+          return { at: [from[0] + dj.notes.sway * Math.sin(age * 2.6 + i * 1.7), from[1] + up, from[2]], size: notes[i].size * size, rock: dj.notes.rock * Math.sin(age * 3.1 + i) }
+        }),
+      }
+    },
+    advance(seconds) {
+      owed += Math.min(Math.max(seconds, 0), 1)
+      while (owed >= SUBSTEP) { tick(SUBSTEP); owed -= SUBSTEP }
+      return sim.pose()
+    },
+  }
+  return sim
+}
+
+/**
+ * The cook's idle, as something to advance in time.
+ * @param {{ chef?: typeof CHEF }} [options]
+ * @returns The move. A pose is a turn's pose, standing still, and `{ chin, twitch }`: how far his chin is up, in radians,
+ *   his head tipping back around CHEF.chin.pivot; and how far into a moustache twitch he is, from 0 to 1, for buildChef in looks/chef.mjs.
+ */
+export function createChef({ chef = CHEF } = {}) {
+  const arms = Array.from({ length: SHAPE.arms.count }, () => [0, 0, 0])
+  const spring = (s, goal, value, rate) => s.speed * s.speed * (goal - value) - 2 * s.damping * s.speed * rate
+  let clock = 0, chin = 0, chinSpeed = 0, squash = 0, squashSpeed = 0, twitch = 0
+
+  function tick(h) {
+    clock = (clock + h) % (chef.rest + chef.hold)
+    const puffed = clock >= chef.rest, into = clock - chef.rest - chef.twitch.delay
+    chinSpeed += spring(chef.head, puffed ? chef.chin.degrees * RAD : 0, chin, chinSpeed) * h
+    chin += chinSpeed * h
+    squashSpeed += spring(chef.head, puffed ? chef.puff : 0, squash, squashSpeed) * h
+    squash += squashSpeed * h
+    // Each twitch goes up and back down in one smooth bump.
+    const which = Math.floor(into / chef.twitch.seconds)
+    twitch = puffed && into >= 0 && which < chef.twitch.count ? Math.sin((Math.PI * (into - which * chef.twitch.seconds)) / chef.twitch.seconds) ** 2 : 0
+  }
+
+  let owed = 0
+  const sim = {
+    pose: () => ({ yaw: 0, squash, arms, chin, twitch }),
+    advance(seconds) {
+      owed += Math.min(Math.max(seconds, 0), 1)
+      while (owed >= SUBSTEP) { tick(SUBSTEP); owed -= SUBSTEP }
+      return sim.pose()
+    },
+  }
+  return sim
+}
+
 /**
  * One full turn, sampled: the same move as createTurn, written down so a file can carry it.
  * @returns {{ seconds: number, times: number[], yaw: number[], squash: number[], arms: number[][][] }}
@@ -555,7 +892,7 @@ const unit = (v) => { const l = Math.hypot(...v) || 1; return v.map((x) => x / l
  *   his arms posed, and where the painter should put each of the other parts: pass both to paintPoulpy.
  */
 export function posePoulpy(model, pose, { confetti = [] } = {}) {
-  const body = put(shift([0, pose.lift ?? 0, 0]), put(aroundY(pose.yaw ?? 0), aroundZ(pose.lean ?? 0)))
+  const body = put(shift([pose.shift ?? 0, pose.lift ?? 0, 0]), put(aroundY(pose.yaw ?? 0), aroundZ(pose.lean ?? 0)))
   const head = put(body, put(shift([0, (model.headLift ?? 0) + (pose.head ?? 0), 0]), put(aroundZ(model.headTilt ?? 0), stretched(squashScale(pose.squash ?? 0)))))
   const joints = armJoints()
   const parts = model.parts.map((part) => {
