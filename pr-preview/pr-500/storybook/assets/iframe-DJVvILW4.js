@@ -1,0 +1,1 @@
+import{t as e}from"./iframe-DC6-1Dy2.js";e();
