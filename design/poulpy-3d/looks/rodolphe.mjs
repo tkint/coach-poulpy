@@ -66,8 +66,8 @@ const armTop = (r) => arms.radius[1] + arms.radius[1] * Math.sqrt(Math.max(1 - (
 // --- what he wears ---------------------------------------------------------------------------------
 
 // The headband: a flat, broad felt strip over the top of his head, leaning a little back. Seen from above it is wide
-// front to back; seen from the front it is thin. It stops well above his sides.
-const BAND = { back: 0.3, reach: 1.02, width: 0.1, thick: 0.026 }
+// front to back; seen from the front it is a solid felt band. It stops well above his sides.
+const BAND = { back: 0.3, reach: 1.02, width: 0.1, thick: 0.05 }
 const bandAt = (t, out = BAND.thick) => onHead([Math.sin(t), Math.cos(t) * Math.cos(BAND.back), -Math.cos(t) * Math.sin(BAND.back)], out)
 // Along the band at `t`: where it is, the way it runs, the way it faces and what is across it (towards his front).
 function bandFrame(t, out) {
@@ -122,7 +122,7 @@ function antlerParts(sign) {
 
 // A little felt reindeer ear on each side of the band, below and outside the antlers, pointing outwards and a little
 // up: tan outside, cream inside, the inside facing forwards. Round, like a leaf of felt.
-const EAR = { at: 0.86, size: [0.2, 0.1, 0.035], lift: 0.35 }
+const EAR = { at: 0.88, size: [0.28, 0.14, 0.045], lift: 0.35 }
 function ear(sign) {
   const { p, n } = bandFrame(sign * EAR.at, BAND.thick)
   const way = norm(add([sign, 0, 0], [0, 1, 0], EAR.lift)), at = add(add(p, way, EAR.size[0] * 0.85), n, 0.02), turn = lying(way, [0, 0, 1])
@@ -132,14 +132,15 @@ function ear(sign) {
   }
 }
 
-// A sprig of holly at the front of each antler's base: three round-ended leaves lying on the band, and three berries.
+// A full cluster of holly at the front of each antler's base: six round-ended leaves fanned out on the band, none
+// pointing down towards his eyes, and five berries in the middle.
 function holly(sign) {
   const { p, across } = bandFrame(sign * ANTLER.at, BAND.thick * 1.6), front = add(p, across, BAND.width * 0.75)
-  const leaves = [-0.9, 0.15, 1.2].map((angle, i) => {
-    const way = norm(add([sign * Math.cos(angle), 0, 0], [0, 1, 0], Math.sin(angle) * 0.8))
-    return egg([0.07, 0.022, 0.125], { around: 14, down: 8, turn: lying(way, across), at: add(add(front, way, 0.1), across, 0.02 * i) })
+  const leaves = [-0.8, -0.15, 0.5, 1.15, 1.8, 2.45].map((angle, i) => {
+    const way = norm(add([sign * Math.cos(angle), 0, 0], [0, 1, 0], Math.sin(angle) * 0.85))
+    return egg([0.085, 0.024, 0.155], { around: 16, down: 8, turn: lying(way, across), at: add(add(front, way, 0.13), across, 0.012 * (i % 3)) })
   })
-  const berries = [[0, 0.025], [0.06, -0.02], [-0.055, -0.03]].map(([dx, dy]) => egg([0.046, 0.046, 0.046], { around: 14, down: 8, at: add(add(add(front, [1, 0, 0], dx * sign), [0, 1, 0], dy), across, 0.05) }))
+  const berries = [[0, 0.03], [0.065, 0.0], [-0.06, -0.01], [0.03, -0.055], [-0.03, -0.06]].map(([dx, dy]) => egg([0.048, 0.048, 0.048], { around: 14, down: 8, at: add(add(add(front, [1, 0, 0], dx * sign), [0, 1, 0], dy), across, 0.05) }))
   return { leaves: join(...leaves), berries: join(...berries) }
 }
 
