@@ -1,0 +1,23 @@
+import { Meta, Story } from '@storybook/addon-docs/blocks'
+import * as Dj from './Dj.stories'
+
+<Meta of={Dj} />
+
+# Poulpy the DJ
+
+**A draft look, for the owner to review.** Nothing is built from it until a PR marks it agreed.
+
+Poulpy behind a set of decks, his headset on, playing. His eyes are shut and he smiles a little: he is into the music and enjoying himself. His head bobs to the beat, he scratches one record while the other turns, and music notes float up around him.
+
+<Story of={Dj.Playing} />
+
+- **He wears a headset.** A padded band over the top of his head and a round cup over each side, ember with a gold cap. It is solid and goes wherever his head goes.
+- **The decks lie on the floor in front of him.** One low console with a turntable each side and the mixer in the middle, low enough that his face stays clear. Turn the view and they stay where they are.
+- **He plays with the tips of his arms, never lifting one.** His front arm lies on the mixer and the two beside it on the records, as they lie on the floor. The scratch is his arm sliding over the record, the way his arms slide when he turns, and the record rocks with it; the other record keeps turning.
+- **His head bobs, only just.** On each beat it nods forward a couple of degrees and dips a little, then comes back up, leaning to one side and then the other, on springs so it never snaps.
+- **The notes float up like the cocky one's stars pop.** One starts every two beats, a little past its size and back, floats up, sways and rocks, then shrinks away. They are comic effects, so they are flat and keep facing whoever looks, like the poses' sparks, each with a white edge so it reads on a light or a dark page.
+- **Blue side, happy.** He is in the happy shade, with the happy one's blush.
+
+The still look (no motion, as for reduced motion) stands at the decks with nothing moving and no notes; the still notes of `buildDj()` are there for a picture, if the look gets one.
+
+`DJ_KIT`, `DJ_FACE` and `DJ_NOTES` in [`design/poulpy-3d/looks/dj.mjs`](https://github.com/tkint/coach-poulpy/blob/main/design/poulpy-3d/looks/dj.mjs) hold the headset, the decks, his face and the notes; `DJ` in `motion.mjs` holds the beat, the bob, the scratch and how the notes float, and `createDj()` runs it live. Like the other moves it is a preview, not in the glTF files.

@@ -13,8 +13,10 @@ import screenBuilderSetsSuperset from './builder-sets-superset.html?raw'
 import screenBuilderTidyEmpty from './builder-tidy-empty.html?raw'
 import screenBuilderTidyAddMenu from './builder-tidy-add-menu.html?raw'
 import screenBuilderTidyRepeatMenu from './builder-tidy-repeat-menu.html?raw'
-import screenBuilderTidyNameError from './builder-tidy-name-error.html?raw'
 import screenBuilderTidyEmptyOptionalBlocks from './builder-tidy-empty-optional-blocks.html?raw'
+import screenBuilderTidyRepeatHeader from './builder-tidy-repeat-header.html?raw'
+import screenBuilderTidyRepeatCountSheet from './builder-tidy-repeat-count-sheet.html?raw'
+import screenBuilderTidyRepeatEmpty from './builder-tidy-repeat-empty.html?raw'
 import screenBuilderStepMenu from './builder-step-menu.html?raw'
 
 // The Builder screens of the apps (ADR 0029), drawn with the phone stylesheet (../screens.css).
@@ -123,7 +125,7 @@ export const BuilderTidyAddMenu: Story = {
   parameters: { mockup: {} },
 }
 
-/** Builder · the actions of a repeat. */
+/** Builder · the ⋮ of a repeat: edit the repetitions, add an exercise or a rest (never a repeat inside a repeat), then the usual actions. */
 export const BuilderTidyRepeatMenu: Story = {
   name: "Repeat menu",
   tags: ['!autodocs', 'agreed'],
@@ -131,18 +133,36 @@ export const BuilderTidyRepeatMenu: Story = {
   parameters: { mockup: {} },
 }
 
-/** Builder · saving without a name. */
-export const BuilderTidyNameError: Story = {
-  name: "Name missing",
-  tags: ['!autodocs', 'agreed'],
-  ...screen(screenBuilderTidyNameError, { reorder: true }),
-  parameters: { mockup: {} },
-}
 
 /** Builder · a Work part with nothing planned before or after it. */
 export const BuilderTidyEmptyOptionalBlocks: Story = {
   name: "Nothing planned before and after",
   tags: ['!autodocs', 'agreed'],
   ...screen(screenBuilderTidyEmptyOptionalBlocks, { reorder: true }),
+  parameters: { mockup: {} },
+}
+
+/** Builder · a repeat's one-line title "Repeat 3 times" opens the count sheet; the ⋮ holds the actions, adding included. */
+export const BuilderTidyRepeatHeader: Story = {
+  name: "Repeat header",
+  tags: ['!autodocs', 'agreed'],
+  ...screen(screenBuilderTidyRepeatHeader, { reorder: true }),
+  parameters: { mockup: {} },
+}
+
+
+/** Builder · tapping the title or the count of a repeat opens a sheet with a number field. */
+export const BuilderTidyRepeatCountSheet: Story = {
+  name: "Repeat count sheet",
+  tags: ['!autodocs', 'agreed'],
+  ...screen(screenBuilderTidyRepeatCountSheet, { reorder: true }),
+  parameters: { mockup: {} },
+}
+
+/** Builder · a repeat with nothing in it says "Tap to add an exercise." like the other blocks. */
+export const BuilderTidyRepeatEmpty: Story = {
+  name: "Empty repeat",
+  tags: ['!autodocs', 'agreed'],
+  ...screen(screenBuilderTidyRepeatEmpty, { reorder: true }),
   parameters: { mockup: {} },
 }

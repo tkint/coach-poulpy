@@ -43,8 +43,6 @@ sealed interface Phase {
         val rounds: Int = 1,
         /** The kind of part holding this step. */
         val part: PartKind = PartKind.WORK,
-        /** Which work part holds this step ("Work 2"), when the workout has several; null otherwise. */
-        val workPart: Int? = null,
     ) : Phase
 
     data class Rest(override val duration: Duration) : Phase
@@ -55,20 +53,13 @@ class TimelineCompiler {
 
     fun compile(workout: Workout): Timeline {
         val phases = mutableListOf<Phase>()
-        val severalWorkParts = workout.parts.count { it.kind == PartKind.WORK } > 1
-        var workParts = 0
         workout.parts.forEach { part ->
-            if (part.kind == PartKind.WORK) workParts++
-            val place = Place(part.kind, workParts.takeIf { severalWorkParts && part.kind == PartKind.WORK })
-            part.steps.forEach { phases.addStep(it, place, round = 1, rounds = 1) }
+            part.steps.forEach { phases.addStep(it, part.kind, round = 1, rounds = 1) }
         }
         return Timeline(phases.dropLastWhile { it is Phase.Rest })
     }
 
-    /** The part a step belongs to, as its phases carry it. */
-    private data class Place(val kind: PartKind, val workPart: Int?)
-
-    private fun MutableList<Phase>.addStep(step: Step, place: Place, round: Int, rounds: Int) {
+    private fun MutableList<Phase>.addStep(step: Step, part: PartKind, round: Int, rounds: Int) {
         when (step) {
             is Step.Rest -> addRest(step.duration)
             is Step.ExerciseStep -> step.prescription.sets.forEachIndexed { index, set ->
@@ -86,14 +77,13 @@ class TimelineCompiler {
                         intensity = set.intensity,
                         role = step.role,
                         rounds = rounds,
-                        part = place.kind,
-                        workPart = place.workPart,
+                        part = part,
                     ),
                 )
                 if (index < step.prescription.sets.lastIndex) addRest(set.restAfter)
             }
             is Step.Group -> for (r in 1..step.rounds) {
-                step.children.forEach { addStep(it, place, round = r, rounds = step.rounds) }
+                step.children.forEach { addStep(it, part, round = r, rounds = step.rounds) }
                 if (r < step.rounds) addRest(step.restBetweenRounds)
             }
         }

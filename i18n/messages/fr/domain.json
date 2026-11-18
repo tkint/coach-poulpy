@@ -94,17 +94,14 @@
     "warmUp": "Échauffement",
     "work": "Corps de séance",
     "coolDown": "Retour au calme",
-    "workNumbered": "Corps de séance {number, number}",
     "addToWarmUp": "Ajouter à l’échauffement",
-    "addToWork": "{number, plural, =0 {Ajouter au corps de séance} other {Ajouter au corps de séance #}}",
+    "addToWork": "Ajouter au corps de séance",
     "addToCoolDown": "Ajouter au retour au calme",
     "inWarmUp": "Dans l’échauffement",
-    "inWork": "{number, plural, =0 {Dans le corps de séance} other {Dans le corps de séance #}}",
+    "inWork": "Dans le corps de séance",
     "inCoolDown": "Dans le retour au calme",
-    "alreadyIn": "Déjà dans cette séance",
-    "goesFirst": "Se place en premier",
-    "goesLast": "Se place en dernier",
-    "addedAfter": "Ajouté après {after} : {part}"
+    "optional": "Facultatif",
+    "nothingYet": "Rien pour l’instant"
   },
   "side": {
     "left": "Côté gauche",

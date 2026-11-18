@@ -1,12 +1,15 @@
 // Draws the Poulpy of design/poulpy-3d/model.mjs with three.js: flat cartoon shading, a light that stays
 // in the room while he turns, the gleam that follows it and the optional outline. He is built on the
-// joints of design/poulpy-3d/motion.mjs, so pose() can turn him, lift him, bend his arms, swing his medal, throw confetti, change his face and light his stars. Poulpy3d.vue owns
+// joints of design/poulpy-3d/motion.mjs, so pose() can turn him, lift him, bend his arms, swing his medal, throw confetti, change his face and light his stars,
+// and play the DJ's records and notes (design/poulpy-3d/looks/dj.mjs). Poulpy3d.vue owns
 // the controls; this file owns the canvas and everything WebGL, and gives it all back on dispose().
 import * as THREE from 'three'
 import tokens from '../../../../design/tokens.json'
 import { buildPoulpy3d, gleamPatch, LOOK, type Poulpy3d, type PoulpyMaterial, type PoulpyMood, type PoulpyPart, type PoulpySide } from '../../../../design/poulpy-3d/model.mjs'
 import { buildPoulpyPose, CONFETTI, GOLDEN, medalHinge, poseMood, STARS, starShape, type PoulpyPose } from '../../../../design/poulpy-3d/poses.mjs'
-import { armJoints, armSkin, squashScale, type CheerPose, type JumpPose, type TurnPose, type WinkPose } from '../../../../design/poulpy-3d/motion.mjs'
+import { armJoints, armSkin, squashScale, type CheerPose, type DjPose, type JumpPose, type TurnPose, type WinkPose, type ZoomPose } from '../../../../design/poulpy-3d/motion.mjs'
+import { buildDj, DJ_KIT, DJ_NOTES, DJ_PLATTERS, noteShape } from '../../../../design/poulpy-3d/looks/dj.mjs'
+import { buildPoulpyJetpack, JETPACK, jetpackFace, NOZZLES, puffShape } from '../../../../design/poulpy-3d/looks/jetpack.mjs'
 
 /** Where the viewer stands: degrees around Poulpy, degrees above (or below) him, and how far away. */
 export interface PoulpyView { turn: number; tilt: number; distance: number; /** The height he is looked at, half his height unless told. */ centre?: number; /** The view's height in degrees, 28 unless told. */ field?: number }
@@ -45,7 +48,12 @@ export function createPoulpyScene(canvas: HTMLCanvasElement) {
   // joints and `hinges` the line each one hangs around.
   // `slide` carries his medal around him and `medal` swings it up and down around its hinge.
   let rig: { turn: THREE.Bone; squash: THREE.Group; slide: THREE.Group; medal: THREE.Group; bends: THREE.Bone[]; hinges: THREE.Vector3[]; rest: THREE.Vector3[]; skeleton: THREE.Skeleton } | undefined
-  let posed: TurnPose | JumpPose | CheerPose | WinkPose | undefined
+  let posed: TurnPose | JumpPose | CheerPose | WinkPose | DjPose | ZoomPose | undefined
+  // The jetpack look's flames, one group per nozzle riding on him and kept facing the viewer, and its smoke, made when it first puffs: each
+  // puff is a disc of its edge's colour under a disc of its own, all edges drawn first, so overlapping puffs make one cloud with one outline.
+  let flames: THREE.Group[] = []
+  let smoke: { edges: THREE.InstancedMesh; fills: THREE.InstancedMesh } | undefined
+  const camRight = new THREE.Vector3(), camUp = new THREE.Vector3(), nozzleWay = new THREE.Vector3()
   // His face when it changes as he moves: the same face drawn at each step from 0 to 1, one shown at a time.
   let faces: THREE.Group[] = []
   const FACE_STEPS = 16
@@ -53,8 +61,11 @@ export function createPoulpyScene(canvas: HTMLCanvasElement) {
   let stars: THREE.Mesh[] = []
   // The champion's confetti, made when he first cheers: every piece is the same small card, in the room and not on him.
   let confetti: THREE.InstancedMesh | undefined
+  // The DJ's records, each turning around its middle on the decks, and his notes, made when he first plays: flat, in the room, facing the viewer.
+  let records: THREE.Group[] = []
+  let notes: THREE.Group[] = []
   const piece = new THREE.Object3D()
-  const back = new THREE.Quaternion(), hang = new THREE.Quaternion(), sideways = new THREE.Vector3()
+  const back = new THREE.Quaternion(), hang = new THREE.Quaternion(), sideways = new THREE.Vector3(), spin = new THREE.Quaternion(), FORWARD = new THREE.Vector3(0, 0, 1)
   let centre = 1
   // How his head is held when he stands in a pose: lifted with his arms, or leaning.
   let stance = { headLift: 0, headTilt: 0 }
@@ -100,6 +111,19 @@ export function createPoulpyScene(canvas: HTMLCanvasElement) {
         card.scale.setScalar((view.distance - way * CARD_GAP) / view.distance)
       }
     }
+    if (flames.length && rig) {
+      // Each flame faces the viewer and points, on the screen, the way its nozzle does.
+      poulpy!.updateMatrixWorld(true)
+      rig.turn.getWorldQuaternion(back)
+      camRight.setFromMatrixColumn(camera.matrixWorld, 0)
+      camUp.setFromMatrixColumn(camera.matrixWorld, 1)
+      flames.forEach((flame, i) => {
+        nozzleWay.fromArray(NOZZLES[i].way).applyQuaternion(back)
+        flame.quaternion.copy(back).invert().multiply(camera.quaternion).multiply(spin.setFromAxisAngle(FORWARD, Math.atan2(nozzleWay.dot(camRight), -nozzleWay.dot(camUp))))
+      })
+    }
+    // A note stands across the line of sight, then rocks in its own plane.
+    for (const n of notes) n.quaternion.copy(camera.quaternion).multiply(spin.setFromAxisAngle(FORWARD, n.userData.rock ?? 0))
     light.target.position.set(0, here, 0)
     light.position.set(...(LOOK.light as [number, number, number])).normalize().transformDirection(camera.matrixWorld).multiplyScalar(10).add(light.target.position)
     if (gleam) {
@@ -116,17 +140,23 @@ export function createPoulpyScene(canvas: HTMLCanvasElement) {
   /**
    * Builds Poulpy again for a side of the plush, one of his moods or one of his poses, with or without the outline.
    * A pose with `effects: false` leaves out the flat effects around him, for when he moves, and one with `faces`
-   * takes his face from it instead: the face at each step from 0 to 1, for pose() to pick from. `model` shows him as
-   * built elsewhere, in a look (design/poulpy-3d/looks/).
+   * takes his face from it instead: the face at each step from 0 to 1, for pose() to pick from. `{ model }` shows a Poulpy built
+   * elsewhere, a look (design/poulpy-3d/looks/): what he wears rides on his head. The DJ (`{ look: 'dj' }`) is built by its own
+   * file, without its still effects: they move when he plays. `{ look: 'jetpack' }` is the jetpack look (design/poulpy-3d/looks/jetpack.mjs),
+   * its flames kept facing the viewer and its face changing as he flies.
    */
-  function show(as: PoulpySide | PoulpyMood | { pose: PoulpyPose; effects?: boolean; faces?: (t: number) => (string | number)[][] } | { model: Poulpy3d }, outline: boolean) {
+  function show(as: PoulpySide | PoulpyMood | { pose: PoulpyPose; effects?: boolean; faces?: (t: number) => (string | number)[][] } | { model: Poulpy3d & { headTilt?: number } } | { look: 'dj' | 'jetpack' }, outline: boolean) {
     clear()
     const colours = tokens.color.poulpy
-    const given = typeof as === 'object' && 'model' in as ? as.model : undefined
+    const look = typeof as === 'object' && 'look' in as && as.look === 'jetpack' ? buildPoulpyJetpack({ tones: tokens.mood, colours, face: [] }) : undefined
     const posing = typeof as === 'object' && 'pose' in as ? as : undefined
-    const changing = posing?.faces
-    const inPose = posing ? buildPoulpyPose({ pose: posing.pose, effects: posing.effects, ...(changing && { face: [] }), tones: tokens.mood, colours }) : undefined
-    const model = given ?? inPose ?? (as === 'blue' || as === 'ember' ? buildPoulpy3d({ side: as, colours }) : buildPoulpy3d({ mood: as as PoulpyMood, tone: tokens.mood[as as PoulpyMood], colours }))
+    // The jetpack look's face changes as he flies, like the cocky one's as he winks.
+    const changing = posing?.faces ?? (look ? jetpackFace : undefined)
+    const inPose = typeof as !== 'object' || look ? undefined
+      : 'model' in as ? as.model
+      : 'look' in as ? buildDj({ tones: tokens.mood, colours, effects: false })
+      : buildPoulpyPose({ pose: as.pose, effects: as.effects, ...(changing && { face: [] }), tones: tokens.mood, colours })
+    const model = inPose ?? look ?? (as === 'blue' || as === 'ember' ? buildPoulpy3d({ side: as, colours }) : buildPoulpy3d({ mood: as as PoulpyMood, tone: tokens.mood[as as PoulpyMood], colours }))
     centre = model.height / 2
     stance = { headLift: model.headLift, headTilt: inPose?.headTilt ?? 0 }
     cards = inPose ? { front: new THREE.Group(), back: new THREE.Group() } : undefined
@@ -138,6 +168,7 @@ export function createPoulpyScene(canvas: HTMLCanvasElement) {
       parent.add(bone)
       bends.push(bone)
     })
+    flames = look ? NOZZLES.map(({ at }) => { const flame = new THREE.Group(); flame.position.fromArray(at); turn.add(flame); return flame }) : []
     medal.position.set(0, medalHinge[0], medalHinge[1])
     slide.add(medal)
     turn.add(squash, slide)
@@ -146,6 +177,8 @@ export function createPoulpyScene(canvas: HTMLCanvasElement) {
     // An arm hangs around the level line across it, which tips its far end down.
     const hinges = joints.map((joint) => new THREE.Vector3(joint.at[2], 0, -joint.at[0]).normalize())
     rig = { turn, squash, slide, medal, bends, hinges, rest: bends.map((bone) => bone.position.clone()), skeleton: new THREE.Skeleton([turn, ...bends]) }
+    // The DJ's records turn around their middles; they lie on the floor with the decks, not on him.
+    records = DJ_PLATTERS.map((at) => { const record = new THREE.Group(); record.position.fromArray(at); poulpy!.add(record); return record })
     // His head and face ride on `squash`; an arm is skinned, so each of its points follows its bends.
     const place = (part: PoulpyPart, geo: THREE.BufferGeometry, material: THREE.Material) => {
       const arm = /^arm_(\d+)/.exec(part.name)
@@ -155,11 +188,24 @@ export function createPoulpyScene(canvas: HTMLCanvasElement) {
         cards[part.card].add(mesh)
         return mesh
       }
+      const flame = /^jetpack_flame_(\d+)/.exec(part.name)
+      if (flame) {
+        const mesh = new THREE.Mesh(geo, material)
+        flames[+flame[1] - 1].add(mesh)
+        return mesh
+      }
+      const record = /^decks_record_(\d+)/.exec(part.name)
+      if (record) {
+        const mesh = new THREE.Mesh(geo, material)
+        mesh.position.fromArray(DJ_PLATTERS[+record[1] - 1]).negate()
+        records[+record[1] - 1].add(mesh)
+        return mesh
+      }
       if (!arm) {
         const mesh = new THREE.Mesh(geo, material)
         // What he wears goes with his head, his medal hangs from its hinge and what lies by him stays on the floor.
         if (part.name.startsWith('medal')) mesh.position.copy(medal.position).negate()
-        ;(part.name.startsWith('medal') ? medal : part.name.startsWith('dumbbell') ? poulpy! : squash).add(mesh)
+        ;(part.name.startsWith('medal') ? medal : /^(dumbbell|decks)/.test(part.name) ? poulpy! : part.name.startsWith('jetpack') ? turn : squash).add(mesh)
         return mesh
       }
       const skin = armSkin(+arm[1] - 1, part.positions)
@@ -188,8 +234,8 @@ export function createPoulpyScene(canvas: HTMLCanvasElement) {
       }
     }
     faces = []
-    if (changing && posing) {
-      const { mood } = poseMood(posing.pose)
+    if (changing) {
+      const mood = posing ? poseMood(posing.pose).mood : JETPACK.mood
       for (let step = 0; step <= FACE_STEPS; step++) {
         const face = buildPoulpy3d({ mood, tone: tokens.mood[mood], features: changing(step / FACE_STEPS), faceOnly: true, colours }), group = new THREE.Group()
         for (const part of face.parts) {
@@ -205,22 +251,33 @@ export function createPoulpyScene(canvas: HTMLCanvasElement) {
     pose(posed)
   }
 
-  /** Puts him in a pose of his turn, his jump, his cheer or his wink (design/poulpy-3d/motion.mjs); with none, he stands as modelled. */
-  function pose(next?: TurnPose | JumpPose | CheerPose | WinkPose) {
+  /** Puts him in a pose of his turn, his jump, his cheer, his wink, the DJ's playing or the jetpack's zoom (design/poulpy-3d/motion.mjs); with none, he stands as modelled. */
+  function pose(next?: TurnPose | JumpPose | CheerPose | WinkPose | DjPose | ZoomPose) {
     posed = next
     if (rig) {
       const jump = next && 'droop' in next ? next : undefined, cheer = next && 'medal' in next ? next : undefined, wink = next && 'wink' in next ? next : undefined
+      const dj = next && 'records' in next ? next : undefined
+      // A pose with `tilt` leans his head: the wink's, the DJ's bob, or a look's idle.
+      const leaning = next && 'tilt' in next ? next : undefined
       rig.turn.rotation.set(0, next?.yaw ?? 0, jump?.lean ?? 0, 'YXZ')
-      rig.turn.position.y = jump?.lift ?? 0
+      const zoom = next && 'puffs' in next ? next : undefined
+      rig.turn.position.set(zoom?.shift ?? 0, jump?.lift ?? 0, 0)
+      shadow.position.x = zoom?.shift ?? 0
+      flames.forEach((flame, i) => flame.scale.set(zoom?.flames[i][1] ?? 1, zoom?.flames[i][0] ?? 1, 1))
+      if (zoom) puff(zoom.puffs)
       rig.squash.position.y = stance.headLift + (jump?.head ?? 0)
-      rig.squash.rotation.z = stance.headTilt + (next && 'tilt' in next ? next.tilt : 0)
+      rig.squash.rotation.z = stance.headTilt + (leaning?.tilt ?? 0)
+      // The DJ nods around the floor under his middle, so his head bobs forward and his arms stay put.
+      rig.squash.rotation.x = dj?.nod ?? 0
+      records.forEach((record, i) => { record.rotation.y = dj?.records[i] ?? 0 })
+      if (dj) play(dj.notes)
       rig.squash.scale.fromArray(squashScale(next?.squash ?? 0))
       // His medal rests on his arm, so it stays on it when his head tucks in and slides out with it.
       rig.medal.position.z = medalHinge[1] + (jump?.spread ?? 0)
       rig.medal.rotation.x = -(cheer?.medal.lift ?? 0)
       rig.slide.rotation.y = cheer?.medal.sway ?? 0
       if (cheer) fly(cheer.confetti, (cheer as { confettiScale?: number }).confettiScale ?? 1)
-      faces.forEach((face, step) => { face.visible = step === Math.round((wink?.wink ?? 0) * FACE_STEPS) })
+      faces.forEach((face, step) => { face.visible = step === Math.round((wink?.wink ?? zoom?.face ?? 0) * FACE_STEPS) })
       if (wink) twinkle(wink.stars)
       rig.bends.forEach((bone, i) => {
         const arm = Math.floor(i / 3), bend = i % 3
@@ -253,6 +310,47 @@ export function createPoulpyScene(canvas: HTMLCanvasElement) {
       confetti!.setMatrixAt(i, piece.matrix)
     })
     confetti.instanceMatrix.needsUpdate = true
+  }
+
+  function puff(puffs: number[][]) {
+    if (!smoke) {
+      const disc = geometry(puffShape()), paint = (colour: string, order: number) => {
+        const mesh = new THREE.InstancedMesh(disc, new THREE.MeshBasicMaterial({ color: new THREE.Color(colour), transparent: true, depthWrite: false }), puffs.length)
+        mesh.frustumCulled = false
+        mesh.renderOrder = order
+        scene.add(mesh)
+        return mesh
+      }
+      smoke = { edges: paint(JETPACK.smoke.edge, 1), fills: paint(JETPACK.smoke.colour, 2) }
+    }
+    puffs.forEach(([x, y, z, size], i) => {
+      piece.position.set(x, y, z)
+      piece.quaternion.copy(camera.quaternion)
+      for (const [mesh, grow] of [[smoke!.fills, 0], [smoke!.edges, JETPACK.smoke.width]] as const) {
+        piece.scale.setScalar(size ? size + grow : 0)
+        piece.updateMatrix()
+        mesh.setMatrixAt(i, piece.matrix)
+      }
+    })
+    smoke.edges.instanceMatrix.needsUpdate = smoke.fills.instanceMatrix.needsUpdate = true
+  }
+
+  function play(all: DjPose['notes']) {
+    if (!notes.length) {
+      notes = DJ_NOTES.map(({ kind, colour }) => {
+        const shape = noteShape(kind), group = new THREE.Group()
+        group.add(new THREE.Mesh(geometry(shape.edge), new THREE.MeshBasicMaterial({ color: new THREE.Color(DJ_KIT.colours.white) })))
+        group.add(new THREE.Mesh(geometry(shape.fill), new THREE.MeshBasicMaterial({ color: new THREE.Color(colour) })))
+        scene.add(group)
+        return group
+      })
+    }
+    all.forEach(({ at, size, rock }, i) => {
+      notes[i].position.fromArray(at)
+      notes[i].scale.setScalar(Math.max(size, 1e-4))
+      notes[i].visible = size > 0.002
+      notes[i].userData.rock = rock
+    })
   }
 
   function twinkle(all: WinkPose['stars']) {
@@ -312,9 +410,14 @@ export function createPoulpyScene(canvas: HTMLCanvasElement) {
     resizing.disconnect()
     clear()
     for (const star of stars) { star.geometry.dispose(); (star.material as THREE.Material).dispose() }
+    for (const n of notes) n.traverse((node) => { if (node instanceof THREE.Mesh) { node.geometry.dispose(); (node.material as THREE.Material).dispose() } })
     confetti?.geometry.dispose()
     ;(confetti?.material as THREE.Material | undefined)?.dispose()
     confetti?.dispose()
+    if (smoke) {
+      smoke.edges.geometry.dispose()
+      for (const mesh of [smoke.edges, smoke.fills]) { (mesh.material as THREE.Material).dispose(); mesh.dispose() }
+    }
     shadow.geometry.dispose()
     shadow.material.map?.dispose()
     shadow.material.dispose()
@@ -322,5 +425,6 @@ export function createPoulpyScene(canvas: HTMLCanvasElement) {
     renderer.dispose()
   }
 
-  return { show, look, pose, fumes, parts, render, dispose }
+  // `room` is the three.js scene, for a look to add what goes on around him (falling leaves); it removes and disposes of it itself.
+  return { show, look, pose, fumes, parts, render, dispose, room: scene }
 }

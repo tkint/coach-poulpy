@@ -51,7 +51,7 @@ data class WorkoutPageStep(val key: String, val row: WorkoutStepRow?, val repeat
 data class WorkoutPagePart(
     val key: String,
     val kind: PartKind,
-    /** "Warm-up", "Work", or "Work 2" when there are several work parts. */
+    /** "Warm-up", "Work" or "Cool down". */
     val name: String,
     /** "4 rounds" or "4 exercises" for work, "2 steps" otherwise ([WorkoutFacts.partLine]). */
     val summary: String,
@@ -99,7 +99,7 @@ data class WorkoutPageState(
     /** Only workouts made with the builder can be edited or copied. */
     val editable: Boolean = false,
     val deletePrompt: DeletePrompt = DeletePrompt("", ""),
-    /** The muscles the work parts train, busiest first, for the list under the exercises. */
+    /** The muscles the work part trains, busiest first, for the list under the exercises. */
     val muscles: List<MuscleLoad> = emptyList(),
     /** Heat 1 to 3 of each area key of the body map to light; areas not listed stay plain. */
     val heat: Map<String, Int> = emptyMap(),
@@ -231,8 +231,6 @@ internal class WorkoutPageBuilder(private val catalog: Catalog, private val labe
 
     private fun parts(workout: Workout): List<WorkoutPagePart> {
         val last = workout.steps.lastOrNull()?.id
-        val severalWorkParts = workout.parts.count { it.kind == PartKind.WORK } > 1
-        var workParts = 0
         fun leaf(step: Step): WorkoutStepRow? = when (step) {
             is Step.ExerciseStep -> stepRow(step, last = step.id == last)
             is Step.Rest -> WorkoutStepRow(
@@ -247,12 +245,11 @@ internal class WorkoutPageBuilder(private val catalog: Catalog, private val labe
             is Step.Group -> null
         }
         return workout.parts.map { part ->
-            if (part.kind == PartKind.WORK) workParts++
             val (count, length) = facts.partLine(part, endsWorkout = part == workout.parts.last())
             WorkoutPagePart(
                 key = part.id.value,
                 kind = part.kind,
-                name = labels.part(part.kind, workParts.takeIf { severalWorkParts && part.kind == PartKind.WORK }),
+                name = labels.part(part.kind),
                 summary = count,
                 time = length,
                 steps = part.steps.map { step ->
