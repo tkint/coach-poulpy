@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// Poulpy's autumn look, live: design/poulpy-3d/looks/autumn.mjs, in PoulpyLookViewer.vue. He wears his scarf and sways while
+// Poulpy's autumn look, live: design/poulpy-3d/looks/autumn.mjs, in ../PoulpyViewer.vue. He wears his scarf and sways while
 // maple leaves fall around him. The leaves are flat and face the viewer as they fall, like the comic effects of the poses; once on
 // the floor they lie flat on it.
 import * as THREE from 'three'
@@ -7,13 +7,13 @@ import { shallowRef, watch } from 'vue'
 import tokens from '../../../../../design/tokens.json'
 import { AUTUMN, buildAutumn, createAutumn, leafShape, type AutumnPose } from '../../../../../design/poulpy-3d/looks/autumn.mjs'
 import type { PoulpyView } from '../poulpy3dScene'
-import PoulpyLookViewer, { type LiveLook, type PoulpyScene } from './PoulpyLookViewer.vue'
+import PoulpyViewer, { type LivePoulpy, type PoulpyScene } from '../PoulpyViewer.vue'
 
 const leavesShown = shallowRef(true)
 let placeLeaves: (() => void) | undefined
 watch(leavesShown, () => placeLeaves?.())
 
-async function start(scene: PoulpyScene): Promise<LiveLook> {
+async function start(scene: PoulpyScene): Promise<LivePoulpy> {
   const move = createAutumn()
   let posed: AutumnPose = move.pose()
   let view: PoulpyView = { turn: 0, tilt: 0, distance: 0 }
@@ -75,13 +75,14 @@ async function start(scene: PoulpyScene): Promise<LiveLook> {
 </script>
 
 <template>
-  <PoulpyLookViewer
+  <PoulpyViewer
     label="Poulpy in his autumn look: happy, in a white and red striped scarf, swaying gently as maple leaves fall around him."
     :framing="{ tilt: 20, distance: 10.4, centre: 1.5 }"
     :start="start"
+    :values="() => ({ page: 'look: autumn', leaves: leavesShown })"
   >
     <template #toggles>
       <button type="button" class="toggle" :aria-pressed="leavesShown" @click="leavesShown = !leavesShown">Leaves</button>
     </template>
-  </PoulpyLookViewer>
+  </PoulpyViewer>
 </template>

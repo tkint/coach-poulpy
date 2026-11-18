@@ -1,10 +1,10 @@
 <script setup lang="ts">
-// Rodolphe, Poulpy's red-nosed reindeer look (design/poulpy-3d/looks/rodolphe.mjs), live in PoulpyLookViewer.vue: he sways to a
+// Rodolphe, Poulpy's red-nosed reindeer look (design/poulpy-3d/looks/rodolphe.mjs), live in ../PoulpyViewer.vue: he sways to a
 // tune, his nose glowing on the beat. The glow is light, so it is drawn here, not in the model.
 import type * as Three from 'three'
 import tokens from '../../../../../design/tokens.json'
 import { buildRodolphe, COLOURS, createRodolpheIdle, noseBulb, scarfKnot } from '../../../../../design/poulpy-3d/looks/rodolphe.mjs'
-import PoulpyLookViewer, { type LiveLook, type PoulpyScene } from './PoulpyLookViewer.vue'
+import PoulpyViewer, { type LivePoulpy, type PoulpyScene } from '../PoulpyViewer.vue'
 
 // A soft round glow, warm in the middle and gone at its edge: the light of his nose on the air in front of his face.
 function glowTexture(three: typeof Three) {
@@ -21,7 +21,7 @@ function glowTexture(three: typeof Three) {
   return new three.CanvasTexture(paint)
 }
 
-async function start(scene: PoulpyScene): Promise<LiveLook> {
+async function start(scene: PoulpyScene): Promise<LivePoulpy> {
   const three = await import('three')
   const move = createRodolpheIdle()
   // What the idle moves on its own: the glow in front of his nose, his nose, and the scarf's ends around their knot.
@@ -74,10 +74,11 @@ async function start(scene: PoulpyScene): Promise<LiveLook> {
 </script>
 
 <template>
-  <PoulpyLookViewer
+  <PoulpyViewer
     label="Poulpy in 3D as Rodolphe, a red-nosed reindeer with antlers and a striped scarf, swaying to a tune as his nose glows."
     :framing="{ tilt: 18, distance: 9.6 }"
     move-label="Dance"
     :start="start"
+    :values="() => ({ page: 'look: rodolphe' })"
   />
 </template>
