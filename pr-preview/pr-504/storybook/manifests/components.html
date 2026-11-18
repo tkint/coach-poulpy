@@ -620,7 +620,7 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">30 docs ok</a></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">34 docs ok</a></div>
   </div>
 </header>
 <main>
@@ -1788,6 +1788,110 @@ import * as Live from &#39;./Autumn.stories&#39;
 - **Every run is the same.** Where each leaf falls and how it swings comes from a fixed list, not from chance, and the leaves have already been falling for a while when he appears.
 
 `AUTUMN` in [`design/poulpy-3d/looks/autumn.mjs`](https://github.com/tkint/coach-poulpy/blob/main/design/poulpy-3d/looks/autumn.mjs) holds every number: his cheeks, the scarf, the leaves and his idle. `buildAutumn()` builds him in his scarf and `createAutumn()` runs the leaves and the sway live. Like the moves, it is a preview: it is not in the glTF files nor in the apps&#39; pictures.
+
+**Still open:** its values (the scarf&#39;s colours, how many leaves fall and how fast, how far he sways).
+</code></pre>
+          </div>
+        </div>
+  </div>
+</article>
+<article
+  class="card is-doc no-doc-error"
+  role="listitem"
+  aria-label="Docs">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> Brand/Poulpy looks/The cook</h2>
+      <div class="badges">
+        
+        <label for="doc-18-brand-poulpy-looks-the-cook-docs-content" class="badge ok as-toggle">view content</label>
+      </div>
+    </div>
+    <div class="meta" title="./stories/brand/looks/Chef.mdx">brand-poulpy-looks-the-cook--docs · ./stories/brand/looks/Chef.mdx</div>
+    <div># Poulpy the cook **Draft.** A look to review here before it goes anywhere else: Poulpy dr...</div>
+  </div>
+
+  <!-- Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="doc-18-brand-poulpy-looks-the-cook-docs-content" class="tg tg-content" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-content">
+          <div class="mdx-content">
+            <pre><code>import { Meta, Story } from &#39;@storybook/addon-docs/blocks&#39;
+import * as Live from &#39;./Chef.stories&#39;
+
+&lt;Meta title=&quot;Brand/Poulpy looks/The cook&quot; /&gt;
+
+# Poulpy the cook
+
+**Draft.** A look to review here before it goes anywhere else: Poulpy dressed up as a cook who is sure of everything, in a tall white toque worn a little askew, with a big curled French moustache and a confident grin.
+
+&lt;Story of={Live.Chef} /&gt;
+
+- **His face** is a small, confident toothy grin, short from top to bottom, its top tucked under the moustache so only a few teeth show. His eyes are wide open and both brows are up, set high so the moustache has room. It is our own drawing, made for Poulpy.
+- **The moustache is solid and big.** A thick, wide handlebar, a rounded volume that stands out from his face like the toque does, tapering from his middle to two tips that curl up beside his eyes, never over them. It is shaded like him, in a dark a little lighter than his ink, belongs to his face (it goes with his head and twitches) and lies over the grin&#39;s top teeth.
+- **The toque is solid.** A plain band, then a puff with soft folds and a light crease in each. It sits on his head, leans 9° to his left and 5° back, and goes wherever his head goes.
+- **His idle is small.** He stands still, then puffs himself up: his chin goes up 6° and his head grows a little taller, on a spring, and while he holds it his moustache twitches twice, tips up. Then he settles back. `CHEF` in `motion.mjs` holds the timing.
+- **Still Poulpy.** Proud, on the blue side, eight tentacles on the floor and no arms (brand decision 8). Walk around him: the toque and the moustache stay where they belong.
+
+The look is in [`design/poulpy-3d/looks/chef.mjs`](https://github.com/tkint/coach-poulpy/blob/main/design/poulpy-3d/looks/chef.mjs): `TOQUE`, `MOUSTACHE`, `SMILE` and `CHEF_FACE`. It is a preview only: not in the glTF files, the pictures or the apps.
+
+**Still open:** its values (how far the toque leans, how big the moustache is, how often he puffs himself up).
+</code></pre>
+          </div>
+        </div>
+  </div>
+</article>
+<article
+  class="card is-doc no-doc-error"
+  role="listitem"
+  aria-label="Docs">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> Brand/Poulpy looks/The DJ</h2>
+      <div class="badges">
+        
+        <label for="doc-19-brand-poulpy-looks-the-dj-docs-content" class="badge ok as-toggle">view content</label>
+      </div>
+    </div>
+    <div class="meta" title="./stories/brand/looks/Dj.mdx">brand-poulpy-looks-the-dj--docs · ./stories/brand/looks/Dj.mdx</div>
+    <div># Poulpy the DJ **Draft.** A look to review here before it goes anywhere else: Poulpy behi...</div>
+  </div>
+
+  <!-- Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="doc-19-brand-poulpy-looks-the-dj-docs-content" class="tg tg-content" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-content">
+          <div class="mdx-content">
+            <pre><code>import { Meta, Story } from &#39;@storybook/addon-docs/blocks&#39;
+import * as Live from &#39;./Dj.stories&#39;
+
+&lt;Meta title=&quot;Brand/Poulpy looks/The DJ&quot; /&gt;
+
+# Poulpy the DJ
+
+**Draft.** A look to review here before it goes anywhere else: Poulpy behind a set of decks, his headset on, playing. His eyes are shut and he smiles a little: he is into the music and enjoying himself. His head bobs to the beat, he scratches one record while the other turns, and music notes float up around him.
+
+&lt;Story of={Live.Dj} /&gt;
+
+- **He wears a headset.** A padded band over the top of his head and a round cup over each side, ember with a gold cap. It is solid and goes wherever his head goes.
+- **The decks lie on the floor in front of him.** One low console with a turntable each side and the mixer in the middle, low enough that his face stays clear. Turn the view and they stay where they are.
+- **He plays with the tips of his arms, never lifting one.** His front arm lies on the mixer and the two beside it on the records, as they lie on the floor. The scratch is his arm sliding over the record, the way his arms slide when he turns, and the record rocks with it; the other record keeps turning.
+- **His head bobs, only just.** On each beat it nods forward a couple of degrees and dips a little, then comes back up, leaning to one side and then the other, on springs so it never snaps.
+- **The notes float up like the cocky one&#39;s stars pop.** One starts every two beats, a little past its size and back, floats up, sways and rocks, then shrinks away. They are comic effects, so they are flat and keep facing whoever looks, like the poses&#39; sparks, each with a white edge so it reads on a light or a dark page.
+- **Blue side, happy.** He is in the happy shade, with the happy one&#39;s blush.
+- **Still, he stands at the decks** with nothing moving and no notes, as for reduced motion; the still notes of `buildDj()` are there for a picture, if the look gets one.
+
+`DJ_KIT`, `DJ_FACE` and `DJ_NOTES` in [`design/poulpy-3d/looks/dj.mjs`](https://github.com/tkint/coach-poulpy/blob/main/design/poulpy-3d/looks/dj.mjs) hold the headset, the decks, his face and the notes; `DJ` in `motion.mjs` holds the beat, the bob, the scratch and how the notes float, and `createDj()` runs it live. Like the other moves it is a preview, not in the glTF files.
+
+**Still open:** its values (the tempo, how far his head bobs, how often a note floats up).
 </code></pre>
           </div>
         </div>
@@ -1802,16 +1906,16 @@ import * as Live from &#39;./Autumn.stories&#39;
       <h2><span class="status-dot dot-ok"></span> Brand/Poulpy looks/Jetpack</h2>
       <div class="badges">
         
-        <label for="doc-18-brand-poulpy-looks-jetpack-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-20-brand-poulpy-looks-jetpack-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
     <div class="meta" title="./stories/brand/looks/Jetpack.mdx">brand-poulpy-looks-jetpack--docs · ./stories/brand/looks/Jetpack.mdx</div>
-    <div># Poulpy with a jetpack **Draft, to validate.** A look: Poulpy in a costume and a move of ...</div>
+    <div># Poulpy with a jetpack **Draft.** A look to review here before it goes anywhere else: Pou...</div>
   </div>
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-18-brand-poulpy-looks-jetpack-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-20-brand-poulpy-looks-jetpack-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -1819,27 +1923,131 @@ import * as Live from &#39;./Autumn.stories&#39;
         <div class="panel panel-content">
           <div class="mdx-content">
             <pre><code>import { Meta, Story } from &#39;@storybook/addon-docs/blocks&#39;
-import * as Jetpack from &#39;./Jetpack.stories&#39;
+import * as Live from &#39;./Jetpack.stories&#39;
 
 &lt;Meta title=&quot;Brand/Poulpy looks/Jetpack&quot; /&gt;
 
 # Poulpy with a jetpack
 
-**Draft, to validate.** A look: Poulpy in a costume and a move of his own, for fun moments. He wears a little rocket pack and zooms from one side to the other, smiling with his eyes shut, flames and smoke under him and his tentacles trailing. It is not in the apps and nothing is baked from it until the owner agrees it.
+**Draft.** A look to review here before it goes anywhere else: Poulpy in a costume and a move of his own, for fun moments. He wears a little rocket pack and zooms from one side to the other, smiling with his eyes shut, flames and smoke under him and his tentacles trailing.
 
-&lt;Story of={Jetpack.Flying} /&gt;
+&lt;Story of={Live.Jetpack} /&gt;
 
 - **The pack is solid, part of him.** Two little white rockets on a plate across the back of his head, each with a round blue nose, a blue stripe, a fin and a steel nozzle. They lean in at the top so their nozzles point down and a little out, clear of his tentacles. Turn him and they turn with him; face on, you see their sides and their flames.
-- **He is enjoying the ride.** His face is [the DJ&#39;s](?path=/docs/brand-looks-the-dj--docs): eyes shut in two happy arcs, a small smile, a little lopsided, and the happy blush, on the blue side in the happy shade. Flying is fun, never a chore. As he pushes off, his smile widens a touch, and nothing else on his face moves. His head widens a little with the push and wobbles back as he stops. `jetpackFace()` gives his face at any point between hovering and dashing. He does not blink for now; a natural, infrequent blink may come later.
+- **He is enjoying the ride.** His face is [the DJ&#39;s](?path=/docs/brand-poulpy-looks-the-dj--docs): eyes shut in two happy arcs, a small smile, a little lopsided, and the happy blush, on the blue side in the happy shade. Flying is fun, never a chore. As he pushes off, his smile widens a touch, and nothing else on his face moves. His head widens a little with the push and wobbles back as he stops. `jetpackFace()` gives his face at any point between hovering and dashing. He does not blink for now; a natural, infrequent blink may come later.
 - **The flames and the smoke are comic effects.** Each flame is three flat layers, orange, yellow and pale cream, facing the viewer like the sparks and puffs of the poses and pointing the way its nozzle does. They are fire, gold and yellow, never the ember of his grumpy side. They flicker and burn longer as he pushes off. The smoke is the fuming pose&#39;s puffs, light with a grey-blue edge: they leave the flames&#39; tips, grow, drift and shrink away, and stay in the room, so he leaves a trail as he zooms. Overlapping puffs make one cloud with one outline.
 - **He zooms, banks and looks where he goes.** He hovers well off the floor, bobbing, and glides from one side to the other, easing in and out, with a short hover at each end. Going sideways he banks into the turn and turns his face a little towards where he is going.
-- **His tentacles hang and trail, he never lifts them.** In the air they hang heavier than in [a jump](?path=/docs/brand-poulpy-moves-little-jumps--docs), as if he pulled a few G&#39;s, and they lag behind him on the same three bends: they trail as he sets off and settle as he stops, with hardly a swing past him, because the G&#39;s weigh them down. Brand decision 8 holds: he never raises a tentacle himself.
+- **His tentacles hang and trail, he never lifts them.** In the air they hang heavier than in [a jump](?path=/docs/brand-poulpy-moves-little-jumps--docs), as if he pulled a few G&#39;s, and they lag behind him on the same three bends: they trail as he sets off and settle as he stops, with hardly a swing past him, because the G&#39;s weigh them down. Brand decision 8 holds: he never raises a tentacle himself. **Soft arms** loosens them.
 
 The look is `JETPACK` and `buildPoulpyJetpack()` in [`design/poulpy-3d/looks/jetpack.mjs`](https://github.com/tkint/coach-poulpy/blob/main/design/poulpy-3d/looks/jetpack.mjs); the flight is `ZOOM` and `createZoom()` in [`motion.mjs`](https://github.com/tkint/coach-poulpy/blob/main/design/poulpy-3d/motion.mjs). It is a live preview, not in the glTF files or the pictures.
 
-**Where he will show:** probably at the end of a session, where the screen has room for him to zoom about. Nothing is built there until this page is agreed.
+**Still open:** where he will show (probably at the end of a session, where the screen has room for him to zoom about; nothing is built there until this page is agreed), and its values (how far and how fast he zooms, how heavy his tentacles hang, how long the flames burn).
+</code></pre>
+          </div>
+        </div>
+  </div>
+</article>
+<article
+  class="card is-doc no-doc-error"
+  role="listitem"
+  aria-label="Docs">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> Brand/Poulpy looks/Rodolphe</h2>
+      <div class="badges">
+        
+        <label for="doc-21-brand-poulpy-looks-rodolphe-docs-content" class="badge ok as-toggle">view content</label>
+      </div>
+    </div>
+    <div class="meta" title="./stories/brand/looks/Rodolphe.mdx">brand-poulpy-looks-rodolphe--docs · ./stories/brand/looks/Rodolphe.mdx</div>
+    <div># Rodolphe, the red-nosed reindeer **Draft.** A festive look to review here before it goes...</div>
+  </div>
 
-**Still open:** its values (how far and how fast he zooms, how heavy his tentacles hang, how long the flames burn).
+  <!-- Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="doc-21-brand-poulpy-looks-rodolphe-docs-content" class="tg tg-content" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-content">
+          <div class="mdx-content">
+            <pre><code>import { Meta, Story } from &#39;@storybook/addon-docs/blocks&#39;
+import * as Live from &#39;./Rodolphe.stories&#39;
+
+&lt;Meta title=&quot;Brand/Poulpy looks/Rodolphe&quot; /&gt;
+
+# Rodolphe, the red-nosed reindeer
+
+**Draft.** A festive look to review here before it goes anywhere else: Poulpy dresses up as a red-nosed reindeer, our own take on the old idea and no one else&#39;s character, and he is very happy about it.
+
+&lt;Story of={Live.Rodolphe} /&gt;
+
+- **Always the blue side, always happy.** Rodolphe is a treat, so he never wears the ember side and never frowns.
+- **A felt reindeer headband.** A flat, broad strip goes over the top of his head, leaning a little back. Seen from above it is wide front to back; seen from the front it is a solid felt band, and it stops well above his sides. Two big, tall, chunky dark-brown felt antlers sit low on it, close to his head. Each is a long fat beam that rises well above his head and bows out, with two round tines branching outwards and a little gold jingle bell on every tip. Below and outside each antler is a felt reindeer ear, tan outside and cream inside, pointing outwards. At the front of each antler&#39;s base is a full cluster of holly: six round-ended green leaves fanned out, none pointing down towards his eyes, and five red berries in the middle. It is all soft and plush, with no points, and the design is our own.
+- **A round, shiny red nose.** A bulb half out of his face, between his eyes and his smile, with a white dot of light like his eyes have. His happy face moves up a little to make room for it and his smile is a little smaller.
+- **A white and red striped scarf.** Puffy knitted pieces all around the base of his head, sitting on his arms: lower in front, under his smile, higher behind. It is knotted over his front right arm and its two ends lie along that arm. Turn the view and everything he wears goes round with him.
+- **His reds are not an alarm.** The nose and the scarf are a bright, warm cherry (`#F2353A`, `#E2373F`), lighter and yellower than the error crimson (`#C8264A`) and redder than any ember shade, and they only ever show on blue. Nothing about him reads as an error or as anger. The berries are the scarf&#39;s red. The antlers are `#5E3A22`, the headband `#9A6A42`, the bells the medal&#39;s gold `#F0B53A`, the ears `#C89A6A` with a `#F5E6CC` inside and the holly `#2E8B4E`; the nose lights up towards `#FF8C8C` and its glow is `#FF5A4E`, fading out.
+- **Flat, like the rest of him.** One shadow band, the plain colours below, no gloss: the nose&#39;s shine is a white dot, as on his eyes.
+- **He sways to a tune.** A step to his left, a step to his right: his body turns a little each way on a spring and his arms trail behind it as they do when he turns, his head leans into each step and bobs on the beat, and the scarf&#39;s ends swing behind. Every eight beats he holds still for two, his nose still glowing.
+- **His nose glows on the beat.** Every other beat it lights up, swells a hair and a warm glow blooms in front of it, then it fades back. The glow is light, so it belongs to whoever draws him, like the gleam; the model only holds the nose.
+- **No arms.** His eight arms stay on the floor; the dance is in his body, his head and the scarf. The scarf&#39;s ends lie on an arm, they are not held.
+
+[`design/poulpy-3d/looks/rodolphe.mjs`](https://github.com/tkint/coach-poulpy/blob/main/design/poulpy-3d/looks/rodolphe.mjs) holds the whole look, built like a pose and moving like a move: `FACE` and `COLOURS`, the shapes in `buildRodolphe()`, and `IDLE`, the dance&#39;s timing and springs, which `createRodolpheIdle()` runs. `PoulpyRodolphe.vue` beside this page adds the glow. It is a preview only: not in the glTF files, the pictures or the apps.
+
+**Still open:** whether he keeps the name Rodolphe; when he would show (a December look, a reward, a choice in settings); whether the dance is his idle or a move he does when tapped; and whether he goes into the glTF files and the pictures once agreed.
+</code></pre>
+          </div>
+        </div>
+  </div>
+</article>
+<article
+  class="card is-doc no-doc-error"
+  role="listitem"
+  aria-label="Docs">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> Brand/Poulpy looks/Winter</h2>
+      <div class="badges">
+        
+        <label for="doc-22-brand-poulpy-looks-winter-docs-content" class="badge ok as-toggle">view content</label>
+      </div>
+    </div>
+    <div class="meta" title="./stories/brand/looks/Winter.mdx">brand-poulpy-looks-winter--docs · ./stories/brand/looks/Winter.mdx</div>
+    <div># Winter Poulpy **Draft.** A look for the cold months, to review here before it goes anywh...</div>
+  </div>
+
+  <!-- Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="doc-22-brand-poulpy-looks-winter-docs-content" class="tg tg-content" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-content">
+          <div class="mdx-content">
+            <pre><code>import { Meta, Story } from &#39;@storybook/addon-docs/blocks&#39;
+import * as Live from &#39;./Winter.stories&#39;
+
+&lt;Meta title=&quot;Brand/Poulpy looks/Winter&quot; /&gt;
+
+# Winter Poulpy
+
+**Draft.** A look for the cold months, to review here before it goes anywhere else: Poulpy, happy, in fluffy ear muffs and a scarf, while snow falls around him and his breath shows in the cold air.
+
+&lt;Story of={Live.Winter} /&gt;
+
+- **What he wears is solid and part of him**, like the poses&#39; props. The set is a warm cream and a deep berry: never ember, which is his angry side, and not the autumn scarf&#39;s red, and both stand out against his blue.
+- **The scarf is the [autumn look](?path=/docs/brand-poulpy-looks-autumn--docs)&#39;s**, exactly: the same shape, size and place, knot and ends, built with its own code, in cream with berry stripes.
+- **The ear muffs sit where the DJ&#39;s headset does**: a thin berry band over his head and a big fluffy cream muff on each side, over where his ears would be, covered in small tufts so its outline is furry.
+- **He is happy, on the blue side.** His face is the happy one, with rosier cheeks from the cold. Winter is cosy, never cold and miserable.
+- **Snow falls around him.** A few six-armed crystals in frost blue, which shows on a light page and a dark one. Each falls at its own pace, sways and turns on itself, and melts where it lands. The flakes are flat and face the viewer, like the comic effects, but they are in the room: walk around him and they stay where they are. They never fall through him. Every run is the same: where each flake falls comes from a fixed list, as the champion&#39;s confetti does.
+- **His breath shows.** Each time he breathes out, his head squashes a little and three small puffs of mist leave his mouth and drift off to the side he looks to, clear of his eyes, rising, growing and fading. They are pale and soft-edged, nothing like the fuming pose&#39;s puffs: cold breath, not anger.
+- **His idle is gentle.** He looks a little to one side, then to the other, on a soft spring; his head leans with him and his arms trail behind, as in his turn. He never lifts an arm.
+
+`WINTER` in [`design/poulpy-3d/looks/winter.mjs`](https://github.com/tkint/coach-poulpy/blob/main/design/poulpy-3d/looks/winter.mjs) holds every number: the colours, the ear muffs, the sway, the breath and the snow. `buildWinterPoulpy()` builds him and `createWinter()` runs his idle. A look keeps to its own file, so looks never step on each other. It is a live preview only: not in the glTF files, the pictures or the apps.
+
+**Still open:** the set&#39;s colours (cream and berry), and how strong the breath should be.
 </code></pre>
           </div>
         </div>
@@ -1854,7 +2062,7 @@ The look is `JETPACK` and `buildPoulpyJetpack()` in [`design/poulpy-3d/looks/jet
       <h2><span class="status-dot dot-ok"></span> Brand/Poulpy moves/Turning</h2>
       <div class="badges">
         
-        <label for="doc-19-brand-poulpy-moves-turning-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-23-brand-poulpy-moves-turning-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
     <div class="meta" title="./stories/brand/poulpy-moves/Turning.mdx">brand-poulpy-moves-turning--docs · ./stories/brand/poulpy-moves/Turning.mdx</div>
@@ -1863,7 +2071,7 @@ The look is `JETPACK` and `buildPoulpyJetpack()` in [`design/poulpy-3d/looks/jet
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-19-brand-poulpy-moves-turning-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-23-brand-poulpy-moves-turning-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -1904,7 +2112,7 @@ His arms are not stiff. Each one bends at three places, and every bend is a smal
       <h2><span class="status-dot dot-ok"></span> Brand/Poulpy moves/Little jumps</h2>
       <div class="badges">
         
-        <label for="doc-20-brand-poulpy-moves-little-jumps-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-24-brand-poulpy-moves-little-jumps-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
     <div class="meta" title="./stories/brand/poulpy-moves/Jumping.mdx">brand-poulpy-moves-little-jumps--docs · ./stories/brand/poulpy-moves/Jumping.mdx</div>
@@ -1913,7 +2121,7 @@ His arms are not stiff. Each one bends at three places, and every bend is a smal
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-20-brand-poulpy-moves-little-jumps-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-24-brand-poulpy-moves-little-jumps-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -1966,7 +2174,7 @@ Poulpy can also jump on the spot. He tucks his head down into his arms, which wi
       <h2><span class="status-dot dot-ok"></span> Brand/Poulpy moves/Jumping around</h2>
       <div class="badges">
         
-        <label for="doc-21-brand-poulpy-moves-jumping-around-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-25-brand-poulpy-moves-jumping-around-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
     <div class="meta" title="./stories/brand/poulpy-moves/JumpingAround.mdx">brand-poulpy-moves-jumping-around--docs · ./stories/brand/poulpy-moves/JumpingAround.mdx</div>
@@ -1975,7 +2183,7 @@ Poulpy can also jump on the spot. He tucks his head down into his arms, which wi
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-21-brand-poulpy-moves-jumping-around-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-25-brand-poulpy-moves-jumping-around-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -2010,7 +2218,7 @@ Given a `stride`, `createJump()` turns him as `createTurn()` does.
       <h2><span class="status-dot dot-ok"></span> Brand/Poulpy moves/The champion</h2>
       <div class="badges">
         
-        <label for="doc-22-brand-poulpy-moves-the-champion-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-26-brand-poulpy-moves-the-champion-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
     <div class="meta" title="./stories/brand/poulpy-moves/Cheering.mdx">brand-poulpy-moves-the-champion--docs · ./stories/brand/poulpy-moves/Cheering.mdx</div>
@@ -2019,7 +2227,7 @@ Given a `stride`, `createJump()` turns him as `createTurn()` does.
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-22-brand-poulpy-moves-the-champion-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-26-brand-poulpy-moves-the-champion-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -2057,7 +2265,7 @@ The controls are the jump&#39;s, starting from the champion&#39;s own values: He
       <h2><span class="status-dot dot-ok"></span> Brand/Poulpy moves/The cocky wink</h2>
       <div class="badges">
         
-        <label for="doc-23-brand-poulpy-moves-the-cocky-wink-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-27-brand-poulpy-moves-the-cocky-wink-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
     <div class="meta" title="./stories/brand/poulpy-moves/Winking.mdx">brand-poulpy-moves-the-cocky-wink--docs · ./stories/brand/poulpy-moves/Winking.mdx</div>
@@ -2066,7 +2274,7 @@ The controls are the jump&#39;s, starting from the champion&#39;s own values: He
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-23-brand-poulpy-moves-the-cocky-wink-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-27-brand-poulpy-moves-the-cocky-wink-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -2107,7 +2315,7 @@ The switch picks the eye he shuts, named for him: his right eye, the design, is 
       <h2><span class="status-dot dot-ok"></span> Brand/Poulpy moves/Annoyed</h2>
       <div class="badges">
         
-        <label for="doc-24-brand-poulpy-moves-annoyed-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-28-brand-poulpy-moves-annoyed-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
     <div class="meta" title="./stories/brand/poulpy-moves/Annoyed.mdx">brand-poulpy-moves-annoyed--docs · ./stories/brand/poulpy-moves/Annoyed.mdx</div>
@@ -2116,7 +2324,7 @@ The switch picks the eye he shuts, named for him: his right eye, the design, is 
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-24-brand-poulpy-moves-annoyed-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-28-brand-poulpy-moves-annoyed-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -2153,7 +2361,7 @@ None of them is a turn: the turn is kept for changing mood. They are the same li
       <h2><span class="status-dot dot-ok"></span> Brand/Poulpy moves/Fuming</h2>
       <div class="badges">
         
-        <label for="doc-25-brand-poulpy-moves-fuming-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-29-brand-poulpy-moves-fuming-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
     <div class="meta" title="./stories/brand/poulpy-moves/Fuming.mdx">brand-poulpy-moves-fuming--docs · ./stories/brand/poulpy-moves/Fuming.mdx</div>
@@ -2162,7 +2370,7 @@ None of them is a turn: the turn is kept for changing mood. They are the same li
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-25-brand-poulpy-moves-fuming-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-29-brand-poulpy-moves-fuming-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -2199,7 +2407,7 @@ How he gets here and how he calms down are on [Getting angry](?path=/docs/brand-
       <h2><span class="status-dot dot-ok"></span> Brand/Poulpy moves/Getting angry</h2>
       <div class="badges">
         
-        <label for="doc-26-brand-poulpy-moves-getting-angry-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-30-brand-poulpy-moves-getting-angry-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
     <div class="meta" title="./stories/brand/poulpy-moves/GettingAngry.mdx">brand-poulpy-moves-getting-angry--docs · ./stories/brand/poulpy-moves/GettingAngry.mdx</div>
@@ -2208,7 +2416,7 @@ How he gets here and how he calms down are on [Getting angry](?path=/docs/brand-
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-26-brand-poulpy-moves-getting-angry-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-30-brand-poulpy-moves-getting-angry-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -2275,7 +2483,7 @@ Not decided yet: how many taps make him annoyed and fuming, and how long he stay
       <h2><span class="status-dot dot-ok"></span> Brand/Brand book</h2>
       <div class="badges">
         
-        <label for="doc-27-brand-brand-book-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-31-brand-brand-book-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
     <div class="meta" title="./stories/brand/BrandBook.mdx">brand-brand-book--docs · ./stories/brand/BrandBook.mdx</div>
@@ -2284,7 +2492,7 @@ Not decided yet: how many taps make him annoyed and fuming, and how long he stay
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-27-brand-brand-book-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-31-brand-brand-book-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -2315,7 +2523,7 @@ The Poulpy brand book: logo, colours, poses, type, tokens and behaviour, with ev
       <h2><span class="status-dot dot-ok"></span> Brand/Decisions</h2>
       <div class="badges">
         
-        <label for="doc-28-brand-decisions-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-32-brand-decisions-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
     <div class="meta" title="./stories/brand/Decisions.mdx">brand-decisions--docs · ./stories/brand/Decisions.mdx</div>
@@ -2324,7 +2532,7 @@ The Poulpy brand book: logo, colours, poses, type, tokens and behaviour, with ev
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-28-brand-decisions-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-32-brand-decisions-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -2491,7 +2699,7 @@ The app icons are his pictures on Deep sea, in light and dark alike, and the loa
       <h2><span class="status-dot dot-ok"></span> Brand/Ideas for later</h2>
       <div class="badges">
         
-        <label for="doc-29-brand-ideas-for-later-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-33-brand-ideas-for-later-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
     <div class="meta" title="./stories/brand/Ideas.mdx">brand-ideas-for-later--docs · ./stories/brand/Ideas.mdx</div>
@@ -2500,7 +2708,7 @@ The app icons are his pictures on Deep sea, in light and dark alike, and the loa
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-29-brand-ideas-for-later-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-33-brand-ideas-for-later-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
