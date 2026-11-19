@@ -6,7 +6,6 @@ import screenBodyLogHeightSheet from './body-log-height-sheet.html?raw'
 import screenBodyLogSheet from './body-log-sheet.html?raw'
 import screenBodyWeightEmpty from './body-weight-empty.html?raw'
 import screenBodyWeight from './body-weight.html?raw'
-import screenDevicesList from './devices-list.html?raw'
 import screenProfileBodyFigureSheet from './profile-body-figure-sheet.html?raw'
 import screenProfileEdit from './profile-edit.html?raw'
 import screenProfileExperienceSheet from './profile-experience-sheet.html?raw'
@@ -17,7 +16,6 @@ import screenProfileSexSheet from './profile-sex-sheet.html?raw'
 import screenSettingsAppIconSheet from './settings-app-icon-sheet.html?raw'
 import screenSettingsGeneral from './settings-general.html?raw'
 import screenSettingsPreferences from './settings-preferences.html?raw'
-import screenYouSettings from './you-settings.html?raw'
 import screenYouStats from './you-stats.html?raw'
 
 // The Profile and settings screens of the apps (ADR 0029), drawn with the phone stylesheet (../screens.css).
@@ -65,12 +63,6 @@ export const BodyWeight: Story = {
   name: "Weight",
   ...screen(screenBodyWeight),
   parameters: { mockup: { issue: undefined } },
-}
-/** Settings · devices. */
-export const DevicesList: Story = {
-  name: "Devices",
-  ...screen(screenDevicesList),
-  parameters: { a11y: { test: 'todo' }, mockup: { issue: undefined } },
 }
 /** Profile · body figure. */
 export const ProfileBodyFigureSheet: Story = {
@@ -133,18 +125,10 @@ export const SettingsPreferences: Story = {
   parameters: { mockup: { issue: undefined } },
 }
 
-// The last destination becomes "You", with Settings and Stats in two tabs (#511): drafts until the owner agrees them in the PR.
-/** You · the Settings tab, the settings screen under the new last destination. */
-export const YouSettings: Story = {
-  name: "You, Settings tab",
-  tags: ['!autodocs', '!agreed', 'draft'],
-  ...screen(screenYouSettings),
-  parameters: { mockup: { issue: 511 } },
-}
+// The last destination is "You", with Stats and Settings in two tabs (#511).
 /** You · the Stats tab, moved out of History. */
 export const YouStats: Story = {
   name: "You, Stats tab",
-  tags: ['!autodocs', '!agreed', 'draft'],
   ...screen(screenYouStats),
   parameters: { mockup: { issue: 511 } },
 }

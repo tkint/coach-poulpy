@@ -860,7 +860,6 @@
 .cp-screen .settings-head { padding: 52px 12px 0 var(--cp-space-lg); display: flex; align-items: center; gap: var(--cp-space-sm); min-height: 100px; }
 .cp-screen .settings-head h1 { flex: 1; font: var(--cp-type-title); }
 .cp-screen .header-add-button { width: 48px; height: 48px; border-radius: var(--cp-radius-pill); background: var(--cp-primary-container); color: var(--cp-on-primary-container); display: flex; align-items: center; justify-content: center; }
-.cp-screen .settings-tabs { margin: var(--cp-space-md) var(--cp-space-lg) 0; }
 .cp-screen .settings-body { flex: 1; min-height: 0; overflow: hidden; padding: var(--cp-space-lg) var(--cp-space-lg); display: flex; flex-direction: column; gap: 10px; }
 .cp-screen .setting-card { border-radius: var(--cp-radius-md); background: var(--cp-surface); border: 1px solid var(--cp-outline); padding: var(--cp-space-md) var(--cp-space-md); display: flex; flex-direction: column; gap: var(--cp-space-sm); }
 .cp-screen .setting-card > strong { font-weight: 800; font-size: 16px; }
