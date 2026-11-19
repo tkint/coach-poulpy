@@ -1,6 +1,6 @@
 <main class="phone">
   <div class="history-head">
-    <h1>History</h1>
+    <div class="history-title"><h1>History</h1><button type="button" class="month-switch" aria-expanded="false" aria-controls="month" aria-label="October 2026, open the month"><span>October 2026</span><MobileIcon name="chevron-down" :size="20" /></button></div>
     <div class="view-tabs" role="tablist" aria-label="History view">
       <button type="button" role="tab" aria-selected="true"><MobileIcon name="list" :size="18" />Sessions</button>
       <button type="button" role="tab" aria-selected="false"><MobileIcon name="chart-no-axes-column" :size="18" />Stats</button>
@@ -17,7 +17,6 @@
       <div><button type="button" class="day day--active day--today day--selected" aria-label="Sat 24 October, 1 session, today" aria-pressed="true">24</button></div>
       <div><button type="button" class="day day--future" aria-label="Sun 25 October" aria-pressed="false" disabled>25</button></div>
     </div>
-    <button type="button" class="card-toggle" aria-expanded="false" aria-controls="month" aria-label="Open the month, October 2026"><span>October 2026</span><MobileIcon name="chevron-down" :size="20" /></button>
   </section>
   <div class="history-filters">
     <MobileSearchField label="Search sessions" placeholder="Session or exercise name" />

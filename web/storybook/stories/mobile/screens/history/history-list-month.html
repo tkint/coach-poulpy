@@ -1,17 +1,12 @@
 <main class="phone">
   <div class="history-head">
-    <h1>History</h1>
+    <div class="history-title"><h1>History</h1><button type="button" class="month-switch month-switch--open" aria-expanded="true" aria-controls="month" aria-label="October 2026, close the month"><span>October 2026</span><MobileIcon name="chevron-up" :size="20" /></button></div>
     <div class="view-tabs" role="tablist" aria-label="History view">
       <button type="button" role="tab" aria-selected="true"><MobileIcon name="list" :size="18" />Sessions</button>
       <button type="button" role="tab" aria-selected="false"><MobileIcon name="chart-no-axes-column" :size="18" />Stats</button>
     </div>
   </div>
   <section class="month-card" id="month" aria-label="October 2026" data-component="month-card">
-    <header>
-      <button class="step" type="button" aria-label="Previous month, September"><MobileIcon name="chevron-left" :size="22" /></button>
-      <div><h2>October 2026</h2><span class="sub">11 active days · swipe for other months</span></div>
-      <button class="step" type="button" aria-label="Next month, November" disabled><MobileIcon name="chevron-right" :size="22" /></button>
-    </header>
     <div class="weekdays" aria-hidden="true"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div>
     <div class="days" role="group" aria-label="Days of October">
       <div></div>
@@ -49,7 +44,6 @@
       <div><button type="button" class="day day--future" aria-label="Fri 30 October" aria-pressed="false" disabled>30</button></div>
       <div><button type="button" class="day day--future" aria-label="Sat 31 October" aria-pressed="false" disabled>31</button></div>
     </div>
-    <button type="button" class="card-toggle" aria-expanded="true" aria-controls="month" aria-label="Close the month"><span>Close</span><MobileIcon name="chevron-up" :size="20" /></button>
   </section>
   <div class="day-list" id="day-sessions">
       <div class="day-heading"><span class="label label--primary">Today · Sat 24 Oct</span></div>

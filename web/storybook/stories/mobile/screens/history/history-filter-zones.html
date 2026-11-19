@@ -1,11 +1,23 @@
 <main class="phone">
   <div class="history-head">
-    <h1>History</h1>
+    <div class="history-title"><h1>History</h1><button type="button" class="month-switch" aria-expanded="false" aria-controls="month" aria-label="October 2026, open the month"><span>October 2026</span><MobileIcon name="chevron-down" :size="20" /></button></div>
     <div class="view-tabs" role="tablist" aria-label="History view">
       <button type="button" role="tab" aria-selected="true"><MobileIcon name="list" :size="18" />Sessions</button>
       <button type="button" role="tab" aria-selected="false"><MobileIcon name="chart-no-axes-column" :size="18" />Stats</button>
     </div>
   </div>
+  <section class="month-card month-card--week" aria-label="Week of 19 October 2026" data-component="week-strip">
+    <div class="weekdays" aria-hidden="true"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div>
+    <div class="days" role="group" aria-label="Days of the week, swipe for other weeks">
+      <div><button type="button" class="day" aria-label="Mon 19 October" aria-pressed="false">19</button></div>
+      <div><button type="button" class="day" aria-label="Tue 20 October" aria-pressed="false">20</button></div>
+      <div><button type="button" class="day day--active" aria-label="Wed 21 October, 1 session" aria-pressed="false">21</button></div>
+      <div><button type="button" class="day" aria-label="Thu 22 October" aria-pressed="false">22</button></div>
+      <div><button type="button" class="day day--active" aria-label="Fri 23 October, 1 session" aria-pressed="false">23</button></div>
+      <div><button type="button" class="day day--active day--today day--selected" aria-label="Sat 24 October, 1 session, today" aria-pressed="true">24</button></div>
+      <div><button type="button" class="day day--future" aria-label="Sun 25 October" aria-pressed="false" disabled>25</button></div>
+    </div>
+  </section>
   <div class="history-filters">
     <MobileSearchField label="Search sessions" placeholder="Session or exercise name" />
     <div class="chip-row" role="group" aria-label="Filters">

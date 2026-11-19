@@ -1173,8 +1173,9 @@
 .cp-screen .repeat .block-empty { min-height: 44px; padding: var(--cp-space-sm) var(--cp-space-md); text-align: center; color: var(--cp-on-surface-variant); }
 
 /* History, list first (draft, #511): a one-row week that opens into the month, and the search and filters over the list. */
-.cp-screen .month-card--week { padding-top: var(--cp-space-sm); padding-bottom: 0; gap: 0; }
+.cp-screen .month-card--week { padding-top: var(--cp-space-sm); padding-bottom: var(--cp-space-xs); gap: 0; }
 .cp-screen .month-card--week .days > div { height: 44px; }
 .cp-screen .day[aria-pressed] { cursor: pointer; }
-.cp-screen .card-toggle { align-self: center; min-height: 32px; padding: 0 var(--cp-space-md); display: flex; align-items: center; gap: var(--cp-space-xs); font-size: 13px; font-weight: 800; color: var(--cp-primary); }
+.cp-screen .history-title { display: flex; align-items: center; justify-content: space-between; gap: var(--cp-space-md); }
+.cp-screen .month-switch { min-height: 44px; padding: 0 var(--cp-space-md); border-radius: var(--cp-radius-pill); display: flex; align-items: center; gap: var(--cp-space-xs); font-size: 15px; font-weight: 800; color: var(--cp-primary); }
 .cp-screen .history-filters { padding: var(--cp-space-md) var(--cp-space-lg) 0; display: flex; flex-direction: column; gap: var(--cp-space-sm); flex: none; }
