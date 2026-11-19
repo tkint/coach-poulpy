@@ -136,6 +136,30 @@ class BuilderStepsTest {
     }
 
     @Test
+    fun aRepeatTakesNewStepsEvenWhenItIsNotLastAndHasAOneLineTitle() {
+        val builder = graph.createWorkout(WorkoutFormat.SETS, "en")
+        builder.addRepeat(builder.work)
+        val repeat = builder.state.value.parts[1].steps.last().key
+        builder.setRepeatTimes(repeat, 3)
+        builder.add("goblet-squat", builder.work, repeat)
+        builder.addRest(builder.work, repeat)
+        builder.addRepeat(builder.work)
+
+        val steps = builder.state.value.parts[1].steps
+        val group = steps.first().repeatGroup!!
+        assertEquals("Repeat 3 times", group.title)
+        assertEquals(2, group.rows.size)
+        assertEquals(2, steps.size)
+        assertTrue(steps.last().repeatGroup!!.rows.isEmpty())
+        assertEquals("Répéter 3 fois", graph.createWorkout(WorkoutFormat.SETS, "fr").let { fr ->
+            fr.addRepeat(fr.work)
+            val key = fr.state.value.parts[1].steps.last().key
+            fr.setRepeatTimes(key, 3)
+            fr.state.value.parts[1].steps.last().repeatGroup!!.title
+        })
+    }
+
+    @Test
     fun setsKeepTheirRestAndASupersetIsARepeat() {
         val builder = graph.createWorkout(WorkoutFormat.SETS, "en")
         builder.rename("Legs and core")

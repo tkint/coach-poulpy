@@ -318,6 +318,9 @@ internal class Labels(private val languageCode: String, private val units: () ->
 
     fun times(count: Int) = DomainText.countTimes(languageCode, count)
 
+    /** A repeat's one-line title in the builder: "Repeat 3 times". */
+    fun repeatTitle(count: Int) = DomainText.countRepeatTimes(languageCode, times(count))
+
     /** "3 rounds of Bench press, Row", for what switching the format gives. */
     fun roundsOf(rounds: Int, names: String) = DomainText.countRoundsOf(languageCode, rounds(rounds), names)
 

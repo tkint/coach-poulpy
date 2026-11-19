@@ -1,6 +1,8 @@
 package ch.coachpoulpy.server.admin
 
 import ch.coachpoulpy.server.accounts.AccountDeletion
+import ch.coachpoulpy.server.accounts.Accounts
+import ch.coachpoulpy.server.accounts.HandConfirmation
 import ch.coachpoulpy.server.auth.AccountId
 import ch.coachpoulpy.server.auth.SignIns
 import ch.coachpoulpy.server.db.Database
@@ -65,16 +67,17 @@ fun pageOf(all: List<AccountView>, query: AccountQuery): AccountPage {
 }
 
 /** What an admin did to an account, or why it was refused. */
-enum class AccountAction { Done, Unknown, OwnAccount, ConfirmationMismatch }
+enum class AccountAction { Done, Unknown, OwnAccount, ConfirmationMismatch, AlreadyConfirmed }
 
 /**
- * Listing, disabling and deleting accounts for the admin (#336). Each change emits an
+ * Listing, confirming, disabling and deleting accounts for the admin (#336). Each change emits an
  * [AdminAction] whose target is the account's id, never its address.
  */
 class AdminAccounts(
     private val database: Database,
     private val signIns: SignIns,
     private val deletion: AccountDeletion,
+    private val accounts: Accounts,
     private val events: Events,
     private val clock: Clock = Clock.systemUTC(),
 ) {
@@ -121,5 +124,15 @@ class AdminAccounts(
         deletion.erase(id)
         events(AdminAction(actor, "admin.account.delete", id.toString()))
         return AccountAction.Done
+    }
+
+    /** Confirms a pending registration by hand (#382); the audit target is the masked address. */
+    fun confirm(actor: AccountId, id: UUID): AccountAction = when (accounts.confirmByHand(id)) {
+        HandConfirmation.Unknown -> AccountAction.Unknown
+        HandConfirmation.AlreadyConfirmed -> AccountAction.AlreadyConfirmed
+        HandConfirmation.Done -> {
+            events(AdminAction(actor, "admin.account.confirm", EmailAddress.of(queries.byId(id).executeAsOne().email).toString()))
+            AccountAction.Done
+        }
     }
 }

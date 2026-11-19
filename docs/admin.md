@@ -23,7 +23,7 @@ The **Accounts** screen lists accounts with email, role, confirmation, sign-in s
 An admin can:
 
 - **Disable** an account. It can't sign in and every device is signed out. **Enable** reverses it. A disabled account gets the same "wrong email or password" as any other refusal.
-- **Confirm email** for an unconfirmed account, in its side panel ([#382](https://github.com/tkint/coach-poulpy/issues/382)). Use it when the email never arrived, or when running locally with no mail server ([Trying it locally](./the-api.md#trying-it-locally)). It has the same effect as the person following the link. A dialog first says the admin vouches for an address nobody proved.
+- **Confirm email** for an unconfirmed account, in its side panel ([#382](https://github.com/tkint/coach-poulpy/issues/382)). Use it when the email never arrived, or when running locally with no mail server ([Trying it locally](./the-api.md#trying-it-locally)). It has the same effect as the person following the link. A dialog first says the admin vouches for an address nobody proved. The server side is done; the button comes once its mockup is agreed.
 - **Delete** an account after typing its email again. This removes the account and all its data, exactly as when a user deletes their own account.
 
 An admin can't disable or delete their own account.
@@ -62,4 +62,4 @@ An exercise's **change** since its latest published revision is added, edited, r
 
 Every admin write is recorded: who did it, what, and the target. The first screen of the admin shows the last 100 entries. Entries stay when the admin's own account is deleted, and an entry with no author means the server did it, as at start-up.
 
-Targets never hold an address in clear. An account is recorded by its id and an email by its masked form (`a***@example.com`). A password is never recorded.
+Targets never hold an address in clear. An account is recorded by its id, and an email by its masked form (`a***@example.com`). Confirming an email by hand is the one account action recorded by masked address rather than id. A password is never recorded.
