@@ -1,0 +1,5 @@
+import{n as e}from"./rolldown-runtime-sJBDdmOt.js";var t,n,r,i;function a(){return(a=e((()=>{t={title:`Mobile/Components/Stepper`,parameters:{docs:{canvas:{sourceState:`none`},description:{component:`Sets, reps, load and rest.`}}}},n=(e,t={})=>({render:()=>({components:t,template:`<div class="cp-mobile">${e}</div>`})}),r=n(`<div class="stepper"><span class="eyebrow">Rest</span><div class="stepper-row">
+  <button type="button" aria-label="Less rest">−</button><span class="value">90 s</span>
+  <button type="button" aria-label="More rest">+</button></div></div>`),i=[`Default`],r.parameters={...r.parameters,docs:{...r.parameters?.docs,source:{originalSource:`sample(\`<div class="stepper"><span class="eyebrow">Rest</span><div class="stepper-row">
+  <button type="button" aria-label="Less rest">−</button><span class="value">90 s</span>
+  <button type="button" aria-label="More rest">+</button></div></div>\`)`,...r.parameters?.docs?.source}}}})))()}a();export{r as Default,i as __namedExportsOrder,t as default};
