@@ -1,81 +1,65 @@
 # The admin area
 
-The admin area is where the maintainer looks after the catalog, the accounts and the server's settings. It is a section of the website under `/admin`, backed by routes under `/api/v1/admin/`. The work is tracked in [#26](https://github.com/tkint/coach-poulpy/issues/26).
+The admin area is where the maintainer looks after the catalog, the accounts and the server's settings. It is a section of the website under `/admin` ([#26](https://github.com/tkint/coach-poulpy/issues/26)). It never shows workouts or health data.
+
+This page holds the rules: who can do what, and what happens when they do. How the server enforces them is in [Admin internals](./admin-internals.md).
 
 ## Who can open it
 
-- **Admin is a role on the account** (`member` or `admin`), not a scope anyone can ask for ([ADR 0020](./adr/0020-every-credential-resolves-to-one-caller.md)).
-- **Only the website's sign-in reaches it.** An admin route answers 401 to an anonymous caller and 403 to anyone who is not an admin signed in through the website: a member, an admin on the phone app, a personal access token or a third-party app.
-- **The website signs in with cookies** (`POST /api/v1/web/session`, see [the API](./the-api.md)). The server reads the access cookie only for the website client, and a write whose `Origin` is not the website's gets 403, which is the CSRF defence of [ADR 0020](./adr/0020-every-credential-resolves-to-one-caller.md). The API answers the website's origin with `Access-Control-Allow-Credentials`, so the page calls it with `credentials: 'include'`.
-- **One admin for now.** There are no finer rights.
+Admin is a role on the account, either member or admin. Nobody can ask for it ([ADR 0020](./adr/0020-every-credential-resolves-to-one-caller.md)). There is one admin for now and no finer rights.
 
-## The screens
+An admin reaches the area only by signing in on the website. The phone app, a personal access token and third-party apps never reach it, even for an admin.
 
-The admin lives at `/admin` ([agreed shell story](https://tkint.github.io/coach-poulpy/storybook/?path=/story/web-screens-admin-audit-log--default)). A member who signs in is immediately signed out with the same "wrong email or password" message as any other refusal, so the sign-in flow does not disclose the account's role. The admin shell links to the audit log, accounts, settings and status; its **Coach Poulpy app** link returns to [the web app](./web-app.md).
-
-## Accounts
-
-The **Accounts** screen lists accounts with their email, role, confirmation and sign-in status, and creation date. It supports filtering, sorting, paging and opening an account by id, including when it is not on the current page. The view is encoded in the address (`/admin/accounts?q=…&role=…&sort=…&order=…&page=…&account=<id>`), so it can be bookmarked and browser history restores previous views ([navigation](./web-app.md#navigation-lives-in-the-url)). It never exposes workouts or health data. Each account action is written to the audit log with the account id as the target, never its address (confirming an email logs the masked address, below):
-
-- **Confirm email** (#382), shown for an account whose email isn't confirmed, confirms it by hand, for example when the email never arrived or on a laptop with no mail server ([Trying it locally](./the-api.md#trying-it-locally)). It has the same effect as following the link: the account can sign in, its pending links stop working and a phone waiting for the link hears it. A dialog first says the admin vouches for an address nobody proved. It is written to the audit log as `admin.account.confirm` with the masked address (`l***@example.com`) (the issue asks for it), where the other account actions log the id. The screen's draft is the `Details not confirmed`, `Confirm email` and `Email confirmed` stories of `Web/Screens/Admin/Accounts` in the component workshop; the web screen follows once it is agreed.\n- **Disable** blocks sign-in and signs every device of the account out, access and refresh tokens included. It is reversible: **Enable** lets the account sign in again. A disabled account is refused at sign-in with the same "wrong email or password" answer as any other refusal.
-- **Delete** removes the account and every row of it through the same code as the user's own deletion, once the admin has typed the account's email again.
-- An admin can't disable or delete their own account (`409 own-account`).
-
-Filtering, sorting and paging happen on the server (`AdminAccounts.list`, which reads every account row and cuts the page in memory, enough for a back office; move it into SQL if accounts reach the hundreds of thousands). The routes are `GET /api/v1/admin/accounts/{id}` for one account (a link opens an account that isn't on the page), `GET /api/v1/admin/accounts` with `q`, `role`, `confirmed` (`yes`/`no`), `signIn` (`active`/`disabled`), `sort` (`email`, `role`, `confirmed`, `signIn`, `created`), `order`, `page` and `size`, answering `{accounts, total}` (a word that isn't allowed is a `400 bad-query`), `POST /api/v1/admin/accounts/{id}/disable`, `POST /api/v1/admin/accounts/{id}/enable`, `POST /api/v1/admin/accounts/{id}/confirm-email` (`204`; `404 unknown-account`, `409 already-confirmed`) and `DELETE /api/v1/admin/accounts/{id}` with `{"confirmEmail": …}`, all described in the OpenAPI document and all for an admin signed in through the website.
-
-## Settings
-
-The **Settings** screen at `/admin/settings` changes the email from-address without a deploy.
-
-- **Only non-secret settings live in the database**, one row per setting in the `settings` table (`ServerSettings`). The SMTP host, port, user and password stay in the environment ([Deploying the server](./deploying-the-server.md)) and are not shown or editable here.
-- **`MAIL_FROM` is the default until a from-address is saved.** A saved one applies to the next email, with no restart: every email goes through `SettingsMailer`, which reads the setting when it sends. An address alone (`hello@example.com`) or with a name (`Coach Poulpy <hello@example.com>`) is accepted; anything else is refused (`400 invalid-address`) and nothing is saved.
-- **Saving writes `admin.settings.mail-from` to the audit log**, with the masked address (`h***@example.com`) as the target.
-- **Send test email** sends a message to the signed-in admin's own address with the saved settings and reports whether the mail server accepted it or returned an error.
-- **The last send is remembered.** `SettingsMailer.last` keeps when the last email (a test or any other) went, which kind it was, to whom (masked) and the mail server's error if any, for the [Status](#status) screen. It lives in memory, so a restart forgets it.
-
-The routes are `GET /api/v1/admin/settings` (`{mailFrom, mailFromSaved}`), `POST /api/v1/admin/settings/mail-from` with `{"mailFrom": …}` and `POST /api/v1/admin/settings/test-email` (`{sent, error}`), for an admin signed in through the website. The screen keeps no state of its own beyond its path.
-
-## Status
-
-The **Status** screen at `/admin/status` reports server health and mail configuration ([#340](https://github.com/tkint/coach-poulpy/issues/340)). It cannot change settings or send email. Further checks can be added independently.
-
-- **Mail** is configured when `SMTP_HOST` is set. Without it, email sending fails with `No mail server is set: SMTP_HOST is unset`; the error is not printed to the log. Otherwise the status reports the last email attempt since server start, its kind (confirmation, password reset or test), time and outcome. The SMTP host, user and password are never shown.
-- **Pending registrations** lists the accounts whose email isn't confirmed yet, newest first (the last 100): the address, when it signed up and when its latest confirmation link expires. Signing up again sends a new link, so the date moves. No email is sent from here. Confirming one by hand is on the Accounts screen, not here.
-
-The routes are `GET /api/v1/admin/status` (`{mail: {configured, lastSend: {at, kind, sent, error} | null}}`) and `GET /api/v1/admin/pending-registrations` (`{registrations: [{email, signedUpAt, linkExpiresAt}]}`), for an admin signed in through the website.
-
-The public side is the web app's `/status` page, which anyone can open. It asks `GET /api/v1/status` and shows only whether Coach Poulpy is up or down, down too when the server can't be reached; it never says how the server is configured, and a test holds it to that.
-
-## Catalog
-
-The server holds the exercise catalog as a **catalog draft** the admin edits and **published revisions** that phones download, each exercise stored on its own as revisions numbered 1, 2, 3, so a publish writes only the exercises it names (`catalog_exercise_revision`; [ADR 0030](./adr/0030-the-catalog-changes-by-exercise-revision-not-by-catalog-version.md), [#337](https://github.com/tkint/coach-poulpy/issues/337), [#437](https://github.com/tkint/coach-poulpy/issues/437)). The screens are [#338](https://github.com/tkint/coach-poulpy/issues/338): the exercise list (`/admin/catalog`) and the exercise editor (`/admin/catalog/new`, `/admin/catalog/<slug>`, with `?lang=` for the language shown) are built; publishing and retiring are built into the list's selection menu ([#439](https://github.com/tkint/coach-poulpy/issues/439)).
-
-- **The first start seeds it** from the catalog the server was built with: its exercises become revision 1, published, and the draft starts equal to them. Later starts leave it alone.
-- **An exercise in the draft is the catalog's JSON**, every text a map from language to string (`{"en": "Goblet squat", "fr": "Squat gobelet"}`). Saving needs the English name; the other shipped languages can wait.
-- **A slug is editable only until the exercise is first published**; after that a rename is refused (`409 slug-published`), since workouts point at it ([ADR 0008](./adr/0008-curated-catalog-with-stable-slugs.md)). Exercises are retired, never deleted, and a retired exercise can be offered again; an edit keeps an exercise retired or offered.
-- **Publishing** gives the draft revision of each exercise it names (every exercise with a change when it names none) the next number of the publication cursor; no other exercise gets a row. It is refused while a name, instruction or variation note of an exercise being published lacks English or French (`409 missing-translations`, listing the exercises and languages), or when none of them has a change (`409 no-changes`). `GET /api/v1/catalog/exercises` serves the new revisions at once.
-- **Every write goes to the audit log**: `admin.catalog.create`, `admin.catalog.edit` (a rename reads `old -> new`), `admin.catalog.retire` and `admin.catalog.offer` with the slug as the target, `admin.catalog.publish` with the published slugs, comma-separated.
-
-The routes, for an admin signed in through the website, are:
-
-- `GET /api/v1/admin/catalog/exercises` with `q` (part of the slug, a name in any language or an alias) and these filters, which combine: `pattern` (a movement pattern, lowercase: `squat`, `hinge`…), `muscles`, `positions` and `equipment` (comma-separated, lowercase, `pull_up_bar`: an exercise matching any of them), `translation` (`complete`, or `incomplete` when a shipped language is missing), `content` (`draft`, never published; `modified`, edited since; `published`, the draft holds what the latest published revision holds or only a lifecycle change; `pending`, anything the next publication would change) and `lifecycle` (`active`, `retiring`, retired in the draft but not yet in its latest published revision, or `retired`). Content, translation and lifecycle are separate dimensions. It also takes `sort`, comma-separated columns, the most important first, from `name`, `pattern`, `languages`, `change` and `status`, each with a leading `-` for descending (`-change,name`: the changed first, then by name; a column at most once; no sort is the catalog's order, which also settles every tie), `page` and `size` (20 by default, up to 100), answering one page as `{exercises: [{exercise, published, change, missing}], total}` (a word that isn't allowed is a `400 bad-query`). `published` says whether the exercise has a published revision, so whether its slug is still editable; `change` is `added`, `edited`, `retired`, `offered` or null against its latest published revision; `missing` lists the shipped languages some of its text lacks. Sorting by `languages` puts the exercises missing a language first, by `change` the changed ones first and by `status` the lifecycle.
-- `GET /api/v1/admin/catalog/exercises/{slug}`, one exercise in the same shape.
-- `POST /api/v1/admin/catalog/exercises` with an exercise (`201`, `400 invalid-exercise` with a `reason`, `409 slug-taken`).
-- `PUT /api/v1/admin/catalog/exercises/{slug}` with the whole exercise; a different slug in the body renames it (`404 unknown-exercise`, `409 slug-published`, `409 slug-taken`).
-- `POST /api/v1/admin/catalog/exercises/{slug}/retire` and `POST /api/v1/admin/catalog/exercises/{slug}/offer`, which offers a retired exercise again.
-- `GET /api/v1/admin/catalog/changes`: what publishing would do, `{added, edited, retired, offered, missing}`, each change a `{slug, name}` and each missing entry `{slug, name, languages}`. An edited exercise also has `fields`: each changed field as `{field, before, after}`, with `before` from the latest published revision and `after` from the draft (null where absent). A text is one field per language and instruction (`name.fr`, `instructions.1.en`); a list of plain values (`muscleGroups`, `equipment`) is one field.
-- `POST /api/v1/admin/catalog/publish`: with a body `{"slugs": [...]}` it publishes those exercises, without one every exercise with a change; answers `{slugs}`, the exercises that got a revision, or the 409s above (400 for a body that isn't `{slugs: [...]}`).
+A member who tries to sign in on the website is signed out at once with the usual "wrong email or password". The sign-in never reveals an account's role.
 
 ## Making the first admin
 
-No endpoint makes an admin. Set `ADMIN_EMAIL` in the `production` environment ([Releasing](./releasing.md#deploy-the-server)) and deploy: when the server starts, the confirmed account with that address becomes an admin. An address with no confirmed account does nothing, so signing up first with someone else's address cannot take the role. The promotion is written to the audit log.
+An admin is made at deploy time, never from the website. The maintainer sets `ADMIN_EMAIL` ([Releasing](./releasing.md#deploy-the-server)) and the confirmed account with that address becomes an admin when the server starts. An address with no confirmed account does nothing, so signing up first with someone else's address can't take the role. The promotion is recorded in the audit log.
+
+## Accounts
+
+The **Accounts** screen lists accounts with email, role, confirmation, sign-in status and creation date. You can filter, sort, page and open an account by id. The view lives in the address, so it can be bookmarked ([navigation](./web-app.md#navigation-lives-in-the-url)).
+
+An admin can:
+
+- **Disable** an account. It can't sign in and every device is signed out. **Enable** reverses it. A disabled account gets the same "wrong email or password" as any other refusal.
+- **Confirm email** for an unconfirmed account, in its side panel ([#382](https://github.com/tkint/coach-poulpy/issues/382)). Use it when the email never arrived, or when running locally with no mail server ([Trying it locally](./the-api.md#trying-it-locally)). It has the same effect as the person following the link. A dialog first says the admin vouches for an address nobody proved. The server side is done; the button comes once its mockup is agreed.
+- **Delete** an account after typing its email again. This removes the account and all its data, exactly as when a user deletes their own account.
+
+An admin can't disable or delete their own account.
+
+## Settings
+
+The **Settings** screen changes the email from-address without a deploy.
+
+- **Only non-secret settings are editable here.** The mail server's host, user and password are set at deploy time and never shown ([Deploying the server](./deploying-the-server.md)).
+- **A saved from-address replaces the default** from the next email. Both `hello@example.com` and `Coach Poulpy <hello@example.com>` work. Anything else is refused and nothing is saved.
+- **Send test email** sends a message to the signed-in admin and says whether the mail server accepted it.
+
+## Status
+
+The **Status** screen shows whether mail works and who is waiting to confirm. It is read-only ([#340](https://github.com/tkint/coach-poulpy/issues/340)).
+
+- **Mail** says whether a mail server is set up and, if so, how the last email went: its kind (confirmation, password reset or test), when, and whether it worked. A server restart forgets it. The mail server's details are never shown.
+- **Pending registrations** are accounts whose email isn't confirmed, newest first, the last 100. Each row shows the address, when it signed up and when its latest link expires. To confirm one, open the account in [Accounts](#accounts).
+
+The public `/status` page of the web app is separate. Anyone can open it. It says only whether Coach Poulpy is up or down, never how the server is configured.
+
+## Catalog
+
+The server keeps the exercise catalog in two forms: a **catalog draft** the admin edits, and **published revisions** that phones download. Each exercise has its own numbered revisions, so publishing touches only the exercises it names ([ADR 0030](./adr/0030-the-catalog-changes-by-exercise-revision-not-by-catalog-version.md)). The first start seeds both from the catalog the server was built with.
+
+The admin has an exercise list at `/admin/catalog` and an editor at `/admin/catalog/<slug>`. Publishing and retiring are in the list's selection menu ([#338](https://github.com/tkint/coach-poulpy/issues/338)).
+
+- **Every text is written per language.** Saving needs the English name. Other languages can wait, but publishing needs English and French.
+- **A slug can change only until the exercise is first published.** Workouts point at it, so after that a rename is refused ([ADR 0008](./adr/0008-curated-catalog-with-stable-slugs.md)).
+- **Exercises are retired, never deleted.** A retired exercise can be offered again.
+- **Publishing** gives each named exercise its next revision, or every exercise with a change when none is named. It is refused when a translation is missing or when nothing has changed. Phones see the new revisions at once.
+
+An exercise's **change** since its latest published revision is added, edited, retired, offered or none. Its **lifecycle** is active, retiring (retired in the draft, not yet in a published revision) or retired. A preview lists what publishing would do, with each edited field before and after.
 
 ## The audit log
 
-An admin action is an `AdminAction` event (who, what, the target), sent through http4k's `Events` like any other event. One sink stores it in the `admin_audit` table (who is empty when the server itself did it, as at start-up; rows stay when the admin's own account is deleted), and another prints it to the server log, which the log shipping picks up. `GET /api/v1/admin/audit` returns the last 100 rows, and the first screen of the admin shows them. Each admin feature emits an `AdminAction` for its writes; tests check it with `RecordingEvents`.
+Every admin write is recorded: who did it, what, and the target. The first screen of the admin shows the last 100 entries. Entries stay when the admin's own account is deleted, and an entry with no author means the server did it, as at start-up.
 
-Sensitive values are values4k types that print masked: `EmailAddress` prints as `a***@example.com`, so an address that reaches a log or an event by accident stays hidden, and the real one is read with `.value` only where it is needed. An event never carries a password or an unmasked address.
-
-## What comes next
-
-Editing variation groups. The status will take more checks, such as the database, and log viewing is its own issue.
+Targets never hold an address in clear. An account is recorded by its id, and an email by its masked form (`a***@example.com`). Confirming an email by hand is the one account action recorded by masked address rather than id. A password is never recorded.

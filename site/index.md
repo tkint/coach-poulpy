@@ -19,9 +19,15 @@ hero:
       target: _blank
       rel: noopener
     - theme: alt
-      text: Architecture
+      text: Product
+      link: /docs/roadmap
+    - theme: alt
+      text: Technical
       link: /docs/architecture
 features:
+  - title: Product
+    details: What the app does and the rules it follows, from accounts to the admin area, in plain language.
+    link: /docs/roadmap
   - title: Brand
     details: Poulpy's two sides, six moods, eighteen drawings, his 3D model and the rules that keep him funny, never guilt, in the Storybook workshop.
     link: /storybook/index.html?path=/docs/brand-introduction--docs
@@ -32,8 +38,8 @@ features:
     link: /storybook/index.html?path=/docs/design-system-introduction--docs
     target: _blank
     rel: noopener
-  - title: Architecture
-    details: Local-first apps over one Kotlin Multiplatform core, and the decisions behind it.
+  - title: Technical
+    details: Local-first apps over one Kotlin Multiplatform core, the API, deploying, and the decisions behind it.
     link: /docs/architecture
   - title: Contributing
     details: How ideas become issues, issues become PRs, and which skill to use at each step.

@@ -92,13 +92,22 @@ export default withMermaid(
     vite: { server: { fs: { allow: [repoRoot] } }, resolve: { dedupe: ['vue', '@lucide/vue'] } },
     themeConfig: {
       logo: '/poulpy.png',
+      // Pages are grouped by reader (docs/agents/writing-docs.md): Product says what the app does and
+      // its rules, Technical how it is built. Design and Brand live in the component workshop
+      // (ADR 0028, ADR 0029, ADR 0032), so their menus link into it.
       nav: [
-        { text: 'Start here', link: '/CONTRIBUTING' },
-        { text: 'Architecture', link: '/docs/architecture' },
-        // The design system's and the brand's home is the component workshop (ADR 0028, ADR 0029, ADR 0032).
-        { text: 'Design system', link: '/storybook/index.html?path=/docs/design-system-introduction--docs', target: '_blank', rel: 'noopener' },
+        { text: 'Product', link: '/docs/roadmap' },
+        { text: 'Technical', link: '/docs/architecture' },
+        {
+          text: 'Design',
+          items: [
+            { text: 'Rules, components and screens', link: '/storybook/index.html?path=/docs/design-system-introduction--docs', target: '_blank', rel: 'noopener' },
+            { text: 'Generating tokens and fonts', link: '/design/README' },
+            { text: 'Body map shapes: credits', link: '/design/body-map-source/NOTICE' },
+          ],
+        },
         { text: 'Brand', link: '/storybook/index.html?path=/docs/brand-introduction--docs', target: '_blank', rel: 'noopener' },
-        { text: 'Design notes', link: '/docs/profile-and-settings' },
+        { text: 'Contributing', link: '/CONTRIBUTING' },
         { text: 'Translations', link: '/translations' },
       ],
       // Each section shows only its own menu: a page gets the menu of the longest key its path starts
@@ -107,29 +116,38 @@ export default withMermaid(
       sidebar: Object.fromEntries(
         [
           [
-            'Design notes',
-            ['/docs/profile-and-settings', '/design/'],
+            'Product',
+            ['/docs/roadmap', '/CONTEXT', '/docs/accounts', '/docs/profile-and-settings', '/docs/workout-file', '/docs/web-app', '/docs/admin'],
             [
-              { text: 'Rules, components and screens', link: '/storybook/index.html?path=/docs/design-system-introduction--docs', target: '_blank', rel: 'noopener' },
+              { text: 'Roadmap', link: '/docs/roadmap' },
+              { text: 'Accounts and sign-in', link: '/docs/accounts' },
               { text: 'Profile and settings', link: '/docs/profile-and-settings' },
-              { text: 'Generating tokens and fonts', link: '/design/README' },
-              { text: 'Body map shapes: credits', link: '/design/body-map-source/NOTICE' },
+              { text: 'The workout file', link: '/docs/workout-file' },
+              { text: 'The web app', link: '/docs/web-app' },
+              { text: 'The admin area', link: '/docs/admin' },
+              { text: 'Glossary', link: '/CONTEXT' },
             ],
           ],
           [
-            'Architecture',
-            ['/docs/architecture', '/docs/roadmap', '/CONTEXT', '/docs/workout-file', '/docs/the-api', '/docs/accounts', '/docs/admin', '/docs/web-app', '/decisions/', '/docs/adr/', '/docs/research/'],
+            'Technical',
+            ['/docs/architecture', '/docs/the-api', '/docs/admin-internals', '/docs/deploying-the-server', '/docs/releasing', '/decisions/', '/docs/adr/', '/docs/research/'],
             [
-              { text: 'Overview', link: '/docs/architecture' },
-              { text: 'Roadmap', link: '/docs/roadmap' },
-              { text: 'Glossary', link: '/CONTEXT' },
-              { text: 'The workout file', link: '/docs/workout-file' },
+              { text: 'Architecture', link: '/docs/architecture' },
               { text: 'The API', link: '/docs/the-api' },
-              { text: 'Accounts', link: '/docs/accounts' },
-              { text: 'The admin area', link: '/docs/admin' },
-              { text: 'The web app', link: '/docs/web-app' },
+              { text: 'Admin internals', link: '/docs/admin-internals' },
+              { text: 'Deploying the server', link: '/docs/deploying-the-server' },
+              { text: 'Releasing a beta', link: '/docs/releasing' },
               { text: 'Decisions', link: '/decisions/', collapsed: true, items: adrs },
               { text: 'Research', collapsed: true, items: research },
+            ],
+          ],
+          [
+            'Design',
+            ['/design/'],
+            [
+              { text: 'Rules, components and screens', link: '/storybook/index.html?path=/docs/design-system-introduction--docs', target: '_blank', rel: 'noopener' },
+              { text: 'Generating tokens and fonts', link: '/design/README' },
+              { text: 'Body map shapes: credits', link: '/design/body-map-source/NOTICE' },
             ],
           ],
           [
@@ -144,13 +162,12 @@ export default withMermaid(
           ],
           [
             'Contributing',
-            ['/CONTRIBUTING', '/CLAUDE', '/docs/agents/', '/docs/agents/skills', '/docs/releasing', '/docs/deploying-the-server'],
+            ['/CONTRIBUTING', '/CLAUDE', '/docs/agents/'],
             [
               { text: 'Issues, skills and PRs', link: '/CONTRIBUTING' },
-              { text: 'Agent skills', link: '/docs/agents/skills' },
               { text: 'House rules', link: '/CLAUDE' },
-              { text: 'Releasing a beta', link: '/docs/releasing' },
-              { text: 'Deploying the server', link: '/docs/deploying-the-server' },
+              { text: 'Writing docs', link: '/docs/agents/writing-docs' },
+              { text: 'Agent skills', link: '/docs/agents/skills' },
             ],
           ],
         ].flatMap(([title, prefixes, items]) => {
