@@ -23,19 +23,19 @@ The Android `versionCode` is the minute the build ran (minutes since 2026-01-01)
 4. Once it is done, the **Releases** page has `v0.6.0` with `coach-poulpy-v0.6.0.apk`, `coach-poulpy-deploy.tar.gz` and notes listing the merged pull requests since the last one.
 5. On a phone, download the APK from that page and install it over the old one; the phone's data is kept.
 
-Publishing a release from GitHub's **Releases** page with a new tag also works, as it pushes the tag. But that release is visible straight away, before CI has passed, and stays without an APK if CI fails. The workflow then adds the APK and the deploy bundle to it, sets its title, and writes the same notes if you left them empty. Pushing the tag is the better way.
+Creating the release from GitHub's **Releases** page also works, but it is visible before CI passes and stays without an APK if CI fails. Push the tag instead.
 
 The workflow stops with a message, and publishes nothing, if the tag is not `v` and three numbers, if the signing key secrets are missing (see the README, "The signing key"), or if any CI check fails. To try again, delete the tag (`git push origin :refs/tags/v0.6.0` and `git tag -d v0.6.0`), fix `main`, and tag again.
 
 ## The server
 
-After CI, the same workflow builds the server image (amd64 only, like the server: [ADR 0019](./adr/0019-the-server-runs-with-docker-compose-on-one-server.md)) with the version baked in (the server's `/health` answers `ok 0.2.0`; any other build says `ok dev`), and pushes it as `ghcr.io/tkint/coach-poulpy-server` with three tags: `0.2.0`, `0.2` and `latest`. The web app's image, `ghcr.io/tkint/coach-poulpy-web`, gets the same tags, with `assetlinks.json` built from the signing key. The pre-release is created only once both images are pushed. `coach-poulpy-deploy.tar.gz` holds the Compose and Caddy files of that version and the deploying page as `DEPLOYING.md`, unpacked on the machine as in [Deploying the server](./deploying-the-server.md).
+After CI, the same workflow pushes two images with the version baked in: `ghcr.io/tkint/coach-poulpy-server` and `ghcr.io/tkint/coach-poulpy-web`, each tagged `0.2.0`, `0.2` and `latest` (amd64 only, [ADR 0019](./adr/0019-the-server-runs-with-docker-compose-on-one-server.md)). `/health` then answers `ok 0.2.0`; any other build says `ok dev`. The pre-release is created only once both images are pushed, with `coach-poulpy-deploy.tar.gz` holding that version's Compose and Caddy files.
 
-The first push creates the package as private. Either make it public once (the package's **Package settings > Change visibility**), or log the machine in with a token that can read packages (`docker login ghcr.io`).
+A package's first push makes it private. Make it public once in its **Package settings**, or log the machine in with `docker login ghcr.io`.
 
 ## Deploy the server
 
-A release never reaches the machine on its own. Open **Actions > Deploy > Run workflow**, pick what to deploy (`server`, `website` for the web app, or `all` for both, the server first), the `production` environment, enter `latest` or a version such as `0.2.0`, and run it. With `all` the two run one after the other in the same workflow run, and a failed server deploy stops before the website; each replaces only its own container and Caddy route. It writes the app's `.env` from that GitHub environment, uploads it with the deploy files from the selected workflow ref and deploys that server image behind the shared Caddy. The machine needs Python 3 and Docker Compose.
+A release never reaches the machine on its own. Open **Actions > Deploy > Run workflow**, pick what to deploy (`server`, `website` or `all`, server first), the `production` environment and `latest` or a version such as `0.2.0`. With `all`, a failed server deploy stops before the website. What happens on the machine is in [Deploying the server](./deploying-the-server.md#deploy).
 
 Set it up once:
 
@@ -75,8 +75,6 @@ Set it up once:
 
 The workflow stops with a message, and changes nothing, if a setting is missing or the version has characters other than letters, digits, `.`, `_` and `-`. Until there is a server, a run failing on missing settings is expected. Once it succeeds, `curl https://api.coach-poulpy.com/health` prints the version deployed. Deploying an older version is the way back if a release goes wrong.
 
-The deployer creates or starts Caddy when needed and adds or replaces only this app's site through Caddy's admin API, leaving other sites alone. Caddy autosaves API updates and resumes them after a restart. Details: [Deploying the server](./deploying-the-server.md).
-
 ## Deploy a pull request
 
 To try a pull request on the machine before it merges, open **Actions > Deploy > Run workflow**, keep `main` under **Use workflow from**, pick the environment and enter the pull request's number as the version, such as `275`. The workflow builds the pull request's latest commit, pushes it as `ghcr.io/tkint/coach-poulpy-server:pr-<number>` (or `coach-poulpy-web:pr-<number>` for `website`), and deploys it with the pull request's own Compose and Caddy files, since it may change them. `/health` then answers `ok pr-<number>`. Only open pull requests from branches of this repository are deployed, never forks. Nothing runs until you start it.
@@ -90,7 +88,7 @@ Set up the `preview` environment once, like `production` above (the same `DEPLOY
 | Another name, such as `coach-poulpy-preview` | Its own hostname, such as `preview.api.coach-poulpy.com` | A second server and Postgres in `~/coach-poulpy-preview`, beside production, with its own data |
 | Unset, or `coach-poulpy` | Production's | Replaces production until the next production deploy |
 
-`APP_NAME` has lowercase letters, digits and dashes; production leaves it unset (`coach-poulpy`). It names the folder on the machine, the Compose project, the server's alias on the `edge` network and its Caddy route. Nothing is cleaned up on its own: deploy another branch over it, or stop it on the machine with `cd ~/coach-poulpy-preview && docker compose down`. A separate preview needs about as much memory as production (512 MB for the server, plus its Postgres), so check the machine has room.
+`APP_NAME` (lowercase letters, digits and dashes) names the folder, the Compose project and the Caddy route; production leaves it unset. Nothing is cleaned up on its own: deploy over it, or stop it with `cd ~/coach-poulpy-preview && docker compose down`. A separate preview needs about as much memory as production.
 
 Deploying runs the pull request's or branch's deploy files on the machine and replaces the shared `~/caddy/deploy.py` with its copy, so only deploy code you have read.
 

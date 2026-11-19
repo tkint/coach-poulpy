@@ -4,6 +4,23 @@ What ships and in which order. A **phase** is a layer of the product ([architect
 
 > **Proposal.** The grouping below is a draft for the maintainer to approve in [#229](https://github.com/tkint/coach-poulpy/issues/229). Version numbers and release names are not final, and the GitHub milestones still follow the phases until it is decided. The current version is the latest tag on the [Releases](https://github.com/tkint/coach-poulpy/releases) page.
 
+## What v1 includes
+
+| Topic | v1 | Later |
+| --- | --- | --- |
+| Audience | The family, as guests | A public app |
+| Accounts | Guest mode, all data on the phone; email and password, Sign in with Apple and Google when the server arrives | Guest data moves into a new account on sign-up |
+| Website | Needs an account; plans, manages, reviews and runs guided sessions without devices | |
+| Catalog | Built-in and curated, with simple images; no user-created exercises | User-created exercises with duplicate detection |
+| Workouts | Circuit or sets, in parts (warm-up, work, cool down); strength, cardio, rehab, stretching and treadmill walks and runs | Outdoor running, walking, swimming with GPS; workout tags |
+| Treadmill | FTMS read and record, alone or checked against a planned workout | Speed and incline control per phase |
+| Progression | Every week written out by hand | Rules from recognised protocols, driven by sessions and goals |
+| Sharing | Save to library synced with the author or as a copy | |
+| Coaching | Athlete invites a coach and can revoke; coach edits assigned plans and comments on sessions | |
+| Export | .FIT file for Garmin Connect and Strava; optional Apple Health and Health Connect | Direct Garmin and Strava links |
+| Language and units | French and English, metric and imperial: distances, speeds and weights follow the setting (weights are stored in kilograms and shown in pounds in imperial), except a distance picked in whole miles or kilometres, which keeps the unit it was picked in | |
+| Hosting | The whole stack runs on the dev computer; the server deploys with Docker to one server ([ADR 0019](./adr/0019-the-server-runs-with-docker-compose-on-one-server.md)) | A bigger machine or a managed database when it runs short |
+
 ## Phase 1 · Guest app
 
 Everything on the phone, no account. Phase 1 is done when the app is complete on both platforms: **1.0**.
