@@ -115,6 +115,22 @@ export default withMermaid(
       // titled with the section's name.
       sidebar: Object.fromEntries(
         [
+          // Technical comes first: VitePress tries the keys with the most slashes first, then in this
+          // order, so '/docs/admin-internals' must be tried before Product's '/docs/admin'.
+          [
+            'Technical',
+            ['/docs/architecture', '/docs/the-api', '/docs/sync', '/docs/admin-internals', '/docs/deploying-the-server', '/docs/releasing', '/decisions/', '/docs/adr/', '/docs/research/'],
+            [
+              { text: 'Architecture', link: '/docs/architecture' },
+              { text: 'The API', link: '/docs/the-api' },
+              { text: 'Sync', link: '/docs/sync' },
+              { text: 'Admin internals', link: '/docs/admin-internals' },
+              { text: 'Deploying the server', link: '/docs/deploying-the-server' },
+              { text: 'Releasing a beta', link: '/docs/releasing' },
+              { text: 'Decisions', link: '/decisions/', collapsed: true, items: adrs },
+              { text: 'Research', collapsed: true, items: research },
+            ],
+          ],
           [
             'Product',
             ['/docs/roadmap', '/CONTEXT', '/docs/accounts', '/docs/profile-and-settings', '/docs/workout-file', '/docs/web-app', '/docs/admin'],
@@ -126,19 +142,6 @@ export default withMermaid(
               { text: 'The web app', link: '/docs/web-app' },
               { text: 'The admin area', link: '/docs/admin' },
               { text: 'Glossary', link: '/CONTEXT' },
-            ],
-          ],
-          [
-            'Technical',
-            ['/docs/architecture', '/docs/the-api', '/docs/admin-internals', '/docs/deploying-the-server', '/docs/releasing', '/decisions/', '/docs/adr/', '/docs/research/'],
-            [
-              { text: 'Architecture', link: '/docs/architecture' },
-              { text: 'The API', link: '/docs/the-api' },
-              { text: 'Admin internals', link: '/docs/admin-internals' },
-              { text: 'Deploying the server', link: '/docs/deploying-the-server' },
-              { text: 'Releasing a beta', link: '/docs/releasing' },
-              { text: 'Decisions', link: '/decisions/', collapsed: true, items: adrs },
-              { text: 'Research', collapsed: true, items: research },
             ],
           ],
           [

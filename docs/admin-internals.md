@@ -4,7 +4,7 @@ What to know before changing admin code: the decisions and the traps. The routes
 
 ## Access
 
-- Admin is a `role` on the account, not a scope ([ADR 0020](./adr/0020-every-credential-resolves-to-one-caller.md)). The server accepts the access cookie only from the website client ([the API](./the-api.md#browser-session-admin-website)).
+- Admin is a `role` on the account, not a scope ([ADR 0020](./adr/0020-every-credential-resolves-to-one-caller.md)). The server accepts the access cookie only from the website client ([the API](./the-api.md#signing-in)).
 - A write whose `Origin` isn't the website's gets 403. This is the CSRF defence.
 - A member who signs in on the website gets the same answer as any refusal, so the role never leaks.
 - `ADMIN_EMAIL` is read at start-up, and the promotion is an `AdminAction`.

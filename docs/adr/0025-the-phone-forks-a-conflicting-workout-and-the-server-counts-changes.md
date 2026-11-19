@@ -5,7 +5,7 @@ date: 2026-11-07
 
 # The phone forks a conflicting workout, and the server counts changes
 
-ADR 0006 keeps both edits of a workout made on two phones. This ADR settles where the copy is made, what a deletion does against an edit, and what the pull cursor is ([Accounts](../accounts.md#sync)).
+ADR 0006 keeps both edits of a workout made on two phones. This ADR settles where the copy is made, what a deletion does against an edit, and what the pull cursor is ([Sync](../sync.md)).
 
 - **The phone makes the copy.** The server refuses a push whose workout version doesn't follow its latest (409 `stale-base`). The phone pulls, turns its unsent versions into a new workout named after the device, points its own sessions and planned workouts at it, and pushes again. The phone already holds every reference to those versions, so nothing stored on the server is ever rewritten, and the server needs no merge rules beyond "version n + 1 follows n".
 - **An edit beats a delete.** A workout deleted on one phone while another pushed a newer version comes back, so a delete never loses someone's work.

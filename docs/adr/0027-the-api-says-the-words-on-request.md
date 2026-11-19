@@ -12,7 +12,7 @@ The signed-in website shows the account's workouts the way the phone does: "Sets
 - **The server builds the words.** `GET /api/v1/workouts` and `GET /api/v1/workouts/{id}` read the latest version of each workout and the sessions done, and build the list and the page with the shared `WorkoutViews`, the same code the phone's library and workout page use.
 - **Words come on request, not by default.** Every answer carries structured values only. A route that can say more takes `include`, with one or several values, comma separated or repeated (`include=text`), like GitLab's API. A plain API call (a script, a future client) is not padded with text, and later routes can add other extras. An unknown value is 400 `bad-query`. We chose this over a separate endpoint for the wording (two calls to join, and a list would need one per row) and over always sending text (it pollutes pure calls and fixes one language in the payload).
 - **The language** is the first of `Accept-Language` the app has words for, otherwise the account's language. The answer says `Content-Language` and `Vary: Accept-Language`.
-- **Read-only.** The website holds the `workouts:read` scope like every first-party client and never writes: the phone is the source of truth ([Accounts, Sync](../accounts.md#sync)).
+- **Read-only.** The website holds the `workouts:read` scope like every first-party client and never writes: the phone is the source of truth ([Sync](../sync.md)).
 
 ## Consequences
 
