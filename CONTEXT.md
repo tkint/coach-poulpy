@@ -224,7 +224,7 @@ One phone or browser signed in to an account, named by its device, with its own 
 _Avoid_: Session (a session is a workout done), login
 
 **Outbox**:
-The changes a signed-in phone has made and not yet pushed to the account; signing out waits for it to be empty ([Accounts](docs/accounts.md#sync)).
+The changes a signed-in phone has made and not yet pushed to the account; signing out waits for it to be empty ([Sync](docs/sync.md)).
 _Avoid_: Queue, pending uploads
 
 **Cursor**:

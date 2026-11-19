@@ -140,7 +140,7 @@ User-facing text lives in `i18n/messages/<locale>/<namespace>.json`; native stri
 
 ## Storage and sync
 
-The phone database is the source of truth; the server is its replica ([ADR 0001](./adr/0001-local-first-phone-is-the-source-of-truth.md)). The sync protocol and conflict handling are described in [Accounts](./accounts.md#sync) and [ADR 0006](./adr/0006-sync-keeps-both-edits.md).
+The phone database is the source of truth; the server is its replica ([ADR 0001](./adr/0001-local-first-phone-is-the-source-of-truth.md)). The sync protocol and conflict handling are described in [Sync](./sync.md) and [ADR 0006](./adr/0006-sync-keeps-both-edits.md).
 
 - Device-generated ids are UUIDv7 ([ADR 0005](./adr/0005-ids-are-uuidv7-made-on-the-device.md)).
 - The catalog is curated, separate from personal-data sync, and updated without an account ([ADR 0008](./adr/0008-curated-catalog-with-stable-slugs.md), [ADR 0026](./adr/0026-the-server-holds-the-catalog-as-a-draft-and-published-versions.md)).

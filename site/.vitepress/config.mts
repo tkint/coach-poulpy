@@ -130,10 +130,11 @@ export default withMermaid(
           ],
           [
             'Technical',
-            ['/docs/architecture', '/docs/the-api', '/docs/admin-internals', '/docs/deploying-the-server', '/docs/releasing', '/decisions/', '/docs/adr/', '/docs/research/'],
+            ['/docs/architecture', '/docs/the-api', '/docs/sync', '/docs/admin-internals', '/docs/deploying-the-server', '/docs/releasing', '/decisions/', '/docs/adr/', '/docs/research/'],
             [
               { text: 'Architecture', link: '/docs/architecture' },
               { text: 'The API', link: '/docs/the-api' },
+              { text: 'Sync', link: '/docs/sync' },
               { text: 'Admin internals', link: '/docs/admin-internals' },
               { text: 'Deploying the server', link: '/docs/deploying-the-server' },
               { text: 'Releasing a beta', link: '/docs/releasing' },
