@@ -1,5 +1,0 @@
-import{n as e}from"./rolldown-runtime-sJBDdmOt.js";import{t,x as n}from"./vue.esm-bundler-CexDUOsq.js";import{n as r,t as i}from"./screen-DxerBG3d.js";var a,o,s,c;function l(){return(l=e((()=>{t(),r(),a={title:`Mobile/Components/Tabs`,args:{selected:`Workouts`},argTypes:{selected:{control:`inline-radio`,options:[`Workouts`,`Exercises`]}},render:e=>n(i,{key:e.selected,markup:`<div style="width: 390px; padding: 16px;"><MobileTabs aria-label="Library" :tabs="['Workouts', 'Exercises']" selected="${e.selected}" /></div>`}),parameters:{docs:{canvas:{sourceState:`none`},description:{component:"`MobileTabs`: two or three tabs that switch a page's view, one selected. `aria-label` names the group."}}}},o={},s={args:{selected:`Exercises`}},c=[`FirstSelected`,`SecondSelected`],o.parameters={...o.parameters,docs:{...o.parameters?.docs,source:{originalSource:`{}`,...o.parameters?.docs?.source}}},s.parameters={...s.parameters,docs:{...s.parameters?.docs,source:{originalSource:`{
-  args: {
-    selected: 'Exercises'
-  }
-}`,...s.parameters?.docs?.source}}}})))()}l();export{o as FirstSelected,s as SecondSelected,c as __namedExportsOrder,a as default};
