@@ -1,0 +1,27 @@
+<main class="phone">
+  <div class="history-head">
+    <h1>History</h1>
+    <div class="view-tabs" role="tablist" aria-label="History view">
+      <button type="button" role="tab" aria-selected="true"><MobileIcon name="list" :size="18" />Sessions</button>
+      <button type="button" role="tab" aria-selected="false"><MobileIcon name="chart-no-axes-column" :size="18" />Stats</button>
+    </div>
+  </div>
+  <div class="history-filters">
+    <MobileSearchField label="Search sessions" placeholder="Session or exercise name" value="squat" />
+    <div class="chip-row" role="group" aria-label="Filters">
+      <MobileFilterChip icon="dumbbell" have :count="1" aria-haspopup="dialog" aria-label="Equipment, 1 ticked" style="padding: 0 var(--cp-space-md); min-width: 48px;" />
+      <MobileFilterChip icon="target" aria-haspopup="dialog" aria-label="Focus" style="padding: 0 var(--cp-space-md); min-width: 48px;" />
+      <MobileFilterChip icon="person-standing" have :count="1" aria-haspopup="dialog" aria-label="Zones, 1 ticked" style="padding: 0 var(--cp-space-md); min-width: 48px;" />
+      <MobileFilterChip icon="timer" aria-haspopup="dialog" aria-label="Duration" style="padding: 0 var(--cp-space-md); min-width: 48px;" />
+      <MobileFilterChip icon="route" aria-haspopup="dialog" aria-label="Distance" style="padding: 0 var(--cp-space-md); min-width: 48px;" />
+    </div>
+  </div>
+  <div class="list-meta"><span aria-live="polite">2 sessions</span><button class="clear-link" type="button">Clear filters</button></div>
+  <div class="day-list" id="day-sessions">
+      <div class="day-heading"><span class="label">Fri 16 Oct</span></div>
+      <button type="button" class="session-row" data-component="session-row"><span class="row-icon" aria-hidden="true"><MobileIcon name="dumbbell" :size="22" /></span><span><strong>Full body</strong><small>19:00 · 41:05 · 20 of 21 sets</small></span></button>
+      <div class="day-heading"><span class="label">Mon 12 Oct</span></div>
+      <button type="button" class="session-row" data-component="session-row"><span class="row-icon" aria-hidden="true"><MobileIcon name="dumbbell" :size="22" /></span><span><strong>Lower body strength</strong><small>18:10 · 36:50 · 18 of 18 sets</small></span></button>
+  </div>
+  <MobileNavBar active="history" />
+</main>

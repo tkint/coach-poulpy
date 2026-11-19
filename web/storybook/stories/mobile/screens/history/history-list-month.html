@@ -1,0 +1,73 @@
+<main class="phone">
+  <div class="history-head">
+    <h1>History</h1>
+    <div class="view-tabs" role="tablist" aria-label="History view">
+      <button type="button" role="tab" aria-selected="true"><MobileIcon name="list" :size="18" />Sessions</button>
+      <button type="button" role="tab" aria-selected="false"><MobileIcon name="chart-no-axes-column" :size="18" />Stats</button>
+    </div>
+  </div>
+  <section class="month-card" id="month" aria-label="October 2026" data-component="month-card">
+    <header>
+      <button class="step" type="button" aria-label="Previous month, September"><MobileIcon name="chevron-left" :size="22" /></button>
+      <div><h2>October 2026</h2><span class="sub">11 active days · swipe for other months</span></div>
+      <button class="step" type="button" aria-label="Next month, November" disabled><MobileIcon name="chevron-right" :size="22" /></button>
+    </header>
+    <div class="weekdays" aria-hidden="true"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div>
+    <div class="days" role="group" aria-label="Days of October">
+      <div></div>
+      <div></div>
+      <div></div>
+      <div><button type="button" class="day" aria-label="Thu 1 October" aria-pressed="false">1</button></div>
+      <div><button type="button" class="day day--active" aria-label="Fri 2 October, 1 session" aria-pressed="false">2</button></div>
+      <div><button type="button" class="day" aria-label="Sat 3 October" aria-pressed="false">3</button></div>
+      <div><button type="button" class="day" aria-label="Sun 4 October" aria-pressed="false">4</button></div>
+      <div><button type="button" class="day day--active" aria-label="Mon 5 October, 1 session" aria-pressed="false">5</button></div>
+      <div><button type="button" class="day" aria-label="Tue 6 October" aria-pressed="false">6</button></div>
+      <div><button type="button" class="day day--active" aria-label="Wed 7 October, 1 session" aria-pressed="false">7</button></div>
+      <div><button type="button" class="day" aria-label="Thu 8 October" aria-pressed="false">8</button></div>
+      <div><button type="button" class="day day--active" aria-label="Fri 9 October, 1 session" aria-pressed="false">9</button></div>
+      <div><button type="button" class="day" aria-label="Sat 10 October" aria-pressed="false">10</button></div>
+      <div><button type="button" class="day" aria-label="Sun 11 October" aria-pressed="false">11</button></div>
+      <div><button type="button" class="day day--active" aria-label="Mon 12 October, 1 session" aria-pressed="false">12</button></div>
+      <div><button type="button" class="day" aria-label="Tue 13 October" aria-pressed="false">13</button></div>
+      <div><button type="button" class="day day--active" aria-label="Wed 14 October, 1 session" aria-pressed="false">14</button></div>
+      <div><button type="button" class="day" aria-label="Thu 15 October" aria-pressed="false">15</button></div>
+      <div><button type="button" class="day day--active" aria-label="Fri 16 October, 1 session" aria-pressed="false">16</button></div>
+      <div><button type="button" class="day day--active" aria-label="Sat 17 October, 1 session" aria-pressed="false">17</button></div>
+      <div><button type="button" class="day" aria-label="Sun 18 October" aria-pressed="false">18</button></div>
+      <div><button type="button" class="day" aria-label="Mon 19 October" aria-pressed="false">19</button></div>
+      <div><button type="button" class="day" aria-label="Tue 20 October" aria-pressed="false">20</button></div>
+      <div><button type="button" class="day day--active" aria-label="Wed 21 October, 1 session" aria-pressed="false">21</button></div>
+      <div><button type="button" class="day" aria-label="Thu 22 October" aria-pressed="false">22</button></div>
+      <div><button type="button" class="day day--active" aria-label="Fri 23 October, 1 session" aria-pressed="false">23</button></div>
+      <div><button type="button" class="day day--active day--today day--selected" aria-label="Sat 24 October, 1 session, today" aria-pressed="true">24</button></div>
+      <div><button type="button" class="day day--future" aria-label="Sun 25 October" aria-pressed="false">25</button></div>
+      <div><button type="button" class="day day--future" aria-label="Mon 26 October" aria-pressed="false">26</button></div>
+      <div><button type="button" class="day day--future" aria-label="Tue 27 October" aria-pressed="false">27</button></div>
+      <div><button type="button" class="day day--future" aria-label="Wed 28 October" aria-pressed="false">28</button></div>
+      <div><button type="button" class="day day--future" aria-label="Thu 29 October" aria-pressed="false">29</button></div>
+      <div><button type="button" class="day day--future" aria-label="Fri 30 October" aria-pressed="false">30</button></div>
+      <div><button type="button" class="day day--future" aria-label="Sat 31 October" aria-pressed="false">31</button></div>
+    </div>
+    <button type="button" class="card-toggle" aria-expanded="true" aria-controls="month" aria-label="Close the month"><span>Close</span><MobileIcon name="chevron-up" :size="20" /></button>
+  </section>
+  <div class="day-list" id="day-sessions">
+      <div class="day-heading"><span class="label label--primary">Today · Sat 24 Oct</span></div>
+      <button type="button" class="session-row" data-component="session-row"><span class="row-icon" aria-hidden="true"><MobileIcon name="dumbbell" :size="22" /></span><span><strong>Lower body strength</strong><small>18:05 · 38:24 · 17 of 18 sets</small></span></button>
+      <div class="day-heading"><span class="label">Fri 23 Oct</span></div>
+      <button type="button" class="session-row" data-component="session-row"><span class="row-icon" aria-hidden="true"><MobileIcon name="gauge" :size="22" /></span><span><strong>Treadmill</strong><small>07:30 · 24:00 · 3.42 km</small></span></button>
+      <div class="day-heading"><span class="label">Wed 21 Oct</span></div>
+      <button type="button" class="session-row" data-component="session-row"><span class="row-icon" aria-hidden="true"><MobileIcon name="dumbbell" :size="22" /></span><span><strong>Upper body</strong><small>18:40 · 32:10 · 15 of 15 sets</small></span></button>
+      <div class="day-heading"><span class="label">Sat 17 Oct</span></div>
+      <button type="button" class="session-row" data-component="session-row"><span class="row-icon" aria-hidden="true"><MobileIcon name="gauge" :size="22" /></span><span><strong>Treadmill</strong><small>09:15 · 30:00 · 4.10 km</small></span></button>
+      <div class="day-heading"><span class="label">Fri 16 Oct</span></div>
+      <button type="button" class="session-row" data-component="session-row"><span class="row-icon" aria-hidden="true"><MobileIcon name="dumbbell" :size="22" /></span><span><strong>Full body</strong><small>19:00 · 41:05 · 20 of 21 sets</small></span></button>
+      <div class="day-heading"><span class="label">Wed 14 Oct</span></div>
+      <button type="button" class="session-row" data-component="session-row"><span class="row-icon" aria-hidden="true"><MobileIcon name="gauge" :size="22" /></span><span><strong>Treadmill</strong><small>07:20 · 20:00 · 2.80 km</small></span></button>
+      <div class="day-heading"><span class="label">Mon 12 Oct</span></div>
+      <button type="button" class="session-row" data-component="session-row"><span class="row-icon" aria-hidden="true"><MobileIcon name="dumbbell" :size="22" /></span><span><strong>Lower body strength</strong><small>18:10 · 36:50 · 18 of 18 sets</small></span></button>
+      <div class="day-heading"><span class="label">Fri 9 Oct</span></div>
+      <button type="button" class="session-row" data-component="session-row"><span class="row-icon" aria-hidden="true"><MobileIcon name="gauge" :size="22" /></span><span><strong>Treadmill</strong><small>07:45 · 25:00 · 3.05 km</small></span></button>
+  </div>
+  <MobileNavBar active="history" />
+</main>
