@@ -1,10 +1,19 @@
 # Deploying the server
 
-The server runs on one Linux machine as Docker containers, behind a shared Caddy for HTTPS. Health data must stay in the EU or Switzerland under the GDPR, so pick a host there ([architecture](./architecture.md#accounts-and-security)). The server answers `/health` with its version and serves [the API](./the-api.md) under `/api/v1`. It connects to Postgres and applies its migrations on start ([ADR 0022](./adr/0022-the-servers-schema-is-sqldelight-migrations-on-postgres.md)); `/health` answers 503 while Postgres doesn't. Postgres holds only the schema's version until accounts arrive ([#25](https://github.com/tkint/coach-poulpy/issues/25)).
+The server runs on one Linux machine as Docker containers behind a shared Caddy for HTTPS ([ADR 0019](./adr/0019-the-server-runs-with-docker-compose-on-one-server.md)). Health data must stay in the EU or Switzerland under the GDPR, so pick a host there. This page covers the machine; cutting a release and setting up the Deploy workflow are in [Releasing](./releasing.md).
 
-The setup follows [ADR 0019](./adr/0019-the-server-runs-with-docker-compose-on-one-server.md). Deployment files are in [`deploy/`](https://github.com/tkint/coach-poulpy/tree/main/deploy), and each [release](./releasing.md#the-server) includes a deployment bundle.
+## What runs on the machine
 
-## The containers
+- **Caddy** is the only container with public ports (80 and 443). It runs in its own Compose project, so stopping the app leaves HTTPS up, and it routes each hostname to its container.
+- **The API server** (http4k on Jetty) serves [the API](./the-api.md) under `/api/v1` and `/health`. It applies its database migrations on start ([ADR 0022](./adr/0022-the-servers-schema-is-sqldelight-migrations-on-postgres.md)), and `/health` answers 503 while Postgres doesn't.
+- **Postgres** sits on a private network that only the server reaches.
+- **The web app** is a static Vue container on its own hostname ([ADR 0021](./adr/0021-the-landing-site-the-app-and-the-api-have-their-own-hostname.md)).
+- **Grafana Alloy** is optional and ships logs to Grafana Cloud ([Logs](#logs)).
+
+The server must run as **one container**. It keeps the phones waiting for a confirmed email in memory, so a second replica would first need those events shared.
+
+<details>
+<summary>Containers, networks and volumes</summary>
 
 ```mermaid
 flowchart TD
@@ -46,59 +55,56 @@ flowchart TD
     alloy -. pushes logs when enabled .-> loki
 ```
 
-Only Caddy publishes host ports. The API server and static web container expose port 8080 on the external `edge` network, where Caddy routes each hostname to its container. The server also joins the private `internal` network and reaches Postgres at `postgres:5432`; Postgres joins only `internal` and is not reachable from Caddy or the internet. Caddy runs in its own Compose project, so stopping the app projects leaves shared HTTPS running. The optional Alloy container joins `internal`, reads Docker logs through a read-only Docker socket and pushes them to Grafana Cloud Loki when log shipping is enabled.
-
-The server runs on Jetty, which holds the phones' server-sent event streams open (Caddy passes them through as they come). It runs as **one container**: who is listening for a confirmed email lives in its memory, so a second replica would need those events shared first.
+</details>
 
 ## What you need
 
 - Linux with Python 3, Docker Engine and Docker Compose.
-- About 1 GB of free memory; the server is capped at 512 MB. Images are built in CI, not on the machine.
-- An API hostname (`api.coach-poulpy.com`) and a web app hostname (`app.coach-poulpy.com`) whose DNS A/AAAA records point to the machine. The landing site gets its own hostname and container later ([ADR 0021](./adr/0021-the-landing-site-the-app-and-the-api-have-their-own-hostname.md)).
-- SSH and ports 80/443 open (TCP, plus UDP 443 for HTTP/3).
-
-If `ghcr.io/tkint/coach-poulpy-server` or `ghcr.io/tkint/coach-poulpy-web` is private (a package's first push makes it private), log the machine in once with a token that can read packages: `docker login ghcr.io`.
+- About 1 GB of free memory. The server is capped at 512 MB, and images are built in CI, not on the machine.
+- DNS records for the API hostname (`api.coach-poulpy.com`) and the web app hostname (`app.coach-poulpy.com`) pointing at the machine.
+- SSH, and ports 80 and 443 open (TCP, plus UDP 443 for HTTP/3).
+- If the images on `ghcr.io` are private, log the machine in once with `docker login ghcr.io` and a token that can read packages.
 
 ## Deploy
 
-Everything is deployed from GitHub; you don't log in to the machine for it. Set up the **Deploy** workflow once ([Releasing](./releasing.md#deploy-the-server)), with `DOMAIN` and `POSTGRES_PASSWORD` in the `production` environment, then run **Actions > Deploy > Run workflow** with `latest` or a version. Check it with `curl https://api.coach-poulpy.com/health`.
+Everything deploys from GitHub with **Actions > Deploy > Run workflow**. You never log in to the machine for it. Setting it up once, and every setting it reads, is in [Deploy the server](./releasing.md#deploy-the-server).
 
-The workflow writes `~/coach-poulpy/.env` from those settings (replaced on every run, so change settings in GitHub, not on the machine), uploads `compose.yaml` and the site file to `~/coach-poulpy`, and the shared Caddy to `~/caddy`. On the machine, `~/caddy/deploy.py` then:
+- Settings live in GitHub. The workflow rewrites `~/coach-poulpy/.env` on every run, so a change made on the machine is lost.
+- The workflow uploads the Compose and Caddy files, then `~/caddy/deploy.py` starts Caddy if needed, starts the server and Postgres, and adds or replaces only this app's route in Caddy. Other sites on the same Caddy are left alone.
+- **What to deploy** `website` deploys the web app to `~/coach-poulpy-web` without restarting the server. It needs `WEB_DOMAIN`.
+- Check with `curl https://api.coach-poulpy.com/health` and `curl https://app.coach-poulpy.com/.well-known/assetlinks.json`.
 
-- creates the external `edge` network and starts Caddy if needed,
-- pulls and starts the server and Postgres (and Alloy when log shipping is enabled),
-- adds the site to Caddy through its admin API, or replaces it if already there.
+### Traps
 
-Caddy keeps the configuration it receives through the API in its `caddy-config` volume and resumes it after a restart; `bootstrap.json` is only used before the first site is added. Other sites on the same Caddy are left alone, and deployments wait for each other. To change the hostname, update `DOMAIN` in GitHub and deploy again. Any branch can be deployed by hand to a `preview` environment, beside production or in its place ([Deploy a pull request](./releasing.md#deploy-a-pull-request)). HTTPS errors are usually caused by DNS or blocked ports; inspect `cd ~/caddy && docker compose logs caddy`.
+- **Never run `docker compose down -v`.** It deletes the volumes, and with them the database.
+- `POSTGRES_PASSWORD` only applies when the Postgres volume is first created. Changing it later needs a password change inside Postgres too.
+- An HTTPS error is almost always DNS or a blocked port. Look at `cd ~/caddy && docker compose logs caddy`.
+- If another Caddy already holds ports 80 and 443, remove that container once before the first deploy.
 
-Mail goes out over SMTP to the provider in `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD` and `MAIL_FROM`, which the Deploy workflow writes to `.env` from the environment ([Releasing](./releasing.md#deploy-the-server)); changing provider is a new deploy, not a code change. `MAIL_FROM` is only the default sender: an admin can save another from-address in the admin, which wins from the next email on ([the admin area](./admin.md#settings)). Port 465 uses implicit TLS, any other requires STARTTLS. Until `SMTP_HOST` is set, the server sends no email at all: each one fails with a clear error (`No mail server is set: SMTP_HOST is unset`), nothing of it is printed, and the admin's [Status](./admin.md#status) says mail isn't configured. Sign-ups still work but their confirmation link never leaves, so set `SMTP_HOST` before opening sign-up. The links point at `WEBSITE_URL`, the website by default.
+## Mail
 
-`POSTGRES_PASSWORD` only takes effect when the Postgres volume is first created; changing it later needs a password change inside Postgres too.
+The server sends email over SMTP using `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD` and `MAIL_FROM`. Port 465 uses implicit TLS, any other port STARTTLS. Changing provider is a new deploy, not a code change.
 
-If another Caddy already holds ports 80/443, remove that container once before the first deploy (`docker rm -f <container>`); the shared Caddy requests the certificates again. Never use `docker compose down -v`: it deletes the volumes.
+**Set `SMTP_HOST` before opening sign-up.** Without it, nobody gets a confirmation link, and the admin's [Status](./admin.md#status) says mail isn't configured. `MAIL_FROM` is only the default sender: an admin can save another in [Settings](./admin.md#settings).
 
-## The web app
-
-`app.coach-poulpy.com` is a separate container and Caddy route ([ADR 0021](./adr/0021-the-landing-site-the-app-and-the-api-have-their-own-hostname.md)): the Vue app from `web/`, served as static files, with every page path answered by the app. Deploy it with **Actions > Deploy > Run workflow**, **What to deploy** `website`, after setting `WEB_DOMAIN` in the environment ([Releasing](./releasing.md#deploy-the-server)). It lands in `~/coach-poulpy-web` (the server's `APP_NAME` followed by `-web`), from [`deploy/web/`](https://github.com/tkint/coach-poulpy/tree/main/deploy/web), and never restarts the server. Check it with `curl https://app.coach-poulpy.com/.well-known/assetlinks.json`.
-
-The account emails link to `/confirm-email#<token>` and `/reset-password#<token>` there; when a link opens in a browser, those pages confirm the email or set the new password through the API, which accepts browser calls from the origin of `WEBSITE_URL` only. The image carries `/.well-known/assetlinks.json`, built from the Android signing key, so Android opens those links in the app; a build without the key (a deploy with no `ANDROID_KEYSTORE_*` secrets) leaves it out and the links open in the browser. The iPhone's `apple-app-site-association` waits on an Apple Developer account ([#24](https://github.com/tkint/coach-poulpy/issues/24)).
+The links in emails point at `WEBSITE_URL`, the web app by default. On Android they open in the app, thanks to `assetlinks.json` built from the signing key. On iPhone they open in the browser until there is an Apple Developer account ([#24](https://github.com/tkint/coach-poulpy/issues/24)).
 
 ## Logs
 
-Containers log to Docker's `json-file` driver, capped at 3 files of 10 MB each, so on the machine `docker compose logs server` only reaches back a short while. To read them from anywhere, with longer retention and search, the deploy can ship them to the free tier of [Grafana Cloud](https://grafana.com/products/cloud/) (Loki). Pick an EU region when creating the stack, for the same GDPR reason as the host.
+On the machine, `docker compose logs server` only reaches back a short while (3 files of 10 MB). For search and longer retention, the deploy can ship logs to the free tier of [Grafana Cloud](https://grafana.com/products/cloud/) (Loki), in an EU region:
 
 1. Create a free Grafana Cloud stack in an EU region.
 2. In the stack's **Loki** details, copy the push URL (`https://logs-prod-XXX.grafana.net/loki/api/v1/push`) and the user ID.
 3. Under **Administration > Access policies**, create a policy with the `logs:write` scope only and generate a token from it.
 4. Add `LOKI_URL`, `LOKI_USER` (variables) and `LOKI_PASSWORD` (secret, the token) to the `production` environment ([Releasing](./releasing.md#deploy-the-server)), then deploy again.
 
-With all three set, the Deploy workflow writes `COMPOSE_PROFILES=logs` to `.env` and an `alloy` container (Grafana Alloy, [`deploy/alloy/config.alloy`](https://github.com/tkint/coach-poulpy/tree/main/deploy/alloy)) starts beside the server. It reads the logs of this Compose project's containers through the read-only Docker socket and pushes them to Loki, labelled `app`, `environment` and `service` (`server` or `postgres`). In Grafana, **Explore** with the Loki data source and `{app="coach-poulpy", service="server"}` shows the server. Setting only some of the three stops the deploy; setting none leaves the logs on the machine. Alloy needs about 256 MB more memory. If you remove the settings after enabling them, stop Alloy once with `docker compose --profile logs stop alloy`.
+All three are needed: setting only some stops the deploy. Logs are labelled `app`, `environment` and `service`. In Grafana, **Explore** with `{app="coach-poulpy", service="server"}` shows the server. Alloy needs about 256 MB more memory. To turn shipping off after enabling it, remove the settings and stop Alloy once with `docker compose --profile logs stop alloy`.
 
-Logs leave the machine, so they must not hold personal data. The server prints no secrets and never an email: without `SMTP_HOST` it sends none rather than printing them ([#340](https://github.com/tkint/coach-poulpy/issues/340)), and a sent one is logged with a masked address (`a…@example.com`). Check the free tier's limits (monthly volume and retention) on Grafana's pricing page, as they change.
+Logs leave the machine, so they never hold personal data: no secrets, and emails only masked.
 
 ## Backups
 
-Postgres has nothing to back up until accounts arrive. After that, dump it nightly and before deploying a release with new migrations, since an older server refuses a migrated database, and store the dumps off-machine in the EU or Switzerland:
+Dump Postgres nightly, and before deploying a release with new migrations, since an older server refuses a migrated database. Keep the dumps off the machine, in the EU or Switzerland:
 
 ```sh
 mkdir -p ~/backups
@@ -106,4 +112,4 @@ cd ~/coach-poulpy
 docker compose exec -T postgres pg_dump -U coachpoulpy -Fc coachpoulpy > ~/backups/coachpoulpy-$(date +%F).dump
 ```
 
-Restore with `pg_restore -U coachpoulpy -d coachpoulpy --clean`, fed through `docker compose exec -T postgres`. Back up `.env` and the shared edge's configuration and migration state as well. Losing Caddy's certificate volume requires issuing new certificates.
+Restore with `pg_restore -U coachpoulpy -d coachpoulpy --clean`, through `docker compose exec -T postgres`. Back up `.env` and the Caddy configuration too. Losing Caddy's certificate volume only means issuing new certificates.

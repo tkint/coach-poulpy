@@ -1,23 +1,6 @@
 # Architecture
 
-Coach Poulpy is **local-first**: the mobile app holds the whole domain model and runs alone as a guest on family phones, and the server and website join later as a sync and sharing layer over the same model. One Kotlin Multiplatform core owns the domain, the workout engine and the database on Android and iOS, so the two apps cannot drift apart. The decisions behind this are recorded as [ADRs](./adr/); the words are defined in the [glossary](../CONTEXT.md).
-
-## Decisions for v1
-
-| Topic | v1 | Later |
-| --- | --- | --- |
-| Audience | The family, as guests | A public app |
-| Accounts | Guest mode, all data on the phone; email and password, Sign in with Apple and Google when the server arrives | Guest data moves into a new account on sign-up |
-| Website | Needs an account; plans, manages, reviews and runs guided sessions without devices | |
-| Catalog | Built-in and curated, with simple images; no user-created exercises | User-created exercises with duplicate detection |
-| Workouts | Circuit or sets, in parts (warm-up, work, cool down); strength, cardio, rehab, stretching and treadmill walks and runs | Outdoor running, walking, swimming with GPS; workout tags |
-| Treadmill | FTMS read and record, alone or checked against a planned workout | Speed and incline control per phase |
-| Progression | Every week written out by hand | Rules from recognised protocols, driven by sessions and goals |
-| Sharing | Save to library synced with the author or as a copy | |
-| Coaching | Athlete invites a coach and can revoke; coach edits assigned plans and comments on sessions | |
-| Export | .FIT file for Garmin Connect and Strava; optional Apple Health and Health Connect | Direct Garmin and Strava links |
-| Language and units | French and English, metric and imperial: distances, speeds and weights follow the setting (weights are stored in kilograms and shown in pounds in imperial), except a distance picked in whole miles or kilometres, which keeps the unit it was picked in | |
-| Hosting | The whole stack runs on the dev computer; the server deploys with Docker to one server ([ADR 0019](./adr/0019-the-server-runs-with-docker-compose-on-one-server.md)) | A bigger machine or a managed database when it runs short |
+Coach Poulpy is **local-first**: the mobile app holds the whole domain model and runs alone as a guest on family phones, and the server and website join later as a sync and sharing layer over the same model. One Kotlin Multiplatform core owns the domain, the workout engine and the database on Android and iOS, so the two apps cannot drift apart. The decisions behind this are recorded as [ADRs](./adr/), the words are defined in the [glossary](../CONTEXT.md), and what v1 includes is in the [roadmap](./roadmap.md#what-v1-includes).
 
 ## Delivery phases
 
@@ -40,6 +23,9 @@ Each phase adds a layer without reworking the one below it, because the domain, 
 
 Every workout shares the same concepts, whatever its format. Planned content is versioned and immutable per version, so a session always points at the exact version it followed, a synced library entry follows the latest version, and a copy forks from one.
 
+<details>
+<summary>What each concept holds</summary>
+
 | Concept | What it holds |
 | --- | --- |
 | Exercise | Stable slug, names in French and English, movement pattern, muscle groups, equipment needs (each a list of alternatives) and optional equipment, measurement (reps, time, distance, hold), per-side flag, images, instruction steps |
@@ -50,6 +36,8 @@ Every workout shares the same concepts, whatever its format. Planned content is 
 | Enrollment | A person following a plan version from a start date, with one calendar entry per scheduled workout (planned, done, skipped, moved) |
 | Goal | A measurable target with an optional deadline, computed from sessions |
 | Session | One workout actually done: start and end, source (guided, free, device only), optional link to the planned workout version and calendar entry, set results, samples, notes, effort and pain |
+
+</details>
 
 Statistics are derived, never typed in. `core/stats` computes metrics from sessions: personal records, weekly load and goal progress all come from the same computation, on the phone for guests and on the server for accounts.
 
@@ -89,6 +77,9 @@ The clock is injected, so tests never wait; each platform turns cues (3-2-1, swi
 The shared engine runs on each platform ([ADR 0002](./adr/0002-one-kotlin-multiplatform-core.md)); session state is folded from its append-only events ([ADR 0003](./adr/0003-sessions-are-append-only-event-logs.md)).
 
 ## Modules
+
+<details>
+<summary>Module graph</summary>
 
 Solid arrows are module dependencies in the current Gradle build; dashed arrows show build-time text generation.
 
@@ -132,7 +123,11 @@ flowchart TD
     server --> model
 ```
 
-Android and iOS both depend on `shared`; iOS consumes its `Shared` framework. The server is now a built JVM/http4k module, not a future component. The web workspace is separate from the Gradle graph: `web/app` is a Vue app built on `web/ui` (Vue and DaisyUI) and calls the server over HTTP. A shared Kotlin/JS engine and a separate sync module are not part of the current build.
+</details>
+
+- Android and iOS both depend on `shared`; iOS consumes it as the `Shared` framework.
+- The server is a JVM module on http4k that shares `core/model` with the apps.
+- The web workspace sits outside Gradle: `web/app` is a Vue app on `web/ui` (Vue and DaisyUI) that calls the server over HTTP.
 
 ## Text and translations
 
@@ -167,7 +162,11 @@ flowchart TD
 
 Treadmills are read-only metric sources in v1 ([ADR 0010](./adr/0010-treadmills-are-read-only-metric-sources.md)).
 
-On Android a Live recording runs in a connected-device foreground service, from Start until it finishes or is discarded, with an ongoing notification that opens Live and has Pause or Resume and Finish buttons; on Android 14 and later it needs the Bluetooth permission, and without it a timer-only recording runs in the app alone. On iOS the Bluetooth background mode keeps recording on a locked phone, and Kable's central has a restore identifier so the system relaunches the app for the device's data after closing it. Guided sessions in the player have neither: they rely on the screen staying on, and on resuming from their events. A dropped link is retried for 60 seconds while the session keeps its timer, and the gap is marked in the samples rather than filled. Many treadmills send only some FTMS fields, so the decoder reads the feature flags first and the UI hides what a machine does not send.
+- **Android** runs a Live recording in a connected-device foreground service, with a notification to pause, resume or finish. On Android 14 and later it needs the Bluetooth permission; without it the recording is timer-only.
+- **iOS** keeps recording on a locked phone with the Bluetooth background mode, and the system can relaunch the app for the device's data.
+- **Guided sessions** in the player have neither. They keep the screen on and resume from their events.
+- **A dropped link** is retried for 60 seconds while the timer keeps going, and the gap is marked in the samples, never filled.
+- **Many treadmills send only some FTMS fields**, so the decoder reads the feature flags first and the screen hides what a machine doesn't send.
 
 ## Accounts and security
 
