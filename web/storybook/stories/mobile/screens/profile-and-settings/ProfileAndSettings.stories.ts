@@ -17,6 +17,8 @@ import screenProfileSexSheet from './profile-sex-sheet.html?raw'
 import screenSettingsAppIconSheet from './settings-app-icon-sheet.html?raw'
 import screenSettingsGeneral from './settings-general.html?raw'
 import screenSettingsPreferences from './settings-preferences.html?raw'
+import screenYouSettings from './you-settings.html?raw'
+import screenYouStats from './you-stats.html?raw'
 
 // The Profile and settings screens of the apps (ADR 0029), drawn with the phone stylesheet (../screens.css).
 // CLEANUP: the screens marked a11y todo carry axe findings the old mockups had (contrast of hints and past days, names of fields); fix them with the screens, then drop the todo.
@@ -129,4 +131,20 @@ export const SettingsPreferences: Story = {
   name: "Appearance and units",
   ...screen(screenSettingsPreferences),
   parameters: { mockup: { issue: undefined } },
+}
+
+// The last destination becomes "You", with Settings and Stats in two tabs (#511): drafts until the owner agrees them in the PR.
+/** You · the Settings tab, the settings screen under the new last destination. */
+export const YouSettings: Story = {
+  name: "You, Settings tab",
+  tags: ['!autodocs', '!agreed', 'draft'],
+  ...screen(screenYouSettings),
+  parameters: { mockup: { issue: 511 } },
+}
+/** You · the Stats tab, moved out of History. */
+export const YouStats: Story = {
+  name: "You, Stats tab",
+  tags: ['!autodocs', '!agreed', 'draft'],
+  ...screen(screenYouStats),
+  parameters: { mockup: { issue: 511 } },
 }

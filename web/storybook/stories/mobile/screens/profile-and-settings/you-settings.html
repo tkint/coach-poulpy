@@ -1,0 +1,28 @@
+<main class="phone">
+  <div class="history-head">
+    <h1>You</h1>
+    <div class="view-tabs" role="tablist" aria-label="You">
+      <button type="button" role="tab" aria-selected="true"><MobileIcon name="settings" :size="18" />Settings</button>
+      <button type="button" role="tab" aria-selected="false"><MobileIcon name="chart-no-axes-column" :size="18" />Stats</button>
+    </div>
+  </div>
+  <div class="settings-body" style="padding-top: var(--cp-space-md);">
+    <button type="button" class="profile-card" id="profile" data-component="profile-card"><img src="../../../poulpy/mood_happy.svg" alt="" aria-hidden="true"><span><strong>Alex</strong><small>34 years · 175 cm · 72.6 kg</small><small>Edit your profile</small></span><MobileIcon name="chevron-right" :size="22" /></button>
+    <span class="label label-row">Body</span>
+    <div class="settings-list" id="body">
+      <MobileSettingsRow icon="move-vertical" title="Height" detail="175 cm · logged in January" />
+      <MobileSettingsRow icon="weight" title="Weight" detail="72.6 kg · logged 3 days ago" />
+    </div>
+    <span class="label label-row">App</span>
+    <div class="settings-list" id="app">
+      <MobileSettingsRow icon="contrast" title="Appearance and units" detail="System theme · English · Metric" />
+      <MobileSettingsRow icon="gauge" title="Devices" detail="3 connected · treadmill, foot pod, heart rate band" />
+      <MobileSettingsRow id="app-icon" picture="../../../poulpy/mood_happy.svg" title="App icon" detail="Happy · default" />
+    </div>
+    <span class="label label-row">About</span>
+    <div class="settings-list" id="about">
+      <MobileSettingsRow icon="info" title="About Coach Poulpy" detail="Version 0.1 · data stays on this phone" />
+    </div>
+  </div>
+  <MobileNavBar active="you" />
+</main>
