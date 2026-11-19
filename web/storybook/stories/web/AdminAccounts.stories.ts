@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import AdminAccountsScreen, { type Account } from './AdminAccountsScreen.vue'
 
-// The admin's accounts (issue #336). The three Confirm stories are drafts (issue #382): confirming an unconfirmed email by hand.
+// The admin's accounts (issue #336). The three Confirm stories are issue #382: confirming an unconfirmed email by hand.
 const meta = {
   title: 'Web/Screens/Admin/Accounts',
   component: AdminAccountsScreen,
@@ -31,13 +31,12 @@ export const Details: Story = { args: { ...base, selected: 'lea@example.com' } }
 export const DetailsDisabled: Story = { args: { ...base, accounts: [{ ...accounts[0], disabled: true }, ...accounts.slice(1)], selected: 'lea@example.com', disabledSince: '9 Nov, 09:02' } }
 export const Delete: Story = { args: { ...base, selected: 'lea@example.com', deleting: true, typed: 'lea@exam' } }
 
-/** Draft (#382): an unconfirmed account's details offer "Confirm email" beside the other actions. */
-export const DetailsNotConfirmed: Story = { tags: ['draft'], parameters: { mockup: { issue: 382 } }, args: { ...base, selected: 'tom@example.com' } }
-/** Draft (#382): the confirmation dialog; the admin vouches for an address nobody proved. */
-export const ConfirmEmail: Story = { tags: ['draft'], parameters: { mockup: { issue: 382 } }, args: { ...base, selected: 'tom@example.com', confirming: true } }
-/** Draft (#382): after confirming, the row reads Confirmed, the button is gone and a note says the account can sign in. */
+/** (#382) an unconfirmed account's details offer "Confirm email" beside the other actions. */
+export const DetailsNotConfirmed: Story = { parameters: { mockup: { issue: 382 } }, args: { ...base, selected: 'tom@example.com' } }
+/** (#382) the confirmation dialog; the admin vouches for an address nobody proved. */
+export const ConfirmEmail: Story = { parameters: { mockup: { issue: 382 } }, args: { ...base, selected: 'tom@example.com', confirming: true } }
+/** (#382) after confirming, the row reads Confirmed, the button is gone and a note says the account can sign in. */
 export const EmailConfirmed: Story = {
-  tags: ['draft'],
   parameters: { mockup: { issue: 382 } },
   args: { ...base, accounts: accounts.map((a) => (a.email === 'tom@example.com' ? { ...a, confirmed: true } : a)), selected: 'tom@example.com', justConfirmed: true },
 }
