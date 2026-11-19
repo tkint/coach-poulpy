@@ -81,6 +81,22 @@
 }
 .cp-screen .icon-button--filled { background: var(--cp-surface); }
 
+/* The one top bar of the apps (draft): 44 under the status bar, then a 44 row. The title is a headline on every screen, left,
+   with the leading button (back or close) before it and at most two actions after it. It replaces .top-bar, .screen-header,
+   .live-title-bar, .history-head, .settings-head and .back-bar. CLEANUP: move the screens over once the bar is agreed, then
+   delete those. */
+.cp-screen .app-bar {
+  flex: none;
+  min-height: 88px;
+  padding: var(--cp-space-xxxl) var(--cp-space-md) 0 var(--cp-space-lg);
+  display: flex;
+  align-items: center;
+  gap: var(--cp-space-sm);
+}
+.cp-screen .app-bar:has(> .icon-button:first-child) { padding-left: var(--cp-space-sm); }
+.cp-screen .app-bar h1 { flex: 1; min-width: 0; font: var(--cp-type-headline); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cp-screen .app-bar-actions { display: flex; align-items: center; gap: var(--cp-space-xs); flex: none; }
+
 /* ---------- Buttons ---------- */
 
 /* The apps' button (draft): a rounded square on the websites' size scale. Heights come from --cp-control-* (design/tokens.json
