@@ -115,19 +115,8 @@ export default withMermaid(
       // titled with the section's name.
       sidebar: Object.fromEntries(
         [
-          [
-            'Product',
-            ['/docs/roadmap', '/CONTEXT', '/docs/accounts', '/docs/profile-and-settings', '/docs/workout-file', '/docs/web-app', '/docs/admin'],
-            [
-              { text: 'Roadmap', link: '/docs/roadmap' },
-              { text: 'Accounts and sign-in', link: '/docs/accounts' },
-              { text: 'Profile and settings', link: '/docs/profile-and-settings' },
-              { text: 'The workout file', link: '/docs/workout-file' },
-              { text: 'The web app', link: '/docs/web-app' },
-              { text: 'The admin area', link: '/docs/admin' },
-              { text: 'Glossary', link: '/CONTEXT' },
-            ],
-          ],
+          // Technical comes first: VitePress tries the keys with the most slashes first, then in this
+          // order, so '/docs/admin-internals' must be tried before Product's '/docs/admin'.
           [
             'Technical',
             ['/docs/architecture', '/docs/the-api', '/docs/sync', '/docs/admin-internals', '/docs/deploying-the-server', '/docs/releasing', '/decisions/', '/docs/adr/', '/docs/research/'],
@@ -140,6 +129,19 @@ export default withMermaid(
               { text: 'Releasing a beta', link: '/docs/releasing' },
               { text: 'Decisions', link: '/decisions/', collapsed: true, items: adrs },
               { text: 'Research', collapsed: true, items: research },
+            ],
+          ],
+          [
+            'Product',
+            ['/docs/roadmap', '/CONTEXT', '/docs/accounts', '/docs/profile-and-settings', '/docs/workout-file', '/docs/web-app', '/docs/admin'],
+            [
+              { text: 'Roadmap', link: '/docs/roadmap' },
+              { text: 'Accounts and sign-in', link: '/docs/accounts' },
+              { text: 'Profile and settings', link: '/docs/profile-and-settings' },
+              { text: 'The workout file', link: '/docs/workout-file' },
+              { text: 'The web app', link: '/docs/web-app' },
+              { text: 'The admin area', link: '/docs/admin' },
+              { text: 'Glossary', link: '/CONTEXT' },
             ],
           ],
           [
