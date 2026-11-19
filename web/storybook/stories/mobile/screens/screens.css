@@ -1173,7 +1173,11 @@
 .cp-screen .repeat .block-empty { min-height: 44px; padding: var(--cp-space-sm) var(--cp-space-md); text-align: center; color: var(--cp-on-surface-variant); }
 
 /* History, list first (draft, #511): a one-row week that opens into the month, and the search and filters over the list. */
-.cp-screen .month-card--week { padding-top: var(--cp-space-sm); padding-bottom: var(--cp-space-xs); gap: 0; }
+.cp-screen .calendar-slot { position: relative; flex: none; margin: var(--cp-space-sm) var(--cp-space-lg) 0; }
+.cp-screen .calendar-slot .month-card { margin: 0; }
+.cp-screen .month-card--week { background: none; border: 0; border-radius: 0; padding: 0; gap: 0; }
+.cp-screen .month-card--under { visibility: hidden; }
+.cp-screen .month-card--float { position: absolute; top: 0; left: 0; right: 0; z-index: 3; box-shadow: 0 12px 32px color-mix(in srgb, var(--cp-poulpy-ink) 28%, transparent); }
 .cp-screen .month-card--week .days > div { height: 44px; }
 .cp-screen .day[aria-pressed] { cursor: pointer; }
 .cp-screen .history-title { display: flex; align-items: center; justify-content: space-between; gap: var(--cp-space-md); }

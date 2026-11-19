@@ -2,7 +2,8 @@
   <div class="history-head">
     <div class="history-title"><h1>History</h1><button type="button" class="month-switch" aria-expanded="false" aria-controls="month" aria-label="October 2026, open the month"><span>October 2026</span><MobileIcon name="chevron-down" :size="20" /></button></div>
   </div>
-  <section class="month-card month-card--week" aria-label="Week of 19 October 2026" data-component="week-strip">
+  <div class="calendar-slot">
+    <section class="month-card month-card--week" aria-label="Week of 19 October 2026" data-component="week-strip">
     <div class="weekdays" aria-hidden="true"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div>
     <div class="days" role="group" aria-label="Days of the week, swipe for other weeks">
       <div><button type="button" class="day" aria-label="Mon 19 October" aria-pressed="false">19</button></div>
@@ -14,6 +15,7 @@
       <div><button type="button" class="day day--future" aria-label="Sun 25 October" aria-pressed="false" disabled>25</button></div>
     </div>
   </section>
+  </div>
   <div class="history-filters">
     <MobileSearchField label="Search sessions" placeholder="Session or exercise name" />
     <div class="chip-row" role="group" aria-label="Filters">

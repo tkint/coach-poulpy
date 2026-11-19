@@ -2,7 +2,20 @@
   <div class="history-head">
     <div class="history-title"><h1>History</h1><button type="button" class="month-switch month-switch--open" aria-expanded="true" aria-controls="month" aria-label="October 2026, close the month"><span>October 2026</span><MobileIcon name="chevron-up" :size="20" /></button></div>
   </div>
-  <section class="month-card" id="month" aria-label="October 2026" data-component="month-card">
+  <div class="calendar-slot">
+    <section inert class="month-card month-card--week month-card--under" aria-label="Week of 19 October 2026" data-component="week-strip">
+    <div class="weekdays" aria-hidden="true"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div>
+    <div class="days" role="group" aria-label="Days of the week, swipe for other weeks">
+      <div><button type="button" class="day" aria-label="Mon 19 October" aria-pressed="false">19</button></div>
+      <div><button type="button" class="day" aria-label="Tue 20 October" aria-pressed="false">20</button></div>
+      <div><button type="button" class="day day--active" aria-label="Wed 21 October, 1 session" aria-pressed="false">21</button></div>
+      <div><button type="button" class="day" aria-label="Thu 22 October" aria-pressed="false">22</button></div>
+      <div><button type="button" class="day day--active" aria-label="Fri 23 October, 1 session" aria-pressed="false">23</button></div>
+      <div><button type="button" class="day day--active day--today day--selected" aria-label="Sat 24 October, 1 session, today" aria-pressed="true">24</button></div>
+      <div><button type="button" class="day day--future" aria-label="Sun 25 October" aria-pressed="false" disabled>25</button></div>
+    </div>
+  </section>
+    <section class="month-card month-card--float" id="month" aria-label="October 2026" data-component="month-card">
     <div class="weekdays" aria-hidden="true"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div>
     <div class="days" role="group" aria-label="Days of October">
       <div></div>
@@ -41,6 +54,17 @@
       <div><button type="button" class="day day--future" aria-label="Sat 31 October" aria-pressed="false" disabled>31</button></div>
     </div>
   </section>
+  </div>
+  <div class="history-filters">
+    <MobileSearchField label="Search sessions" placeholder="Session or exercise name" />
+    <div class="chip-row" role="group" aria-label="Filters">
+      <MobileFilterChip icon="dumbbell" aria-haspopup="dialog" aria-label="Equipment" style="padding: 0 var(--cp-space-md); min-width: 48px;" />
+      <MobileFilterChip icon="target" aria-haspopup="dialog" aria-label="Focus" style="padding: 0 var(--cp-space-md); min-width: 48px;" />
+      <MobileFilterChip icon="person-standing" aria-haspopup="dialog" aria-label="Zones" style="padding: 0 var(--cp-space-md); min-width: 48px;" />
+      <MobileFilterChip icon="timer" aria-haspopup="dialog" aria-label="Duration" style="padding: 0 var(--cp-space-md); min-width: 48px;" />
+      <MobileFilterChip icon="route" aria-haspopup="dialog" aria-label="Distance" style="padding: 0 var(--cp-space-md); min-width: 48px;" />
+    </div>
+  </div>
   <div class="day-list" id="day-sessions">
       <div class="day-heading"><span class="label label--primary">Today · Sat 24 Oct</span></div>
       <button type="button" class="session-row" data-component="session-row"><span class="row-icon" aria-hidden="true"><MobileIcon name="dumbbell" :size="22" /></span><span><strong>Lower body strength</strong><small>18:05 · 38:24 · 17 of 18 sets</small></span></button>
