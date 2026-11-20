@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { screen } from '../screen'
-import screenHistoryCalendar from './history-calendar.html?raw'
 import screenHistorySessionDelete from './history-session-delete.html?raw'
 import screenHistorySessionShare from './history-session-share.html?raw'
 
@@ -14,12 +13,6 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** History · calendar. */
-export const HistoryCalendar: Story = {
-  name: "Calendar",
-  ...screen(screenHistoryCalendar),
-  parameters: { a11y: { test: 'todo' }, mockup: { issue: 104 } },
-}
 /** History · delete a session. */
 export const HistorySessionDelete: Story = {
   name: "Delete a session",

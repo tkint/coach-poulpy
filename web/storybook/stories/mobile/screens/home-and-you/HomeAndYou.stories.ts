@@ -6,6 +6,7 @@ import screenHomeDiaryNothingScheduled from './home-diary-nothing-scheduled.html
 import screenSettings from './settings.html?raw'
 import screenProfile from './profile.html?raw'
 import screenProfileSignedIn from './profile-signed-in.html?raw'
+import screenHomeCalendarSheet from './home-calendar-sheet.html?raw'
 import screenRecord from './record.html?raw'
 import screenYouEditStatistics from './you-edit-statistics.html?raw'
 import screenYouGuest from './you-guest.html?raw'
@@ -29,6 +30,8 @@ type Story = StoryObj<typeof meta>
 export const HomeDiary: Story = { name: 'Home, the diary', ...screen(screenHomeDiary) }
 /** Home · nothing planned: Up next suggests a short workout, as a tappable card. */
 export const HomeDiaryNothingScheduled: Story = { name: 'Home, nothing scheduled', ...screen(screenHomeDiaryNothingScheduled) }
+/** Home · the Calendar button opens a bottom sheet that is only a shortcut: tap a day and it closes and the timeline scrolls to that date. */
+export const HomeCalendarSheet: Story = { name: 'Home, jump to a day', ...screen(screenHomeCalendarSheet) }
 /** Record · the Record button opens a bottom sheet over Home: a free session, a walk or a run, or a workout from the library. */
 export const Record: Story = { name: 'Record', ...screen(screenRecord) }
 /** Achievements · opened from the motivation row: Poulpy and the eight tentacles, what is earned, and what is still hidden. */
