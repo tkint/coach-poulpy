@@ -679,7 +679,7 @@ The landing site, the web app and these pages draw with one package, [`web/ui`](
 - **Web &gt; Components**: each Vue component in every state, with its classes. Each state is a story and runs as a test in CI, with an accessibility check. Use the toolbar to switch between light and dark.
 - **Mobile &gt; Components**: the raw pieces of the Android and iOS screens (buttons, chips, fields, rows), one page each, with a story per variation and controls to try them.
 - **Mobile &gt; Patterns**: pieces composed from those, such as the nav bar, sheets and charts.
-- **Mobile &gt; Screens**: every agreed phone screen, built from the components and patterns, and the drafts ([ADR 0029](https://tkint.github.io/coach-poulpy/docs/adr/0029-mockups-are-stories-in-the-component-workshop)).
+- **Mobile &gt; Screens**: every agreed phone screen, grouped by bottom-bar tab (Home, Library, You) and then by view, built from the components and patterns, and the drafts ([ADR 0029](https://tkint.github.io/coach-poulpy/docs/adr/0029-mockups-are-stories-in-the-component-workshop)).
 
 ## Classes
 
@@ -996,6 +996,8 @@ The movement-pattern badge stands in for exercise pictures, and Lucide draws few
 | Component | Shape | Notes |
 | --- | --- | --- |
 | [Top bar](?path=/docs/mobile-components-top-bar--docs) | One bar on every phone screen: 44 under the status bar, then a 44 row. The title is a headline (21) on the left; a back chevron (pushed screen) or a close cross (screen that ends a task) before it, none on a tab&#39;s root; at most two actions after it. Tabs, search and filters sit below the bar, never in it | `MobileTopBar` in the mockups. Replaces the screen header, Live title bar, History head, Settings head and back bar |
+| [Motivation row](?path=/docs/mobile-components-motivation-row--docs) | Home&#39;s one motivation row: a pill with a small Poulpy, eight segments (the tentacles, lit in `primary`), the latest achievements and a chevron | `MobileMotivationRow`. A tap opens Achievements. No streak: a lit tentacle never goes dark |
+| [Achievement](?path=/docs/mobile-components-achievement--docs) | A round token: earned in `primaryContainer` with a Lucide icon, or locked as a quiet &quot;?&quot; in `surfaceVariant`; 28 in a row, 64 on Achievements | `MobileAchievement`. Locked ones never say what they ask for |
 | [Button](?path=/docs/mobile-components-button--docs) | Rounded square (10 radius), never a pill, on the websites&#39; size scale: xs 24, sm 32, md 40 (the default), lg 48, xl 56, xxl 64; below 44 the touch area still reaches 44 | `MobileButton` in the mockups, `PoulpyButton` on both platforms (`PoulpyButtonKind`, `PoulpyButtonSize`). Primary: one per screen. Tonal (`primaryContainer`): secondary actions. Secondary (2 px `outline`): cancel, less important choices. Grumpy: only the catch-up action while Poulpy is ember. A top bar&#39;s button is `sm`, a screen&#39;s or sheet&#39;s main action `xl`, a card&#39;s actions `md` |
 | [Chip](?path=/docs/mobile-components-filter-chip--docs) | 32 high, pill; on = `primary`, off = 1.5 px `outline` | Filters (muscle, equipment, format), with `aria-pressed` or selected state; `PoulpyChip` on both platforms |
 | Choosing one value | A select field that opens a sheet for a longer list, or a native menu for a short one | Pills and chips are for filters and for view switches; a form asks for a value with a select, never a row of pills |
@@ -1012,7 +1014,7 @@ The movement-pattern badge stands in for exercise pictures, and Lucide draws few
 
 ## Base fields
 
-The fields every form is built from. Reference mockups: `profile-edit`, the three `profile-*-sheet` pages, `body-log-sheet`, `body-log-height-sheet`, under Mobile &gt; Screens &gt; Profile and settings in the workshop. Build every new form from these, and move old screens to them as they are touched.
+The fields every form is built from. Reference mockups: `profile` (guest), the `profile-*-sheet` pages, `body-log-sheet`, `body-log-height-sheet`, under Mobile &gt; Screens &gt; You &gt; Profile and You &gt; Profile sheets and body in the workshop. Build every new form from these, and move old screens to them as they are touched.
 
 | Field | Shape | Behaviour |
 | --- | --- | --- |
@@ -1071,6 +1073,14 @@ Every screen mockup is a story in the [component workshop](?path=/docs/design-sy
 - CI runs every story as a test, with the accessibility check.
 
 The mockup is the design reference; this page defines the shared rules and components used to build it.
+
+## Navigation
+
+The bottom bar has three destinations: **Home**, **Library** and **You**. Live is the **Record** button in Home&#39;s top bar, which opens a bottom sheet; History is the past feed on Home; Statistics sit on You under the profile card, and Settings stays **Settings**, behind the cog in You&#39;s top bar. See Mobile &gt; Screens &gt; Home, Library and You.
+
+- Home is the diary: the motivation row, **Up next** (what is planned, or a suggestion when nothing is), then the past with a recap or a record between sessions.
+- The profile card on You carries one badge: **Guest**, **Confirm your email** or **Signed in**. Sign up and sign in open from the one Account row at the top of the profile (it opens the account screens), never from a banner or a pop-up.
+- Statistics have a period switch (7 days, 30 days, Year, All time) and an Edit button that chooses and orders the blocks.
 </code></pre>
           </div>
         </div>
