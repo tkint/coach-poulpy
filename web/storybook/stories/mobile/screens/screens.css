@@ -63,13 +63,6 @@
 
 /* ---------- Top bar ---------- */
 
-.cp-screen .top-bar {
-  padding: var(--cp-space-xxxl) var(--cp-space-md) 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
 .cp-screen .icon-button {
   width: 40px;
   height: 40px;
@@ -82,9 +75,7 @@
 .cp-screen .icon-button--filled { background: var(--cp-surface); }
 
 /* The one top bar of the apps: 44 under the status bar, then a 44 row. The title is a headline on every screen, left,
-   with the leading button (back or close) before it and at most two actions after it. It replaces .top-bar, .screen-header,
-   .live-title-bar, .history-head, .settings-head and .back-bar. CLEANUP: move the screens over once the bar is agreed, then
-   delete those. */
+   with the leading button (back or close) before it and at most two actions after it. Every screen uses it. */
 .cp-screen .app-bar {
   flex: none;
   min-height: 88px;
@@ -95,7 +86,10 @@
 }
 .cp-screen .app-bar:has(> .icon-button:first-child) { padding-left: var(--cp-space-sm); }
 .cp-screen .app-bar h1 { flex: 1; min-width: 0; font: var(--cp-type-headline); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.cp-screen .app-bar-actions { display: flex; align-items: center; gap: var(--cp-space-xs); flex: none; }
+.cp-screen .app-bar-sub { padding: 0 var(--cp-space-lg); margin-top: calc(var(--cp-space-xs) * -1); font-size: 13px; line-height: 17px; font-weight: 700; color: var(--cp-on-surface-variant); display: flex; align-items: center; gap: 6px; }
+.cp-screen .app-bar-sub.state { color: var(--cp-success); font-weight: 800; }
+.cp-screen .app-bar-sub.state::before { content: ""; width: 8px; height: 8px; border-radius: var(--cp-radius-pill); background: currentColor; }
+.cp-screen .app-bar-actions { margin-left: auto; display: flex; align-items: center; gap: var(--cp-space-xs); flex: none; }
 
 /* ---------- Buttons ---------- */
 
@@ -720,8 +714,6 @@
 /* ---------- Live ---------- */
 
 .cp-screen .live-body { flex: 1; min-height: 0; overflow: hidden; padding: var(--cp-space-md) var(--cp-space-lg) var(--cp-space-md); display: flex; flex-direction: column; gap: 10px; }
-.cp-screen .live-title-bar { padding: 52px var(--cp-space-lg) 0; display: flex; align-items: center; gap: var(--cp-space-sm); }
-.cp-screen .live-title-bar h1 { flex: 1; font: var(--cp-type-title); }
 .cp-screen .device-pill { height: 36px; padding: 0 var(--cp-space-md); border-radius: var(--cp-radius-pill); background: var(--cp-surface); border: 1px solid var(--cp-outline); color: var(--cp-on-surface-variant); font-size: 14px; font-weight: 800; display: flex; align-items: center; gap: 6px; }
 .cp-screen .device-pill .dot { width: 8px; height: 8px; border-radius: var(--cp-radius-pill); background: var(--cp-success); }
 .cp-screen .live-numbers { border-radius: var(--cp-radius-lg); background: var(--cp-primary-container); color: var(--cp-on-primary-container); padding: 10px; display: flex; flex-direction: column; gap: var(--cp-space-sm); }
@@ -799,8 +791,6 @@
 .cp-screen .block-list .what { flex: 1; font-weight: 700; }
 .cp-screen .block-list .target { font-size: 14px; font-weight: 800; color: var(--cp-primary); }
 .cp-screen .block-list .target--low { color: var(--cp-on-grumpy-container); }
-.cp-screen .back-bar { padding: 48px var(--cp-space-md) 0; display: flex; align-items: center; gap: var(--cp-space-xs); }
-.cp-screen .back-bar h1 { font: var(--cp-type-headline); }
 .cp-screen .action-row { padding: var(--cp-space-md) var(--cp-space-lg) 28px; display: flex; gap: 10px; }
 .cp-screen .action-row .button { flex: 1; }
 
@@ -873,9 +863,6 @@
 
 /* ---------- Settings and devices ---------- */
 
-.cp-screen .settings-head { padding: 52px 12px 0 var(--cp-space-lg); display: flex; align-items: center; gap: var(--cp-space-sm); min-height: 100px; }
-.cp-screen .settings-head h1 { flex: 1; font: var(--cp-type-title); }
-.cp-screen .header-add-button { width: 48px; height: 48px; border-radius: var(--cp-radius-pill); background: var(--cp-primary-container); color: var(--cp-on-primary-container); display: flex; align-items: center; justify-content: center; }
 .cp-screen .settings-tabs { margin: var(--cp-space-md) var(--cp-space-lg) 0; }
 .cp-screen .settings-body { flex: 1; min-height: 0; overflow: hidden; padding: var(--cp-space-lg) var(--cp-space-lg); display: flex; flex-direction: column; gap: 10px; }
 .cp-screen .setting-card { border-radius: var(--cp-radius-md); background: var(--cp-surface); border: 1px solid var(--cp-outline); padding: var(--cp-space-md) var(--cp-space-md); display: flex; flex-direction: column; gap: var(--cp-space-sm); }
@@ -908,12 +895,6 @@
 .cp-screen .empty-card h2 { font: var(--cp-type-headline); font-size: 23px; line-height: 27px; }
 .cp-screen .empty-card p { font-size: 15px; line-height: 22px; }
 .cp-screen .empty-card .button { margin-top: 10px; }
-.cp-screen .page-bar { padding: 48px 8px 0 12px; display: flex; align-items: center; gap: var(--cp-space-xs); }
-.cp-screen .page-bar > div { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-.cp-screen .page-bar h1 { font: var(--cp-type-headline); }
-.cp-screen .page-bar small { font-size: 13px; line-height: 17px; color: var(--cp-on-surface-variant); }
-.cp-screen .page-bar .state { font-size: 13px; line-height: 17px; font-weight: 800; color: var(--cp-success); display: flex; align-items: center; gap: 6px; }
-.cp-screen .page-bar .state::before { content: ""; width: 8px; height: 8px; border-radius: var(--cp-radius-pill); background: currentColor; }
 .cp-screen .measure-list { border-radius: var(--cp-radius-md); background: var(--cp-surface); border: 1px solid var(--cp-outline); padding: 2px var(--cp-space-lg); display: flex; flex-direction: column; }
 .cp-screen .measure-list li { display: flex; align-items: center; justify-content: space-between; padding: 11px 0; border-bottom: 1px solid var(--cp-outline); font-weight: 700; }
 .cp-screen .measure-list li:last-child { border-bottom: 0; }
