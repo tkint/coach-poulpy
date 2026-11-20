@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// Poulpy on Home as his moods change (draft, the moves validated on Brand/Poulpy moves): tapped again and again he loses patience.
+// Poulpy on Home as his moods change (the moves validated on Brand/Poulpy moves): tapped again and again he loses patience.
 //   happy     a tap makes him jump; the 5th tap in a row turns him round (one full turn) and he comes out annoyed
 //   annoyed   a tap makes him shake; the 3rd in a row turns him round and he comes out fuming, his fumes puffing
 //   fuming    a tap makes him shudder, the fumes puffing harder
