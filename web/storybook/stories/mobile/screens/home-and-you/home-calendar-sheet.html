@@ -40,41 +40,41 @@
         <button class="step" type="button" aria-label="Next month, November" disabled><MobileIcon name="chevron-right" :size="22" /></button>
       </header>
       <div class="weekdays" aria-hidden="true"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div>
-      <div class="days" role="grid">
+      <div class="days" role="group" aria-label="Days of October">
         <div></div>
         <div></div>
         <div></div>
-        <div><span class="day" role="gridcell" aria-label="Thu 1 October" aria-selected="false">1</span></div>
-        <div><span class="day day--active" role="gridcell" aria-label="Fri 2 October, 1 session" aria-selected="false">2</span></div>
-        <div><span class="day" role="gridcell" aria-label="Sat 3 October" aria-selected="false">3</span></div>
-        <div><span class="day" role="gridcell" aria-label="Sun 4 October" aria-selected="false">4</span></div>
-        <div><span class="day day--active" role="gridcell" aria-label="Mon 5 October, 1 session" aria-selected="false">5</span></div>
-        <div><span class="day" role="gridcell" aria-label="Tue 6 October" aria-selected="false">6</span></div>
-        <div><span class="day day--active" role="gridcell" aria-label="Wed 7 October, 1 session" aria-selected="false">7</span></div>
-        <div><span class="day" role="gridcell" aria-label="Thu 8 October" aria-selected="false">8</span></div>
-        <div><span class="day day--active" role="gridcell" aria-label="Fri 9 October, 1 session" aria-selected="false">9</span></div>
-        <div><span class="day" role="gridcell" aria-label="Sat 10 October" aria-selected="false">10</span></div>
-        <div><span class="day" role="gridcell" aria-label="Sun 11 October" aria-selected="false">11</span></div>
-        <div><span class="day day--active" role="gridcell" aria-label="Mon 12 October, 1 session" aria-selected="false">12</span></div>
-        <div><span class="day" role="gridcell" aria-label="Tue 13 October" aria-selected="false">13</span></div>
-        <div><span class="day day--active" role="gridcell" aria-label="Wed 14 October, 1 session" aria-selected="false">14</span></div>
-        <div><span class="day" role="gridcell" aria-label="Thu 15 October" aria-selected="false">15</span></div>
-        <div><span class="day day--active" role="gridcell" aria-label="Fri 16 October, 1 session" aria-selected="false">16</span></div>
-        <div><span class="day day--active" role="gridcell" aria-label="Sat 17 October, 1 session" aria-selected="false">17</span></div>
-        <div><span class="day" role="gridcell" aria-label="Sun 18 October" aria-selected="false">18</span></div>
-        <div><span class="day" role="gridcell" aria-label="Mon 19 October" aria-selected="false">19</span></div>
-        <div><span class="day day--active" role="gridcell" aria-label="Tue 20 October, 1 session" aria-selected="false">20</span></div>
-        <div><span class="day day--active" role="gridcell" aria-label="Wed 21 October, 1 session" aria-selected="false">21</span></div>
-        <div><span class="day day--active day--selected" role="gridcell" aria-label="Thu 22 October, 1 session" aria-selected="true">22</span></div>
-        <div><span class="day day--active" role="gridcell" aria-label="Fri 23 October, 1 session" aria-selected="false">23</span></div>
-        <div><span class="day day--active day--today" role="gridcell" aria-label="Sat 24 October, 1 session, today" aria-selected="false">24</span></div>
-        <div><span class="day day--future" role="gridcell" aria-label="Sun 25 October" aria-selected="false">25</span></div>
-        <div><span class="day day--future" role="gridcell" aria-label="Mon 26 October" aria-selected="false">26</span></div>
-        <div><span class="day day--future" role="gridcell" aria-label="Tue 27 October" aria-selected="false">27</span></div>
-        <div><span class="day day--future" role="gridcell" aria-label="Wed 28 October" aria-selected="false">28</span></div>
-        <div><span class="day day--future" role="gridcell" aria-label="Thu 29 October" aria-selected="false">29</span></div>
-        <div><span class="day day--future" role="gridcell" aria-label="Fri 30 October" aria-selected="false">30</span></div>
-        <div><span class="day day--future" role="gridcell" aria-label="Sat 31 October" aria-selected="false">31</span></div>
+        <div><button type="button" class="day" aria-label="Thu 1 October" aria-pressed="false">1</button></div>
+        <div><button type="button" class="day day--active" aria-label="Fri 2 October, 1 session" aria-pressed="false">2</button></div>
+        <div><button type="button" class="day" aria-label="Sat 3 October" aria-pressed="false">3</button></div>
+        <div><button type="button" class="day" aria-label="Sun 4 October" aria-pressed="false">4</button></div>
+        <div><button type="button" class="day day--active" aria-label="Mon 5 October, 1 session" aria-pressed="false">5</button></div>
+        <div><button type="button" class="day" aria-label="Tue 6 October" aria-pressed="false">6</button></div>
+        <div><button type="button" class="day day--active" aria-label="Wed 7 October, 1 session" aria-pressed="false">7</button></div>
+        <div><button type="button" class="day" aria-label="Thu 8 October" aria-pressed="false">8</button></div>
+        <div><button type="button" class="day day--active" aria-label="Fri 9 October, 1 session" aria-pressed="false">9</button></div>
+        <div><button type="button" class="day" aria-label="Sat 10 October" aria-pressed="false">10</button></div>
+        <div><button type="button" class="day" aria-label="Sun 11 October" aria-pressed="false">11</button></div>
+        <div><button type="button" class="day day--active" aria-label="Mon 12 October, 1 session" aria-pressed="false">12</button></div>
+        <div><button type="button" class="day" aria-label="Tue 13 October" aria-pressed="false">13</button></div>
+        <div><button type="button" class="day day--active" aria-label="Wed 14 October, 1 session" aria-pressed="false">14</button></div>
+        <div><button type="button" class="day" aria-label="Thu 15 October" aria-pressed="false">15</button></div>
+        <div><button type="button" class="day day--active" aria-label="Fri 16 October, 1 session" aria-pressed="false">16</button></div>
+        <div><button type="button" class="day day--active" aria-label="Sat 17 October, 1 session" aria-pressed="false">17</button></div>
+        <div><button type="button" class="day" aria-label="Sun 18 October" aria-pressed="false">18</button></div>
+        <div><button type="button" class="day" aria-label="Mon 19 October" aria-pressed="false">19</button></div>
+        <div><button type="button" class="day day--active" aria-label="Tue 20 October, 1 session" aria-pressed="false">20</button></div>
+        <div><button type="button" class="day day--active" aria-label="Wed 21 October, 1 session" aria-pressed="false">21</button></div>
+        <div><button type="button" class="day day--active day--selected" aria-label="Thu 22 October, 1 session" aria-pressed="true">22</button></div>
+        <div><button type="button" class="day day--active" aria-label="Fri 23 October, 1 session" aria-pressed="false">23</button></div>
+        <div><button type="button" class="day day--active day--today" aria-label="Sat 24 October, 1 session, today" aria-pressed="false">24</button></div>
+        <div><button type="button" class="day day--future" aria-label="Sun 25 October" aria-pressed="false" disabled>25</button></div>
+        <div><button type="button" class="day day--future" aria-label="Mon 26 October" aria-pressed="false" disabled>26</button></div>
+        <div><button type="button" class="day day--future" aria-label="Tue 27 October" aria-pressed="false" disabled>27</button></div>
+        <div><button type="button" class="day day--future" aria-label="Wed 28 October" aria-pressed="false" disabled>28</button></div>
+        <div><button type="button" class="day day--future" aria-label="Thu 29 October" aria-pressed="false" disabled>29</button></div>
+        <div><button type="button" class="day day--future" aria-label="Fri 30 October" aria-pressed="false" disabled>30</button></div>
+        <div><button type="button" class="day day--future" aria-label="Sat 31 October" aria-pressed="false" disabled>31</button></div>
       </div>
     </section>
   </MobileSheet>
