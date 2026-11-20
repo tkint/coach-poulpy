@@ -1212,10 +1212,6 @@
 .cp-screen .feed-card small { font-size: 14px; line-height: 19px; font-weight: 700; }
 .cp-screen .feed-card .text-link { color: inherit; margin: 0; }
 
-/* Achievements: a grid of tokens under their names. */
-.cp-screen .achievement-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--cp-space-md) var(--cp-space-sm); }
-.cp-screen .achievement-grid > div { display: flex; flex-direction: column; align-items: center; gap: var(--cp-space-xs); text-align: center; font-size: 13px; line-height: 17px; font-weight: 700; }
-.cp-screen .achievement-grid small { color: var(--cp-on-surface-variant); font-size: 12px; line-height: 15px; }
 .cp-screen .count-dots { display: flex; justify-content: center; gap: 6px; }
 .cp-screen .count-dots i { width: 14px; height: 14px; border-radius: var(--cp-radius-pill); background: color-mix(in srgb, var(--cp-on-primary-container) 18%, transparent); }
 .cp-screen .count-dots i.lit { background: var(--cp-primary); }
@@ -1242,3 +1238,12 @@
 .cp-screen .timeline > * { position: relative; }
 .cp-screen .timeline > *::before { content: ""; position: absolute; left: calc(-1 * var(--cp-space-xl) + 2px); top: 50%; width: 12px; height: 12px; margin-top: -6px; border-radius: 50%; background: var(--cp-primary); border: 2px solid var(--cp-background); box-sizing: content-box; transform: translate(-2px, 0); }
 .cp-screen .timeline > .session-row::before { background: var(--cp-outline); }
+
+/* Achievements (draft): Poulpy and the count on top, then the badges as squares. */
+.cp-screen .achievements-hero { display: flex; flex-direction: column; align-items: center; gap: var(--cp-space-xs); text-align: center; padding: var(--cp-space-sm) 0; }
+.cp-screen .achievements-hero h2 { font: var(--cp-type-headline); }
+.cp-screen .achievements-hero p { font-size: 15px; line-height: 20px; color: var(--cp-on-surface-variant); }
+.cp-screen .achievements-hero .count-dots { margin-top: var(--cp-space-sm); }
+.cp-screen .badge-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--cp-space-sm); }
+.cp-screen .badge-tile { aspect-ratio: 1; border-radius: var(--cp-radius-lg); background: var(--cp-primary-container); color: var(--cp-on-primary-container); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--cp-space-xs); padding: var(--cp-space-xs); text-align: center; font-size: 13px; line-height: 16px; font-weight: 800; }
+.cp-screen .badge-tile--locked { background: var(--cp-surface-variant); color: var(--cp-on-surface-variant); }
