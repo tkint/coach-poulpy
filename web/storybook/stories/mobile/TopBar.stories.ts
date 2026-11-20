@@ -6,8 +6,8 @@ const bar = (inner: string) => `<div style="width: 390px; background: var(--cp-b
 
 const meta = {
   title: 'Mobile/Components/Top bar',
-  tags: ['draft'],
-  parameters: { docs: { canvas: { sourceState: 'none' }, description: { component: '`MobileTopBar`: the one top bar of every phone screen (draft). 44 under the status bar, then a 44 row; the title is a headline (21) on the left, the same on every screen. A pushed screen starts with a back chevron, a screen that ends a task with a close cross; a tab\'s root screen has neither. Actions go on the right, at most two. Filters, search and tabs sit below the bar, never in it.' } } },
+  tags: ['agreed'],
+  parameters: { docs: { canvas: { sourceState: 'none' }, description: { component: '`MobileTopBar`: the one top bar of every phone screen. 44 under the status bar, then a 44 row; the title is a headline (21) on the left, the same on every screen. A pushed screen starts with a back chevron, a screen that ends a task with a close cross; a tab\'s root screen has neither. Actions go on the right, at most two. Filters, search and tabs sit below the bar, never in it.' } } },
 } satisfies Meta
 export default meta
 type Story = StoryObj<typeof meta>
