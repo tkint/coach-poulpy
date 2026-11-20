@@ -1215,6 +1215,7 @@
 .cp-screen .block-toggle .switch[aria-checked="true"]::after { left: 21px; background: var(--cp-on-primary); }
 
 /* Home's past feed as a timeline: a quiet line down the left, a dot at each session, recap or record. */
+.cp-screen .feed-scroll { flex: 1; min-height: 0; overflow: hidden; -webkit-mask-image: linear-gradient(#000 88%, transparent); mask-image: linear-gradient(#000 88%, transparent); }
 .cp-screen .timeline { position: relative; display: flex; flex-direction: column; gap: var(--cp-space-sm); padding-left: var(--cp-space-xl); }
 .cp-screen .timeline::before { content: ""; position: absolute; left: 7px; top: 12px; bottom: 12px; width: 2px; border-radius: 1px; background: var(--cp-outline); }
 .cp-screen .timeline > * { position: relative; }
