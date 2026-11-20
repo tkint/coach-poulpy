@@ -107,6 +107,19 @@ export async function setAccountDisabled(id: string, disabled: boolean): Promise
   }
 }
 
+/** Confirmed, already confirmed (someone got there first) or not reached. */
+export type ConfirmAnswer = 'confirmed' | 'already' | 'failed'
+
+/** Confirms an account's email by hand (#382), for an address nobody proved. */
+export async function confirmAccountEmail(id: string): Promise<ConfirmAnswer> {
+  try {
+    const response = await authorized(`/admin/accounts/${id}/confirm-email`, 'POST')
+    return response.ok ? 'confirmed' : response.status === 409 ? 'already' : 'failed'
+  } catch {
+    return 'failed'
+  }
+}
+
 /** Deletes an account, once its email is typed again; true when the server did it. */
 export async function deleteAccount(id: string, confirmEmail: string): Promise<boolean> {
   try {

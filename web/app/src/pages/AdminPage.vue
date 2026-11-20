@@ -66,6 +66,7 @@ const actions: Record<string, string> = {
   'admin.promote': 'admin.actionPromote',
   'admin.account.disable': 'admin.actionDisable',
   'admin.account.enable': 'admin.actionEnable',
+  'admin.account.confirm': 'admin.actionConfirm',
   'admin.account.delete': 'admin.actionDelete',
   'admin.settings.mail-from': 'admin.actionMailFrom',
 }
