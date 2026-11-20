@@ -2,10 +2,10 @@
 import { CpIcon } from '@coach-poulpy/ui'
 // The accounts screen of the admin (the Web/Screens/Admin/Accounts stories in the component workshop): a paged table of every
 // account, sorted and filtered on the server, with the account picked in a panel floating on the right where it
-// is disabled, enabled or deleted after typing its email again (#336). It never shows a workout or health data.
+// has its email confirmed by hand (#382), is disabled, enabled or deleted after typing its email again (#336). It never shows a workout or health data.
 // The table's state lives in the URL (route.ts): /admin/accounts?q=lea&role=admin&sort=email&order=asc&page=2&account=<id>.
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
-import { ChevronDown, ChevronUp, ChevronsUpDown } from '@lucide/vue'
+import { ChevronDown, ChevronUp, ChevronsUpDown, CircleCheck } from '@lucide/vue'
 import {
   CpAvatar,
   CpBadge,
@@ -17,10 +17,11 @@ import {
   CpSelectField,
   CpSheet,
   CpSidePanel,
+  CpSuccessNote,
   CpTable,
   CpTextField,
 } from '@coach-poulpy/ui'
-import { deleteAccount, getAccount, listAccounts, setAccountDisabled, type AccountsQuery, type AdminAccount } from '../session'
+import { confirmAccountEmail, deleteAccount, getAccount, listAccounts, setAccountDisabled, type AccountsQuery, type AdminAccount } from '../session'
 import { navigate, search, withParams } from '../route'
 import { locale, t } from '../i18n'
 
@@ -59,7 +60,10 @@ const state = ref<'loading' | 'ready' | 'failed'>('loading')
 const selected = ref<AdminAccount>()
 const busy = ref(false)
 /** Which button waits for the server, so only that one spins. */
-const working = ref<'toggle' | 'delete'>()
+const working = ref<'toggle' | 'delete' | 'confirm'>()
+const confirming = ref(false)
+/** The address just confirmed by hand, for the note that says it can sign in. */
+const justConfirmed = ref<string>()
 const deleting = ref(false)
 const typed = ref('')
 
@@ -167,7 +171,10 @@ async function syncSelected() {
 
 // Everything but the open account asks the server again.
 watch(() => JSON.stringify(query.value), load, { immediate: true })
-watch(accountId, syncSelected)
+watch(accountId, () => {
+  justConfirmed.value = undefined
+  syncSelected()
+})
 
 async function toggle() {
   const account = selected.value
@@ -178,6 +185,22 @@ async function toggle() {
   busy.value = false
   if (done) await load()
   else state.value = 'failed'
+}
+
+async function confirmEmail() {
+  const account = selected.value
+  if (!account) return
+  busy.value = true
+  working.value = 'confirm'
+  const answer = await confirmAccountEmail(account.id)
+  busy.value = false
+  confirming.value = false
+  if (answer === 'failed') {
+    state.value = 'failed'
+    return
+  }
+  justConfirmed.value = answer === 'confirmed' ? account.email : undefined
+  await load()
 }
 
 function askDelete() {
@@ -269,10 +292,15 @@ async function remove() {
           <dd>{{ selected.disabledAt ? t('admin.signInBlocked', { when: moment.format(new Date(selected.disabledAt)) }) : t('admin.signInAllowed') }}</dd>
         </div>
       </dl>
+      <CpSuccessNote v-if="justConfirmed === selected.email">{{ t('admin.emailConfirmedNote', { email: selected.email }) }}</CpSuccessNote>
       <p v-if="isOwn" class="text-sm text-base-content/70">{{ t('admin.ownAccount') }}</p>
       <template v-else>
+        <p v-if="!selected.confirmed" class="text-sm text-base-content/70">{{ t('admin.confirmEmailHint') }}</p>
         <p v-if="!selected.disabledAt" class="text-sm text-base-content/70">{{ t('admin.disableHint') }}</p>
         <div class="flex flex-wrap gap-2">
+          <CpButton v-if="!selected.confirmed" size="md" class="gap-2" :disabled="busy" :loading="busy && working === 'confirm'" @click="confirming = true">
+            <CpIcon :icon="CircleCheck" size="sm" />{{ t('admin.confirmEmail') }}
+          </CpButton>
           <CpButton :variant="selected.disabledAt ? 'primary' : 'outline'" size="md" :disabled="busy" :loading="busy && working === 'toggle'" @click="toggle">
             {{ selected.disabledAt ? t('admin.enable') : t('admin.disable') }}
           </CpButton>
@@ -280,6 +308,15 @@ async function remove() {
         </div>
       </template>
     </CpSidePanel>
+    <CpSheet v-if="selected" v-model:open="confirming" :title="t('admin.confirmEmailTitle')">
+      <p class="py-2">{{ t('admin.confirmEmailBody', { email: selected.email }) }}</p>
+      <template #actions>
+        <CpButton variant="ghost" size="md" @click="confirming = false">{{ t('admin.deleteCancel') }}</CpButton>
+        <CpButton size="md" class="gap-2" :disabled="busy" :loading="busy && working === 'confirm'" @click="confirmEmail">
+          <CpIcon :icon="CircleCheck" size="sm" />{{ t('admin.confirmEmail') }}
+        </CpButton>
+      </template>
+    </CpSheet>
     <CpSheet v-if="selected" v-model:open="deleting" :title="t('admin.deleteTitle')">
       <p class="py-2">{{ t('admin.deleteBody', { email: selected.email }) }}</p>
       <CpTextField v-model="typed" :label="t('admin.deleteConfirmLabel')" autocomplete="off" />
