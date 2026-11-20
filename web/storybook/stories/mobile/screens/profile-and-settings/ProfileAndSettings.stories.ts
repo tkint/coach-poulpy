@@ -18,7 +18,7 @@ import screenSettingsAppIconSheet from './settings-app-icon-sheet.html?raw'
 // The Profile and settings screens of the apps (ADR 0029), drawn with the phone stylesheet (../screens.css).
 // CLEANUP: the screens marked a11y todo carry axe findings the old mockups had (contrast of hints and past days, names of fields); fix them with the screens, then drop the todo.
 const meta = {
-  title: "Mobile/Screens/Profile and settings",
+  title: "Mobile/Screens/You/Profile sheets and body",
   tags: ['!autodocs', 'agreed'],
   parameters: { layout: 'fullscreen', mockup: {}, docs: { canvas: { sourceState: 'none' } } },
 } satisfies Meta
