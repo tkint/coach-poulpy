@@ -1247,3 +1247,5 @@
 .cp-screen .badge-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--cp-space-sm); }
 .cp-screen .badge-tile { aspect-ratio: 1; border-radius: var(--cp-radius-lg); background: var(--cp-primary-container); color: var(--cp-on-primary-container); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--cp-space-xs); padding: var(--cp-space-xs); text-align: center; font-size: 13px; line-height: 16px; font-weight: 800; }
 .cp-screen .badge-tile--locked { background: var(--cp-surface-variant); color: var(--cp-on-surface-variant); }
+.cp-screen .timeline > .day-heading { margin: 0 var(--cp-space-xs); }
+.cp-screen .timeline > .day-heading::before { display: none; }

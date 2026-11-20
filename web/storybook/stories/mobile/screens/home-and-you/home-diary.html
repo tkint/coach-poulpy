@@ -17,10 +17,13 @@
     </button>
     <span class="label label-row" style="margin-top: var(--cp-space-xs);">Past</span>
     <div class="timeline" id="past">
+      <div class="day-heading"><span class="label label--primary">This week</span></div>
       <button type="button" class="feed-card" id="week-recap"><span><strong>Your week</strong><small>4 sessions · 2 h 10 · legs most worked</small></span><MobileIcon name="chevron-right" :size="20" /></button>
-      <button type="button" class="session-row" data-component="session-row"><span class="row-icon" aria-hidden="true"><MobileIcon name="dumbbell" :size="22" /></span><span><strong>Upper body</strong><small>Thu 22 Oct · 32:10 · 15 of 15 sets</small></span></button>
+      <div class="day-heading"><span class="label">Thu 22 Oct</span></div>
+      <button type="button" class="session-row" data-component="session-row"><span class="row-icon" aria-hidden="true"><MobileIcon name="dumbbell" :size="22" /></span><span><strong>Upper body</strong><small>32:10 · 15 of 15 sets</small></span></button>
       <div class="feed-card" id="record-card"><MobileAchievement icon="award" name="First record" /><span><strong>New record</strong><small>Goblet squat, 24 kg</small></span></div>
-      <button type="button" class="session-row" data-component="session-row"><span class="row-icon" aria-hidden="true"><MobileIcon name="gauge" :size="22" /></span><span><strong>Easy run</strong><small>Tue 20 Oct · 24:00 · 3.4 km</small></span></button>
+      <div class="day-heading"><span class="label">Tue 20 Oct</span></div>
+      <button type="button" class="session-row" data-component="session-row"><span class="row-icon" aria-hidden="true"><MobileIcon name="gauge" :size="22" /></span><span><strong>Easy run</strong><small>24:00 · 3.4 km</small></span></button>
     </div>
   </div>
   <MobileNavBar active="home" destinations="three" />
