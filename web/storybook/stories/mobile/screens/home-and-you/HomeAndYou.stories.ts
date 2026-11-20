@@ -25,9 +25,9 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** Home · the diary: a slim motivation row, what is next with Start, then the past with a recap and a record between sessions. Record sits in the top bar. */
+/** Home · the diary: a slim motivation row, what is next as a tappable card, then the past with a recap and a record between sessions. Record sits in the top bar. */
 export const HomeDiary: Story = { name: 'Home, the diary', ...screen(screenHomeDiary) }
-/** Home · nothing planned: Up next suggests a short workout, with Start. */
+/** Home · nothing planned: Up next suggests a short workout, as a tappable card. */
 export const HomeDiaryNothingScheduled: Story = { name: 'Home, nothing scheduled', ...screen(screenHomeDiaryNothingScheduled) }
 /** Record · what to record: a free session, a walk or a run, or a workout from the library. */
 export const Record: Story = { name: 'Record', ...screen(screenRecord) }

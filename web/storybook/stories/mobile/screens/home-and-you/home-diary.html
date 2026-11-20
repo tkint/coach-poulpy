@@ -3,13 +3,11 @@
   <div class="page-body" style="padding-top: var(--cp-space-sm); gap: var(--cp-space-sm);">
     <MobileMotivationRow :lit="5" label="5 of 8 tentacles lit. Open achievements." picture="../../../poulpy/mood_happy.svg" picture-alt="Poulpy, happy"><MobileAchievement icon="award" name="First record" /><MobileAchievement icon="target" name="Goal met" /><MobileAchievement locked name="" /></MobileMotivationRow>
     <span class="label label-row">Up next</span>
-    <article class="card card--highlight" id="up-next" data-component="planned-workout-card" style="display: flex; flex-direction: column; gap: var(--cp-space-sm); padding: var(--cp-space-sm);">
-      <div style="display: flex; align-items: center; gap: var(--cp-space-sm);">
-        <span class="row-icon" aria-hidden="true"><MobileIcon name="dumbbell" :size="22" /></span>
-        <button type="button" class="row-text"><strong>Lower body strength</strong><span>Today · Sets · about 40 min</span></button>
-        <MobileButton size="md" icon="play">Start</MobileButton>
-      </div>
-    </article>
+    <button type="button" class="list-row card--highlight" id="up-next" data-component="list-row" style="border-radius: var(--cp-radius-lg); padding: var(--cp-space-sm); border: 1.5px solid color-mix(in srgb, var(--cp-primary) 50%, transparent);">
+      <span class="row-icon" aria-hidden="true"><MobileIcon name="dumbbell" :size="22" /></span>
+      <span class="row-text"><strong>Lower body strength</strong><span>Today · Sets · about 40 min</span></span>
+      <span class="chevron"><MobileIcon name="chevron-right" :size="20" /></span>
+    </button>
     <button type="button" class="list-row" id="tomorrow" data-component="list-row" style="border-radius: var(--cp-radius-lg); padding: var(--cp-space-sm);">
       <span class="row-icon" aria-hidden="true"><MobileIcon name="gauge" :size="22" /></span>
       <span class="row-text"><strong>Easy run</strong><span>Tomorrow · about 25 min</span></span>

@@ -3,13 +3,11 @@
   <div class="page-body" style="padding-top: var(--cp-space-sm); gap: var(--cp-space-sm);">
     <MobileMotivationRow :lit="5" label="5 of 8 tentacles lit. Open achievements." picture="../../../poulpy/mood_happy.svg" picture-alt="Poulpy, happy"><MobileAchievement icon="award" name="First record" /><MobileAchievement icon="target" name="Goal met" /><MobileAchievement locked name="" /></MobileMotivationRow>
     <span class="label label-row">Up next</span>
-    <article class="card" id="suggestion" style="display: flex; flex-direction: column; gap: var(--cp-space-sm); padding: var(--cp-space-sm);">
-      <div style="display: flex; align-items: center; gap: var(--cp-space-sm);">
-        <span class="row-icon" aria-hidden="true"><MobileIcon name="gauge" :size="22" /></span>
-        <button type="button" class="row-text"><strong>Easy run</strong><span>Nothing planned · a quick one, about 25 min</span></button>
-        <MobileButton size="md" icon="play">Start</MobileButton>
-      </div>
-    </article>
+    <button type="button" class="list-row" id="suggestion" data-component="list-row" style="border-radius: var(--cp-radius-lg); padding: var(--cp-space-sm);">
+      <span class="row-icon" aria-hidden="true"><MobileIcon name="gauge" :size="22" /></span>
+      <span class="row-text"><strong>Easy run</strong><span>Nothing planned · a quick one, about 25 min</span></span>
+      <span class="chevron"><MobileIcon name="chevron-right" :size="20" /></span>
+    </button>
     <button type="button" class="text-link" style="align-self: flex-start; margin: -4px var(--cp-space-xs) 0;">Pick something else from your library<MobileIcon name="chevron-right" :size="18" /></button>
     <span class="label label-row" style="margin-top: var(--cp-space-xs);">Past</span>
     <div class="timeline" id="past">
