@@ -5,15 +5,13 @@ import screenAccountCheckEmail from './account-check-email.html?raw'
 import screenAccountConfirmed from './account-confirmed.html?raw'
 import screenAccountDeleteError from './account-delete-error.html?raw'
 import screenAccountDelete from './account-delete.html?raw'
+import screenAccountDetailsGuest from './account-details-guest.html?raw'
 import screenAccountDetailsPending from './account-details-pending.html?raw'
 import screenAccountDetails from './account-details.html?raw'
 import screenAccountForgotPasswordSent from './account-forgot-password-sent.html?raw'
 import screenAccountForgotPassword from './account-forgot-password.html?raw'
 import screenAccountLinkExpired from './account-link-expired.html?raw'
 import screenAccountResetPassword from './account-reset-password.html?raw'
-import screenAccountSettingsGuest from './account-settings-guest.html?raw'
-import screenAccountSettingsPending from './account-settings-pending.html?raw'
-import screenAccountSettingsSynced from './account-settings-synced.html?raw'
 import screenAccountSignInError from './account-sign-in-error.html?raw'
 import screenAccountSignInMerge from './account-sign-in-merge.html?raw'
 import screenAccountSignInResetDone from './account-sign-in-reset-done.html?raw'
@@ -28,7 +26,7 @@ import screenAccountSignUp from './account-sign-up.html?raw'
 // The Accounts screens of the apps (ADR 0029), drawn with the phone stylesheet (../screens.css).
 // CLEANUP: the screens marked a11y todo carry axe findings the old mockups had (contrast of hints and past days, names of fields); fix them with the screens, then drop the todo.
 const meta = {
-  title: "Mobile/Screens/Accounts",
+  title: "Mobile/Screens/You/Accounts",
   tags: ['!autodocs', 'agreed'],
   parameters: { layout: 'fullscreen', mockup: {}, docs: { canvas: { sourceState: 'none' } } },
 } satisfies Meta
@@ -65,6 +63,11 @@ export const AccountDelete: Story = {
   ...screen(screenAccountDelete),
   parameters: { mockup: { issue: 272 } },
 }
+/** Account · account, guest: sign up or sign in, from the Account row at the top of Profile. */
+export const AccountDetailsGuest: Story = {
+  name: "Account, guest",
+  ...screen(screenAccountDetailsGuest),
+}
 /** Account · account, email not confirmed. */
 export const AccountDetailsPending: Story = {
   name: "Account, email not confirmed",
@@ -99,24 +102,6 @@ export const AccountLinkExpired: Story = {
 export const AccountResetPassword: Story = {
   name: "Choose a new password",
   ...screen(screenAccountResetPassword),
-  parameters: { mockup: { issue: 272 } },
-}
-/** Account · settings, guest. */
-export const AccountSettingsGuest: Story = {
-  name: "Settings, guest",
-  ...screen(screenAccountSettingsGuest),
-  parameters: { mockup: { issue: 272 } },
-}
-/** Account · settings, email not confirmed. */
-export const AccountSettingsPending: Story = {
-  name: "Settings, email not confirmed",
-  ...screen(screenAccountSettingsPending),
-  parameters: { mockup: { issue: 272 } },
-}
-/** Account · settings, signed in. */
-export const AccountSettingsSynced: Story = {
-  name: "Settings, signed in",
-  ...screen(screenAccountSettingsSynced),
   parameters: { mockup: { issue: 272 } },
 }
 /** Account · sign in, wrong password. */

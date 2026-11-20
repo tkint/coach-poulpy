@@ -1,15 +1,14 @@
 <script setup lang="ts">
-import { Activity, House, LibraryBig, RotateCcwClock, Settings } from '@lucide/vue'
+import { House, LibraryBig, UserRound } from '@lucide/vue'
 
-// The bottom bar of the apps' main screens: the five destinations, one of them current.
-defineProps<{ active?: 'home' | 'library' | 'live' | 'history' | 'settings' }>()
+// The bottom bar of the apps' main screens, one destination current: Home, Library and You. Live is the Record button
+// of Home's top bar, History is Home's past feed, and Settings (behind the cog) and Statistics sit under You.
+defineProps<{ active?: 'home' | 'library' | 'you' }>()
 
 const items = [
   { key: 'home', label: 'Home', icon: House },
   { key: 'library', label: 'Library', icon: LibraryBig },
-  { key: 'live', label: 'Live', icon: Activity },
-  { key: 'history', label: 'History', icon: RotateCcwClock },
-  { key: 'settings', label: 'Settings', icon: Settings },
+  { key: 'you', label: 'You', icon: UserRound },
 ] as const
 </script>
 

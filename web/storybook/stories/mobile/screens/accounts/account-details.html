@@ -1,10 +1,12 @@
 <main class="phone">
-  <MobileTopBar title="Account" leading="back" back-label="Back to settings" />
+  <MobileTopBar title="Account" leading="back" back-label="Back to profile" />
   <div class="form-body" style="padding-top: var(--cp-space-lg);">
     <div class="card account-card" id="account-email" data-component="account-card"><span class="label">Email</span><strong>alex@example.com</strong></div>
     <div class="sync-state" id="sync-state" role="status"><span class="dot" aria-hidden="true"></span><span><strong>Up to date</strong><small>Last synced 2 minutes ago</small></span></div>
     <section class="card" id="follows" data-component="info-card"><h2 class="headline" style="font-size: 17px; line-height: 22px;">What follows your account</h2><p class="muted" style="font-size: 14px; line-height: 20px; margin-top: 4px;">Workouts, plans and sessions, your profile and body log, units and language. Theme, app icon and paired devices stay on each phone.</p></section>
     <div class="settings-list" id="data">
+      <MobileSettingsRow icon="key-round" title="Password" detail="Change it" />
+      <MobileSettingsRow icon="smartphone" title="Signed-in devices" detail="This phone, Ana’s iPhone" />
       <MobileSettingsRow icon="download" title="Export my data" detail="JSON, and your sessions as FIT files" />
     </div>
     <div class="leave-actions">

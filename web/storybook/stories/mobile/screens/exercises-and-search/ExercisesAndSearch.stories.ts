@@ -16,7 +16,7 @@ import screenExercisesZones from './exercises-zones.html?raw'
 // The Exercises and search screens of the apps (ADR 0029), drawn with the phone stylesheet (../screens.css).
 // CLEANUP: the screens marked a11y todo carry axe findings the old mockups had (contrast of hints and past days, names of fields); fix them with the screens, then drop the todo.
 const meta = {
-  title: "Mobile/Screens/Exercises and search",
+  title: "Mobile/Screens/Library/Exercises and search",
   tags: ['!autodocs', 'agreed'],
   parameters: { layout: 'fullscreen', mockup: {}, docs: { canvas: { sourceState: 'none' } } },
 } satisfies Meta

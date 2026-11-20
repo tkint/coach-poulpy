@@ -1,12 +1,13 @@
 <main class="phone">
-  <iframe class="base-screen" src="iframe.html?id=mobile-screens-session-recap--session-recap-sets-full&amp;viewMode=story&amp;embedded" title="Session recap, behind" aria-hidden="true" tabindex="-1" inert></iframe>
+  <iframe class="base-screen" src="iframe.html?id=mobile-screens-home-sessions-session-recap--session-recap-sets-full&amp;viewMode=story&amp;embedded" title="Session recap, behind" aria-hidden="true" tabindex="-1" inert></iframe>
   <div class="scrim"></div>
-  <MobileSheet id="share-sheet" aria-label="Share this session">
-    <span class="sheet-handle"></span>
-    <div class="sheet-title"><h2>Share this session</h2><p>Pick a format.</p></div>
-    <div class="option-list">
-      <MobileOptionRow icon="download" hint="Save it, then import it on the Garmin Connect or Strava website">.FIT file</MobileOptionRow>
-      <MobileOptionRow icon="image" hint="A card with your numbers to send or post">Image</MobileOptionRow>
+  <MobileSheet id="share-sheet" aria-label="Share this session" style="gap: var(--cp-space-sm);">
+    <span class="sheet-handle" aria-hidden="true"></span>
+    <div class="sheet-head" style="padding: 0;">
+      <div class="sheet-title" style="flex: 1;"><h2>Share this session</h2><p>Pick a format.</p></div>
+      <button type="button" class="icon-button" aria-label="Close"><MobileIcon name="x" :size="22" /></button>
     </div>
+    <MobileSettingsRow card icon="download" title=".FIT file" detail="Save it, then import it on the Garmin Connect or Strava website" />
+    <MobileSettingsRow card icon="image" title="Image" detail="A card with your numbers to send or post" />
   </MobileSheet>
 </main>

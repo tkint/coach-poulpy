@@ -1,0 +1,40 @@
+<main class="phone">
+  <MobileTopBar title="Home"><MobileButton size="sm" icon="circle-dot">Record</MobileButton></MobileTopBar>
+  <div class="page-body" style="padding-top: var(--cp-space-sm); gap: var(--cp-space-sm);">
+    <MobileMotivationRow :lit="5" label="5 of 8 tentacles lit. Open achievements." picture="../../../poulpy/mood_happy.svg" picture-alt="Poulpy, happy"><MobileAchievement icon="award" name="First record" /><MobileAchievement icon="target" name="Goal met" /><MobileAchievement locked name="" /></MobileMotivationRow>
+    <span class="label label-row">Up next</span>
+    <button type="button" class="list-row card--highlight" id="up-next" data-component="list-row" style="border-radius: var(--cp-radius-lg); padding: var(--cp-space-sm); border: 1.5px solid color-mix(in srgb, var(--cp-primary) 50%, transparent);">
+      <span class="row-icon" aria-hidden="true"><MobileIcon name="dumbbell" :size="22" /></span>
+      <span class="row-text"><strong>Lower body strength</strong><span>Today · Sets · about 40 min</span></span>
+      <span class="chevron"><MobileIcon name="chevron-right" :size="20" /></span>
+    </button>
+    <button type="button" class="list-row" id="tomorrow" data-component="list-row" style="border-radius: var(--cp-radius-lg); padding: var(--cp-space-sm);">
+      <span class="row-icon" aria-hidden="true"><MobileIcon name="gauge" :size="22" /></span>
+      <span class="row-text"><strong>Easy run</strong><span>Tomorrow · about 25 min</span></span>
+      <span class="chevron"><MobileIcon name="chevron-right" :size="20" /></span>
+    </button>
+    <span class="label label-row" style="margin-top: var(--cp-space-xs);">Past</span>
+    <div class="timeline" id="past">
+      <div class="day-heading"><span class="label label--primary">This week</span></div>
+      <button type="button" class="feed-card" id="week-recap"><span><strong>Your week</strong><small>4 sessions · 2 h 10 · legs most worked</small></span><MobileIcon name="chevron-right" :size="20" /></button>
+      <div class="day-heading"><span class="label">Thu 22 Oct</span></div>
+      <button type="button" class="session-row" data-component="session-row"><span class="row-icon" aria-hidden="true"><MobileIcon name="dumbbell" :size="22" /></span><span><strong>Upper body</strong><small>32:10 · 15 of 15 sets</small></span></button>
+      <div class="feed-card" id="record-card"><MobileAchievement icon="award" name="First record" /><span><strong>New record</strong><small>Goblet squat, 24 kg</small></span></div>
+      <div class="day-heading"><span class="label">Tue 20 Oct</span></div>
+      <button type="button" class="session-row" data-component="session-row"><span class="row-icon" aria-hidden="true"><MobileIcon name="gauge" :size="22" /></span><span><strong>Easy run</strong><small>24:00 · 3.4 km</small></span></button>
+    </div>
+  </div>
+  <MobileNavBar active="home" />
+
+  <div class="scrim" aria-hidden="true"></div>
+  <MobileSheet id="record-choice" aria-label="What are you recording?" style="gap: var(--cp-space-sm);">
+    <span class="sheet-handle" aria-hidden="true"></span>
+    <div class="sheet-head" style="padding: 0;">
+      <div class="sheet-title" style="flex: 1;"><h2>What are you recording?</h2><p>Pick one to start.</p></div>
+      <button type="button" class="icon-button" aria-label="Close"><MobileIcon name="x" :size="22" /></button>
+    </div>
+    <MobileSettingsRow card icon="dumbbell" title="Free session" detail="Log exercises and sets as you go" />
+    <MobileSettingsRow card icon="gauge" title="Walk or run" detail="Follow it live, with your phone or a treadmill" />
+    <MobileSettingsRow card icon="library-big" title="A workout from your library" detail="Pick one and follow its steps" />
+  </MobileSheet>
+</main>

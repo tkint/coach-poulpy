@@ -70,4 +70,4 @@ When two phones change the same thing, the rules are simple:
 
 ## Screens
 
-The agreed screens are in the [component workshop](https://tkint.github.io/coach-poulpy/storybook/?path=/docs/mobile-screens-accounts--docs), under Mobile → Screens → Accounts. They own the layout and the copy. This page owns the rules.
+The agreed screens are in the [component workshop](https://tkint.github.io/coach-poulpy/storybook/?path=/docs/mobile-screens-you-accounts--docs), under Mobile → Screens → You → Accounts. They own the layout and the copy. This page owns the rules.

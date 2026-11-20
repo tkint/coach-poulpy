@@ -1,6 +1,6 @@
 # Profile and settings
 
-This page defines the profile fields, body-measurement history, units and pain or rehab behavior. The agreed screen layouts and states live in the [component workshop](https://tkint.github.io/coach-poulpy/storybook/?path=/docs/mobile-screens-profile-and-settings--docs), rather than being repeated here ([ADR 0029](./adr/0029-mockups-are-stories-in-the-component-workshop.md)). Wording rules are in [Inclusive by default](https://tkint.github.io/coach-poulpy/storybook/?path=/docs/brand-inclusive-by-default--docs).
+This page defines the profile fields, body-measurement history, units and pain or rehab behavior. The agreed screen layouts and states live in the [component workshop](https://tkint.github.io/coach-poulpy/storybook/?path=/docs/mobile-screens-you-profile-sheets-and-body--docs), rather than being repeated here ([ADR 0029](./adr/0029-mockups-are-stories-in-the-component-workshop.md)). Wording rules are in [Inclusive by default](https://tkint.github.io/coach-poulpy/storybook/?path=/docs/brand-inclusive-by-default--docs).
 
 ## Profile fields
 

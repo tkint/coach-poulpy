@@ -107,7 +107,7 @@
   align-items: center;
   justify-content: center;
 }
-.cp-screen .button .button-content { padding: 0 var(--cp-space-lg); }
+.cp-screen .button .button-content { padding: 0 var(--cp-space-lg); display: inline-flex; align-items: center; justify-content: center; gap: var(--cp-space-sm); }
 .cp-screen .button::after { content: ""; position: absolute; inset: 50% 0 auto; height: max(100%, 44px); transform: translateY(-50%); }
 .cp-screen .button[data-size="xs"] { --button-height: var(--cp-control-xs); font-size: 12px; }
 .cp-screen .button[data-size="sm"] { --button-height: var(--cp-control-sm); font-size: 14px; }
@@ -339,7 +339,7 @@
   background: var(--cp-surface);
   border-top: 1px solid var(--cp-outline);
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 2px;
   flex: none;
 }
@@ -819,6 +819,8 @@
 .cp-screen .day--active { font-weight: 800; background: var(--cp-primary); color: var(--cp-on-primary); }
 .cp-screen .day--today::after { background: var(--cp-primary); }
 .cp-screen .day--active.day--today::after { background: var(--cp-on-primary); }
+.cp-screen button.day { border: 0; padding: 0; font-family: inherit; cursor: pointer; }
+.cp-screen button.day:not(.day--active) { background: transparent; }
 .cp-screen .day--selected { box-shadow: 0 0 0 2px var(--cp-surface), 0 0 0 4px var(--cp-on-primary-container); }
 .cp-screen .day-list { flex: 1; min-height: 0; overflow: hidden; padding: var(--cp-space-md) var(--cp-space-lg) 0; display: flex; flex-direction: column; gap: var(--cp-space-sm); -webkit-mask-image: linear-gradient(#000 85%, transparent); mask-image: linear-gradient(#000 85%, transparent); }
 .cp-screen .day-heading { display: flex; align-items: center; gap: var(--cp-space-sm); margin: 6px var(--cp-space-xs) 0; }
@@ -1168,3 +1170,65 @@
 .cp-screen .repeat-header .repeat-title strong { font-size: 13px; line-height: 16px; }
 .cp-screen .repeat-header .repeat-title:focus-visible { outline: 3px solid var(--cp-primary); outline-offset: 2px; }
 .cp-screen .repeat .block-empty { min-height: 44px; padding: var(--cp-space-sm) var(--cp-space-md); text-align: center; color: var(--cp-on-surface-variant); }
+
+/* ---------- Home and You (draft) ---------- */
+
+/* The new bottom bar: Home, Library, You. */
+
+/* Home's motivation row: a small Poulpy, eight segments, the latest achievements, a chevron. One row, never a card. */
+.cp-screen .motivation-row { min-height: 48px; padding: 0 var(--cp-space-sm) 0 var(--cp-space-xs); display: flex; align-items: center; gap: var(--cp-space-sm); border-radius: var(--cp-radius-pill); background: var(--cp-surface); border: 1px solid var(--cp-outline); color: var(--cp-on-surface-variant); text-align: start; }
+.cp-screen .motivation-row img { flex: none; width: 36px; height: 32px; margin-left: 4px; }
+.cp-screen .motivation-row .segments { flex: 1; min-width: 40px; display: flex; gap: 3px; }
+.cp-screen .motivation-row .segments i { flex: 1; height: 8px; border-radius: 4px; background: color-mix(in srgb, var(--cp-on-primary-container) 18%, transparent); }
+.cp-screen .motivation-row .segments i.lit { background: var(--cp-primary); }
+.cp-screen .motivation-row .achievements { display: flex; gap: var(--cp-space-xs); }
+
+/* An achievement: a round token, earned in primary, locked as a quiet "?". */
+.cp-screen .achievement { width: 28px; height: 28px; flex: none; border-radius: var(--cp-radius-pill); display: inline-flex; align-items: center; justify-content: center; background: var(--cp-primary-container); color: var(--cp-on-primary-container); }
+.cp-screen .achievement--locked { background: var(--cp-surface-variant); color: var(--cp-on-surface-variant); }
+.cp-screen .achievement--lg { width: 64px; height: 64px; }
+
+/* Home's past feed: a recap or a record between sessions. */
+.cp-screen .feed-card { border-radius: var(--cp-radius-lg); background: var(--cp-primary-container); color: var(--cp-on-primary-container); padding: var(--cp-space-md); display: flex; align-items: center; gap: var(--cp-space-md); text-align: start; }
+.cp-screen .feed-card > span:not(.achievement) { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.cp-screen .feed-card small { font-size: 14px; line-height: 19px; font-weight: 700; }
+.cp-screen .feed-card .text-link { color: inherit; margin: 0; }
+
+.cp-screen .count-dots { display: flex; justify-content: center; gap: 6px; }
+.cp-screen .count-dots i { width: 14px; height: 14px; border-radius: var(--cp-radius-pill); background: color-mix(in srgb, var(--cp-on-primary-container) 18%, transparent); }
+.cp-screen .count-dots i.lit { background: var(--cp-primary); }
+
+/* You: the profile card's small badge (Guest, Confirm your email, Signed in). */
+.cp-screen .account-badge { align-self: flex-start; margin-top: 2px; height: 22px; padding: 0 var(--cp-space-sm); border-radius: var(--cp-radius-pill); display: inline-flex; align-items: center; gap: 4px; font-size: 12.5px; line-height: 16px; font-weight: 800; background: color-mix(in srgb, var(--cp-on-primary-container) 12%, transparent); color: inherit; }
+.cp-screen .account-badge--signed-in { background: var(--cp-primary); color: var(--cp-on-primary); }
+.cp-screen .section-head { display: flex; align-items: center; justify-content: space-between; margin: 6px var(--cp-space-xs) 0; }
+.cp-screen .section-head .label { color: var(--cp-on-surface-variant); }
+.cp-screen .period-tabs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); padding: var(--cp-space-xs); border-radius: var(--cp-radius-pill); background: var(--cp-surface-variant); }
+.cp-screen .period-tabs button { height: 36px; border-radius: var(--cp-radius-pill); font-size: 14px; font-weight: 800; color: var(--cp-on-surface-variant); white-space: nowrap; }
+.cp-screen .period-tabs button[aria-selected="true"] { background: var(--cp-surface); color: var(--cp-on-primary-container); box-shadow: 0 1px 3px color-mix(in srgb, var(--cp-poulpy-ink) 18%, transparent); }
+.cp-screen .block-toggle { display: flex; align-items: center; gap: var(--cp-space-sm); min-height: 56px; padding: 0 var(--cp-space-md) 0 var(--cp-space-sm); border-radius: var(--cp-radius-md); background: var(--cp-surface); border: 1px solid var(--cp-outline); }
+.cp-screen .block-toggle .grip { color: var(--cp-on-surface-variant); }
+.cp-screen .block-toggle strong { flex: 1; font-size: 16px; }
+.cp-screen .block-toggle .switch { width: 44px; height: 26px; border-radius: var(--cp-radius-pill); background: var(--cp-outline); position: relative; flex: none; }
+.cp-screen .block-toggle .switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: var(--cp-surface); }
+.cp-screen .block-toggle .switch[aria-checked="true"] { background: var(--cp-primary); }
+.cp-screen .block-toggle .switch[aria-checked="true"]::after { left: 21px; background: var(--cp-on-primary); }
+
+/* Home's past feed as a timeline: a quiet line down the left, a dot at each session, recap or record. */
+.cp-screen .feed-scroll { flex: 1; min-height: 0; overflow: hidden; -webkit-mask-image: linear-gradient(#000 88%, transparent); mask-image: linear-gradient(#000 88%, transparent); }
+.cp-screen .timeline { position: relative; display: flex; flex-direction: column; gap: var(--cp-space-sm); padding-left: var(--cp-space-xl); }
+.cp-screen .timeline::before { content: ""; position: absolute; left: 7px; top: 12px; bottom: 12px; width: 2px; border-radius: 1px; background: var(--cp-outline); }
+.cp-screen .timeline > * { position: relative; }
+.cp-screen .timeline > *::before { content: ""; position: absolute; left: calc(-1 * var(--cp-space-xl) + 2px); top: 50%; width: 12px; height: 12px; margin-top: -6px; border-radius: 50%; background: var(--cp-primary); border: 2px solid var(--cp-background); box-sizing: content-box; transform: translate(-2px, 0); }
+.cp-screen .timeline > .session-row::before { background: var(--cp-outline); }
+
+/* Achievements (draft): Poulpy and the count on top, then the badges as squares. */
+.cp-screen .achievements-hero { display: flex; flex-direction: column; align-items: center; gap: var(--cp-space-xs); text-align: center; padding: 0 0 var(--cp-space-sm); margin-top: -18px; }
+.cp-screen .achievements-hero h2 { font: var(--cp-type-headline); }
+.cp-screen .achievements-hero p { font-size: 15px; line-height: 20px; color: var(--cp-on-surface-variant); }
+.cp-screen .achievements-hero .count-dots { margin-top: var(--cp-space-sm); }
+.cp-screen .badge-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--cp-space-sm); }
+.cp-screen .badge-tile { aspect-ratio: 1; border-radius: var(--cp-radius-lg); background: var(--cp-primary-container); color: var(--cp-on-primary-container); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--cp-space-xs); padding: var(--cp-space-xs); text-align: center; font-size: 13px; line-height: 16px; font-weight: 800; }
+.cp-screen .badge-tile--locked { background: var(--cp-surface-variant); color: var(--cp-on-surface-variant); }
+.cp-screen .timeline > .day-heading { margin: 0 var(--cp-space-xs); }
+.cp-screen .timeline > .day-heading::before { display: none; }

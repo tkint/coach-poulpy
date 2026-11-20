@@ -1,0 +1,23 @@
+<main class="phone" style="--frame-height: 910px;">
+  <MobileTopBar title="Achievements" leading="back" />
+  <div class="page-body" style="padding-top: 0;">
+    <section class="achievements-hero" id="ring" aria-label="5 of 8 tentacles lit">
+      <MobilePoulpyMood label="Poulpy, happy" :size="200" />
+      <h2>5 of 8 tentacles lit</h2>
+      <p>Three more sessions and I turn into a champion.</p>
+      <div class="count-dots" aria-hidden="true"><i class="lit"></i><i class="lit"></i><i class="lit"></i><i class="lit"></i><i class="lit"></i><i></i><i></i><i></i></div>
+    </section>
+    <span class="label label-row">Badges</span>
+    <div class="badge-grid" id="badges">
+      <div class="badge-tile"><MobileIcon name="award" :size="30" /><span>First record</span></div>
+      <div class="badge-tile"><MobileIcon name="target" :size="30" /><span>Goal met</span></div>
+      <div class="badge-tile"><MobileIcon name="footprints" :size="30" /><span>First walk</span></div>
+      <div class="badge-tile"><MobileIcon name="calendar" :size="30" /><span>Four weeks</span></div>
+      <div class="badge-tile badge-tile--locked" role="img" aria-label="Locked badge"><MobileIcon name="circle-question-mark" :size="30" /></div>
+      <div class="badge-tile badge-tile--locked" role="img" aria-label="Locked badge"><MobileIcon name="circle-question-mark" :size="30" /></div>
+    </div>
+    <span class="label label-row">Goal</span>
+    <section class="card progress-card" id="goal"><strong>3 sessions a week</strong><div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="3" aria-valuenow="2" aria-label="2 of 3 sessions this week"><span style="width: 66%;"></span></div><small>2 of 3 this week</small></section>
+  </div>
+  <MobileNavBar active="home" />
+</main>
