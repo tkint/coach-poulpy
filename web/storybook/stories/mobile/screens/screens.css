@@ -113,7 +113,7 @@
   align-items: center;
   justify-content: center;
 }
-.cp-screen .button .button-content { padding: 0 var(--cp-space-lg); }
+.cp-screen .button .button-content { padding: 0 var(--cp-space-lg); display: inline-flex; align-items: center; justify-content: center; gap: var(--cp-space-sm); }
 .cp-screen .button::after { content: ""; position: absolute; inset: 50% 0 auto; height: max(100%, 44px); transform: translateY(-50%); }
 .cp-screen .button[data-size="xs"] { --button-height: var(--cp-control-xs); font-size: 12px; }
 .cp-screen .button[data-size="sm"] { --button-height: var(--cp-control-sm); font-size: 14px; }
@@ -1235,3 +1235,10 @@
 .cp-screen .block-toggle .switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: var(--cp-surface); }
 .cp-screen .block-toggle .switch[aria-checked="true"] { background: var(--cp-primary); }
 .cp-screen .block-toggle .switch[aria-checked="true"]::after { left: 21px; background: var(--cp-on-primary); }
+
+/* Home's past feed as a timeline: a quiet line down the left, a dot at each session, recap or record. */
+.cp-screen .timeline { position: relative; display: flex; flex-direction: column; gap: var(--cp-space-sm); padding-left: var(--cp-space-xl); }
+.cp-screen .timeline::before { content: ""; position: absolute; left: 7px; top: 12px; bottom: 12px; width: 2px; border-radius: 1px; background: var(--cp-outline); }
+.cp-screen .timeline > * { position: relative; }
+.cp-screen .timeline > *::before { content: ""; position: absolute; left: calc(-1 * var(--cp-space-xl) + 2px); top: 50%; width: 12px; height: 12px; margin-top: -6px; border-radius: 50%; background: var(--cp-primary); border: 2px solid var(--cp-background); box-sizing: content-box; transform: translate(-2px, 0); }
+.cp-screen .timeline > .session-row::before { background: var(--cp-outline); }
