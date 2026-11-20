@@ -1,0 +1,8 @@
+import{n as e}from"./rolldown-runtime-sJBDdmOt.js";import{_ as t,h as n,n as r}from"./iframe-CaaPvKd2.js";var i;function a(){return(a=e((()=>{i="`CpStats` and `CpStat`: a row of figures, stacked on a phone. `vertical` keeps them stacked, for a narrow column beside other content (the workout page).\n\n| Vue | Classes |\n| --- | --- |\n| `<CpStats>` | `cp-stats cp-stats-vertical md:cp-stats-horizontal bg-base-100 shadow-sm` (`cp-stats cp-stats-vertical` with `vertical`) |\n| `<CpStat>` | `cp-stat` with `cp-stat-title`, `cp-stat-value` (`text-primary` with `accent`) and `cp-stat-desc` |\n"})))()}var o,s,c,l;function u(){return(u=e((()=>{r(),a(),o={title:`Web/Components/Display/Stats`,parameters:{docs:{description:{component:i}}},component:n,render:e=>({components:{CpStats:n,CpStat:t},setup:()=>({args:e}),template:`<CpStats v-bind="args">
+      <CpStat title="Sessions" value="12" description="this month" />
+      <CpStat title="Streak" value="4 days" accent />
+    </CpStats>`})},s={},c={args:{vertical:!0}},l=[`Horizontal`,`Vertical`],s.parameters={...s.parameters,docs:{...s.parameters?.docs,source:{originalSource:`{}`,...s.parameters?.docs?.source}}},c.parameters={...c.parameters,docs:{...c.parameters?.docs,source:{originalSource:`{
+  args: {
+    vertical: true
+  }
+}`,...c.parameters?.docs?.source}}}})))()}u();export{s as Horizontal,c as Vertical,l as __namedExportsOrder,o as default};
