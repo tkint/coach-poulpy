@@ -6,9 +6,7 @@ import screenLiveMixedPlayerNoTreadmill from './live-mixed-player-no-treadmill.h
 import screenLiveMixedPlayerPaused from './live-mixed-player-paused.html?raw'
 import screenLiveMixedPlayerStrength from './live-mixed-player-strength.html?raw'
 import screenLiveMixedPlayerWaitsForBelt from './live-mixed-player-waits-for-belt.html?raw'
-import screenLivePicker from './live-picker.html?raw'
 import screenLiveReady from './live-ready.html?raw'
-import screenLiveSummary from './live-summary.html?raw'
 import screenLiveWaiting from './live-waiting.html?raw'
 
 // The Live screens of the apps (ADR 0029), drawn with the phone stylesheet (../screens.css).
@@ -57,22 +55,10 @@ export const LiveMixedPlayerWaitsForBelt: Story = {
   ...screen(screenLiveMixedPlayerWaitsForBelt),
   parameters: { mockup: { issue: 82 } },
 }
-/** Live · what are you doing?. */
-export const LivePicker: Story = {
-  name: "What are you doing?",
-  ...screen(screenLivePicker),
-  parameters: { mockup: { issue: 104 } },
-}
 /** Live · ready. */
 export const LiveReady: Story = {
   name: "Ready",
   ...screen(screenLiveReady),
-  parameters: { mockup: { issue: 104 } },
-}
-/** Live · summary. */
-export const LiveSummary: Story = {
-  name: "Summary",
-  ...screen(screenLiveSummary),
   parameters: { mockup: { issue: 104 } },
 }
 /** Live · waiting for the treadmill. */

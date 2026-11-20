@@ -6,10 +6,14 @@
     <span class="label label-row" style="margin-top: var(--cp-space-sm);">Region</span>
     <div class="field" id="language"><MobileSelectField label="Language" value="System" /></div>
     <div class="field" id="units"><MobileSelectField label="Units" value="Metric" /><span class="field-note">Metric: km, km/h, kg, cm. Imperial: mi, mph, lb, ft and in. Weight and height you logged are converted, never changed.</span></div>
-    <span class="label label-row" style="margin-top: var(--cp-space-sm);">Devices</span>
+    <span class="label label-row" style="margin-top: var(--cp-space-sm);">App</span>
     <div class="settings-list" id="app">
       <MobileSettingsRow icon="gauge" title="Devices" detail="3 connected · treadmill, foot pod, heart rate band" />
+      <MobileSettingsRow id="app-icon" picture="../../../poulpy/mood_happy.svg" title="App icon" detail="Happy · default" />
     </div>
-    <span class="field-note">Reached from the cog on You.</span>
+    <span class="label label-row" style="margin-top: var(--cp-space-sm);">About</span>
+    <div class="settings-list" id="about">
+      <MobileSettingsRow icon="info" title="About Coach Poulpy" detail="Version 0.1 · data stays on this phone" />
+    </div>
   </div>
 </main>

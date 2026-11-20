@@ -8,6 +8,8 @@ import screenWorkoutPageDetails from './workout-page-details.html?raw'
 import screenWorkoutPagePain from './workout-page-pain.html?raw'
 import screenWorkoutPagePlanned from './workout-page-planned.html?raw'
 import screenWorkoutPlan from './workout-plan.html?raw'
+import screenWorkoutPageExerciseDetailsFull from './workout-page-exercise-details-full.html?raw'
+import screenWorkoutPageExerciseDetails from './workout-page-exercise-details.html?raw'
 
 // The Workout page screens of the apps (ADR 0029), drawn with the phone stylesheet (../screens.css).
 // CLEANUP: the screens marked a11y todo carry axe findings the old mockups had (contrast of hints and past days, names of fields); fix them with the screens, then drop the todo.
@@ -66,4 +68,16 @@ export const WorkoutPlan: Story = {
   name: "Plan days",
   ...screen(screenWorkoutPlan),
   parameters: { a11y: { test: 'todo' }, mockup: { issue: 104 } },
+}
+/** Workout page · exercise sheet, pulled up. */
+export const WorkoutPageExerciseDetailsFull: Story = {
+  name: "Exercise sheet, pulled up",
+  ...screen(screenWorkoutPageExerciseDetailsFull),
+  parameters: { mockup: { issue: 359 } },
+}
+/** Workout page · exercise sheet. */
+export const WorkoutPageExerciseDetails: Story = {
+  name: "Exercise sheet",
+  ...screen(screenWorkoutPageExerciseDetails),
+  parameters: { mockup: { issue: 359 } },
 }
