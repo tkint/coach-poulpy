@@ -1,9 +1,7 @@
 <main class="phone" style="--frame-height: 1120px">
-<div class="screen-header" style="padding-top: 48px; padding-bottom: var(--cp-space-sm); gap: var(--cp-space-md);">
-    <div style="display: flex; align-items: center; gap: var(--cp-space-xs); margin-left: -8px;">
-      <button type="button" class="icon-button" aria-label="Back to the workout"><MobileIcon name="chevron-left" :size="22" /></button>
-      <div style="display: flex; flex-direction: column;"><h1 class="headline">Pick an exercise</h1><span class="muted" style="font-size: 13.5px; line-height: 18px; font-weight: 700;">For Lower body strength · Strength</span></div>
-    </div>
+<MobileTopBar title="Pick an exercise" leading="back" />
+<div class="screen-header" style="padding-top: 0; padding-bottom: var(--cp-space-sm); gap: var(--cp-space-md);">
+    <span class="muted" style="font-size: 13.5px; line-height: 18px; font-weight: 700;">For Lower body strength · Strength</span>
     <MobileSearchField label="Search exercises" placeholder="Name, muscle, mobility or floor" />
     <div class="chip-row" role="group" aria-label="Filters">
       <MobileFilterChip icon="dumbbell" aria-haspopup="dialog" aria-label="Equipment" style="padding: 0 var(--cp-space-md); min-width: 48px;" />

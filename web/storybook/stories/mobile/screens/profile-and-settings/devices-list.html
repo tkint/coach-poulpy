@@ -1,6 +1,6 @@
 <main class="phone">
 
-  <header class="page-bar"><button type="button" class="icon-button" aria-label="Back to settings"><MobileIcon name="chevron-left" :size="22" /></button><div><h1>Devices</h1></div><button type="button" class="header-add-button" aria-label="Add a device"><MobileIcon name="plus" /></button></header>
+  <MobileTopBar title="Devices" leading="back" back-label="Back to settings"><MobileIconButton icon="plus" :icon-size="22" filled aria-label="Add a device" /></MobileTopBar>
   <div class="settings-body" style="padding-top: var(--cp-space-lg);">
     <span class="label label-row">Your devices</span>
     <button type="button" class="device-row" data-component="device-row"><span class="device-icon" aria-hidden="true"><MobileIcon name="gauge" /><span class="presence"></span></span><span class="device-text"><strong>Home treadmill</strong><span class="state">Connected</span><small>Speed, distance, incline, energy</small></span><span class="chevron-right"><MobileIcon name="chevron-right" :size="22" /></span></button>

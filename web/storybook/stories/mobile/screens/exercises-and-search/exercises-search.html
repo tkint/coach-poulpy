@@ -1,6 +1,6 @@
 <main class="phone">
-<div class="screen-header" style="padding-bottom: var(--cp-space-sm); gap: var(--cp-space-md);">
-    <h1>Library</h1>
+<MobileTopBar title="Library" />
+<div class="screen-header" style="padding-top: 0; padding-bottom: var(--cp-space-sm); gap: var(--cp-space-md);">
     <MobileTabs aria-label="Library" :tabs="['Workouts', 'Exercises']" selected="Exercises" />
     <MobileSearchField label="Search exercises" placeholder="Name, muscle, mobility or floor" value="dumbbell" />
     <div class="chip-row" role="group" aria-label="Filters">

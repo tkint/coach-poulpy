@@ -1,6 +1,7 @@
 <main class="phone">
 
-  <header class="page-bar"><button type="button" class="icon-button" aria-label="Back to settings"><MobileIcon name="chevron-left" :size="22" /></button><div><h1>Weight</h1><span class="muted">Nothing logged yet</span></div><MobileButton size="sm">Log</MobileButton></header>
+  <MobileTopBar title="Weight" leading="back" back-label="Back to settings"><MobileButton size="sm">Log</MobileButton></MobileTopBar>
+  <p class="app-bar-sub">Nothing logged yet</p>
   <div class="settings-body" style="padding-top: var(--cp-space-lg); gap: var(--cp-space-md);">
     <section class="empty-card" id="weight-empty" data-component="empty-card" aria-label="No weight yet">
       <img src="../../../poulpy/mood_happy.svg" alt="Poulpy, happy">
