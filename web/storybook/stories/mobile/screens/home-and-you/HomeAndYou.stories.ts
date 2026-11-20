@@ -43,7 +43,7 @@ export const YouSignedIn: Story = { name: 'You, signed in', ...screen(screenYouS
 export const YouEditStatistics: Story = { name: 'Edit statistics', ...screen(screenYouEditStatistics) }
 /** Settings · Appearance, Region (language and units) and Devices, all on the page, reached from the cog on You. */
 export const Settings: Story = { name: 'Settings', ...screen(screenSettings) }
-/** Profile · a guest: Account on top (Create an account, Sign in), then about you with a Poulpy face, training and body. */
+/** Profile · a guest: one Account row on top (it opens Create an account and Sign in), then about you with a Poulpy face, training and body. */
 export const Profile: Story = { name: 'Profile, guest', ...screen(screenProfile) }
-/** Profile · signed in: the Account section holds email, password, devices, export, sign out and delete. */
+/** Profile · signed in: one Account row at the top, showing the email; it opens the existing account screen (password, devices, export, sign out, delete). */
 export const ProfileSignedIn: Story = { name: 'Profile, signed in', ...screen(screenProfileSignedIn) }

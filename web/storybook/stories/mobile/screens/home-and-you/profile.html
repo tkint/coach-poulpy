@@ -1,6 +1,9 @@
-<main class="phone" style="--frame-height: 1600px;">
+<main class="phone" style="--frame-height: 1460px;">
   <MobileTopBar title="Profile" leading="back" />
   <div class="form-body" style="padding-top: var(--cp-space-lg);">
+    <div id="account-list">
+      <MobileSettingsRow card icon="user-round" title="Account" detail="Guest · create an account or sign in" />
+    </div>
     <span class="label label-row">About you</span>
     <div class="field" id="name"><label class="label" for="display-name">What should Poulpy call you?</label><input class="text-field" id="display-name" value="Alex"></div>
     <MobileSelectField label="Poulpy face" value="Happy" id="face" />
@@ -20,11 +23,5 @@
     <MobileSelectField label="Pain or rehab" value="Left knee, left hip · until 4 Nov" id="pain-or-rehab" />
     <span class="field-note">Poulpy stays on the blue side until then. With nothing set, this row says None.</span>
     <MobilePoulpyCard id="patched-up-note" title="Taking it easy"><template #art><img src="../../../poulpy/pose_patched_up.svg" alt="" width="71" height="64"></template>Poulpy is patched up with you until 4 Nov. No catching up, just rest.</MobilePoulpyCard>
-    <span class="label label-row" style="margin-top: var(--cp-space-sm);">Account</span>
-    <span class="field-note">You are a guest: your training is on this phone only.</span>
-    <div class="settings-list" id="account-list">
-      <MobileSettingsRow icon="circle-plus" title="Create an account" detail="Back up your training and use it on other phones." />
-      <MobileSettingsRow icon="log-in" title="Sign in" detail="Already have an account?" />
-    </div>
   </div>
 </main>
