@@ -16,5 +16,5 @@ export const Library: Story = { args: { active: 'library' } }
 export const Live: Story = { args: { active: 'live' } }
 export const History: Story = { args: { active: 'history' } }
 export const Settings: Story = { args: { active: 'settings' } }
-/** The new bar (draft): Home, Library and You; Live is Home's Record button. */
-export const Three: Story = { tags: ['draft'], args: { active: 'you', destinations: 'three' } }
+/** The new bar: Home, Library and You; Live is Home's Record button. */
+export const Three: Story = { tags: ['agreed'], args: { active: 'you', destinations: 'three' } }

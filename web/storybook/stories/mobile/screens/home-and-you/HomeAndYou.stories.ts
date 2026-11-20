@@ -12,14 +12,14 @@ import screenYouGuest from './you-guest.html?raw'
 import screenYouPending from './you-pending.html?raw'
 import screenYouSignedIn from './you-signed-in.html?raw'
 
-// The new Home, You and profile screens (draft), on the compact top bar (draft) and the three-destination bar:
+// The new Home, You and profile screens, on the compact top bar and the three-destination bar:
 // Home · Library · You. Home is the diary (what is next, then the past), Live becomes the Record button in its bar,
 // Statistics sit on You under the profile card, and Settings sits behind the cog. Nothing is built until a
 // PR agrees them.
 // CLEANUP: these screens draw six Lucide icons the apps don't have yet (award, circle-plus, circle-question-mark, key-round, ruler, smartphone). Run `node design/build-icons.mjs --add award circle-plus circle-question-mark key-round ruler smartphone` when the screens are agreed; it needs network access to jsdelivr, which this session's sandbox blocked. They replace the History, You and Settings drafts of #511 and #512 where they overlap.
 const meta = {
   title: 'Mobile/Screens/Home and You',
-  tags: ['!autodocs', 'draft'],
+  tags: ['!autodocs', 'agreed'],
   parameters: { layout: 'fullscreen', mockup: {}, docs: { canvas: { sourceState: 'none' } } },
 } satisfies Meta
 export default meta

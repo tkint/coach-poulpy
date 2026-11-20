@@ -4,8 +4,8 @@ import { Screen } from './screens/screen'
 
 const meta = {
   title: 'Mobile/Components/Motivation row',
-  tags: ['draft'],
-  parameters: { docs: { canvas: { sourceState: 'none' }, description: { component: '`MobileMotivationRow` (draft): Home\'s one motivation row. A small Poulpy, his eight tentacles as eight segments with some lit, the latest achievements and a chevron; a tap opens Achievements. A lit tentacle never goes dark and there is no streak, so the row never turns into a debt.' } } },
+  tags: ['agreed'],
+  parameters: { docs: { canvas: { sourceState: 'none' }, description: { component: '`MobileMotivationRow`: Home\'s one motivation row. A small Poulpy, his eight tentacles as eight segments with some lit, the latest achievements and a chevron; a tap opens Achievements. A lit tentacle never goes dark and there is no streak, so the row never turns into a debt.' } } },
 } satisfies Meta
 export default meta
 type Story = StoryObj<typeof meta>
