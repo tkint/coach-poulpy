@@ -29,7 +29,7 @@ type Story = StoryObj<typeof meta>
 export const HomeDiary: Story = { name: 'Home, the diary', ...screen(screenHomeDiary) }
 /** Home · nothing planned: Up next suggests a short workout, as a tappable card. */
 export const HomeDiaryNothingScheduled: Story = { name: 'Home, nothing scheduled', ...screen(screenHomeDiaryNothingScheduled) }
-/** Record · what to record: a free session, a walk or a run, or a workout from the library. */
+/** Record · the Record button opens a bottom sheet over Home: a free session, a walk or a run, or a workout from the library. */
 export const Record: Story = { name: 'Record', ...screen(screenRecord) }
 /** Achievements · opened from the motivation row: Poulpy and the eight tentacles, what is earned, and what is still hidden. */
 export const Achievements: Story = { name: 'Achievements', ...screen(screenAchievements) }
