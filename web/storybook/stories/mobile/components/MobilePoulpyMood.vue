@@ -10,13 +10,14 @@ import { nextTick, onBeforeUnmount, ref } from 'vue'
 import { poulpyDrawings } from '@coach-poulpy/ui'
 import { MOOD_MOVES, tucking, type Move } from '../../brand/moodMoves'
 
-defineProps<{ label: string }>()
+const props = defineProps<{ label: string; size?: number }>() // size: his picture's height in px (default 95, as on Home)
 type Mood = 'happy' | 'annoyed' | 'fuming'
 const TAPS = { happy: 5, annoyed: 3 } // taps in a row that make him change mood
 const CALM_MILLIS = 5000 // alone this long, he improves his mood by a step
 const PAD_PER_HEIGHT = 110 / 210 // how much room a move has around the picture, in picture heights
-const PICTURE_HEIGHT = 95
-const PAD = PICTURE_HEIGHT * PAD_PER_HEIGHT
+const PICTURE_HEIGHT = 95 // the shot is framed for this height; a bigger size just scales the stage with it
+const height = () => props.size ?? PICTURE_HEIGHT
+const PAD = () => height() * PAD_PER_HEIGHT
 
 interface Plan { make: () => Move; seconds: number; swap: 'half' | 'start'; to: Mood; boost?: number }
 // The phones' moves (design/poulpy-3d/moods.mjs), plus the happy jump, which on the phones is the jump already baked for the happy Poulpy.
@@ -48,7 +49,7 @@ async function perform(plan: Plan) {
     const showMood = (m: Mood) => {
       scene.show(m === 'fuming' ? { pose: 'fuming', effects: true } : m, false)
       // The same shot as his still picture, on a canvas that reaches PAD px further each way.
-      scene.look({ turn: 0, tilt: 8, distance: 9.4, centre: 1.35, field: (2 * Math.atan(((PICTURE_HEIGHT + 2 * PAD) / PICTURE_HEIGHT) * Math.tan((14 * Math.PI) / 180)) * 180) / Math.PI })
+      scene.look({ turn: 0, tilt: 8, distance: 9.4, centre: 1.35, field: (2 * Math.atan((1 + 2 * PAD_PER_HEIGHT) * Math.tan((14 * Math.PI) / 180)) * 180) / Math.PI })
     }
     showMood(from)
     const move = plan.make()
@@ -103,8 +104,8 @@ onBeforeUnmount(() => { clearTimeout(calm); stop() })
 </script>
 
 <template>
-  <button type="button" class="poulpy-cheer poulpy-cheer--home" :aria-label="`${label}. Tap and he reacts to his mood`" data-component="poulpy-mood" @click="tap">
+  <button type="button" class="poulpy-cheer poulpy-cheer--home" :aria-label="`${label}. Tap and he reacts to his mood`" data-component="poulpy-mood" :style="size ? { width: `${Math.round(size * 104 / 95)}px`, height: `${size}px` } : undefined" @click="tap">
     <img :src="picture(mood)" alt="" :style="{ visibility: playing ? 'hidden' : 'visible' }" />
-    <span v-if="playing" class="poulpy-cheer-stage" aria-hidden="true" :style="{ inset: `-${PAD}px` }"><canvas ref="canvas" /></span>
+    <span v-if="playing" class="poulpy-cheer-stage" aria-hidden="true" :style="{ inset: `-${PAD()}px` }"><canvas ref="canvas" /></span>
   </button>
 </template>
