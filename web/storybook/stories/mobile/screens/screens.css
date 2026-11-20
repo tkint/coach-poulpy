@@ -339,7 +339,7 @@
   background: var(--cp-surface);
   border-top: 1px solid var(--cp-outline);
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 2px;
   flex: none;
 }
@@ -1172,7 +1172,6 @@
 /* ---------- Home and You (draft) ---------- */
 
 /* The new bottom bar: Home, Library, You. */
-.cp-screen .nav-bar--three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 
 /* Home's motivation row: a small Poulpy, eight segments, the latest achievements, a chevron. One row, never a card. */
 .cp-screen .motivation-row { min-height: 48px; padding: 0 var(--cp-space-sm) 0 var(--cp-space-xs); display: flex; align-items: center; gap: var(--cp-space-sm); border-radius: var(--cp-radius-pill); background: var(--cp-surface); border: 1px solid var(--cp-outline); color: var(--cp-on-surface-variant); text-align: start; }
