@@ -81,7 +81,7 @@
 }
 .cp-screen .icon-button--filled { background: var(--cp-surface); }
 
-/* The one top bar of the apps (draft): 44 under the status bar, then a 44 row. The title is a headline on every screen, left,
+/* The one top bar of the apps: 44 under the status bar, then a 44 row. The title is a headline on every screen, left,
    with the leading button (back or close) before it and at most two actions after it. It replaces .top-bar, .screen-header,
    .live-title-bar, .history-head, .settings-head and .back-bar. CLEANUP: move the screens over once the bar is agreed, then
    delete those. */
