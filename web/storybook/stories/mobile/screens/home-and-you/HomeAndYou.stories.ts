@@ -41,7 +41,7 @@ export const YouPending: Story = { name: 'You, confirm your email', ...screen(sc
 export const YouSignedIn: Story = { name: 'You, signed in', ...screen(screenYouSignedIn) }
 /** Edit statistics · a switch and a handle per block, to choose and order what You shows. */
 export const YouEditStatistics: Story = { name: 'Edit statistics', ...screen(screenYouEditStatistics) }
-/** Settings · Appearance and units and Devices, reached from the cog on You. */
+/** Settings · Appearance, Region (language and units) and Devices, all on the page, reached from the cog on You. */
 export const Settings: Story = { name: 'Settings', ...screen(screenSettings) }
 /** Profile · a guest: Account on top (Create an account, Sign in), then about you with a Poulpy face, training and body. */
 export const Profile: Story = { name: 'Profile, guest', ...screen(screenProfile) }

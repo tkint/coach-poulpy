@@ -1,11 +1,15 @@
-<main class="phone" style="--frame-height: 900px;">
+<main class="phone" style="--frame-height: 760px;">
   <MobileTopBar title="Settings" leading="back" />
-  <div class="page-body" style="padding-top: var(--cp-space-sm);">
-    <span class="label label-row">App</span>
+  <div class="form-body" style="padding-top: var(--cp-space-lg);">
+    <span class="label label-row">Appearance</span>
+    <div class="field" id="theme"><MobileSelectField label="Theme" value="System" /><span class="field-note">System follows your phone’s light or dark mode.</span></div>
+    <span class="label label-row" style="margin-top: var(--cp-space-sm);">Region</span>
+    <div class="field" id="language"><MobileSelectField label="Language" value="System" /></div>
+    <div class="field" id="units"><MobileSelectField label="Units" value="Metric" /><span class="field-note">Metric: km, km/h, kg, cm. Imperial: mi, mph, lb, ft and in. Weight and height you logged are converted, never changed.</span></div>
+    <span class="label label-row" style="margin-top: var(--cp-space-sm);">Devices</span>
     <div class="settings-list" id="app">
-      <MobileSettingsRow icon="contrast" title="Appearance and units" detail="System theme · English · Metric" />
       <MobileSettingsRow icon="gauge" title="Devices" detail="3 connected · treadmill, foot pod, heart rate band" />
     </div>
-    <span class="field-note">Devices stay here, with Appearance and units: this is today's Settings, reached from the cog on You.</span>
+    <span class="field-note">Reached from the cog on You.</span>
   </div>
 </main>
