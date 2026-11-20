@@ -1,0 +1,16 @@
+import{n as e}from"./rolldown-runtime-sJBDdmOt.js";import{d as t,l as n}from"./blocks-BnrI-CoX.js";import{a as r}from"./chunk-W22LQPXL-DAacIxBz.js";import{i,r as a}from"./react-DITjJg24.js";function o(e){let t={a:`a`,code:`code`,h1:`h1`,h2:`h2`,li:`li`,p:`p`,strong:`strong`,ul:`ul`,...i(),...e.components};return(0,c.jsxs)(c.Fragment,{children:[(0,c.jsx)(n,{title:`Design system/Rules/Screens`}),`
+`,(0,c.jsx)(t.h1,{id:`screens`,children:`Screens`}),`
+`,(0,c.jsxs)(t.p,{children:[`Every screen mockup is a story in the `,(0,c.jsx)(t.a,{href:`?path=/docs/design-system-introduction--docs`,children:`component workshop`}),` (`,(0,c.jsx)(t.a,{href:`https://tkint.github.io/coach-poulpy/docs/adr/0029-mockups-are-stories-in-the-component-workshop`,rel:`nofollow`,children:`ADR 0029`}),`): the web screens under Web > Screens, composed from the `,(0,c.jsx)(t.code,{children:`Cp*`}),` components, and the phone screens under Mobile > Screens, built from the `,(0,c.jsx)(t.code,{children:`Mobile*`}),` components and patterns.`]}),`
+`,(0,c.jsxs)(t.ul,{children:[`
+`,(0,c.jsx)(t.li,{children:`Build from an agreed mockup. If a screen has none, agree one through a PR before building it.`}),`
+`,(0,c.jsxs)(t.li,{children:[`Each state of a screen is a story, in light and dark from the workshop's theme toolbar. A new screen or redesign is tagged `,(0,c.jsx)(t.code,{children:`draft`}),`; a PR that changes the tag to `,(0,c.jsx)(t.code,{children:`agreed`}),` is its approval, and nothing is built from a draft.`]}),`
+`,(0,c.jsx)(t.li,{children:`CI runs every story as a test, with the accessibility check.`}),`
+`]}),`
+`,(0,c.jsx)(t.p,{children:`The mockup is the design reference; this page defines the shared rules and components used to build it.`}),`
+`,(0,c.jsx)(t.h2,{id:`navigation-draft`,children:`Navigation (draft)`}),`
+`,(0,c.jsxs)(t.p,{children:[`The bottom bar has three destinations: `,(0,c.jsx)(t.strong,{children:`Home`}),`, `,(0,c.jsx)(t.strong,{children:`Library`}),` and `,(0,c.jsx)(t.strong,{children:`You`}),`. Live is the `,(0,c.jsx)(t.strong,{children:`Record`}),` button in Home's top bar and a `,(0,c.jsx)(t.strong,{children:`Start`}),` button on each Up next card; History is the past feed on Home; Statistics sit on You under the profile card, and Settings is `,(0,c.jsx)(t.strong,{children:`Preferences`}),`, behind the cog in You's top bar. See Mobile > Screens > Home and You.`]}),`
+`,(0,c.jsxs)(t.ul,{children:[`
+`,(0,c.jsxs)(t.li,{children:[`Home is the diary: the motivation row, `,(0,c.jsx)(t.strong,{children:`Up next`}),` (what is planned, or a suggestion when nothing is), then the past with a recap or a record between sessions.`]}),`
+`,(0,c.jsxs)(t.li,{children:[`The profile card on You carries one badge: `,(0,c.jsx)(t.strong,{children:`Guest`}),`, `,(0,c.jsx)(t.strong,{children:`Confirm your email`}),` or `,(0,c.jsx)(t.strong,{children:`Signed in`}),`. Sign up and sign in open from the profile's Account section, never from a banner or a pop-up.`]}),`
+`,(0,c.jsx)(t.li,{children:`Statistics have a period switch (7 days, 30 days, Year, All time) and an Edit button that chooses and orders the blocks.`}),`
+`]})]})}function s(e={}){let{wrapper:t}={...i(),...e.components};return t?(0,c.jsx)(t,{...e,children:(0,c.jsx)(o,{...e})}):o(e)}var c;function l(){return(l=e((()=>{c=r(),a(),t()})))()}l();export{s as default};
