@@ -1,16 +1,7 @@
 <main class="phone" style="--frame-height: 1700px;">
   <MobileTopBar title="Profile" leading="back"><MobileButton kind="primary" size="sm">Done</MobileButton></MobileTopBar>
   <div class="form-body" style="padding-top: var(--cp-space-lg);">
-    <span class="label label-row">Account</span>
-    <div class="settings-list" id="account-list">
-      <MobileSettingsRow icon="mail" title="Email" detail="alex@example.com · confirmed" />
-      <MobileSettingsRow icon="key-round" title="Password" detail="Change it" />
-      <MobileSettingsRow icon="smartphone" title="Signed-in devices" detail="This phone, Ana’s iPhone" />
-      <MobileSettingsRow icon="download" title="Export my data" detail="JSON, and your sessions as FIT files" />
-      <MobileSettingsRow icon="log-out" title="Sign out" detail="This phone becomes an empty guest." />
-      <MobileSettingsRow icon="trash" title="Delete account" detail="Removes your data from every phone." />
-    </div>
-    <span class="label label-row" style="margin-top: var(--cp-space-sm);">About you</span>
+    <span class="label label-row">About you</span>
     <div class="field" id="name"><label class="label" for="display-name">What should Poulpy call you?</label><input class="text-field" id="display-name" value="Alex"></div>
     <MobileSelectField label="Poulpy face" value="Happy" id="face" />
     <span class="field-note">The face shown on your profile card. It never changes Poulpy's mood in the app.</span>
@@ -29,5 +20,14 @@
     <MobileSelectField label="Pain or rehab" value="Left knee, left hip · until 4 Nov" id="pain-or-rehab" />
     <span class="field-note">Poulpy stays on the blue side until then. With nothing set, this row says None.</span>
     <MobilePoulpyCard id="patched-up-note" title="Taking it easy"><template #art><img src="../../../poulpy/pose_patched_up.svg" alt="" width="71" height="64"></template>Poulpy is patched up with you until 4 Nov. No catching up, just rest.</MobilePoulpyCard>
+    <span class="label label-row" style="margin-top: var(--cp-space-sm);">Account</span>
+    <div class="settings-list" id="account-list">
+      <MobileSettingsRow icon="mail" title="Email" detail="alex@example.com · confirmed" />
+      <MobileSettingsRow icon="key-round" title="Password" detail="Change it" />
+      <MobileSettingsRow icon="smartphone" title="Signed-in devices" detail="This phone, Ana’s iPhone" />
+      <MobileSettingsRow icon="download" title="Export my data" detail="JSON, and your sessions as FIT files" />
+      <MobileSettingsRow icon="log-out" title="Sign out" detail="This phone becomes an empty guest." />
+      <MobileSettingsRow icon="trash" title="Delete account" detail="Removes your data from every phone." />
+    </div>
   </div>
 </main>
