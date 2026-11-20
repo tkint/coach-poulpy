@@ -7,7 +7,6 @@ import screenRecord from './record.html?raw'
 
 // Home is the diary (what is next, then the past) on the compact top bar and the three-tab bar: Home · Library · You.
 // Live becomes the Record button in its bar, which opens a bottom sheet.
-// CLEANUP: these screens draw six Lucide icons the apps don't have yet (award, circle-plus, circle-question-mark, key-round, ruler, smartphone). Run `node design/build-icons.mjs --add award circle-plus circle-question-mark key-round ruler smartphone` when the screens are agreed; it needs network access to jsdelivr, which this session's sandbox blocked. They replace the History, You and Settings drafts of #511 and #512 where they overlap.
 const meta = {
   title: 'Mobile/Screens/Home/Diary',
   tags: ['!autodocs', 'agreed'],
