@@ -1,0 +1,19 @@
+<main class="phone" style="--frame-height: 900px;">
+  <MobileTopBar title="You"><MobileIconButton icon="settings" :icon-size="22" aria-label="Preferences" /></MobileTopBar>
+  <div class="page-body" style="padding-top: var(--cp-space-sm);">
+    <button type="button" class="profile-card" id="profile" data-component="profile-card"><img src="../../../poulpy/mood_happy.svg" alt="" aria-hidden="true"><span><strong>Alex</strong><small>Build strength · Regular</small><span class="account-badge">Confirm your email</span></span><MobileIcon name="chevron-right" :size="22" /></button>
+    <div class="section-head"><span class="label">Statistics</span><MobileButton kind="tonal" size="sm" icon="pencil">Edit</MobileButton></div>
+    <div class="period-tabs" role="tablist" aria-label="Period" id="period"><button type="button" role="tab" aria-selected="false">7 days</button><button type="button" role="tab" aria-selected="true">30 days</button><button type="button" role="tab" aria-selected="false">Year</button><button type="button" role="tab" aria-selected="false">All time</button></div>
+    <div class="stat-pair">
+      <section class="stat-card stat-card--highlight" id="sessions"><span class="label" style="color: inherit;">Sessions</span><span class="big">11</span><span class="line">386 min · 14.8 km</span></section>
+      <section class="stat-card" id="weight"><span class="label label--primary">Weight</span><span class="big">72.6 kg</span><span class="line muted">3 days ago</span></section>
+    </div>
+    <div class="stat-trio" id="records">
+      <section class="stat-card"><span class="name">Records</span><span class="value">3</span><span class="note">this period</span></section>
+      <section class="stat-card"><span class="name">Longest run</span><span class="value">5.2 km</span><span class="note">8 Oct</span></section>
+      <section class="stat-card"><span class="name">Full octopus</span><span class="value">×1</span><span class="note">5 of 8 lit</span></section>
+    </div>
+    <button type="button" class="list-row" id="body-map" data-component="list-row" style="border-radius: var(--cp-radius-lg); padding: var(--cp-space-sm);"><span class="row-icon" aria-hidden="true"><MobileIcon name="person-standing" :size="22" /></span><span class="row-text"><strong>Body map</strong><span>Legs most worked, shoulders least</span></span><span class="chevron"><MobileIcon name="chevron-right" :size="20" /></span></button>
+  </div>
+  <MobileNavBar active="you" destinations="three" />
+</main>

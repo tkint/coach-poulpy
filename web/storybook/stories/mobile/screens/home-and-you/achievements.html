@@ -1,0 +1,22 @@
+<main class="phone" style="--frame-height: 900px;">
+  <MobileTopBar title="Achievements" leading="back" />
+  <div class="page-body" style="padding-top: var(--cp-space-sm);">
+    <MobilePoulpyCard id="ring" aria-label="Poulpy" title="5 of 8 tentacles lit" meta="1 full octopus so far">
+      <template #art><img src="../../../poulpy/mood_happy.svg" alt="Poulpy, happy" width="71" height="64"></template>
+      Three more sessions and I turn into a champion.
+      <div class="count-dots" style="margin-top: var(--cp-space-sm);" aria-hidden="true"><i class="lit"></i><i class="lit"></i><i class="lit"></i><i class="lit"></i><i class="lit"></i><i></i><i></i><i></i></div>
+    </MobilePoulpyCard>
+    <span class="label label-row">Earned</span>
+    <div class="achievement-grid" id="earned">
+      <div><MobileAchievement size="lg" icon="award" name="First record" />First record<small>12 Oct</small></div>
+      <div><MobileAchievement size="lg" icon="target" name="Goal met" />Goal met<small>18 Oct</small></div>
+      <div><MobileAchievement size="lg" icon="footprints" name="First walk or run" />First walk<small>20 Oct</small></div>
+    </div>
+    <span class="label label-row">Still hidden</span>
+    <div class="achievement-grid" id="locked">
+      <div><MobileAchievement size="lg" locked name="" />?</div>
+      <div><MobileAchievement size="lg" locked name="" />?</div>
+      <div><MobileAchievement size="lg" locked name="" />?</div>
+    </div>
+  </div>
+</main>

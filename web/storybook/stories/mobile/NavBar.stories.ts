@@ -5,7 +5,7 @@ const meta = {
   title: 'Mobile/Patterns/Nav bar',
   render: renderComponent('MobileNavBar', 'width: 390px; background: var(--cp-surface);'),
   args: { active: 'home' },
-  argTypes: { active: { control: 'inline-radio', options: ['home', 'library', 'live', 'history', 'settings'] } },
+  argTypes: { active: { control: 'inline-radio', options: ['home', 'library', 'live', 'history', 'settings', 'you'] }, destinations: { control: 'inline-radio', options: ['five', 'three'] } },
   parameters: { docs: { canvas: { sourceState: 'none' }, description: { component: '`MobileNavBar`: the bottom bar of the main screens, with the current destination marked.' } } },
 } satisfies Meta
 export default meta
@@ -16,3 +16,5 @@ export const Library: Story = { args: { active: 'library' } }
 export const Live: Story = { args: { active: 'live' } }
 export const History: Story = { args: { active: 'history' } }
 export const Settings: Story = { args: { active: 'settings' } }
+/** The new bar (draft): Home, Library and You; Live is Home's Record button. */
+export const Three: Story = { tags: ['draft'], args: { active: 'you', destinations: 'three' } }

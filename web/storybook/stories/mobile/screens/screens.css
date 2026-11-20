@@ -1187,3 +1187,51 @@
 .cp-screen .repeat-header .repeat-title strong { font-size: 13px; line-height: 16px; }
 .cp-screen .repeat-header .repeat-title:focus-visible { outline: 3px solid var(--cp-primary); outline-offset: 2px; }
 .cp-screen .repeat .block-empty { min-height: 44px; padding: var(--cp-space-sm) var(--cp-space-md); text-align: center; color: var(--cp-on-surface-variant); }
+
+/* ---------- Home and You (draft) ---------- */
+
+/* The new bottom bar: Home, Library, You. */
+.cp-screen .nav-bar--three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+/* Home's motivation row: a small Poulpy, eight segments, the latest achievements, a chevron. One row, never a card. */
+.cp-screen .motivation-row { min-height: 48px; padding: 0 var(--cp-space-sm) 0 var(--cp-space-xs); display: flex; align-items: center; gap: var(--cp-space-sm); border-radius: var(--cp-radius-pill); background: var(--cp-surface); border: 1px solid var(--cp-outline); color: var(--cp-on-surface-variant); text-align: start; }
+.cp-screen .motivation-row img { flex: none; width: 36px; height: 32px; margin-left: 4px; }
+.cp-screen .motivation-row .segments { flex: 1; min-width: 40px; display: flex; gap: 3px; }
+.cp-screen .motivation-row .segments i { flex: 1; height: 8px; border-radius: 4px; background: color-mix(in srgb, var(--cp-on-primary-container) 18%, transparent); }
+.cp-screen .motivation-row .segments i.lit { background: var(--cp-primary); }
+.cp-screen .motivation-row .achievements { display: flex; gap: var(--cp-space-xs); }
+
+/* An achievement: a round token, earned in primary, locked as a quiet "?". */
+.cp-screen .achievement { width: 28px; height: 28px; flex: none; border-radius: var(--cp-radius-pill); display: inline-flex; align-items: center; justify-content: center; background: var(--cp-primary-container); color: var(--cp-on-primary-container); }
+.cp-screen .achievement--locked { background: var(--cp-surface-variant); color: var(--cp-on-surface-variant); }
+.cp-screen .achievement--lg { width: 64px; height: 64px; }
+
+/* Home's past feed: a recap or a record between sessions. */
+.cp-screen .feed-card { border-radius: var(--cp-radius-lg); background: var(--cp-primary-container); color: var(--cp-on-primary-container); padding: var(--cp-space-md); display: flex; align-items: center; gap: var(--cp-space-md); text-align: start; }
+.cp-screen .feed-card > span:not(.achievement) { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.cp-screen .feed-card small { font-size: 14px; line-height: 19px; font-weight: 700; }
+.cp-screen .feed-card .text-link { color: inherit; margin: 0; }
+
+/* Achievements: a grid of tokens under their names. */
+.cp-screen .achievement-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--cp-space-md) var(--cp-space-sm); }
+.cp-screen .achievement-grid > div { display: flex; flex-direction: column; align-items: center; gap: var(--cp-space-xs); text-align: center; font-size: 13px; line-height: 17px; font-weight: 700; }
+.cp-screen .achievement-grid small { color: var(--cp-on-surface-variant); font-size: 12px; line-height: 15px; }
+.cp-screen .count-dots { display: flex; justify-content: center; gap: 6px; }
+.cp-screen .count-dots i { width: 14px; height: 14px; border-radius: var(--cp-radius-pill); background: color-mix(in srgb, var(--cp-on-primary-container) 18%, transparent); }
+.cp-screen .count-dots i.lit { background: var(--cp-primary); }
+
+/* You: the profile card's small badge (Guest, Confirm your email, Signed in). */
+.cp-screen .account-badge { align-self: flex-start; margin-top: 2px; height: 22px; padding: 0 var(--cp-space-sm); border-radius: var(--cp-radius-pill); display: inline-flex; align-items: center; gap: 4px; font-size: 12.5px; line-height: 16px; font-weight: 800; background: color-mix(in srgb, var(--cp-on-primary-container) 12%, transparent); color: inherit; }
+.cp-screen .account-badge--signed-in { background: var(--cp-primary); color: var(--cp-on-primary); }
+.cp-screen .section-head { display: flex; align-items: center; justify-content: space-between; margin: 6px var(--cp-space-xs) 0; }
+.cp-screen .section-head .label { color: var(--cp-on-surface-variant); }
+.cp-screen .period-tabs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); padding: var(--cp-space-xs); border-radius: var(--cp-radius-pill); background: var(--cp-surface-variant); }
+.cp-screen .period-tabs button { height: 36px; border-radius: var(--cp-radius-pill); font-size: 14px; font-weight: 800; color: var(--cp-on-surface-variant); white-space: nowrap; }
+.cp-screen .period-tabs button[aria-selected="true"] { background: var(--cp-surface); color: var(--cp-on-primary-container); box-shadow: 0 1px 3px color-mix(in srgb, var(--cp-poulpy-ink) 18%, transparent); }
+.cp-screen .block-toggle { display: flex; align-items: center; gap: var(--cp-space-sm); min-height: 56px; padding: 0 var(--cp-space-md) 0 var(--cp-space-sm); border-radius: var(--cp-radius-md); background: var(--cp-surface); border: 1px solid var(--cp-outline); }
+.cp-screen .block-toggle .grip { color: var(--cp-on-surface-variant); }
+.cp-screen .block-toggle strong { flex: 1; font-size: 16px; }
+.cp-screen .block-toggle .switch { width: 44px; height: 26px; border-radius: var(--cp-radius-pill); background: var(--cp-outline); position: relative; flex: none; }
+.cp-screen .block-toggle .switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: var(--cp-surface); }
+.cp-screen .block-toggle .switch[aria-checked="true"] { background: var(--cp-primary); }
+.cp-screen .block-toggle .switch[aria-checked="true"]::after { left: 21px; background: var(--cp-on-primary); }

@@ -1,0 +1,30 @@
+<main class="phone" style="--frame-height: 1500px;">
+  <MobileTopBar title="Profile" leading="back"><MobileButton kind="primary" size="sm">Done</MobileButton></MobileTopBar>
+  <div class="form-body" style="padding-top: var(--cp-space-lg);">
+    <span class="label label-row">Account</span>
+    <div class="settings-list" id="account-list">
+      <MobileSettingsRow icon="user-round" title="Guest" detail="Your training is on this phone only." />
+      <MobileSettingsRow icon="circle-plus" title="Create an account" detail="Back up your training and use it on other phones." />
+      <MobileSettingsRow icon="log-in" title="Sign in" detail="Already have an account?" />
+    </div>
+    <span class="label label-row" style="margin-top: var(--cp-space-sm);">About you</span>
+    <div class="field" id="name"><label class="label" for="display-name">What should Poulpy call you?</label><input class="text-field" id="display-name" value="Alex"></div>
+    <MobileSelectField label="Poulpy face" value="Happy" id="face" />
+    <span class="field-note">The face shown on your profile card. It never changes Poulpy's mood in the app.</span>
+    <MobileSelectField label="Birthdate" value="14 March 1991 · 34 years" />
+    <MobileSelectField label="Pronouns" value="ze / hir" id="pronouns" />
+    <span class="field-note">Used for French wording and Poulpy’s lines. A custom entry is repeated as written; French wording that needs a gender stays neutral.</span>
+    <MobileSelectField label="Sex assigned at birth" value="Prefer not to say" />
+    <span class="field-note">Only used for estimates such as calories and heart rate zones. Skip it and Poulpy uses a neutral average.</span>
+    <MobileSelectField label="Body figure" value="Wider shoulders" id="body-figure" />
+    <span class="field-note">Only the drawing used for pain and muscles. It is separate from the line above and is never used for estimates.</span>
+    <span class="label label-row" style="margin-top: var(--cp-space-sm);">Training</span>
+    <MobileSelectField label="Goals" value="Run further, Build strength" />
+    <MobileSelectField label="Experience" value="Regular" />
+    <div class="field" id="resting-hr"><label class="label" for="resting-hr-input">Resting heart rate</label><span class="number-field" data-component="number-field"><input id="resting-hr-input" inputmode="numeric" value="58" aria-describedby="resting-hr-note"><span class="unit">bpm</span></span><span class="field-note" id="resting-hr-note">Between 30 and 120. Used for heart rate zones.</span></div>
+    <MobileSettingsRow icon="ruler" title="Measurements" detail="72.6 kg · 175 cm" />
+    <MobileSelectField label="Pain or rehab" value="Left knee, left hip · until 4 Nov" id="pain-or-rehab" />
+    <span class="field-note">Poulpy stays on the blue side until then. With nothing set, this row says None.</span>
+    <MobilePoulpyCard id="patched-up-note" title="Taking it easy"><template #art><img src="../../../poulpy/pose_patched_up.svg" alt="" width="71" height="64"></template>Poulpy is patched up with you until 4 Nov. No catching up, just rest.</MobilePoulpyCard>
+  </div>
+</main>
