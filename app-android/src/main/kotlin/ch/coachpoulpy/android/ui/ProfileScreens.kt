@@ -337,13 +337,17 @@ internal fun ProfileScreen(graph: AppGraph, language: String, onBack: () -> Unit
             )
             Note(stringResource(R.string.profile_restingHrHint))
         }
-        // Weight and height share one row; the sheet picks which of the two pages opens.
-        val measurements = listOfNotNull(
-            weight.latest?.let { BodyDisplay.weight(it.value, units.units, language) },
-            height.latest?.let { BodyDisplay.height(it.value, units.units, language) },
-        ).joinToString(" · ")
+        SectionLabel(R.string.profile_measurements)
         SettingsList {
-            SettingsRow(Lucide.Ruler, stringResource(R.string.profile_measurements), measurements.ifEmpty { stringResource(R.string.body_nothingLogged) }) { sheet = ProfileSheet.MEASUREMENTS }
+            SettingsRow(
+                Lucide.Weight, stringResource(R.string.body_weight),
+                weight.latest?.let { BodyDisplay.weight(it.value, units.units, language) } ?: stringResource(R.string.body_nothingLogged),
+            ) { onPage(SettingsPage.WEIGHT) }
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            SettingsRow(
+                Lucide.MoveVertical, stringResource(R.string.body_height),
+                height.latest?.let { BodyDisplay.height(it.value, units.units, language) } ?: stringResource(R.string.body_nothingLogged),
+            ) { onPage(SettingsPage.HEIGHT) }
         }
         val painAreas = ui.painAreas.joinToString(", ") { BodyMap.label(it, language) }
         val pain = ui.painUntil?.let { LocalDate.of(it.year, it.month, it.day) }
@@ -359,13 +363,6 @@ internal fun ProfileScreen(graph: AppGraph, language: String, onBack: () -> Unit
     }
 
     when (sheet) {
-        ProfileSheet.MEASUREMENTS -> OptionSheet(
-            title = stringResource(R.string.profile_measurements), why = null,
-            options = listOf<Pair<BodyMetric?, String>>(BodyMetric.WEIGHT to stringResource(R.string.body_weight), BodyMetric.HEIGHT to stringResource(R.string.body_height)),
-            selected = BodyMetric.WEIGHT, note = null,
-            onSave = { onPage(if (it == BodyMetric.HEIGHT) SettingsPage.HEIGHT else SettingsPage.WEIGHT) },
-            onDismiss = { sheet = null },
-        )
         ProfileSheet.BIRTHDATE -> DateDialog(profile.birthdate?.toJava(), today, onPick = { model.setBirthdate(it.toShared()) }, onDismiss = { sheet = null })
         ProfileSheet.PRONOUNS -> OptionSheet(
             title = stringResource(R.string.profile_pronouns),
@@ -429,7 +426,7 @@ internal fun ProfileScreen(graph: AppGraph, language: String, onBack: () -> Unit
     }
 }
 
-private enum class ProfileSheet { MEASUREMENTS, BIRTHDATE, PRONOUNS, SEX, GOALS, EXPERIENCE, FIGURE, PAIN }
+private enum class ProfileSheet { BIRTHDATE, PRONOUNS, SEX, GOALS, EXPERIENCE, FIGURE, PAIN }
 
 private val BodyFigure.label: Int
     get() = when (this) {

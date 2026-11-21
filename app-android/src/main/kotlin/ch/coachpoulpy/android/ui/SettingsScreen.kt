@@ -89,7 +89,7 @@ fun SettingsScreen(
         SettingsPage.WEIGHT -> BodyScreen(graph, BodyMetric.WEIGHT, language, up, modifier)
         SettingsPage.HEIGHT -> BodyScreen(graph, BodyMetric.HEIGHT, language, up, modifier)
         SettingsPage.DEVICES -> DevicesPage(graph, up, onOpen, modifier)
-        SettingsPage.EDIT_STATISTICS -> EditStatisticsScreen(graph, language, up)
+        SettingsPage.EDIT_STATISTICS -> EditStatisticsScreen(graph, language, up, modifier)
     }
 }
 

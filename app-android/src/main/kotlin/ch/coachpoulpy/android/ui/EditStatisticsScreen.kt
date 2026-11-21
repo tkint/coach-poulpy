@@ -47,7 +47,7 @@ import kotlin.math.roundToInt
 
 /** Edit statistics: a switch and a handle per block, to choose and order what You shows. Every change is saved as it is made. */
 @Composable
-fun EditStatisticsScreen(graph: AppGraph, language: String, onClose: () -> Unit) {
+fun EditStatisticsScreen(graph: AppGraph, language: String, onClose: () -> Unit, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val model = remember(graph, language) { graph.you(language, AppPreferences(context)) }
     DisposableEffect(model) { onDispose { model.close() } }
@@ -58,7 +58,7 @@ fun EditStatisticsScreen(graph: AppGraph, language: String, onClose: () -> Unit)
     var dragY by remember { mutableFloatStateOf(0f) }
     val gap = with(LocalDensity.current) { PoulpySpace.sm.toPx() }
 
-    Column(Modifier.fillMaxSize()) {
+    Column(modifier.fillMaxSize()) {
         Row(
             Modifier.fillMaxWidth().padding(start = 4.dp, end = PoulpySpace.lg, top = PoulpySpace.md),
             verticalAlignment = Alignment.CenterVertically,

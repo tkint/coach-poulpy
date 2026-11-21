@@ -12,15 +12,14 @@ private enum ProfileSheet: Identifiable {
     var id: Self { self }
 }
 
-/// Profile: every field is optional and saved as it is changed. A small Account row sits at the top, and Measurements opens
-/// the weight or the height page.
+/// Profile: every field is optional and saved as it is changed. A small Account row sits at the top, and Measurements has a row
+/// each for weight and height.
 struct ProfileView: View {
     @ObservedObject var profile: Observed<ProfileModel, ProfileUi>
     @ObservedObject var account: Observed<AccountModel, AccountState>
     @ObservedObject var weight: Observed<BodyModel, BodyUi>
     @ObservedObject var height: Observed<BodyModel, BodyUi>
     let units: UnitSystem
-    @State private var measuring = false
     @State private var openWeight = false
     @State private var openHeight = false
     @State private var sheet: ProfileSheet?
@@ -70,23 +69,14 @@ struct ProfileView: View {
                         .onChange(of: heartRate) { model.setRestingHeartRateText(text: $0) }
                     FieldNote("profile.restingHrHint")
                 }
-                // Weight and height share one row; the dialog picks which of the two pages opens.
-                Button { measuring = true } label: {
-                    HStack(spacing: 12) {
-                        LucideIcon(.ruler, size: 24).foregroundStyle(PoulpyColor.primary).frame(width: 26)
-                        VStack(alignment: .leading, spacing: 0) {
-                            Text("profile.measurements").font(.poulpy(.headline)).foregroundStyle(PoulpyColor.onSurface)
-                            Text(measurementsText()).font(.poulpy(.footnote)).foregroundStyle(PoulpyColor.onSurfaceVariant)
-                        }
-                        Spacer()
-                        LucideIcon(.chevronRight, size: 16).foregroundStyle(PoulpyColor.onSurfaceVariant.opacity(0.6))
-                    }
-                    .frame(minHeight: 44)
-                    .padding(.horizontal, 14)
-                    .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
-                    .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(PoulpyColor.outline, lineWidth: 1))
+                sectionLabel("profile.measurements")
+                VStack(spacing: 0) {
+                    measurementRow(.weight, "body.weight", weight.value.latest.map { bodyText(.weight, $0.value, units) }) { openWeight = true }
+                    Divider().overlay(PoulpyColor.outline)
+                    measurementRow(.moveVertical, "body.height", height.value.latest.map { bodyText(.height, $0.value, units) }) { openHeight = true }
                 }
-                .buttonStyle(.plain)
+                .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
+                .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(PoulpyColor.outline, lineWidth: 1))
                 SelectField(label: "profile.pain", value: painText(state)) { sheet = .pain }
                 FieldNote("profile.painNote")
             }
@@ -95,10 +85,6 @@ struct ProfileView: View {
         }
         .scrollDismissesKeyboard(.interactively)
         .background(PoulpyColor.background)
-        .confirmationDialog("profile.measurements", isPresented: $measuring, titleVisibility: .visible) {
-            Button("body.weight") { openWeight = true }
-            Button("body.height") { openHeight = true }
-        }
         .navigationDestination(isPresented: $openWeight) { BodyView(metric: .weight, log: weight, units: units).toolbar(.hidden, for: .tabBar) }
         .navigationDestination(isPresented: $openHeight) { BodyView(metric: .height, log: height, units: units).toolbar(.hidden, for: .tabBar) }
         .navigationTitle("profile.title")
@@ -172,13 +158,22 @@ struct ProfileView: View {
         }
     }
 
-    /// "72.6 kg · 175 cm", or that nothing is logged.
-    private func measurementsText() -> String {
-        let parts = [
-            weight.value.latest.map { bodyText(.weight, $0.value, units) },
-            height.value.latest.map { bodyText(.height, $0.value, units) },
-        ].compactMap { $0 }
-        return parts.isEmpty ? L("body.nothingLogged") : parts.joined(separator: " · ")
+    /// A leading icon, the metric and its latest value, and a chevron; it opens that metric's page.
+    private func measurementRow(_ symbol: Lucide, _ title: LocalizedStringKey, _ value: String?, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: 12) {
+                LucideIcon(symbol, size: 24).foregroundStyle(PoulpyColor.primary).frame(width: 26)
+                VStack(alignment: .leading, spacing: 0) {
+                    Text(title).font(.poulpy(.headline)).foregroundStyle(PoulpyColor.onSurface)
+                    Text(value ?? L("body.nothingLogged")).font(.poulpy(.footnote)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+                }
+                Spacer()
+                LucideIcon(.chevronRight, size: 16).foregroundStyle(PoulpyColor.onSurfaceVariant.opacity(0.6))
+            }
+            .frame(minHeight: 44)
+            .padding(.horizontal, 14)
+        }
+        .buttonStyle(.plain)
     }
 
     private func painText(_ state: ProfileUi) -> String {
