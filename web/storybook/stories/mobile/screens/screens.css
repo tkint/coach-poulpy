@@ -548,7 +548,7 @@
 
 /* ---------- Empty states ---------- */
 
-.cp-screen .empty-state { display: flex; align-items: flex-start; gap: var(--cp-space-md); padding: var(--cp-space-md); border-radius: var(--cp-radius-lg); border: 1.5px dashed color-mix(in srgb, var(--cp-on-surface-variant) 60%, transparent); }
+.cp-screen .empty-state { display: flex; align-items: flex-start; gap: var(--cp-space-md); padding: var(--cp-space-md); border-radius: var(--cp-radius-lg); border: 2px dashed var(--cp-outline); }
 .cp-screen .empty-state--stack { flex-direction: column; align-items: center; text-align: center; gap: var(--cp-space-sm); padding: var(--cp-space-lg) var(--cp-space-lg); }
 .cp-screen .empty-state--stack .empty-state-text { align-items: center; }
 .cp-screen .empty-state img { flex: none; object-fit: contain; }
