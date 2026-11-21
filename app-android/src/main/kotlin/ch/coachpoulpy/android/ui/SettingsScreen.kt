@@ -96,19 +96,13 @@ internal fun ColumnScope.Devices(graph: AppGraph, onOpen: (DeviceRoute) -> Unit)
 
     BluetoothProblems(bluetooth)
     if (state.known.isEmpty()) {
-        Surface(Modifier.fillMaxWidth(), shape = RoundedCornerShape(PoulpyRadius.lg), color = MaterialTheme.colorScheme.primaryContainer) {
-            Column(Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Image(painterResource(R.drawable.poulpy_pose_standing_tall), contentDescription = null, modifier = Modifier.size(140.dp))
-                Text(stringResource(R.string.devices_emptyTitle), style = MaterialTheme.typography.headlineSmall, textAlign = TextAlign.Center)
-                Text(stringResource(R.string.devices_emptyBody), textAlign = TextAlign.Center)
-                PoulpyButton(onClick = { onOpen(DeviceRoute.Add) }, size = PoulpyButtonSize.Lg, modifier = Modifier.padding(top = 8.dp)) {
-                    Icon(Lucide.Plus, contentDescription = null)
-                    Spacer(Modifier.size(8.dp))
-                    Text(stringResource(R.string.devices_addFirst))
-                }
-                Text(stringResource(R.string.devices_switchOn), style = MaterialTheme.typography.bodySmall)
-            }
-        }
+        EmptyState(
+            title = stringResource(R.string.devices_emptyTitle),
+            body = stringResource(R.string.devices_emptyBody) + " " + stringResource(R.string.devices_switchOn),
+            button = stringResource(R.string.devices_addFirst),
+            onClick = { onOpen(DeviceRoute.Add) },
+            buttonIcon = Lucide.Plus,
+        )
         return
     }
     SectionLabel(R.string.devices_yours)
