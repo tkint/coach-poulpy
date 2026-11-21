@@ -91,6 +91,7 @@ object Lucide {
     val RotateCcw: ImageVector by lazy { lucideIcon("rotate-ccw", "M 3 12 a 9 9 0 1 0 9 -9 9.75 9.75 0 0 0 -6.74 2.74 L 3 8", "M 3 3 v 5 h 5") }
     val RotateCcwClock: ImageVector by lazy { lucideIcon("rotate-ccw-clock", "M 3 12 a 9 9 0 1 0 9 -9 9.75 9.75 0 0 0 -6.74 2.74 L 3 8", "M 3 3 v 5 h 5", "M 12 7 v 5 l 4 2") }
     val RotateCw: ImageVector by lazy { lucideIcon("rotate-cw", "M 21 12 a 9 9 0 1 1 -9 -9 c 2.52 0 4.93 1 6.74 2.74 L 21 8", "M 21 3 v 5 h -5") }
+    val Route: ImageVector by lazy { lucideIcon("route", "M 3 19 A 3 3 0 1 0 9 19 A 3 3 0 1 0 3 19 Z", "M 9 19 h 8.5 a 3.5 3.5 0 0 0 0 -7 h -11 a 3.5 3.5 0 0 1 0 -7 H 15", "M 15 5 A 3 3 0 1 0 21 5 A 3 3 0 1 0 15 5 Z") }
     val Ruler: ImageVector by lazy { lucideIcon("ruler", "M 21.3 15.3 a 2.4 2.4 0 0 1 0 3.4 l -2.6 2.6 a 2.4 2.4 0 0 1 -3.4 0 L 2.7 8.7 a 2.41 2.41 0 0 1 0 -3.4 l 2.6 -2.6 a 2.41 2.41 0 0 1 3.4 0 Z", "m 14.5 12.5 2 -2", "m 11.5 9.5 2 -2", "m 8.5 6.5 2 -2", "m 17.5 15.5 2 -2") }
     val Search: ImageVector by lazy { lucideIcon("search", "m 21 21 -4.34 -4.34", "M 3 11 A 8 8 0 1 0 19 11 A 8 8 0 1 0 3 11 Z") }
     val Send: ImageVector by lazy { lucideIcon("send", "M 14.536 21.686 a .5 .5 0 0 0 .937 -.024 l 6.5 -19 a .496 .496 0 0 0 -.635 -.635 l -19 6.5 a .5 .5 0 0 0 -.024 .937 l 7.93 3.18 a 2 2 0 0 1 1.112 1.11 z", "m 21.854 2.147 -10.94 10.939") }

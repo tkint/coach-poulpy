@@ -1,0 +1,33 @@
+<main class="phone">
+  <MobileTopBar title="Search sessions" leading="back" backLabel="Back to Home" />
+  <div class="diary-filters">
+    <MobileSearchField label="Search sessions" placeholder="Session or exercise name" value="" />
+    <div class="chip-row" role="group" aria-label="Filters">
+      <MobileFilterChip icon="dumbbell"  aria-haspopup="dialog" aria-label="Equipment" style="padding: 0 var(--cp-space-md); min-width: 48px;" />
+      <MobileFilterChip icon="target" aria-haspopup="dialog" aria-label="Focus" style="padding: 0 var(--cp-space-md); min-width: 48px;" />
+      <MobileFilterChip icon="person-standing"  aria-haspopup="dialog" aria-label="Zones" style="padding: 0 var(--cp-space-md); min-width: 48px;" />
+      <MobileFilterChip icon="timer" have :count="2" aria-haspopup="dialog" aria-label="Duration, 2 ticked" style="padding: 0 var(--cp-space-md); min-width: 48px;" />
+      <MobileFilterChip icon="route" aria-haspopup="dialog" aria-label="Distance" style="padding: 0 var(--cp-space-md); min-width: 48px;" />
+    </div>
+  </div>
+  <div class="list-meta"><span aria-live="polite">8 sessions</span></div>
+  <div class="day-list" id="day-sessions">
+      <div class="day-heading"><span class="label">Fri 16 Oct</span></div>
+      <button type="button" class="session-row" data-component="session-row"><span class="row-icon" aria-hidden="true"><MobileIcon name="dumbbell" :size="22" /></span><span><strong>Full body</strong><small>41:05 · 20 of 21 sets</small></span></button>
+      <div class="day-heading"><span class="label">Mon 12 Oct</span></div>
+      <button type="button" class="session-row" data-component="session-row"><span class="row-icon" aria-hidden="true"><MobileIcon name="dumbbell" :size="22" /></span><span><strong>Lower body strength</strong><small>36:50 · 18 of 18 sets</small></span></button>
+  </div>
+  <MobileNavBar active="home" />
+  <div class="scrim" aria-hidden="true"></div>
+  <MobileSheet id="diary-duration-sheet" aria-modal="true" aria-label="Duration">
+    <span class="sheet-handle" aria-hidden="true"></span>
+    <div class="sheet-title"><h2>Duration</h2><p>Keep the sessions that lasted this long. Distance works the same way, in kilometres.</p></div>
+    <div class="check-list">
+      <label><input type="checkbox"><span>Under 20 minutes</span><span>0 sessions</span></label>
+      <label><input type="checkbox" checked><span>20 to 30 minutes</span><span>3 sessions</span></label>
+      <label><input type="checkbox" checked><span>30 to 45 minutes</span><span>4 sessions</span></label>
+      <label><input type="checkbox"><span>Over 45 minutes</span><span>1 session</span></label>
+    </div>
+    <div class="sheet-actions"><MobileButton kind="secondary" size="xl">Clear</MobileButton><MobileButton size="xl">Show 7 sessions</MobileButton></div>
+  </MobileSheet>
+</main>
