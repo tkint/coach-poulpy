@@ -1,0 +1,23 @@
+<main class="phone">
+  <MobileTopBar title="Search sessions" leading="back" backLabel="Back to Home" />
+  <div class="diary-filters">
+    <MobileSearchField label="Search sessions" placeholder="Session or exercise name" value="zumba" />
+    <div class="chip-row" role="group" aria-label="Filters">
+      <MobileFilterChip icon="dumbbell" aria-haspopup="dialog" aria-label="Equipment" style="padding: 0 var(--cp-space-md); min-width: 48px;" />
+      <MobileFilterChip icon="target" aria-haspopup="dialog" aria-label="Focus" style="padding: 0 var(--cp-space-md); min-width: 48px;" />
+      <MobileFilterChip icon="person-standing" aria-haspopup="dialog" aria-label="Zones" style="padding: 0 var(--cp-space-md); min-width: 48px;" />
+      <MobileFilterChip icon="timer"  aria-haspopup="dialog" aria-label="Duration" style="padding: 0 var(--cp-space-md); min-width: 48px;" />
+      <MobileFilterChip icon="route" aria-haspopup="dialog" aria-label="Distance" style="padding: 0 var(--cp-space-md); min-width: 48px;" />
+    </div>
+  </div>
+  <div class="list-meta"><span aria-live="polite">0 sessions</span></div>
+  <div class="day-list" id="day-sessions">
+    <div class="no-results" data-component="no-results">
+      <img src="../../../poulpy/mood_happy.svg" alt="Poulpy, happy">
+      <h2>Nothing for “zumba”</h2>
+      <p>Try another word, or clear a filter.</p>
+      <MobileButton size="md">Clear search and filters</MobileButton>
+    </div>
+  </div>
+  <MobileNavBar active="home" />
+</main>
