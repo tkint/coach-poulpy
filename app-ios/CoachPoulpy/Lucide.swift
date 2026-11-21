@@ -82,6 +82,7 @@ enum Lucide: String, CaseIterable {
     case rotateCcw = "LucideRotateCcw"
     case rotateCcwClock = "LucideRotateCcwClock"
     case rotateCw = "LucideRotateCw"
+    case route = "LucideRoute"
     case ruler = "LucideRuler"
     case search = "LucideSearch"
     case send = "LucideSend"

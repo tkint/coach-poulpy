@@ -66,7 +66,7 @@
 .cp-screen .icon-button {
   width: 40px;
   height: 40px;
-  border-radius: var(--cp-radius-pill);
+  border-radius: var(--cp-radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1232,3 +1232,12 @@
 .cp-screen .badge-tile--locked { background: var(--cp-surface-variant); color: var(--cp-on-surface-variant); }
 .cp-screen .timeline > .day-heading { margin: 0 var(--cp-space-xs); }
 .cp-screen .timeline > .day-heading::before { display: none; }
+
+/* Home diary search: the search field and filter chips under the top bar, then the matching sessions. */
+.cp-screen .diary-filters { padding: var(--cp-space-sm) var(--cp-space-lg) 0; display: flex; flex-direction: column; gap: var(--cp-space-sm); flex: none; }
+/* The Past heading's two tonal icon buttons: search and jump to a day. */
+.cp-screen .section-actions { display: flex; gap: var(--cp-space-sm); margin-right: calc(-1 * var(--cp-space-xs)); }
+.cp-screen .section-actions .icon-button { position: relative; width: var(--cp-control-sm); height: var(--cp-control-sm); background: var(--cp-primary-container); color: var(--cp-on-primary-container); }
+/* A small button keeps a 44 touch area (Accessibility). */
+.cp-screen .section-actions .icon-button::after { content: ''; position: absolute; inset: -6px; }
+.cp-screen .section-head:has(.section-actions) { margin-bottom: calc(-1 * var(--cp-space-xs)); }
