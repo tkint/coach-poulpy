@@ -23,7 +23,7 @@
     "firstTitle": "Rien de prévu pour l’instant",
     "firstBody": "Créez votre première séance dans la bibliothèque, puis prévoyez-la pour un jour.",
     "openLibrary": "Ouvrir la bibliothèque",
-    "somethingElse": "Autre chose ? Choisissez dans votre bibliothèque",
+    "somethingElse": "Autre chose ? Choisissez dans votre bibliothèque",
     "restLine": "Reposez-vous, ou choisissez dans votre bibliothèque",
     "tomorrow": "Demain · {date}",
     "inDays": "{days, plural, one {Dans # jour · {date}} many {Dans # jours · {date}} other {Dans # jours · {date}}}",
@@ -696,7 +696,7 @@
     "notNow": "Plus tard"
   },
   "record": {
-    "title": "Que voulez-vous enregistrer ?",
+    "title": "Que voulez-vous enregistrer ?",
     "subtitle": "Choisissez pour commencer.",
     "walkTitle": "Marche ou course",
     "walkDetail": "Suivez-la en direct, avec votre téléphone ou un tapis",
