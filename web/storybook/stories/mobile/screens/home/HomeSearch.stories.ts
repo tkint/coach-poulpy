@@ -9,7 +9,7 @@ import screenHomeSearchZones from './home-search-zones.html?raw'
 // the filters are the library's (Equipment, Focus, Zones) plus Duration and Distance.
 const meta = {
   title: 'Mobile/Screens/Home/Search',
-  tags: ['!autodocs', 'draft'],
+  tags: ['!autodocs', 'agreed'],
   parameters: { layout: 'fullscreen', mockup: { issue: 511 }, docs: { canvas: { sourceState: 'none' } } },
 } satisfies Meta
 export default meta
