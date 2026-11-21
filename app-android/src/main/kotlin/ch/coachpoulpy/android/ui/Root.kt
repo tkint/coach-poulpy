@@ -4,6 +4,7 @@ import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
@@ -26,19 +27,17 @@ import ch.coachpoulpy.shared.AppGraph
 private enum class Tab(@StringRes val label: Int, val icon: ImageVector) {
     HOME(R.string.tab_home, Lucide.House),
     LIBRARY(R.string.tab_library, Lucide.LibraryBig),
-    LIVE(R.string.tab_live, Lucide.Activity),
-    HISTORY(R.string.tab_history, Lucide.RotateCcwClock),
-    SETTINGS(R.string.tab_settings, Lucide.Settings),
+    YOU(R.string.tab_you, Lucide.UserRound),
 }
 
 /**
  * The screen shown over the tabs, as a string so it survives rotation:
  * "import" (a workout file opened from another app), "builder:<id>", "builder-new:<format>" (new, in that format), "builder-add:<format>:<slug>" (new, holding that exercise), "builder-copy:<id>" (an unsaved copy), "player:<id>", "resume", "workout:<id>", "exercise:<slug>", "session:<id>",
- * "device-add", "device-sources", "device:<key>", or "account:<step>" (see [AccountFlow]).
+ * "live" (recording a walk or run, from Record on Home), "device-add", "device-sources", "device:<key>", or "account:<step>" (see [AccountFlow]).
  */
 private typealias Route = String
 
-/** [openLive] shows the Live tab, as when the recording notification is tapped; [onLiveOpened] says it was done. */
+/** [openLive] shows Live over the tabs, as when the recording notification is tapped; [onLiveOpened] says it was done. */
 @Composable
 fun CoachPoulpyRoot(
     graph: AppGraph,
@@ -55,9 +54,7 @@ fun CoachPoulpyRoot(
     var libraryView by rememberSaveable { mutableStateOf(LibraryView.WORKOUTS) }
     var route by rememberSaveable { mutableStateOf<Route?>(null) }
     var settingsPage by rememberSaveable { mutableStateOf(SettingsPage.HUB) }
-    // The tab that opened Settings › Devices (Live's Manage devices), so back from it returns there instead of the hub.
-    var devicesFrom by rememberSaveable { mutableStateOf<Tab?>(null) }
-    // A mixed workout played from Live (#82) takes the whole display, tab bar included.
+    // A mixed workout played from Live (#82) takes the whole display, back button included.
     var liveFullScreen by remember { mutableStateOf(false) }
     val language = LocalConfiguration.current.locales[0].language
     // Where closing goes back to: the workout page for its editor and exercises, else the tabs.
@@ -80,12 +77,11 @@ fun CoachPoulpyRoot(
         }
     }
 
-    // An email link opens its screen over the Settings tab, where Continue or Close leads.
+    // An email link opens its screen over the You tab, where Continue or Close leads.
     LaunchedEffect(accountLink) {
         if (accountLink != null) {
-            tab = Tab.SETTINGS
+            tab = Tab.YOU
             settingsPage = SettingsPage.HUB
-            devicesFrom = null
             back = null
             route = "account:$accountLink"
             onAccountLinkOpened()
@@ -124,10 +120,8 @@ fun CoachPoulpyRoot(
 
     LaunchedEffect(openLive) {
         if (openLive) {
-            route = null
             back = null
-            devicesFrom = null
-            tab = Tab.LIVE
+            route = "live"
             onLiveOpened()
         }
     }
@@ -135,14 +129,11 @@ fun CoachPoulpyRoot(
     when (val current = route) {
         null -> Scaffold(
             bottomBar = {
-                if (!(tab == Tab.LIVE && liveFullScreen)) NavigationBar {
+                NavigationBar {
                     Tab.entries.forEach { item ->
                         NavigationBarItem(
                             selected = tab == item,
-                            onClick = {
-                                devicesFrom = null
-                                tab = item
-                            },
+                            onClick = { tab = item },
                             icon = { Icon(item.icon, contentDescription = null) },
                             label = { FitText(stringResource(item.label)) },
                         )
@@ -158,7 +149,7 @@ fun CoachPoulpyRoot(
                     onOpenWorkout = { route = "workout:$it" },
                     onStart = { route = "player:$it" },
                     onResume = { route = "resume" },
-                    onOpenLive = { tab = Tab.LIVE },
+                    onOpenLive = { route = "live" },
                     onOpenSession = { route = "session:$it" },
                     onOpenLibrary = {
                         libraryView = LibraryView.WORKOUTS
@@ -178,28 +169,11 @@ fun CoachPoulpyRoot(
                     onOpenExercise = { route = "exercise:$it" },
                     modifier = modifier,
                 )
-                Tab.LIVE -> LiveScreen(
-                    graph,
-                    language,
-                    onManageDevices = {
-                        settingsPage = SettingsPage.DEVICES
-                        devicesFrom = Tab.LIVE
-                        tab = Tab.SETTINGS
-                    },
-                    modifier = modifier,
-                    onFullScreen = { liveFullScreen = it },
-                )
-                Tab.HISTORY -> HistoryScreen(graph, language, onOpen = { route = "session:$it" }, modifier = modifier)
-                Tab.SETTINGS -> SettingsScreen(
+                Tab.YOU -> SettingsScreen(
                     graph,
                     language = language,
                     page = settingsPage,
-                    onPage = {
-                        settingsPage = it
-                        val from = devicesFrom
-                        devicesFrom = null
-                        if (it == SettingsPage.HUB && from != null) tab = from
-                    },
+                    onPage = { settingsPage = it },
                     onOpen = { device ->
                         route = when (device) {
                             DeviceRoute.Add -> "device-add"
@@ -232,6 +206,25 @@ fun CoachPoulpyRoot(
             }
         }
         "resume" -> PlayerScreen(graph, language, workoutId = null, onClose = close)
+        // Recording a walk or run takes the whole display, with a way back to Home; recording goes on after closing.
+        "live" -> Scaffold(
+            topBar = {
+                if (!liveFullScreen) IconButton(onClick = close) { Icon(Lucide.ChevronLeft, contentDescription = stringResource(R.string.action_back)) }
+            },
+        ) { padding ->
+            LiveScreen(
+                graph,
+                language,
+                onManageDevices = {
+                    settingsPage = SettingsPage.DEVICES
+                    tab = Tab.YOU
+                    back = null
+                    route = null
+                },
+                modifier = Modifier.padding(padding),
+                onFullScreen = { liveFullScreen = it },
+            )
+        }
         "device-add" -> DeviceAddScreen(graph, onBack = close)
         "device-sources" -> DataSourcesScreen(graph, onBack = close)
         else -> {

@@ -218,7 +218,7 @@ private fun CalendarView(model: HistoryModel, state: HistoryState, onOpen: (Stri
 
 /** The month grid, Monday first; swipe or the arrows change month, never past this one. */
 @Composable
-private fun MonthCard(month: CalendarMonth, selected: Int, onSelect: (Int) -> Unit, onMonth: (Int) -> Unit) {
+internal fun MonthCard(month: CalendarMonth, selected: Int, onSelect: (Int) -> Unit, onMonth: (Int) -> Unit) {
     var drag by remember { mutableFloatStateOf(0f) }
     val cells: List<CalendarDay?> = List(month.leadingBlanks) { null } + month.days
     OutlinedCard(
@@ -357,7 +357,7 @@ private fun RestingRow() {
 }
 
 @Composable
-private fun SessionCard(session: SessionRow, highlighted: Boolean, onClick: () -> Unit) {
+internal fun SessionCard(session: SessionRow, highlighted: Boolean, onClick: () -> Unit) {
     val colors = MaterialTheme.colorScheme
     OutlinedCard(
         onClick = onClick,
@@ -668,7 +668,7 @@ private fun fullDate(monthStartMillis: Long, day: Int): String =
 private fun shortDayMonth(millis: Long): String = pattern("dMMM").format(zoned(millis))
 
 /** Day and month in the user's order, such as "21/10" or "10/21". */
-private fun shortDate(millis: Long): String = pattern("dM").format(zoned(millis))
+internal fun shortDate(millis: Long): String = pattern("dM").format(zoned(millis))
 
 /** A distance in the units picked in Settings. */
 @Composable
