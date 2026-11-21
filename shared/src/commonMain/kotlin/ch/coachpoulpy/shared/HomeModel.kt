@@ -63,6 +63,8 @@ data class HomeState(
     val next: NextSession? = null,
     /** False before the first workout is saved: Home then points to the library to make one. */
     val hasWorkouts: Boolean = false,
+    /** The past under Up next: every finished session by week and day, newest first (see [diaryTimeline]). */
+    val past: List<DiaryEntry> = emptyList(),
 )
 
 /**
@@ -181,6 +183,7 @@ class HomeModel internal constructor(
             today = items,
             next = next,
             hasWorkouts = workouts.isNotEmpty(),
+            past = diaryTimeline(sessions.mapNotNull { session -> session.realTotals?.let { sessionRow(session, it, labels) } }, now, zone),
         )
     }
 

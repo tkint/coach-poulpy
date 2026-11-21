@@ -92,6 +92,19 @@ class PlanningModelsTest {
     }
 
     @Test
+    fun aSessionDoneTodayAlsoOpensThePastTimelineUnderThisWeek() {
+        val legs = workout("Legs", "push-up")
+        play(legs)
+
+        val past = home().state.await { it.loaded && it.past.isNotEmpty() }.past
+
+        assertEquals(DiaryEntry.WeekHeading(startMillis = LocalDate(2023, 11, 13).atStartOfDayIn(TimeZone.UTC).toEpochMilliseconds(), isCurrent = true), past[0])
+        assertEquals(1, (past[1] as DiaryEntry.WeekRecap).sessions)
+        assertEquals(true, (past[2] as DiaryEntry.DayHeading).isToday)
+        assertEquals("Legs", (past[3] as DiaryEntry.Session).row.title)
+    }
+
+    @Test
     fun aSessionDoneTodayTicksOffItsPlan() {
         val legs = workout("Legs", "push-up")
         graph.store.planWorkout(legs, today)
