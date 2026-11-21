@@ -136,7 +136,10 @@ struct HistoryView: View {
     }
 
     private func monthCard(_ month: CalendarMonth, _ state: HistoryState) -> some View {
-        MonthCardView(month: month, selected: selected, onSelect: { selected = $0 }, onMonth: { changeMonth(by: $0, state) })
+        MonthCardView(month: month, selected: selected, onSelect: { selected = $0 }, onMonth: { changeMonth(by: $0, state) }, neighbour: { step in
+            let at = offset + step
+            return at >= state.firstMonthOffset && at <= 0 ? history.model.month(state: state, offset: at, selectedDay: 0) : nil
+        })
     }
 
     private func dayHeader(_ section: DaySection, highlighted: Bool) -> some View {
@@ -287,22 +290,28 @@ struct HistoryView: View {
     }
 }
 
-/// The month grid, Monday first; swipe or the arrows change month, never past this one. Used by History and by Home's Jump to a day.
+/// The month grid, Monday first; swipe or the arrows change month, never past this one nor before the first. Used by History
+/// and by Home's Jump to a day. The days follow the finger, with the month beside them coming in (`neighbour` gives it, or
+/// nil at either end), and settle on the one the swipe went far enough towards. Every month takes six weeks so the card
+/// keeps its height.
 struct MonthCardView: View {
     let month: CalendarMonth
     let selected: Int32
     let onSelect: (Int32) -> Void
     let onMonth: (Int32) -> Void
-    /// The way the last change went, so the days slide in from that side.
-    @State private var direction: Int32 = 1
+    let neighbour: (Int32) -> CalendarMonth?
+    @State private var slide: CGFloat = 0
+    @State private var width: CGFloat = 0
 
     var body: some View {
+        let previous = neighbour(-1)
+        let next = neighbour(1)
         VStack(spacing: 4) {
             HStack {
-                Button { go(-1) } label: {
+                Button { settle(-1) } label: {
                     LucideIcon(.chevronLeft, size: 22).frame(width: 44, height: 44)
                 }
-                .disabled(!month.canGoBack)
+                .disabled(previous == nil)
                 .accessibilityLabel(Text("history.previousMonth"))
                 Spacer()
                 VStack(spacing: 0) {
@@ -312,10 +321,10 @@ struct MonthCardView: View {
                         .foregroundStyle(PoulpyColor.onSurfaceVariant)
                 }
                 Spacer()
-                Button { go(1) } label: {
+                Button { settle(1) } label: {
                     LucideIcon(.chevronRight, size: 22).frame(width: 44, height: 44)
                 }
-                .disabled(!month.canGoForward)
+                .disabled(next == nil)
                 .accessibilityLabel(Text("history.nextMonth"))
             }
             .foregroundStyle(PoulpyColor.primary)
@@ -328,46 +337,68 @@ struct MonthCardView: View {
                 }
             }
             .accessibilityHidden(true)
-            // The days slide in from the side the month comes from, and every month takes six weeks so the card keeps its height.
             ZStack {
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 0), count: 7), spacing: 2) {
-                    ForEach(0..<Int(month.leadingBlanks), id: \.self) { index in
-                        Color.clear.frame(height: 44).id("lead\(index)")
-                    }
-                    ForEach(month.days, id: \.day) { day in
-                        dayCell(day)
-                    }
-                    ForEach(0..<max(0, 42 - Int(month.leadingBlanks) - month.days.count), id: \.self) { index in
-                        Color.clear.frame(height: 44).id("trail\(index)")
-                    }
-                }
-                .id(month.monthStartMillis)
-                .transition(.asymmetric(
-                    insertion: .move(edge: direction > 0 ? .trailing : .leading).combined(with: .opacity),
-                    removal: .move(edge: direction > 0 ? .leading : .trailing).combined(with: .opacity)
-                ))
+                if let previous { days(previous, selected: 0).offset(x: slide - width).accessibilityHidden(true) }
+                days(month, selected: selected).offset(x: slide)
+                if let next { days(next, selected: 0).offset(x: slide + width).accessibilityHidden(true) }
             }
+            .background(GeometryReader { geo in Color.clear.onAppear { width = geo.size.width }.onChange(of: geo.size.width) { width = $0 } })
             .clipped()
+            .contentShape(Rectangle())
+            .gesture(
+                DragGesture(minimumDistance: 10)
+                    .onChanged { drag in
+                        let moved = drag.translation.width
+                        // At either end the days only give a little, as a sign there is nothing further.
+                        let blocked = (moved > 0 && previous == nil) || (moved < 0 && next == nil)
+                        slide = blocked ? moved / 4 : moved
+                    }
+                    .onEnded { drag in
+                        let moved = drag.translation.width
+                        if moved > width / 4, previous != nil { settle(-1) }
+                        else if moved < -width / 4, next != nil { settle(1) }
+                        else { settle(0) }
+                    }
+            )
         }
         .padding(EdgeInsets(top: 10, leading: 12, bottom: 12, trailing: 12))
         .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
         .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(PoulpyColor.outline))
         .padding(.horizontal, PoulpySpace.lg)
         .padding(.top, 14)
-        .gesture(
-            DragGesture(minimumDistance: 30).onEnded { drag in
-                if drag.translation.width > 80, month.canGoBack { go(-1) }
-                if drag.translation.width < -80, month.canGoForward { go(1) }
+    }
+
+    /// Slides to the month `step` away (0 springs back), then makes it the month; it is then already in the middle.
+    private func settle(_ step: Int32) {
+        let target = step == 0 ? 0 : -CGFloat(step) * width
+        withAnimation(.easeOut(duration: 0.2)) { slide = target }
+        guard step != 0 else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            var plain = Transaction()
+            plain.disablesAnimations = true
+            withTransaction(plain) {
+                onMonth(step)
+                slide = 0
             }
-        )
+        }
     }
 
-    private func go(_ step: Int32) {
-        direction = step
-        withAnimation(.easeInOut(duration: 0.25)) { onMonth(step) }
+    /// Six weeks of the month's days, blanks before the 1st and after the last day.
+    private func days(_ shown: CalendarMonth, selected: Int32) -> some View {
+        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 0), count: 7), spacing: 2) {
+            ForEach(0..<Int(shown.leadingBlanks), id: \.self) { _ in
+                Color.clear.frame(height: 44)
+            }
+            ForEach(shown.days, id: \.day) { day in
+                dayCell(shown, day, selected: selected)
+            }
+            ForEach(0..<max(0, 42 - Int(shown.leadingBlanks) - shown.days.count), id: \.self) { _ in
+                Color.clear.frame(height: 44)
+            }
+        }
     }
 
-    private func dayCell(_ day: CalendarDay) -> some View {
+    private func dayCell(_ month: CalendarMonth, _ day: CalendarDay, selected: Int32) -> some View {
         let isSelected = day.day == selected
         let text: Color = day.active ? PoulpyColor.onPrimary : (day.isFuture ? PoulpyColor.onSurfaceVariant.opacity(0.45) : PoulpyColor.onSurface)
         let dot: Color = !day.isToday ? .clear : (day.active ? PoulpyColor.onPrimary : PoulpyColor.primary)

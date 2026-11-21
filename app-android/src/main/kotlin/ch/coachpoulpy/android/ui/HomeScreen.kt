@@ -307,7 +307,9 @@ private fun JumpToDaySheet(graph: AppGraph, language: String, onDay: (Long) -> U
             MonthCard(month, selected = 0, onSelect = { day ->
                 val start = Instant.ofEpochMilli(month.monthStartMillis).atZone(ZoneId.systemDefault()).toLocalDate().plusDays(day - 1L)
                 onDay(start.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli())
-            }, onMonth = { step -> offset = (offset + step).coerceAtMost(0) })
+            }, onMonth = { step -> offset = (offset + step).coerceIn(historyState.firstMonthOffset, 0) }, neighbour = { step ->
+                (offset + step).takeIf { it in historyState.firstMonthOffset..0 }?.let { history.month(historyState, it, selectedDay = 0) }
+            })
         }
     }
 }

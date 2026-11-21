@@ -411,6 +411,9 @@ private struct JumpToDaySheet: View {
                 onDay(Int64(Calendar.current.startOfDay(for: target).timeIntervalSince1970 * 1000))
             }, onMonth: { step in
                 offset = min(0, max(state.firstMonthOffset, offset + step))
+            }, neighbour: { step in
+                let at = offset + step
+                return at >= state.firstMonthOffset && at <= 0 ? history.model.month(state: state, offset: at, selectedDay: 0) : nil
             })
             Spacer(minLength: 0)
         }
