@@ -737,14 +737,14 @@ private fun fullDate(monthStartMillis: Long, day: Int): String =
     DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).withLocale(Locale.getDefault()).format(zoned(monthStartMillis).withDayOfMonth(day))
 
 /** "24 Oct", in the user's order. */
-private fun shortDayMonth(millis: Long): String = pattern("dMMM").format(zoned(millis))
+internal fun shortDayMonth(millis: Long): String = pattern("dMMM").format(zoned(millis))
 
 /** Day and month in the user's order, such as "21/10" or "10/21". */
 internal fun shortDate(millis: Long): String = pattern("dM").format(zoned(millis))
 
 /** A distance in the units picked in Settings. */
 @Composable
-private fun distance(meters: Double, decimals: Int): String {
+internal fun distance(meters: Double, decimals: Int): String {
     val m = Units.distance(meters, LocalUnitSystem.current, decimals)
     return "${decimal(m.value, m.decimals)} ${m.unit}"
 }

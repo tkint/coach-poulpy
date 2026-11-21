@@ -370,15 +370,15 @@
     "unitsHint": "Métrique : km, km/h, kg, cm. Impérial : mi, mph, lb, pi et po. Le poids et la taille déjà notés sont convertis, jamais modifiés.",
     "languageNextLaunch": "Une nouvelle langue s’affiche à la prochaine ouverture de l’app.",
     "version": "Version {version}",
-    "body": "Corps",
     "app": "App",
     "about": "À propos",
-    "appearanceUnits": "Apparence et unités",
-    "editProfile": "Modifier votre profil",
     "yourProfile": "Votre profil",
     "aboutApp": "À propos de Coach Poulpy",
     "aboutLine": "Version {version} · les données restent sur ce téléphone",
-    "appIcon": "Icône de l’app"
+    "appIcon": "Icône de l’app",
+    "devicesNone": "Rien d’ajouté pour l’instant",
+    "devicesLine": "{count, plural, one {# connecté · {kinds}} many {# connectés · {kinds}} other {# connectés · {kinds}}}",
+    "devicesIdle": "Non connecté · {kinds}"
   },
   "theme": {
     "system": "Système",
@@ -468,8 +468,7 @@
     "imageNote": "Une carte avec vos chiffres à envoyer ou à publier"
   },
   "profile": {
-    "title": "Votre profil",
-    "subtitle": "Tout est facultatif et reste sur ce téléphone",
+    "title": "Profil",
     "aboutYou": "À propos de vous",
     "training": "Entraînement",
     "name": "Comment Poulpy doit-il vous appeler ?",
@@ -539,7 +538,8 @@
     "painDurationClearedSub": "Rééducation sans date de fin. Efface-la ici quand tu es de retour",
     "painAgain": "Encore mal quand le temps est écoulé ? Règle-la de nouveau, un seul geste suffit.",
     "figureFront": "Face",
-    "figureBack": "Dos"
+    "figureBack": "Dos",
+    "measurements": "Mesures"
   },
   "body": {
     "weight": "Poids",
@@ -595,10 +595,7 @@
   },
   "account": {
     "sectionLabel": "Compte",
-    "guestRow": "Se connecter ou créer un compte",
-    "guestRowHint": "Sauvegardez votre entraînement et retrouvez-le sur d’autres téléphones.",
     "rowPending": "Confirmez votre adresse e-mail",
-    "rowPendingHint": "Lien envoyé à {email}",
     "title": "Compte",
     "signUpTitle": "Créer votre compte",
     "signUpIntro": "Sauvegardez votre entraînement et retrouvez-le sur n’importe quel téléphone. L’app continue de fonctionner sans connexion.",
@@ -685,7 +682,12 @@
     "deleteTitle": "Supprimer votre compte ?",
     "deleteBody": "Cela supprime tout ce que contient votre compte, tout de suite et définitivement. Chaque téléphone connecté redevient un invité et garde sa propre copie. Les sauvegardes disparaissent sous 30 jours.",
     "deletePassword": "Saisissez votre mot de passe pour confirmer",
-    "errorDeletePassword": "Ce mot de passe n’est pas le bon. Rien n’a été supprimé."
+    "errorDeletePassword": "Ce mot de passe n’est pas le bon. Rien n’a été supprimé.",
+    "rowGuest": "Invité·e · créez un compte ou connectez-vous",
+    "guestTitle": "Votre entraînement est seulement sur ce téléphone.",
+    "guestAbout": "Avec un compte",
+    "guestAboutBody": "Votre entraînement est sauvegardé et vous le retrouvez sur d’autres téléphones. Rien ne change tant que vous ne choisissez pas.",
+    "createAnAccount": "Créer un compte"
   },
   "crash": {
     "title": "Coach Poulpy s’est fermé sur une erreur",
@@ -702,5 +704,24 @@
     "walkDetail": "Suivez-la en direct, avec votre téléphone ou un tapis",
     "libraryTitle": "Une séance de votre bibliothèque",
     "libraryDetail": "Choisissez-en une et suivez ses étapes"
+  },
+  "you": {
+    "statistics": "Statistiques",
+    "period": "Période",
+    "period7": "7 jours",
+    "period30": "30 jours",
+    "periodYear": "Année",
+    "periodAll": "Tout",
+    "sessions": "Séances",
+    "weightToday": "Aujourd’hui",
+    "weightYesterday": "Hier",
+    "weightDaysAgo": "{days, plural, one {il y a # jour} many {il y a # jours} other {il y a # jours}}",
+    "badgeGuest": "Invité·e",
+    "badgeSignedIn": "Connecté·e",
+    "editTitle": "Modifier les statistiques",
+    "editNote": "Choisissez les blocs à afficher dans Vous, et faites glisser la poignée pour les réordonner.",
+    "blockSessions": "Séances et durée",
+    "blockRecords": "Records et poids",
+    "dragHandle": "Réordonner {block}"
   }
 }

@@ -155,6 +155,14 @@ _Avoid_: Account (there is none while the app is guest-only), user data
 One dated weight or height entry in the person's log. Entries are only added or corrected, never summed, and each chart is drawn from them.
 _Avoid_: Weigh-in record, vital
 
+**Statistics**:
+What You shows about the sessions done, as blocks of cards (sessions and time, then weight, longest run and full octopus) for one period. The period switch (7 days, 30 days, Year, All time) sets every block; Edit chooses which blocks show and in what order, kept on the phone. Derived from the sessions, never typed in.
+_Avoid_: Stats page, dashboard, progress
+
+**Period**:
+The span the statistics add up: the last 7 days, 30 days or year counting today, or everything. A session counts on the day it started.
+_Avoid_: Range (the weight and height charts have a range), timeframe
+
 **Unit system**:
 Metric or imperial, chosen once in Settings. Everything is stored metric (kg, cm, km) and converted only for display and input, so switching never changes a stored value.
 _Avoid_: Locale, measurement preference

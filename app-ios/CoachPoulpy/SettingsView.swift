@@ -7,12 +7,13 @@ enum DeviceRoute: Hashable {
     case device(String)
 }
 
-/// The Settings tab: a hub that opens the account, profile, weight, height, appearance and units, and devices.
-/// The account's screens open over the tabs through `onAccount`.
+/// The You tab: You itself, and the pages it opens (Settings, Profile, Account and Devices). The account's screens open over
+/// the tabs through `onAccount`.
 struct SettingsView: View {
     @ObservedObject var settings: Observed<SettingsModel, SettingsUiState>
     @ObservedObject var account: Observed<AccountModel, AccountState>
     let onAccount: (String) -> Void
+    @StateObject private var you: Observed<YouModel, YouState>
     @StateObject private var devices: Observed<DevicesModel, DevicesUiState>
     @StateObject private var profile: Observed<ProfileModel, ProfileUi>
     @StateObject private var weight: Observed<BodyModel, BodyUi>
@@ -30,6 +31,7 @@ struct SettingsView: View {
         self.settings = settings
         self.account = account
         self.onAccount = onAccount
+        _you = StateObject(wrappedValue: graph.observedYou())
         _devices = StateObject(wrappedValue: graph.observedDevices())
         _profile = StateObject(wrappedValue: graph.observedProfile())
         _weight = StateObject(wrappedValue: graph.observedBody(.weight))
@@ -39,37 +41,141 @@ struct SettingsView: View {
 
     var body: some View {
         NavigationStack(path: $path) {
-            SettingsHub(settings: settings, account: account, onAccount: onAccount, profile: profile, weight: weight, height: height)
-                .navigationTitle("tab.settings")
+            YouView(you: you, account: account, profile: profile)
                 .navigationDestination(for: SettingsPage.self) { page in
-                    switch page {
-                    case .account: AccountPage(account: account, onFlow: onAccount)
-                    case .profile: ProfileView(profile: profile)
-                    case .weight: BodyView(metric: .weight, log: weight, units: settings.value.units)
-                    case .height: BodyView(metric: .height, log: height, units: settings.value.units)
-                    case .preferences: PreferencesView(settings: settings)
-                    case .devices:
-                        DevicesList(devices: devices, bluetooth: bluetooth, onAdd: { path.append(DeviceRoute.add) })
-                            .navigationTitle("settings.devices")
-                            .navigationBarTitleDisplayMode(.inline)
-                            .toolbar {
-                                ToolbarItem(placement: .navigationBarTrailing) {
-                                    NavigationLink(value: DeviceRoute.add) {
-                                        LucideIcon(.plus)
+                    Group {
+                        switch page {
+                        case .settings: SettingsPageView(settings: settings, devices: devices)
+                        case .profile: ProfileView(profile: profile, account: account, weight: weight, height: height, units: settings.value.units)
+                        case .account: AccountPage(account: account, onFlow: onAccount)
+                        case .devices:
+                            DevicesList(devices: devices, bluetooth: bluetooth, onAdd: { path.append(DeviceRoute.add) })
+                                .navigationTitle("settings.devices")
+                                .navigationBarTitleDisplayMode(.inline)
+                                .toolbar {
+                                    ToolbarItem(placement: .navigationBarTrailing) {
+                                        NavigationLink(value: DeviceRoute.add) {
+                                            LucideIcon(.plus)
+                                        }
+                                        .accessibilityLabel(Text("devices.add"))
                                     }
-                                    .accessibilityLabel(Text("devices.add"))
                                 }
-                            }
+                        }
                     }
+                    // These pages take the whole screen, as drawn.
+                    .toolbar(.hidden, for: .tabBar)
                 }
                 .navigationDestination(for: DeviceRoute.self) { route in
-                    switch route {
-                    case .add: DeviceAddView(devices: devices)
-                    case .sources: DataSourcesView(devices: devices)
-                    case .device(let key): DeviceView(devices: devices, key: key)
+                    Group {
+                        switch route {
+                        case .add: DeviceAddView(devices: devices)
+                        case .sources: DataSourcesView(devices: devices)
+                        case .device(let key): DeviceView(devices: devices, key: key)
+                        }
                     }
+                    .toolbar(.hidden, for: .tabBar)
                 }
         }
+    }
+}
+
+/// Settings, opened by the cog on You: Appearance, Region, Devices, App icon and About.
+private struct SettingsPageView: View {
+    @ObservedObject var settings: Observed<SettingsModel, SettingsUiState>
+    @ObservedObject var devices: Observed<DevicesModel, DevicesUiState>
+    @State private var appIcon = AppIcon.current
+    @State private var pickingIcon = false
+
+    var body: some View {
+        let state = settings.value
+        let model = settings.model
+        List {
+            Section {
+                Picker("settings.theme", selection: Binding(get: { state.theme }, set: { model.setTheme(theme: $0) })) {
+                    Text("theme.system").tag(ThemeChoice.system)
+                    Text("theme.light").tag(ThemeChoice.light)
+                    Text("theme.dark").tag(ThemeChoice.dark)
+                }
+                .pickerStyle(.menu)
+            } header: {
+                Text("settings.appearance")
+            } footer: {
+                Text("settings.themeHint")
+            }
+            Section {
+                // Language names stay in their own language, so anyone can find theirs.
+                Picker("settings.language", selection: Binding(get: { state.language }, set: {
+                    model.setLanguage(language: $0)
+                    AppLanguage.apply($0)
+                })) {
+                    Text("language.system").tag(LanguageChoice.system)
+                    Text(verbatim: "English").tag(LanguageChoice.english)
+                    Text(verbatim: "Français").tag(LanguageChoice.french)
+                }
+                .pickerStyle(.menu)
+                Picker("settings.units", selection: Binding(get: { state.units }, set: { model.setUnits(units: $0) })) {
+                    Text("units.metric").tag(UnitSystem.metric)
+                    Text("units.imperial").tag(UnitSystem.imperial)
+                }
+                .pickerStyle(.menu)
+            } header: {
+                Text("settings.region")
+            } footer: {
+                Text("settings.languageNextLaunch") + Text(verbatim: " ") + Text("settings.unitsHint")
+            }
+            Section("settings.app") {
+                NavigationLink(value: SettingsPage.devices) { row(.gauge, "settings.devices", devicesLine()) }
+                Button { pickingIcon = true } label: {
+                    HStack(spacing: 12) {
+                        Image(appIcon.drawing).resizable().scaledToFit().frame(width: 30, height: 30).scaleEffect(1.6).frame(width: 26).padding(.bottom, 4).accessibilityHidden(true)
+                        VStack(alignment: .leading, spacing: 0) {
+                            Text("settings.appIcon").font(.poulpy(.headline)).foregroundStyle(PoulpyColor.onSurface)
+                            Text(appIcon.label).font(.poulpy(.footnote)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+                        }
+                        Spacer()
+                        LucideIcon(.chevronRight, size: 16).foregroundStyle(PoulpyColor.onSurfaceVariant.opacity(0.6))
+                    }
+                    .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                }
+            }
+            Section("settings.about") {
+                row(.info, "settings.aboutApp", L("settings.aboutLine %@", Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "—"))
+            }
+        }
+        .navigationTitle("tab.settings")
+        .navigationBarTitleDisplayMode(.inline)
+        .sheet(isPresented: $pickingIcon) {
+            AppIconSheet(selected: appIcon) { picked in
+                appIcon = picked
+                picked.apply()
+            }
+        }
+    }
+
+    /// "3 connected · treadmill, foot pod, heart rate band", or that nothing was added.
+    private func devicesLine() -> String {
+        let known = devices.value.known
+        if known.isEmpty { return L("settings.devicesNone") }
+        var kinds: [String] = []
+        for device in known {
+            let name = kindLabel(device.kind).lowercased()
+            if !kinds.contains(name) { kinds.append(name) }
+        }
+        let connected = known.filter { $0.status == .connected }.count
+        if connected > 0 { return L("settings.devicesLine %lld %@", Int64(connected), kinds.joined(separator: ", ")) }
+        return L("settings.devicesIdle %@", kinds.joined(separator: ", "))
+    }
+
+    /// A leading icon, a bold title with a line under it.
+    private func row(_ symbol: Lucide, _ title: LocalizedStringKey, _ subtitle: String?) -> some View {
+        HStack(spacing: 12) {
+            LucideIcon(symbol, size: 24).foregroundStyle(PoulpyColor.primary).frame(width: 26)
+            VStack(alignment: .leading, spacing: 0) {
+                Text(title).font(.poulpy(.headline))
+                if let subtitle { Text(subtitle).font(.poulpy(.footnote)).foregroundStyle(PoulpyColor.onSurfaceVariant) }
+            }
+        }
+        .frame(minHeight: 44)
     }
 }
 

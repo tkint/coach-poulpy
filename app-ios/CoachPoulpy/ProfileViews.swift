@@ -2,170 +2,8 @@ import SwiftUI
 import Charts
 import Shared
 
-/// The pages the Settings hub opens inside its tab. Device pages open through `DeviceRoute`.
-enum SettingsPage: Hashable { case account, profile, weight, height, preferences, devices }
-
-// MARK: - Hub
-
-/// Settings: the profile card, Account, Body, App and About. `onAccount` opens a sign-in or sign-up screen over the tabs.
-struct SettingsHub: View {
-    @ObservedObject var settings: Observed<SettingsModel, SettingsUiState>
-    @ObservedObject var account: Observed<AccountModel, AccountState>
-    let onAccount: (String) -> Void
-    @ObservedObject var profile: Observed<ProfileModel, ProfileUi>
-    @ObservedObject var weight: Observed<BodyModel, BodyUi>
-    @ObservedObject var height: Observed<BodyModel, BodyUi>
-    @State private var appIcon = AppIcon.current
-    @State private var pickingIcon = false
-
-    var body: some View {
-        let units = settings.value.units
-        let parts = [
-            profile.value.age.map { L("profile.years %lld", Int64($0.intValue)) },
-            height.value.latest.map { bodyText(.height, $0.value, units) },
-            weight.value.latest.map { bodyText(.weight, $0.value, units) },
-        ].compactMap { $0 }
-        List {
-            Section {
-                NavigationLink(value: SettingsPage.profile) {
-                    HStack(spacing: 14) {
-                        Image("PoulpyMoodHappy").resizable().scaledToFit().frame(width: 64, height: 64).accessibilityHidden(true)
-                        VStack(alignment: .leading, spacing: 2) {
-                            if profile.value.displayName.isEmpty {
-                                Text("settings.yourProfile").font(.poulpy(.title3))
-                            } else {
-                                Text(profile.value.displayName).font(.poulpy(.title3))
-                            }
-                            if !parts.isEmpty { Text(parts.joined(separator: " · ")) }
-                            Text("settings.editProfile").font(.custom(PoulpyFontFace.nunitoExtraBold, size: 13, relativeTo: .footnote))
-                        }
-                        Spacer()
-                    }
-                    .foregroundStyle(PoulpyColor.onPrimaryContainer)
-                    .padding(.vertical, 6)
-                }
-                .listRowBackground(PoulpyColor.primaryContainer)
-            }
-            AccountSection(account: account, onFlow: onAccount)
-            Section("settings.body") {
-                NavigationLink(value: SettingsPage.height) {
-                    row(.moveVertical, "body.height", height.value.latest.map { bodyText(.height, $0.value, units) } ?? L("body.nothingLogged"))
-                }
-                NavigationLink(value: SettingsPage.weight) {
-                    row(.weight, "body.weight", weight.value.latest.map { bodyText(.weight, $0.value, units) } ?? L("body.nothingLogged"))
-                }
-            }
-            Section("settings.app") {
-                NavigationLink(value: SettingsPage.preferences) {
-                    row(.contrast, "settings.appearanceUnits", "\(themeName(settings.value.theme)) · \(languageName(settings.value.language)) · \(unitsName(units))")
-                }
-                NavigationLink(value: SettingsPage.devices) { row(.gauge, "settings.devices", nil) }
-                Button { pickingIcon = true } label: {
-                    HStack(spacing: 12) {
-                        Image(appIcon.drawing).resizable().scaledToFit().frame(width: 30, height: 30).scaleEffect(1.6).frame(width: 26).padding(.bottom, 4).accessibilityHidden(true)
-                        VStack(alignment: .leading, spacing: 0) {
-                            Text("settings.appIcon").font(.poulpy(.headline)).foregroundStyle(PoulpyColor.onSurface)
-                            Text(appIcon.label).font(.poulpy(.footnote)).foregroundStyle(PoulpyColor.onSurfaceVariant)
-                        }
-                        Spacer()
-                        LucideIcon(.chevronRight, size: 16).foregroundStyle(PoulpyColor.onSurfaceVariant.opacity(0.6))
-                    }
-                    .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-                }
-            }
-            Section("settings.about") {
-                row(.info, "settings.aboutApp", L("settings.aboutLine %@", Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "—"))
-            }
-        }
-        .sheet(isPresented: $pickingIcon) {
-            AppIconSheet(selected: appIcon) { picked in
-                appIcon = picked
-                picked.apply()
-            }
-        }
-    }
-
-    /// A leading icon, a bold title with a line under it.
-    private func row(_ symbol: Lucide, _ title: LocalizedStringKey, _ subtitle: String?) -> some View {
-        HStack(spacing: 12) {
-            LucideIcon(symbol, size: 24).foregroundStyle(PoulpyColor.primary).frame(width: 26)
-            VStack(alignment: .leading, spacing: 0) {
-                Text(title).font(.poulpy(.headline))
-                if let subtitle { Text(subtitle).font(.poulpy(.footnote)).foregroundStyle(PoulpyColor.onSurfaceVariant) }
-            }
-        }
-        .frame(minHeight: 44)
-    }
-
-    private func themeName(_ theme: ThemeChoice) -> String {
-        switch theme {
-        case .light: return L("theme.light")
-        case .dark: return L("theme.dark")
-        default: return L("theme.system")
-        }
-    }
-
-    private func languageName(_ language: LanguageChoice) -> String {
-        switch language {
-        case .english: return "English"
-        case .french: return "Français"
-        default: return L("language.system")
-        }
-    }
-
-    private func unitsName(_ units: UnitSystem) -> String {
-        units == UnitSystem.imperial ? L("units.imperial") : L("units.metric")
-    }
-}
-
-// MARK: - Appearance and units
-
-/// Theme, language and units as selects.
-struct PreferencesView: View {
-    @ObservedObject var settings: Observed<SettingsModel, SettingsUiState>
-
-    var body: some View {
-        let state = settings.value
-        let model = settings.model
-        List {
-            Section {
-                Picker("settings.theme", selection: Binding(get: { state.theme }, set: { model.setTheme(theme: $0) })) {
-                    Text("theme.system").tag(ThemeChoice.system)
-                    Text("theme.light").tag(ThemeChoice.light)
-                    Text("theme.dark").tag(ThemeChoice.dark)
-                }
-                .pickerStyle(.menu)
-            } header: {
-                Text("settings.appearance")
-            } footer: {
-                Text("settings.themeHint")
-            }
-            Section {
-                // Language names stay in their own language, so anyone can find theirs.
-                Picker("settings.language", selection: Binding(get: { state.language }, set: {
-                    model.setLanguage(language: $0)
-                    AppLanguage.apply($0)
-                })) {
-                    Text("language.system").tag(LanguageChoice.system)
-                    Text(verbatim: "English").tag(LanguageChoice.english)
-                    Text(verbatim: "Français").tag(LanguageChoice.french)
-                }
-                .pickerStyle(.menu)
-                Picker("settings.units", selection: Binding(get: { state.units }, set: { model.setUnits(units: $0) })) {
-                    Text("units.metric").tag(UnitSystem.metric)
-                    Text("units.imperial").tag(UnitSystem.imperial)
-                }
-                .pickerStyle(.menu)
-            } header: {
-                Text("settings.region")
-            } footer: {
-                Text("settings.languageNextLaunch") + Text(verbatim: " ") + Text("settings.unitsHint")
-            }
-        }
-        .navigationTitle("settings.appearanceUnits")
-        .navigationBarTitleDisplayMode(.inline)
-    }
-}
+/// The pages You opens inside its tab: Settings, Profile and what hangs off them. Device pages open through `DeviceRoute`.
+enum SettingsPage: Hashable { case settings, profile, account, devices }
 
 // MARK: - Profile
 
@@ -174,9 +12,16 @@ private enum ProfileSheet: Identifiable {
     var id: Self { self }
 }
 
-/// Your profile: every field is optional and saved as it is changed.
+/// Profile: every field is optional and saved as it is changed. A small Account row sits at the top, and Measurements has a row
+/// each for weight and height.
 struct ProfileView: View {
     @ObservedObject var profile: Observed<ProfileModel, ProfileUi>
+    @ObservedObject var account: Observed<AccountModel, AccountState>
+    @ObservedObject var weight: Observed<BodyModel, BodyUi>
+    @ObservedObject var height: Observed<BodyModel, BodyUi>
+    let units: UnitSystem
+    @State private var openWeight = false
+    @State private var openHeight = false
     @State private var sheet: ProfileSheet?
     @State private var name = ""
     @State private var custom = ""
@@ -188,6 +33,22 @@ struct ProfileView: View {
         let notSet = L("profile.notSet")
         ScrollView {
             VStack(alignment: .leading, spacing: 10) {
+                NavigationLink(value: SettingsPage.account) {
+                    HStack(spacing: 12) {
+                        LucideIcon(.userRound, size: 24).foregroundStyle(PoulpyColor.primary).frame(width: 26)
+                        VStack(alignment: .leading, spacing: 0) {
+                            Text("account.sectionLabel").font(.poulpy(.headline)).foregroundStyle(PoulpyColor.onSurface)
+                            Text(accountDetail(account.value)).font(.poulpy(.footnote)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+                        }
+                        Spacer()
+                        LucideIcon(.chevronRight, size: 16).foregroundStyle(PoulpyColor.onSurfaceVariant.opacity(0.6))
+                    }
+                    .frame(minHeight: 44)
+                    .padding(.horizontal, 14)
+                    .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
+                    .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(PoulpyColor.outline, lineWidth: 1))
+                }
+                .buttonStyle(.plain)
                 sectionLabel("profile.aboutYou")
                 PoulpyTextField(label: "profile.name", text: $name)
                     .onChange(of: name) { model.setDisplayName(name: $0) }
@@ -208,6 +69,14 @@ struct ProfileView: View {
                         .onChange(of: heartRate) { model.setRestingHeartRateText(text: $0) }
                     FieldNote("profile.restingHrHint")
                 }
+                sectionLabel("profile.measurements")
+                VStack(spacing: 0) {
+                    measurementRow(.weight, "body.weight", weight.value.latest.map { bodyText(.weight, $0.value, units) }) { openWeight = true }
+                    Divider().overlay(PoulpyColor.outline)
+                    measurementRow(.moveVertical, "body.height", height.value.latest.map { bodyText(.height, $0.value, units) }) { openHeight = true }
+                }
+                .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
+                .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(PoulpyColor.outline, lineWidth: 1))
                 SelectField(label: "profile.pain", value: painText(state)) { sheet = .pain }
                 FieldNote("profile.painNote")
             }
@@ -216,6 +85,8 @@ struct ProfileView: View {
         }
         .scrollDismissesKeyboard(.interactively)
         .background(PoulpyColor.background)
+        .navigationDestination(isPresented: $openWeight) { BodyView(metric: .weight, log: weight, units: units).toolbar(.hidden, for: .tabBar) }
+        .navigationDestination(isPresented: $openHeight) { BodyView(metric: .height, log: height, units: units).toolbar(.hidden, for: .tabBar) }
         .navigationTitle("profile.title")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
@@ -277,6 +148,32 @@ struct ProfileView: View {
         guard let pronouns = state.pronouns else { return notSet }
         if pronouns == Pronouns.custom && !state.customPronouns.isEmpty { return state.customPronouns }
         return pronounLabel(pronouns)
+    }
+
+    private func accountDetail(_ state: AccountState) -> String {
+        switch state {
+        case is AccountStatePending: return L("account.rowPending")
+        case let signedIn as AccountStateSignedIn: return signedIn.email
+        default: return L("account.rowGuest")
+        }
+    }
+
+    /// A leading icon, the metric and its latest value, and a chevron; it opens that metric's page.
+    private func measurementRow(_ symbol: Lucide, _ title: LocalizedStringKey, _ value: String?, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: 12) {
+                LucideIcon(symbol, size: 24).foregroundStyle(PoulpyColor.primary).frame(width: 26)
+                VStack(alignment: .leading, spacing: 0) {
+                    Text(title).font(.poulpy(.headline)).foregroundStyle(PoulpyColor.onSurface)
+                    Text(value ?? L("body.nothingLogged")).font(.poulpy(.footnote)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+                }
+                Spacer()
+                LucideIcon(.chevronRight, size: 16).foregroundStyle(PoulpyColor.onSurfaceVariant.opacity(0.6))
+            }
+            .frame(minHeight: 44)
+            .padding(.horizontal, 14)
+        }
+        .buttonStyle(.plain)
     }
 
     private func painText(_ state: ProfileUi) -> String {
@@ -359,7 +256,7 @@ private func figureLabel(_ value: BodyFigure) -> String {
     }
 }
 
-private func goalLabel(_ value: TrainingGoal) -> String {
+func goalLabel(_ value: TrainingGoal) -> String {
     switch value {
     case .stayActive: return L("profile.goalStayActive")
     case .buildStrength: return L("profile.goalBuildStrength")
@@ -369,7 +266,7 @@ private func goalLabel(_ value: TrainingGoal) -> String {
     }
 }
 
-private func experienceLabel(_ value: Experience) -> String {
+func experienceLabel(_ value: Experience) -> String {
     switch value {
     case .justStarting: return L("profile.experienceJustStarting")
     case .gettingGoing: return L("profile.experienceGettingGoing")

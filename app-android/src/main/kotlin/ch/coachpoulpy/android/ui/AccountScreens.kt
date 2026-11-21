@@ -122,25 +122,6 @@ internal fun WatchEmailConfirmation(onConfirmed: () -> Unit) {
     }
 }
 
-/** Settings' Account section: one row that says where the phone stands and opens the next step. */
-@Composable
-internal fun AccountRow(onPage: () -> Unit, onFlow: (String) -> Unit, row: @Composable (title: String, subtitle: String, onClick: () -> Unit) -> Unit) {
-    val account = rememberAccount()
-    val state by account.state.collectAsStateWithLifecycle()
-    when (val current = state) {
-        AccountState.Guest -> row(stringResource(R.string.account_guestRow), stringResource(R.string.account_guestRowHint)) { onFlow("sign-in") }
-        is AccountState.Pending -> row(stringResource(R.string.account_rowPending), stringResource(R.string.account_rowPendingHint, current.email), onPage)
-        is AccountState.SignedIn -> row(current.email, syncSummary(current), onPage)
-    }
-}
-
-/** "Up to date · Last synced 2 min ago", or that the training is on its way. */
-@Composable
-private fun syncSummary(state: AccountState.SignedIn): String = listOfNotNull(
-    stringResource(if (state.upToDate) R.string.account_stateUpToDate else R.string.account_uploading),
-    state.lastSyncedAt?.let { stringResource(R.string.account_stateLastSynced, since(it)) },
-).joinToString(" · ")
-
 /** How long ago [at] was, in the app's language, refreshed every half minute. */
 @Composable
 private fun since(at: Instant): String {
@@ -172,8 +153,31 @@ internal fun AccountPage(onBack: () -> Unit, onFlow: (String) -> Unit, modifier:
     var deleting by remember { mutableStateOf(false) }
     val current = state
     if (current == AccountState.Guest) {
-        // Signed out, deleted or changed address: nothing is left to show here.
-        LaunchedEffect(Unit) { onBack() }
+        // A guest, or signed out or deleted: what an account adds, and the way in.
+        SubPage(stringResource(R.string.account_title), subtitle = null, onBack = onBack, modifier = modifier) {
+            OutlinedSurface {
+                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text(stringResource(R.string.you_badgeGuest), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(stringResource(R.string.account_guestTitle), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold)
+                }
+            }
+            OutlinedSurface {
+                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text(stringResource(R.string.account_guestAbout), style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(R.string.account_guestAboutBody), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+            Column(Modifier.fillMaxWidth().padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                PoulpyButton(onClick = { onFlow("sign-up") }, size = PoulpyButtonSize.Lg, modifier = Modifier.fillMaxWidth()) {
+                    Icon(Lucide.CirclePlus, contentDescription = null)
+                    Text(stringResource(R.string.account_createAnAccount), modifier = Modifier.padding(start = 8.dp))
+                }
+                PoulpyButton(onClick = { onFlow("sign-in") }, kind = PoulpyButtonKind.Secondary, size = PoulpyButtonSize.Lg, modifier = Modifier.fillMaxWidth()) {
+                    Icon(Lucide.LogIn, contentDescription = null)
+                    Text(stringResource(R.string.account_signIn), modifier = Modifier.padding(start = 8.dp), color = MaterialTheme.colorScheme.onSurface)
+                }
+            }
+        }
         return
     }
     val email = when (current) {

@@ -54,7 +54,7 @@ struct RootView: View {
         // Recording a walk or run takes the whole display, with a way back to Home; recording goes on after closing.
         .fullScreenCover(isPresented: $liveOpen) {
             LiveView(graph: graph, onManageDevices: {
-                settingsPath = NavigationPath([SettingsPage.devices])
+                settingsPath = NavigationPath([SettingsPage.settings, SettingsPage.devices])
                 tab = .you
                 liveOpen = false
             }, onClose: { liveOpen = false })

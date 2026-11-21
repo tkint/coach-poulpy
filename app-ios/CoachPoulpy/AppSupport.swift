@@ -83,6 +83,12 @@ extension AppGraph {
         return Observed(model, current: model.state.value as! SettingsUiState, watch: model.watch, close: { _ in })
     }
 
+    /// You's statistics. Closed with the tab's screen, since it follows the database.
+    func observedYou() -> Observed<YouModel, YouState> {
+        let model = you(languageCode: Language.code, memory: UserDefaultsStore())
+        return Observed(model, current: model.current, watch: model.watch, close: { $0.close() })
+    }
+
     func observedProfile() -> Observed<ProfileModel, ProfileUi> {
         let model = profile(memory: UserDefaultsStore())
         return Observed(model, current: model.ui.value as! ProfileUi, watch: model.watch, close: { _ in })

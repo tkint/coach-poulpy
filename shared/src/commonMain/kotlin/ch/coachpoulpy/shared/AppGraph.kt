@@ -63,6 +63,9 @@ class AppGraph(driverFactory: DriverFactory) {
     // CLEANUP: History's Poulpy header ignores pain or rehab, so it can show the ember side inside the blue-side window. Pass the profile's painActive here like home() does.
     fun history(languageCode: String) = HistoryModel(store, compiler, languageCode)
 
+    /** You's Statistics: the sessions of a period, the latest weight, Poulpy's tentacles and the blocks shown. */
+    fun you(languageCode: String, memory: KeyValueStore) = YouModel(history(languageCode), store, memory)
+
     /** The picture to share for a finished session of the history, the same one as straight after the session. */
     fun sessionShareCard(sessionId: String, units: UnitSystem, languageCode: String): ShareCard? =
         SessionShare(store, compiler, languageCode).card(sessionId, units)

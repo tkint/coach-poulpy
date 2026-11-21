@@ -129,14 +129,17 @@ fun CoachPoulpyRoot(
     when (val current = route) {
         null -> Scaffold(
             bottomBar = {
-                NavigationBar {
-                    Tab.entries.forEach { item ->
-                        NavigationBarItem(
-                            selected = tab == item,
-                            onClick = { tab = item },
-                            icon = { Icon(item.icon, contentDescription = null) },
-                            label = { FitText(stringResource(item.label)) },
-                        )
+                // The pages You opens (Settings, Profile, Edit statistics...) take the whole screen, as drawn.
+                if (tab != Tab.YOU || settingsPage == SettingsPage.HUB) {
+                    NavigationBar {
+                        Tab.entries.forEach { item ->
+                            NavigationBarItem(
+                                selected = tab == item,
+                                onClick = { tab = item },
+                                icon = { Icon(item.icon, contentDescription = null) },
+                                label = { FitText(stringResource(item.label)) },
+                            )
+                        }
                     }
                 }
             },
