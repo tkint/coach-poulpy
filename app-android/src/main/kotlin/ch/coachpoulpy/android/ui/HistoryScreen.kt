@@ -357,16 +357,18 @@ private fun RestingRow() {
 }
 
 @Composable
-internal fun SessionCard(session: SessionRow, highlighted: Boolean, onClick: () -> Unit) {
+/** In the diary the card is the timeline's: tighter corners and no time of day, since the day heading says when. */
+internal fun SessionCard(session: SessionRow, highlighted: Boolean, diary: Boolean = false, onClick: () -> Unit) {
     val colors = MaterialTheme.colorScheme
     OutlinedCard(
         onClick = onClick,
         colors = CardDefaults.outlinedCardColors(containerColor = colors.surface),
         border = if (highlighted) BorderStroke(2.dp, colors.primary) else BorderStroke(1.dp, colors.outline),
+        shape = if (diary) RoundedCornerShape(PoulpyRadius.md) else CardDefaults.outlinedShape,
         modifier = Modifier.fillMaxWidth(),
     ) {
         Row(
-            Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+            if (diary) Modifier.padding(PoulpySpace.md) else Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
@@ -376,7 +378,7 @@ internal fun SessionCard(session: SessionRow, highlighted: Boolean, onClick: () 
             Column(Modifier.weight(1f)) {
                 Text(session.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold)
                 Text(
-                    "${time(session.startedAtMillis)} · ${session.headline()}",
+                    if (diary) session.headline() else "${time(session.startedAtMillis)} · ${session.headline()}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = colors.onSurfaceVariant,
                 )

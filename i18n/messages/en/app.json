@@ -34,7 +34,8 @@
     "past": "Past",
     "jumpToDay": "Jump to a day",
     "record": "Record",
-    "weekOf": "Week of {date}"
+    "weekOf": "Week of {date}",
+    "yourWeek": "Your week"
   },
   "library": {
     "workouts": "Workouts",

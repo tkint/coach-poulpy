@@ -45,6 +45,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.annotation.StringRes
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
@@ -125,9 +127,10 @@ fun HomeScreen(
                     RestCard(state, onOpenLibrary)
                 } else {
                     SectionLabel(stringResource(R.string.home_upNext))
-                    upNext.forEach { item ->
+                    upNext.forEachIndexed { index, item ->
                         UpNextCard(
                             item,
+                            highlighted = index == 0,
                             onClick = {
                                 when {
                                     item.status != TodayStatus.IN_PROGRESS -> item.workoutId?.let(onOpenWorkout)
@@ -143,8 +146,9 @@ fun HomeScreen(
                 if (state.past.isNotEmpty()) {
                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                         SectionLabel(stringResource(R.string.home_past), Modifier.weight(1f))
-                        IconButton(onClick = { jumping = true }) {
-                            Icon(Lucide.Calendar, contentDescription = stringResource(R.string.home_jumpToDay))
+                        // 40 square with the screens' corner, as drawn.
+                        IconButton(onClick = { jumping = true }, modifier = Modifier.size(40.dp).clip(RoundedCornerShape(PoulpyRadius.md))) {
+                            Icon(Lucide.Calendar, contentDescription = stringResource(R.string.home_jumpToDay), modifier = Modifier.size(20.dp))
                         }
                     }
                 }
@@ -155,24 +159,37 @@ fun HomeScreen(
                 state = listState,
                 modifier = Modifier.weight(1f).fillMaxWidth(),
                 contentPadding = PaddingValues(start = PoulpySpace.lg, end = PoulpySpace.lg, bottom = PoulpySpace.xl),
-                verticalArrangement = Arrangement.spacedBy(PoulpySpace.sm),
             ) {
-                itemsIndexed(state.past, key = { index, entry -> entry.key(index) }) { _, entry ->
-                    when (entry) {
-                        is DiaryEntry.WeekHeading -> SectionLabel(
-                            if (entry.isCurrent) stringResource(R.string.history_thisWeek) else stringResource(R.string.home_weekOf, shortDate(entry.startMillis)),
-                            Modifier.padding(top = PoulpySpace.xs),
-                        )
-                        is DiaryEntry.WeekRecap -> Text(
-                            "${pluralStringResource(R.plurals.history_sessions, entry.sessions, entry.sessions)} · ${stringResource(R.string.history_minutes, entry.activeMinutes)}",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(start = 4.dp),
-                        )
-                        is DiaryEntry.DayHeading -> SectionLabel(
-                            if (entry.isToday) stringResource(R.string.history_todayDay, dayLabel(entry.dateMillis)) else dayLabel(entry.dateMillis),
-                        )
-                        is DiaryEntry.Session -> SessionCard(entry.row, highlighted = false) { onOpenSession(entry.row.id) }
+                itemsIndexed(state.past, key = { index, entry -> entry.key(index) }) { index, entry ->
+                    val colors = MaterialTheme.colorScheme
+                    TimelineRow(
+                        dot = if (entry is DiaryEntry.Session) colors.outline else colors.primary,
+                        first = index == 0,
+                        last = index == state.past.lastIndex,
+                    ) {
+                        when (entry) {
+                            is DiaryEntry.WeekHeading -> RuledLabel(
+                                if (entry.isCurrent) stringResource(R.string.history_thisWeek) else stringResource(R.string.home_weekOf, shortDate(entry.startMillis)),
+                                color = if (entry.isCurrent) colors.primary else colors.onSurfaceVariant,
+                            )
+                            is DiaryEntry.WeekRecap -> Column(
+                                Modifier.fillMaxWidth().clip(RoundedCornerShape(PoulpyRadius.lg)).background(colors.primaryContainer).padding(PoulpySpace.md),
+                                verticalArrangement = Arrangement.spacedBy(2.dp),
+                            ) {
+                                Text(stringResource(R.string.home_yourWeek), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold, color = colors.onPrimaryContainer)
+                                Text(
+                                    "${pluralStringResource(R.plurals.history_sessions, entry.sessions, entry.sessions)} · ${stringResource(R.string.history_minutes, entry.activeMinutes)}",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = colors.onPrimaryContainer,
+                                )
+                            }
+                            is DiaryEntry.DayHeading -> RuledLabel(
+                                if (entry.isToday) stringResource(R.string.history_todayDay, dayLabel(entry.dateMillis)) else dayLabel(entry.dateMillis),
+                                color = colors.onSurfaceVariant,
+                            )
+                            is DiaryEntry.Session -> SessionCard(entry.row, highlighted = false, diary = true) { onOpenSession(entry.row.id) }
+                        }
                     }
                 }
             }
@@ -283,6 +300,35 @@ private fun JumpToDaySheet(graph: AppGraph, language: String, onDay: (Long) -> U
     }
 }
 
+/** A label followed by a hairline to the edge, as the day headings of the diary are drawn. */
+@Composable
+private fun RuledLabel(text: String, color: Color) {
+    Row(Modifier.fillMaxWidth().padding(start = PoulpySpace.xs, top = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(PoulpySpace.sm)) {
+        Text(text.uppercase(Locale.getDefault()), style = MaterialTheme.typography.labelMedium, color = color)
+        Box(Modifier.weight(1f).height(1.dp).background(MaterialTheme.colorScheme.outline))
+    }
+}
+
+/** One row of the diary's rail: a line down the left with a dot at the row's middle, primary for headings and the week, outline for sessions. */
+@Composable
+private fun TimelineRow(dot: Color, first: Boolean, last: Boolean, content: @Composable () -> Unit) {
+    val rail = MaterialTheme.colorScheme.outline
+    val ground = MaterialTheme.colorScheme.background
+    val gap = PoulpySpace.sm
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .drawBehind {
+                val x = 8.dp.toPx()
+                val middle = (size.height - gap.toPx()) / 2
+                drawLine(rail, Offset(x, if (first) middle else 0f), Offset(x, if (last) middle else size.height), strokeWidth = 2.dp.toPx())
+                drawCircle(ground, radius = 8.dp.toPx(), center = Offset(x, middle))
+                drawCircle(dot, radius = 6.dp.toPx(), center = Offset(x, middle))
+            }
+            .padding(start = PoulpySpace.xl, bottom = gap),
+    ) { content() }
+}
+
 @Composable
 private fun SectionLabel(text: String, modifier: Modifier = Modifier) {
     Text(
@@ -295,7 +341,7 @@ private fun SectionLabel(text: String, modifier: Modifier = Modifier) {
 
 /** A workout to do or a session left halfway, as a card ending in a chevron; a session left halfway can also be discarded. */
 @Composable
-private fun UpNextCard(item: TodayItem, onClick: () -> Unit, onDiscard: () -> Unit) {
+private fun UpNextCard(item: TodayItem, highlighted: Boolean, onClick: () -> Unit, onDiscard: () -> Unit) {
     val colors = MaterialTheme.colorScheme
     val inProgress = item.status == TodayStatus.IN_PROGRESS
     var discarding by rememberSaveable { mutableStateOf(false) }
@@ -303,7 +349,7 @@ private fun UpNextCard(item: TodayItem, onClick: () -> Unit, onDiscard: () -> Un
         onClick = onClick,
         enabled = inProgress || item.workoutId != null,
         colors = CardDefaults.outlinedCardColors(containerColor = colors.surface),
-        border = BorderStroke(1.5.dp, PoulpyPalette.Lagoon300),
+        border = if (highlighted) BorderStroke(1.5.dp, colors.primary.copy(alpha = 0.5f)) else BorderStroke(1.dp, colors.outline),
         shape = RoundedCornerShape(PoulpyRadius.lg),
         modifier = Modifier.fillMaxWidth(),
     ) {

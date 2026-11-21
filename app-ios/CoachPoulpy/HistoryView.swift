@@ -381,6 +381,8 @@ struct MonthCardView: View {
 struct SessionCardView: View {
     let session: SessionRow
     var highlighted = false
+    /// In the diary the card is the timeline's: tighter corners and no time of day, since the day heading says when.
+    var diary = false
     @Environment(\.unitSystem) private var units
 
     var body: some View {
@@ -391,17 +393,17 @@ struct SessionCardView: View {
                 .background(PoulpyColor.primaryContainer, in: Circle())
             VStack(alignment: .leading, spacing: 2) {
                 Text(session.title).font(.poulpy(.headline)).foregroundStyle(PoulpyColor.onSurface)
-                Text("\(time(session.startedAtMillis)) · \(headline(session))")
+                Text(diary ? headline(session) : "\(time(session.startedAtMillis)) · \(headline(session))")
                     .font(.poulpy(.subheadline))
                     .monospacedDigit()
                     .foregroundStyle(PoulpyColor.onSurfaceVariant)
             }
             Spacer(minLength: 0)
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 12)
-        .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
-        .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(highlighted ? PoulpyColor.primary : PoulpyColor.outline, lineWidth: highlighted ? 2 : 1))
+        .padding(.horizontal, diary ? PoulpySpace.md : 14)
+        .padding(.vertical, diary ? PoulpySpace.md : 12)
+        .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: diary ? PoulpyRadius.md : PoulpyRadius.lg))
+        .overlay(RoundedRectangle(cornerRadius: diary ? PoulpyRadius.md : PoulpyRadius.lg).stroke(highlighted ? PoulpyColor.primary : PoulpyColor.outline, lineWidth: highlighted ? 2 : 1))
     }
 
     /// The numbers that matter most for the row: duration, then distance for the treadmill or sets for a workout.

@@ -34,7 +34,8 @@
     "past": "Passé",
     "jumpToDay": "Aller à un jour",
     "record": "Enregistrer",
-    "weekOf": "Semaine du {date}"
+    "weekOf": "Semaine du {date}",
+    "yourWeek": "Votre semaine"
   },
   "library": {
     "workouts": "Séances",
