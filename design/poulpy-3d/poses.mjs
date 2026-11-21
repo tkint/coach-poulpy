@@ -9,6 +9,7 @@
 // The effects are flat, as in the drawing, and whoever draws him keeps them facing the viewer.
 // What is on him is part of his face: sweat, a tear. He never lifts an arm in any of them (brand decision 8).
 // To change a pose, edit POSES below and look at the page; the rules are in web/storybook/stories/brand/Poulpy3d.mdx.
+import { GLYPHS } from '../glyphs.mjs'
 import { SHAPE, FACES, MOODS, buildPoulpy3d, egg, facing, join, linear, pathPoints, tube } from './model.mjs'
 
 // The drawing's floor is y 165 and its middle x 100; 64 of its units are 1 in the model, for what stands around him.
@@ -91,17 +92,6 @@ export const POSES = {
   },
 }
 
-// Rounded stroke lettering for the few words drawn in the poses, on a 1-unit em, baseline at 0.
-// CLEANUP: the letters still drawn here, copied from GLYPHS in design/build-poulpy.mjs; keep one copy once the pictures are
-// rendered from this model and the 2D generator goes (brand decision 16).
-const GLYPHS = {
-  h: { d: 'M0 -0.72 L0 0 M0 -0.3 Q0 -0.5 0.19 -0.5 Q0.38 -0.5 0.38 -0.3 L0.38 0', advance: 0.56 },
-  m: { d: 'M0 -0.5 L0 0 M0 -0.32 Q0 -0.5 0.16 -0.5 Q0.3 -0.5 0.3 -0.32 L0.3 0 M0.3 -0.32 Q0.3 -0.5 0.46 -0.5 Q0.6 -0.5 0.6 -0.32 L0.6 0', advance: 0.78 },
-  p: { d: 'M0 -0.5 L0 0.24 M0 -0.25 Q0 -0.5 0.19 -0.5 Q0.38 -0.5 0.38 -0.25 Q0.38 0 0.19 0 Q0 0 0 -0.25', advance: 0.56 },
-  z: { d: 'M0 -0.5 L0.36 -0.5 L0 0 L0.36 0', advance: 0.5 },
-  '?': { d: 'M0 -0.56 Q0 -0.76 0.2 -0.76 Q0.4 -0.76 0.4 -0.56 Q0.4 -0.42 0.2 -0.34 L0.2 -0.22 M0.2 -0.02 L0.2 0', advance: 0.44 },
-  '…': { d: 'M0 -0.02 L0 0 M0.26 -0.02 L0.26 0 M0.52 -0.02 L0.52 0', advance: 0.64 },
-}
 // The strokes of some words, as lists of points.
 function lettering(x, y, size, words, anchor) {
   // The last letter's advance includes the gap before a next letter, which centring should ignore.

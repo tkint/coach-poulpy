@@ -84,6 +84,8 @@ node design/build-poulpy-3d.mjs
 | `design/poulpy-3d/poulpy_ember.glb` | The ember, grumpy side |
 | `design/poulpy-3d/poulpy_blue_turn.glb` | The blue side, rigged, with the animation `turn` |
 | `design/poulpy-3d/poulpy_ember_turn.glb` | The ember side, rigged, with the animation `turn` |
+| `design/poulpy-3d/poulpy_blue_jump.glb`, `poulpy_ember_jump.glb` | Each side, rigged, with the looping animation `jump` |
+| `design/poulpy-3d/poulpy_champion_cheer.glb` | The champion with his medal, rigged, with the looping animation `cheer` |
 
 The script writes the files itself, byte for byte the same on every machine, and CI runs it with `--check`. The Brand > Poulpy in 3D page of the component workshop ([`web/storybook/stories/brand/Poulpy3d.mdx`](../web/storybook/stories/brand/Poulpy3d.mdx) and the live model) draws the same `model.mjs` and runs the same `motion.mjs` live, lists the rules of the shape and of the move and says how to reuse it; the apps do not use the model yet.
 
