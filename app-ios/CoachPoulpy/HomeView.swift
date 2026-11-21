@@ -1,6 +1,3 @@
-import SwiftUI
-import Shared
-
 /// What to open over Home.
 private enum Cover: Identifiable {
     case player(workoutId: String?)
@@ -12,15 +9,17 @@ private enum Cover: Identifiable {
     }
 }
 
-/// Home: Poulpy, what there is to do or was done today, and the next planned session.
+/// Home, the diary: what is up next, then the past by week and day, newest first. Record starts a session.
 struct HomeView: View {
     let graph: AppGraph
     let onOpenLibrary: () -> Void
-    /// Opens the Live tab, for a Live recording left open.
+    /// Opens Live over the tabs, to record a walk or run or to open a recording left open.
     let onOpenLive: () -> Void
     @StateObject private var home: Observed<HomeModel, HomeState>
     @State private var cover: Cover?
     @State private var discarding = false
+    @State private var choosingRecord = false
+    @State private var jumping = false
 
     init(graph: AppGraph, onOpenLibrary: @escaping () -> Void, onOpenLive: @escaping () -> Void) {
         self.graph = graph
@@ -36,54 +35,85 @@ struct HomeView: View {
     var body: some View {
         let state = home.value
         NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: PoulpySpace.sm) {
-                    Text(Date().formatted(.dateTime.weekday(.wide).day().month(.wide)).uppercased())
-                        .font(PoulpyFont.label)
-                        .kerning(1)
-                        .foregroundStyle(PoulpyColor.onSurfaceVariant)
-                    if let poulpy = state.poulpy {
-                        PoulpyHeaderView(status: poulpy, compact: true)
-                    }
-                    if state.loaded {
-                        if state.today.isEmpty {
-                            restCard(firstTime: !state.hasWorkouts)
-                        } else {
-                            sectionLabel("home.today")
-                            ForEach(state.today, id: \.key) { item in
-                                todayCard(item)
-                            }
-                            Button(action: onOpenLibrary) {
-                                HStack(spacing: 4) {
-                                    Text("home.somethingElse")
-                                    LucideIcon(.chevronRight, size: 16)
+            ScrollViewReader { proxy in
+                ScrollView {
+                    LazyVStack(alignment: .leading, spacing: PoulpySpace.sm) {
+                        if let poulpy = state.poulpy {
+                            PoulpyHeaderView(status: poulpy, compact: true)
+                        }
+                        if state.loaded {
+                            let upNext = state.today.filter { $0.status != .done }
+                            if upNext.isEmpty && state.next == nil {
+                                restCard(firstTime: !state.hasWorkouts)
+                            } else {
+                                sectionLabel("home.upNext")
+                                ForEach(upNext, id: \.key) { item in
+                                    upNextCard(item)
                                 }
-                                .font(.poulpy(.subheadline).weight(.heavy))
-                                .frame(minHeight: 44)
+                                if let next = state.next {
+                                    NavigationLink {
+                                        WorkoutPageView(graph: graph, workoutId: next.workoutId)
+                                    } label: {
+                                        nextCard(next)
+                                    }
+                                    .buttonStyle(.plain)
+                                }
                             }
-                            .padding(.horizontal, 4)
-                        }
-                        if let next = state.next {
-                            sectionLabel("home.next").padding(.top, PoulpySpace.xs)
-                            NavigationLink {
-                                WorkoutPageView(graph: graph, workoutId: next.workoutId)
-                            } label: {
-                                nextCard(next)
+                            if !state.past.isEmpty {
+                                HStack {
+                                    sectionLabel("home.past")
+                                    Spacer(minLength: 0)
+                                    Button { jumping = true } label: {
+                                        LucideIcon(.calendar, size: 22).frame(width: 44, height: 44)
+                                    }
+                                    .foregroundStyle(PoulpyColor.primary)
+                                    .accessibilityLabel(Text("home.jumpToDay"))
+                                }
+                                ForEach(Array(state.past.enumerated()), id: \.offset) { index, entry in
+                                    pastRow(entry).id(index)
+                                }
                             }
-                            .buttonStyle(.plain)
                         }
+                    }
+                    .padding(.horizontal, PoulpySpace.lg)
+                    .padding(.bottom, PoulpySpace.xl)
+                }
+                .sheet(isPresented: $jumping) {
+                    JumpToDaySheet(graph: graph) { dayMillis in
+                        jumping = false
+                        let index = home.model.indexOfDay(dayMillis: dayMillis)
+                        if index >= 0 { withAnimation { proxy.scrollTo(Int(index), anchor: .top) } }
                     }
                 }
-                .padding(.horizontal, PoulpySpace.lg)
-                .padding(.bottom, PoulpySpace.xl)
             }
             .background(PoulpyColor.background)
             .navigationTitle("tab.home")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button { choosingRecord = true } label: {
+                        Label("home.record", lucide: .circleDot)
+                    }
+                    .buttonStyle(PoulpyButtonStyle(.primary, size: .md))
+                }
+            }
             .onAppear { home.model.refresh() }
             .confirmationDialog("home.discardTitle", isPresented: $discarding, titleVisibility: .visible) {
                 Button("home.discard", role: .destructive) { home.model.discardUnfinished() }
             } message: {
                 Text("home.discardBody")
+            }
+            .sheet(isPresented: $choosingRecord) {
+                RecordSheet(
+                    onWalkOrRun: {
+                        choosingRecord = false
+                        onOpenLive()
+                    },
+                    onLibrary: {
+                        choosingRecord = false
+                        onOpenLibrary()
+                    },
+                    onClose: { choosingRecord = false }
+                )
             }
             .fullScreenCover(item: $cover, onDismiss: { home.model.refresh() }) { cover in
                 switch cover {
@@ -94,7 +124,16 @@ struct HomeView: View {
     }
 
     private func sectionLabel(_ key: LocalizedStringKey) -> some View {
-        Text(key)
+        sectionStyle(Text(key))
+    }
+
+    /// A heading already built from a date, so not a key to look up.
+    private func sectionLabel(verbatim text: String) -> some View {
+        sectionStyle(Text(verbatim: text))
+    }
+
+    private func sectionStyle(_ text: Text) -> some View {
+        text
             .textCase(.uppercase)
             .font(PoulpyFont.label)
             .kerning(1)
@@ -104,95 +143,74 @@ struct HomeView: View {
     }
 
     @ViewBuilder
-    private func todayCard(_ item: TodayItem) -> some View {
-        switch item.status {
-        case .done:
-            if let session = item.session {
-                NavigationLink {
-                    SessionDetailView(graph: graph, session: session, onDelete: { home.model.deleteSession(sessionId: session.id) })
-                } label: {
-                    doneCard(session)
-                }
-                .buttonStyle(.plain)
+    private func pastRow(_ entry: DiaryEntry) -> some View {
+        switch entry {
+        case let week as DiaryEntryWeekHeading:
+            sectionLabel(verbatim: week.isCurrent ? L("history.thisWeek") : L("home.weekOf %@", shortDate(week.startMillis)))
+                .padding(.top, PoulpySpace.xs)
+        case let recap as DiaryEntryWeekRecap:
+            Text("\(L("history.sessions %lld", Int64(recap.sessions))) · \(L("history.minutes %lld", Int64(recap.activeMinutes)))")
+                .font(.poulpy(.subheadline))
+                .foregroundStyle(PoulpyColor.onSurfaceVariant)
+                .padding(.leading, 4)
+        case let day as DiaryEntryDayHeading:
+            let label = dayLabel(day.dateMillis)
+            sectionLabel(verbatim: day.isToday ? L("history.todayDay %@", label) : label)
+        case let item as DiaryEntrySession:
+            NavigationLink {
+                SessionDetailView(graph: graph, session: item.row, onDelete: { home.model.deleteSession(sessionId: item.row.id) })
+            } label: {
+                SessionCardView(session: item.row)
             }
+            .buttonStyle(.plain)
         default:
-            plannedCard(item)
+            EmptyView()
         }
     }
 
     /// A workout to do today, or a session left halfway, which can be opened (it comes back paused) or discarded.
-    private func plannedCard(_ item: TodayItem) -> some View {
+    private func upNextCard(_ item: TodayItem) -> some View {
         let inProgress = item.status == .inProgress
-        return VStack(alignment: .leading, spacing: PoulpySpace.sm) {
-            HStack(spacing: PoulpySpace.sm) {
-                LucideIcon(.dumbbell, size: 22)
-                    .foregroundStyle(PoulpyColor.onPrimaryContainer)
-                    .frame(width: 44, height: 44)
-                    .background(PoulpyColor.primaryContainer, in: Circle())
-                    .accessibilityHidden(true)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(item.title).font(.poulpy(.headline)).foregroundStyle(PoulpyColor.onSurface)
-                    if !item.details.isEmpty {
-                        Text(item.details).font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
-                    }
-                }
-                Spacer(minLength: 0)
-            }
-            if inProgress {
-                Text("home.inProgress").font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
-            } else if !item.exercises.isEmpty {
-                Text(item.exercises).font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
-            }
-            HStack(spacing: PoulpySpace.sm) {
+        return VStack(alignment: .leading, spacing: PoulpySpace.xs) {
+            Group {
                 if inProgress {
-                    // Destructive, so crimson with an icon, never ember.
-                    Button { discarding = true } label: {
-                        Label("home.discard", lucide: .trash)
-                            .font(.poulpy(.body).weight(.heavy))
-                            .frame(maxWidth: .infinity, minHeight: PoulpyControl.lg)
-                            .foregroundStyle(PoulpyColor.error)
-                            .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.md).stroke(PoulpyColor.error, lineWidth: 2))
-                    }
-                    .buttonStyle(.plain)
+                    Button {
+                        if item.live { onOpenLive() } else { cover = .player(workoutId: nil) }
+                    } label: { upNextRow(item, inProgress: true) }
                 } else if let workoutId = item.workoutId {
                     NavigationLink {
                         WorkoutPageView(graph: graph, workoutId: workoutId)
-                    } label: {
-                        Text("home.seeWorkout")
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(PoulpyButtonStyle(.secondary, size: .lg))
+                    } label: { upNextRow(item, inProgress: false) }
                 }
-                Button {
-                    if inProgress && item.live { onOpenLive() } else { cover = .player(workoutId: inProgress ? nil : item.workoutId) }
-                } label: {
-                    // "Open", not "Resume": the session comes back paused.
-                    Label(LocalizedStringKey(inProgress ? "home.openSession" : "action.start"), lucide: .play)
-                        .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.plain)
+            if inProgress {
+                // Destructive, so crimson with an icon, never ember.
+                Button { discarding = true } label: {
+                    Label("home.discard", lucide: .trash)
+                        .font(.poulpy(.subheadline).weight(.heavy))
+                        .foregroundStyle(PoulpyColor.error)
+                        .frame(minHeight: 44)
                 }
-                .buttonStyle(PoulpyButtonStyle(.primary, size: .lg))
-                .layoutPriority(1)
+                .buttonStyle(.plain)
+                .padding(.leading, 4)
             }
         }
-        .padding(PoulpySpace.sm)
-        .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
-        .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(PoulpyPalette.lagoon300, lineWidth: 1.5))
     }
 
-    /// A session finished today, opening its page as in the history.
-    private func doneCard(_ session: SessionRow) -> some View {
+    private func upNextRow(_ item: TodayItem, inProgress: Bool) -> some View {
         HStack(spacing: PoulpySpace.sm) {
-            LucideIcon(.check, size: 22)
-                .foregroundStyle(PoulpyColor.surface)
+            LucideIcon(.dumbbell, size: 22)
+                .foregroundStyle(PoulpyColor.onPrimaryContainer)
                 .frame(width: 44, height: 44)
-                .background(PoulpyColor.success, in: Circle())
-                .accessibilityLabel(Text("workout.done"))
+                .background(PoulpyColor.primaryContainer, in: Circle())
+                .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 2) {
-                Text(session.title).font(.poulpy(.headline)).foregroundStyle(PoulpyColor.onSurface)
-                Text("\(time(session.startedAtMillis)) · \(clock(session.activeSeconds))")
-                    .font(.poulpy(.subheadline))
-                    .monospacedDigit()
-                    .foregroundStyle(PoulpyColor.onSurfaceVariant)
+                Text(item.title).font(.poulpy(.headline)).foregroundStyle(PoulpyColor.onSurface)
+                let detail = inProgress ? L("home.inProgress") : item.details
+                if !detail.isEmpty {
+                    Text(detail).font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+                }
             }
             Spacer(minLength: 0)
             LucideIcon(.chevronRight).foregroundStyle(PoulpyColor.onSurfaceVariant)
@@ -200,7 +218,7 @@ struct HomeView: View {
         .padding(PoulpySpace.sm)
         .frame(minHeight: 60)
         .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
-        .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(PoulpyColor.outline))
+        .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(PoulpyPalette.lagoon300, lineWidth: 1.5))
     }
 
     private func nextCard(_ next: NextSession) -> some View {
@@ -259,11 +277,96 @@ private func L(_ key: String, _ args: CVarArg...) -> String {
     String(format: NSLocalizedString(key, comment: ""), locale: Locale.current, arguments: args)
 }
 
-private func time(_ millis: Int64) -> String {
-    Date(timeIntervalSince1970: Double(millis) / 1000).formatted(date: .omitted, time: .shortened)
+/// What can be recorded: a walk or run followed live, or a workout from the library.
+private struct RecordSheet: View {
+    let onWalkOrRun: () -> Void
+    let onLibrary: () -> Void
+    let onClose: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: PoulpySpace.sm) {
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("record.title").font(.poulpy(.title3))
+                    Text("record.subtitle").font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+                }
+                Spacer(minLength: 0)
+                Button(action: onClose) { LucideIcon(.x, size: 22).frame(width: 44, height: 44) }
+                    .accessibilityLabel(Text("action.close"))
+            }
+            choice(.footprints, "record.walkTitle", "record.walkDetail", onWalkOrRun)
+            choice(.libraryBig, "record.libraryTitle", "record.libraryDetail", onLibrary)
+            Spacer(minLength: 0)
+        }
+        .padding(PoulpySpace.lg)
+        .background(PoulpyColor.surface)
+        .presentationDetents([.medium])
+    }
+
+    private func choice(_ icon: Lucide, _ title: LocalizedStringKey, _ detail: LocalizedStringKey, _ action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: PoulpySpace.sm) {
+                LucideIcon(icon, size: 22)
+                    .foregroundStyle(PoulpyColor.onPrimaryContainer)
+                    .frame(width: 44, height: 44)
+                    .background(PoulpyColor.primaryContainer, in: Circle())
+                    .accessibilityHidden(true)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title).font(.poulpy(.headline)).foregroundStyle(PoulpyColor.onSurface)
+                    Text(detail).font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+                        .multilineTextAlignment(.leading)
+                }
+                Spacer(minLength: 0)
+                LucideIcon(.chevronRight).foregroundStyle(PoulpyColor.onSurfaceVariant)
+            }
+            .padding(PoulpySpace.sm)
+            .frame(minHeight: 60)
+            .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
+            .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(PoulpyColor.outline))
+        }
+        .buttonStyle(.plain)
+    }
 }
 
-private func clock(_ seconds: Int64) -> String {
-    let h = seconds / 3600, m = (seconds % 3600) / 60, s = seconds % 60
-    return h > 0 ? String(format: "%lld:%02lld:%02lld", h, m, s) : String(format: "%lld:%02lld", m, s)
+/// The calendar over Home: a tapped day scrolls the past to it.
+private struct JumpToDaySheet: View {
+    @StateObject private var history: Observed<HistoryModel, HistoryState>
+    @State private var offset: Int32 = 0
+    let onDay: (Int64) -> Void
+
+    init(graph: AppGraph, onDay: @escaping (Int64) -> Void) {
+        self.onDay = onDay
+        _history = StateObject(wrappedValue: {
+            let model = graph.history(languageCode: Language.code)
+            return Observed(model, current: model.current, watch: model.watch, close: { $0.close() })
+        }())
+    }
+
+    var body: some View {
+        let state = history.value
+        let month = history.model.month(state: state, offset: offset, selectedDay: 0)
+        VStack(alignment: .leading, spacing: 0) {
+            Text("home.jumpToDay").font(.poulpy(.title3)).padding(.horizontal, PoulpySpace.lg).padding(.top, PoulpySpace.lg)
+            MonthCardView(month: month, selected: 0, onSelect: { day in
+                let start = Date(timeIntervalSince1970: Double(month.monthStartMillis) / 1000)
+                let target = Calendar.current.date(byAdding: .day, value: Int(day) - 1, to: start) ?? start
+                onDay(Int64(Calendar.current.startOfDay(for: target).timeIntervalSince1970 * 1000))
+            }, onMonth: { step in
+                offset = min(0, max(state.firstMonthOffset, offset + step))
+            })
+            Spacer(minLength: 0)
+        }
+        .background(PoulpyColor.background)
+        .presentationDetents([.medium, .large])
+    }
+}
+
+/// "24 Oct", in the user's order.
+private func shortDate(_ millis: Int64) -> String {
+    Date(timeIntervalSince1970: Double(millis) / 1000).formatted(.dateTime.day().month(.abbreviated))
+}
+
+/// "Sat 24 Oct", in the user's order.
+private func dayLabel(_ millis: Int64) -> String {
+    Date(timeIntervalSince1970: Double(millis) / 1000).formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated))
 }

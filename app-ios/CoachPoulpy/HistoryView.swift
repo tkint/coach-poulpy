@@ -135,87 +135,8 @@ struct HistoryView: View {
         selected = next == 0 ? todayDay : 0
     }
 
-    /// The month grid, Monday first; swipe or the arrows change month, never past this one.
     private func monthCard(_ month: CalendarMonth, _ state: HistoryState) -> some View {
-        VStack(spacing: 4) {
-            HStack {
-                Button { changeMonth(by: -1, state) } label: {
-                    LucideIcon(.chevronLeft, size: 22).frame(width: 44, height: 44)
-                }
-                .disabled(!month.canGoBack)
-                .accessibilityLabel(Text("history.previousMonth"))
-                Spacer()
-                VStack(spacing: 0) {
-                    Text(monthTitle(month.monthStartMillis)).font(.poulpy(.title3))
-                    Text(L("history.activeDays %lld", Int64(month.activeDays)))
-                        .font(.poulpy(.caption).weight(.bold))
-                        .foregroundStyle(PoulpyColor.onSurfaceVariant)
-                }
-                Spacer()
-                Button { changeMonth(by: 1, state) } label: {
-                    LucideIcon(.chevronRight, size: 22).frame(width: 44, height: 44)
-                }
-                .disabled(!month.canGoForward)
-                .accessibilityLabel(Text("history.nextMonth"))
-            }
-            .foregroundStyle(PoulpyColor.primary)
-            HStack(spacing: 0) {
-                ForEach(Array(weekdaySymbols.enumerated()), id: \.offset) { _, symbol in
-                    Text(symbol)
-                        .font(.poulpy(.caption).weight(.heavy))
-                        .foregroundStyle(PoulpyColor.onSurfaceVariant)
-                        .frame(maxWidth: .infinity)
-                }
-            }
-            .accessibilityHidden(true)
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 0), count: 7), spacing: 2) {
-                ForEach(0..<Int(month.leadingBlanks), id: \.self) { _ in
-                    Color.clear.frame(height: 44)
-                }
-                ForEach(month.days, id: \.day) { day in
-                    dayCell(month, day)
-                }
-            }
-        }
-        .padding(EdgeInsets(top: 10, leading: 12, bottom: 12, trailing: 12))
-        .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
-        .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(PoulpyColor.outline))
-        .padding(.horizontal, PoulpySpace.lg)
-        .padding(.top, 14)
-        .gesture(
-            DragGesture(minimumDistance: 30).onEnded { drag in
-                if drag.translation.width > 80 { changeMonth(by: -1, state) }
-                if drag.translation.width < -80 { changeMonth(by: 1, state) }
-            }
-        )
-    }
-
-    private func dayCell(_ month: CalendarMonth, _ day: CalendarDay) -> some View {
-        let isSelected = day.day == selected
-        let text: Color = day.active ? PoulpyColor.onPrimary : (day.isFuture ? PoulpyColor.onSurfaceVariant.opacity(0.45) : PoulpyColor.onSurface)
-        let dot: Color = !day.isToday ? .clear : (day.active ? PoulpyColor.onPrimary : PoulpyColor.primary)
-        var label = fullDate(month.monthStartMillis, day.day)
-        if day.active { label += ", " + L("history.sessions %lld", Int64(day.sessionCount)) }
-        return Button {
-            selected = day.day
-        } label: {
-            VStack(spacing: 1) {
-                Text("\(day.day)")
-                    .font(.poulpy(.subheadline).weight(day.active ? .heavy : .bold))
-                    .monospacedDigit()
-                Circle().fill(dot).frame(width: 4, height: 4)
-            }
-            .foregroundStyle(text)
-            .frame(width: 36, height: 36)
-            .background(Circle().fill(day.active ? PoulpyColor.primary : Color.clear))
-            .padding(3)
-            .overlay(Circle().stroke(isSelected ? PoulpyColor.onPrimaryContainer : Color.clear, lineWidth: 2))
-        }
-        .buttonStyle(.plain)
-        .disabled(day.isFuture)
-        .frame(height: 44)
-        .accessibilityLabel(label)
-        .accessibilityAddTraits(isSelected ? [.isSelected] : [])
+        MonthCardView(month: month, selected: selected, onSelect: { selected = $0 }, onMonth: { changeMonth(by: $0, state) })
     }
 
     private func dayHeader(_ section: DaySection, highlighted: Bool) -> some View {
@@ -247,34 +168,7 @@ struct HistoryView: View {
     }
 
     private func sessionCard(_ session: SessionRow, highlighted: Bool) -> some View {
-        HStack(spacing: 12) {
-            LucideIcon(session.kind == .treadmill ? .gauge : .dumbbell, size: 22)
-                .foregroundStyle(PoulpyColor.onPrimaryContainer)
-                .frame(width: 44, height: 44)
-                .background(PoulpyColor.primaryContainer, in: Circle())
-            VStack(alignment: .leading, spacing: 2) {
-                Text(session.title).font(.poulpy(.headline)).foregroundStyle(PoulpyColor.onSurface)
-                Text("\(time(session.startedAtMillis)) · \(headline(session))")
-                    .font(.poulpy(.subheadline))
-                    .monospacedDigit()
-                    .foregroundStyle(PoulpyColor.onSurfaceVariant)
-            }
-            Spacer(minLength: 0)
-        }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 12)
-        .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
-        .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(highlighted ? PoulpyColor.primary : PoulpyColor.outline, lineWidth: highlighted ? 2 : 1))
-    }
-
-    /// The numbers that matter most for the row: duration, then distance for the treadmill or sets for a workout.
-    private func headline(_ session: SessionRow) -> String {
-        var parts = [clock(session.activeSeconds)]
-        if let distance = session.distanceMeters { parts.append(Units.shared.distance(meters: distance.doubleValue, system: units, decimals: 2).text) }
-        if session.kind == .workout, let done = session.setsDone, let planned = session.setsPlanned {
-            parts.append(L("history.sets %lld %lld", Int64(done.intValue), Int64(planned.intValue)))
-        }
-        return parts.joined(separator: " · ")
+        SessionCardView(session: session, highlighted: highlighted)
     }
 
     // MARK: Stats
@@ -390,6 +284,134 @@ struct HistoryView: View {
         .padding(EdgeInsets(top: 12, leading: 14, bottom: 12, trailing: 14))
         .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
         .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(PoulpyColor.outline))
+    }
+}
+
+/// The month grid, Monday first; swipe or the arrows change month, never past this one. Used by History and by Home's Jump to a day.
+struct MonthCardView: View {
+    let month: CalendarMonth
+    let selected: Int32
+    let onSelect: (Int32) -> Void
+    let onMonth: (Int32) -> Void
+
+    var body: some View {
+        VStack(spacing: 4) {
+            HStack {
+                Button { onMonth(-1) } label: {
+                    LucideIcon(.chevronLeft, size: 22).frame(width: 44, height: 44)
+                }
+                .disabled(!month.canGoBack)
+                .accessibilityLabel(Text("history.previousMonth"))
+                Spacer()
+                VStack(spacing: 0) {
+                    Text(monthTitle(month.monthStartMillis)).font(.poulpy(.title3))
+                    Text(L("history.activeDays %lld", Int64(month.activeDays)))
+                        .font(.poulpy(.caption).weight(.bold))
+                        .foregroundStyle(PoulpyColor.onSurfaceVariant)
+                }
+                Spacer()
+                Button { onMonth(1) } label: {
+                    LucideIcon(.chevronRight, size: 22).frame(width: 44, height: 44)
+                }
+                .disabled(!month.canGoForward)
+                .accessibilityLabel(Text("history.nextMonth"))
+            }
+            .foregroundStyle(PoulpyColor.primary)
+            HStack(spacing: 0) {
+                ForEach(Array(weekdaySymbols.enumerated()), id: \.offset) { _, symbol in
+                    Text(symbol)
+                        .font(.poulpy(.caption).weight(.heavy))
+                        .foregroundStyle(PoulpyColor.onSurfaceVariant)
+                        .frame(maxWidth: .infinity)
+                }
+            }
+            .accessibilityHidden(true)
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 0), count: 7), spacing: 2) {
+                ForEach(0..<Int(month.leadingBlanks), id: \.self) { _ in
+                    Color.clear.frame(height: 44)
+                }
+                ForEach(month.days, id: \.day) { day in
+                    dayCell(day)
+                }
+            }
+        }
+        .padding(EdgeInsets(top: 10, leading: 12, bottom: 12, trailing: 12))
+        .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
+        .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(PoulpyColor.outline))
+        .padding(.horizontal, PoulpySpace.lg)
+        .padding(.top, 14)
+        .gesture(
+            DragGesture(minimumDistance: 30).onEnded { drag in
+                if drag.translation.width > 80 { onMonth(-1) }
+                if drag.translation.width < -80 { onMonth(1) }
+            }
+        )
+    }
+
+    private func dayCell(_ day: CalendarDay) -> some View {
+        let isSelected = day.day == selected
+        let text: Color = day.active ? PoulpyColor.onPrimary : (day.isFuture ? PoulpyColor.onSurfaceVariant.opacity(0.45) : PoulpyColor.onSurface)
+        let dot: Color = !day.isToday ? .clear : (day.active ? PoulpyColor.onPrimary : PoulpyColor.primary)
+        var label = fullDate(month.monthStartMillis, day.day)
+        if day.active { label += ", " + L("history.sessions %lld", Int64(day.sessionCount)) }
+        return Button {
+            onSelect(day.day)
+        } label: {
+            VStack(spacing: 1) {
+                Text("\(day.day)")
+                    .font(.poulpy(.subheadline).weight(day.active ? .heavy : .bold))
+                    .monospacedDigit()
+                Circle().fill(dot).frame(width: 4, height: 4)
+            }
+            .foregroundStyle(text)
+            .frame(width: 36, height: 36)
+            .background(Circle().fill(day.active ? PoulpyColor.primary : Color.clear))
+            .padding(3)
+            .overlay(Circle().stroke(isSelected ? PoulpyColor.onPrimaryContainer : Color.clear, lineWidth: 2))
+        }
+        .buttonStyle(.plain)
+        .disabled(day.isFuture)
+        .frame(height: 44)
+        .accessibilityLabel(label)
+        .accessibilityAddTraits(isSelected ? [.isSelected] : [])
+    }
+}
+
+/// A session as a row: icon, title, time and its numbers. Used by History and by Home's diary.
+struct SessionCardView: View {
+    let session: SessionRow
+    var highlighted = false
+    @Environment(\.unitSystem) private var units
+
+    var body: some View {
+        HStack(spacing: 12) {
+            LucideIcon(session.kind == .treadmill ? .gauge : .dumbbell, size: 22)
+                .foregroundStyle(PoulpyColor.onPrimaryContainer)
+                .frame(width: 44, height: 44)
+                .background(PoulpyColor.primaryContainer, in: Circle())
+            VStack(alignment: .leading, spacing: 2) {
+                Text(session.title).font(.poulpy(.headline)).foregroundStyle(PoulpyColor.onSurface)
+                Text("\(time(session.startedAtMillis)) · \(headline(session))")
+                    .font(.poulpy(.subheadline))
+                    .monospacedDigit()
+                    .foregroundStyle(PoulpyColor.onSurfaceVariant)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
+        .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(highlighted ? PoulpyColor.primary : PoulpyColor.outline, lineWidth: highlighted ? 2 : 1))
+    }
+
+    /// The numbers that matter most for the row: duration, then distance for the treadmill or sets for a workout.
+    private func headline(_ session: SessionRow) -> String {
+        var parts = [clock(session.activeSeconds)]
+        if let distance = session.distanceMeters { parts.append(Units.shared.distance(meters: distance.doubleValue, system: units, decimals: 2).text) }
+        if session.kind == .workout, let done = session.setsDone, let planned = session.setsPlanned {
+            parts.append(L("history.sets %lld %lld", Int64(done.intValue), Int64(planned.intValue)))
+        }
+        return parts.joined(separator: " · ")
     }
 }
 

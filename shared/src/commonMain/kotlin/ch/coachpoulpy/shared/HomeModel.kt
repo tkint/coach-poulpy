@@ -118,6 +118,9 @@ class HomeModel internal constructor(
 
     fun deleteSession(sessionId: String) = store.deleteSession(sessionId)
 
+    /** Where the past timeline scrolls to for a day tapped in Jump to a day, for Swift, which cannot call the extension. */
+    fun indexOfDay(dayMillis: Long): Int = state.value.past.indexOfDay(dayMillis)
+
     fun close() = scope.cancel()
 
     private fun build(

@@ -2,7 +2,7 @@ import SwiftUI
 import Shared
 
 /// The tabs, in order. Each label lives in Localizable.strings under its tab.* key.
-private enum AppTab: Hashable { case home, library, live, history, settings }
+private enum AppTab: Hashable { case home, library, you }
 
 struct RootView: View {
     let graph: AppGraph
@@ -22,8 +22,8 @@ struct RootView: View {
     @State private var tab = AppTab.home
     @State private var librarySection = LibrarySection.workouts
     @State private var settingsPath = NavigationPath()
-    /// The tab that opened Settings › Devices (Live's Manage devices), so back from it returns there instead of the hub.
-    @State private var devicesFrom: AppTab?
+    /// Live over the tabs, from Record on Home or a recording left open.
+    @State private var liveOpen = false
     @State private var incoming: IncomingWorkoutFile?
 
     init(graph: AppGraph, account: AccountModel) {
@@ -39,36 +39,25 @@ struct RootView: View {
             HomeView(graph: graph, onOpenLibrary: {
                 librarySection = .workouts
                 tab = .library
-            }, onOpenLive: { tab = .live })
+            }, onOpenLive: { liveOpen = true })
                 .tabItem { Label("tab.home", lucide: .house) }
                 .tag(AppTab.home)
             LibraryView(graph: graph, section: $librarySection)
                 .tabItem { Label("tab.library", lucide: .libraryBig) }
                 .tag(AppTab.library)
-            LiveView(graph: graph, onManageDevices: {
-                settingsPath = NavigationPath([SettingsPage.devices])
-                devicesFrom = .live
-                tab = .settings
-            })
-                .tabItem { Label("tab.live", lucide: .activity) }
-                .tag(AppTab.live)
-            HistoryView(graph: graph)
-                .tabItem { Label("tab.history", lucide: .rotateCcwClock) }
-                .tag(AppTab.history)
             SettingsView(graph: graph, settings: settings, account: accountState, path: $settingsPath) { step in
                 accountFlow = AccountFlowStart(step: step)
             }
-                .tabItem { Label("tab.settings", lucide: .settings) }
-                .tag(AppTab.settings)
+                .tabItem { Label("tab.you", lucide: .userRound) }
+                .tag(AppTab.you)
         }
-        .onChange(of: settingsPath.count) { depth in
-            if depth == 0, let from = devicesFrom {
-                devicesFrom = nil
-                tab = from
-            }
-        }
-        .onChange(of: tab) { selected in
-            if selected != .settings { devicesFrom = nil }
+        // Recording a walk or run takes the whole display, with a way back to Home; recording goes on after closing.
+        .fullScreenCover(isPresented: $liveOpen) {
+            LiveView(graph: graph, onManageDevices: {
+                settingsPath = NavigationPath([SettingsPage.devices])
+                tab = .you
+                liveOpen = false
+            }, onClose: { liveOpen = false })
         }
         // Text without its own font (list rows, buttons, forms) is set in Nunito.
         .font(.poulpy(.body))
@@ -128,9 +117,8 @@ struct RootView: View {
 
     /// Universal Links need the Associated Domains entitlement and app.coach-poulpy.com's apple-app-site-association (#24).
     private func openFromLink(_ step: String) {
-        tab = .settings
+        tab = .you
         settingsPath = NavigationPath()
-        devicesFrom = nil
         accountFlow = AccountFlowStart(step: step)
     }
 }
