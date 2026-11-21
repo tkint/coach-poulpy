@@ -41,16 +41,34 @@ struct HomeView: View {
             // The top stays put and only the past scrolls, as drawn.
             VStack(alignment: .leading, spacing: PoulpySpace.sm) {
                 if let poulpy = state.poulpy {
-                    PoulpyHeaderView(status: poulpy, compact: true)
+                    MotivationRow(status: poulpy)
                 }
                 if state.loaded {
                     let upNext = state.today.filter { $0.status != .done }
-                    if upNext.isEmpty && state.next == nil {
-                        restCard(firstTime: !state.hasWorkouts)
+                    if !state.hasWorkouts {
+                        restCard(firstTime: true)
                     } else {
                         sectionLabel("home.upNext")
                         ForEach(Array(upNext.enumerated()), id: \.element.key) { index, item in
                             upNextCard(item, highlighted: index == 0)
+                        }
+                        if let suggestion = state.suggestion, let workoutId = suggestion.workoutId {
+                            NavigationLink {
+                                WorkoutPageView(graph: graph, workoutId: workoutId)
+                            } label: {
+                                upNextRow(suggestion, inProgress: false, highlighted: false, detail: L("home.suggestion %@", suggestion.details))
+                            }
+                            .buttonStyle(.plain)
+                            Button(action: onOpenLibrary) {
+                                HStack(spacing: 4) {
+                                    Text("home.somethingElse")
+                                    LucideIcon(.chevronRight, size: 18)
+                                }
+                                .font(.poulpy(.subheadline).weight(.heavy))
+                                .foregroundStyle(PoulpyColor.primary)
+                                .frame(minHeight: 32)
+                            }
+                            .padding(.horizontal, PoulpySpace.xs)
                         }
                         if let next = state.next {
                             NavigationLink {
@@ -176,7 +194,7 @@ struct HomeView: View {
             .background(PoulpyColor.primaryContainer, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
         case let day as DiaryEntryDayHeading:
             let label = dayLabel(day.dateMillis)
-            ruledLabel(day.isToday ? L("history.todayDay %@", label) : label, color: PoulpyColor.onSurfaceVariant)
+            ruledLabel(day.isToday ? L("history.todayDay %@", label) : label, color: day.isToday ? PoulpyColor.primary : PoulpyColor.onSurfaceVariant)
         case let item as DiaryEntrySession:
             NavigationLink {
                 SessionDetailView(graph: graph, session: item.row, onDelete: { home.model.deleteSession(sessionId: item.row.id) })
@@ -233,7 +251,7 @@ struct HomeView: View {
         }
     }
 
-    private func upNextRow(_ item: TodayItem, inProgress: Bool, highlighted: Bool) -> some View {
+    private func upNextRow(_ item: TodayItem, inProgress: Bool, highlighted: Bool, detail: String? = nil) -> some View {
         HStack(spacing: PoulpySpace.sm) {
             LucideIcon(.dumbbell, size: 22)
                 .foregroundStyle(PoulpyColor.onPrimaryContainer)
@@ -242,9 +260,9 @@ struct HomeView: View {
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 2) {
                 Text(item.title).font(.poulpy(.headline)).foregroundStyle(PoulpyColor.onSurface)
-                let detail = inProgress ? L("home.inProgress") : item.details
-                if !detail.isEmpty {
-                    Text(detail).font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+                let line = detail ?? (inProgress ? L("home.inProgress") : item.details)
+                if !line.isEmpty {
+                    Text(line).font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
                 }
             }
             Spacer(minLength: 0)
@@ -259,23 +277,17 @@ struct HomeView: View {
         )
     }
 
+    /// The next planned session, drawn as an Up next row: "Tomorrow · Sets · about 25 min".
     private func nextCard(_ next: NextSession) -> some View {
-        let day = Date(timeIntervalSince1970: Double(next.dayMillis) / 1000)
         let when = next.daysAway == 1
             ? L("home.tomorrow %@", next.details)
             : L("home.inDays %lld %@", Int64(next.daysAway), next.details)
-        return HStack(spacing: 12) {
-            VStack(spacing: 0) {
-                Text(day.formatted(.dateTime.weekday(.abbreviated)).uppercased())
-                    .font(.poulpy(.caption2).weight(.heavy))
-                    .foregroundStyle(PoulpyColor.primary)
-                Text(day.formatted(.dateTime.day()))
-                    .font(.poulpy(.headline))
-                    .foregroundStyle(PoulpyColor.onPrimaryContainer)
-            }
-            .frame(width: 44, height: 48)
-            .background(PoulpyColor.background, in: RoundedRectangle(cornerRadius: PoulpyRadius.md))
-            .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.md).stroke(PoulpyColor.outline))
+        return HStack(spacing: PoulpySpace.sm) {
+            LucideIcon(.dumbbell, size: 22)
+                .foregroundStyle(PoulpyColor.onPrimaryContainer)
+                .frame(width: 44, height: 44)
+                .background(PoulpyColor.primaryContainer, in: Circle())
+                .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 2) {
                 Text(next.title).font(.poulpy(.headline)).foregroundStyle(PoulpyColor.onSurface)
                 Text(when).font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
@@ -284,6 +296,7 @@ struct HomeView: View {
             LucideIcon(.chevronRight).foregroundStyle(PoulpyColor.onSurfaceVariant)
         }
         .padding(PoulpySpace.sm)
+        .frame(minHeight: 60)
         .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
         .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(PoulpyColor.outline))
     }
@@ -432,5 +445,35 @@ private struct TimelineRow<Content: View>: View {
                     Circle().fill(dot).frame(width: 12, height: 12).position(x: 8, y: middle)
                 }
             }
+    }
+}
+
+/// Home's motivation row (`home-diary` mockup): a small Poulpy and his eight tentacles as segments, never a streak.
+/// The latest achievements and the way to Achievements join it with #523.
+private struct MotivationRow: View {
+    let status: PoulpyStatus
+
+    var body: some View {
+        HStack(spacing: PoulpySpace.sm) {
+            Image(status.drawing.imageName)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 36, height: 32)
+                .padding(.leading, 4)
+            HStack(spacing: 3) {
+                ForEach(0..<8, id: \.self) { index in
+                    Capsule()
+                        .fill(index < Int(status.tentaclesLit) ? PoulpyColor.primary : PoulpyColor.onPrimaryContainer.opacity(0.18))
+                        .frame(height: 8)
+                }
+            }
+        }
+        .padding(.leading, PoulpySpace.xs)
+        .padding(.trailing, PoulpySpace.lg)
+        .frame(maxWidth: .infinity, minHeight: 48)
+        .background(PoulpyColor.surface, in: Capsule())
+        .overlay(Capsule().stroke(PoulpyColor.outline))
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text(verbatim: status.tentaclesCaption))
     }
 }

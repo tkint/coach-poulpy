@@ -45,6 +45,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.annotation.StringRes
 import androidx.compose.ui.draw.clip
+import ch.coachpoulpy.shared.PoulpyStatus
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.res.painterResource
+import androidx.compose.foundation.border
+import androidx.compose.foundation.Image
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -120,10 +126,11 @@ fun HomeScreen(
             Modifier.padding(horizontal = PoulpySpace.lg).padding(top = PoulpySpace.sm),
             verticalArrangement = Arrangement.spacedBy(PoulpySpace.sm),
         ) {
-            state.poulpy?.let { poulpy -> PoulpyHeader(poulpy, Modifier.fillMaxWidth(), compact = true) }
+            state.poulpy?.let { poulpy -> MotivationRow(poulpy) }
             if (state.loaded) {
                 val upNext = state.today.filter { it.status != TodayStatus.DONE }
-                if (upNext.isEmpty() && state.next == null) {
+                val suggestion = state.suggestion
+                if (!state.hasWorkouts) {
                     RestCard(state, onOpenLibrary)
                 } else {
                     SectionLabel(stringResource(R.string.home_upNext))
@@ -140,6 +147,19 @@ fun HomeScreen(
                             },
                             onDiscard = model::discardUnfinished,
                         )
+                    }
+                    if (suggestion != null) {
+                        UpNextCard(
+                            suggestion,
+                            highlighted = false,
+                            detail = stringResource(R.string.home_suggestion, suggestion.details),
+                            onClick = { suggestion.workoutId?.let(onOpenWorkout) },
+                            onDiscard = {},
+                        )
+                        TextButton(onClick = onOpenLibrary, contentPadding = PaddingValues(horizontal = PoulpySpace.xs)) {
+                            Text(stringResource(R.string.home_somethingElse), fontWeight = FontWeight.ExtraBold)
+                            Icon(Lucide.ChevronRight, contentDescription = null, modifier = Modifier.size(18.dp))
+                        }
                     }
                     state.next?.let { next -> NextCard(next) { onOpenWorkout(next.workoutId) } }
                 }
@@ -186,7 +206,7 @@ fun HomeScreen(
                             }
                             is DiaryEntry.DayHeading -> RuledLabel(
                                 if (entry.isToday) stringResource(R.string.history_todayDay, dayLabel(entry.dateMillis)) else dayLabel(entry.dateMillis),
-                                color = colors.onSurfaceVariant,
+                                color = if (entry.isToday) colors.primary else colors.onSurfaceVariant,
                             )
                             is DiaryEntry.Session -> SessionCard(entry.row, highlighted = false, diary = true) { onOpenSession(entry.row.id) }
                         }
@@ -341,7 +361,7 @@ private fun SectionLabel(text: String, modifier: Modifier = Modifier) {
 
 /** A workout to do or a session left halfway, as a card ending in a chevron; a session left halfway can also be discarded. */
 @Composable
-private fun UpNextCard(item: TodayItem, highlighted: Boolean, onClick: () -> Unit, onDiscard: () -> Unit) {
+private fun UpNextCard(item: TodayItem, highlighted: Boolean, detail: String? = null, onClick: () -> Unit, onDiscard: () -> Unit) {
     val colors = MaterialTheme.colorScheme
     val inProgress = item.status == TodayStatus.IN_PROGRESS
     var discarding by rememberSaveable { mutableStateOf(false) }
@@ -360,8 +380,8 @@ private fun UpNextCard(item: TodayItem, highlighted: Boolean, onClick: () -> Uni
                 }
                 Column(Modifier.weight(1f)) {
                     Text(item.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold)
-                    val detail = if (inProgress) stringResource(R.string.home_inProgress) else item.details
-                    if (detail.isNotEmpty()) Text(detail, style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
+                    val line = detail ?: if (inProgress) stringResource(R.string.home_inProgress) else item.details
+                    if (line.isNotEmpty()) Text(line, style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
                 }
                 Icon(Lucide.ChevronRight, contentDescription = null, tint = colors.onSurfaceVariant)
             }
@@ -389,10 +409,10 @@ private fun UpNextCard(item: TodayItem, highlighted: Boolean, onClick: () -> Uni
     }
 }
 
+/** The next planned session, drawn as an Up next row: "Tomorrow · Sets · about 25 min". */
 @Composable
 private fun NextCard(next: NextSession, onClick: () -> Unit) {
     val colors = MaterialTheme.colorScheme
-    val day = Instant.ofEpochMilli(next.dayMillis).atZone(ZoneId.systemDefault())
     val whenText = if (next.daysAway == 1) stringResource(R.string.home_tomorrow, next.details)
     else pluralStringResource(R.plurals.home_inDays, next.daysAway, next.daysAway, next.details)
     OutlinedCard(
@@ -402,24 +422,49 @@ private fun NextCard(next: NextSession, onClick: () -> Unit) {
         shape = RoundedCornerShape(PoulpyRadius.lg),
         modifier = Modifier.fillMaxWidth(),
     ) {
-        Row(Modifier.padding(PoulpySpace.sm), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Column(
-                Modifier.size(44.dp, 48.dp).clip(RoundedCornerShape(PoulpyRadius.md)).background(colors.background),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-            ) {
-                Text(
-                    DateTimeFormatter.ofPattern("EEE", Locale.getDefault()).format(day).uppercase(Locale.getDefault()),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = colors.primary,
-                )
-                Text(day.dayOfMonth.toString(), style = MaterialTheme.typography.titleMedium, color = colors.onPrimaryContainer)
+        Row(Modifier.padding(PoulpySpace.sm), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(PoulpySpace.sm)) {
+            Box(Modifier.size(44.dp).clip(CircleShape).background(colors.primaryContainer), contentAlignment = Alignment.Center) {
+                Icon(Lucide.Dumbbell, contentDescription = null, tint = colors.onPrimaryContainer)
             }
             Column(Modifier.weight(1f)) {
                 Text(next.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold)
                 Text(whenText, style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
             }
             Icon(Lucide.ChevronRight, contentDescription = null, tint = colors.onSurfaceVariant)
+        }
+    }
+}
+
+/**
+ * Home's motivation row (`home-diary` mockup): a small Poulpy and his eight tentacles as segments, never a streak.
+ * The latest achievements and the way to Achievements join it with #523.
+ */
+@Composable
+private fun MotivationRow(poulpy: PoulpyStatus) {
+    val colors = MaterialTheme.colorScheme
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .heightIn(min = 48.dp)
+            .clip(RoundedCornerShape(percent = 50))
+            .background(colors.surface)
+            .border(1.dp, colors.outline, RoundedCornerShape(percent = 50))
+            .padding(start = PoulpySpace.xs, end = PoulpySpace.lg)
+            .semantics(mergeDescendants = true) { contentDescription = poulpy.tentaclesCaption },
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(PoulpySpace.sm),
+    ) {
+        Image(painterResource(poulpy.drawing.drawable), contentDescription = null, modifier = Modifier.padding(start = 4.dp).size(36.dp, 32.dp))
+        Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+            repeat(PoulpyStatus.TENTACLES) { index ->
+                Box(
+                    Modifier
+                        .weight(1f)
+                        .height(8.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(if (index < poulpy.tentaclesLit) colors.primary else colors.onPrimaryContainer.copy(alpha = 0.18f)),
+                )
+            }
         }
     }
 }

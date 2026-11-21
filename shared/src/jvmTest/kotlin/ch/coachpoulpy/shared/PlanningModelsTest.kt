@@ -92,6 +92,29 @@ class PlanningModelsTest {
     }
 
     @Test
+    fun withNothingPlannedHomeSuggestsTheWorkoutNotDoneForTheLongest() {
+        val legs = workout("Legs", "push-up")
+        workout("Arms", "push-up")
+        play(legs)
+
+        val state = home().state.await { it.loaded && it.suggestion != null }
+
+        assertEquals("Arms", state.suggestion!!.title)
+        assertEquals(TodayStatus.TO_DO, state.suggestion!!.status)
+    }
+
+    @Test
+    fun aWorkoutPlannedTodayLeavesNoSuggestion() {
+        val legs = workout("Legs", "push-up")
+        workout("Arms", "push-up")
+        graph.store.planWorkout(legs, today)
+
+        val state = home().state.await { it.loaded && it.today.isNotEmpty() }
+
+        assertNull(state.suggestion)
+    }
+
+    @Test
     fun aSessionDoneTodayAlsoOpensThePastTimelineUnderThisWeek() {
         val legs = workout("Legs", "push-up")
         play(legs)

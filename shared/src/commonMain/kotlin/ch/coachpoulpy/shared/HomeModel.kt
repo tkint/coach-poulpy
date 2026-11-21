@@ -61,6 +61,11 @@ data class HomeState(
     /** In progress first, then still to do, then done. Empty on a day with nothing planned or done. */
     val today: List<TodayItem> = emptyList(),
     val next: NextSession? = null,
+    /**
+     * A workout to do when nothing is planned or left open today: the library's workout not done for the longest,
+     * a never-done one first, so the library comes round in turn. Null when today has something to do.
+     */
+    val suggestion: TodayItem? = null,
     /** False before the first workout is saved: Home then points to the library to make one. */
     val hasWorkouts: Boolean = false,
     /** The past under Up next: every finished session by week and day, newest first (see [diaryTimeline]). */
@@ -180,11 +185,21 @@ class HomeModel internal constructor(
             NextSession(plan.id, workout.id.value, workout.name, facts.details(workout), plan.day.startMillis(zone), today.daysUntil(plan.day))
         }
 
+        val lastDone = sessions.filter { it.counts }
+            .mapNotNull { session -> session.record.workout?.workoutId?.let { it to session.record.startedAt } }
+            .groupBy({ it.first }, { it.second })
+            .mapValues { (_, starts) -> starts.max() }
+        val suggestion = workouts
+            .takeIf { items.none { it.status != TodayStatus.DONE } }
+            ?.minByOrNull { lastDone[it.id] ?: Instant.DISTANT_PAST }
+            ?.let { item(TodayStatus.TO_DO, "suggest:${it.id.value}", it, plan = null) }
+
         return HomeState(
             loaded = true,
             poulpy = coach.status(ends, now, painActive()),
             today = items,
             next = next,
+            suggestion = suggestion,
             hasWorkouts = workouts.isNotEmpty(),
             past = diaryTimeline(sessions.mapNotNull { session -> session.realTotals?.let { sessionRow(session, it, labels) } }, now, zone),
         )
