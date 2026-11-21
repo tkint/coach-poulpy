@@ -19,7 +19,7 @@ type Story = StoryObj<typeof meta>
 export const HomeDiary: Story = { name: 'Home, the diary', ...screen(screenHomeDiary) }
 /** Home · nothing planned: Up next suggests a short workout, as a tappable card. */
 export const HomeDiaryNothingScheduled: Story = { name: 'Home, nothing scheduled', ...screen(screenHomeDiaryNothingScheduled) }
-/** Home · the calendar button on the Past heading opens a bottom sheet that is only a shortcut: tap a day and it closes and the timeline scrolls to that date. */
+/** Home · the calendar button on the Past heading opens the platform's own date picker, as everywhere else the app asks for a date: pick a day, confirm, and the timeline scrolls to that date. It does not mark the days with sessions; History's calendar does. */
 export const HomeCalendarSheet: Story = { name: 'Home, jump to a day', ...screen(screenHomeCalendarSheet) }
 /** Record · the Record button opens a bottom sheet over Home: a free session, a walk or a run, or a workout from the library. */
 export const Record: Story = { name: 'Record', ...screen(screenRecord) }

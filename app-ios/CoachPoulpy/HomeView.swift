@@ -93,7 +93,7 @@ struct HomeView: View {
                                 }
                             }
                             .sheet(isPresented: $jumping) {
-                                JumpToDaySheet(graph: graph) { dayMillis in
+                                JumpToDaySheet { dayMillis in
                                     jumping = false
                                     let index = home.model.indexOfDay(dayMillis: dayMillis)
                                     if index >= 0 { withAnimation { proxy.scrollTo(Int(index), anchor: .top) } }
@@ -386,38 +386,32 @@ private struct RecordSheet: View {
     }
 }
 
-/// The calendar over Home: a tapped day scrolls the past to it.
+/// The native date picker over Home: the picked day scrolls the past to it.
 private struct JumpToDaySheet: View {
-    @StateObject private var history: Observed<HistoryModel, HistoryState>
-    @State private var offset: Int32 = 0
+    @State private var picked = Date()
+    @Environment(\.dismiss) private var dismiss
     let onDay: (Int64) -> Void
 
-    init(graph: AppGraph, onDay: @escaping (Int64) -> Void) {
-        self.onDay = onDay
-        _history = StateObject(wrappedValue: {
-            let model = graph.history(languageCode: Language.code)
-            return Observed(model, current: model.current, watch: model.watch, close: { $0.close() })
-        }())
-    }
-
     var body: some View {
-        let state = history.value
-        let month = history.model.month(state: state, offset: offset, selectedDay: 0)
-        VStack(alignment: .leading, spacing: 0) {
-            Text("home.jumpToDay").font(.poulpy(.title3)).padding(.horizontal, PoulpySpace.lg).padding(.top, PoulpySpace.lg)
-            MonthCardView(month: month, selected: 0, onSelect: { day in
-                let start = Date(timeIntervalSince1970: Double(month.monthStartMillis) / 1000)
-                let target = Calendar.current.date(byAdding: .day, value: Int(day) - 1, to: start) ?? start
-                onDay(Int64(Calendar.current.startOfDay(for: target).timeIntervalSince1970 * 1000))
-            }, onMonth: { step in
-                offset = min(0, max(state.firstMonthOffset, offset + step))
-            }, neighbour: { step in
-                let at = offset + step
-                return at >= state.firstMonthOffset && at <= 0 ? history.model.month(state: state, offset: at, selectedDay: 0) : nil
-            })
-            Spacer(minLength: 0)
+        NavigationStack {
+            DatePicker("home.jumpToDay", selection: $picked, in: ...Date(), displayedComponents: .date)
+                .datePickerStyle(.graphical)
+                .padding(.horizontal, PoulpySpace.lg)
+                .frame(maxHeight: .infinity, alignment: .top)
+                .background(PoulpyColor.background)
+                .navigationTitle("home.jumpToDay")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button(LocalizedStringKey("action.cancel")) { dismiss() }
+                    }
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button(LocalizedStringKey("action.done")) {
+                            onDay(Int64(Calendar.current.startOfDay(for: picked).timeIntervalSince1970 * 1000))
+                        }
+                    }
+                }
         }
-        .background(PoulpyColor.background)
         .presentationDetents([.medium, .large])
     }
 }

@@ -35,55 +35,18 @@
   <MobileNavBar active="home" />
 
   <div class="scrim" aria-hidden="true"></div>
-  <MobileSheet id="calendar-sheet" aria-label="Jump to a day" style="gap: var(--cp-space-sm);">
-    <span class="sheet-handle" aria-hidden="true"></span>
-    <div class="sheet-head" style="padding: 0;">
-      <div class="sheet-title" style="flex: 1;"><h2>Jump to a day</h2><p>Tap a day and the timeline scrolls to it.</p></div>
-      <button type="button" class="icon-button" aria-label="Close"><MobileIcon name="x" :size="22" /></button>
-    </div>
-  <section class="month-card" style="margin: 0;" id="month" aria-label="October 2026" data-component="month-card">
-      <header>
-        <button class="step" type="button" aria-label="Previous month, September"><MobileIcon name="chevron-left" :size="22" /></button>
-        <div><h2>October 2026</h2><span class="sub">12 active days · tap a day to jump to it</span></div>
-        <button class="step" type="button" aria-label="Next month, November" disabled><MobileIcon name="chevron-right" :size="22" /></button>
-      </header>
-      <div class="weekdays" aria-hidden="true"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div>
-      <div class="days" role="group" aria-label="Days of October">
-        <div></div>
-        <div></div>
-        <div></div>
-        <div><button type="button" class="day" aria-label="Thu 1 October" aria-pressed="false">1</button></div>
-        <div><button type="button" class="day day--active" aria-label="Fri 2 October, 1 session" aria-pressed="false">2</button></div>
-        <div><button type="button" class="day" aria-label="Sat 3 October" aria-pressed="false">3</button></div>
-        <div><button type="button" class="day" aria-label="Sun 4 October" aria-pressed="false">4</button></div>
-        <div><button type="button" class="day day--active" aria-label="Mon 5 October, 1 session" aria-pressed="false">5</button></div>
-        <div><button type="button" class="day" aria-label="Tue 6 October" aria-pressed="false">6</button></div>
-        <div><button type="button" class="day day--active" aria-label="Wed 7 October, 1 session" aria-pressed="false">7</button></div>
-        <div><button type="button" class="day" aria-label="Thu 8 October" aria-pressed="false">8</button></div>
-        <div><button type="button" class="day day--active" aria-label="Fri 9 October, 1 session" aria-pressed="false">9</button></div>
-        <div><button type="button" class="day" aria-label="Sat 10 October" aria-pressed="false">10</button></div>
-        <div><button type="button" class="day" aria-label="Sun 11 October" aria-pressed="false">11</button></div>
-        <div><button type="button" class="day day--active" aria-label="Mon 12 October, 1 session" aria-pressed="false">12</button></div>
-        <div><button type="button" class="day" aria-label="Tue 13 October" aria-pressed="false">13</button></div>
-        <div><button type="button" class="day day--active" aria-label="Wed 14 October, 1 session" aria-pressed="false">14</button></div>
-        <div><button type="button" class="day" aria-label="Thu 15 October" aria-pressed="false">15</button></div>
-        <div><button type="button" class="day day--active" aria-label="Fri 16 October, 1 session" aria-pressed="false">16</button></div>
-        <div><button type="button" class="day day--active" aria-label="Sat 17 October, 1 session" aria-pressed="false">17</button></div>
-        <div><button type="button" class="day" aria-label="Sun 18 October" aria-pressed="false">18</button></div>
-        <div><button type="button" class="day" aria-label="Mon 19 October" aria-pressed="false">19</button></div>
-        <div><button type="button" class="day day--active" aria-label="Tue 20 October, 1 session" aria-pressed="false">20</button></div>
-        <div><button type="button" class="day day--active" aria-label="Wed 21 October, 1 session" aria-pressed="false">21</button></div>
-        <div><button type="button" class="day day--active day--selected" aria-label="Thu 22 October, 1 session" aria-pressed="true">22</button></div>
-        <div><button type="button" class="day day--active" aria-label="Fri 23 October, 1 session" aria-pressed="false">23</button></div>
-        <div><button type="button" class="day day--active day--today" aria-label="Sat 24 October, 1 session, today" aria-pressed="false">24</button></div>
-        <div><button type="button" class="day day--future" aria-label="Sun 25 October" aria-pressed="false" disabled>25</button></div>
-        <div><button type="button" class="day day--future" aria-label="Mon 26 October" aria-pressed="false" disabled>26</button></div>
-        <div><button type="button" class="day day--future" aria-label="Tue 27 October" aria-pressed="false" disabled>27</button></div>
-        <div><button type="button" class="day day--future" aria-label="Wed 28 October" aria-pressed="false" disabled>28</button></div>
-        <div><button type="button" class="day day--future" aria-label="Thu 29 October" aria-pressed="false" disabled>29</button></div>
-        <div><button type="button" class="day day--future" aria-label="Fri 30 October" aria-pressed="false" disabled>30</button></div>
-        <div><button type="button" class="day day--future" aria-label="Sat 31 October" aria-pressed="false" disabled>31</button></div>
+  <!-- The platform's own date picker (Material dialog on Android, graphical DatePicker on iOS), drawn in the app's theme. -->
+  <div class="dialog" role="dialog" aria-label="Jump to a day" style="top: 0; display: flex; align-items: center;">
+    <div style="width: 100%; gap: var(--cp-space-xs);">
+      <span class="label">Jump to a day</span>
+      <h2 style="text-align: left;">Wed 21 Oct</h2>
+      <div style="display: flex; align-items: center; justify-content: space-between;">
+        <strong>October 2026</strong>
+        <span style="display: flex; gap: 4px; color: var(--cp-primary);"><MobileIcon name="chevron-left" :size="22" /><MobileIcon name="chevron-right" :size="22" /></span>
       </div>
-    </section>
-  </MobileSheet>
+      <div class="weekdays" aria-hidden="true" style="display: grid; grid-template-columns: repeat(7, 1fr); text-align: center;"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div>
+      <div role="group" aria-label="Days of October" style="display: grid; grid-template-columns: repeat(7, 1fr); row-gap: 2px;"><span></span><span></span><span></span><span class="day" style="margin: 0 auto;" aria-hidden="true">1</span><span class="day" style="margin: 0 auto;" aria-hidden="true">2</span><span class="day" style="margin: 0 auto;" aria-hidden="true">3</span><span class="day" style="margin: 0 auto;" aria-hidden="true">4</span><span class="day" style="margin: 0 auto;" aria-hidden="true">5</span><span class="day" style="margin: 0 auto;" aria-hidden="true">6</span><span class="day" style="margin: 0 auto;" aria-hidden="true">7</span><span class="day" style="margin: 0 auto;" aria-hidden="true">8</span><span class="day" style="margin: 0 auto;" aria-hidden="true">9</span><span class="day" style="margin: 0 auto;" aria-hidden="true">10</span><span class="day" style="margin: 0 auto;" aria-hidden="true">11</span><span class="day" style="margin: 0 auto;" aria-hidden="true">12</span><span class="day" style="margin: 0 auto;" aria-hidden="true">13</span><span class="day" style="margin: 0 auto;" aria-hidden="true">14</span><span class="day" style="margin: 0 auto;" aria-hidden="true">15</span><span class="day" style="margin: 0 auto;" aria-hidden="true">16</span><span class="day" style="margin: 0 auto;" aria-hidden="true">17</span><span class="day" style="margin: 0 auto;" aria-hidden="true">18</span><span class="day" style="margin: 0 auto;" aria-hidden="true">19</span><span class="day" style="margin: 0 auto;" aria-hidden="true">20</span><span class="day day--today" style="margin: 0 auto;" aria-hidden="true">21</span><span class="day day--future" style="margin: 0 auto;" aria-hidden="true">22</span><span class="day day--future" style="margin: 0 auto;" aria-hidden="true">23</span><span class="day day--future" style="margin: 0 auto;" aria-hidden="true">24</span><span class="day day--future" style="margin: 0 auto;" aria-hidden="true">25</span><span class="day day--future" style="margin: 0 auto;" aria-hidden="true">26</span><span class="day day--future" style="margin: 0 auto;" aria-hidden="true">27</span><span class="day day--future" style="margin: 0 auto;" aria-hidden="true">28</span><span class="day day--future" style="margin: 0 auto;" aria-hidden="true">29</span><span class="day day--future" style="margin: 0 auto;" aria-hidden="true">30</span><span class="day day--future" style="margin: 0 auto;" aria-hidden="true">31</span></div>
+      <div class="actions" style="justify-content: flex-end; margin-top: var(--cp-space-xs);"><MobileButton kind="secondary" size="sm">Cancel</MobileButton><MobileButton size="sm">Done</MobileButton></div>
+    </div>
+  </div>
 </main>

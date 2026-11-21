@@ -35,7 +35,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.remember
@@ -73,7 +72,7 @@ import ch.coachpoulpy.shared.HomeState
 import ch.coachpoulpy.shared.NextSession
 import ch.coachpoulpy.shared.TodayItem
 import ch.coachpoulpy.shared.TodayStatus
-import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -81,7 +80,7 @@ import kotlinx.coroutines.launch
 
 /**
  * Home, the diary: Poulpy, what is next, then the past as a timeline of weeks and days. Only the timeline scrolls. The
- * calendar button opens a sheet that is only a shortcut (a tap on a day closes it and scrolls the timeline there), and
+ * calendar button opens the Material date dialog (a picked day scrolls the timeline there), and
  * Record opens a sheet to choose what to record.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -222,15 +221,15 @@ fun HomeScreen(
         )
     }
     if (jumping) {
-        JumpToDaySheet(
-            graph = graph,
-            language = language,
-            onDay = { dayMillis ->
-                jumping = false
-                val index = state.past.indexOfDay(dayMillis)
+        DateDialog(
+            initial = null,
+            latest = LocalDate.now(),
+            onPick = { day ->
+                val index = state.past.indexOfDay(day.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli())
                 if (index >= 0) scope.launch { listState.animateScrollToItem(index) }
             },
-            onClose = { jumping = false },
+            onDismiss = { jumping = false },
+            confirm = R.string.action_done,
         )
     }
 }
@@ -281,35 +280,6 @@ private fun RecordChoice(icon: ImageVector, @StringRes title: Int, @StringRes de
                 Text(stringResource(detail), style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
             }
             Icon(Lucide.ChevronRight, contentDescription = null, tint = colors.onSurfaceVariant)
-        }
-    }
-}
-
-/** The month grid as a shortcut: a tap on a day closes the sheet and the timeline scrolls to that day. */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun JumpToDaySheet(graph: AppGraph, language: String, onDay: (Long) -> Unit, onClose: () -> Unit) {
-    val history = remember(graph, language) { graph.history(language) }
-    DisposableEffect(history) { onDispose { history.close() } }
-    val historyState by history.state.collectAsStateWithLifecycle()
-    var offset by rememberSaveable { mutableIntStateOf(0) }
-    val month = history.month(historyState, offset, selectedDay = 0)
-    ModalBottomSheet(
-        onDismissRequest = onClose,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        containerColor = MaterialTheme.colorScheme.surface,
-    ) {
-        Column(Modifier.padding(bottom = 24.dp).navigationBarsPadding()) {
-            Row(Modifier.padding(horizontal = PoulpySpace.lg), verticalAlignment = Alignment.Top) {
-                Box(Modifier.weight(1f)) { SheetTitle(stringResource(R.string.home_jumpToDay), "") }
-                IconButton(onClick = onClose) { Icon(Lucide.X, contentDescription = stringResource(R.string.action_close)) }
-            }
-            MonthCard(month, selected = 0, onSelect = { day ->
-                val start = Instant.ofEpochMilli(month.monthStartMillis).atZone(ZoneId.systemDefault()).toLocalDate().plusDays(day - 1L)
-                onDay(start.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli())
-            }, onMonth = { step -> offset = (offset + step).coerceIn(historyState.firstMonthOffset, 0) }, neighbour = { step ->
-                (offset + step).takeIf { it in historyState.firstMonthOffset..0 }?.let { history.month(historyState, it, selectedDay = 0) }
-            })
         }
     }
 }
