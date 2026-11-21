@@ -89,6 +89,12 @@ extension AppGraph {
         return Observed(model, current: model.current, watch: model.watch, close: { $0.close() })
     }
 
+    /// The Achievements page. Closed with the page, since it follows the database.
+    func observedAchievements() -> Observed<AchievementsModel, AchievementsState> {
+        let model = achievements(languageCode: Language.code, memory: UserDefaultsStore())
+        return Observed(model, current: model.current, watch: model.watch, close: { $0.close() })
+    }
+
     func observedProfile() -> Observed<ProfileModel, ProfileUi> {
         let model = profile(memory: UserDefaultsStore())
         return Observed(model, current: model.ui.value as! ProfileUi, watch: model.watch, close: { _ in })

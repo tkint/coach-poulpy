@@ -312,6 +312,17 @@
     "fullOctopus": "Full octopus",
     "tentaclesLit": "{lit, number} of 8 lit"
   },
+  "achievements": {
+    "title": "Achievements",
+    "badges": "Badges",
+    "toGo": "{left, plural, one {One more session and I turn into a champion.} other {# more sessions and I turn into a champion.}}",
+    "champion": "All eight tentacles lit. Gold for the octopus!",
+    "locked": "Locked badge",
+    "firstRecord": "First record",
+    "goalMet": "Goal met",
+    "firstWalk": "First walk",
+    "open": "Achievements, {caption}"
+  },
   "live": {
     "noneConnected": "None connected",
     "emptyTitle": "No device connected",
