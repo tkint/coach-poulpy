@@ -10,7 +10,7 @@ const meta = {
     ariaLabel: { control: 'text', description: 'Its accessible name; always set.' },
     floating: { control: 'inline-radio', options: [undefined, 'start', 'end'] },
   },
-  parameters: { docs: { canvas: { sourceState: 'none' }, description: { component: '`MobileIconButton`: a round button holding one icon, always with an `aria-label`. `filled` over a picture or a header, `floating` to sit in a corner of the screen.' } } },
+  parameters: { docs: { canvas: { sourceState: 'none' }, description: { component: '`MobileIconButton`: a rounded-square button holding one icon, always with an `aria-label`. `filled` over a picture or a header, `floating` to sit in a corner of the screen.' } } },
 } satisfies Meta
 export default meta
 type Story = StoryObj<typeof meta>
