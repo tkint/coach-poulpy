@@ -466,7 +466,7 @@ private struct NoExercises: View {
     let clear: () -> Void
 
     var body: some View {
-        PoulpyCard(
+        EmptyState(
             title: query.isEmpty ? Text("exercises.noFit") : Text("exercises.nothingFor \(query)"),
             message: Text(LocalizedStringKey(query.isEmpty ? "exercises.noFitHint" : "exercises.nothingHint")),
             button: Text("exercises.clearAll"),

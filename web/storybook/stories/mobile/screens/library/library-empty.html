@@ -5,12 +5,10 @@
   </div>
 
   <div style="flex: 1; min-height: 0; overflow: hidden; padding: var(--cp-space-sm) var(--cp-space-lg) 0;">
-    <section class="empty-card" id="library-empty" data-component="empty-card" aria-label="No workouts yet">
-      <img src="../../../poulpy/mood_happy.svg" alt="Poulpy, happy">
-      <h2>No workouts yet</h2>
-      <p>Build one once, then plan it for any day or keep it here for later.</p>
-      <MobileButton size="md" icon="plus">Build your first workout</MobileButton>
-    </section>
+    <MobileEmptyState id="library-empty" title="No workouts yet">
+      Build one once, then plan it for any day or keep it here for later.
+      <template #action><MobileButton kind="secondary" size="sm" icon="plus">Build your first workout</MobileButton></template>
+    </MobileEmptyState>
   </div>
 
   <MobileNavBar active="library" />

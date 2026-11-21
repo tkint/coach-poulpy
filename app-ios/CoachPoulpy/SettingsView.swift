@@ -49,7 +49,7 @@ struct SettingsView: View {
                         case .profile: ProfileView(profile: profile, account: account, weight: weight, height: height, units: settings.value.units)
                         case .account: AccountPage(account: account, onFlow: onAccount)
                         case .devices:
-                            DevicesList(devices: devices, bluetooth: bluetooth)
+                            DevicesList(devices: devices, bluetooth: bluetooth, onAdd: { path.append(DeviceRoute.add) })
                                 .navigationTitle("settings.devices")
                                 .navigationBarTitleDisplayMode(.inline)
                                 .toolbar {
@@ -182,6 +182,7 @@ private struct SettingsPageView: View {
 private struct DevicesList: View {
     @ObservedObject var devices: Observed<DevicesModel, DevicesUiState>
     @ObservedObject var bluetooth: BluetoothGate
+    let onAdd: () -> Void
 
     var body: some View {
         let state = devices.value
@@ -189,21 +190,15 @@ private struct DevicesList: View {
             BluetoothProblems(bluetooth: bluetooth)
             if state.known.isEmpty {
                 Section {
-                    VStack(spacing: 10) {
-                        Image("PoulpyPoseStandingTall").resizable().scaledToFit().frame(width: 140, height: 126).accessibilityHidden(true)
-                        Text("devices.emptyTitle").font(PoulpyFont.headline).multilineTextAlignment(.center)
-                        Text("devices.emptyBody").multilineTextAlignment(.center)
-                        NavigationLink(value: DeviceRoute.add) {
-                            Label("devices.addFirst", lucide: .plus)
-                        }
-                        .buttonStyle(PoulpyButtonStyle(.primary, size: .lg))
-                        .padding(.top, PoulpySpace.sm)
-                        Text("devices.switchOn").font(.poulpy(.footnote))
-                    }
-                    .foregroundStyle(PoulpyColor.onPrimaryContainer)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, PoulpySpace.lg)
-                    .listRowBackground(PoulpyColor.primaryContainer)
+                    EmptyState(
+                        title: Text("devices.emptyTitle"),
+                        message: Text("devices.emptyBody") + Text(" ") + Text("devices.switchOn"),
+                        button: Text("devices.addFirst"),
+                        icon: .plus,
+                        action: onAdd
+                    )
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
                 }
             } else {
                 Section("devices.yours") {
