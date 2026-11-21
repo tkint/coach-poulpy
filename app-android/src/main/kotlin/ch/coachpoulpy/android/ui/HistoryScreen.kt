@@ -1,5 +1,6 @@
 package ch.coachpoulpy.android.ui
 
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import kotlinx.coroutines.launch
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.graphics.graphicsLayer
@@ -359,7 +360,14 @@ private fun DayCell(month: CalendarMonth, day: CalendarDay, selected: Boolean, o
             .padding(3.dp)
             .clip(CircleShape)
             .background(if (day.active) colors.primary else Color.Transparent)
-            .selectable(selected = selected, enabled = !day.isFuture, onClick = { onSelect(day.day) })
+            // No ripple: a drag across the month starts on a day, and the ring already shows the pick.
+            .selectable(
+                selected = selected,
+                enabled = !day.isFuture,
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                onClick = { onSelect(day.day) },
+            )
             .semantics { contentDescription = description },
         contentAlignment = Alignment.Center,
     ) {
