@@ -81,7 +81,8 @@ struct HomeView: View {
                                 LazyVStack(alignment: .leading, spacing: 0) {
                                     ForEach(Array(state.past.enumerated()), id: \.offset) { index, entry in
                                         TimelineRow(
-                                            dot: entry is DiaryEntrySession ? PoulpyColor.outline : PoulpyColor.primary,
+                                            // Headings sit on the line without a dot, as drawn.
+                                            dot: entry is DiaryEntrySession ? PoulpyColor.outline : entry is DiaryEntryWeekRecap ? PoulpyColor.primary : nil,
                                             first: index == 0,
                                             last: index == state.past.count - 1
                                         ) {
@@ -203,8 +204,7 @@ struct HomeView: View {
                 .foregroundStyle(color)
             Rectangle().fill(PoulpyColor.outline).frame(height: 1)
         }
-        .padding(.leading, PoulpySpace.xs)
-        .padding(.top, 6)
+        .padding(.horizontal, PoulpySpace.xs)
     }
 
     /// A workout to do today, or a session left halfway, which can be opened (it comes back paused) or discarded.
@@ -429,9 +429,9 @@ private func dayLabel(_ millis: Int64) -> String {
     Date(timeIntervalSince1970: Double(millis) / 1000).formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated))
 }
 
-/// One row of the diary's rail: a line down the left with a dot at the row's middle, primary for headings and the week, outline for sessions.
+/// One row of the diary's rail: a line down the left with a dot at the row's middle, primary for the week, outline for sessions, none for headings.
 private struct TimelineRow<Content: View>: View {
-    let dot: Color
+    let dot: Color?
     let first: Bool
     let last: Bool
     @ViewBuilder let content: () -> Content
@@ -442,14 +442,18 @@ private struct TimelineRow<Content: View>: View {
             .padding(.bottom, PoulpySpace.sm)
             .background(alignment: .leading) {
                 GeometryReader { geo in
-                    let middle = (geo.size.height - PoulpySpace.sm) / 2
+                    let content = geo.size.height - PoulpySpace.sm
+                    let middle = content / 2
+                    // One line down the whole past, 12 in from its first and last rows.
                     Path { path in
-                        path.move(to: CGPoint(x: 8, y: first ? middle : 0))
-                        path.addLine(to: CGPoint(x: 8, y: last ? middle : geo.size.height))
+                        path.move(to: CGPoint(x: 8, y: first ? 12 : 0))
+                        path.addLine(to: CGPoint(x: 8, y: last ? content - 12 : geo.size.height))
                     }
                     .stroke(PoulpyColor.outline, style: StrokeStyle(lineWidth: 2, lineCap: .round))
-                    Circle().fill(PoulpyColor.background).frame(width: 16, height: 16).position(x: 8, y: middle)
-                    Circle().fill(dot).frame(width: 12, height: 12).position(x: 8, y: middle)
+                    if let dot {
+                        Circle().fill(PoulpyColor.background).frame(width: 16, height: 16).position(x: 8, y: middle)
+                        Circle().fill(dot).frame(width: 12, height: 12).position(x: 8, y: middle)
+                    }
                 }
             }
     }

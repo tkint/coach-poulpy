@@ -170,7 +170,12 @@ fun HomeScreen(
                 itemsIndexed(state.past, key = { index, entry -> entry.key(index) }) { index, entry ->
                     val colors = MaterialTheme.colorScheme
                     TimelineRow(
-                        dot = if (entry is DiaryEntry.Session) colors.outline else colors.primary,
+                        dot = when (entry) {
+                            is DiaryEntry.Session -> colors.outline
+                            is DiaryEntry.WeekRecap -> colors.primary
+                            // Headings sit on the line without a dot, as drawn.
+                            else -> null
+                        },
                         first = index == 0,
                         last = index == state.past.lastIndex,
                     ) {
@@ -310,15 +315,15 @@ private fun JumpToDaySheet(graph: AppGraph, language: String, onDay: (Long) -> U
 /** A label followed by a hairline to the edge, as the day headings of the diary are drawn. */
 @Composable
 private fun RuledLabel(text: String, color: Color) {
-    Row(Modifier.fillMaxWidth().padding(start = PoulpySpace.xs, top = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(PoulpySpace.sm)) {
+    Row(Modifier.fillMaxWidth().padding(horizontal = PoulpySpace.xs), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(PoulpySpace.sm)) {
         Text(text.uppercase(Locale.getDefault()), style = MaterialTheme.typography.labelMedium, color = color)
         Box(Modifier.weight(1f).height(1.dp).background(MaterialTheme.colorScheme.outline))
     }
 }
 
-/** One row of the diary's rail: a line down the left with a dot at the row's middle, primary for headings and the week, outline for sessions. */
+/** One row of the diary's rail: a line down the left with a dot at the row's middle, primary for the week, outline for sessions, none for headings. */
 @Composable
-private fun TimelineRow(dot: Color, first: Boolean, last: Boolean, content: @Composable () -> Unit) {
+private fun TimelineRow(dot: Color?, first: Boolean, last: Boolean, content: @Composable () -> Unit) {
     val rail = MaterialTheme.colorScheme.outline
     val ground = MaterialTheme.colorScheme.background
     val gap = PoulpySpace.sm
@@ -327,10 +332,14 @@ private fun TimelineRow(dot: Color, first: Boolean, last: Boolean, content: @Com
             .fillMaxWidth()
             .drawBehind {
                 val x = 8.dp.toPx()
-                val middle = (size.height - gap.toPx()) / 2
-                drawLine(rail, Offset(x, if (first) middle else 0f), Offset(x, if (last) middle else size.height), strokeWidth = 2.dp.toPx())
-                drawCircle(ground, radius = 8.dp.toPx(), center = Offset(x, middle))
-                drawCircle(dot, radius = 6.dp.toPx(), center = Offset(x, middle))
+                val content = size.height - gap.toPx()
+                val middle = content / 2
+                // One line down the whole past, 12 in from its first and last rows.
+                drawLine(rail, Offset(x, if (first) 12.dp.toPx() else 0f), Offset(x, if (last) content - 12.dp.toPx() else size.height), strokeWidth = 2.dp.toPx())
+                if (dot != null) {
+                    drawCircle(ground, radius = 8.dp.toPx(), center = Offset(x, middle))
+                    drawCircle(dot, radius = 6.dp.toPx(), center = Offset(x, middle))
+                }
             }
             .padding(start = PoulpySpace.xl, bottom = gap),
     ) { content() }
