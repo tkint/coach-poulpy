@@ -93,7 +93,7 @@ struct HomeView: View {
                                 }
                             }
                             .sheet(isPresented: $jumping) {
-                                JumpToDaySheet { dayMillis in
+                                JumpToDaySheet(graph: graph) { dayMillis in
                                     jumping = false
                                     let index = home.model.indexOfDay(dayMillis: dayMillis)
                                     if index >= 0 { withAnimation { proxy.scrollTo(Int(index), anchor: .top) } }
@@ -386,33 +386,92 @@ private struct RecordSheet: View {
     }
 }
 
-/// The native date picker over Home: the picked day scrolls the past to it.
+/// The native calendar over Home, with a dot under the days that have sessions: a tapped day scrolls the past to it.
 private struct JumpToDaySheet: View {
-    @State private var picked = Date()
+    @StateObject private var history: Observed<HistoryModel, HistoryState>
     @Environment(\.dismiss) private var dismiss
     let onDay: (Int64) -> Void
 
+    init(graph: AppGraph, onDay: @escaping (Int64) -> Void) {
+        self.onDay = onDay
+        _history = StateObject(wrappedValue: {
+            let model = graph.history(languageCode: Language.code)
+            return Observed(model, current: model.current, watch: model.watch, close: { $0.close() })
+        }())
+    }
+
     var body: some View {
+        let state = history.value
         NavigationStack {
-            DatePicker("home.jumpToDay", selection: $picked, in: ...Date(), displayedComponents: .date)
-                .datePickerStyle(.graphical)
-                .padding(.horizontal, PoulpySpace.lg)
-                .frame(maxHeight: .infinity, alignment: .top)
-                .background(PoulpyColor.background)
-                .navigationTitle("home.jumpToDay")
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button(LocalizedStringKey("action.cancel")) { dismiss() }
-                    }
-                    ToolbarItem(placement: .confirmationAction) {
-                        Button(LocalizedStringKey("action.done")) {
-                            onDay(Int64(Calendar.current.startOfDay(for: picked).timeIntervalSince1970 * 1000))
-                        }
-                    }
+            SessionCalendar(
+                sessionDays: Set(state.sessions.map { dayKey(Date(timeIntervalSince1970: Double($0.startedAtMillis) / 1000)) }),
+                firstMonthOffset: Int(state.firstMonthOffset)
+            ) { picked in
+                onDay(Int64(Calendar.current.startOfDay(for: picked).timeIntervalSince1970 * 1000))
+            }
+            .padding(.horizontal, PoulpySpace.lg)
+            .frame(maxHeight: .infinity, alignment: .top)
+            .background(PoulpyColor.background)
+            .navigationTitle("home.jumpToDay")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(LocalizedStringKey("action.close")) { dismiss() }
                 }
+            }
         }
         .presentationDetents([.medium, .large])
+    }
+}
+
+private func dayKey(_ date: Date) -> Int {
+    let parts = Calendar.current.dateComponents([.year, .month, .day], from: date)
+    return (parts.year ?? 0) * 10_000 + (parts.month ?? 0) * 100 + (parts.day ?? 0)
+}
+
+/// UIKit's calendar (iOS 16): it is the system's own, and the only native one that can decorate days.
+private struct SessionCalendar: UIViewRepresentable {
+    let sessionDays: Set<Int>
+    let firstMonthOffset: Int
+    let onPick: (Date) -> Void
+
+    func makeCoordinator() -> Coordinator { Coordinator(self) }
+
+    func makeUIView(context: Context) -> UICalendarView {
+        let view = UICalendarView()
+        view.calendar = Calendar.current
+        view.tintColor = UIColor(PoulpyColor.primary)
+        view.delegate = context.coordinator
+        view.selectionBehavior = UICalendarSelectionSingleDate(delegate: context.coordinator)
+        return view
+    }
+
+    func updateUIView(_ view: UICalendarView, context: Context) {
+        context.coordinator.parent = self
+        let calendar = Calendar.current
+        let thisMonth = calendar.dateInterval(of: .month, for: Date())?.start ?? Date()
+        let start = calendar.date(byAdding: .month, value: firstMonthOffset, to: thisMonth) ?? thisMonth
+        view.availableDateRange = DateInterval(start: start, end: Date())
+        let days = sessionDays.compactMap { key in
+            DateComponents(calendar: calendar, year: key / 10_000, month: key / 100 % 100, day: key % 100)
+        }
+        view.reloadDecorations(forDateComponents: days, animated: false)
+    }
+
+    final class Coordinator: NSObject, UICalendarViewDelegate, UICalendarSelectionSingleDateDelegate {
+        var parent: SessionCalendar
+
+        init(_ parent: SessionCalendar) { self.parent = parent }
+
+        func calendarView(_ calendarView: UICalendarView, decorationFor dateComponents: DateComponents) -> UICalendarView.Decoration? {
+            guard let date = calendarView.calendar.date(from: dateComponents), parent.sessionDays.contains(dayKey(date)) else { return nil }
+            return .default(color: UIColor(PoulpyColor.primary), size: .large)
+        }
+
+        func dateSelection(_ selection: UICalendarSelectionSingleDate, didSelectDate dateComponents: DateComponents?) {
+            guard let dateComponents, let date = Calendar.current.date(from: dateComponents) else { return }
+            parent.onPick(date)
+        }
     }
 }
 

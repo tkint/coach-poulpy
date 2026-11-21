@@ -125,7 +125,7 @@ internal fun SubPage(
 /** The Material date dialog on a java.time date. Dates after [latest] are brought back to it. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun DateDialog(initial: LocalDate?, latest: LocalDate, onPick: (LocalDate) -> Unit, onDismiss: () -> Unit, @StringRes confirm: Int = R.string.action_save) {
+internal fun DateDialog(initial: LocalDate?, latest: LocalDate, onPick: (LocalDate) -> Unit, onDismiss: () -> Unit) {
     val state = rememberDatePickerState(initialSelectedDateMillis = (initial ?: latest).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
     DatePickerDialog(
         onDismissRequest = onDismiss,
@@ -136,7 +136,7 @@ internal fun DateDialog(initial: LocalDate?, latest: LocalDate, onPick: (LocalDa
                     onPick(if (picked.isAfter(latest)) latest else picked)
                 }
                 onDismiss()
-            }) { Text(stringResource(confirm)) }
+            }) { Text(stringResource(R.string.action_save)) }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
     ) { DatePicker(state = state) }

@@ -72,6 +72,18 @@ import ch.coachpoulpy.shared.HomeState
 import ch.coachpoulpy.shared.NextSession
 import ch.coachpoulpy.shared.TodayItem
 import ch.coachpoulpy.shared.TodayStatus
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.text.style.TextAlign
+import com.kizitonwose.calendar.compose.HorizontalCalendar
+import com.kizitonwose.calendar.compose.rememberCalendarState
+import com.kizitonwose.calendar.core.DayPosition
+import com.kizitonwose.calendar.core.daysOfWeek
+import java.time.DayOfWeek
+import java.time.Instant
+import java.time.YearMonth
+import java.time.format.FormatStyle
+import java.time.format.TextStyle
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -80,7 +92,7 @@ import kotlinx.coroutines.launch
 
 /**
  * Home, the diary: Poulpy, what is next, then the past as a timeline of weeks and days. Only the timeline scrolls. The
- * calendar button opens the Material date dialog (a picked day scrolls the timeline there), and
+ * calendar button opens a month calendar that marks the days with sessions (a picked day scrolls the timeline there), and
  * Record opens a sheet to choose what to record.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -221,15 +233,15 @@ fun HomeScreen(
         )
     }
     if (jumping) {
-        DateDialog(
-            initial = null,
-            latest = LocalDate.now(),
-            onPick = { day ->
-                val index = state.past.indexOfDay(day.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli())
+        JumpToDaySheet(
+            graph = graph,
+            language = language,
+            onDay = { dayMillis ->
+                jumping = false
+                val index = state.past.indexOfDay(dayMillis)
                 if (index >= 0) scope.launch { listState.animateScrollToItem(index) }
             },
-            onDismiss = { jumping = false },
-            confirm = R.string.action_done,
+            onClose = { jumping = false },
         )
     }
 }
@@ -280,6 +292,111 @@ private fun RecordChoice(icon: ImageVector, @StringRes title: Int, @StringRes de
                 Text(stringResource(detail), style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
             }
             Icon(Lucide.ChevronRight, contentDescription = null, tint = colors.onSurfaceVariant)
+        }
+    }
+}
+
+/** A month calendar as a shortcut: days with sessions are filled, and a tap on a day closes the sheet and scrolls the timeline there. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun JumpToDaySheet(graph: AppGraph, language: String, onDay: (Long) -> Unit, onClose: () -> Unit) {
+    val history = remember(graph, language) { graph.history(language) }
+    DisposableEffect(history) { onDispose { history.close() } }
+    val historyState by history.state.collectAsStateWithLifecycle()
+    val zone = ZoneId.systemDefault()
+    val today = remember { LocalDate.now() }
+    val activeDays = remember(historyState.sessions) {
+        historyState.sessions.map { Instant.ofEpochMilli(it.startedAtMillis).atZone(zone).toLocalDate() }.toSet()
+    }
+    val thisMonth = YearMonth.from(today)
+    val firstMonth = thisMonth.plusMonths(historyState.firstMonthOffset.toLong())
+    val calendar = rememberCalendarState(startMonth = firstMonth, endMonth = thisMonth, firstVisibleMonth = thisMonth, firstDayOfWeek = DayOfWeek.MONDAY)
+    val scope = rememberCoroutineScope()
+    val shown = calendar.firstVisibleMonth.yearMonth
+    ModalBottomSheet(
+        onDismissRequest = onClose,
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        containerColor = MaterialTheme.colorScheme.surface,
+    ) {
+        Column(Modifier.padding(horizontal = PoulpySpace.lg).padding(bottom = 24.dp).navigationBarsPadding()) {
+            Row(verticalAlignment = Alignment.Top) {
+                Box(Modifier.weight(1f)) { SheetTitle(stringResource(R.string.home_jumpToDay), "") }
+                IconButton(onClick = onClose) { Icon(Lucide.X, contentDescription = stringResource(R.string.action_close)) }
+            }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(onClick = { scope.launch { calendar.animateScrollToMonth(shown.minusMonths(1)) } }, enabled = shown > firstMonth) {
+                    Icon(Lucide.ChevronLeft, contentDescription = stringResource(R.string.history_previousMonth))
+                }
+                Text(
+                    shown.atDay(1).format(DateTimeFormatter.ofPattern("LLLL yyyy", Locale.getDefault())),
+                    style = MaterialTheme.typography.titleLarge,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.weight(1f),
+                )
+                IconButton(onClick = { scope.launch { calendar.animateScrollToMonth(shown.plusMonths(1)) } }, enabled = shown < thisMonth) {
+                    Icon(Lucide.ChevronRight, contentDescription = stringResource(R.string.history_nextMonth))
+                }
+            }
+            Row(Modifier.fillMaxWidth().padding(vertical = 4.dp).clearAndSetSemantics { }) {
+                daysOfWeek(firstDayOfWeek = DayOfWeek.MONDAY).forEach { day ->
+                    Text(
+                        day.getDisplayName(TextStyle.NARROW, Locale.getDefault()),
+                        modifier = Modifier.weight(1f),
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+            HorizontalCalendar(
+                state = calendar,
+                dayContent = { day ->
+                    if (day.position == DayPosition.MonthDate) {
+                        JumpDay(day.date, today, active = day.date in activeDays) { onDay(it.atStartOfDay(zone).toInstant().toEpochMilli()) }
+                    }
+                },
+            )
+        }
+    }
+}
+
+/** One day of the jump calendar: filled when it had sessions, a dot under today, dimmed and inert after today. */
+@Composable
+private fun JumpDay(date: LocalDate, today: LocalDate, active: Boolean, onPick: (LocalDate) -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    val future = date.isAfter(today)
+    val text = when {
+        active -> colors.onPrimary
+        future -> colors.onSurfaceVariant.copy(alpha = 0.45f)
+        else -> colors.onSurface
+    }
+    val description = date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL)) + if (active) ", " + stringResource(R.string.home_jumpDayHasSessions) else ""
+    Box(Modifier.fillMaxWidth().height(44.dp), contentAlignment = Alignment.Center) {
+        Box(
+            Modifier
+                .size(42.dp)
+                .padding(3.dp)
+                .clip(CircleShape)
+                .background(if (active) colors.primary else Color.Transparent)
+                .clickable(enabled = !future, onClick = { onPick(date) })
+                .semantics { contentDescription = description },
+            contentAlignment = Alignment.Center,
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    "${date.dayOfMonth}",
+                    color = text,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = if (active) FontWeight.ExtraBold else FontWeight.Bold,
+                )
+                Box(
+                    Modifier
+                        .size(4.dp)
+                        .clip(CircleShape)
+                        .background(if (date != today) Color.Transparent else if (active) colors.onPrimary else colors.primary),
+                )
+            }
         }
     }
 }

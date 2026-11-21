@@ -34,6 +34,7 @@
     "upNext": "Up next",
     "past": "Past",
     "jumpToDay": "Jump to a day",
+    "jumpDayHasSessions": "Has sessions",
     "record": "Record",
     "weekOf": "Week of {date}",
     "yourWeek": "Your week"
