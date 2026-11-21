@@ -29,3 +29,12 @@ export const TextOnly: Story = {
   Finish a workout or a treadmill session and it will show up here.
 </MobileEmptyState>`),
 }
+
+const btn = `<template #action><MobileButton kind="secondary" size="sm" icon="plus">Build your first workout</MobileButton></template>`
+const line = 'Build one once, then plan it for any day or keep it here for later.'
+/** A: dotted card, Poulpy beside the text. */
+export const DottedRow: Story = { render: () => frame(`<MobileEmptyState title="No workouts yet">${line}${btn}</MobileEmptyState>`) }
+/** B: dotted card, centred, Poulpy above. */
+export const DottedStack: Story = { render: () => frame(`<MobileEmptyState stack :size="56" title="No workouts yet">${line}${btn}</MobileEmptyState>`) }
+/** C: dotted card, smallest: a 40 px Poulpy and no button. */
+export const DottedMinimal: Story = { render: () => frame(`<MobileEmptyState :size="40" title="No workouts yet">${line}</MobileEmptyState>`) }
