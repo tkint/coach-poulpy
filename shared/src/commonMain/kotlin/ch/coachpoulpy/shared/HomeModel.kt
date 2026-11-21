@@ -63,6 +63,8 @@ data class HomeState(
     val next: NextSession? = null,
     /** False before the first workout is saved: Home then points to the library to make one. */
     val hasWorkouts: Boolean = false,
+    /** The past under Up next: every finished session by week and day, newest first (see [diaryTimeline]). */
+    val past: List<DiaryEntry> = emptyList(),
 )
 
 /**
@@ -115,6 +117,9 @@ class HomeModel internal constructor(
     }
 
     fun deleteSession(sessionId: String) = store.deleteSession(sessionId)
+
+    /** Where the past timeline scrolls to for a day tapped in Jump to a day, for Swift, which cannot call the extension. */
+    fun indexOfDay(dayMillis: Long): Int = state.value.past.indexOfDay(dayMillis)
 
     fun close() = scope.cancel()
 
@@ -181,6 +186,7 @@ class HomeModel internal constructor(
             today = items,
             next = next,
             hasWorkouts = workouts.isNotEmpty(),
+            past = diaryTimeline(sessions.mapNotNull { session -> session.realTotals?.let { sessionRow(session, it, labels) } }, now, zone),
         )
     }
 

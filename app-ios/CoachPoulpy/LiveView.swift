@@ -12,12 +12,15 @@ struct LiveView: View {
     @State private var modeInfo = false
     @State private var confirmStop = false
     let onManageDevices: () -> Void
+    /// Closes Live when it covers the tabs, from Record on Home; recording goes on.
+    let onClose: () -> Void
 
-    init(graph: AppGraph, onManageDevices: @escaping () -> Void) {
+    init(graph: AppGraph, onManageDevices: @escaping () -> Void, onClose: @escaping () -> Void) {
         // Shared by the whole app: leaving the tab keeps the devices connected and the recording going.
         _live = StateObject(wrappedValue: graph.observedLive())
         _devices = StateObject(wrappedValue: graph.observedDevices())
         self.onManageDevices = onManageDevices
+        self.onClose = onClose
     }
 
     private var state: LiveUiState { live.value }
@@ -28,7 +31,6 @@ struct LiveView: View {
         if let recording = state.recording, let player = recording.player {
             NavigationStack {
                 workoutPlayer(recording, player)
-                    .toolbar(.hidden, for: .tabBar)
                     .toolbar(.hidden, for: .navigationBar)
             }
         } else {
@@ -81,6 +83,10 @@ struct LiveView: View {
             .background(PoulpyColor.background)
             .navigationTitle("tab.live")
             .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: onClose) { LucideIcon(.chevronLeft, size: 22) }
+                        .accessibilityLabel(Text("action.back"))
+                }
                 ToolbarItem(placement: .navigationBarTrailing) { connectedChip }
             }
             .onAppear {

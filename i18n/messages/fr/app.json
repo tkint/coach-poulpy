@@ -10,7 +10,8 @@
     "library": "Bibliothèque",
     "history": "Historique",
     "live": "En direct",
-    "settings": "Réglages"
+    "settings": "Réglages",
+    "you": "Vous"
   },
   "home": {
     "today": "Aujourd’hui",
@@ -22,13 +23,20 @@
     "firstTitle": "Rien de prévu pour l’instant",
     "firstBody": "Créez votre première séance dans la bibliothèque, puis prévoyez-la pour un jour.",
     "openLibrary": "Ouvrir la bibliothèque",
-    "somethingElse": "Autre chose ? Choisissez dans votre bibliothèque",
+    "somethingElse": "Autre chose ? Choisissez dans votre bibliothèque",
+    "restLine": "Reposez-vous, ou choisissez dans votre bibliothèque",
     "tomorrow": "Demain · {date}",
     "inDays": "{days, plural, one {Dans # jour · {date}} many {Dans # jours · {date}} other {Dans # jours · {date}}}",
     "openSession": "Ouvrir",
     "discard": "Abandonner",
     "discardTitle": "Abandonner cette séance ?",
-    "discardBody": "Elle n’apparaîtra ni dans votre historique ni dans vos totaux. C’est définitif."
+    "discardBody": "Elle n’apparaîtra ni dans votre historique ni dans vos totaux. C’est définitif.",
+    "upNext": "À suivre",
+    "past": "Passé",
+    "jumpToDay": "Aller à un jour",
+    "record": "Enregistrer",
+    "weekOf": "Semaine du {date}",
+    "yourWeek": "Votre semaine"
   },
   "library": {
     "workouts": "Séances",
@@ -686,5 +694,13 @@
     "bodyRunning": "Coach Poulpy a rencontré une erreur mais reste ouvert. Envoyer le rapport aide à la corriger. Il ne dit que ce qui s’est mal passé, et vous pouvez le lire avant de l’envoyer.",
     "send": "Envoyer le rapport",
     "notNow": "Plus tard"
+  },
+  "record": {
+    "title": "Que voulez-vous enregistrer ?",
+    "subtitle": "Choisissez pour commencer.",
+    "walkTitle": "Marche ou course",
+    "walkDetail": "Suivez-la en direct, avec votre téléphone ou un tapis",
+    "libraryTitle": "Une séance de votre bibliothèque",
+    "libraryDetail": "Choisissez-en une et suivez ses étapes"
   }
 }

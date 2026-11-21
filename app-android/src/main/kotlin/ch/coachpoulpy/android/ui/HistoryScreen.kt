@@ -1,5 +1,13 @@
 package ch.coachpoulpy.android.ui
 
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import kotlinx.coroutines.launch
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.Animatable
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
@@ -181,7 +189,9 @@ private fun CalendarView(model: HistoryModel, state: HistoryState, onOpen: (Stri
     }
 
     Column(Modifier.fillMaxSize()) {
-        MonthCard(month, selected, onSelect = { selected = it }, onMonth = changeMonth)
+        MonthCard(month, selected, onSelect = { selected = it }, onMonth = changeMonth, neighbour = { step ->
+            (offset + step).takeIf { it in state.firstMonthOffset..0 }?.let { model.month(state, it, selectedDay = 0) }
+        })
         LazyColumn(
             state = list,
             contentPadding = PaddingValues(start = PoulpySpace.lg, end = PoulpySpace.lg, top = 12.dp, bottom = 16.dp),
@@ -216,29 +226,45 @@ private fun CalendarView(model: HistoryModel, state: HistoryState, onOpen: (Stri
     }
 }
 
-/** The month grid, Monday first; swipe or the arrows change month, never past this one. */
+/**
+ * The month grid, Monday first; swipe or the arrows change month, never past this one nor before the first.
+ * The days follow the finger, with the month beside them coming in ([neighbour] gives it, or null at either end), and settle
+ * on the one the swipe went far enough towards. Every month takes six weeks so the card keeps its height.
+ */
 @Composable
-private fun MonthCard(month: CalendarMonth, selected: Int, onSelect: (Int) -> Unit, onMonth: (Int) -> Unit) {
-    var drag by remember { mutableFloatStateOf(0f) }
-    val cells: List<CalendarDay?> = List(month.leadingBlanks) { null } + month.days
+internal fun MonthCard(
+    month: CalendarMonth,
+    selected: Int,
+    onSelect: (Int) -> Unit,
+    onMonth: (Int) -> Unit,
+    neighbour: (Int) -> CalendarMonth?,
+) {
+    val scope = rememberCoroutineScope()
+    val slide = remember { Animatable(0f) }
+    var width by remember { mutableIntStateOf(0) }
+    val previous = remember(month) { neighbour(-1) }
+    val next = remember(month) { neighbour(1) }
+    // The new month is on screen once the offset says so: put it back in the middle without a jump.
+    LaunchedEffect(month.monthStartMillis) { slide.snapTo(0f) }
+
+    fun settle(step: Int) {
+        scope.launch {
+            val target = if (step == 0) 0f else -step * width.toFloat()
+            slide.animateTo(target, tween(PoulpyMotion.quickMillis))
+            if (step != 0) onMonth(step)
+        }
+    }
+
     OutlinedCard(
         colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surface),
         shape = RoundedCornerShape(PoulpyRadius.lg),
         modifier = Modifier
             .padding(start = PoulpySpace.lg, end = PoulpySpace.lg, top = 14.dp)
-            .fillMaxWidth()
-            .pointerInput(month.year, month.month) {
-                detectHorizontalDragGestures(
-                    onDragStart = { drag = 0f },
-                    onDragEnd = {
-                        if (drag > SWIPE_PX) onMonth(-1) else if (drag < -SWIPE_PX) onMonth(1)
-                    },
-                ) { _, amount -> drag += amount }
-            },
+            .fillMaxWidth(),
     ) {
         Column(Modifier.padding(start = 12.dp, end = 12.dp, top = 10.dp, bottom = 12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = { onMonth(-1) }, enabled = month.canGoBack) {
+                IconButton(onClick = { settle(-1) }, enabled = previous != null) {
                     Icon(Lucide.ChevronLeft, contentDescription = stringResource(R.string.history_previousMonth))
                 }
                 Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -249,7 +275,7 @@ private fun MonthCard(month: CalendarMonth, selected: Int, onSelect: (Int) -> Un
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
-                IconButton(onClick = { onMonth(1) }, enabled = month.canGoForward) {
+                IconButton(onClick = { settle(1) }, enabled = next != null) {
                     Icon(Lucide.ChevronRight, contentDescription = stringResource(R.string.history_nextMonth))
                 }
             }
@@ -265,14 +291,52 @@ private fun MonthCard(month: CalendarMonth, selected: Int, onSelect: (Int) -> Un
                     )
                 }
             }
-            cells.chunked(7).forEach { week ->
-                Row(Modifier.fillMaxWidth()) {
-                    week.forEach { day ->
-                        Box(Modifier.weight(1f).height(44.dp), contentAlignment = Alignment.Center) {
-                            if (day != null) DayCell(month, day, day.day == selected, onSelect)
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .clipToBounds()
+                    .onSizeChanged { width = it.width }
+                    .pointerInput(month.monthStartMillis, previous != null, next != null) {
+                        detectHorizontalDragGestures(
+                            onDragEnd = {
+                                val moved = slide.value
+                                settle(
+                                    when {
+                                        moved > width / 4f && previous != null -> -1
+                                        moved < -width / 4f && next != null -> 1
+                                        else -> 0
+                                    },
+                                )
+                            },
+                            onDragCancel = { settle(0) },
+                        ) { change, amount ->
+                            change.consume()
+                            // At either end the days only give a little, as a sign there is nothing further.
+                            val blocked = (amount > 0 && slide.value >= 0f && previous == null) || (amount < 0 && slide.value <= 0f && next == null)
+                            scope.launch { slide.snapTo(slide.value + if (blocked) amount / 4f else amount) }
                         }
+                    },
+            ) {
+                previous?.let { MonthDays(it, selected = 0, onSelect = {}, Modifier.graphicsLayer { translationX = slide.value - width }) }
+                MonthDays(month, selected, onSelect, Modifier.graphicsLayer { translationX = slide.value })
+                next?.let { MonthDays(it, selected = 0, onSelect = {}, Modifier.graphicsLayer { translationX = slide.value + width }) }
+            }
+        }
+    }
+}
+
+/** Six weeks of [month]'s days, blanks before the 1st and after the last day. */
+@Composable
+private fun MonthDays(month: CalendarMonth, selected: Int, onSelect: (Int) -> Unit, modifier: Modifier = Modifier) {
+    val leading: List<CalendarDay?> = List(month.leadingBlanks) { null }
+    val cells = (leading + month.days).let { it + List(6 * 7 - it.size) { null } }
+    Column(modifier.fillMaxWidth()) {
+        cells.chunked(7).forEach { week ->
+            Row(Modifier.fillMaxWidth()) {
+                week.forEach { day ->
+                    Box(Modifier.weight(1f).height(44.dp), contentAlignment = Alignment.Center) {
+                        if (day != null) DayCell(month, day, day.day == selected, onSelect)
                     }
-                    repeat(7 - week.size) { Spacer(Modifier.weight(1f)) }
                 }
             }
         }
@@ -296,7 +360,14 @@ private fun DayCell(month: CalendarMonth, day: CalendarDay, selected: Boolean, o
             .padding(3.dp)
             .clip(CircleShape)
             .background(if (day.active) colors.primary else Color.Transparent)
-            .selectable(selected = selected, enabled = !day.isFuture, onClick = { onSelect(day.day) })
+            // No ripple: a drag across the month starts on a day, and the ring already shows the pick.
+            .selectable(
+                selected = selected,
+                enabled = !day.isFuture,
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                onClick = { onSelect(day.day) },
+            )
             .semantics { contentDescription = description },
         contentAlignment = Alignment.Center,
     ) {
@@ -357,16 +428,18 @@ private fun RestingRow() {
 }
 
 @Composable
-private fun SessionCard(session: SessionRow, highlighted: Boolean, onClick: () -> Unit) {
+/** In the diary the card is the timeline's: tighter corners and no time of day, since the day heading says when. */
+internal fun SessionCard(session: SessionRow, highlighted: Boolean, diary: Boolean = false, onClick: () -> Unit) {
     val colors = MaterialTheme.colorScheme
     OutlinedCard(
         onClick = onClick,
         colors = CardDefaults.outlinedCardColors(containerColor = colors.surface),
         border = if (highlighted) BorderStroke(2.dp, colors.primary) else BorderStroke(1.dp, colors.outline),
+        shape = if (diary) RoundedCornerShape(PoulpyRadius.md) else CardDefaults.outlinedShape,
         modifier = Modifier.fillMaxWidth(),
     ) {
         Row(
-            Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+            if (diary) Modifier.padding(PoulpySpace.md) else Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
@@ -376,7 +449,7 @@ private fun SessionCard(session: SessionRow, highlighted: Boolean, onClick: () -
             Column(Modifier.weight(1f)) {
                 Text(session.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold)
                 Text(
-                    "${time(session.startedAtMillis)} · ${session.headline()}",
+                    if (diary) session.headline() else "${time(session.startedAtMillis)} · ${session.headline()}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = colors.onSurfaceVariant,
                 )
@@ -626,7 +699,6 @@ fun SessionDetailScreen(graph: AppGraph, language: String, sessionId: String, on
     }
 }
 
-private const val SWIPE_PX = 120f
 
 private val SessionRow.icon
     get() = if (kind == SessionKind.TREADMILL) Lucide.Gauge else Lucide.Dumbbell
@@ -668,7 +740,7 @@ private fun fullDate(monthStartMillis: Long, day: Int): String =
 private fun shortDayMonth(millis: Long): String = pattern("dMMM").format(zoned(millis))
 
 /** Day and month in the user's order, such as "21/10" or "10/21". */
-private fun shortDate(millis: Long): String = pattern("dM").format(zoned(millis))
+internal fun shortDate(millis: Long): String = pattern("dM").format(zoned(millis))
 
 /** A distance in the units picked in Settings. */
 @Composable
