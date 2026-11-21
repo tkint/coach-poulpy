@@ -27,6 +27,7 @@ import MobileStatTile from './MobileStatTile.vue'
 import MobileTopBar from './MobileTopBar.vue'
 import MobileMotivationRow from './MobileMotivationRow.vue'
 import MobileAchievement from './MobileAchievement.vue'
+import MobileEmptyState from './MobileEmptyState.vue'
 
 /** The Vue components a phone screen's markup can use, by the name its template writes. */
-export const mobileComponents = { MobileIcon, MobileBadge, MobileInfoCard, MobileOptionRow, MobileSelectField, MobileNextCard, MobilePoulpyCard, MobilePoulpyLoader, MobilePoulpyCheer, MobilePoulpyTap, MobilePoulpyMood, MobileTentacleRing, MobileFormatChip, MobileRoleTag, MobileSearchField, MobileSheet, MobileSheetHandle, MobileTabs, MobileButton, MobileExerciseRow, MobileFilterChip, MobileIconButton, MobileInfoButton, MobileNavBar, MobileSettingsRow, MobileStatTile, MobileTopBar, MobileMotivationRow, MobileAchievement }
+export const mobileComponents = { MobileIcon, MobileBadge, MobileInfoCard, MobileOptionRow, MobileSelectField, MobileNextCard, MobilePoulpyCard, MobilePoulpyLoader, MobilePoulpyCheer, MobilePoulpyTap, MobilePoulpyMood, MobileTentacleRing, MobileFormatChip, MobileRoleTag, MobileSearchField, MobileSheet, MobileSheetHandle, MobileTabs, MobileButton, MobileExerciseRow, MobileFilterChip, MobileIconButton, MobileInfoButton, MobileNavBar, MobileSettingsRow, MobileStatTile, MobileTopBar, MobileMotivationRow, MobileAchievement, MobileEmptyState }

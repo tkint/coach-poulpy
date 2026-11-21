@@ -26,6 +26,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
@@ -87,36 +94,48 @@ fun ListFilters(
 }
 
 /**
- * Poulpy, happy on the blue side, in a `primaryContainer` card: what the lists show
- * when nothing matches or nothing exists yet, with one primary button.
+ * What a list or screen shows when nothing exists yet or nothing matches: Poulpy thinking beside a title and a line, in
+ * a dashed outline with no fill, then one small secondary button (the `EmptyState` mockup).
  */
 @Composable
-fun PoulpyCard(
+fun EmptyState(
     title: String,
     body: String,
     button: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     buttonIcon: ImageVector? = null,
-    poulpySize: Dp = 96.dp,
 ) {
     val colors = MaterialTheme.colorScheme
-    Column(
+    Row(
         modifier
             .fillMaxWidth()
-            .background(colors.primaryContainer, RoundedCornerShape(PoulpyRadius.lg))
-            .padding(horizontal = PoulpySpace.lg, vertical = 24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+            .dashedBorder(colors.outline, PoulpyRadius.lg)
+            .padding(PoulpySpace.md),
+        horizontalArrangement = Arrangement.spacedBy(PoulpySpace.md),
     ) {
-        Image(painterResource(R.drawable.poulpy_mood_happy), contentDescription = null, modifier = Modifier.size(poulpySize))
-        Text(title, style = MaterialTheme.typography.titleLarge, color = colors.onPrimaryContainer, textAlign = TextAlign.Center)
-        Text(body, style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant, textAlign = TextAlign.Center)
-        PoulpyButton(onClick = onClick, modifier = Modifier.padding(top = 8.dp)) {
-            if (buttonIcon != null) Icon(buttonIcon, contentDescription = null, modifier = Modifier.padding(end = 8.dp).size(20.dp))
-            Text(button)
+        Image(painterResource(R.drawable.poulpy_pose_thinking), contentDescription = null, modifier = Modifier.size(width = 64.dp, height = 58.dp))
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(PoulpySpace.xs)) {
+            Text(title, style = MaterialTheme.typography.titleMedium, color = colors.onSurface)
+            Text(body, style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
+            PoulpyButton(onClick = onClick, kind = PoulpyButtonKind.Secondary, size = PoulpyButtonSize.Sm, modifier = Modifier.padding(top = PoulpySpace.sm)) {
+                if (buttonIcon != null) Icon(buttonIcon, contentDescription = null, modifier = Modifier.padding(end = 8.dp).size(16.dp))
+                Text(button)
+            }
         }
     }
+}
+
+/** A 2 dp dashed outline with rounded corners, drawn behind the content. */
+private fun Modifier.dashedBorder(color: Color, radius: Dp): Modifier = drawBehind {
+    val width = 2.dp.toPx()
+    drawRoundRect(
+        color = color,
+        topLeft = Offset(width / 2, width / 2),
+        size = Size(size.width - width, size.height - width),
+        cornerRadius = CornerRadius(radius.toPx()),
+        style = Stroke(width = width, pathEffect = PathEffect.dashPathEffect(floatArrayOf(6.dp.toPx(), 4.dp.toPx()))),
+    )
 }
 
 /** The 44 high pill search with a 1.5 px outline, `primary` once something is typed, and a clear button. */

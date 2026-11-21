@@ -399,12 +399,11 @@ struct BodyView: View {
         Group {
             if state.history.isEmpty {
                 ScrollView {
-                    PoulpyCard(
+                    EmptyState(
                         title: Text(LocalizedStringKey(isWeight ? "body.emptyWeightTitle" : "body.emptyHeightTitle")),
                         message: Text(LocalizedStringKey(isWeight ? "body.emptyWeightBody" : "body.emptyHeightBody")),
                         button: Text(LocalizedStringKey(isWeight ? "body.logWeight" : "body.logHeight")),
-                        icon: .plus,
-                        poulpySize: 120
+                        icon: .plus
                     ) { logging = true }
                     .padding(.horizontal, PoulpySpace.lg)
                     .padding(.top, 16)

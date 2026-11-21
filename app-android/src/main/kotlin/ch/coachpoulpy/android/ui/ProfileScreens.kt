@@ -554,7 +554,7 @@ internal fun BodyScreen(graph: AppGraph, metric: BodyMetric, language: String, o
         action = { PoulpyButton(onClick = { logging = true }, size = PoulpyButtonSize.Sm) { Text(stringResource(R.string.body_log)) } },
     ) {
         if (state.history.isEmpty()) {
-            PoulpyCard(
+            EmptyState(
                 title = stringResource(if (isWeight) R.string.body_emptyWeightTitle else R.string.body_emptyHeightTitle),
                 body = stringResource(if (isWeight) R.string.body_emptyWeightBody else R.string.body_emptyHeightBody),
                 button = stringResource(if (isWeight) R.string.body_logWeight else R.string.body_logHeight),

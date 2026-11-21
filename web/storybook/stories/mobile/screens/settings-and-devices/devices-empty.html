@@ -4,14 +4,11 @@
     <button type="button" role="tab" aria-selected="false">General</button>
     <button type="button" role="tab" aria-selected="true">Devices</button>
   </div>
-  <div class="settings-body" style="justify-content: center; padding-bottom: var(--cp-space-xl);">
-    <section class="empty-card" id="no-devices">
-      <img src="../../../poulpy/pose_standing_tall.svg" alt="Poulpy, ready to go">
-      <h2>No devices yet</h2>
-      <p>Add your treadmill, a foot pod or a heart rate band. Poulpy shows their numbers together while you run, and records the session.</p>
-      <MobileButton size="md" icon="plus">Add my first device</MobileButton>
-      <span class="hint-text" style="font-size: 14px; line-height: 19px;">Switch the device on first.</span>
-    </section>
+  <div class="settings-body" style="padding-bottom: var(--cp-space-xl);">
+    <MobileEmptyState id="no-devices" title="No devices yet">
+      Add your treadmill, a foot pod or a heart rate band. Poulpy shows their numbers together while you run, and records the session. Switch the device on first.
+      <template #action><MobileButton kind="secondary" size="sm" icon="plus">Add my first device</MobileButton></template>
+    </MobileEmptyState>
   </div>
   <MobileNavBar active="you" />
 </main>

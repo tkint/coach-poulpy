@@ -3,11 +3,9 @@
   <MobileTopBar title="Weight" leading="back" back-label="Back to settings"><MobileButton size="sm">Log</MobileButton></MobileTopBar>
   <p class="app-bar-sub">Nothing logged yet</p>
   <div class="settings-body" style="padding-top: var(--cp-space-lg); gap: var(--cp-space-md);">
-    <section class="empty-card" id="weight-empty" data-component="empty-card" aria-label="No weight yet">
-      <img src="../../../poulpy/mood_happy.svg" alt="Poulpy, happy">
-      <h2>No weight yet</h2>
-      <p>Log it once to see your chart. It stays on this phone, and only you see it.</p>
-      <MobileButton size="md" icon="plus">Log your weight</MobileButton>
-    </section>
+    <MobileEmptyState id="weight-empty" title="No weight yet">
+      Log it once to see your chart. It stays on this phone, and only you see it.
+      <template #action><MobileButton kind="secondary" size="sm" icon="plus">Log your weight</MobileButton></template>
+    </MobileEmptyState>
   </div>
 </main>

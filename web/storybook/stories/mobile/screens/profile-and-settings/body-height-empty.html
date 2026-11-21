@@ -3,11 +3,9 @@
   <MobileTopBar title="Height" leading="back" back-label="Back to settings"><MobileButton size="sm">Log</MobileButton></MobileTopBar>
   <p class="app-bar-sub">Nothing logged yet</p>
   <div class="settings-body" style="padding-top: var(--cp-space-lg); gap: var(--cp-space-md);">
-    <section class="empty-card" id="height-empty" data-component="empty-card" aria-label="No height yet">
-      <img src="../../../poulpy/mood_happy.svg" alt="Poulpy, happy">
-      <h2>No height yet</h2>
-      <p>Log it once to see your chart. A measure every few months is plenty.</p>
-      <MobileButton size="md" icon="plus">Log your height</MobileButton>
-    </section>
+    <MobileEmptyState id="height-empty" title="No height yet">
+      Log it once to see your chart. A measure every few months is plenty.
+      <template #action><MobileButton kind="secondary" size="sm" icon="plus">Log your height</MobileButton></template>
+    </MobileEmptyState>
   </div>
 </main>
