@@ -26,9 +26,10 @@ sealed interface DiaryEntry {
 /** The diary's past: sessions by week, then by day, newest first, each week opening with its recap. */
 internal fun diaryTimeline(sessions: List<SessionRow>, now: Instant, zone: TimeZone): List<DiaryEntry> {
     val today = now.toLocalDateTime(zone).date
-    val byDay = sessions
+    val byDay: List<Pair<LocalDate, List<SessionRow>>> = sessions
         .groupBy { Instant.fromEpochMilliseconds(it.startedAtMillis).toLocalDateTime(zone).date }
-        .toSortedMap(compareByDescending { it })
+        .toList()
+        .sortedByDescending { it.first }
     val thisMonday = today.monday()
     return buildList {
         var week: LocalDate? = null
@@ -36,7 +37,7 @@ internal fun diaryTimeline(sessions: List<SessionRow>, now: Instant, zone: TimeZ
             val monday = day.monday()
             if (monday != week) {
                 week = monday
-                val inWeek = byDay.filterKeys { it.monday() == monday }.values.flatten()
+                val inWeek = byDay.filter { it.first.monday() == monday }.flatMap { it.second }
                 add(DiaryEntry.WeekHeading(monday.atStartOfDayIn(zone).toEpochMilliseconds(), isCurrent = monday == thisMonday))
                 add(DiaryEntry.WeekRecap(inWeek.size, (inWeek.sumOf { it.activeSeconds } / 60).toInt()))
             }
