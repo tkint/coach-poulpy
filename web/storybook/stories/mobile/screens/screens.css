@@ -548,17 +548,12 @@
 
 /* ---------- Empty states ---------- */
 
-.cp-screen .empty-state {
-  border-radius: var(--cp-radius-lg);
-  border: 1.5px dashed color-mix(in srgb, var(--cp-on-surface-variant) 60%, transparent);
-  padding: 18px var(--cp-space-lg);
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 6px;
-}
-.cp-screen .empty-state h2 { font-family: var(--cp-font-display); font-size: 20px; line-height: 24px; font-weight: 700; }
-.cp-screen .empty-state p { font-size: 15px; line-height: 21px; color: var(--cp-on-surface-variant); }
+.cp-screen .empty-state { display: flex; align-items: flex-start; gap: var(--cp-space-md); padding: var(--cp-space-md) var(--cp-space-sm); }
+.cp-screen .empty-state img { width: 64px; height: 58px; flex: none; object-fit: contain; }
+.cp-screen .empty-state-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--cp-space-xs); }
+.cp-screen .empty-state h2 { font-family: var(--cp-font-display); font-size: 17px; line-height: 22px; font-weight: 700; }
+.cp-screen .empty-state p { font-size: 14px; line-height: 20px; color: var(--cp-on-surface-variant); }
+.cp-screen .empty-state-action { margin-top: var(--cp-space-sm); }
 
 /* ---------- Builder ---------- */
 
@@ -892,11 +887,6 @@
 .cp-screen .search-card { border-radius: var(--cp-radius-lg); background: var(--cp-primary-container); color: var(--cp-on-primary-container); padding: 22px var(--cp-space-lg); display: flex; flex-direction: column; align-items: center; gap: var(--cp-space-sm); text-align: center; }
 .cp-screen .search-card h2 { font: var(--cp-type-headline); }
 .cp-screen .search-card p { font-size: 15px; line-height: 21px; }
-.cp-screen .empty-card { border-radius: var(--cp-radius-lg); background: var(--cp-primary-container); color: var(--cp-on-primary-container); padding: 28px 22px; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; }
-.cp-screen .empty-card img { width: 140px; height: 126px; }
-.cp-screen .empty-card h2 { font: var(--cp-type-headline); font-size: 23px; line-height: 27px; }
-.cp-screen .empty-card p { font-size: 15px; line-height: 22px; }
-.cp-screen .empty-card .button { margin-top: 10px; }
 .cp-screen .measure-list { border-radius: var(--cp-radius-md); background: var(--cp-surface); border: 1px solid var(--cp-outline); padding: 2px var(--cp-space-lg); display: flex; flex-direction: column; }
 .cp-screen .measure-list li { display: flex; align-items: center; justify-content: space-between; padding: 11px 0; border-bottom: 1px solid var(--cp-outline); font-weight: 700; }
 .cp-screen .measure-list li:last-child { border-bottom: 0; }
@@ -928,11 +918,6 @@
 .cp-screen .filter-chip--have { background: var(--cp-on-primary-container); border-color: transparent; color: var(--cp-on-primary); font-weight: 800; gap: var(--cp-space-xs); }
 .cp-screen .filter-chip--have b { min-width: 18px; height: 18px; padding: 0 var(--cp-space-xs); border-radius: var(--cp-radius-pill); background: var(--cp-surface); color: var(--cp-on-primary-container); font-size: 13px; display: flex; align-items: center; justify-content: center; font-variant-numeric: tabular-nums; }
 .cp-screen .clear-link { min-height: 32px; font-weight: 800; color: var(--cp-primary); }
-.cp-screen .no-results { margin-top: var(--cp-space-lg); padding: var(--cp-space-xl) var(--cp-space-lg); border-radius: var(--cp-radius-lg); background: var(--cp-primary-container); color: var(--cp-on-primary-container); display: flex; flex-direction: column; align-items: center; gap: var(--cp-space-sm); text-align: center; }
-.cp-screen .no-results img { width: 96px; height: 86px; object-fit: contain; }
-.cp-screen .no-results h2 { font: var(--cp-type-headline); margin-top: var(--cp-space-xs); }
-.cp-screen .no-results p { font-size: 15px; line-height: 21px; }
-.cp-screen .no-results .button { margin-top: var(--cp-space-sm); }
 .cp-screen .check-list { display: flex; flex-direction: column; }
 .cp-screen .check-list label { min-height: 48px; display: flex; align-items: center; gap: 14px; border-bottom: 1px solid var(--cp-outline); font-size: 16px; font-weight: 700; }
 .cp-screen .check-list input { width: 22px; height: 22px; margin: 0; accent-color: var(--cp-primary); }
