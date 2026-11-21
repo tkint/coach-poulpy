@@ -129,12 +129,11 @@ struct LibraryView: View {
             Spacer()
         } else if state.rows.isEmpty {
             ScrollView {
-                PoulpyCard(
+                EmptyState(
                     title: Text("library.emptyTitle"),
                     message: Text("library.emptyBody"),
                     button: Text("library.buildFirst"),
-                    icon: .plus,
-                    poulpySize: 120
+                    icon: .plus
                 ) { choosingFormat = true }
                 .padding(.horizontal, PoulpySpace.lg)
                 .padding(.top, 16)
@@ -166,7 +165,7 @@ struct LibraryView: View {
                 LazyVStack(spacing: 8) {
                     ForEach(listing.rows, id: \.id) { row in workoutRow(row) }
                     if listing.rows.isEmpty {
-                        PoulpyCard(
+                        EmptyState(
                             title: listing.searching
                                 ? Text("library.nothingFor \(query.trimmingCharacters(in: .whitespaces))")
                                 : Text("library.noKind"),

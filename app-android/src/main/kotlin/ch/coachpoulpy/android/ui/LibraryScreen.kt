@@ -151,13 +151,12 @@ private fun Workouts(
 
     if (!state.loaded) return
     if (state.rows.isEmpty()) {
-        PoulpyCard(
+        EmptyState(
             title = stringResource(R.string.library_emptyTitle),
             body = stringResource(R.string.library_emptyBody),
             button = stringResource(R.string.library_buildFirst),
             onClick = onNew,
             buttonIcon = Lucide.Plus,
-            poulpySize = 120.dp,
             modifier = Modifier.padding(start = PoulpySpace.lg, end = PoulpySpace.lg, top = 16.dp),
         )
         return
@@ -211,7 +210,7 @@ private fun Workouts(
                 }
                 if (listing.rows.isEmpty()) {
                     item(key = "none") {
-                        PoulpyCard(
+                        EmptyState(
                             title = if (listing.searching) stringResource(R.string.library_nothingFor, query.trim()) else stringResource(R.string.library_noKind),
                             body = stringResource(R.string.library_nothingHint),
                             button = stringResource(R.string.exercises_clearAll),

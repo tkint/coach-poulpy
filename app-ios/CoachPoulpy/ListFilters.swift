@@ -34,45 +34,47 @@ struct ListFilters<Chips: View, Action: View>: View {
     }
 }
 
-/// Poulpy, happy on the blue side, in a `primaryContainer` card: what the lists show
-/// when nothing matches or nothing exists yet, with one primary button.
-struct PoulpyCard: View {
+/// What a list or screen shows when nothing exists yet or nothing matches: Poulpy thinking beside a title and a line, in
+/// a dashed outline with no fill, then one small secondary button (the `EmptyState` mockup).
+struct EmptyState: View {
     let title: Text
     let message: Text
     let button: Text
     var icon: Lucide? = nil
-    var poulpySize: CGFloat = 96
     let action: () -> Void
 
     var body: some View {
-        VStack(spacing: 8) {
-            Image("PoulpyMoodHappy")
+        HStack(alignment: .top, spacing: PoulpySpace.md) {
+            Image("PoulpyPoseThinking")
                 .resizable()
                 .scaledToFit()
-                .frame(width: poulpySize, height: poulpySize)
+                .frame(width: 64, height: 58)
                 .accessibilityHidden(true)
-            title
-                .font(PoulpyFont.headline)
-                .foregroundStyle(PoulpyColor.onPrimaryContainer)
-            message
-                .font(.poulpy(.subheadline))
-                .foregroundStyle(PoulpyColor.onSurfaceVariant)
-            Button(action: action) {
-                HStack(spacing: 8) {
-                    if let icon {
-                        LucideIcon(icon, size: 18)
+            VStack(alignment: .leading, spacing: PoulpySpace.xs) {
+                title
+                    .font(.poulpy(.headline))
+                    .foregroundStyle(PoulpyColor.onSurface)
+                message
+                    .font(.poulpy(.subheadline))
+                    .foregroundStyle(PoulpyColor.onSurfaceVariant)
+                Button(action: action) {
+                    HStack(spacing: 8) {
+                        if let icon {
+                            LucideIcon(icon, size: 16)
+                        }
+                        button
                     }
-                    button
                 }
+                .buttonStyle(PoulpyButtonStyle(.secondary, size: .sm))
+                .padding(.top, PoulpySpace.sm)
             }
-            .buttonStyle(PoulpyButtonStyle(.primary, size: .md))
-            .padding(.top, 8)
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .multilineTextAlignment(.center)
-        .frame(maxWidth: .infinity)
-        .padding(.horizontal, PoulpySpace.lg)
-        .padding(.vertical, 24)
-        .background(PoulpyColor.primaryContainer, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
+        .padding(PoulpySpace.md)
+        .overlay(
+            RoundedRectangle(cornerRadius: PoulpyRadius.lg)
+                .strokeBorder(PoulpyColor.outline, style: StrokeStyle(lineWidth: 2, dash: [6, 4]))
+        )
     }
 }
 

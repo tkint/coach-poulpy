@@ -511,7 +511,7 @@ private fun PickerCard(row: ExerciseRow, onOpen: () -> Unit, onAdd: () -> Unit) 
 /** Poulpy's card when nothing matches: a search shows what was typed. */
 @Composable
 private fun NoExercises(query: String, onClear: () -> Unit) {
-    PoulpyCard(
+    EmptyState(
         title = if (query.isEmpty()) stringResource(R.string.exercises_noFit) else stringResource(R.string.exercises_nothingFor, query),
         body = stringResource(if (query.isEmpty()) R.string.exercises_noFitHint else R.string.exercises_nothingHint),
         button = stringResource(R.string.exercises_clearAll),
