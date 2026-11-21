@@ -1,5 +1,11 @@
 package ch.coachpoulpy.android.ui
 
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.AnimatedContent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
@@ -220,7 +226,6 @@ private fun CalendarView(model: HistoryModel, state: HistoryState, onOpen: (Stri
 @Composable
 internal fun MonthCard(month: CalendarMonth, selected: Int, onSelect: (Int) -> Unit, onMonth: (Int) -> Unit) {
     var drag by remember { mutableFloatStateOf(0f) }
-    val cells: List<CalendarDay?> = List(month.leadingBlanks) { null } + month.days
     OutlinedCard(
         colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surface),
         shape = RoundedCornerShape(PoulpyRadius.lg),
@@ -265,14 +270,29 @@ internal fun MonthCard(month: CalendarMonth, selected: Int, onSelect: (Int) -> U
                     )
                 }
             }
-            cells.chunked(7).forEach { week ->
-                Row(Modifier.fillMaxWidth()) {
-                    week.forEach { day ->
-                        Box(Modifier.weight(1f).height(44.dp), contentAlignment = Alignment.Center) {
-                            if (day != null) DayCell(month, day, day.day == selected, onSelect)
+            // The days slide in from the side the month comes from, and every month takes six weeks so the card keeps its height.
+            AnimatedContent(
+                targetState = month,
+                contentKey = { it.monthStartMillis },
+                transitionSpec = {
+                    val forward = targetState.monthStartMillis > initialState.monthStartMillis
+                    (slideInHorizontally { width -> if (forward) width else -width } + fadeIn()) togetherWith
+                        (slideOutHorizontally { width -> if (forward) -width else width } + fadeOut())
+                },
+                label = "month",
+            ) { shown ->
+                val leading: List<CalendarDay?> = List(shown.leadingBlanks) { null }
+                val cells = (leading + shown.days).let { it + List(6 * 7 - it.size) { null } }
+                Column {
+                    cells.chunked(7).forEach { week ->
+                        Row(Modifier.fillMaxWidth()) {
+                            week.forEach { day ->
+                                Box(Modifier.weight(1f).height(44.dp), contentAlignment = Alignment.Center) {
+                                    if (day != null) DayCell(shown, day, day.day == selected, onSelect)
+                                }
+                            }
                         }
                     }
-                    repeat(7 - week.size) { Spacer(Modifier.weight(1f)) }
                 }
             }
         }

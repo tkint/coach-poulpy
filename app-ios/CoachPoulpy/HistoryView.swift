@@ -293,11 +293,13 @@ struct MonthCardView: View {
     let selected: Int32
     let onSelect: (Int32) -> Void
     let onMonth: (Int32) -> Void
+    /// The way the last change went, so the days slide in from that side.
+    @State private var direction: Int32 = 1
 
     var body: some View {
         VStack(spacing: 4) {
             HStack {
-                Button { onMonth(-1) } label: {
+                Button { go(-1) } label: {
                     LucideIcon(.chevronLeft, size: 22).frame(width: 44, height: 44)
                 }
                 .disabled(!month.canGoBack)
@@ -310,7 +312,7 @@ struct MonthCardView: View {
                         .foregroundStyle(PoulpyColor.onSurfaceVariant)
                 }
                 Spacer()
-                Button { onMonth(1) } label: {
+                Button { go(1) } label: {
                     LucideIcon(.chevronRight, size: 22).frame(width: 44, height: 44)
                 }
                 .disabled(!month.canGoForward)
@@ -326,14 +328,26 @@ struct MonthCardView: View {
                 }
             }
             .accessibilityHidden(true)
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 0), count: 7), spacing: 2) {
-                ForEach(0..<Int(month.leadingBlanks), id: \.self) { _ in
-                    Color.clear.frame(height: 44)
+            // The days slide in from the side the month comes from, and every month takes six weeks so the card keeps its height.
+            ZStack {
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 0), count: 7), spacing: 2) {
+                    ForEach(0..<Int(month.leadingBlanks), id: \.self) { index in
+                        Color.clear.frame(height: 44).id("lead\(index)")
+                    }
+                    ForEach(month.days, id: \.day) { day in
+                        dayCell(day)
+                    }
+                    ForEach(0..<max(0, 42 - Int(month.leadingBlanks) - month.days.count), id: \.self) { index in
+                        Color.clear.frame(height: 44).id("trail\(index)")
+                    }
                 }
-                ForEach(month.days, id: \.day) { day in
-                    dayCell(day)
-                }
+                .id(month.monthStartMillis)
+                .transition(.asymmetric(
+                    insertion: .move(edge: direction > 0 ? .trailing : .leading).combined(with: .opacity),
+                    removal: .move(edge: direction > 0 ? .leading : .trailing).combined(with: .opacity)
+                ))
             }
+            .clipped()
         }
         .padding(EdgeInsets(top: 10, leading: 12, bottom: 12, trailing: 12))
         .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
@@ -342,10 +356,15 @@ struct MonthCardView: View {
         .padding(.top, 14)
         .gesture(
             DragGesture(minimumDistance: 30).onEnded { drag in
-                if drag.translation.width > 80 { onMonth(-1) }
-                if drag.translation.width < -80 { onMonth(1) }
+                if drag.translation.width > 80, month.canGoBack { go(-1) }
+                if drag.translation.width < -80, month.canGoForward { go(1) }
             }
         )
+    }
+
+    private func go(_ step: Int32) {
+        direction = step
+        withAnimation(.easeInOut(duration: 0.25)) { onMonth(step) }
     }
 
     private func dayCell(_ day: CalendarDay) -> some View {
