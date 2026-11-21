@@ -52,23 +52,9 @@ struct HomeView: View {
                         ForEach(Array(upNext.enumerated()), id: \.element.key) { index, item in
                             upNextCard(item, highlighted: index == 0)
                         }
-                        if let suggestion = state.suggestion, let workoutId = suggestion.workoutId {
-                            NavigationLink {
-                                WorkoutPageView(graph: graph, workoutId: workoutId)
-                            } label: {
-                                upNextRow(suggestion, inProgress: false, highlighted: false, detail: L("home.suggestion %@", suggestion.details))
-                            }
-                            .buttonStyle(.plain)
-                            Button(action: onOpenLibrary) {
-                                HStack(spacing: 4) {
-                                    Text("home.somethingElse")
-                                    LucideIcon(.chevronRight, size: 18)
-                                }
-                                .font(.poulpy(.subheadline).weight(.heavy))
-                                .foregroundStyle(PoulpyColor.primary)
-                                .frame(minHeight: 32)
-                            }
-                            .padding(.horizontal, PoulpySpace.xs)
+                        if upNext.isEmpty {
+                            Button(action: onOpenLibrary) { restRow }
+                                .buttonStyle(.plain)
                         }
                         if let next = state.next {
                             NavigationLink {
@@ -275,6 +261,27 @@ struct HomeView: View {
             RoundedRectangle(cornerRadius: PoulpyRadius.lg)
                 .stroke(highlighted ? PoulpyColor.primary.opacity(0.5) : PoulpyColor.outline, lineWidth: highlighted ? 1.5 : 1)
         )
+    }
+
+    /// Nothing to do today: a row the size of the Up next ones, opening the library.
+    private var restRow: some View {
+        HStack(spacing: PoulpySpace.sm) {
+            LucideIcon(.moon, size: 22)
+                .foregroundStyle(PoulpyColor.onSurfaceVariant)
+                .frame(width: 44, height: 44)
+                .background(PoulpyColor.surfaceVariant, in: Circle())
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("home.restTitle").font(.poulpy(.headline)).foregroundStyle(PoulpyColor.onSurface)
+                Text("home.restLine").font(.poulpy(.subheadline)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+            }
+            Spacer(minLength: 0)
+            LucideIcon(.chevronRight).foregroundStyle(PoulpyColor.onSurfaceVariant)
+        }
+        .padding(PoulpySpace.sm)
+        .frame(minHeight: 60)
+        .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
+        .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(PoulpyColor.outline))
     }
 
     /// The next planned session, drawn as an Up next row: "Tomorrow · Sets · about 25 min".

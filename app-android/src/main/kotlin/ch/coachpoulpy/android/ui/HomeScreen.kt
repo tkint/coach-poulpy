@@ -129,7 +129,6 @@ fun HomeScreen(
             state.poulpy?.let { poulpy -> MotivationRow(poulpy) }
             if (state.loaded) {
                 val upNext = state.today.filter { it.status != TodayStatus.DONE }
-                val suggestion = state.suggestion
                 if (!state.hasWorkouts) {
                     RestCard(state, onOpenLibrary)
                 } else {
@@ -148,19 +147,7 @@ fun HomeScreen(
                             onDiscard = model::discardUnfinished,
                         )
                     }
-                    if (suggestion != null) {
-                        UpNextCard(
-                            suggestion,
-                            highlighted = false,
-                            detail = stringResource(R.string.home_suggestion, suggestion.details),
-                            onClick = { suggestion.workoutId?.let(onOpenWorkout) },
-                            onDiscard = {},
-                        )
-                        TextButton(onClick = onOpenLibrary, contentPadding = PaddingValues(horizontal = PoulpySpace.xs)) {
-                            Text(stringResource(R.string.home_somethingElse), fontWeight = FontWeight.ExtraBold)
-                            Icon(Lucide.ChevronRight, contentDescription = null, modifier = Modifier.size(18.dp))
-                        }
-                    }
+                    if (upNext.isEmpty()) RestRow(onOpenLibrary)
                     state.next?.let { next -> NextCard(next) { onOpenWorkout(next.workoutId) } }
                 }
                 if (state.past.isNotEmpty()) {
@@ -429,6 +416,30 @@ private fun NextCard(next: NextSession, onClick: () -> Unit) {
             Column(Modifier.weight(1f)) {
                 Text(next.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold)
                 Text(whenText, style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
+            }
+            Icon(Lucide.ChevronRight, contentDescription = null, tint = colors.onSurfaceVariant)
+        }
+    }
+}
+
+/** Nothing to do today: a row the size of the Up next ones, opening the library. */
+@Composable
+private fun RestRow(onOpenLibrary: () -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    OutlinedCard(
+        onClick = onOpenLibrary,
+        colors = CardDefaults.outlinedCardColors(containerColor = colors.surface),
+        border = BorderStroke(1.dp, colors.outline),
+        shape = RoundedCornerShape(PoulpyRadius.lg),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Row(Modifier.padding(PoulpySpace.sm), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(PoulpySpace.sm)) {
+            Box(Modifier.size(44.dp).clip(CircleShape).background(colors.surfaceVariant), contentAlignment = Alignment.Center) {
+                Icon(Lucide.Moon, contentDescription = null, tint = colors.onSurfaceVariant)
+            }
+            Column(Modifier.weight(1f)) {
+                Text(stringResource(R.string.home_restTitle), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold)
+                Text(stringResource(R.string.home_restLine), style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
             }
             Icon(Lucide.ChevronRight, contentDescription = null, tint = colors.onSurfaceVariant)
         }
