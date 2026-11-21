@@ -71,11 +71,14 @@ import ch.coachpoulpy.android.R
 import ch.coachpoulpy.core.model.BodyFigure
 import ch.coachpoulpy.core.model.BodyMeasurement
 import ch.coachpoulpy.core.model.BodyMetric
+import ch.coachpoulpy.device.ftms.DeviceKind
+import ch.coachpoulpy.shared.ConnectionStatus
 import ch.coachpoulpy.core.model.BodyRange
 import ch.coachpoulpy.core.model.Experience
 import ch.coachpoulpy.core.model.TrainingGoal
 import ch.coachpoulpy.core.model.Pronouns
 import ch.coachpoulpy.core.model.SexAssignedAtBirth
+import ch.coachpoulpy.shared.AccountState
 import ch.coachpoulpy.shared.AppGraph
 import ch.coachpoulpy.shared.BodyMap
 import ch.coachpoulpy.shared.BodyDisplay
@@ -92,8 +95,20 @@ import java.util.Locale
 import kotlinx.datetime.number
 import kotlinx.datetime.LocalDate as KDate
 
-/** The pages Settings opens inside its tab. Device pages open over the tabs instead, through [DeviceRoute]. */
-enum class SettingsPage { HUB, ACCOUNT, PROFILE, WEIGHT, HEIGHT, PREFERENCES, DEVICES }
+/**
+ * The pages the You tab opens inside itself: [HUB] is You, the rest hang off it. Device pages open over the tabs instead,
+ * through [DeviceRoute]. [parent] is where back goes.
+ */
+enum class SettingsPage(val parent: SettingsPage?) {
+    HUB(null),
+    SETTINGS(HUB),
+    PROFILE(HUB),
+    ACCOUNT(PROFILE),
+    WEIGHT(PROFILE),
+    HEIGHT(PROFILE),
+    DEVICES(SETTINGS),
+    EDIT_STATISTICS(HUB),
+}
 
 /** A Settings page: a back arrow, a title with an optional line under it, an optional action, then [content] scrolling. */
 @Composable
@@ -150,112 +165,55 @@ private fun mediumDate(date: LocalDate) = date.format(DateTimeFormatter.ofLocali
 
 private fun shortDate(date: LocalDate) = date.format(DateTimeFormatter.ofPattern("d MMM", Locale.getDefault()))
 
-/** Settings › hub: the profile card, Account, Body, App and About. [onAccount] opens a sign-in or sign-up screen over the tabs. */
+/** Settings, opened by the cog on You: Appearance, Region, Devices, App icon and About, as in the Settings mockup. */
 @Composable
-internal fun SettingsHub(graph: AppGraph, language: String, onPage: (SettingsPage) -> Unit, onAccount: (String) -> Unit, modifier: Modifier = Modifier) {
+internal fun SettingsPageScreen(graph: AppGraph, onBack: () -> Unit, onPage: (SettingsPage) -> Unit, modifier: Modifier = Modifier) {
     val context = LocalContext.current
-    val memory = remember { AppPreferences(context) }
-    val profileModel = remember(graph) { graph.profile(memory) }
-    val profile by profileModel.profile.collectAsStateWithLifecycle()
-    val units by graph.settings(memory).state.collectAsStateWithLifecycle()
-    val weightModel = remember(graph) { graph.body(BodyMetric.WEIGHT) }
-    val heightModel = remember(graph) { graph.body(BodyMetric.HEIGHT) }
-    DisposableEffect(weightModel, heightModel) { onDispose { weightModel.close(); heightModel.close() } }
-    val weight by weightModel.state.collectAsStateWithLifecycle()
-    val height by heightModel.state.collectAsStateWithLifecycle()
+    val devicesModel = remember(graph) { graph.devices(AppPreferences(context)) }
+    val devices by devicesModel.state.collectAsStateWithLifecycle()
 
-    val age = profileModel.age(profile)
-    val summary = listOfNotNull(
-        age?.let { pluralStringResource(R.plurals.profile_years, it, it) },
-        height.latest?.let { BodyDisplay.height(it.value, units.units, language) },
-        weight.latest?.let { BodyDisplay.weight(it.value, units.units, language) },
-    ).joinToString(" · ")
-
-    Column(modifier.fillMaxSize()) {
-        Text(
-            stringResource(R.string.tab_settings),
-            style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(start = PoulpySpace.lg, end = 12.dp, top = PoulpySpace.lg),
-        )
-        Column(
-            Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(start = PoulpySpace.lg, end = PoulpySpace.lg, top = PoulpySpace.md, bottom = PoulpySpace.lg),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-            Surface(
-                onClick = { onPage(SettingsPage.PROFILE) },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(PoulpyRadius.lg),
-                color = MaterialTheme.colorScheme.primaryContainer,
-            ) {
-                Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Image(painterResource(R.drawable.poulpy_mood_happy), contentDescription = null, modifier = Modifier.size(64.dp))
-                    Column(Modifier.padding(start = 14.dp).weight(1f)) {
-                        Text(profile.displayName ?: stringResource(R.string.settings_yourProfile), style = MaterialTheme.typography.titleLarge)
-                        if (summary.isNotEmpty()) Text(summary, style = MaterialTheme.typography.bodyMedium)
-                        Text(stringResource(R.string.settings_editProfile), style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.ExtraBold)
+    SubPage(stringResource(R.string.tab_settings), null, onBack, modifier) {
+        PreferenceFields(graph)
+        SectionLabel(R.string.settings_app)
+        SettingsList {
+            val kinds = devices.known.map { it.kind }.distinct().map { stringResource(it.label).lowercase(Locale.getDefault()) }.joinToString(", ")
+            val connected = devices.known.count { it.status == ConnectionStatus.CONNECTED }
+            SettingsRow(
+                Lucide.Gauge, stringResource(R.string.settings_devices),
+                when {
+                    devices.known.isEmpty() -> stringResource(R.string.settings_devicesNone)
+                    connected > 0 -> pluralStringResource(R.plurals.settings_devicesLine, connected, connected, kinds)
+                    else -> stringResource(R.string.settings_devicesIdle, kinds)
+                },
+            ) { onPage(SettingsPage.DEVICES) }
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            var appIcon by remember { mutableStateOf(AppIconSwitch.current(context)) }
+            var pickingIcon by remember { mutableStateOf(false) }
+            SettingsRow(
+                leading = {
+                    Box(Modifier.size(26.dp), contentAlignment = Alignment.Center) {
+                        Image(
+                            painterResource(appIcon.drawingRes),
+                            contentDescription = null,
+                            modifier = Modifier.size(30.dp).scale(1.6f).padding(bottom = 4.dp),
+                        )
                     }
-                    Icon(Lucide.ChevronRight, contentDescription = null)
-                }
-            }
-            SectionLabel(R.string.account_sectionLabel)
-            SettingsList {
-                AccountRow(onPage = { onPage(SettingsPage.ACCOUNT) }, onFlow = onAccount) { title, subtitle, onClick ->
-                    SettingsRow(Lucide.UserRound, title, subtitle, onClick)
-                }
-            }
-            SectionLabel(R.string.settings_body)
-            SettingsList {
-                SettingsRow(
-                    Lucide.MoveVertical, stringResource(R.string.body_height),
-                    height.latest?.let { BodyDisplay.height(it.value, units.units, language) } ?: stringResource(R.string.body_nothingLogged),
-                ) { onPage(SettingsPage.HEIGHT) }
-                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                SettingsRow(
-                    Lucide.Weight, stringResource(R.string.body_weight),
-                    weight.latest?.let { BodyDisplay.weight(it.value, units.units, language) } ?: stringResource(R.string.body_nothingLogged),
-                ) { onPage(SettingsPage.WEIGHT) }
-            }
-            SectionLabel(R.string.settings_app)
-            SettingsList {
-                val theme = stringResource(when (units.theme) { ThemeChoice.SYSTEM -> R.string.theme_system; ThemeChoice.LIGHT -> R.string.theme_light; ThemeChoice.DARK -> R.string.theme_dark })
-                val languageName = when (units.language) {
-                    LanguageChoice.SYSTEM -> stringResource(R.string.language_system)
-                    LanguageChoice.ENGLISH -> "English"
-                    LanguageChoice.FRENCH -> "Français"
-                }
-                val system = stringResource(if (units.units == UnitSystem.METRIC) R.string.units_metric else R.string.units_imperial)
-                SettingsRow(Lucide.Contrast, stringResource(R.string.settings_appearanceUnits), "$theme · $languageName · $system") { onPage(SettingsPage.PREFERENCES) }
-                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                SettingsRow(Lucide.Gauge, stringResource(R.string.settings_devices), null) { onPage(SettingsPage.DEVICES) }
-                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                var appIcon by remember { mutableStateOf(AppIconSwitch.current(context)) }
-                var pickingIcon by remember { mutableStateOf(false) }
-                SettingsRow(
-                    leading = {
-                        Box(Modifier.size(26.dp), contentAlignment = Alignment.Center) {
-                            Image(
-                                painterResource(appIcon.drawingRes),
-                                contentDescription = null,
-                                modifier = Modifier.size(30.dp).scale(1.6f).padding(bottom = 4.dp),
-                            )
-                        }
-                    },
-                    title = stringResource(R.string.settings_appIcon),
-                    subtitle = appIcon.label(),
-                    onClick = { pickingIcon = true },
+                },
+                title = stringResource(R.string.settings_appIcon),
+                subtitle = appIcon.label(),
+                onClick = { pickingIcon = true },
+            )
+            if (pickingIcon) {
+                AppIconSheet(
+                    selected = appIcon,
+                    onPick = { picked -> AppIconSwitch.apply(context, picked); appIcon = picked },
+                    onDismiss = { pickingIcon = false },
                 )
-                if (pickingIcon) {
-                    AppIconSheet(
-                        selected = appIcon,
-                        onPick = { picked -> AppIconSwitch.apply(context, picked); appIcon = picked },
-                        onDismiss = { pickingIcon = false },
-                    )
-                }
             }
-            SectionLabel(R.string.settings_about)
-            SettingsList {
-                SettingsRow(Lucide.Info, stringResource(R.string.settings_aboutApp), stringResource(R.string.settings_aboutLine, BuildConfig.VERSION_NAME), onClick = null)
-            }
+        }
+        SectionLabel(R.string.settings_about)
+        SettingsList {
+            SettingsRow(Lucide.Info, stringResource(R.string.settings_aboutApp), stringResource(R.string.settings_aboutLine, BuildConfig.VERSION_NAME), onClick = null)
         }
     }
 }
@@ -293,9 +251,9 @@ private fun SettingsRow(leading: @Composable () -> Unit, title: String, subtitle
     if (onClick != null) Surface(onClick = onClick, color = MaterialTheme.colorScheme.surface, content = row) else row()
 }
 
-/** Settings › Your profile. Every field is optional; a change is saved as soon as it is made. */
+/** Profile, opened by the card on You. Every field is optional; a change is saved as soon as it is made. */
 @Composable
-internal fun ProfileScreen(graph: AppGraph, language: String, onBack: () -> Unit, modifier: Modifier = Modifier) {
+internal fun ProfileScreen(graph: AppGraph, language: String, onBack: () -> Unit, onPage: (SettingsPage) -> Unit, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val model = remember(graph) { graph.profile(AppPreferences(context)) }
     val profile by model.profile.collectAsStateWithLifecycle()
@@ -306,8 +264,26 @@ internal fun ProfileScreen(graph: AppGraph, language: String, onBack: () -> Unit
     var custom by remember { mutableStateOf(profile.customPronouns.orEmpty()) }
     var heartRate by remember { mutableStateOf(profile.restingHeartRate?.toString().orEmpty()) }
     val today = remember { LocalDate.now() }
+    val units by graph.settings(AppPreferences(context)).state.collectAsStateWithLifecycle()
+    val weightModel = remember(graph) { graph.body(BodyMetric.WEIGHT) }
+    val heightModel = remember(graph) { graph.body(BodyMetric.HEIGHT) }
+    DisposableEffect(weightModel, heightModel) { onDispose { weightModel.close(); heightModel.close() } }
+    val weight by weightModel.state.collectAsStateWithLifecycle()
+    val height by heightModel.state.collectAsStateWithLifecycle()
+    val account by rememberAccount().state.collectAsStateWithLifecycle()
 
-    SubPage(stringResource(R.string.profile_title), stringResource(R.string.profile_subtitle), onBack, modifier) {
+    SubPage(stringResource(R.string.profile_title), null, onBack, modifier) {
+        // One small Account row at the top: it opens the account page, which offers Create an account and Sign in to a guest.
+        SettingsList {
+            SettingsRow(
+                Lucide.UserRound, stringResource(R.string.account_sectionLabel),
+                when (val current = account) {
+                    AccountState.Guest -> stringResource(R.string.account_rowGuest)
+                    is AccountState.Pending -> stringResource(R.string.account_rowPending)
+                    is AccountState.SignedIn -> current.email
+                },
+            ) { onPage(SettingsPage.ACCOUNT) }
+        }
         SectionLabel(R.string.profile_aboutYou)
         PoulpyTextField(
             label = stringResource(R.string.profile_name),
@@ -361,6 +337,14 @@ internal fun ProfileScreen(graph: AppGraph, language: String, onBack: () -> Unit
             )
             Note(stringResource(R.string.profile_restingHrHint))
         }
+        // Weight and height share one row; the sheet picks which of the two pages opens.
+        val measurements = listOfNotNull(
+            weight.latest?.let { BodyDisplay.weight(it.value, units.units, language) },
+            height.latest?.let { BodyDisplay.height(it.value, units.units, language) },
+        ).joinToString(" · ")
+        SettingsList {
+            SettingsRow(Lucide.Ruler, stringResource(R.string.profile_measurements), measurements.ifEmpty { stringResource(R.string.body_nothingLogged) }) { sheet = ProfileSheet.MEASUREMENTS }
+        }
         val painAreas = ui.painAreas.joinToString(", ") { BodyMap.label(it, language) }
         val pain = ui.painUntil?.let { LocalDate.of(it.year, it.month, it.day) }
         SelectField(
@@ -375,6 +359,13 @@ internal fun ProfileScreen(graph: AppGraph, language: String, onBack: () -> Unit
     }
 
     when (sheet) {
+        ProfileSheet.MEASUREMENTS -> OptionSheet(
+            title = stringResource(R.string.profile_measurements), why = null,
+            options = listOf<Pair<BodyMetric?, String>>(BodyMetric.WEIGHT to stringResource(R.string.body_weight), BodyMetric.HEIGHT to stringResource(R.string.body_height)),
+            selected = BodyMetric.WEIGHT, note = null,
+            onSave = { onPage(if (it == BodyMetric.HEIGHT) SettingsPage.HEIGHT else SettingsPage.WEIGHT) },
+            onDismiss = { sheet = null },
+        )
         ProfileSheet.BIRTHDATE -> DateDialog(profile.birthdate?.toJava(), today, onPick = { model.setBirthdate(it.toShared()) }, onDismiss = { sheet = null })
         ProfileSheet.PRONOUNS -> OptionSheet(
             title = stringResource(R.string.profile_pronouns),
@@ -438,7 +429,7 @@ internal fun ProfileScreen(graph: AppGraph, language: String, onBack: () -> Unit
     }
 }
 
-private enum class ProfileSheet { BIRTHDATE, PRONOUNS, SEX, GOALS, EXPERIENCE, FIGURE, PAIN }
+private enum class ProfileSheet { MEASUREMENTS, BIRTHDATE, PRONOUNS, SEX, GOALS, EXPERIENCE, FIGURE, PAIN }
 
 private val BodyFigure.label: Int
     get() = when (this) {
@@ -464,7 +455,7 @@ private val SexAssignedAtBirth.label: Int
         SexAssignedAtBirth.PREFER_NOT_TO_SAY -> R.string.profile_sexPreferNotToSay
     }
 
-private val TrainingGoal.label: Int
+internal val TrainingGoal.label: Int
     get() = when (this) {
         TrainingGoal.STAY_ACTIVE -> R.string.profile_goalStayActive
         TrainingGoal.BUILD_STRENGTH -> R.string.profile_goalBuildStrength
@@ -473,7 +464,7 @@ private val TrainingGoal.label: Int
         TrainingGoal.SOMETHING_ELSE -> R.string.profile_goalSomethingElse
     }
 
-private val Experience.label: Int
+internal val Experience.label: Int
     get() = when (this) {
         Experience.JUST_STARTING -> R.string.profile_experienceJustStarting
         Experience.GETTING_GOING -> R.string.profile_experienceGettingGoing
@@ -482,9 +473,9 @@ private val Experience.label: Int
         Experience.VERY_EXPERIENCED -> R.string.profile_experienceVeryExperienced
     }
 
-/** Settings › Appearance and units: theme, language and units as selects. */
+/** Settings' Appearance and Region: theme, language and units as selects, each opening a sheet. */
 @Composable
-internal fun PreferencesScreen(graph: AppGraph, onBack: () -> Unit, modifier: Modifier = Modifier) {
+internal fun ColumnScope.PreferenceFields(graph: AppGraph) {
     val context = LocalContext.current
     val model = remember(graph) { graph.settings(AppPreferences(context)) }
     val state by model.state.collectAsStateWithLifecycle()
@@ -495,15 +486,13 @@ internal fun PreferencesScreen(graph: AppGraph, onBack: () -> Unit, modifier: Mo
     val languages = listOf(LanguageChoice.SYSTEM to stringResource(R.string.language_system), LanguageChoice.ENGLISH to "English", LanguageChoice.FRENCH to "Français")
     val unitSystems = listOf(UnitSystem.METRIC to R.string.units_metric, UnitSystem.IMPERIAL to R.string.units_imperial)
 
-    SubPage(stringResource(R.string.settings_appearanceUnits), null, onBack, modifier) {
-        SectionLabel(R.string.settings_appearance)
-        SelectField(stringResource(R.string.settings_theme), stringResource(themes.first { it.first == state.theme }.second)) { sheet = PreferenceSheet.THEME }
-        Note(stringResource(R.string.settings_themeHint))
-        SectionLabel(R.string.settings_region)
-        SelectField(stringResource(R.string.settings_language), languages.first { it.first == state.language }.second) { sheet = PreferenceSheet.LANGUAGE }
-        SelectField(stringResource(R.string.settings_units), stringResource(unitSystems.first { it.first == state.units }.second)) { sheet = PreferenceSheet.UNITS }
-        Note(stringResource(R.string.settings_unitsHint))
-    }
+    SectionLabel(R.string.settings_appearance)
+    SelectField(stringResource(R.string.settings_theme), stringResource(themes.first { it.first == state.theme }.second)) { sheet = PreferenceSheet.THEME }
+    Note(stringResource(R.string.settings_themeHint))
+    SectionLabel(R.string.settings_region)
+    SelectField(stringResource(R.string.settings_language), languages.first { it.first == state.language }.second) { sheet = PreferenceSheet.LANGUAGE }
+    SelectField(stringResource(R.string.settings_units), stringResource(unitSystems.first { it.first == state.units }.second)) { sheet = PreferenceSheet.UNITS }
+    Note(stringResource(R.string.settings_unitsHint))
 
     when (sheet) {
         PreferenceSheet.THEME -> OptionSheet(

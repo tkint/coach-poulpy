@@ -60,8 +60,8 @@ import ch.coachpoulpy.shared.KnownDeviceUi
 import ch.coachpoulpy.shared.Quantity
 
 /**
- * The Settings tab: a hub, and the pages it opens (account, profile, weight, height, appearance and units,
- * devices). Device pages open over the tabs through [onOpen], the account's screens through [onAccount].
+ * The You tab: You itself, and the pages it opens (Settings, Profile, Account, Weight, Height, Devices and Edit statistics).
+ * Device pages open over the tabs through [onOpen], the account's screens through [onAccount].
  */
 @Composable
 fun SettingsScreen(
@@ -73,16 +73,23 @@ fun SettingsScreen(
     onAccount: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    BackHandler(enabled = page != SettingsPage.HUB) { onPage(SettingsPage.HUB) }
-    val hub = { onPage(SettingsPage.HUB) }
+    val up = { onPage(page.parent ?: SettingsPage.HUB) }
+    BackHandler(enabled = page != SettingsPage.HUB, onBack = up)
     when (page) {
-        SettingsPage.HUB -> SettingsHub(graph, language, onPage, onAccount, modifier)
-        SettingsPage.ACCOUNT -> AccountPage(hub, onAccount, modifier)
-        SettingsPage.PROFILE -> ProfileScreen(graph, language, hub, modifier)
-        SettingsPage.WEIGHT -> BodyScreen(graph, BodyMetric.WEIGHT, language, hub, modifier)
-        SettingsPage.HEIGHT -> BodyScreen(graph, BodyMetric.HEIGHT, language, hub, modifier)
-        SettingsPage.PREFERENCES -> PreferencesScreen(graph, hub, modifier)
-        SettingsPage.DEVICES -> DevicesPage(graph, hub, onOpen, modifier)
+        SettingsPage.HUB -> YouScreen(
+            graph, language,
+            onSettings = { onPage(SettingsPage.SETTINGS) },
+            onProfile = { onPage(SettingsPage.PROFILE) },
+            onEdit = { onPage(SettingsPage.EDIT_STATISTICS) },
+            modifier = modifier,
+        )
+        SettingsPage.SETTINGS -> SettingsPageScreen(graph, up, onPage, modifier)
+        SettingsPage.PROFILE -> ProfileScreen(graph, language, up, onPage, modifier)
+        SettingsPage.ACCOUNT -> AccountPage(up, onAccount, modifier)
+        SettingsPage.WEIGHT -> BodyScreen(graph, BodyMetric.WEIGHT, language, up, modifier)
+        SettingsPage.HEIGHT -> BodyScreen(graph, BodyMetric.HEIGHT, language, up, modifier)
+        SettingsPage.DEVICES -> DevicesPage(graph, up, onOpen, modifier)
+        SettingsPage.EDIT_STATISTICS -> EditStatisticsScreen(graph, language, up)
     }
 }
 
@@ -434,7 +441,7 @@ private val Quantity.label: Int
         Quantity.POWER -> R.string.quantity_power
     }
 
-private val DeviceKind?.label: Int
+internal val DeviceKind?.label: Int
     get() = when (this) {
         DeviceKind.TREADMILL -> R.string.kind_treadmill
         DeviceKind.FOOT_POD -> R.string.kind_footPod

@@ -370,15 +370,15 @@
     "unitsHint": "Metric: km, km/h, kg, cm. Imperial: mi, mph, lb, ft and in. Weight and height you logged are converted, never changed.",
     "languageNextLaunch": "A new language shows the next time you open the app.",
     "version": "Version {version}",
-    "body": "Body",
     "app": "App",
     "about": "About",
-    "appearanceUnits": "Appearance and units",
-    "editProfile": "Edit your profile",
     "yourProfile": "Your profile",
     "aboutApp": "About Coach Poulpy",
     "aboutLine": "Version {version} · data stays on this phone",
-    "appIcon": "App icon"
+    "appIcon": "App icon",
+    "devicesNone": "Nothing added yet",
+    "devicesLine": "{count, plural, one {# connected · {kinds}} other {# connected · {kinds}}}",
+    "devicesIdle": "Not connected · {kinds}"
   },
   "theme": {
     "system": "System",
@@ -468,8 +468,7 @@
     "imageNote": "A card with your numbers to send or post"
   },
   "profile": {
-    "title": "Your profile",
-    "subtitle": "Everything is optional and stays on this phone",
+    "title": "Profile",
     "aboutYou": "About you",
     "training": "Training",
     "name": "What should Poulpy call you?",
@@ -539,7 +538,8 @@
     "painDurationClearedSub": "Rehab with no end date. Clear it here when you are back",
     "painAgain": "Still hurting when the time is up? Set it again, it only takes a tap.",
     "figureFront": "Front",
-    "figureBack": "Back"
+    "figureBack": "Back",
+    "measurements": "Measurements"
   },
   "body": {
     "weight": "Weight",
@@ -595,10 +595,7 @@
   },
   "account": {
     "sectionLabel": "Account",
-    "guestRow": "Sign in or create an account",
-    "guestRowHint": "Back up your training and use it on other phones.",
     "rowPending": "Confirm your email",
-    "rowPendingHint": "Link sent to {email}",
     "title": "Account",
     "signUpTitle": "Create your account",
     "signUpIntro": "Back up your training and pick it up on any phone. The app keeps working without a connection.",
@@ -685,7 +682,12 @@
     "deleteTitle": "Delete your account?",
     "deleteBody": "This deletes everything stored in your account, right away and for good. Every phone signed in goes back to a guest and keeps its own copy. Backups age out within 30 days.",
     "deletePassword": "Enter your password to confirm",
-    "errorDeletePassword": "That password isn’t right. Nothing was deleted."
+    "errorDeletePassword": "That password isn’t right. Nothing was deleted.",
+    "rowGuest": "Guest · create an account or sign in",
+    "guestTitle": "Your training is on this phone only.",
+    "guestAbout": "With an account",
+    "guestAboutBody": "Your training is backed up and you can use it on other phones. Nothing changes until you choose.",
+    "createAnAccount": "Create an account"
   },
   "crash": {
     "title": "Coach Poulpy closed on an error",
@@ -702,5 +704,24 @@
     "walkDetail": "Follow it live, with your phone or a treadmill",
     "libraryTitle": "A workout from your library",
     "libraryDetail": "Pick one and follow its steps"
+  },
+  "you": {
+    "statistics": "Statistics",
+    "period": "Period",
+    "period7": "7 days",
+    "period30": "30 days",
+    "periodYear": "Year",
+    "periodAll": "All time",
+    "sessions": "Sessions",
+    "weightToday": "Today",
+    "weightYesterday": "Yesterday",
+    "weightDaysAgo": "{days, plural, one {# day ago} other {# days ago}}",
+    "badgeGuest": "Guest",
+    "badgeSignedIn": "Signed in",
+    "editTitle": "Edit statistics",
+    "editNote": "Choose the blocks you want on You, and drag the handle to reorder them.",
+    "blockSessions": "Sessions and time",
+    "blockRecords": "Records and weight",
+    "dragHandle": "Reorder {block}"
   }
 }

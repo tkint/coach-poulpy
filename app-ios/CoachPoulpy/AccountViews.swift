@@ -55,44 +55,7 @@ func accountStep(for url: URL) -> String? {
     }
 }
 
-// MARK: - Settings
-
-/// Settings' Account section: one row that says where the phone stands and opens the next step.
-struct AccountSection: View {
-    @ObservedObject var account: Observed<AccountModel, AccountState>
-    let onFlow: (String) -> Void
-
-    var body: some View {
-        Section("account.sectionLabel") {
-            switch account.value {
-            case let pending as AccountStatePending:
-                NavigationLink(value: SettingsPage.account) { row(Text("account.rowPending"), L("account.rowPendingHint %@", pending.email)) }
-            case let signedIn as AccountStateSignedIn:
-                NavigationLink(value: SettingsPage.account) { row(Text(verbatim: signedIn.email), syncSummary(signedIn)) }
-            default:
-                Button { onFlow("sign-in") } label: {
-                    HStack {
-                        row(Text("account.guestRow"), L("account.guestRowHint"))
-                        Spacer()
-                        LucideIcon(.chevronRight, size: 16).foregroundStyle(PoulpyColor.onSurfaceVariant.opacity(0.6))
-                    }
-                }
-                .foregroundStyle(PoulpyColor.onSurface)
-            }
-        }
-    }
-
-    private func row(_ title: Text, _ subtitle: String) -> some View {
-        HStack(spacing: 12) {
-            LucideIcon(.userRound, size: 24).foregroundStyle(PoulpyColor.primary).frame(width: 26)
-            VStack(alignment: .leading, spacing: 0) {
-                title.font(.poulpy(.headline))
-                Text(subtitle).font(.poulpy(.footnote)).foregroundStyle(PoulpyColor.onSurfaceVariant)
-            }
-        }
-        .frame(minHeight: 44)
-    }
-}
+// MARK: - Account page
 
 /// "Up to date · Last synced 2 min ago", or that the training is on its way.
 private func syncSummary(_ state: AccountStateSignedIn) -> String {
@@ -117,7 +80,6 @@ private enum LeaveDialog { case signOut, unsent }
 struct AccountPage: View {
     @ObservedObject var account: Observed<AccountModel, AccountState>
     let onFlow: (String) -> Void
-    @Environment(\.dismiss) private var dismiss
     @State private var dialog: LeaveDialog?
     @State private var deleting = false
     // Refreshes "Last synced 2 min ago".
@@ -128,6 +90,36 @@ struct AccountPage: View {
         let state = account.value
         ScrollView {
             VStack(alignment: .leading, spacing: 12) {
+                if state is AccountStateGuest {
+                    // A guest, or signed out or deleted: what an account adds, and the way in.
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("you.badgeGuest").font(.poulpy(.footnote)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+                        Text("account.guestTitle").font(.poulpy(.headline).weight(.heavy))
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(16)
+                    .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
+                    .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(PoulpyColor.outline, lineWidth: 1))
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("account.guestAbout").font(.poulpy(.title3))
+                        Text("account.guestAboutBody").font(.poulpy(.callout)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(16)
+                    .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
+                    .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(PoulpyColor.outline, lineWidth: 1))
+                    VStack(spacing: 8) {
+                        Button { onFlow("sign-up") } label: {
+                            Label("account.createAnAccount", lucide: .circlePlus).frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(PoulpyButtonStyle(.primary, size: .lg))
+                        Button { onFlow("sign-in") } label: {
+                            Label("account.signIn", lucide: .logIn).frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(PoulpyButtonStyle(.secondary, size: .lg))
+                    }
+                    .padding(.top, 8)
+                }
                 if let email = email(state) {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("account.email").font(.poulpy(.footnote)).foregroundStyle(PoulpyColor.onSurfaceVariant)
@@ -190,10 +182,6 @@ struct AccountPage: View {
         .navigationBarTitleDisplayMode(.inline)
         .refreshable { _ = try? await account.model.refresh() }
         .onReceive(ticker) { now = $0 }
-        .onChange(of: state is AccountStateGuest) { guest in
-            // Signed out, deleted or changed address: nothing is left to show here.
-            if guest { dismiss() }
-        }
         .alert(L("account.signOutTitle"), isPresented: Binding(get: { dialog == .signOut }, set: { if !$0 { dialog = nil } })) {
             Button(LocalizedStringKey("action.cancel"), role: .cancel) {}
             Button(LocalizedStringKey("account.signOut")) { signOut(evenWithChanges: false) }
