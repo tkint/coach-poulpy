@@ -1,3 +1,6 @@
+import SwiftUI
+import Shared
+
 /// What to open over Home.
 private enum Cover: Identifiable {
     case player(workoutId: String?)
