@@ -5,7 +5,7 @@ import screenHomeSearchEmpty from './home-search-empty.html?raw'
 import screenHomeSearchDuration from './home-search-duration.html?raw'
 import screenHomeSearchZones from './home-search-zones.html?raw'
 
-// Search and filters over the diary's past sessions (#511). The search button in Home's top bar opens them;
+// Search and filters over the diary's past sessions (#511). The search button on the Past heading, beside the calendar button, opens them;
 // the filters are the library's (Equipment, Focus, Zones) plus Duration and Distance.
 const meta = {
   title: 'Mobile/Screens/Home/Search',
