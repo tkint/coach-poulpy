@@ -1240,3 +1240,4 @@
 .cp-screen .section-actions .icon-button { position: relative; width: var(--cp-control-sm); height: var(--cp-control-sm); background: var(--cp-primary-container); color: var(--cp-on-primary-container); }
 /* A small button keeps a 44 touch area (Accessibility). */
 .cp-screen .section-actions .icon-button::after { content: ''; position: absolute; inset: -6px; }
+.cp-screen .section-head:has(.section-actions) { margin-bottom: calc(-1 * var(--cp-space-xs)); }
