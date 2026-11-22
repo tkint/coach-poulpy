@@ -2,17 +2,15 @@ package ch.coachpoulpy.android.ui
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -24,19 +22,25 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ch.coachpoulpy.android.R
 import ch.coachpoulpy.shared.AppGraph
 import ch.coachpoulpy.shared.Badge
 import ch.coachpoulpy.shared.PoulpyStatus
+import java.util.Locale
 
 @get:StringRes
 internal val Badge.label: Int
@@ -53,7 +57,7 @@ internal val Badge.icon: ImageVector
         Badge.FIRST_WALK -> Lucide.Footprints
     }
 
-/** A badge as a square tile: earned ones show their icon and name; a locked one is only a "?", never named. */
+/** A badge as a square tile, as drawn: an earned one shows its icon and name; a locked one is only a "?", never named. */
 @Composable
 internal fun BadgeTile(badge: Badge?, modifier: Modifier = Modifier) {
     val colors = MaterialTheme.colorScheme
@@ -62,26 +66,39 @@ internal fun BadgeTile(badge: Badge?, modifier: Modifier = Modifier) {
         modifier
             .aspectRatio(1f)
             .clip(RoundedCornerShape(PoulpyRadius.lg))
-            .background(if (badge != null) colors.primaryContainer else colors.surface)
-            .border(1.dp, if (badge != null) colors.primary else colors.outline, RoundedCornerShape(PoulpyRadius.lg))
-            .padding(PoulpySpace.sm)
+            .background(if (badge != null) colors.primaryContainer else colors.surfaceVariant)
+            .padding(PoulpySpace.xs)
             .semantics(mergeDescendants = true) { contentDescription = name },
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.spacedBy(PoulpySpace.xs, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Icon(
             badge?.icon ?: Lucide.CircleQuestionMark,
             contentDescription = null,
             tint = if (badge != null) colors.onPrimaryContainer else colors.onSurfaceVariant,
-            modifier = Modifier.size(28.dp),
+            modifier = Modifier.size(30.dp),
         )
         if (badge != null) {
-            Text(name, style = MaterialTheme.typography.labelMedium, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 6.dp))
+            Text(
+                name,
+                color = colors.onPrimaryContainer,
+                fontSize = 13.sp,
+                lineHeight = 16.sp,
+                fontWeight = FontWeight.ExtraBold,
+                textAlign = TextAlign.Center,
+            )
         }
     }
 }
 
-/** Achievements, opened from the motivation row on Home: Poulpy's tentacles, then the badges. */
+/** Pulls the content up by [amount], as the mockup's negative margin does: the drawing has room of its own around Poulpy. */
+private fun Modifier.pullUp(amount: Dp) = layout { measurable, constraints ->
+    val placeable = measurable.measure(constraints)
+    val pull = amount.roundToPx()
+    layout(placeable.width, placeable.height - pull) { placeable.place(0, -pull) }
+}
+
+/** Achievements, opened from the motivation row on Home (`achievements` mockup): Poulpy's tentacles, then the badges. */
 @Composable
 fun AchievementsScreen(graph: AppGraph, language: String, onBack: () -> Unit, modifier: Modifier = Modifier) {
     val context = LocalContext.current
@@ -90,12 +107,16 @@ fun AchievementsScreen(graph: AppGraph, language: String, onBack: () -> Unit, mo
     val state by model.state.collectAsStateWithLifecycle()
     val colors = MaterialTheme.colorScheme
 
-    SubPage(stringResource(R.string.achievements_title), null, onBack, modifier) {
+    SubPage(stringResource(R.string.achievements_title), null, onBack, modifier, topPadding = 0.dp, spacing = PoulpySpace.md) {
         state.poulpy?.let { poulpy ->
-            // Poulpy stays big and plays his move when tapped, as on Home; the spacing around him is tight.
-            Column(Modifier.fillMaxWidth().offset(y = (-PoulpySpace.sm)), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Column(
+                Modifier.fillMaxWidth().pullUp(18.dp).padding(bottom = PoulpySpace.sm),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(PoulpySpace.xs),
+            ) {
+                // Poulpy stays big and plays his move when tapped, as on Home.
                 PoulpyTapArt(poulpy.drawing, poulpy.title, 200.dp)
-                Text(poulpy.litCaption, style = MaterialTheme.typography.titleLarge, textAlign = TextAlign.Center)
+                Text(poulpy.litCaption, style = MaterialTheme.typography.headlineSmall, textAlign = TextAlign.Center)
                 Text(
                     if (state.sessionsToFull == 0) stringResource(R.string.achievements_champion)
                     else pluralStringResource(R.plurals.achievements_toGo, state.sessionsToFull, state.sessionsToFull),
@@ -103,12 +124,12 @@ fun AchievementsScreen(graph: AppGraph, language: String, onBack: () -> Unit, mo
                     color = colors.onSurfaceVariant,
                     textAlign = TextAlign.Center,
                 )
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.padding(top = 4.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.padding(top = PoulpySpace.sm).clearAndSetSemantics { }) {
                     repeat(PoulpyStatus.TENTACLES) { index ->
                         Box(
                             Modifier
-                                .size(10.dp)
-                                .clip(RoundedCornerShape(5.dp))
+                                .size(14.dp)
+                                .clip(CircleShape)
                                 .background(if (index < poulpy.tentaclesLit) colors.primary else colors.onPrimaryContainer.copy(alpha = 0.18f)),
                         )
                     }
@@ -116,18 +137,18 @@ fun AchievementsScreen(graph: AppGraph, language: String, onBack: () -> Unit, mo
             }
         }
         Text(
-            stringResource(R.string.achievements_badges),
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(top = PoulpySpace.xs),
+            stringResource(R.string.achievements_badges).uppercase(Locale.getDefault()),
+            style = MaterialTheme.typography.labelMedium,
+            color = colors.onSurfaceVariant,
+            modifier = Modifier.padding(start = PoulpySpace.xs, top = 6.dp),
         )
-        val tiles = state.achievements.earned.reversed() + state.achievements.locked
+        // Earned badges first, then the locked ones as "?", as drawn.
+        val earned = state.achievements.earnedInOrder
+        val tiles = earned + state.achievements.locked
         tiles.chunked(3).forEach { rowTiles ->
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                rowTiles.forEach { badge ->
-                    // A locked tile is drawn without a name: the badge itself stays hidden.
-                    BadgeTile(badge.takeIf { it in state.achievements.earned }, Modifier.weight(1f))
-                }
-                repeat(3 - rowTiles.size) { Box(Modifier.weight(1f).height(0.dp)) }
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(PoulpySpace.sm)) {
+                rowTiles.forEach { badge -> BadgeTile(badge.takeIf { it in earned }, Modifier.weight(1f)) }
+                repeat(3 - rowTiles.size) { Box(Modifier.weight(1f)) }
             }
         }
     }

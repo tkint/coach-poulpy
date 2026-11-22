@@ -25,6 +25,9 @@ enum class Badge(val key: String) {
  * named, only drawn as "?".
  */
 data class AchievementsUi(val earned: List<Badge> = emptyList()) {
+    /** The earned badges in the order Achievements draws them, then come the locked ones as "?". */
+    val earnedInOrder: List<Badge> get() = Badge.entries.filter { it in earned }
+
     val locked: List<Badge> get() = Badge.entries.filter { it !in earned }
 
     /** The most recent badges first, as many as [count], for the motivation row on Home. */

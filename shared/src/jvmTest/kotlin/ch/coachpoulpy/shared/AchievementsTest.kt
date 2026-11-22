@@ -43,5 +43,6 @@ class AchievementsTest {
         val ui = AchievementsUi(listOf(Badge.FIRST_RECORD, Badge.FIRST_WALK))
         assertEquals(listOf(Badge.FIRST_WALK), ui.latest(1))
         assertEquals(listOf(Badge.GOAL_MET), ui.locked)
+        assertEquals(listOf(Badge.FIRST_RECORD, Badge.FIRST_WALK), ui.earnedInOrder)
     }
 }

@@ -64,6 +64,7 @@ import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ch.coachpoulpy.android.BuildConfig
@@ -118,6 +119,8 @@ internal fun SubPage(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
     action: (@Composable () -> Unit)? = null,
+    topPadding: Dp = PoulpySpace.lg,
+    spacing: Dp = 10.dp,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     Column(modifier.fillMaxSize()) {
@@ -130,8 +133,8 @@ internal fun SubPage(
             action?.invoke()
         }
         Column(
-            Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(start = PoulpySpace.lg, end = PoulpySpace.lg, top = PoulpySpace.lg, bottom = PoulpySpace.lg),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+            Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(start = PoulpySpace.lg, end = PoulpySpace.lg, top = topPadding, bottom = PoulpySpace.lg),
+            verticalArrangement = Arrangement.spacedBy(spacing),
             content = content,
         )
     }
