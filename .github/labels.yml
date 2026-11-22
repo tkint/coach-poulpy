@@ -97,5 +97,7 @@ milestones:
     description: Plan, review and run guided sessions in the browser
   - title: Phase 5 · Sharing and coaching
     description: Library sync or copy, coach links, comments
+  - title: Phase 6 · Stores
+    description: Apple Developer membership, TestFlight, App Store and Google Play
   - title: Later
     description: Wanted, not planned yet

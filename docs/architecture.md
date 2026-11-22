@@ -11,10 +11,11 @@ flowchart TD
     accounts["3 · Accounts and sync<br/>Server, Postgres, sign-in,<br/>push and pull sync"]
     website["4 · Website<br/>Plan, review and run<br/>guided sessions"]
     sharing["5 · Sharing and coaching<br/>Library sync or copy,<br/>coach links, comments"]
+    stores["6 · Stores<br/>TestFlight, App Store,<br/>Google Play"]
 
     guest --> accounts
     guest -. developed alongside .-> treadmill
-    accounts --> website --> sharing
+    accounts --> website --> sharing --> stores
 ```
 
 Each phase adds a layer without reworking the one below it, because the domain, engine and storage are already shared. Phase 2 runs alongside phase 1 because the treadmill link was the riskiest piece. GitHub milestones follow these phases.
