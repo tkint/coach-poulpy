@@ -15,7 +15,7 @@ Issues and specs for this repo live as GitHub issues on `tkint/coach-poulpy`. La
 - **Comment on an issue**: `gh issue comment <number> --body "..."`
 - **Apply / remove labels**: `gh issue edit <number> --add-label "..."` / `--remove-label "..."`
 - **Close**: `gh issue close <number> --comment "..."`
-- **Every new issue** gets one type label, one state label, at least one `area:` label, and the milestone of the release it ships in (`Later` when it is not planned).
+- **Every new issue** gets its labels and milestone as [Contributing](../../CONTRIBUTING.md#labels) says.
 - **A Quick idea** (`needs-triage`, a few words) is refined into an agent-ready issue by hand, following [Refining an issue](refining-issues.md).
 - **Every PR** body says `Closes #<n>` for the issue it finishes.
 

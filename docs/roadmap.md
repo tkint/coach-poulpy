@@ -2,7 +2,7 @@
 
 What ships and in which order. **Version 1.0** is the app, the accounts and sync, the website and the admin as they are drawn in the agreed mockups. Everything built or mocked up today is in it. What is not mocked up yet, and everything after 1.0, is listed below with what blocks it.
 
-> **Draft.** Release numbers after the current one are not final, and the GitHub milestones still carry the old phase names until the maintainer approves this page in [#229](https://github.com/tkint/coach-poulpy/issues/229). The current version is the latest tag on the [Releases](https://github.com/tkint/coach-poulpy/releases) page.
+Release numbers after the current one can change as the work is planned. The current version is the latest tag on the [Releases](https://github.com/tkint/coach-poulpy/releases) page.
 
 ## How it is planned
 

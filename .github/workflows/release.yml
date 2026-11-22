@@ -47,7 +47,7 @@ jobs:
           [ -n "$KEYSTORE_BASE64" ] || missing="$missing ANDROID_KEYSTORE_BASE64"
           [ -n "$KEYSTORE_PASSWORD" ] || missing="$missing ANDROID_KEYSTORE_PASSWORD"
           if [ -n "$missing" ]; then
-            echo "::error::Missing secrets:$missing. A release must be signed with the key phones already trust (README, \"The signing key\")."
+            echo "::error::Missing secrets:$missing. A release must be signed with the key phones already trust (docs/releasing.md, \"The signing key\")."
             exit 1
           fi
 
