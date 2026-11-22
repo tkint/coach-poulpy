@@ -86,18 +86,28 @@ remove:
   - invalid
   - question
 
+# One milestone per release, named "<version> · <theme>"; a release belongs to a phase, named in its
+# description. The plan is docs/roadmap.md. Every issue has exactly one milestone.
 milestones:
-  - title: Phase 1 · Guest app
-    description: Catalog, builder, player, plans, history and FIT export, all on the phone
-  - title: Phase 2 · Treadmill
-    description: FTMS recording, free or matched to a planned workout
-  - title: Phase 3 · Accounts and sync
-    description: Server, accounts and sync ship; what is left is the admin catalog workspace, a super admin, Apple and Google sign-in and the calendar feed
-  - title: Phase 4 · Website
-    description: Plan, review and run guided sessions in the browser
-  - title: Phase 5 · Sharing and coaching
-    description: Library sync or copy, coach links, comments
-  - title: Phase 6 · Stores
-    description: Apple Developer membership, TestFlight, App Store and Google Play
+  - title: 0.11 · Home, Library, You
+    description: "Phase 1, Version 1. The three-tab bar, the diary Home with Record, You, Achievements"
+  - title: 0.12 · Find and reuse
+    description: "Phase 1, Version 1. Diary search and filters, swap an exercise in the builder, a workout from a session"
+  - title: 0.13 · Training plans
+    description: "Phase 1, Version 1. Follow a plan"
+  - title: 0.14 · Beyond the app
+    description: "Phase 1, Version 1. Apple Health and Health Connect, choose what a device measures"
+  - title: 0.15 · The admin, complete
+    description: "Phase 1, Version 1. A super admin from environment variables, the catalog workspace closed"
+  - title: 1.0 · Version 1 complete
+    description: "Phase 1, Version 1. Whatever remains, then the first release that is not a pre-release"
+  - title: After 1.0 · Stores
+    description: "Phase 2, After 1.0. Apple Developer membership, TestFlight, App Store, Google Play"
+  - title: After 1.0 · Website sessions
+    description: "Phase 2, After 1.0. Plan, review and run guided sessions in the browser"
+  - title: After 1.0 · Accounts and calendars
+    description: "Phase 2, After 1.0. Sign in with Apple and Google, training days in other calendars"
+  - title: After 1.0 · Sharing and coaching
+    description: "Phase 2, After 1.0. Library sync or copy, coach links, comments"
   - title: Later
     description: Wanted, not planned yet
