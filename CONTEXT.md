@@ -202,7 +202,7 @@ _Avoid_: Gender (the app does not ask for it)
 ### Sharing and coaching
 
 **Library**:
-A person's own workouts and plans, and items shared with them. Catalog exercises and curated workouts are not in it: they are always available, and a curated workout is edited by copying it here.
+A person's own workouts and plans, and items shared with them. Catalog exercises and curated workouts are not in it: they are always available, and a curated workout is edited by copying it here. A catalog plan will work the same way.
 _Avoid_: Collection, favourites
 
 **Library entry**:

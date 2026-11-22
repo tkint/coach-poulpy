@@ -15,9 +15,13 @@ The catalog held only exercises ([ADR 0033](./0033-the-server-database-is-the-ca
 - **One workout per level.** The same workout at three levels is three curated workouts, grouped in a workout family, so each level can change its exercises, reps, rests and rounds freely. Swapping exercises by level would need new engine logic and is not done.
 - **The first version is a browsable list by level.** The admin writes about ten families to start.
 
+## Plans follow the same model
+
+[#17](https://github.com/tkint/coach-poulpy/issues/17) already has people browse catalog plans beside their own. A catalog plan is a locked catalog item the same way: always available and synced, copied to the library when a person edits it, as ADR 0009 does for a synced plan. A plan's own levels are not decided here.
+
 ## Left out of the first version
 
-Suggesting a level from a questionnaire, an effort rating after a session, filters by time or equipment, and curated plans (training plans, [#17](https://github.com/tkint/coach-poulpy/issues/17), come first). Each is its own decision later.
+Suggesting a level from a questionnaire, an effort rating after a session, filters by time or equipment, and catalog plans, which come with #17. Each is its own decision later.
 
 ## Consequences
 
