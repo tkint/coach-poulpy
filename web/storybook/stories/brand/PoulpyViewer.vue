@@ -35,7 +35,7 @@ export const TILT = 90
 // the `sides` and `choice`, `toggle` and `slider` classes, and anything else at the end of the panel; a short press on him is a `tap`.
 import { onBeforeUnmount, onMounted, shallowRef, useTemplateRef, watch } from 'vue'
 
-const { label, framing, start, moveLabel = 'Move', values, stopOnGrab = false, speeds = { max: 3, step: 0.1 }, bare = false } = defineProps<{
+const { label, framing, start, moveLabel = 'Move', values, stopOnGrab = false, speeds = { max: 3, step: 0.1 } } = defineProps<{
   /** What the canvas shows, for a screen reader; how to look around him is added. */
   label: string
   framing: PoulpyFraming
@@ -47,8 +47,6 @@ const { label, framing, start, moveLabel = 'Move', values, stopOnGrab = false, s
   /** Grabbing the view (a drag, an arrow key, the Turn slider) stops Move: for a page where Move walks the viewer around him. */
   stopOnGrab?: boolean
   speeds?: { max: number; step: number }
-  /** Just him on a clear background, without the panel or the hint: for a page that embeds him (the docs home). */
-  bare?: boolean
 }>()
 const emit = defineEmits<{ tap: [] }>()
 
@@ -194,7 +192,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="frame"><div class="poulpy-viewer" :class="{ bare }">
+  <div class="frame"><div class="poulpy-viewer">
     <div ref="stage" class="stage">
       <canvas
         ref="canvas"
@@ -209,9 +207,9 @@ onBeforeUnmount(() => {
         @keydown="nudge"
       />
       <p v-if="failed" class="failed">The 3D preview could not start in this browser.</p>
-      <p v-else-if="!bare" class="hint">Drag to look around him</p>
+      <p v-else class="hint">Drag to look around him</p>
     </div>
-    <div v-if="!bare" class="controls">
+    <div class="controls">
       <slot name="pickers" />
       <div class="toggles">
         <button type="button" class="toggle" :aria-pressed="playing" @click="playing = !playing">{{ moveLabel }}</button>
@@ -240,8 +238,6 @@ onBeforeUnmount(() => {
   .stage { position: sticky; top: 16px; }
 }
 .stage { position: relative; aspect-ratio: 4 / 3; max-height: 70vh; border-radius: 24px; background: var(--cp-surface-variant); overflow: hidden; }
-.poulpy-viewer.bare { margin: 0; display: block; }
-.poulpy-viewer.bare .stage { position: relative; top: auto; max-height: none; background: none; }
 .stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: grab; border-radius: 24px; }
 .stage canvas:active { cursor: grabbing; }
 .stage canvas:focus-visible { outline: 3px solid var(--cp-primary); outline-offset: -3px; }

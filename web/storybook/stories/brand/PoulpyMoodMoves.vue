@@ -8,8 +8,7 @@ import PoulpyViewer, { type LivePoulpy, type PoulpyScene } from './PoulpyViewer.
 
 // `only` shows just some of the steps (the page of one mood's moves); with none, all five, as a sequence.
 // `plain` leaves out the choice of variants: just the steps and the run.
-// `hero` is just him, no panel, running the whole sequence again and again (the docs home).
-const props = defineProps<{ only?: string[]; plain?: boolean; hero?: boolean }>()
+const props = defineProps<{ only?: string[]; plain?: boolean }>()
 type State = 'happy' | 'annoyed' | 'fuming'
 // A move is anything that gives a pose for a time step; `swap` says when the face changes: when he is half way round, or as he starts.
 interface Variant { id: string; label: string; note: string; make: (clockwise: boolean) => Move; seconds: number; swap: 'half' | 'start'; boost?: number }
@@ -103,10 +102,7 @@ function advance(seconds: number) {
   }
   if (!done) return
   queue.shift()
-  if (!queue.length) {
-    playing.value = ''
-    if (props.hero) playAll()
-  }
+  if (!queue.length) playing.value = ''
 }
 
 const variantOf = (step: Step) => step.variants.find((v) => v.id === picked.value[step.id]) ?? step.variants[0]
@@ -128,18 +124,16 @@ function playAll() {
   playing.value = 'all'
   show(steps[0].from)
   // A short pause before each step; the tuck is followed by a few seconds of fumes before he calms down.
-  const run = steps.flatMap((step): Action[] => [
+  queue = steps.flatMap((step): Action[] => [
     { kind: 'wait', seconds: 0.9, fumes: false },
     { kind: 'perform', step, variant: variantOf(step), elapsed: 0, swapped: false },
     ...(step.id === 'tuck' ? [{ kind: 'wait', seconds: 2.5, fumes: true } as const] : []),
   ])
-  queue = props.hero ? [...run, { kind: 'wait', seconds: 3, fumes: false }] : run
   viewer.value?.play()
 }
 
 async function start(next: PoulpyScene): Promise<LivePoulpy> {
   scene = next
-  if (props.hero) queueMicrotask(playAll)
   return {
     show(outline) {
       outlined = outline
@@ -160,11 +154,10 @@ const values = () => ({ page: `mood moves: ${steps.map((step) => step.id).join('
     label="Poulpy in 3D, in his moods from normal to annoyed and fuming. Tap him and he reacts to his mood."
     :framing="{ tilt: 8, distance: 9.4, centre: 1.35 }"
     :start="start"
-    :bare="hero"
     :values="values"
     @tap="tap"
   >
-    <div v-if="!hero" class="steps">
+    <div class="steps">
       <button v-if="steps.length > 1" type="button" class="play-all" :aria-pressed="playing === 'all'" @click="playAll">{{ only ? 'Play them one after the other' : 'Play the whole sequence' }}</button>
       <section v-for="step in steps" :key="step.id" class="step">
         <h3>{{ only ? step.title.replace(/^\d\. /, '') : step.title }}</h3>
