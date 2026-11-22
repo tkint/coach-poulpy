@@ -1,8 +1,8 @@
 # The server's database
 
-The tables of the server's Postgres database, how they relate, and why they are shaped this way. Read it before changing the schema or writing a query. The phone keeps its own, different database ([the phone's database](#the-phones-database)).
+The tables of the server's Postgres database, how they relate, and why they are shaped this way. Read it before changing the schema or writing a query. [Open the diagram](https://tkint.github.io/coach-poulpy/database-erd/) to see every table and relation on one zoomable graph. The phone keeps its own, different database ([the phone's database](#the-phones-database)).
 
-The schema is the numbered migrations in `server/src/main/sqldelight/migrations`, applied on start ([ADR 0022](./adr/0022-the-servers-schema-is-sqldelight-migrations-on-postgres.md)); the typed queries sit beside them in `.sq` files. When this page and a migration disagree, the migration is right.
+The schema is the numbered migrations in `server/src/main/sqldelight/migrations`, applied on start ([ADR 0022](./adr/0022-the-servers-schema-is-sqldelight-migrations-on-postgres.md)); the typed queries sit beside them in `.sq` files. The diagram is built from the migrations on every docs build, so it is always current. When this page and a migration disagree, the migration is right.
 
 ## How it is shaped
 
@@ -16,35 +16,6 @@ The schema is the numbered migrations in `server/src/main/sqldelight/migrations`
 
 An account, its sign-ins (one per phone or browser) and the short-lived secrets that belong to them. The rules a person sees are in [Accounts](./accounts.md).
 
-```mermaid
-erDiagram
-    account ||--o{ sign_in : "has"
-    account ||--o{ confirmation_token : "confirms with"
-    account ||--o{ confirmation_watch : "watched by"
-    account ||--o{ password_reset_token : "resets with"
-    sign_in ||--o{ access_token : "holds"
-    sign_in ||--o{ refresh_token : "holds"
-    account {
-        uuid id PK
-        text email "unique, any case"
-        text password_hash "Argon2id"
-        text role "member or admin"
-        timestamptz confirmed_at "null until confirmed"
-        timestamptz disabled_at "null while in use"
-        bigint change_count "last change number"
-    }
-    sign_in {
-        uuid id PK
-        uuid account_id FK
-        text device_name
-        timestamptz revoked_at
-    }
-    sign_in_failure {
-        text email
-        timestamptz failed_at
-    }
-```
-
 - `access_token` and `refresh_token` belong to a sign-in, so they live and die together. A refresh token works once and is kept after use, so a second use revokes the whole sign-in ([ADR 0020](./adr/0020-every-credential-resolves-to-one-caller.md)).
 - `confirmation_watch` lets a phone waiting on "Check your email" ask whether the link was opened, with a key whose hash is stored.
 - `sign_in_failure` has no account column: it counts failed attempts per address, to slow down password guessing.
@@ -52,62 +23,6 @@ erDiagram
 ## Synced data
 
 What a phone pushes and pulls, all owned by an account. Each table keeps the account first in its key, so a person's rows sit together.
-
-```mermaid
-erDiagram
-    account ||--o{ session : "owns"
-    session ||--o{ session_event : "records"
-    account ||--o{ workout_version : "owns"
-    account ||--o{ workout_deletion : "owns"
-    account ||--o{ planned_workout : "owns"
-    account ||--o{ body_measurement : "owns"
-    account ||--o{ setting : "owns"
-    session {
-        uuid account_id PK
-        uuid id PK
-        uuid workout_id "no foreign key"
-        timestamptz deleted_at
-        jsonb totals
-        bigint change_number
-    }
-    session_event {
-        uuid account_id PK
-        uuid session_id PK
-        bigint seq PK
-        jsonb payload
-        bigint change_number
-    }
-    workout_version {
-        uuid account_id PK
-        uuid workout_id PK
-        int version PK
-        jsonb content
-        bigint change_number
-    }
-    workout_deletion {
-        uuid account_id PK
-        uuid workout_id PK
-        int version
-    }
-    planned_workout {
-        uuid account_id PK
-        uuid id PK
-        uuid workout_id
-        date day
-        boolean deleted
-    }
-    body_measurement {
-        uuid account_id PK
-        text metric PK
-        date day PK
-        double value "null once deleted"
-    }
-    setting {
-        uuid account_id PK
-        text key PK
-        text value "null once cleared"
-    }
-```
 
 Two kinds of table, by how conflicts are settled ([ADR 0006](./adr/0006-sync-keeps-both-edits.md)):
 
@@ -119,24 +34,6 @@ Two kinds of table, by how conflicts are settled ([ADR 0006](./adr/0006-sync-kee
 ## The catalog
 
 The exercises phones download, edited and published in the admin ([The catalog's shape](./the-catalog.md), [ADR 0026](./adr/0026-the-server-holds-the-catalog-as-a-draft-and-published-versions.md), [ADR 0030](./adr/0030-the-catalog-changes-by-exercise-revision-not-by-catalog-version.md)). It belongs to no account.
-
-```mermaid
-erDiagram
-    catalog_exercise_revision {
-        text slug PK
-        int revision PK
-        int position "catalog order"
-        jsonb content "the shared Exercise"
-        int variation_group
-        int variation_rank "easiest first"
-        bigint seq "null for the draft"
-        timestamptz created_at
-    }
-    catalog_publication {
-        int id PK "always 1"
-        bigint last_seq
-    }
-```
 
 - **One row per revision of one exercise.** A slug has at most one draft revision (no `seq`) and any number of published ones. Published revisions are never changed.
 - **`seq` is the publication cursor.** A publish takes the next numbers from `catalog_publication`, under that row's lock, so `seq` follows commit order and a phone asks for what is after the last `seq` it has.
@@ -151,7 +48,7 @@ erDiagram
 
 ## Admin and housekeeping
 
-Three tables with no part in the diagrams above.
+Three tables that belong to none of the groups above.
 
 | Table | What it holds |
 | --- | --- |

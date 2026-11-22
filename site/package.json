@@ -10,6 +10,9 @@
     "preview": "vitepress preview"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "0.5.17",
+    "@electric-sql/pglite-tools": "0.4.17",
+    "@liam-hq/cli": "0.7.24",
     "@lucide/vue": "1.71.0",
     "mermaid": "11.17.2",
     "vitepress": "1.6.4",
