@@ -73,7 +73,7 @@ Set it up once:
 
 3. In the same `production` environment, tick **Required reviewers** and add yourself, so a deploy waits for your approval before it touches the machine.
 
-The workflow stops with a message, and changes nothing, if a setting is missing or the version has characters other than letters, digits, `.`, `_` and `-`. Until there is a server, a run failing on missing settings is expected. Once it succeeds, `curl https://api.coach-poulpy.com/health` prints the version deployed. Deploying an older version is the way back if a release goes wrong.
+The workflow stops with a message, and changes nothing, if a setting is missing or the version has characters other than letters, digits, `.`, `_` and `-`. Once it succeeds, `curl https://api.coach-poulpy.com/health` prints the version deployed. Deploying an older version is the way back if a release goes wrong.
 
 ## Deploy a pull request
 

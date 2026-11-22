@@ -1,6 +1,6 @@
 # Architecture
 
-Coach Poulpy is **local-first**: the mobile app holds the whole domain model and runs alone as a guest on family phones, and the server adds accounts and sync between phones; the website, sharing and coaching follow over the same model. One Kotlin Multiplatform core owns the domain, the workout engine and the database on Android and iOS, so the two apps cannot drift apart. The decisions behind this are recorded as [ADRs](./adr/), the words are defined in the [glossary](../CONTEXT.md), and what ships in which order, and what v1 includes, is in the [roadmap](./roadmap.md). Each layer is added without reworking the one below it, because the domain, engine and storage are shared.
+Coach Poulpy is **local-first**: the mobile app holds the whole domain model and runs alone as a guest on family phones, and the server adds accounts and sync between phones; the website reads the account's workouts, and sharing and coaching follow over the same model. One Kotlin Multiplatform core owns the domain, the workout engine and the database on Android and iOS, so the two apps cannot drift apart. The decisions behind this are recorded as [ADRs](./adr/), the words are defined in the [glossary](../CONTEXT.md), and what ships in which order, and what v1 includes, is in the [roadmap](./roadmap.md). Each layer is added without reworking the one below it, because the domain, engine and storage are shared.
 
 ## Domain model
 
@@ -8,7 +8,7 @@ Every workout shares the same concepts, whatever its format. Planned content is 
 
 What each concept holds (exercise, workout, step, prescription, plan, enrollment, goal, session, library entry, coach link) is defined in the [glossary](../CONTEXT.md).
 
-Statistics are derived, never typed in. `core/stats` computes metrics from sessions: personal records, weekly load and goal progress all come from the same computation, on the phone for guests and on the server for accounts.
+Statistics are derived, never typed in. A session's totals (`core/stats`) are saved next to it when it ends, so the history opens without replaying its events; sessions that ended before that are summed once. `core/stats` computes metrics from sessions: personal records, weekly load and goal progress all come from the same computation, on the phone for guests and on the server for accounts.
 
 ## Formats, parts and the engine
 

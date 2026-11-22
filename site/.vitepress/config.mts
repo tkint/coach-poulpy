@@ -134,12 +134,11 @@ export default withMermaid(
           ],
           [
             'Product',
-            ['/docs/roadmap', '/CONTEXT', '/docs/accounts', '/docs/profile-and-settings', '/docs/treadmill-and-history', '/docs/workout-file', '/docs/web-app', '/docs/admin'],
+            ['/docs/roadmap', '/CONTEXT', '/docs/accounts', '/docs/profile-and-settings', '/docs/workout-file', '/docs/web-app', '/docs/admin'],
             [
               { text: 'Roadmap', link: '/docs/roadmap' },
               { text: 'Accounts and sign-in', link: '/docs/accounts' },
               { text: 'Profile and settings', link: '/docs/profile-and-settings' },
-              { text: 'Treadmill and history', link: '/docs/treadmill-and-history' },
               { text: 'The workout file', link: '/docs/workout-file' },
               { text: 'The web app', link: '/docs/web-app' },
               { text: 'The admin area', link: '/docs/admin' },

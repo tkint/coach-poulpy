@@ -1,6 +1,6 @@
 # Coach Poulpy
 
-A personal training platform: build workouts, follow plans, run guided sessions and track progress. The Android and iPhone apps keep everything on the phone, as a guest or with an account that syncs between phones through the server. The website, sharing and coaching come later, over the same Kotlin domain.
+A personal training platform: build workouts, follow plans, run guided sessions and track progress. The Android and iPhone apps keep everything on the phone, as a guest or with an account that syncs between phones through the server. The website shows an account's workouts; sharing and coaching come later, over the same Kotlin domain.
 
 The brand, design system and architecture are published at [docs.coach-poulpy.com](https://docs.coach-poulpy.com/); the site is built from `docs/` by the VitePress project in `site/`. How work moves from an idea to a merged PR is in [CONTRIBUTING.md](CONTRIBUTING.md).
 
@@ -10,7 +10,7 @@ The brand, design system and architecture are published at [docs.coach-poulpy.co
 | --- | --- |
 | `core/model` | Domain types: exercises, workouts, steps, prescriptions, plans, session records |
 | `core/engine` | Timeline compiler, session state machine, event log |
-| `core/stats` | Derived metrics (placeholder) |
+| `core/stats` | Derived metrics: session totals and the statistics built from them |
 | `types/treadmill` | Treadmill recording, summaries and step estimate |
 | `catalog` | The exercise catalog's shape and rules |
 | `catalog-sample` | A frozen set of exercises for tests only |
@@ -23,7 +23,7 @@ The brand, design system and architecture are published at [docs.coach-poulpy.co
 | `app-ios` | SwiftUI app, project generated with XcodeGen |
 | `server` | http4k API under `/api/v1` ([The API](docs/the-api.md)) and `/health`; image built from `server/Dockerfile` |
 | `deploy` | Docker Compose files to run the server, Postgres and Caddy on one machine; see [Deploying the server](docs/deploying-the-server.md) |
-| `web` | The websites, an npm workspace: `web/ui`, the shared Vue and DaisyUI design system ([ADR 0023](docs/adr/0023-the-websites-share-one-vue-and-daisyui-design-system.md)), `web/storybook`, the component workshop ([ADR 0028](docs/adr/0028-storybook-is-the-component-workshop-of-the-design-system.md)), and `web/app`, the web app (placeholder) |
+| `web` | The websites, an npm workspace: `web/ui`, the shared Vue and DaisyUI design system ([ADR 0023](docs/adr/0023-the-websites-share-one-vue-and-daisyui-design-system.md)), `web/storybook`, the component workshop ([ADR 0028](docs/adr/0028-storybook-is-the-component-workshop-of-the-design-system.md)), and `web/app`, the web app |
 | `build-logic` | Gradle convention plugins: `coachpoulpy.kmp-library` (Android, iOS, JVM) and `coachpoulpy.kmp-web-library` (the same plus JavaScript, for the modules the website runs) |
 | `design` | Brand tokens (`tokens.json`) and the script that generates the Android, iOS and web theme files from them |
 | `docs` | Architecture, ADRs, design system and brand, read by agents and published on the docs site |
@@ -66,7 +66,6 @@ The iOS build runs `./gradlew :shared:embedAndSignAppleFrameworkForXcode` itself
 ## Read more
 
 - [The catalog's shape](docs/the-catalog.md): the rules of an exercise. The catalog lives in the server database and phones download it; nothing ships bundled with the apps.
-- [Treadmill and history](docs/treadmill-and-history.md): what those two tabs do.
 - [Releasing a beta](docs/releasing.md): installing a build on a phone, the Android signing key and the iPhone build.
 
 ## Continuous integration
