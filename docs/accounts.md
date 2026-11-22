@@ -18,13 +18,21 @@ Sign-in uses the email and password. After five failed tries in 15 minutes, sign
 
 **Coach Poulpy never reveals whether an email has an account.** An unknown address and a wrong password get the same refusal. Signing up with an address that already has an account, or asking a reset for an address without one, looks exactly like a success.
 
-A phone stays signed in until the person signs out, resets the password, deletes the account or someone revokes that sign-in. Then it becomes a guest again and keeps its data.
+A phone stays signed in until the person signs out, resets or changes the password, deletes the account, or the sign-in is revoked (from another device, or by an admin). Then it becomes a guest again and keeps its data.
 
 ## Forgotten password
 
 The person asks for a reset link by email and picks a new password. The link lasts one hour and works once. At most three links go out per hour.
 
 A reset signs every device out, so anyone who knew the old password loses access.
+
+## Changing the password
+
+A signed-in person changes the password from Account › Password by typing the current one and a new one. The phone doing it stays signed in, and every other device is signed out. A wrong current password changes nothing.
+
+## Signed-in devices
+
+Account › Signed-in devices lists every phone and browser signed in, this phone first, with when each was last used. Any one of them, or every other one at once, can be signed out from there. A device signed out becomes a guest and keeps its copy, as when it signs out by itself.
 
 ## The phone and the account
 
