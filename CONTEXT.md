@@ -11,11 +11,23 @@ One movement from the curated catalog, identified by a slug that never changes.
 _Avoid_: Move, drill
 
 **Catalog**:
-The curated set of exercises held in the server database, edited and published in the admin and downloaded by phones exercise by exercise, without an account. The catalog as a whole has no version, and nothing ships bundled ([ADR 0033](docs/adr/0033-the-server-database-is-the-catalog-and-nothing-ships-bundled.md)).
+The curated set of exercises and curated workouts held in the server database, edited and published in the admin and downloaded by phones item by item, without an account. The catalog as a whole has no version, and nothing ships bundled ([ADR 0033](docs/adr/0033-the-server-database-is-the-catalog-and-nothing-ships-bundled.md)).
 _Avoid_: Exercise database, library (the library is the user's)
 
+**Curated workout**:
+A workout in the catalog, written by the admin at one level, with its own slug and revisions like an exercise. It is locked: a person starts it, never edits it, and it is always available and kept in sync with the server without an account. Editing it makes a copy in the person's library, a normal workout that no longer follows the catalog ([ADR 0034](docs/adr/0034-curated-workouts-are-locked-catalog-items-at-three-levels.md)).
+_Avoid_: Template, preset, program, plan (a plan is weeks of workouts)
+
+**Level**:
+How demanding a curated workout is: starter, steady or strong (working names until the brand pages settle them). Three fixed levels, the same for every goal, with no numbers; a person picks one themselves.
+_Avoid_: Difficulty, rank, grade, variation (a variation is an exercise made easier or harder)
+
+**Workout family**:
+The curated workouts that are the same workout at different levels, each its own curated workout with its own reps, rests and rounds. A family has at most one workout per level.
+_Avoid_: Series, group (a group is a step holding other steps)
+
 **Revision**:
-One numbered, finished state of a single catalog exercise (1, 2, 3…). A published revision never changes; the server serves each exercise's latest, and a phone takes an exercise only when its revision is higher than the one it has ([ADR 0030](docs/adr/0030-the-catalog-changes-by-exercise-revision-not-by-catalog-version.md)).
+One numbered, finished state of a single catalog exercise or curated workout (1, 2, 3…). A published revision never changes; the server serves each item's latest, and a phone takes an item only when its revision is higher than the one it has ([ADR 0030](docs/adr/0030-the-catalog-changes-by-exercise-revision-not-by-catalog-version.md)).
 _Avoid_: Version (workouts and plans have versions; the catalog doesn't), release (a release is an app build), catalog update
 
 **Catalog draft**:
@@ -190,7 +202,7 @@ _Avoid_: Gender (the app does not ask for it)
 ### Sharing and coaching
 
 **Library**:
-A person's own workouts and plans, catalog items they kept, and items shared with them.
+A person's own workouts and plans, and items shared with them. Catalog exercises and curated workouts are not in it: they are always available, and a curated workout is edited by copying it here.
 _Avoid_: Collection, favourites
 
 **Library entry**:
