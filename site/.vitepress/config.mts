@@ -126,6 +126,7 @@ export default withMermaid(
               { text: 'The API', link: '/docs/the-api' },
               { text: 'Sync', link: '/docs/sync' },
               { text: 'The server\'s database', link: '/docs/database' },
+              { text: 'Database diagram', link: '/database-erd/index.html', target: '_blank', rel: 'noopener' },
               { text: 'Admin internals', link: '/docs/admin-internals' },
               { text: 'Deploying the server', link: '/docs/deploying-the-server' },
               { text: 'Releasing a beta', link: '/docs/releasing' },
