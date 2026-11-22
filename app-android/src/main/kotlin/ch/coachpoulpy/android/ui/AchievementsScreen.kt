@@ -1,7 +1,6 @@
 package ch.coachpoulpy.android.ui
 
 import androidx.annotation.StringRes
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -11,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -26,7 +26,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -93,8 +92,9 @@ fun AchievementsScreen(graph: AppGraph, language: String, onBack: () -> Unit, mo
 
     SubPage(stringResource(R.string.achievements_title), null, onBack, modifier) {
         state.poulpy?.let { poulpy ->
-            Column(Modifier.fillMaxWidth().padding(vertical = PoulpySpace.sm), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(PoulpySpace.sm)) {
-                Image(painterResource(poulpy.drawing.drawable), contentDescription = null, modifier = Modifier.size(200.dp))
+            // Poulpy stays big and plays his move when tapped, as on Home; the spacing around him is tight.
+            Column(Modifier.fillMaxWidth().offset(y = (-PoulpySpace.sm)), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                PoulpyTapArt(poulpy.drawing, poulpy.title, 200.dp)
                 Text(poulpy.tentaclesCaption, style = MaterialTheme.typography.titleLarge, textAlign = TextAlign.Center)
                 Text(
                     if (state.sessionsToFull == 0) stringResource(R.string.achievements_champion)
@@ -118,7 +118,7 @@ fun AchievementsScreen(graph: AppGraph, language: String, onBack: () -> Unit, mo
         Text(
             stringResource(R.string.achievements_badges),
             style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(top = PoulpySpace.sm),
+            modifier = Modifier.padding(top = PoulpySpace.xs),
         )
         val tiles = state.achievements.earned.reversed() + state.achievements.locked
         tiles.chunked(3).forEach { rowTiles ->

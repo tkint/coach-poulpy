@@ -61,12 +61,9 @@ struct AchievementsView: View {
         ScrollView {
             VStack(spacing: PoulpySpace.md) {
                 if let poulpy = state.poulpy {
-                    VStack(spacing: PoulpySpace.sm) {
-                        Image(poulpy.drawing.imageName)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 200, height: 200)
-                            .accessibilityHidden(true)
+                    // Poulpy stays big and plays his move when tapped, as on Home; the spacing around him is tight.
+                    VStack(spacing: 2) {
+                        PoulpyTapArt(drawing: poulpy.drawing, description: poulpy.title, art: 200)
                         Text(verbatim: poulpy.tentaclesCaption)
                             .font(PoulpyFont.headline)
                         Text(verbatim: state.sessionsToFull == 0 ? L("achievements.champion") : L("achievements.toGo %lld", Int64(state.sessionsToFull)))
@@ -83,7 +80,6 @@ struct AchievementsView: View {
                         .accessibilityHidden(true)
                     }
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, PoulpySpace.sm)
                 }
                 Text("achievements.badges")
                     .font(PoulpyFont.headline)
@@ -95,7 +91,8 @@ struct AchievementsView: View {
                     }
                 }
             }
-            .padding(PoulpySpace.lg)
+            .padding(.horizontal, PoulpySpace.lg)
+            .padding(.bottom, PoulpySpace.lg)
         }
         .navigationTitle("achievements.title")
         .navigationBarTitleDisplayMode(.inline)
