@@ -1,0 +1,12 @@
+<main class="phone">
+  <MobileTopBar title="Signed-in devices" leading="back" back-label="Back to account" />
+  <div class="form-body" style="padding-top: var(--cp-space-lg);">
+    <span class="field-note">Every phone and browser signed in to alex@example.com. Signing one out keeps its copy of your training on it, as a guest.</span>
+    <article class="device-row" id="this-phone" data-component="device-row"><span class="device-icon device-icon--sm" aria-hidden="true"><MobileIcon name="smartphone" :size="22" /></span><span class="device-text" style="gap: var(--cp-space-xs);"><strong>Pixel 8</strong><span class="kind-tag">This phone</span></span></article>
+    <article class="device-row" id="other-phone" data-component="device-row"><span class="device-icon device-icon--sm device-icon--off" aria-hidden="true"><MobileIcon name="smartphone" :size="22" /></span><span class="device-text"><strong>Ana’s iPhone</strong><small>Last used 3 days ago</small></span><MobileButton kind="secondary" size="sm">Sign out</MobileButton></article>
+    <article class="device-row" id="browser" data-component="device-row"><span class="device-icon device-icon--sm device-icon--off" aria-hidden="true"><MobileIcon name="monitor" :size="22" /></span><span class="device-text"><strong>Firefox on Windows</strong><small>Last used 2 weeks ago</small></span><MobileButton kind="secondary" size="sm">Sign out</MobileButton></article>
+    <div class="leave-actions">
+      <button type="button" class="text-button text-button--danger" id="sign-out-others" style="flex: none;"><MobileIcon name="log-out" :size="20" />&nbsp;Sign out every other device</button>
+    </div>
+  </div>
+</main>
