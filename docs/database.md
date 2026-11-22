@@ -154,7 +154,7 @@ erDiagram
 Three tables with no part in the diagrams above.
 
 | Table | What it holds |
-|---|---|
+| --- | --- |
 | `admin_audit` | One row per admin write: who (`actor_id`, null once that admin's account is deleted), what (`action`), on what (`target`, such as an account id or an exercise slug), and when. See [Admin internals](./admin-internals.md#audit-log). |
 | `settings` | Server settings an admin changes without a deploy, one row per name. A setting with no row keeps its default from the environment, and secrets never live here ([Admin internals](./admin-internals.md#settings-and-mail)). Not to be confused with `setting`, the person's synced preferences. |
 | `schema_version` | One row: the number of the next migration to apply. Kept by `Database.migrate`. |
