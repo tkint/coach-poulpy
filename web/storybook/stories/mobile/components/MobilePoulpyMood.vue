@@ -12,6 +12,7 @@ import { MOOD_MOVES, tucking, type Move } from '../../brand/moodMoves'
 
 const props = defineProps<{ label: string; size?: number }>() // size: his picture's height in px (default 95, as on Home)
 type Mood = 'happy' | 'annoyed' | 'fuming'
+const MOODS: Mood[] = ['happy', 'annoyed', 'fuming']
 const TAPS = { happy: 5, annoyed: 3 } // taps in a row that make him change mood
 const CALM_MILLIS = 5000 // alone this long, he improves his mood by a step
 const PAD_PER_HEIGHT = 110 / 210 // how much room a move has around the picture, in picture heights
@@ -109,7 +110,8 @@ onBeforeUnmount(() => { clearTimeout(calm); stop() })
 
 <template>
   <button type="button" class="poulpy-cheer poulpy-cheer--home" :aria-label="`${label}. Tap and he reacts to his mood`" data-component="poulpy-mood" :style="size ? { width: `${Math.round(size * 104 / 95)}px`, height: `${size}px` } : undefined" @click="tap">
-    <img :src="picture(mood)" alt="" :style="{ visibility: showing ? 'hidden' : 'visible' }" />
+    <!-- All three pictures stay in place, and one shows: swapping a single picture's source would keep the old one on screen until the new one has loaded. -->
+    <img v-for="m in MOODS" :key="m" :src="picture(m)" alt="" :style="{ position: m === MOODS[0] ? 'static' : 'absolute', inset: m === MOODS[0] ? undefined : 0, visibility: !showing && mood === m ? 'visible' : 'hidden' }" />
     <span v-if="playing" class="poulpy-cheer-stage" aria-hidden="true" :style="{ inset: `-${PAD()}px` }"><canvas ref="canvas" /></span>
   </button>
 </template>
