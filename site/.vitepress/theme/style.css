@@ -44,3 +44,12 @@
     max-width: none;
   }
 }
+
+/* Mermaid sizes each label for 1.5 line height, but VitePress gives the <p> inside it 28px lines
+   and margins, so the text outgrows its box and is cut. Keep the label's own line height. */
+.vp-doc .mermaid .nodeLabel p,
+.vp-doc .mermaid .edgeLabel p,
+.vp-doc .mermaid .label p {
+  margin: 0;
+  line-height: inherit;
+}
