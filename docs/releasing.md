@@ -1,6 +1,6 @@
 # Releasing a beta
 
-Coach Poulpy is in beta. **Pushing a version tag is the release:** the tag is the version, CI runs in full, then a GitHub pre-release with the Android APK and the server image on the GitHub Container Registry are published. No version pull request, no button, no agent. Deploying the server is a separate button.
+Coach Poulpy is in beta. **Pushing a version tag is the release:** the tag is the version, CI runs in full, then a GitHub pre-release with the Android APK and the server image on the GitHub Container Registry are published. No version pull request, no button, no agent. Deploying the server is a separate button. A release plus the deployed server is production; the app stores come in their own phase ([roadmap](./roadmap.md)).
 
 ## The version
 

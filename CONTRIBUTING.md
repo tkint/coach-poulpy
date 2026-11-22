@@ -54,7 +54,7 @@ Rounded boxes are where work starts. The table below says what each skill leaves
 
 ## Labels
 
-Every issue has one type, one state and at least one area, and sits in its phase's milestone. The labels are defined in [`.github/labels.yml`](.github/labels.yml) and synced to GitHub when that file changes on `main`.
+Every issue has one type, one state and at least one area, and sits in one milestone, the release it ships in ([roadmap](docs/roadmap.md)). The labels are defined in [`.github/labels.yml`](.github/labels.yml) and synced to GitHub when that file changes on `main`.
 
 | Group | Labels |
 | --- | --- |

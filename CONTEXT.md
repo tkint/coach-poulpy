@@ -149,7 +149,7 @@ _Avoid_: Data point, packet
 
 **Profile**:
 What a person tells the app about themselves, all optional and kept on the phone: a display name, birthdate, pronouns, sex assigned at birth, goal, experience, resting heart rate. Body measurements are logged beside it, not inside it.
-_Avoid_: Account (there is none while the app is guest-only), user data
+_Avoid_: Account (a Profile is not an account: it never leaves the phone), user data
 
 **Body measurement**:
 One dated weight or height entry in the person's log. Entries are only added or corrected, never summed, and each chart is drawn from them.

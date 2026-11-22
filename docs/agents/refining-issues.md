@@ -51,7 +51,7 @@ Only labels and milestones listed in `.github/labels.yml` exist; never invent on
 - **One state:** see below.
 - **At least one area:** `area:*`.
 - **`device-test`** when the *Device test* section exists.
-- **One milestone**, the phase it belongs to.
+- **One milestone**, the release it ships in, or `Later`. The [roadmap](../roadmap.md) says which release a theme belongs to.
 
 | State | When |
 | --- | --- |

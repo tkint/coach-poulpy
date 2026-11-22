@@ -1,23 +1,6 @@
 # Architecture
 
-Coach Poulpy is **local-first**: the mobile app holds the whole domain model and runs alone as a guest on family phones, and the server and website join later as a sync and sharing layer over the same model. One Kotlin Multiplatform core owns the domain, the workout engine and the database on Android and iOS, so the two apps cannot drift apart. The decisions behind this are recorded as [ADRs](./adr/), the words are defined in the [glossary](../CONTEXT.md), and what v1 includes is in the [roadmap](./roadmap.md#what-v1-includes).
-
-## Delivery phases
-
-```mermaid
-flowchart TD
-    guest["1 · Guest app<br/>Catalog, builder, player,<br/>plans, history, FIT export"]
-    treadmill["2 · Treadmill<br/>FTMS recording,<br/>free or matched to a plan"]
-    accounts["3 · Accounts and sync<br/>Server, Postgres, sign-in,<br/>push and pull sync"]
-    website["4 · Website<br/>Plan, review and run<br/>guided sessions"]
-    sharing["5 · Sharing and coaching<br/>Library sync or copy,<br/>coach links, comments"]
-
-    guest --> accounts
-    guest -. developed alongside .-> treadmill
-    accounts --> website --> sharing
-```
-
-Each phase adds a layer without reworking the one below it, because the domain, engine and storage are already shared. Phase 2 runs alongside phase 1 because the treadmill link was the riskiest piece. GitHub milestones follow these phases.
+Coach Poulpy is **local-first**: the mobile app holds the whole domain model and runs alone as a guest on family phones, and the server adds accounts and sync between phones; the website, sharing and coaching follow over the same model. One Kotlin Multiplatform core owns the domain, the workout engine and the database on Android and iOS, so the two apps cannot drift apart. The decisions behind this are recorded as [ADRs](./adr/), the words are defined in the [glossary](../CONTEXT.md), and what ships in which order, and what v1 includes, is in the [roadmap](./roadmap.md). Each layer is added without reworking the one below it, because the domain, engine and storage are shared.
 
 ## Domain model
 
