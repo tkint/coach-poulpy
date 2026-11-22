@@ -2,7 +2,7 @@
 // Poulpy on the docs home, as on the app's Home: tap him and he jumps, tap him again and again and he turns annoyed, then fuming,
 // and left alone he calms down. It is the workshop's own component (the Home mockup's), not a copy of it, so its moves and
 // tap counts stay the ones the mockup agreed; its look comes from the rules below, which the mockup keeps under `.cp-screen`.
-import { MobilePoulpyMood } from '../../../web/storybook/stories/mobile/components'
+import MobilePoulpyMood from '../../../web/storybook/stories/mobile/components/MobilePoulpyMood.vue'
 </script>
 
 <template>
