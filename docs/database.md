@@ -2,7 +2,7 @@
 
 The tables of the server's Postgres database, how they relate, and why they are shaped this way. Read it before changing the schema or writing a query. [Open the diagram](https://tkint.github.io/coach-poulpy/database-erd/) to see every table and relation on one zoomable graph, or read [one example row per table](./database-examples.md). The phone keeps its own, different database ([the phone's database](#the-phones-database)).
 
-The schema is the numbered migrations in `server/src/main/sqldelight/migrations`, applied on start ([ADR 0022](./adr/0022-the-servers-schema-is-sqldelight-migrations-on-postgres.md)); the typed queries sit beside them in `.sq` files. The diagram is built from the migrations on every docs build, so it is always current. When this page and a migration disagree, the migration is right.
+The schema is the numbered migrations in `server/src/main/sqldelight/migrations`, applied on start ([ADR 0022](./adr/0022-the-servers-schema-is-sqldelight-migrations-on-postgres.md)); the typed queries sit beside them in `.sq` files. The diagram is built from the migrations on every docs build, so it is always current. What each table and column means is written in `site/database-comments.sql`; a migration that adds one adds its comment there, and the build lists any that is missing. When this page and a migration disagree, the migration is right.
 
 ## How it is shaped
 
