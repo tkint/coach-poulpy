@@ -134,7 +134,9 @@ const LOADER_SECONDS = 3.6
 // The moves of Home: a tap on his picture plays his jump, leaning to one side or the other. Frame by frame, with the same shot as his
 // picture, on a canvas that reaches `pad` further each way so the jump is not cut off. One sheet per mood and move, `columns` across, in
 // design/poulpy-3d/moves. The numbers are also in PoulpyMoves.kt, which the build checks.
-const MOVES = { dir: 'design/poulpy-3d/moves', frames: 30, fps: 24, columns: 6, picture: 64, pad: 24, scale: 3 }
+// The taps (`left`, `right`, `spin`) are drawn at `tapFps`, twice the pictures a second of the mood moves (`fps`), to be smooth: the same 1.25 s
+// in `tapFrames` frames. The mood moves stay at `fps`, since a sheet with twice the frames would be taller than a phone's GPU takes.
+const MOVES = { dir: 'design/poulpy-3d/moves', frames: 30, fps: 24, tapFrames: 60, tapFps: 48, columns: 6, picture: 64, pad: 24, scale: 3 }
 // Which moves each mood has, and how each is made. `left` and `right` are his little jump leaning to that side (a positive lean takes his
 // head to the right of the picture); `spin` is the high jump with a full turn anticlockwise, as the owner tuned it on the workshop's
 // "Jumping around" page: height 1, heavy arms, one step of exactly 360 degrees (no wiggle).
@@ -146,10 +148,10 @@ const MOVE_KINDS = {
 {
   const kotlin = readFileSync(join(root, 'shared/src/commonMain/kotlin/ch/coachpoulpy/shared/PoulpyMoves.kt'), 'utf8')
   const sizes = { width: Math.round(((MOVES.picture * FRAME.width) / FRAME.height + 2 * MOVES.pad) * MOVES.scale), height: (MOVES.picture + 2 * MOVES.pad) * MOVES.scale }
-  for (const [name, value] of [['FRAMES', MOVES.frames], ['FPS', MOVES.fps], ['COLUMNS', MOVES.columns], ['FRAME_WIDTH', sizes.width], ['FRAME_HEIGHT', sizes.height], ['PICTURE_WIDTH', Math.round((MOVES.picture * FRAME.width) / FRAME.height * MOVES.scale)], ['PICTURE_HEIGHT', MOVES.picture * MOVES.scale]]) {
+  for (const [name, value] of [['FRAMES', MOVES.tapFrames], ['FPS', MOVES.tapFps], ['MOOD_FPS', MOVES.fps], ['COLUMNS', MOVES.columns], ['FRAME_WIDTH', sizes.width], ['FRAME_HEIGHT', sizes.height], ['PICTURE_WIDTH', Math.round((MOVES.picture * FRAME.width) / FRAME.height * MOVES.scale)], ['PICTURE_HEIGHT', MOVES.picture * MOVES.scale]]) {
     if (!new RegExp(`const val ${name} = ${value}\\b`).test(kotlin)) { console.error(`PoulpyMoves.kt: ${name} must be ${value}, as in design/build-poulpy-pictures.mjs.`); process.exit(1) }
   }
-  const rowsOf = Math.ceil(MOVES.frames / MOVES.columns), s = MOVES.scale
+  const rowsOf = Math.ceil(MOVES.tapFrames / MOVES.columns), s = MOVES.scale
   const height = (MOVES.picture + 2 * MOVES.pad) * s, width = Math.round(((MOVES.picture * FRAME.width) / FRAME.height + 2 * MOVES.pad) * s)
   // Grown by the padding, the view shows the same size of him as the picture does (SHOT, picture's field of 28 degrees).
   const field = (2 * Math.atan(((MOVES.picture + 2 * MOVES.pad) / MOVES.picture) * Math.tan((14 * Math.PI) / 180)) * 180) / Math.PI
@@ -158,8 +160,8 @@ const MOVE_KINDS = {
     for (const [kind, { moods, make }] of Object.entries(MOVE_KINDS)) {
       if (!moods.includes(mood)) continue
       const jump = make(), sheet = new Uint8Array(MOVES.columns * width * rowsOf * height * 4)
-      for (let i = 0; i < MOVES.frames; i++) {
-        const pose = i ? jump.advance(1 / MOVES.fps) : jump.pose(), { model: posed, placed } = posePoulpy(model, pose)
+      for (let i = 0; i < MOVES.tapFrames; i++) {
+        const pose = i ? jump.advance(1 / MOVES.tapFps) : jump.pose(), { model: posed, placed } = posePoulpy(model, pose)
         const pixels = paintPoulpy(posed, { width, height, ...SHOT, field, placed, gather: 1 - Math.min(pose.lift * 0.4, 0.3) })
         const left = (i % MOVES.columns) * width, top = Math.floor(i / MOVES.columns) * height
         for (let y = 0; y < height; y++) sheet.set(pixels.subarray(y * width * 4, (y + 1) * width * 4), ((top + y) * MOVES.columns * width + left) * 4)

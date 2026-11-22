@@ -3,11 +3,14 @@ package ch.coachpoulpy.shared
 /**
  * What happens when Home's Poulpy is tapped: he plays a short move for his picture, drawn frame by frame from the 3D model
  * (design/build-poulpy-pictures.mjs, into design/poulpy-3d/moves). Happy and proud jump, leaning to one side or the other at random, and happy sometimes
- * spins in a high jump; the other moods have no move yet. A sheet holds the [FRAMES] pictures of a move, [COLUMNS] across, shown at [FPS] pictures a second.
+ * spins in a high jump; the other moods have no move yet. A sheet holds the [FRAMES] pictures of a move, [COLUMNS] across, shown at [FPS] pictures a second (a mood move at [MOOD_FPS]).
  */
 object PoulpyMoves {
-    const val FRAMES = 30
-    const val FPS = 24
+    const val FRAMES = 60
+    const val FPS = 48
+
+    /** The mood moves have fewer pictures a second: their sheets are taller than a tap's would be at [FPS]. */
+    const val MOOD_FPS = 24
     const val COLUMNS = 6
 
     /**

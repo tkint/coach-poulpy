@@ -20,10 +20,10 @@ enum class TemperReaction(val sheet: String, val frames: Int, val after: TemperL
     ;
 
     /** How long the move lasts. */
-    val millis: Long get() = frames * 1_000L / PoulpyMoves.FPS
+    val millis: Long get() = frames * 1_000L / PoulpyMoves.MOOD_FPS
 
     /** Which of the [frames] pictures to show [elapsedMillis] into the move, or null once it is over: he is back to his picture. */
-    fun frame(elapsedMillis: Long): Int? = if (elapsedMillis < 0 || elapsedMillis >= millis) null else (elapsedMillis * PoulpyMoves.FPS / 1_000).toInt().coerceAtMost(frames - 1)
+    fun frame(elapsedMillis: Long): Int? = if (elapsedMillis < 0 || elapsedMillis >= millis) null else (elapsedMillis * PoulpyMoves.MOOD_FPS / 1_000).toInt().coerceAtMost(frames - 1)
 
     /** The column and the row of [frame] in its sheet. */
     fun cellOf(frame: Int): Pair<Int, Int> = frame % PoulpyMoves.COLUMNS to frame / PoulpyMoves.COLUMNS
