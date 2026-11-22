@@ -134,7 +134,7 @@ class SyncClient(
 
     /**
      * Revokes the sign-in and clears what follows the account: workouts, sessions, plans, the body
-     * log, the profile, units and language, with the outbox and cursor. Theme, app icon and paired
+     * log, the profile, units and language, the badges earned, with the outbox and cursor. Theme, app icon and paired
      * devices stay. With changes still to push it signs out only when [evenWithChanges].
      */
     suspend fun signOut(evenWithChanges: Boolean = false): SignOutResult = running.withLock {
@@ -148,6 +148,8 @@ class SyncClient(
         }
         store.clearAccountData()
         SyncedSettings.KEYS.forEach { memory.putString(it, null) }
+        // The badges earned come from the sessions, which just left: the next person on this phone starts with none.
+        memory.putString(AchievementLedger.KEY, null)
         memory.putString(LAST_SYNCED, null)
         _lastSyncedAt.value = null
         SignOutResult.SIGNED_OUT

@@ -174,6 +174,7 @@ class SyncClientTest {
         ana.store.saveWorkout(legs)
         ana.settings.putString("profile.name", "Ana")
         ana.memory.putString("settings.theme", "DARK")
+        ana.memory.putString("achievements.earned", "firstWalk")
 
         assertEquals(SignOutResult.CHANGES_WAITING, ana.sync.signOut())
         assertEquals(0, server.revoked)
@@ -183,6 +184,7 @@ class SyncClientTest {
         assertEquals(1, server.revoked)
         assertEquals(emptyList(), ana.names())
         assertNull(ana.memory.getString("profile.name"))
+        assertNull(ana.memory.getString("achievements.earned"))
         assertEquals("DARK", ana.memory.getString("settings.theme"))
         assertFalse(ana.store.recordingChanges())
         assertNull(ana.store.syncCursor())
