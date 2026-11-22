@@ -17,11 +17,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -41,6 +39,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -684,22 +684,22 @@ private fun MessageScreen(@DrawableRes pose: Int, title: Int, body: AnnotatedStr
     }
 }
 
-/**
- * Every account screen: a close button, the content scrolling, and one wide action at the bottom. The close button sits
- * in the same row as every other page's back arrow, right under the status bar, not in a Material top app bar.
- */
+/** Every account screen: a close button, the content scrolling, and one wide action at the bottom. */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AccountFrame(onClose: (() -> Unit)?, action: Int, busy: Boolean, onAction: () -> Unit, content: @Composable ColumnScope.() -> Unit) {
+    val colors = MaterialTheme.colorScheme
     Scaffold(
         topBar = {
-            Row(
-                Modifier.fillMaxWidth().statusBarsPadding().padding(start = 4.dp, top = PoulpySpace.xs).heightIn(min = PoulpySize.touch),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                onClose?.let { close ->
-                    IconButton(onClick = close) { Icon(Lucide.X, contentDescription = stringResource(R.string.action_close)) }
-                }
-            }
+            TopAppBar(
+                title = { },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = colors.background, scrolledContainerColor = colors.background),
+                navigationIcon = {
+                    onClose?.let { close ->
+                        IconButton(onClick = close) { Icon(Lucide.X, contentDescription = stringResource(R.string.action_close)) }
+                    }
+                },
+            )
         },
         bottomBar = {
             Box(Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = PoulpySpace.lg, vertical = 12.dp)) {
