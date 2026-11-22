@@ -30,7 +30,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -39,8 +38,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -684,19 +681,7 @@ private fun MessageScreen(@DrawableRes pose: Int, title: Int, body: AnnotatedStr
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AccountFrame(onClose: (() -> Unit)?, action: Int, busy: Boolean, onAction: () -> Unit, content: @Composable ColumnScope.() -> Unit) {
-    val colors = MaterialTheme.colorScheme
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = colors.background, scrolledContainerColor = colors.background),
-                navigationIcon = {
-                    onClose?.let { close ->
-                        IconButton(onClick = close) { Icon(Lucide.X, contentDescription = stringResource(R.string.action_close)) }
-                    }
-                },
-            )
-        },
         bottomBar = {
             Box(Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = PoulpySpace.lg, vertical = 12.dp)) {
                 PoulpyButton(onClick = onAction, size = PoulpyButtonSize.Lg, enabled = !busy, modifier = Modifier.fillMaxWidth()) {
@@ -705,11 +690,14 @@ private fun AccountFrame(onClose: (() -> Unit)?, action: Int, busy: Boolean, onA
             }
         },
     ) { padding ->
-        Column(
-            Modifier.padding(padding).fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = PoulpySpace.lg, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            content = content,
-        )
+        Column(Modifier.padding(padding).fillMaxSize()) {
+            AppBar(title = null, leading = { if (onClose != null) CloseButton(onClose) })
+            Column(
+                Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = PoulpySpace.lg, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                content = content,
+            )
+        }
     }
 }
 
