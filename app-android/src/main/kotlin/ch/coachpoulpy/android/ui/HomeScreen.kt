@@ -128,7 +128,7 @@ fun HomeScreen(
 
     Column(modifier.fillMaxSize()) {
         Row(
-            Modifier.fillMaxWidth().padding(start = PoulpySpace.lg, end = PoulpySpace.lg, top = PoulpySpace.lg),
+            Modifier.fillMaxWidth().padding(start = PoulpySpace.lg, end = PoulpySpace.lg, top = PoulpySpace.xs),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(stringResource(R.string.tab_home), style = MaterialTheme.typography.headlineMedium, modifier = Modifier.weight(1f))

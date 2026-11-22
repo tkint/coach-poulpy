@@ -71,7 +71,7 @@ fun YouScreen(
 
     Column(modifier.fillMaxSize()) {
         Row(
-            Modifier.fillMaxWidth().padding(start = PoulpySpace.lg, end = PoulpySpace.sm, top = PoulpySpace.lg),
+            Modifier.fillMaxWidth().padding(start = PoulpySpace.lg, end = PoulpySpace.sm, top = PoulpySpace.xs),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(stringResource(R.string.tab_you), style = MaterialTheme.typography.headlineMedium, modifier = Modifier.weight(1f))

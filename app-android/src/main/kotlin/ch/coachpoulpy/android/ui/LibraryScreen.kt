@@ -74,7 +74,7 @@ fun LibraryScreen(
 ) {
     Column(modifier.fillMaxSize()) {
         Column(
-            Modifier.padding(start = PoulpySpace.lg, end = PoulpySpace.lg, top = PoulpySpace.lg),
+            Modifier.padding(start = PoulpySpace.lg, end = PoulpySpace.lg, top = PoulpySpace.xs),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(stringResource(R.string.tab_library), style = MaterialTheme.typography.headlineMedium)
