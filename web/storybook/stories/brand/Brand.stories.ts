@@ -39,6 +39,11 @@ export const Fuming: Story = { render: () => ({ components: { PoulpyMoodMoves },
 export const Annoyed: Story = { render: () => ({ components: { PoulpyMoodMoves }, template: `<PoulpyMoodMoves :only="['huff']" />` }) }
 /** The whole sequence from his normal self to fuming and back, played in one go. */
 export const Sequence: Story = { render: () => ({ components: { PoulpyMoodMoves }, template: `<PoulpyMoodMoves plain />` }) }
+/** Just Poulpy running the whole sequence in a loop, for the docs home page. */
+export const Home: Story = {
+  render: () => ({ components: { PoulpyMoodMoves }, template: '<PoulpyMoodMoves hero />' }),
+  parameters: { backgrounds: { disable: true } },
+}
 /** Normal to annoyed: the spin. */
 export const ToAnnoyed: Story = { render: () => ({ components: { PoulpyMoodMoves }, template: `<PoulpyMoodMoves :only="['annoyed']" />` }) }
 /** Annoyed to fuming: the spin. */
