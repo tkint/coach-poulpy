@@ -11,11 +11,23 @@ One movement from the curated catalog, identified by a slug that never changes.
 _Avoid_: Move, drill
 
 **Catalog**:
-The curated set of exercises held in the server database, edited and published in the admin and downloaded by phones exercise by exercise, without an account. The catalog as a whole has no version, and nothing ships bundled ([ADR 0033](docs/adr/0033-the-server-database-is-the-catalog-and-nothing-ships-bundled.md)).
+The curated set of exercises and curated workouts held in the server database, edited and published in the admin and downloaded by phones item by item, without an account. The catalog as a whole has no version, and nothing ships bundled ([ADR 0033](docs/adr/0033-the-server-database-is-the-catalog-and-nothing-ships-bundled.md)).
 _Avoid_: Exercise database, library (the library is the user's)
 
+**Curated workout**:
+A workout in the catalog, written by the admin at one level, with its own slug and revisions like an exercise. It is always available without an account, with nothing to save, and shows in the person's workout list beside their own, marked by a **Curated** badge; the list filters by that origin. Editing it makes a personal copy, as for a synced shared plan ([ADR 0034](docs/adr/0034-curated-workouts-are-catalog-items-at-three-levels.md), [ADR 0009](docs/adr/0009-shared-plans-are-synced-or-copied.md)).
+_Avoid_: Template, preset, program, plan (a plan is weeks of workouts)
+
+**Level**:
+The difficulty level of a workout or a plan: starter, steady or strong (working names until the brand pages settle them). Three fixed levels, the same for every goal, with no numbers. A curated workout or plan always has one; a person's own can have one too, and the list filters by it.
+_Avoid_: Difficulty (as a term in code and copy, say level), rank, grade, variation (a variation is an exercise made easier or harder)
+
+**Workout family**:
+The curated workouts that are the same workout at different levels, each its own curated workout with its own reps, rests and rounds. A family has at most one workout per level.
+_Avoid_: Series, group (a group is a step holding other steps)
+
 **Revision**:
-One numbered, finished state of a single catalog exercise (1, 2, 3…). A published revision never changes; the server serves each exercise's latest, and a phone takes an exercise only when its revision is higher than the one it has ([ADR 0030](docs/adr/0030-the-catalog-changes-by-exercise-revision-not-by-catalog-version.md)).
+One numbered, finished state of a single catalog exercise or curated workout (1, 2, 3…). A published revision never changes; the server serves each item's latest, and a phone takes an item only when its revision is higher than the one it has ([ADR 0030](docs/adr/0030-the-catalog-changes-by-exercise-revision-not-by-catalog-version.md)).
 _Avoid_: Version (workouts and plans have versions; the catalog doesn't), release (a release is an app build), catalog update
 
 **Catalog draft**:
