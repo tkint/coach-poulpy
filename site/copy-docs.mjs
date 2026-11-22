@@ -20,6 +20,8 @@ execFileSync('npm', ['run', 'build', '-w', 'storybook'], { cwd: web, stdio: 'inh
 rmSync('public/storybook', { recursive: true, force: true })
 cpSync(resolve(web, 'storybook/dist'), 'public/storybook', { recursive: true })
 
+execFileSync('node', ['build-database-erd.mjs'], { stdio: 'inherit' })
+
 for (const path of shared) {
   rmSync(path, { recursive: true, force: true })
   cpSync(`../${path}`, path, { recursive: true })

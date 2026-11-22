@@ -41,3 +41,4 @@ web/ui/poulpy-ui*.css
 
 # The component workshop, built into the docs site (site/copy-docs.mjs)
 site/public/storybook/
+site/public/database-erd/
