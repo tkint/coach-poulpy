@@ -81,6 +81,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.kizitonwose.calendar.compose)
     debugImplementation(libs.androidx.compose.ui.tooling)
 }
 
