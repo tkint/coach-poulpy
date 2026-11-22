@@ -119,12 +119,15 @@ export default withMermaid(
           // order, so '/docs/admin-internals' must be tried before Product's '/docs/admin'.
           [
             'Technical',
-            ['/docs/architecture', '/docs/the-catalog', '/docs/the-api', '/docs/sync', '/docs/admin-internals', '/docs/deploying-the-server', '/docs/releasing', '/decisions/', '/docs/adr/', '/docs/research/'],
+            ['/docs/architecture', '/docs/the-catalog', '/docs/the-api', '/docs/sync', '/docs/database', '/docs/database-examples', '/docs/admin-internals', '/docs/deploying-the-server', '/docs/releasing', '/decisions/', '/docs/adr/', '/docs/research/'],
             [
               { text: 'Architecture', link: '/docs/architecture' },
               { text: 'The catalog\'s shape', link: '/docs/the-catalog' },
               { text: 'The API', link: '/docs/the-api' },
               { text: 'Sync', link: '/docs/sync' },
+              { text: 'The server\'s database', link: '/docs/database' },
+              { text: 'The database by example', link: '/docs/database-examples' },
+              { text: 'Database diagram', link: '/database-erd/index.html', target: '_blank', rel: 'noopener' },
               { text: 'Admin internals', link: '/docs/admin-internals' },
               { text: 'Deploying the server', link: '/docs/deploying-the-server' },
               { text: 'Releasing a beta', link: '/docs/releasing' },
