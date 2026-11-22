@@ -15,12 +15,12 @@ The curated set of exercises and curated workouts held in the server database, e
 _Avoid_: Exercise database, library (the library is the user's)
 
 **Curated workout**:
-A workout in the catalog, written by the admin at one level, with its own slug and revisions like an exercise. A person can start it from the catalog without an account, or save it to their library, synced to its latest revision or as a copy; editing a synced one makes a personal copy, as for a shared plan ([ADR 0034](docs/adr/0034-curated-workouts-are-catalog-items-at-three-levels.md), [ADR 0009](docs/adr/0009-shared-plans-are-synced-or-copied.md)).
+A workout in the catalog, written by the admin at one level, with its own slug and revisions like an exercise. It is always available without an account and shows in the person's workout list beside their own, marked by a **Curated** badge; the list filters by that origin. Starting it needs nothing; editing a synced one makes a personal copy, as for a shared plan ([ADR 0034](docs/adr/0034-curated-workouts-are-catalog-items-at-three-levels.md), [ADR 0009](docs/adr/0009-shared-plans-are-synced-or-copied.md)).
 _Avoid_: Template, preset, program, plan (a plan is weeks of workouts)
 
 **Level**:
-How demanding a curated workout is: starter, steady or strong (working names until the brand pages settle them). Three fixed levels, the same for every goal, with no numbers; a person picks one themselves.
-_Avoid_: Difficulty, rank, grade, variation (a variation is an exercise made easier or harder)
+The difficulty level of a workout or a plan: starter, steady or strong (working names until the brand pages settle them). Three fixed levels, the same for every goal, with no numbers. A curated workout or plan always has one; a person's own can have one too, and the list filters by it.
+_Avoid_: Difficulty (as a term in code and copy, say level), rank, grade, variation (a variation is an exercise made easier or harder)
 
 **Workout family**:
 The curated workouts that are the same workout at different levels, each its own curated workout with its own reps, rests and rounds. A family has at most one workout per level.
