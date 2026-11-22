@@ -131,7 +131,7 @@ fun HomeScreen(
             Modifier.fillMaxWidth().padding(start = PoulpySpace.lg, end = PoulpySpace.lg, top = PoulpySpace.xs),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(stringResource(R.string.tab_home), style = MaterialTheme.typography.headlineMedium, modifier = Modifier.weight(1f))
+            Text(stringResource(R.string.tab_home), style = tabTitleStyle(), modifier = Modifier.weight(1f))
             PoulpyButton(onClick = { choosingRecord = true }) {
                 Icon(Lucide.CircleDot, contentDescription = null)
                 Text(stringResource(R.string.home_record), modifier = Modifier.padding(start = 6.dp))

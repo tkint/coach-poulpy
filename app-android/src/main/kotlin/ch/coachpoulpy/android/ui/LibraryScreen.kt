@@ -77,7 +77,7 @@ fun LibraryScreen(
             Modifier.padding(start = PoulpySpace.lg, end = PoulpySpace.lg, top = PoulpySpace.xs),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Text(stringResource(R.string.tab_library), style = MaterialTheme.typography.headlineMedium)
+            Text(stringResource(R.string.tab_library), style = tabTitleStyle())
             ViewSwitch(view, onView)
         }
         when (view) {
