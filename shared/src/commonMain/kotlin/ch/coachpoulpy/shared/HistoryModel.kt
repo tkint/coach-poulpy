@@ -81,6 +81,8 @@ data class HistoryState(
     val tentaclesLit: Int = 0,
     /** How far back the calendar goes: 0 for this month, -3 when the oldest session is three months ago. */
     val firstMonthOffset: Int = 0,
+    /** The day of the oldest session at midnight, local time: no earlier day is worth picking. Null without any session. */
+    val firstDayMillis: Long? = null,
 ) {
     /** Whether the distance chart has anything to show. */
     val hasDistance: Boolean get() = weeks.any { it.distanceKm > 0 }
@@ -204,6 +206,7 @@ class HistoryModel internal constructor(
             longestRunMillis = longest?.first?.record?.startedAt?.toEpochMilliseconds(),
             fullOctopuses = poulpy.fullOctopuses,
             tentaclesLit = poulpy.tentaclesLit,
+            firstDayMillis = oldest?.atStartOfDayIn(zone)?.toEpochMilliseconds(),
             firstMonthOffset = oldest?.let { -((today.year - it.year) * 12 + (today.month.number - it.month.number)) }?.coerceAtMost(0) ?: 0,
         )
     }

@@ -188,6 +188,7 @@ class HistoryModelTest {
         val model = history()
         val state = model.awaitSessions(4)
         assertEquals(-2, state.firstMonthOffset)
+        assertEquals(Instant.parse("2023-09-20T00:00:00Z").toEpochMilliseconds(), state.firstDayMillis)
 
         val month = model.month(state, offset = 0, selectedDay = 15)
         assertEquals(2023 to 11, month.year to month.month)
