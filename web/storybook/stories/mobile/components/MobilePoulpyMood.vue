@@ -12,6 +12,7 @@ import { MOOD_MOVES, tucking, type Move } from '../../brand/moodMoves'
 
 const props = defineProps<{ label: string; size?: number }>() // size: his picture's height in px (default 95, as on Home)
 type Mood = 'happy' | 'annoyed' | 'fuming'
+const MOODS: Mood[] = ['happy', 'annoyed', 'fuming']
 const TAPS = { happy: 5, annoyed: 3 } // taps in a row that make him change mood
 const CALM_MILLIS = 5000 // alone this long, he improves his mood by a step
 const PAD_PER_HEIGHT = 110 / 210 // how much room a move has around the picture, in picture heights
@@ -28,6 +29,7 @@ const plans: Record<string, Plan> = {
 
 const mood = ref<Mood>('happy')
 const playing = ref(false)
+const showing = ref(false) // his still picture hides only once the canvas has drawn him, so there is never a gap or another mood between the two
 const canvas = ref<HTMLCanvasElement>()
 let taps = 0
 let calm: ReturnType<typeof setTimeout> | undefined
@@ -37,23 +39,34 @@ let stop = () => {}
 const picture = (m: Mood) => (poulpyDrawings as Record<string, string>)[m === 'fuming' ? 'pose_fuming' : `mood_${m}`]
 const reduced = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
+// Resolves after `count` frames have been painted, drawing him again on each: the still picture and the 3D canvas swap places only once the one
+// taking over is on screen, so there is never a blink between them.
+const frames = (count: number, draw?: () => void) => new Promise<void>((done) => {
+  const next = () => { draw?.(); if (--count > 0) requestAnimationFrame(next); else done() }
+  requestAnimationFrame(next)
+})
+
 // Plays one move from the mood he is in, and lands on the mood the move ends in.
 async function perform(plan: Plan) {
   const from = mood.value
   playing.value = true
   await nextTick()
-  if (!canvas.value) { playing.value = false; return }
+  if (!canvas.value) { showing.value = false; playing.value = false; return }
   try {
     const { createPoulpyScene } = await import('../../brand/poulpy3dScene')
     const scene = createPoulpyScene(canvas.value)
+    let frame = 0
+    stop = () => { cancelAnimationFrame(frame); scene.dispose() }
     const showMood = (m: Mood) => {
       scene.show(m === 'fuming' ? { pose: 'fuming', effects: true } : m, false)
       // The same shot as his still picture, on a canvas that reaches PAD px further each way.
       scene.look({ turn: 0, tilt: 8, distance: 9.4, centre: 1.35, field: (2 * Math.atan((1 + 2 * PAD_PER_HEIGHT) * Math.tan((14 * Math.PI) / 180)) * 180) / Math.PI })
     }
     showMood(from)
+    await frames(2, () => scene.render())
+    showing.value = true
     const move = plan.make()
-    let shown = from, last = performance.now(), elapsed = 0, frame = 0, clock = 0
+    let shown = from, last = performance.now(), elapsed = 0, clock = 0
     const swapAt = (pose: { yaw?: number }) => (plan.swap === 'start' ? elapsed > 0.05 : Math.abs(pose.yaw ?? 0) > Math.PI)
     const tick = (now: number) => {
       const dt = Math.min((now - last) / 1000, 0.05)
@@ -67,15 +80,17 @@ async function perform(plan: Plan) {
       if (elapsed < plan.seconds) { frame = requestAnimationFrame(tick); return }
       finish()
     }
-    const finish = () => {
-      stop(); stop = () => {}
+    const finish = async () => {
       mood.value = plan.to
+      showing.value = false
+      await frames(2) // his picture is back before the canvas, still showing his last frame, goes
+      stop(); stop = () => {}
       playing.value = false
       wait()
     }
-    stop = () => { cancelAnimationFrame(frame); scene.dispose() }
     frame = requestAnimationFrame(tick)
   } catch {
+    showing.value = false
     playing.value = false // no 3D in this browser: he just stands there
   }
 }
@@ -105,7 +120,8 @@ onBeforeUnmount(() => { clearTimeout(calm); stop() })
 
 <template>
   <button type="button" class="poulpy-cheer poulpy-cheer--home" :aria-label="`${label}. Tap and he reacts to his mood`" data-component="poulpy-mood" :style="size ? { width: `${Math.round(size * 104 / 95)}px`, height: `${size}px` } : undefined" @click="tap">
-    <img :src="picture(mood)" alt="" :style="{ visibility: playing ? 'hidden' : 'visible' }" />
+    <!-- All three pictures stay in place, and one shows: swapping a single picture's source would keep the old one on screen until the new one has loaded. -->
+    <img v-for="m in MOODS" :key="m" :src="picture(m)" alt="" :style="{ position: m === MOODS[0] ? 'static' : 'absolute', inset: m === MOODS[0] ? undefined : 0, visibility: !showing && mood === m ? 'visible' : 'hidden' }" />
     <span v-if="playing" class="poulpy-cheer-stage" aria-hidden="true" :style="{ inset: `-${PAD()}px` }"><canvas ref="canvas" /></span>
   </button>
 </template>
