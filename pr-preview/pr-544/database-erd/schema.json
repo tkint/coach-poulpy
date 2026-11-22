@@ -1,0 +1,1600 @@
+{
+  "tables": {
+    "access_token": {
+      "name": "access_token",
+      "columns": {
+        "token_hash": {
+          "name": "token_hash",
+          "type": "bytea",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "sign_in_id": {
+          "name": "sign_in_id",
+          "type": "uuid",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamptz",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        }
+      },
+      "comment": null,
+      "indexes": {
+        "access_token_sign_in": {
+          "name": "access_token_sign_in",
+          "unique": false,
+          "columns": [
+            "sign_in_id"
+          ],
+          "type": "btree"
+        }
+      },
+      "constraints": {
+        "access_token_pkey": {
+          "type": "PRIMARY KEY",
+          "name": "access_token_pkey",
+          "columnNames": [
+            "token_hash"
+          ]
+        },
+        "access_token_sign_in_id_fkey": {
+          "type": "FOREIGN KEY",
+          "name": "access_token_sign_in_id_fkey",
+          "columnNames": [
+            "sign_in_id"
+          ],
+          "targetTableName": "sign_in",
+          "targetColumnNames": [
+            "id"
+          ],
+          "updateConstraint": "NO_ACTION",
+          "deleteConstraint": "CASCADE"
+        }
+      }
+    },
+    "account": {
+      "name": "account",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "password_hash": {
+          "name": "password_hash",
+          "type": "text",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "language": {
+          "name": "language",
+          "type": "text",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "role": {
+          "name": "role",
+          "type": "text",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "health_consent_at": {
+          "name": "health_consent_at",
+          "type": "timestamptz",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "confirmed_at": {
+          "name": "confirmed_at",
+          "type": "timestamptz",
+          "default": null,
+          "check": null,
+          "notNull": false,
+          "comment": null
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "change_count": {
+          "name": "change_count",
+          "type": "int8",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "disabled_at": {
+          "name": "disabled_at",
+          "type": "timestamptz",
+          "default": null,
+          "check": null,
+          "notNull": false,
+          "comment": null
+        }
+      },
+      "comment": null,
+      "indexes": {
+        "account_email": {
+          "name": "account_email",
+          "unique": true,
+          "columns": [],
+          "type": "btree"
+        }
+      },
+      "constraints": {
+        "account_role_check": {
+          "type": "CHECK",
+          "name": "account_role_check",
+          "detail": "(role = ANY (ARRAY['member'::text, 'admin'::text]))"
+        },
+        "account_pkey": {
+          "type": "PRIMARY KEY",
+          "name": "account_pkey",
+          "columnNames": [
+            "id"
+          ]
+        }
+      }
+    },
+    "admin_audit": {
+      "name": "admin_audit",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "actor_id": {
+          "name": "actor_id",
+          "type": "uuid",
+          "default": null,
+          "check": null,
+          "notNull": false,
+          "comment": null
+        },
+        "action": {
+          "name": "action",
+          "type": "text",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "target": {
+          "name": "target",
+          "type": "text",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "at": {
+          "name": "at",
+          "type": "timestamptz",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        }
+      },
+      "comment": null,
+      "indexes": {
+        "admin_audit_at": {
+          "name": "admin_audit_at",
+          "unique": false,
+          "columns": [
+            "at"
+          ],
+          "type": "btree"
+        }
+      },
+      "constraints": {
+        "admin_audit_pkey": {
+          "type": "PRIMARY KEY",
+          "name": "admin_audit_pkey",
+          "columnNames": [
+            "id"
+          ]
+        },
+        "admin_audit_actor_id_fkey": {
+          "type": "FOREIGN KEY",
+          "name": "admin_audit_actor_id_fkey",
+          "columnNames": [
+            "actor_id"
+          ],
+          "targetTableName": "account",
+          "targetColumnNames": [
+            "id"
+          ],
+          "updateConstraint": "NO_ACTION",
+          "deleteConstraint": "SET_NULL"
+        }
+      }
+    },
+    "body_measurement": {
+      "name": "body_measurement",
+      "columns": {
+        "account_id": {
+          "name": "account_id",
+          "type": "uuid",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "metric": {
+          "name": "metric",
+          "type": "text",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "day": {
+          "name": "day",
+          "type": "date",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "value": {
+          "name": "value",
+          "type": "float8",
+          "default": null,
+          "check": null,
+          "notNull": false,
+          "comment": null
+        },
+        "changed_at": {
+          "name": "changed_at",
+          "type": "timestamptz",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "change_number": {
+          "name": "change_number",
+          "type": "int8",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        }
+      },
+      "comment": null,
+      "indexes": {
+        "body_measurement_changes": {
+          "name": "body_measurement_changes",
+          "unique": false,
+          "columns": [
+            "account_id",
+            "change_number"
+          ],
+          "type": "btree"
+        }
+      },
+      "constraints": {
+        "body_measurement_pkey": {
+          "type": "PRIMARY KEY",
+          "name": "body_measurement_pkey",
+          "columnNames": [
+            "account_id",
+            "metric",
+            "day"
+          ]
+        },
+        "body_measurement_account_id_fkey": {
+          "type": "FOREIGN KEY",
+          "name": "body_measurement_account_id_fkey",
+          "columnNames": [
+            "account_id"
+          ],
+          "targetTableName": "account",
+          "targetColumnNames": [
+            "id"
+          ],
+          "updateConstraint": "NO_ACTION",
+          "deleteConstraint": "CASCADE"
+        }
+      }
+    },
+    "catalog_exercise_revision": {
+      "name": "catalog_exercise_revision",
+      "columns": {
+        "slug": {
+          "name": "slug",
+          "type": "text",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "revision": {
+          "name": "revision",
+          "type": "int4",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "position": {
+          "name": "position",
+          "type": "int4",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "content": {
+          "name": "content",
+          "type": "jsonb",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "variation_group": {
+          "name": "variation_group",
+          "type": "int4",
+          "default": null,
+          "check": null,
+          "notNull": false,
+          "comment": null
+        },
+        "variation_rank": {
+          "name": "variation_rank",
+          "type": "int4",
+          "default": null,
+          "check": null,
+          "notNull": false,
+          "comment": null
+        },
+        "published_in": {
+          "name": "published_in",
+          "type": "int4",
+          "default": null,
+          "check": null,
+          "notNull": false,
+          "comment": null
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "seq": {
+          "name": "seq",
+          "type": "int8",
+          "default": null,
+          "check": null,
+          "notNull": false,
+          "comment": null
+        }
+      },
+      "comment": null,
+      "indexes": {
+        "catalog_exercise_revision_draft": {
+          "name": "catalog_exercise_revision_draft",
+          "unique": true,
+          "columns": [
+            "slug"
+          ],
+          "type": "btree"
+        },
+        "catalog_exercise_revision_published": {
+          "name": "catalog_exercise_revision_published",
+          "unique": false,
+          "columns": [
+            "published_in"
+          ],
+          "type": "btree"
+        },
+        "catalog_exercise_revision_seq": {
+          "name": "catalog_exercise_revision_seq",
+          "unique": true,
+          "columns": [
+            "seq"
+          ],
+          "type": "btree"
+        }
+      },
+      "constraints": {
+        "catalog_exercise_revision_pkey": {
+          "type": "PRIMARY KEY",
+          "name": "catalog_exercise_revision_pkey",
+          "columnNames": [
+            "slug",
+            "revision"
+          ]
+        },
+        "catalog_exercise_revision_published_in_fkey": {
+          "type": "FOREIGN KEY",
+          "name": "catalog_exercise_revision_published_in_fkey",
+          "columnNames": [
+            "published_in"
+          ],
+          "targetTableName": "catalog_version",
+          "targetColumnNames": [
+            "version"
+          ],
+          "updateConstraint": "NO_ACTION",
+          "deleteConstraint": "NO_ACTION"
+        }
+      }
+    },
+    "catalog_publication": {
+      "name": "catalog_publication",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int4",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "last_seq": {
+          "name": "last_seq",
+          "type": "int8",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        }
+      },
+      "comment": null,
+      "indexes": {},
+      "constraints": {
+        "catalog_publication_id_check": {
+          "type": "CHECK",
+          "name": "catalog_publication_id_check",
+          "detail": "(id = 1)"
+        },
+        "catalog_publication_pkey": {
+          "type": "PRIMARY KEY",
+          "name": "catalog_publication_pkey",
+          "columnNames": [
+            "id"
+          ]
+        }
+      }
+    },
+    "catalog_version": {
+      "name": "catalog_version",
+      "columns": {
+        "version": {
+          "name": "version",
+          "type": "int4",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "published_at": {
+          "name": "published_at",
+          "type": "timestamptz",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        }
+      },
+      "comment": null,
+      "indexes": {},
+      "constraints": {
+        "catalog_version_pkey": {
+          "type": "PRIMARY KEY",
+          "name": "catalog_version_pkey",
+          "columnNames": [
+            "version"
+          ]
+        }
+      }
+    },
+    "confirmation_token": {
+      "name": "confirmation_token",
+      "columns": {
+        "token_hash": {
+          "name": "token_hash",
+          "type": "bytea",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "account_id": {
+          "name": "account_id",
+          "type": "uuid",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamptz",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        }
+      },
+      "comment": null,
+      "indexes": {
+        "confirmation_token_account": {
+          "name": "confirmation_token_account",
+          "unique": false,
+          "columns": [
+            "account_id"
+          ],
+          "type": "btree"
+        }
+      },
+      "constraints": {
+        "confirmation_token_pkey": {
+          "type": "PRIMARY KEY",
+          "name": "confirmation_token_pkey",
+          "columnNames": [
+            "token_hash"
+          ]
+        },
+        "confirmation_token_account_id_fkey": {
+          "type": "FOREIGN KEY",
+          "name": "confirmation_token_account_id_fkey",
+          "columnNames": [
+            "account_id"
+          ],
+          "targetTableName": "account",
+          "targetColumnNames": [
+            "id"
+          ],
+          "updateConstraint": "NO_ACTION",
+          "deleteConstraint": "CASCADE"
+        }
+      }
+    },
+    "confirmation_watch": {
+      "name": "confirmation_watch",
+      "columns": {
+        "token_hash": {
+          "name": "token_hash",
+          "type": "bytea",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "key_hash": {
+          "name": "key_hash",
+          "type": "bytea",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "account_id": {
+          "name": "account_id",
+          "type": "uuid",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "confirmed": {
+          "name": "confirmed",
+          "type": "bool",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamptz",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        }
+      },
+      "comment": null,
+      "indexes": {
+        "confirmation_watch_key": {
+          "name": "confirmation_watch_key",
+          "unique": false,
+          "columns": [
+            "key_hash"
+          ],
+          "type": "btree"
+        }
+      },
+      "constraints": {
+        "confirmation_watch_pkey": {
+          "type": "PRIMARY KEY",
+          "name": "confirmation_watch_pkey",
+          "columnNames": [
+            "token_hash"
+          ]
+        },
+        "confirmation_watch_account_id_fkey": {
+          "type": "FOREIGN KEY",
+          "name": "confirmation_watch_account_id_fkey",
+          "columnNames": [
+            "account_id"
+          ],
+          "targetTableName": "account",
+          "targetColumnNames": [
+            "id"
+          ],
+          "updateConstraint": "NO_ACTION",
+          "deleteConstraint": "CASCADE"
+        }
+      }
+    },
+    "password_reset_token": {
+      "name": "password_reset_token",
+      "columns": {
+        "token_hash": {
+          "name": "token_hash",
+          "type": "bytea",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "account_id": {
+          "name": "account_id",
+          "type": "uuid",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamptz",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        }
+      },
+      "comment": null,
+      "indexes": {
+        "password_reset_token_account": {
+          "name": "password_reset_token_account",
+          "unique": false,
+          "columns": [
+            "account_id",
+            "created_at"
+          ],
+          "type": "btree"
+        }
+      },
+      "constraints": {
+        "password_reset_token_pkey": {
+          "type": "PRIMARY KEY",
+          "name": "password_reset_token_pkey",
+          "columnNames": [
+            "token_hash"
+          ]
+        },
+        "password_reset_token_account_id_fkey": {
+          "type": "FOREIGN KEY",
+          "name": "password_reset_token_account_id_fkey",
+          "columnNames": [
+            "account_id"
+          ],
+          "targetTableName": "account",
+          "targetColumnNames": [
+            "id"
+          ],
+          "updateConstraint": "NO_ACTION",
+          "deleteConstraint": "CASCADE"
+        }
+      }
+    },
+    "planned_workout": {
+      "name": "planned_workout",
+      "columns": {
+        "account_id": {
+          "name": "account_id",
+          "type": "uuid",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "workout_id": {
+          "name": "workout_id",
+          "type": "uuid",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "day": {
+          "name": "day",
+          "type": "date",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "changed_at": {
+          "name": "changed_at",
+          "type": "timestamptz",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "deleted": {
+          "name": "deleted",
+          "type": "bool",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "change_number": {
+          "name": "change_number",
+          "type": "int8",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        }
+      },
+      "comment": null,
+      "indexes": {
+        "planned_workout_changes": {
+          "name": "planned_workout_changes",
+          "unique": false,
+          "columns": [
+            "account_id",
+            "change_number"
+          ],
+          "type": "btree"
+        }
+      },
+      "constraints": {
+        "planned_workout_pkey": {
+          "type": "PRIMARY KEY",
+          "name": "planned_workout_pkey",
+          "columnNames": [
+            "account_id",
+            "id"
+          ]
+        },
+        "planned_workout_account_id_fkey": {
+          "type": "FOREIGN KEY",
+          "name": "planned_workout_account_id_fkey",
+          "columnNames": [
+            "account_id"
+          ],
+          "targetTableName": "account",
+          "targetColumnNames": [
+            "id"
+          ],
+          "updateConstraint": "NO_ACTION",
+          "deleteConstraint": "CASCADE"
+        }
+      }
+    },
+    "refresh_token": {
+      "name": "refresh_token",
+      "columns": {
+        "token_hash": {
+          "name": "token_hash",
+          "type": "bytea",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "sign_in_id": {
+          "name": "sign_in_id",
+          "type": "uuid",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamptz",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "used_at": {
+          "name": "used_at",
+          "type": "timestamptz",
+          "default": null,
+          "check": null,
+          "notNull": false,
+          "comment": null
+        }
+      },
+      "comment": null,
+      "indexes": {
+        "refresh_token_sign_in": {
+          "name": "refresh_token_sign_in",
+          "unique": false,
+          "columns": [
+            "sign_in_id"
+          ],
+          "type": "btree"
+        }
+      },
+      "constraints": {
+        "refresh_token_pkey": {
+          "type": "PRIMARY KEY",
+          "name": "refresh_token_pkey",
+          "columnNames": [
+            "token_hash"
+          ]
+        },
+        "refresh_token_sign_in_id_fkey": {
+          "type": "FOREIGN KEY",
+          "name": "refresh_token_sign_in_id_fkey",
+          "columnNames": [
+            "sign_in_id"
+          ],
+          "targetTableName": "sign_in",
+          "targetColumnNames": [
+            "id"
+          ],
+          "updateConstraint": "NO_ACTION",
+          "deleteConstraint": "CASCADE"
+        }
+      }
+    },
+    "schema_version": {
+      "name": "schema_version",
+      "columns": {
+        "version": {
+          "name": "version",
+          "type": "int8",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        }
+      },
+      "comment": null,
+      "indexes": {},
+      "constraints": {}
+    },
+    "session": {
+      "name": "session",
+      "columns": {
+        "account_id": {
+          "name": "account_id",
+          "type": "uuid",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "source": {
+          "name": "source",
+          "type": "text",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "started_at": {
+          "name": "started_at",
+          "type": "timestamptz",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "ended_at": {
+          "name": "ended_at",
+          "type": "timestamptz",
+          "default": null,
+          "check": null,
+          "notNull": false,
+          "comment": null
+        },
+        "workout_id": {
+          "name": "workout_id",
+          "type": "uuid",
+          "default": null,
+          "check": null,
+          "notNull": false,
+          "comment": null
+        },
+        "workout_version": {
+          "name": "workout_version",
+          "type": "int4",
+          "default": null,
+          "check": null,
+          "notNull": false,
+          "comment": null
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "default": null,
+          "check": null,
+          "notNull": false,
+          "comment": null
+        },
+        "format": {
+          "name": "format",
+          "type": "text",
+          "default": null,
+          "check": null,
+          "notNull": false,
+          "comment": null
+        },
+        "totals": {
+          "name": "totals",
+          "type": "jsonb",
+          "default": null,
+          "check": null,
+          "notNull": false,
+          "comment": null
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamptz",
+          "default": null,
+          "check": null,
+          "notNull": false,
+          "comment": null
+        },
+        "change_number": {
+          "name": "change_number",
+          "type": "int8",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        }
+      },
+      "comment": null,
+      "indexes": {
+        "session_changes": {
+          "name": "session_changes",
+          "unique": false,
+          "columns": [
+            "account_id",
+            "change_number"
+          ],
+          "type": "btree"
+        }
+      },
+      "constraints": {
+        "session_pkey": {
+          "type": "PRIMARY KEY",
+          "name": "session_pkey",
+          "columnNames": [
+            "account_id",
+            "id"
+          ]
+        },
+        "session_account_id_fkey": {
+          "type": "FOREIGN KEY",
+          "name": "session_account_id_fkey",
+          "columnNames": [
+            "account_id"
+          ],
+          "targetTableName": "account",
+          "targetColumnNames": [
+            "id"
+          ],
+          "updateConstraint": "NO_ACTION",
+          "deleteConstraint": "CASCADE"
+        }
+      }
+    },
+    "session_event": {
+      "name": "session_event",
+      "columns": {
+        "account_id": {
+          "name": "account_id",
+          "type": "uuid",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "session_id": {
+          "name": "session_id",
+          "type": "uuid",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "seq": {
+          "name": "seq",
+          "type": "int8",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "at": {
+          "name": "at",
+          "type": "timestamptz",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "payload": {
+          "name": "payload",
+          "type": "jsonb",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "change_number": {
+          "name": "change_number",
+          "type": "int8",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        }
+      },
+      "comment": null,
+      "indexes": {
+        "session_event_changes": {
+          "name": "session_event_changes",
+          "unique": false,
+          "columns": [
+            "account_id",
+            "change_number"
+          ],
+          "type": "btree"
+        }
+      },
+      "constraints": {
+        "session_event_pkey": {
+          "type": "PRIMARY KEY",
+          "name": "session_event_pkey",
+          "columnNames": [
+            "account_id",
+            "session_id",
+            "seq"
+          ]
+        },
+        "session_event_account_id_session_id_fkey": {
+          "type": "FOREIGN KEY",
+          "name": "session_event_account_id_session_id_fkey",
+          "columnNames": [
+            "account_id",
+            "session_id"
+          ],
+          "targetTableName": "session",
+          "targetColumnNames": [
+            "account_id",
+            "id"
+          ],
+          "updateConstraint": "NO_ACTION",
+          "deleteConstraint": "CASCADE"
+        }
+      }
+    },
+    "setting": {
+      "name": "setting",
+      "columns": {
+        "account_id": {
+          "name": "account_id",
+          "type": "uuid",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "key": {
+          "name": "key",
+          "type": "text",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "value": {
+          "name": "value",
+          "type": "text",
+          "default": null,
+          "check": null,
+          "notNull": false,
+          "comment": null
+        },
+        "changed_at": {
+          "name": "changed_at",
+          "type": "timestamptz",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "change_number": {
+          "name": "change_number",
+          "type": "int8",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        }
+      },
+      "comment": null,
+      "indexes": {
+        "setting_changes": {
+          "name": "setting_changes",
+          "unique": false,
+          "columns": [
+            "account_id",
+            "change_number"
+          ],
+          "type": "btree"
+        }
+      },
+      "constraints": {
+        "setting_pkey": {
+          "type": "PRIMARY KEY",
+          "name": "setting_pkey",
+          "columnNames": [
+            "account_id",
+            "key"
+          ]
+        },
+        "setting_account_id_fkey": {
+          "type": "FOREIGN KEY",
+          "name": "setting_account_id_fkey",
+          "columnNames": [
+            "account_id"
+          ],
+          "targetTableName": "account",
+          "targetColumnNames": [
+            "id"
+          ],
+          "updateConstraint": "NO_ACTION",
+          "deleteConstraint": "CASCADE"
+        }
+      }
+    },
+    "settings": {
+      "name": "settings",
+      "columns": {
+        "name": {
+          "name": "name",
+          "type": "text",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "value": {
+          "name": "value",
+          "type": "text",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        }
+      },
+      "comment": null,
+      "indexes": {},
+      "constraints": {
+        "settings_pkey": {
+          "type": "PRIMARY KEY",
+          "name": "settings_pkey",
+          "columnNames": [
+            "name"
+          ]
+        }
+      }
+    },
+    "sign_in": {
+      "name": "sign_in",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "account_id": {
+          "name": "account_id",
+          "type": "uuid",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "device_name": {
+          "name": "device_name",
+          "type": "text",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "client": {
+          "name": "client",
+          "type": "text",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "last_refreshed_at": {
+          "name": "last_refreshed_at",
+          "type": "timestamptz",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "revoked_at": {
+          "name": "revoked_at",
+          "type": "timestamptz",
+          "default": null,
+          "check": null,
+          "notNull": false,
+          "comment": null
+        }
+      },
+      "comment": null,
+      "indexes": {
+        "sign_in_account": {
+          "name": "sign_in_account",
+          "unique": false,
+          "columns": [
+            "account_id"
+          ],
+          "type": "btree"
+        }
+      },
+      "constraints": {
+        "sign_in_pkey": {
+          "type": "PRIMARY KEY",
+          "name": "sign_in_pkey",
+          "columnNames": [
+            "id"
+          ]
+        },
+        "sign_in_account_id_fkey": {
+          "type": "FOREIGN KEY",
+          "name": "sign_in_account_id_fkey",
+          "columnNames": [
+            "account_id"
+          ],
+          "targetTableName": "account",
+          "targetColumnNames": [
+            "id"
+          ],
+          "updateConstraint": "NO_ACTION",
+          "deleteConstraint": "CASCADE"
+        }
+      }
+    },
+    "sign_in_failure": {
+      "name": "sign_in_failure",
+      "columns": {
+        "email": {
+          "name": "email",
+          "type": "text",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "failed_at": {
+          "name": "failed_at",
+          "type": "timestamptz",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        }
+      },
+      "comment": null,
+      "indexes": {
+        "sign_in_failure_email": {
+          "name": "sign_in_failure_email",
+          "unique": false,
+          "columns": [
+            "email",
+            "failed_at"
+          ],
+          "type": "btree"
+        }
+      },
+      "constraints": {}
+    },
+    "workout_deletion": {
+      "name": "workout_deletion",
+      "columns": {
+        "account_id": {
+          "name": "account_id",
+          "type": "uuid",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "workout_id": {
+          "name": "workout_id",
+          "type": "uuid",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "version": {
+          "name": "version",
+          "type": "int4",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamptz",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "change_number": {
+          "name": "change_number",
+          "type": "int8",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        }
+      },
+      "comment": null,
+      "indexes": {
+        "workout_deletion_changes": {
+          "name": "workout_deletion_changes",
+          "unique": false,
+          "columns": [
+            "account_id",
+            "change_number"
+          ],
+          "type": "btree"
+        }
+      },
+      "constraints": {
+        "workout_deletion_pkey": {
+          "type": "PRIMARY KEY",
+          "name": "workout_deletion_pkey",
+          "columnNames": [
+            "account_id",
+            "workout_id"
+          ]
+        },
+        "workout_deletion_account_id_fkey": {
+          "type": "FOREIGN KEY",
+          "name": "workout_deletion_account_id_fkey",
+          "columnNames": [
+            "account_id"
+          ],
+          "targetTableName": "account",
+          "targetColumnNames": [
+            "id"
+          ],
+          "updateConstraint": "NO_ACTION",
+          "deleteConstraint": "CASCADE"
+        }
+      }
+    },
+    "workout_version": {
+      "name": "workout_version",
+      "columns": {
+        "account_id": {
+          "name": "account_id",
+          "type": "uuid",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "workout_id": {
+          "name": "workout_id",
+          "type": "uuid",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "version": {
+          "name": "version",
+          "type": "int4",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "format": {
+          "name": "format",
+          "type": "text",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "content": {
+          "name": "content",
+          "type": "jsonb",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        },
+        "change_number": {
+          "name": "change_number",
+          "type": "int8",
+          "default": null,
+          "check": null,
+          "notNull": true,
+          "comment": null
+        }
+      },
+      "comment": null,
+      "indexes": {
+        "workout_version_changes": {
+          "name": "workout_version_changes",
+          "unique": false,
+          "columns": [
+            "account_id",
+            "change_number"
+          ],
+          "type": "btree"
+        }
+      },
+      "constraints": {
+        "workout_version_pkey": {
+          "type": "PRIMARY KEY",
+          "name": "workout_version_pkey",
+          "columnNames": [
+            "account_id",
+            "workout_id",
+            "version"
+          ]
+        },
+        "workout_version_account_id_fkey": {
+          "type": "FOREIGN KEY",
+          "name": "workout_version_account_id_fkey",
+          "columnNames": [
+            "account_id"
+          ],
+          "targetTableName": "account",
+          "targetColumnNames": [
+            "id"
+          ],
+          "updateConstraint": "NO_ACTION",
+          "deleteConstraint": "CASCADE"
+        }
+      }
+    }
+  },
+  "enums": {},
+  "extensions": {}
+}
