@@ -41,7 +41,12 @@ struct HomeView: View {
             // The top stays put and only the past scrolls, as drawn.
             VStack(alignment: .leading, spacing: PoulpySpace.sm) {
                 if let poulpy = state.poulpy {
-                    MotivationRow(status: poulpy)
+                    NavigationLink {
+                        AchievementsView(graph: graph)
+                    } label: {
+                        MotivationRow(status: poulpy, achievements: state.achievements)
+                    }
+                    .buttonStyle(.plain)
                 }
                 if state.loaded {
                     let upNext = state.today.filter { $0.status != .done }
@@ -515,10 +520,11 @@ private struct TimelineRow<Content: View>: View {
     }
 }
 
-/// Home's motivation row (`home-diary` mockup): a small Poulpy and his eight tentacles as segments, never a streak.
-/// The latest achievements and the way to Achievements join it with #523.
+/// Home's motivation row (`home-diary` mockup): a small Poulpy, his eight tentacles as segments (never a streak) and the
+/// latest badges. It opens Achievements.
 private struct MotivationRow: View {
     let status: PoulpyStatus
+    let achievements: AchievementsUi
 
     var body: some View {
         HStack(spacing: PoulpySpace.sm) {
@@ -534,13 +540,28 @@ private struct MotivationRow: View {
                         .frame(height: 8)
                 }
             }
+            // The latest badges, then a locked "?" while some are still hidden.
+            ForEach(Array(achievements.latest(count: 2).enumerated()), id: \.offset) { _, badge in
+                chip(badge)
+            }
+            if !achievements.locked.isEmpty { chip(nil) }
         }
         .padding(.leading, PoulpySpace.xs)
-        .padding(.trailing, PoulpySpace.lg)
+        .padding(.trailing, PoulpySpace.sm)
         .frame(maxWidth: .infinity, minHeight: 48)
         .background(PoulpyColor.surface, in: Capsule())
         .overlay(Capsule().stroke(PoulpyColor.outline))
+        .contentShape(Capsule())
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(Text(verbatim: status.tentaclesCaption))
+        .accessibilityLabel(Text(verbatim: String(format: NSLocalizedString("achievements.open %@", comment: ""), locale: Locale.current, status.litCaption)))
+        .accessibilityAddTraits(.isButton)
+    }
+
+    private func chip(_ badge: Badge?) -> some View {
+        LucideIcon(badge?.lucide ?? .circleQuestionMark, size: 16)
+            .foregroundStyle(badge == nil ? PoulpyColor.onSurfaceVariant : PoulpyColor.onPrimaryContainer)
+            .frame(width: 32, height: 32)
+            .background(badge == nil ? PoulpyColor.surface : PoulpyColor.primaryContainer, in: Circle())
+            .overlay(Circle().stroke(badge == nil ? PoulpyColor.outline : PoulpyColor.primary))
     }
 }

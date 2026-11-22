@@ -65,6 +65,8 @@ data class HomeState(
     val hasWorkouts: Boolean = false,
     /** The past under Up next: every finished session by week and day, newest first (see [diaryTimeline]). */
     val past: List<DiaryEntry> = emptyList(),
+    /** The badges earned, for the motivation row. */
+    val achievements: AchievementsUi = AchievementsUi(),
 )
 
 /**
@@ -74,7 +76,7 @@ data class HomeState(
 class HomeModel internal constructor(
     private val store: LocalStore,
     compiler: TimelineCompiler,
-    catalog: Catalog,
+    private val catalog: Catalog,
     languageCode: String,
     private val clock: Clock = Clock.System,
     private val zone: TimeZone = TimeZone.currentSystemDefault(),
@@ -83,6 +85,7 @@ class HomeModel internal constructor(
     private val discardOpen: (String) -> Unit = store::deleteSession,
     /** Pain or rehab is set and its time is not up: Poulpy stays on the blue side. */
     private val painActive: () -> Boolean = { false },
+    private val ledger: AchievementLedger? = null,
 ) {
     private val labels = Labels(languageCode)
     private val coach = PoulpyCoach(languageCode, zone)
@@ -180,13 +183,15 @@ class HomeModel internal constructor(
             NextSession(plan.id, workout.id.value, workout.name, facts.details(workout), plan.day.startMillis(zone), today.daysUntil(plan.day))
         }
 
+        val rows = sessions.mapNotNull { session -> session.realTotals?.let { sessionRow(session, it, labels) } }
         return HomeState(
             loaded = true,
             poulpy = coach.status(ends, now, painActive()),
             today = items,
             next = next,
             hasWorkouts = workouts.isNotEmpty(),
-            past = diaryTimeline(sessions.mapNotNull { session -> session.realTotals?.let { sessionRow(session, it, labels) } }, now, zone),
+            past = diaryTimeline(rows, now, zone),
+            achievements = ledger?.let { AchievementsUi(it.earned(Badges.earnedFrom(rows, walkPlansOf(sessions, store, catalog)))) } ?: AchievementsUi(),
         )
     }
 

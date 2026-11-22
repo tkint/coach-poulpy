@@ -49,6 +49,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.Image
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.geometry.Offset
@@ -65,7 +66,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ch.coachpoulpy.android.R
+import ch.coachpoulpy.shared.AchievementsUi
 import ch.coachpoulpy.shared.AppGraph
+import ch.coachpoulpy.shared.Badge
 import ch.coachpoulpy.shared.DiaryEntry
 import ch.coachpoulpy.shared.indexOfDay
 import ch.coachpoulpy.shared.HomeState
@@ -105,6 +108,7 @@ fun HomeScreen(
     onResume: () -> Unit,
     onOpenLive: () -> Unit,
     onOpenSession: (String) -> Unit,
+    onOpenAchievements: () -> Unit,
     onOpenLibrary: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -137,7 +141,7 @@ fun HomeScreen(
             Modifier.padding(horizontal = PoulpySpace.lg).padding(top = PoulpySpace.sm),
             verticalArrangement = Arrangement.spacedBy(PoulpySpace.sm),
         ) {
-            state.poulpy?.let { poulpy -> MotivationRow(poulpy) }
+            state.poulpy?.let { poulpy -> MotivationRow(poulpy, state.achievements, onOpenAchievements) }
             if (state.loaded) {
                 val upNext = state.today.filter { it.status != TodayStatus.DONE }
                 if (!state.hasWorkouts) {
@@ -548,21 +552,23 @@ private fun RestRow(onOpenLibrary: () -> Unit) {
 }
 
 /**
- * Home's motivation row (`home-diary` mockup): a small Poulpy and his eight tentacles as segments, never a streak.
- * The latest achievements and the way to Achievements join it with #523.
+ * Home's motivation row (`home-diary` mockup): a small Poulpy, his eight tentacles as segments (never a streak) and the latest badges. It opens Achievements.
  */
 @Composable
-private fun MotivationRow(poulpy: PoulpyStatus) {
+private fun MotivationRow(poulpy: PoulpyStatus, achievements: AchievementsUi, onClick: () -> Unit) {
     val colors = MaterialTheme.colorScheme
+    val shape = RoundedCornerShape(percent = 50)
+    val caption = stringResource(R.string.achievements_open, poulpy.litCaption)
     Row(
         Modifier
             .fillMaxWidth()
             .heightIn(min = 48.dp)
-            .clip(RoundedCornerShape(percent = 50))
+            .clip(shape)
             .background(colors.surface)
-            .border(1.dp, colors.outline, RoundedCornerShape(percent = 50))
-            .padding(start = PoulpySpace.xs, end = PoulpySpace.lg)
-            .semantics(mergeDescendants = true) { contentDescription = poulpy.tentaclesCaption },
+            .border(1.dp, colors.outline, shape)
+            .clickable(onClick = onClick)
+            .padding(start = PoulpySpace.xs, end = PoulpySpace.sm)
+            .semantics(mergeDescendants = true) { contentDescription = caption },
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(PoulpySpace.sm),
     ) {
@@ -578,6 +584,30 @@ private fun MotivationRow(poulpy: PoulpyStatus) {
                 )
             }
         }
+        // The latest badges, then a locked "?" while some are still hidden.
+        achievements.latest(2).forEach { badge -> BadgeChip(badge) }
+        if (achievements.locked.isNotEmpty()) BadgeChip(null)
+    }
+}
+
+/** A small round badge for the motivation row. */
+@Composable
+private fun BadgeChip(badge: Badge?) {
+    val colors = MaterialTheme.colorScheme
+    Box(
+        Modifier
+            .size(32.dp)
+            .clip(CircleShape)
+            .background(if (badge != null) colors.primaryContainer else colors.surface)
+            .border(1.dp, if (badge != null) colors.primary else colors.outline, CircleShape),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            badge?.icon ?: Lucide.CircleQuestionMark,
+            contentDescription = null,
+            tint = if (badge != null) colors.onPrimaryContainer else colors.onSurfaceVariant,
+            modifier = Modifier.size(16.dp),
+        )
     }
 }
 

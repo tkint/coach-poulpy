@@ -154,6 +154,7 @@ fun CoachPoulpyRoot(
                     onResume = { route = "resume" },
                     onOpenLive = { route = "live" },
                     onOpenSession = { route = "session:$it" },
+                    onOpenAchievements = { route = "achievements" },
                     onOpenLibrary = {
                         libraryView = LibraryView.WORKOUTS
                         tab = Tab.LIBRARY
@@ -228,6 +229,7 @@ fun CoachPoulpyRoot(
                 onFullScreen = { liveFullScreen = it },
             )
         }
+        "achievements" -> Scaffold { padding -> AchievementsScreen(graph, language, onBack = close, modifier = Modifier.padding(padding)) }
         "device-add" -> DeviceAddScreen(graph, onBack = close)
         "device-sources" -> DataSourcesScreen(graph, onBack = close)
         else -> {

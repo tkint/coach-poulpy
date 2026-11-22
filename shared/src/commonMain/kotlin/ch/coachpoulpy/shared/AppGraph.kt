@@ -47,7 +47,12 @@ class AppGraph(driverFactory: DriverFactory) {
     /** [memory] is the one the profile uses, so Poulpy knows about pain or rehab. */
     fun home(languageCode: String, memory: KeyValueStore): HomeModel {
         val profile = profile(memory)
-        return HomeModel(store, compiler, catalog, languageCode, discardOpen = ::discardOpen, painActive = profile::painActive)
+        return HomeModel(store, compiler, catalog, languageCode, discardOpen = ::discardOpen, painActive = profile::painActive, ledger = AchievementLedger(memory))
+    }
+    /** Achievements: Poulpy's tentacles and the badges. [memory] is the one the profile uses, so pain or rehab shows. */
+    fun achievements(languageCode: String, memory: KeyValueStore): AchievementsModel {
+        val profile = profile(memory)
+        return AchievementsModel(store, compiler, catalog, languageCode, AchievementLedger(memory), profile::painActive)
     }
     fun library(languageCode: String) = LibraryModel(store, compiler, catalog, languageCode)
     /** [memory] is the one the profile uses, so the page can show the worked muscles that hurt. */

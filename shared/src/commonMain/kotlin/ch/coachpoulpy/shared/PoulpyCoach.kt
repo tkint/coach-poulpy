@@ -40,6 +40,8 @@ data class PoulpyStatus(
     val tentaclesLit: Int,
     val fullOctopuses: Int,
     val tentaclesCaption: String,
+    /** Only "N of 8 tentacles lit", without the full octopuses: what Achievements and its row's label say, as drawn. */
+    val litCaption: String = tentaclesCaption,
 ) {
     /** True on the blue side; false once a session slipped (ember side). */
     val blueSide: Boolean get() = mood in BLUE_SIDE
@@ -73,7 +75,7 @@ class PoulpyCoach(private val languageCode: String, private val timeZone: TimeZo
         val lit = if (total > 0 && total % PoulpyStatus.TENTACLES == 0) PoulpyStatus.TENTACLES else total % PoulpyStatus.TENTACLES
         val caption = if (full == 0) DomainText.poulpyCaption(languageCode, lit) else DomainText.poulpyCaptionFull(languageCode, caption = DomainText.poulpyCaption(languageCode, lit), full = full)
         val status = { mood: PoulpyStatus.Mood, drawing: PoulpyDrawing, title: String, line: String ->
-            PoulpyStatus(mood, drawing, title, line, lit, full, caption)
+            PoulpyStatus(mood, drawing, title, line, lit, full, caption, DomainText.poulpyCaption(languageCode, lit))
         }
 
         if (painActive) {

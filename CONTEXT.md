@@ -163,6 +163,10 @@ _Avoid_: Stats page, dashboard, progress
 The span the statistics add up: the last 7 days, 30 days or year counting today, or everything. A session counts on the day it started.
 _Avoid_: Range (the weight and height charts have a range), timeframe
 
+**Badge**:
+A mark of something done, shown on Achievements (opened from the motivation row on Home). A locked badge is only a "?" and is never named. Once earned a badge is never taken back, even if the session that earned it is deleted. First walk is a treadmill session with some distance at an average speed of 6.5 km/h or less, or, when no machine sent readings, a free walk or run recorded in Live or a session of a workout made only of walks and runs (Record and the catalog treat a walk and a run as one thing, so nothing tells them apart without readings); First record and Goal met stay locked until records and a weekly goal exist.
+_Avoid_: Trophy, medal, streak reward
+
 **Unit system**:
 Metric or imperial, chosen once in Settings. Everything is stored metric (kg, cm, km) and converted only for display and input, so switching never changes a stored value.
 _Avoid_: Locale, measurement preference

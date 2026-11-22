@@ -313,6 +313,17 @@
     "fullOctopus": "Poulpe complet",
     "tentaclesLit": "Allumés : {lit, number} sur 8"
   },
+  "achievements": {
+    "title": "Succès",
+    "badges": "Badges",
+    "toGo": "{left, plural, one {Encore une séance et je deviens champion.} other {Encore # séances et je deviens champion.}}",
+    "champion": "Les huit tentacules sont allumés. De l’or pour la pieuvre !",
+    "locked": "Badge verrouillé",
+    "firstRecord": "Premier record",
+    "goalMet": "Objectif atteint",
+    "firstWalk": "Première marche",
+    "open": "{caption}. Ouvrir les succès."
+  },
   "live": {
     "noneConnected": "Aucun connecté",
     "emptyTitle": "Aucun appareil connecté",
