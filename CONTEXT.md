@@ -15,7 +15,7 @@ The curated set of exercises and curated workouts held in the server database, e
 _Avoid_: Exercise database, library (the library is the user's)
 
 **Curated workout**:
-A workout in the catalog, written by the admin at one level, with its own slug and revisions like an exercise. It is always available without an account and shows in the person's workout list beside their own, marked by a **Curated** badge; the list filters by that origin. Starting it needs nothing; editing a synced one makes a personal copy, as for a shared plan ([ADR 0034](docs/adr/0034-curated-workouts-are-catalog-items-at-three-levels.md), [ADR 0009](docs/adr/0009-shared-plans-are-synced-or-copied.md)).
+A workout in the catalog, written by the admin at one level, with its own slug and revisions like an exercise. It is always available without an account, with nothing to save, and shows in the person's workout list beside their own, marked by a **Curated** badge; the list filters by that origin. Editing it makes a personal copy, as for a synced shared plan ([ADR 0034](docs/adr/0034-curated-workouts-are-catalog-items-at-three-levels.md), [ADR 0009](docs/adr/0009-shared-plans-are-synced-or-copied.md)).
 _Avoid_: Template, preset, program, plan (a plan is weeks of workouts)
 
 **Level**:
@@ -206,7 +206,7 @@ A person's own workouts and plans, catalog items they kept, and items shared wit
 _Avoid_: Collection, favourites
 
 **Library entry**:
-A shared or curated workout, or a plan, saved in a library, either synced to the author's latest version or as a copy.
+A shared workout or plan saved in a library, either synced to the author's latest version or as a copy.
 _Avoid_: Bookmark, fork
 
 **Workout file**:
