@@ -6,25 +6,9 @@ Coach Poulpy is **local-first**: the mobile app holds the whole domain model and
 
 Every workout shares the same concepts, whatever its format. Planned content is versioned and immutable per version, so a session always points at the exact version it followed, a synced library entry follows the latest version, and a copy forks from one.
 
-<details>
-<summary>What each concept holds</summary>
-
-| Concept | What it holds |
-| --- | --- |
-| Exercise | Stable slug, names in French and English, movement pattern, muscle groups, equipment needs (each a list of alternatives) and optional equipment, measurement (reps, time, distance, hold), per-side flag, images, instruction steps |
-| Workout | Name, format (circuit or sets), parts (an optional warm-up, one work part, an optional cool down) each holding a tree of steps, estimated duration, tags |
-| Step | An exercise step (exercise, prescription, and a role: exercise or recover), a group (sequence, superset, circuit, interval set with rounds), or a rest |
-| Prescription | Sets, and per set a target (reps, duration, distance, hold), an optional load, intensity (RPE, speed, incline, heart rate zone), tempo, and rest before the next set |
-| Plan | Name, goal, weeks of days, each day holding zero or more workouts |
-| Enrollment | A person following a plan version from a start date, with one calendar entry per scheduled workout (planned, done, skipped, moved) |
-| Goal | A measurable target with an optional deadline, computed from sessions |
-| Session | One workout actually done: start and end, source (guided, free, device only), optional link to the planned workout version and calendar entry, set results, samples, notes, effort and pain |
-
-</details>
+What each concept holds (exercise, workout, step, prescription, plan, enrollment, goal, session, library entry, coach link) is defined in the [glossary](../CONTEXT.md).
 
 Statistics are derived, never typed in. `core/stats` computes metrics from sessions: personal records, weekly load and goal progress all come from the same computation, on the phone for guests and on the server for accounts.
-
-Sharing and coaching add three small concepts: a library entry (synced or copy), a coach link (status, revocation date) and a comment attached to a session, a set result or a calendar entry.
 
 ## Formats, parts and the engine
 

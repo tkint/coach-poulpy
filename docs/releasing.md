@@ -25,7 +25,7 @@ The Android `versionCode` is the minute the build ran (minutes since 2026-01-01)
 
 Creating the release from GitHub's **Releases** page also works, but it is visible before CI passes and stays without an APK if CI fails. Push the tag instead.
 
-The workflow stops with a message, and publishes nothing, if the tag is not `v` and three numbers, if the signing key secrets are missing (see the README, "The signing key"), or if any CI check fails. To try again, delete the tag (`git push origin :refs/tags/v0.6.0` and `git tag -d v0.6.0`), fix `main`, and tag again.
+The workflow stops with a message, and publishes nothing, if the tag is not `v` and three numbers, if the signing key secrets are missing (see [The signing key](#the-signing-key)), or if any CI check fails. To try again, delete the tag (`git push origin :refs/tags/v0.6.0` and `git tag -d v0.6.0`), fix `main`, and tag again.
 
 ## The server
 
@@ -57,11 +57,11 @@ Set it up once:
    | `DEPLOY_PORT` | variable | Optional, `22` by default |
    | `DOMAIN` | variable | The API hostname, without scheme, port or path |
    | `POSTGRES_PASSWORD` | secret | For example `openssl rand -hex 24`; used when the Postgres volume is created |
-   | `SMTP_HOST` | variable | The EU mail provider's SMTP server. Optional until one is chosen: without it the server sends no email (no confirmation link either) and the admin's [Status](./admin.md#status) says mail isn't configured |
+   | `SMTP_HOST` | variable | The EU mail provider's SMTP server. Optional until one is chosen; see [Mail](./deploying-the-server.md#mail) for what happens without it |
    | `SMTP_PORT` | variable | Optional, `587` (STARTTLS) by default; `465` for implicit TLS |
    | `SMTP_USER` | variable | The SMTP login |
    | `SMTP_PASSWORD` | secret | The SMTP password |
-   | `MAIL_FROM` | variable | The sender, for example `Coach Poulpy <hello@coach-poulpy.com>`; needed with `SMTP_HOST`. A from-address saved in the admin replaces it ([Settings](./admin.md#settings)) |
+   | `MAIL_FROM` | variable | The sender, for example `Coach Poulpy <hello@coach-poulpy.com>`; needed with `SMTP_HOST`. [Mail](./deploying-the-server.md#mail) says what a saved from-address changes |
    | `WEBSITE_URL` | variable | Optional, `https://app.coach-poulpy.com` by default: where the links in emails point |
    | `ADMIN_EMAIL` | variable | Optional: the confirmed account with this address becomes an admin when the server starts ([the admin area](./admin.md)) |
    | `LOKI_URL` | variable | Optional: the push URL of a Grafana Cloud Loki, `https://logs-prod-XXX.grafana.net/loki/api/v1/push`. With it, the deploy starts a container that ships the logs there ([Logs](./deploying-the-server.md#logs)) |
@@ -92,8 +92,26 @@ Set up the `preview` environment once, like `production` above (the same `DEPLOY
 
 Deploying runs the pull request's or branch's deploy files on the machine and replaces the shared `~/caddy/deploy.py` with its copy, so only deploy code you have read.
 
+## Installing a build on a phone
+
+- **Android:** every CI run uploads a debug APK as the `coach-poulpy-debug-apk` artifact. Download it on the phone and allow installing from that source. Each build is numbered by the time it ran and signed with the same key, so a newer APK installs over the old one and keeps the phone's data. Android refuses an APK built before the one on the phone ("you can't install the app on your device"); to install an older branch's build, re-run its CI job, which gives it a fresh number. `./gradlew :app-android:assembleRelease` gives a smaller build, signed with the same key.
+- **iPhone:** set your Apple team in Xcode (Signing & Capabilities) and run on a connected iPhone. With a free Apple account the app expires after 7 days; TestFlight needs the paid Apple Developer Program.
+
+## The signing key
+
+Android only installs an update when it is signed with the same key as the app already on the phone. CI signs every APK with one fixed key, kept in two repository secrets:
+
+| Secret | What it holds |
+| --- | --- |
+| `ANDROID_KEYSTORE_BASE64` | The keystore file (`.jks`), base64 encoded on one line |
+| `ANDROID_KEYSTORE_PASSWORD` | Its password (the key inside, `poulpy`, uses the same one) |
+
+To make them, run `tools/make-signing-key.sh` once on your own computer (it needs a JDK) and follow what it prints. Keep the `.jks` file and its password in a password manager: losing them means every phone has to uninstall the app once more. Without the secrets, for example on a pull request from a fork, CI still builds but signs with a throwaway key and says so in a warning.
+
+To sign local builds with the same key, put `storeFile` and `storePassword` in `app-android/keystore.properties`, which is not committed. The build also reads `POULPY_KEYSTORE_FILE`, `POULPY_KEYSTORE_PASSWORD`, and optionally `POULPY_KEY_ALIAS` and `POULPY_KEY_PASSWORD`, from the environment.
+
 ## What a release does not do yet
 
-- **iPhone:** no file is attached. A phone build needs an Apple Developer account and signing; until then iOS is built from Xcode (README).
+- **iPhone:** no file is attached. A phone build needs an Apple Developer account and signing; until then iOS is built from Xcode ([Installing a build on a phone](#installing-a-build-on-a-phone)).
 - **Debug build type:** the APK is the same `assembleDebug` build CI makes, the one that has been run on phones. A smaller, minified `assembleRelease` build is a later step once it has been tried on a phone.
 - **Not a store release:** while the major is 0, the pre-release flag keeps it off the "latest" release, and nothing goes to Google Play or TestFlight.

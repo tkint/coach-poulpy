@@ -47,11 +47,7 @@ Keep it short. An issue that takes more than one PR is split, with each part a s
 
 Only labels and milestones listed in `.github/labels.yml` exist; never invent one.
 
-- **One type:** `bug`, `enhancement` or `documentation`.
-- **One state:** see below.
-- **At least one area:** `area:*`.
-- **`device-test`** when the *Device test* section exists.
-- **One milestone**, the release it ships in, or `Later`. The [roadmap](../roadmap.md) says which release a theme belongs to.
+Every issue has one type, one state, at least one area and one milestone ([the rules](../../CONTRIBUTING.md#labels)). Add `device-test` when the *Device test* section exists, and set the milestone to the release it ships in, or `Later`; the [roadmap](../roadmap.md) says which release a theme belongs to.
 
 | State | When |
 | --- | --- |

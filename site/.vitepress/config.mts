@@ -119,9 +119,10 @@ export default withMermaid(
           // order, so '/docs/admin-internals' must be tried before Product's '/docs/admin'.
           [
             'Technical',
-            ['/docs/architecture', '/docs/the-api', '/docs/sync', '/docs/admin-internals', '/docs/deploying-the-server', '/docs/releasing', '/decisions/', '/docs/adr/', '/docs/research/'],
+            ['/docs/architecture', '/docs/the-catalog', '/docs/the-api', '/docs/sync', '/docs/admin-internals', '/docs/deploying-the-server', '/docs/releasing', '/decisions/', '/docs/adr/', '/docs/research/'],
             [
               { text: 'Architecture', link: '/docs/architecture' },
+              { text: 'The catalog\'s shape', link: '/docs/the-catalog' },
               { text: 'The API', link: '/docs/the-api' },
               { text: 'Sync', link: '/docs/sync' },
               { text: 'Admin internals', link: '/docs/admin-internals' },
@@ -133,11 +134,12 @@ export default withMermaid(
           ],
           [
             'Product',
-            ['/docs/roadmap', '/CONTEXT', '/docs/accounts', '/docs/profile-and-settings', '/docs/workout-file', '/docs/web-app', '/docs/admin'],
+            ['/docs/roadmap', '/CONTEXT', '/docs/accounts', '/docs/profile-and-settings', '/docs/treadmill-and-history', '/docs/workout-file', '/docs/web-app', '/docs/admin'],
             [
               { text: 'Roadmap', link: '/docs/roadmap' },
               { text: 'Accounts and sign-in', link: '/docs/accounts' },
               { text: 'Profile and settings', link: '/docs/profile-and-settings' },
+              { text: 'Treadmill and history', link: '/docs/treadmill-and-history' },
               { text: 'The workout file', link: '/docs/workout-file' },
               { text: 'The web app', link: '/docs/web-app' },
               { text: 'The admin area', link: '/docs/admin' },

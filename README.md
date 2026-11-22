@@ -2,7 +2,7 @@
 
 A personal training platform: build workouts, follow plans, run guided sessions and track progress. The Android and iPhone apps keep everything on the phone, as a guest or with an account that syncs between phones through the server. The website, sharing and coaching come later, over the same Kotlin domain.
 
-The brand, design system and architecture are published at [docs.coach-poulpy.com](https://docs.coach-poulpy.com/), built from `docs/`, `CONTEXT.md` and `CONTRIBUTING.md` by the VitePress project in `site/`. The workflow reads the domain and base path from GitHub Pages settings, sets `SITE_BASE` for the main site and its `pr-preview/pr-<number>/` previews, and preserves the settings-managed `CNAME` when publishing. How work moves from an idea to a merged PR is in [CONTRIBUTING.md](CONTRIBUTING.md).
+The brand, design system and architecture are published at [docs.coach-poulpy.com](https://docs.coach-poulpy.com/); the site is built from `docs/` by the VitePress project in `site/`. How work moves from an idea to a merged PR is in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Layout
 
@@ -63,49 +63,11 @@ cd web && npm install && npm run dev
 
 The iOS build runs `./gradlew :shared:embedAndSignAppleFrameworkForXcode` itself, so the Kotlin code and the string tables are rebuilt whenever you build in Xcode; `xcodegen` makes them once first (`./gradlew :shared:generateAppleStrings`), since it lists them in the project.
 
-## The exercise catalog
+## Read more
 
-The catalog lives in the server database: the admin creates, edits, publishes and retires exercises there, and nothing ships bundled with the apps ([ADR 0033](docs/adr/0033-the-server-database-is-the-catalog-and-nothing-ships-bundled.md)). A phone downloads the exercises published since its last update and keeps them in its own database, and every screen reads the catalog from there. A phone that has never downloaded it, such as a first launch with no connection, shows no exercises yet. Tests use a frozen sample (`catalog-sample`). Every exercise has a `slug` that never changes: workouts point at exercises by slug. To stop offering an exercise, retire it in the admin rather than deleting it, so workouts that use it still open.
-
-A variation group is the slugs of one movement made easier or harder, ordered from easiest to hardest. An exercise is in at most one group, and a retired one stays in its group but isn't shown. Every exercise in a group carries a `variationNote` in every language, the one line the variations sheet shows under its name ("Knees down, a shorter lever").
-
-An exercise's `equipment` lists what it needs, each need a list of alternatives: `[["DUMBBELL", "KETTLEBELL"]]` is a dumbbell or a kettlebell, `[["DUMBBELL"], ["BENCH"]]` is dumbbells and a bench. No need means bodyweight; `BODYWEIGHT` and `MAT` are never needs. Equipment that helps but isn't needed (a mat, a treadmill for a walk) goes in `optionalEquipment`. The Equipment filter shows an exercise when it uses something ticked, needed or optional, and every need has one alternative ticked; bodyweight-only exercises hide while anything is ticked, unless "No equipment" is.
-
-An exercise's optional `aliases` are other names people search with, per language, which a language may leave out. The search reads them like names but never shows them, and an alias can't be empty.
-
-The admin publishes single exercises on the server, and on launch the app downloads those published since its last update, with no account needed (`CatalogUpdater`, [ADR 0030](docs/adr/0030-the-catalog-changes-by-exercise-revision-not-by-catalog-version.md)). That is separate from syncing a user's own data, so guests get catalog updates too.
-
-## Installing on family phones
-
-- **Android:** every CI run uploads a debug APK as the `coach-poulpy-debug-apk` artifact. Download it on the phone and allow installing from that source. Each build is numbered by the time it ran and signed with the same key, so a newer APK installs over the old one and keeps the phone's data. Android refuses an APK built before the one on the phone ("you can't install the app on your device"); to install an older branch's build, re-run its CI job, which gives it a fresh number. `./gradlew :app-android:assembleRelease` gives a smaller build, signed with the same key.
-- **iPhone:** set your Apple team in Xcode (Signing & Capabilities) and run on a connected iPhone. With a free Apple account the app expires after 7 days; TestFlight needs the paid Apple Developer Program.
-
-### The signing key
-
-Android only installs an update when it is signed with the same key as the app already on the phone. CI signs every APK with one fixed key, kept in two repository secrets:
-
-| Secret | What it holds |
-| --- | --- |
-| `ANDROID_KEYSTORE_BASE64` | The keystore file (`.jks`), base64 encoded on one line |
-| `ANDROID_KEYSTORE_PASSWORD` | Its password (the key inside, `poulpy`, uses the same one) |
-
-To make them, run `tools/make-signing-key.sh` once on your own computer (it needs a JDK) and follow what it prints. Keep the `.jks` file and its password in a password manager: losing them means every phone has to uninstall the app once more. Without the secrets, for example on a pull request from a fork, CI still builds but signs with a throwaway key and says so in a warning.
-
-To sign local builds with the same key, put `storeFile` and `storePassword` in `app-android/keystore.properties`, which is not committed. The build also reads `POULPY_KEYSTORE_FILE`, `POULPY_KEYSTORE_PASSWORD`, and optionally `POULPY_KEY_ALIAS` and `POULPY_KEY_PASSWORD`, from the environment.
-
-## Treadmill (Bluetooth FTMS)
-
-The **Treadmill** tab finds a treadmill that speaks the Bluetooth Fitness Machine Service, shows its live readings and records a session, either free or following a treadmill workout (a built-in demo workout is there until the workout builder exists). Recording is read-only: the app never changes the treadmill's speed or incline yet, though `device/ftms` already encodes those commands.
-
-Testing on a new machine: the bottom of the tab lists what the treadmill says it can report and counts any packets the decoder could not read. Treadmills differ in which fields they send, so a metric that never shows up is usually one the machine does not send.
-
-## History
-
-The **History** tab has two views. **Calendar** shows a month, Monday first, with the days you trained filled in; swipe or use the arrows to go back through earlier months. Under it, that month's sessions are grouped by day, newest first, and tapping a day scrolls the list to it (a day without sessions shows as a rest day). **Stats** shows this week's and this month's totals, charts of the last eight weeks (active minutes, treadmill kilometres), the total number of sessions, the longest run and Poulpy's full octopuses. Each session's totals (`core/stats`) are saved next to it when it ends, so the history opens without replaying the event log; sessions recorded before the history existed are summed up once, the first time the tab opens. Sessions can be deleted from their detail screen.
-
-## Releasing
-
-The app version is the release tag, and "dev" on any other build. To publish a beta (a GitHub pre-release with the APK), push a tag such as `v0.6.0` on `main`: the Release workflow runs CI, then publishes. See [Releasing a beta](docs/releasing.md).
+- [The catalog's shape](docs/the-catalog.md): the rules of an exercise. The catalog lives in the server database and phones download it; nothing ships bundled with the apps.
+- [Treadmill and history](docs/treadmill-and-history.md): what those two tabs do.
+- [Releasing a beta](docs/releasing.md): installing a build on a phone, the Android signing key and the iPhone build.
 
 ## Continuous integration
 
