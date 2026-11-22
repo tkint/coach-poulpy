@@ -1,6 +1,8 @@
 package ch.coachpoulpy.shared
 
+import ch.coachpoulpy.catalog.Catalog
 import ch.coachpoulpy.data.local.LocalStore
+import ch.coachpoulpy.data.local.StoredSession
 import kotlin.time.Clock
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -40,17 +42,22 @@ object Badges {
     const val WALK_MAX_KMH = 6.5
 
     /**
-     * The badges the finished sessions in [rows] earn, in the order of [Badge].
+     * The badges the finished sessions in [rows] earn, in the order of [Badge]. [walkPlans] holds the ids of the sessions that followed a
+     * workout of only walks and runs.
      *
      * CLEANUP: First record and Goal met stay locked: a record (#527) and a weekly goal are not defined yet.
      */
-    fun earnedFrom(rows: List<SessionRow>): List<Badge> = buildList {
-        if (rows.any(::isWalk)) add(Badge.FIRST_WALK)
+    fun earnedFrom(rows: List<SessionRow>, walkPlans: Set<String> = emptySet()): List<Badge> = buildList {
+        if (rows.any { isWalk(it, it.id in walkPlans) }) add(Badge.FIRST_WALK)
     }
 
-    /** A treadmill session that covered some distance at a walking speed. */
-    fun isWalk(row: SessionRow): Boolean {
-        val speed = row.averageSpeedKmh ?: return false
+    /**
+     * A session with readings is a walk at a walking speed. Without any, nothing tells a walk from a run: Record offers "Walk or run" as one
+     * thing and a workout's walk and run exercises are one kind, so a free walk or run in Live, or a session that followed only walks and runs
+     * ([walkPlan]), counts as a walk.
+     */
+    fun isWalk(row: SessionRow, walkPlan: Boolean = false): Boolean {
+        val speed = row.averageSpeedKmh ?: return row.freeRun || walkPlan
         return row.kind == SessionKind.TREADMILL && (row.distanceMeters ?: 0.0) > 0 && speed > 0 && speed <= WALK_MAX_KMH
     }
 }
@@ -86,8 +93,9 @@ data class AchievementsState(
 )
 
 class AchievementsModel internal constructor(
-    store: LocalStore,
+    private val store: LocalStore,
     compiler: TimelineCompiler,
+    private val catalog: Catalog,
     languageCode: String,
     private val ledger: AchievementLedger,
     private val painActive: () -> Boolean,
@@ -105,7 +113,7 @@ class AchievementsModel internal constructor(
         AchievementsState(
             loaded = true,
             poulpy = poulpy,
-            achievements = AchievementsUi(ledger.earned(Badges.earnedFrom(rows))),
+            achievements = AchievementsUi(ledger.earned(Badges.earnedFrom(rows, walkPlansOf(sessions, store, catalog)))),
             sessionsToFull = (PoulpyStatus.TENTACLES - poulpy.tentaclesLit).coerceAtLeast(0),
         )
     }.stateIn(scope, SharingStarted.Eagerly, AchievementsState())
@@ -117,3 +125,10 @@ class AchievementsModel internal constructor(
 
     fun close() = scope.cancel()
 }
+
+/** The ids of the finished [sessions] that followed a workout of only walks and runs, as far as the workout is still on the phone. */
+internal fun walkPlansOf(sessions: List<StoredSession>, store: LocalStore, catalog: Catalog): Set<String> =
+    sessions.filter { session ->
+        val ref = session.record.workout ?: return@filter false
+        store.workout(ref.workoutId, ref.version)?.isWalksAndRuns(catalog) == true
+    }.map { it.record.id.value }.toSet()

@@ -76,7 +76,7 @@ data class HomeState(
 class HomeModel internal constructor(
     private val store: LocalStore,
     compiler: TimelineCompiler,
-    catalog: Catalog,
+    private val catalog: Catalog,
     languageCode: String,
     private val clock: Clock = Clock.System,
     private val zone: TimeZone = TimeZone.currentSystemDefault(),
@@ -191,7 +191,7 @@ class HomeModel internal constructor(
             next = next,
             hasWorkouts = workouts.isNotEmpty(),
             past = diaryTimeline(rows, now, zone),
-            achievements = ledger?.let { AchievementsUi(it.earned(Badges.earnedFrom(rows))) } ?: AchievementsUi(),
+            achievements = ledger?.let { AchievementsUi(it.earned(Badges.earnedFrom(rows, walkPlansOf(sessions, store, catalog)))) } ?: AchievementsUi(),
         )
     }
 

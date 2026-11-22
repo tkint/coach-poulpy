@@ -57,6 +57,8 @@ data class SessionRow(
     val energyKcal: Int?,
     /** Estimated from the speed, shown with "≈". */
     val estimatedSteps: Int?,
+    /** A free walk or run recorded in Live, with or without a device. */
+    val freeRun: Boolean = false,
 )
 
 data class PeriodUi(val sessions: Int, val activeMinutes: Int, val distanceMeters: Double)
@@ -277,5 +279,6 @@ internal fun sessionRow(session: StoredSession, totals: SessionTotals, labels: L
         maxHeartRateBpm = totals.maxHeartRateBpm,
         energyKcal = totals.energyKcal,
         estimatedSteps = totals.estimatedSteps,
+        freeRun = freeRun,
     )
 }
