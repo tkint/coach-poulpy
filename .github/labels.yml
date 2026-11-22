@@ -92,7 +92,7 @@ milestones:
   - title: Phase 2 · Treadmill
     description: FTMS recording, free or matched to a planned workout
   - title: Phase 3 · Accounts and sync
-    description: Server, Postgres, sign-in, guest upload, sync between phones, catalog updates
+    description: Server, accounts and sync ship; what is left is the admin catalog workspace, a super admin, Apple and Google sign-in and the calendar feed
   - title: Phase 4 · Website
     description: Plan, review and run guided sessions in the browser
   - title: Phase 5 · Sharing and coaching

@@ -8,24 +8,25 @@ A GitHub release plus the server deployed on Infomaniak is production ([Releasin
 
 ## What v1 includes
 
-| Topic | v1 | Later |
-| --- | --- | --- |
-| Audience | The family, as guests | A public app |
-| Accounts | Guest mode, all data on the phone; email and password, Sign in with Apple and Google when the server arrives | Guest data moves into a new account on sign-up |
-| Website | Needs an account; plans, manages, reviews and runs guided sessions without devices | |
-| Catalog | Built-in and curated, with simple images; no user-created exercises | User-created exercises with duplicate detection |
-| Workouts | Circuit or sets, in parts (warm-up, work, cool down); strength, cardio, rehab, stretching and treadmill walks and runs | Outdoor running, walking, swimming with GPS; workout tags |
-| Treadmill | FTMS read and record, alone or checked against a planned workout | Speed and incline control per phase |
-| Progression | Every week written out by hand | Rules from recognised protocols, driven by sessions and goals |
-| Sharing | Save to library synced with the author or as a copy | |
-| Coaching | Athlete invites a coach and can revoke; coach edits assigned plans and comments on sessions | |
-| Export | .FIT file for Garmin Connect and Strava; optional Apple Health and Health Connect | Direct Garmin and Strava links |
-| Language and units | French and English, metric and imperial: distances, speeds and weights follow the setting (weights are stored in kilograms and shown in pounds in imperial), except a distance picked in whole miles or kilometres, which keeps the unit it was picked in | |
-| Hosting | The whole stack runs on the dev computer; the server deploys with Docker to one server ([ADR 0019](./adr/0019-the-server-runs-with-docker-compose-on-one-server.md)) | A bigger machine or a managed database when it runs short |
+| Topic | v1 | Later | Phase |
+| --- | --- | --- | --- |
+| Audience | The family, as guests or with an account | A public app | 1 |
+| Accounts | Guest mode with all data on the phone; email and password, with the guest's data joining the account on sign-up | Sign in with Apple and Google ([#536](https://github.com/tkint/coach-poulpy/issues/536)) | 1, 3 |
+| Website | Needs an account; plans, manages, reviews and runs guided sessions without devices | | 4 |
+| Catalog | Curated, published from the server and downloaded by the phone, with simple images; no user-created exercises | User-created exercises with duplicate detection | 3 |
+| Workouts | Circuit or sets, in parts (warm-up, work, cool down); strength, cardio, rehab, stretching and treadmill walks and runs | Outdoor running, walking, swimming with GPS; workout tags | 1 |
+| Treadmill | FTMS read and record, alone or checked against a planned workout | Speed and incline control per phase | 2 |
+| Progression | Every week written out by hand | Rules from recognised protocols, driven by sessions and goals | 1 |
+| Sharing | Save to library synced with the author or as a copy | | 5 |
+| Coaching | Athlete invites a coach and can revoke; coach edits assigned plans and comments on sessions | | 5 |
+| Export | .FIT file for Garmin Connect and Strava; optional Apple Health and Health Connect | Direct Garmin and Strava links | 1 |
+| Language and units | French and English, metric and imperial: distances, speeds and weights follow the setting (weights are stored in kilograms and shown in pounds in imperial), except a distance picked in whole miles or kilometres, which keeps the unit it was picked in | | 1 |
+| Hosting | A GitHub release for the app and the server on Infomaniak, deployed with Docker to one server ([ADR 0019](./adr/0019-the-server-runs-with-docker-compose-on-one-server.md)): this is production | A bigger machine or a managed database when it runs short | 3 |
+| Distribution | A GitHub release with the Android APK; iPhone builds from Xcode | App Store, TestFlight and Google Play | 6 |
 
 ## Phase 1 · Guest app
 
-Everything the app does for one person, on the phone. Accounts and sync already ship, so phase 1 is done when the guest features below are complete on both platforms: **1.0**. Releases 0.6 to 0.10 are out; their contents are in the release notes.
+Everything the app does for one person, on the phone. Accounts and sync already ship (phase 3), so phase 1 is done when the guest features below are complete on both platforms: **1.0**. Releases 0.6 to 0.10 are out; their contents are in the release notes.
 
 | Release | Theme | Issues |
 | --- | --- | --- |

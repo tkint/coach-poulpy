@@ -1,6 +1,6 @@
 # Coach Poulpy
 
-A training platform: Android and iOS apps first, guest-only and offline, with a server and website to come. One Kotlin Multiplatform core holds every decision about workouts; the apps only render and talk to hardware. The README maps the modules and how to run each part.
+A training platform: Android and iOS apps first, offline and guest-first, with a server for accounts and sync and a website to come. One Kotlin Multiplatform core holds every decision about workouts; the apps only render and talk to hardware. The README maps the modules and how to run each part.
 
 ## Read before you work
 

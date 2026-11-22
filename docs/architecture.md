@@ -1,6 +1,6 @@
 # Architecture
 
-Coach Poulpy is **local-first**: the mobile app holds the whole domain model and runs alone as a guest on family phones, and the server and website join later as a sync and sharing layer over the same model. One Kotlin Multiplatform core owns the domain, the workout engine and the database on Android and iOS, so the two apps cannot drift apart. The decisions behind this are recorded as [ADRs](./adr/), the words are defined in the [glossary](../CONTEXT.md), and what v1 includes is in the [roadmap](./roadmap.md#what-v1-includes).
+Coach Poulpy is **local-first**: the mobile app holds the whole domain model and runs alone as a guest on family phones, and the server adds accounts and sync between phones; the website, sharing and coaching follow over the same model. One Kotlin Multiplatform core owns the domain, the workout engine and the database on Android and iOS, so the two apps cannot drift apart. The decisions behind this are recorded as [ADRs](./adr/), the words are defined in the [glossary](../CONTEXT.md), and what v1 includes is in the [roadmap](./roadmap.md#what-v1-includes).
 
 ## Delivery phases
 
