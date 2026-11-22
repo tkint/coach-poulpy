@@ -4,7 +4,6 @@ import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
@@ -211,11 +210,7 @@ fun CoachPoulpyRoot(
         }
         "resume" -> PlayerScreen(graph, language, workoutId = null, onClose = close)
         // Recording a walk or run takes the whole display, with a way back to Home; recording goes on after closing.
-        "live" -> Scaffold(
-            topBar = {
-                if (!liveFullScreen) IconButton(onClick = close) { Icon(Lucide.ChevronLeft, contentDescription = stringResource(R.string.action_back)) }
-            },
-        ) { padding ->
+        "live" -> Scaffold { padding ->
             LiveScreen(
                 graph,
                 language,
@@ -227,6 +222,7 @@ fun CoachPoulpyRoot(
                 },
                 modifier = Modifier.padding(padding),
                 onFullScreen = { liveFullScreen = it },
+                onBack = if (liveFullScreen) null else close,
             )
         }
         "achievements" -> Scaffold { padding -> AchievementsScreen(graph, language, onBack = close, modifier = Modifier.padding(padding)) }
