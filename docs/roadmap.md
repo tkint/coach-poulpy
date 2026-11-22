@@ -53,7 +53,7 @@ Each theme is a milestone named `After 1.0 · <theme>`.
 
 These are in the `Later` milestone until they have a release.
 
-- **Tailored workouts in the catalog.** Curated workouts at three levels, browsed in the catalog and locked until a person copies one to edit it ([ADR 0034](./adr/0034-curated-workouts-are-locked-catalog-items-at-three-levels.md)). The maintainer has decided the model; the issues, the admin editor and the mockups come next, and it is not placed in a release yet. Level suggestions, effort ratings after a session and curated plans stay out of the first version.
+- **Tailored workouts in the catalog.** Curated workouts at three levels, browsed in the catalog and saved to the library synced or as a copy, like a shared plan ([ADR 0034](./adr/0034-curated-workouts-are-catalog-items-at-three-levels.md)). The maintainer has decided the model; the issues, the admin editor and the mockups come next, and it is not placed in a release yet. Level suggestions, effort ratings after a session and curated plans stay out of the first version.
 - **Rethinking the workout player and the live recorder as one idea** ([#225](https://github.com/tkint/coach-poulpy/issues/225)). A design discussion first; [ADR 0018](./adr/0018-live-plays-mixed-workouts-with-the-players-steps.md) stays in force until then.
 - **Poulpy's animations** ([#537](https://github.com/tkint/coach-poulpy/issues/537)) and his looks (drawn as drafts in the brand pages).
 
