@@ -1,10 +1,28 @@
 # Roadmap
 
-What ships and in which order. A **phase** is a layer of the product ([architecture](./architecture.md#delivery-phases)); a **release** is a set of features inside a phase that makes sense together, cut when it is ready, not on a date.
+What ships and in which order. A **phase** is a layer of the product, each added without reworking the one below; a **release** is a set of features inside a phase that makes sense together, cut when it is ready, not on a date.
 
 > **Draft.** The grouping below awaits the maintainer's approval in [#229](https://github.com/tkint/coach-poulpy/issues/229). Release numbers after the current one are not final, and the GitHub milestones still follow the phases until it is decided. The current version is the latest tag on the [Releases](https://github.com/tkint/coach-poulpy/releases) page.
 
 A GitHub release plus the server deployed on Infomaniak is production ([Releasing](./releasing.md)). Publishing in the app stores comes in its own phase, at the end.
+
+## The phases
+
+```mermaid
+flowchart TD
+    guest["1 · Guest app<br/>Catalog, builder, player,<br/>plans, history, FIT export"]
+    treadmill["2 · Treadmill<br/>FTMS recording,<br/>free or matched to a plan"]
+    accounts["3 · Accounts and sync<br/>Server, Postgres, sign-in,<br/>push and pull sync"]
+    website["4 · Website<br/>Plan, review and run<br/>guided sessions"]
+    sharing["5 · Sharing and coaching<br/>Library sync or copy,<br/>coach links, comments"]
+    stores["6 · Stores<br/>TestFlight, App Store,<br/>Google Play"]
+
+    guest --> accounts
+    guest -. developed alongside .-> treadmill
+    accounts --> website --> sharing --> stores
+```
+
+GitHub milestones follow the phases.
 
 ## What v1 includes
 
