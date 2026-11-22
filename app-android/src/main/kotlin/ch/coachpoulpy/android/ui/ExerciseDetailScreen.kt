@@ -318,8 +318,8 @@ private fun Ladder(rung: Int, count: Int) {
 }
 
 @Composable
-fun BackButton(onBack: () -> Unit) {
+fun BackButton(onBack: () -> Unit, label: String? = null) {
     IconButton(onClick = onBack) {
-        Icon(Lucide.ChevronLeft, contentDescription = stringResource(R.string.action_back))
+        Icon(Lucide.ChevronLeft, contentDescription = label ?: stringResource(R.string.action_back))
     }
 }
