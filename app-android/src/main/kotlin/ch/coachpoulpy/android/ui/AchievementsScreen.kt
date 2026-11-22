@@ -95,7 +95,7 @@ fun AchievementsScreen(graph: AppGraph, language: String, onBack: () -> Unit, mo
             // Poulpy stays big and plays his move when tapped, as on Home; the spacing around him is tight.
             Column(Modifier.fillMaxWidth().offset(y = (-PoulpySpace.sm)), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 PoulpyTapArt(poulpy.drawing, poulpy.title, 200.dp)
-                Text(poulpy.tentaclesCaption, style = MaterialTheme.typography.titleLarge, textAlign = TextAlign.Center)
+                Text(poulpy.litCaption, style = MaterialTheme.typography.titleLarge, textAlign = TextAlign.Center)
                 Text(
                     if (state.sessionsToFull == 0) stringResource(R.string.achievements_champion)
                     else pluralStringResource(R.plurals.achievements_toGo, state.sessionsToFull, state.sessionsToFull),

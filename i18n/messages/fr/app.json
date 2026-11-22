@@ -321,7 +321,7 @@
     "firstRecord": "Premier record",
     "goalMet": "Objectif atteint",
     "firstWalk": "Première marche",
-    "open": "Succès, {caption}"
+    "open": "{caption}. Ouvrir les succès."
   },
   "live": {
     "noneConnected": "Aucun connecté",

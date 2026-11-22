@@ -64,7 +64,7 @@ struct AchievementsView: View {
                     // Poulpy stays big and plays his move when tapped, as on Home; the spacing around him is tight.
                     VStack(spacing: 2) {
                         PoulpyTapArt(drawing: poulpy.drawing, description: poulpy.title, art: 200)
-                        Text(verbatim: poulpy.tentaclesCaption)
+                        Text(verbatim: poulpy.litCaption)
                             .font(PoulpyFont.headline)
                         Text(verbatim: state.sessionsToFull == 0 ? L("achievements.champion") : L("achievements.toGo %lld", Int64(state.sessionsToFull)))
                             .font(PoulpyFont.body)

@@ -321,7 +321,7 @@
     "firstRecord": "First record",
     "goalMet": "Goal met",
     "firstWalk": "First walk",
-    "open": "Achievements, {caption}"
+    "open": "{caption}. Open achievements."
   },
   "live": {
     "noneConnected": "None connected",

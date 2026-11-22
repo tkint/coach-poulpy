@@ -500,7 +500,7 @@ private struct MotivationRow: View {
         .overlay(Capsule().stroke(PoulpyColor.outline))
         .contentShape(Capsule())
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(Text(verbatim: String(format: NSLocalizedString("achievements.open %@", comment: ""), locale: Locale.current, status.tentaclesCaption)))
+        .accessibilityLabel(Text(verbatim: String(format: NSLocalizedString("achievements.open %@", comment: ""), locale: Locale.current, status.litCaption)))
         .accessibilityAddTraits(.isButton)
     }
 

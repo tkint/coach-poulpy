@@ -468,7 +468,7 @@ private fun RestRow(onOpenLibrary: () -> Unit) {
 private fun MotivationRow(poulpy: PoulpyStatus, achievements: AchievementsUi, onClick: () -> Unit) {
     val colors = MaterialTheme.colorScheme
     val shape = RoundedCornerShape(percent = 50)
-    val caption = stringResource(R.string.achievements_open, poulpy.tentaclesCaption)
+    val caption = stringResource(R.string.achievements_open, poulpy.litCaption)
     Row(
         Modifier
             .fillMaxWidth()
