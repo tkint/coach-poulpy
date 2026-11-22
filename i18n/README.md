@@ -21,13 +21,9 @@ Every word a person reads lives here, one JSON file per language and namespace (
 
 On the phones a plural can only branch on its language's forms (`one`, `many`, `other`…); an exact branch like `=0` works in `domain` only.
 
-## Proofread or translate in Fink
+## Proofread or translate
 
-1. Open [Fink](https://fink.inlang.com/) and sign in with a free GitHub account.
-2. Open the repository `tkint/coach-poulpy`; Fink finds `i18n/project.inlang`.
-3. Pick the language, edit, and send the changes: Fink opens a pull request.
-
-Read the [English rules and notes](glossary/en.md) and the glossary of your language ([français](glossary/fr.md)) first. Type plain apostrophes and spaces: the repository fixes the typography after each merge.
+Translators work in [Fink](https://fink.inlang.com/); the steps are on [Proofread and translate](https://docs.coach-poulpy.com/translations). Read the [English rules and notes](glossary/en.md) and the glossary of your language ([français](glossary/fr.md)) first. Type plain apostrophes and spaces: the repository fixes the typography after each merge.
 
 ## Add a language
 

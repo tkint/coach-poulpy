@@ -119,9 +119,10 @@ export default withMermaid(
           // order, so '/docs/admin-internals' must be tried before Product's '/docs/admin'.
           [
             'Technical',
-            ['/docs/architecture', '/docs/the-api', '/docs/sync', '/docs/admin-internals', '/docs/deploying-the-server', '/docs/releasing', '/decisions/', '/docs/adr/', '/docs/research/'],
+            ['/docs/architecture', '/docs/the-catalog', '/docs/the-api', '/docs/sync', '/docs/admin-internals', '/docs/deploying-the-server', '/docs/releasing', '/decisions/', '/docs/adr/', '/docs/research/'],
             [
               { text: 'Architecture', link: '/docs/architecture' },
+              { text: 'The catalog\'s shape', link: '/docs/the-catalog' },
               { text: 'The API', link: '/docs/the-api' },
               { text: 'Sync', link: '/docs/sync' },
               { text: 'Admin internals', link: '/docs/admin-internals' },
