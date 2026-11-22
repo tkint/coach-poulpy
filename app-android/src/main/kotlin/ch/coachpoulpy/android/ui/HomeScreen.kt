@@ -310,6 +310,7 @@ private fun JumpToDaySheet(graph: AppGraph, language: String, onDay: (Long) -> U
     }
     val thisMonth = YearMonth.from(today)
     val firstMonth = thisMonth.plusMonths(historyState.firstMonthOffset.toLong())
+    val firstDay = historyState.firstDayMillis?.let { Instant.ofEpochMilli(it).atZone(zone).toLocalDate() }
     val calendar = rememberCalendarState(startMonth = firstMonth, endMonth = thisMonth, firstVisibleMonth = thisMonth, firstDayOfWeek = DayOfWeek.MONDAY)
     val scope = rememberCoroutineScope()
     val shown = calendar.firstVisibleMonth.yearMonth
@@ -353,7 +354,7 @@ private fun JumpToDaySheet(graph: AppGraph, language: String, onDay: (Long) -> U
                 state = calendar,
                 dayContent = { day ->
                     if (day.position == DayPosition.MonthDate) {
-                        JumpDay(day.date, today, active = day.date in activeDays) { onDay(it.atStartOfDay(zone).toInstant().toEpochMilli()) }
+                        JumpDay(day.date, today, firstDay, active = day.date in activeDays) { onDay(it.atStartOfDay(zone).toInstant().toEpochMilli()) }
                     }
                 },
             )
@@ -361,14 +362,16 @@ private fun JumpToDaySheet(graph: AppGraph, language: String, onDay: (Long) -> U
     }
 }
 
-/** One day of the jump calendar: filled when it had sessions, a dot under today, dimmed and inert after today. */
+/** One day of the jump calendar: filled when it had sessions, a dot under today, dimmed and inert before the first session and after today. */
 @Composable
-private fun JumpDay(date: LocalDate, today: LocalDate, active: Boolean, onPick: (LocalDate) -> Unit) {
+private fun JumpDay(date: LocalDate, today: LocalDate, firstDay: LocalDate?, active: Boolean, onPick: (LocalDate) -> Unit) {
     val colors = MaterialTheme.colorScheme
+    // Nothing to jump to before the first session, or after today.
     val future = date.isAfter(today)
+    val pickable = !future && (firstDay == null || !date.isBefore(firstDay))
     val text = when {
         active -> colors.onPrimary
-        future -> colors.onSurfaceVariant.copy(alpha = 0.45f)
+        !pickable -> colors.onSurfaceVariant.copy(alpha = 0.45f)
         else -> colors.onSurface
     }
     val description = date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL)) + if (active) ", " + stringResource(R.string.home_jumpDayHasSessions) else ""
@@ -379,7 +382,7 @@ private fun JumpDay(date: LocalDate, today: LocalDate, active: Boolean, onPick: 
                 .padding(3.dp)
                 .clip(CircleShape)
                 .background(if (active) colors.primary else Color.Transparent)
-                .clickable(enabled = !future, onClick = { onPick(date) })
+                .clickable(enabled = pickable, onClick = { onPick(date) })
                 .semantics { contentDescription = description },
             contentAlignment = Alignment.Center,
         ) {

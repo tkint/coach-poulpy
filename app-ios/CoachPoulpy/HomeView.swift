@@ -405,7 +405,7 @@ private struct JumpToDaySheet: View {
         NavigationStack {
             SessionCalendar(
                 sessionDays: Set(state.sessions.map { dayKey(Date(timeIntervalSince1970: Double($0.startedAtMillis) / 1000)) }),
-                firstMonthOffset: Int(state.firstMonthOffset)
+                firstDay: state.firstDayMillis.map { Date(timeIntervalSince1970: Double(truncating: $0) / 1000) }
             ) { picked in
                 onDay(Int64(Calendar.current.startOfDay(for: picked).timeIntervalSince1970 * 1000))
             }
@@ -432,7 +432,7 @@ private func dayKey(_ date: Date) -> Int {
 /// UIKit's calendar (iOS 16): it is the system's own, and the only native one that can decorate days.
 private struct SessionCalendar: UIViewRepresentable {
     let sessionDays: Set<Int>
-    let firstMonthOffset: Int
+    let firstDay: Date?
     let onPick: (Date) -> Void
 
     func makeCoordinator() -> Coordinator { Coordinator(self) }
@@ -449,8 +449,8 @@ private struct SessionCalendar: UIViewRepresentable {
     func updateUIView(_ view: UICalendarView, context: Context) {
         context.coordinator.parent = self
         let calendar = Calendar.current
-        let thisMonth = calendar.dateInterval(of: .month, for: Date())?.start ?? Date()
-        let start = calendar.date(byAdding: .month, value: firstMonthOffset, to: thisMonth) ?? thisMonth
+        // Nothing to jump to before the first session, or after today.
+        let start = firstDay ?? calendar.startOfDay(for: Date())
         view.availableDateRange = DateInterval(start: start, end: Date())
         let days = sessionDays.compactMap { key in
             DateComponents(calendar: calendar, year: key / 10_000, month: key / 100 % 100, day: key % 100)
