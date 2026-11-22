@@ -28,6 +28,7 @@ const plans: Record<string, Plan> = {
 
 const mood = ref<Mood>('happy')
 const playing = ref(false)
+const showing = ref(false) // his still picture hides only once the canvas has drawn him, so there is never a gap or another mood between the two
 const canvas = ref<HTMLCanvasElement>()
 let taps = 0
 let calm: ReturnType<typeof setTimeout> | undefined
@@ -42,7 +43,7 @@ async function perform(plan: Plan) {
   const from = mood.value
   playing.value = true
   await nextTick()
-  if (!canvas.value) { playing.value = false; return }
+  if (!canvas.value) { showing.value = false; playing.value = false; return }
   try {
     const { createPoulpyScene } = await import('../../brand/poulpy3dScene')
     const scene = createPoulpyScene(canvas.value)
@@ -52,6 +53,7 @@ async function perform(plan: Plan) {
       scene.look({ turn: 0, tilt: 8, distance: 9.4, centre: 1.35, field: (2 * Math.atan((1 + 2 * PAD_PER_HEIGHT) * Math.tan((14 * Math.PI) / 180)) * 180) / Math.PI })
     }
     showMood(from)
+    showing.value = true
     const move = plan.make()
     let shown = from, last = performance.now(), elapsed = 0, frame = 0, clock = 0
     const swapAt = (pose: { yaw?: number }) => (plan.swap === 'start' ? elapsed > 0.05 : Math.abs(pose.yaw ?? 0) > Math.PI)
@@ -70,12 +72,14 @@ async function perform(plan: Plan) {
     const finish = () => {
       stop(); stop = () => {}
       mood.value = plan.to
+      showing.value = false
       playing.value = false
       wait()
     }
     stop = () => { cancelAnimationFrame(frame); scene.dispose() }
     frame = requestAnimationFrame(tick)
   } catch {
+    showing.value = false
     playing.value = false // no 3D in this browser: he just stands there
   }
 }
@@ -105,7 +109,7 @@ onBeforeUnmount(() => { clearTimeout(calm); stop() })
 
 <template>
   <button type="button" class="poulpy-cheer poulpy-cheer--home" :aria-label="`${label}. Tap and he reacts to his mood`" data-component="poulpy-mood" :style="size ? { width: `${Math.round(size * 104 / 95)}px`, height: `${size}px` } : undefined" @click="tap">
-    <img :src="picture(mood)" alt="" :style="{ visibility: playing ? 'hidden' : 'visible' }" />
+    <img :src="picture(mood)" alt="" :style="{ visibility: showing ? 'hidden' : 'visible' }" />
     <span v-if="playing" class="poulpy-cheer-stage" aria-hidden="true" :style="{ inset: `-${PAD()}px` }"><canvas ref="canvas" /></span>
   </button>
 </template>
