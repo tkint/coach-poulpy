@@ -15,13 +15,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -41,17 +38,6 @@ fun ImportScreen(state: WorkoutImportState, onClose: () -> Unit) {
     val colors = MaterialTheme.colorScheme
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = colors.background, scrolledContainerColor = colors.background),
-                navigationIcon = {
-                    IconButton(onClick = onClose) {
-                        Icon(Lucide.X, contentDescription = stringResource(R.string.action_close))
-                    }
-                },
-            )
-        },
         bottomBar = {
             Column(Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = PoulpySpace.lg, vertical = 12.dp)) {
                 PoulpyButton(onClick = onClose, kind = PoulpyButtonKind.Secondary, size = PoulpyButtonSize.Lg, modifier = Modifier.fillMaxWidth()) {
@@ -60,20 +46,23 @@ fun ImportScreen(state: WorkoutImportState, onClose: () -> Unit) {
             }
         },
     ) { padding ->
-        Column(
-            Modifier.padding(padding).fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = PoulpySpace.lg, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            Text(stringResource(R.string.import_errorTitle), style = MaterialTheme.typography.headlineMedium)
-            Row(
-                Modifier.fillMaxWidth().clip(RoundedCornerShape(PoulpyRadius.md)).background(colors.surfaceVariant).padding(16.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
+        Column(Modifier.padding(padding).fillMaxSize()) {
+            AppBar(title = null, leading = { CloseButton(onClose) })
+            Column(
+                Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = PoulpySpace.lg, vertical = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                // Crimson with an icon, never ember.
-                Icon(Lucide.CircleExclamationPoint, contentDescription = null, tint = colors.error, modifier = Modifier.size(24.dp))
-                Text(state.errorMessage, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, color = colors.error)
+                Text(stringResource(R.string.import_errorTitle), style = MaterialTheme.typography.headlineMedium)
+                Row(
+                    Modifier.fillMaxWidth().clip(RoundedCornerShape(PoulpyRadius.md)).background(colors.surfaceVariant).padding(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    // Crimson with an icon, never ember.
+                    Icon(Lucide.CircleExclamationPoint, contentDescription = null, tint = colors.error, modifier = Modifier.size(24.dp))
+                    Text(state.errorMessage, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, color = colors.error)
+                }
+                Text(stringResource(R.string.import_nothingAdded), style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
             }
-            Text(stringResource(R.string.import_nothingAdded), style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
         }
     }
 }

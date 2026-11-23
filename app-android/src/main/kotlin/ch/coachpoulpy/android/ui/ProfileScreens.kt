@@ -125,7 +125,7 @@ internal fun SubPage(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     Column(modifier.fillMaxSize()) {
-        Row(Modifier.padding(start = 4.dp, end = 12.dp, top = PoulpySpace.md), verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.padding(start = 4.dp, end = 12.dp, top = PoulpySpace.xs), verticalAlignment = Alignment.CenterVertically) {
             BackButton(onBack, backLabel)
             Column(Modifier.weight(1f)) {
                 Text(title, style = MaterialTheme.typography.headlineSmall)

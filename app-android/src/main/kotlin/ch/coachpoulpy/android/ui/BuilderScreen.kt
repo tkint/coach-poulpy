@@ -43,8 +43,6 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
@@ -125,21 +123,17 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
     val list = rememberLazyListState()
     pickingPart?.let { part ->
         BackHandler { pickingPart = null; pickingRepeat = null }
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = { Text(stringResource(R.string.builder_pickTitle)) },
-                    navigationIcon = { BackButton(onBack = { pickingPart = null; pickingRepeat = null }) },
+        Scaffold { padding ->
+            Column(Modifier.padding(padding).fillMaxSize()) {
+                AppBar(stringResource(R.string.builder_pickTitle), leading = { BackButton(onBack = { pickingPart = null; pickingRepeat = null }) })
+                ExerciseList(
+                    graph, language,
+                    onPick = { model.add(it, part, pickingRepeat); pickingPart = null; pickingRepeat = null },
+                    modifier = Modifier.weight(1f),
+                    adding = true,
+                    onOpen = { previewing = it },
                 )
-            },
-        ) { padding ->
-            ExerciseList(
-                graph, language,
-                onPick = { model.add(it, part, pickingRepeat); pickingPart = null; pickingRepeat = null },
-                modifier = Modifier.padding(padding),
-                adding = true,
-                onOpen = { previewing = it },
-            )
+            }
         }
         previewing?.let { slug ->
             ExerciseInfoSheet(
@@ -151,16 +145,11 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
         return
     }
 
-    Scaffold(
-        containerColor = colors.background,
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(if (model.isEditing) R.string.builder_editTitle else R.string.builder_newTitle), style = MaterialTheme.typography.titleLarge) },
-                navigationIcon = {
-                    IconButton(onClick = onClose) {
-                        Icon(Lucide.X, contentDescription = stringResource(R.string.action_close))
-                    }
-                },
+    Scaffold(containerColor = colors.background) { padding ->
+        Column(Modifier.padding(padding).fillMaxSize()) {
+            AppBar(
+                title = stringResource(if (model.isEditing) R.string.builder_editTitle else R.string.builder_newTitle),
+                leading = { CloseButton(onClose) },
                 actions = {
                     PoulpyButton(
                         onClick = { if (model.save() != null) onClose() },
@@ -171,27 +160,25 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
                         Text(stringResource(R.string.action_save))
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = colors.background, scrolledContainerColor = colors.background),
             )
-        },
-    ) { padding ->
-        LazyColumn(
-            state = list,
-            modifier = Modifier.padding(padding).fillMaxSize().navigationBarsPadding(),
-            contentPadding = PaddingValues(start = PoulpySpace.lg, end = PoulpySpace.lg, top = 8.dp, bottom = 24.dp),
-        ) {
-            item {
-                PoulpyTextField(
-                    stringResource(R.string.builder_name), state.name, model::rename,
-                    Modifier.padding(bottom = 14.dp).fillMaxWidth(),
-                    placeholder = stringResource(R.string.builder_namePlaceholder),
-                )
-            }
-            item { FormatLine(state.format, state.formatLabel, onClick = { changingFormat = true }) }
-            state.parts.forEach { part ->
-                item(key = "part-${part.key}") {
-                    Box(Modifier.padding(bottom = 8.dp)) {
-                        BuilderPartBlock(model, part, onPick = { repeatKey -> pickingPart = part.key; pickingRepeat = repeatKey }, onEdit = { editing = it }, onCount = { countingRepeat = it })
+            LazyColumn(
+                state = list,
+                modifier = Modifier.weight(1f).fillMaxWidth().navigationBarsPadding(),
+                contentPadding = PaddingValues(start = PoulpySpace.lg, end = PoulpySpace.lg, top = 8.dp, bottom = 24.dp),
+            ) {
+                item {
+                    PoulpyTextField(
+                        stringResource(R.string.builder_name), state.name, model::rename,
+                        Modifier.padding(bottom = 14.dp).fillMaxWidth(),
+                        placeholder = stringResource(R.string.builder_namePlaceholder),
+                    )
+                }
+                item { FormatLine(state.format, state.formatLabel, onClick = { changingFormat = true }) }
+                state.parts.forEach { part ->
+                    item(key = "part-${part.key}") {
+                        Box(Modifier.padding(bottom = 8.dp)) {
+                            BuilderPartBlock(model, part, onPick = { repeatKey -> pickingPart = part.key; pickingRepeat = repeatKey }, onEdit = { editing = it }, onCount = { countingRepeat = it })
+                        }
                     }
                 }
             }
