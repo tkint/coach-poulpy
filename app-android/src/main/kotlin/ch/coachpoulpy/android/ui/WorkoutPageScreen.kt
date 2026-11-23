@@ -74,6 +74,7 @@ import java.time.ZoneId
 import java.util.Locale
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.fillMaxSize
 
 /**
  * One saved workout: the muscles it works on a body map, and over it a sheet you drag up for its exercises, how it
@@ -166,10 +167,10 @@ fun WorkoutPageScreen(
                             }
                         }
                     },
-                )
+                ) {
+                    WorkoutDetails(state, onPlan = { picking = true }, onOpen = { detailing = it })
+                }
             }
-        } {
-            WorkoutDetails(state, onPlan = { picking = true }, onOpen = { detailing = it })
         }
     }
 

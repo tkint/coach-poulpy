@@ -35,6 +35,8 @@ import ch.coachpoulpy.shared.RecapRow
 import ch.coachpoulpy.shared.RecapTile
 import ch.coachpoulpy.shared.SessionRecap
 import java.util.Locale
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.IconButton
 
 /**
  * What opening a finished session shows (`session-recap-*` mockups): its name and date, the figures, then each part
@@ -78,10 +80,10 @@ internal fun SessionRecapSheet(recap: SessionRecap, dateLine: String, figure: Bo
                         description = stringResource(R.string.workout_mapLabel, recap.muscles.loads.joinToString(", ") { it.label }),
                     )
                 },
-            )
+            ) {
+                RecapDetails(recap, dateLine)
+            }
         }
-    } {
-        RecapDetails(recap, dateLine)
     }
 }
 
