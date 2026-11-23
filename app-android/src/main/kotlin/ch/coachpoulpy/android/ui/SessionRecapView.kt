@@ -35,6 +35,8 @@ import ch.coachpoulpy.shared.RecapRow
 import ch.coachpoulpy.shared.RecapTile
 import ch.coachpoulpy.shared.SessionRecap
 import java.util.Locale
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.IconButton
 
 /**
  * What opening a finished session shows (`session-recap-*` mockups): its name and date, the figures, then each part
@@ -54,32 +56,34 @@ internal fun SessionRecapContent(recap: SessionRecap, dateLine: String, modifier
 /** The muscles worked on a body map, and over it the sheet you drag up for the session's figures and exercises. */
 @Composable
 internal fun SessionRecapSheet(recap: SessionRecap, dateLine: String, figure: BodyFigure, onBack: () -> Unit, onShare: () -> Unit, onDelete: () -> Unit) {
-    DetailSheet(
-        showBackgroundLabel = stringResource(R.string.workout_showMap),
-        showDetailsLabel = stringResource(R.string.workout_showExercises),
-        background = { room ->
-            HeatMapPanel(
-                room, figure, recap.muscles.heat, emptySet(),
-                description = stringResource(R.string.workout_mapLabel, recap.muscles.loads.joinToString(", ") { it.label }),
-            )
-        },
-        floating = {
-            Row(Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = PoulpySpace.lg, vertical = PoulpySpace.sm), horizontalArrangement = Arrangement.SpaceBetween) {
-                FloatingButton(onClick = onBack) {
-                    Icon(Lucide.ChevronLeft, contentDescription = stringResource(R.string.action_back))
+    Column(Modifier.fillMaxSize()) {
+        AppBar(
+            title = null,
+            modifier = Modifier.statusBarsPadding(),
+            leading = { BackButton(onBack) },
+            actions = {
+                IconButton(onClick = onShare) {
+                    Icon(Lucide.Share2, contentDescription = stringResource(R.string.shareSession_title))
                 }
-                Row(horizontalArrangement = Arrangement.spacedBy(PoulpySpace.sm)) {
-                    FloatingButton(onClick = onShare) {
-                        Icon(Lucide.Share2, contentDescription = stringResource(R.string.shareSession_title))
-                    }
-                    FloatingButton(onClick = onDelete) {
-                        Icon(Lucide.Trash, contentDescription = stringResource(R.string.action_delete))
-                    }
+                IconButton(onClick = onDelete) {
+                    Icon(Lucide.Trash, contentDescription = stringResource(R.string.action_delete))
                 }
+            },
+        )
+        Box(Modifier.weight(1f)) {
+            DetailSheet(
+                showBackgroundLabel = stringResource(R.string.workout_showMap),
+                showDetailsLabel = stringResource(R.string.workout_showExercises),
+                background = { room ->
+                    HeatMapPanel(
+                        room, figure, recap.muscles.heat, emptySet(),
+                        description = stringResource(R.string.workout_mapLabel, recap.muscles.loads.joinToString(", ") { it.label }),
+                    )
+                },
+            ) {
+                RecapDetails(recap, dateLine)
             }
-        },
-    ) {
-        RecapDetails(recap, dateLine)
+        }
     }
 }
 
