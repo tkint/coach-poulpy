@@ -2,6 +2,7 @@
 
 package ch.coachpoulpy.android.ui
 
+import android.content.Intent
 import android.icu.text.RelativeDateTimeFormatter
 import android.icu.util.ULocale
 import androidx.annotation.DrawableRes
@@ -28,7 +29,9 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -65,12 +68,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.FileProvider
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ch.coachpoulpy.android.CoachPoulpyApp
 import ch.coachpoulpy.android.R
+import ch.coachpoulpy.shared.AccountDevice
+import ch.coachpoulpy.shared.AccountExportFile
 import ch.coachpoulpy.shared.AccountModel
 import ch.coachpoulpy.shared.AccountState
+import ch.coachpoulpy.shared.ChangePasswordResult
 import ch.coachpoulpy.shared.ConfirmResult
 import ch.coachpoulpy.shared.DeleteResult
 import ch.coachpoulpy.shared.NewPasswordResult
@@ -140,9 +147,12 @@ private fun since(at: Instant): String {
 
 private enum class LeaveDialog { SIGN_OUT, UNSENT }
 
-/** Profile › Account, as the Account stories draw it: the address, the sync state, what follows the account, Sign out and Delete account. */
+/**
+ * Profile › Account, as the Account stories draw it: the address, the sync state, what follows the account, the
+ * Password, Signed-in devices and Export my data rows, Sign out and Delete account.
+ */
 @Composable
-internal fun AccountPage(onBack: () -> Unit, onFlow: (String) -> Unit, modifier: Modifier = Modifier) {
+internal fun AccountPage(onBack: () -> Unit, onFlow: (String) -> Unit, onPage: (SettingsPage) -> Unit, modifier: Modifier = Modifier) {
     val account = rememberAccount()
     val state by account.state.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
@@ -177,6 +187,7 @@ internal fun AccountPage(onBack: () -> Unit, onFlow: (String) -> Unit, modifier:
         }
         return
     }
+    val thisPhone = stringResource(R.string.account_thisPhone)
     val email = when (current) {
         is AccountState.Pending -> current.email
         is AccountState.SignedIn -> current.email
@@ -222,7 +233,21 @@ internal fun AccountPage(onBack: () -> Unit, onFlow: (String) -> Unit, modifier:
                         Text(stringResource(R.string.account_followsBody), color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
-                // CLEANUP: Export my data (account-details mockup) waits for an export of the whole phone (#304).
+                val devices by produceState<List<AccountDevice>?>(null, account) { value = account.devices() }
+                SettingsList {
+                    SettingsRow(Lucide.KeyRound, stringResource(R.string.account_rowPassword), stringResource(R.string.account_rowPasswordDetail)) {
+                        onPage(SettingsPage.ACCOUNT_PASSWORD)
+                    }
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                    SettingsRow(
+                        Lucide.Smartphone, stringResource(R.string.account_rowDevices),
+                        devices?.joinToString { if (it.current) thisPhone else it.name } ?: stringResource(R.string.account_rowDevicesDetail),
+                    ) { onPage(SettingsPage.ACCOUNT_DEVICES) }
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                    SettingsRow(Lucide.Download, stringResource(R.string.account_rowExport), stringResource(R.string.account_rowExportDetail)) {
+                        onPage(SettingsPage.ACCOUNT_EXPORT)
+                    }
+                }
                 Column(Modifier.fillMaxWidth().padding(top = 8.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     PoulpyButton(
                         onClick = { dialog = if (current.upToDate) LeaveDialog.SIGN_OUT else LeaveDialog.UNSENT },
@@ -792,4 +817,235 @@ private fun Link(text: Int, onClick: () -> Unit) {
         fontWeight = FontWeight.ExtraBold,
         modifier = Modifier.clickable(onClick = onClick).padding(vertical = 4.dp),
     )
+}
+
+/** Goes back as soon as the phone is no longer signed in, such as when another device signed it out. */
+@Composable
+private fun LeaveWhenSignedOut(account: AccountModel, onBack: () -> Unit) {
+    val state by account.state.collectAsStateWithLifecycle()
+    LaunchedEffect(state) { if (state !is AccountState.SignedIn) onBack() }
+}
+
+/** One wide button at the bottom of an Account page. */
+@Composable
+private fun ActionBar(enabled: Boolean, onClick: () -> Unit, content: @Composable () -> Unit) {
+    Box(Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = PoulpySpace.lg, vertical = 12.dp)) {
+        PoulpyButton(onClick = onClick, size = PoulpyButtonSize.Md, enabled = enabled, modifier = Modifier.fillMaxWidth()) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) { content() }
+        }
+    }
+}
+
+/**
+ * Account › Password: the current password and the new one typed twice. The other devices are signed out and
+ * this one stays signed in. Mockup: Mobile › Screens › You › Accounts › Password, devices and export.
+ */
+@Composable
+internal fun AccountPasswordPage(onBack: () -> Unit, modifier: Modifier = Modifier) {
+    val account = rememberAccount()
+    val scope = rememberCoroutineScope()
+    val state by account.state.collectAsStateWithLifecycle()
+    val email = (state as? AccountState.SignedIn)?.email.orEmpty()
+    var current by remember { mutableStateOf("") }
+    var new by remember { mutableStateOf("") }
+    var repeated by remember { mutableStateOf("") }
+    var problem by remember { mutableStateOf<ChangePasswordResult?>(null) }
+    var busy by remember { mutableStateOf(false) }
+    var resetSent by remember { mutableStateOf<Boolean?>(null) }
+    LeaveWhenSignedOut(account, onBack)
+
+    SubPage(
+        stringResource(R.string.account_rowPassword), subtitle = null, onBack = onBack, modifier = modifier,
+        spacing = 16.dp, backLabel = stringResource(R.string.account_backToAccount),
+        bottomBar = {
+            ActionBar(enabled = !busy && current.isNotEmpty() && new.isNotEmpty() && repeated.isNotEmpty(), onClick = {
+                busy = true
+                scope.launch {
+                    val result = account.changePassword(current, new, repeated)
+                    busy = false
+                    if (result == ChangePasswordResult.CHANGED) onBack() else problem = result
+                }
+            }) { Text(stringResource(R.string.account_changePassword)) }
+        },
+    ) {
+        when (problem) {
+            ChangePasswordResult.WRONG_PASSWORD -> ErrorCard(stringResource(R.string.account_errorCurrentPassword))
+            ChangePasswordResult.OFFLINE -> ErrorCard(stringResource(R.string.account_errorOffline))
+            else -> Unit
+        }
+        PoulpyTextField(
+            stringResource(R.string.account_currentPassword), current, { current = it; if (problem == ChangePasswordResult.WRONG_PASSWORD) problem = null },
+            password = true, contentType = ContentType.Password,
+        )
+        PoulpyTextField(
+            stringResource(R.string.account_newPassword), new, { new = it; problem = null },
+            note = stringResource(R.string.account_passwordHint),
+            error = if (problem == ChangePasswordResult.TOO_SHORT) stringResource(R.string.account_errorPasswordShort) else null,
+            password = true, contentType = ContentType.NewPassword,
+        )
+        PoulpyTextField(
+            stringResource(R.string.account_repeatPassword), repeated, { repeated = it; if (problem == ChangePasswordResult.MISMATCH) problem = null },
+            error = if (problem == ChangePasswordResult.MISMATCH) stringResource(R.string.account_errorPasswordMismatch) else null,
+            password = true, contentType = ContentType.NewPassword,
+        )
+        Surface(Modifier.fillMaxWidth(), shape = RoundedCornerShape(PoulpyRadius.md), color = MaterialTheme.colorScheme.primaryContainer) {
+            Row(Modifier.padding(horizontal = 14.dp, vertical = 12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Icon(Lucide.Smartphone, contentDescription = null)
+                Text(stringResource(R.string.account_passwordOthersSignedOut), fontWeight = FontWeight.SemiBold)
+            }
+        }
+        when (resetSent) {
+            true -> DoneLine(stringResource(R.string.account_passwordResetSent, email))
+            false -> ErrorCard(stringResource(R.string.account_errorOffline))
+            null -> Unit
+        }
+        HelpLine(R.string.account_passwordForgot, R.string.account_passwordResetLink) {
+            scope.launch { resetSent = account.requestPasswordReset(email) }
+        }
+    }
+}
+
+/** Account › Signed-in devices: this phone first, then every other phone and browser, each with Sign out. */
+@Composable
+internal fun AccountDevicesPage(onBack: () -> Unit, modifier: Modifier = Modifier) {
+    val account = rememberAccount()
+    val scope = rememberCoroutineScope()
+    val state by account.state.collectAsStateWithLifecycle()
+    val email = (state as? AccountState.SignedIn)?.email.orEmpty()
+    var devices by remember { mutableStateOf<List<AccountDevice>?>(null) }
+    var offline by remember { mutableStateOf(false) }
+    LaunchedEffect(account) {
+        devices = account.devices()
+        offline = devices == null
+    }
+    LeaveWhenSignedOut(account, onBack)
+    val update: (suspend () -> Boolean) -> Unit = { call ->
+        scope.launch {
+            offline = !call()
+            if (!offline) account.devices()?.let { devices = it }
+        }
+    }
+
+    SubPage(
+        stringResource(R.string.account_devicesTitle), subtitle = null, onBack = onBack, modifier = modifier,
+        backLabel = stringResource(R.string.account_backToAccount),
+    ) {
+        Note(stringResource(R.string.account_devicesIntro, email))
+        if (offline) ErrorCard(stringResource(R.string.account_errorOffline))
+        val shown = devices
+        if (shown == null) {
+            if (!offline) Box(Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
+            return@SubPage
+        }
+        shown.forEach { device -> DeviceRow(device, onSignOut = { update { account.signOutDevice(device) } }) }
+        if (shown.any { !it.current }) {
+            Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                TextButton(onClick = { update { account.signOutOtherDevices() } }) {
+                    Icon(Lucide.LogOut, contentDescription = null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(20.dp))
+                    Text(stringResource(R.string.account_signOutOthers), modifier = Modifier.padding(start = 4.dp), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.error)
+                }
+            }
+        }
+    }
+}
+
+/** A phone or browser: its icon, its name, This phone or when it was last used, and Sign out for the others. */
+@Composable
+private fun DeviceRow(device: AccountDevice, onSignOut: () -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    OutlinedSurface {
+        Row(Modifier.padding(horizontal = 14.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Box(
+                Modifier.size(44.dp).clip(CircleShape).background(if (device.current) colors.primaryContainer else colors.surfaceVariant),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    if (device.phone) Lucide.Smartphone else Lucide.Monitor,
+                    contentDescription = null,
+                    tint = if (device.current) colors.onPrimaryContainer else colors.onSurfaceVariant,
+                    modifier = Modifier.size(22.dp),
+                )
+            }
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(device.name, fontWeight = FontWeight.ExtraBold)
+                if (device.current) {
+                    KindTag(stringResource(R.string.account_thisPhone))
+                } else {
+                    Text(stringResource(R.string.account_lastUsed, since(device.lastUsedAt)), style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
+                }
+            }
+            if (!device.current) {
+                PoulpyButton(onClick = onSignOut, kind = PoulpyButtonKind.Secondary, size = PoulpyButtonSize.Sm) {
+                    Text(stringResource(R.string.account_signOut), color = colors.onSurface)
+                }
+            }
+        }
+    }
+}
+
+/** A small rounded label, as This phone. */
+@Composable
+private fun KindTag(text: String) {
+    Surface(shape = RoundedCornerShape(PoulpyRadius.pill), color = MaterialTheme.colorScheme.surfaceVariant) {
+        Text(
+            text, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(horizontal = PoulpySpace.sm, vertical = 2.dp),
+        )
+    }
+}
+
+/** Account › Export my data: what the .zip holds, and the button that fetches it and hands it to the share sheet. */
+@Composable
+internal fun AccountExportPage(onBack: () -> Unit, modifier: Modifier = Modifier) {
+    val account = rememberAccount()
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    var busy by remember { mutableStateOf(false) }
+    var offline by remember { mutableStateOf(false) }
+    val title = stringResource(R.string.account_exportTitle)
+    LeaveWhenSignedOut(account, onBack)
+
+    SubPage(
+        title, subtitle = null, onBack = onBack, modifier = modifier,
+        spacing = 16.dp, backLabel = stringResource(R.string.account_backToAccount),
+        bottomBar = {
+            ActionBar(enabled = !busy, onClick = {
+                busy = true
+                offline = false
+                scope.launch {
+                    val file = account.exportData()
+                    busy = false
+                    if (file == null) offline = true else shareExport(context, file, title)
+                }
+            }) {
+                if (busy) CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp, color = MaterialTheme.colorScheme.onPrimary)
+                else Icon(Lucide.Download, contentDescription = null)
+                Text(title)
+            }
+        },
+    ) {
+        if (offline) ErrorCard(stringResource(R.string.account_errorOffline))
+        OutlinedSurface {
+            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(stringResource(R.string.account_exportContentsTitle), style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(R.string.account_exportContentsBody), color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
+        Note(stringResource(R.string.account_exportNote))
+    }
+}
+
+/**
+ * Hands the export to the system share sheet, where it can be saved to Files or sent on. It is written under the
+ * cache folder and shared through [FileProvider] (see `res/xml/file_paths.xml`).
+ */
+private fun shareExport(context: android.content.Context, file: AccountExportFile, title: String) {
+    val folder = java.io.File(context.cacheDir, "shared").apply { mkdirs() }
+    val written = java.io.File(folder, file.fileName).apply { writeBytes(file.bytes) }
+    val uri = FileProvider.getUriForFile(context, "${context.packageName}.files", written)
+    val send = Intent(Intent.ACTION_SEND)
+        .setType("application/zip")
+        .putExtra(Intent.EXTRA_STREAM, uri)
+        .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    context.startActivity(Intent.createChooser(send, title))
 }

@@ -66,6 +66,19 @@ enum class DeleteAnswer { DELETED, WRONG_PASSWORD }
 
 enum class NewPasswordAnswer { SAVED, INVALID_TOKEN, INVALID_PASSWORD }
 
+enum class ChangePasswordAnswer { CHANGED, WRONG_PASSWORD, INVALID_PASSWORD }
+
+/** A phone or browser signed in to the account, from `GET /api/v1/me/devices`; [current] is the one asking. */
+@Serializable
+data class SignedInDevice(
+    val id: String,
+    val name: String,
+    val client: String,
+    val signedInAt: Instant,
+    val lastUsedAt: Instant,
+    val current: Boolean,
+)
+
 sealed interface PushResult {
     data object Accepted : PushResult
     data class StaleBase(val workouts: List<WorkoutId>) : PushResult
@@ -243,6 +256,53 @@ class AccountClient(
         }
     }
 
+    /** Changes the password with the [current] one; the other devices are signed out, this one keeps its tokens. */
+    suspend fun changePassword(current: String, newPassword: String): ChangePasswordAnswer {
+        val response = signedInCall {
+            http.post("$base/api/v1/me/password") {
+                bearerAuth(it)
+                contentType(ContentType.Application.Json)
+                setBody(ChangePasswordRequest(current, newPassword))
+            }
+        }
+        return when (response.status) {
+            HttpStatusCode.NoContent -> ChangePasswordAnswer.CHANGED
+            HttpStatusCode.BadRequest -> ChangePasswordAnswer.INVALID_PASSWORD
+            HttpStatusCode.Forbidden -> ChangePasswordAnswer.WRONG_PASSWORD
+            else -> throw UnexpectedAnswer(response.status.value)
+        }
+    }
+
+    /** Every phone and browser signed in to the account, most recently used first. */
+    suspend fun devices(): List<SignedInDevice> {
+        val response = signedInCall { get("$base/api/v1/me/devices", it) }
+        if (response.status != HttpStatusCode.OK) throw UnexpectedAnswer(response.status.value)
+        return response.body<DevicesAnswer>().devices
+    }
+
+    /** Signs the device [id] out; false when it already was. */
+    suspend fun signOutDevice(id: String): Boolean {
+        val response = signedInCall { http.delete("$base/api/v1/me/devices/$id") { bearerAuth(it) } }
+        return when (response.status) {
+            HttpStatusCode.NoContent -> true
+            HttpStatusCode.NotFound -> false
+            else -> throw UnexpectedAnswer(response.status.value)
+        }
+    }
+
+    /** Signs every device of the account out but this one. */
+    suspend fun signOutOtherDevices() {
+        val response = signedInCall { http.delete("$base/api/v1/me/devices") { bearerAuth(it) } }
+        if (response.status != HttpStatusCode.NoContent) throw UnexpectedAnswer(response.status.value)
+    }
+
+    /** Export my data: the account as one .zip, built by the server from what every device sent. */
+    suspend fun export(): ByteArray {
+        val response = signedInCall { get("$base/api/v1/me/export", it) }
+        if (response.status != HttpStatusCode.OK) throw UnexpectedAnswer(response.status.value)
+        return response.body()
+    }
+
     /** Revokes this device's sign-in (RFC 7009) and forgets its tokens, even when the server can't be reached. */
     suspend fun signOut() {
         val held = tokens.read() ?: return
@@ -351,6 +411,12 @@ private data class EmailRequest(val email: String)
 
 @Serializable
 private data class PasswordRequest(val password: String)
+
+@Serializable
+private data class ChangePasswordRequest(val currentPassword: String, val newPassword: String)
+
+@Serializable
+private data class DevicesAnswer(val devices: List<SignedInDevice>)
 
 @Serializable
 private data class TokenRequest(val token: String)

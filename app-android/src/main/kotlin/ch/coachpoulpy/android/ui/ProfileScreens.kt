@@ -105,13 +105,19 @@ enum class SettingsPage(val parent: SettingsPage?) {
     SETTINGS(HUB),
     PROFILE(HUB),
     ACCOUNT(PROFILE),
+    ACCOUNT_PASSWORD(ACCOUNT),
+    ACCOUNT_DEVICES(ACCOUNT),
+    ACCOUNT_EXPORT(ACCOUNT),
     WEIGHT(PROFILE),
     HEIGHT(PROFILE),
     DEVICES(SETTINGS),
     EDIT_STATISTICS(HUB),
 }
 
-/** A Settings page: a back arrow, a title with an optional line under it, an optional action, then [content] scrolling. */
+/**
+ * A Settings page: a back arrow, a title with an optional line under it, an optional action, then [content] scrolling,
+ * and an optional [bottomBar] under it, such as one wide button.
+ */
 @Composable
 internal fun SubPage(
     title: String,
@@ -122,6 +128,7 @@ internal fun SubPage(
     topPadding: Dp = PoulpySpace.lg,
     spacing: Dp = 10.dp,
     backLabel: String? = null,
+    bottomBar: (@Composable () -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     Column(modifier.fillMaxSize()) {
@@ -134,10 +141,11 @@ internal fun SubPage(
             action?.invoke()
         }
         Column(
-            Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(start = PoulpySpace.lg, end = PoulpySpace.lg, top = topPadding, bottom = PoulpySpace.lg),
+            Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()).padding(start = PoulpySpace.lg, end = PoulpySpace.lg, top = topPadding, bottom = PoulpySpace.lg),
             verticalArrangement = Arrangement.spacedBy(spacing),
             content = content,
         )
+        bottomBar?.invoke()
     }
 }
 
@@ -224,13 +232,13 @@ internal fun SettingsPageScreen(graph: AppGraph, onBack: () -> Unit, onPage: (Se
 
 /** Rows in one outlined card, a divider between them. */
 @Composable
-private fun SettingsList(content: @Composable ColumnScope.() -> Unit) {
+internal fun SettingsList(content: @Composable ColumnScope.() -> Unit) {
     OutlinedSurface { Column(content = content) }
 }
 
 /** A leading icon, a bold title with a line under it, and a chevron when it opens something. */
 @Composable
-private fun SettingsRow(icon: ImageVector, title: String, subtitle: String?, onClick: (() -> Unit)?) {
+internal fun SettingsRow(icon: ImageVector, title: String, subtitle: String?, onClick: (() -> Unit)?) {
     SettingsRow(
         leading = { Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
         title = title,
@@ -241,7 +249,7 @@ private fun SettingsRow(icon: ImageVector, title: String, subtitle: String?, onC
 
 /** The same row with any leading content, such as one of Poulpy's drawings. */
 @Composable
-private fun SettingsRow(leading: @Composable () -> Unit, title: String, subtitle: String?, onClick: (() -> Unit)?) {
+internal fun SettingsRow(leading: @Composable () -> Unit, title: String, subtitle: String?, onClick: (() -> Unit)?) {
     val row = @Composable {
         Row(Modifier.fillMaxWidth().heightIn(min = PoulpySize.row).padding(horizontal = 14.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.padding(end = 12.dp)) { leading() }

@@ -154,6 +154,53 @@ class AccountClientTest {
     }
 
     @Test
+    fun changingThePasswordReadsTheAnswer() = runTest {
+        store.tokens = Tokens("cp_at_1", "cp_rt_1", now + 10.minutes)
+        answer = { _, _ -> respond("", HttpStatusCode.NoContent) }
+        assertEquals(ChangePasswordAnswer.CHANGED, client.changePassword("old-secret", "purple octopus"))
+        assertEquals("""POST /api/v1/me/password {"currentPassword":"old-secret","newPassword":"purple octopus"}""", requests.single())
+
+        answer = { _, _ -> json("""{"error":"wrong-password"}""", HttpStatusCode.Forbidden) }
+        assertEquals(ChangePasswordAnswer.WRONG_PASSWORD, client.changePassword("guess", "purple octopus"))
+        answer = { _, _ -> json("""{"error":"invalid-password"}""", HttpStatusCode.BadRequest) }
+        assertEquals(ChangePasswordAnswer.INVALID_PASSWORD, client.changePassword("old-secret", "short"))
+        assertEquals("cp_rt_1", store.tokens?.refreshToken)
+    }
+
+    @Test
+    fun devicesAreListedAndSignedOut() = runTest {
+        store.tokens = Tokens("cp_at_1", "cp_rt_1", now + 10.minutes)
+        answer = { _, _ ->
+            json(
+                """{"devices":[{"id":"d1","name":"Pixel 8","client":"app","signedInAt":"2026-10-01T08:00:00Z","lastUsedAt":"2026-11-22T21:40:00Z","current":true},""" +
+                    """{"id":"d2","name":"Ana's iPhone","client":"app","signedInAt":"2026-09-12T18:00:00Z","lastUsedAt":"2026-11-19T07:15:00Z","current":false}]}""",
+            )
+        }
+        val devices = client.devices()
+        assertEquals(listOf("Pixel 8", "Ana's iPhone"), devices.map { it.name })
+        assertEquals(listOf(true, false), devices.map { it.current })
+        assertEquals(Instant.parse("2026-11-19T07:15:00Z"), devices[1].lastUsedAt)
+
+        requests.clear()
+        answer = { _, _ -> respond("", HttpStatusCode.NoContent) }
+        assertTrue(client.signOutDevice("d2"))
+        client.signOutOtherDevices()
+        assertEquals(listOf("DELETE /api/v1/me/devices/d2", "DELETE /api/v1/me/devices"), requests)
+
+        answer = { _, _ -> json("""{"error":"unknown-device"}""", HttpStatusCode.NotFound) }
+        assertEquals(false, client.signOutDevice("d2"))
+    }
+
+    @Test
+    fun theExportIsTheZipTheServerSends() = runTest {
+        store.tokens = Tokens("cp_at_1", "cp_rt_1", now + 10.minutes)
+        val zip = byteArrayOf(0x50, 0x4B, 0x03, 0x04)
+        answer = { _, _ -> respond(zip, HttpStatusCode.OK, headersOf(HttpHeaders.ContentType, "application/zip")) }
+        assertTrue(zip.contentEquals(client.export()))
+        assertEquals("GET /api/v1/me/export", requests.single())
+    }
+
+    @Test
     fun aRefusedRefreshTokenSignsThePhoneOut() = runTest {
         store.tokens = Tokens("cp_at_1", "cp_rt_1", now)
         answer = { _, _ -> json("""{"error":"invalid_grant"}""", HttpStatusCode.BadRequest) }

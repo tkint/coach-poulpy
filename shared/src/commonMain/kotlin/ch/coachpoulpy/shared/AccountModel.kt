@@ -3,12 +3,14 @@ package ch.coachpoulpy.shared
 import ch.coachpoulpy.data.local.LocalStore
 import ch.coachpoulpy.data.local.outboxSize
 import ch.coachpoulpy.data.remote.AccountClient
+import ch.coachpoulpy.data.remote.ChangePasswordAnswer
 import ch.coachpoulpy.data.remote.DeleteAnswer
 import ch.coachpoulpy.data.remote.NewPasswordAnswer
 import ch.coachpoulpy.data.remote.SignInAnswer
 import ch.coachpoulpy.data.remote.SignInRefusedByServer
 import ch.coachpoulpy.data.remote.SignUpAnswer
 import kotlin.coroutines.cancellation.CancellationException
+import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
@@ -30,6 +32,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
@@ -92,6 +96,18 @@ enum class NewPasswordResult { SAVED, LINK_EXPIRED, TOO_SHORT, OFFLINE }
 
 enum class DeleteResult { DELETED, WRONG_PASSWORD, OFFLINE }
 
+/** Password: [MISMATCH] and [TOO_SHORT] are found on the phone, before anything is sent. */
+enum class ChangePasswordResult { CHANGED, WRONG_PASSWORD, TOO_SHORT, MISMATCH, OFFLINE }
+
+/** A phone or browser on Signed-in devices; [current] is this phone, and [phone] is false for a browser. */
+data class AccountDevice(val id: String, val name: String, val lastUsedAt: Instant, val current: Boolean, val phone: Boolean) {
+    /** [lastUsedAt] for Swift, which has no Kotlin Instant. */
+    val lastUsedEpochMillis: Long get() = lastUsedAt.toEpochMilliseconds()
+}
+
+/** Export my data: the .zip the server built, and the name to save it under. */
+class AccountExportFile(val fileName: String, val bytes: ByteArray)
+
 /**
  * The account behind Settings' Account section, its screens and the email links: sign in, sign up
  * and confirm, reset a password, sign out and delete. While signed in, [sync] keeps the phone and
@@ -110,6 +126,7 @@ class AccountModel(
     private val reconnectAfter: Duration = 3.seconds,
     /** True while a guided session plays or Live records: Email confirmed waits until it ends. */
     training: Flow<Boolean> = flowOf(false),
+    private val clock: Clock = Clock.System,
 ) {
     val sync = SyncClient(
         store, memory, RemoteSyncServer(client), deviceName, languageCode, scope,
@@ -308,6 +325,51 @@ class AccountModel(
             DeleteAnswer.DELETED -> DeleteResult.DELETED.also { becomeGuest() }
             DeleteAnswer.WRONG_PASSWORD -> DeleteResult.WRONG_PASSWORD
         }
+    }
+
+    /**
+     * Password: the [current] one and the [newPassword] typed twice. The other devices are signed out and this
+     * one stays signed in. A mismatch or a short password is caught here and nothing is sent.
+     */
+    suspend fun changePassword(current: String, newPassword: String, repeated: String): ChangePasswordResult {
+        if (newPassword.length !in PASSWORD_LENGTH) return ChangePasswordResult.TOO_SHORT
+        if (newPassword != repeated) return ChangePasswordResult.MISMATCH
+        return offlineAs(ChangePasswordResult.OFFLINE) {
+            when (client.changePassword(current, newPassword)) {
+                ChangePasswordAnswer.CHANGED -> ChangePasswordResult.CHANGED
+                ChangePasswordAnswer.WRONG_PASSWORD -> ChangePasswordResult.WRONG_PASSWORD
+                ChangePasswordAnswer.INVALID_PASSWORD -> ChangePasswordResult.TOO_SHORT
+            }
+        }
+    }
+
+    /** Signed-in devices: this phone first, then the others, most recently used first; null offline. */
+    suspend fun devices(): List<AccountDevice>? = offlineAs(null) {
+        client.devices()
+            .map { AccountDevice(it.id, it.name, it.lastUsedAt, it.current, phone = it.client == "app") }
+            .sortedWith(compareByDescending<AccountDevice> { it.current }.thenByDescending { it.lastUsedAt })
+    }
+
+    /** Signs [device] out, which keeps its copy as a guest; false offline. Already signed out counts as done. */
+    suspend fun signOutDevice(device: AccountDevice): Boolean = offlineAs(false) {
+        client.signOutDevice(device.id)
+        true
+    }
+
+    /** Signs every device but this phone out; false offline. */
+    suspend fun signOutOtherDevices(): Boolean = offlineAs(false) {
+        client.signOutOtherDevices()
+        true
+    }
+
+    /**
+     * Export my data: sends what waits on this phone first, then fetches the account's .zip, named for
+     * today. Null offline.
+     */
+    suspend fun exportData(): AccountExportFile? = offlineAs(null) {
+        sync.run()
+        val today = clock.todayIn(TimeZone.currentSystemDefault())
+        AccountExportFile("coach-poulpy-$today.zip", client.export())
     }
 
     /** Pull to refresh. */
