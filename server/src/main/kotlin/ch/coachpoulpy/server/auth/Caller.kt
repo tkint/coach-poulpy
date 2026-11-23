@@ -23,6 +23,8 @@ sealed interface Caller {
         val client: Client,
         val scopes: Set<Scope>,
         val role: Role = Role.Member,
+        /** The device's sign-in, when the credential is one: what "this phone" is in the list of devices. */
+        val signInId: UUID? = null,
     ) : Caller
 }
 

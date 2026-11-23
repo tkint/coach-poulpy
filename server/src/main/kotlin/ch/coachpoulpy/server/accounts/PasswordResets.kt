@@ -25,7 +25,8 @@ enum class AccountProblem(val code: String) {
 
 /**
  * A forgotten password (docs/accounts.md): a link mailed to a confirmed address sets a new
- * password once, within an hour, and signs every device out.
+ * password once, within an hour, and signs every device out. A signed-in person can also
+ * change it with the current one, which signs every other device out.
  *
  * The link reads `<websiteUrl>/reset-password#<token>`, the token in the fragment as for
  * confirming an email.
@@ -75,6 +76,26 @@ class PasswordResets(
             signIns.revokeAll(used.account_id, now)
             null
         }
+    }
+
+    /**
+     * Changes the password of a signed-in [caller] once [current] is its password, and signs every other device out; the
+     * caller's own stays signed in. Only a first-party sign-in may (ADR 0020). Null when done.
+     */
+    fun change(caller: Caller.Signed, current: String, new: String): AccountProblem? {
+        val signIn = caller.signInId
+        if (caller.client !in AccountDeletion.FIRST_PARTY_CLIENTS || signIn == null) return AccountProblem.NotFirstParty
+        val id = caller.accountId.value
+        val stored = database.queries.accountQueries.passwordHashById(id).executeAsOneOrNull() ?: return AccountProblem.WrongPassword
+        if (!passwords.verify(current, stored)) return AccountProblem.WrongPassword
+        if (new.length !in SignUpRules.PASSWORD_MIN..SignUpRules.PASSWORD_MAX) return AccountProblem.InvalidPassword
+        val hash = passwords.hash(new)
+        database.queries.transaction {
+            database.queries.accountQueries.setPassword(hash, id)
+            queries.deleteForAccount(id)
+            signIns.revokeAllExcept(id, signIn, OffsetDateTime.now(clock))
+        }
+        return null
     }
 
     companion object {
