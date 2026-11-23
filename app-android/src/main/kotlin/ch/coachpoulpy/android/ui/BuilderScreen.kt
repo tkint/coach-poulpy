@@ -129,7 +129,7 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
             topBar = {
                 TopAppBar(
                     title = { Text(stringResource(R.string.builder_pickTitle)) },
-                    navigationIcon = { BackButton { pickingPart = null; pickingRepeat = null } },
+                    navigationIcon = { BackButton(onBack = { pickingPart = null; pickingRepeat = null }) },
                 )
             },
         ) { padding ->
