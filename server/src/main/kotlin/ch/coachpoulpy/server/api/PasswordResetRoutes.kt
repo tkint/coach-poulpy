@@ -1,6 +1,7 @@
 package ch.coachpoulpy.server.api
 
 import ch.coachpoulpy.server.accounts.AccountDeletion
+import ch.coachpoulpy.server.accounts.AccountProblem
 import ch.coachpoulpy.server.accounts.PasswordResets
 import ch.coachpoulpy.server.accounts.SignUpRules
 import ch.coachpoulpy.server.auth.Caller
@@ -30,9 +31,13 @@ data class NewPasswordRequest(val token: String, val password: String)
 @Serializable
 data class DeleteAccountRequest(val password: String)
 
+@Serializable
+data class ChangePasswordRequest(val currentPassword: String, val newPassword: String)
+
 private val resetBody = Body.auto<PasswordResetRequest>().toLens()
 private val newPasswordBody = Body.auto<NewPasswordRequest>().toLens()
 private val deleteBody = Body.auto<DeleteAccountRequest>().toLens()
+private val changeBody = Body.auto<ChangePasswordRequest>().toLens()
 private val problemBody = Body.auto<Problem>().toLens()
 
 private val accountsTag = Tag("accounts")
@@ -86,6 +91,28 @@ fun deleteMeRoute(deletion: AccountDeletion): ContractRoute = "$API_PREFIX/me" m
 } bindContract DELETE to { request ->
     when (val problem = deletion.deleteAccount(request.caller as Caller.Signed, deleteBody(request).password)) {
         null -> Response(NO_CONTENT)
+        else -> Response(FORBIDDEN).with(problemBody of Problem(problem.code))
+    }
+}
+
+/** Changes the caller's password with the current one; every other device is signed out, the caller's stays signed in. */
+fun changePasswordRoute(resets: PasswordResets): ContractRoute = "$API_PREFIX/me/password" meta {
+    summary = "Change your password"
+    description = "Takes the current password and a new one of ${SignUpRules.PASSWORD_MIN} to ${SignUpRules.PASSWORD_MAX} " +
+        "characters. Every other device of the account is signed out; the one sending this stays signed in. Only Coach " +
+        "Poulpy's own apps may do it."
+    operationId = "changePassword"
+    tags += accountsTag
+    security = requires()
+    receiving(changeBody to ChangePasswordRequest("correct horse battery", "purple octopus stapler"), definitionId = "ChangePassword")
+    returning(NO_CONTENT to "The password is changed")
+    returning(BAD_REQUEST, problemBody to Problem("invalid-password"), "invalid-password: the new one is too short or too long", definitionId = "Problem")
+    returning(FORBIDDEN, problemBody to Problem("wrong-password"), "wrong-password or first-party-only", definitionId = "Problem")
+} bindContract POST to { request ->
+    val body = changeBody(request)
+    when (val problem = resets.change(request.caller as Caller.Signed, body.currentPassword, body.newPassword)) {
+        null -> Response(NO_CONTENT)
+        AccountProblem.InvalidPassword -> Response(BAD_REQUEST).with(problemBody of Problem(problem.code))
         else -> Response(FORBIDDEN).with(problemBody of Problem(problem.code))
     }
 }
