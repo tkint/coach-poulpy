@@ -103,7 +103,7 @@ fun PlayerScreen(graph: AppGraph, language: String, workoutId: String?, onClose:
 
     Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Column(
-            Modifier.safeDrawingPadding().padding(24.dp).fillMaxSize(),
+            Modifier.safeDrawingPadding().padding(start = 24.dp, end = 24.dp, bottom = 24.dp).padding(top = PoulpySpace.xs).fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             when (state.status) {

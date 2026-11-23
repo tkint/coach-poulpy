@@ -673,6 +673,7 @@
     "linkExpiredTitle": "Ce lien ne fonctionne plus",
     "linkExpiredBody": "Il a peut-être déjà servi, ou il a expiré au bout de 24 heures. Inscrivez-vous de nouveau avec la même adresse et nous en enverrons un nouveau.",
     "backToSignUp": "Retour à l’inscription",
+    "backToProfile": "Retour au profil",
     "stateUpToDate": "À jour",
     "stateLastSynced": "Dernière synchronisation {when}",
     "stateNotSyncing": "Pas encore de synchronisation",

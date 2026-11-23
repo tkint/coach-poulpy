@@ -10,6 +10,9 @@ import java.time.Duration
 import java.time.OffsetDateTime
 import java.util.UUID
 
+/** One phone or browser signed in to an account, as the list of devices shows it. */
+data class Device(val id: UUID, val name: String, val client: Client, val signedInAt: OffsetDateTime, val lastUsedAt: OffsetDateTime)
+
 /** The tokens a sign-in or a refresh hands out (ADR 0020). */
 data class Tokens(val accessToken: String, val refreshToken: String, val expiresIn: Duration)
 
@@ -94,8 +97,30 @@ class SignIns(
     /** The `cp_at_` authenticator: a live access token gives its account, client and scopes. */
     val authenticator = Authenticator { token ->
         queries.liveCaller(hashOf(token), OffsetDateTime.now(clock)).executeAsOneOrNull()?.let {
-            Caller.Signed(AccountId.of(it.account_id), Client(it.client), FIRST_PARTY_SCOPES, Role.of(it.role))
+            Caller.Signed(AccountId.of(it.account_id), Client(it.client), FIRST_PARTY_SCOPES, Role.of(it.role), signInId = it.id)
         }
+    }
+
+    /** The devices [account] is signed in on, most recently used first. */
+    fun devices(account: UUID): List<Device> = queries.devices(account).executeAsList().map {
+        Device(it.id, it.device_name, Client(it.client), it.created_at, it.last_refreshed_at)
+    }
+
+    /** Signs the device [signIn] of [account] out; false when it is not one of the account's live devices. */
+    fun signOut(account: UUID, signIn: UUID): Boolean = database.queries.transactionWithResult {
+        val now = OffsetDateTime.now(clock)
+        val done = queries.revokeOwned(now, signIn, account).executeAsOneOrNull() != null
+        if (done) queries.deleteAccessTokens(signIn)
+        done
+    }
+
+    /** Signs every device of [account] out but [keep], the caller's own. */
+    fun signOutOthers(account: UUID, keep: UUID) = database.queries.transaction { revokeAllExcept(account, keep, OffsetDateTime.now(clock)) }
+
+    /** Signs every device of [account] out but [keep], as changing the password does. Call it inside a transaction. */
+    internal fun revokeAllExcept(account: UUID, keep: UUID, now: OffsetDateTime) {
+        queries.revokeAllExcept(now, account, keep)
+        queries.deleteAccessTokensExcept(account, keep)
     }
 
     /** Signs every device of [account] out, as a new password does. Call it inside a transaction. */

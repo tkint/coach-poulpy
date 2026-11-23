@@ -51,7 +51,6 @@ import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -117,10 +116,10 @@ fun HistoryScreen(graph: AppGraph, language: String, onOpen: (String) -> Unit, m
 
     Column(modifier.fillMaxSize()) {
         Column(
-            Modifier.padding(start = PoulpySpace.lg, end = PoulpySpace.lg, top = PoulpySpace.lg),
+            Modifier.padding(start = PoulpySpace.lg, end = PoulpySpace.lg, top = PoulpySpace.xs),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            Text(stringResource(R.string.tab_history), style = MaterialTheme.typography.headlineMedium)
+            Text(stringResource(R.string.tab_history), style = tabTitleStyle())
             ViewSwitch(view, onSelect = { view = it })
         }
         if (!state.loaded) return@Column
@@ -644,11 +643,11 @@ fun SessionDetailScreen(graph: AppGraph, language: String, sessionId: String, on
         val figure = remember(graph, context) { graph.profile(AppPreferences(context)).profile.value.bodyFigure ?: BodyFigure.SHOULDERS }
         SessionRecapSheet(recap, dateLine, figure, onBack = onBack, onShare = { sharing = true }, onDelete = { deleting = true })
     } else {
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = {},
-                    navigationIcon = { BackButton(onBack) },
+        Scaffold { padding ->
+            Column(Modifier.padding(padding).fillMaxSize()) {
+                AppBar(
+                    title = null,
+                    leading = { BackButton(onBack) },
                     actions = {
                         if (session != null) {
                             IconButton(onClick = { sharing = true }) {
@@ -660,9 +659,8 @@ fun SessionDetailScreen(graph: AppGraph, language: String, sessionId: String, on
                         }
                     },
                 )
-            },
-        ) { padding ->
-            if (recap != null) SessionRecapContent(recap, dateLine, Modifier.padding(padding))
+                if (recap != null) SessionRecapContent(recap, dateLine, Modifier.weight(1f))
+            }
         }
     }
 

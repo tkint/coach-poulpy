@@ -6,6 +6,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.LineHeightStyle
 
 private val LocalPoulpyExtraColors = staticCompositionLocalOf { PoulpyLightExtras }
 
@@ -29,3 +31,10 @@ object PoulpyTheme {
         @Composable @ReadOnlyComposable
         get() = LocalPoulpyExtraColors.current
 }
+
+/** A tab's title, with the space the line adds above and below the letters trimmed, so it sits right under the status bar. */
+@Composable
+@ReadOnlyComposable
+internal fun tabTitleStyle(): TextStyle = MaterialTheme.typography.headlineMedium.copy(
+    lineHeightStyle = LineHeightStyle(alignment = LineHeightStyle.Alignment.Center, trim = LineHeightStyle.Trim.Both),
+)
