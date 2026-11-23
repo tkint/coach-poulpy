@@ -76,7 +76,7 @@ private func lastSynced(_ state: AccountStateSignedIn) -> String? {
 
 private enum LeaveDialog { case signOut, unsent }
 
-/// Settings › Account: the address, the sync state, what follows the account, Sign out and Delete account.
+/// Profile › Account, as the Account stories draw it: the address, the sync state, what follows the account, Sign out and Delete account.
 struct AccountPage: View {
     @ObservedObject var account: Observed<AccountModel, AccountState>
     let onFlow: (String) -> Void
@@ -112,11 +112,11 @@ struct AccountPage: View {
                         Button { onFlow("sign-up") } label: {
                             Label("account.createAnAccount", lucide: .circlePlus).frame(maxWidth: .infinity)
                         }
-                        .buttonStyle(PoulpyButtonStyle(.primary, size: .lg))
+                        .buttonStyle(PoulpyButtonStyle(.primary, size: .md))
                         Button { onFlow("sign-in") } label: {
                             Label("account.signIn", lucide: .logIn).frame(maxWidth: .infinity)
                         }
-                        .buttonStyle(PoulpyButtonStyle(.secondary, size: .lg))
+                        .buttonStyle(PoulpyButtonStyle(.secondary, size: .md))
                     }
                     .padding(.top, 8)
                 }
@@ -132,7 +132,7 @@ struct AccountPage: View {
                 }
                 if let pending = state as? AccountStatePending {
                     VStack(alignment: .leading, spacing: 8) {
-                        Label("account.pendingTitle", lucide: .info).font(.poulpy(.title3))
+                        Label("account.pendingTitle", lucide: .mail).font(.poulpy(.title3))
                         Text(L("account.pendingBody %@", pending.email)).font(.poulpy(.callout).weight(.semibold))
                         HelpLine(question: "account.noEmail", link: "account.sendAgain") {
                             Task { @MainActor in
@@ -163,12 +163,12 @@ struct AccountPage: View {
                     // CLEANUP: Export my data (account-details mockup) waits for an export of the whole phone.
                     VStack(spacing: 4) {
                         Button { dialog = signedIn.upToDate ? .signOut : .unsent } label: {
-                            Text("account.signOut")
+                            Label("account.signOut", lucide: .logOut)
                                 .frame(maxWidth: .infinity)
                         }
-                        .buttonStyle(PoulpyButtonStyle(.secondary, size: .lg))
+                        .buttonStyle(PoulpyButtonStyle(.secondary, size: .md))
                         Button { deleting = true } label: {
-                            Text("account.deleteAccount").font(.poulpy(.headline).weight(.heavy)).foregroundStyle(PoulpyColor.error).frame(minHeight: 44)
+                            Label("account.deleteAccount", lucide: .trash).font(.poulpy(.headline).weight(.heavy)).foregroundStyle(PoulpyColor.error).frame(minHeight: 44)
                         }
                     }
                     .padding(.top, 8)

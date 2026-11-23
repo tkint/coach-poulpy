@@ -121,11 +121,12 @@ internal fun SubPage(
     action: (@Composable () -> Unit)? = null,
     topPadding: Dp = PoulpySpace.lg,
     spacing: Dp = 10.dp,
+    backLabel: String? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     Column(modifier.fillMaxSize()) {
         Row(Modifier.padding(start = 4.dp, end = 12.dp, top = PoulpySpace.xs), verticalAlignment = Alignment.CenterVertically) {
-            BackButton(onBack)
+            BackButton(onBack, backLabel)
             Column(Modifier.weight(1f)) {
                 Text(title, style = MaterialTheme.typography.headlineSmall)
                 subtitle?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }

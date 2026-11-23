@@ -125,7 +125,7 @@ fun BuilderScreen(graph: AppGraph, language: String, workoutId: String?, onClose
         BackHandler { pickingPart = null; pickingRepeat = null }
         Scaffold { padding ->
             Column(Modifier.padding(padding).fillMaxSize()) {
-                AppBar(stringResource(R.string.builder_pickTitle), leading = { BackButton { pickingPart = null; pickingRepeat = null } })
+                AppBar(stringResource(R.string.builder_pickTitle), leading = { BackButton(onBack = { pickingPart = null; pickingRepeat = null }) })
                 ExerciseList(
                     graph, language,
                     onPick = { model.add(it, part, pickingRepeat); pickingPart = null; pickingRepeat = null },

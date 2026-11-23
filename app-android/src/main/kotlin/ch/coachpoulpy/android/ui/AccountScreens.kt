@@ -140,7 +140,7 @@ private fun since(at: Instant): String {
 
 private enum class LeaveDialog { SIGN_OUT, UNSENT }
 
-/** Settings › Account: the address, the sync state, what follows the account, Sign out and Delete account. */
+/** Profile › Account, as the Account stories draw it: the address, the sync state, what follows the account, Sign out and Delete account. */
 @Composable
 internal fun AccountPage(onBack: () -> Unit, onFlow: (String) -> Unit, modifier: Modifier = Modifier) {
     val account = rememberAccount()
@@ -151,7 +151,7 @@ internal fun AccountPage(onBack: () -> Unit, onFlow: (String) -> Unit, modifier:
     val current = state
     if (current == AccountState.Guest) {
         // A guest, or signed out or deleted: what an account adds, and the way in.
-        SubPage(stringResource(R.string.account_title), subtitle = null, onBack = onBack, modifier = modifier) {
+        SubPage(stringResource(R.string.account_title), subtitle = null, onBack = onBack, modifier = modifier, backLabel = stringResource(R.string.account_backToProfile)) {
             OutlinedSurface {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     Text(stringResource(R.string.you_badgeGuest), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -165,11 +165,11 @@ internal fun AccountPage(onBack: () -> Unit, onFlow: (String) -> Unit, modifier:
                 }
             }
             Column(Modifier.fillMaxWidth().padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                PoulpyButton(onClick = { onFlow("sign-up") }, size = PoulpyButtonSize.Lg, modifier = Modifier.fillMaxWidth()) {
+                PoulpyButton(onClick = { onFlow("sign-up") }, size = PoulpyButtonSize.Md, modifier = Modifier.fillMaxWidth()) {
                     Icon(Lucide.CirclePlus, contentDescription = null)
                     Text(stringResource(R.string.account_createAnAccount), modifier = Modifier.padding(start = 8.dp))
                 }
-                PoulpyButton(onClick = { onFlow("sign-in") }, kind = PoulpyButtonKind.Secondary, size = PoulpyButtonSize.Lg, modifier = Modifier.fillMaxWidth()) {
+                PoulpyButton(onClick = { onFlow("sign-in") }, kind = PoulpyButtonKind.Secondary, size = PoulpyButtonSize.Md, modifier = Modifier.fillMaxWidth()) {
                     Icon(Lucide.LogIn, contentDescription = null)
                     Text(stringResource(R.string.account_signIn), modifier = Modifier.padding(start = 8.dp), color = MaterialTheme.colorScheme.onSurface)
                 }
@@ -183,7 +183,7 @@ internal fun AccountPage(onBack: () -> Unit, onFlow: (String) -> Unit, modifier:
         AccountState.Guest -> ""
     }
 
-    SubPage(stringResource(R.string.account_title), subtitle = null, onBack = onBack, modifier = modifier) {
+    SubPage(stringResource(R.string.account_title), subtitle = null, onBack = onBack, modifier = modifier, backLabel = stringResource(R.string.account_backToProfile)) {
         OutlinedSurface {
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(stringResource(R.string.account_email), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -195,7 +195,7 @@ internal fun AccountPage(onBack: () -> Unit, onFlow: (String) -> Unit, modifier:
                 Surface(Modifier.fillMaxWidth(), shape = RoundedCornerShape(PoulpyRadius.md), color = MaterialTheme.colorScheme.primaryContainer) {
                     Column(Modifier.padding(horizontal = 14.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Icon(Lucide.Info, contentDescription = null)
+                            Icon(Lucide.Mail, contentDescription = null)
                             Text(stringResource(R.string.account_pendingTitle), style = MaterialTheme.typography.titleMedium)
                         }
                         Text(stringResource(R.string.account_pendingBody, current.email), fontWeight = FontWeight.SemiBold)
@@ -227,11 +227,15 @@ internal fun AccountPage(onBack: () -> Unit, onFlow: (String) -> Unit, modifier:
                     PoulpyButton(
                         onClick = { dialog = if (current.upToDate) LeaveDialog.SIGN_OUT else LeaveDialog.UNSENT },
                         kind = PoulpyButtonKind.Secondary,
-                        size = PoulpyButtonSize.Lg,
+                        size = PoulpyButtonSize.Md,
                         modifier = Modifier.fillMaxWidth(),
-                    ) { Text(stringResource(R.string.account_signOut), color = MaterialTheme.colorScheme.onSurface) }
+                    ) {
+                        Icon(Lucide.LogOut, contentDescription = null)
+                        Text(stringResource(R.string.account_signOut), modifier = Modifier.padding(start = 8.dp), color = MaterialTheme.colorScheme.onSurface)
+                    }
                     TextButton(onClick = { deleting = true }) {
-                        Text(stringResource(R.string.account_deleteAccount), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.error)
+                        Icon(Lucide.Trash, contentDescription = null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(20.dp))
+                        Text(stringResource(R.string.account_deleteAccount), modifier = Modifier.padding(start = 4.dp), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.error)
                     }
                 }
             }
