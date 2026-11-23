@@ -14,14 +14,14 @@ type Story = StoryObj<typeof meta>
 
 const story = (markup: string): Story => ({ render: () => h(Screen, { markup: bar(markup) }) })
 
-/** Home: the date moves to the right, so the bar stays one row. */
-export const Home: Story = story(`<MobileTopBar title="Home"><span class="label">Sat 24 Oct</span></MobileTopBar>`)
+/** Home: Record is the one action. */
+export const Home: Story = story(`<MobileTopBar title="Home"><MobileButton size="sm" icon="circle-dot">Record</MobileButton></MobileTopBar>`)
 /** Library: the tabs, search and filters are the page's, below the bar. */
 export const Library: Story = story(`<MobileTopBar title="Library" />`)
 /** Live: the device pill is the one action. */
 export const Live: Story = story(`<MobileTopBar title="Live"><button type="button" class="device-pill"><span class="dot" aria-hidden="true"></span>3 connected</button></MobileTopBar>`)
-/** History: the month button, as in the list-first draft (#511). */
-export const History: Story = story(`<MobileTopBar title="History"><button type="button" style="min-height: 44px; padding: 0 var(--cp-space-md); display: flex; align-items: center; gap: var(--cp-space-xs); font-size: 15px; font-weight: 800; color: var(--cp-primary);" aria-label="October 2026, open the month"><span>October 2026</span><MobileIcon name="chevron-down" :size="20" /></button></MobileTopBar>`)
+/** You: the cog opens Settings. */
+export const You: Story = story(`<MobileTopBar title="You"><MobileIconButton icon="settings" :icon-size="22" aria-label="Settings" /></MobileTopBar>`)
 /** Settings, with its add button at the 40 size, as every bar action. */
 export const Settings: Story = story(`<MobileTopBar title="Settings"><MobileIconButton icon="plus" :icon-size="22" filled aria-label="Add a device" /></MobileTopBar>`)
 /** A screen reached from another: back, the title, an action. */

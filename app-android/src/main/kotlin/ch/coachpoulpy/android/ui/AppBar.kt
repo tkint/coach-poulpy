@@ -22,11 +22,12 @@ import ch.coachpoulpy.android.R
 @Composable
 internal fun AppBar(
     title: String?,
+    modifier: Modifier = Modifier,
     leading: @Composable () -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {},
 ) {
     Row(
-        Modifier.fillMaxWidth().padding(start = 4.dp, end = 12.dp, top = PoulpySpace.xs),
+        modifier.fillMaxWidth().padding(start = 4.dp, end = 12.dp, top = PoulpySpace.xs),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         leading()

@@ -30,11 +30,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -56,6 +54,8 @@ import ch.coachpoulpy.shared.AppGraph
 import ch.coachpoulpy.shared.BodyView
 import ch.coachpoulpy.shared.ExerciseDetail
 import ch.coachpoulpy.shared.VariationRow
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 
 /** The two halves of an exercise's page. */
 internal enum class ExerciseTab { MUSCLES, HOW }
@@ -116,23 +116,12 @@ fun ExerciseDetailScreen(
 /** Back, and the variations button when the exercise is in a variation group. */
 @Composable
 private fun TopBar(detail: ExerciseDetail, onBack: () -> Unit, onVariations: () -> Unit) {
-    val colors = MaterialTheme.colorScheme
-    Box(Modifier.fillMaxWidth()) {
-        Row(
-            Modifier.statusBarsPadding().fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Surface(shape = CircleShape, color = colors.surface, modifier = Modifier.size(44.dp)) {
-                IconButton(onClick = onBack) {
-                    Icon(Lucide.ChevronLeft, contentDescription = stringResource(R.string.action_back))
-                }
-            }
-            if (detail.variations.isNotEmpty()) {
-                VariationButton(detail, onVariations)
-            }
-        }
-    }
+    AppBar(
+        title = null,
+        modifier = Modifier.statusBarsPadding(),
+        leading = { BackButton(onBack) },
+        actions = { if (detail.variations.isNotEmpty()) VariationButton(detail, onVariations) },
+    )
 }
 
 /** The eyebrow, the name and the equipment chip. */
