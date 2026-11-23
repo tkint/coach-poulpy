@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -35,18 +34,14 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -77,6 +72,8 @@ import ch.coachpoulpy.shared.WorkoutStepRow
 import java.time.Instant
 import java.time.ZoneId
 import java.util.Locale
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 
 /**
  * One saved workout: the muscles it works on a body map, and over it a sheet you drag up for its exercises, how it
@@ -115,23 +112,14 @@ fun WorkoutPageScreen(
     LaunchedEffect(state.loaded, state.found) { if (state.loaded && !state.found) onBack() }
 
     if (state.found) {
-        DetailSheet(
-            showBackgroundLabel = stringResource(R.string.workout_showMap),
-            showDetailsLabel = stringResource(R.string.workout_showExercises),
-            background = { room ->
-                val mapText = stringResource(R.string.workout_mapLabel, state.muscles.joinToString(", ") { it.label })
-                HeatMapPanel(
-                    room, figure, state.heat, state.painAreas.toSet(),
-                    description = if (state.painNote.isEmpty()) mapText else "$mapText. ${state.painNote}",
-                )
-            },
-            floating = {
-                Row(Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = PoulpySpace.lg, vertical = PoulpySpace.sm), horizontalArrangement = Arrangement.SpaceBetween) {
-                    FloatingButton(onClick = onBack) {
-                        Icon(Lucide.ChevronLeft, contentDescription = stringResource(R.string.action_back))
-                    }
+        Column(Modifier.fillMaxSize()) {
+            AppBar(
+                title = null,
+                modifier = Modifier.statusBarsPadding(),
+                leading = { BackButton(onBack) },
+                actions = {
                     Box {
-                        FloatingButton(onClick = { menu = true }) {
+                        IconButton(onClick = { menu = true }) {
                             Icon(Lucide.EllipsisVertical, contentDescription = stringResource(R.string.action_more))
                         }
                         DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
@@ -151,23 +139,36 @@ fun WorkoutPageScreen(
                             DeleteMenuItem(onClick = { menu = false; deleting = true })
                         }
                     }
-                }
-            },
-            actions = {
-                Row(Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = PoulpySpace.lg, vertical = 12.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    if (state.editable) {
-                        PoulpyButton(onClick = onEdit, kind = PoulpyButtonKind.Secondary, size = PoulpyButtonSize.Lg, modifier = Modifier.weight(1f)) {
-                            Icon(Lucide.Pencil, contentDescription = null)
-                            Text(stringResource(R.string.action_edit), modifier = Modifier.padding(start = 6.dp))
+                },
+            )
+            Box(Modifier.weight(1f)) {
+                DetailSheet(
+                    showBackgroundLabel = stringResource(R.string.workout_showMap),
+                    showDetailsLabel = stringResource(R.string.workout_showExercises),
+                    background = { room ->
+                        val mapText = stringResource(R.string.workout_mapLabel, state.muscles.joinToString(", ") { it.label })
+                        HeatMapPanel(
+                            room, figure, state.heat, state.painAreas.toSet(),
+                            description = if (state.painNote.isEmpty()) mapText else "$mapText. ${state.painNote}",
+                        )
+                    },
+                    actions = {
+                        Row(Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = PoulpySpace.lg, vertical = 12.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            if (state.editable) {
+                                PoulpyButton(onClick = onEdit, kind = PoulpyButtonKind.Secondary, size = PoulpyButtonSize.Lg, modifier = Modifier.weight(1f)) {
+                                    Icon(Lucide.Pencil, contentDescription = null)
+                                    Text(stringResource(R.string.action_edit), modifier = Modifier.padding(start = 6.dp))
+                                }
+                            }
+                            PoulpyButton(onClick = onStart, size = PoulpyButtonSize.Lg, modifier = Modifier.weight(1.6f)) {
+                                Icon(Lucide.Play, contentDescription = null)
+                                Text(stringResource(R.string.workout_start), modifier = Modifier.padding(start = 6.dp))
+                            }
                         }
-                    }
-                    PoulpyButton(onClick = onStart, size = PoulpyButtonSize.Lg, modifier = Modifier.weight(1.6f)) {
-                        Icon(Lucide.Play, contentDescription = null)
-                        Text(stringResource(R.string.workout_start), modifier = Modifier.padding(start = 6.dp))
-                    }
-                }
-            },
-        ) {
+                    },
+                )
+            }
+        } {
             WorkoutDetails(state, onPlan = { picking = true }, onOpen = { detailing = it })
         }
     }
@@ -211,19 +212,6 @@ fun WorkoutPageScreen(
             adding = false,
             closeLabel = null,
         )
-    }
-}
-
-/** A round filled button over the map, with a thin outline so it stays visible on any heat. */
-@Composable
-internal fun FloatingButton(onClick: () -> Unit, content: @Composable () -> Unit) {
-    Surface(
-        shape = CircleShape,
-        color = MaterialTheme.colorScheme.surface,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
-        modifier = Modifier.size(PoulpySize.iconButton),
-    ) {
-        IconButton(onClick = onClick) { content() }
     }
 }
 
