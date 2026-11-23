@@ -1,1 +1,0 @@
-import{_ as t,o,c as a,a3 as s}from"./chunks/framework.DURWMSe4.js";const g=JSON.parse('{"title":"Coach Poulpy","description":"","frontmatter":{},"headers":[],"relativePath":"CONTEXT.md","filePath":"CONTEXT.md"}'),n={name:"CONTEXT.md"};function r(i,e,d,h,p,l){return o(),a("div",null,[...e[0]||(e[0]=[s("",80)])])}const m=t(n,[["render",r]]);export{g as __pageData,m as default};
