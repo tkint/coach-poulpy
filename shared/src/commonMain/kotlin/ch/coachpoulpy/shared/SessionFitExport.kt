@@ -22,11 +22,17 @@ class SessionFitFile(val fileName: String, val bytes: ByteArray)
  * The .FIT file of a session of the history (ADR 0011), rebuilt from what the phone kept. Its FIT sport
  * follows what the session holds, not a workout type.
  */
-internal class SessionFitExport(private val store: LocalStore, private val compiler: TimelineCompiler, private val catalog: Catalog) {
-    fun file(sessionId: String, zone: TimeZone): SessionFitFile? {
+internal class SessionFitExport(private val compiler: TimelineCompiler, private val catalog: Catalog) {
+    /** The .FIT file of a session the phone kept. */
+    fun file(store: LocalStore, sessionId: String, zone: TimeZone): SessionFitFile? {
         val stored = store.finishedSession(sessionId) ?: return null
-        val events = store.events(sessionId)
         val workout = stored.record.workout?.let { store.workout(it.workoutId, it.version) }
+        return file(stored, store.events(sessionId), workout, zone)
+    }
+
+    /** The .FIT file of [stored], from its [events] and the [workout] version it followed; what the server's export uses too. */
+    fun file(stored: StoredSession, events: List<SessionEvent>, workout: Workout?, zone: TimeZone): SessionFitFile? {
+        val sessionId = stored.record.id.value
         val timeline = sessionTimeline(stored, workout, compiler)
         val start = stored.record.startedAt
         val bytes = FitActivity.encode(
@@ -53,3 +59,10 @@ internal class SessionFitExport(private val store: LocalStore, private val compi
         return FitSport.of(stored.format ?: workout?.format ?: WorkoutFormat.CIRCUIT, walksAndRuns, treadmill)
     }
 }
+
+/**
+ * The .FIT file of a finished session outside the phone, as the account's export builds it on the server: the session,
+ * its events and the workout version it followed, with the exercises of [catalog]. Null when it never started.
+ */
+fun sessionFitFile(stored: StoredSession, events: List<SessionEvent>, workout: Workout?, catalog: Catalog, zone: TimeZone): SessionFitFile? =
+    SessionFitExport(TimelineCompiler(), catalog).file(stored, events, workout, zone)

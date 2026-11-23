@@ -81,7 +81,7 @@ class AppGraph(driverFactory: DriverFactory) {
 
     /** The .FIT file of a finished session, to import into Garmin Connect or upload to Strava; null when it never started. */
     fun sessionFitFile(sessionId: String): SessionFitFile? =
-        SessionFitExport(store, compiler, catalog).file(sessionId, TimeZone.currentSystemDefault())
+        SessionFitExport(compiler, catalog).file(store, sessionId, TimeZone.currentSystemDefault())
 
     private var profileModel: ProfileModel? = null
 

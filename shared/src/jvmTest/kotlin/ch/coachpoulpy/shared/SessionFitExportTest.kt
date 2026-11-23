@@ -28,7 +28,7 @@ import kotlinx.datetime.TimeZone
 /** A session of the history as a .FIT file: its sport comes from what it holds, and the file is named by its start. */
 class SessionFitExportTest {
     private val graph = AppGraph(DriverFactory()).withSampleCatalog()
-    private val export = SessionFitExport(graph.store, graph.compiler, graph.catalog)
+    private val export = SessionFitExport(graph.compiler, graph.catalog)
     private val start = Instant.parse("2023-11-13T08:05:00Z")
 
     private fun step(slug: String) =
@@ -75,10 +75,10 @@ class SessionFitExportTest {
     fun theFileIsNamedByWhenTheSessionStarted() {
         session("sets", workoutOf("sets", "Legs", listOf(step("push-up")), WorkoutFormat.SETS))
 
-        val file = assertNotNull(export.file("sets", TimeZone.of("Europe/Zurich")))
+        val file = assertNotNull(export.file(graph.store, "sets", TimeZone.of("Europe/Zurich")))
 
         assertEquals("coach-poulpy-2023-11-13-0905.fit", file.fileName)
         assertEquals(".FIT", file.bytes.copyOfRange(8, 12).decodeToString())
-        assertNull(export.file("unknown", TimeZone.UTC))
+        assertNull(export.file(graph.store, "unknown", TimeZone.UTC))
     }
 }
