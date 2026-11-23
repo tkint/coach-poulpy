@@ -71,6 +71,10 @@ When two phones change the same thing, the rules are simple:
 - **Sessions are never merged.** Only the phone that recorded a session changes it.
 - **For everything else** (a planned day, a body measurement, a profile field) the latest change wins.
 
+## Exporting your data
+
+Account › Export my data downloads one .zip built from the account, so it holds what every phone sent. `coach-poulpy.json` lists every change the account stores, as sync pulls them. `sessions/` holds each finished session as a .FIT file for Garmin Connect or Strava.
+
 ## Leaving
 
 - **Deleting the account is immediate**, once the person types their password. All their data goes, every phone signs out and becomes a guest with its own copy, and backups age out within 30 days.

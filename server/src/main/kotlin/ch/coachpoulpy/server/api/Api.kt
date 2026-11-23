@@ -10,6 +10,7 @@ import ch.coachpoulpy.server.admin.ServerSettings
 import ch.coachpoulpy.server.mail.NoMailServer
 import ch.coachpoulpy.server.mail.SettingsMailer
 import ch.coachpoulpy.server.accounts.AccountDeletion
+import ch.coachpoulpy.server.accounts.AccountExport
 import ch.coachpoulpy.server.accounts.Accounts
 import ch.coachpoulpy.server.accounts.PasswordResets
 import ch.coachpoulpy.server.auth.SignIns
@@ -71,6 +72,7 @@ fun apiRoutes(
     devicesRoute(signIns),
     signOutDeviceRoute(signIns),
     signOutOtherDevicesRoute(signIns),
+    exportRoute(AccountExport(sync, ServerCatalog(database)::published)),
     pushRoute(sync),
     pullRoute(sync),
     workoutsRoute(WorkoutLibrary(database, ServerCatalog(database)::published)),
