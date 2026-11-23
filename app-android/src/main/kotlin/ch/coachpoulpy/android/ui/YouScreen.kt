@@ -71,10 +71,10 @@ fun YouScreen(
 
     Column(modifier.fillMaxSize()) {
         Row(
-            Modifier.fillMaxWidth().padding(start = PoulpySpace.lg, end = PoulpySpace.sm, top = PoulpySpace.lg),
+            Modifier.fillMaxWidth().padding(start = PoulpySpace.lg, end = PoulpySpace.sm, top = PoulpySpace.xs),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(stringResource(R.string.tab_you), style = MaterialTheme.typography.headlineMedium, modifier = Modifier.weight(1f))
+            Text(stringResource(R.string.tab_you), style = tabTitleStyle(), modifier = Modifier.weight(1f))
             IconButton(onClick = onSettings, modifier = Modifier.size(PoulpySize.touch)) {
                 Icon(Lucide.Settings, contentDescription = stringResource(R.string.tab_settings), modifier = Modifier.size(22.dp))
             }

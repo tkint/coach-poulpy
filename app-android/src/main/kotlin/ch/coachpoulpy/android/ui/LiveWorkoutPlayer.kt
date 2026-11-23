@@ -61,7 +61,7 @@ internal fun LiveWorkoutPlayer(state: LiveUiState, recording: RecordingUi, playe
 
     Surface(modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Column(
-            Modifier.safeDrawingPadding().padding(24.dp).fillMaxSize(),
+            Modifier.safeDrawingPadding().padding(start = 24.dp, end = 24.dp, bottom = 24.dp).padding(top = PoulpySpace.xs).fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             PlayerBar(

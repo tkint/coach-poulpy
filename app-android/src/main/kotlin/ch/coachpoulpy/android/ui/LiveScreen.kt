@@ -101,6 +101,8 @@ fun LiveScreen(
     modifier: Modifier = Modifier,
     /** Says whether the screen takes the whole display, tab bar included: a mixed workout plays full screen (#82). */
     onFullScreen: (Boolean) -> Unit = {},
+    /** A pushed Live screen has a back chevron in its title row; null on the tab. */
+    onBack: (() -> Unit)? = null,
 ) {
     val context = LocalContext.current
     val memory = remember(context) { AppPreferences(context) }
@@ -132,11 +134,12 @@ fun LiveScreen(
     }
 
     Column(
-        modifier.fillMaxSize().padding(start = PoulpySpace.lg, end = PoulpySpace.lg, top = PoulpySpace.lg, bottom = PoulpySpace.md),
+        modifier.fillMaxSize().padding(start = PoulpySpace.lg, end = PoulpySpace.lg, top = PoulpySpace.xs, bottom = PoulpySpace.md),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(stringResource(R.string.tab_live), style = MaterialTheme.typography.headlineMedium, modifier = Modifier.weight(1f))
+            if (onBack != null) IconButton(onClick = onBack) { Icon(Lucide.ChevronLeft, contentDescription = stringResource(R.string.action_back)) }
+            Text(stringResource(R.string.tab_live), style = tabTitleStyle(), modifier = Modifier.weight(1f))
             ConnectedChip(state.connectedCount, onManageDevices)
         }
         if (state.connection == LiveConnection.EMPTY && state.recording == null) {

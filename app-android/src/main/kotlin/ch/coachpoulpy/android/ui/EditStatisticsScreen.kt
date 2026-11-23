@@ -59,16 +59,13 @@ fun EditStatisticsScreen(graph: AppGraph, language: String, onClose: () -> Unit,
     val gap = with(LocalDensity.current) { PoulpySpace.sm.toPx() }
 
     Column(modifier.fillMaxSize()) {
-        Row(
-            Modifier.fillMaxWidth().padding(start = 4.dp, end = PoulpySpace.lg, top = PoulpySpace.md),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            IconButton(onClick = onClose) { Icon(Lucide.X, contentDescription = stringResource(R.string.action_close)) }
-            Text(stringResource(R.string.you_editTitle), style = MaterialTheme.typography.headlineSmall, modifier = Modifier.weight(1f))
-            PoulpyButton(onClick = onClose, size = PoulpyButtonSize.Sm) { Text(stringResource(R.string.action_done)) }
-        }
+        AppBar(
+            title = stringResource(R.string.you_editTitle),
+            leading = { CloseButton(onClose) },
+            actions = { PoulpyButton(onClick = onClose, size = PoulpyButtonSize.Sm) { Text(stringResource(R.string.action_done)) } },
+        )
         Column(
-            Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = PoulpySpace.lg, vertical = PoulpySpace.sm),
+            Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = PoulpySpace.lg, vertical = PoulpySpace.sm),
             verticalArrangement = Arrangement.spacedBy(PoulpySpace.sm),
         ) {
             Note(stringResource(R.string.you_editNote))
