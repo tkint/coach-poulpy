@@ -116,10 +116,10 @@ fun HistoryScreen(graph: AppGraph, language: String, onOpen: (String) -> Unit, m
 
     Column(modifier.fillMaxSize()) {
         Column(
-            Modifier.padding(start = PoulpySpace.lg, end = PoulpySpace.lg, top = PoulpySpace.lg),
+            Modifier.padding(start = PoulpySpace.lg, end = PoulpySpace.lg, top = PoulpySpace.xs),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            Text(stringResource(R.string.tab_history), style = MaterialTheme.typography.headlineMedium)
+            Text(stringResource(R.string.tab_history), style = tabTitleStyle())
             ViewSwitch(view, onSelect = { view = it })
         }
         if (!state.loaded) return@Column
