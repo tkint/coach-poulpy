@@ -65,7 +65,6 @@ class AppGraph(driverFactory: DriverFactory) {
     }
     /** A workout file's text, read for the preview before it is added to the library. */
     fun importWorkout(fileText: String, languageCode: String) = WorkoutImport(fileText, store, catalog, compiler, languageCode, ::units)
-    // CLEANUP: History's Poulpy header ignores pain or rehab, so it can show the ember side inside the blue-side window. Pass the profile's painActive here like home() does.
     fun history(languageCode: String) = HistoryModel(store, compiler, languageCode)
 
     /** You's Statistics: the sessions of a period, the latest weight, Poulpy's tentacles and the blocks shown. */
