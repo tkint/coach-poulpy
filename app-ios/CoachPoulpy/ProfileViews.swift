@@ -3,7 +3,7 @@ import Charts
 import Shared
 
 /// The pages You opens inside its tab: Settings, Profile and what hangs off them. Device pages open through `DeviceRoute`.
-enum SettingsPage: Hashable { case settings, profile, account, devices }
+enum SettingsPage: Hashable { case settings, profile, account, accountPassword, accountDevices, accountExport, devices }
 
 // MARK: - Profile
 

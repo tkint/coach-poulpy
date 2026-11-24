@@ -343,6 +343,73 @@ class AccountModelTest {
         assertEquals(listOf("Legs"), store.savedWorkouts().map { it.workout.name })
         assertEquals(0, store.outbox(10).size)
     }
+
+    @Test
+    fun aNewPasswordIsTypedTwiceAndCheckedBeforeSending() = runTest {
+        serverAccepts()
+        val account = model()
+        account.signIn("ana@example.com", "secret-pass")
+        calls.clear()
+
+        assertEquals(ChangePasswordResult.TOO_SHORT, account.changePassword("secret-pass", "short", "short"))
+        assertEquals(ChangePasswordResult.MISMATCH, account.changePassword("secret-pass", "purple octopus", "purple octopsu"))
+        assertTrue(calls.none { it.endsWith("/me/password") })
+
+        answers["POST /api/v1/me/password"] = { json("""{"error":"wrong-password"}""", HttpStatusCode.Forbidden) }
+        assertEquals(ChangePasswordResult.WRONG_PASSWORD, account.changePassword("guess", "purple octopus", "purple octopus"))
+        answers["POST /api/v1/me/password"] = { respond("", HttpStatusCode.NoContent) }
+        assertEquals(ChangePasswordResult.CHANGED, account.changePassword("secret-pass", "purple octopus", "purple octopus"))
+        assertIs<AccountState.SignedIn>(account.state.value)
+
+        offline = true
+        assertEquals(ChangePasswordResult.OFFLINE, account.changePassword("secret-pass", "purple octopus", "purple octopus"))
+    }
+
+    @Test
+    fun thisPhoneComesFirstInSignedInDevices() = runTest {
+        serverAccepts()
+        answers["GET /api/v1/me/devices"] = {
+            json(
+                """{"devices":[{"id":"d2","name":"Firefox on Windows","client":"web","signedInAt":"2026-09-01T08:00:00Z","lastUsedAt":"2026-11-22T21:40:00Z","current":false},""" +
+                    """{"id":"d3","name":"Pixel 8","client":"app","signedInAt":"2026-09-01T08:00:00Z","lastUsedAt":"2026-11-10T21:40:00Z","current":false},""" +
+                    """{"id":"d1","name":"Ana's iPhone","client":"app","signedInAt":"2026-10-01T08:00:00Z","lastUsedAt":"2026-11-20T07:15:00Z","current":true}]}""",
+            )
+        }
+        answers["DELETE /api/v1/me/devices/d2"] = { respond("", HttpStatusCode.NoContent) }
+        answers["DELETE /api/v1/me/devices"] = { respond("", HttpStatusCode.NoContent) }
+        val account = model()
+        account.signIn("ana@example.com", "secret-pass")
+
+        val devices = assertNotNull(account.devices())
+        assertEquals(listOf("Ana's iPhone", "Firefox on Windows", "Pixel 8"), devices.map { it.name })
+        assertEquals(listOf(true, false, true), devices.map { it.phone })
+        assertTrue(account.signOutDevice(devices[1]))
+        assertTrue(account.signOutOtherDevices())
+        assertIs<AccountState.SignedIn>(account.state.value)
+
+        offline = true
+        assertNull(account.devices())
+        assertEquals(false, account.signOutOtherDevices())
+    }
+
+    @Test
+    fun theExportSendsWhatWaitsFirst() = runTest {
+        serverAccepts()
+        answers["GET /api/v1/me/export"] = { respond(byteArrayOf(0x50, 0x4B), HttpStatusCode.OK, headersOf(HttpHeaders.ContentType, "application/zip")) }
+        val account = model()
+        account.signIn("ana@example.com", "secret-pass")
+        account.becomes { it is AccountState.SignedIn && it.upToDate }
+        store.saveWorkout(legs)
+        calls.clear()
+
+        val file = assertNotNull(account.exportData())
+
+        assertTrue(file.fileName.matches(Regex("coach-poulpy-\\d{4}-\\d{2}-\\d{2}\\.zip")), file.fileName)
+        assertEquals(2, file.bytes.size)
+        assertTrue(calls.indexOf("POST /api/v1/sync/push") in 0 until calls.indexOf("GET /api/v1/me/export"), calls.toString())
+        offline = true
+        assertNull(account.exportData())
+    }
 }
 
 internal class MemorySecrets : SecretStore {

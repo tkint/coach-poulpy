@@ -1,5 +1,6 @@
 import SwiftUI
 import Shared
+import UniformTypeIdentifiers
 
 // The account (docs/accounts.md): Settings' Account row and page, and the screens that open over the tabs to sign
 // in, sign up, confirm the email and reset a password. Mockups: Mobile > Screens > Accounts in the component
@@ -76,10 +77,12 @@ private func lastSynced(_ state: AccountStateSignedIn) -> String? {
 
 private enum LeaveDialog { case signOut, unsent }
 
-/// Profile › Account, as the Account stories draw it: the address, the sync state, what follows the account, Sign out and Delete account.
+/// Profile › Account, as the Account stories draw it: the address, the sync state, what follows the account, the Password,
+/// Signed-in devices and Export my data rows, Sign out and Delete account.
 struct AccountPage: View {
     @ObservedObject var account: Observed<AccountModel, AccountState>
     let onFlow: (String) -> Void
+    @State private var devices: [AccountDevice]?
     @State private var dialog: LeaveDialog?
     @State private var deleting = false
     // Refreshes "Last synced 2 min ago".
@@ -160,7 +163,20 @@ struct AccountPage: View {
                     .padding(16)
                     .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
                     .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(PoulpyColor.outline, lineWidth: 1))
-                    // CLEANUP: Export my data (account-details mockup) waits for an export of the whole phone.
+                    VStack(spacing: 0) {
+                        AccountRow(icon: .keyRound, title: "account.rowPassword", detail: L("account.rowPasswordDetail"), page: .accountPassword)
+                        Divider().overlay(PoulpyColor.outline)
+                        AccountRow(
+                            icon: .smartphone, title: "account.rowDevices",
+                            detail: devices.map { $0.map { $0.current ? L("account.thisPhone") : $0.name }.joined(separator: ", ") } ?? L("account.rowDevicesDetail"),
+                            page: .accountDevices
+                        )
+                        Divider().overlay(PoulpyColor.outline)
+                        AccountRow(icon: .download, title: "account.rowExport", detail: L("account.rowExportDetail"), page: .accountExport)
+                    }
+                    .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
+                    .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(PoulpyColor.outline, lineWidth: 1))
+                    .task { devices = try? await account.model.devices() }
                     VStack(spacing: 4) {
                         Button { dialog = signedIn.upToDate ? .signOut : .unsent } label: {
                             Label("account.signOut", lucide: .logOut)
@@ -206,6 +222,305 @@ struct AccountPage: View {
             let result = try? await account.model.signOut(evenWithChanges: evenWithChanges)
             dialog = result == SignOutResult.changesWaiting ? .unsent : nil
         }
+    }
+}
+
+/// A row of the Account page that opens one of its pages: an icon, a title with a line under it, and a chevron.
+private struct AccountRow: View {
+    let icon: Lucide
+    let title: LocalizedStringKey
+    let detail: String
+    let page: SettingsPage
+
+    var body: some View {
+        NavigationLink(value: page) {
+            HStack(spacing: 12) {
+                LucideIcon(icon, size: 24).foregroundStyle(PoulpyColor.primary).frame(width: 26)
+                VStack(alignment: .leading, spacing: 0) {
+                    Text(title).font(.poulpy(.headline)).foregroundStyle(PoulpyColor.onSurface)
+                    Text(detail).font(.poulpy(.footnote)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+                }
+                Spacer()
+                LucideIcon(.chevronRight, size: 16).foregroundStyle(PoulpyColor.onSurfaceVariant.opacity(0.6))
+            }
+            .frame(minHeight: 44)
+            .padding(.horizontal, 14)
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+// MARK: - Password, Signed-in devices and Export my data
+
+/// One wide button at the bottom of an Account page.
+private struct ActionBar<Content: View>: View {
+    var enabled = true
+    let action: () -> Void
+    @ViewBuilder var label: () -> Content
+
+    var body: some View {
+        Button(action: action) { label().frame(maxWidth: .infinity) }
+            .buttonStyle(PoulpyButtonStyle(.primary, size: .md))
+            .disabled(!enabled)
+            .padding(.horizontal, PoulpySpace.lg)
+            .padding(.vertical, 12)
+            .background(PoulpyColor.surface)
+    }
+}
+
+/// Goes back as soon as the phone is no longer signed in, such as when another device signed it out.
+private struct LeaveWhenSignedOut: ViewModifier {
+    let state: AccountState
+    @Environment(\.dismiss) private var dismiss
+
+    func body(content: Content) -> some View {
+        content.onChange(of: state is AccountStateSignedIn) { signedIn in
+            if !signedIn { dismiss() }
+        }
+    }
+}
+
+/// Account › Password: the current password and the new one typed twice. The other devices are signed out and this one
+/// stays signed in. Mockup: Mobile › Screens › You › Accounts › Password, devices and export. Mirrors AccountPasswordPage.
+struct AccountPasswordPage: View {
+    @ObservedObject var account: Observed<AccountModel, AccountState>
+    @Environment(\.dismiss) private var dismiss
+    @State private var current = ""
+    @State private var new = ""
+    @State private var repeated = ""
+    @State private var problem: ChangePasswordResult?
+    @State private var busy = false
+    @State private var resetSent: Bool?
+
+    var body: some View {
+        let email = (account.value as? AccountStateSignedIn)?.email ?? ""
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                if problem == ChangePasswordResult.wrongPassword { ErrorCard(L("account.errorCurrentPassword")) }
+                if problem == ChangePasswordResult.offline { ErrorCard(L("account.errorOffline")) }
+                PoulpyTextField(label: "account.currentPassword", text: $current, secure: true, contentType: .password)
+                    .onChange(of: current) { _ in if problem == ChangePasswordResult.wrongPassword { problem = nil } }
+                PoulpyTextField(
+                    label: "account.newPassword", text: $new, note: "account.passwordHint",
+                    error: problem == ChangePasswordResult.tooShort ? L("account.errorPasswordShort") : nil,
+                    secure: true, contentType: .newPassword
+                )
+                .onChange(of: new) { _ in problem = nil }
+                PoulpyTextField(
+                    label: "account.repeatPassword", text: $repeated,
+                    error: problem == ChangePasswordResult.mismatch ? L("account.errorPasswordMismatch") : nil,
+                    secure: true, contentType: .newPassword
+                )
+                .onChange(of: repeated) { _ in if problem == ChangePasswordResult.mismatch { problem = nil } }
+                HStack(alignment: .top, spacing: 12) {
+                    LucideIcon(.smartphone)
+                    Text("account.passwordOthersSignedOut").font(.poulpy(.callout).weight(.semibold))
+                }
+                .foregroundStyle(PoulpyColor.onPrimaryContainer)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(EdgeInsets(top: 12, leading: 14, bottom: 12, trailing: 14))
+                .background(PoulpyColor.primaryContainer, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
+                if resetSent == true { DoneLine(L("account.passwordResetSent %@", email)) }
+                if resetSent == false { ErrorCard(L("account.errorOffline")) }
+                HelpLine(question: "account.passwordForgot", link: "account.passwordResetLink") {
+                    Task { @MainActor in
+                        resetSent = (try? await account.model.requestPasswordReset(email: email))?.boolValue ?? false
+                    }
+                }
+            }
+            .padding(.horizontal, PoulpySpace.lg)
+            .padding(.vertical, 16)
+        }
+        .scrollDismissesKeyboard(.interactively)
+        .background(PoulpyColor.background)
+        .safeAreaInset(edge: .bottom) {
+            ActionBar(enabled: !busy && !current.isEmpty && !new.isEmpty && !repeated.isEmpty, action: change) {
+                Text("account.changePassword")
+            }
+        }
+        .navigationTitle("account.rowPassword")
+        .navigationBarTitleDisplayMode(.inline)
+        .modifier(LeaveWhenSignedOut(state: account.value))
+    }
+
+    private func change() {
+        busy = true
+        Task { @MainActor in
+            let result = (try? await account.model.changePassword(current: current, newPassword: new, repeated: repeated)) ?? ChangePasswordResult.offline
+            busy = false
+            if result == ChangePasswordResult.changed { dismiss() } else { problem = result }
+        }
+    }
+}
+
+/// Account › Signed-in devices: this phone first, then every other phone and browser, each with Sign out. Mirrors AccountDevicesPage.
+struct AccountDevicesPage: View {
+    @ObservedObject var account: Observed<AccountModel, AccountState>
+    @State private var devices: [AccountDevice]?
+    @State private var offline = false
+
+    var body: some View {
+        let email = (account.value as? AccountStateSignedIn)?.email ?? ""
+        ScrollView {
+            VStack(alignment: .leading, spacing: 10) {
+                Text(L("account.devicesIntro %@", email)).font(.poulpy(.footnote)).foregroundStyle(PoulpyColor.onSurfaceVariant).padding(.horizontal, 4)
+                if offline { ErrorCard(L("account.errorOffline")) }
+                if let devices {
+                    ForEach(devices, id: \.id) { device in
+                        DeviceRow(device: device) { update { (try? await account.model.signOutDevice(device: device))?.boolValue ?? false } }
+                    }
+                    if devices.contains(where: { !$0.current }) {
+                        Button { update { (try? await account.model.signOutOtherDevices())?.boolValue ?? false } } label: {
+                            Label("account.signOutOthers", lucide: .logOut).font(.poulpy(.headline).weight(.heavy)).foregroundStyle(PoulpyColor.error).frame(minHeight: 44)
+                        }
+                        .frame(maxWidth: .infinity)
+                    }
+                } else if !offline {
+                    ProgressView().frame(maxWidth: .infinity).padding(24)
+                }
+            }
+            .padding(.horizontal, PoulpySpace.lg)
+            .padding(.vertical, 16)
+        }
+        .background(PoulpyColor.background)
+        .navigationTitle("account.devicesTitle")
+        .navigationBarTitleDisplayMode(.inline)
+        .modifier(LeaveWhenSignedOut(state: account.value))
+        .task { await load() }
+        .refreshable { await load() }
+    }
+
+    private func load() async {
+        devices = try? await account.model.devices()
+        offline = devices == nil
+    }
+
+    private func update(_ call: @escaping () async -> Bool) {
+        Task { @MainActor in
+            offline = !(await call())
+            if !offline, let fresh = try? await account.model.devices() { devices = fresh }
+        }
+    }
+}
+
+/// A phone or browser: its icon, its name, This phone or when it was last used, and Sign out for the others.
+private struct DeviceRow: View {
+    let device: AccountDevice
+    let onSignOut: () -> Void
+
+    var body: some View {
+        HStack(spacing: 12) {
+            LucideIcon(device.phone ? .smartphone : .monitor, size: 22)
+                .foregroundStyle(device.current ? PoulpyColor.onPrimaryContainer : PoulpyColor.onSurfaceVariant)
+                .frame(width: 44, height: 44)
+                .background(device.current ? PoulpyColor.primaryContainer : PoulpyColor.surfaceVariant, in: Circle())
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(verbatim: device.name).font(.poulpy(.headline).weight(.heavy))
+                if device.current {
+                    Text("account.thisPhone")
+                        .font(.poulpy(.caption).weight(.heavy))
+                        .foregroundStyle(PoulpyColor.onSurfaceVariant)
+                        .padding(.horizontal, PoulpySpace.sm)
+                        .frame(height: 22)
+                        .background(PoulpyColor.surfaceVariant, in: Capsule())
+                } else {
+                    Text(L("account.lastUsed %@", lastUsed)).font(.poulpy(.footnote)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+                }
+            }
+            Spacer()
+            if !device.current {
+                Button(action: onSignOut) { Text("account.signOut") }
+                    .buttonStyle(PoulpyButtonStyle(.secondary, size: .sm))
+            }
+        }
+        .padding(EdgeInsets(top: 12, leading: 14, bottom: 12, trailing: 14))
+        .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
+        .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(PoulpyColor.outline, lineWidth: 1))
+    }
+
+    private var lastUsed: String {
+        let formatter = RelativeDateTimeFormatter()
+        formatter.dateTimeStyle = .named
+        let at = Date(timeIntervalSince1970: TimeInterval(device.lastUsedEpochMillis) / 1000)
+        return formatter.localizedString(for: min(at, Date()), relativeTo: Date())
+    }
+}
+
+/// Account › Export my data: what the .zip holds, and the button that fetches it and opens the save dialog. Mirrors AccountExportPage.
+struct AccountExportPage: View {
+    @ObservedObject var account: Observed<AccountModel, AccountState>
+    @State private var busy = false
+    @State private var offline = false
+    @State private var saving: ZipDocument?
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                if offline { ErrorCard(L("account.errorOffline")) }
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("account.exportContentsTitle").font(.poulpy(.title3))
+                    Text("account.exportContentsBody").font(.poulpy(.callout)).foregroundStyle(PoulpyColor.onSurfaceVariant)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(16)
+                .background(PoulpyColor.surface, in: RoundedRectangle(cornerRadius: PoulpyRadius.lg))
+                .overlay(RoundedRectangle(cornerRadius: PoulpyRadius.lg).stroke(PoulpyColor.outline, lineWidth: 1))
+                Text("account.exportNote").font(.poulpy(.footnote)).foregroundStyle(PoulpyColor.onSurfaceVariant).padding(.horizontal, 4)
+            }
+            .padding(.horizontal, PoulpySpace.lg)
+            .padding(.vertical, 16)
+        }
+        .background(PoulpyColor.background)
+        .safeAreaInset(edge: .bottom) {
+            ActionBar(enabled: !busy, action: export) {
+                HStack(spacing: 8) {
+                    if busy { ProgressView().tint(PoulpyColor.onPrimary) } else { LucideIcon(.download, size: 20) }
+                    Text("account.exportTitle")
+                }
+            }
+        }
+        .navigationTitle("account.exportTitle")
+        .navigationBarTitleDisplayMode(.inline)
+        .modifier(LeaveWhenSignedOut(state: account.value))
+        .fileExporter(
+            isPresented: Binding(get: { saving != nil }, set: { if !$0 { saving = nil } }),
+            document: saving,
+            contentType: .zip,
+            defaultFilename: saving?.fileName
+        ) { _ in saving = nil }
+    }
+
+    private func export() {
+        busy = true
+        offline = false
+        Task { @MainActor in
+            let file = try? await account.model.exportData()
+            busy = false
+            if let file { saving = ZipDocument(file) } else { offline = true }
+        }
+    }
+}
+
+/// The export's .zip for the system's save dialog, to keep it in Files or send it on.
+private struct ZipDocument: FileDocument {
+    static var readableContentTypes: [UTType] { [.zip] }
+
+    let fileName: String
+    let data: Data
+
+    init(_ file: AccountExportFile) {
+        let bytes = file.bytes
+        fileName = file.fileName
+        data = Data((0..<bytes.size).map { UInt8(bitPattern: bytes.get(index: $0)) })
+    }
+
+    init(configuration: ReadConfiguration) throws {
+        throw CocoaError(.fileReadUnsupportedScheme)
+    }
+
+    func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
+        FileWrapper(regularFileWithContents: data)
     }
 }
 

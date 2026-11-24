@@ -68,6 +68,7 @@ enum Lucide: String, CaseIterable {
     case luggage = "LucideLuggage"
     case mail = "LucideMail"
     case minus = "LucideMinus"
+    case monitor = "LucideMonitor"
     case moon = "LucideMoon"
     case moveVertical = "LucideMoveVertical"
     case panelLeft = "LucidePanelLeft"

@@ -77,6 +77,7 @@ object Lucide {
     val Luggage: ImageVector by lazy { lucideIcon("luggage", "M 6 20 a 2 2 0 0 1 -2 -2 V 8 a 2 2 0 0 1 2 -2 h 12 a 2 2 0 0 1 2 2 v 10 a 2 2 0 0 1 -2 2", "M 8 18 V 4 a 2 2 0 0 1 2 -2 h 4 a 2 2 0 0 1 2 2 v 14", "M 10 20 h 4", "M 14 20 A 2 2 0 1 0 18 20 A 2 2 0 1 0 14 20 Z", "M 6 20 A 2 2 0 1 0 10 20 A 2 2 0 1 0 6 20 Z") }
     val Mail: ImageVector by lazy { lucideIcon("mail", "m 22 7 -8.991 5.727 a 2 2 0 0 1 -2.009 0 L 2 7", "M 4 4 H 20 A 2 2 0 0 1 22 6 V 18 A 2 2 0 0 1 20 20 H 4 A 2 2 0 0 1 2 18 V 6 A 2 2 0 0 1 4 4 Z") }
     val Minus: ImageVector by lazy { lucideIcon("minus", "M 5 12 h 14") }
+    val Monitor: ImageVector by lazy { lucideIcon("monitor", "M 4 3 H 20 A 2 2 0 0 1 22 5 V 15 A 2 2 0 0 1 20 17 H 4 A 2 2 0 0 1 2 15 V 5 A 2 2 0 0 1 4 3 Z", "M 8 21 L 16 21", "M 12 17 L 12 21") }
     val Moon: ImageVector by lazy { lucideIcon("moon", "M 20.985 12.486 a 9 9 0 1 1 -9.473 -9.472 c .405 -.022 .617 .46 .402 .803 a 6 6 0 0 0 8.268 8.268 c .344 -.215 .825 -.004 .803 .401") }
     val MoveVertical: ImageVector by lazy { lucideIcon("move-vertical", "M 12 2 v 20", "m 8 18 4 4 4 -4", "m 8 6 4 -4 4 4") }
     val PanelLeft: ImageVector by lazy { lucideIcon("panel-left", "M 5 3 H 19 A 2 2 0 0 1 21 5 V 19 A 2 2 0 0 1 19 21 H 5 A 2 2 0 0 1 3 19 V 5 A 2 2 0 0 1 5 3 Z", "M 9 3 v 18") }

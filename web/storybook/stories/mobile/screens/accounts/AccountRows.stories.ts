@@ -9,7 +9,7 @@ import screenAccountExport from './account-export.html?raw'
 // The pages behind the three rows of Account, signed in: Password, Signed-in devices and Export my data (#553).
 const meta = {
   title: 'Mobile/Screens/You/Accounts/Password, devices and export',
-  tags: ['!autodocs', 'draft'],
+  tags: ['!autodocs', 'agreed'],
   parameters: { layout: 'fullscreen', mockup: { issue: 553 }, docs: { canvas: { sourceState: 'none' } } },
 } satisfies Meta
 export default meta

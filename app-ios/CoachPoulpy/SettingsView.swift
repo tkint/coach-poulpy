@@ -48,6 +48,9 @@ struct SettingsView: View {
                         case .settings: SettingsPageView(settings: settings, devices: devices)
                         case .profile: ProfileView(profile: profile, account: account, weight: weight, height: height, units: settings.value.units)
                         case .account: AccountPage(account: account, onFlow: onAccount)
+                        case .accountPassword: AccountPasswordPage(account: account)
+                        case .accountDevices: AccountDevicesPage(account: account)
+                        case .accountExport: AccountExportPage(account: account)
                         case .devices:
                             DevicesList(devices: devices, bluetooth: bluetooth, onAdd: { path.append(DeviceRoute.add) })
                                 .navigationTitle("settings.devices")
