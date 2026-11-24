@@ -18,6 +18,9 @@ import screenBuilderTidyRepeatHeader from './builder-tidy-repeat-header.html?raw
 import screenBuilderTidyRepeatCountSheet from './builder-tidy-repeat-count-sheet.html?raw'
 import screenBuilderTidyRepeatEmpty from './builder-tidy-repeat-empty.html?raw'
 import screenBuilderStepMenu from './builder-step-menu.html?raw'
+import screenBuilderSwapMenu from './builder-swap-menu.html?raw'
+import screenBuilderSwapSheet from './builder-swap-sheet.html?raw'
+import screenBuilderSwapPicker from './builder-swap-picker.html?raw'
 
 // The Builder screens of the apps (ADR 0029), drawn with the phone stylesheet (../screens.css).
 // CLEANUP: the screens marked a11y todo carry axe findings the old mockups had (contrast of hints and past days, names of fields); fix them with the screens, then drop the todo.
@@ -165,4 +168,26 @@ export const BuilderTidyRepeatEmpty: Story = {
   tags: ['!autodocs', 'agreed'],
   ...screen(screenBuilderTidyRepeatEmpty, { reorder: true }),
   parameters: { mockup: {} },
+}
+
+/** Builder · the step menu offers "Swap exercise" on every exercise step. */
+export const BuilderSwapMenu: Story = {
+  name: "Swap an exercise, menu",
+  tags: ['!autodocs', 'draft'],
+  ...screen(screenBuilderSwapMenu, { reorder: true }),
+  parameters: { mockup: { issue: 37 } },
+}
+/** Builder · the swap sheet lists the exercise's variations, easiest first, and opens the library for any other. */
+export const BuilderSwapSheet: Story = {
+  name: "Swap an exercise, variations",
+  tags: ['!autodocs', 'draft'],
+  ...screen(screenBuilderSwapSheet, { reorder: true }),
+  parameters: { mockup: { issue: 37 } },
+}
+/** Builder · choosing any exercise to swap in; also where the menu goes straight when there are no variations. */
+export const BuilderSwapPicker: Story = {
+  name: "Swap an exercise, any exercise",
+  tags: ['!autodocs', 'draft'],
+  ...screen(screenBuilderSwapPicker),
+  parameters: { mockup: { issue: 37 } },
 }

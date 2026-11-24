@@ -394,7 +394,7 @@ class BuilderModelTest {
     }
 
     @Test
-    fun swapOffersTheWholeGroupAndKeepsThePrescription() {
+    fun swapOffersTheVariationsAndKeepsThePrescription() {
         val builder = builder(WorkoutFormat.SETS)
         builder.add("push-up", builder.work)
         val key = builder.state.value.addedKey!!
@@ -404,9 +404,7 @@ class BuilderModelTest {
         builder.setRestBetweenSets(key, 90)
         builder.add("plank", builder.work)
         val plank = builder.state.value.addedKey!!
-        assertFalse(builder.current.parts[1].steps.last().row!!.canSwap, "no variations, no swap")
         assertTrue(builder.swapOptions(plank).isEmpty())
-        assertTrue(builder.current.parts[1].steps.first().row!!.canSwap)
 
         val options = builder.swapOptions(key)
         assertEquals(listOf("knee-push-up", "incline-push-up", "push-up", "diamond-push-up", "one-arm-push-up"), options.map { it.slug })
@@ -423,9 +421,20 @@ class BuilderModelTest {
         assertEquals(90, row.restBetweenSets)
         assertTrue(builder.swapOptions(key).single { it.isCurrent }.slug == "diamond-push-up")
 
-        builder.swap(key, "diamond-push-up")
-        builder.swap(key, "plank")
-        assertEquals("diamond-push-up", builder.current.parts[1].steps.first().row!!.slug, "only a variation can be swapped in")
+        builder.swap(key, "no-such-exercise")
+        assertEquals("diamond-push-up", builder.current.parts[1].steps.first().row!!.slug, "an unknown exercise changes nothing")
+    }
+
+    @Test
+    fun anyExerciseCanBeSwappedIn() {
+        val builder = builder(WorkoutFormat.SETS)
+        builder.add("plank", builder.work)
+        val key = builder.state.value.addedKey!!
+        builder.setSets(key, 2)
+        builder.swap(key, "push-up")
+        val row = builder.current.parts[1].steps.single().row!!
+        assertEquals("push-up", row.slug)
+        assertEquals(2, row.sets)
     }
 
     @Test

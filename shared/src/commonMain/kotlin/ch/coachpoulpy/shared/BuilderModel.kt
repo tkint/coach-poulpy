@@ -68,11 +68,9 @@ data class BuilderRow(
     val summary: String,
     /** A walk or a run's target, edited instead of sets, reps and weight; null for any other exercise. */
     val target: WalkRunTarget? = null,
-    /** Whether the step's exercise has variations, so the step menu offers "Swap for a variation". */
-    val canSwap: Boolean = false,
 )
 
-/** One exercise of a variation group in the swap list; [isCurrent] marks the step's own exercise. */
+/** One exercise of a variation group at the top of the swap sheet; [isCurrent] marks the step's own exercise. */
 data class SwapOption(val slug: String, val name: String, val isCurrent: Boolean)
 
 /** What a step's amount counts: the unit shown beside its number field. */
@@ -250,21 +248,20 @@ class BuilderModel internal constructor(
         addStep(entry, partKey, repeatKey)
     }
 
-    /** The variation group of the exercise at step [key], easiest to hardest, empty when it has none. */
+    /** The variation group of the exercise at step [key], easiest to hardest, empty when it has none: the swap sheet's top list. */
     fun swapOptions(key: String): List<SwapOption> {
         val current = entry(key)?.exercise ?: return emptyList()
         return catalog.variationsOf(current).map { SwapOption(it.slug.value, labels.text(it.name), it.slug == current) }
     }
 
     /**
-     * Replaces the exercise of step [key] with another of its variations, keeping its place, role,
+     * Replaces the exercise of step [key] with any other catalog exercise, a variation or not, keeping its place, role,
      * sets, weight and rest. The amount is kept too, unless the new exercise is measured another
      * way (reps against time) or is a walk or a run: it then starts at its usual default.
      */
     fun swap(key: String, slug: String) {
         val old = entry(key) ?: return
-        if (swapOptions(key).none { it.slug == slug && !it.isCurrent }) return
-        val exercise = catalog[ExerciseSlug(slug)] ?: return
+        val exercise = catalog[ExerciseSlug(slug)]?.takeIf { it.slug != old.exercise && !it.retired } ?: return
         val fresh = DraftEntry.new(exercise, draft.format, units())
         editEntry(key) {
             if (old.walkOrRun || fresh.walkOrRun) {
@@ -668,7 +665,6 @@ class BuilderModel internal constructor(
             else -> null
         }
         return BuilderRow(
-            canSwap = catalog.variationsOf(entry.exercise).isNotEmpty(),
             key = entry.key,
             roleLabel = labels.role(entry.role),
             role = entry.role,
