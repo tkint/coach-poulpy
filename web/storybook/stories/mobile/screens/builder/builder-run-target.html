@@ -44,16 +44,16 @@
   </div>
 
   <div class="scrim" aria-hidden="true"></div>
-  <MobileSheet id="edit-run" aria-label="Edit Run" style="gap: var(--cp-space-md);">
+  <MobileSheet id="edit-run" class="sheet--compact" aria-label="Edit Run" style="gap: var(--cp-space-sm);">
     <span class="sheet-handle" aria-hidden="true"></span>
     <div class="sheet-title"><h2>Run</h2><p>In Warm-up · about 12 min</p></div>
     <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--cp-space-sm);"><MobileSelectField label="Step" value="Exercise" opens="list" style="grid-column: span 2;" /><MobileSelectField label="Duration" value="Distance" opens="list" /><MobileSelectField label="Intensity" value="Pace" opens="list" /></div>
-    <div class="steppers" style="grid-template-columns: 1fr;">
-      <div class="stepper" data-component="stepper">
+    <div class="steppers">
+      <div class="stepper stepper--square" data-component="stepper">
         <span class="label">Distance</span>
         <div><button type="button" aria-label="Shorter">−</button><button type="button" class="value-link" aria-label="Set distance, 2.0 km">2.0 km</button><button type="button" aria-label="Longer">+</button></div>
       </div>
-      <div class="stepper" data-component="stepper">
+      <div class="stepper stepper--square" data-component="stepper">
         <span class="label">Pace</span>
         <div><button type="button" aria-label="Slower pace">−</button><button type="button" class="value-link" aria-label="Set pace, 6:00 per km">6:00 /km</button><button type="button" aria-label="Faster pace">+</button></div>
       </div>

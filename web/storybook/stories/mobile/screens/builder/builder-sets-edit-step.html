@@ -56,15 +56,27 @@
   </div>
 
   <div class="scrim" aria-hidden="true"></div>
-  <MobileSheet id="edit-step" aria-label="Edit Goblet squat" style="gap: var(--cp-space-md);">
+  <MobileSheet id="edit-step" class="sheet--compact" aria-label="Edit Goblet squat" style="gap: var(--cp-space-sm);">
     <span class="sheet-handle" aria-hidden="true"></span>
     <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: var(--cp-space-md);"><div class="sheet-title"><h2>Goblet squat</h2><p>In Work · 3 sets</p></div><MobileButton size="sm" aria-label="See details of Goblet squat" style="gap: 6px; background: var(--cp-surface-variant); color: var(--cp-on-surface);"><MobileIcon name="info" :size="20" />Details</MobileButton></div>
-    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--cp-space-sm);"><MobileSelectField label="Step" value="Exercise" opens="list" style="grid-column: span 2;" /><MobileSelectField label="Measured by" value="Reps" opens="list" /></div>
-    <div style="display: flex; flex-direction: column; gap: var(--cp-space-sm);">
-      <div class="field"><span class="label">Sets</span><div class="number-entry" data-component="number-entry"><button type="button" aria-label="Fewer sets">−</button><span class="number-field"><input inputmode="numeric" value="3" aria-label="Sets"></span><button type="button" aria-label="More sets">+</button></div></div>
-      <div class="field"><span class="label">Each set</span><div class="number-entry" data-component="number-entry"><button type="button" aria-label="Fewer reps">−</button><span class="number-field"><input inputmode="numeric" value="8" aria-label="Reps"><span class="unit">reps</span></span><button type="button" aria-label="More reps">+</button></div></div>
-      <div class="field"><span class="label">Rest between sets</span><div class="number-entry" data-component="number-entry"><button type="button" aria-label="Shorter rest">−</button><span class="number-field"><input inputmode="numeric" value="120" aria-label="Rest between sets, in seconds"><span class="unit">s</span></span><button type="button" aria-label="Longer rest">+</button></div></div>
-      <div class="field"><span class="label">Weight</span><span class="number-field"><input inputmode="decimal" value="40" aria-label="Weight in kilograms"><span class="unit">kg</span></span></div>
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--cp-space-sm);"><MobileSelectField label="Step" value="Exercise" opens="list" style="grid-column: span 2;" /><MobileSelectField label="Measured by" value="Reps" opens="list" style="grid-column: span 2;" /></div>
+    <div class="steppers">
+      <div class="stepper stepper--square" data-component="stepper">
+        <span class="label">Sets</span>
+        <div><button type="button" aria-label="Fewer sets">−</button><button type="button" class="value-link" aria-label="Set sets, 3">3</button><button type="button" aria-label="More sets">+</button></div>
+      </div>
+      <div class="stepper stepper--square" data-component="stepper">
+        <span class="label">Each set</span>
+        <div><button type="button" aria-label="Fewer reps">−</button><button type="button" class="value-link" aria-label="Set reps, 8 reps">8 reps</button><button type="button" aria-label="More reps">+</button></div>
+      </div>
+      <div class="stepper stepper--square" data-component="stepper">
+        <span class="label">Rest</span>
+        <div><button type="button" aria-label="Shorter rest">−</button><button type="button" class="value-link" aria-label="Set rest, 2 min">2 min</button><button type="button" aria-label="Longer rest">+</button></div>
+      </div>
+      <div class="stepper stepper--square" data-component="stepper">
+        <span class="label">Weight</span>
+        <div><button type="button" aria-label="Lighter">−</button><button type="button" class="value-link" aria-label="Set weight, 40 kg">40 kg</button><button type="button" aria-label="Heavier">+</button></div>
+      </div>
     </div>
     <span class="hint">Rest between sets shows from 2 sets. A walk or a run has no sets.</span>
     <MobileButton size="md">Done</MobileButton>
