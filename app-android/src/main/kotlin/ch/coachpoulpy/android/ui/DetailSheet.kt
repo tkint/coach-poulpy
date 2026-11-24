@@ -32,10 +32,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -57,8 +59,6 @@ import kotlin.math.abs
 import kotlin.math.roundToInt
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.launch
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 
 private const val STOP_HALF = 1
 private const val STOP_FULL = 2
@@ -98,6 +98,7 @@ internal fun DetailSheet(
     showBackgroundLabel: String,
     showDetailsLabel: String,
     background: @Composable BoxScope.(room: Dp) -> Unit,
+    floating: @Composable BoxScope.() -> Unit,
     actions: (@Composable () -> Unit)? = null,
     modifier: Modifier = Modifier,
     halfShare: Float = 0.46f,
@@ -217,5 +218,6 @@ internal fun DetailSheet(
                 }
             }
         }
+        floating()
     }
 }

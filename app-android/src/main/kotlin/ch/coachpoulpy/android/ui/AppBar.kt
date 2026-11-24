@@ -3,11 +3,15 @@ package ch.coachpoulpy.android.ui
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -26,19 +30,24 @@ internal fun AppBar(
     leading: @Composable () -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {},
 ) {
-    Row(
-        modifier.fillMaxWidth().padding(start = 4.dp, end = 12.dp, top = PoulpySpace.xs),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        leading()
-        Text(
-            title.orEmpty(),
-            style = tabTitleStyle(),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f),
-        )
-        actions()
+    // The bar sits on the screen's background, not on a surface: its text and icons take the background's text colour
+    // (black text on a dark theme otherwise, since nothing above sets one).
+    // The bar is one touch-sized row right under the status bar, so the back and share buttons sit as close to it as their targets allow.
+    CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onBackground) {
+        Row(
+            modifier.fillMaxWidth().height(PoulpySize.touch).padding(start = 4.dp, end = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            leading()
+            Text(
+                title.orEmpty(),
+                style = tabTitleStyle(),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f),
+            )
+            actions()
+        }
     }
 }
 
