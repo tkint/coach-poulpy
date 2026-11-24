@@ -271,3 +271,5 @@ private fun StatTile(label: String, value: String, caption: String, modifier: Mo
         }
     }
 }
+
+private fun decimal(value: Double, decimals: Int) = String.format(Locale.getDefault(), "%.${decimals}f", value)

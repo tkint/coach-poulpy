@@ -255,7 +255,7 @@ internal fun distance(meters: Double, decimals: Int): String {
     return "${decimal(m.value, m.decimals)} ${m.unit}"
 }
 
-internal fun decimal(value: Double, decimals: Int) = String.format(Locale.getDefault(), "%.${decimals}f", value)
+private fun decimal(value: Double, decimals: Int) = String.format(Locale.getDefault(), "%.${decimals}f", value)
 
 private fun clock(seconds: Long): String {
     val h = seconds / 3600
