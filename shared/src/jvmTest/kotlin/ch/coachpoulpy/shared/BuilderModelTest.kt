@@ -394,7 +394,7 @@ class BuilderModelTest {
     }
 
     @Test
-    fun swapOffersTheVariationsAndKeepsThePrescription() {
+    fun swapKeepsThePrescriptionAndPositionOnceConfirmed() {
         val builder = builder(WorkoutFormat.SETS)
         builder.add("push-up", builder.work)
         val key = builder.state.value.addedKey!!
@@ -404,13 +404,9 @@ class BuilderModelTest {
         builder.setRestBetweenSets(key, 90)
         builder.add("plank", builder.work)
         val plank = builder.state.value.addedKey!!
-        assertTrue(builder.swapOptions(plank).isEmpty())
 
-        val options = builder.swapOptions(key)
-        assertEquals(listOf("knee-push-up", "incline-push-up", "push-up", "diamond-push-up", "one-arm-push-up"), options.map { it.slug })
-        assertEquals(listOf("push-up"), options.filter { it.isCurrent }.map { it.slug })
-
-        builder.swap(key, "diamond-push-up")
+        builder.startSwap(key, "diamond-push-up")
+        builder.confirmSwap()
         val steps = builder.current.parts[1].steps
         assertEquals(listOf(key, plank), steps.map { it.key }, "same position")
         val row = steps.first().row!!
@@ -419,10 +415,27 @@ class BuilderModelTest {
         assertEquals(12, row.amount)
         assertEquals("10", row.weight)
         assertEquals(90, row.restBetweenSets)
-        assertTrue(builder.swapOptions(key).single { it.isCurrent }.slug == "diamond-push-up")
 
-        builder.swap(key, "no-such-exercise")
+        builder.startSwap(key, "no-such-exercise")
+        builder.confirmSwap()
         assertEquals("diamond-push-up", builder.current.parts[1].steps.first().row!!.slug, "an unknown exercise changes nothing")
+    }
+
+    @Test
+    fun cancellingASwapGivesTheOldExerciseBack() {
+        val builder = builder(WorkoutFormat.SETS)
+        builder.add("push-up", builder.work)
+        val key = builder.state.value.addedKey!!
+        builder.setAmount(key, 12)
+
+        builder.startSwap(key, "bodyweight-squat")
+        builder.setAmount(key, 20)
+        assertEquals("bodyweight-squat", builder.current.parts[1].steps.single().row!!.slug)
+        builder.cancelSwap()
+
+        val row = builder.current.parts[1].steps.single().row!!
+        assertEquals("push-up", row.slug)
+        assertEquals(12, row.amount)
     }
 
     @Test
@@ -431,21 +444,32 @@ class BuilderModelTest {
         builder.add("plank", builder.work)
         val key = builder.state.value.addedKey!!
         builder.setSets(key, 2)
-        builder.swap(key, "push-up")
+        builder.startSwap(key, "push-up")
+        builder.confirmSwap()
         val row = builder.current.parts[1].steps.single().row!!
         assertEquals("push-up", row.slug)
         assertEquals(2, row.sets)
     }
 
     @Test
+    fun swapToARunDropsSetsRepsAndWeight() {
+        val builder = builder(WorkoutFormat.SETS)
+        builder.add("goblet-squat", builder.work)
+        val key = builder.state.value.addedKey!!
+        builder.setWeight(key, "40")
+        builder.startSwap(key, "run")
+        builder.confirmSwap()
+        val row = builder.current.parts[1].steps.single().row!!
+        assertEquals("run", row.slug)
+        assertEquals("", row.weight)
+        assertNotNull(row.target)
+    }
+
+    @Test
     fun swapToAnExerciseMeasuredAnotherWayTakesItsDefaultAmountAndKeepsTheRest() {
         val graph = AppGraph(DriverFactory())
         val sample = ch.coachpoulpy.catalog.sample.SampleCatalog.catalog
-        val group = listOf("push-up", "plank")
-        graph.catalogRepository.apply(
-            sample.exercises.map { ch.coachpoulpy.data.local.CatalogRevision(it, 1, if (it.slug.value in group) 0 else null, group.indexOf(it.slug.value).takeIf { i -> i >= 0 }) },
-            "0",
-        )
+        graph.catalogRepository.apply(sample.exercises.map { ch.coachpoulpy.data.local.CatalogRevision(it, 1, null, null) }, "0")
         val builder = graph.createWorkout(WorkoutFormat.SETS, "en")
         builder.add("push-up", builder.work)
         val key = builder.state.value.addedKey!!
@@ -453,7 +477,8 @@ class BuilderModelTest {
         builder.setAmount(key, 15)
         builder.setWeight(key, "5")
 
-        builder.swap(key, "plank")
+        builder.startSwap(key, "plank")
+        builder.confirmSwap()
         val row = builder.current.parts[1].steps.single().row!!
         assertEquals("plank", row.slug)
         assertTrue(row.isTimed, "reps become a hold")

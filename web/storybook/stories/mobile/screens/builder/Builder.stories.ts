@@ -19,8 +19,8 @@ import screenBuilderTidyRepeatCountSheet from './builder-tidy-repeat-count-sheet
 import screenBuilderTidyRepeatEmpty from './builder-tidy-repeat-empty.html?raw'
 import screenBuilderStepMenu from './builder-step-menu.html?raw'
 import screenBuilderSwapMenu from './builder-swap-menu.html?raw'
-import screenBuilderSwapSheet from './builder-swap-sheet.html?raw'
-import screenBuilderSwapPicker from './builder-swap-picker.html?raw'
+import screenBuilderSwapStepSheet from './builder-swap-step-sheet.html?raw'
+import screenBuilderSwapRunSheet from './builder-swap-run-sheet.html?raw'
 
 // The Builder screens of the apps (ADR 0029), drawn with the phone stylesheet (../screens.css).
 // CLEANUP: the screens marked a11y todo carry axe findings the old mockups had (contrast of hints and past days, names of fields); fix them with the screens, then drop the todo.
@@ -170,24 +170,24 @@ export const BuilderTidyRepeatEmpty: Story = {
   parameters: { mockup: {} },
 }
 
-/** Builder · the step menu offers "Swap exercise" on every exercise step. */
+/** Builder · the step menu offers "Swap exercise" on every exercise step; it opens the exercise picker. */
 export const BuilderSwapMenu: Story = {
   name: "Swap an exercise, menu",
   tags: ['!autodocs', 'draft'],
   ...screen(screenBuilderSwapMenu, { reorder: true }),
   parameters: { mockup: { issue: 37 } },
 }
-/** Builder · the swap sheet lists the exercise's variations, easiest first, and opens the library for any other. */
-export const BuilderSwapSheet: Story = {
-  name: "Swap an exercise, variations",
+/** Builder · after picking the other exercise in the exercise picker, the step sheet shows its values; the step changes only on Swap. */
+export const BuilderSwapStepSheet: Story = {
+  name: "Swap an exercise, step sheet",
   tags: ['!autodocs', 'draft'],
-  ...screen(screenBuilderSwapSheet, { reorder: true }),
+  ...screen(screenBuilderSwapStepSheet, { reorder: true }),
   parameters: { mockup: { issue: 37 } },
 }
-/** Builder · choosing any exercise to swap in; also where the menu goes straight when there are no variations. */
-export const BuilderSwapPicker: Story = {
-  name: "Swap an exercise, any exercise",
+/** Builder · swapping for a run: sets, reps and weight don't apply and drop out. */
+export const BuilderSwapRunSheet: Story = {
+  name: "Swap an exercise, for a run",
   tags: ['!autodocs', 'draft'],
-  ...screen(screenBuilderSwapPicker),
+  ...screen(screenBuilderSwapRunSheet, { reorder: true }),
   parameters: { mockup: { issue: 37 } },
 }

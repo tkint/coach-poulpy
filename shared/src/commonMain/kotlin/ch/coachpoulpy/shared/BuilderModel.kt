@@ -70,9 +70,6 @@ data class BuilderRow(
     val target: WalkRunTarget? = null,
 )
 
-/** One exercise of a variation group at the top of the swap sheet; [isCurrent] marks the step's own exercise. */
-data class SwapOption(val slug: String, val name: String, val isCurrent: Boolean)
-
 /** What a step's amount counts: the unit shown beside its number field. */
 enum class AmountUnit { REPS, SECONDS, METERS }
 
@@ -248,21 +245,22 @@ class BuilderModel internal constructor(
         addStep(entry, partKey, repeatKey)
     }
 
-    /** The variation group of the exercise at step [key], easiest to hardest, empty when it has none: the swap sheet's top list. */
-    fun swapOptions(key: String): List<SwapOption> {
-        val current = entry(key)?.exercise ?: return emptyList()
-        return catalog.variationsOf(current).map { SwapOption(it.slug.value, labels.text(it.name), it.slug == current) }
-    }
+    /** The workout as it was before a swap began, kept until the step sheet confirms or cancels it. */
+    private var beforeSwap: WorkoutDraft? = null
 
     /**
-     * Replaces the exercise of step [key] with any other catalog exercise, a variation or not, keeping its place, role,
-     * sets, weight and rest. The amount is kept too, unless the new exercise is measured another
-     * way (reps against time) or is a walk or a run: it then starts at its usual default.
+     * Starts swapping step [key] for any other catalog exercise, picked in the exercise picker. The
+     * step sheet then shows the new exercise's values: the place, role, sets, weight and rest of the
+     * old step, and its amount too unless the new exercise is measured another way (reps against
+     * time) or is a walk or a run, whose target differs: it then starts at its usual default.
+     * [confirmSwap] keeps the result, [cancelSwap] gives the old exercise back.
      */
-    fun swap(key: String, slug: String) {
+    fun startSwap(key: String, slug: String) {
         val old = entry(key) ?: return
         val exercise = catalog[ExerciseSlug(slug)]?.takeIf { it.slug != old.exercise && !it.retired } ?: return
         val fresh = DraftEntry.new(exercise, draft.format, units())
+            .let { if (it.walkOrRun) it.withDuration(DurationKind.DISTANCE) else it }
+        beforeSwap = draft
         editEntry(key) {
             if (old.walkOrRun || fresh.walkOrRun) {
                 fresh.copy(key = old.key, role = old.role)
@@ -275,6 +273,18 @@ class BuilderModel internal constructor(
                 )
             }
         }
+    }
+
+    /** The step sheet's Swap button: keeps the new exercise. */
+    fun confirmSwap() {
+        beforeSwap = null
+    }
+
+    /** Closing the step sheet without Swap: the step keeps the exercise it had. */
+    fun cancelSwap() {
+        val before = beforeSwap ?: return
+        beforeSwap = null
+        edit { before }
     }
 
     /** Puts a copy of a step, or of a repeat and its steps, right after it. */
