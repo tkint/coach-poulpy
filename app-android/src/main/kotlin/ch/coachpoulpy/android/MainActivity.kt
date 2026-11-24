@@ -10,10 +10,14 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ch.coachpoulpy.android.ui.AppPreferences
 import ch.coachpoulpy.android.ui.CoachPoulpyRoot
@@ -73,15 +77,19 @@ class MainActivity : ComponentActivity() {
             }
             CoachPoulpyTheme(dark = dark) {
                 CompositionLocalProvider(LocalUnitSystem provides state.units) {
-                    CoachPoulpyRoot(
-                        graph,
-                        openLive = openLive.value,
-                        onLiveOpened = { openLive.value = false },
-                        importFile = importFile.value,
-                        onImportOpened = { importFile.value = null },
-                        accountLink = accountLink.value,
-                        onAccountLinkOpened = { accountLink.value = null },
-                    )
+                    // The app paints its own background and text colour: the window behind it follows the system's dark mode,
+                    // not the theme chosen in the app, so a screen without its own background (the top bar's) showed it.
+                    Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+                        CoachPoulpyRoot(
+                            graph,
+                            openLive = openLive.value,
+                            onLiveOpened = { openLive.value = false },
+                            importFile = importFile.value,
+                            onImportOpened = { importFile.value = null },
+                            accountLink = accountLink.value,
+                            onAccountLinkOpened = { accountLink.value = null },
+                        )
+                    }
                     crash?.let { notice ->
                         CrashDialog(notice.report, closed = notice.closed) { CrashCatcher.forget(this@MainActivity) }
                     }
