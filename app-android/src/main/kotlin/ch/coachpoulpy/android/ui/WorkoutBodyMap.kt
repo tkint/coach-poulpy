@@ -5,10 +5,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
@@ -102,7 +106,7 @@ internal fun WorkoutBodyMap(
     }
 }
 
-/** Where the figures start below the top bar: the legend and the gap under it. */
+/** Where the figures start below the status bar: the legend and the gap under it. */
 private val MAP_FIGURES_TOP = PoulpySpace.lg + 16.dp + PoulpySpace.lg
 
 /**
@@ -117,9 +121,10 @@ internal fun HeatMapPanel(
     hurting: Set<String>,
     description: String,
 ) {
+    val statusBar = with(LocalDensity.current) { WindowInsets.statusBars.getTop(this).toDp() }
     val maxFigure = (LocalConfiguration.current.screenWidthDp.dp - PoulpySpace.lg * 2 - PoulpySpace.sm) / 2
-    val figureWidth = ((room - MAP_FIGURES_TOP - PoulpySpace.md) / (BodyMapBox.HEIGHT / BodyMapBox.WIDTH)).coerceIn(56.dp, maxFigure)
-    Column(Modifier.fillMaxWidth().padding(top = PoulpySpace.lg), horizontalAlignment = Alignment.CenterHorizontally) {
+    val figureWidth = ((room - statusBar - MAP_FIGURES_TOP - PoulpySpace.md) / (BodyMapBox.HEIGHT / BodyMapBox.WIDTH)).coerceIn(56.dp, maxFigure)
+    Column(Modifier.fillMaxWidth().statusBarsPadding().padding(top = PoulpySpace.lg), horizontalAlignment = Alignment.CenterHorizontally) {
         HeatLegend(showPain = hurting.isNotEmpty())
         Spacer(Modifier.height(PoulpySpace.lg))
         WorkoutBodyMap(figure, heat, hurting, description, figureWidth)

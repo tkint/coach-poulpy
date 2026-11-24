@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -31,10 +32,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -56,8 +59,6 @@ import kotlin.math.abs
 import kotlin.math.roundToInt
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.launch
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 
 private const val STOP_HALF = 1
 private const val STOP_FULL = 2
@@ -97,6 +98,7 @@ internal fun DetailSheet(
     showBackgroundLabel: String,
     showDetailsLabel: String,
     background: @Composable BoxScope.(room: Dp) -> Unit,
+    floating: @Composable BoxScope.() -> Unit,
     actions: (@Composable () -> Unit)? = null,
     modifier: Modifier = Modifier,
     halfShare: Float = 0.46f,
@@ -167,6 +169,7 @@ internal fun DetailSheet(
             }
         }
 
+        val statusBar = with(density) { WindowInsets.statusBars.getTop(density).toDp() }
         // The background keeps the room it has at the half stop once the sheet goes higher.
         background(with(density) { maxOf(top.value, halfTop).toDp() })
 
@@ -188,6 +191,7 @@ internal fun DetailSheet(
                         .fillMaxWidth()
                         .then(dragging)
                         .clickable(onClickLabel = if (expanded) showBackgroundLabel else showDetailsLabel) { stop = if (expanded) STOP_HALF else STOP_FULL }
+                        .padding(top = statusBar * full)
                         .height(PoulpySize.touch),
                     contentAlignment = Alignment.Center,
                 ) {
@@ -214,5 +218,6 @@ internal fun DetailSheet(
                 }
             }
         }
+        floating()
     }
 }
