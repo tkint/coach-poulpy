@@ -602,13 +602,17 @@
 }
 .cp-screen .stepper > div { display: flex; align-items: center; justify-content: space-between; width: 100%; }
 .cp-screen .stepper button:not(.value-link) { width: 44px; height: 44px; border-radius: var(--cp-radius-pill); background: var(--cp-surface); color: var(--cp-primary); font-size: 22px; font-weight: 800; }
-.cp-screen .stepper--square { padding: 4px 6px; gap: 0; background: var(--cp-surface); border: 1.5px solid var(--cp-outline); }
+.cp-screen .stepper.stepper--square { display: grid; grid-template-columns: 30px minmax(0, 1fr) 30px; align-items: center; column-gap: var(--cp-space-xs); height: 44px; padding: 3px 6px; background: var(--cp-surface); border: 1.5px solid var(--cp-outline); border-radius: 12px; }
+.cp-screen .stepper--square > div { display: contents; }
+.cp-screen .stepper.stepper--square .label { grid-column: 2; grid-row: 1; justify-self: center; font-size: 11.5px; line-height: 14px; }
+.cp-screen .stepper--square button:first-child { grid-column: 1; grid-row: 1 / 3; }
+.cp-screen .stepper--square button:last-child { grid-column: 3; grid-row: 1 / 3; }
 .cp-screen .stepper.stepper--square button:not(.value-link) { position: relative; width: 30px; height: 30px; border-radius: var(--cp-radius-sm); font-size: 18px; background: var(--cp-surface-variant); }
 .cp-screen .stepper--square button:not(.value-link)::after { content: ""; position: absolute; inset: -7px; }
 .cp-screen .sheet--compact { padding-bottom: var(--cp-space-lg); }
 .cp-screen .sheet--compact .select-field { height: 44px; padding-top: 3px; padding-bottom: 3px; }
 .cp-screen .sheet .stepper.stepper--square { background: var(--cp-surface); border: 1.5px solid var(--cp-outline); }
-.cp-screen .stepper--square .value-link { font-size: 16px; min-height: 30px; }
+.cp-screen .stepper.stepper--square .value-link { grid-column: 2; grid-row: 2; justify-self: center; font-size: 16px; line-height: 20px; min-height: 0; }
 .cp-screen .stepper strong { white-space: nowrap; font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; }
 .cp-screen .stepper input { width: 56px; height: 40px; border-radius: var(--cp-radius-sm); border: 1.5px solid var(--cp-outline); background: var(--cp-surface); text-align: center; font: inherit; font-size: 20px; font-weight: 800; color: var(--cp-on-surface); }
 .cp-screen .stepper .value-link { white-space: nowrap; min-height: 44px; display: flex; align-items: center; font-size: 20px; font-weight: 800; font-variant-numeric: tabular-nums; text-decoration: underline dotted color-mix(in srgb, var(--cp-primary) 50%, transparent); text-underline-offset: 5px; text-decoration-thickness: 2px; }
