@@ -392,4 +392,101 @@ class BuilderModelTest {
         builder.moveDown(squat)
         assertEquals(listOf(pushUp, squat, plank), order())
     }
+
+    @Test
+    fun swapKeepsThePrescriptionAndPositionOnceConfirmed() {
+        val builder = builder(WorkoutFormat.SETS)
+        builder.add("push-up", builder.work)
+        val key = builder.state.value.addedKey!!
+        builder.setSets(key, 4)
+        builder.setAmount(key, 12)
+        builder.setWeight(key, "10")
+        builder.setRestBetweenSets(key, 90)
+        builder.add("plank", builder.work)
+        val plank = builder.state.value.addedKey!!
+
+        builder.startSwap(key, "diamond-push-up")
+        builder.confirmSwap()
+        val steps = builder.current.parts[1].steps
+        assertEquals(listOf(key, plank), steps.map { it.key }, "same position")
+        val row = steps.first().row!!
+        assertEquals("diamond-push-up", row.slug)
+        assertEquals(4, row.sets)
+        assertEquals(12, row.amount)
+        assertEquals("10", row.weight)
+        assertEquals(90, row.restBetweenSets)
+
+        builder.startSwap(key, "no-such-exercise")
+        builder.confirmSwap()
+        assertEquals("diamond-push-up", builder.current.parts[1].steps.first().row!!.slug, "an unknown exercise changes nothing")
+    }
+
+    @Test
+    fun cancellingASwapGivesTheOldExerciseBack() {
+        val builder = builder(WorkoutFormat.SETS)
+        builder.add("push-up", builder.work)
+        val key = builder.state.value.addedKey!!
+        builder.setAmount(key, 12)
+
+        builder.startSwap(key, "bodyweight-squat")
+        builder.setAmount(key, 20)
+        assertEquals("bodyweight-squat", builder.current.swap!!.slug)
+        assertEquals(20, builder.current.swap!!.amount)
+        assertEquals("push-up", builder.current.parts[1].steps.single().row!!.slug, "the builder keeps the old exercise until Swap")
+        builder.cancelSwap()
+        assertNull(builder.current.swap)
+
+        val row = builder.current.parts[1].steps.single().row!!
+        assertEquals("push-up", row.slug)
+        assertEquals(12, row.amount)
+    }
+
+    @Test
+    fun anyExerciseCanBeSwappedIn() {
+        val builder = builder(WorkoutFormat.SETS)
+        builder.add("plank", builder.work)
+        val key = builder.state.value.addedKey!!
+        builder.setSets(key, 2)
+        builder.startSwap(key, "push-up")
+        builder.confirmSwap()
+        val row = builder.current.parts[1].steps.single().row!!
+        assertEquals("push-up", row.slug)
+        assertEquals(2, row.sets)
+    }
+
+    @Test
+    fun swapToARunDropsSetsRepsAndWeight() {
+        val builder = builder(WorkoutFormat.SETS)
+        builder.add("goblet-squat", builder.work)
+        val key = builder.state.value.addedKey!!
+        builder.setWeight(key, "40")
+        builder.startSwap(key, "run")
+        builder.confirmSwap()
+        val row = builder.current.parts[1].steps.single().row!!
+        assertEquals("run", row.slug)
+        assertEquals("", row.weight)
+        assertNotNull(row.target)
+    }
+
+    @Test
+    fun swapToAnExerciseMeasuredAnotherWayTakesItsDefaultAmountAndKeepsTheRest() {
+        val graph = AppGraph(DriverFactory())
+        val sample = ch.coachpoulpy.catalog.sample.SampleCatalog.catalog
+        graph.catalogRepository.apply(sample.exercises.map { ch.coachpoulpy.data.local.CatalogRevision(it, 1, null, null) }, "0")
+        val builder = graph.createWorkout(WorkoutFormat.SETS, "en")
+        builder.add("push-up", builder.work)
+        val key = builder.state.value.addedKey!!
+        builder.setSets(key, 2)
+        builder.setAmount(key, 15)
+        builder.setWeight(key, "5")
+
+        builder.startSwap(key, "plank")
+        builder.confirmSwap()
+        val row = builder.current.parts[1].steps.single().row!!
+        assertEquals("plank", row.slug)
+        assertTrue(row.isTimed, "reps become a hold")
+        assertEquals(30, row.amount, "the plank's usual default")
+        assertEquals(2, row.sets)
+        assertEquals("5", row.weight)
+    }
 }

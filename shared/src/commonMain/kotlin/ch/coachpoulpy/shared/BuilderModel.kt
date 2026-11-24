@@ -139,6 +139,8 @@ data class BuilderState(
     val addedKey: String?,
     /** Whether the workout has what it takes to be saved; a blank name becomes one made from its exercises. */
     val canSave: Boolean,
+    /** While a swap is under way, the step as it would be with the new exercise; the rows above keep the old one until the swap is confirmed. */
+    val swap: BuilderRow? = null,
 )
 
 /** A card of the format sheet: Circuit or Sets, with its name. */
@@ -243,6 +245,48 @@ class BuilderModel internal constructor(
         val entry = DraftEntry.new(exercise, format, units(), inRepeat = repeatKey != null)
             .let { if (it.walkOrRun) it.withDuration(DurationKind.DISTANCE) else it }
         addStep(entry, partKey, repeatKey)
+    }
+
+    /** The step being swapped, with the new exercise, held aside until the step sheet confirms it. */
+    private var swapping: DraftEntry? = null
+
+    /**
+     * Starts swapping step [key] for any other catalog exercise, picked in the exercise picker. The
+     * step sheet then shows [BuilderState.swap]: the old step's place, role, sets, weight and rest on
+     * the new exercise, and its amount too unless the new exercise is measured another way (reps
+     * against time) or is a walk or a run, whose target differs: it then starts at its usual
+     * default. The sheet's setters edit that held-aside step; the workout itself keeps the old
+     * exercise until [confirmSwap]. [cancelSwap] drops the new one.
+     */
+    fun startSwap(key: String, slug: String) {
+        val old = entry(key) ?: return
+        val exercise = catalog[ExerciseSlug(slug)]?.takeIf { it.slug != old.exercise && !it.retired } ?: return
+        val fresh = DraftEntry.new(exercise, draft.format, units())
+            .let { if (it.walkOrRun) it.withDuration(DurationKind.DISTANCE) else it }
+        swapping = if (old.walkOrRun || fresh.walkOrRun) {
+            fresh.copy(key = old.key, role = old.role)
+        } else {
+            old.copy(
+                exercise = fresh.exercise,
+                perSide = fresh.perSide,
+                measurement = fresh.measurement,
+                amount = if (fresh.measurement == old.measurement) old.amount else fresh.amount,
+            )
+        }
+        mutableState.value = render(draft)
+    }
+
+    /** The step sheet's Swap button: the step takes the new exercise. */
+    fun confirmSwap() {
+        val swapped = swapping ?: return
+        swapping = null
+        editEntry(swapped.key) { swapped }
+    }
+
+    /** Closing the step sheet without Swap: nothing changed. */
+    fun cancelSwap() {
+        swapping = null
+        mutableState.value = render(draft)
     }
 
     /** Puts a copy of a step, or of a repeat and its steps, right after it. */
@@ -507,8 +551,14 @@ class BuilderModel internal constructor(
         mutableState.value = render(draft)
     }
 
-    private fun editEntry(key: String, change: DraftEntry.() -> DraftEntry) = edit {
-        mapLeaves { if (it is DraftEntry && it.key == key) it.change() else it }
+    private fun editEntry(key: String, change: DraftEntry.() -> DraftEntry) {
+        val held = swapping
+        if (held != null && held.key == key) {
+            swapping = held.change()
+            mutableState.value = render(draft)
+        } else {
+            edit { mapLeaves { if (it is DraftEntry && it.key == key) it.change() else it } }
+        }
     }
 
     private fun editPart(key: String, change: (List<DraftStep>) -> List<DraftStep>) = edit {
@@ -545,7 +595,7 @@ class BuilderModel internal constructor(
         move(key, to)
     }
 
-    private fun render(draft: WorkoutDraft): BuilderState {
+    private fun render(draft: WorkoutDraft, preview: Boolean = false): BuilderState {
         val lastPart = draft.parts.lastOrNull { it.steps.isNotEmpty() }
         // "Until the end" only makes sense at the very end, not on every round of a repeat.
         val lastKey = lastPart?.steps?.lastOrNull()?.takeIf { it !is DraftRepeat }?.key
@@ -587,6 +637,9 @@ class BuilderModel internal constructor(
             canSave = rows.any { !it.isRest } &&
                 draft.parts.first { it.kind == PartKind.WORK }.steps.isNotEmpty() &&
                 parts.all { part -> part.steps.all { it.repeatGroup?.rows?.isNotEmpty() ?: true } },
+            swap = swapping?.takeUnless { preview }?.let { held ->
+                render(draft.mapLeaves { if (it.key == held.key) held else it }, preview = true).rows.firstOrNull { it.key == held.key }
+            },
         )
     }
 
