@@ -430,8 +430,11 @@ class BuilderModelTest {
 
         builder.startSwap(key, "bodyweight-squat")
         builder.setAmount(key, 20)
-        assertEquals("bodyweight-squat", builder.current.parts[1].steps.single().row!!.slug)
+        assertEquals("bodyweight-squat", builder.current.swap!!.slug)
+        assertEquals(20, builder.current.swap!!.amount)
+        assertEquals("push-up", builder.current.parts[1].steps.single().row!!.slug, "the builder keeps the old exercise until Swap")
         builder.cancelSwap()
+        assertNull(builder.current.swap)
 
         val row = builder.current.parts[1].steps.single().row!!
         assertEquals("push-up", row.slug)

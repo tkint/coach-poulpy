@@ -56,17 +56,17 @@
   </div>
 
   <div class="scrim" aria-hidden="true"></div>
-  <MobileSheet id="swap-step" aria-label="Swap for Run" style="gap: var(--cp-space-md);">
+  <MobileSheet id="swap-step" aria-label="Swap for Run" style="gap: var(--cp-space-sm);">
     <span class="sheet-handle" aria-hidden="true"></span>
     <div class="sheet-title"><h2>Swap for Run</h2><p>Replaces Goblet squat · In Work</p></div>
     <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--cp-space-sm);"><MobileSelectField label="Step" value="Exercise" opens="list" style="grid-column: span 2;" /><MobileSelectField label="Duration" value="Distance" opens="list" /><MobileSelectField label="Intensity" value="Free" opens="list" /></div>
     <div class="steppers" style="grid-template-columns: 1fr;">
-      <div class="stepper" data-component="stepper">
+      <div class="stepper stepper--square" data-component="stepper">
         <span class="label">Distance</span>
         <div><button type="button" aria-label="Shorter">−</button><button type="button" class="value-link" aria-label="Set distance, 5.0 km">5.0 km</button><button type="button" aria-label="Longer">+</button></div>
       </div>
     </div>
-    <span class="hint">A run has no sets, reps or weight, so they are left out and it starts with the usual 5 km. The builder changes only when you tap Swap.</span>
-    <div style="display: flex; flex-direction: column; gap: var(--cp-space-sm);"><MobileButton size="md">Swap</MobileButton><MobileButton size="md" style="background: var(--cp-surface-variant); color: var(--cp-on-surface);">Cancel</MobileButton></div>
+    <span class="hint">A run has no sets, reps or weight. Nothing changes until you tap Swap.</span>
+    <div style="display: flex; gap: var(--cp-space-sm);"><MobileButton size="md" style="flex: 1; background: var(--cp-surface-variant); color: var(--cp-on-surface);">Cancel</MobileButton><MobileButton size="md" style="flex: 1;">Swap</MobileButton></div>
   </MobileSheet>
 </main>
