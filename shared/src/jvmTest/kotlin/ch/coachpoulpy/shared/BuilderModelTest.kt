@@ -392,4 +392,64 @@ class BuilderModelTest {
         builder.moveDown(squat)
         assertEquals(listOf(pushUp, squat, plank), order())
     }
+
+    @Test
+    fun swapOffersTheWholeGroupAndKeepsThePrescription() {
+        val builder = builder(WorkoutFormat.SETS)
+        builder.add("push-up", builder.work)
+        val key = builder.state.value.addedKey!!
+        builder.setSets(key, 4)
+        builder.setAmount(key, 12)
+        builder.setWeight(key, "10")
+        builder.setRestBetweenSets(key, 90)
+        builder.add("plank", builder.work)
+        val plank = builder.state.value.addedKey!!
+        assertFalse(builder.current.parts[1].steps.last().row!!.canSwap, "no variations, no swap")
+        assertTrue(builder.swapOptions(plank).isEmpty())
+        assertTrue(builder.current.parts[1].steps.first().row!!.canSwap)
+
+        val options = builder.swapOptions(key)
+        assertEquals(listOf("knee-push-up", "incline-push-up", "push-up", "diamond-push-up", "one-arm-push-up"), options.map { it.slug })
+        assertEquals(listOf("push-up"), options.filter { it.isCurrent }.map { it.slug })
+
+        builder.swap(key, "diamond-push-up")
+        val steps = builder.current.parts[1].steps
+        assertEquals(listOf(key, plank), steps.map { it.key }, "same position")
+        val row = steps.first().row!!
+        assertEquals("diamond-push-up", row.slug)
+        assertEquals(4, row.sets)
+        assertEquals(12, row.amount)
+        assertEquals("10", row.weight)
+        assertEquals(90, row.restBetweenSets)
+        assertTrue(builder.swapOptions(key).single { it.isCurrent }.slug == "diamond-push-up")
+
+        builder.swap(key, "diamond-push-up")
+        builder.swap(key, "plank")
+        assertEquals("diamond-push-up", builder.current.parts[1].steps.first().row!!.slug, "only a variation can be swapped in")
+    }
+
+    @Test
+    fun swapToAnExerciseMeasuredAnotherWayTakesItsDefaultAmountAndKeepsTheRest() {
+        val graph = AppGraph(DriverFactory())
+        val sample = ch.coachpoulpy.catalog.sample.SampleCatalog.catalog
+        val group = listOf("push-up", "plank")
+        graph.catalogRepository.apply(
+            sample.exercises.map { ch.coachpoulpy.data.local.CatalogRevision(it, 1, if (it.slug.value in group) 0 else null, group.indexOf(it.slug.value).takeIf { i -> i >= 0 }) },
+            "0",
+        )
+        val builder = graph.createWorkout(WorkoutFormat.SETS, "en")
+        builder.add("push-up", builder.work)
+        val key = builder.state.value.addedKey!!
+        builder.setSets(key, 2)
+        builder.setAmount(key, 15)
+        builder.setWeight(key, "5")
+
+        builder.swap(key, "plank")
+        val row = builder.current.parts[1].steps.single().row!!
+        assertEquals("plank", row.slug)
+        assertTrue(row.isTimed, "reps become a hold")
+        assertEquals(30, row.amount, "the plank's usual default")
+        assertEquals(2, row.sets)
+        assertEquals("5", row.weight)
+    }
 }

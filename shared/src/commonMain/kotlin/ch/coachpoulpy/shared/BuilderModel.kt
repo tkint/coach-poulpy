@@ -68,7 +68,12 @@ data class BuilderRow(
     val summary: String,
     /** A walk or a run's target, edited instead of sets, reps and weight; null for any other exercise. */
     val target: WalkRunTarget? = null,
+    /** Whether the step's exercise has variations, so the step menu offers "Swap for a variation". */
+    val canSwap: Boolean = false,
 )
+
+/** One exercise of a variation group in the swap list; [isCurrent] marks the step's own exercise. */
+data class SwapOption(val slug: String, val name: String, val isCurrent: Boolean)
 
 /** What a step's amount counts: the unit shown beside its number field. */
 enum class AmountUnit { REPS, SECONDS, METERS }
@@ -243,6 +248,36 @@ class BuilderModel internal constructor(
         val entry = DraftEntry.new(exercise, format, units(), inRepeat = repeatKey != null)
             .let { if (it.walkOrRun) it.withDuration(DurationKind.DISTANCE) else it }
         addStep(entry, partKey, repeatKey)
+    }
+
+    /** The variation group of the exercise at step [key], easiest to hardest, empty when it has none. */
+    fun swapOptions(key: String): List<SwapOption> {
+        val current = entry(key)?.exercise ?: return emptyList()
+        return catalog.variationsOf(current).map { SwapOption(it.slug.value, labels.text(it.name), it.slug == current) }
+    }
+
+    /**
+     * Replaces the exercise of step [key] with another of its variations, keeping its place, role,
+     * sets, weight and rest. The amount is kept too, unless the new exercise is measured another
+     * way (reps against time) or is a walk or a run: it then starts at its usual default.
+     */
+    fun swap(key: String, slug: String) {
+        val old = entry(key) ?: return
+        if (swapOptions(key).none { it.slug == slug && !it.isCurrent }) return
+        val exercise = catalog[ExerciseSlug(slug)] ?: return
+        val fresh = DraftEntry.new(exercise, draft.format, units())
+        editEntry(key) {
+            if (old.walkOrRun || fresh.walkOrRun) {
+                fresh.copy(key = old.key, role = old.role)
+            } else {
+                copy(
+                    exercise = fresh.exercise,
+                    perSide = fresh.perSide,
+                    measurement = fresh.measurement,
+                    amount = if (fresh.measurement == old.measurement) old.amount else fresh.amount,
+                )
+            }
+        }
     }
 
     /** Puts a copy of a step, or of a repeat and its steps, right after it. */
@@ -633,6 +668,7 @@ class BuilderModel internal constructor(
             else -> null
         }
         return BuilderRow(
+            canSwap = catalog.variationsOf(entry.exercise).isNotEmpty(),
             key = entry.key,
             roleLabel = labels.role(entry.role),
             role = entry.role,
